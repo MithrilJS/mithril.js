@@ -1,0 +1,19 @@
+{
+	"name": "mithril",
+	"version": "0.1.0",
+	"scripts": {
+		"test": "grunt test"
+	},
+	"devDependencies": {
+		"grunt-cli": "*",
+		"grunt-contrib-copy": "*",
+		"grunt-contrib-uglify": "*",
+		"grunt-contrib-clean": "*",
+		"grunt-contrib-concat": "*",
+		"grunt-contrib-watch": "*",
+		"grunt-execute": "*",
+		"grunt-md2html": "*",
+		"grunt-replace": "*",
+		"grunt-zip": "*"
+	}
+}
