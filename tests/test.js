@@ -1,6 +1,6 @@
 function test(condition) {
 	try {if (!condition()) throw new Error}
-	catch (e) {test.failures.push(condition)}
+	catch (e) {console.error(e);test.failures.push(condition)}
 	test.total++
 }
 test.total = 0

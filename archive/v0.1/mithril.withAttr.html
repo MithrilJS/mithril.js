@@ -21,7 +21,7 @@
 				<div class="container">
 					<div class="row">
 						<div class="col(3,3,12)">
-							<h2 id="api">API (v$version)</h2>
+							<h2 id="api">API (v0.1)</h2>
 							<h3 id="core">Core</h3>
 							<ul>
 								<li><a href="mithril.html">m</a></li>
@@ -59,7 +59,56 @@
 							</ul>
 						</div>
 						<div class="col(9,9,12)">
-							{DOC}
+							<h2 id="m-withattr">m.withAttr</h2>
+<p>This is an event handler factory. It returns a method that can be bound to a DOM element&#39;s event listener.</p>
+<p>Typically, it&#39;s used in conjunction with <a href="mithril.prop"><code>m.prop</code></a> to implement data binding in the view-to-model direction.</p>
+<p>This method is provided to decouple the browser&#39;s event model from the controller/logic model.</p>
+<p>You should use this method and implement similar ones when extracting values from a browser&#39;s Event object, instead of hard-coding the extraction code into controllers (or model methods).</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">//standalone usage
+document.body.onclick = m.withAttr(&quot;title&quot;, function(value) {
+    //alerts the title of the body element when it&#39;s clicked
+    alert(value);
+})</code></pre>
+<p>A contrived example of bi-directional data binding</p>
+<pre><code class="lang-javascript">var user = {
+    model: function(name) {
+        this.name = m.prop(name);
+    },
+    controller: function() {
+        this.user = new user.model(&quot;John Doe&quot;);
+    },
+    view: function(controller) {
+        m.render(&quot;body&quot;, [
+            m(&quot;input&quot;, {onchange: m.withAttr(&quot;value&quot;, controller.user.name), value: controller.user.name()})
+        ]);
+    }
+};</code></pre>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">EventHandler withAttr(String property, void callback(any value))
+
+where:
+    EventHandler :: void handler(Event e)</code></pre>
+<ul>
+<li><p><strong>String property</strong></p>
+<p>Defines the property of the DOM element whose value will be passed to the callback.</p>
+</li>
+<li><p><strong>void callback(any value)</strong></p>
+<p>This function will be called with the value of the defined property as an argument.</p>
+<ul>
+<li><p><strong>any value</strong></p>
+<p>This is the value of the defined DOM element&#39;s property.</p>
+</li>
+</ul>
+</li>
+<li><p><strong>returns EventHandler handler</strong></p>
+<p>This handler method can be assigned to properties like <code>onclick</code>, or passed as callbacks to <code>addEventListener</code>.</p>
+</li>
+</ul>
+
 						</div>
 					</div>
 				</div>

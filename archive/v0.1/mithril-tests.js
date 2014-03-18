@@ -415,7 +415,7 @@ new function(window) {
 }(this)
 function test(condition) {
 	try {if (!condition()) throw new Error}
-	catch (e) {test.failures.push(condition)}
+	catch (e) {console.error(e);test.failures.push(condition)}
 	test.total++
 }
 test.total = 0
@@ -468,11 +468,16 @@ mock.window = new function() {
 	}
 	window.performance = new function () {
 		var timestamp = 50
-		this.$elapse = function(amount) {timestamp = amount}
+		this.$elapse = function(amount) {timestamp += amount}
 		this.now = function() {return timestamp}
 	}
 	window.cancelAnimationFrame = function() {}
-	window.requestAnimationFrame = function(callback) {callback()}
+	window.requestAnimationFrame = function(callback) {window.requestAnimationFrame.$callback = callback}
+	window.requestAnimationFrame.$resolve = function() {
+		if (window.requestAnimationFrame.$callback) window.requestAnimationFrame.$callback()
+		window.requestAnimationFrame.$callback = null
+		window.performance.$elapse(20)
+	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {
 			this.open = function(method, url) {
@@ -520,18 +525,25 @@ function testMithril(mock) {
 	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
 
 	//m.module
-	for (var i = 0; i < 2; i++) {
-		//first iteration tests immediate rendering
-		//second iteration tests deferred rendering
-		test(function() {
-			var root = mock.document.createElement("div")
-			m.module(root, {
-				controller: function() {this.value = "test"},
-				view: function(ctrl) {return ctrl.value}
-			})
-			return root.childNodes[0].nodeValue === "test"
+	test(function() {
+		mock.performance.$elapse(50)
+		
+		var root1 = mock.document.createElement("div")
+		m.module(root1, {
+			controller: function() {this.value = "test1"},
+			view: function(ctrl) {return ctrl.value}
 		})
-	}
+		
+		var root2 = mock.document.createElement("div")
+		m.module(root2, {
+			controller: function() {this.value = "test2"},
+			view: function(ctrl) {return ctrl.value}
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return root1.childNodes[0].nodeValue === "test1" && root2.childNodes[0].nodeValue === "test2"
+	})
 
 	//m.withAttr
 	test(function() {
@@ -606,6 +618,8 @@ function testMithril(mock) {
 
 	//m.route
 	test(function() {
+		mock.performance.$elapse(50)
+		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test1", {
@@ -614,6 +628,8 @@ function testMithril(mock) {
 		return mock.location.search == "?/test1" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
+		mock.performance.$elapse(50)
+		
 		var root = mock.document.createElement("div")
 		m.route.mode = "pathname"
 		m.route(root, "/test2", {
@@ -622,6 +638,8 @@ function testMithril(mock) {
 		return mock.location.pathname == "/test2" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
+		mock.performance.$elapse(50)
+		
 		var root = mock.document.createElement("div")
 		m.route.mode = "hash"
 		m.route(root, "/test3", {
@@ -630,6 +648,8 @@ function testMithril(mock) {
 		return mock.location.hash == "#/test3" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
+		mock.performance.$elapse(50)
+		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test4/foo", {
@@ -706,12 +726,17 @@ function testMithril(mock) {
 
 	//m.startComputation/m.endComputation
 	test(function() {
+		mock.performance.$elapse(50)
+		
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
 			controller: function() {controller = this},
 			view: function(ctrl) {return ctrl.value}
 		})
+		
+		mock.performance.$elapse(50)
+		
 		m.startComputation()
 		controller.value = "foo"
 		m.endComputation()

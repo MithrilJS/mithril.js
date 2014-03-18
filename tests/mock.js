@@ -40,11 +40,16 @@ mock.window = new function() {
 	}
 	window.performance = new function () {
 		var timestamp = 50
-		this.$elapse = function(amount) {timestamp = amount}
+		this.$elapse = function(amount) {timestamp += amount}
 		this.now = function() {return timestamp}
 	}
 	window.cancelAnimationFrame = function() {}
-	window.requestAnimationFrame = function(callback) {callback()}
+	window.requestAnimationFrame = function(callback) {window.requestAnimationFrame.$callback = callback}
+	window.requestAnimationFrame.$resolve = function() {
+		if (window.requestAnimationFrame.$callback) window.requestAnimationFrame.$callback()
+		window.requestAnimationFrame.$callback = null
+		window.performance.$elapse(20)
+	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {
 			this.open = function(method, url) {

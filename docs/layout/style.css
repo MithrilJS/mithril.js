@@ -29,8 +29,8 @@ nav a:visited {color:#ddd;}
 footer {text-align:center;padding:10px 0;}
 footer,footer a,footer a:visited {color:#fff;}
 h1,h2 {font-family:Palatino;margin:0 0 10px;}
-h1 {font-size:3em;text-shadow:0.01em 0.01em #777, -0.01em -0.01em #fff;}
-h1 span {animation:logo 2s;display:inline-block;}
+h1 {font-size:3em;text-shadow:0.024em 0.024em #777, -0.024em -0.024em #fff;}
+h1 span {animation:logo 2s;display:inline-block;-webkit-animation:logo 2s;}
 h2 {color:#888;font-style:italic;}
 h3 {margin:10px 0;}
 p {margin:15px 0;}
@@ -56,6 +56,7 @@ background-color: #e3e3e3;
 background-size: 20px 20px;
 }
 .logo {color:#d3d3d3;font-family:Georgia;font-style:italic;}
+.logo span {font-family:Arial;font-style:normal;}
 .logo :before {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.10em;}
 .logo :after {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.5em;}
 .button,.button:visited {background:#5a5;border-radius:5px;box-shadow:1px 1px #777, -1px -1px #fff;color:#fff;display:inline-block;font:normal bold 16px Helvetica;margin:0 10px 10px;padding:10px 30px;text-decoration:none;}
@@ -83,4 +84,8 @@ background-size: 20px 20px;
 @keyframes logo {
 	from {opacity:0;transform:scale(2) rotate(359deg);}
 	to {opacity:1;transform:scale(1) rotate(0deg);}
+}
+@-webkit-keyframes logo {
+	from {opacity:0;-webkit-transform:scale(2) rotate(359deg);}
+	to {opacity:1;-webkit-transform:scale(1) rotate(0deg);}
 }

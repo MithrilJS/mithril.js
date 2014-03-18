@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 	var inputFolder = "./docs"
 	var tempFolder = "./temp"
 	var archiveFolder = "./archive"
-	var outputFolder = "../public"
+	var outputFolder = "../mithril"
 	
 	var guideLayout = "guide"
 	var guide = [
@@ -74,7 +74,7 @@ module.exports = function(grunt) {
 		},
 		replace: {
 			options: {force: true, patterns: [{match: /\.md/g, replacement: ".html"}, {match: /\$version/g, replacement: version}]},
-			links: {expand: true, flatten: true, src: [tempFolder + "/**/*.html"], dest: outputFolder + "/"},
+			links: {expand: true, flatten: true, src: [tempFolder + "/**/*.html"], dest: currentVersionArchiveFolder + "/"},
 			index: {src: inputFolder + "/layout/index.html", dest: currentVersionArchiveFolder + "/index.html"},
 		},
 		copy: {
@@ -84,7 +84,7 @@ module.exports = function(grunt) {
 			tools: {expand: true, cwd: inputFolder + "/layout/tools/", src: "./**", dest: currentVersionArchiveFolder + "/tools/"},
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
-			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version}
+			archive: {expand: true, cwd: outputFolder, src: "./**", dest: outputFolder + "/archive/v" + version}
 		},
 		execute: {
 			tests: {src: [currentVersionArchiveFolder + "/mithril-tests.js"]}

@@ -21,7 +21,7 @@
 				<div class="container">
 					<div class="row">
 						<div class="col(3,3,12)">
-							<h2 id="api">API (v$version)</h2>
+							<h2 id="api">API (v0.1)</h2>
 							<h3 id="core">Core</h3>
 							<ul>
 								<li><a href="mithril.html">m</a></li>
@@ -59,7 +59,52 @@
 							</ul>
 						</div>
 						<div class="col(9,9,12)">
-							{DOC}
+							<h2 id="m-render">m.render</h2>
+<p>This method generates a DOM tree inside of a given HTML element.</p>
+<p>If the method is run more than once with the same root element, it diffs the new tree against the existing one and intelligently modifies only the portions that have changed.</p>
+<p>Note that, unlike many templating engines, this &quot;smart diff&quot; feature does not affect things like cursor placement in inputs and focus, and is therefore safe to call during user interactions.</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<p>Assuming a document has an empty <code>&lt;body&gt;</code> element, the code below:</p>
+<pre><code class="lang-javascript">var links = [
+    {title: &quot;item 1&quot;, url: &quot;/item1&quot;}
+];
+
+m.render(document.body, [
+    m(&quot;ul.nav&quot;, [
+        m(&quot;li&quot;, links.map(function(link) {
+            return m(&quot;a&quot;, {href: link.url, config: m.route}, link.title)
+        })
+    ])
+]);</code></pre>
+<p>yields:</p>
+<pre><code class="lang-markup">&lt;body&gt;
+    &lt;ul class=&quot;nav&quot;&gt;
+        &lt;li&gt;
+            &lt;a href=&quot;/item1&quot;&gt;item 1&lt;/a&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/body&gt;</code></pre>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">void render(DOMElement rootElement, Children children)
+
+where:
+    Children :: String text | Array&lt;String text | VirtualElement virtualElement | Children children&gt;
+    VirtualElement :: Object { String tag, Attributes attributes, Children children }
+    Attributes :: Object&lt;Any | void config(DOMElement element)&gt;</code></pre>
+<ul>
+<li><p><strong>DOMElement rootElement</strong></p>
+<p>A DOM element which will contain the template represented by <code>children</code>.</p>
+</li>
+<li><p><strong>Children children</strong></p>
+<p>If this argument is a string, it will be rendered as a text node. To render a string as HTML, see <a href="mithril.trust"><code>m.trust</code></a></p>
+<p>If it&#39;s a VirtualElement, it will be rendered as a DOM Element.</p>
+<p>If it&#39;s a list, its contents will recursively be rendered as appropriate and appended as children of the <code>root</code> element.</p>
+</li>
+</ul>
+
 						</div>
 					</div>
 				</div>
