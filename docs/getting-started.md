@@ -474,15 +474,15 @@ In order to deal with that type of refactoring, one can explicitly decide to sup
 Given the code above, the replacement class would only need to implement the `.push()` and `.map()` methods. By freezing APIs and swapping implementations, the developer can completely avoid touching other layers in the application while refactoring.
 
 ```javascript
-todo.Todo = Array;
+todo.TodoList = Array;
 ```
 
 becomes:
 
 ```javascript
-todo.Todo = {
-	push: function() { /*...*/ },
-	map: function() { /*...*/ }
+todo.TodoList = function () {
+	this.push = function() { /*...*/ },
+	this.map = function() { /*...*/ }
 };
 ```
 
