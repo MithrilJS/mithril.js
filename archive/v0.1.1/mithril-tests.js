@@ -59,6 +59,7 @@ new function(window) {
 			}
 		}
 		else if (dataType == "[object Object]") {
+			if (typeof data.tag != "string") return
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join()) clear(cached.nodes)
 			
 			var node, isNew = cached.nodes.length === 0
