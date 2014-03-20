@@ -213,7 +213,7 @@ See [`m()`](mithril.md) for more information on virtual elements.
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement element, Boolean isNew)
+void route(DOMElement element, Boolean isInitialized)
 ```
 
 -	**DOMElement element**
