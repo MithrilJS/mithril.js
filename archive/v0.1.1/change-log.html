@@ -61,10 +61,20 @@
 						<div class="col(9,9,12)">
 							<h2 id="change-log">Change Log</h2>
 <p><a href="/archive/v0.1.1">v0.1.1</a> - maintenance</p>
+<h3 id="bug-fixes-">Bug Fixes:</h3>
+<ul>
+<li><code>m.route.param</code> now resets on route change correctly <a href="https://github.com/lhorie/mithril.js/issues/15">#15</a></li>
+</ul>
 <h3 id="breaking-changes-">Breaking changes:</h3>
 <ul>
-<li>changed default value for <code>xhr.withCredentials</code> from <code>true</code> to <code>false</code> for <code>m.request</code>, since public APIs are more common than auth-walled ones</li>
+<li><p>changed default value for <code>xhr.withCredentials</code> from <code>true</code> to <code>false</code> for <code>m.request</code>, since public APIs are more common than auth-walled ones. <a href="https://github.com/lhorie/mithril.js/issues/14">#14</a></p>
+<p>In order to configure this flag, the following configuration should be used:</p>
+<pre><code class="lang-javascript">var privateAPI = function(xhr) {xhr.withCredentials = true};
+
+m.request({method: &quot;GET&quot;, url: &quot;/foo&quot;, config: privateAPI});</code></pre>
+</li>
 </ul>
+<hr>
 <p><a href="/archive/v0.1">v0.1</a> - Initial release</p>
 
 						</div>
