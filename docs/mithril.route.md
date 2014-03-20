@@ -165,7 +165,7 @@ where:
 
 #### Usage
 
-You can programmatically redirec to another page. Given the example in the "Defining Routes" section:
+You can programmatically redirect to another page. Given the example in the "Defining Routes" section:
 
 ```javascript
 m.route("/dashboard/marysue");
