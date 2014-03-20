@@ -153,6 +153,23 @@ function testMithril(mock) {
 		})
 		return mock.location.search == "?/test4/foo" && root.childNodes[0].nodeValue === "foo"
 	})
+	test(function() {
+		mock.performance.$elapse(50)
+		
+		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
+		
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/test5/foo", {
+			"/": module,
+			"/test5/:test": module
+		})
+		var paramValueBefore = m.route.param("test")
+		m.route("/")
+		var paramValueAfter = m.route.param("test")
+		
+		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
+	})
 
 	//m.prop
 	test(function() {

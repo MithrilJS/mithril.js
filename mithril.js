@@ -258,6 +258,7 @@ new function(window) {
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
 	function routeByValue(root, router, path) {
+		routeParams = {}
 		for (var route in router) {
 			if (route == path) return !void m.module(root, router[route])
 			
@@ -266,7 +267,6 @@ new function(window) {
 				return !void path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g)
 					var values = [].slice.call(arguments, 1, -2)
-					routeParams = {}
 					for (var i = 0; i < keys.length; i++) routeParams[keys[i].slice(1)] = values[i]
 					m.module(root, router[route])
 				})
