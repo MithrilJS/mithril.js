@@ -182,7 +182,7 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 
 where:
     VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object&lt;any | void config(DOMElement element, Boolean isNew)&gt;
+    Attributes :: Object&lt;any | void config(DOMElement element, Boolean isInitialized)&gt;
     Children :: String text | Array&lt;String text | VirtualElement virtualElement | Children children&gt;</code></pre>
 <ul>
 <li><p><strong>String selector</strong></p>
@@ -216,7 +216,7 @@ where:
 <p><code>{ style: {border: &quot;1px solid red&quot;} }</code></p>
 </li>
 <li><h4 id="the-config-attribute">The <code>config</code> attribute</h4>
-<p><strong>void config(DOMElement element, Boolean isNew)</strong> (optional)</p>
+<p><strong>void config(DOMElement element, Boolean isInitialized)</strong> (optional)</p>
 <p>You can define a non-HTML-standard attribute called <code>config</code>. This special parameter allows you to call methods on the DOM element after it gets created.</p>
 <p>This is useful, for example, if you declare a <code>canvas</code> element and want to use the Javascript API to draw:</p>
 <pre><code class="lang-javascript">function draw(element, isInitialized) {

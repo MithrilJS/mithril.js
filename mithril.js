@@ -46,11 +46,12 @@ new function(window) {
 			var nodes = [], intact = cached.length === data.length
 			for (var i = 0; i < data.length; i++) {
 				var item = build(parent, data[i], cached[i])
+				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				cached[i] = item
 			}
 			if (!intact) {
-				for (var i = 0; i < data.length; i++) nodes = nodes.concat(cached[i].nodes)
+				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) if (node.parentNode !== null) node.parentNode.removeChild(node)
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parent.appendChild(node)
 				cached.length = data.length

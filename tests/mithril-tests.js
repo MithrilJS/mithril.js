@@ -19,6 +19,8 @@ function testMithril(mock) {
 	test(function() {return m("div", ["a", "b"]).children.length === 2})
 	test(function() {return m("div", [m("div")]).children[0].tag === "div"})
 	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
+	test(function() {return m("div", [undefined]).tag === "div"})
+	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
 
 	//m.module
 	test(function() {
@@ -97,6 +99,11 @@ function testMithril(mock) {
 		m.render(root, "test")
 		var elementAfter = root.childNodes[0]
 		return elementBefore !== elementAfter
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [undefined]))
+		return root.childNodes[0].childNodes.length === 0
 	})
 
 	//m.redraw
