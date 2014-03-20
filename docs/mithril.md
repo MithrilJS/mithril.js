@@ -194,7 +194,7 @@ VirtualElement m(String selector [, Attributes attributes] [, Children children]
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object<any | void config(DOMElement element, Boolean isNew)>
+    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized)>
 	Children :: String text | Array<String text | VirtualElement virtualElement | Children children>
 ```
 
@@ -256,7 +256,7 @@ where:
 	
 -	#### The `config` attribute
 	
-	**void config(DOMElement element, Boolean isNew)** (optional)
+	**void config(DOMElement element, Boolean isInitialized)** (optional)
 
 	You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
 
