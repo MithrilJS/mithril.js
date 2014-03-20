@@ -345,7 +345,6 @@ new function(window) {
 		xhr.open(options.method, options.url, true, options.user, options.password)
 		xhr.onload = typeof options.onload == "function" ? options.onload : function() {}
 		xhr.onerror = typeof options.onerror == "function" ? options.onerror : function() {}
-		xhr.withCredentials = true
 		if (typeof options.config == "function") options.config(xhr, options)
 		xhr.send(options.data)
 		return xhr
