@@ -362,11 +362,11 @@ this.description = function(value) {
 <p>While this decision allows better API discoverability, the trade-off is that we&#39;re largely giving up on custom constraints and behavior. For example, if we wanted to change the application to make the list be persisted, a native Array would most certainly not be a suitable class to use.</p>
 <p>In order to deal with that type of refactoring, one can explicitly decide to support only a subset of the Array API, and implement another class with the same interface as this subset API.</p>
 <p>Given the code above, the replacement class would only need to implement the <code>.push()</code> and <code>.map()</code> methods. By freezing APIs and swapping implementations, the developer can completely avoid touching other layers in the application while refactoring.</p>
-<pre><code class="lang-javascript">todo.Todo = Array;</code></pre>
+<pre><code class="lang-javascript">todo.TodoList = Array;</code></pre>
 <p>becomes:</p>
-<pre><code class="lang-javascript">todo.Todo = {
-    push: function() { /*...*/ },
-    map: function() { /*...*/ }
+<pre><code class="lang-javascript">todo.TodoList = function () {
+    this.push = function() { /*...*/ },
+    this.map = function() { /*...*/ }
 };</code></pre>
 <p>Hopefully these examples give you an idea of ways requirements can change over time and how Mithril&#39;s philosophy allows developers to use standard OOP techniques to refactor their codebases, rather than needing to modify large portions of the application.</p>
 <hr>
