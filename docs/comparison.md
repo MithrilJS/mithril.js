@@ -38,13 +38,13 @@ It's often said that *frameworks*, in contrast to *libraries*, dictate how code 
 
 Instead of locking developers down to very specific implementations of design patterns, Mithril's approach is to provide an idiomatic pattern to follow, and tools to aid the developer when required. This approach means that developers can get discoverable codebases without necessarily getting locked into the framework.
 
-One related difference is that other frameworks often hard-coded base classes where every conceivable convenience method are inherited by the developer's classes (remember, in Javascript, this can mean copying all of the utility methods over to the child class, regardless of whether they're going to be used or now).
+One related difference is that other frameworks often have hard-coded base classes where every conceivable convenience method gets inherited by the developer's classes (remember, in Javascript, this can mean copying all of the utility methods over to the child class, regardless of whether they're going to be used or not).
 
 Mithril's on-demand tooling approach means there are no hidden performance costs when implementing core MVC patterns, and there's also no extra learning curve for framework-specific syntax for those patterns.
 
 ### View Layer Paradigm
 
-Some of the older frameworks among the popular ones (out-of-the-box jQuery and Backbone, specifically) take a more procedural paradigm when it comes to the view layer: this means every action requires the developer to write custom view-level code to handle it.
+Some of the older frameworks among the popular ones (out-of-the-box jQuery and Backbone, specifically) take a more procedural paradigm when it comes to the view layer; this means every action requires the developer to write custom view-level code to handle it.
 
 This can get noticeably bulky when you look at thing like collections: you often need to implement insertion code and deletion code, in addition to a "draw everything" routine for performance. And this is for every list that needs to be displayed in some way.
 
@@ -78,7 +78,7 @@ In contrast, Mithril encourages that applications be developed using the pattern
 
 One technical aspect that is also different is that Backbone is heavily event-oriented. Mithril, on the other hand, purposely avoids the observer pattern in an attempt to abolish "come-from hell", i.e. a class of debugging problems where you don't know what triggers some code because of a long chain of events triggering other events.
 
-A particularly nasty instance of this problem that sometimes occurs in "real-time" applications is when event triggering chains become circular due to a conditional statement bug, casuing infinite loops and browser crashes.
+A particularly nasty instance of this problem that sometimes occurs in "real-time" applications is when event triggering chains become circular due to a conditional statement bug, causing infinite loops and browser crashes.
 
 Another significant difference between Backbone and Mithril is in their approach to familiarity: Backbone appeals to people familiar w/ jQuery; Mithril is designed to be familiar to people with server-side MVC framework experience.
 
