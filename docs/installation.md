@@ -42,7 +42,7 @@ Content delivery networks allow the library to be cached across different websit
 
 [Bower](http://http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
 
-Assuming you have NodeJS installed, you can install bower by typing this in the command line:
+Assuming you have NodeJS installed, you can install Bower by typing this in the command line:
 
 ```
 npm install -g bower
@@ -57,5 +57,5 @@ bower install mithril
 Then, to use Mithril, point a script tag to the downloaded file:
 
 ```markup
-<script src="bower_components/mithril/mithril.min.js"></script>
+<script src="/bower_components/mithril/mithril.min.js"></script>
 ```
