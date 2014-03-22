@@ -19,6 +19,8 @@ function testMithril(mock) {
 	test(function() {return m("div", ["a", "b"]).children.length === 2})
 	test(function() {return m("div", [m("div")]).children[0].tag === "div"})
 	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
+	test(function() {return m("div", [undefined]).tag === "div"})
+	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
 
 	//m.module
 	test(function() {
@@ -98,6 +100,11 @@ function testMithril(mock) {
 		var elementAfter = root.childNodes[0]
 		return elementBefore !== elementAfter
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [undefined]))
+		return root.childNodes[0].childNodes.length === 0
+	})
 
 	//m.redraw
 	test(function() {
@@ -153,6 +160,23 @@ function testMithril(mock) {
 		})
 		return mock.location.search == "?/test4/foo" && root.childNodes[0].nodeValue === "foo"
 	})
+	test(function() {
+		mock.performance.$elapse(50)
+		
+		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
+		
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/test5/foo", {
+			"/": module,
+			"/test5/:test": module
+		})
+		var paramValueBefore = m.route.param("test")
+		m.route("/")
+		var paramValueAfter = m.route.param("test")
+		
+		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
+	})
 
 	//m.prop
 	test(function() {
@@ -190,7 +214,7 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(function(value) {return "foo"}).then(function(data) {value = data})
+		deferred.promise.then(function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.resolve("test")
 		return value === "foo"
 	})
@@ -204,9 +228,16 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(null, function(value) {return "foo"}).then(null, function(data) {value = data})
+		deferred.promise.then(null, function(data) {return "foo"}).then(null, function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
+	})
+	test(function() {
+		var value1, value2
+		var deferred = m.deferred()
+		deferred.promise.then(function(data) {throw new Error}).then(function(data) {value1 = 1}, function(data) {value2 = data})
+		deferred.resolve("test")
+		return value1 === undefined && value2 instanceof Error
 	})
 
 	//m.sync
