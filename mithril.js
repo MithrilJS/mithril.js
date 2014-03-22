@@ -307,14 +307,20 @@ new function(window) {
 			var next = m.deferred()
 			if (!success) success = identity
 			if (!error) error = identity
-			resolvers.push(function(value) {
-				var result = success(value)
-				next.resolve(result !== undefined ? result : value)
-			})
-			rejecters.push(function(value) {
-				var result = error(value)
-				next.reject(result !== undefined ? result : value)
-			})
+			function push(list, method, callback) {
+				list.push(function(value) {
+					try {
+						var result = callback(value)
+						next[method](result !== undefined ? result : value)
+					}
+					catch (e) {
+						if (e instanceof Error && e.constructor !== Error) throw e
+						else next.reject(e)
+					}
+				})
+			}
+			push(resolvers, "resolve", success)
+			push(rejecters, "reject", error)
 			return next.promise
 		}
 		return object

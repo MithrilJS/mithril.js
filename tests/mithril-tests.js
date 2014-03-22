@@ -214,7 +214,7 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(function(value) {return "foo"}).then(function(data) {value = data})
+		deferred.promise.then(function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.resolve("test")
 		return value === "foo"
 	})
@@ -228,9 +228,16 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(null, function(value) {return "foo"}).then(null, function(data) {value = data})
+		deferred.promise.then(null, function(data) {return "foo"}).then(null, function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
+	})
+	test(function() {
+		var value1, value2
+		var deferred = m.deferred()
+		deferred.promise.then(function(data) {throw new Error}).then(function(data) {value1 = 1}, function(data) {value2 = data})
+		deferred.resolve("test")
+		return value1 === undefined && value2 instanceof Error
 	})
 
 	//m.sync

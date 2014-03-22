@@ -307,14 +307,20 @@ new function(window) {
 			var next = m.deferred()
 			if (!success) success = identity
 			if (!error) error = identity
-			resolvers.push(function(value) {
-				var result = success(value)
-				next.resolve(result !== undefined ? result : value)
-			})
-			rejecters.push(function(value) {
-				var result = error(value)
-				next.reject(result !== undefined ? result : value)
-			})
+			function push(list, method, callback) {
+				list.push(function(value) {
+					try {
+						var result = callback(value)
+						next[method](result !== undefined ? result : value)
+					}
+					catch (e) {
+						if (e instanceof Error && e.constructor !== Error) throw e
+						else next.reject(e)
+					}
+				})
+			}
+			push(resolvers, "resolve", success)
+			push(rejecters, "reject", error)
 			return next.promise
 		}
 		return object
@@ -719,7 +725,7 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(function(value) {return "foo"}).then(function(data) {value = data})
+		deferred.promise.then(function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.resolve("test")
 		return value === "foo"
 	})
@@ -733,9 +739,16 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(null, function(value) {return "foo"}).then(null, function(data) {value = data})
+		deferred.promise.then(null, function(data) {return "foo"}).then(null, function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
+	})
+	test(function() {
+		var value1, value2
+		var deferred = m.deferred()
+		deferred.promise.then(function(data) {throw new Error}).then(function(data) {value1 = 1}, function(data) {value2 = data})
+		deferred.resolve("test")
+		return value1 === undefined && value2 instanceof Error
 	})
 
 	//m.sync
