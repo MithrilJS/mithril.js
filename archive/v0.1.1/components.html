@@ -61,10 +61,10 @@ dashboard.controller = function() {
 dashboard.view = function(ctrl) {
     return m(&quot;#example&quot;, [
         m(&quot;.profile&quot;, [
-            new userProfile.view(this.userProfile);
+            new userProfile.view(ctrl.userProfile);
         ]),
         m(&quot;.projects&quot;, [
-            new projectList.view(this.projectList);
+            new projectList.view(ctrl.projectList);
         ])
     ])
 }
