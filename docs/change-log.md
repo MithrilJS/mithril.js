@@ -1,10 +1,16 @@
 ## Change Log
 
-[v0.1.1](/archive/v0.1.1) - maintenance
+[v0.1.1](/mithril/archive/v0.1.1) - maintenance
+
+### News:
+
+-	Mithril is now available at [cdnjs](http://cdnjs.com/libraries/mithril/) and [jsdelivr](http://www.jsdelivr.com/#!mithril)
 
 ### Bug Fixes:
 
 -	`m.route.param` now resets on route change correctly [#15](https://github.com/lhorie/mithril.js/issues/15)
+-	`m.render` now correctly ignores undefined values in the virtual tree[#16](https://github.com/lhorie/mithril.js/issues/16)
+-	errors thrown in promises now cause downstreams to be rejected [#1](https://github.com/lhorie/mithril.js/issues/1)
 
 ### Breaking changes:
 
@@ -15,9 +21,9 @@
 	```javascript
 	var privateAPI = function(xhr) {xhr.withCredentials = true};
 	
-	m.request({method: "GET", url: "/foo", config: privateAPI});
+	m.request({method: "GET", url: "http://foo.com/api", config: privateAPI});
 	```
 
 ---
 
-[v0.1](/archive/v0.1) - Initial release
+[v0.1](/mithril/archive/v0.1) - Initial release

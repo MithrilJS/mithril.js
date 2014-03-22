@@ -60,10 +60,16 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="change-log">Change Log</h2>
-<p><a href="/archive/v0.1.1">v0.1.1</a> - maintenance</p>
+<p><a href="/mithril/archive/v0.1.1">v0.1.1</a> - maintenance</p>
+<h3 id="news-">News:</h3>
+<ul>
+<li>Mithril is now available at <a href="http://cdnjs.com/libraries/mithril/">cdnjs</a> and <a href="http://www.jsdelivr.com/#!mithril">jsdelivr</a></li>
+</ul>
 <h3 id="bug-fixes-">Bug Fixes:</h3>
 <ul>
 <li><code>m.route.param</code> now resets on route change correctly <a href="https://github.com/lhorie/mithril.js/issues/15">#15</a></li>
+<li><code>m.render</code> now correctly ignores undefined values in the virtual tree<a href="https://github.com/lhorie/mithril.js/issues/16">#16</a></li>
+<li>errors thrown in promises now cause downstreams to be rejected <a href="https://github.com/lhorie/mithril.js/issues/1">#1</a></li>
 </ul>
 <h3 id="breaking-changes-">Breaking changes:</h3>
 <ul>
@@ -71,11 +77,11 @@
 <p>In order to configure this flag, the following configuration should be used:</p>
 <pre><code class="lang-javascript">var privateAPI = function(xhr) {xhr.withCredentials = true};
 
-m.request({method: &quot;GET&quot;, url: &quot;/foo&quot;, config: privateAPI});</code></pre>
+m.request({method: &quot;GET&quot;, url: &quot;http://foo.com/api&quot;, config: privateAPI});</code></pre>
 </li>
 </ul>
 <hr>
-<p><a href="/archive/v0.1">v0.1</a> - Initial release</p>
+<p><a href="/mithril/archive/v0.1">v0.1</a> - Initial release</p>
 
 						</div>
 					</div>
