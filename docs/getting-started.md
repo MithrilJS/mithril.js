@@ -16,7 +16,7 @@ However, using its entire toolset idiomatically can bring lots of benefits: lear
 
 ## A Simple Application
 
-Getting started is surprisingly boilerplate-free:
+Once you have a [copy of Mithril](installation.md), getting started is surprisingly boilerplate-free:
 
 ```markup
 <!doctype html>

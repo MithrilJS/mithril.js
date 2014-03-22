@@ -14,6 +14,7 @@ module.exports = function(grunt) {
 		"comparison",
 		"components",
 		"getting-started",
+		"installation",
 		"integration",
 		"practices",
 		"refactoring",

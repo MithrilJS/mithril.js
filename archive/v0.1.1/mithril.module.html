@@ -72,11 +72,11 @@
 <p>You can make anonymous modules out of existing classes</p>
 <pre><code class="lang-javascript">//controller class
 var dashboardController = function() {
-        this.greeting = &quot;Hello&quot;;
+    this.greeting = &quot;Hello&quot;;
 };
 
 //view class
-var dashboardView = function() {
+var dashboardView = function(ctrl) {
     return m(&quot;h1&quot;, ctrl.greeting);
 };
 
@@ -88,11 +88,11 @@ var dashboard = {}
 
 //controller class
 dashboard.controller = function() {
-        this.greeting = &quot;Hello&quot;;
+    this.greeting = &quot;Hello&quot;;
 };
 
 //view class
-dashboard.view = function() {
+dashboard.view = function(ctrl) {
     return m(&quot;h1&quot;, ctrl.greeting);
 };
 
