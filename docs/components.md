@@ -24,10 +24,10 @@ dashboard.controller = function() {
 dashboard.view = function(ctrl) {
 	return m("#example", [
 		m(".profile", [
-			new userProfile.view(this.userProfile);
+			new userProfile.view(ctrl.userProfile);
 		]),
 		m(".projects", [
-			new projectList.view(this.projectList);
+			new projectList.view(ctrl.projectList);
 		])
 	])
 }
