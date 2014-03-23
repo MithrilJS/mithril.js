@@ -10,4 +10,7 @@ test.print = function(print) {
 		print(test.failures[i].toString())
 	}
 	print("tests: " + test.total + "\nfailures: " + test.failures.length)
+  if (test.failures.length > 0) {
+    throw new Error(test.failures.length + " test did not pass.")
+  }
 }
