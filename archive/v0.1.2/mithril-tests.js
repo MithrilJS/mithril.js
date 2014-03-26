@@ -417,6 +417,8 @@ new function(window) {
 		}
 	}
 	
+	if (window.module) window.module.exports = m
+	
 	//testing API
 	m.deps = function(mock) {return window = mock}
 }(this)
