@@ -64,7 +64,11 @@ new function(window) {
 			
 			var node, isNew = cached.nodes.length === 0
 			if (isNew) {
-				node = window.document.createElement(data.tag)
+				if (parent instanceof SVGElement || data.tag == "svg") {
+					node = window.document.createElementNS('http://www.w3.org/2000/svg', data.tag)
+				} else {
+					node = window.document.createElement(data.tag)
+				}
 				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}), children: build(node, data.children, cached.children), nodes: [node]}
 				parent.appendChild(node)
 			}
