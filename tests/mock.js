@@ -13,10 +13,16 @@ mock.window = new function() {
 			setAttribute: function(name, value) {
 				this[name] = value.toString()
 			},
+			setAttributeNS: function(namespace, name, value) {
+				this[name] = value.toString()
+			},
 			getAttribute: function(name, value) {
 				return this[name]
 			},
 		}
+	}
+	window.document.createElementNS = function(namespace, tag) {
+		return window.document.createElement(tag)
 	}
 	window.document.createTextNode = function(text) {
 		return {nodeValue: text.toString()}

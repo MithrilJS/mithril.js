@@ -21,6 +21,8 @@ function testMithril(mock) {
 	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
 	test(function() {return m("div", [undefined]).tag === "div"})
 	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
+	test(function() {return m("svg", [m("g")])})
+	test(function() {return m("svg", [m("a[href='http://google.com']")])})
 
 	//m.module
 	test(function() {
@@ -104,6 +106,18 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
 		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("svg", [m("g")]))
+		console.log(root.childNodes[0].childNodes[0])
+		return root.childNodes[0].childNodes[0].nodeName === "G"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("svg", [m("a[href='http://google.com']")]))
+		console.log(root.childNodes[0].childNodes[0])
+		return root.childNodes[0].childNodes[0].nodeName === "A"
 	})
 
 	//m.redraw

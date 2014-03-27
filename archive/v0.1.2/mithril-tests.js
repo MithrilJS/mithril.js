@@ -32,7 +32,7 @@ new function(window) {
 		}
 		return cell
 	}
-	function build(parent, data, cached) {
+	function build(parent, data, cached, namespace) {
 		if (data === null || data === undefined) return
 		
 		var cachedType = type.call(cached), dataType = type.call(data)
@@ -45,7 +45,7 @@ new function(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length
 			for (var i = 0; i < data.length; i++) {
-				var item = build(parent, data[i], cached[i])
+				var item = build(parent, data[i], cached[i], namespace)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				cached[i] = item
@@ -63,15 +63,16 @@ new function(window) {
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join()) clear(cached.nodes)
 			
 			var node, isNew = cached.nodes.length === 0
+			if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
 			if (isNew) {
-				node = window.document.createElement(data.tag)
-				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}), children: build(node, data.children, cached.children), nodes: [node]}
+				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
+				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}, namespace), children: build(node, data.children, cached.children, namespace), nodes: [node]}
 				parent.appendChild(node)
 			}
 			else {
 				node = cached.nodes[0]
-				setAttributes(node, data.attrs, cached.attrs)
-				cached.children = build(node, data.children, cached.children)
+				setAttributes(node, data.attrs, cached.attrs, namespace)
+				cached.children = build(node, data.children, cached.children, namespace)
 				cached.nodes.intact = true
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
@@ -116,7 +117,7 @@ new function(window) {
 		
 		return cached
 	}
-	function setAttributes(node, dataAttrs, cachedAttrs) {
+	function setAttributes(node, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			if (!(attrName in cachedAttrs) || (cachedAttrs[attrName] !== dataAttr)) {
@@ -124,7 +125,8 @@ new function(window) {
 				if (attrName == "config") continue
 				if (attrName.indexOf("on") == 0 && typeof dataAttr == "function") dataAttr = autoredraw(dataAttr, node)
 				if (attrName == "style") for (var rule in dataAttr) node.style[rule] = dataAttr[rule]
-				else if (attrName in node) node[attrName] = dataAttr
+				else if (attrName in node && namespace === undefined) node[attrName] = dataAttr
+				else if (namespace !== undefined && attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
 				else node.setAttribute(attrName, dataAttr)
 			}
 		}
@@ -453,10 +455,16 @@ mock.window = new function() {
 			setAttribute: function(name, value) {
 				this[name] = value.toString()
 			},
+			setAttributeNS: function(namespace, name, value) {
+				this[name] = value.toString()
+			},
 			getAttribute: function(name, value) {
 				return this[name]
 			},
 		}
+	}
+	window.document.createElementNS = function(namespace, tag) {
+		return window.document.createElement(tag)
 	}
 	window.document.createTextNode = function(text) {
 		return {nodeValue: text.toString()}
@@ -537,6 +545,8 @@ function testMithril(mock) {
 	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
 	test(function() {return m("div", [undefined]).tag === "div"})
 	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
+	test(function() {return m("svg", [m("g")])})
+	test(function() {return m("svg", [m("a[href='http://google.com']")])})
 
 	//m.module
 	test(function() {
@@ -620,6 +630,18 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
 		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("svg", [m("g")]))
+		console.log(root.childNodes[0].childNodes[0])
+		return root.childNodes[0].childNodes[0].nodeName === "G"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("svg", [m("a[href='http://google.com']")]))
+		console.log(root.childNodes[0].childNodes[0])
+		return root.childNodes[0].childNodes[0].nodeName === "A"
 	})
 
 	//m.redraw

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+	<head></head>
+	<body>
+		<p>Since it's not possible to test SVG functionality from a NodeJS environment, this page can be used to test it in a browser.</p>
+		<p>There should be an HTML link labeled "HTML link", a SVG link labeled "SVG link", and a tilted blue square. The links should open in a new tab. All three items should display title tooltips.</p>
+		<div id="test"></div>
+		<script src="../mithril.js"></script>
+		<script>
+var svg = [
+	m("p", [
+		m("a[href='http://google.com'][target='_blank'][title='HTML link']", "HTML link")
+	]),
+	m("svg[width=180][height=200]", [
+		m("rect[x=50][y=50][height=100][width=100][transform='translate(30) rotate(45 50 50)'][title='Square']", {style: {stroke: "#000", fill: "#0086b2"}}),
+		m("a[href='http://google.com'][title='SVG link'][target=_new]", {style: {textDecoration: "underline"}}, [
+			m("text[x=0][y=20]", "SVG Link")
+		])
+	])
+]
+
+m.render(document.getElementById("test"), svg)
+		</script>
+	</body>
+</html>
