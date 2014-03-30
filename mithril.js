@@ -180,6 +180,7 @@ new function(window) {
 	var currentRoot, currentModule = {view: function() {}}, currentController = {}, now = 0, lastRedraw = 0, lastRedrawId = 0
 	m.module = function(root, module) {
 		m.startComputation()
+		cellCache = {}
 		currentRoot = root
 		currentModule = module
 		currentController = new module.controller
