@@ -417,7 +417,8 @@ new function(window) {
 		}
 	}
 	
-	if (window.module) window.module.exports = m
+	if (typeof module != "undefined" && module !== null) module.exports = m
+	if (typeof define == "function" && define.amd) define(function() {return m})
 	
 	//testing API
 	m.deps = function(mock) {return window = mock}
