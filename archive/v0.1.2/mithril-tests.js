@@ -119,14 +119,14 @@ new function(window) {
 	function setAttributes(node, dataAttrs, cachedAttrs) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
-			if (!(attrName in cachedAttrs) || (cachedAttrs[attrName] !== dataAttr)) {
+			//if (!(attrName in cachedAttrs) || (cachedAttrs[attrName] !== dataAttr)) {
 				cachedAttrs[attrName] = dataAttr
 				if (attrName == "config") continue
 				if (attrName.indexOf("on") == 0 && typeof dataAttr == "function") dataAttr = autoredraw(dataAttr, node)
 				if (attrName == "style") for (var rule in dataAttr) node.style[rule] = dataAttr[rule]
 				else if (attrName in node) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
-			}
+			//}
 		}
 		return cachedAttrs
 	}
@@ -180,6 +180,7 @@ new function(window) {
 	var currentRoot, currentModule = {view: function() {}}, currentController = {}, now = 0, lastRedraw = 0, lastRedrawId = 0
 	m.module = function(root, module) {
 		m.startComputation()
+		cellCache = {}
 		currentRoot = root
 		currentModule = module
 		currentController = new module.controller
