@@ -73,6 +73,7 @@ new function(window) {
 				setAttributes(node, data.attrs, cached.attrs)
 				cached.children = build(node, data.children, cached.children)
 				cached.nodes.intact = true
+				parent.appendChild(node)
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
 		}
@@ -180,7 +181,6 @@ new function(window) {
 	var currentRoot, currentModule = {view: function() {}}, currentController = {}, now = 0, lastRedraw = 0, lastRedrawId = 0
 	m.module = function(root, module) {
 		m.startComputation()
-		cellCache = {}
 		currentRoot = root
 		currentModule = module
 		currentController = new module.controller

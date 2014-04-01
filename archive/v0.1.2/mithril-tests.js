@@ -73,6 +73,7 @@ new function(window) {
 				setAttributes(node, data.attrs, cached.attrs)
 				cached.children = build(node, data.children, cached.children)
 				cached.nodes.intact = true
+				parent.appendChild(node)
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
 		}
@@ -620,6 +621,12 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
 		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div.classname", [m("a", {href: "/first"})]))
+		m.render(root, m("div", [m("a", {href: "/second"})]))
+		return root.childNodes[0].childNodes.length == 1
 	})
 
 	//m.redraw
