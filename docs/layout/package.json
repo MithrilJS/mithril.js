@@ -6,6 +6,6 @@
 	"author": "Leo Horie <leohorie@hotmail.com>",
 	"repository": {"type": "git", "url": "https://github.com/lhorie/mithril"},
 	"main": "mithril.min.js",
-	"licenses": [{"type": "MIT", "url": "http://opensource.org/licenses/MIT"}]
+	"licenses": [{"type": "MIT", "url": "http://opensource.org/licenses/MIT"}],
 	"files": ["mithril.min.js", "mithril.min.map"]
 }
