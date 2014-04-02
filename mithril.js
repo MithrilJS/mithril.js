@@ -187,7 +187,7 @@ new function(window) {
 		m.endComputation()
 	}
 	m.redraw = function() {
-		m.render(currentRoot || window.document, currentModule.view(currentController))
+		m.render(currentRoot, currentModule.view(currentController))
 		lastRedraw = now
 	}
 	function redraw() {
