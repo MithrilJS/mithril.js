@@ -4,9 +4,10 @@
 
 ### News:
 
--	There's now a [community mailing list](mailto:mithriljs@googlegroups.com). There's also [web interface](https://groups.google.com/forum/#!forum/mithriljs)
+-	There's now a [community mailing list](mailto:mithriljs@googlegroups.com). There's also a [web interface](https://groups.google.com/forum/#!forum/mithriljs)
 -	Mithril is now on Travis CI. The build status can be found in the [project homepage](https://github.com/lhorie/mithril.js)
 -	Mithril is now available via the CommonJS and AMD API
+-	Mithril can now [be installed via npm and bower](installation.md)
 
 ### Bug Fixes:
 

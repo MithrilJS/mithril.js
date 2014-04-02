@@ -38,6 +38,24 @@ Content delivery networks allow the library to be cached across different websit
 
 ---
 
+### NPM
+
+NPM is the default package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use NPM to conveniently keep up-to-date with Mithril versions.
+
+Assuming you have NodeJS installed,  you can download Mithril by typing this:
+
+```
+npm install mithril
+```
+
+Then, to use Mithril, point a script tag to the downloaded file:
+
+```markup
+<script src="/node_modules/mithril/mithril.min.js"></script>
+```
+
+---
+
 ### Bower
 
 [Bower](http://http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
