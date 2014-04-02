@@ -77,6 +77,7 @@ module.exports = function(grunt) {
 			options: {force: true, patterns: [{match: /\.md/g, replacement: ".html"}, {match: /\$version/g, replacement: version}]},
 			links: {expand: true, flatten: true, src: [tempFolder + "/**/*.html"], dest: currentVersionArchiveFolder + "/"},
 			index: {src: inputFolder + "/layout/index.html", dest: currentVersionArchiveFolder + "/index.html"},
+			commonjs: {expand: true, flatten: true, src: [inputFolder + "/layout/*.json"], dest: currentVersionArchiveFolder},
 		},
 		copy: {
 			style: {src: inputFolder + "/layout/style.css", dest: currentVersionArchiveFolder + "/style.css"},
