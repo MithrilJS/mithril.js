@@ -73,7 +73,7 @@ new function(window) {
 				setAttributes(node, data.attrs, cached.attrs)
 				cached.children = build(node, data.children, cached.children)
 				cached.nodes.intact = true
-				parent.appendChild(node)
+				if (node.parentNode !== parent) parent.appendChild(node)
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
 		}
@@ -120,13 +120,20 @@ new function(window) {
 	function setAttributes(node, dataAttrs, cachedAttrs) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
-			if (!(attrName in cachedAttrs) || (cachedAttrs[attrName] !== dataAttr) || node === window.document.activeElement) {
-				cachedAttrs[attrName] = dataAttr
-				if (attrName == "config") continue
-				if (attrName.indexOf("on") == 0 && typeof dataAttr == "function") dataAttr = autoredraw(dataAttr, node)
-				if (attrName == "style") for (var rule in dataAttr) node.style[rule] = dataAttr[rule]
+			var cachedAttr = cachedAttrs[attrName]
+			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
+				if (attrName === "config") continue
+				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
+					if (String(dataAttr) !== String(cachedAttr)) node[attrName] = autoredraw(dataAttr, node)
+				}
+				else if (attrName === "style") {
+					for (var rule in dataAttr) {
+						if (cachedAttr === undefined || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+					}
+				}
 				else if (attrName in node) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
+				cachedAttrs[attrName] = dataAttr
 			}
 		}
 		return cachedAttrs
@@ -141,9 +148,9 @@ new function(window) {
 		return result
 	}
 	function autoredraw(callback, object) {
-		return function() {
+		return function(e) {
 			m.startComputation()
-			var output = callback.apply(object || window, arguments)
+			var output = callback.call(object, e)
 			m.endComputation()
 			return output
 		}
@@ -460,6 +467,7 @@ mock.window = new function() {
 			getAttribute: function(name, value) {
 				return this[name]
 			},
+			style: {}
 		}
 	}
 	window.document.createTextNode = function(text) {
