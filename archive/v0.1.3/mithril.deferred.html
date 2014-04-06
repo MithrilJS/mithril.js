@@ -79,6 +79,32 @@ greetAsync()
     .then(function(value) {return value + &quot; world&quot;})
     .then(function(value) {console.log(value)}); //logs &quot;hello world&quot; after 1 second</code></pre>
 <hr>
+<h3 id="differences-from-promises-a-">Differences from Promises/A+</h3>
+<p>For the most part, Mithril promises behave as you&#39;d expect a <a href="http://promises-aplus.github.io/promises-spec/">Promise/A+</a> promise to behave, but with a few key differences:</p>
+<p>Mithril promises forward a value downstream if a resolution callback returns <code>undefined</code>. This allows simpler debugging of promise chains:</p>
+<pre><code class="lang-javascript">var data = m.request({method: &quot;GET&quot;, url: &quot;/data&quot;})
+    .then(console.log) //Mithril promises let us debug like this
+    .then(doStuff)
+
+var data = m.request({method: &quot;GET&quot;, url: &quot;/data&quot;})
+    .then(function(value) { // Promises/A+ would require us to declare an anonymous function
+        console.log(value) // here&#39;s the debugging snippet
+        return value // and we need to remember to return the value as well
+    })
+    .then(doStuff) // or else `doStuff` will break</code></pre>
+<p>Another subtle difference is that the Promises/A+ require a callback to run in a different execution context than its respective <code>then</code> method. This requirement exists to support an obscure edge cases and incurs <a href="http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/">a significant performance hit on each link of a promise chain</a>. To be more specific, the performance hit can come either in the form of a 4ms minimum delay (if the implementation uses <code>setTimeout</code>), or from having to load a <a href="https://raw.githubusercontent.com/NobleJS/setImmediate/master/setImmediate.js">bunch of hacky polyfill code</a> for a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window.setImmediate">feature that is not being considered for addition by some browser vendors</a>.</p>
+<p>To illustrate the difference between Mithril and A+ promises, consider the code below:</p>
+<pre><code class="lang-javascript">var deferred = m.deferred()
+
+deferred.promise.then(function() {
+    console.log(1)
+})
+
+deferred.resolve(&quot;value&quot;)
+
+console.log(2)</code></pre>
+<p>In the example above, A+ promises are required to log <code>2</code> before logging <code>1</code>, whereas Mithril logs <code>1</code> before <code>2</code>. Typically <code>resolve</code>/<code>reject</code> are called asynchronously after the <code>then</code> method is called, so normally this difference does not matter.</p>
+<hr>
 <h3 id="signature">Signature</h3>
 <p><a href="how-to-read-signatures.html">How to read signatures</a></p>
 <pre><code class="lang-clike">Deferred deferred()

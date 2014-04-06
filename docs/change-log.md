@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.3](/mithril/archive/v0.1.3) - maintenance
+
+### Bug Fixes:
+
+-	diff no longer touch the DOM when processing `style` attributes and event handlers
+-	returning a thennable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
+
+---
+
 [v0.1.2](/mithril/archive/v0.1.2) - maintenance
 
 ### News:
