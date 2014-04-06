@@ -99,5 +99,5 @@ component install lhorie/mithril@gh-pages
 Then, to use Mithril, point a script tag to the downloaded file:
 
 ```markup
-<script src="/components/lhorie/mithril/master/mithril.min.js"></script>
+<script src="/components/lhorie/mithril/gh-pages/mithril.min.js"></script>
 ```
