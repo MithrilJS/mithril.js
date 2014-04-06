@@ -58,7 +58,7 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Bower
 
-[Bower](http://http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
+[Bower](http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
 
 Assuming you have NodeJS installed, you can install Bower by typing this in the command line:
 
@@ -76,4 +76,28 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ```markup
 <script src="/bower_components/mithril/mithril.min.js"></script>
+```
+
+---
+
+### Component
+
+[Component](http://component.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
+
+Assuming you have NodeJS installed, you can install Bower by typing this in the command line:
+
+```
+npm install -g component
+```
+
+And you can download Mithril by typing this:
+
+```
+component install lhorie/mithril@gh-pages
+```
+
+Then, to use Mithril, point a script tag to the downloaded file:
+
+```markup
+<script src="/components/lhorie/mithril/master/mithril.min.js"></script>
 ```

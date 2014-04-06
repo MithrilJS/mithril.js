@@ -2,6 +2,11 @@
 
 [v0.1.3](/mithril/archive/v0.1.3) - maintenance
 
+### News:
+
+-	Mithril is now available via [Component](http://component.io)
+-	There's now an extra low-level optimization hook called a SubtreeDirective, which allows implementing plugins that only create virtual trees if necessary.
+
 ### Bug Fixes:
 
 -	diff no longer touch the DOM when processing `style` attributes and event handlers

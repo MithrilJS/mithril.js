@@ -2,7 +2,7 @@
 	"name": "mithril",
 	"description": "A Javascript framework for building brilliant applications",
 	"keywords": ["mvc", "framework"],
-	"repo": "lhorie/mithril",
+	"repository": "lhorie/mithril",
 	"main": "mithril.min.js",
 	"scripts": ["mithril.min.js"],
 	"version": "$version",
