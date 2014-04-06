@@ -183,7 +183,8 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 where:
     VirtualElement :: Object { String tag, Attributes attributes, Children children }
     Attributes :: Object&lt;any | void config(DOMElement element, Boolean isInitialized)&gt;
-    Children :: String text | Array&lt;String text | VirtualElement virtualElement | Children children&gt;</code></pre>
+    Children :: String text | Array&lt;String text | VirtualElement virtualElement | SubtreeDirective directive | Children children&gt;
+    SubtreeDirective :: Object { String subtree }</code></pre>
 <ul>
 <li><p><strong>String selector</strong></p>
 <p>This string should be a CSS rule that represents a DOM element.</p>
@@ -259,6 +260,7 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 <p>If this argument is a string, it will be rendered as a text node. To render a string as HTML, see <a href="mithril.trust"><code>m.trust</code></a></p>
 <p>If it&#39;s a VirtualElement, it will be rendered as a DOM Element.</p>
 <p>If it&#39;s a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.</p>
+<p>If it&#39;s a SubtreeDirective with the value &quot;retain&quot;, it will retain the existing DOM tree in place, if any. See <a href="mithril.render#subtree-directives">subtree directives</a> for more information.</p>
 </li>
 <li><p><strong>returns</strong> VirtualElement</p>
 <p>The returned VirtualElement is a javascript data structure that represents the DOM element to be rendered by <a href="mithril.render"><code>m.render</code></a></p>

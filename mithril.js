@@ -33,7 +33,11 @@ new function(window) {
 		return cell
 	}
 	function build(parent, data, cached) {
-		if (data === null || data === undefined) return
+		if (data === null || data === undefined) {
+			if (cached) clear(cached.nodes)
+			return 
+		}
+		if (data.subtree === "retain") return
 		
 		var cachedType = type.call(cached), dataType = type.call(data)
 		if (cachedType != dataType) {
@@ -59,8 +63,8 @@ new function(window) {
 			}
 		}
 		else if (dataType == "[object Object]") {
-			if (typeof data.tag != "string") return
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join()) clear(cached.nodes)
+			if (typeof data.tag != "string") return
 			
 			var node, isNew = cached.nodes.length === 0
 			if (isNew) {

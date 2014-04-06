@@ -86,14 +86,50 @@ m.render(document.body, [
     &lt;/ul&gt;
 &lt;/body&gt;</code></pre>
 <hr>
+<h3 id="subtree-directives">Subtree Directives</h3>
+<p><code>m.render</code> accepts a special low level SubtreeDirective object as a node in a virtual DOM tree: if a tree contains a node that looks exactly like the object below, Mithril will abort the diff algorithm for that node. This allows you to implement optimizations that avoid creating virtual DOM trees in favor of their cached counterparts, if you know they have not changed between redraws. Note that using this feature is discouraged if you don&#39;t have visible performance problems.</p>
+<pre><code class="lang-javascript">{subtree: &quot;retain&quot;}</code></pre>
+<p>This mechanism is only intended to be used as a last resort optimization tool. If you do use it, you are responsible for determining what constitutes a scenario where the virtual DOM tree is changed/unchanged.</p>
+<p>The example below shows how to use a SubtreeDirective object to create a static header that doesn&#39;t incur diff costs once it has been rendered. This means that we are avoiding the creation of the header subtree (and therefore skipping the diff algorithm) altogether, but it also means that dynamic variables will NOT be updated within the header.</p>
+<pre><code>var app = {}
+
+//here&#39;s an example plugin that determines whether data has changes.
+//in this case, it simply assume data has changed the first time, and never changes after that.
+app.bindOnce = new function() {
+    var cache = {}
+    function(view) {
+        if (!cache[view.toString()]) {
+            cache[view.toString()] = true
+            return view()
+        }
+        else return {subtree: &quot;retain&quot;}
+    }
+}
+
+//here&#39;s the view
+app.view = function(ctrl) {
+    m(&quot;.layout&quot;, [
+        app.bindOnce(function() {
+            //this only runs once in order to boost performance
+            //dynamic variables are not updated here
+            return m(&quot;header&quot;, [
+                m(&quot;h1&quot;, &quot;this never changes&quot;)
+            ])
+        }),
+        //dynamic variables here still update on every redraw
+        m(&quot;main&quot;, &quot;rest of app goes here&quot;)
+    ])
+}</code></pre>
+<hr>
 <h3 id="signature">Signature</h3>
 <p><a href="how-to-read-signatures.html">How to read signatures</a></p>
 <pre><code class="lang-clike">void render(DOMElement rootElement, Children children)
 
 where:
-    Children :: String text | Array&lt;String text | VirtualElement virtualElement | Children children&gt;
+    Children :: String text | Array&lt;String text | VirtualElement virtualElement | SubtreeDirective directive | Children children&gt;
     VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object&lt;Any | void config(DOMElement element)&gt;</code></pre>
+    Attributes :: Object&lt;Any | void config(DOMElement element)&gt;
+    SubtreeDirective :: Object { String subtree }</code></pre>
 <ul>
 <li><p><strong>DOMElement rootElement</strong></p>
 <p>A DOM element which will contain the template represented by <code>children</code>.</p>

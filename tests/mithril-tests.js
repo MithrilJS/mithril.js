@@ -111,6 +111,36 @@ function testMithril(mock) {
 		m.render(root, m("div", [m("a", {href: "/second"})]))
 		return root.childNodes[0].childNodes.length == 1
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [m("li"), undefined]))
+		return root.childNodes[0].childNodes.length === 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li"), m("li")]))
+		m.render(root, m("ul", [m("li"), undefined]))
+		return root.childNodes[0].childNodes.length === 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [undefined]))
+		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{}]))
+		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", [m("a")])]))
+		m.render(root, m("ul", [{fromCache: true}]))
+		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
+	})
 
 	//m.redraw
 	test(function() {
