@@ -319,7 +319,8 @@ new function(window) {
 				list.push(function(value) {
 					try {
 						var result = callback(value)
-						next[method](result !== undefined ? result : value)
+						if (result && typeof result.then == "function") result.then(next[method], error)
+						else next[method](result !== undefined ? result : value)
 					}
 					catch (e) {
 						if (e instanceof Error && e.constructor !== Error) throw e
@@ -772,6 +773,20 @@ function testMithril(mock) {
 		deferred.promise.then(function(data) {throw new Error}).then(function(data) {value1 = 1}, function(data) {value2 = data})
 		deferred.resolve("test")
 		return value1 === undefined && value2 instanceof Error
+	})
+	test(function() {
+		var deferred1 = m.deferred()
+		var deferred2 = m.deferred()
+		var value1, value2
+		deferred1.promise.then(function(data) {
+			value1 = data
+			return deferred2.promise
+		}).then(function(data) {
+			value2 = data
+		})
+		deferred1.resolve(1)
+		deferred2.resolve(2)
+		return value1 === 1 && value2 === 2
 	})
 
 	//m.sync

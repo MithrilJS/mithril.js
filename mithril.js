@@ -319,7 +319,8 @@ new function(window) {
 				list.push(function(value) {
 					try {
 						var result = callback(value)
-						next[method](result !== undefined ? result : value)
+						if (result && typeof result.then == "function") result.then(next[method], error)
+						else next[method](result !== undefined ? result : value)
 					}
 					catch (e) {
 						if (e instanceof Error && e.constructor !== Error) throw e

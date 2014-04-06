@@ -245,6 +245,20 @@ function testMithril(mock) {
 		deferred.resolve("test")
 		return value1 === undefined && value2 instanceof Error
 	})
+	test(function() {
+		var deferred1 = m.deferred()
+		var deferred2 = m.deferred()
+		var value1, value2
+		deferred1.promise.then(function(data) {
+			value1 = data
+			return deferred2.promise
+		}).then(function(data) {
+			value2 = data
+		})
+		deferred1.resolve(1)
+		deferred2.resolve(2)
+		return value1 === 1 && value2 === 2
+	})
 
 	//m.sync
 	test(function() {
