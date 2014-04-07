@@ -87,40 +87,40 @@ Applications often reuse rich UI controls that aren't provided out of the box by
 var autocompleter = {};
 
 autocompleter.controller = function(data, getter) {
-	//binding for the text input
-	this.value = m.prop("");
-	//store for the list of items
-	this.data = m.prop([]);
-	
-	//method to determine what property of a list item to compare the text input's value to
-	this.getter = getter;
-	
-	//this method changes the relevance list depending on what's currently in the text input
-	this.change = function(value) {
-		this.value(value);
-		
-		var data = value === "" ? [] : data.filter(function(item) {
-			return this.getter(item).toLowerCase().indexOf(value.toLowerCase()) > -1;
-		}, this);
-		this.data(data);
-	};
-	
-	//this method is called when an option is selected. It triggers an `onchange` event
-	this.select = function(value) {
-		this.value(value);
-		this.data([]);
-		if (this.onchange) this.onchange({target: {value: value}});
-	};
+    //binding for the text input
+    this.value = m.prop("");
+    //store for the list of items
+    this.data = m.prop([]);
+
+    //method to determine what property of a list item to compare the text input's value to
+    this.getter = getter;
+
+    //this method changes the relevance list depending on what's currently in the text input
+    this.change = function(value) {
+        this.value(value);
+
+        var list = value === "" ? [] : data.filter(function(item) {
+            return this.getter(item).toLowerCase().indexOf(value.toLowerCase()) > -1;
+        }, this);
+        this.data(list);
+    };
+
+    //this method is called when an option is selected. It triggers an `onchange` event
+    this.select = function(value) {
+        this.value(value);
+        this.data([]);
+        if (this.onchange) this.onchange({currentTarget: {value: value}});
+    };
 }
 
 autocompleter.view = function(ctrl, options) {
-	if (options) ctrl.onchange = options.onchange;
-	return [
-		m("input", {oninput: m.withAttr("value", ctrl.change.bind(ctrl)), value: ctrl.value()}),
-		ctrl.data().map(function(item) {
-			return m("div", {data: ctrl.getter(item), onclick: m.withAttr("data", ctrl.select.bind(ctrl))}, ctrl.getter(item));
-		})
-	];
+    if (options) ctrl.onchange = options.onchange;
+    return [
+        m("input", {oninput: m.withAttr("value", ctrl.change.bind(ctrl)), value: ctrl.value()}),
+        ctrl.data().map(function(item) {
+            return m("div", {data: ctrl.getter(item), onclick: m.withAttr("data", ctrl.select.bind(ctrl))}, ctrl.getter(item));
+        })
+    ];
 }
 
 
@@ -129,17 +129,17 @@ autocompleter.view = function(ctrl, options) {
 var dashboard = {}
 
 dashboard.controller = function() {
-	this.names = m.prop([{id: 1, name: "John"}, {id: 2, name: "Bob"}, {id: 2, name: "Mary"}]);
-	this.autocompleter = new autocompleter.controller(this.names(), function(item) {
-		return item.name;
-	});
+    this.names = m.prop([{id: 1, name: "John"}, {id: 2, name: "Bob"}, {id: 2, name: "Mary"}]);
+    this.autocompleter = new autocompleter.controller(this.names(), function(item) {
+        return item.name;
+    });
 };
 
 dashboard.view = function(ctrl) {
-	//assuming there's an element w/ id = "example" somewhere on the page
-	return m("#example", [
-		new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", console.log)}),
-	]);
+    //assuming there's an element w/ id = "example" somewhere on the page
+    return m("#example", [
+        new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", console.log)}),
+    ]);
 };
 
 

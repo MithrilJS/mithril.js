@@ -126,17 +126,17 @@ autocompleter.controller = function(data, getter) {
     this.change = function(value) {
         this.value(value);
 
-        var data = value === &quot;&quot; ? [] : data.filter(function(item) {
+        var list = value === &quot;&quot; ? [] : data.filter(function(item) {
             return this.getter(item).toLowerCase().indexOf(value.toLowerCase()) &gt; -1;
         }, this);
-        this.data(data);
+        this.data(list);
     };
 
     //this method is called when an option is selected. It triggers an `onchange` event
     this.select = function(value) {
         this.value(value);
         this.data([]);
-        if (this.onchange) this.onchange({target: {value: value}});
+        if (this.onchange) this.onchange({currentTarget: {value: value}});
     };
 }
 
