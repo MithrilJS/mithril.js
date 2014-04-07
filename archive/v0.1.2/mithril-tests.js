@@ -460,6 +460,7 @@ mock.window = new function() {
 			getAttribute: function(name, value) {
 				return this[name]
 			},
+			style: {}
 		}
 	}
 	window.document.createTextNode = function(text) {

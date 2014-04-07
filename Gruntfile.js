@@ -10,6 +10,7 @@ module.exports = function(grunt) {
 	var guideLayout = "guide"
 	var guide = [
 		"auto-redrawing",
+		"community",
 		"compiling-templates",
 		"comparison",
 		"components",
