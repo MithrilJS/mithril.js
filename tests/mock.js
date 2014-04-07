@@ -15,7 +15,7 @@ mock.window = new function() {
 			},
 			getAttribute: function(name, value) {
 				return this[name]
-			},
+			}
 		}
 	}
 	window.document.createTextNode = function(text) {
