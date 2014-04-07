@@ -93,11 +93,11 @@ npm install -g component
 And you can download Mithril by typing this:
 
 ```
-component install lhorie/mithril@gh-pages
+component install lhorie/mithril
 ```
 
 Then, to use Mithril, point a script tag to the downloaded file:
 
 ```markup
-<script src="/components/lhorie/mithril/gh-pages/mithril.min.js"></script>
+<script src="/components/lhorie/mithril/master/mithril.min.js"></script>
 ```
