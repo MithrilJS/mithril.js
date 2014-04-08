@@ -86,6 +86,7 @@ module.exports = function(grunt) {
 			lib: {expand: true, cwd: inputFolder + "/layout/lib/", src: "./**", dest: currentVersionArchiveFolder + "/lib/"},
 			tools: {expand: true, cwd: inputFolder + "/layout/tools/", src: "./**", dest: currentVersionArchiveFolder + "/tools/"},
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
+			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
 			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version}
 		},

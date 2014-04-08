@@ -141,7 +141,7 @@ function testMithril(mock) {
 		m.render(root, m("ul", [{subtree: "retain"}]))
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
 	})
-
+	
 	//m.redraw
 	test(function() {
 		var controller

@@ -4,7 +4,7 @@
 	"keywords": ["mvc", "framework"],
 	"repository": "lhorie/mithril",
 	"main": "mithril.min.js",
-	"scripts": ["mithril.min.js"],
+	"scripts": ["mithril.min.js", "mithril.min.map", "mithril.js"],
 	"version": "$version",
 	"license": "MIT"
 }
