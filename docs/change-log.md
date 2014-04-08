@@ -1,5 +1,12 @@
 ## Change Log
 
+[v0.1.4](/mithril/archive/v0.1.3) - maintenance
+
+### Bug Fixes:
+
+-	URLs with port numbers are now handled correctly [#40](https://github.com/lhorie/mithril.js/issues/40)
+-	NPM package now contains unminified version for map files [#39](https://github.com/lhorie/mithril.js/issues/39)
+
 [v0.1.3](/mithril/archive/v0.1.3) - maintenance
 
 ### News:

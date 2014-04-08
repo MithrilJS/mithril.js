@@ -158,6 +158,7 @@ function testMithril(mock) {
 	//m.route
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
@@ -168,6 +169,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.pathname = "/"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "pathname"
@@ -178,6 +180,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.hash = "#"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "hash"
@@ -188,6 +191,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
@@ -198,6 +202,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
 		
@@ -211,6 +216,23 @@ function testMithril(mock) {
 		m.route("/")
 		var paramValueAfter = m.route.param("test")
 		
+		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
+	})
+	test(function() {
+		mock.performance.$elapse(50)
+		mock.location.search = "?"
+		
+		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
+		
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/test6/foo", {
+			"/": module,
+			"/test6/:a1": module
+		})
+		var paramValueBefore = m.route.param("a1")
+		m.route("/")
+		var paramValueAfter = m.route.param("a1")
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 
@@ -237,6 +259,20 @@ function testMithril(mock) {
 		var e = mock.XMLHttpRequest.$events.pop()
 		e.target.onload(e)
 		return prop() === "foo"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "http://domain.com:80", data: {}}).then(function(value) {return value})
+		var e = mock.XMLHttpRequest.$events.pop()
+		e.target.onload(e)
+		console.log(prop().url)
+		return prop().url === "http://domain.com:80"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "http://domain.com:80/:test1", data: {test1: "foo"}}).then(function(value) {return value})
+		var e = mock.XMLHttpRequest.$events.pop()
+		e.target.onload(e)
+		console.log(prop().url)
+		return prop().url === "http://domain.com:80/foo"
 	})
 
 	//m.deferred
