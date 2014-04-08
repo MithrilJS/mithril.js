@@ -32,7 +32,7 @@ new function(window) {
 		}
 		return cell
 	}
-	function build(parent, data, cached) {
+	function build(parent, data, cached, shouldReattach) {
 		if (data === null || data === undefined) {
 			if (cached) clear(cached.nodes)
 			return 
@@ -49,7 +49,7 @@ new function(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length
 			for (var i = 0; i < data.length; i++) {
-				var item = build(parent, data[i], cached[i])
+				var item = build(parent, data[i], cached[i], shouldReattach)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				cached[i] = item
@@ -69,15 +69,15 @@ new function(window) {
 			var node, isNew = cached.nodes.length === 0
 			if (isNew) {
 				node = window.document.createElement(data.tag)
-				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}), children: build(node, data.children, cached.children), nodes: [node]}
+				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}), children: build(node, data.children, cached.children, true), nodes: [node]}
 				parent.appendChild(node)
 			}
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.attrs, cached.attrs)
-				cached.children = build(node, data.children, cached.children)
+				cached.children = build(node, data.children, cached.children, false)
 				cached.nodes.intact = true
-				if (node.parentNode !== parent) parent.appendChild(node)
+				if (shouldReattach === true) parent.appendChild(node)
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
 		}
@@ -180,7 +180,7 @@ new function(window) {
 		var index = nodeCache.indexOf(root)
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
-		cellCache[id] = build(node, cell, cellCache[id])
+		cellCache[id] = build(node, cell, cellCache[id], false)
 	}
 	
 	m.trust = function(value) {
