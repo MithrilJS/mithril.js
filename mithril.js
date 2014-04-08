@@ -388,7 +388,7 @@ new function(window) {
 		return xhrOptions
 	}
 	function parameterizeUrl(url, data) {
-		var tokens = url.match(/:\w+/g)
+		var tokens = url.match(/:[a-zA-Z]+/g)
 		if (tokens && data) {
 			for (var i = 0; i < tokens.length; i++) {
 				var key = tokens[i].slice(1)
