@@ -1,10 +1,33 @@
 ## Tools
 
-### HTML to Mithril Template Converter
+### HTML-to-Mithril Template Converter
 
-If you already have your HTML written and want to convert it into a Mithril template, use the tool below.
+If you already have your HTML written and want to convert it into a Mithril template, you can use the tool below for one-off manual conversion.
 
 [Template Converter](tools/template-converter.html)
+
+---
+
+### Automatic HTML-to-Mithril Template Converter
+
+There's a tool called [MSX by Jonathan Buchanan](https://github.com/insin/msx) that allows you to write templates using HTML syntax, and then automatically compile them to Javascript when files change.
+
+It is useful for teams where styling and functionality are done by different people, and for those who prefer to maintain templates in HTML syntax.
+
+The tool allows you to write code like this:
+
+```javascript
+todo.view = function(ctrl) {
+	return <html>
+		<body>
+			<input onchange={m.withAttr("value", ctrl.description)} value={ctrl.description()}/>
+			<button onclick={ctrl.add.bind(ctrl, ctrl.description)}>Add</button>
+		</body>
+	</html>
+};
+```
+
+Note, however, that since the code above is not valid Javascript, this syntax can only be used with a preprocessor build tool such as the provided [Gulp.js](http://gulpjs.com) script.
 
 ---
 

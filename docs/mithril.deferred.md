@@ -29,6 +29,46 @@ greetAsync()
 
 ---
 
+### Differences from Promises/A+
+
+For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but with a few key differences:
+
+Mithril promises forward a value downstream if a resolution callback returns `undefined`. This allows simpler debugging of promise chains:
+
+```javascript
+var data = m.request({method: "GET", url: "/data"})
+	.then(console.log) //Mithril promises let us debug like this
+	.then(doStuff)
+	
+var data = m.request({method: "GET", url: "/data"})
+	.then(function(value) { // Promises/A+ would require us to declare an anonymous function
+		console.log(value) // here's the debugging snippet
+		return value // and we need to remember to return the value as well
+	})
+	.then(doStuff) // or else `doStuff` will break
+
+```
+
+Another subtle difference is that the Promises/A+ require a callback to run in a different execution context than its respective `then` method. This requirement exists to support an obscure edge cases and incurs [a significant performance hit on each link of a promise chain](http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/). To be more specific, the performance hit can come either in the form of a 4ms minimum delay (if the implementation uses `setTimeout`), or from having to load a [bunch of hacky polyfill code](https://raw.githubusercontent.com/NobleJS/setImmediate/master/setImmediate.js) for a [feature that is not being considered for addition by some browser vendors](https://developer.mozilla.org/en-US/docs/Web/API/Window.setImmediate).
+
+To illustrate the difference between Mithril and A+ promises, consider the code below:
+
+```javascript
+var deferred = m.deferred()
+
+deferred.promise.then(function() {
+	console.log(1)
+})
+
+deferred.resolve("value")
+
+console.log(2)
+```
+
+In the example above, A+ promises are required to log `2` before logging `1`, whereas Mithril logs `1` before `2`. Typically `resolve`/`reject` are called asynchronously after the `then` method is called, so normally this difference does not matter.
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)

@@ -10,6 +10,12 @@ mock.window = new function() {
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,
 			replaceChild: window.document.replaceChild,
+			insertBefore: function(node, reference) {
+				node.parentNode = this
+				var index = this.childNodes.indexOf(reference)
+				if (index < 0) this.childNodes.push(node)
+				else this.childNodes.splice(index, 0, node)
+			},
 			setAttribute: function(name, value) {
 				this[name] = value.toString()
 			},
@@ -18,7 +24,7 @@ mock.window = new function() {
 			},
 			getAttribute: function(name, value) {
 				return this[name]
-			},
+			}
 		}
 	}
 	window.document.createElementNS = function(namespace, tag) {

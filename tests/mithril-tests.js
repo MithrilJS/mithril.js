@@ -110,16 +110,105 @@ function testMithril(mock) {
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("svg", [m("g")]))
-		console.log(root.childNodes[0].childNodes[0])
 		return root.childNodes[0].childNodes[0].nodeName === "G"
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("svg", [m("a[href='http://google.com']")]))
-		console.log(root.childNodes[0].childNodes[0])
 		return root.childNodes[0].childNodes[0].nodeName === "A"
 	})
-
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div.classname", [m("a", {href: "/first"})]))
+		m.render(root, m("div", [m("a", {href: "/second"})]))
+		return root.childNodes[0].childNodes.length == 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [m("li"), undefined]))
+		return root.childNodes[0].childNodes.length === 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li"), m("li")]))
+		m.render(root, m("ul", [m("li"), undefined]))
+		return root.childNodes[0].childNodes.length === 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [undefined]))
+		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{}]))
+		return root.childNodes[0].childNodes.length === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", [m("a")])]))
+		m.render(root, m("ul", [{subtree: "retain"}]))
+		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/43
+		var root = mock.document.createElement("div")
+		m.render(root, m("a", {config: m.route}, "test"))
+		m.render(root, m("a", {config: m.route}, "test"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/29
+		var root = mock.document.createElement("div")
+		var list = [false, false]
+		m.render(root, list.reverse().map(function(flag, index) {
+			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
+		}))
+		
+		mock.document.activeElement = root.childNodes[0]
+		root.childNodes[0].checked = true
+		root.childNodes[0].onclick({currentTarget: {checked: true}})
+		
+		m.render(root, list.reverse().map(function(flag, index) {
+			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
+		}))
+		
+		mock.document.activeElement = null
+		
+		return root.childNodes[0].checked === false && root.childNodes[1].checked === true
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", ["test", m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", [m("div"), m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeName === "DIV"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", ["test", m("#bar")]))
+		m.render(root, m("#foo", [m("div"), m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeName === "DIV"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [m("div"), m("#bar")]))
+		m.render(root, m("#foo", ["test", m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	
 	//m.redraw
 	test(function() {
 		var controller
@@ -136,6 +225,7 @@ function testMithril(mock) {
 	//m.route
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
@@ -146,6 +236,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.pathname = "/"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "pathname"
@@ -156,6 +247,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.hash = "#"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "hash"
@@ -166,6 +258,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
@@ -176,6 +269,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		mock.performance.$elapse(50)
+		mock.location.search = "?"
 		
 		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
 		
@@ -189,6 +283,23 @@ function testMithril(mock) {
 		m.route("/")
 		var paramValueAfter = m.route.param("test")
 		
+		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
+	})
+	test(function() {
+		mock.performance.$elapse(50)
+		mock.location.search = "?"
+		
+		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
+		
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/test6/foo", {
+			"/": module,
+			"/test6/:a1": module
+		})
+		var paramValueBefore = m.route.param("a1")
+		m.route("/")
+		var paramValueAfter = m.route.param("a1")
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 
@@ -215,6 +326,18 @@ function testMithril(mock) {
 		var e = mock.XMLHttpRequest.$events.pop()
 		e.target.onload(e)
 		return prop() === "foo"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "http://domain.com:80", data: {}}).then(function(value) {return value})
+		var e = mock.XMLHttpRequest.$events.pop()
+		e.target.onload(e)
+		return prop().url === "http://domain.com:80"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "http://domain.com:80/:test1", data: {test1: "foo"}}).then(function(value) {return value})
+		var e = mock.XMLHttpRequest.$events.pop()
+		e.target.onload(e)
+		return prop().url === "http://domain.com:80/foo"
 	})
 
 	//m.deferred
@@ -252,6 +375,20 @@ function testMithril(mock) {
 		deferred.promise.then(function(data) {throw new Error}).then(function(data) {value1 = 1}, function(data) {value2 = data})
 		deferred.resolve("test")
 		return value1 === undefined && value2 instanceof Error
+	})
+	test(function() {
+		var deferred1 = m.deferred()
+		var deferred2 = m.deferred()
+		var value1, value2
+		deferred1.promise.then(function(data) {
+			value1 = data
+			return deferred2.promise
+		}).then(function(data) {
+			value2 = data
+		})
+		deferred1.resolve(1)
+		deferred2.resolve(2)
+		return value1 === 1 && value2 === 2
 	})
 
 	//m.sync

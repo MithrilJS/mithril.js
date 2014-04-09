@@ -1,5 +1,50 @@
 ## Change Log
 
+[v0.1.4](/mithril/archive/v0.1.4) - maintenance
+
+### News:
+
+-	added regression tests for reported bugs
+
+### Bug Fixes:
+
+-	URLs with port numbers are now handled correctly [#40](https://github.com/lhorie/mithril.js/issues/40)
+-	NPM package now contains unminified version for map files [#39](https://github.com/lhorie/mithril.js/issues/39)
+-	fixed ordering issue when mixing newly created virtual elements with elements from cache [#44](https://github.com/lhorie/mithril.js/issues/44)
+-	fixed caching bug in links w/ config option attached [#43](https://github.com/lhorie/mithril.js/issues/43)
+-	fixed attribute update bug when an element has both `oninput` and `onkeydown` handlers [#36](https://github.com/lhorie/mithril.js/issues/36)
+
+[v0.1.3](/mithril/archive/v0.1.3) - maintenance
+
+### News:
+
+-	Mithril is now available via [Component](http://component.io)
+-	There's now an extra low-level optimization hook called a SubtreeDirective, which allows implementing plugins that only create virtual trees if necessary.
+
+### Bug Fixes:
+
+-	diff no longer touch the DOM when processing `style` attributes and event handlers
+-	returning a thennable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
+-	diff now correctly clears subtree if null or undefined is passed as a node
+
+---
+
+[v0.1.2](/mithril/archive/v0.1.2) - maintenance
+
+### News:
+
+-	There's now a [community mailing list](mailto:mithriljs@googlegroups.com). There's also a [web interface](https://groups.google.com/forum/#!forum/mithriljs)
+-	Mithril is now on Travis CI. The build status can be found in the [project homepage](https://github.com/lhorie/mithril.js)
+-	Mithril is now available via the CommonJS and AMD API
+-	Mithril can now [be installed via npm and bower](installation.md)
+
+### Bug Fixes:
+
+-	`m.render` now correctly reattaches reused DOM elements to replaced parent nodes [#31](https://github.com/lhorie/mithril.js/issues/31)
+-	UI actions that can potentially de-synchronize the DOM from cache now force synchronization [#29](https://github.com/lhorie/mithril.js/issues/29)
+
+---
+
 [v0.1.1](/mithril/archive/v0.1.1) - maintenance
 
 ### News:

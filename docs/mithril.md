@@ -195,7 +195,8 @@ VirtualElement m(String selector [, Attributes attributes] [, Children children]
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
     Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized)>
-	Children :: String text | Array<String text | VirtualElement virtualElement | Children children>
+	Children :: String text | Array<String text | VirtualElement virtualElement | SubtreeDirective directive | Children children>
+	SubtreeDirective :: Object { String subtree }
 ```
 
 -	**String selector**
@@ -316,6 +317,8 @@ where:
 	If it's a VirtualElement, it will be rendered as a DOM Element.
 	
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.
+	
+	If it's a SubtreeDirective with the value "retain", it will retain the existing DOM tree in place, if any. See [subtree directives](mithril.render#subtree-directives) for more information.
 
 -	**returns** VirtualElement
 

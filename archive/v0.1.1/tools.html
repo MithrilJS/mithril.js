@@ -44,9 +44,23 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="tools">Tools</h2>
-<h3 id="html-to-mithril-template-converter">HTML to Mithril Template Converter</h3>
-<p>If you already have your HTML written and want to convert it into a Mithril template, use the tool below.</p>
+<h3 id="html-to-mithril-template-converter">HTML-to-Mithril Template Converter</h3>
+<p>If you already have your HTML written and want to convert it into a Mithril template, you can use the tool below for one-off manual conversion.</p>
 <p><a href="tools/template-converter.html">Template Converter</a></p>
+<hr>
+<h3 id="automatic-html-to-mithril-template-converter">Automatic HTML-to-Mithril Template Converter</h3>
+<p>There&#39;s a tool called <a href="https://github.com/insin/msx">MSX by Jonathan Buchanan</a> that allows you to write templates using HTML syntax, and then automatically compile them to Javascript when files change.</p>
+<p>It is useful for teams where styling and functionality are done by different people, and for those who prefer to maintain templates in HTML syntax.</p>
+<p>The tool allows you to write code like this:</p>
+<pre><code class="lang-javascript">todo.view = function(ctrl) {
+    return &lt;html&gt;
+        &lt;body&gt;
+            &lt;input onchange={m.withAttr(&quot;value&quot;, ctrl.description)} value={ctrl.description()}/&gt;
+            &lt;button onclick={ctrl.add.bind(ctrl, ctrl.description)}&gt;Add&lt;/button&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;
+};</code></pre>
+<p>Note, however, that since the code above is not valid Javascript, this syntax can only be used with a preprocessor build tool such as the provided <a href="http://gulpjs.com">Gulp.js</a> script.</p>
 <hr>
 <h3 id="mithril-template-compiler">Mithril Template Compiler</h3>
 <p>You can pre-compile Mithril templates to make them run faster. For more information see this page:</p>
