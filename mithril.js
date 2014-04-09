@@ -126,6 +126,7 @@ new function(window) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
+				cachedAttrs[attrName] = dataAttr
 				if (attrName === "config") continue
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
 					if (String(dataAttr) !== String(cachedAttr)) node[attrName] = autoredraw(dataAttr, node)
@@ -137,7 +138,6 @@ new function(window) {
 				}
 				else if (attrName in node) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
-				cachedAttrs[attrName] = dataAttr
 			}
 		}
 		return cachedAttrs

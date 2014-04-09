@@ -126,6 +126,7 @@ new function(window) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
+				cachedAttrs[attrName] = dataAttr
 				if (attrName === "config") continue
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
 					if (String(dataAttr) !== String(cachedAttr)) node[attrName] = autoredraw(dataAttr, node)
@@ -137,7 +138,6 @@ new function(window) {
 				}
 				else if (attrName in node) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
-				cachedAttrs[attrName] = dataAttr
 			}
 		}
 		return cachedAttrs
@@ -673,6 +673,12 @@ function testMithril(mock) {
 		m.render(root, m("ul", [{subtree: "retain"}]))
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("a", {config: m.route}, "test"))
+		m.render(root, m("a", {config: m.route}, "test"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
 	
 	//m.redraw
 	test(function() {
@@ -796,14 +802,12 @@ function testMithril(mock) {
 		var prop = m.request({method: "POST", url: "http://domain.com:80", data: {}}).then(function(value) {return value})
 		var e = mock.XMLHttpRequest.$events.pop()
 		e.target.onload(e)
-		console.log(prop().url)
 		return prop().url === "http://domain.com:80"
 	})
 	test(function() {
 		var prop = m.request({method: "POST", url: "http://domain.com:80/:test1", data: {test1: "foo"}}).then(function(value) {return value})
 		var e = mock.XMLHttpRequest.$events.pop()
 		e.target.onload(e)
-		console.log(prop().url)
 		return prop().url === "http://domain.com:80/foo"
 	})
 
