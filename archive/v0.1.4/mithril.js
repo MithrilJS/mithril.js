@@ -129,7 +129,7 @@ new function(window) {
 				cachedAttrs[attrName] = dataAttr
 				if (attrName === "config") continue
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
-					if (String(dataAttr) !== String(cachedAttr)) node[attrName] = autoredraw(dataAttr, node)
+					node[attrName] = autoredraw(dataAttr, node)
 				}
 				else if (attrName === "style") {
 					for (var rule in dataAttr) {

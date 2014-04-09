@@ -147,6 +147,26 @@ function testMithril(mock) {
 		m.render(root, m("a", {config: m.route}, "test"))
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
+	test(function() {
+		//see issue #29
+		var root = mock.document.createElement("div")
+		var list = [false, false]
+		m.render(root, list.reverse().map(function(flag, index) {
+			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
+		}))
+		
+		mock.document.activeElement = root.childNodes[0]
+		root.childNodes[0].checked = true
+		root.childNodes[0].onclick({currentTarget: {checked: true}})
+		
+		m.render(root, list.reverse().map(function(flag, index) {
+			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
+		}))
+		
+		mock.document.activeElement = null
+		
+		return root.childNodes[0].checked === false && root.childNodes[1].checked === true
+	})
 	
 	//m.redraw
 	test(function() {
