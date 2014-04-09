@@ -142,13 +142,14 @@ function testMithril(mock) {
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/43
 		var root = mock.document.createElement("div")
 		m.render(root, m("a", {config: m.route}, "test"))
 		m.render(root, m("a", {config: m.route}, "test"))
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
 	test(function() {
-		//see issue #29
+		//https://github.com/lhorie/mithril.js/issues/29
 		var root = mock.document.createElement("div")
 		var list = [false, false]
 		m.render(root, list.reverse().map(function(flag, index) {
@@ -166,6 +167,20 @@ function testMithril(mock) {
 		mock.document.activeElement = null
 		
 		return root.childNodes[0].checked === false && root.childNodes[1].checked === true
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", ["test", m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", [m("div"), m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeName === "DIV"
 	})
 	
 	//m.redraw

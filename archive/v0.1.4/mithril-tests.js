@@ -32,7 +32,7 @@ new function(window) {
 		}
 		return cell
 	}
-	function build(parent, data, cached, shouldReattach) {
+	function build(parent, data, cached, shouldReattach, index) {
 		if (data === null || data === undefined) {
 			if (cached) clear(cached.nodes)
 			return 
@@ -49,7 +49,7 @@ new function(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length
 			for (var i = 0; i < data.length; i++) {
-				var item = build(parent, data[i], cached[i], shouldReattach)
+				var item = build(parent, data[i], cached[i], shouldReattach, i)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				cached[i] = item
@@ -70,14 +70,14 @@ new function(window) {
 			if (isNew) {
 				node = window.document.createElement(data.tag)
 				cached = {tag: data.tag, attrs: setAttributes(node, data.attrs, {}), children: build(node, data.children, cached.children, true), nodes: [node]}
-				parent.appendChild(node)
+				parent.insertBefore(node, parent.childNodes[index])
 			}
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.attrs, cached.attrs)
 				cached.children = build(node, data.children, cached.children, false)
 				cached.nodes.intact = true
-				if (shouldReattach === true) parent.appendChild(node)
+				if (shouldReattach === true) parent.insertBefore(node, parent.childNodes[index])
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
 		}
@@ -91,7 +91,7 @@ new function(window) {
 				}
 				else {
 					node = window.document.createTextNode(data)
-					parent.appendChild(node)
+					parent.insertBefore(node, parent.childNodes[index])
 				}
 				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data
 				cached.nodes = [node]
@@ -110,7 +110,7 @@ new function(window) {
 				}
 				else {
 					node = cached.nodes[0]
-					parent.appendChild(node)
+					parent.insertBefore(node, parent.childNodes[index])
 					node.nodeValue = data
 				}
 				cached = new data.constructor(data)
@@ -466,6 +466,12 @@ mock.window = new function() {
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,
 			replaceChild: window.document.replaceChild,
+			insertBefore: function(node, reference) {
+				node.parentNode = this
+				var index = this.childNodes.indexOf(reference)
+				if (index < 0) this.childNodes.push(node)
+				else this.childNodes.splice(index, 0, node)
+			},
 			setAttribute: function(name, value) {
 				this[name] = value.toString()
 			},
@@ -674,13 +680,14 @@ function testMithril(mock) {
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/43
 		var root = mock.document.createElement("div")
 		m.render(root, m("a", {config: m.route}, "test"))
 		m.render(root, m("a", {config: m.route}, "test"))
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
 	test(function() {
-		//see issue #29
+		//https://github.com/lhorie/mithril.js/issues/29
 		var root = mock.document.createElement("div")
 		var list = [false, false]
 		m.render(root, list.reverse().map(function(flag, index) {
@@ -698,6 +705,20 @@ function testMithril(mock) {
 		mock.document.activeElement = null
 		
 		return root.childNodes[0].checked === false && root.childNodes[1].checked === true
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", ["test", m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/44
+		var root = mock.document.createElement("div")
+		m.render(root, m("#foo", [null, m("#bar")]))
+		m.render(root, m("#foo", [m("div"), m("#bar")]))
+		return root.childNodes[0].childNodes[0].nodeName === "DIV"
 	})
 	
 	//m.redraw
