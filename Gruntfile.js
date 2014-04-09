@@ -79,6 +79,7 @@ module.exports = function(grunt) {
 			links: {expand: true, flatten: true, src: [tempFolder + "/**/*.html"], dest: currentVersionArchiveFolder + "/"},
 			index: {src: inputFolder + "/layout/index.html", dest: currentVersionArchiveFolder + "/index.html"},
 			commonjs: {expand: true, flatten: true, src: [inputFolder + "/layout/*.json"], dest: currentVersionArchiveFolder},
+			cdnjs: {src: "deploy/cdnjs-package.json", dest: "../cdnjs/ajax/libs/mithril/package.json"}
 		},
 		copy: {
 			style: {src: inputFolder + "/layout/style.css", dest: currentVersionArchiveFolder + "/style.css"},
@@ -88,7 +89,13 @@ module.exports = function(grunt) {
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
-			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version}
+			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version},
+			cdnjs1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.js"},
+			cdnjs2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.js"},
+			cdnjs3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.map"},
+			jsdelivr1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.js"},
+			jsdelivr2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.js"},
+			jsdelivr3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.map"}
 		},
 		execute: {
 			tests: {src: [currentVersionArchiveFolder + "/mithril-tests.js"]}
