@@ -20,6 +20,7 @@ mock.window = new function() {
 				this[name] = value.toString()
 			},
 			setAttributeNS: function(namespace, name, value) {
+				this.namespaceURI = namespace
 				this[name] = value.toString()
 			},
 			getAttribute: function(name, value) {
@@ -28,7 +29,9 @@ mock.window = new function() {
 		}
 	}
 	window.document.createElementNS = function(namespace, tag) {
-		return window.document.createElement(tag)
+		var element = window.document.createElement(tag)
+		element.namespaceURI = namespace
+		return element
 	}
 	window.document.createTextNode = function(text) {
 		return {nodeValue: text.toString()}

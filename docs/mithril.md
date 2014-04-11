@@ -185,6 +185,18 @@ You can use this mechanism to attach custom event listeners to controller method
 
 ---
 
+You can use Mithril to create SVG documents (as long as you don't need to support browsers that don't support SVG natively).
+
+Mithril automatically figures out the correct XML namespaces when it sees an SVG island in the virtual DOM tree.
+
+```javascript
+m("svg[height='200px'][width='200px']", [
+	m("image[href='foo.jpg'][height='200px'][width='200px']")
+])
+```
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)

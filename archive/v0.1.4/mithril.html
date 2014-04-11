@@ -177,6 +177,12 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 <p>Also note that the <code>config</code> callback only runs after a rendering lifecycle is done. Therefore, you should not use <code>config</code> to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next <code>m.render</code> or <code>m.module</code> call.</p>
 <p>You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril&#39;s autoredrawing system is in place. See the <a href="integration.html">integration guide</a> for more information.</p>
 <hr>
+<p>You can use Mithril to create SVG documents (as long as you don&#39;t need to support browsers that don&#39;t support SVG natively).</p>
+<p>Mithril automatically figures out the correct XML namespaces when it sees an SVG island in the virtual DOM tree.</p>
+<pre><code class="lang-javascript">m(&quot;svg[height=&#39;200px&#39;][width=&#39;200px&#39;]&quot;, [
+    m(&quot;image[href=&#39;foo.jpg&#39;][height=&#39;200px&#39;][width=&#39;200px&#39;]&quot;)
+])</code></pre>
+<hr>
 <h3 id="signature">Signature</h3>
 <p><a href="how-to-read-signatures.html">How to read signatures</a></p>
 <pre><code class="lang-clike">VirtualElement m(String selector [, Attributes attributes] [, Children children])

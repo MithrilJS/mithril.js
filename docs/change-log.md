@@ -5,6 +5,7 @@
 ### News:
 
 -	added regression tests for reported bugs
+-	added support for SVG
 
 ### Bug Fixes:
 
@@ -13,6 +14,8 @@
 -	fixed ordering issue when mixing newly created virtual elements with elements from cache [#44](https://github.com/lhorie/mithril.js/issues/44)
 -	fixed caching bug in links w/ config option attached [#43](https://github.com/lhorie/mithril.js/issues/43)
 -	fixed attribute update bug when an element has both `oninput` and `onkeydown` handlers [#36](https://github.com/lhorie/mithril.js/issues/36)
+
+---
 
 [v0.1.3](/mithril/archive/v0.1.3) - maintenance
 
