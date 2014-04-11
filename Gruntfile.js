@@ -70,7 +70,7 @@ module.exports = function(grunt) {
 		zip: {
 			distribution: {
 				cwd: currentVersionArchiveFolder + "/",
-				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.map"],
+				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.map", currentVersionArchiveFolder + "/mithril.js"],
 				dest: currentVersionArchiveFolder + "/mithril.min.zip"
 			}
 		},
