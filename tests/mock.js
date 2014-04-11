@@ -36,7 +36,7 @@ mock.window = new function() {
 	window.document.createTextNode = function(text) {
 		return {nodeValue: text.toString()}
 	}
-	window.document.documentElement = null
+	window.document.documentElement = window.document.createElement("html")
 	window.document.replaceChild = function(newChild, oldChild) {
 		var index = this.childNodes.indexOf(oldChild)
 		if (index > -1) this.childNodes.splice(index, 1, newChild)
