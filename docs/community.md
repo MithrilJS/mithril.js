@@ -1,5 +1,13 @@
 ## Community
 
+### Blog
+
+Read Mithril tutorials and articles about web app development. Join the discussion!
+
+Go to the [Mithril Blog](http://lhorie.github.io/mithril-blog)
+
+---
+
 ### Mailing List
 
 Got questions about Mithril? Suggestions?

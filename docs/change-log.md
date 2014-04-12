@@ -1,5 +1,17 @@
 ## Change Log
 
+[v0.1.5](/mithril/archive/v0.1.5) - maintenance
+
+### News:
+
+-	Launched the [Mithril Blog](http://lhorie.github.io/mithril-blog)
+
+### Bug Fixes:
+
+-	Fixed serious ordering problem when mixing arrays with virtual elements [#48](https://github.com/lhorie/mithril.js/issues/48)
+
+---
+
 [v0.1.4](/mithril/archive/v0.1.4) - maintenance
 
 ### News:
