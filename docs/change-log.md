@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.6](/mithril/archive/v0.1.6) - maintenance
+
+### Bug Fixes:
+
+-	Fixed serious bug when mixing cached text nodes with new virtual elements [#49](https://github.com/lhorie/mithril.js/issues/49)
+
+---
+
 [v0.1.5](/mithril/archive/v0.1.5) - maintenance
 
 ### News:
