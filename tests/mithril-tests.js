@@ -238,6 +238,20 @@ function testMithril(mock) {
 		m.render(root, m("a", "test"))
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/49
+		var root = mock.document.createElement("div")
+		m.render(root, m("a.foo", "test"))
+		m.render(root, m("a", "test1"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test1"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/49
+		var root = mock.document.createElement("div")
+		m.render(root, m("a", "test"))
+		m.render(root, m("a", "test1"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test1"
+	})
 	//end m.render
 	
 	//m.redraw
