@@ -186,7 +186,6 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("#foo", [null, m("#bar")]))
 		m.render(root, m("#foo", ["test", m("#bar")]))
-		console.log(111,root.childNodes[0].childNodes[0])
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
 	test(function() {
@@ -201,7 +200,6 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("#foo", ["test", m("#bar")]))
 		m.render(root, m("#foo", [m("div"), m("#bar")]))
-		console.log(111,root.childNodes[0].childNodes[0])
 		return root.childNodes[0].childNodes[0].nodeName === "DIV"
 	})
 	test(function() {
@@ -209,7 +207,6 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("#foo", [m("div"), m("#bar")]))
 		m.render(root, m("#foo", ["test", m("#bar")]))
-		console.log(123,root.childNodes[0].childNodes[0])
 		return root.childNodes[0].childNodes[0].nodeValue === "test"
 	})
 	test(function() {
@@ -217,7 +214,6 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("#foo", [m("#bar")]))
 		m.render(root, m("#foo", [m("#bar"), [m("#baz")]]))
-		console.log(113,root.childNodes[0].childNodes[1])
 		return root.childNodes[0].childNodes[1].id === "baz"
 	})
 	test(function() {
@@ -228,6 +224,19 @@ function testMithril(mock) {
 		root.childNodes = [mock.document.createElement("html")]
 		return result
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("a", "test"))
+		m.render(root, m("a.foo", "test"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("a.foo", "test"))
+		m.render(root, m("a", "test"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test"
+	})
+	//end m.render
 	
 	//m.redraw
 	test(function() {
