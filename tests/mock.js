@@ -16,6 +16,15 @@ mock.window = new function() {
 				if (index < 0) this.childNodes.push(node)
 				else this.childNodes.splice(index, 0, node)
 			},
+			insertAdjacentHTML: function(position, html) {
+				//todo: accept markup
+				if (position == "beforebegin") {
+					this.parentNode.insertBefore(window.document.createTextNode(html), this)
+				}
+				else if (position == "beforeend") {
+					this.appendChild(window.document.createTextNode(html))
+				}
+			},
 			setAttribute: function(name, value) {
 				this[name] = value.toString()
 			},

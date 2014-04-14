@@ -1,5 +1,16 @@
 ## Change Log
 
+[v0.1.8](/mithril/archive/v0.1.8) - maintenance
+
+-	Mock now contains a basic `insertAdjacentHTML` implementation to enable better testing of `m.trust` / `m.render` interactions
+
+### Bug Fixes:
+
+-	Fixed ordering bug in deep subchildren [#51](https://github.com/lhorie/mithril.js/issues/51)
+-	Fixed ordering bug with trusted strings [#51](https://github.com/lhorie/mithril.js/issues/51)
+
+---
+
 [v0.1.7](/mithril/archive/v0.1.7) - maintenance
 
 ### News:

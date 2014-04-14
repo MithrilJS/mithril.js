@@ -283,6 +283,27 @@ function testMithril(mock) {
 		m.render(root, m("#foo", [["a", "b"], "test"]))
 		return root.childNodes[0].childNodes[1].nodeValue === "b" && root.childNodes[0].childNodes[2].nodeValue === "test"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/51
+		var root = mock.document.createElement("div")
+		m.render(root, m("main", [m("button"), m("article", [m("section"), m("nav")])]))
+		m.render(root, m("main", [m("button"), m("article", [m("span"), m("nav")])]))
+		return root.childNodes[0].childNodes[1].childNodes[0].nodeName === "SPAN"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/51
+		var root = mock.document.createElement("div")
+		m.render(root, m("main", [m("button"), m("article", [m("section"), m("nav")])]))
+		m.render(root, m("main", [m("button"), m("article", ["test", m("nav")])]))
+		return root.childNodes[0].childNodes[1].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/51
+		var root = mock.document.createElement("div")
+		m.render(root, m("main", [m("button"), m("article", [m("section"), m("nav")])]))
+		m.render(root, m("main", [m("button"), m("article", [m.trust("test"), m("nav")])]))
+		return root.childNodes[0].childNodes[1].childNodes[0].nodeValue === "test"
+	})
 	//end m.render
 	
 	//m.redraw
