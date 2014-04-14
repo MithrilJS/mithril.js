@@ -1,5 +1,17 @@
 ## Change Log
 
+[v0.1.7](/mithril/archive/v0.1.7) - maintenance
+
+### News:
+
+-	Mithril will be on a accelerated release cycle for the rest of the v0.1.x series. This means CDNs may lag behind in versions, so it's recommended that you either use one of the supported NodeJS package managers or fork from the Github repo directly. More information can be found [here](https://groups.google.com/forum/#!msg/mithriljs/mc0qTgFTlgs/OD7Mc7_2Wa4J)
+
+### Bug Fixes:
+
+-	Fixed ordering bug when virtual element is preceded by array [#50](https://github.com/lhorie/mithril.js/issues/50)
+
+---
+
 [v0.1.6](/mithril/archive/v0.1.6) - maintenance
 
 ### Bug Fixes:
