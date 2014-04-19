@@ -79,7 +79,7 @@ Here's a less trivial example:
 ```javascript
 var links = [
     {title: "item 1", url: "/item1"},
-    {title: "item 2", url: "/item2"}
+    {title: "item 2", url: "/item2"},
     {title: "item 3", url: "/item3"}
 ];
 
@@ -87,7 +87,7 @@ m.render(document.body, [
     m("ul.nav", [
         m("li", links.map(function(link) {
             return m("a", {href: link.url}, link.title)
-        })
+        }))
     ])
 ]);
 ```

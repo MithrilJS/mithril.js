@@ -1,6 +1,16 @@
 ## Change Log
 
+[v0.1.9](/mithril/archive/v0.1.9) - maintenance
+
+### News:
+
+-	added support for multi-island apps [#34](https://github.com/lhorie/mithril.js/issues/34)
+
+---
+
 [v0.1.8](/mithril/archive/v0.1.8) - maintenance
+
+### News:
 
 -	Mock now contains a basic `insertAdjacentHTML` implementation to enable better testing of `m.trust` / `m.render` interactions
 

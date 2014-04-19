@@ -102,3 +102,21 @@ The `dashboard` module in the example shows how a developer would consume the se
 
 You should always document integration components so that others can find out what attribute parameters can be used to initialize the component.
 
+---
+
+## Integrating to legacy code
+
+If you need to add separate widgets to different places on a same page, you can simply initialize each widget as you would a regular Mithril application (i.e. use `m.render`, `m.module` or `m.route`).
+
+There's just one caveat: while simply initializing multiple "islands" in this fashion works, their initialization calls are not aware of each other and can cause redraws too frequently. To optimize rendering, you should add a `m.startComputation` call before the first widget initialization call, and a `m.endComputation` after the last widget initialization call in each execution thread.
+
+```
+m.startComputation()
+
+m.module(document.getElementById("widget1-container"), widget1)
+
+m.module(document.getElementById("widget2-container"), widget1)
+
+m.endComputation()
+```
+

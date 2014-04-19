@@ -254,7 +254,7 @@ onchange: function(e) {
 }
 ```
 
-The difference, aside from the cosmetic avoidance of anonymous functions, is that the `m.withAttr` idiom also takes care of catching the correct even target and selecting the appropriate source of the data - i.e. whether it should come from a javascript property or from `DOMElement::getAttribute()`
+The difference, aside from the cosmetic avoidance of anonymous functions, is that the `m.withAttr` idiom also takes care of catching the correct event target and selecting the appropriate source of the data - i.e. whether it should come from a javascript property or from `DOMElement::getAttribute()`
 
 ---
 
@@ -436,7 +436,7 @@ Idiomatic Mithril code is meant to apply good programming conventions and be eas
 
 In the application above, notice how the Todo class can easily be moved to a different module if code re-organization is required.
 
-Todos are self-container and their data aren't tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it's a plain-vanilla Javascript class which requires almost no framework-specific learning curve.
+Todos are self-contained and their data aren't tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it's a plain-vanilla Javascript class which requires almost no framework-specific learning curve.
 
 [`m.prop`](mithril.prop.md) is a simple but surprisingly versatile tool: it's composable, it enables [uniform data access](http://en.wikipedia.org/wiki/Uniform_data_access) and allows a higher degree of decoupling when major refactoring is required.
 

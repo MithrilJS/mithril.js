@@ -64,17 +64,17 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-		m.render(root, m("div", {id: "a"}))
+		m.render(root, m("div", {class: "a"}))
 		var elementBefore = root.childNodes[0]
-		m.render(root, m("div", {id: "b"}))
+		m.render(root, m("div", {class: "b"}))
 		var elementAfter = root.childNodes[0]
 		return elementBefore === elementAfter
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-		m.render(root, m("#a"))
+		m.render(root, m(".a"))
 		var elementBefore = root.childNodes[0]
-		m.render(root, m("#b"))
+		m.render(root, m(".b"))
 		var elementAfter = root.childNodes[0]
 		return elementBefore === elementAfter
 	})
@@ -303,6 +303,15 @@ function testMithril(mock) {
 		m.render(root, m("main", [m("button"), m("article", [m("section"), m("nav")])]))
 		m.render(root, m("main", [m("button"), m("article", [m.trust("test"), m("nav")])]))
 		return root.childNodes[0].childNodes[1].childNodes[0].nodeValue === "test"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/55
+		var root = mock.document.createElement("div")
+		m.render(root, m("#a"))
+		var elementBefore = root.childNodes[0]
+		m.render(root, m("#b"))
+		var elementAfter = root.childNodes[0]
+		return elementBefore !== elementAfter
 	})
 	//end m.render
 	
