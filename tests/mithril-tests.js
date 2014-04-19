@@ -389,6 +389,14 @@ function testMithril(mock) {
 		prop("foo")
 		return prop() == "foo"
 	})
+	test(function() {
+		var prop = m.prop("test")
+		return JSON.stringify(prop) == "\"test\""
+	})
+	test(function() {
+		var obj = { prop: m.prop("test") }
+		return JSON.stringify(obj) == "{\"prop\":\"test\"}"
+	})
 
 	//m.request
 	test(function() {

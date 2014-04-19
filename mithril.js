@@ -313,10 +313,14 @@ new function(window) {
 	
 	//model
 	m.prop = function(store) {
-		return function() {
+		var f = function() {
 			if (arguments.length) store = arguments[0]
 			return store
 		}
+		f.toJSON = function() {
+			return store
+		}
+		return f
 	}
 
 	m.deferred = function() {
