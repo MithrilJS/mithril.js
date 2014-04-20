@@ -226,6 +226,23 @@ var file = m.request({
 });
 ```
 
+---
+
+### Extracting Metadata from the Response
+
+The `extract` method can be used to read metadata from HTTP response headers or the status field of an XMLHttpRequest.
+
+```javascript
+var extract = function(xhr, xhrOptions) {
+	if (xhrOptions.method == "HEAD") return xhr.getResponseHeader("x-item-count")
+	else return xhr.responseText
+}
+
+m.request({method: "POST", url: "/foo", extract: extract});
+```
+
+---
+
 ### Configuring the underlying XMLHttpRequest
 
 The `config` option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise.
@@ -258,14 +275,14 @@ where:
 		[String user,]
 		[String password,]
 		[Object<any> data,]
-		[Response unwrapSuccess(Response data),]
-		[Response unwrapError(Response data),]
+		[any unwrapSuccess(any data),]
+		[any unwrapError(any data),]
 		[String serialize(any dataToSerialize),]
 		[any deserialize(String dataToDeserialize),]
+		[any extract(XMLHttpRequest xhr, XHROptions options),]
 		[void type(Object<any> data),]
 		[void config(XMLHttpRequest xhr, XHROptions options)]
 	}
-	Response :: Object<any> | Array<any>
 ```
 
 -	**XHROptions options**
@@ -296,7 +313,7 @@ where:
 	
 		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
 		
-	-	**Response unwrapSuccess(Response data)** (optional)
+	-	**any unwrapSuccess(any data)** (optional)
 
 		A preprocessor function to extract the data from a success response in case the response contains metadata wrapping the data.
 		
@@ -312,7 +329,7 @@ where:
 		
 			The unwrapped data
 
-	-	**String unwrapError(Response data)** (optional)
+	-	**any unwrapError(any data)** (optional)
 
 		A preprocessor function to extract the data from an error response in case the response contains metadata wrapping the data.
 		
@@ -349,7 +366,13 @@ where:
 			Data to be deserialized
 			
 		-	**returns any deserializedData**
+		
+	-	**any extract(XMLHttpRequest xhr, XHROptions options)** (optional)
+	
+		Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.
 
+		If this parameter is falsy, `xhr.responseText` will be used.
+		
 	-	**void type(Object<any> data)** (optional)
 
 		The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by `type`

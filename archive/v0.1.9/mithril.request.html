@@ -213,6 +213,16 @@ var users = User.list();
     url: &quot;myfile.txt&quot;,
     deserialize: function(value) {return value;}
 });</code></pre>
+<hr>
+<h3 id="extracting-metadata-from-the-response">Extracting Metadata from the Response</h3>
+<p>The <code>extract</code> method can be used to read metadata from HTTP response headers or the status field of an XMLHttpRequest.</p>
+<pre><code class="lang-javascript">var extract = function(xhr, xhrOptions) {
+    if (xhrOptions.method == &quot;HEAD&quot;) return xhr.getResponseHeader(&quot;x-item-count&quot;)
+    else return xhr.responseText
+}
+
+m.request({method: &quot;POST&quot;, url: &quot;/foo&quot;, extract: extract});</code></pre>
+<hr>
 <h3 id="configuring-the-underlying-xmlhttprequest">Configuring the underlying XMLHttpRequest</h3>
 <p>The <code>config</code> option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise.</p>
 <p>The example below show how to configure a request where the server expects requests to have a <code>Content-Type: application/json</code> header</p>
@@ -235,14 +245,14 @@ where:
         [String user,]
         [String password,]
         [Object&lt;any&gt; data,]
-        [Response unwrapSuccess(Response data),]
-        [Response unwrapError(Response data),]
+        [any unwrapSuccess(any data),]
+        [any unwrapError(any data),]
         [String serialize(any dataToSerialize),]
         [any deserialize(String dataToDeserialize),]
+        [any extract(XMLHttpRequest xhr, XHROptions options),]
         [void type(Object&lt;any&gt; data),]
         [void config(XMLHttpRequest xhr, XHROptions options)]
-    }
-    Response :: Object&lt;any&gt; | Array&lt;any&gt;</code></pre>
+    }</code></pre>
 <ul>
 <li><p><strong>XHROptions options</strong></p>
 <p>A map of options for the XMLHttpRequest</p>
@@ -265,7 +275,7 @@ where:
 <li><p><strong>Object<any> data</strong> (optional)</p>
 <p>Data to be sent. It&#39;s automatically placed in the appropriate section of the request with the appropriate serialization based on <code>method</code></p>
 </li>
-<li><p><strong>Response unwrapSuccess(Response data)</strong> (optional)</p>
+<li><p><strong>any unwrapSuccess(any data)</strong> (optional)</p>
 <p>A preprocessor function to extract the data from a success response in case the response contains metadata wrapping the data.</p>
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <p>For example, if the response is <code>{data: [{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]}</code> and the unwrap function is <code>function(response) {return response.data}</code>, then the response will be considered to be <code>[{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]</code> when processing the <code>type</code> parameter</p>
@@ -278,7 +288,7 @@ where:
 </li>
 </ul>
 </li>
-<li><p><strong>String unwrapError(Response data)</strong> (optional)</p>
+<li><p><strong>any unwrapError(any data)</strong> (optional)</p>
 <p>A preprocessor function to extract the data from an error response in case the response contains metadata wrapping the data.</p>
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <ul>
@@ -311,6 +321,10 @@ where:
 <li><p><strong>returns any deserializedData</strong></p>
 </li>
 </ul>
+</li>
+<li><p><strong>any extract(XMLHttpRequest xhr, XHROptions options)</strong> (optional)</p>
+<p>Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.</p>
+<p>If this parameter is falsy, <code>xhr.responseText</code> will be used.</p>
 </li>
 <li><p><strong>void type(Object<any> data)</strong> (optional)</p>
 <p>The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by <code>type</code></p>

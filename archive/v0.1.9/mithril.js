@@ -430,11 +430,12 @@ Mithril = m = new function app(window) {
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
+		var extract = xhrOptions.extract || function(xhr, xhrOptions) {return xhr.responseText}
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
 			var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
-			var response = unwrap(deserialize(e.target.responseText))
+			var response = unwrap(deserialize(extract(e.target, xhrOptions)))
 			if (response instanceof Array && xhrOptions.type) {
 				for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 			}
