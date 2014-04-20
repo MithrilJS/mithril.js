@@ -319,14 +319,14 @@ Mithril = m = new function app(window) {
 	
 	//model
 	m.prop = function(store) {
-		var f = function() {
+		var prop = function() {
 			if (arguments.length) store = arguments[0]
 			return store
 		}
-		f.toJSON = function() {
+		prop.toJSON = function() {
 			return store
 		}
-		return f
+		return prop
 	}
 
 	m.deferred = function() {

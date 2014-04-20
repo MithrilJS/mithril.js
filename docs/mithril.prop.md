@@ -1,6 +1,6 @@
 ## m.prop
 
-This is a getter-setter factory utility. It returns a function that stores information
+This is a getter-setter factory utility. It returns a function that stores information.
 
 ---
 
@@ -53,6 +53,19 @@ m.request({method: "GET", url: "/users"})
 //then when resolved (e.g. in a view), the `users` getter-setter will contain a list of User instances
 //i.e. users()[0].name() == "John"
 ```
+
+---
+
+### Serializing getter-setters
+
+Getter-setters are JSON-serializable:
+
+```javascript
+var data = {foo: m.prop("bar")};
+JSON.stringify(data); // '{"foo": "bar"}'
+```
+
+This allows getter-setters to be passed directly as parameters to [`m.request`](mithril.request.md), for example.
 
 ---
 

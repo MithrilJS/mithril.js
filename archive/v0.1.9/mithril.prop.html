@@ -61,7 +61,7 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="m-prop">m.prop</h2>
-<p>This is a getter-setter factory utility. It returns a function that stores information</p>
+<p>This is a getter-setter factory utility. It returns a function that stores information.</p>
 <hr>
 <h3 id="usage">Usage</h3>
 <pre><code class="lang-javascript">//define a getter-setter with initial value `John`
@@ -100,6 +100,12 @@ m.request({method: &quot;GET&quot;, url: &quot;/users&quot;})
 //assuming the response contains the following data: `[{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]`
 //then when resolved (e.g. in a view), the `users` getter-setter will contain a list of User instances
 //i.e. users()[0].name() == &quot;John&quot;</code></pre>
+<hr>
+<h3 id="serializing-getter-setters">Serializing getter-setters</h3>
+<p>Getter-setters are JSON-serializable:</p>
+<pre><code class="lang-javascript">var data = {foo: m.prop(&quot;bar&quot;)};
+JSON.stringify(data); // &#39;{&quot;foo&quot;: &quot;bar&quot;}&#39;</code></pre>
+<p>This allows getter-setters to be passed directly as parameters to <a href="mithril.request.html"><code>m.request</code></a>, for example.</p>
 <hr>
 <h3 id="signature">Signature</h3>
 <p><a href="how-to-read-signatures.html">How to read signatures</a></p>

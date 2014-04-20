@@ -319,10 +319,14 @@ Mithril = m = new function app(window) {
 	
 	//model
 	m.prop = function(store) {
-		return function() {
+		var prop = function() {
 			if (arguments.length) store = arguments[0]
 			return store
 		}
+		prop.toJSON = function() {
+			return store
+		}
+		return prop
 	}
 
 	m.deferred = function() {
@@ -998,7 +1002,15 @@ function testMithril(mock) {
 	test(function() {
 		var prop = m.prop("test")
 		prop("foo")
-		return prop() == "foo"
+		return prop() === "foo"
+	})
+	test(function() {
+		var prop = m.prop("test")
+		return JSON.stringify(prop) === '"test"'
+	})
+	test(function() {
+		var obj = {prop: m.prop("test")}
+		return JSON.stringify(obj) === '{"prop":"test"}'
 	})
 
 	//m.request
