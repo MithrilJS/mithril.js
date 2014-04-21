@@ -313,6 +313,14 @@ function testMithril(mock) {
 		var elementAfter = root.childNodes[0]
 		return elementBefore !== elementAfter
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/56
+		var root = mock.document.createElement("div")
+		m.render(root, [null, "foo"])
+		m.render(root, ["bar"])
+		console.log(root.childNodes)
+		return root.childNodes.length == 1
+	})
 	//end m.render
 	
 	//m.redraw

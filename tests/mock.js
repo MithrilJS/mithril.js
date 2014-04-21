@@ -12,9 +12,12 @@ mock.window = new function() {
 			replaceChild: window.document.replaceChild,
 			insertBefore: function(node, reference) {
 				node.parentNode = this
-				var index = this.childNodes.indexOf(reference)
-				if (index < 0) this.childNodes.push(node)
-				else this.childNodes.splice(index, 0, node)
+				var referenceIndex = this.childNodes.indexOf(reference)
+				if (referenceIndex < 0) this.childNodes.push(node)
+				else {
+					var index = this.childNodes.indexOf(node)
+					this.childNodes.splice(referenceIndex, index < 0 ? 0 : 1, node)
+				}
 			},
 			insertAdjacentHTML: function(position, html) {
 				//todo: accept markup
@@ -54,6 +57,8 @@ mock.window = new function() {
 		oldChild.parentNode = null
 	}
 	window.document.appendChild = function(child) {
+		var index = this.childNodes.indexOf(child)
+		if (index > -1) this.childNodes.splice(index, 1)
 		this.childNodes.push(child)
 		child.parentNode = this
 	}

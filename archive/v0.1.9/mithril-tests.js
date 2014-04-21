@@ -48,18 +48,18 @@ Mithril = m = new function app(window) {
 		
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
-			for (var i = 0; i < data.length; i++) {
-				var item = build(parent, data[i], cached[i], shouldReattach, index + subArrayCount || subArrayCount, namespace)
+			for (var i = 0, cacheCount = 0; i < data.length; i++) {
+				var item = build(parent, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, namespace)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				subArrayCount += item instanceof Array ? item.length : 1
-				cached[i] = item
+				cached[cacheCount++] = item
 			}
 			if (!intact) {
 				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) if (node.parentNode !== null) node.parentNode.removeChild(node)
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parent.appendChild(node)
-				cached.length = data.length
+				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
 		}
@@ -498,9 +498,12 @@ mock.window = new function() {
 			replaceChild: window.document.replaceChild,
 			insertBefore: function(node, reference) {
 				node.parentNode = this
-				var index = this.childNodes.indexOf(reference)
-				if (index < 0) this.childNodes.push(node)
-				else this.childNodes.splice(index, 0, node)
+				var referenceIndex = this.childNodes.indexOf(reference)
+				if (referenceIndex < 0) this.childNodes.push(node)
+				else {
+					var index = this.childNodes.indexOf(node)
+					this.childNodes.splice(referenceIndex, index < 0 ? 0 : 1, node)
+				}
 			},
 			insertAdjacentHTML: function(position, html) {
 				//todo: accept markup
@@ -540,6 +543,8 @@ mock.window = new function() {
 		oldChild.parentNode = null
 	}
 	window.document.appendChild = function(child) {
+		var index = this.childNodes.indexOf(child)
+		if (index > -1) this.childNodes.splice(index, 1)
 		this.childNodes.push(child)
 		child.parentNode = this
 	}
@@ -898,6 +903,14 @@ function testMithril(mock) {
 		m.render(root, m("#b"))
 		var elementAfter = root.childNodes[0]
 		return elementBefore !== elementAfter
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/56
+		var root = mock.document.createElement("div")
+		m.render(root, [null, "foo"])
+		m.render(root, ["bar"])
+		console.log(root.childNodes)
+		return root.childNodes.length == 1
 	})
 	//end m.render
 	
