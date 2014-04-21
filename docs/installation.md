@@ -104,6 +104,16 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ---
 
+### Rails
+
+Jordan Humphreys created a gem to allow integration with Rails:
+
+[https://github.com/mrsweaters/mithril-rails](Mithril-Rails)
+
+It includes support for the [MSX](https://github.com/insin/msx) HTML templating syntax from Jonathan Buchanan.
+
+---
+
 ### Github
 
 You can also fork the latest stable project [directly from Github](https://github.com/lhorie/mithril).

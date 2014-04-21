@@ -324,7 +324,7 @@ where:
 </li>
 <li><p><strong>any extract(XMLHttpRequest xhr, XHROptions options)</strong> (optional)</p>
 <p>Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.</p>
-<p>If this parameter is falsy, <code>xhr.responseText</code> will be used.</p>
+<p>If this parameter is falsy, the default value is <code>function(xhr, options) {return xhr.responseText}</code>.</p>
 </li>
 <li><p><strong>void type(Object<any> data)</strong> (optional)</p>
 <p>The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by <code>type</code></p>

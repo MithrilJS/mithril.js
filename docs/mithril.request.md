@@ -371,7 +371,7 @@ where:
 	
 		Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.
 
-		If this parameter is falsy, `xhr.responseText` will be used.
+		If this parameter is falsy, the default value is `function(xhr, options) {return xhr.responseText}`.
 		
 	-	**void type(Object<any> data)** (optional)
 

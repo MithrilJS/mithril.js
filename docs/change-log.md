@@ -4,7 +4,14 @@
 
 ### News:
 
+-	added comparison with React to homepage
 -	added support for multi-island apps [#34](https://github.com/lhorie/mithril.js/issues/34)
+-	m.prop is now JSON-serializable [#54](https://github.com/lhorie/mithril.js/issues/54)
+-	added `extract` option to `m.request` to allow access to response metadata [#53](https://github.com/lhorie/mithril.js/issues/53)
+
+### Breaking changes:
+
+-	changing an id in a  virtual element now recreates the element, instead of recycling it [#55](https://github.com/lhorie/mithril.js/issues/55)
 
 ---
 

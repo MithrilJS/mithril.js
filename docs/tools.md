@@ -29,6 +29,8 @@ todo.view = function(ctrl) {
 
 Note, however, that since the code above is not valid Javascript, this syntax can only be used with a preprocessor build tool such as the provided [Gulp.js](http://gulpjs.com) script.
 
+This tool is also available as a [Rails gem](https://github.com/mrsweaters/mithril-rails), created by Jordan Humphreys.
+
 ---
 
 ### Mithril Template Compiler
