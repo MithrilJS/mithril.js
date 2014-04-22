@@ -115,13 +115,13 @@ where:
 
 	**String mode**
 
-	The `m.route.mode` property defines which URL portion is used to implement the routing mechanism. Its value can be set to either "search", "hash" or "pathname". Default value is "search"
+	The `m.route.mode` property defines which URL portion is used to implement the routing mechanism. Its value can be set to either "search", "hash" or "pathname". Default value is "search". Note that if you're changing this configuration value, you should change it **before** calling `m.route`.
 
-	-	`search` mode uses the querystring. This allows named anchors (i.e. `<a href="#top">Back to top</a>`, `<a name="top"></a>`) to work on the page, but routing changes causes page refreshes in IE8, due to its lack of support for `history.pushState`.
+	-	`search` mode uses the querystring (i.e. `?`). This allows named anchors (i.e. `<a href="#top">Back to top</a>`, `<a name="top"></a>`) to work on the page, but routing changes causes page refreshes in IE8, due to its lack of support for `history.pushState`.
 	
 		Example URL: `http://server/?/path/to/page`
 	
-	-	`hash` mode uses the hash. It's the only mode in which routing changes do not cause page refreshes in any browser. However, this mode does not support named anchors.
+	-	`hash` mode uses the hash (i.e. `#`). It's the only mode in which routing changes do not cause page refreshes in any browser. However, this mode does not support named anchors.
 	
 		Example URL: `http://server/#/path/to/page`
 	
