@@ -73,7 +73,7 @@ Mithril = m = new function app(window) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
 					tag: data.tag,
-					attrs: setAttributes(node, data.attrs, {}, namespace),
+					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					children: build(node, data.children, cached.children, true, 0, namespace),
 					nodes: [node]
 				}
@@ -81,7 +81,7 @@ Mithril = m = new function app(window) {
 			}
 			else {
 				node = cached.nodes[0]
-				setAttributes(node, data.attrs, cached.attrs, namespace)
+				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
 				cached.children = build(node, data.children, cached.children, false, 0, namespace)
 				cached.nodes.intact = true
 				if (shouldReattach === true) parent.insertBefore(node, parent.childNodes[index] || null)
@@ -124,7 +124,7 @@ Mithril = m = new function app(window) {
 		
 		return cached
 	}
-	function setAttributes(node, dataAttrs, cachedAttrs, namespace) {
+	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
@@ -143,6 +143,11 @@ Mithril = m = new function app(window) {
 					if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
 					else if (attrName === "className") node.setAttribute("class", dataAttr)
 					else node.setAttribute(attrName, dataAttr)
+				}
+				else if (attrName === "value" && tag === "input") {
+					if (node[attrName] !== dataAttr) {
+						node.setAttribute(attrName, dataAttr)
+					}
 				}
 				else if (attrName in node) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
