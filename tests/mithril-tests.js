@@ -318,7 +318,6 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, [null, "foo"])
 		m.render(root, ["bar"])
-		console.log(root.childNodes)
 		return root.childNodes.length == 1
 	})
 	//end m.render

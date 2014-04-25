@@ -1,13 +1,25 @@
 ## Change Log
 
+[v0.1.10](/mithril/archive/v0.1.10) - maintenance
+
+### News:
+
+-	Added social buttons to homepage
+
+### Bug Fixes:
+
+-	Bi-directional bindings no longer wipe out cursor position in Chrome [#58](https://github.com/lhorie/mithril.js/issues/58)
+
+---
+
 [v0.1.9](/mithril/archive/v0.1.9) - maintenance
 
 ### News:
 
--	added comparison with React to homepage
--	added support for multi-island apps [#34](https://github.com/lhorie/mithril.js/issues/34)
+-	Added comparison with React to homepage
+-	Added support for multi-island apps [#34](https://github.com/lhorie/mithril.js/issues/34)
 -	m.prop is now JSON-serializable [#54](https://github.com/lhorie/mithril.js/issues/54)
--	added `extract` option to `m.request` to allow access to response metadata [#53](https://github.com/lhorie/mithril.js/issues/53)
+-	Added `extract` option to `m.request` to allow access to response metadata [#53](https://github.com/lhorie/mithril.js/issues/53)
 
 ### Bug Fixes:
 
