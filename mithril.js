@@ -429,8 +429,11 @@ Mithril = m = new function app(window) {
 		return url
 	}
 
-	m.request = function(xhrOptions) {
-		m.startComputation()
+	m.request = function(xhrOptions, options) {
+		options = options || {};
+		if (options.holdRender !== false) {
+			m.startComputation()
+		}
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
@@ -444,6 +447,9 @@ Mithril = m = new function app(window) {
 				for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 			}
 			else if (xhrOptions.type) response = new xhrOptions.type(response)
+			if (options.holdRender === false) {
+				m.startComputation()
+			}
 			deferred.promise(response)
 			deferred[e.type == "load" ? "resolve" : "reject"](response)
 			m.endComputation()
