@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.11](/mithril/archive/v0.1.11) - maintenance
+
+### News:
+
+-	Added `m.route()` overload to allow reading of current route [#61](https://github.com/lhorie/mithril.js/issues/61)
+
+---
+
 [v0.1.10](/mithril/archive/v0.1.10) - maintenance
 
 ### News:
