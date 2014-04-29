@@ -4,11 +4,13 @@ Routing is a system that allows creating Single-Page-Applications (SPA), i.e. ap
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
-This method overloads 3 different units of functionality:
+This method overloads 4 different units of functionality:
 
 - `m.route(rootElement, defaultRoute, routes)` - defines the available URLs in an application, and their respective modules
 
 - `m.route(path)` - redirects to another route
+
+- `m.route()` - returns the currently active route
 
 - `m.route(element)` - an extension to link elements that unobtrusively abstracts away the routing mode
 
@@ -186,6 +188,39 @@ void route(String path)
 -	**String path**
 
 	The route to redirect to. Note that to redirect to a different page outside of the scope of Mithril's routing, you should use `window.location`
+
+---
+
+<a name="reading-current-route"></a>
+
+### Reading the currently active route
+
+#### Usage
+
+Mithril updates the native `location` object after rendering in order to allow the browser's `history.pushState` API to correctly show descriptive history entries (e.g. for Chrome's Ctrl+H page).
+
+In order to retrieve the currently active route in a controller, you can use `m.route()`. This returns the portion of the URL determined by `m.route.mode` (minus the `?` or `#` symbols for the `search` and `hash` modes, respectively).
+
+```javascript
+//if the location bar is "http://example.com/?/foo/bar"
+//and m.route.mode is `search`
+//then `currentRoute == "/foo/bar"`
+var currentRoute = m.route();
+```
+
+---
+
+#### Signature
+
+[How to read signatures](how-to-read-signatures.md)
+
+```clike
+String route()
+```
+
+-	**returns String route**
+
+	returns the currently active route
 
 ---
 

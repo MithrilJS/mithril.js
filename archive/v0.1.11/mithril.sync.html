@@ -22,7 +22,7 @@
 				<div class="container">
 					<div class="row">
 						<div class="col(3,3,12)">
-							<h2 id="api">API (v$version)</h2>
+							<h2 id="api">API (v0.1.11)</h2>
 							<h3 id="core">Core</h3>
 							<ul>
 								<li><a href="mithril.html">m</a></li>
@@ -61,7 +61,42 @@
 							</ul>
 						</div>
 						<div class="col(9,9,12)">
-							{DOC}
+							<h2 id="m-sync">m.sync</h2>
+<p>This method takes a list of promises and returns a promise that resolves when all promises in the input list have resolved. See <a href="mithril.deferred"><code>m.deferred</code></a> for more information on promises.</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">var greetAsync = function(delay) {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+    }, delay);
+    return deferred.promise;
+};
+
+m.sync([
+    greetAsync(1000),
+    greetAsync(1500)
+]).then(function(args) {
+    console.log(args); // [&quot;hello&quot;, &quot;hello&quot;]
+});</code></pre>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">Promise sync(Array&lt;Promise&gt; promises)
+
+where:
+    Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)) }
+    GetterSetter :: any getterSetter([any value])</code></pre>
+<ul>
+<li><p><strong>Array<Promise> promises</strong></p>
+<p>A list of promises to synchronize</p>
+</li>
+<li><p><strong>return Promise promise</strong></p>
+<p>The promise of the deferred object that is resolved when all input promises have been resolved</p>
+<p>The callbacks for this promise receive as a parameter an Array containing the values of all the input promises</p>
+</li>
+</ul>
+
 						</div>
 					</div>
 				</div>
