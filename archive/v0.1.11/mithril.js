@@ -222,20 +222,20 @@ Mithril = m = new function app(window) {
 		m.endComputation()
 	}
 	m.redraw = function() {
-		for (var i = 0; i < roots.length; i++) {
-			m.render(roots[i], modules[i].view(controllers[i]))
-		}
-		lastRedraw = now
-	}
-	function redraw() {
 		now = window.performance && window.performance.now ? window.performance.now() : new window.Date().getTime()
-		if (now - lastRedraw > 16) m.redraw()
+		if (now - lastRedraw > 16) redraw()
 		else {
 			var cancel = window.cancelAnimationFrame || window.clearTimeout
 			var defer = window.requestAnimationFrame || window.setTimeout
 			cancel(lastRedrawId)
-			lastRedrawId = defer(m.redraw, 0)
+			lastRedrawId = defer(redraw, 0)
 		}
+	}
+	function redraw() {
+		for (var i = 0; i < roots.length; i++) {
+			m.render(roots[i], modules[i].view(controllers[i]))
+		}
+		lastRedraw = now
 	}
 	
 	var pendingRequests = 0, computePostRedrawHook = null
@@ -243,7 +243,7 @@ Mithril = m = new function app(window) {
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
 		if (pendingRequests == 0) {
-			redraw()
+			m.redraw()
 			if (computePostRedrawHook) {
 				computePostRedrawHook()
 				computePostRedrawHook = null
@@ -437,7 +437,7 @@ Mithril = m = new function app(window) {
 	}
 
 	m.request = function(xhrOptions) {
-		m.startComputation()
+		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
@@ -455,7 +455,7 @@ Mithril = m = new function app(window) {
 			else if (xhrOptions.type) response = new xhrOptions.type(response)
 			deferred.promise(response)
 			deferred[e.type == "load" ? "resolve" : "reject"](response)
-			m.endComputation()
+			if (xhrOptions.background !== true) m.endComputation()
 		}
 		ajax(xhrOptions)
 		deferred.promise.then = propBinder(deferred.promise)

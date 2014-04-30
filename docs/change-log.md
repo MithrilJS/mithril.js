@@ -1,10 +1,11 @@
 ## Change Log
 
-[v0.1.11](/mithril/archive/v0.1.11) - maintenance
+[v0.1.11](/mithril/archive/v0.1.11) - enhancement
 
 ### News:
 
 -	Added `m.route()` overload to allow reading of current route [#61](https://github.com/lhorie/mithril.js/issues/61)
+-	Added `background` option to `m.request` to allow requests that don't affect rendering [#62](https://github.com/lhorie/mithril.js/issues/62)
 
 ---
 

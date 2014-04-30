@@ -290,6 +290,7 @@ where:
 		[String user,]
 		[String password,]
 		[Object<any> data,]
+		[Boolean background,]
 		[any unwrapSuccess(any data),]
 		[any unwrapError(any data),]
 		[String serialize(any dataToSerialize),]
@@ -327,6 +328,19 @@ where:
 	-	**Object<any> data** (optional)
 	
 		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
+		
+	-	**Boolean background** (optional)
+	
+		Determines whether the `m.request` can affect template rendering. Defaults to false.
+		
+		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
+		
+		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md)
+		
+		```javascript
+		m.request({method: "GET", url: "/foo", background: true})
+			.then(m.redraw); //force redraw
+		```
 		
 	-	**any unwrapSuccess(any data)** (optional)
 

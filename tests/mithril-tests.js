@@ -320,10 +320,17 @@ function testMithril(mock) {
 		m.render(root, ["bar"])
 		return root.childNodes.length == 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/56
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", "foo"))
+		return root.childNodes.length == 1
+	})
 	//end m.render
 	
 	//m.redraw
 	test(function() {
+		mock.performance.$elapse(50)
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
@@ -332,7 +339,29 @@ function testMithril(mock) {
 		})
 		controller.value = "foo"
 		m.redraw()
-		return root.childNodes[0].nodeValue === "foo"
+		var lengthBefore = root.childNodes.length
+		mock.performance.$elapse(50)
+		m.redraw()
+		mock.performance.$elapse(50)
+		return lengthBefore === 0 && root.childNodes[0].nodeValue === "foo"
+	})
+	test(function() {
+		mock.performance.$elapse(50)
+		var count = 0
+		var root = mock.document.createElement("div")
+		m.module(root, {
+			controller: function() {},
+			view: function(ctrl) {
+				count++
+			}
+		})
+		m.redraw()
+		m.redraw()
+		m.redraw()
+		mock.performance.$elapse(50)
+		m.redraw()
+		mock.performance.$elapse(50)
+		return count === 2
 	})
 
 	//m.route

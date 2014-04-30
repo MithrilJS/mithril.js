@@ -255,6 +255,7 @@ where:
         [String user,]
         [String password,]
         [Object&lt;any&gt; data,]
+        [Boolean background,]
         [any unwrapSuccess(any data),]
         [any unwrapError(any data),]
         [String serialize(any dataToSerialize),]
@@ -284,6 +285,13 @@ where:
 </li>
 <li><p><strong>Object<any> data</strong> (optional)</p>
 <p>Data to be sent. It&#39;s automatically placed in the appropriate section of the request with the appropriate serialization based on <code>method</code></p>
+</li>
+<li><p><strong>Boolean background</strong> (optional)</p>
+<p>Determines whether the <code>m.request</code> can affect template rendering. Defaults to false.</p>
+<p>If this option is set to true, then the request does NOT call <a href="mithril.computation.html"><code>m.startComputation</code> / <code>m.endComputation</code></a>, and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).</p>
+<p>In order to force a redraw after a background request, use <a href="mithril.redraw.html"><code>m.redraw</code></a></p>
+<pre><code class="lang-javascript">m.request({method: &quot;GET&quot;, url: &quot;/foo&quot;, background: true})
+  .then(m.redraw); //force redraw</code></pre>
 </li>
 <li><p><strong>any unwrapSuccess(any data)</strong> (optional)</p>
 <p>A preprocessor function to unwrap the data from a success response in case the response contains metadata wrapping the data.</p>

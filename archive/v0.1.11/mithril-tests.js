@@ -222,20 +222,20 @@ Mithril = m = new function app(window) {
 		m.endComputation()
 	}
 	m.redraw = function() {
-		for (var i = 0; i < roots.length; i++) {
-			m.render(roots[i], modules[i].view(controllers[i]))
-		}
-		lastRedraw = now
-	}
-	function redraw() {
 		now = window.performance && window.performance.now ? window.performance.now() : new window.Date().getTime()
-		if (now - lastRedraw > 16) m.redraw()
+		if (now - lastRedraw > 16) redraw()
 		else {
 			var cancel = window.cancelAnimationFrame || window.clearTimeout
 			var defer = window.requestAnimationFrame || window.setTimeout
 			cancel(lastRedrawId)
-			lastRedrawId = defer(m.redraw, 0)
+			lastRedrawId = defer(redraw, 0)
 		}
+	}
+	function redraw() {
+		for (var i = 0; i < roots.length; i++) {
+			m.render(roots[i], modules[i].view(controllers[i]))
+		}
+		lastRedraw = now
 	}
 	
 	var pendingRequests = 0, computePostRedrawHook = null
@@ -243,7 +243,7 @@ Mithril = m = new function app(window) {
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
 		if (pendingRequests == 0) {
-			redraw()
+			m.redraw()
 			if (computePostRedrawHook) {
 				computePostRedrawHook()
 				computePostRedrawHook = null
@@ -437,7 +437,7 @@ Mithril = m = new function app(window) {
 	}
 
 	m.request = function(xhrOptions) {
-		m.startComputation()
+		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
@@ -455,7 +455,7 @@ Mithril = m = new function app(window) {
 			else if (xhrOptions.type) response = new xhrOptions.type(response)
 			deferred.promise(response)
 			deferred[e.type == "load" ? "resolve" : "reject"](response)
-			m.endComputation()
+			if (xhrOptions.background !== true) m.endComputation()
 		}
 		ajax(xhrOptions)
 		deferred.promise.then = propBinder(deferred.promise)
@@ -924,10 +924,17 @@ function testMithril(mock) {
 		m.render(root, ["bar"])
 		return root.childNodes.length == 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/56
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", "foo"))
+		return root.childNodes.length == 1
+	})
 	//end m.render
 	
 	//m.redraw
 	test(function() {
+		mock.performance.$elapse(50)
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
@@ -936,7 +943,29 @@ function testMithril(mock) {
 		})
 		controller.value = "foo"
 		m.redraw()
-		return root.childNodes[0].nodeValue === "foo"
+		var lengthBefore = root.childNodes.length
+		mock.performance.$elapse(50)
+		m.redraw()
+		mock.performance.$elapse(50)
+		return lengthBefore === 0 && root.childNodes[0].nodeValue === "foo"
+	})
+	test(function() {
+		mock.performance.$elapse(50)
+		var count = 0
+		var root = mock.document.createElement("div")
+		m.module(root, {
+			controller: function() {},
+			view: function(ctrl) {
+				count++
+			}
+		})
+		m.redraw()
+		m.redraw()
+		m.redraw()
+		mock.performance.$elapse(50)
+		m.redraw()
+		mock.performance.$elapse(50)
+		return count === 2
 	})
 
 	//m.route

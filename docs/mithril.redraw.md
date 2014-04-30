@@ -2,7 +2,7 @@
 
 Redraws the view for the currently active module. Use [`m.module()`](mithril.module) to activate a module.
 
-This method is called internally by Mithril's auto-redrawing system and is only documented for completeness; you should avoid calling it manually unless you explicitly want a multi-pass redraw cycle.
+This method is called internally by Mithril's auto-redrawing system and is only documented for completeness; usually you should avoid calling it manually unless you explicitly want a multi-pass redraw cycle. One case where `m.redraw` may be useful is to force a manual redraw after background requests (see the `background` option in [`m.request`](mithril.request.md).
 
 A multi-pass redraw cycle is usually only useful if you need non-trivial UI metrics measurements. A multi-pass cycle may span multiple browser repaints and therefore could cause flash of unbehaviored content (FOUC) and performance degradation.
 
