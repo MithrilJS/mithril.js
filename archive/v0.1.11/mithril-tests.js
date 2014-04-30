@@ -399,7 +399,9 @@ Mithril = m = new function app(window) {
 		xhr.onload = typeof options.onload == "function" ? options.onload : function() {}
 		xhr.onerror = typeof options.onerror == "function" ? options.onerror : function() {}
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 0) xhr.onerror({type: "error", target: xhr})
+			if (xhr.readyState === 4 && xhr.status === 0) {
+				xhr.onerror({type: "error", target: xhr})
+			}
 		}
 		if (typeof options.config == "function") options.config(xhr, options)
 		xhr.send(options.data)
@@ -439,7 +441,9 @@ Mithril = m = new function app(window) {
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
-		var extract = xhrOptions.extract || function(xhr, xhrOptions) {return xhr.responseText}
+		var extract = xhrOptions.extract || function(xhr, xhrOptions) {
+			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
+		}
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
