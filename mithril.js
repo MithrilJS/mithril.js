@@ -314,6 +314,7 @@ Mithril = m = new function app(window) {
 		}
 	}
 	function routeUnobtrusive(e) {
+		if (e.ctrlKey || e.metaKey || e.which == 2) return
 		e.preventDefault()
 		m.route(e.currentTarget.getAttribute("href"))
 	}
