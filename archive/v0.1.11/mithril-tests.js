@@ -398,6 +398,9 @@ Mithril = m = new function app(window) {
 		xhr.open(options.method, options.url, true, options.user, options.password)
 		xhr.onload = typeof options.onload == "function" ? options.onload : function() {}
 		xhr.onerror = typeof options.onerror == "function" ? options.onerror : function() {}
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4 && xhr.status === 0) xhr.onerror({type: "error", target: xhr})
+		}
 		if (typeof options.config == "function") options.config(xhr, options)
 		xhr.send(options.data)
 		return xhr
@@ -1011,6 +1014,24 @@ function testMithril(mock) {
 		m.route("/")
 		var paramValueAfter = m.route.param("a1")
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/61
+		mock.performance.$elapse(50)
+		mock.location.search = "?"
+		
+		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
+		
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/test7/foo", {
+			"/": module,
+			"/test7/:a1": module
+		})
+		var routeValueBefore = m.route()
+		m.route("/")
+		var routeValueAfter = m.route()
+		return routeValueBefore === "/test7/foo" && routeValueAfter === "/"
 	})
 
 	//m.prop

@@ -214,7 +214,7 @@ m.render(todo.view(ctrl)); // input now says &quot;Write code&quot;</code></pre>
 <hr>
 <p>In addition to bi-directional data binding, we can also bind parameterized functions to events:</p>
 <pre><code class="lang-javascript">m(&quot;button&quot;, {onclick: ctrl.add.bind(ctrl, ctrl.description)}, &quot;Add&quot;)</code></pre>
-<p>In the code above, we are simply using the native Javascript <code>Function::bind</code> method. This creates a new function with the parameter already set. In functional programming, this is called <a href="http://en.wikipedia.org/wiki/Currying"><em>currying</em></a>.</p>
+<p>In the code above, we are simply using the native Javascript <code>Function::bind</code> method. This creates a new function with the parameter already set. In functional programming, this is called <a href="http://en.wikipedia.org/wiki/Partial_application"><em>partial application</em></a>.</p>
 <p>The <code>ctrl.add.bind(ctrl, ctrl.description)</code> expression above returns a function that is equivalent to this code:</p>
 <pre><code class="lang-javascript">onclick: function(e) {
     ctrl.add(ctrl.description)
@@ -262,7 +262,7 @@ m(&quot;table&quot;, [
 <ul>
 <li>The template is rendered as a child of the implicit <code>&lt;html&gt;</code> element of the document</li>
 <li>The text input saves its value to the <code>ctrl.description</code> getter-setter we defined earlier</li>
-<li><p>The button calls the <code>ctrl.add</code> method when clicked. The <code>.bind(ctrl, ctrl.description)</code> idiom is a <a href="http://en.wikipedia.org/wiki/Currying">functional curry</a>.</p>
+<li><p>The button calls the <code>ctrl.add</code> method when clicked. The <code>.bind(ctrl, ctrl.description)</code> idiom is a <a href="http://en.wikipedia.org/wiki/Partial_application">partial application</a>.</p>
 <p>In this example, it&#39;s only used to maintain the scope binding for the <code>this</code> parameter in the controller method, but typically it&#39;s also used to bind parameters to the function without the need to declare a wrapper anonymous function.</p>
 </li>
 <li>The table lists all the existing to-dos, if any.</li>
@@ -409,7 +409,7 @@ this.description = function(value) {
 <p>Another feature - the optional <code>m()</code> utility - allows writing terse templates in a declarative style using CSS shorthands, similar to popular HTML preprocessors from server-side MVC frameworks.</p>
 <p>And because Mithril views are javascript, the developer has full freedom to abstract common patterns - from bidirectional binding helpers to full blown components - using standard javascript refactoring techniques.</p>
 <p>Mithril templates are also more collision-proof than other component systems since there&#39;s no way to pollute the HTML tag namespace by defining ad-hoc tag names.</p>
-<p>A more intellectually interesting aspect of the framework is that event handling is encouraged to be done via functional composition (i.e. by using tools like <a href="mithril.withAttr.html"><code>m.withAttr</code></a>, <a href="mithril.prop.html"><code>m.prop</code></a> and the native <code>.bind()</code> method for currying).</p>
+<p>A more intellectually interesting aspect of the framework is that event handling is encouraged to be done via functional composition (i.e. by using tools like <a href="mithril.withAttr.html"><code>m.withAttr</code></a>, <a href="mithril.prop.html"><code>m.prop</code></a> and the native <code>.bind()</code> method for partial application).</p>
 <p>If you&#39;ve been interested in learning or using Functional Programming in the real world, Mithril provides very pragmatic opportunities to get into it.</p>
 <hr>
 <h2 id="learn-more">Learn More</h2>

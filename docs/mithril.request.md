@@ -259,6 +259,21 @@ m.request({method: "POST", url: "/foo", config: xhrConfig});
 
 ---
 
+### Aborting a request
+
+The `config` option can also be used to retrieve the `XMLHttpRequest` instance for aborting the request. This idiom can also be used to attach `onprogress` event handlers.
+
+```javascript
+var transport = m.prop();
+
+m.request({method: "POST", url: "/foo", config: transport});
+
+//the `transport` getter-setter contains an instance of XMLHttpRequest
+transport().abort();
+```
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)
@@ -315,7 +330,7 @@ where:
 		
 	-	**any unwrapSuccess(any data)** (optional)
 
-		A preprocessor function to extract the data from a success response in case the response contains metadata wrapping the data.
+		A preprocessor function to unwrap the data from a success response in case the response contains metadata wrapping the data.
 		
 		The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
 		
@@ -331,7 +346,7 @@ where:
 
 	-	**any unwrapError(any data)** (optional)
 
-		A preprocessor function to extract the data from an error response in case the response contains metadata wrapping the data.
+		A preprocessor function to unwrap the data from an error response in case the response contains metadata wrapping the data.
 		
 		The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
 		
@@ -371,7 +386,7 @@ where:
 	
 		Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.
 
-		If this parameter is falsy, the default value is `function(xhr, options) {return xhr.responseText}`.
+		If this parameter is falsy, the default value is a function that returns `xhr.responseText`.
 		
 	-	**void type(Object<any> data)** (optional)
 
@@ -398,7 +413,7 @@ where:
 			The XMLHttpRequest instance.
 			
 		-	**XHROptions options**
-		
+			
 			The `options` parameter that was passed into `m.request` call
 	
 -	**returns Promise promise**

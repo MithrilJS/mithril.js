@@ -398,6 +398,9 @@ Mithril = m = new function app(window) {
 		xhr.open(options.method, options.url, true, options.user, options.password)
 		xhr.onload = typeof options.onload == "function" ? options.onload : function() {}
 		xhr.onerror = typeof options.onerror == "function" ? options.onerror : function() {}
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4 && xhr.status === 0) xhr.onerror({type: "error", target: xhr})
+		}
 		if (typeof options.config == "function") options.config(xhr, options)
 		xhr.send(options.data)
 		return xhr

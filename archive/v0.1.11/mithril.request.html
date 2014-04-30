@@ -233,6 +233,15 @@ m.request({method: &quot;POST&quot;, url: &quot;/foo&quot;, extract: extract});<
 
 m.request({method: &quot;POST&quot;, url: &quot;/foo&quot;, config: xhrConfig});</code></pre>
 <hr>
+<h3 id="aborting-a-request">Aborting a request</h3>
+<p>The <code>config</code> option can also be used to retrieve the <code>XMLHttpRequest</code> instance for aborting the request. This idiom can also be used to attach <code>onprogress</code> event handlers.</p>
+<pre><code class="lang-javascript">var transport = m.prop();
+
+m.request({method: &quot;POST&quot;, url: &quot;/foo&quot;, config: transport});
+
+//the `transport` getter-setter contains an instance of XMLHttpRequest
+transport().abort();</code></pre>
+<hr>
 <h3 id="signature">Signature</h3>
 <p><a href="how-to-read-signatures.html">How to read signatures</a></p>
 <pre><code class="lang-clike">Promise request(XHROptions options)
@@ -277,7 +286,7 @@ where:
 <p>Data to be sent. It&#39;s automatically placed in the appropriate section of the request with the appropriate serialization based on <code>method</code></p>
 </li>
 <li><p><strong>any unwrapSuccess(any data)</strong> (optional)</p>
-<p>A preprocessor function to extract the data from a success response in case the response contains metadata wrapping the data.</p>
+<p>A preprocessor function to unwrap the data from a success response in case the response contains metadata wrapping the data.</p>
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <p>For example, if the response is <code>{data: [{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]}</code> and the unwrap function is <code>function(response) {return response.data}</code>, then the response will be considered to be <code>[{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]</code> when processing the <code>type</code> parameter</p>
 <ul>
@@ -290,7 +299,7 @@ where:
 </ul>
 </li>
 <li><p><strong>any unwrapError(any data)</strong> (optional)</p>
-<p>A preprocessor function to extract the data from an error response in case the response contains metadata wrapping the data.</p>
+<p>A preprocessor function to unwrap the data from an error response in case the response contains metadata wrapping the data.</p>
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <ul>
 <li><p><strong>Object<any> | Array<any> data</strong></p>
@@ -325,7 +334,7 @@ where:
 </li>
 <li><p><strong>any extract(XMLHttpRequest xhr, XHROptions options)</strong> (optional)</p>
 <p>Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.</p>
-<p>If this parameter is falsy, the default value is <code>function(xhr, options) {return xhr.responseText}</code>.</p>
+<p>If this parameter is falsy, the default value is a function that returns <code>xhr.responseText</code>.</p>
 </li>
 <li><p><strong>void type(Object<any> data)</strong> (optional)</p>
 <p>The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by <code>type</code></p>
