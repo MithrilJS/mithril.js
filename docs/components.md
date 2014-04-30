@@ -136,7 +136,6 @@ dashboard.controller = function() {
 };
 
 dashboard.view = function(ctrl) {
-    //assuming there's an element w/ id = "example" somewhere on the page
     return m("#example", [
         new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", console.log)}),
     ]);

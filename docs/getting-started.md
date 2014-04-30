@@ -264,7 +264,7 @@ In addition to bi-directional data binding, we can also bind parameterized funct
 m("button", {onclick: ctrl.add.bind(ctrl, ctrl.description)}, "Add")
 ```
 
-In the code above, we are simply using the native Javascript `Function::bind` method. This creates a new function with the parameter already set. In functional programming, this is called [*currying*](http://en.wikipedia.org/wiki/Currying).
+In the code above, we are simply using the native Javascript `Function::bind` method. This creates a new function with the parameter already set. In functional programming, this is called [*partial application*](http://en.wikipedia.org/wiki/Partial_application).
 
 The `ctrl.add.bind(ctrl, ctrl.description)` expression above returns a function that is equivalent to this code:
 
@@ -333,7 +333,7 @@ Here are the highlights of the template above:
 
 -	The template is rendered as a child of the implicit `<html>` element of the document
 -	The text input saves its value to the `ctrl.description` getter-setter we defined earlier
--	The button calls the `ctrl.add` method when clicked. The `.bind(ctrl, ctrl.description)` idiom is a [functional curry](http://en.wikipedia.org/wiki/Currying).
+-	The button calls the `ctrl.add` method when clicked. The `.bind(ctrl, ctrl.description)` idiom is a [partial application](http://en.wikipedia.org/wiki/Partial_application).
 
 	In this example, it's only used to maintain the scope binding for the `this` parameter in the controller method, but typically it's also used to bind parameters to the function without the need to declare a wrapper anonymous function.
 -	The table lists all the existing to-dos, if any.
@@ -540,7 +540,7 @@ And because Mithril views are javascript, the developer has full freedom to abst
 
 Mithril templates are also more collision-proof than other component systems since there's no way to pollute the HTML tag namespace by defining ad-hoc tag names.
 
-A more intellectually interesting aspect of the framework is that event handling is encouraged to be done via functional composition (i.e. by using tools like [`m.withAttr`](mithril.withAttr.md), [`m.prop`](mithril.prop.md) and the native `.bind()` method for currying).
+A more intellectually interesting aspect of the framework is that event handling is encouraged to be done via functional composition (i.e. by using tools like [`m.withAttr`](mithril.withAttr.md), [`m.prop`](mithril.prop.md) and the native `.bind()` method for partial application).
 
 If you've been interested in learning or using Functional Programming in the real world, Mithril provides very pragmatic opportunities to get into it.
 
