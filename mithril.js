@@ -211,7 +211,7 @@ Mithril = m = new function app(window) {
 		return value
 	}
 	
-	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0
+	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0, computePostRedrawHook = null
 	m.module = function(root, module) {
 		m.startComputation()
 		var index = roots.indexOf(root)
@@ -235,20 +235,18 @@ Mithril = m = new function app(window) {
 		for (var i = 0; i < roots.length; i++) {
 			m.render(roots[i], modules[i].view(controllers[i]))
 		}
+		if (computePostRedrawHook) {
+			computePostRedrawHook()
+			computePostRedrawHook = null
+		}
 		lastRedraw = now
 	}
 	
-	var pendingRequests = 0, computePostRedrawHook = null
+	var pendingRequests = 0
 	m.startComputation = function() {pendingRequests++}
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
-		if (pendingRequests == 0) {
-			m.redraw()
-			if (computePostRedrawHook) {
-				computePostRedrawHook()
-				computePostRedrawHook = null
-			}
-		}
+		if (pendingRequests == 0) m.redraw()
 	}
 	
 	m.withAttr = function(prop, withAttrCallback) {
@@ -279,6 +277,7 @@ Mithril = m = new function app(window) {
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
 			var isInitialized = arguments[1]
+			element.href = modes[m.route.mode] + element.pathname
 			if (!isInitialized) {
 				element.removeEventListener("click", routeUnobtrusive)
 				element.addEventListener("click", routeUnobtrusive)
@@ -316,8 +315,9 @@ Mithril = m = new function app(window) {
 		}
 	}
 	function routeUnobtrusive(e) {
+		if (e.ctrlKey || e.metaKey || e.which == 2) return
 		e.preventDefault()
-		m.route(e.currentTarget.getAttribute("href"))
+		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
 	}
 	function scrollToHash() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash

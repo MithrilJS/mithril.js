@@ -211,7 +211,7 @@ Mithril = m = new function app(window) {
 		return value
 	}
 	
-	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0
+	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0, computePostRedrawHook = null
 	m.module = function(root, module) {
 		m.startComputation()
 		var index = roots.indexOf(root)
@@ -235,20 +235,18 @@ Mithril = m = new function app(window) {
 		for (var i = 0; i < roots.length; i++) {
 			m.render(roots[i], modules[i].view(controllers[i]))
 		}
+		if (computePostRedrawHook) {
+			computePostRedrawHook()
+			computePostRedrawHook = null
+		}
 		lastRedraw = now
 	}
 	
-	var pendingRequests = 0, computePostRedrawHook = null
+	var pendingRequests = 0
 	m.startComputation = function() {pendingRequests++}
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
-		if (pendingRequests == 0) {
-			m.redraw()
-			if (computePostRedrawHook) {
-				computePostRedrawHook()
-				computePostRedrawHook = null
-			}
-		}
+		if (pendingRequests == 0) m.redraw()
 	}
 	
 	m.withAttr = function(prop, withAttrCallback) {
@@ -279,6 +277,7 @@ Mithril = m = new function app(window) {
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
 			var isInitialized = arguments[1]
+			element.href = modes[m.route.mode] + element.pathname
 			if (!isInitialized) {
 				element.removeEventListener("click", routeUnobtrusive)
 				element.addEventListener("click", routeUnobtrusive)
@@ -316,8 +315,9 @@ Mithril = m = new function app(window) {
 		}
 	}
 	function routeUnobtrusive(e) {
+		if (e.ctrlKey || e.metaKey || e.which == 2) return
 		e.preventDefault()
-		m.route(e.currentTarget.getAttribute("href"))
+		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
 	}
 	function scrollToHash() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
@@ -934,7 +934,7 @@ function testMithril(mock) {
 	
 	//m.redraw
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
@@ -946,11 +946,11 @@ function testMithril(mock) {
 		var lengthBefore = root.childNodes.length
 		mock.performance.$elapse(50)
 		m.redraw()
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //teardown
 		return lengthBefore === 0 && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		var count = 0
 		var root = mock.document.createElement("div")
 		m.module(root, {
@@ -964,13 +964,13 @@ function testMithril(mock) {
 		m.redraw()
 		mock.performance.$elapse(50)
 		m.redraw()
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //teardown
 		return count === 2
 	})
 
 	//m.route
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
@@ -978,10 +978,11 @@ function testMithril(mock) {
 		m.route(root, "/test1", {
 			"/test1": {controller: function() {}, view: function() {return "foo"}}
 		})
+		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/test1" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.pathname = "/"
 		
 		var root = mock.document.createElement("div")
@@ -989,10 +990,11 @@ function testMithril(mock) {
 		m.route(root, "/test2", {
 			"/test2": {controller: function() {}, view: function() {return "foo"}}
 		})
+		mock.performance.$elapse(50) //teardown
 		return mock.location.pathname == "/test2" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.hash = "#"
 		
 		var root = mock.document.createElement("div")
@@ -1000,10 +1002,11 @@ function testMithril(mock) {
 		m.route(root, "/test3", {
 			"/test3": {controller: function() {}, view: function() {return "foo"}}
 		})
+		mock.performance.$elapse(50) //teardown
 		return mock.location.hash == "#/test3" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
@@ -1011,10 +1014,11 @@ function testMithril(mock) {
 		m.route(root, "/test4/foo", {
 			"/test4/:test": {controller: function() {}, view: function() {return m.route.param("test")}}
 		})
+		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/test4/foo" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
 		
 		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
@@ -1026,13 +1030,14 @@ function testMithril(mock) {
 			"/test5/:test": module
 		})
 		var paramValueBefore = m.route.param("test")
+		mock.performance.$elapse(50)
 		m.route("/")
 		var paramValueAfter = m.route.param("test")
-		
+		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
 		
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
@@ -1044,13 +1049,15 @@ function testMithril(mock) {
 			"/test6/:a1": module
 		})
 		var paramValueBefore = m.route.param("a1")
+		mock.performance.$elapse(50)
 		m.route("/")
 		var paramValueAfter = m.route.param("a1")
+		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/61
-		mock.performance.$elapse(50)
+		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
 		
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
@@ -1062,8 +1069,10 @@ function testMithril(mock) {
 			"/test7/:a1": module
 		})
 		var routeValueBefore = m.route()
+		mock.performance.$elapse(50)
 		m.route("/")
 		var routeValueAfter = m.route()
+		mock.performance.$elapse(50) //teardown
 		return routeValueBefore === "/test7/foo" && routeValueAfter === "/"
 	})
 

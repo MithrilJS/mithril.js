@@ -147,6 +147,8 @@ m(&quot;button&quot;, {onclick: alert}); //yields &lt;button&gt;&lt;/button&gt;,
 <p>You can set inline styles like this:</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {style: {border: &quot;1px solid red&quot;}}); //yields &lt;div style=&quot;border:1px solid red;&quot;&gt;&lt;/div&gt;</code></pre>
 <p>Note that in order to keep the framework lean, Mithril does not auto-append units like <code>px</code> or <code>%</code> to any values. Typically, you should not even be using inline styles to begin with (unless you are dynamically changing them).</p>
+<p>Mithril also does not auto-camel-case CSS properties on inline style attributes, so you should use the Javascript syntax when setting them:</p>
+<pre><code class="lang-javascript">m(&quot;div&quot;, {style: {textAlign: &quot;center&quot;}}); //yields &lt;div style=&quot;text-align:1px solid red;&quot;&gt;&lt;/div&gt;</code></pre>
 <hr>
 <p>You can define a non-HTML-standard attribute called <code>config</code>. This special parameter allows you to call methods on the DOM element after it gets created.</p>
 <p>This is useful, for example, if you declare a <code>canvas</code> element and want to use the Javascript API to draw:</p>

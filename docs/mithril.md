@@ -138,6 +138,12 @@ m("div", {style: {border: "1px solid red"}}); //yields <div style="border:1px so
 
 Note that in order to keep the framework lean, Mithril does not auto-append units like `px` or `%` to any values. Typically, you should not even be using inline styles to begin with (unless you are dynamically changing them).
 
+Mithril also does not auto-camel-case CSS properties on inline style attributes, so you should use the Javascript syntax when setting them:
+
+```javascript
+m("div", {style: {textAlign: "center"}}); //yields <div style="text-align:1px solid red;"></div>
+```
+
 ---
 
 You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.

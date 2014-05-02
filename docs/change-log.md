@@ -7,6 +7,10 @@
 -	Added `m.route()` overload to allow reading of current route [#61](https://github.com/lhorie/mithril.js/issues/61)
 -	Added `background` option to `m.request` to allow requests that don't affect rendering [#62](https://github.com/lhorie/mithril.js/issues/62)
 
+### Bug Fixes:
+
+-	Links using `config: m.route` can now be opened in new tab correctly [#64](https://github.com/lhorie/mithril.js/issues/64)
+
 ---
 
 [v0.1.10](/mithril/archive/v0.1.10) - maintenance
