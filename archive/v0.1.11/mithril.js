@@ -32,7 +32,7 @@ Mithril = m = new function app(window) {
 		}
 		return cell
 	}
-	function build(parentElement, parentTag, data, cached, shouldReattach, index, namespace) {
+	function build(parentElement, parentTag, data, cached, shouldReattach, index, editable, namespace) {
 		if (data === null || data === undefined) {
 			if (cached) clear(cached.nodes)
 			return 
@@ -49,7 +49,7 @@ Mithril = m = new function app(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
-				var item = build(parentElement, null, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, namespace)
+				var item = build(parentElement, null, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				subArrayCount += item instanceof Array ? item.length : 1
@@ -74,7 +74,7 @@ Mithril = m = new function app(window) {
 				cached = {
 					tag: data.tag,
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
-					children: build(node, data.tag, data.children, cached.children, true, 0, namespace),
+					children: build(node, data.tag, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace),
 					nodes: [node]
 				}
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -82,7 +82,7 @@ Mithril = m = new function app(window) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, data.children, cached.children, false, 0, namespace)
+				cached.children = build(node, data.tag, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace)
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
@@ -102,20 +102,25 @@ Mithril = m = new function app(window) {
 				cached.nodes = [node]
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
-				if (data.$trusted) {
-					var current = cached.nodes[0], nodes = [current]
-					if (current) {
-						while (current = current.nextSibling) nodes.push(current)
-						clear(nodes)
-						node = injectHTML(parentElement, index, data)
+				if (!editable || editable !== window.document.activeElement) {
+					if (data.$trusted) {
+						var current = cached.nodes[0], nodes = [current]
+						if (current) {
+							while (current = current.nextSibling) nodes.push(current)
+							clear(nodes)
+							node = injectHTML(parentElement, index, data)
+						}
+						else parentElement.innerHTML = data
 					}
-					else parentElement.innerHTML = data
-				}
-				else {
-					node = cached.nodes[0]
-					if (parentTag === "textarea") parentElement.value = data
-					else parentElement.insertBefore(node, parentElement.childNodes[index] || null)
-					node.nodeValue = data
+					else {
+						node = cached.nodes[0]
+						if (parentTag === "textarea") parentElement.value = data
+						else if (editable) editable.innerHTML = data
+						else {
+							parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+							node.nodeValue = data
+						}
+					}
 				}
 				cached = new data.constructor(data)
 				cached.nodes = [node]
@@ -137,6 +142,7 @@ Mithril = m = new function app(window) {
 				}
 				else if (attrName === "style") {
 					for (var rule in dataAttr) {
+						console.log(node)
 						if (cachedAttr === undefined || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
 					}
 				}
@@ -202,7 +208,7 @@ Mithril = m = new function app(window) {
 		var index = nodeCache.indexOf(root)
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
-		cellCache[id] = build(node, null, cell, cellCache[id], false, 0)
+		cellCache[id] = build(node, null, cell, cellCache[id], false, 0, null, undefined)
 	}
 	
 	m.trust = function(value) {

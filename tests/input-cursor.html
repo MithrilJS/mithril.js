@@ -17,20 +17,25 @@ app.view = function(ctrl) {
 		onkeyup: m.withAttr("value", ctrl.title),
 			value: ctrl.title()
 		}),
-	m("br"),
+		m("br"),
 		m("textarea", {
 			onkeyup: m.withAttr("value", ctrl.title),
 			value: ctrl.title()
 		}),
-	m("br"),
+		m("br"),
 		m("textarea", {
 			onkeyup: m.withAttr("value", ctrl.title)
 		}, ctrl.title()),
-	m("br"),
+		m("br"),
 		m("div[contenteditable]", {
 			style: {border: "1px solid #888"},
 			onkeyup: m.withAttr("innerHTML", ctrl.title)
 		}, ctrl.title()),
+		m("br"),
+		m("div[contenteditable]", {
+			style: {border: "1px solid #888"},
+			onkeyup: m.withAttr("innerHTML", ctrl.title)
+		}, m.trust(ctrl.title())),
 	]);
 }
 
