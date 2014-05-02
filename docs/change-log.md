@@ -1,6 +1,6 @@
 ## Change Log
 
-[v0.1.11](/mithril/archive/v0.1.11) - enhancement
+[v0.1.11](/mithril/archive/v0.1.11) - maintenance
 
 ### News:
 
@@ -10,6 +10,7 @@
 ### Bug Fixes:
 
 -	Links using `config: m.route` can now be opened in new tab correctly [#64](https://github.com/lhorie/mithril.js/issues/64)
+-	Fixed diff within contenteditable areas [#65](https://github.com/lhorie/mithril.js/issues/65)
 
 ---
 

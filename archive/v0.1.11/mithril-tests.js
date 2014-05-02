@@ -161,7 +161,7 @@ Mithril = m = new function app(window) {
 		return cachedAttrs
 	}
 	function clear(nodes) {
-		for (var i = 0; i < nodes.length; i++) nodes[i].parentNode.removeChild(nodes[i])
+		for (var i = nodes.length - 1; i > -1; i--) nodes[i].parentNode.removeChild(nodes[i])
 		nodes.length = 0
 	}
 	function injectHTML(parentElement, index, data) {
