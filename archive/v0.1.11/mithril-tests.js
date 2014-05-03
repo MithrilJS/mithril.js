@@ -474,6 +474,8 @@ Mithril = m = new function app(window) {
 	
 	//testing API
 	m.deps = function(mock) {return window = mock}
+	//for internal testing only, do not use `m.deps.factory`
+	m.deps.factory = app
 	
 	return m
 }(this)
@@ -1220,6 +1222,11 @@ function testMithril(mock) {
 		controller.value = "foo"
 		m.endComputation()
 		return root.childNodes[0].nodeValue === "foo"
+	})
+	
+	//console.log presence
+	test(function() {
+		return m.deps.factory.toString().indexOf("console") < 0
 	})
 }
 

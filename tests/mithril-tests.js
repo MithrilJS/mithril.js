@@ -615,6 +615,11 @@ function testMithril(mock) {
 		m.endComputation()
 		return root.childNodes[0].nodeValue === "foo"
 	})
+	
+	//console.log presence
+	test(function() {
+		return m.deps.factory.toString().indexOf("console") < 0
+	})
 }
 
 //mocks

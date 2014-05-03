@@ -474,6 +474,8 @@ Mithril = m = new function app(window) {
 	
 	//testing API
 	m.deps = function(mock) {return window = mock}
+	//for internal testing only, do not use `m.deps.factory`
+	m.deps.factory = app
 	
 	return m
 }(this)
