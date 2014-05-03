@@ -33,10 +33,7 @@ Mithril = m = new function app(window) {
 		return cell
 	}
 	function build(parentElement, parentTag, data, cached, shouldReattach, index, editable, namespace) {
-		if (data === null || data === undefined) {
-			if (cached) clear(cached.nodes)
-			return 
-		}
+		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return
 		
 		var cachedType = type.call(cached), dataType = type.call(data)
@@ -56,7 +53,9 @@ Mithril = m = new function app(window) {
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
+				//console.log(123, nodes, cached.nodes, 666,cached[0], cached[1], data.length)
 				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+				//console.log(234, nodes, cached.nodes, cached[i])
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) if (node.parentNode !== null) node.parentNode.removeChild(node)
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parentElement.appendChild(node)
 				if (data.length < cached.length) cached.length = data.length

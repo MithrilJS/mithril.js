@@ -105,7 +105,7 @@ function testMithril(mock) {
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
-		return root.childNodes[0].childNodes.length === 0
+		return root.childNodes[0].childNodes[0].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -128,19 +128,19 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes.length === 1
+		return root.childNodes[0].childNodes[1].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li"), m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes.length === 1
+		return root.childNodes[0].childNodes[1].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [undefined]))
-		return root.childNodes[0].childNodes.length === 0
+		return root.childNodes[0].childNodes[0].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -326,6 +326,24 @@ function testMithril(mock) {
 		m.render(root, m("div", "foo"))
 		return root.childNodes.length == 1
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("button"), m("ul")]))
+		var valueBefore = root.childNodes[0].childNodes[0].nodeName
+		m.render(root, m("div", [undefined, m("ul")]))
+		var valueAfter = root.childNodes[0].childNodes[0].nodeValue
+		return valueBefore === "BUTTON" && valueAfter === ""
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("ul"), undefined]))
+		var valueBefore1 = root.childNodes[0].childNodes[0].nodeName
+		var valueBefore2 = root.childNodes[0].childNodes[1].nodeValue
+		m.render(root, m("div", [undefined, m("ul")]))
+		var valueAfter1 = root.childNodes[0].childNodes[0].nodeValue
+		var valueAfter2 = root.childNodes[0].childNodes[1].nodeName
+		return valueBefore1 === "UL" && valueAfter1 === "" && valueBefore2 === "" && valueAfter2 === "UL"
+	})
 	//end m.render
 	
 	//m.redraw
@@ -339,11 +357,11 @@ function testMithril(mock) {
 		})
 		controller.value = "foo"
 		m.redraw()
-		var lengthBefore = root.childNodes.length
+		var valueBefore = root.childNodes[0].nodeValue
 		mock.performance.$elapse(50)
 		m.redraw()
 		mock.performance.$elapse(50) //teardown
-		return lengthBefore === 0 && root.childNodes[0].nodeValue === "foo"
+		return valueBefore === "" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
 		mock.performance.$elapse(50) //setup
