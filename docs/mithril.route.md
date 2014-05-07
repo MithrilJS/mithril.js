@@ -74,6 +74,39 @@ The string `johndoe` is bound to the `:userID` parameter, which can be retrived 
 
 The `m.route.mode` defines which part of the URL to use for routing.
 
+#### "Variadic" routes
+
+We can append an ellipsis (`...`) to the name of a route argument to allow it to match URL snippets that contain slashes:
+
+```javascript
+m.route(document.body, "/files/pictures/pic1.jpg", {
+	"/files/:file...": gallery
+});
+
+m.route.param("file") === "pictures/pic1.jpg"
+```
+
+```javascript
+m.route(document.body, "/blog/2014/01/20/articles", {
+	"/blog/:date.../articles": articleList
+});
+
+m.route.param("date") === "2014/01/20"
+```
+
+Note that Mithril checks for route matches in the order the routes are defined, so you should put variadic routes at the bottom of the list to prevent them from matching other more specific routes.
+
+```
+m.route(document.body, "/blog/archive/2014", {
+	"/blog/:date...": module1, //for the default path in the line above, this route matches first!
+	"/blog/archive/:year": module2
+});
+
+m.route.param("date") === "archive/2014"
+
+//the routes should be flipped around to get `m.route.param("year") == "2014"`
+```
+
 ---
 
 #### Signature
