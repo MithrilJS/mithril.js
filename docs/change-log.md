@@ -2,6 +2,10 @@
 
 [v0.1.12](/mithril/archive/v0.1.12) - maintenance
 
+### News:
+
+-	It's now possible to define [variadic routes](mithril.route.md#variadic-routes) [#70](https://github.com/lhorie/mithril.js/issues/70)
+
 ### Bug Fixes:
 
 -	Fix link location in links using `config: m.route` after redraws [#74](https://github.com/lhorie/mithril.js/issues/74)

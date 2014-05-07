@@ -74,7 +74,7 @@ The string `johndoe` is bound to the `:userID` parameter, which can be retrived 
 
 The `m.route.mode` defines which part of the URL to use for routing.
 
-#### "Variadic" routes
+#### Variadic routes
 
 We can append an ellipsis (`...`) to the name of a route argument to allow it to match URL snippets that contain slashes:
 
