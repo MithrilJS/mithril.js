@@ -13,10 +13,15 @@ app.controller = function() {
 app.view = function(ctrl) {
 	return	m("body", [
 		m("h1", ["Title: ", ctrl.title()]),
-		m("input", {
+		m("input[list=data]", {
 		onkeyup: m.withAttr("value", ctrl.title),
 			value: ctrl.title()
 		}),
+		m("datalist#data", [
+			m("option", "John"),
+			m("option", "Bob"),
+			m("option", "Mary")
+		]),
 		m("br"),
 		m("textarea", {
 			onkeyup: m.withAttr("value", ctrl.title),

@@ -1,5 +1,15 @@
 ## Change Log
 
+[v0.1.12](/mithril/archive/v0.1.12) - maintenance
+
+### Bug Fixes:
+
+-	Fix link location in links using `config: m.route` after redraws [#74](https://github.com/lhorie/mithril.js/issues/74)
+-	Fixed support for `list` attribute in inputs [#69](https://github.com/lhorie/mithril.js/issues/69)
+
+---
+
+
 [v0.1.11](/mithril/archive/v0.1.11) - maintenance
 
 ### News:

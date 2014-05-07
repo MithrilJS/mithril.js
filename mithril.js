@@ -150,7 +150,7 @@ Mithril = m = new function app(window) {
 				else if (attrName === "value" && tag === "input") {
 					if (node.value !== dataAttr) node.value = dataAttr
 				}
-				else if (attrName in node) node[attrName] = dataAttr
+				else if (attrName in node && attrName != "list") node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
 			}
 		}
@@ -279,7 +279,9 @@ Mithril = m = new function app(window) {
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
 			var isInitialized = arguments[1]
-			element.href = location.pathname + modes[m.route.mode] + element.pathname
+			if (element.href.indexOf(modes[m.route.mode]) < 0) {
+				element.href = location.pathname + modes[m.route.mode] + element.pathname
+			}
 			if (!isInitialized) {
 				element.removeEventListener("click", routeUnobtrusive)
 				element.addEventListener("click", routeUnobtrusive)
