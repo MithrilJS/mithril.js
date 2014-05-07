@@ -194,7 +194,7 @@ Mithril = m = new function app(window) {
 				window.document.replaceChild(html, window.document.documentElement)
 			}
 		},
-		insertBefore: function(node, reference) {
+		insertBefore: function(node) {
 			this.appendChild(node)
 		},
 		childNodes: []
@@ -445,7 +445,7 @@ Mithril = m = new function app(window) {
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize || JSON.stringify
 		var deserialize = xhrOptions.deserialize || JSON.parse
-		var extract = xhrOptions.extract || function(xhr, xhrOptions) {
+		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		}
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
