@@ -174,9 +174,8 @@ Mithril = m = new function app(window) {
 	function autoredraw(callback, object) {
 		return function(e) {
 			m.startComputation()
-			var output = callback.call(object, e)
-			m.endComputation()
-			return output
+			try {return callback.call(object, e)}
+			finally {m.endComputation()}
 		}
 	}
 	

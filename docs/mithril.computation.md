@@ -34,6 +34,21 @@ For each `m.startComputation` call a library makes, it MUST also make one and ON
 
 You should not use these methods if your code is intended to run repeatedly (e.g. by using `setInterval`). If you want to repeatedly redraw the view without necessarily waiting for user input, you should manually call [`m.redraw`](mithril.redraw.md) within the repeatable context.
 
+Note that failing to call `endComputation` after a respective `startComputation` call will halt the redrawing system. It's a good idea to wrap exception-prone code in a `try` block and call `m.endComputation` from within the respective `finally` block, in order to prevent rendering from halting.
+
+```javascript
+window.onfocus = function() {
+	m.startComputation();
+	
+	try {
+		doStuff();
+	}
+	finally {
+		m.endComputation(); //redraw regardless of whether `doStuff` threw errors
+	}
+}
+```
+
 ---
 
 ### Integrating multiple execution threads
