@@ -10,6 +10,7 @@
 
 -	Fix link location in links using `config: m.route` after redraws [#74](https://github.com/lhorie/mithril.js/issues/74)
 -	Fixed support for `list` attribute in inputs [#69](https://github.com/lhorie/mithril.js/issues/69)
+-	Fixed URL decoding in route params [#75](https://github.com/lhorie/mithril.js/issues/75)
 
 ---
 
