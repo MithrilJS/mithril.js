@@ -312,7 +312,7 @@ Mithril = m = new function app(window) {
 				return !void path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g)
 					var values = [].slice.call(arguments, 1, -2)
-					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = values[i]
+					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					m.module(root, router[route])
 				})
 			}
