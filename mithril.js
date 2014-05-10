@@ -137,9 +137,12 @@ Mithril = m = new function app(window) {
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
 					node[attrName] = autoredraw(dataAttr, node)
 				}
-				else if (attrName === "style") {
+				else if (attrName === "style" && typeof dataAttr == "object") {
 					for (var rule in dataAttr) {
 						if (cachedAttr === undefined || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+					}
+					for (var rule in cachedAttr) {
+						if (!(rule in dataAttr)) node.style[rule] = ""
 					}
 				}
 				else if (namespace !== undefined) {
@@ -150,7 +153,7 @@ Mithril = m = new function app(window) {
 				else if (attrName === "value" && tag === "input") {
 					if (node.value !== dataAttr) node.value = dataAttr
 				}
-				else if (attrName in node && attrName != "list") node[attrName] = dataAttr
+				else if (attrName in node && !(attrName == "list" || attrName == "style")) node[attrName] = dataAttr
 				else node.setAttribute(attrName, dataAttr)
 			}
 		}

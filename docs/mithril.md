@@ -138,11 +138,22 @@ m("div", {style: {border: "1px solid red"}}); //yields <div style="border:1px so
 
 Note that in order to keep the framework lean, Mithril does not auto-append units like `px` or `%` to any values. Typically, you should not even be using inline styles to begin with (unless you are dynamically changing them).
 
-Mithril also does not auto-camel-case CSS properties on inline style attributes, so you should use the Javascript syntax when setting them:
+Mithril also does not auto-camel-case CSS properties on inline style attributes, so you should use the Javascript syntax when setting them via Javascript objects:
 
 ```javascript
-m("div", {style: {textAlign: "center"}}); //yields <div style="text-align:1px solid red;"></div>
+m("div", {style: {textAlign: "center"}}); //yields <div style="text-align:center;"></div>
+
+//this does not work
+m("div", {style: {"text-align": "center"}});
 ```
+
+You can, however, use CSS syntax when defining style rules as inline strings:
+
+```javascript
+m("div[style='text-align:center']"); //yields <div style="text-align:center;"></div>
+```
+
+One caveat of using the CSS syntax is that it clobbers the `style` attribute in the DOM element on redraws, so this syntax is not appropriate if you need to use it in conjunction with 3rd party tools that modify the element's style outside of Mithril's templates (e.g. via `config`, which is explained below)
 
 ---
 

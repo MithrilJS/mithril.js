@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.13](/mithril/archive/v0.1.13) - maintenance
+
+### Bug Fixes:
+
+-	Removing CSS rules now diffs correctly [#79](https://github.com/lhorie/mithril.js/issues/79)
+
+---
+
 [v0.1.12](/mithril/archive/v0.1.12) - maintenance
 
 ### News:
@@ -13,7 +21,6 @@
 -	Fixed URL decoding in route params [#75](https://github.com/lhorie/mithril.js/issues/75)
 
 ---
-
 
 [v0.1.11](/mithril/archive/v0.1.11) - maintenance
 

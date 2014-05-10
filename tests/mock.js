@@ -5,6 +5,7 @@ mock.window = new function() {
 	window.document.childNodes = []
 	window.document.createElement = function(tag) {
 		return {
+			style: {},
 			childNodes: [],
 			nodeName: tag.toUpperCase(),
 			appendChild: window.document.appendChild,

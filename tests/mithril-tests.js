@@ -344,6 +344,19 @@ function testMithril(mock) {
 		var valueAfter2 = root.childNodes[0].childNodes[1].nodeName
 		return valueBefore1 === "UL" && valueAfter1 === "" && valueBefore2 === "" && valueAfter2 === "UL"
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", {style: {background: "red"}}))
+		var valueBefore = root.childNodes[0].style.background
+		m.render(root, m("div", {style: {}}))
+		var valueAfter = root.childNodes[0].style.background
+		return valueBefore === "red" && valueAfter === ""
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div[style='background:red']"))
+		return root.childNodes[0].style === "background:red"
+	})
 	//end m.render
 	
 	//m.redraw
