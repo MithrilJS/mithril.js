@@ -1,5 +1,11 @@
 ## Community
 
+### Projects and Snippets
+
+A collection of projects and snippets created by Mithril users. A great place to find useful tools.
+
+Go to the [Mithril wiki](https://github.com/lhorie/mithril.js/wiki/Community-Projects-and-Snippets)
+
 ### Blog
 
 Read Mithril tutorials and articles about web app development. Join the discussion!
