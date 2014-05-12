@@ -1,10 +1,12 @@
 ## Compiling Templates
 
-If performance is absolutely critical, you can optionally pre-compile templates that use `m()` by running the [`template-compiler.sjs`](tools/template-compiler.sjs) macro with [Sweet.js](https://github.com/mozilla/sweet.js)
+You can optionally pre-compile templates that use `m()` by running the [`template-compiler.sjs`](tools/template-compiler.sjs) macro with [Sweet.js](https://github.com/mozilla/sweet.js). This step isn't required in order to use Mithril, but it's an easy way to squeeze a little bit more performance out of an application, without the need for code changes.
 
-Compiling a template transforms the nested function calls into a raw virtual DOM tree (which is merely a collection of native Javascript objects that is ready to be rendered via [`m.render`](mithril.render.md))
+Compiling a template transforms the nested function calls of a template into a raw virtual DOM tree (which is merely a collection of native Javascript objects that is ready to be rendered via [`m.render`](mithril.render.md)). This means that compiled templates don't need to parse the string in `m("div#foo")` and they don't incur the cost of the function call.
 
-For example, given the following template:
+It's worth mentioning that Mithril has built-in mechanisms elsewhere that take care of real bottlenecks like browser repaint management and DOM updating. This optional compilation tool is merely "icing on the cake" that speeds up the javascript run-time of templates (which is already fast even without compilation - see performance test in the homepage).
+
+The macro takes regular Mithril templates like the one below:
 
 ```javascript
 var view = function() {
@@ -12,7 +14,7 @@ var view = function() {
 }
 ```
 
-It would be compiled into:
+It pre-processes the `m()` call and replaces it with its output:
 
 ```javascript
 var view = function() {
