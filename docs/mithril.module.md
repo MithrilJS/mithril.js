@@ -103,6 +103,32 @@ yields:
 </body>
 ```
 
+### Unloading modules
+
+If a module's controller implements an instance method called `onunload`, this method will be called when a new `m.module` call updates the root DOM element tied to the module in question.
+
+```javascript
+var module1 = {};
+module1.controller = function() {
+	this.onunload = function() {
+		console.log("unloading module 1");
+	};
+};
+module1.view = function() {};
+
+m.module(document, module1);
+
+
+
+var module2 = {};
+module2.controller = function() {};
+module1.view = function() {};
+
+m.module(document, module2); // logs "unloading module 1"
+```
+
+This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `onunload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
+
 ---
 
 ### Signature
@@ -113,7 +139,8 @@ yields:
 void module(DOMElement rootElement, Module module)
 
 where:
-	Module :: Object { void controller(), void view(Object controllerInstance) }
+	Module :: Object { Controller, void view(Object controllerInstance) }
+	Controller :: void controller() | void controller() { prototype: void unload() }
 ```
 
 -	**DOMElement rootElement**

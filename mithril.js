@@ -222,6 +222,7 @@ Mithril = m = new function app(window) {
 		if (index < 0) index = roots.length
 		roots[index] = root
 		modules[index] = module
+		if (controllers[index] && typeof controllers[index].onunload == "function") controllers[index].onunload()
 		controllers[index] = new module.controller
 		m.endComputation()
 	}

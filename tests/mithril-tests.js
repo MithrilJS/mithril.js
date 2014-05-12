@@ -345,6 +345,7 @@ function testMithril(mock) {
 		return valueBefore1 === "UL" && valueAfter1 === "" && valueBefore2 === "" && valueAfter2 === "UL"
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/79
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", {style: {background: "red"}}))
 		var valueBefore = root.childNodes[0].style.background
@@ -356,6 +357,25 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div[style='background:red']"))
 		return root.childNodes[0].style === "background:red"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", {style: {background: "red"}}))
+		var valueBefore = root.childNodes[0].style.background
+		m.render(root, m("div", {}))
+		var valueAfter = root.childNodes[0].style.background
+		return valueBefore === "red" && valueAfter === undefined
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var module = {}, unloaded = false
+		module.controller = function() {
+			this.onunload = function() {unloaded = true}
+		}
+		module.view = function() {}
+		m.module(root, module)
+		m.module(root, {controller: function() {}, view: function() {}})
+		return unloaded === true
 	})
 	//end m.render
 	

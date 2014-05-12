@@ -107,6 +107,34 @@ m.route.param("date") === "archive/2014"
 //the routes should be flipped around to get `m.route.param("year") == "2014"`
 ```
 
+### Running clean up code on route change
+
+If a module's controller implements an instance method called `onunload`, this method will be called when a route changes.
+
+```javascript
+var home = {};
+home.controller = function() {
+	this.onunload = function() {
+		console.log("unloading home module");
+	};
+};
+
+var dashboard = {};
+dashboard.controller = function() {};
+dashboard.view = function() {};
+
+//go to the default route (home)
+m.route(document.body, "/", {
+	"/": home,
+	"/dashboard": dashboard,
+});
+
+//re-route to dashboard
+m.route("/dashboard"); // logs "unloading home"
+```
+
+This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `unload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
+
 ---
 
 #### Signature
