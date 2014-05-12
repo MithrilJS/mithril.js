@@ -688,6 +688,60 @@ function testMithril(mock) {
 		})
 		return value === 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/80
+		var deferred = m.deferred(), value
+		deferred.resolve(1)
+		deferred.resolve(2)
+		deferred.promise.then(function(data) {
+			value = data
+		})
+		return value === 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/80
+		var deferred = m.deferred(), value
+		deferred.promise.then(function(data) {
+			value = data
+		})
+		deferred.resolve(1)
+		deferred.resolve(2)
+		return value === 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/80
+		var deferred = m.deferred(), value1, value2
+		deferred.promise.then(function(data) {
+			value1 = data
+		}, function(data) {
+			value2 = data
+		})
+		deferred.resolve(1)
+		deferred.reject(2)
+		return value1 === 1 && value2 === undefined
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/80
+		var deferred = m.deferred(), value1, value2
+		deferred.promise.then(function() {
+			value1 = data
+		}, function(data) {
+			value2 = data
+		})
+		deferred.reject(1)
+		deferred.resolve(2)
+		return value1 === undefined && value2 === 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/80
+		var deferred = m.deferred(), value
+		deferred.promise.then(null, function(data) {
+			value = data
+		})
+		deferred.reject(1)
+		deferred.reject(2)
+		return value === 1
+	})
 
 	//m.sync
 	test(function() {

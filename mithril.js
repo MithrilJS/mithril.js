@@ -347,12 +347,14 @@ Mithril = m = new function app(window) {
 		var resolvers = [], rejecters = [], resolved, rejected
 		var object = {
 			resolve: function(value) {
-				resolved = value
+				if (resolved === undefined) resolved = value
 				for (var i = 0; i < resolvers.length; i++) resolvers[i](value)
+				resolvers.length = rejecters.length = 0
 			},
 			reject: function(value) {
-				rejected = value
+				if (rejected === undefined) rejected = value
 				for (var i = 0; i < rejecters.length; i++) rejecters[i](value)
+				resolvers.length = rejecters.length = 0
 			},
 			promise: m.prop()
 		}
