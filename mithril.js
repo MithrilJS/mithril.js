@@ -344,12 +344,14 @@ Mithril = m = new function app(window) {
 	}
 
 	m.deferred = function() {
-		var resolvers = [], rejecters = []
+		var resolvers = [], rejecters = [], resolved, rejected
 		var object = {
 			resolve: function(value) {
+				resolved = value
 				for (var i = 0; i < resolvers.length; i++) resolvers[i](value)
 			},
 			reject: function(value) {
+				rejected = value
 				for (var i = 0; i < rejecters.length; i++) rejecters[i](value)
 			},
 			promise: m.prop()
@@ -359,8 +361,8 @@ Mithril = m = new function app(window) {
 			var next = m.deferred()
 			if (!success) success = identity
 			if (!error) error = identity
-			function push(list, method, callback) {
-				list.push(function(value) {
+			function callback(method, callback) {
+				return function(value) {
 					try {
 						var result = callback(value)
 						if (result && typeof result.then == "function") result.then(next[method], error)
@@ -370,10 +372,14 @@ Mithril = m = new function app(window) {
 						if (e instanceof Error && e.constructor !== Error) throw e
 						else next.reject(e)
 					}
-				})
+				}
 			}
-			push(resolvers, "resolve", success)
-			push(rejecters, "reject", error)
+			if (resolved !== undefined) callback("resolve", success)(resolved)
+			else if (rejected !== undefined) callback("reject", error)(rejected)
+			else {
+				resolvers.push(callback("resolve", success))
+				rejecters.push(callback("reject", error))
+			}
 			return next.promise
 		}
 		return object
