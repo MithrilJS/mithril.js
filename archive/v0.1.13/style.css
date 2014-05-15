@@ -28,10 +28,10 @@ nav a {color:#fff;display:inline-block;padding:10px;}
 nav a:visited {color:#ddd;}
 footer {text-align:center;padding:10px 0;}
 footer,footer a,footer a:visited {color:#fff;}
-h1,h2 {font-family:Palatino;margin:0 0 10px;}
-h1 {font-size:3em;text-shadow:0.024em 0.024em #777, -0.024em -0.024em #fff;}
+h1,h2 {font-family:Verdana;margin:0 0 10px;}
+h1 {font-size:3em;}
 h1 span {animation:logo 2s;display:inline-block;-webkit-animation:logo 2s;}
-h2 {color:#888;font-style:italic;}
+h2 {color:#888;font-weight:normal;}
 h3 {margin:10px 0;}
 p {margin:15px 0;}
 ul {margin:15px 0;padding:0 0 0 1em;}
@@ -55,11 +55,11 @@ linear-gradient(#ededed 25%, #eaeaea 25%, #eaeaea 50%, rgba(255,255,255,0) 50%, 
 background-color: #e3e3e3;
 background-size: 20px 20px;
 }
-.logo {color:#d3d3d3;font-family:Georgia;font-style:italic;}
+.logo {color:#5a5;font-family:Georgia;font-style:italic;}
 .logo span {font-family:Arial;font-style:normal;}
 .logo :before {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.10em;}
 .logo :after {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.5em;}
-.button,.button:visited {background:#5a5;border-radius:5px;box-shadow:1px 1px #777, -1px -1px #fff;color:#fff;display:inline-block;font:normal bold 16px Helvetica;margin:0 10px 10px;padding:10px 30px;text-decoration:none;}
+.button,.button:visited {background:#5a5;color:#fff;display:inline-block;font:normal bold 16px Helvetica;margin:0 10px 10px;padding:10px 30px;text-decoration:none;}
 .features {background:#fff;padding:30px 0 0;}
 .feature {margin:0 0 30px;padding:0 20px 0 0;}
 .sample {background:#f5f5f5;padding:30px 0 10px;}
@@ -69,11 +69,12 @@ background-size: 20px 20px;
 .more {background:#ddd;padding:30px 0;}
 .output a,.more a {display:block;margin:0 0 10px;}
 .output a:after,.more a:after {content:" \bb";}
-.performance {background:#fff;padding:30px 0;}
+.performance,.socialmedia {background:#fff;padding:30px 0;}
 .performance td:first-child {text-align:right;width:1%;}
 .bar {background:red;height:4px;float:left;margin:0.5em 1em 0 0;}
 .security {background:#f5f5f5;padding:30px 0;}
 .success {color:#383;}
+.callout {background:#84db84;padding:1em;}
 .error {color:#f00;}
 .content {background:#f5f5f5;padding:30px 0;}
 

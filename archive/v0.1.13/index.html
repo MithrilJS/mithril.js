@@ -2,7 +2,6 @@
 <html>
 	<head>
 		<title>Mithril</title>
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic" rel="stylesheet" />
 		<link href="lib/prism/prism.css" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 	</head>
@@ -40,6 +39,10 @@
 			</section>
 			
 			<section class="features">
+				<div class="container">
+					<h2>What is Mithril?</h2>
+					<p>Mithril is a client-side MVC framework - a tool to organize code in a way that is easy to think about and to maintain.</p>
+				</div>
 				<div class="container row">
 					<div class="feature col(4,4,12)">
 						<h2>Light-weight</h2>
@@ -83,13 +86,20 @@ app.PageList = function() {
 //controller
 app.controller = function() {
 	this.pages = app.PageList();
+	
+	this.rotate = function() {
+		this.pages.push(this.pages.shift())
+	}.bind(this)
 };
 
 //view
 app.view = function(ctrl) {
-	return ctrl.pages().map(function(page) {
-		return m("a", {href: page.url}, page.title);
-	});
+	return [
+		ctrl.pages().map(function(page) {
+			return m("a", {href: page.url}, page.title);
+		}),
+		m("a", {onclick: ctrl.rotate}, "Rotate links")
+	];
 };
 
 //initialize
@@ -99,10 +109,6 @@ m.module(document.getElementById("example"), app);</code></pre>
 					<div class="col(4,4,12)">
 						<h2>Output</h2>
 						<div id="example" class="example output">
-							<noscript>
-								<a href="getting-started.html">Getting Started</a>
-								<a href="mithril.html">Documentation</a></div>
-							</noscript>
 							<script src="mithril.min.js"></script>
 							<script>
 //namespace
@@ -116,13 +122,20 @@ app.PageList = function() {
 //controller
 app.controller = function() {
 	this.pages = app.PageList();
+	
+	this.rotate = function() {
+		this.pages().push(this.pages().shift())
+	}.bind(this)
 };
 
 //view
 app.view = function(ctrl) {
-	return ctrl.pages().map(function(page) {
-		return m("a", {href: page.url}, page.title);
-	});
+	return [
+		ctrl.pages().map(function(page) {
+			return m("a", {href: page.url}, page.title);
+		}),
+		m("button", {onclick: ctrl.rotate}, "Rotate links")
+	];
 };
 
 //initialize
@@ -194,6 +207,29 @@ m.module(document.getElementById("example"), app);
 						<h2>API</h2>
 						<p>Docs and code samples for your reference</p>
 						<p><a href="mithril.html">Read Docs</a></p>
+					</div>
+				</div>
+			</section>
+			
+			<section class="socialmedia">
+				<div class="container row">
+					<div class="col(8,12,12)">
+						<h2>Social Media</h2>
+						
+						<blockquote class="twitter-tweet" lang="en"><p>Mithril.js m.prop feature is plain brilliant. I spent years yearning for an approach that lightweight <a href="http://t.co/KgzOxoa2WR">http://t.co/KgzOxoa2WR</a></p>&mdash; Xavier Via (@xaviervia) <a href="https://twitter.com/xaviervia/statuses/454635992360554497">April 11, 2014</a></blockquote>
+						
+						<blockquote class="twitter-tweet" lang="en"><p>Mithril: The newest JavaScript MVC library 3Kb. <a href="http://twitter.com/LeoHorie">@LeoHorie</a> got it right: It's all about good guides/docs: <a href="http://lhorie.github.io/mithril/comparison.html">lhorie.github.io/mithril/comparison.html</a></p> &mdash; David Corbacho (@dcorbacho) <a href="https://twitter.com/dcorbacho/status/446926407843991552">March 21, 2014</a></blockquote>
+						
+						<blockquote class="twitter-tweet" lang="en"><p>Mithril: Another MVC JS Framework &lt;&lt; there&#39;s always room for one more, especially when they&#39;re this small... <a href="http://t.co/gDp3kyUkxL">http://t.co/gDp3kyUkxL</a></p>&mdash; Graham Ashton (@grahamashton) <a href="https://twitter.com/grahamashton/statuses/446353031677100033">March 19, 2014</a></blockquote>
+						 
+						<script async src="http://platform.twitter.com/widgets.js"></script>
+					</div>
+					<div class="col(4,12,12)">
+						<div class="callout">
+							<h3>Want to hear more?</h3>
+							<p>Subscribe to the <a href="http://lhorie.github.io/mithril-blog">Mithril blog</a>. It's updated weekly with articles about how to use Mithril (and Javascript in general) to their full potential.</p>
+							<p>There's also a <a href="https://groups.google.com/forum/#!forum/mithriljs">mailing list</a>, where you can post questions and discuss Mithril related topics.</p>
+						</div>
 					</div>
 				</div>
 			</section>
