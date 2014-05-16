@@ -41,6 +41,20 @@ You can pre-compile Mithril templates to make them run faster. For more informat
 
 ---
 
+### Typescript Support
+
+There's a type definition file that you can use to add Mithril support to Typescript
+
+[mithril.d.ts](mithril.d.ts)
+
+You can use it by adding a reference to your Typescript files. This will allow the compiler to type-check calls to the Mithril API.
+
+```javascript
+/// <reference path="mithril.d.ts" />
+```
+
+---
+
 ### Internet Explorer Compatibility
 
 Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf` and `Object::keys`, as well as the `JSON` object.

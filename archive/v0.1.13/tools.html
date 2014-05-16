@@ -67,6 +67,12 @@
 <p>You can pre-compile Mithril templates to make them run faster. For more information see this page:</p>
 <p><a href="compiling-templates.html">Compiling Templates</a></p>
 <hr>
+<h3 id="typescript-support">Typescript Support</h3>
+<p>There&#39;s a type definition file that you can use to add Mithril support to Typescript</p>
+<p><a href="mithril.d.ts">mithril.d.ts</a></p>
+<p>You can use it by adding a reference to your Typescript files. This will allow the compiler to type-check calls to the Mithril API.</p>
+<pre><code class="lang-javascript">/// &lt;reference path=&quot;mithril.d.ts&quot; /&gt;</code></pre>
+<hr>
 <h3 id="internet-explorer-compatibility">Internet Explorer Compatibility</h3>
 <p>Mithril relies on some Ecmascript 5 features, namely: <code>Array::indexOf</code> and <code>Object::keys</code>, as well as the <code>JSON</code> object.</p>
 <p>You can use polyfill libraries to support these features in IE7.</p>
