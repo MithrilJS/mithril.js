@@ -8,26 +8,28 @@ Generally speaking, these tests are making a deliberate effort to be **biased in
 
 To run the execution time tests below, click on their respective links, run the profiler from your desired browser's developer tools and measure the running time of a page refresh (Lower is better).
 
-<div class="row">
-	<div class="col(4,4,6)">
-		<h3>Loading</h3>
-		<table>
-			<tr><td><a href="comparisons/mithril.parsing.html">Mithril</a></td><td><span class="bar" style="background:#161;width:1%;"></span> 0.28ms</td></tr>
-			<tr><td><a href="comparisons/jquery.parsing.html">jQuery</a></td><td><span class="bar" style="background:#66c;width:26%;"></span> 13.11ms</td></tr>
-			<tr><td><a href="comparisons/backbone.parsing.html">Backbone</a></td><td><span class="bar" style="background:#33c;width:37%;"></span> 18.54ms</td></tr>
-			<tr><td><a href="comparisons/angular.parsing.html">Angular</a></td><td><span class="bar" style="background:#c33;width:14%;"></span> 7.49ms</td></tr>
-			<tr><td><a href="comparisons/react.parsing.html">React</a></td><td><span class="bar" style="background:#6af;width:50%;"></span> 24.99ms</td></tr>
-		</table>
-	</div>
-	<div class="col(8,8,12)">
-		<h3>Rendering</h3>
-		<table>
-			<tr><td><a href="comparisons/mithril.rendering.html">Mithril</a></td><td><span class="bar" style="background:#161;width:4%;"></span> 9.44ms (uncompiled)</td></tr>
-			<tr><td><a href="comparisons/jquery.rendering.html">jQuery</a></td><td><span class="bar" style="background:#66c;width:17%;"></span> 40.27ms</td></tr>
-			<tr><td><a href="comparisons/backbone.rendering.html">Backbone</a></td><td><span class="bar" style="background:#33c;width:10%;"></span> 23.05ms</td></tr>
-			<tr><td><a href="comparisons/angular.rendering.html">Angular</a></td><td><span class="bar" style="background:#c33;width:50%;"></span> 118.63ms</td></tr>
-			<tr><td><a href="comparisons/react.rendering.html">React</a></td><td><span class="bar" style="background:#6af;width:33%;"></span> 79.65ms</td></tr>
-		</table>
+<div class="performance" style="padding:0 0 0 10px;">
+	<div class="row">
+		<div class="col(4,4,6)">
+			<h3>Loading</h3>
+			<table>
+				<tr><td><a href="comparisons/mithril.parsing.html">Mithril</a></td><td><span class="bar" style="background:#161;width:1%;"></span> 0.28ms</td></tr>
+				<tr><td><a href="comparisons/jquery.parsing.html">jQuery</a></td><td><span class="bar" style="background:#66c;width:26%;"></span> 13.11ms</td></tr>
+				<tr><td><a href="comparisons/backbone.parsing.html">Backbone</a></td><td><span class="bar" style="background:#33c;width:37%;"></span> 18.54ms</td></tr>
+				<tr><td><a href="comparisons/angular.parsing.html">Angular</a></td><td><span class="bar" style="background:#c33;width:14%;"></span> 7.49ms</td></tr>
+				<tr><td><a href="comparisons/react.parsing.html">React</a></td><td><span class="bar" style="background:#6af;width:50%;"></span> 24.99ms</td></tr>
+			</table>
+		</div>
+		<div class="col(8,8,12)">
+			<h3>Rendering</h3>
+			<table>
+				<tr><td><a href="comparisons/mithril.rendering.html">Mithril</a></td><td><span class="bar" style="background:#161;width:4%;"></span> 9.44ms (uncompiled)</td></tr>
+				<tr><td><a href="comparisons/jquery.rendering.html">jQuery</a></td><td><span class="bar" style="background:#66c;width:17%;"></span> 40.27ms</td></tr>
+				<tr><td><a href="comparisons/backbone.rendering.html">Backbone</a></td><td><span class="bar" style="background:#33c;width:10%;"></span> 23.05ms</td></tr>
+				<tr><td><a href="comparisons/angular.rendering.html">Angular</a></td><td><span class="bar" style="background:#c33;width:50%;"></span> 118.63ms</td></tr>
+				<tr><td><a href="comparisons/react.rendering.html">React</a></td><td><span class="bar" style="background:#6af;width:33%;"></span> 79.65ms</td></tr>
+			</table>
+		</div>
 	</div>
 </div>
 
