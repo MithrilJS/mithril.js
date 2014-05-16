@@ -10,6 +10,7 @@ module.exports = function(grunt) {
 	var guideLayout = "guide"
 	var guide = [
 		"auto-redrawing",
+		"benchmarks",
 		"community",
 		"compiling-templates",
 		"comparison",
@@ -21,7 +22,7 @@ module.exports = function(grunt) {
 		"refactoring",
 		"routing",
 		"tools",
-		"web-services"
+		"web-services",
 	]
 	var apiLayout = "api"
 	var api = [

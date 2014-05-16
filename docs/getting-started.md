@@ -280,6 +280,27 @@ Hopefully by now, you're starting to see why Mithril encourages the usage of `m.
 
 Mithril uses them in other interesting ways elsewhere.
 
+As a side note, some readers have pointed out that we can refactor the `add` method like this:
+
+```javascript
+this.add = function() {
+	if (this.description()) {
+		this.list.push(new todo.Todo({description: this.description()}));
+		this.description("");
+	}
+}.bind(this);
+```
+
+The difference is that `add` no longer takes an argument, and we call `.bind(this)` at the end to lock the scoping of `this` inside of the `add` method
+
+Then we can make the `onclick` binding on the template much simpler:
+
+```
+m("button", {onclick: ctrl.add}, "Add")
+```
+
+The only reason I talked about partial application here was to make you aware of that technique, since it becomes useful when dealing with parameterized event handlers. In real life, given a choice, you should always pick the simplest idiom for your use case, as we just did here.
+
 ---
 
 To implement flow control in Mithril views, we simply use Javascript:
@@ -313,7 +334,7 @@ todo.view = function(ctrl) {
 	return m("html", [
 		m("body", [
 			m("input", {onchange: m.withAttr("value", ctrl.description), value: ctrl.description()}),
-			m("button", {onclick: ctrl.add.bind(ctrl, ctrl.description)}, "Add"),
+			m("button", {onclick: ctrl.add}, "Add"),
 			m("table", [
 				ctrl.list.map(function(task, index) {
 					return m("tr", [
@@ -391,12 +412,12 @@ todo.controller = function() {
 	this.list = new todo.TodoList();
 	this.description = m.prop("");
 	
-	this.add = function(description) {
-		if (description()) {
-			this.list.push(new todo.Todo({description: description()}));
+	this.add = function() {
+		if (this.description()) {
+			this.list.push(new todo.Todo({description: this.description()}));
 			this.description("");
 		}
-	};
+	}.bind(this);
 };
 
 //here's the view
@@ -404,7 +425,7 @@ todo.view = function(ctrl) {
 	return m("html", [
 		m("body", [
 			m("input", {onchange: m.withAttr("value", ctrl.description), value: ctrl.description()}),
-			m("button", {onclick: ctrl.add.bind(ctrl, ctrl.description)}, "Add"),
+			m("button", {onclick: ctrl.add}, "Add"),
 			m("table", [
 				ctrl.list.map(function(task, index) {
 					return m("tr", [

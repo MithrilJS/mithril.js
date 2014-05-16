@@ -38,6 +38,7 @@
 							<h2 id="misc">Misc</h2>
 							<ul>
 								<li><a href="comparison.html">Differences from Other MVC Frameworks</a></li>
+								<li><a href="benchmarks.html">Benchmarks</a></li>
 								<li><a href="practices.html">Good Practices</a></li>
 								<li><a href="tools.html">Useful Tools</a></li>
 							</ul>
@@ -221,6 +222,17 @@ m.render(todo.view(ctrl)); // input now says &quot;Write code&quot;</code></pre>
 <p>Note that when we construct the parameterized binding, we are passing the <code>description</code> getter-setter <em>by reference</em>, and not its value. We only evaluate the getter-setter to get its value in the controller method. This is a form of <em>lazy evaluation</em>: it allows us to say &quot;use this value later, when the event handler gets called&quot;.</p>
 <p>Hopefully by now, you&#39;re starting to see why Mithril encourages the usage of <code>m.prop</code>: Because Mithril getter-setters are functions, they naturally compose well with functional programming tools, and allow for some very powerful idioms. In this case, we&#39;re using them in a way that resembles C pointers.</p>
 <p>Mithril uses them in other interesting ways elsewhere.</p>
+<p>As a side note, some readers have pointed out that we can refactor the <code>add</code> method like this:</p>
+<pre><code class="lang-javascript">this.add = function() {
+    if (this.description()) {
+        this.list.push(new todo.Todo({description: this.description()}));
+        this.description(&quot;&quot;);
+    }
+}.bind(this);</code></pre>
+<p>The difference is that <code>add</code> no longer takes an argument, and we call <code>.bind(this)</code> at the end to lock the scoping of <code>this</code> inside of the <code>add</code> method</p>
+<p>Then we can make the <code>onclick</code> binding on the template much simpler:</p>
+<pre><code>m(&quot;button&quot;, {onclick: ctrl.add}, &quot;Add&quot;)</code></pre>
+<p>The only reason I talked about partial application here was to make you aware of that technique, since it becomes useful when dealing with parameterized event handlers. In real life, given a choice, you should always pick the simplest idiom for your use case, as we just did here.</p>
 <hr>
 <p>To implement flow control in Mithril views, we simply use Javascript:</p>
 <pre><code class="lang-javascript">//here&#39;s the view
@@ -243,7 +255,7 @@ m(&quot;table&quot;, [
     return m(&quot;html&quot;, [
         m(&quot;body&quot;, [
             m(&quot;input&quot;, {onchange: m.withAttr(&quot;value&quot;, ctrl.description), value: ctrl.description()}),
-            m(&quot;button&quot;, {onclick: ctrl.add.bind(ctrl, ctrl.description)}, &quot;Add&quot;),
+            m(&quot;button&quot;, {onclick: ctrl.add}, &quot;Add&quot;),
             m(&quot;table&quot;, [
                 ctrl.list.map(function(task, index) {
                     return m(&quot;tr&quot;, [
@@ -306,12 +318,12 @@ todo.controller = function() {
     this.list = new todo.TodoList();
     this.description = m.prop(&quot;&quot;);
 
-    this.add = function(description) {
-        if (description()) {
-            this.list.push(new todo.Todo({description: description()}));
+    this.add = function() {
+        if (this.description()) {
+            this.list.push(new todo.Todo({description: this.description()}));
             this.description(&quot;&quot;);
         }
-    };
+    }.bind(this);
 };
 
 //here&#39;s the view
@@ -319,7 +331,7 @@ todo.view = function(ctrl) {
     return m(&quot;html&quot;, [
         m(&quot;body&quot;, [
             m(&quot;input&quot;, {onchange: m.withAttr(&quot;value&quot;, ctrl.description), value: ctrl.description()}),
-            m(&quot;button&quot;, {onclick: ctrl.add.bind(ctrl, ctrl.description)}, &quot;Add&quot;),
+            m(&quot;button&quot;, {onclick: ctrl.add}, &quot;Add&quot;),
             m(&quot;table&quot;, [
                 ctrl.list.map(function(task, index) {
                     return m(&quot;tr&quot;, [
