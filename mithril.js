@@ -343,16 +343,17 @@ Mithril = m = new function app(window) {
 		return prop
 	}
 
+	var none = {}
 	m.deferred = function() {
-		var resolvers = [], rejecters = [], resolved, rejected
+		var resolvers = [], rejecters = [], resolved = none, rejected = none
 		var object = {
 			resolve: function(value) {
-				if (resolved === undefined) resolved = value
+				if (resolved === none) resolved = value
 				for (var i = 0; i < resolvers.length; i++) resolvers[i](value)
 				resolvers.length = rejecters.length = 0
 			},
 			reject: function(value) {
-				if (rejected === undefined) rejected = value
+				if (rejected === none) rejected = value
 				for (var i = 0; i < rejecters.length; i++) rejecters[i](value)
 				resolvers.length = rejecters.length = 0
 			},
@@ -376,8 +377,8 @@ Mithril = m = new function app(window) {
 					}
 				}
 			}
-			if (resolved !== undefined) callback("resolve", success)(resolved)
-			else if (rejected !== undefined) callback("reject", error)(rejected)
+			if (resolved !== none) callback("resolve", success)(resolved)
+			else if (rejected !== none) callback("reject", error)(rejected)
 			else {
 				resolvers.push(callback("resolve", success))
 				rejecters.push(callback("reject", error))
@@ -496,3 +497,5 @@ Mithril = m = new function app(window) {
 
 if (typeof module != "undefined" && module !== null) module.exports = m
 if (typeof define == "function" && define.amd) define(function() {return m})
+
+;;;

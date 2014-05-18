@@ -742,6 +742,24 @@ function testMithril(mock) {
 		deferred.reject(2)
 		return value === 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/85
+		var deferred = m.deferred(), value
+		deferred.resolve()
+		deferred.promise.then(function(data) {
+			value = 1
+		})
+		return value === 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/85
+		var deferred = m.deferred(), value
+		deferred.reject()
+		deferred.promise.then(null, function(data) {
+			value = 1
+		})
+		return value === 1
+	})
 
 	//m.sync
 	test(function() {
