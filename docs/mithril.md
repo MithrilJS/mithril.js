@@ -224,7 +224,7 @@ VirtualElement m(String selector [, Attributes attributes] [, Children children]
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
     Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized)>
-	Children :: String text | Array<String text | VirtualElement virtualElement | SubtreeDirective directive | Children children>
+	Children :: String text | VirtualElement virtualElement | SubtreeDirective directive | Array<Children children>
 	SubtreeDirective :: Object { String subtree }
 ```
 

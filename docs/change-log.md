@@ -1,10 +1,24 @@
 ## Change Log
 
+[v0.1.14](/mithril/archive/v0.1.14) - maintenance
+
+### News:
+
+-	The signature of `m` now accepts virtual elements as the second parameter of the function.
+
+### Bug Fixes:
+
+-	Resolving promises early without a value now works [#85](https://github.com/lhorie/mithril.js/issues/85)
+-	Throwing exceptions within `m.request` now follow the same resolution procedure as `m.deferred` [#86](https://github.com/lhorie/mithril.js/issues/85)
+-	Promises now always update their `m.prop` on success (and leave the m.prop alone on error)
+
+---
+
 [v0.1.13](/mithril/archive/v0.1.13) - maintenance
 
 ### News:
 
--	m.module now runs clean-up code in root module controllers that implement an `onunload` instance method [82](https://github.com/lhorie/mithril.js/issues/82)
+-	m.module now runs clean-up code in root module controllers that implement an `onunload` instance method [#82](https://github.com/lhorie/mithril.js/issues/82)
 
 ### Bug Fixes:
 

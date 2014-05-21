@@ -5,7 +5,7 @@ Mithril = m = new function app(window) {
 	
 	function m() {
 		var args = arguments
-		var hasAttrs = type.call(args[1]) == "[object Object]"
+		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = selectorCache[args[0]]
@@ -176,6 +176,7 @@ Mithril = m = new function app(window) {
 	}
 	function autoredraw(callback, object) {
 		return function(e) {
+			e = e || event
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {m.endComputation()}
@@ -255,7 +256,10 @@ Mithril = m = new function app(window) {
 	}
 	
 	m.withAttr = function(prop, withAttrCallback) {
-		return function(e) {withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))}
+		return function(e) {
+			e = e || event
+			withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))
+		}
 	}
 	
 	//routing
@@ -323,6 +327,7 @@ Mithril = m = new function app(window) {
 		}
 	}
 	function routeUnobtrusive(e) {
+		e = e || event
 		if (e.ctrlKey || e.metaKey || e.which == 2) return
 		e.preventDefault()
 		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
@@ -345,10 +350,10 @@ Mithril = m = new function app(window) {
 
 	var none = {}
 	m.deferred = function() {
-		var resolvers = [], rejecters = [], resolved = none, rejected = none
+		var resolvers = [], rejecters = [], resolved = none, rejected = none, promise = m.prop()
 		var object = {
 			resolve: function(value) {
-				if (resolved === none) resolved = value
+				if (resolved === none) promise(resolved = value)
 				for (var i = 0; i < resolvers.length; i++) resolvers[i](value)
 				resolvers.length = rejecters.length = 0
 			},
@@ -357,7 +362,7 @@ Mithril = m = new function app(window) {
 				for (var i = 0; i < rejecters.length; i++) rejecters[i](value)
 				resolvers.length = rejecters.length = 0
 			},
-			promise: m.prop()
+			promise: promise
 		}
 		object.promise.resolvers = resolvers
 		object.promise.then = function(success, error) {
@@ -464,27 +469,24 @@ Mithril = m = new function app(window) {
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
-			var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
-			var response = unwrap(deserialize(extract(e.target, xhrOptions)))
-			if (response instanceof Array && xhrOptions.type) {
-				for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+			try {
+				e = e || event
+				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
+				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
+				if (response instanceof Array && xhrOptions.type) {
+					for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+				}
+				else if (xhrOptions.type) response = new xhrOptions.type(response)
+				deferred[e.type == "load" ? "resolve" : "reject"](response)
 			}
-			else if (xhrOptions.type) response = new xhrOptions.type(response)
-			deferred.promise(response)
-			deferred[e.type == "load" ? "resolve" : "reject"](response)
+			catch (e) {
+				if (e instanceof Error && e.constructor !== Error) throw e
+				else deferred.reject(e)
+			}
 			if (xhrOptions.background !== true) m.endComputation()
 		}
 		ajax(xhrOptions)
-		deferred.promise.then = propBinder(deferred.promise)
 		return deferred.promise
-	}
-	function propBinder(promise) {
-		var bind = promise.then
-		return function(success, error) {
-			var next = bind(function(value) {return next(success(value))}, function(value) {return next(error(value))})
-			next.then = propBinder(next)
-			return next
-		}
 	}
 	
 	//testing API

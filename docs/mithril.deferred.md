@@ -10,7 +10,7 @@ Each computation function takes a value as a parameter and is expected to return
 
 The deferred object returned by `m.deferred` has two methods: `resolve` and `reject`, and one property called `promise`. The methods can be called to dispatch a value to the promise tree. The `promise` property is the root of the promise tree. It has a method `then` which takes a `successCallback` and a `errorCallback` callbacks. Calling the `then` method attaches the computations represented by `successCallback` and `errorCallback` to the promise, which will be called when either `resolve` or `reject` is called. The `then` method returns a child promise, which, itself, can have more child promises, recursively.
 
-The `promise` object is actually a function - specifically, it's an [`m.prop`](mithril.prop.md) getter-setter, which gets populated with the value returned by  `successCallback` or `errorCallback` (depending on whether `resolve` or `reject` got called).
+The `promise` object is actually a function - specifically, it's an [`m.prop`](mithril.prop.md) getter-setter, which gets populated with the value returned by  `successCallback` if the promise is resolved successfully.
 
 Note that Mithril promises are not automatically integrated to its automatic redrawing system. If you wish to use third party asynchronous libraries (for example, `jQuery.ajax`), you should also consider using [`m.startComputation` / `m.endComputation`](mithril.computation.md) if you want views to redraw after requests complete.
 
@@ -32,6 +32,8 @@ greetAsync()
 	.then(function(value) {return value + " world"})
 	.then(function(value) {console.log(value)}); //logs "hello world" after 1 second
 ```
+
+---
 
 #### Retrieving a value via the getter-setter API
 
@@ -58,6 +60,8 @@ setTimeout(function() {
 }, 2000)
 ```
 
+---
+
 #### Integrating to the Mithril redrawing system
 
 ```javascript
@@ -73,6 +77,54 @@ var greetAsync = function() {
 	}, 1000);
 	return deferred.promise;
 };
+```
+
+---
+
+### Recoverable vs Unrecoverable errors
+
+Recoverable errors are exceptions that are deliberately thrown by the application developer to signal an abnormal condition in the business logic. You can throw errors in this way if a computation needs to forward a failure condition to downstream promises.
+
+In the example below we throw a recoverable error. It rejects the subsequent promise, and logs the string `"error"` to the console
+
+```javascript
+//standalone usage
+var greetAsync = function() {
+	var deferred = m.deferred();
+	setTimeout(function() {
+		deferred.resolve("hello");
+	}, 1000);
+	return deferred.promise;
+};
+
+greetAsync()
+	.then(function(data) {
+		if (data != "hi") throw new Error("wrong greeting")
+	})
+	.then(function() {
+		console.log("success")
+	}, function() {
+		console.log("error")
+	})
+```
+
+Unrecoverable errors are exceptions that happen at runtime due to bugs in the code.
+
+In the example below, calling the inexistent `foo.bar.baz` triggers a `ReferenceError`. Mithril does not handle this error in any way: it aborts execution and dumps the error information in the console.
+
+```javascript
+//standalone usage
+var greetAsync = function() {
+	var deferred = m.deferred();
+	setTimeout(function() {
+		deferred.resolve("hello");
+	}, 1000);
+	return deferred.promise;
+};
+
+greetAsync().then(function() {
+	foo.bar.baz()
+})
 ```
 
 ---
@@ -114,6 +166,8 @@ console.log(2)
 ```
 
 In the example above, A+ promises are required to log `2` before logging `1`, whereas Mithril logs `1` before `2`. Typically `resolve`/`reject` are called asynchronously after the `then` method is called, so normally this difference does not matter.
+
+One final difference is in how Mithril handles exceptions: if exceptions are thrown from within a success or error callbacks, A+ promises always reject the downstreams (and thus swallow the exception). Mithril does so only with errors that are subclasses of the Error class. Errors that are instances of the Error class itself are not caught by Mithril. This allows unrecoverable runtime errors to get thrown to the console w/ standard stack traces, while allowing developers to create application-space errors normally.
 
 ---
 

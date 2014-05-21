@@ -94,7 +94,7 @@ app.view = function(ctrl) {
 void render(DOMElement rootElement, Children children)
 
 where:
-	Children :: String text | Array<String text | VirtualElement virtualElement | SubtreeDirective directive | Children children>
+	Children :: String text | VirtualElement virtualElement | SubtreeDirective directive | Array<Children children>
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
     Attributes :: Object<Any | void config(DOMElement element)>
 	SubtreeDirective :: Object { String subtree }

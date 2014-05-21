@@ -18,7 +18,7 @@ function testMithril(mock) {
 	test(function() {return m("div", {title: "bar"}, [m("div")]).children[0].tag === "div"})
 	test(function() {return m("div", ["a", "b"]).children.length === 2})
 	test(function() {return m("div", [m("div")]).children[0].tag === "div"})
-	test(function() {return m("div", m("div")).attrs.tag === "div"}) //yes, this is expected behavior: see method signature
+	test(function() {return m("div", m("div")).children.tag === "div"}) //yes, this is expected behavior: see method signature
 	test(function() {return m("div", [undefined]).tag === "div"})
 	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
 	test(function() {return m("svg", [m("g")])})
@@ -619,6 +619,22 @@ function testMithril(mock) {
 		e.target.onload(e)
 		return prop().url === "http://domain.com:80/foo"
 	})
+	test(function() {
+		var error = m.prop("no error")
+		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}}).then(null, error)
+		var e = mock.XMLHttpRequest.$events.pop()
+		e.target.onload(e)
+		return prop() === undefined && error().message === "error occurred"
+	})
+	test(function() {
+		var error = m.prop("no error"), exception
+		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new SyntaxError("error occurred")}}).then(null, error)
+		var event = mock.XMLHttpRequest.$events.pop()
+		try {event.target.onload(event)}
+		catch (e) {exception = e}
+		m.endComputation()
+		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
+	})
 
 	//m.deferred
 	test(function() {
@@ -759,6 +775,22 @@ function testMithril(mock) {
 			value = 1
 		})
 		return value === 1
+	})
+	test(function() {
+		var deferred = m.deferred(), value
+		deferred.resolve(1)
+		return deferred.promise() === 1
+	})
+	test(function() {
+		var deferred = m.deferred(), value
+		var promise = deferred.promise.then(function(data) {return data + 1})
+		deferred.resolve(1)
+		return promise() === 2
+	})
+	test(function() {
+		var deferred = m.deferred(), value
+		deferred.reject(1)
+		return deferred.promise() === undefined
 	})
 
 	//m.sync
