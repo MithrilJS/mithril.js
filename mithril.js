@@ -293,6 +293,9 @@ Mithril = m = new function app(window) {
 		else if (typeof arguments[0] == "string") {
 			currentRoute = arguments[0]
 			var shouldReplaceHistoryEntry = arguments[1] === true
+			var queryString = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
+			if(queryString) currentRoute += (currentRoute.indexOf('?') === -1 ? '?' : '&') + queryString
+
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
@@ -336,6 +339,14 @@ Mithril = m = new function app(window) {
 	}
 	function scrollToHash() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
+	}
+	function buildQueryString(object, prefix) {
+		var str = []
+		for(var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
+			str.push(typeof value == "object" ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+		}
+		return str.join("&")
 	}
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
@@ -448,18 +459,10 @@ Mithril = m = new function app(window) {
 		xhr.send(options.data)
 		return xhr
 	}
-	function querystring(object, prefix) {
-		var str = []
-		for(var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
-			str.push(typeof value == "object" ? querystring(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
-		}
-		return str.join("&")
-	}
 	function bindData(xhrOptions, data, serialize) {
 		if (data && Object.keys(data).length > 0) {
 			if (xhrOptions.method == "GET") {
-				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + querystring(data)
+				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + buildQueryString(data)
 			}
 			else xhrOptions.data = serialize(data)
 		}
