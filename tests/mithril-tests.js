@@ -573,6 +573,21 @@ function testMithril(mock) {
 		mock.performance.$elapse(50) //teardown
 		return root.childNodes[0].nodeValue === "foo bar"
 	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() {return "foo"}},
+			"/test11": {controller: function() {}, view: function() {return "bar"}}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test11/")
+		mock.performance.$elapse(50) //teardown
+		return mock.location.search == "?/test11/" && root.childNodes[0].nodeValue === "bar"
+	})
 	//end m.route
 
 	//m.prop

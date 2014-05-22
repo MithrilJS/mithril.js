@@ -310,11 +310,11 @@ Mithril = m = new function app(window) {
 		for (var route in router) {
 			if (route == path) return !void m.module(root, router[route])
 			
-			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "$")
+			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 			
 			if (matcher.test(path)) {
 				return !void path.replace(matcher, function() {
-					var keys = route.match(/:[^\/]+/g)
+					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
 					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					m.module(root, router[route])
