@@ -307,6 +307,13 @@ Mithril = m = new function app(window) {
 	m.route.mode = "search"
 	function routeByValue(root, router, path) {
 		routeParams = {}
+
+		var queryStart = path.indexOf('?');
+		if (queryStart !== -1) {
+			routeParams = parseQueryString(path.substr(queryStart + 1, path.length));
+			path = path.substr(0, queryStart);
+		}
+
 		for (var route in router) {
 			if (route == path) return !void m.module(root, router[route])
 			
@@ -329,6 +336,24 @@ Mithril = m = new function app(window) {
 	}
 	function scrollToHash() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
+	}
+	function parseQueryString(str) {
+		var pairs = str.split("&"), params = {};
+		for(var i=0; i < pairs.length; i++) {
+			var pair = pairs[i].split("="),
+					key = decodeURIComponent(pair[0]),
+					value = pair[1] ? decodeURIComponent(pair[1]) : (pair.length === 1 ? true : "");
+			if (key.indexOf('[') != -1) {
+				var e, regex = /\[?([^\]\[]+)\]?/g,
+						subParams = params;
+				while ((e = regex.exec(key)) !== null) {
+					subParams = subParams[e[1]] = (regex.lastIndex === key.length ? value : subParams[e[1]] || {})
+				}
+			} else {
+				params[key] = value;
+			}
+		}
+		return params;
 	}
 	
 	//model
