@@ -377,6 +377,12 @@ function testMithril(mock) {
 		m.module(root, {controller: function() {}, view: function() {}})
 		return unloaded === true
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [[m("a"), m("a")], m("button")]))
+		m.render(root, m("div", [[m("a")], m("button")]))
+		return root.childNodes[0].childNodes.length == 2
+	})
 	//end m.render
 	
 	//m.redraw
