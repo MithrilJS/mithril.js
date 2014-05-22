@@ -11,6 +11,7 @@
 -	Resolving promises early without a value now works [#85](https://github.com/lhorie/mithril.js/issues/85)
 -	Throwing exceptions within `m.request` now follow the same resolution procedure as `m.deferred` [#86](https://github.com/lhorie/mithril.js/issues/85)
 -	Promises now always update their `m.prop` on success (and leave the m.prop alone on error)
+-	Nested arrays no longer cause double removal of elements [#87](https://github.com/lhorie/mithril.js/issues/87)
 
 ---
 
