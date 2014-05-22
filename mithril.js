@@ -53,6 +53,7 @@ Mithril = m = new function app(window) {
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
+				if (nodes.length < cached.nodes.length) cached.nodes = cached.nodes.filter(function(node) {return node.parentNode !== null})
 				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) if (node.parentNode !== null) node.parentNode.removeChild(node)
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parentElement.appendChild(node)
