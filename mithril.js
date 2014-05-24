@@ -66,7 +66,8 @@ Mithril = m = new function app(window) {
 			if (typeof data.tag != "string") return
 			
 			var node, isNew = cached.nodes.length === 0
-			if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
+			if (data.attrs.xmlns) namespace = data.attrs.xmlns
+			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
 			if (isNew) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
