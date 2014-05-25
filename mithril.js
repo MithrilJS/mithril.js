@@ -331,7 +331,7 @@ Mithril = m = new function app(window) {
 				return !void path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
-					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeSpace(values[i])
 					m.module(root, router[route])
 				})
 			}
@@ -355,16 +355,18 @@ Mithril = m = new function app(window) {
 		return str.join("&")
 	}
 	function parseQueryString(str) {
-		var derefParser = /\[?([^\]\[]+)\]?/g
 		var pairs = str.split("&"), params = {}
 		for (var i = 0; i < pairs.length; i++) {
 			var pair = pairs[i].split("=")
 			var key = decodeSpace(pair[0])
-			var value = pair[1] ? decodeSpace(pair[1]) : (pair.length == 1 ? true : "")
-			if (key.indexOf('[') > -1) {
-				var subParams = params
-				while ((match =  derefParser.exec(key)) !== null) {
-					subParams = subParams[match[1]] = (derefParser.lastIndex === key.length ? value : subParams[match[1]] || {})
+			var value = pair[1] ? decodeSpace(pair[1]) : (pair.length === 1 ? true : "")
+			if (key.indexOf("[") != -1) {
+				var match, subKey, lastParams, queryParser = /\[?([^\]\[]+)\]?|\[\]|/g, subParams = params
+				while ((match = queryParser.exec(key)) !== null && match[0]) {
+					if ((match[1] === undefined || (/^\d+$/).test(match[1])) && (type.call(subParams) != "[object Array]")) subParams = lastParams[subKey] = []
+					subKey = match[1] || subParams.length
+					lastParams = subParams
+					subParams = subParams[subKey] = (queryParser.lastIndex === key.length ? value : subParams[subKey] || {})
 				}
 			}
 			else params[key] = value
