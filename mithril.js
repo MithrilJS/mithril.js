@@ -273,7 +273,7 @@ Mithril = m = new function app(window) {
 			currentRoute = window.location[m.route.mode].slice(modes[m.route.mode].length)
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
-				var path = source.slice(modes[m.route.mode].length)
+				var path = currentRoute = source.slice(modes[m.route.mode].length)
 				if (!routeByValue(root, router, path)) {
 					m.route(defaultRoute, true)
 				}
