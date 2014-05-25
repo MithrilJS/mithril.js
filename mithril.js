@@ -298,6 +298,9 @@ Mithril = m = new function app(window) {
 		else if (typeof arguments[0] == "string") {
 			currentRoute = arguments[0]
 			var shouldReplaceHistoryEntry = arguments[1] === true
+			var queryString = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
+			if(queryString) currentRoute += (currentRoute.indexOf('?') === -1 ? '?' : '&') + queryString
+
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
@@ -312,6 +315,13 @@ Mithril = m = new function app(window) {
 	m.route.mode = "search"
 	function routeByValue(root, router, path) {
 		routeParams = {}
+
+		var queryStart = path.indexOf("?")
+		if (queryStart !== -1) {
+			routeParams = parseQueryString(path.substr(queryStart + 1, path.length))
+			path = path.substr(0, queryStart)
+		}
+
 		for (var route in router) {
 			if (route == path) return !void m.module(root, router[route])
 			
@@ -335,6 +345,31 @@ Mithril = m = new function app(window) {
 	}
 	function scrollToHash() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
+	}
+	function buildQueryString(object, prefix) {
+		var str = []
+		for(var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
+			str.push(typeof value == "object" ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+		}
+		return str.join("&")
+	}
+	var arrayParser = /\[?([^\]\[]+)\]?/g
+	function parseQueryString(str) {
+		var pairs = str.split("&"), params = {}
+		for (var i = 0; i < pairs.length; i++) {
+			var pair = pairs[i].split("=")
+			var key = decodeURIComponent(pair[0]),
+			var value = pair[1] ? decodeURIComponent(pair[1]) : (pair.length === 1 ? true : "")
+			if (key.indexOf('[') != -1) {
+				var subParams = params
+				while ((match =  arrayParser.exec(key)) !== null) {
+					subParams = subParams[match[1]] = (arrayParser.lastIndex === key.length ? value : subParams[match[1]] || {})
+				}
+			}
+			else params[key] = value
+		}
+		return params
 	}
 	
 	//model
@@ -430,18 +465,10 @@ Mithril = m = new function app(window) {
 		xhr.send(options.data)
 		return xhr
 	}
-	function querystring(object, prefix) {
-		var str = []
-		for(var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
-			str.push(typeof value == "object" ? querystring(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
-		}
-		return str.join("&")
-	}
 	function bindData(xhrOptions, data, serialize) {
 		if (data && Object.keys(data).length > 0) {
 			if (xhrOptions.method == "GET") {
-				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + querystring(data)
+				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + buildQueryString(data)
 			}
 			else xhrOptions.data = serialize(data)
 		}
