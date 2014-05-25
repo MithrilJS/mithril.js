@@ -359,18 +359,7 @@ Mithril = m = new function app(window) {
 		var pairs = str.split("&"), params = {}
 		for (var i = 0; i < pairs.length; i++) {
 			var pair = pairs[i].split("=")
-			var key = decodeSpace(pair[0])
-			var value = pair[1] ? decodeSpace(pair[1]) : (pair.length === 1 ? true : "")
-			if (key.indexOf("[") != -1) {
-				var match, subKey, lastParams, queryParser = /\[?([^\]\[]+)\]?|\[\]|/g, subParams = params
-				while ((match = queryParser.exec(key)) !== null && match[0]) {
-					if ((match[1] === undefined || (/^\d+$/).test(match[1])) && (type.call(subParams) != "[object Array]")) subParams = lastParams[subKey] = []
-					subKey = match[1] || subParams.length
-					lastParams = subParams
-					subParams = subParams[subKey] = (queryParser.lastIndex === key.length ? value : subParams[subKey] || {})
-				}
-			}
-			else params[key] = value
+			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : (pair.length === 1 ? true : "")
 		}
 		return params
 	}
