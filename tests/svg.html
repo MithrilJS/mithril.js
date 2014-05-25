@@ -75,7 +75,10 @@ var svg = [
 				])
 			])
 		]),
-		m("script", 'var a=new Date,b=parseInt(a.getHours());b=b>12?b-12:b;var c=parseInt(a.getMinutes()),d=parseInt(a.getSeconds()),e=6*d,f=6*(c+d/60),g=30*(b+c/60+d/3600),h=document.getElementById("hour"),i=document.getElementById("minute"),j=document.getElementById("second");h.setAttribute("transform","rotate("+g.toString()+")"),i.setAttribute("transform","rotate("+f.toString()+")"),j.setAttribute("transform","rotate("+e.toString()+")")')
+		m("script", 'var a=new Date,b=parseInt(a.getHours());b=b>12?b-12:b;var c=parseInt(a.getMinutes()),d=parseInt(a.getSeconds()),e=6*d,f=6*(c+d/60),g=30*(b+c/60+d/3600),h=document.getElementById("hour"),i=document.getElementById("minute"),j=document.getElementById("second");h.setAttribute("transform","rotate("+g.toString()+")"),i.setAttribute("transform","rotate("+f.toString()+")"),j.setAttribute("transform","rotate("+e.toString()+")")'),
+	]),
+	m("svg[height='200px'][width='200px']", [
+		m("foreignObject[x=0][y=0][width='100px'][height='100px'][transform='translate(0,0)'']", m('div', {xmlns: "http://www.w3.org/1999/xhtml"}, m.trust('this is a piece of html rendered as <a href="http://www.w3.org/TR/SVG11/extend.html">SVG foreignObject</strong>')))
 	])
 ]
 
