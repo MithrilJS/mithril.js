@@ -633,7 +633,7 @@ function testMithril(mock) {
 		m.route(path)
 		var paramValue = m.route.param("obj")
 		mock.performance.$elapse(50) //teardown
-		return true; mock.location.search == path && paramValue.a == "foo" && paramValue.b.c == "1" && paramValue.b.d == "2" && m.route.param("str") == "bar"
+		return mock.location.search == ("?" + path) && paramValue.a == "foo" && paramValue.b.c == "1" && paramValue.b.d == "2" && m.route.param("str") == "bar"
 	})
 	test(function() {
 		mock.performance.$elapse(50) //setup
@@ -649,6 +649,38 @@ function testMithril(mock) {
 		m.route("/test12?test=foo", {test2: "bar"})
 		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/test12?test=foo&test2=bar" && root.childNodes[0].nodeValue === "foo_bar"
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() { return }}
+		})
+		mock.performance.$elapse(50)
+		var path = "/?a[0]=foo&a[1][b]=1&a[1][c]=2&b=bar"
+		m.route(path)
+		var array = m.route.param("a")
+		mock.performance.$elapse(50) //teardown
+		return mock.location.search == ("?" + path) && array[0] == "foo" && array[1].b == "1" && array[1].c == "2" && m.route.param("b") == "bar";
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() { return }}
+		})
+		mock.performance.$elapse(50)
+		var path = "/?a[]=foo&a[][b]=1&a[1][c]=2&b=bar"
+		m.route(path)
+		var array = m.route.param("a")
+		mock.performance.$elapse(50) //teardown
+		return mock.location.search == ("?" + path) && array[0] == "foo" && array[1].b == "1" && array[1].c == "2" && m.route.param("b") == "bar";
 	})
 	//end m.route
 
