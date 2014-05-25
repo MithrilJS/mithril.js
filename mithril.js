@@ -276,6 +276,8 @@ Mithril = m = new function app(window) {
 				var path = source.slice(modes[m.route.mode].length)
 				if (!routeByValue(root, router, path)) {
 					m.route(defaultRoute, true)
+				} else {
+					currentRoute = path
 				}
 			}
 			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
