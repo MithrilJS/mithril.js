@@ -74,6 +74,8 @@ The string `johndoe` is bound to the `:userID` parameter, which can be retrived 
 
 The `m.route.mode` defines which part of the URL to use for routing.
 
+---
+
 #### Variadic routes
 
 We can append an ellipsis (`...`) to the name of a route argument to allow it to match URL snippets that contain slashes:
@@ -107,7 +109,22 @@ m.route.param("date") === "archive/2014"
 //the routes should be flipped around to get `m.route.param("year") == "2014"`
 ```
 
-### Running clean up code on route change
+---
+
+#### Routes with querystrings
+
+In addition to route parameters, it's possible to pass arbitrary data to `m.route.param` using the querystring
+
+```javascript
+m.route("/grid?sortby=date&dir=desc")
+
+var sortBy = m.route.param("sortby") // "date"
+var dir = m.route.param("dir") // "desc"
+```
+
+---
+
+#### Running clean up code on route change
 
 If a module's controller implements an instance method called `onunload`, this method will be called when a route changes.
 
@@ -208,9 +225,13 @@ where:
 
 	A route with parameters might look like this:
 
-	`"/path/to/page/:id"` - here `id` is the name of the route parameter
+	`"/path/to/page/:id"` - here, `id` is the name of the route parameter
 
 	If the currently active route is `/dashboard/:userID` and the current URL is `/dashboard/johndoe`, then calling `m.route.param("userID")` returns `"johndoe"`
+	
+	Querystring parameters in a route are also available in this collection automatically.
+	
+	`"/grid?sortby=date"` - here,  `m.route.param("sortby")` returns `"date"`
 	
 	-	**String key**
 	

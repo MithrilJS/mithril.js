@@ -4,7 +4,7 @@
 
 Mithril is a client-side Javascript MVC framework, i.e. it's a tool to make application code divided into a data layer (called "**M**odel"), a UI layer (called **V**iew), and a glue layer (called **C**ontroller)
 
-Mithril is around 3kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
+Mithril is around 4kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
 
 The goal of the framework is to make application code discoverable, readable and maintainable, and hopefully help you become an even better developer.
 
