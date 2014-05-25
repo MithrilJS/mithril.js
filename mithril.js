@@ -354,22 +354,25 @@ Mithril = m = new function app(window) {
 		}
 		return str.join("&")
 	}
-	var arrayParser = /\[?([^\]\[]+)\]?/g
 	function parseQueryString(str) {
+		var derefParser = /\[?([^\]\[]+)\]?/g
 		var pairs = str.split("&"), params = {}
 		for (var i = 0; i < pairs.length; i++) {
 			var pair = pairs[i].split("=")
-			var key = decodeURIComponent(pair[0]),
-			var value = pair[1] ? decodeURIComponent(pair[1]) : (pair.length === 1 ? true : "")
-			if (key.indexOf('[') != -1) {
+			var key = decodeSpace(pair[0])
+			var value = pair[1] ? decodeSpace(pair[1]) : (pair.length == 1 ? true : "")
+			if (key.indexOf('[') > -1) {
 				var subParams = params
-				while ((match =  arrayParser.exec(key)) !== null) {
-					subParams = subParams[match[1]] = (arrayParser.lastIndex === key.length ? value : subParams[match[1]] || {})
+				while ((match =  derefParser.exec(key)) !== null) {
+					subParams = subParams[match[1]] = (derefParser.lastIndex === key.length ? value : subParams[match[1]] || {})
 				}
 			}
 			else params[key] = value
 		}
 		return params
+	}
+	function decodeSpace(string) {
+		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
 	
 	//model

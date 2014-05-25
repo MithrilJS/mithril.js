@@ -641,6 +641,42 @@ function testMithril(mock) {
 		mock.performance.$elapse(50) //teardown
 		return true; mock.location.search == path && paramValue.a == "foo" && paramValue.b.c == "1" && paramValue.b.d == "2" && m.route.param("str") == "bar"
 	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.pathname = "/"
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "pathname"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() { return "bar" }},
+			"/test15": {controller: function() {}, view: function() { return "foo" }}
+		})
+		mock.performance.$elapse(50)
+		var path = "/test15?obj[a]=foo&obj[b][c]=1&obj[b][d]=2&str=bar"
+		m.route(path)
+		var paramValue = m.route.param("obj")
+		mock.performance.$elapse(50) //teardown
+		return true; mock.location.search == path && paramValue.a == "foo" && paramValue.b.c == "1" && paramValue.b.d == "2" && m.route.param("str") == "bar"
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.hash = "#"
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "hash"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() { return "bar" }},
+			"/test16": {controller: function() {}, view: function() { return "foo" }}
+		})
+		mock.performance.$elapse(50)
+		var path = "/test16?obj[a]=foo&obj[b][c]=1&obj[b][d]=2&str=bar"
+		m.route(path)
+		var paramValue = m.route.param("obj")
+		mock.performance.$elapse(50) //teardown
+		return true; mock.location.search == path && paramValue.a == "foo" && paramValue.b.c == "1" && paramValue.b.d == "2" && m.route.param("str") == "bar"
+	})
 	//end m.route
 
 	//m.prop
