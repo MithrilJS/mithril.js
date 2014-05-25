@@ -2,7 +2,7 @@ Mithril = m = new function app(window) {
 	var selectorCache = {}
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.+?)\2)?\]/
-	
+
 	function m() {
 		var args = arguments
 		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
@@ -35,14 +35,14 @@ Mithril = m = new function app(window) {
 	function build(parentElement, parentTag, data, cached, shouldReattach, index, editable, namespace) {
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return
-		
+
 		var cachedType = type.call(cached), dataType = type.call(data)
 		if (cachedType != dataType) {
 			if (cached !== null && cached !== undefined) clear(cached.nodes)
 			cached = new data.constructor
 			cached.nodes = []
 		}
-		
+
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
@@ -64,7 +64,7 @@ Mithril = m = new function app(window) {
 		else if (dataType == "[object Object]") {
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) clear(cached.nodes)
 			if (typeof data.tag != "string") return
-			
+
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
@@ -126,7 +126,7 @@ Mithril = m = new function app(window) {
 			}
 			else cached.nodes.intact = true
 		}
-		
+
 		return cached
 	}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
@@ -184,7 +184,7 @@ Mithril = m = new function app(window) {
 			finally {m.endComputation()}
 		}
 	}
-	
+
 	var html
 	var documentNode = {
 		insertAdjacentHTML: function(_, data) {
@@ -211,13 +211,13 @@ Mithril = m = new function app(window) {
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
 		cellCache[id] = build(node, null, cell, cellCache[id], false, 0, null, undefined)
 	}
-	
+
 	m.trust = function(value) {
 		value = new String(value)
 		value.$trusted = true
 		return value
 	}
-	
+
 	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0, computePostRedrawHook = null
 	m.module = function(root, module) {
 		m.startComputation()
@@ -249,21 +249,21 @@ Mithril = m = new function app(window) {
 		}
 		lastRedraw = now
 	}
-	
+
 	var pendingRequests = 0
 	m.startComputation = function() {pendingRequests++}
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
 		if (pendingRequests == 0) m.redraw()
 	}
-	
+
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
 			e = e || event
 			withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))
 		}
 	}
-	
+
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"}
 	var redirect = function() {}, routeParams = {}, currentRoute
@@ -325,9 +325,9 @@ Mithril = m = new function app(window) {
 
 		for (var route in router) {
 			if (route == path) return !void m.module(root, router[route])
-			
+
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-			
+
 			if (matcher.test(path)) {
 				return !void path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
@@ -377,7 +377,7 @@ Mithril = m = new function app(window) {
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
-	
+
 	//model
 	m.prop = function(store) {
 		var prop = function() {
@@ -447,7 +447,7 @@ Mithril = m = new function app(window) {
 				return value
 			}
 		}
-		
+
 		var deferred = m.deferred()
 		var results = []
 		for (var i = 0; i < args.length; i++) {
@@ -522,12 +522,12 @@ Mithril = m = new function app(window) {
 		ajax(xhrOptions)
 		return deferred.promise
 	}
-	
+
 	//testing API
 	m.deps = function(mock) {return window = mock}
 	//for internal testing only, do not use `m.deps.factory`
 	m.deps.factory = app
-	
+
 	return m
 }(this)
 
