@@ -298,9 +298,10 @@ Mithril = m = new function app(window) {
 		}
 		else if (typeof arguments[0] == "string") {
 			currentRoute = arguments[0]
-			var shouldReplaceHistoryEntry = arguments[1] === true
-			var queryString = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
-			if(queryString) currentRoute += (currentRoute.indexOf('?') === -1 ? '?' : '&') + queryString
+			var querystring = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
+			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
+			
+			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
 
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {

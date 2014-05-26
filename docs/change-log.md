@@ -5,6 +5,8 @@
 ### News:
 
 -	The signature of `m` now accepts virtual elements as the second parameter of the function.
+-	`m.route(path, params)` now accepts an argument that gets parsed as a querystring.
+-	routes now ignore trailing slashes [#88](https://github.com/lhorie/mithril.js/issues/88)
 
 ### Bug Fixes:
 

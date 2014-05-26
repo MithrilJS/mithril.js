@@ -264,12 +264,16 @@ redirects to `http://server/#/dashboard/marysue`
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(String path)
+void route(String path [, any params])
 ```
 
 -	**String path**
 
 	The route to redirect to. Note that to redirect to a different page outside of the scope of Mithril's routing, you should use `window.location`
+
+-	**any params**
+
+	Parameters to pass as a querystring
 
 ---
 

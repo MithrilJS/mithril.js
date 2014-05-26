@@ -6,13 +6,13 @@ interface MithrilStatic {
 	prop(value?: any): (value?: any) => any;
 	withAttr(property: string, callback: (value: any) => void): (e: Event) => any;
 	module(rootElement: Element, module: MithrilModule): void;
-	trust(html: string): String
-	render(rootElement: Element, children?: any): void
-	render(rootElement: HTMLDocument, children?: any): void
-	redraw(): void
-	route(rootElement: Element, defaultRoute: string, routes: { [key: string]: MithrilModule }): void
-	route(rootElement: HTMLDocument, defaultRoute: string, routes: { [key: string]: MithrilModule }): void
-	route(path: string): void
+	trust(html: string): String;
+	render(rootElement: Element, children?: any): void;
+	render(rootElement: HTMLDocument, children?: any): void;
+	redraw(): void;
+	route(rootElement: Element, defaultRoute: string, routes: { [key: string]: MithrilModule }): void;
+	route(rootElement: HTMLDocument, defaultRoute: string, routes: { [key: string]: MithrilModule }): void;
+	route(path: string, params?: any, shouldReplaceHistory?: boolean): void;
 	route(): string;
 	route(element: Element, isInitialized: boolean): void;
 	request(options: MithrilXHROptions): MithrilPromise;
