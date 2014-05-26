@@ -1,12 +1,12 @@
 module.exports = function(grunt) {
 
 	var version = "0.1.14"
-	
+
 	var inputFolder = "./docs"
 	var tempFolder = "./temp"
 	var archiveFolder = "./archive"
 	var outputFolder = "../mithril"
-	
+
 	var guideLayout = "guide"
 	var guide = [
 		"auto-redrawing",
@@ -43,9 +43,9 @@ module.exports = function(grunt) {
 		"mithril.withAttr",
 		"mithril.xhr"
 	]
-	
-	
-	
+
+
+
 	var md2htmlTasks = {}
 	var makeTasks = function(layout, pages) {
 		pages.map(function(name) {
@@ -57,7 +57,7 @@ module.exports = function(grunt) {
 	}
 	makeTasks("guide", guide)
 	makeTasks("api", api)
-	
+
 	var currentVersionArchiveFolder = archiveFolder + "/v" + version
 	grunt.initConfig({
 		md2html: md2htmlTasks,
@@ -111,7 +111,7 @@ module.exports = function(grunt) {
 			tasks: ["build"]
 		}
 	});
-	
+
 	grunt.loadNpmTasks("grunt-contrib-clean");
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks("grunt-contrib-copy");

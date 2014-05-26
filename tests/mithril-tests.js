@@ -1,6 +1,6 @@
 function testMithril(mock) {
 	m.deps(mock)
-	
+
 	//m
 	test(function() {return m("div").tag === "div"})
 	test(function() {return m(".foo").tag === "div"})
@@ -27,21 +27,21 @@ function testMithril(mock) {
 	//m.module
 	test(function() {
 		mock.performance.$elapse(50)
-		
+
 		var root1 = mock.document.createElement("div")
 		m.module(root1, {
 			controller: function() {this.value = "test1"},
 			view: function(ctrl) {return ctrl.value}
 		})
-		
+
 		var root2 = mock.document.createElement("div")
 		m.module(root2, {
 			controller: function() {this.value = "test2"},
 			view: function(ctrl) {return ctrl.value}
 		})
-		
+
 		mock.requestAnimationFrame.$resolve()
-		
+
 		return root1.childNodes[0].nodeValue === "test1" && root2.childNodes[0].nodeValue === "test2"
 	})
 
@@ -168,17 +168,17 @@ function testMithril(mock) {
 		m.render(root, list.reverse().map(function(flag, index) {
 			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
 		}))
-		
+
 		mock.document.activeElement = root.childNodes[0]
 		root.childNodes[0].checked = true
 		root.childNodes[0].onclick({currentTarget: {checked: true}})
-		
+
 		m.render(root, list.reverse().map(function(flag, index) {
 			return m("input[type=checkbox]", {onclick: m.withAttr("checked", function(value) {list[index] = value}), checked: flag})
 		}))
-		
+
 		mock.document.activeElement = null
-		
+
 		return root.childNodes[0].checked === false && root.childNodes[1].checked === true
 	})
 	test(function() {
@@ -384,7 +384,7 @@ function testMithril(mock) {
 		return root.childNodes[0].childNodes.length == 2
 	})
 	//end m.render
-	
+
 	//m.redraw
 	test(function() {
 		mock.performance.$elapse(50) //setup
@@ -425,7 +425,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test1", {
@@ -437,7 +437,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.pathname = "/"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "pathname"
 		m.route(root, "/test2", {
@@ -449,7 +449,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.hash = "#"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "hash"
 		m.route(root, "/test3", {
@@ -461,7 +461,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test4/foo", {
@@ -473,9 +473,9 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test5/foo", {
@@ -492,9 +492,9 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test6/foo", {
@@ -512,9 +512,9 @@ function testMithril(mock) {
 		//https://github.com/lhorie/mithril.js/issues/61
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test7/foo", {
@@ -531,7 +531,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test8/foo/SEP/bar/baz", {
@@ -548,7 +548,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test9/foo/bar/SEP/baz", {
@@ -565,7 +565,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.performance.$elapse(50) //setup
 		mock.location.search = "?"
-		
+
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test10/foo%20bar", {
@@ -888,22 +888,22 @@ function testMithril(mock) {
 	//m.startComputation/m.endComputation
 	test(function() {
 		mock.performance.$elapse(50)
-		
+
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
 			controller: function() {controller = this},
 			view: function(ctrl) {return ctrl.value}
 		})
-		
+
 		mock.performance.$elapse(50)
-		
+
 		m.startComputation()
 		controller.value = "foo"
 		m.endComputation()
 		return root.childNodes[0].nodeValue === "foo"
 	})
-	
+
 	//console.log presence
 	test(function() {
 		return m.deps.factory.toString().indexOf("console") < 0
