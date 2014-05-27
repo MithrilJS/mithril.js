@@ -162,10 +162,7 @@ Mithril = m = new function app(window) {
 		return cachedAttrs
 	}
 	function clear(nodes) {
-		if (nodes.length > 0) {
-			var parent = nodes[i].parentNode
-			for (var i = nodes.length - 1; i > -1; i--) parent.removeChild(nodes[i])
-		}
+		for (var i = nodes.length - 1; i > -1; i--) if (nodes[i]) nodes[i].parentNode.removeChild(nodes[i])
 		nodes.length = 0
 	}
 	function injectHTML(parentElement, index, data) {
@@ -209,6 +206,7 @@ Mithril = m = new function app(window) {
 	}
 	var nodeCache = [], cellCache = {}
 	m.render = function(root, cell) {
+		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var index = nodeCache.indexOf(root)
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
