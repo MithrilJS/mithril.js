@@ -301,7 +301,7 @@ Mithril = m = new function app(window) {
 			currentRoute = arguments[0]
 			var querystring = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
-			
+
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
 
 			if (window.history.pushState) {
@@ -427,11 +427,11 @@ Mithril = m = new function app(window) {
 	}
 	m.sync = function(args) {
 		var method = "resolve"
-		function synchronizer(resolved) {
+		function synchronizer(pos, resolved) {
 			return function(value) {
-				results.push(value)
+				results[pos] = value
 				if (!resolved) method = "reject"
-				if (results.length == args.length) {
+				if (--outstanding == 0) {
 					deferred.promise(results)
 					deferred[method](results)
 				}
@@ -440,9 +440,10 @@ Mithril = m = new function app(window) {
 		}
 
 		var deferred = m.deferred()
-		var results = []
+		var outstanding = args.length
+		var results = new Array(outstanding)
 		for (var i = 0; i < args.length; i++) {
-			args[i].then(synchronizer(true), synchronizer(false))
+			args[i].then(synchronizer(i, true), synchronizer(false))
 		}
 		return deferred.promise
 	}
