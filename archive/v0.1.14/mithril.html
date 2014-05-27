@@ -83,7 +83,7 @@ m(&quot;a[name=top]&quot;); //yields &lt;a name=&quot;top&quot;&gt;&lt;/a&gt;
 m(&quot;[contenteditable]&quot;); //yields &lt;div contenteditable&gt;&lt;/div&gt;
 
 m(&quot;a#google.external[href=&#39;http://google.com&#39;]&quot;, &quot;Google&quot;); //yields &lt;a id=&quot;google&quot; class=&quot;external&quot; href=&quot;http://google.com&quot;&gt;Google&lt;/a&gt;</code></pre>
-<p>Each <code>m()</code> call creates a virtual DOM element, that is, a javascript object that represents a DOM element, and which is eventually converted into one.</p>
+<p>Each <code>m()</code> call creates a virtual DOM element, that is, a Javascript object that represents a DOM element, and which is eventually converted into one.</p>
 <p>You can, of course, nest virtual elements:</p>
 <pre><code class="lang-javascript">m(&quot;ul&quot;, [
     m(&quot;li&quot;, &quot;item 1&quot;),
@@ -132,7 +132,7 @@ m.render(document.body, [
 &lt;/body&gt;</code></pre>
 <p>As you can see, flow control is done with vanilla Javascript. This allows the developer to abstract away any aspect of the template at will.</p>
 <hr>
-<p>Note that you can use both javascript property names and HTML attribute names to set values in the <code>attributes</code> argument, but you should pass a value of appropriate type. If an attribute has the same name in Javascript and in HTML, then Mithril assumes you&#39;re setting the Javascript property.</p>
+<p>Note that you can use both Javascript property names and HTML attribute names to set values in the <code>attributes</code> argument, but you should pass a value of appropriate type. If an attribute has the same name in Javascript and in HTML, then Mithril assumes you&#39;re setting the Javascript property.</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {class: &quot;widget&quot;}); //yields &lt;div class=&quot;widget&quot;&gt;&lt;/div&gt;
 
 m(&quot;div&quot;, {className: &quot;widget&quot;}); //yields &lt;div class=&quot;widget&quot;&gt;&lt;/div&gt;
@@ -278,7 +278,7 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 <p>If it&#39;s a SubtreeDirective with the value &quot;retain&quot;, it will retain the existing DOM tree in place, if any. See <a href="mithril.render#subtree-directives">subtree directives</a> for more information.</p>
 </li>
 <li><p><strong>returns</strong> VirtualElement</p>
-<p>The returned VirtualElement is a javascript data structure that represents the DOM element to be rendered by <a href="mithril.render"><code>m.render</code></a></p>
+<p>The returned VirtualElement is a Javascript data structure that represents the DOM element to be rendered by <a href="mithril.render"><code>m.render</code></a></p>
 </li>
 </ul>
 

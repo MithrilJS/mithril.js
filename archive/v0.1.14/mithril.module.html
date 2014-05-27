@@ -176,8 +176,8 @@ where:
 <p>The controller class is instantiated immediately upon calling <code>m.module</code>.</p>
 <p>Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view&#39;s constructor.</p>
 <p>Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can instantiate child views and manually pass the child controller instances down the the child view constructors.</p>
-<p>This &quot;turtles all the way down&quot; approach is the heart of Mithril&#39;s component system.</p>
-<p>Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components) and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).</p>
+<p>This &quot;<a href="https://en.wikipedia.org/wiki/Turtles_all_the_way_down">turtles all the way down</a>&quot; approach is the heart of Mithril&#39;s component system.</p>
+<p>Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components), and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).</p>
 </li>
 </ul>
 

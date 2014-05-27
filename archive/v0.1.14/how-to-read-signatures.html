@@ -61,8 +61,8 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="how-to-read-signatures">How to Read Signatures</h2>
-<p>Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old javascript objects (POJOs) that match given signatures.</p>
-<p>A signature is a description of its static type. For functions, it shows what are the parameters of the function, its return value and their expected types. For objects and arrays, it shows the expected data structure and the expected types of their members.</p>
+<p>Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old Javascript objects (POJOs) that match given signatures.</p>
+<p>A signature is a description of its static type. For functions, it shows the parameters of the function, its return value and their expected types. For objects and arrays, it shows the expected data structure and the expected types of their members.</p>
 <p>Method signatures in this documentation follow a syntax similar to Java syntax, with some extra additions:</p>
 <pre><code class="lang-clike">ReturnType methodName(ParameterType1 param1, ParameterType2 param2)</code></pre>
 <h3 id="optional-parameters">Optional Parameters</h3>
@@ -121,7 +121,7 @@ var a = aComplexTypeValue
 typeof a == &quot;function&quot; // true
 &quot;label&quot; in a // true
 a.label = &quot;first&quot;</code></pre>
-<h3 id="polimorphic-types">Polimorphic Types</h3>
+<h3 id="polymorphic-types">Polymorphic Types</h3>
 <p>When multiple (but not all) types are accepted, the pipe <code>|</code> is used to delimit the list of valid types</p>
 <pre><code class="lang-clike">void test(Children children, Value value)
 
@@ -132,7 +132,7 @@ where:
 test([&quot;test&quot;, 2], &quot;second&quot;)
 test([1, 2, 3], &quot;second&quot;)
 test([1, &quot;test&quot;, 3], 2)</code></pre>
-<p>Pipe syntax within Object curly brace syntax means that for a specific key name has specific type requirements.</p>
+<p>Pipe syntax within Object curly brace syntax means that, for a specific key, name has specific type requirements.</p>
 <p>In the example below, the <code>value</code> parameter should be a key-value map. This map may contain a key called <code>config</code>, whose value should be a function.</p>
 <pre><code class="lang-clike">void test(Object { any | void config(DOMElement) } value)</code></pre>
 <pre><code class="lang-javascript">//example of a valid function call

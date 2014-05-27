@@ -63,7 +63,7 @@
 							<h2 id="m-trust">m.trust</h2>
 <p>If you&#39;re writing a template for a view, use <code>m()</code> instead.</p>
 <p>This method flags a string as trusted HTML.</p>
-<p>Trusted HTML is allowed to render arbitrary, potentially invalid markup, as well as run arbitrary javascript, and therefore the developer is responsible for either:</p>
+<p>Trusted HTML is allowed to render arbitrary, potentially invalid markup, as well as run arbitrary Javascript, and therefore the developer is responsible for either:</p>
 <ul>
 <li><p>sanitizing the markup contained in the string, or</p>
 </li>
@@ -73,7 +73,7 @@
 <p>Note that browsers ignore <code>&lt;script&gt;</code> tags that have been inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible <code>innerHTML</code> property), their rendering engines cannot backtrack to the parsing-stage if the script calls something like <code>document.write(&quot;&lt;/body&gt;&quot;)</code>.</p>
 <p>For this reason, <code>m.trust</code> will not auto-run <code>&lt;script&gt;</code> tags from trusted strings.</p>
 <p>Browsers do, however, allow scripts to be run asynchronously via a number of execution points, such as the <code>onload</code> or <code>onerror</code> attributes in <code>&lt;img&gt;</code> and <code>&lt;iframe&gt;</code>.</p>
-<p>IE also allows running of javascript via CSS behaviors in <code>&lt;link&gt;</code>/<code>&lt;style&gt;</code> tags and <code>style</code> attributes.</p>
+<p>IE also allows running of Javascript via CSS behaviors in <code>&lt;link&gt;</code>/<code>&lt;style&gt;</code> tags and <code>style</code> attributes.</p>
 <p>It&#39;s worth noting that the execution points listed above are commonly used for security attacks in combination with malformed markup, e.g. strings with mismatched attribute quotes like <code>&quot; onload=&quot;alert(1)</code>.</p>
 <p>Mithril templates are defended against these attacks by default, except when markup is injected via <code>m.trust</code>.</p>
 <p>It is the developer&#39;s responsibility to ensure the input to <code>m.trust</code> cannot be maliciously modified by user-entered data.</p>
@@ -100,7 +100,7 @@ m.render(&quot;body&quot;, [
 <p>A string containing HTML markup</p>
 </li>
 <li><p><strong>returns String trustedHtml</strong></p>
-<p>The returned string is a String object instance (as opposed to a string primitive) containing the same html content, and exposing a flag property for internal use within Mithril. Do not create or manipulate trust flags manually.</p>
+<p>The returned string is a String object instance (as opposed to a string primitive) containing the same HTML content, and exposing a flag property for internal use within Mithril. Do not create or manipulate trust flags manually.</p>
 <p>Also note that concatenating or splitting a trusted string removes the trust flag. If doing such operations, the final string needs to be flagged as trusted.</p>
 </li>
 </ul>

@@ -46,7 +46,7 @@
 						<div class="col(9,9,12)">
 							<h2 id="getting-started">Getting Started</h2>
 <h3 id="what-is-mithril-">What is Mithril?</h3>
-<p>Mithril is a client-side Javascript MVC framework, i.e. it&#39;s a tool to make application code divided into a data layer (called &quot;<strong>M</strong>odel&quot;), a UI layer (called <strong>V</strong>iew), and a glue layer (called <strong>C</strong>ontroller)</p>
+<p>Mithril is a client-side Javascript MVC framework, i.e. it&#39;s a tool to make application code divided into a data layer (called <strong>M</strong>odel), a UI layer (called <strong>V</strong>iew), and a glue layer (called <strong>C</strong>ontroller)</p>
 <p>Mithril is around 4kb gzipped thanks to its <a href="mithril.html">small, focused, API</a>. It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.</p>
 <p>The goal of the framework is to make application code discoverable, readable and maintainable, and hopefully help you become an even better developer.</p>
 <p>Unlike some frameworks, Mithril tries very hard to avoid locking you into a web of dependencies: you can use as <em>little</em> of the framework as you need.</p>
@@ -62,7 +62,7 @@
 <p>Yes, this is valid HTML 5! According to the specs, the <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code> and <code>&lt;body&gt;</code> tags can be omitted, but their respective DOM elements will still be there implicitly when a browser renders that markup.</p>
 <hr>
 <h3 id="model">Model</h3>
-<p>In Mithril, typically an application lives in an namespace and contains modules. Modules are merely structures that represent a viewable &quot;page&quot; or component.</p>
+<p>In Mithril, an application typically lives in a namespace and contains modules. Modules are merely structures that represent a viewable &quot;page&quot; or component.</p>
 <p>For simplicity, our application will have only one module, and we&#39;re going to use it as the namespace for our application:</p>
 <pre><code class="lang-markup">&lt;script&gt;
 //this application only has one module: todo
@@ -113,7 +113,7 @@ list.length; //0</code></pre>
 <hr>
 <h3 id="controller">Controller</h3>
 <p>Our next step is to write a controller that will use our model classes.</p>
-<pre><code class="lang-javascript">//the controller uses 3 model-level entities, of which one is a custom defined class:
+<pre><code class="lang-javascript">//the controller uses three model-level entities, of which one is a custom defined class:
 //`Todo` is the central class in this application
 //`list` is merely a generic array, with standard array methods
 //`description` is a temporary storage box that holds a string
@@ -184,7 +184,7 @@ m.render(document, todo.view(ctrl));</code></pre>
 &lt;/html&gt;</code></pre>
 <hr>
 <h4 id="data-bindings">Data Bindings</h4>
-<p>Let&#39;s implement a <strong>data binding</strong> on the text input. Data bindings connect a DOM element to a javascript variable so that updating one updates the other.</p>
+<p>Let&#39;s implement a <strong>data binding</strong> on the text input. Data bindings connect a DOM element to a Javascript variable so that updating one updates the other.</p>
 <pre><code class="lang-javascript">m(&quot;input&quot;)
 
 //becomes
@@ -196,7 +196,7 @@ m.render(todo.view(ctrl)); // input is empty
 ctrl.description(&quot;Write code&quot;); //set the description in the controller
 m.render(todo.view(ctrl)); // input now says &quot;Write code&quot;</code></pre>
 <p>Note that calling the <code>todo.view</code> method multiple times does not re-render the entire template.</p>
-<p>Mithril internally keeps a virtual representation of the DOM in cache, scans for changes, and then only modifies the minimum required to apply the change.</p>
+<p>Internally, Mithril keeps a virtual representation of the DOM in cache, scans for changes, and then only modifies the minimum required to apply the change.</p>
 <p>In this case, Mithril only touches the <code>value</code> attribute of the input.</p>
 <hr>
 <p>Bindings can also be <strong>bi-directional</strong>: that is, they can be made such that, in addition to what we saw just now, a user typing on the input updates the description getter-setter.</p>
@@ -210,7 +210,7 @@ m.render(todo.view(ctrl)); // input now says &quot;Write code&quot;</code></pre>
 <pre><code class="lang-javascript">onchange: function(e) {
     ctrl.description(e.target[&quot;value&quot;]);
 }</code></pre>
-<p>The difference, aside from the cosmetic avoidance of anonymous functions, is that the <code>m.withAttr</code> idiom also takes care of catching the correct event target and selecting the appropriate source of the data - i.e. whether it should come from a javascript property or from <code>DOMElement::getAttribute()</code></p>
+<p>The difference, aside from the cosmetic avoidance of anonymous functions, is that the <code>m.withAttr</code> idiom also takes care of catching the correct event target and selecting the appropriate source of the data - i.e. whether it should come from a Javascript property or from <code>DOMElement::getAttribute()</code></p>
 <hr>
 <p>In addition to bi-directional data binding, we can also bind parameterized functions to events:</p>
 <pre><code class="lang-javascript">m(&quot;button&quot;, {onclick: ctrl.add.bind(ctrl, ctrl.description)}, &quot;Add&quot;)</code></pre>
@@ -271,22 +271,22 @@ m(&quot;table&quot;, [
 };</code></pre>
 <p>Here are the highlights of the template above:</p>
 <ul>
-<li>The template is rendered as a child of the implicit <code>&lt;html&gt;</code> element of the document</li>
-<li>The text input saves its value to the <code>ctrl.description</code> getter-setter we defined earlier</li>
+<li>The template is rendered as a child of the implicit <code>&lt;html&gt;</code> element of the document.</li>
+<li>The text input saves its value to the <code>ctrl.description</code> getter-setter we defined earlier.</li>
 <li><p>The button calls the <code>ctrl.add</code> method when clicked. The <code>.bind(ctrl, ctrl.description)</code> idiom is a <a href="http://en.wikipedia.org/wiki/Partial_application">partial application</a>.</p>
 <p>In this example, it&#39;s only used to maintain the scope binding for the <code>this</code> parameter in the controller method, but typically it&#39;s also used to bind parameters to the function without the need to declare a wrapper anonymous function.</p>
 </li>
 <li>The table lists all the existing to-dos, if any.</li>
-<li>The checkboxes save their value to the <code>task.done</code> getter setter</li>
-<li>The description gets crossed out via CSS if the task is marked as done</li>
-<li>When updates happen, the template is not wholly re-rendered - only the changes are applied</li>
+<li>The checkboxes save their value to the <code>task.done</code> getter setter.</li>
+<li>The description gets crossed out via CSS if the task is marked as done.</li>
+<li>When updates happen, the template is not wholly re-rendered - only the changes are applied.</li>
 </ul>
 <hr>
 <p>When running the classes in this application separately, you have full control and full responsibility for determining when to redraw the view.</p>
-<p>However, Mithril does provide another utility to make this task automatic.</p>
+<p>However, Mithril does provide another utility to make this task automatic: <a href="http://lhorie.github.io/mithril/auto-redrawing.html">the Auto-Redrawing System</a>.</p>
 <p>In order to enable Mithril&#39;s auto-redrawing system, we run the code as a Mithril module:</p>
 <pre><code class="lang-javascript">m.module(document, todo);</code></pre>
-<p>Mithril&#39;s auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous ajax payloads.</p>
+<p>Mithril&#39;s auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads.</p>
 <p>Also note that this mechanism itself is not asynchronous if it doesn&#39;t need to be: Mithril does not need to wait for the next browser repaint frame to redraw - it doesn&#39;t even need to wait for the document ready event on the first redraw - it will redraw immediately upon script completion, if able to.</p>
 <hr>
 <h3 id="summary">Summary</h3>
@@ -308,7 +308,7 @@ todo.Todo = function(data) {
 //the TodoList class is a list of Todo&#39;s
 todo.TodoList = Array;
 
-//the controller uses 3 model-level entities, of which one is a custom defined class:
+//the controller uses three model-level entities, of which one is a custom defined class:
 //`Todo` is the central class in this application
 //`list` is merely a generic array, with standard array methods
 //`description` is a temporary storage box that holds a string
@@ -355,9 +355,9 @@ m.module(document, todo);
 <h3 id="model">Model</h3>
 <p>Idiomatic Mithril code is meant to apply good programming conventions and be easy to refactor.</p>
 <p>In the application above, notice how the Todo class can easily be moved to a different module if code re-organization is required.</p>
-<p>Todos are self-contained and their data aren&#39;t tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it&#39;s a plain-vanilla Javascript class which requires almost no framework-specific learning curve.</p>
+<p>Todos are self-contained and their data aren&#39;t tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it&#39;s a plain-vanilla Javascript class, and so has almost no framework-specific learning curve.</p>
 <p><a href="mithril.prop.html"><code>m.prop</code></a> is a simple but surprisingly versatile tool: it&#39;s composable, it enables <a href="http://en.wikipedia.org/wiki/Uniform_data_access">uniform data access</a> and allows a higher degree of decoupling when major refactoring is required.</p>
-<p>When said refactoring is unavoidable, the developer can simply replace the <code>m.prop</code> call with an appropriate getter-setter implementation, instead of having to grep for API usage across the entire application.</p>
+<p>When refactoring is unavoidable, the developer can simply replace the <code>m.prop</code> call with an appropriate getter-setter implementation, instead of having to grep for API usage across the entire application.</p>
 <p>For example, if todo descriptions needed to always be uppercased, one could simply change the <code>description</code> getter-setter:</p>
 <pre><code class="lang-javascript">this.description = m.prop(data.description)</code></pre>
 <p>becomes:</p>
@@ -370,7 +370,7 @@ this.description = function(value) {
     return description;
 }</code></pre>
 <p>According to Mithril&#39;s philosophy, <code>list</code> and <code>description</code> are also considered model-level entities. This is a subtle but important point: model entities don&#39;t need to be full-blown custom classes.</p>
-<p>Native javascript classes are quite appropriate for storing primitive and structured data. Since in this case they are indeed being used to store data - even if temporarily - they are model entities!</p>
+<p>Native Javascript classes are quite appropriate for storing primitive and structured data. Since in this case they are indeed being used to store data - even if temporarily - they are model entities!</p>
 <p>Be aware that by using the native Array class for a list, we&#39;re making an implicit statement that we are going to support all of the standard Array methods as part of our API.</p>
 <p>While this decision allows better API discoverability, the trade-off is that we&#39;re largely giving up on custom constraints and behavior. For example, if we wanted to change the application to make the list be persisted, a native Array would most certainly not be a suitable class to use.</p>
 <p>In order to deal with that type of refactoring, one can explicitly decide to support only a subset of the Array API, and implement another class with the same interface as this subset API.</p>
@@ -411,14 +411,14 @@ this.description = function(value) {
 </li>
 <li><p>You get the ability to automate linting, unit testing and minifying of the entire view layer - and you are even able to use Closure Compiler&#39;s Advanced Mode without needing extensive annotations.</p>
 </li>
-<li><p>It provides full Turing completeness: full control over evaluation eagerness/lazyness and caching in templates. You can even build components that take other components as first-class-citizen parameters!</p>
+<li><p>It provides full Turing completeness: full control over evaluation eagerness/laziness and caching in templates. You can even build components that take other components as first-class-citizen parameters!</p>
 </li>
-<li><p>Turtles all the way down: you don&#39;t need write custom data binding code in jQuery for every possible user interaction, and you don&#39;t need to support a complicated &quot;directive&quot; layer to be able to fit some types of components into the system.</p>
+<li><p><a href="https://en.wikipedia.org/wiki/Turtles_all_the_way_down">Turtles all the way down</a>: you don&#39;t need write custom data binding code in jQuery for every possible user interaction, and you don&#39;t need to support a complicated &quot;directive&quot; layer to be able to fit some types of components into the system.</p>
 </li>
 </ul>
 <p>Views in Mithril use a virtual DOM diff implementation, which sidesteps performance problems related to opaque dirty-checking and excessive browser repaint that are present in some frameworks.</p>
 <p>Another feature - the optional <code>m()</code> utility - allows writing terse templates in a declarative style using CSS shorthands, similar to popular HTML preprocessors from server-side MVC frameworks.</p>
-<p>And because Mithril views are javascript, the developer has full freedom to abstract common patterns - from bidirectional binding helpers to full blown components - using standard javascript refactoring techniques.</p>
+<p>And because Mithril views are Javascript, the developer has full freedom to abstract common patterns - from bidirectional binding helpers to full blown components - using standard Javascript refactoring techniques.</p>
 <p>Mithril templates are also more collision-proof than other component systems since there&#39;s no way to pollute the HTML tag namespace by defining ad-hoc tag names.</p>
 <p>A more intellectually interesting aspect of the framework is that event handling is encouraged to be done via functional composition (i.e. by using tools like <a href="mithril.withAttr.html"><code>m.withAttr</code></a>, <a href="mithril.prop.html"><code>m.prop</code></a> and the native <code>.bind()</code> method for partial application).</p>
 <p>If you&#39;ve been interested in learning or using Functional Programming in the real world, Mithril provides very pragmatic opportunities to get into it.</p>
@@ -438,6 +438,8 @@ this.description = function(value) {
 </ul>
 <h2 id="misc">Misc</h2>
 <ul>
+<li><a href="comparison">Differences from Other MVC Frameworks</a></li>
+<li><a href="benchmarks">Benchmarks</a></li>
 <li><a href="practices">Good Practices</a></li>
 <li><a href="tools">Useful Tools</a></li>
 </ul>

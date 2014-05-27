@@ -63,7 +63,7 @@
 							<h2 id="m-route">m.route</h2>
 <p>Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a page to another without causing a full browser refresh.</p>
 <p>It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser&#39;s history mechanism.</p>
-<p>This method overloads 4 different units of functionality:</p>
+<p>This method overloads four different units of functionality:</p>
 <ul>
 <li><p><code>m.route(rootElement, defaultRoute, routes)</code> - defines the available URLs in an application, and their respective modules</p>
 </li>
@@ -80,7 +80,7 @@
 <h3 id="defining-routes">Defining routes</h3>
 <h4 id="usage">Usage</h4>
 <p>To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective <a href="mithril.module.html">modules</a> to be rendered.</p>
-<p>The example below defines 3 routes, to be rendered in <code>&lt;body&gt;</code>. <code>home</code>, <code>login</code> and <code>dashboard</code> are modules. We&#39;ll see how to define a module in a bit.</p>
+<p>The example below defines three routes, to be rendered in <code>&lt;body&gt;</code>. <code>home</code>, <code>login</code> and <code>dashboard</code> are modules. We&#39;ll see how to define a module in a bit.</p>
 <pre><code class="lang-javascript">m.route(document.body, &quot;/&quot;, {
     &quot;/&quot;: home,
     &quot;/login&quot;: login,
@@ -109,7 +109,7 @@ m.route.mode = &quot;hash&quot;;</code></pre>
 <pre><code class="lang-markup">&lt;body&gt;johndoe&lt;/body&gt;</code></pre>
 <p>Above, <code>dashboard</code> is a module. It contains a <code>controller</code> and a <code>view</code> properties. When the URL matches a route, the respective module&#39;s controller is instantiated and passed as a parameter to the view.</p>
 <p>In this case, since there&#39;s only route, the app redirects to the default route <code>&quot;/dashboard/johndoe&quot;</code>.</p>
-<p>The string <code>johndoe</code> is bound to the <code>:userID</code> parameter, which can be retrived programmatically in the controller via <code>m.route.param(&quot;userID&quot;)</code>.</p>
+<p>The string <code>johndoe</code> is bound to the <code>:userID</code> parameter, which can be retrieved programmatically in the controller via <code>m.route.param(&quot;userID&quot;)</code>.</p>
 <p>The <code>m.route.mode</code> defines which part of the URL to use for routing.</p>
 <hr>
 <h4 id="variadic-routes">Variadic routes</h4>

@@ -71,9 +71,9 @@ var doStuff = function() {
 <hr>
 <h3 id="integrating-multiple-execution-threads">Integrating multiple execution threads</h3>
 <p>When <a href="integration.html">integrating with third party libraries</a>, you might find that you need to call asynchronous methods from outside of Mithril&#39;s API.</p>
-<p>In order to integrate non-trivial asynchronous code to Mithril&#39;s auto-redrawing system, you need to ensure all execution threads call <code>m.startComputation</code> / <code>m.endComputation</code>.</p>
+<p>In order to integrate non-trivial asynchronous code with Mithril&#39;s auto-redrawing system, you need to ensure all execution threads call <code>m.startComputation</code> / <code>m.endComputation</code>.</p>
 <p>An execution thread is basically any amount of code that runs before other asynchronous threads start to run.</p>
-<p>Integrating multiple execution threads can be done in a two different ways: in a layered fashion or in comprehensive fashion</p>
+<p>Integrating multiple execution threads can be done in two different ways: in a layered fashion or in comprehensive fashion.</p>
 <h4 id="layered-integration">Layered integration</h4>
 <p>Layered integration is recommended for modular code where many different APIs may be put together at the application level.</p>
 <p>Below is an example where various methods implemented with a third party library can be integrated in layered fashion: any of the methods can be used in isolation or in combination.</p>
@@ -105,7 +105,7 @@ var doBoth = function(callback) {
     })
 };</code></pre>
 <h4 id="comprehensive-integration">Comprehensive integration</h4>
-<p>Comprehensive integration is recommended if integrating a monolithic series of asynchronous operations. In contrast to layered integration, it minimizes the number of <code>m.startComputation</code> / <code>m.endComputation</code> to avoid clutter.</p>
+<p>Comprehensive integration is recommended if integrating a monolithic series of asynchronous operations. In contrast to layered integration, it minimizes the number of <code>m.startComputation</code> / <code>m.endComputation</code> calls to avoid clutter.</p>
 <p>The example below shows a convoluted series of AJAX requests implemented with a third party library.</p>
 <pre><code class="lang-javascript">var doSomething = function(callback) {
     m.startComputation(); //call `startComputation` before everything else

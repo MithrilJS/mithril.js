@@ -77,11 +77,11 @@ var doSomething = function() { /*...*/ }
 
 m.request({method: &quot;GET&quot;, url: &quot;/user&quot;}).then(users).then(doSomething)</code></pre>
 <p>While both basic assignment syntax and thennable syntax can be used to the same effect, typically it&#39;s recommended that you use the assignment syntax in the first example whenever possible, as it&#39;s easier to read.</p>
-<p>The thennable mechanism is intended to be used in 3 ways:</p>
+<p>The thennable mechanism is intended to be used in three ways:</p>
 <ul>
-<li>in the model layer: to process web service data in transformative ways (e.g. filtering a list based on a parameter that the web service doesn&#39;t support)</li>
-<li>in the controller layer: to bind redirection code upon a condition</li>
-<li>in the controller layer: to bind error messages</li>
+<li>In the model layer: to process web service data in transformative ways (e.g. filtering a list based on a parameter that the web service doesn&#39;t support)</li>
+<li>In the controller layer: to bind redirection code upon a condition</li>
+<li>In the controller layer: to bind error messages</li>
 </ul>
 <h4 id="processing-web-service-data">Processing web service data</h4>
 <p>This step is meant to be done in the model layer. Doing it in the controller level is also possible, but philosophically not recommended, because by tying logic to a controller, the code becomes harder to reuse due to unrelated controller dependencies.</p>
@@ -109,7 +109,7 @@ var controller = function() {
     })
 }</code></pre>
 <h4 id="binding-errors">Binding errors</h4>
-<p>Mithril thennables take two functions as optional parameters: the first parameter is called if the web service request completes successfully. The second one is called if it completes with an error.</p>
+<p>Mithril thennables take two functions as optional parameters: the first parameter is called if the web service request completes successfully. The second parameter is called if it completes with an error.</p>
 <p>Error binding is meant to be done in the controller layer. Doing it in the model level is also possible, but generally leads to more code in order to connect all the dots.</p>
 <p>In the example below, we bind an error getter-setter to our previous controller so that the <code>error</code> variable gets populated if the server throws an error.</p>
 <pre><code class="lang-javascript">//controller
@@ -131,11 +131,11 @@ var controller = function() {
 <h3 id="queuing-operations">Queuing Operations</h3>
 <p>As you saw, you can chain operations that act on the response data. Typically this is required in three situations:</p>
 <ul>
-<li>in model-level methods if client-side processing is needed to make the data useful for a controller or view.</li>
-<li>in the controller, to redirect after a model service resolves.</li>
-<li>in the controller, to bind error messages</li>
+<li>In model-level methods if client-side processing is needed to make the data useful for a controller or view</li>
+<li>In the controller, to redirect after a model service resolves</li>
+<li>In the controller, to bind error messages</li>
 </ul>
-<p>In the example below, we take advantage of queuing to debug the ajax response data prior to doing further processing on the user list</p>
+<p>In the example below, we take advantage of queuing to debug the AJAX response data prior to doing further processing on the user list:</p>
 <pre><code class="lang-javascript">var users = m.request({method: &quot;GET&quot;, url: &quot;/user&quot;})
     .then(console.log);
     .then(function(users) {
@@ -148,7 +148,7 @@ var controller = function() {
 //i.e. users() //[{name: &quot;John&quot;}, {name: &quot;Mary&quot;}, {name: &quot;Jane&quot;}]</code></pre>
 <hr>
 <h3 id="casting-the-response-data-to-a-class">Casting the Response Data to a Class</h3>
-<p>It&#39;s possible to auto-cast a JSON response to a class. This is useful when we want to control access to certain properties in an object, as opposed to exposing all the fields in POJOs (plain old javascript objects) for arbitrary processing.</p>
+<p>It&#39;s possible to auto-cast a JSON response to a class. This is useful when we want to control access to certain properties in an object, as opposed to exposing all the fields in POJOs (plain old Javascript objects) for arbitrary processing.</p>
 <p>In the example below, <code>User.list</code> returns a list of <code>User</code> instances.</p>
 <pre><code class="lang-javascript">var User = function(data) {
     this.name = m.prop(data.name);

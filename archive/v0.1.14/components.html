@@ -103,8 +103,8 @@ projectList.view = function(ctrl) {
 
 //initialize
 m.module(document.body, dashboard);</code></pre>
-<p>As you can see, components look exactly like regular modules - it&#39;s turtles all the way down! Remember that modules are simply dumb containers for <code>controller</code> and <code>view</code> classes.</p>
-<p>This means components are decoupled both <em>horizontally</em> and <em>vertically</em>. It&#39;s possible to refactor each component as a isolated unit of logic (which itself follows the MVC pattern). And we can do so without touching the rest of the application (as long as the component API stays the same).</p>
+<p>As you can see, components look exactly like regular modules - it&#39;s <a href="https://en.wikipedia.org/wiki/Turtles_all_the_way_down">turtles all the way down</a>! Remember that modules are simply dumb containers for <code>controller</code> and <code>view</code> classes.</p>
+<p>This means components are decoupled both <em>horizontally</em> and <em>vertically</em>. It&#39;s possible to refactor each component as an isolated unit of logic (which itself follows the MVC pattern). And we can do so without touching the rest of the application (as long as the component API stays the same).</p>
 <p>Similarly, it&#39;s possible to mix and match different classes to make mix-in anonymous components (e.g. it&#39;s straightforward to build several views - for, say, a mobile app - that use the same controller).</p>
 <p>It&#39;s also possible to keep references to parent and even sibling components. This is useful, for example, when implementing notification badges in a navigation component, which are triggered and managed by other components in the system.</p>
 <hr>
