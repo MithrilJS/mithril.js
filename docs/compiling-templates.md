@@ -4,7 +4,7 @@ You can optionally pre-compile templates that use `m()` by running the [`templat
 
 Compiling a template transforms the nested function calls of a template into a raw virtual DOM tree (which is merely a collection of native Javascript objects that is ready to be rendered via [`m.render`](mithril.render.md)). This means that compiled templates don't need to parse the string in `m("div#foo")` and they don't incur the cost of the function call.
 
-It's worth mentioning that Mithril has built-in mechanisms elsewhere that take care of real bottlenecks like browser repaint management and DOM updating. This optional compilation tool is merely "icing on the cake" that speeds up the javascript run-time of templates (which is already fast even without compilation - see performance test in the homepage).
+It's worth mentioning that Mithril has built-in mechanisms elsewhere that take care of real bottlenecks like browser repaint management and DOM updating. This optional compilation tool is merely "icing on the cake" that speeds up the Javascript run-time of templates (which is already fast, even without compilation - see the [performance section on the homepage](http://lhorie.github.io/mithril/index.html#performance)).
 
 The macro takes regular Mithril templates like the one below:
 

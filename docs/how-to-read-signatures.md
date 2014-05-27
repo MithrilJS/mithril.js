@@ -1,8 +1,8 @@
 ## How to Read Signatures
 
-Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old javascript objects (POJOs) that match given signatures.
+Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old Javascript objects (POJOs) that match given signatures.
 
-A signature is a description of its static type. For functions, it shows what are the parameters of the function, its return value and their expected types. For objects and arrays, it shows the expected data structure and the expected types of their members.
+A signature is a description of its static type. For functions, it shows the parameters of the function, its return value and their expected types. For objects and arrays, it shows the expected data structure and the expected types of their members.
 
 Method signatures in this documentation follow a syntax similar to Java syntax, with some extra additions:
 
@@ -133,7 +133,7 @@ typeof a == "function" // true
 a.label = "first"
 ```
 
-### Polimorphic Types
+### Polymorphic Types
 
 When multiple (but not all) types are accepted, the pipe `|` is used to delimit the list of valid types
 
@@ -152,7 +152,7 @@ test([1, 2, 3], "second")
 test([1, "test", 3], 2)
 ```
 
-Pipe syntax within Object curly brace syntax means that for a specific key name has specific type requirements.
+Pipe syntax within Object curly brace syntax means that, for a specific key, name has specific type requirements.
 
 In the example below, the `value` parameter should be a key-value map. This map may contain a key called `config`, whose value should be a function.
 

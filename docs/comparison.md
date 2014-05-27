@@ -10,7 +10,7 @@ One of the most obvious differences between Mithril and most frameworks is in fi
 
 Note that while a small gzipped size can look appealing, that number is often used to "hide the weight" of the uncompressed code: remember that the decompressed Javascript still needs to be parsed and evaluated on every page load, and this cost (which can be in the dozens of milliseconds range for some frameworks in some browsers) cannot be cached.
 
-This cost might be less of a concern in single page apps, but not necessarily if the app is typically opened simultaneously in multiple tabs, or in less powerful devices.
+This cost might be less of a concern in single page apps, but not necessarily if the app is typically opened simultaneously in multiple tabs, or run on less powerful devices.
 
 The performance tests in the homepage show execution times for parsing and evaluation of Mithril's code, compared to some popular frameworks. As you can see, it paints a much less flattering picture for some frameworks than when we look at gzipped size alone.
 
@@ -20,9 +20,9 @@ Another point of comparison is documentation. Most of the popular frameworks hav
 
 This is a problem particularly for frameworks that had breaking changes in the past: It's common to find answers in StackOverflow that are out-of-date and no longer work with the latest version of said frameworks.
 
-Mithril has more documentation in this site than the amount of code in the framework, and none of the documentation is auto-generated.
+Mithril has more documentation in its Github repo than source code, and none of the documentation is auto-generated.
 
-All API points are explained in prose, and have code examples. Because the entire documentation is hand-crafted, you get the benefit of actually having explanations for things that documentation generator tools don't support well (for example, interfaces and callback parameter documentation).
+All API points are explained in prose, and have code examples. Because the entire documentation is hand-crafted, you get the benefit of actually having explanations for things that documentation-generator tools don't support well (for example, interfaces and callback parameter documentation).
 
 In addition, this guide section covers topics related to how to fit all the pieces together.
 
@@ -72,11 +72,11 @@ Backbone was originally designed as a way to structure jQuery-based applications
 
 As with jQuery, Mithril differs from Backbone by enforcing view code to be written in a declarative style.
 
-Another marking difference is that Backbone is workflow agnostic, that is, there's no one idiomatic way to organize applications. This is good for framework adoption, but not necessarily ideal for team scalability and codebase discoverability.
+Another marking difference is that Backbone is workflow agnostic, providing no idiomatic way to organize applications. This is good for framework adoption, but not necessarily ideal for team scalability and codebase discoverability.
 
-In contrast, Mithril encourages that applications be developed using the patterns found throughout this guide. This discourages "bastardized" MVC pattern variations and architecturing style fragmentation.
+In contrast, Mithril encourages you to develop applications using the patterns found throughout this guide, and discourages the use of "bastardized" MVC pattern variations.
 
-One technical aspect that is also different is that Backbone is heavily event-oriented. Mithril, on the other hand, purposely avoids the observer pattern in an attempt to abolish "come-from hell", i.e. a class of debugging problems where you don't know what triggers some code because of a long chain of events triggering other events.
+One technical aspect that is also different is that Backbone is heavily event-oriented. Mithril, on the other hand, purposely avoids the observer pattern in an attempt to abolish "come-from hell", a class of debugging problems where you don't know what triggers some code because of a long chain of events triggering other events.
 
 A particularly nasty instance of this problem that sometimes occurs in "real-time" applications is when event triggering chains become circular due to a conditional statement bug, causing infinite loops and browser crashes.
 
@@ -88,17 +88,17 @@ Angular is an MVC framework maintained by Google, and it provides a declarative 
 
 The main difference between Angular templates and Mithril templates is that Angular templates follow the tradition of being defined in HTML. This has the benefit of cleaner syntax for writing static text, but it comes with the disadvantage of features getting awkwardly tied to HTML syntax, as well as providing poor debugging support.
 
-One thing you may have noticed in the homepage is that, out of the box, Angular is not as performant as other frameworks. Steep performance degradation is a notoriously common issue in non-trivial Angular applications and there are several third party libraries which attempt to get around performance problems. Speaking from experience, it's generally difficult to reason about performance in Angular.
+One thing you may have noticed on the [Mithril homepage](http://lhorie.github.io/mithril/index.html#performance) is that, out of the box, Angular is not as performant as other frameworks. Steep performance degradation is a notoriously common issue in non-trivial Angular applications and there are several third party libraries which attempt to get around performance problems. Speaking from experience, it's generally difficult to reason about performance in Angular.
 
 Mithril takes some learnings from that and implements a templating redrawing system that renders less aggressively, is less complex and is easier to profile.
 
-A noteworthy difference between Angular and Mithril is in framework complexity: Angular implements several subsystems that would seem more logical in programming language implementations (e.g. a parser, a dynamic scoping mechanism, decorators, etc). Mithril, on the other hand, tries to provide only features to support a more classic MVC paradigm.
+A noteworthy difference between Angular and Mithril is in framework complexity: Angular implements several subsystems that would seem more logical in programming language implementations (e.g. a parser, a dynamic scoping mechanism, decorators, etc). Mithril, on the other hand, tries to provide only features that support a more classic MVC paradigm.
 
 ### Ember
 
 Ember is a highly comprehensive MVC framework, providing a large API that covers not only traditional MVC patterns, but also a vast range of helper utilities as well.
 
-The biggest difference between Ember and Mithril is summarized in the Architecture section above: Ember's comprehensiveness come at a cost of a steep learning curve, and a high degree of vendor lock-in.
+The biggest difference between Ember and Mithril is summarized in the Architecture section above: Ember's comprehensiveness comes at the cost of a steep learning curve and a high degree of vendor lock-in.
 
 Ember is also more opinionated in terms of how application architecture should look, and as a result, tends to be less transparent in terms of what is actually happening under the hood.
 
@@ -106,7 +106,7 @@ Ember is also more opinionated in terms of how application architecture should l
 
 React is a templating engine developed by Facebook. It's relevant for comparison because it uses the same architecture as Mithril's templating engine: i.e. it acknowledges that DOM operations are the bottleneck of templating systems, and implements a virtual DOM tree which keeps track of changes and only applies diffs to the real DOM where needed.
 
-The most visible difference between React and Mithril is that React's *JSX* syntax does not run natively in the browser, whereas Mithril's uncompiled templates do. Both can be compiled, but React's compiled code still has function calls for each virtual DOM element; Mithril templates compile into static javascript data structures.
+The most visible difference between React and Mithril is that React's *JSX* syntax does not run natively in the browser, whereas Mithril's uncompiled templates do. Both can be compiled, but React's compiled code still has function calls for each virtual DOM element; Mithril templates compile into static Javascript data structures.
 
 Another difference is that Mithril, being an MVC framework, rather than a templating engine, provides an auto-redrawing system that is aware of network asynchrony and that can render views efficiently without cluttering application code with redraw calls, and without letting the developer unintentionally bleed out of the MVC pattern.
 
@@ -124,7 +124,7 @@ As with Angular, Knockout templates are written in HTML, and therefore have the 
 
 ### Vue
 
-Vue is a relatively new and unknown templating engine, but it boasts impressive results in its performance benchmark.
+Vue is a relatively new templating engine, but it boasts impressive results in its performance benchmark.
 
 It is not a full MVC framework, but it is similar to Angular templates, and uses the same terminology for its features (e.g. directives and filters).
 

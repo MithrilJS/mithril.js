@@ -51,11 +51,11 @@ m.request({method: "GET", url: "/user"}).then(users).then(doSomething)
 
 While both basic assignment syntax and thennable syntax can be used to the same effect, typically it's recommended that you use the assignment syntax in the first example whenever possible, as it's easier to read.
 
-The thennable mechanism is intended to be used in 3 ways:
+The thennable mechanism is intended to be used in three ways:
 
--	in the model layer: to process web service data in transformative ways (e.g. filtering a list based on a parameter that the web service doesn't support)
--	in the controller layer: to bind redirection code upon a condition
--	in the controller layer: to bind error messages
+-	In the model layer: to process web service data in transformative ways (e.g. filtering a list based on a parameter that the web service doesn't support)
+-	In the controller layer: to bind redirection code upon a condition
+-	In the controller layer: to bind error messages
 
 #### Processing web service data
 
@@ -96,7 +96,7 @@ var controller = function() {
 
 #### Binding errors
 
-Mithril thennables take two functions as optional parameters: the first parameter is called if the web service request completes successfully. The second one is called if it completes with an error.
+Mithril thennables take two functions as optional parameters: the first parameter is called if the web service request completes successfully. The second parameter is called if it completes with an error.
 
 Error binding is meant to be done in the controller layer. Doing it in the model level is also possible, but generally leads to more code in order to connect all the dots.
 
@@ -130,11 +130,11 @@ var controller = function() {
 
 As you saw, you can chain operations that act on the response data. Typically this is required in three situations:
 
--	in model-level methods if client-side processing is needed to make the data useful for a controller or view.
--	in the controller, to redirect after a model service resolves.
--	in the controller, to bind error messages
+-	In model-level methods if client-side processing is needed to make the data useful for a controller or view
+-	In the controller, to redirect after a model service resolves
+-	In the controller, to bind error messages
 
-In the example below, we take advantage of queuing to debug the ajax response data prior to doing further processing on the user list
+In the example below, we take advantage of queuing to debug the AJAX response data prior to doing further processing on the user list:
 
 ```javascript
 var users = m.request({method: "GET", url: "/user"})
@@ -153,7 +153,7 @@ var users = m.request({method: "GET", url: "/user"})
 
 ### Casting the Response Data to a Class
 
-It's possible to auto-cast a JSON response to a class. This is useful when we want to control access to certain properties in an object, as opposed to exposing all the fields in POJOs (plain old javascript objects) for arbitrary processing.
+It's possible to auto-cast a JSON response to a class. This is useful when we want to control access to certain properties in an object, as opposed to exposing all the fields in POJOs (plain old Javascript objects) for arbitrary processing.
 
 In the example below, `User.list` returns a list of `User` instances.
 

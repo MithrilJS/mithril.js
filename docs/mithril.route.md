@@ -4,7 +4,7 @@ Routing is a system that allows creating Single-Page-Applications (SPA), i.e. ap
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
-This method overloads 4 different units of functionality:
+This method overloads four different units of functionality:
 
 - `m.route(rootElement, defaultRoute, routes)` - defines the available URLs in an application, and their respective modules
 
@@ -26,7 +26,7 @@ Routing is single-page-application (SPA) friendly, and can be implemented using 
 
 To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.module.md) to be rendered.
 
-The example below defines 3 routes, to be rendered in `<body>`. `home`, `login` and `dashboard` are modules. We'll see how to define a module in a bit.
+The example below defines three routes, to be rendered in `<body>`. `home`, `login` and `dashboard` are modules. We'll see how to define a module in a bit.
 
 ```javascript
 m.route(document.body, "/", {
@@ -70,7 +70,7 @@ Above, `dashboard` is a module. It contains a `controller` and a `view` properti
 
 In this case, since there's only route, the app redirects to the default route `"/dashboard/johndoe"`.
 
-The string `johndoe` is bound to the `:userID` parameter, which can be retrived programmatically in the controller via `m.route.param("userID")`.
+The string `johndoe` is bound to the `:userID` parameter, which can be retrieved programmatically in the controller via `m.route.param("userID")`.
 
 The `m.route.mode` defines which part of the URL to use for routing.
 

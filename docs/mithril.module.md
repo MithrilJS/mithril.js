@@ -157,9 +157,9 @@ where:
 	
 	Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can instantiate child views and manually pass the child controller instances down the the child view constructors.
 	
-	This "turtles all the way down" approach is the heart of Mithril's component system.
+	This "[turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down)" approach is the heart of Mithril's component system.
 	
-	Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components) and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).
+	Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components), and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).
 
 
 
