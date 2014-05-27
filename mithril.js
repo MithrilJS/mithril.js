@@ -162,7 +162,10 @@ Mithril = m = new function app(window) {
 		return cachedAttrs
 	}
 	function clear(nodes) {
-		for (var i = nodes.length - 1; i > -1; i--) nodes[i].parentNode.removeChild(nodes[i])
+		if (nodes.length > 0) {
+			var parent = nodes[i].parentNode
+			for (var i = nodes.length - 1; i > -1; i--) parent.removeChild(nodes[i])
+		}
 		nodes.length = 0
 	}
 	function injectHTML(parentElement, index, data) {
@@ -450,11 +453,10 @@ Mithril = m = new function app(window) {
 	function ajax(options) {
 		var xhr = window.XDomainRequest ? new window.XDomainRequest : new window.XMLHttpRequest
 		xhr.open(options.method, options.url, true, options.user, options.password)
-		xhr.onload = typeof options.onload == "function" ? options.onload : function() {}
-		xhr.onerror = typeof options.onerror == "function" ? options.onerror : function() {}
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 0) {
-				xhr.onerror({type: "error", target: xhr})
+			if (xhr.readyState === 4) {
+				if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
+				else options.onerror({type: "error", target: xhr})
 			}
 		}
 		if (typeof options.config == "function") options.config(xhr, options)

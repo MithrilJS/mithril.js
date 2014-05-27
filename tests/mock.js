@@ -88,10 +88,12 @@ mock.window = new function() {
 			}
 			this.send = function() {
 				this.responseText = JSON.stringify(this)
-				request.$events.push({type: "load", target: this})
+				this.readyState = 4
+				this.status = 200
+				request.$instances.push(this)
 			}
 		}
-		request.$events = []
+		request.$instances = []
 		return request
 	}
 	window.location = {search: "", pathname: "", hash: ""},

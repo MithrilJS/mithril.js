@@ -678,40 +678,34 @@ function testMithril(mock) {
 	//m.request
 	test(function() {
 		var prop = m.request({method: "GET", url: "test"})
-		var e = mock.XMLHttpRequest.$events.pop()
-		e.target.onload(e)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop().method === "GET" && prop().url === "test"
 	})
 	test(function() {
 		var prop = m.request({method: "GET", url: "test"}).then(function(value) {return "foo"})
-		var e = mock.XMLHttpRequest.$events.pop()
-		e.target.onload(e)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop() === "foo"
 	})
 	test(function() {
 		var prop = m.request({method: "POST", url: "http://domain.com:80", data: {}}).then(function(value) {return value})
-		var e = mock.XMLHttpRequest.$events.pop()
-		e.target.onload(e)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop().url === "http://domain.com:80"
 	})
 	test(function() {
 		var prop = m.request({method: "POST", url: "http://domain.com:80/:test1", data: {test1: "foo"}}).then(function(value) {return value})
-		var e = mock.XMLHttpRequest.$events.pop()
-		e.target.onload(e)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop().url === "http://domain.com:80/foo"
 	})
 	test(function() {
 		var error = m.prop("no error")
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}}).then(null, error)
-		var e = mock.XMLHttpRequest.$events.pop()
-		e.target.onload(e)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop() === undefined && error().message === "error occurred"
 	})
 	test(function() {
 		var error = m.prop("no error"), exception
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new SyntaxError("error occurred")}}).then(null, error)
-		var event = mock.XMLHttpRequest.$events.pop()
-		try {event.target.onload(event)}
+		try {mock.XMLHttpRequest.$instances.pop().onreadystatechange()}
 		catch (e) {exception = e}
 		m.endComputation()
 		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
