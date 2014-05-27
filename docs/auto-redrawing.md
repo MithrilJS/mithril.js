@@ -41,11 +41,11 @@ You should not use these methods if your code is intended to run repeatedly (e.g
 
 When [integrating with third party libraries](integration.md), you might find that you need to call asynchronous methods from outside of Mithril's API.
 
-In order to integrate non-trivial asynchronous code to Mithril's auto-redrawing system, you need to ensure all execution threads call `m.startComputation` / `m.endComputation`.
+In order to integrate non-trivial asynchronous code with Mithril's auto-redrawing system, you need to ensure all execution threads call `m.startComputation` / `m.endComputation`.
 
 An execution thread is basically any amount of code that runs before other asynchronous threads start to run.
 
-Integrating multiple execution threads can be done in a two different ways: in a layered fashion or in comprehensive fashion
+Integrating multiple execution threads can be done in two different ways: in a layered fashion or in comprehensive fashion.
 
 #### Layered integration
 
@@ -86,7 +86,7 @@ var doBoth = function(callback) {
 
 #### Comprehensive integration
 
-Comprehensive integration is recommended if integrating a monolithic series of asynchronous operations. In contrast to layered integration, it minimizes the number of `m.startComputation` / `m.endComputation` to avoid clutter.
+Comprehensive integration is recommended if integrating a monolithic series of asynchronous operations. In contrast to layered integration, it minimizes the number of `m.startComputation` / `m.endComputation` calls to avoid clutter.
 
 The example below shows a convoluted series of AJAX requests implemented with a third party library.
 

@@ -38,7 +38,7 @@ m("[contenteditable]"); //yields <div contenteditable></div>
 m("a#google.external[href='http://google.com']", "Google"); //yields <a id="google" class="external" href="http://google.com">Google</a>
 ```
 
-Each `m()` call creates a virtual DOM element, that is, a javascript object that represents a DOM element, and which is eventually converted into one.
+Each `m()` call creates a virtual DOM element, that is, a Javascript object that represents a DOM element, and which is eventually converted into one.
 
 You can, of course, nest virtual elements:
 
@@ -110,7 +110,7 @@ As you can see, flow control is done with vanilla Javascript. This allows the de
 
 ---
 
-Note that you can use both javascript property names and HTML attribute names to set values in the `attributes` argument, but you should pass a value of appropriate type. If an attribute has the same name in Javascript and in HTML, then Mithril assumes you're setting the Javascript property.
+Note that you can use both Javascript property names and HTML attribute names to set values in the `attributes` argument, but you should pass a value of appropriate type. If an attribute has the same name in Javascript and in HTML, then Mithril assumes you're setting the Javascript property.
 
 ```javascript
 m("div", {class: "widget"}); //yields <div class="widget"></div>
@@ -351,5 +351,5 @@ where:
 
 -	**returns** VirtualElement
 
-	The returned VirtualElement is a javascript data structure that represents the DOM element to be rendered by [`m.render`](mithril.render)
+	The returned VirtualElement is a Javascript data structure that represents the DOM element to be rendered by [`m.render`](mithril.render)
 

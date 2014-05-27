@@ -94,7 +94,7 @@ For example, if you were to call a web service using `m.request`, you would not 
 
 On the other hand, if you were to call a web service using jQuery, then you would be responsible for adding a `m.startComputation` call before the jQuery ajax call, and for adding a `m.endComputation` call at the end of the completion callback, in addition to the calls within the `change` event handler. Refer to the [`auto-redrawing`](auto-redrawing.md) guide for an example.
 
-One important note about the `config` method is that you should avoid calling `m.redraw`, `m.startComputation` and `m.endComputation` in the `config` function's execution thread. (An execution thread is basically any amount of code that runs before other asynchronous threads start to run)
+One important note about the `config` method is that you should avoid calling `m.redraw`, `m.startComputation` and `m.endComputation` in the `config` function's execution thread. (An execution thread is basically any amount of code that runs before other asynchronous threads start to run.)
 
 While Mithril technically does support this use case, relying on multiple redraw passes degrades performance and makes it possible to code yourself into an infinite execution loop situation, which is extremely difficult to debug.
 

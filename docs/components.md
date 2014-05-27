@@ -67,9 +67,9 @@ projectList.view = function(ctrl) {
 m.module(document.body, dashboard);
 ```
 
-As you can see, components look exactly like regular modules - it's turtles all the way down! Remember that modules are simply dumb containers for `controller` and `view` classes.
+As you can see, components look exactly like regular modules - it's [turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down)! Remember that modules are simply dumb containers for `controller` and `view` classes.
 
-This means components are decoupled both *horizontally* and *vertically*. It's possible to refactor each component as a isolated unit of logic (which itself follows the MVC pattern). And we can do so without touching the rest of the application (as long as the component API stays the same).
+This means components are decoupled both *horizontally* and *vertically*. It's possible to refactor each component as an isolated unit of logic (which itself follows the MVC pattern). And we can do so without touching the rest of the application (as long as the component API stays the same).
 
 Similarly, it's possible to mix and match different classes to make mix-in anonymous components (e.g. it's straightforward to build several views - for, say, a mobile app - that use the same controller).
 

@@ -4,7 +4,7 @@ If you're writing a template for a view, use `m()` instead.
 
 This method flags a string as trusted HTML.
 
-Trusted HTML is allowed to render arbitrary, potentially invalid markup, as well as run arbitrary javascript, and therefore the developer is responsible for either:
+Trusted HTML is allowed to render arbitrary, potentially invalid markup, as well as run arbitrary Javascript, and therefore the developer is responsible for either:
 
 - sanitizing the markup contained in the string, or
 
@@ -16,7 +16,7 @@ For this reason, `m.trust` will not auto-run `<script>` tags from trusted string
 
 Browsers do, however, allow scripts to be run asynchronously via a number of execution points, such as the `onload` or `onerror` attributes in `<img>` and `<iframe>`.
 
-IE also allows running of javascript via CSS behaviors in `<link>`/`<style>` tags and `style` attributes.
+IE also allows running of Javascript via CSS behaviors in `<link>`/`<style>` tags and `style` attributes.
 
 It's worth noting that the execution points listed above are commonly used for security attacks in combination with malformed markup, e.g. strings with mismatched attribute quotes like `" onload="alert(1)`.
 
@@ -63,6 +63,6 @@ String trust(String html)
 
 -	**returns String trustedHtml**
 	
-	The returned string is a String object instance (as opposed to a string primitive) containing the same html content, and exposing a flag property for internal use within Mithril. Do not create or manipulate trust flags manually.
+	The returned string is a String object instance (as opposed to a string primitive) containing the same HTML content, and exposing a flag property for internal use within Mithril. Do not create or manipulate trust flags manually.
 	
 	Also note that concatenating or splitting a trusted string removes the trust flag. If doing such operations, the final string needs to be flagged as trusted.

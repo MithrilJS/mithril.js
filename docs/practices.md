@@ -10,15 +10,15 @@ Mithril's design strongly encourages all entity logic to be handled in atomic mo
 
 In fact, unavoidable abstraction leaks (such as network-bound asynchrony) are laid out in such a way as to make idiomatic code organization elegant, and conversely, to make it so that the abstraction leak problems themselves discourage attempts to misplace entity logic in the controller.
 
-This design decision comes from experience with DRY and ["bus factor"](http://en.wikipedia.org/wiki/Bus_factor) of large, highly relational model layers.
+This design decision comes from experience with [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) and the ["bus factor"](http://en.wikipedia.org/wiki/Bus_factor) of large, highly relational model layers.
 
-This is in stark contrast to the ActiveRecord pattern of other frameworks, where model entities are largely object representations of database entities and these entities are manipulated in controllers in an ad-hoc field-by-field fashion, and the "committed" via a `save` method.
+This is in stark contrast to the ActiveRecord pattern of other frameworks, where model entities are largely object representations of database entities and these entities are manipulated in controllers in an ad-hoc field-by-field fashion, and then "committed" via a `save` method.
 
-Because Mithril encourages all entity logic to be done in the model layer, it's idiomatic to create modules with model-level classes that deal specifically with relationship between entities, when there isn't already a model entity that can logically hold the relational business logic.
+Because Mithril encourages all entity logic to be done in the model layer, it's idiomatic to create modules with model-level classes that deal specifically with relationships between entities, when there isn't already a model entity that can logically hold the relational business logic.
 
 Models are also responsible for centralizing tasks such as filtering of entity lists and validation routines, so that access to these methods is available across the application.
 
-DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw), but, if possible, it's preferable to abstract this into a service which integrates w/ Mithril's auto-redrawing system (see. [`m.startComputation` / `m.endComputation`](mithril.computation))
+DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw), but, if possible, it's preferable to abstract this into a service which integrates with Mithril's auto-redrawing system (see [`m.startComputation` / `m.endComputation`](mithril.computation)).
 
 ---
 
@@ -57,7 +57,7 @@ Typically, when separating MVC layers, it's common that the namespace declaratio
 
 You may choose to declare the namespace in a separate file or have the build system generate it on demand, instead.
 
-You should avoid grouping classes by the MVC layer they belong to, i.e. don't create 3 files called model.js, controllers.js and views.js.
+You should avoid grouping classes by the MVC layer they belong to, i.e. don't create three files called model.js, controllers.js and views.js.
 
 That organization pattern needlessly ties unrelated aspects of the application together and dilutes the clarity of modules.
 
@@ -93,7 +93,7 @@ In the unlikely case that you have another global variable called `m` in your pa
 
 `m.redraw` is a method that allows you to render a template outside the scope of Mithril's auto-redrawing system.
 
-Calling of this method while using `m.module` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
+Calling this method while using `m.module` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
 
 If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.emdComputation`](mithril.computation.md) instead.
 
