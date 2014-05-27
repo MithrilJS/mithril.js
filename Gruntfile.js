@@ -105,10 +105,6 @@ module.exports = function(grunt) {
 		clean: {
 			options: {force: true},
 			generated: [tempFolder]
-		},
-		watch: {
-			files: ["./**/*"],
-			tasks: ["build"]
 		}
 	});
 
@@ -116,7 +112,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
-	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks('grunt-execute');
 	grunt.loadNpmTasks("grunt-md2html");
 	grunt.loadNpmTasks("grunt-replace");
@@ -124,6 +119,6 @@ module.exports = function(grunt) {
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("test", ["concat", "execute"]);
-	grunt.registerTask("default", ["build", "watch"]);
+	grunt.registerTask("default", ["build"]);
 
 };
