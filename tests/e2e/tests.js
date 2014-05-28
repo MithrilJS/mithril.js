@@ -6,26 +6,42 @@ test('Mithril accessible as window.m', function() {
 });
 
 
-test('issue99 regression', function() {
-	// https://github.com/lhorie/mithril.js/issues/99
-	expect(3);
+test('array item removal', function() {
+	expect(2);
 	var view1 = m('div', {}, [
-		m('a', {href: '#/product/' + 12345}, 'link1')
+		m('div', {}, '0'),
+		m('div', {}, '1'),
+		m('div', {}, '2')
 	]);
 
-	var view2 = m('div', {}, [
-	  m('img', {src: 'http://www.ru', align:'right', width:400}),
-	  m('h1', {}, 'Product1'),
-	  m('h2', {}, 'brand')
+	var view2= m('div', {}, [
+		m('div', {}, '0'),
 	]);
 
 	m.render(dummyEl, view1);
-	equal(dummyEl.innerHTML, '<div><a href="#/product/12345">link1</a></div>', 'view1 rendered correctly');
+	equal(dummyEl.innerHTML, '<div><div>0</div><div>1</div><div>2</div></div>', 'view1 rendered correctly');
 
 	m.render(dummyEl, view2);
-	equal(dummyEl.innerHTML, '<div><img src="http://www.ru" align="right" width="400"><h1>Product1</h1><h2>brand</h2></div>', 'view2 rendered correctly');
+	equal(dummyEl.innerHTML, '<div><div>0</div></div>', 'view2 should be rendered correctly');
+
+});
+
+test('issue99 regression', function() {
+	// see https://github.com/lhorie/mithril.js/issues/99
+	expect(2);
+	var view1 = m('div', {}, [
+		m('div', {}, '0'),
+		m('div', {}, '1'),
+		m('div', {}, '2')
+	]);
+
+	var view2= m('div', {}, [
+		m('span', {}, '0'),
+	]);
 
 	m.render(dummyEl, view1);
-	equal(dummyEl.innerHTML, '<div><a href="#/product/12345">link1</a></div>', 'view1 should be restored correctly');
+	equal(dummyEl.innerHTML, '<div><div>0</div><div>1</div><div>2</div></div>', 'view1 rendered correctly');
 
+	m.render(dummyEl, view2);
+	equal(dummyEl.innerHTML, '<div><span>0</span></div>', 'view2 should be rendered correctly');
 });
