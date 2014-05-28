@@ -73,7 +73,7 @@ Mithril = m = new function app(window) {
 				cached = {
 					tag: data.tag,
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
-					children: build(node, data.tag, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace),
+					children: data.children !== undefined ? build(node, data.tag, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace) : undefined,
 					nodes: [node]
 				}
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -155,7 +155,9 @@ Mithril = m = new function app(window) {
 				else if (attrName === "value" && tag === "input") {
 					if (node.value !== dataAttr) node.value = dataAttr
 				}
-				else if (attrName in node && !(attrName == "list" || attrName == "style")) node[attrName] = dataAttr
+				else if (attrName in node && !(attrName == "list" || attrName == "style")) {
+					node[attrName] = dataAttr
+				}
 				else node.setAttribute(attrName, dataAttr)
 			}
 		}

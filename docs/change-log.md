@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.15](/mithril/archive/v0.1.15) - maintenance
+
+### Bug Fixes:
+
+-	`m.sync` now correctly passes arguments to resolver in same order as input arguments [#96](https://github.com/lhorie/mithril.js/issues/96) 
+-	updating textarea attributes updates its value correctly [#100](https://github.com/lhorie/mithril.js/issues/100)
+
+---
+
 [v0.1.14](/mithril/archive/v0.1.14) - maintenance
 
 ### News:
