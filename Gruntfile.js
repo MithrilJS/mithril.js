@@ -102,6 +102,17 @@ module.exports = function(grunt) {
 		execute: {
 			tests: {src: [currentVersionArchiveFolder + "/mithril-tests.js"]}
 		},
+		qunit: {
+			all: ['tests/e2e/**/*.html']
+  		},
+		connect: {
+			server: {
+				options: {
+					port: 8000,
+					base: '.'
+				}
+			}
+		},
 		clean: {
 			options: {force: true},
 			generated: [tempFolder]
@@ -116,9 +127,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-md2html");
 	grunt.loadNpmTasks("grunt-replace");
 	grunt.loadNpmTasks('grunt-zip');
+	grunt.loadNpmTasks('grunt-contrib-qunit');
+	grunt.loadNpmTasks('grunt-contrib-connect');
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("test", ["concat", "execute"]);
+	grunt.registerTask('teste2e', ['connect', 'qunit']);
 	grunt.registerTask("default", ["build"]);
 
 };

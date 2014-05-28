@@ -14,6 +14,8 @@
 		"grunt-execute": "*",
 		"grunt-md2html": "*",
 		"grunt-replace": "*",
+		"grunt-contrib-qunit": "*",
+		"grunt-contrib-connect": "*",
 		"grunt-zip": "*"
 	}
 }
