@@ -445,7 +445,7 @@ Mithril = m = new function app(window) {
 		var outstanding = args.length
 		var results = new Array(outstanding)
 		for (var i = 0; i < args.length; i++) {
-			args[i].then(synchronizer(i, true), synchronizer(false))
+			args[i].then(synchronizer(i, true), synchronizer(i, false))
 		}
 		return deferred.promise
 	}
