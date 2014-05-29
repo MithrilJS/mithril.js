@@ -378,10 +378,25 @@ function testMithril(mock) {
 		return unloaded === true
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/87
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [[m("a"), m("a")], m("button")]))
 		m.render(root, m("div", [[m("a")], m("button")]))
-		return root.childNodes[0].childNodes.length == 2
+		return root.childNodes[0].childNodes.length == 2 && root.childNodes[0].childNodes[1].nodeName == "BUTTON"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/87
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a"), m("b"), m("button")]))
+		m.render(root, m("div", [m("a"), m("button")]))
+		return root.childNodes[0].childNodes.length == 2 && root.childNodes[0].childNodes[1].nodeName == "BUTTON"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/99
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("img"), m("h1")]))
+		m.render(root, m("div", [m("a")]))
+		return root.childNodes[0].childNodes.length == 1 && root.childNodes[0].childNodes[0].nodeName == "A"
 	})
 	//end m.render
 
