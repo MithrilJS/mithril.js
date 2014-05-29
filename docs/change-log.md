@@ -5,6 +5,7 @@
 ### Bug Fixes:
 
 -	`m.sync` now correctly passes arguments to resolver in same order as input arguments [#96](https://github.com/lhorie/mithril.js/issues/96) 
+-	fixed diff deletion bug [#99](https://github.com/lhorie/mithril.js/issues/99) 
 -	updating textarea attributes updates its value correctly [#100](https://github.com/lhorie/mithril.js/issues/100)
 
 ---

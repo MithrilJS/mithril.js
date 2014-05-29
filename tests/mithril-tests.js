@@ -893,6 +893,15 @@ function testMithril(mock) {
 		deferred2.resolve("foo")
 		return value[0] === "test" && value[1] === "foo"
 	})
+	test(function() {
+		var value
+		var deferred1 = m.deferred()
+		var deferred2 = m.deferred()
+		m.sync([deferred1.promise, deferred2.promise]).then(function(data) {value = data})
+		deferred2.resolve("foo")
+		deferred1.resolve("test")
+		return value[0] === "test" && value[1] === "foo"
+	})
 
 	//m.startComputation/m.endComputation
 	test(function() {
