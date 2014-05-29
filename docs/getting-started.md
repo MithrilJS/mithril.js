@@ -217,9 +217,9 @@ This binds the `description` getter-setter to the text input. Updating the value
 ```javascript
 var ctrl = new todo.controller();
 ctrl.description(); // empty string
-m.render(todo.view(ctrl)); // input is empty
+m.render(document, todo.view(ctrl)); // input is empty
 ctrl.description("Write code"); //set the description in the controller
-m.render(todo.view(ctrl)); // input now says "Write code"
+m.render(document, todo.view(ctrl)); // input now says "Write code"
 ```
 
 Note that calling the `todo.view` method multiple times does not re-render the entire template.
@@ -354,9 +354,7 @@ Here are the highlights of the template above:
 
 -	The template is rendered as a child of the implicit `<html>` element of the document.
 -	The text input saves its value to the `ctrl.description` getter-setter we defined earlier.
--	The button calls the `ctrl.add` method when clicked. The `.bind(ctrl, ctrl.description)` idiom is a [partial application](http://en.wikipedia.org/wiki/Partial_application).
-
-	In this example, it's only used to maintain the scope binding for the `this` parameter in the controller method, but typically it's also used to bind parameters to the function without the need to declare a wrapper anonymous function.
+-	The button calls the `ctrl.add` method when clicked.
 -	The table lists all the existing to-dos, if any.
 -	The checkboxes save their value to the `task.done` getter setter.
 -	The description gets crossed out via CSS if the task is marked as done.
