@@ -37,7 +37,7 @@ var dashboard = {
 		this.id = m.route.param("userID");
 	},
 	view: function(controller) {
-		m.render("body", controller.id);
+		return m("div", controller.id);
 	}
 }
 
