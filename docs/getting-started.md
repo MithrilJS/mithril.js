@@ -127,7 +127,9 @@ todo.controller = function() {
 }
 ```
 
-The code above should hopefully be self-explanatory. You can use the controller like this:
+The code above defines a controller class. It has three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string. Later in this guide, we'll pass the `description` property as the parameter to this function. I'll explain why we're passing it as an argument when we get there.
+
+You can use the controller like this:
 
 ```javascript
 var ctrl = new todo.controller();
