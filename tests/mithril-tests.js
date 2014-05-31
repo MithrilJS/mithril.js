@@ -951,7 +951,7 @@ function testMithril(mock) {
 		var checkConfig = function(elem, isInitialized, ctx) {
 			success = success && (ctx.data === idx++)
 		}
-		node = m("div", {config: statefulConfig});
+		node = m("div", {config: checkConfig});
 		m.render(root, [node, node]);
 		return success;
 	})
