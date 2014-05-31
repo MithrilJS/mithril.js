@@ -926,6 +926,16 @@ function testMithril(mock) {
 	test(function() {
 		return m.deps.factory.toString().indexOf("console") < 0
 	})
+
+	// config context
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var success = false;
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data=1}}));
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data===1}}));
+		return success;
+	})
 }
 
 //mocks
