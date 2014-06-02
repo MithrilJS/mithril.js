@@ -616,8 +616,8 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/", {
-			"/": {controller: function() {}, view: function() {return;}},
-			"/test12": {controller: function() {}, view: function() {return;}}
+			"/": {controller: function() {}, view: function() {}},
+			"/test12": {controller: function() {}, view: function() {}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test12?a=foo&b=bar")
@@ -647,7 +647,7 @@ function testMithril(mock) {
 		m.route.mode = "search"
 		m.route(root, "/", {
 			"/": {controller: function() {}, view: function() {return "bar"}},
-			"/test14": {controller: function() {}, view: function() {return "foo" }}
+			"/test14": {controller: function() {}, view: function() {return "foo"}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test14?test&test2=")
@@ -661,13 +661,29 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/", {
-			"/": {controller: function() {}, view: function() {return;}},
-			"/test12": {controller: function() {}, view: function() {return;}}
+			"/": {controller: function() {}, view: function() {}},
+			"/test12": {controller: function() {}, view: function() {}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test12", {a: "foo", b: "bar"})
 		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var route1, route2
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {route1 = m.route()}, view: function() {}},
+			"/test13": {controller: function() {route2 = m.route()}, view: function() {}}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test13")
+		mock.performance.$elapse(50) //teardown
+		return route1 == "/" && route2 == "/test13"
 	})
 	//end m.route
 

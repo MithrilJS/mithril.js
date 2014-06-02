@@ -53,11 +53,15 @@ Mithril = m = new function app(window) {
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
-				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+				for (var i = 0; i < data.length; i++) {
+					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+				}
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) {
 					if (node.parentNode !== null && node.parentNode.childNodes.length != nodes.length) node.parentNode.removeChild(node)
 				}
-				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parentElement.appendChild(node)
+				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
+					if (node.parentNode === null) parentElement.appendChild(node)
+				}
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
@@ -274,20 +278,22 @@ Mithril = m = new function app(window) {
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
 		else if (arguments.length === 3) {
-			currentRoute = window.location[m.route.mode].slice(modes[m.route.mode].length)
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
-				var path = currentRoute = source.slice(modes[m.route.mode].length)
+				var path = currentRoute = normalizeRoute(source)
 				if (!routeByValue(root, router, path)) {
 					m.route(defaultRoute, true)
 				}
 			}
 			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
 			window[listener] = function() {
-				redirect(window.location[m.route.mode])
+				if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
+					redirect(window.location[m.route.mode])
+				}
 			}
 			computePostRedrawHook = scrollToHash
 			window[listener]()
+			currentRoute = normalizeRoute(window.location[m.route.mode])
 		}
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
@@ -319,6 +325,7 @@ Mithril = m = new function app(window) {
 	}
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
+	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
 		routeParams = {}
 
