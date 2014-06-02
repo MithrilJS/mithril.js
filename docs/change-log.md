@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.16](/mithril/archive/v0.1.6) - maintenance
+
+### Bug Fixes:
+
+-	prevent route change when only hash changes in non-hash mode [#107](https://github.com/lhorie/mithril.js/issues/107)
+
+---
+
 [v0.1.15](/mithril/archive/v0.1.15) - maintenance
 
 ### Bug Fixes:
