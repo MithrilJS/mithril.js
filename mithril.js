@@ -530,7 +530,7 @@ Mithril = m = new function app(window) {
 	m.deps.factory = app
 
 	return m
-}(this)
+}(typeof window != "undefined" ? window : {})
 
 if (typeof module != "undefined" && module !== null) module.exports = m
 if (typeof define == "function" && define.amd) define(function() {return m})
