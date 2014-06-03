@@ -143,7 +143,7 @@ var users = m.request({method: "GET", url: "/user"})
 		//add one more user to the response
 		return users.concat({name: "Jane"})
 	})
-
+	
 function log(load) {
     console.log(load)
     return load
