@@ -144,6 +144,11 @@ var users = m.request({method: "GET", url: "/user"})
 		return users.concat({name: "Jane"})
 	})
 
+function log(load) {
+    console.log(load)
+    return load
+}
+
 //assuming the response contains the following data: `[{name: "John"}, {name: "Mary"}]`
 //then when resolved (e.g. in a view), the `users` getter-setter will contain a list of users
 //i.e. users() //[{name: "John"}, {name: "Mary"}, {name: "Jane"}]
