@@ -138,7 +138,7 @@ In the example below, we take advantage of queuing to debug the AJAX response da
 
 ```javascript
 var users = m.request({method: "GET", url: "/user"})
-	.then(console.log);
+	.then(log);
 	.then(function(users) {
 		//add one more user to the response
 		return users.concat({name: "Jane"})
