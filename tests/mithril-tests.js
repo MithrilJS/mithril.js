@@ -454,6 +454,31 @@ function testMithril(mock) {
 		var children = root.childNodes[0].childNodes
 		return children.length == 3 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var success = false
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data = 1}}))
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data === 1}}))
+		return success
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var index = 0;
+		var success = true;
+		var statefulConfig = function(elem, isInitialized, ctx) {ctx.data = index++}
+		var node = m("div", {config: statefulConfig});
+		m.render(root, [node, node]);
+
+		index = 0;
+		var checkConfig = function(elem, isInitialized, ctx) {
+			success = success && (ctx.data === index++)
+		}
+		node = m("div", {config: checkConfig});
+		m.render(root, [node, node]);
+		return success;
+	})
 	//end m.render
 
 	//m.redraw

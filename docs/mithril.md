@@ -162,7 +162,7 @@ You can define a non-HTML-standard attribute called `config`. This special param
 This is useful, for example, if you declare a `canvas` element and want to use the Javascript API to draw:
 
 ```javascript
-function draw(element, isInitialized) {
+function draw(element, isInitialized, context) {
 	//don't redraw if we did once already
 	if (isInitialized) return;
 	
@@ -202,6 +202,21 @@ You can use this mechanism to attach custom event listeners to controller method
 
 ---
 
+The third argument for `config` allows you to map data to a virtual DOM element in a way that persists across redraws. This is useful when a `config` instantiates 3rd party classes and accesses the instance on redraws.
+
+The example below shows a contrived redraw counter. In it, the count is stored in the context object and re-accessed on each redraw.
+
+```javascript
+function alertsRedrawCount(element, isInit, context) {
+	if (!isInit) context.count = 0
+	alert(++context.count)
+}
+
+m("div", {config: alertsRedrawCount})
+```
+
+---
+
 You can use Mithril to create SVG documents (as long as you don't need to support browsers that don't support SVG natively).
 
 Mithril automatically figures out the correct XML namespaces when it sees an SVG island in the virtual DOM tree.
@@ -223,7 +238,7 @@ VirtualElement m(String selector [, Attributes attributes] [, Children children]
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized)>
+    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context)>
 	Children :: String text | VirtualElement virtualElement | SubtreeDirective directive | Array<Children children>
 	SubtreeDirective :: Object { String subtree }
 ```
@@ -286,7 +301,7 @@ where:
 	
 -	#### The `config` attribute
 	
-	**void config(DOMElement element, Boolean isInitialized)** (optional)
+	**void config(DOMElement element, Boolean isInitialized, Object context)** (optional)
 
 	You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
 
@@ -339,6 +354,21 @@ where:
 	
 	Whether this is the first time we are running this function on this element. This flag is false the first time it runs on an element, and true on redraws that happen after the element has been created.
 
+	-	**Object context**
+	
+	An object that retains its state across redraws. It can be used to store instances of 3rd party classes that need to be accessed more than one time throughout the lifecycle of a page.
+	
+	The example below shows a contrived redraw counter. In it, the count is stored in the context object and re-accessed on each redraw.
+
+	```javascript
+	function alertsRedrawCount(element, isInit, context) {
+		if (!isInit) context.count = 0
+		alert(++context.count)
+	}
+
+	m("div", {config: alertsRedrawCount})
+	```
+	
 -	**Children children** (optional)
 
 	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust)

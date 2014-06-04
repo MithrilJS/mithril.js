@@ -96,7 +96,7 @@ Mithril = m = new function app(window) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
+			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew, cached.configContext = cached.configContext || {})
 		}
 		else {
 			var node
@@ -283,7 +283,7 @@ Mithril = m = new function app(window) {
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
-		else if (arguments.length === 3) {
+		else if (arguments.length === 3 && typeof arguments[1] == "string") {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source)
