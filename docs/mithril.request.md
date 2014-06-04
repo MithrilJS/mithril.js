@@ -228,6 +228,23 @@ var file = m.request({
 
 ---
 
+### Using variable data formats
+
+By default, Mithril assumes both success and error responses are in JSON format, but some servers may not return JSON responses when returning HTTP error codes (e.g. 404)
+
+You can get around this issue by using `extract`
+
+```javascript
+var nonJsonErrors = function(xhr) {
+  return xhr.status > 200 ? JSON.stringify(xhr.responseText) : xhr.responseText
+}
+
+m.request({method: "GET", url: "/foo/bar.x", extract: nonJsonErrors})
+  .then(function(data) {}, function(error) {console.log(error)})
+```
+
+---
+
 ### Extracting Metadata from the Response
 
 The `extract` method can be used to read metadata from HTTP response headers or the status field of an XMLHttpRequest.
