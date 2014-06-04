@@ -96,7 +96,7 @@ Mithril = m = new function app(window) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
+			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew, cached.config_context=cached.config_context || {})
 		}
 		else {
 			var node
