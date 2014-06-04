@@ -144,9 +144,9 @@ var users = m.request({method: "GET", url: "/user"})
 		return users.concat({name: "Jane"})
 	})
 	
-function log(load) {
-    console.log(load)
-    return load
+function log(value) {
+    console.log(value)
+    return value
 }
 
 //assuming the response contains the following data: `[{name: "John"}, {name: "Mary"}]`
