@@ -134,7 +134,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li"), m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes[1].nodeValue === ""
+		return root.childNodes[0].childNodes.length == 2 && root.childNodes[0].childNodes[1].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -397,6 +397,62 @@ function testMithril(mock) {
 		m.render(root, m("div", [m("img"), m("h1")]))
 		m.render(root, m("div", [m("a")]))
 		return root.childNodes[0].childNodes.length == 1 && root.childNodes[0].childNodes[0].nodeName == "A"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", "b", "c", "d"]))
+		m.render(root, m("div", [["d", "e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [["a", "b", "c", "d"]]))
+		m.render(root, m("div", ["d", "e"]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["x", [["a"], "b", "c", "d"]]))
+		m.render(root, m("div", ["d", ["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["b"]))
+		m.render(root, m("div", [["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 1 && children[0].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", ["b"]]))
+		m.render(root, m("div", ["d", [["e"]]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", [["b"]]]))
+		m.render(root, m("div", ["d", ["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", [["b"], "c"]]))
+		m.render(root, m("div", ["d", [[["e"]], "x"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 3 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
 	})
 	//end m.render
 
