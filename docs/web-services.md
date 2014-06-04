@@ -138,11 +138,16 @@ In the example below, we take advantage of queuing to debug the AJAX response da
 
 ```javascript
 var users = m.request({method: "GET", url: "/user"})
-	.then(console.log);
+	.then(log);
 	.then(function(users) {
 		//add one more user to the response
 		return users.concat({name: "Jane"})
 	})
+	
+function log(load) {
+    console.log(load)
+    return load
+}
 
 //assuming the response contains the following data: `[{name: "John"}, {name: "Mary"}]`
 //then when resolved (e.g. in a view), the `users` getter-setter will contain a list of users
