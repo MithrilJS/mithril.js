@@ -310,7 +310,7 @@ Mithril = m = new function app(window) {
 			var element = arguments[0]
 			var isInitialized = arguments[1]
 			if (element.href.indexOf(modes[m.route.mode]) < 0) {
-				element.href = location.pathname + modes[m.route.mode] + element.pathname
+				element.href = window.location.pathname + modes[m.route.mode] + element.pathname
 			}
 			if (!isInitialized) {
 				element.removeEventListener("click", routeUnobtrusive)
