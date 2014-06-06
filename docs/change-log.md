@@ -5,6 +5,7 @@
 ### Bug Fixes:
 
 -	prevent route change when only hash changes in non-hash mode [#107](https://github.com/lhorie/mithril.js/issues/107)
+-	config now always runs after template is attached to document [#109](https://github.com/lhorie/mithril.js/issues/109)
 -	fix null reference exception with Browserify [#110](https://github.com/lhorie/mithril.js/issues/110)
 -	fix nested array removal edge cases [#120](https://github.com/lhorie/mithril.js/issues/120)
 
