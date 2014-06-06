@@ -32,6 +32,7 @@ Mithril = m = new function app(window) {
 		}
 		return cell
 	}
+	var configs = []
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace) {
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return
@@ -96,7 +97,9 @@ Mithril = m = new function app(window) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew, cached.configContext = cached.configContext || {})
+			if (type.call(data.attrs["config"]) == "[object Function]") {
+				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}))
+			}
 		}
 		else {
 			var node
@@ -224,6 +227,8 @@ Mithril = m = new function app(window) {
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined)
+		for (var i = 0; i < configs.length; i++) configs[i]()
+		configs.length = 0
 	}
 
 	m.trust = function(value) {

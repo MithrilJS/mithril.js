@@ -479,6 +479,14 @@ function testMithril(mock) {
 		m.render(root, [node, node]);
 		return success;
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var parent
+		m.render(root, m("div", m("a", {
+			config: function(el) {parent = el.parentNode.parentNode}
+		})));
+		return parent === root
+	})
 	//end m.render
 
 	//m.redraw
