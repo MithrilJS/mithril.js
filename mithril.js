@@ -32,8 +32,7 @@ Mithril = m = new function app(window) {
 		}
 		return cell
 	}
-	var configs = []
-	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace) {
+	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return
 
@@ -52,8 +51,9 @@ Mithril = m = new function app(window) {
 
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
+			
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
-				var item = build(parentElement, null, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace)
+				var item = build(parentElement, null, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				subArrayCount += item instanceof Array ? item.length : 1
@@ -85,7 +85,7 @@ Mithril = m = new function app(window) {
 				cached = {
 					tag: data.tag,
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
-					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace) : undefined,
+					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
 					nodes: [node]
 				}
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -93,7 +93,7 @@ Mithril = m = new function app(window) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace)
+				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
@@ -222,13 +222,13 @@ Mithril = m = new function app(window) {
 	}
 	var nodeCache = [], cellCache = {}
 	m.render = function(root, cell) {
+		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var index = nodeCache.indexOf(root)
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
-		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined)
+		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
-		configs.length = 0
 	}
 
 	m.trust = function(value) {

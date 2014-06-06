@@ -487,6 +487,19 @@ function testMithril(mock) {
 		})));
 		return parent === root
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var count = 0
+		m.render(root, m("div", m("a", {
+			config: function(el) {
+				var island = mock.document.createElement("div")
+				count++
+				if (count > 2) throw "too much recursion..."
+				m.render(island, m("div"))
+			}
+		})));
+		return count == 1
+	})
 	//end m.render
 
 	//m.redraw
