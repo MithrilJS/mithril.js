@@ -519,10 +519,12 @@ Mithril = m = new function app(window) {
 				e = e || event
 				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
 				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
-				if (response instanceof Array && xhrOptions.type) {
-					for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+				if (e.type == "load") {
+					if (response instanceof Array && xhrOptions.type) {
+						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+					}
+					else if (xhrOptions.type) response = new xhrOptions.type(response)
 				}
-				else if (xhrOptions.type) response = new xhrOptions.type(response)
 				deferred[e.type == "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
