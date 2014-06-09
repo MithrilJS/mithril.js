@@ -260,7 +260,7 @@ Mithril = m = new function app(window) {
 	}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
-			m.render(roots[i], modules[i].view(controllers[i]))
+			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
 		}
 		if (computePostRedrawHook) {
 			computePostRedrawHook()
