@@ -500,6 +500,13 @@ function testMithril(mock) {
 		})));
 		return count == 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/129
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [["foo", "bar"], ["foo", "bar"], ["foo", "bar"]]));
+		m.render(root, m("div", ["asdf", "asdf2", "asdf3"]));
+		return true
+	})
 	//end m.render
 
 	//m.redraw
