@@ -134,7 +134,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li"), m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes[1].nodeValue === ""
+		return root.childNodes[0].childNodes.length == 2 && root.childNodes[0].childNodes[1].nodeValue === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -398,6 +398,95 @@ function testMithril(mock) {
 		m.render(root, m("div", [m("a")]))
 		return root.childNodes[0].childNodes.length == 1 && root.childNodes[0].childNodes[0].nodeName == "A"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", "b", "c", "d"]))
+		m.render(root, m("div", [["d", "e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [["a", "b", "c", "d"]]))
+		m.render(root, m("div", ["d", "e"]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["x", [["a"], "b", "c", "d"]]))
+		m.render(root, m("div", ["d", ["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["b"]))
+		m.render(root, m("div", [["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 1 && children[0].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", ["b"]]))
+		m.render(root, m("div", ["d", [["e"]]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", [["b"]]]))
+		m.render(root, m("div", ["d", ["e"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 2 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/120
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", ["a", [["b"], "c"]]))
+		m.render(root, m("div", ["d", [[["e"]], "x"]]))
+		var children = root.childNodes[0].childNodes
+		return children.length == 3 && children[0].nodeValue == "d" && children[1].nodeValue == "e"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var success = false
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data = 1}}))
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data === 1}}))
+		return success
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var index = 0;
+		var success = true;
+		var statefulConfig = function(elem, isInitialized, ctx) {ctx.data = index++}
+		var node = m("div", {config: statefulConfig});
+		m.render(root, [node, node]);
+
+		index = 0;
+		var checkConfig = function(elem, isInitialized, ctx) {
+			success = success && (ctx.data === index++)
+		}
+		node = m("div", {config: checkConfig});
+		m.render(root, [node, node]);
+		return success;
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var parent
+		m.render(root, m("div", m("a", {
+			config: function(el) {parent = el.parentNode.parentNode}
+		})));
+		return parent === root
+	})
 	//end m.render
 
 	//m.redraw
@@ -616,8 +705,8 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/", {
-			"/": {controller: function() {}, view: function() {return;}},
-			"/test12": {controller: function() {}, view: function() {return;}}
+			"/": {controller: function() {}, view: function() {}},
+			"/test12": {controller: function() {}, view: function() {}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test12?a=foo&b=bar")
@@ -647,7 +736,7 @@ function testMithril(mock) {
 		m.route.mode = "search"
 		m.route(root, "/", {
 			"/": {controller: function() {}, view: function() {return "bar"}},
-			"/test14": {controller: function() {}, view: function() {return "foo" }}
+			"/test14": {controller: function() {}, view: function() {return "foo"}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test14?test&test2=")
@@ -661,13 +750,29 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/", {
-			"/": {controller: function() {}, view: function() {return;}},
-			"/test12": {controller: function() {}, view: function() {return;}}
+			"/": {controller: function() {}, view: function() {}},
+			"/test12": {controller: function() {}, view: function() {}}
 		})
 		mock.performance.$elapse(50)
 		m.route("/test12", {a: "foo", b: "bar"})
 		mock.performance.$elapse(50) //teardown
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var route1, route2
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {route1 = m.route()}, view: function() {}},
+			"/test13": {controller: function() {route2 = m.route()}, view: function() {}}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test13")
+		mock.performance.$elapse(50) //teardown
+		return route1 == "/" && route2 == "/test13"
 	})
 	//end m.route
 
@@ -719,7 +824,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var error = m.prop("no error"), exception
-		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new SyntaxError("error occurred")}}).then(null, error)
+		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new TypeError("error occurred")}}).then(null, error)
 		try {mock.XMLHttpRequest.$instances.pop().onreadystatechange()}
 		catch (e) {exception = e}
 		m.endComputation()
@@ -926,6 +1031,36 @@ function testMithril(mock) {
 	test(function() {
 		return m.deps.factory.toString().indexOf("console") < 0
 	})
+
+	// config context
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var success = false;
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data=1}}));
+		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data===1}}));
+		return success;
+	})
+
+	// more complex config context
+	test(function() {
+		var root = mock.document.createElement("div")
+
+		var idx = 0;
+		var success = true;
+		var statefulConfig = function(elem, isInitialized, ctx) {ctx.data=idx++}
+		var node = m("div", {config: statefulConfig});
+		m.render(root, [node, node]);
+
+		idx = 0;
+		var checkConfig = function(elem, isInitialized, ctx) {
+			success = success && (ctx.data === idx++)
+		}
+		node = m("div", {config: checkConfig});
+		m.render(root, [node, node]);
+		return success;
+	})
+
 }
 
 //mocks

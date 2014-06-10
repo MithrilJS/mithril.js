@@ -32,13 +32,20 @@ Mithril = m = new function app(window) {
 		}
 		return cell
 	}
-	function build(parentElement, parentTag, data, cached, shouldReattach, index, editable, namespace) {
+	var configs = []
+	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace) {
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return
 
 		var cachedType = type.call(cached), dataType = type.call(data)
 		if (cachedType != dataType) {
-			if (cached !== null && cached !== undefined) clear(cached.nodes)
+			if (cached !== null && cached !== undefined) {
+				if (parentCache && parentCache.nodes) {
+					var offset = index - parentIndex
+					clear(parentCache.nodes.slice(offset, offset + (dataType == "[object Array]" ? data : cached.nodes).length))
+				}
+				else clear(cached.nodes)
+			}
 			cached = new data.constructor
 			cached.nodes = []
 		}
@@ -46,18 +53,22 @@ Mithril = m = new function app(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
-				var item = build(parentElement, null, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace)
+				var item = build(parentElement, null, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				subArrayCount += item instanceof Array ? item.length : 1
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
-				for (var i = 0; i < data.length; i++) if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+				for (var i = 0; i < data.length; i++) {
+					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+				}
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) {
 					if (node.parentNode !== null && node.parentNode.childNodes.length != nodes.length) node.parentNode.removeChild(node)
 				}
-				for (var i = cached.nodes.length, node; node = nodes[i]; i++) if (node.parentNode === null) parentElement.appendChild(node)
+				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
+					if (node.parentNode === null) parentElement.appendChild(node)
+				}
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
@@ -74,7 +85,7 @@ Mithril = m = new function app(window) {
 				cached = {
 					tag: data.tag,
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
-					children: data.children !== undefined ? build(node, data.tag, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace) : undefined,
+					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace) : undefined,
 					nodes: [node]
 				}
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -82,11 +93,13 @@ Mithril = m = new function app(window) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace)
+				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace)
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") data.attrs["config"](node, !isNew)
+			if (type.call(data.attrs["config"]) == "[object Function]") {
+				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}))
+			}
 		}
 		else {
 			var node
@@ -213,7 +226,9 @@ Mithril = m = new function app(window) {
 		var index = nodeCache.indexOf(root)
 		var id = index < 0 ? nodeCache.push(root) - 1 : index
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
-		cellCache[id] = build(node, null, cell, cellCache[id], false, 0, null, undefined)
+		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined)
+		for (var i = 0; i < configs.length; i++) configs[i]()
+		configs.length = 0
 	}
 
 	m.trust = function(value) {
@@ -273,21 +288,23 @@ Mithril = m = new function app(window) {
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
-		else if (arguments.length === 3) {
-			currentRoute = window.location[m.route.mode].slice(modes[m.route.mode].length)
+		else if (arguments.length === 3 && typeof arguments[1] == "string") {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
-				var path = currentRoute = source.slice(modes[m.route.mode].length)
+				var path = currentRoute = normalizeRoute(source)
 				if (!routeByValue(root, router, path)) {
 					m.route(defaultRoute, true)
 				}
 			}
 			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
 			window[listener] = function() {
-				redirect(window.location[m.route.mode])
+				if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
+					redirect(window.location[m.route.mode])
+				}
 			}
 			computePostRedrawHook = scrollToHash
 			window[listener]()
+			currentRoute = normalizeRoute(window.location[m.route.mode])
 		}
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
@@ -319,6 +336,7 @@ Mithril = m = new function app(window) {
 	}
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
+	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
 		routeParams = {}
 
@@ -508,7 +526,8 @@ Mithril = m = new function app(window) {
 				deferred[e.type == "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
-				if (e instanceof Error && e.constructor !== Error) throw e
+				if (e instanceof SyntaxError) throw new SyntaxError("Could not parse HTTP response. See http://lhorie.github.io/mithril/mithril.request.html#using-variable-data-formats")
+				else if (e instanceof Error && e.constructor !== Error) throw e
 				else deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
@@ -523,7 +542,7 @@ Mithril = m = new function app(window) {
 	m.deps.factory = app
 
 	return m
-}(this)
+}(typeof window != "undefined" ? window : {})
 
 if (typeof module != "undefined" && module !== null) module.exports = m
 if (typeof define == "function" && define.amd) define(function() {return m})
