@@ -195,7 +195,7 @@ var users = m.request({
 		return response.data;
 	},
 	unwrapError: function(response) {
-		return JSON.parse(response).error;
+		return response.error;
 	}
 });
 
