@@ -8,6 +8,8 @@
 -	config now always runs after template is attached to document [#109](https://github.com/lhorie/mithril.js/issues/109)
 -	fix null reference exception with Browserify [#110](https://github.com/lhorie/mithril.js/issues/110)
 -	fix nested array removal edge cases [#120](https://github.com/lhorie/mithril.js/issues/120)
+-	ignore redraw calls when controller is not ready [#127](https://github.com/lhorie/mithril.js/issues/127)
+-	fix null reference exception in nested array edge case [#129](https://github.com/lhorie/mithril.js/issues/129)
 
 ---
 
