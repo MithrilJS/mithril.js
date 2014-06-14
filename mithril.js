@@ -69,23 +69,18 @@ Mithril = m = new function app(window) {
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
-				var changes = actions
-					.sort(function(a, b) {return a.action - b.action || b.index - a.index})
+				var changes = actions.sort(function(a, b) {return a.action - b.action || b.index - a.index})
 				var newCached = new Array(cached.length)
-				var children = []
-				for (var i = 0, child; child = parentElement.childNodes[i]; i++) children.push(child)
 				
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
 						clear(cached[change.index].nodes)
-						children.splice(change.index, 1)
 						newCached.splice(change.index, 1)
 					}
 					if (change.action == INSERTION) {
-						var dummy = window.document.createElement("x")
+						var dummy = window.document.createElement("div")
 						dummy.key = data[change.index].attrs.key.toString()
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
-						children.splice(change.index, 0, dummy)
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
 					
