@@ -89,3 +89,128 @@ test('config handler context', function() {
 	}})
 	m.render(dummyEl, view);
 })
+
+test('node identity remove firstChild', function() {
+	expect(2);
+	var view1 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+	]);
+	m.render(dummyEl, view1);
+
+	var node2 = dummyEl.firstChild.lastChild;
+	equal(node2.innerHTML, 'E2')
+
+	var view2 = m('div', {}, [
+		m('div', {key:2}, 'E2'),
+	]);
+	m.render(dummyEl, view2);
+
+	equal(dummyEl.firstChild.firstChild, node2);
+
+})
+
+test('node identity change order', function() {
+	expect(2);
+	var view1 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+		m('div', {key:3}, 'E3'),
+	]);
+	m.render(dummyEl, view1);
+
+	var e2 = dummyEl.firstChild.firstChild.nextSibling;
+	equal(e2.innerHTML, 'E2')
+
+	var view2 = m('div', {}, [
+		m('div', {key:2}, 'E2'),
+		m('div', {key:1}, 'E1'),
+		m('div', {key:3}, 'E3'),
+	]);
+	m.render(dummyEl, view2);
+
+	equal(dummyEl.firstChild.firstChild, e2);
+})
+
+test('node identity remove in the middle', function() {
+	expect(2);
+	var view1 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+		m('div', {key:3}, 'E3'),
+	]);
+	m.render(dummyEl, view1);
+
+	var e3 = dummyEl.firstChild.lastChild;
+	equal(e3.innerHTML, 'E3')
+
+	var view2 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:3}, 'E3'),
+	]);
+	m.render(dummyEl, view2);
+
+	equal(dummyEl.firstChild.firstChild.nextSibling, e3);
+
+})
+
+test('node identity remove last', function() {
+	expect(4);
+	var view1 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+		m('div', {key:3}, 'E3'),
+	]);
+	m.render(dummyEl, view1);
+
+	var e1 = dummyEl.firstChild.firstChild;
+	equal(e1.innerHTML, 'E1')
+	var e2 = dummyEl.firstChild.firstChild.nextSibling;
+	equal(e2.innerHTML, 'E2')
+
+	var view2 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+	]);
+	m.render(dummyEl, view2);
+
+	equal(dummyEl.firstChild.firstChild, e1);
+	equal(dummyEl.firstChild.firstChild.nextSibling, e2);
+
+})
+
+test('node identity shuffle and remove', function() {
+	expect(8);
+	var view1 = m('div', {}, [
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+		m('div', {key:3}, 'E3'),
+		m('div', {key:4}, 'E4'),
+		m('div', {key:5}, 'E5'),
+	]);
+	m.render(dummyEl, view1);
+
+	var e1 = dummyEl.firstChild.firstChild;
+	equal(e1.innerHTML, 'E1')
+	var e2 = e1.nextSibling;
+	equal(e2.innerHTML, 'E2')
+	var e3 = e2.nextSibling;
+	equal(e3.innerHTML, 'E3')
+	var e4 = e3.nextSibling;
+	equal(e4.innerHTML, 'E4')
+	var e5 = e4.nextSibling;
+	equal(e5.innerHTML, 'E5')
+
+	var view2 = m('div', {}, [
+		m('div', {key:4}, 'E4'),
+		m('div', {key:10}, 'E10'),
+		m('div', {key:1}, 'E1'),
+		m('div', {key:2}, 'E2'),
+	]);
+	m.render(dummyEl, view2);
+
+	equal(dummyEl.firstChild.firstChild, e4, 'e4 is first element');
+	equal(dummyEl.firstChild.firstChild.nextSibling.nextSibling, e1, 'e1 is third element');
+	equal(dummyEl.firstChild.firstChild.nextSibling.nextSibling.nextSibling, e2, 'e2 is fourth element');
+
+})

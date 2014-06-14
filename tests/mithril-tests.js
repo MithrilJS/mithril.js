@@ -507,6 +507,47 @@ function testMithril(mock) {
 		m.render(root, m("div", ["asdf", "asdf2", "asdf3"]));
 		return true
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		//insert at beginning
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[0]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstAfter = root.childNodes[1]
+		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 4
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[0]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2})])
+		var firstAfter = root.childNodes[1]
+		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 3
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[1]
+		m.render(root, [m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4})])
+		var firstAfter = root.childNodes[0]
+		return firstBefore == firstAfter && root.childNodes[0].key === "2" && root.childNodes.length === 3
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		var firstBefore = root.childNodes[0]
+		var secondBefore = root.childNodes[1]
+		var fourthBefore = root.childNodes[3]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 1}), m("a", {key: 2})])
+		var firstAfter = root.childNodes[2]
+		var secondAfter = root.childNodes[3]
+		var fourthAfter = root.childNodes[0]
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes.length === 4
+	})
 	//end m.render
 
 	//m.redraw

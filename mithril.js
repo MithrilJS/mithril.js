@@ -52,6 +52,55 @@ Mithril = m = new function app(window) {
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
+			var DELETION = 1, INSERTION = 2 , MOVE = 3
+			var existing = {}, shouldMaintainIdentities = false
+			for (var i = 0; i < cached.length; i++) {
+				if (cached[i] && cached[i].attrs && cached[i].attrs.key !== undefined) {
+					shouldMaintainIdentities = true
+					existing[cached[i].attrs.key] = {action: DELETION, index: i}
+				}
+			}
+			if (shouldMaintainIdentities) {
+				for (var i = 0; i < data.length; i++) {
+					if (data[i] && data[i].attrs && data[i].attrs.key !== undefined) {
+						var key = data[i].attrs.key
+						if (!existing[key]) existing[key] = {action: INSERTION, index: i}
+						else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
+					}
+				}
+				var actions = Object.keys(existing).map(function(key) {return existing[key]})
+				var changes = actions
+					.sort(function(a, b) {return a.action - b.action || b.index - a.index})
+				var newCached = new Array(cached.length)
+				var children = []
+				for (var i = 0, child; child = parentElement.childNodes[i]; i++) children.push(child)
+				
+				for (var i = 0, change; change = changes[i]; i++) {
+					if (change.action == DELETION) {
+						clear(cached[change.index].nodes)
+						children.splice(change.index, 1)
+						newCached.splice(change.index, 1)
+					}
+					if (change.action == INSERTION) {
+						var dummy = window.document.createElement("x")
+						dummy.key = data[change.index].attrs.key.toString()
+						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
+						children.splice(change.index, 0, dummy)
+						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
+					}
+					
+					if (change.action == MOVE) {
+						if (parentElement.childNodes[change.index] !== change.element) {
+							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
+						}
+						newCached[change.index] = cached[change.from]
+					}
+				}
+				cached = newCached
+				cached.nodes = []
+				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
+			}
+			
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, null, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
@@ -72,6 +121,7 @@ Mithril = m = new function app(window) {
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
+			
 		}
 		else if (dataType == "[object Object]") {
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) clear(cached.nodes)
@@ -471,7 +521,7 @@ Mithril = m = new function app(window) {
 	function identity(value) {return value}
 
 	function ajax(options) {
-		var xhr = window.XDomainRequest ? new window.XDomainRequest : new window.XMLHttpRequest
+		var xhr = new window.XMLHttpRequest
 		xhr.open(options.method, options.url, true, options.user, options.password)
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
@@ -479,7 +529,10 @@ Mithril = m = new function app(window) {
 				else options.onerror({type: "error", target: xhr})
 			}
 		}
-		if (typeof options.config == "function") options.config(xhr, options)
+		if (typeof options.config == "function") {
+			var maybeXhr = options.config(xhr, options)
+			if (maybeXhr !== undefined) xhr = maybeXhr
+		}
 		xhr.send(options.data)
 		return xhr
 	}

@@ -17,7 +17,8 @@ mock.window = new function() {
 				if (referenceIndex < 0) this.childNodes.push(node)
 				else {
 					var index = this.childNodes.indexOf(node)
-					this.childNodes.splice(referenceIndex, index < 0 ? 0 : 1, node)
+					if (index > -1) this.childNodes.splice(index, 1)
+					this.childNodes.splice(referenceIndex, 0, node)
 				}
 			},
 			insertAdjacentHTML: function(position, html) {
