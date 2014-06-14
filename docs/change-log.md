@@ -11,6 +11,10 @@
 -	ignore redraw calls when controller is not ready [#127](https://github.com/lhorie/mithril.js/issues/127)
 -	fix null reference exception in nested array edge case [#129](https://github.com/lhorie/mithril.js/issues/129)
 
+### Breaking changes:
+
+-	Due to the poor level of compatibility between XDomainRequest and XHR2, XDomainRequest is no longer called internally by Mithril. If you need to use CORS in IE9 or lower, you will need to return an XDomainRequest instance from `m.request`'s `config` method.
+
 ---
 
 [v0.1.15](/mithril/archive/v0.1.15) - maintenance
