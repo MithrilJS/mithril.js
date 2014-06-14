@@ -69,7 +69,7 @@ var dashboard = {
 		return [
 			m("h1", controller.greeting),
 			
-			new user.view(controller.user)
+			user.view(controller.user)
 		];
 	}
 };
