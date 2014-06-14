@@ -471,7 +471,7 @@ Mithril = m = new function app(window) {
 	function identity(value) {return value}
 
 	function ajax(options) {
-		var xhr = window.XDomainRequest ? new window.XDomainRequest : new window.XMLHttpRequest
+		var xhr = new window.XMLHttpRequest
 		xhr.open(options.method, options.url, true, options.user, options.password)
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
