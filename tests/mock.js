@@ -70,6 +70,7 @@ mock.window = new function() {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
+	window.scrollTo = function() {}
 	window.performance = new function () {
 		var timestamp = 50
 		this.$elapse = function(amount) {timestamp += amount}

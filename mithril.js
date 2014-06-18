@@ -360,7 +360,7 @@ Mithril = m = new function app(window) {
 					redirect(window.location[m.route.mode])
 				}
 			}
-			computePostRedrawHook = scrollToHash
+			computePostRedrawHook = setScroll
 			window[listener]()
 			currentRoute = normalizeRoute(window.location[m.route.mode])
 		}
@@ -385,7 +385,7 @@ Mithril = m = new function app(window) {
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
-					scrollToHash()
+					setScroll()
 				}
 				redirect(modes[m.route.mode] + currentRoute)
 			}
@@ -425,8 +425,9 @@ Mithril = m = new function app(window) {
 		e.preventDefault()
 		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
 	}
-	function scrollToHash() {
+	function setScroll() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
+		else window.scrollTo(0, 0)
 	}
 	function buildQueryString(object, prefix) {
 		var str = []
