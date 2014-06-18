@@ -97,7 +97,7 @@ Mithril = m = new function app(window) {
 			}
 			
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
-				var item = build(parentElement, null, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
+				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				subArrayCount += item instanceof Array ? item.length : 1

@@ -570,6 +570,13 @@ function testMithril(mock) {
 		m.render(root, m("div", {contenteditable: false}, "test2"))
 		return root.childNodes[0].childNodes[0].nodeValue === "test2"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/136
+		var root = mock.document.createElement("div")
+		m.render(root, m("textarea", ["test"]))
+		m.render(root, m("textarea", ["test1"]))
+		return root.childNodes[0].value === "test1"
+	})
 	//end m.render
 
 	//m.redraw
