@@ -297,14 +297,22 @@ Mithril = m = new function app(window) {
 
 	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0, computePostRedrawHook = null
 	m.module = function(root, module) {
-		m.startComputation()
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
-		roots[index] = root
-		modules[index] = module
-		if (controllers[index] && typeof controllers[index].onunload == "function") controllers[index].onunload()
-		controllers[index] = new module.controller
-		m.endComputation()
+		var isPrevented = false
+		if (controllers[index] && typeof controllers[index].onunload == "function") {
+			var event = {
+				preventDefault: function() {isPrevented = true}
+			}
+			controllers[index].onunload(event)
+		}
+		if (!isPrevented) {
+			m.startComputation()
+			roots[index] = root
+			modules[index] = module
+			controllers[index] = new module.controller
+			m.endComputation()
+		}
 	}
 	m.redraw = function() {
 		now = window.performance && window.performance.now ? window.performance.now() : new window.Date().getTime()

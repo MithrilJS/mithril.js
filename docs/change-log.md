@@ -2,6 +2,10 @@
 
 [v0.1.16](/mithril/archive/v0.1.6) - maintenance
 
+### News:
+
+-	controller::onunload now receives an event parameter so that the unloading can be aborted [#135](https://github.com/lhorie/mithril.js/issues/135)
+
 ### Bug Fixes:
 
 -	prevent route change when only hash changes in non-hash mode [#107](https://github.com/lhorie/mithril.js/issues/107)
