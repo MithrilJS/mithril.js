@@ -7,6 +7,7 @@ mock.window = new function() {
 		return {
 			style: {},
 			childNodes: [],
+			nodeType: 1,
 			nodeName: tag.toUpperCase(),
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,

@@ -10,6 +10,9 @@
 -	fix nested array removal edge cases [#120](https://github.com/lhorie/mithril.js/issues/120)
 -	ignore redraw calls when controller is not ready [#127](https://github.com/lhorie/mithril.js/issues/127)
 -	fix null reference exception in nested array edge case [#129](https://github.com/lhorie/mithril.js/issues/129)
+-	fix a contenteditable null reference error [#134](https://github.com/lhorie/mithril.js/issues/134)
+-	fix textarea value diffing when value is a node inside an array [#136](https://github.com/lhorie/mithril.js/issues/136)
+-	fix diff bug with trusted strings [#138](https://github.com/lhorie/mithril.js/issues/138)
 
 ### Breaking changes:
 

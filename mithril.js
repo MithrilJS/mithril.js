@@ -147,41 +147,40 @@ Mithril = m = new function app(window) {
 			}
 		}
 		else {
-			var node
+			var nodes
 			if (cached.nodes.length === 0) {
 				if (data.$trusted) {
-					node = injectHTML(parentElement, index, data)
+					nodes = injectHTML(parentElement, index, data)
 				}
 				else {
-					node = window.document.createTextNode(data)
-					parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+					nodes = [window.document.createTextNode(data)]
+					parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
 				}
 				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data
-				cached.nodes = [node]
+				cached.nodes = nodes
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
-				node = cached.nodes[0]
+				nodes = cached.nodes
 				if (!editable || editable !== window.document.activeElement) {
 					if (data.$trusted) {
-						var current = cached.nodes[0], nodes = [current]
-						if (current) {
-							while (current = current.nextSibling) nodes.push(current)
-							clear(nodes)
-							node = injectHTML(parentElement, index, data)
-						}
-						else parentElement.innerHTML = data
+						clear(nodes)
+						nodes = injectHTML(parentElement, index, data)
 					}
 					else {
 						if (parentTag === "textarea") parentElement.value = data
 						else if (editable) editable.innerHTML = data
 						else {
-							parentElement.insertBefore(node, parentElement.childNodes[index] || null)
-							node.nodeValue = data
+							if (nodes[0].nodeType == 1 || nodes.length > 1) { //was a trusted string
+								clear(cached.nodes)
+								nodes = [window.document.createTextNode(data)]
+							}
+							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
+							nodes[0].nodeValue = data
 						}
 					}
 				}
 				cached = new data.constructor(data)
-				cached.nodes = [node]
+				cached.nodes = nodes
 			}
 			else cached.nodes.intact = true
 		}
@@ -228,9 +227,23 @@ Mithril = m = new function app(window) {
 	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index]
-		if (nextSibling) nextSibling.insertAdjacentHTML("beforebegin", data)
+		if (nextSibling) {
+			var isElement = nextSibling.nodeType != 1
+			var placeholder = window.document.createElement("span")
+			if (isElement) {
+				parentElement.insertBefore(placeholder, nextSibling)
+				placeholder.insertAdjacentHTML("beforebegin", data)
+				parentElement.removeChild(placeholder)
+			}
+			else nextSibling.insertAdjacentHTML("beforebegin", data)
+		}
 		else parentElement.insertAdjacentHTML("beforeend", data)
-		return nextSibling ? nextSibling.previousSibling : parentElement.firstChild
+		var nodes = []
+		while (parentElement.childNodes[index] !== nextSibling) {
+			nodes.push(parentElement.childNodes[index])
+			index++
+		}
+		return nodes
 	}
 	function clone(object) {
 		var result = {}
