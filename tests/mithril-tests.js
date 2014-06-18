@@ -548,6 +548,28 @@ function testMithril(mock) {
 		var fourthAfter = root.childNodes[0]
 		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes.length === 4
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		var firstBefore = root.childNodes[0]
+		var secondBefore = root.childNodes[1]
+		var fourthBefore = root.childNodes[3]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 2}), m("a", {key: 1}), m("a", {key: 6}), m("a", {key: 7})])
+		var firstAfter = root.childNodes[3]
+		var secondAfter = root.childNodes[2]
+		var fourthAfter = root.childNodes[0]
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes[4].key == "6" && root.childNodes[5].key == "7" && root.childNodes.length === 6
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/134
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", {contenteditable: true}, "test"))
+		mock.document.activeElement = root.childNodes[0]
+		m.render(root, m("div", {contenteditable: true}, "test1"))
+		m.render(root, m("div", {contenteditable: false}, "test2"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test2"
+	})
 	//end m.render
 
 	//m.redraw

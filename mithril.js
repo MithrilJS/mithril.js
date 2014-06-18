@@ -160,6 +160,7 @@ Mithril = m = new function app(window) {
 				cached.nodes = [node]
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
+				node = cached.nodes[0]
 				if (!editable || editable !== window.document.activeElement) {
 					if (data.$trusted) {
 						var current = cached.nodes[0], nodes = [current]
@@ -171,7 +172,6 @@ Mithril = m = new function app(window) {
 						else parentElement.innerHTML = data
 					}
 					else {
-						node = cached.nodes[0]
 						if (parentTag === "textarea") parentElement.value = data
 						else if (editable) editable.innerHTML = data
 						else {
