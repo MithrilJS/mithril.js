@@ -1,6 +1,18 @@
 ## Change Log
 
-[v0.1.16](/mithril/archive/v0.1.6) - maintenance
+[v0.1.17](/mithril/archive/v0.1.17) - maintenance
+
+### News:
+
+-	config contexts can now have an `onunload` property for clean up tasks after elements are detached from the document
+
+### Bug Fixes:
+
+-	fixed a subtree directive bug that happened in inputs inside loops
+
+---
+
+[v0.1.16](/mithril/archive/v0.1.16) - maintenance
 
 ### News:
 
