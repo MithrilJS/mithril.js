@@ -85,6 +85,10 @@ mock.window = new function() {
 	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {
+			this.$headers = {}
+			this.setRequestHeader = function(key, value) {
+				this.$headers[key] = value
+			}
 			this.open = function(method, url) {
 				this.method = method
 				this.url = url

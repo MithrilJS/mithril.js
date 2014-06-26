@@ -1211,6 +1211,13 @@ function testMithril(mock) {
 		m.endComputation()
 		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
 	})
+	test(function() {
+		var error = m.prop("no error")
+		var prop = m.request({method: "POST", url: "test"}).then(null, error)
+		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.onreadystatechange()
+		return xhr.$headers["Content-Type"] == "application/json; charset=utf-8"
+	})
 
 	//m.deferred
 	test(function() {

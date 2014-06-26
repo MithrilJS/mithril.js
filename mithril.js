@@ -561,6 +561,9 @@ Mithril = m = new function app(window) {
 				else options.onerror({type: "error", target: xhr})
 			}
 		}
+		if (options.serialize == JSON.stringify && options.method != "GET") {
+			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+		}
 		if (typeof options.config == "function") {
 			var maybeXhr = options.config(xhr, options)
 			if (maybeXhr !== undefined) xhr = maybeXhr
@@ -592,8 +595,8 @@ Mithril = m = new function app(window) {
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
-		var serialize = xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize || JSON.parse
+		var serialize = xhrOptions.serialize = xhrOptions.serialize || JSON.stringify
+		var deserialize = xhrOptions.deserialize = xhrOptions.deserialize || JSON.parse
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		}
