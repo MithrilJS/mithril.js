@@ -10,6 +10,7 @@
 
 -	fixed a subtree directive bug that happened in inputs inside loops
 -	fixed select.value so that the correct option is displayed on first render
+-	in m.request, non-idempotent methods now automatically send appropriate Content-Type header if `serialize` is `JSON.stringify` [#139](https://github.com/lhorie/mithril.js/issues/139)
 
 ---
 
