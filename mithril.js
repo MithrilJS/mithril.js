@@ -133,8 +133,9 @@ Mithril = m = new function app(window) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
 					tag: data.tag,
-					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
+					//process children before attrs so that select.value works correctly
 					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
+					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					nodes: [node]
 				}
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)

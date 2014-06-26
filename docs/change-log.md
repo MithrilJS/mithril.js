@@ -9,6 +9,7 @@
 ### Bug Fixes:
 
 -	fixed a subtree directive bug that happened in inputs inside loops
+-	fixed select.value so that the correct option is displayed on first render
 
 ---
 
