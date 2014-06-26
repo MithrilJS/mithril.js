@@ -41,9 +41,10 @@ Mithril = m = new function app(window) {
 			if (cached !== null && cached !== undefined) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
-					clear(parentCache.nodes.slice(offset, offset + (dataType == "[object Array]" ? data : cached.nodes).length))
+					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
+					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
-				else clear(cached.nodes)
+				else clear(cached.nodes, cached)
 			}
 			cached = new data.constructor
 			cached.nodes = []
@@ -74,7 +75,7 @@ Mithril = m = new function app(window) {
 				
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
-						clear(cached[change.index].nodes)
+						clear(cached[change.index].nodes, cached[change.index])
 						newCached.splice(change.index, 1)
 					}
 					if (change.action == INSERTION) {
@@ -108,7 +109,10 @@ Mithril = m = new function app(window) {
 					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				}
 				for (var i = nodes.length, node; node = cached.nodes[i]; i++) {
-					if (node.parentNode !== null && node.parentNode.childNodes.length != nodes.length) node.parentNode.removeChild(node)
+					if (node.parentNode !== null && node.parentNode.childNodes.length != nodes.length) {
+						node.parentNode.removeChild(node)
+						if (cached[i]) unload(cached[i])
+					}
 				}
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
 					if (node.parentNode === null) parentElement.appendChild(node)
@@ -119,7 +123,7 @@ Mithril = m = new function app(window) {
 			
 		}
 		else if (dataType == "[object Object]") {
-			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) clear(cached.nodes)
+			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) clear(cached.nodes, cached)
 			if (typeof data.tag != "string") return
 
 			var node, isNew = cached.nodes.length === 0
@@ -143,7 +147,7 @@ Mithril = m = new function app(window) {
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			if (type.call(data.attrs["config"]) == "[object Function]") {
-				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}))
+				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
 			}
 		}
 		else {
@@ -163,7 +167,7 @@ Mithril = m = new function app(window) {
 				nodes = cached.nodes
 				if (!editable || editable !== window.document.activeElement) {
 					if (data.$trusted) {
-						clear(nodes)
+						clear(nodes, cached)
 						nodes = injectHTML(parentElement, index, data)
 					}
 					else {
@@ -171,7 +175,7 @@ Mithril = m = new function app(window) {
 						else if (editable) editable.innerHTML = data
 						else {
 							if (nodes[0].nodeType == 1 || nodes.length > 1) { //was a trusted string
-								clear(cached.nodes)
+								clear(cached.nodes, cached)
 								nodes = [window.document.createTextNode(data)]
 							}
 							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
@@ -221,9 +225,19 @@ Mithril = m = new function app(window) {
 		}
 		return cachedAttrs
 	}
-	function clear(nodes) {
-		for (var i = nodes.length - 1; i > -1; i--) if (nodes[i] && nodes[i].parentNode) nodes[i].parentNode.removeChild(nodes[i])
+	function clear(nodes, cached) {
+		for (var i = nodes.length - 1; i > -1; i--) {
+			if (nodes[i] && nodes[i].parentNode) {
+				nodes[i].parentNode.removeChild(nodes[i])
+				cached = [].concat(cached)
+				if (cached[i]) unload(cached[i])
+			}
+		}
 		nodes.length = 0
+	}
+	function unload(cached) {
+		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
+		if (cached.children instanceof Array) for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
 	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index]

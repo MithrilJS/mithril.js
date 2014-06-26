@@ -864,6 +864,297 @@ function testMithril(mock) {
 		mock.performance.$elapse(50) //teardown
 		return route1 == "/" && route2 == "/test13"
 	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test14": {controller: function() {}, view: function() {}}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test14")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div"),
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test15": {
+				controller: function() {},
+				view: function() {
+					return [m("div")]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test15")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test16": {
+				controller: function() {},
+				view: function() {
+					return m("a")
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test16")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test17": {
+				controller: function() {},
+				view: function() {
+					return m("a")
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test17")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test18": {
+				controller: function() {},
+				view: function() {
+					return [m("a")]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test18")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test19": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test19")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 0
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test20": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 2,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test20")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test21": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test21")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
 	//end m.route
 
 	//m.prop

@@ -217,6 +217,29 @@ m("div", {config: alertsRedrawCount})
 
 ---
 
+If the `context` object that is passed to a `config` function has a property called `onunload`, this function will be called when the element gets detached from the document by Mithril's diff engine.
+
+This is useful if there are cleanup tasks that need to be run when an element is destroyed (e.g. clearing `setTimeout`'s, etc)
+
+```javascript
+function unloadable(element, isInit, context) {
+	context.timer = setTimeout(function() {
+		alert("timed out!");
+	}, 1000);
+	
+	context.onunload = function() {
+		clearTimeout(context.timer);
+		console.log("unloaded the div");
+	}
+};
+
+m.render(document, m("div", {config: unloadable}));
+
+m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
+```
+
+---
+
 You can use Mithril to create SVG documents (as long as you don't need to support browsers that don't support SVG natively).
 
 Mithril automatically figures out the correct XML namespaces when it sees an SVG island in the virtual DOM tree.
@@ -367,6 +390,27 @@ where:
 	}
 
 	m("div", {config: alertsRedrawCount})
+	```
+	
+	If the `context` object that is passed to a `config` function has a property called `onunload`, this function will be called when the element gets detached from the document by Mithril's diff engine.
+
+	This is useful if there are cleanup tasks that need to be run when an element is destroyed (e.g. clearing `setTimeout`'s, etc)
+
+	```javascript
+	function unloadable(element, isInit, context) {
+		context.timer = setTimeout(function() {
+			alert("timed out!");
+		}, 1000);
+		
+		context.onunload = function() {
+			clearTimeout(context.timer);
+			console.log("unloaded the div");
+		}
+	};
+
+	m.render(document, m("div", {config: unloadable}));
+
+	m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 	```
 	
 -	**Children children** (optional)
