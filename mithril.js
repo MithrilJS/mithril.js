@@ -1,7 +1,7 @@
 Mithril = m = new function app(window) {
 	var selectorCache = {}
 	var type = {}.toString
-	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.+?)\2)?\]/
+	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 
 	function m() {
 		var args = arguments
@@ -18,7 +18,7 @@ Mithril = m = new function app(window) {
 				else if (match[1] == ".") classes.push(match[2])
 				else if (match[3][0] == "[") {
 					var pair = attrParser.exec(match[3])
-					cell.attrs[pair[1]] = pair[3] || true
+					cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true)
 				}
 			}
 			if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
