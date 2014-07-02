@@ -5,12 +5,16 @@
 ### News:
 
 -	config contexts can now have an `onunload` property for clean up tasks after elements are detached from the document
+-	route changes now re-render from scratch, rather than attempting a virtual dom diff
+-	virtual elements that are children of an array can now accept a `key` attribute which maintains the identity of the underlying DOM elements when the array gets shuffled [#98](https://github.com/lhorie/mithril.js/issues/98)
 
 ### Bug Fixes:
 
 -	fixed a subtree directive bug that happened in inputs inside loops
 -	fixed select.value so that the correct option is displayed on first render
 -	in m.request, non-idempotent methods now automatically send appropriate Content-Type header if `serialize` is `JSON.stringify` [#139](https://github.com/lhorie/mithril.js/issues/139)
+-	`m` selectors now correctly handle empty attribute values like `[href='']`
+-	pre-existing nodes in a root element now get cleared if there's no cell cache associated with the element [#60](https://github.com/lhorie/mithril.js/issues/60)
 
 ---
 

@@ -577,6 +577,32 @@ function testMithril(mock) {
 		m.render(root, m("textarea", ["test1"]))
 		return root.childNodes[0].value === "test1"
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.render(root, [
+			m("div", {
+				key: 1,
+				config: function(el, init, ctx) {
+					ctx.onunload = function() {
+						unloaded++
+					}
+				}
+			})
+		])
+		m.render(root, [
+			m("div", {key: 2}),
+			m("div", {
+				key: 1,
+				config: function(el, init, ctx) {
+					ctx.onunload = function() {
+						unloaded++
+					}
+				}
+			})
+		])
+		return unloaded == 0
+	})
 	//end m.render
 
 	//m.redraw
@@ -1023,50 +1049,6 @@ function testMithril(mock) {
 		m.route("/test18")
 		mock.performance.$elapse(50) //teardown
 		return unloaded == 1
-	})
-	test(function() {
-		mock.performance.$elapse(50) //setup
-		mock.location.search = "?"
-
-		var root = mock.document.createElement("div")
-		var unloaded = 0
-		m.route.mode = "search"
-		m.route(root, "/", {
-			"/": {
-				controller: function() {},
-				view: function() {
-					return [
-						m("div", {
-							key: 1,
-							config: function(el, init, ctx) {
-								ctx.onunload = function() {
-									unloaded++
-								}
-							}
-						})
-					]
-				}
-			},
-			"/test19": {
-				controller: function() {},
-				view: function() {
-					return [
-						m("div", {
-							key: 1,
-							config: function(el, init, ctx) {
-								ctx.onunload = function() {
-									unloaded++
-								}
-							}
-						})
-					]
-				}
-			}
-		})
-		mock.performance.$elapse(50)
-		m.route("/test19")
-		mock.performance.$elapse(50) //teardown
-		return unloaded == 0
 	})
 	test(function() {
 		mock.performance.$elapse(50) //setup

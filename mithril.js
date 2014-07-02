@@ -297,11 +297,15 @@ Mithril = m = new function app(window) {
 	m.render = function(root, cell) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
-		var index = nodeCache.indexOf(root)
-		var id = index < 0 ? nodeCache.push(root) - 1 : index
+		var id = getCellCacheId(root)
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
+		if (cellCache[id] === undefined) clear(node.childNodes)
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
+	}
+	function getCellCacheId(element) {
+		var index = nodeCache.indexOf(element)
+		return index < 0 ? nodeCache.push(element) - 1 : index
 	}
 
 	m.trust = function(value) {
@@ -428,17 +432,23 @@ Mithril = m = new function app(window) {
 		}
 
 		for (var route in router) {
-			if (route == path) return !void m.module(root, router[route])
+			if (route == path) {
+				clear(root.childNodes, cellCache[getCellCacheId(root)])
+				m.module(root, router[route])
+				return true
+			}
 
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 			if (matcher.test(path)) {
-				return !void path.replace(matcher, function() {
+				clear(root.childNodes, cellCache[getCellCacheId(root)])
+				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
 					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeSpace(values[i])
 					m.module(root, router[route])
 				})
+				return true
 			}
 		}
 	}
