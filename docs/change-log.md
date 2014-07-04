@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.18](/mithril/archive/v0.1.18) - maintenance
+
+### Bug Fixes:
+
+-	routing now correctly clears diff cache [#148](https://github.com/lhorie/mithril.js/issues/148)
+-	fixed incorrect context unloading when reattaching a child to a new parent
+
+---
+
 [v0.1.17](/mithril/archive/v0.1.17) - maintenance
 
 ### News:

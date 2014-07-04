@@ -123,7 +123,10 @@ Mithril = m = new function app(window) {
 			
 		}
 		else if (dataType == "[object Object]") {
-			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) clear(cached.nodes, cached)
+			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
+				clear(cached.nodes)
+				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
+			}
 			if (typeof data.tag != "string") return
 
 			var node, isNew = cached.nodes.length === 0
@@ -238,7 +241,10 @@ Mithril = m = new function app(window) {
 	}
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
-		if (cached.children instanceof Array) for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+		if (cached.children) {
+			if (cached.children instanceof Array) for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+			else if (cached.children.tag) unload(cached.children)
+		}
 	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index]

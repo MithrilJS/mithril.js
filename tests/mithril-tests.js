@@ -603,6 +603,44 @@ function testMithril(mock) {
 		])
 		return unloaded == 0
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloadedParent = 0
+		var unloadedChild = 0
+		var configParent = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedParent++
+			}
+		}
+		var configChild = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedChild++
+			}
+		}
+		var unloaded = 0
+		m.render(root, m("div", {config: configParent}, m("a", {config: configChild})))
+		m.render(root, m("main", {config: configParent}, m("a", {config: configChild})))
+		return unloadedParent === 1 && unloadedChild === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloadedParent = 0
+		var unloadedChild = 0
+		var configParent = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedParent++
+			}
+		}
+		var configChild = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedChild++
+			}
+		}
+		var unloaded = 0
+		m.render(root, m("div", {config: configParent}, m("a", {config: configChild})))
+		m.render(root, m("main", {config: configParent}, m("b", {config: configChild})))
+		return unloadedParent === 1 && unloadedChild === 1
+	})
 	//end m.render
 
 	//m.redraw
@@ -1161,9 +1199,39 @@ function testMithril(mock) {
 		var foo = root.childNodes[0].childNodes[0].nodeValue;
 		m.route("/bar")
 		mock.performance.$elapse(50) //teardown
-		console.log(root.childNodes)
 		var bar = root.childNodes[0].childNodes[0].nodeValue;
 		return (foo === "foo" && bar === "bar")
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		var config = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloaded++
+			}
+		}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function() {
+					return m("div", m("a", {config: config}, "foo"));
+				}
+			},
+			"/bar1": {
+				controller: function() {},
+				view: function() {
+					return m("main", m("a", {config: config}, "foo"));
+				}
+			},
+		})
+		mock.performance.$elapse(50)
+		m.route("/bar1")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
 	})
 	//end m.route
 
