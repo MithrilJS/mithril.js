@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-	var version = "0.1.17"
+	var version = "0.1.18"
 
 	var inputFolder = "./docs"
 	var tempFolder = "./temp"
