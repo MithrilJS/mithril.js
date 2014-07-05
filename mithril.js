@@ -269,11 +269,6 @@ Mithril = m = new function app(window) {
 		}
 		return nodes
 	}
-	function clone(object) {
-		var result = {}
-		for (var prop in object) result[prop] = object[prop]
-		return result
-	}
 	function autoredraw(callback, object) {
 		return function(e) {
 			e = e || event
@@ -442,9 +437,7 @@ Mithril = m = new function app(window) {
 
 		for (var route in router) {
 			if (route == path) {
-				var cacheKey = getCellCacheKey(root)
-				clear(root.childNodes, cellCache[cacheKey])
-				cellCache[cacheKey] = undefined
+				reset(root)
 				m.module(root, router[route])
 				return true
 			}
@@ -452,9 +445,7 @@ Mithril = m = new function app(window) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 			if (matcher.test(path)) {
-				var cacheKey = getCellCacheKey(root)
-				clear(root.childNodes, cellCache[cacheKey])
-				cellCache[cacheKey] = undefined
+				reset(root)
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
@@ -464,6 +455,11 @@ Mithril = m = new function app(window) {
 				return true
 			}
 		}
+	}
+	function reset(root) {
+		var cacheKey = getCellCacheKey(root)
+		clear(root.childNodes, cellCache[cacheKey])
+		cellCache[cacheKey] = undefined
 	}
 	function routeUnobtrusive(e) {
 		e = e || event
