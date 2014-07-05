@@ -49,7 +49,7 @@ Mithril = m = new function app(window) {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
-			var existing = {}, shouldMaintainIdentities = false
+			var existing = {}, unkeyed = [], shouldMaintainIdentities = false
 			for (var i = 0; i < cached.length; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key !== undefined) {
 					shouldMaintainIdentities = true
@@ -58,15 +58,18 @@ Mithril = m = new function app(window) {
 			}
 			if (shouldMaintainIdentities) {
 				for (var i = 0; i < data.length; i++) {
-					if (data[i] && data[i].attrs && data[i].attrs.key !== undefined) {
-						var key = data[i].attrs.key
-						if (!existing[key]) existing[key] = {action: INSERTION, index: i}
-						else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
+					if (data[i] && data[i].attrs) {
+						if (data[i].attrs.key !== undefined) {
+							var key = data[i].attrs.key
+							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
+							else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
+						}
+						else unkeyed.push({index: i, element: parentElement.childNodes[i]})
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
 				var changes = actions.sort(function(a, b) {return a.action - b.action || b.index - a.index})
-				var newCached = new Array(cached.length)
+				var newCached = cached.slice()
 				
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
@@ -86,6 +89,11 @@ Mithril = m = new function app(window) {
 						}
 						newCached[change.index] = cached[change.from]
 					}
+				}
+				for (var i = 0; i < unkeyed.length; i++) {
+					var change = unkeyed[i]
+					parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
+					newCached[change.index] = cached[change.index]
 				}
 				cached = newCached
 				cached.nodes = []

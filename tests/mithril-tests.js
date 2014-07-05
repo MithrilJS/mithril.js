@@ -564,6 +564,23 @@ function testMithril(mock) {
 		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes[4].key == "6" && root.childNodes[5].key == "7" && root.childNodes.length === 6
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/149
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a"), m("a", {key: 4}), m("a", {key: 5})])
+		var firstBefore = root.childNodes[0]
+		var secondBefore = root.childNodes[1]
+		var thirdBefore = root.childNodes[2]
+		var fourthBefore = root.childNodes[3]
+		var fifthBefore = root.childNodes[4]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 5}), m("a"), m("a", {key: 1}), m("a", {key: 2})])
+		var firstAfter = root.childNodes[3]
+		var secondAfter = root.childNodes[4]
+		var thirdAfter = root.childNodes[2]
+		var fourthAfter = root.childNodes[0]
+		var fifthAfter = root.childNodes[1]
+		return firstBefore === firstAfter && secondBefore === secondAfter && thirdBefore === thirdAfter && fourthBefore === fourthAfter && fifthBefore === fifthAfter
+	})
+	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/134
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", {contenteditable: true}, "test"))
