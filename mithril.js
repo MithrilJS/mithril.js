@@ -1,5 +1,4 @@
 Mithril = m = new function app(window) {
-	var selectorCache = {}
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 
@@ -8,23 +7,19 @@ Mithril = m = new function app(window) {
 		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
-		var cell = selectorCache[args[0]]
-		if (cell === undefined) {
-			selectorCache[args[0]] = cell = {tag: "div", attrs: {}}
-			var match, classes = []
-			while (match = parser.exec(args[0])) {
-				if (match[1] == "") cell.tag = match[2]
-				else if (match[1] == "#") cell.attrs.id = match[2]
-				else if (match[1] == ".") classes.push(match[2])
-				else if (match[3][0] == "[") {
-					var pair = attrParser.exec(match[3])
-					cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true)
-				}
+		var cell = {tag: "div", attrs: {}}
+		var match, classes = []
+		while (match = parser.exec(args[0])) {
+			if (match[1] == "") cell.tag = match[2]
+			else if (match[1] == "#") cell.attrs.id = match[2]
+			else if (match[1] == ".") classes.push(match[2])
+			else if (match[3][0] == "[") {
+				var pair = attrParser.exec(match[3])
+				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true)
 			}
-			if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
 		}
-		cell = clone(cell)
-		cell.attrs = clone(cell.attrs)
+		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
+		
 		cell.children = hasAttrs ? args[2] : args[1]
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
