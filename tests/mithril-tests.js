@@ -660,6 +660,13 @@ function testMithril(mock) {
 		m.render(root, m("main", {config: configParent}, m("b", {config: configChild})))
 		return unloadedParent === 1 && unloadedChild === 1
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/150
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a"), m("div")])
+		m.render(root, [[], m("div")])
+		return root.childNodes.length == 1 && root.childNodes[0].nodeName == "DIV"
+	})
 	//end m.render
 
 	//m.redraw

@@ -104,18 +104,16 @@ Mithril = m = new function app(window) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
-				subArrayCount += item instanceof Array ? item.length : 1
+				var isArray = item instanceof Array
+				subArrayCount += isArray ? item.length : 1
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				}
-				for (var i = nodes.length, node; node = cached.nodes[i]; i++) {
-					if (node.parentNode !== null && node.parentNode.childNodes.length != nodes.length) {
-						node.parentNode.removeChild(node)
-						if (cached[i]) unload(cached[i])
-					}
+				for (var i = 0, node; node = cached.nodes[i]; i++) {
+					if (node.parentNode !== null && nodes.indexOf(node) < 0) node.parentNode.removeChild(node)
 				}
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
 					if (node.parentNode === null) parentElement.appendChild(node)
