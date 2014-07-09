@@ -7,6 +7,7 @@ mock.window = new function() {
 		return {
 			style: {},
 			childNodes: [],
+			nodeType: 1,
 			nodeName: tag.toUpperCase(),
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,
@@ -17,7 +18,8 @@ mock.window = new function() {
 				if (referenceIndex < 0) this.childNodes.push(node)
 				else {
 					var index = this.childNodes.indexOf(node)
-					this.childNodes.splice(referenceIndex, index < 0 ? 0 : 1, node)
+					if (index > -1) this.childNodes.splice(index, 1)
+					this.childNodes.splice(referenceIndex, 0, node)
 				}
 			},
 			insertAdjacentHTML: function(position, html) {
@@ -68,6 +70,7 @@ mock.window = new function() {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
+	window.scrollTo = function() {}
 	window.performance = new function () {
 		var timestamp = 50
 		this.$elapse = function(amount) {timestamp += amount}
@@ -82,6 +85,10 @@ mock.window = new function() {
 	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {
+			this.$headers = {}
+			this.setRequestHeader = function(key, value) {
+				this.$headers[key] = value
+			}
 			this.open = function(method, url) {
 				this.method = method
 				this.url = url

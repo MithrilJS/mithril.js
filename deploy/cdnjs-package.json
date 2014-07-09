@@ -19,5 +19,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/lhorie/mithril.js.git"
-  }
+  },
+  "npmFileMap": [
+    {
+      "basePath": "/",
+      "files": [
+        "mithril.js",
+        "mithril.min.js",
+        "mithril.min.map"
+      ]
+    }
+  ]
 }

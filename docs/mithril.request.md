@@ -314,7 +314,7 @@ where:
 		[any deserialize(String dataToDeserialize),]
 		[any extract(XMLHttpRequest xhr, XHROptions options),]
 		[void type(Object<any> data),]
-		[void config(XMLHttpRequest xhr, XHROptions options)]
+		[XMLHttpRequest? config(XMLHttpRequest xhr, XHROptions options)]
 	}
 ```
 
@@ -435,7 +435,7 @@ where:
 		
 		And the data is `[{name: "John"}, {name: "Mary"}]`, then the response will contain an array of two User instances.
 		
-	-	**void config(XMLHttpRequest xhr, XHROptions options)** (optional)
+	-	**XMLHttpRequest? config(XMLHttpRequest xhr, XHROptions options)** (optional)
 		
 		An initialization function that runs after `open` and before `send`. Useful for adding request headers and when using XHR2 features, such as the XMLHttpRequest's `upload` property.
 		
@@ -446,6 +446,10 @@ where:
 		-	**XHROptions options**
 			
 			The `options` parameter that was passed into `m.request` call
+			
+		-	**returns XMLHttpRequest? xhr**
+		
+			You may return an XHR-like object (e.g. a XDomainRequest instance) to override the provided XHR instance altogether.
 	
 -	**returns Promise promise**
 

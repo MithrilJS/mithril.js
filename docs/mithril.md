@@ -157,6 +157,8 @@ One caveat of using the CSS syntax is that it clobbers the `style` attribute in 
 
 ---
 
+#### Accessing the real DOM element
+
 You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
 
 This is useful, for example, if you declare a `canvas` element and want to use the Javascript API to draw:
@@ -202,6 +204,8 @@ You can use this mechanism to attach custom event listeners to controller method
 
 ---
 
+#### Persisting config data
+
 The third argument for `config` allows you to map data to a virtual DOM element in a way that persists across redraws. This is useful when a `config` instantiates 3rd party classes and accesses the instance on redraws.
 
 The example below shows a contrived redraw counter. In it, the count is stored in the context object and re-accessed on each redraw.
@@ -217,6 +221,33 @@ m("div", {config: alertsRedrawCount})
 
 ---
 
+#### Destructors
+
+If the `context` object that is passed to a `config` function has a property called `onunload`, this function will be called when the element gets detached from the document by Mithril's diff engine.
+
+This is useful if there are cleanup tasks that need to be run when an element is destroyed (e.g. clearing `setTimeout`'s, etc)
+
+```javascript
+function unloadable(element, isInit, context) {
+	context.timer = setTimeout(function() {
+		alert("timed out!");
+	}, 1000);
+	
+	context.onunload = function() {
+		clearTimeout(context.timer);
+		console.log("unloaded the div");
+	}
+};
+
+m.render(document, m("div", {config: unloadable}));
+
+m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
+```
+
+---
+
+#### SVG
+
 You can use Mithril to create SVG documents (as long as you don't need to support browsers that don't support SVG natively).
 
 Mithril automatically figures out the correct XML namespaces when it sees an SVG island in the virtual DOM tree.
@@ -225,6 +256,38 @@ Mithril automatically figures out the correct XML namespaces when it sees an SVG
 m("svg[height='200px'][width='200px']", [
 	m("image[href='foo.jpg'][height='200px'][width='200px']")
 ])
+```
+
+---
+
+#### Dealing with focus
+
+The virtual DOM diffing algorithm has a weakness: a naive diff is not aware of the identity of DOM elements. In practice, this means performing operations like shifting an item from the beginning of a list would cause every element in the list to be diffed and potentially recreated. Another side-effect is that UI state like input focus is not tracked correctly if the focused element moves around, and likewise, state for 3rd party plugins that are added via `config` can also end up in the wrong element.
+
+Fortunately, with Mithril, it's possible for developers to attach an identity key to elements so that array operations like shift, splice and sort only affect the minimum amount of elements required, leaving the rest of the DOM elements untouched when a redraw happens. This allows us to maintain input focus and plugin state correctly.
+
+To maintain the identities of DOM elements, you need to add a `key` property to the direct children of the array that you're planning to modify. The key for each child must be unique among its siblings, but it does not need to be globally unique. Also, keys must be either strings or numbers.
+
+```javascript
+m("ul", [
+	ctrl.items.map(function(item) {
+		return m("li", {key: item.id}, [
+			m("input")
+		]);
+	})
+]);
+```
+
+In the example above, input focus would be maintained correctly after a redraw even if `ctrl.items` got sorted or reversed. The key is defined in the `li`, which is the closest element to the `ctrl.items` array, not directly on the `input`, even though we want to track focus on the input.
+
+Note that in addition to the presence of the `key` attribute, diffing rules also apply in determining whether an element is recreated. Elements are recreated if either their node name changes, or if the list of attribute names change, or if the ID attribute changes. To avoid surprises, be sure to change only attribute values, using `undefined` or `null` as values if appropriate, rather than conditionally substituting attribute dictionaries altogether.
+
+```javascript
+//avoid using this idiom
+m("li", selected ? {class: "active"} : {})
+
+//use this idiom instead
+m("li", {class: selected ? "active" : ""})
 ```
 
 ---
@@ -367,6 +430,27 @@ where:
 	}
 
 	m("div", {config: alertsRedrawCount})
+	```
+	
+	If the `context` object that is passed to a `config` function has a property called `onunload`, this function will be called when the element gets detached from the document by Mithril's diff engine.
+
+	This is useful if there are cleanup tasks that need to be run when an element is destroyed (e.g. clearing `setTimeout`'s, etc)
+
+	```javascript
+	function unloadable(element, isInit, context) {
+		context.timer = setTimeout(function() {
+			alert("timed out!");
+		}, 1000);
+		
+		context.onunload = function() {
+			clearTimeout(context.timer);
+			console.log("unloaded the div");
+		}
+	};
+
+	m.render(document, m("div", {config: unloadable}));
+
+	m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 	```
 	
 -	**Children children** (optional)

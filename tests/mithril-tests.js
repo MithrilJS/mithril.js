@@ -487,6 +487,160 @@ function testMithril(mock) {
 		})));
 		return parent === root
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var count = 0
+		m.render(root, m("div", m("a", {
+			config: function(el) {
+				var island = mock.document.createElement("div")
+				count++
+				if (count > 2) throw "too much recursion..."
+				m.render(island, m("div"))
+			}
+		})));
+		return count == 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/129
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [["foo", "bar"], ["foo", "bar"], ["foo", "bar"]]));
+		m.render(root, m("div", ["asdf", "asdf2", "asdf3"]));
+		return true
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		//insert at beginning
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[0]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstAfter = root.childNodes[1]
+		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 4
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[0]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2})])
+		var firstAfter = root.childNodes[1]
+		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 3
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		var firstBefore = root.childNodes[1]
+		m.render(root, [m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4})])
+		var firstAfter = root.childNodes[0]
+		return firstBefore == firstAfter && root.childNodes[0].key === "2" && root.childNodes.length === 3
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		var firstBefore = root.childNodes[0]
+		var secondBefore = root.childNodes[1]
+		var fourthBefore = root.childNodes[3]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 1}), m("a", {key: 2})])
+		var firstAfter = root.childNodes[2]
+		var secondAfter = root.childNodes[3]
+		var fourthAfter = root.childNodes[0]
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes.length === 4
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/98
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		var firstBefore = root.childNodes[0]
+		var secondBefore = root.childNodes[1]
+		var fourthBefore = root.childNodes[3]
+		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 2}), m("a", {key: 1}), m("a", {key: 6}), m("a", {key: 7})])
+		var firstAfter = root.childNodes[3]
+		var secondAfter = root.childNodes[2]
+		var fourthAfter = root.childNodes[0]
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes[4].key == "6" && root.childNodes[5].key == "7" && root.childNodes.length === 6
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/134
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", {contenteditable: true}, "test"))
+		mock.document.activeElement = root.childNodes[0]
+		m.render(root, m("div", {contenteditable: true}, "test1"))
+		m.render(root, m("div", {contenteditable: false}, "test2"))
+		return root.childNodes[0].childNodes[0].nodeValue === "test2"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/136
+		var root = mock.document.createElement("div")
+		m.render(root, m("textarea", ["test"]))
+		m.render(root, m("textarea", ["test1"]))
+		return root.childNodes[0].value === "test1"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.render(root, [
+			m("div", {
+				key: 1,
+				config: function(el, init, ctx) {
+					ctx.onunload = function() {
+						unloaded++
+					}
+				}
+			})
+		])
+		m.render(root, [
+			m("div", {key: 2}),
+			m("div", {
+				key: 1,
+				config: function(el, init, ctx) {
+					ctx.onunload = function() {
+						unloaded++
+					}
+				}
+			})
+		])
+		return unloaded == 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloadedParent = 0
+		var unloadedChild = 0
+		var configParent = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedParent++
+			}
+		}
+		var configChild = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedChild++
+			}
+		}
+		var unloaded = 0
+		m.render(root, m("div", {config: configParent}, m("a", {config: configChild})))
+		m.render(root, m("main", {config: configParent}, m("a", {config: configChild})))
+		return unloadedParent === 1 && unloadedChild === 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var unloadedParent = 0
+		var unloadedChild = 0
+		var configParent = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedParent++
+			}
+		}
+		var configChild = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloadedChild++
+			}
+		}
+		var unloaded = 0
+		m.render(root, m("div", {config: configParent}, m("a", {config: configChild})))
+		m.render(root, m("main", {config: configParent}, m("b", {config: configChild})))
+		return unloadedParent === 1 && unloadedChild === 1
+	})
 	//end m.render
 
 	//m.redraw
@@ -774,6 +928,311 @@ function testMithril(mock) {
 		mock.performance.$elapse(50) //teardown
 		return route1 == "/" && route2 == "/test13"
 	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test14": {controller: function() {}, view: function() {}}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test14")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div"),
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test15": {
+				controller: function() {},
+				view: function() {
+					return [m("div")]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test15")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test16": {
+				controller: function() {},
+				view: function() {
+					return m("a")
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test16")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test17": {
+				controller: function() {},
+				view: function() {
+					return m("a")
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test17")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return m("div", {
+						config: function(el, init, ctx) {
+							ctx.onunload = function() {
+								unloaded++
+							}
+						}
+					})
+				}
+			},
+			"/test18": {
+				controller: function() {},
+				view: function() {
+					return [m("a")]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test18")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test20": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 2,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test20")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							key: 1,
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			},
+			"/test21": {
+				controller: function() {},
+				view: function() {
+					return [
+						m("div", {
+							config: function(el, init, ctx) {
+								ctx.onunload = function() {
+									unloaded++
+								}
+							}
+						})
+					]
+				}
+			}
+		})
+		mock.performance.$elapse(50)
+		m.route("/test21")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/foo", {
+			"/foo": {
+				controller: function() {},
+				view: function() {
+					return m("div", "foo");
+				}
+			},
+			"/bar": {
+				controller: function() {},
+				view: function() {
+					return m("div", "bar");
+				}
+			},
+		})
+		mock.performance.$elapse(50)
+		var foo = root.childNodes[0].childNodes[0].nodeValue;
+		m.route("/bar")
+		mock.performance.$elapse(50) //teardown
+		var bar = root.childNodes[0].childNodes[0].nodeValue;
+		return (foo === "foo" && bar === "bar")
+	})
+	test(function() {
+		mock.performance.$elapse(50) //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var unloaded = 0
+		var config = function(el, init, ctx) {
+			ctx.onunload = function() {
+				unloaded++
+			}
+		}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function() {
+					return m("div", m("a", {config: config}, "foo"));
+				}
+			},
+			"/bar1": {
+				controller: function() {},
+				view: function() {
+					return m("main", m("a", {config: config}, "foo"));
+				}
+			},
+		})
+		mock.performance.$elapse(50)
+		m.route("/bar1")
+		mock.performance.$elapse(50) //teardown
+		return unloaded == 1
+	})
 	//end m.route
 
 	//m.prop
@@ -829,6 +1288,13 @@ function testMithril(mock) {
 		catch (e) {exception = e}
 		m.endComputation()
 		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
+	})
+	test(function() {
+		var error = m.prop("no error")
+		var prop = m.request({method: "POST", url: "test"}).then(null, error)
+		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.onreadystatechange()
+		return xhr.$headers["Content-Type"] == "application/json; charset=utf-8"
 	})
 
 	//m.deferred

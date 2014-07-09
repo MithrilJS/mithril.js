@@ -1,12 +1,53 @@
 ## Change Log
 
-[v0.1.16](/mithril/archive/v0.1.6) - maintenance
+[v0.1.18](/mithril/archive/v0.1.18) - maintenance
+
+### Bug Fixes:
+
+-	routing now correctly clears diff cache [#148](https://github.com/lhorie/mithril.js/issues/148)
+-	fixed incorrect context unloading when reattaching a child to a new parent
+
+---
+
+[v0.1.17](/mithril/archive/v0.1.17) - maintenance
+
+### News:
+
+-	config contexts can now have an `onunload` property for clean up tasks after elements are detached from the document
+-	route changes now re-render from scratch, rather than attempting a virtual dom diff
+-	virtual elements that are children of an array can now accept a `key` attribute which maintains the identity of the underlying DOM elements when the array gets shuffled [#98](https://github.com/lhorie/mithril.js/issues/98)
+
+### Bug Fixes:
+
+-	fixed a subtree directive bug that happened in inputs inside loops
+-	fixed select.value so that the correct option is displayed on first render
+-	in m.request, non-idempotent methods now automatically send appropriate Content-Type header if `serialize` is `JSON.stringify` [#139](https://github.com/lhorie/mithril.js/issues/139)
+-	`m` selectors now correctly handle empty attribute values like `[href='']`
+-	pre-existing nodes in a root element now get cleared if there's no cell cache associated with the element [#60](https://github.com/lhorie/mithril.js/issues/60)
+
+---
+
+[v0.1.16](/mithril/archive/v0.1.16) - maintenance
+
+### News:
+
+-	controller::onunload now receives an event parameter so that the unloading can be aborted [#135](https://github.com/lhorie/mithril.js/issues/135)
 
 ### Bug Fixes:
 
 -	prevent route change when only hash changes in non-hash mode [#107](https://github.com/lhorie/mithril.js/issues/107)
+-	config now always runs after template is attached to document [#109](https://github.com/lhorie/mithril.js/issues/109)
 -	fix null reference exception with Browserify [#110](https://github.com/lhorie/mithril.js/issues/110)
 -	fix nested array removal edge cases [#120](https://github.com/lhorie/mithril.js/issues/120)
+-	ignore redraw calls when controller is not ready [#127](https://github.com/lhorie/mithril.js/issues/127)
+-	fix null reference exception in nested array edge case [#129](https://github.com/lhorie/mithril.js/issues/129)
+-	fix a contenteditable null reference error [#134](https://github.com/lhorie/mithril.js/issues/134)
+-	fix textarea value diffing when value is a node inside an array [#136](https://github.com/lhorie/mithril.js/issues/136)
+-	fix diff bug with trusted strings [#138](https://github.com/lhorie/mithril.js/issues/138)
+
+### Breaking changes:
+
+-	Due to the poor level of compatibility between XDomainRequest and XHR2, XDomainRequest is no longer called internally by Mithril. If you need to use CORS in IE9 or lower, you will need to return an XDomainRequest instance from `m.request`'s `config` method [#121](https://github.com/lhorie/mithril.js/issues/121)
 
 ---
 

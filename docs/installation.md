@@ -99,7 +99,7 @@ component install lhorie/mithril
 Then, to use Mithril, point a script tag to the downloaded file:
 
 ```markup
-<script src="/components/lhorie/mithril/master/mithril.min.js"></script>
+<script src="/components/lhorie/mithril/master/mithril.js"></script>
 ```
 
 ---

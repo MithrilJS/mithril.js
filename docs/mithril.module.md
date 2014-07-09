@@ -129,6 +129,17 @@ m.module(document, module2); // logs "unloading module 1"
 
 This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `onunload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
 
+You can also use this event to prevent a module from being unloaded (e.g. to alert a user to save their changes before navigating away from a page)
+
+```javascript
+var module1 = {}
+module1.controller = function() {
+	this.onunload = function(e) {
+		if (!confirm("are you sure you want to leave this page?")) e.preventDefault()
+	}
+}
+```
+
 ---
 
 ### Signature
@@ -140,7 +151,8 @@ void module(DOMElement rootElement, Module module)
 
 where:
 	Module :: Object { Controller, void view(Object controllerInstance) }
-	Controller :: void controller() | void controller() { prototype: void unload() }
+	Controller :: void controller() | void controller() { prototype: void unload(UnloadEvent e) }
+	UnloadEvent :: Object {void preventDefault()}
 ```
 
 -	**DOMElement rootElement**

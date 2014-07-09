@@ -3,8 +3,8 @@
 	"description": "A Javascript framework for building brilliant applications",
 	"keywords": ["mvc", "framework"],
 	"repository": "lhorie/mithril",
-	"main": "mithril.min.js",
-	"scripts": ["mithril.min.js", "mithril.min.map", "mithril.js"],
+	"main": "mithril.js",
+	"scripts": ["mithril.js"],
 	"version": "$version",
 	"license": "MIT"
 }
