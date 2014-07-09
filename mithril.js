@@ -447,20 +447,38 @@ Mithril = m = new function app(window) {
 				return true
 			}
 
-			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+			var matchers = [
+				{// Suport for : /path/to/:id
+					route_regex: route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)"),
+					key_regex : /:[^\/]+/g,
+					special_chars_regex: /:|\./g
+				},
+				{// Suport for : /path/to/{id}
+					route_regex: route.replace(/\{(\w+)\}/g, "(.+?)"),
+					key_regex : /\{\w+\}/g,
+					special_chars_regex: /\{|\}/g
+				},
 
-			if (matcher.test(path)) {
-				var cacheKey = getCellCacheKey(root)
-				clear(root.childNodes, cellCache[cacheKey])
-				cellCache[cacheKey] = undefined
-				path.replace(matcher, function() {
-					var keys = route.match(/:[^\/]+/g) || []
-					var values = [].slice.call(arguments, 1, -2)
-					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeSpace(values[i])
-					m.module(root, router[route])
-				})
-				return true
-			}
+			]
+			for (var i = 0; i < matchers.length; i++) {
+				
+				var matcher_config = matchers[i]
+				var matcher = new RegExp("^" + matcher_config.route_regex + "\/?$")
+
+				if (matcher.test(path)) {
+					var cacheKey = getCellCacheKey(root)
+					clear(root.childNodes, cellCache[cacheKey])
+					cellCache[cacheKey] = undefined
+					path.replace(matcher, function() {
+						var keys = route.match(matcher_config.key_regex) || []
+						var values = [].slice.call(arguments, 1, -2)
+						for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(matcher_config.special_chars_regex, "")] = decodeSpace(values[i])
+						m.module(root, router[route])
+					})
+					return true
+				}
+			};
+
 		}
 	}
 	function routeUnobtrusive(e) {
