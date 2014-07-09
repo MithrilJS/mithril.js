@@ -426,6 +426,7 @@ Mithril = m = new function app(window) {
 		}
 	}
 	m.route.param = function(key) {return routeParams[key]}
+	m.route.params = function() { return routeParams }
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
