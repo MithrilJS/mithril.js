@@ -1,7 +1,7 @@
 Mithril = m = new function app(window) {
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
-
+	
 	function m() {
 		var args = arguments
 		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
@@ -197,6 +197,7 @@ Mithril = m = new function app(window) {
 		return cached
 	}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
+		var groups = {}
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
@@ -267,7 +268,7 @@ Mithril = m = new function app(window) {
 		}
 		return nodes
 	}
-	function autoredraw(callback, object) {
+	function autoredraw(callback, object, group) {
 		return function(e) {
 			e = e || event
 			m.startComputation()
@@ -316,7 +317,7 @@ Mithril = m = new function app(window) {
 		return value
 	}
 
-	var roots = [], modules = [], controllers = [], now = 0, lastRedraw = 0, lastRedrawId = 0, computePostRedrawHook = null
+	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
@@ -336,14 +337,10 @@ Mithril = m = new function app(window) {
 		}
 	}
 	m.redraw = function() {
-		now = window.performance && window.performance.now ? window.performance.now() : new window.Date().getTime()
-		if (now - lastRedraw > 16) redraw()
-		else {
-			var cancel = window.cancelAnimationFrame || window.clearTimeout
-			var defer = window.requestAnimationFrame || window.setTimeout
-			cancel(lastRedrawId)
-			lastRedrawId = defer(redraw, 0)
-		}
+		var cancel = window.cancelAnimationFrame || window.clearTimeout
+		var defer = window.requestAnimationFrame || window.setTimeout
+		cancel(lastRedrawId)
+		lastRedrawId = defer(redraw, 0)
 	}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
@@ -353,7 +350,6 @@ Mithril = m = new function app(window) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
-		lastRedraw = now
 	}
 
 	var pendingRequests = 0
@@ -391,7 +387,6 @@ Mithril = m = new function app(window) {
 			}
 			computePostRedrawHook = setScroll
 			window[listener]()
-			currentRoute = normalizeRoute(window.location[m.route.mode])
 		}
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
@@ -410,7 +405,7 @@ Mithril = m = new function app(window) {
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
 
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
-
+			
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
@@ -585,7 +580,7 @@ Mithril = m = new function app(window) {
 			var maybeXhr = options.config(xhr, options)
 			if (maybeXhr !== undefined) xhr = maybeXhr
 		}
-		xhr.send(options.data)
+		xhr.send(options.method == "GET" ? "" : options.data)
 		return xhr
 	}
 	function bindData(xhrOptions, data, serialize) {

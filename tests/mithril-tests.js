@@ -28,7 +28,7 @@ function testMithril(mock) {
 
 	//m.module
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 
 		var root1 = mock.document.createElement("div")
 		m.module(root1, {
@@ -671,23 +671,22 @@ function testMithril(mock) {
 
 	//m.redraw
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		var controller
 		var root = mock.document.createElement("div")
 		m.module(root, {
 			controller: function() {controller = this},
 			view: function(ctrl) {return ctrl.value}
 		})
+		mock.requestAnimationFrame.$resolve()
+		var valueBefore = root.childNodes[0].nodeValue
 		controller.value = "foo"
 		m.redraw()
-		var valueBefore = root.childNodes[0].nodeValue
-		mock.performance.$elapse(50)
-		m.redraw()
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve()
 		return valueBefore === "" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		var count = 0
 		var root = mock.document.createElement("div")
 		m.module(root, {
@@ -696,18 +695,18 @@ function testMithril(mock) {
 				count++
 			}
 		})
+		mock.requestAnimationFrame.$resolve() //teardown
 		m.redraw()
 		m.redraw()
 		m.redraw()
-		mock.performance.$elapse(50)
 		m.redraw()
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return count === 2
 	})
 
 	//m.route
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -715,11 +714,11 @@ function testMithril(mock) {
 		m.route(root, "/test1", {
 			"/test1": {controller: function() {}, view: function() {return "foo"}}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test1" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.pathname = "/"
 
 		var root = mock.document.createElement("div")
@@ -727,11 +726,11 @@ function testMithril(mock) {
 		m.route(root, "/test2", {
 			"/test2": {controller: function() {}, view: function() {return "foo"}}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.pathname == "/test2" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.hash = "#"
 
 		var root = mock.document.createElement("div")
@@ -739,11 +738,11 @@ function testMithril(mock) {
 		m.route(root, "/test3", {
 			"/test3": {controller: function() {}, view: function() {return "foo"}}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.hash == "#/test3" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -751,11 +750,11 @@ function testMithril(mock) {
 		m.route(root, "/test4/foo", {
 			"/test4/:test": {controller: function() {}, view: function() {return m.route.param("test")}}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test4/foo" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
@@ -767,14 +766,14 @@ function testMithril(mock) {
 			"/test5/:test": module
 		})
 		var paramValueBefore = m.route.param("test")
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/")
 		var paramValueAfter = m.route.param("test")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
@@ -786,15 +785,15 @@ function testMithril(mock) {
 			"/test6/:a1": module
 		})
 		var paramValueBefore = m.route.param("a1")
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/")
 		var paramValueAfter = m.route.param("a1")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/61
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
@@ -806,14 +805,14 @@ function testMithril(mock) {
 			"/test7/:a1": module
 		})
 		var routeValueBefore = m.route()
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/")
 		var routeValueAfter = m.route()
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return routeValueBefore === "/test7/foo" && routeValueAfter === "/"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -826,11 +825,11 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test8/foo/SEP/bar/baz" && root.childNodes[0].nodeValue === "foo_bar/baz"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -843,11 +842,11 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test9/foo/bar/SEP/baz" && root.childNodes[0].nodeValue === "foo/bar_baz"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -860,11 +859,11 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return root.childNodes[0].nodeValue === "foo bar"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -873,13 +872,13 @@ function testMithril(mock) {
 			"/": {controller: function() {}, view: function() {return "foo"}},
 			"/test11": {controller: function() {}, view: function() {return "bar"}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test11/")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test11/" && root.childNodes[0].nodeValue === "bar"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -888,13 +887,13 @@ function testMithril(mock) {
 			"/": {controller: function() {}, view: function() {}},
 			"/test12": {controller: function() {}, view: function() {}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test12?a=foo&b=bar")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -903,13 +902,13 @@ function testMithril(mock) {
 			"/": {controller: function() {}, view: function() {return "bar"}},
 			"/test13/:test": {controller: function() {}, view: function() {return m.route.param("test")}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test13/foo?test=bar")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test13/foo?test=bar" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -918,13 +917,13 @@ function testMithril(mock) {
 			"/": {controller: function() {}, view: function() {return "bar"}},
 			"/test14": {controller: function() {}, view: function() {return "foo"}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === true && m.route.param("test2") === ""
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -933,13 +932,13 @@ function testMithril(mock) {
 			"/": {controller: function() {}, view: function() {}},
 			"/test12": {controller: function() {}, view: function() {}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test12", {a: "foo", b: "bar"})
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -949,13 +948,13 @@ function testMithril(mock) {
 			"/": {controller: function() {route1 = m.route()}, view: function() {}},
 			"/test13": {controller: function() {route2 = m.route()}, view: function() {}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test13")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return route1 == "/" && route2 == "/test13"
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -976,13 +975,13 @@ function testMithril(mock) {
 			},
 			"/test14": {controller: function() {}, view: function() {}}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test14")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1011,13 +1010,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test15")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1043,13 +1042,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test16")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1077,13 +1076,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test17")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1109,13 +1108,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test18")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1153,13 +1152,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test20")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1196,13 +1195,13 @@ function testMithril(mock) {
 				}
 			}
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/test21")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1221,15 +1220,15 @@ function testMithril(mock) {
 				}
 			},
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		var foo = root.childNodes[0].childNodes[0].nodeValue;
 		m.route("/bar")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		var bar = root.childNodes[0].childNodes[0].nodeValue;
 		return (foo === "foo" && bar === "bar")
 	})
 	test(function() {
-		mock.performance.$elapse(50) //setup
+		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
 		var root = mock.document.createElement("div")
@@ -1254,9 +1253,9 @@ function testMithril(mock) {
 				}
 			},
 		})
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 		m.route("/bar1")
-		mock.performance.$elapse(50) //teardown
+		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
 	//end m.route
@@ -1502,7 +1501,7 @@ function testMithril(mock) {
 
 	//m.startComputation/m.endComputation
 	test(function() {
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 
 		var controller
 		var root = mock.document.createElement("div")
@@ -1511,11 +1510,13 @@ function testMithril(mock) {
 			view: function(ctrl) {return ctrl.value}
 		})
 
-		mock.performance.$elapse(50)
+		mock.requestAnimationFrame.$resolve()
 
 		m.startComputation()
 		controller.value = "foo"
 		m.endComputation()
+		mock.requestAnimationFrame.$resolve()
+		
 		return root.childNodes[0].nodeValue === "foo"
 	})
 

@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.18](/mithril/archive/v0.1.19) - maintenance
+
+### Bug Fixes:
+
+-	fix double redraw when events fire simultaneously
+-	prevent routes from reverting to original route in some cases
+
+---
+
 [v0.1.18](/mithril/archive/v0.1.18) - maintenance
 
 ### Bug Fixes:
