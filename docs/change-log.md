@@ -1,10 +1,11 @@
 ## Change Log
 
-[v0.1.18](/mithril/archive/v0.1.19) - maintenance
+[v0.1.19](/mithril/archive/v0.1.19) - maintenance
 
 ### Bug Fixes:
 
--	fix double redraw when events fire simultaneously
+-	fix double redraw when events fire simultaneously [#151](https://github.com/lhorie/mithril.js/issues/151)
+-	fix node insertion bug when using document as root [#153](https://github.com/lhorie/mithril.js/issues/153)
 -	prevent routes from reverting to original route in some cases
 
 ---
