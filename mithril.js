@@ -287,9 +287,10 @@ Mithril = m = new function app(window) {
 			if (html === undefined) html = window.document.createElement("html")
 			if (node.nodeName == "HTML") html = node
 			else html.appendChild(node)
-			if (window.document.documentElement !== html) {
+			if (window.document.documentElement && window.document.documentElement !== html) {
 				window.document.replaceChild(html, window.document.documentElement)
 			}
+			else window.document.appendChild(html)
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)

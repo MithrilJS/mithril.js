@@ -41,13 +41,13 @@ var dashboard = {
 	}
 }
 
+//setup routes to start w/ the `#` symbol
+m.route.mode = "hash";
+
 //define a route
 m.route(document.body, "/dashboard/johndoe", {
 	"/dashboard/:userID": dashboard
 });
-
-//setup routes to start w/ the `#` symbol
-m.route.mode = "hash";
 ```
 
 This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
