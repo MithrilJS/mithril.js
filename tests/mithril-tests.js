@@ -678,6 +678,13 @@ function testMithril(mock) {
 		]))
 		return root.childNodes[0].childNodes[8].nodeName == "SPAN"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/157
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 2}), m("li", {key: 4})]))
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "012345"
+	})
 	//end m.render
 
 	//m.redraw

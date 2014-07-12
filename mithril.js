@@ -80,7 +80,7 @@ Mithril = m = new function app(window) {
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
-				var changes = actions.sort(function(a, b) {return a.action - b.action || b.index - a.index})
+				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index})
 				var newCached = cached.slice()
 				
 				for (var i = 0, change; change = changes[i]; i++) {
@@ -90,7 +90,7 @@ Mithril = m = new function app(window) {
 					}
 					if (change.action == INSERTION) {
 						var dummy = window.document.createElement("div")
-						dummy.key = data[change.index].attrs.key.toString()
+						dummy.key = data[change.index].attrs.key
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
