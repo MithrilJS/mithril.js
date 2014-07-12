@@ -667,6 +667,17 @@ function testMithril(mock) {
 		m.render(root, [[], m("div")])
 		return root.childNodes.length == 1 && root.childNodes[0].nodeName == "DIV"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/156
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [
+			["a", "b", "c", "d"].map(function() {
+				return [m("div"), " "]
+			}),
+			m("span")
+		]))
+		return root.childNodes[0].childNodes[8].nodeName == "SPAN"
+	})
 	//end m.render
 
 	//m.redraw

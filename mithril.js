@@ -20,7 +20,19 @@ Mithril = m = new function app(window) {
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
 		
-		cell.children = hasAttrs ? args[2] : args[1]
+		var children = hasAttrs ? args[2] : args[1]
+		if (children instanceof Array) {
+			cell.children = []
+			for (var i = 0; i < children.length; i++) {
+				var child = children[i]
+				if (child instanceof Array) children.push.apply(cell.children, child)
+				else cell.children.push(child)
+			}
+		}
+		else {
+			cell.children = children
+		}
+		
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
 			else cell.attrs[attrName] = attrs[attrName]
