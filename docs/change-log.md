@@ -4,9 +4,11 @@
 
 ### Bug Fixes:
 
--	fix double redraw when events fire simultaneously [#151](https://github.com/lhorie/mithril.js/issues/151)
--	fix node insertion bug when using document as root [#153](https://github.com/lhorie/mithril.js/issues/153)
+-	fixed double redraw when events fire simultaneously [#151](https://github.com/lhorie/mithril.js/issues/151)
+-	fixed node insertion bug when using document as root [#153](https://github.com/lhorie/mithril.js/issues/153)
 -	prevent routes from reverting to original route in some cases
+-	fixed nested array ordering [#156](https://github.com/lhorie/mithril.js/issues/156)
+-	fixed key ordering in interpolation case [#157](https://github.com/lhorie/mithril.js/issues/157)
 
 ---
 
