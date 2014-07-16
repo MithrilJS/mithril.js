@@ -20,18 +20,7 @@ Mithril = m = new function app(window) {
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
 		
-		var children = hasAttrs ? args[2] : args[1]
-		if (children instanceof Array) {
-			cell.children = []
-			for (var i = 0; i < children.length; i++) {
-				var child = children[i]
-				if (child instanceof Array) children.push.apply(cell.children, child)
-				else cell.children.push(child)
-			}
-		}
-		else {
-			cell.children = children
-		}
+		cell.children = hasAttrs ? args[2] : args[1]
 		
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
@@ -58,6 +47,7 @@ Mithril = m = new function app(window) {
 		}
 
 		if (dataType == "[object Array]") {
+			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
@@ -279,6 +269,15 @@ Mithril = m = new function app(window) {
 			index++
 		}
 		return nodes
+	}
+	function flatten(data) {
+		var flattened = []
+		for (var i = 0; i < data.length; i++) {
+			var item = data[i]
+			if (item instanceof Array) flattened.push.apply(flattened, flatten(item))
+			else flattened.push(item)
+		}
+		return flattened
 	}
 	function autoredraw(callback, object, group) {
 		return function(e) {
