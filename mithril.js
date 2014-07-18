@@ -224,7 +224,7 @@ Mithril = m = new function app(window) {
 				else if (attrName in node && !(attrName == "list" || attrName == "style")) {
 					node[attrName] = dataAttr
 				}
-				else if(dataAttr === undefined && dataAttr === false){
+				else if(!dataAttr && node.removeAttribute){
 					node.removeAttribute(attrName, dataAttr)
 				}
 				else node.setAttribute(attrName, dataAttr)
