@@ -104,7 +104,7 @@ Mithril = m = new function app(window) {
 				subArrayCount += item instanceof Array ? item.length : 1
 				cached[cacheCount++] = item
 			}
-			if (!intact) {
+			if (!intasct) {
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				}
@@ -223,9 +223,6 @@ Mithril = m = new function app(window) {
 				}
 				else if (attrName in node && !(attrName == "list" || attrName == "style")) {
 					node[attrName] = dataAttr
-				}
-				else if(dataAttr === undefined && dataAttr === false){
-					node.removeAttribute(attrName, dataAttr)
 				}
 				else node.setAttribute(attrName, dataAttr)
 			}
