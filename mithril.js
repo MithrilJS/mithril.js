@@ -241,7 +241,7 @@ Mithril = m = new function app(window) {
 				if (cached[i]) unload(cached[i])
 			}
 		}
-		nodes.length = 0
+		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
