@@ -139,8 +139,13 @@ As you saw, you can chain operations that act on the response data. Typically th
 In the example below, we take advantage of queuing to debug the AJAX response data prior to doing further processing on the user list
 
 ```javascript
+//a FP-friendly console.log
+var log = function(value) {
+	console.log(value)
+}
+
 var users = m.request({method: "GET", url: "/user"})
-	.then(console.log);
+	.then(log);
 	.then(function(users) {
 		//add one more user to the response
 		return users.concat({name: "Jane"})

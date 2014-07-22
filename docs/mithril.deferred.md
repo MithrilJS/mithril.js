@@ -136,14 +136,19 @@ For the most part, Mithril promises behave as you'd expect a [Promise/A+](http:/
 Mithril promises forward a value downstream if a resolution callback returns `undefined`. This allows simpler debugging of promise chains:
 
 ```javascript
+//a FP-friendly console.log
+var log = function(value) {
+	console.log(value)
+}
+
 var data = m.request({method: "GET", url: "/data"})
-	.then(console.log) //Mithril promises let us debug like this
+	.then(log) //Mithril promises let us debug like this
 	.then(doStuff)
 	
 var data = m.request({method: "GET", url: "/data"})
-	.then(function(value) { // Promises/A+ would require us to declare an anonymous function
+	.then(function(value) {
 		console.log(value) // here's the debugging snippet
-		return value // and we need to remember to return the value as well
+		return value // Promises/A+ requires us to return a value
 	})
 	.then(doStuff) // or else `doStuff` will break
 
