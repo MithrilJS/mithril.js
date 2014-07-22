@@ -376,6 +376,8 @@ m.module(document, todo);
 
 Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads.
 
+Also note that this mechanism itself is not asynchronous if it doesn't need to be: Mithril does not need to wait for the next browser repaint frame to redraw - it doesn't even need to wait for the document ready event on the first redraw - it will redraw immediately upon script completion, if able to.
+
 ---
 
 ### Summary

@@ -284,7 +284,10 @@ Mithril = m = new function app(window) {
 			e = e || event
 			m.startComputation()
 			try {return callback.call(object, e)}
-			finally {m.endComputation()}
+			finally {
+				if (!lastRedrawId) lastRedrawId = -1;
+				m.endComputation()
+			}
 		}
 	}
 
@@ -351,8 +354,14 @@ Mithril = m = new function app(window) {
 	m.redraw = function() {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		cancel(lastRedrawId)
-		lastRedrawId = defer(redraw, 0)
+		if (lastRedrawId) {
+			cancel(lastRedrawId)
+			lastRedrawId = defer(redraw, 0)
+		}
+		else {
+			redraw()
+			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
+		}
 	}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
@@ -362,6 +371,7 @@ Mithril = m = new function app(window) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
+		lastRedrawId = null
 	}
 
 	var pendingRequests = 0

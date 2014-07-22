@@ -714,12 +714,13 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
-		m.redraw()
-		m.redraw()
+		m.redraw() //should run synchronously
+		
+		m.redraw() //rest should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
-		return count === 2
+		return count === 3
 	})
 
 	//m.route
