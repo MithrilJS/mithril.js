@@ -1322,7 +1322,7 @@ function testMithril(mock) {
 		var error = m.prop("no error")
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}}).then(null, error)
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
-		return prop() === undefined && error().message === "error occurred"
+		return prop().message === "error occurred" && error().message === "error occurred"
 	})
 	test(function() {
 		var error = m.prop("no error"), exception
@@ -1365,7 +1365,7 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(null, function(data) {return "foo"}).then(null, function(data) {value = data})
+		deferred.promise.then(null, function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
 	})
@@ -1534,7 +1534,7 @@ function testMithril(mock) {
 		controller.value = "foo"
 		m.endComputation()
 		mock.requestAnimationFrame.$resolve()
-		
+
 		return root.childNodes[0].nodeValue === "foo"
 	})
 
