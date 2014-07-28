@@ -674,9 +674,39 @@ if (typeof define == "function" && define.amd) define(function() {return m})
 ;;;
 
 function test(condition) {
-	try {if (!condition()) throw new Error}
-	catch (e) {console.error(e);test.failures.push(condition)}
+	var duration = 0;
+	var start = 0;
+	var result = true;
 	test.total++
+
+	if (typeof window != "undefined") {
+		if (typeof performance != "undefined") {
+			start = performance.now();
+		}
+		try {if (!condition()) throw new Error}
+		catch (e) {result = false;console.error(e);test.failures.push(condition)}
+		if (typeof performance != "undefined") {
+			duration = performance.now() - start;
+		}
+
+
+		test_obj = {
+			name: "" + test.total,
+			result: result,
+			duration: duration
+		}
+		if (!result) {
+			message: "failed: " + condition,
+			window.global_test_results.tests.push(test_obj)
+		}
+
+		window.global_test_results.duration += duration;
+		if (result) {
+			window.global_test_results.passed++;
+		} else {
+			window.global_test_results.failed++;
+		}
+	}
 }
 test.total = 0
 test.failures = []
@@ -2381,7 +2411,17 @@ function testMithril(mock) {
 
 }
 
-//mocks
-testMithril(mock.window)
+//test reporting for saucelabs
+if (typeof window != "undefined") {
+	window.global_test_results = {
+		tests: [],
+		duration: 0,
+		passed: 0,
+		failed: 0
+	};
+}
 
-test.print(console.log)
+//mock
+testMithril(mock.window);
+
+test.print(function(value){console.log(value)});

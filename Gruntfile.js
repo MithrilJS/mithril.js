@@ -1,5 +1,5 @@
-_ = require('lodash')
 module.exports = function(grunt) {
+	_ = require('lodash');
 
 	var version = "0.1.19"
 
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
 	];
 
 	var sauceOnTestComplete = function(result, callback) {
-		var request = require('request')
+		var request = require('request');
 
 		var user = process.env.SAUCE_USERNAME;
 		var pass = process.env.SAUCE_ACCESS_KEY;
@@ -198,7 +198,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-zip');
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-connect');
-	grunt.loadNpmTasks('grunt-saucelabs')
+	grunt.loadNpmTasks('grunt-saucelabs');
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("test", ["concat", "execute"]);
@@ -207,5 +207,5 @@ module.exports = function(grunt) {
 
 	grunt.registerTask("sauce-qunit", ["connect", "saucelabs-qunit"]);
 	grunt.registerTask("sauce-custom", ["connect", "saucelabs-custom"]);
-	grunt.registerTask("sauce-all", ["connect", "saucelabs-qunit", "saucelabs-custom"])
+	grunt.registerTask("sauce-all", ["connect", "saucelabs-qunit", "saucelabs-custom"]);
 };
