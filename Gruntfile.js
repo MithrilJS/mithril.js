@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+	_ = require('lodash');
 
 	var version = "0.1.19"
 
@@ -58,6 +59,62 @@ module.exports = function(grunt) {
 	makeTasks("guide", guide)
 	makeTasks("api", api)
 
+	var sauceBrowsers =[
+		{ browserName: 'firefox', version: '19', platform: 'XP' },
+		{ browserName: "internet explorer", platform: "XP", version: "6"},
+		{ browserName: "safari", platform: "OS X 10.9", version: "7"},
+		{ browserName: "iPad", platform: "OS X 10.9", version: "7.1"},
+		{ browserName: "opera", platform: "Linux", version: "12"},
+		{ browserName: "chrome", platform: "XP", version: "26"},
+		{ browserName: "chrome", platform: "Windows 8", version: "26"},
+	];
+
+	var sauceOnTestComplete = function(result, callback) {
+		var request = require('request');
+
+		var user = process.env.SAUCE_USERNAME;
+		var pass = process.env.SAUCE_ACCESS_KEY;
+
+		request.put({
+			url: ['https://saucelabs.com/rest/v1', user, 'jobs', result.job_id].join('/'),
+			auth: { user: user, pass: pass },
+			json: { passed: result.passed }
+		}, function (error, response, body) {
+			if (error) {
+				callback(error);
+			} else if (response.statusCode !== 200) {
+				callback(new Error('Unexpected response status: '
+					+ response.statusCode + "\n "));
+			} else {
+				callback(null, result.passed);
+			}
+		});
+	};
+
+	var sauceBaseOptions = {
+		username: process.env.SAUCE_USERNAME,
+		key: process.env.SAUCE_ACCESS_KEY,
+		testname: "Mithril Tests " + new Date().toJSON(),
+		browsers: sauceBrowsers,
+		sauceConfig: {
+			"record-video": false,
+			"record-screenshots": false,
+		},
+		build: process.env.TRAVIS_JOB_ID,
+		onTestComplete: sauceOnTestComplete,
+		tunnelTimeout: 5,
+	};
+	var sauceCustomOptions = {
+		testname: "Mithril Custom Tests "+ new Date().toJSON(),
+		urls: ["http://127.0.0.1:8000/tests/index.html"],
+	};
+	_.assign(sauceCustomOptions, sauceBaseOptions);
+	var sauceQunitOptions = {
+		testname: "qUnit Tests "+ new Date().toJSON(),
+		urls: ["http://127.0.0.1:8000/tests/e2e/test.html"],
+	};
+	_.assign(sauceQunitOptions, sauceBaseOptions);
+
 	var currentVersionArchiveFolder = archiveFolder + "/v" + version
 	grunt.initConfig({
 		md2html: md2htmlTasks,
@@ -104,7 +161,19 @@ module.exports = function(grunt) {
 		},
 		qunit: {
 			all: ['tests/e2e/**/*.html']
-  		},
+		},
+		"saucelabs-custom": {
+			all:{
+				options: sauceCustomOptions
+			}
+		},
+		"saucelabs-qunit": {
+			all:{
+				options: sauceQunitOptions
+			}
+		},
+		watch: {},
+
 		connect: {
 			server: {
 				options: {
@@ -129,10 +198,14 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-zip');
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-connect');
+	grunt.loadNpmTasks('grunt-saucelabs');
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("test", ["concat", "execute"]);
 	grunt.registerTask('teste2e', ['connect', 'qunit']);
 	grunt.registerTask("default", ["build"]);
 
+	grunt.registerTask("sauce-qunit", ["connect", "saucelabs-qunit"]);
+	grunt.registerTask("sauce-custom", ["connect", "saucelabs-custom"]);
+	grunt.registerTask("sauce-all", ["connect", "saucelabs-qunit", "saucelabs-custom"]);
 };
