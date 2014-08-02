@@ -106,7 +106,7 @@ Mithril = m = new function app(window) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
-				var isArray = item instanceof Array
+				var isArray = type.call(item) == "[object Array]"
 				subArrayCount += isArray ? item.length : 1
 				cached[cacheCount++] = item
 			}
@@ -246,7 +246,7 @@ Mithril = m = new function app(window) {
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
 		if (cached.children) {
-			if (cached.children instanceof Array) for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+			if (type.call(cached.children) == "[object Array]") for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
 			else if (cached.children.tag) unload(cached.children)
 		}
 	}
@@ -274,7 +274,7 @@ Mithril = m = new function app(window) {
 		var flattened = []
 		for (var i = 0; i < data.length; i++) {
 			var item = data[i]
-			if (item instanceof Array) flattened.push.apply(flattened, flatten(item))
+			if (type.call(item) == "[object Array]") flattened.push.apply(flattened, flatten(item))
 			else flattened.push(item)
 		}
 		return flattened
@@ -332,7 +332,7 @@ Mithril = m = new function app(window) {
 		return value
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null
+	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
@@ -352,6 +352,11 @@ Mithril = m = new function app(window) {
 		}
 	}
 	m.redraw = function() {
+		if (prevented) {
+			prevented = false
+			return
+		}
+		
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId) {
@@ -363,6 +368,7 @@ Mithril = m = new function app(window) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
+	m.preventRedraw = function() {prevented = true}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
 			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
@@ -642,7 +648,7 @@ Mithril = m = new function app(window) {
 				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
 				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
 				if (e.type == "load") {
-					if (response instanceof Array && xhrOptions.type) {
+					if (type.call(response) == "[object Array]" && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 					}
 					else if (xhrOptions.type) response = new xhrOptions.type(response)

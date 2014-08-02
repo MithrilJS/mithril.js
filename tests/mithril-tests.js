@@ -1575,7 +1575,17 @@ function testMithril(mock) {
 
 }
 
-//mocks
-testMithril(mock.window)
+//test reporting for saucelabs
+if (typeof window != "undefined") {
+	window.global_test_results = {
+		tests: [],
+		duration: 0,
+		passed: 0,
+		failed: 0
+	};
+}
+
+//mock
+testMithril(mock.window);
 
 test.print(function(value) {console.log(value)})
