@@ -553,7 +553,7 @@ Mithril = m = new function app(window) {
 						else next[method](result !== undefined ? result : value)
 					}
 					catch (e) {
-						if (e instanceof Error && e.constructor !== Error) throw e
+						if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
 						else next.reject(e)
 					}
 				}
@@ -657,7 +657,7 @@ Mithril = m = new function app(window) {
 			}
 			catch (e) {
 				if (e instanceof SyntaxError) throw new SyntaxError("Could not parse HTTP response. See http://lhorie.github.io/mithril/mithril.request.html#using-variable-data-formats")
-				else if (e instanceof Error && e.constructor !== Error) throw e
+				else if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
 				else deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
