@@ -4,6 +4,7 @@
 	"scripts": {
 		"test": "grunt test"
 	},
+	"main": "mithril.js",
 	"devDependencies": {
 		"grunt-cli": "*",
 		"grunt-contrib-copy": "*",
