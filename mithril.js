@@ -29,7 +29,8 @@ Mithril = m = new function app(window) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
-		if (data === null || data === undefined) data = ""
+		if (data === undefined) return undefined
+		if (data === null) data = ""
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
