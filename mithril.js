@@ -1,10 +1,10 @@
 Mithril = m = new function app(window) {
-	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	
 	function m() {
 		var args = arguments
-		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var a = args[1]
+		var hasAttrs = typeof a === 'object' && a !== null && !(a instanceof Array) && !("tag" in a) && !("subtree" in a)
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -32,12 +32,13 @@ Mithril = m = new function app(window) {
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return cached
 
-		var cachedType = type.call(cached), dataType = type.call(data)
-		if (cachedType != dataType) {
+		var cachedType = cached instanceof Array ? "array" : typeof cached, 
+		    dataType = data instanceof Array ? "array" : typeof data
+		if (cached === null || cached === undefined || cachedType != dataType) {
 			if (cached !== null && cached !== undefined) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
-					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
+					var end = offset + (dataType === "array" ? data : cached.nodes).length
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
 				else clear(cached.nodes, cached)
@@ -46,7 +47,7 @@ Mithril = m = new function app(window) {
 			cached.nodes = []
 		}
 
-		if (dataType == "[object Array]") {
+		if (dataType === "array") {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
@@ -125,7 +126,7 @@ Mithril = m = new function app(window) {
 			}
 			
 		}
-		else if (dataType == "[object Object]") {
+		else if (dataType === "object") {
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)
 				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
@@ -153,7 +154,7 @@ Mithril = m = new function app(window) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") {
+			if (typeof data.attrs["config"] === "function") {
 				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
 			}
 		}
