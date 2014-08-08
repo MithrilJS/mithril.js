@@ -384,7 +384,8 @@ Mithril = m = new function app(window, undefined) {
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
 			e = e || event
-			withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))
+			var currentTarget = e.currentTarget || this
+			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
 	}
 
