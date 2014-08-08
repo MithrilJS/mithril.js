@@ -29,6 +29,12 @@ Mithril = m = new function app(window, undefined) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
+		
+		
+		//fix for explorer 8 in some case cached is undefined
+		//maybe for the differences of dom between version 8 and 9?
+		if (cached == undefined) cached = {nodes:[]} 
+		
 		if (data === null || data === undefined) data = ""
 		if (data.subtree === "retain") return cached
 
