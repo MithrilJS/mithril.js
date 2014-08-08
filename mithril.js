@@ -33,7 +33,7 @@ Mithril = m = new function app(window, undefined) {
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
-		if (cachedType != dataType) {
+		if (cached === undefined || cached === null || cachedType != dataType) {
 			if (cached !== null && cached !== undefined) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
