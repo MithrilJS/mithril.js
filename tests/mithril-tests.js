@@ -1517,6 +1517,11 @@ function testMithril(mock) {
 		deferred1.resolve("test")
 		return value[0] === "test" && value[1] === "foo"
 	})
+	test(function() {
+		var value = 1
+		m.sync([]).then(function() {value = 2})
+		return value == 2
+	})
 
 	//m.startComputation/m.endComputation
 	test(function() {

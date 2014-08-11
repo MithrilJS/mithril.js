@@ -586,9 +586,13 @@ Mithril = m = new function app(window, undefined) {
 		var deferred = m.deferred()
 		var outstanding = args.length
 		var results = new Array(outstanding)
-		for (var i = 0; i < args.length; i++) {
-			args[i].then(synchronizer(i, true), synchronizer(i, false))
+		if (args.length > 0) {
+			for (var i = 0; i < args.length; i++) {
+				args[i].then(synchronizer(i, true), synchronizer(i, false))
+			}
 		}
+		else deferred.resolve()
+		
 		return deferred.promise
 	}
 	function identity(value) {return value}
