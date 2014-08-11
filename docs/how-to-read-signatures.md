@@ -164,3 +164,13 @@ void test(Object { any | void config(DOMElement) } value)
 //example of a valid function call
 test({ first: "first", config: function(element) { /*do stuff*/ } })
 ```
+
+### Nullable Types
+
+A question mark `?` after a type denotes that a value can be either of that type or `undefined`.
+
+```clink
+XMLHttpRequest? config()
+```
+
+In the example above, the `config` function is expected to return either an instance of the XMLHttpRequest object or `undefined`

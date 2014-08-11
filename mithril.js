@@ -4,7 +4,7 @@ Mithril = m = new function app(window, undefined) {
 	
 	function m() {
 		var args = arguments
-		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var hasAttrs = args[1] !== undefined && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -29,8 +29,7 @@ Mithril = m = new function app(window, undefined) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
-		if (data === undefined) return undefined
-		if (data === null) data = ""
+		if (data === undefined || data === null) data = ""
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
@@ -555,7 +554,7 @@ Mithril = m = new function app(window, undefined) {
 						else next[method](result !== undefined ? result : value)
 					}
 					catch (e) {
-						if (e instanceof Error && e.constructor !== Error) throw e
+						if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
 						else next.reject(e)
 					}
 				}
@@ -587,9 +586,13 @@ Mithril = m = new function app(window, undefined) {
 		var deferred = m.deferred()
 		var outstanding = args.length
 		var results = new Array(outstanding)
-		for (var i = 0; i < args.length; i++) {
-			args[i].then(synchronizer(i, true), synchronizer(i, false))
+		if (args.length > 0) {
+			for (var i = 0; i < args.length; i++) {
+				args[i].then(synchronizer(i, true), synchronizer(i, false))
+			}
 		}
+		else deferred.resolve()
+		
 		return deferred.promise
 	}
 	function identity(value) {return value}
@@ -659,7 +662,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			catch (e) {
 				if (e instanceof SyntaxError) throw new SyntaxError("Could not parse HTTP response. See http://lhorie.github.io/mithril/mithril.request.html#using-variable-data-formats")
-				else if (e instanceof Error && e.constructor !== Error) throw e
+				else if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
 				else deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()

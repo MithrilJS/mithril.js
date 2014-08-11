@@ -1517,6 +1517,11 @@ function testMithril(mock) {
 		deferred1.resolve("test")
 		return value[0] === "test" && value[1] === "foo"
 	})
+	test(function() {
+		var value = 1
+		m.sync([]).then(function() {value = 2})
+		return value == 2
+	})
 
 	//m.startComputation/m.endComputation
 	test(function() {
@@ -1588,4 +1593,4 @@ if (typeof window != "undefined") {
 //mock
 testMithril(mock.window);
 
-test.print(function(value){console.log(value)});
+test.print(function(value) {console.log(value)})
