@@ -29,6 +29,21 @@ Mithril = m = new function app(window, undefined) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
+		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
+
+		//`parentElement` is a DOM element used for W3C DOM API calls
+		//`parentTag` is only used for handling a corner case for textarea values
+		//`parentCache` is used to remove nodes in some multi-node cases
+		//`parentIndex` and `index` are used to figure out the offset of nodes. They're artifacts from before arrays started being flattened and are likely refactorable
+		//`data` and `cached` are, respectively, the new and old nodes being diffed
+		//`shouldReattach` is a flag indicating whether a parent node was recreated (if so, and if this node is reused, then this node must reattach itself to the new parent)
+		//`editable` is a flag that indicates whether an ancestor is contenteditable
+		//`namespace` indicates the closest HTML namespace as it cascades down from an ancestor
+		//`configs` is a list of config functions to run after the topmost `build` call finishes running
+		
+		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
+		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
+		//- it simplifies diffing code
 		if (data === undefined || data === null) data = ""
 		if (data.subtree === "retain") return cached
 
@@ -50,6 +65,12 @@ Mithril = m = new function app(window, undefined) {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
+			//key algorithm: sort elements without recreating them if keys are present
+			//1) create a map of all existing keys, and mark all for deletion
+			//2) add new keys to map and mark them for addition
+			//3) if key exists in new list, change action from deletion to a move
+			//4) for each key, handle its corresponding action as marked in previous steps
+			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false
 			for (var i = 0; i < cached.length; i++) {
@@ -101,6 +122,7 @@ Mithril = m = new function app(window, undefined) {
 				cached.nodes = []
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
+			//end key algorithm
 			
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
@@ -125,7 +147,8 @@ Mithril = m = new function app(window, undefined) {
 			}
 			
 		}
-		else if (dataType == "[object Object]") {
+		else if (data !== undefined && dataType == "[object Object]") {
+			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)
 				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
@@ -153,11 +176,13 @@ Mithril = m = new function app(window, undefined) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
+			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
 				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
 			}
 		}
-		else {
+		else if (typeof dataType != "function") {
+			//handle text nodes
 			var nodes
 			if (cached.nodes.length === 0) {
 				if (data.$trusted) {
@@ -178,6 +203,7 @@ Mithril = m = new function app(window, undefined) {
 						nodes = injectHTML(parentElement, index, data)
 					}
 					else {
+						//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
 						if (parentTag === "textarea") parentElement.value = data
 						else if (editable) editable.innerHTML = data
 						else {
@@ -352,11 +378,6 @@ Mithril = m = new function app(window, undefined) {
 		}
 	}
 	m.redraw = function() {
-		if (prevented) {
-			prevented = false
-			return
-		}
-		
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId) {
@@ -368,7 +389,6 @@ Mithril = m = new function app(window, undefined) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
-	m.preventRedraw = function() {prevented = true}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
 			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
