@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.20](/mithril/archive/v0.1.20) - maintenance
+
+### Bug Fixes:
+
+-	fixed IE8 null reference exception in `m`
+-	fixed `m.sync` resolution when passed an empty array [#191](https://github.com/lhorie/mithril.js/issues/191)
+
+---
+
 [v0.1.19](/mithril/archive/v0.1.19) - maintenance
 
 ### Bug Fixes:
