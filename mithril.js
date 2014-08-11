@@ -1,4 +1,4 @@
-Mithril = m = new function app(window) {
+Mithril = m = new function app(window, undefined) {
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	
@@ -29,11 +29,12 @@ Mithril = m = new function app(window) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
-		if (data === null || data === undefined) data = ""
+		if (data === undefined) return undefined
+		if (data === null) data = ""
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
-		if (cachedType != dataType) {
+		if (cached === undefined || cached === null || cachedType != dataType) {
 			if (cached !== null && cached !== undefined) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
@@ -153,7 +154,7 @@ Mithril = m = new function app(window) {
 				cached.nodes.intact = true
 				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
-			if (type.call(data.attrs["config"]) == "[object Function]") {
+			if (typeof data.attrs["config"] === "function") {
 				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
 			}
 		}
@@ -390,7 +391,8 @@ Mithril = m = new function app(window) {
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
 			e = e || event
-			withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))
+			var currentTarget = e.currentTarget || this
+			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
 	}
 
