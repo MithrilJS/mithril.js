@@ -158,6 +158,7 @@ Mithril = m = new function app(window, undefined) {
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
+			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML"
 			if (isNew) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
