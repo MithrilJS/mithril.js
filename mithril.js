@@ -378,11 +378,6 @@ Mithril = m = new function app(window, undefined) {
 		}
 	}
 	m.redraw = function() {
-		if (prevented) {
-			prevented = false
-			return
-		}
-		
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId) {
@@ -394,7 +389,6 @@ Mithril = m = new function app(window, undefined) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
-	m.preventRedraw = function() {prevented = true}
 	function redraw() {
 		for (var i = 0; i < roots.length; i++) {
 			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
