@@ -107,7 +107,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 					
 					if (change.action == MOVE) {
-						if (parentElement.childNodes[change.index] !== change.element) {
+						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
 						}
 						newCached[change.index] = cached[change.from]
@@ -175,7 +175,7 @@ Mithril = m = new function app(window, undefined) {
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
 				cached.nodes.intact = true
-				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				if (shouldReattach === true && node !== null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
