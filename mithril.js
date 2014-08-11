@@ -4,7 +4,7 @@ Mithril = m = new function app(window, undefined) {
 	
 	function m() {
 		var args = arguments
-		var hasAttrs = type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var hasAttrs = args[1] !== undefined && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -29,8 +29,7 @@ Mithril = m = new function app(window, undefined) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
-		if (data === undefined) return undefined
-		if (data === null) data = ""
+		if (data === undefined || data === null) data = ""
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
