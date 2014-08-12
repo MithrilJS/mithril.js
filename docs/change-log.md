@@ -2,6 +2,10 @@
 
 [v0.1.20](/mithril/archive/v0.1.20) - maintenance
 
+### News:
+
+-	`math` tags now automatically get created with the MathML namespace
+
 ### Bug Fixes:
 
 -	fixed IE8 null reference exception in `m`
