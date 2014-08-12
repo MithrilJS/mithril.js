@@ -91,7 +91,7 @@ app.view = function(ctrl) {
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void render(DOMElement rootElement, Children children)
+void render(DOMElement rootElement, Children children [, Boolean forceRecreation])
 
 where:
 	Children :: String text | VirtualElement virtualElement | SubtreeDirective directive | Array<Children children>
@@ -112,3 +112,6 @@ where:
 	
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the `root` element.
 
+-	**Boolean forceRecreation**
+
+	If set to true, rendering a new virtual tree will completely overwrite an existing one without attempting to diff against it

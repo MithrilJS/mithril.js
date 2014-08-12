@@ -1298,6 +1298,101 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("none")
+				},
+				view: function() {
+					return m("div");
+				}
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && root.childNodes.length == 0
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy, count = 0
+		var config = function(el, init) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+			"/bar1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("redraw")
+				},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route("/bar1")
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && count == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {this.number = 1},
+				view: function(ctrl) {
+					return m("div", {onclick: function() {
+						strategy = m.redraw.strategy()
+						ctrl.number++
+						m.redraw.strategy("none")
+					}}, ctrl.number);
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var count = 0
+		var config = function(el, init ) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function(ctrl) {
+					return m("div", {config: config, onclick: function() {
+						m.redraw.strategy("all")
+					}});
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count == 2
+	})
 	//end m.route
 
 	//m.prop

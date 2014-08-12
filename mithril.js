@@ -309,6 +309,7 @@ Mithril = m = new function app(window, undefined) {
 	function autoredraw(callback, object, group) {
 		return function(e) {
 			e = e || event
+			m.redraw.strategy("diff")
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
@@ -339,12 +340,13 @@ Mithril = m = new function app(window, undefined) {
 		childNodes: []
 	}
 	var nodeCache = [], cellCache = {}
-	m.render = function(root, cell) {
+	m.render = function(root, cell, forceRecreation) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var id = getCellCacheKey(root)
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
 		if (cellCache[id] === undefined) clear(node.childNodes)
+		if (forceRecreation === true) reset(root)
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
 	}
@@ -359,6 +361,17 @@ Mithril = m = new function app(window, undefined) {
 		return value
 	}
 
+	m.prop = function(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0]
+			return store
+		}
+		prop.toJSON = function() {
+			return store
+		}
+		return prop
+	}
+	
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -371,6 +384,7 @@ Mithril = m = new function app(window, undefined) {
 			controllers[index].onunload(event)
 		}
 		if (!isPrevented) {
+			m.redraw.strategy("all")
 			m.startComputation()
 			roots[index] = root
 			modules[index] = module
@@ -390,15 +404,18 @@ Mithril = m = new function app(window, undefined) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
+	m.redraw.strategy = m.prop()
 	function redraw() {
+		var mode = m.redraw.strategy()
 		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
+			if (controllers[i] && mode != "none") m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
 		}
 		if (computePostRedrawHook) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
 		lastRedrawId = null
+		m.redraw.strategy("diff")
 	}
 
 	var pendingRequests = 0
@@ -480,7 +497,6 @@ Mithril = m = new function app(window, undefined) {
 
 		for (var route in router) {
 			if (route == path) {
-				reset(root)
 				m.module(root, router[route])
 				return true
 			}
@@ -488,7 +504,6 @@ Mithril = m = new function app(window, undefined) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 			if (matcher.test(path)) {
-				reset(root)
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
@@ -498,11 +513,6 @@ Mithril = m = new function app(window, undefined) {
 				return true
 			}
 		}
-	}
-	function reset(root) {
-		var cacheKey = getCellCacheKey(root)
-		clear(root.childNodes, cellCache[cacheKey])
-		cellCache[cacheKey] = undefined
 	}
 	function routeUnobtrusive(e) {
 		e = e || event
@@ -533,17 +543,10 @@ Mithril = m = new function app(window, undefined) {
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
-
-	//model
-	m.prop = function(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0]
-			return store
-		}
-		prop.toJSON = function() {
-			return store
-		}
-		return prop
+	function reset(root) {
+		var cacheKey = getCellCacheKey(root)
+		clear(root.childNodes, cellCache[cacheKey])
+		cellCache[cacheKey] = undefined
 	}
 
 	var none = {}

@@ -18,10 +18,65 @@ If you are developing an asynchronous model-level service and finding that Mithr
 
 ---
 
+### Changing redraw strategy
+
+If you need to change how Mithril performs redraws, you can change the value of the `m.redraw.strategy` getter-setter to either `"all"`, `"diff"` or `"none"`. By default, this value is set to `"all"` when running controller constructors, and it's set to `"diff"` for all subsequent redraws.
+
+```javascript
+var module1 = {}
+module1.controller = function() {
+	//this module will attempt to diff its template when routing, as opposed to re-creating the view from scratch.
+	//this allows config contexts to live across route changes, if its element does not need to be recreated by the diff
+	m.redraw.strategy("diff")
+}
+module1.view = function() {
+	return m("h1", {config: module1.config}, "test")
+}
+module1.config = function(el, isInit, ctx) {
+	if (!isInit) ctx.data = "foo"
+}
+```
+
+---
+
+### Preventing redraws on events
+
+Similarly, it's possible to skip redrawing altogether by calling `m.redraw.strategy("none")`
+
+```javascript
+m("input", {onkeydown: function(e) {
+	if (e.keyCode == 13) ctrl.save() //do things and re-render only if the `enter` key was pressed
+	else m.redraw.strategy("none") //otherwise, ignore
+}})
+```
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void redraw()
+void redraw() { GetterSetter strategy }
+
+where:
+	GetterSetter :: String getterSetter([String value])
 ```
+
+-	<a name="strategy"></a>
+
+	### m.redraw.strategy
+	
+	**GetterSetter strategy**
+	
+	The `m.redraw.strategy` getter-setter indicates how the next module redraw will occur. It can be one of three values:
+	
+	-	`"all"` - recreates the DOM tree from scratch
+	-	`"diff"` - updates only DOM elements if needed
+	-	`"none"` - leaves the DOM tree intact
+	
+	This value can be programmatically changed in controllers and event handlers to modify the next redrawing strategy. It is modified internally by Mithril to the value `"all"` before running controller constructors, and to the value `"diff"` after all redraws.
+	
+	Calling this function without arguments returns the currently assigned redraw strategy.
+
+	
