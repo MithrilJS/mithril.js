@@ -5,6 +5,7 @@
 ### Bug Fixes:
 
 -	fixed IE8 null reference exception in `m`
+-	fixed IE8 empty-text-node-in-input issue [#195](https://github.com/lhorie/mithril.js/issues/195)
 -	fixed `m.sync` resolution when passed an empty array [#191](https://github.com/lhorie/mithril.js/issues/191)
 
 ---
