@@ -55,7 +55,7 @@ Mithril = m = new function app(window, undefined) {
 					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
-				else clear(cached.nodes, cached)
+				else if (cached.nodes) clear(cached.nodes, cached)
 			}
 			cached = new data.constructor
 			cached.nodes = []
@@ -107,7 +107,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 					
 					if (change.action == MOVE) {
-						if (parentElement.childNodes[change.index] !== change.element) {
+						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
 						}
 						newCached[change.index] = cached[change.from]
@@ -158,12 +158,13 @@ Mithril = m = new function app(window, undefined) {
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
+			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML"
 			if (isNew) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
 					tag: data.tag,
 					//process children before attrs so that select.value works correctly
-					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
+					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : [],
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					nodes: [node]
 				}
@@ -172,9 +173,9 @@ Mithril = m = new function app(window, undefined) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
+				cached.children = data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : []
 				cached.nodes.intact = true
-				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				if (shouldReattach === true && node !== null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
