@@ -4,6 +4,7 @@
 
 ### News:
 
+-	redraw strategy can now be modified via `m.redraw.strategy`
 -	`math` tags now automatically get created with the MathML namespace
 
 ### Bug Fixes:
