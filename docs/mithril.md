@@ -266,7 +266,7 @@ The virtual DOM diffing algorithm has a weakness: a naive diff is not aware of t
 
 Fortunately, with Mithril, it's possible for developers to attach an identity key to elements so that array operations like shift, splice and sort only affect the minimum amount of elements required, leaving the rest of the DOM elements untouched when a redraw happens. This allows us to maintain input focus and plugin state correctly.
 
-To maintain the identities of DOM elements, you need to add a `key` property to the direct children of the array that you're planning to modify. The key for each child must be unique among its siblings, but it does not need to be globally unique. Also, keys must be either strings or numbers.
+To maintain the identities of DOM elements, you need to add a `key` property to the direct children of the array that you're planning to modify. The key for each child must be unique among a list of sibling DOM elements, but it does not need to be globally unique. Also, keys must be either strings or numbers.
 
 ```javascript
 m("ul", [
