@@ -55,7 +55,7 @@ Mithril = m = new function app(window, undefined) {
 					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
-				else clear(cached.nodes, cached)
+				else if (cached.nodes) clear(cached.nodes, cached)
 			}
 			cached = new data.constructor
 			cached.nodes = []
@@ -164,7 +164,7 @@ Mithril = m = new function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//process children before attrs so that select.value works correctly
-					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
+					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : [],
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					nodes: [node]
 				}
@@ -173,7 +173,7 @@ Mithril = m = new function app(window, undefined) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
+				cached.children = data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : []
 				cached.nodes.intact = true
 				if (shouldReattach === true && node !== null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
