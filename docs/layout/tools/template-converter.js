@@ -12,13 +12,13 @@ templateConverter.VirtualFragment = function recurse(domFragment) {
 		if (el.nodeType == 3) {
 			virtualFragment.push(el.nodeValue);
 		}
-		else {
+		else if (el.nodeType == 1) {
 			var attrs = {};
 			for (var j = 0, attr; attr = el.attributes[j]; j++) {
 				attrs[attr.name] = attr.value;
 			}
 			
-			virtualFragment.push({tag: el.tagName.toLowerCase(), attrs: attrs, children: recurse(el.childNodes)});
+			virtualFragment.push({tag: el.nodeName.toLowerCase(), attrs: attrs, children: recurse(el.childNodes)});
 		}
 	}
 	return virtualFragment;
@@ -49,6 +49,7 @@ templateConverter.Template = function recurse() {
 			for (var j = 0, attrName; attrName = attrNames[j]; j++) {
 				if (attrName != "style") virtual += "[" + attrName + "='" + el.attrs[attrName].replace(/'/g, "\\'") + "']";
 			}
+			if (virtual == "") virtual = "div"
 			virtual = '"' + virtual + '"';
 			
 			var style = ""
