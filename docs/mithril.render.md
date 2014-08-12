@@ -106,7 +106,7 @@ where:
 	
 -	**Children children**
 
-	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust)
+	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust.md)
 	
 	If it's a VirtualElement, it will be rendered as a DOM Element.
 	

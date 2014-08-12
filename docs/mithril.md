@@ -1,6 +1,6 @@
 ## m
 
-This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render).
+This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render.md).
 
 You are encouraged to use CSS selectors to define virtual elements. See "Signature" section for details.
 
@@ -18,7 +18,7 @@ m("div", "Hello"); //yields <div>Hello</div>
 m("div", {class: "container"}, "Hello"); //yields <div class="container">Hello</div>
 ```
 
-Note that the output value from `m()` is not an actual DOM element. In order to turn the virtual element into a real DOM element, you must call [`m.render()`](mithril.render).
+Note that the output value from `m()` is not an actual DOM element. In order to turn the virtual element into a real DOM element, you must call [`m.render()`](mithril.render.md).
 
 ```javascript
 m.render(document.body, m("br")); //puts a <br> in <body>
@@ -183,7 +183,7 @@ m.render(document.body, view);
 m.render(document.body, view);
 ```
 
-One common way of using `config` is in conjunction with [`m.route`](mithril.route), which is an unobtrusive extension to links that allow Mithril's routing system to work transparently regardless of which routing mode is used.
+One common way of using `config` is in conjunction with [`m.route`](mithril.route.md), which is an unobtrusive extension to links that allow Mithril's routing system to work transparently regardless of which routing mode is used.
 
 ```javascript
 //this link can use any of Mithril's routing system modes
@@ -390,7 +390,7 @@ where:
 	m.render(document.body, view);
 	```
   
-	One common way of using `config` is in conjunction with [`m.route`](mithril.route), which is an unobtrusive extension to links that allow Mithril's routing system to work transparently regardless of which routing mode is used.
+	One common way of using `config` is in conjunction with [`m.route`](mithril.route.md), which is an unobtrusive extension to links that allow Mithril's routing system to work transparently regardless of which routing mode is used.
 	
 	```javascript
 	//this link can use any of Mithril's routing system modes
@@ -455,15 +455,15 @@ where:
 	
 -	**Children children** (optional)
 
-	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust)
+	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust.md)
 	
 	If it's a VirtualElement, it will be rendered as a DOM Element.
 	
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.
 	
-	If it's a SubtreeDirective with the value "retain", it will retain the existing DOM tree in place, if any. See [subtree directives](mithril.render#subtree-directives) for more information.
+	If it's a SubtreeDirective with the value "retain", it will retain the existing DOM tree in place, if any. See [subtree directives.md](mithril.render.md#subtree-directives) for more information.
 
 -	**returns** VirtualElement
 
-	The returned VirtualElement is a Javascript data structure that represents the DOM element to be rendered by [`m.render`](mithril.render)
+	The returned VirtualElement is a Javascript data structure that represents the DOM element to be rendered by [`m.render`](mithril.render.md)
 

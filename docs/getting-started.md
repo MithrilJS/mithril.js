@@ -571,19 +571,19 @@ If you've been interested in learning or using Functional Programming in the rea
 
 Mithril provides a few more facilities that are not demonstrated in this page. The following topics are good places to start a deeper dive.
 
--	[Routing](routing)
--	[Web Services](web-services)
--	[Components](components)
+-	[Routing](routing.md)
+-	[Web Services](web-services.md)
+-	[Components](components.md)
 
 ## Advanced Topics
 
 -	[Compiling templates](compiling-templates)
--	[Integrating with the Auto-Redrawing System](auto-redrawing)
--	[Integrating with Other Libraries](integration)
+-	[Integrating with the Auto-Redrawing System](auto-redrawing.md)
+-	[Integrating with Other Libraries](integration.md)
 
 ## Misc
 
--	[Differences from Other MVC Frameworks](comparison)
--	[Benchmarks](benchmarks)
--	[Good Practices](practices)
--	[Useful Tools](tools)
+-	[Differences from Other MVC Frameworks](comparison.md)
+-	[Benchmarks](benchmarks.md)
+-	[Good Practices](practices.md)
+-	[Useful Tools](tools.md)

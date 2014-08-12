@@ -91,7 +91,7 @@ where:
 <li><p><strong>GetterSetter { Promise then([any successCallback(any value) [, any errorCallback(any value)]]) } promise</strong></p>
 <p>A promise has a method called <code>then</code> which takes two computation callbacks as parameters.</p>
 <p>The <code>then</code> method returns another promise whose computations (if any) receive their inputs from the parent promise&#39;s computation.</p>
-<p>A promise is also a getter-setter (see <a href="mithril.prop"><code>m.prop</code></a>). After a call to either <code>resolve</code> or <code>reject</code>, it holds the result of the parent&#39;s computation (or the <code>resolve</code>/<code>reject</code> value, if the promise has no parent promises)</p>
+<p>A promise is also a getter-setter (see <a href="mithril.prop.html"><code>m.prop</code></a>). After a call to either <code>resolve</code> or <code>reject</code>, it holds the result of the parent&#39;s computation (or the <code>resolve</code>/<code>reject</code> value, if the promise has no parent promises)</p>
 <ul>
 <li><p><strong>Promise then([any successCallback(any value) [, any errorCallback(any value)]])</strong></p>
 <p>This method accepts two callbacks which process a value passed to the <code>resolve</code> and <code>reject</code> methods, respectively, and pass the processed value to the returned promise</p>

@@ -1,6 +1,6 @@
 ## m.redraw
 
-Redraws the view for the currently active module. Use [`m.module()`](mithril.module) to activate a module.
+Redraws the view for the currently active module. Use [`m.module()`](mithril.module.md) to activate a module.
 
 This method is called internally by Mithril's auto-redrawing system. Usually you don't need to call it manually unless you are doing recurring asynchronous operations (i.e. using `setInterval`) or if you want to decouple slow running background requests from the rendering context (see the `background` option in [`m.request`](mithril.request.md).
 
@@ -8,7 +8,7 @@ By default, if you're using either [`m.route`](mithril.route.md) or [`m.module`]
 
 `m.redraw` is also called automatically on event handlers defined in virtual elements.
 
-Note that calling this method will not do anything if a module was not activated via either [`m.module()`](mithril.module) or [`m.route()`](mithril.route). This means that `m.redraw` doesn't do anything when instantiating controllers and rendering views via `m.render` manually.
+Note that calling this method will not do anything if a module was not activated via either [`m.module()`](mithril.module.md) or [`m.route()`](mithril.route.md). This means that `m.redraw` doesn't do anything when instantiating controllers and rendering views via `m.render` manually.
 
 If there are pending [`m.request`](mithril.request.md) calls in either a controller constructor or event handler, the auto-redrawing system waits for all the AJAX requests to complete before calling `m.redraw`.
 

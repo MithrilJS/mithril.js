@@ -62,7 +62,7 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="m">m</h2>
-<p>This is a convenience method to compose virtual elements that can be rendered via <a href="mithril.render"><code>m.render()</code></a>.</p>
+<p>This is a convenience method to compose virtual elements that can be rendered via <a href="mithril.render.html"><code>m.render()</code></a>.</p>
 <p>You are encouraged to use CSS selectors to define virtual elements. See &quot;Signature&quot; section for details.</p>
 <hr>
 <h3 id="usage">Usage</h3>
@@ -72,7 +72,7 @@
 m(&quot;div&quot;, &quot;Hello&quot;); //yields &lt;div&gt;Hello&lt;/div&gt;
 
 m(&quot;div&quot;, {class: &quot;container&quot;}, &quot;Hello&quot;); //yields &lt;div class=&quot;container&quot;&gt;Hello&lt;/div&gt;</code></pre>
-<p>Note that the output value from <code>m()</code> is not an actual DOM element. In order to turn the virtual element into a real DOM element, you must call <a href="mithril.render"><code>m.render()</code></a>.</p>
+<p>Note that the output value from <code>m()</code> is not an actual DOM element. In order to turn the virtual element into a real DOM element, you must call <a href="mithril.render.html"><code>m.render()</code></a>.</p>
 <pre><code class="lang-javascript">m.render(document.body, m(&quot;br&quot;)); //puts a &lt;br&gt; in &lt;body&gt;</code></pre>
 <p>You can also use more complex CSS selectors:</p>
 <pre><code class="lang-javascript">m(&quot;.container&quot;); //yields &lt;div class=&quot;container&quot;&gt;&lt;/div&gt;
@@ -169,7 +169,7 @@ m.render(document.body, view);
 
 //here, isInitialized is `true`
 m.render(document.body, view);</code></pre>
-<p>One common way of using <code>config</code> is in conjunction with <a href="mithril.route"><code>m.route</code></a>, which is an unobtrusive extension to links that allow Mithril&#39;s routing system to work transparently regardless of which routing mode is used.</p>
+<p>One common way of using <code>config</code> is in conjunction with <a href="mithril.route.html"><code>m.route</code></a>, which is an unobtrusive extension to links that allow Mithril&#39;s routing system to work transparently regardless of which routing mode is used.</p>
 <pre><code class="lang-javascript">//this link can use any of Mithril&#39;s routing system modes
 //(i.e. it can use either the hash, the querystring or the pathname as the router implementation)
 //without needing to hard-code any syntax (`#` or `?`) in the `href` attribute.
@@ -247,7 +247,7 @@ m.render(document.body, view);
 
 //here, isInitialized is `true`
 m.render(document.body, view);</code></pre>
-<p>One common way of using <code>config</code> is in conjunction with <a href="mithril.route"><code>m.route</code></a>, which is an unobtrusive extension to links that allow Mithril&#39;s routing system to work transparently regardless of which routing mode is used.</p>
+<p>One common way of using <code>config</code> is in conjunction with <a href="mithril.route.html"><code>m.route</code></a>, which is an unobtrusive extension to links that allow Mithril&#39;s routing system to work transparently regardless of which routing mode is used.</p>
 <pre><code class="lang-javascript">//this link can use any of Mithril&#39;s routing system modes
 //(i.e. it can use either the hash, the querystring or the pathname as the router implementation)
 //without needing to hard-code any syntax (`#` or `?`) in the `href` attribute.
@@ -267,13 +267,13 @@ m(&quot;a[href=&#39;/dashboard&#39;]&quot;, {config: m.route}, &quot;Dashboard&q
 <p>Whether this is the first time we are running this function on this element. This flag is false the first time it runs on an element, and true on redraws that happen after the element has been created.</p>
 </li>
 <li><p><strong>Children children</strong> (optional)</p>
-<p>If this argument is a string, it will be rendered as a text node. To render a string as HTML, see <a href="mithril.trust"><code>m.trust</code></a></p>
+<p>If this argument is a string, it will be rendered as a text node. To render a string as HTML, see <a href="mithril.trust.html"><code>m.trust</code></a></p>
 <p>If it&#39;s a VirtualElement, it will be rendered as a DOM Element.</p>
 <p>If it&#39;s a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.</p>
 <p>If it&#39;s a SubtreeDirective with the value &quot;retain&quot;, it will retain the existing DOM tree in place, if any. See <a href="mithril.render#subtree-directives">subtree directives</a> for more information.</p>
 </li>
 <li><p><strong>returns</strong> VirtualElement</p>
-<p>The returned VirtualElement is a javascript data structure that represents the DOM element to be rendered by <a href="mithril.render"><code>m.render</code></a></p>
+<p>The returned VirtualElement is a javascript data structure that represents the DOM element to be rendered by <a href="mithril.render.html"><code>m.render</code></a></p>
 </li>
 </ul>
 

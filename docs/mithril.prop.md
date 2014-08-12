@@ -20,7 +20,7 @@ name("Mary"); //Mary
 var b = name(); //b == "Mary"
 ```
 
-It can be used in conjunction with [`m.withAttr`](mithril.withattr) to implement data binding in the view-to-model direction and to provide uniform data access for model entity properties.
+It can be used in conjunction with [`m.withAttr`](mithril.withattr.md) to implement data binding in the view-to-model direction and to provide uniform data access for model entity properties.
 
 ```javascript
 //a contrived example of bi-directional data binding
@@ -41,7 +41,7 @@ var user = {
 
 In the example above, the usage of `m.prop` allows the developer to change the implementation of the user name getter/setter without the need for code changes in the controller and view.
 
-`m.prop` can also be used in conjunction with [`m.request`](mithril.request) and [`m.deferred`](mithril.deferred) to bind data on completion of an asynchronous operation.
+`m.prop` can also be used in conjunction with [`m.request`](mithril.request.md) and [`m.deferred`](mithril.deferred.md) to bind data on completion of an asynchronous operation.
 
 ```javascript
 var users = m.prop([]);

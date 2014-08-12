@@ -62,11 +62,11 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="m-redraw">m.redraw</h2>
-<p>Redraws the view for the currently active module. Use <a href="mithril.module"><code>m.module()</code></a> to activate a module.</p>
+<p>Redraws the view for the currently active module. Use <a href="mithril.module.html"><code>m.module()</code></a> to activate a module.</p>
 <p>This method is called internally by Mithril&#39;s auto-redrawing system. Usually you don&#39;t need to call it manually unless you are doing recurring asynchronous operations (i.e. using <code>setInterval</code>) or if you want to decouple slow running background requests from the rendering context (see the <code>background</code> option in <a href="mithril.request.html"><code>m.request</code></a>.</p>
 <p>By default, if you&#39;re using either <a href="mithril.route.html"><code>m.route</code></a> or <a href="mithril.module.html"><code>m.module</code></a>, <code>m.redraw()</code> is called automatically by Mithril&#39;s auto-redrawing system once the controller finishes executing.</p>
 <p><code>m.redraw</code> is also called automatically on event handlers defined in virtual elements.</p>
-<p>Note that calling this method will not do anything if a module was not activated via either <a href="mithril.module"><code>m.module()</code></a> or <a href="mithril.route"><code>m.route()</code></a>. This means that <code>m.redraw</code> doesn&#39;t do anything when instantiating controllers and rendering views via <code>m.render</code> manually.</p>
+<p>Note that calling this method will not do anything if a module was not activated via either <a href="mithril.module.html"><code>m.module()</code></a> or <a href="mithril.route.html"><code>m.route()</code></a>. This means that <code>m.redraw</code> doesn&#39;t do anything when instantiating controllers and rendering views via <code>m.render</code> manually.</p>
 <p>If there are pending <a href="mithril.request.html"><code>m.request</code></a> calls in either a controller constructor or event handler, the auto-redrawing system waits for all the AJAX requests to complete before calling <code>m.redraw</code>.</p>
 <p>This method may also be called manually from within a controller if more granular updates to the view are needed, however doing so is generally not recommended, as it may degrade performance. Model classes should never call this method. </p>
 <p>If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should use <a href="mithril.computation.html"><code>m.startComputation</code> and <code>m.endComputation</code></a> to integrate with Mithril&#39;s auto-redrawing system instead.</p>
