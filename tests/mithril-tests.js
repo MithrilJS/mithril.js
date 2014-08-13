@@ -1414,29 +1414,20 @@ function testMithril(mock) {
 		return JSON.stringify(obj) === '{"prop":"test"}'
 	})
 	test(function() {
-		var prop = m.prop({
-			then: function(cb) {cb("test")}
-		})
+		var defer = m.deferred()
+		var prop = m.prop(defer.promise)
+		defer.resolve("test")
+
 		return prop() === "test"
 	})
 	test(function() {
-		var prop = m.prop({
-			then: function() {}
+		var defer = m.deferred()
+		var prop = m.prop(defer.promise).then(function () {
+			return "test2"
 		})
+		defer.resolve("test")
 
-		return prop() === undefined
-	})
-	test(function() {
-		var promise = {
-			then: function(cb) {this.cb = cb},
-			resolve: function (x) {
-				this.cb(x)
-			}
-		}
-		var prop = m.prop(promise)
-		promise.resolve("test")
-
-		return prop() === "test"
+		return prop() === "test2"
 	})
 
 	//m.request

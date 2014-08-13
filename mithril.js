@@ -361,31 +361,29 @@ Mithril = m = new function app(window, undefined) {
 		return value
 	}
 
-	m.prop = function(store) {
-		function isPromise(obj) {
-			return typeof store === 'object' && typeof store.then === 'function'
-		}
-
+	function _prop(store) {
 		var prop = function() {
-			if (arguments.length) {
-				store = arguments[0]
-				if (isPromise(store)) {
-					store.then(prop)
-				}
-			}
-
-			return isPromise(store) ? undefined : store
+			if (arguments.length) store = arguments[0]
+			return store
 		}
 
 		prop.toJSON = function() {
-			return isPromise(store) ? undefined : store
-		}
-
-		if (isPromise(store)) {
-			store.then(prop)
+			return store
 		}
 
 		return prop
+	}
+
+	m.prop = function (store) {
+		if ((typeof store === 'object' || typeof store === 'function') &&
+				typeof store.then === 'function') {
+			var prop = _prop()
+			newPromisedProp(prop, store).then(prop)
+
+			return prop
+		}
+
+		return _prop(store)
 	}
 
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
@@ -566,6 +564,25 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	var none = {}
+	function newPromisedProp(prop, promise) {
+		prop.then = function () {
+			var newProp = m.prop()
+			return newPromisedProp(newProp,
+				promise.then.apply(promise, arguments).then(newProp))
+		}
+		prop.promise = prop
+		prop.resolve = function (val) {
+			prop(val)
+			promise = promise.resolve.apply(promise, arguments)
+			return prop
+		}
+		prop.reject = function () {
+			promise = promise.reject.apply(promise, arguments)
+			return prop
+		}
+
+		return prop
+	}
 	m.deferred = function () {
 
 		// Promiz.mithril.js | Zolmeister | MIT
@@ -693,26 +710,6 @@ Mithril = m = new function app(window, undefined) {
 
 				})
 			}
-		}
-
-		function newPromisedProp(prop, promise) {
-			prop.then = function () {
-				var newProp = m.prop(prop())
-				return newPromisedProp(newProp,
-					promise.then.apply(promise, arguments).then(newProp))
-			}
-			prop.promise = prop
-			prop.resolve = function (val) {
-				prop(val)
-				promise = promise.resolve.apply(promise, arguments)
-				return prop
-			}
-			prop.reject = function () {
-				promise = promise.reject.apply(promise, arguments)
-				return prop
-			}
-
-			return prop
 		}
 
 		return newPromisedProp(m.prop(), new Deferred())
