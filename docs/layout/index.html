@@ -48,7 +48,7 @@
 					<div class="feature col(4,4,12)">
 						<h2>Light-weight</h2>
 						<ul>
-							<li>Only 4kb gzipped, no dependencies</li>
+							<li>Only 5kb gzipped, no dependencies</li>
 							<li>Small API, small learning curve</li>
 						</ul>
 					</div>
@@ -89,7 +89,7 @@ app.controller = function() {
 	this.pages = app.PageList();
 	
 	this.rotate = function() {
-		this.pages.push(this.pages.shift())
+		this.pages().push(this.pages().shift())
 	}.bind(this)
 };
 

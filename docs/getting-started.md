@@ -4,7 +4,7 @@
 
 Mithril is a client-side Javascript MVC framework, i.e. it's a tool to make application code divided into a data layer (called **M**odel), a UI layer (called **V**iew), and a glue layer (called **C**ontroller)
 
-Mithril is around 4kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
+Mithril is around 5kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
 
 The goal of the framework is to make application code discoverable, readable and maintainable, and hopefully help you become an even better developer.
 
@@ -376,6 +376,8 @@ m.module(document, todo);
 
 Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads.
 
+Also note that this mechanism itself is not asynchronous if it doesn't need to be: Mithril does not need to wait for the next browser repaint frame to redraw - it doesn't even need to wait for the document ready event on the first redraw - it will redraw immediately upon script completion, if able to.
+
 ---
 
 ### Summary
@@ -569,19 +571,19 @@ If you've been interested in learning or using Functional Programming in the rea
 
 Mithril provides a few more facilities that are not demonstrated in this page. The following topics are good places to start a deeper dive.
 
--	[Routing](routing)
--	[Web Services](web-services)
--	[Components](components)
+-	[Routing](routing.md)
+-	[Web Services](web-services.md)
+-	[Components](components.md)
 
 ## Advanced Topics
 
 -	[Compiling templates](compiling-templates)
--	[Integrating with the Auto-Redrawing System](auto-redrawing)
--	[Integrating with Other Libraries](integration)
+-	[Integrating with the Auto-Redrawing System](auto-redrawing.md)
+-	[Integrating with Other Libraries](integration.md)
 
 ## Misc
 
--	[Differences from Other MVC Frameworks](comparison)
--	[Benchmarks](benchmarks)
--	[Good Practices](practices)
--	[Useful Tools](tools)
+-	[Differences from Other MVC Frameworks](comparison.md)
+-	[Benchmarks](benchmarks.md)
+-	[Good Practices](practices.md)
+-	[Useful Tools](tools.md)

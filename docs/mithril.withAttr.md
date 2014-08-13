@@ -2,7 +2,7 @@
 
 This is an event handler factory. It returns a method that can be bound to a DOM element's event listener.
 
-Typically, it's used in conjunction with [`m.prop`](mithril.prop) to implement data binding in the view-to-model direction.
+Typically, it's used in conjunction with [`m.prop`](mithril.prop.md) to implement data binding in the view-to-model direction.
 
 This method is provided to decouple the browser's event model from the controller/logic model.
 

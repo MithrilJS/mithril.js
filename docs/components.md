@@ -137,10 +137,12 @@ dashboard.controller = function() {
 
 dashboard.view = function(ctrl) {
     return m("#example", [
-        new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", console.log)}),
+        new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", log)}),
     ]);
 };
 
+//an FP-friendly console.log
+var log = function(value) {console.log(value)}
 
 
 //initialize

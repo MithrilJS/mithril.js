@@ -72,7 +72,11 @@ mock.window = new function() {
 	}
 	window.scrollTo = function() {}
 	window.cancelAnimationFrame = function() {}
-	window.requestAnimationFrame = function(callback) {window.requestAnimationFrame.$callback = callback}
+	window.requestAnimationFrame = function(callback) {
+		window.requestAnimationFrame.$callback = callback
+		return window.requestAnimationFrame.$id++
+	}
+	window.requestAnimationFrame.$id = 1
 	window.requestAnimationFrame.$resolve = function() {
 		if (window.requestAnimationFrame.$callback) window.requestAnimationFrame.$callback()
 		window.requestAnimationFrame.$callback = null

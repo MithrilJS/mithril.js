@@ -685,6 +685,27 @@ function testMithril(mock) {
 		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
 		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "012345"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/157
+		var root = mock.document.createElement("div")
+		m.render(root, m("input", {value: "a"}))
+		m.render(root, m("input", {value: "aa"}))
+		return root.childNodes[0].childNodes.length == 0
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/157
+		var root = mock.document.createElement("div")
+		m.render(root, m("br", {class: "a"}))
+		m.render(root, m("br", {class: "aa"}))
+		return root.childNodes[0].childNodes.length == 0
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/194
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 4}), m("li", {key: 5})]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "01245"
+	})
 	//end m.render
 
 	//m.redraw
@@ -714,12 +735,13 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
-		m.redraw()
-		m.redraw()
+		m.redraw() //should run synchronously
+		
+		m.redraw() //rest should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
-		return count === 2
+		return count === 3
 	})
 
 	//m.route
@@ -1276,6 +1298,101 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("none")
+				},
+				view: function() {
+					return m("div");
+				}
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && root.childNodes.length == 0
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy, count = 0
+		var config = function(el, init) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+			"/bar1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("redraw")
+				},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route("/bar1")
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && count == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {this.number = 1},
+				view: function(ctrl) {
+					return m("div", {onclick: function() {
+						strategy = m.redraw.strategy()
+						ctrl.number++
+						m.redraw.strategy("none")
+					}}, ctrl.number);
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var count = 0
+		var config = function(el, init ) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function(ctrl) {
+					return m("div", {config: config, onclick: function() {
+						m.redraw.strategy("all")
+					}});
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count == 2
+	})
 	//end m.route
 
 	//m.prop
@@ -1516,6 +1633,11 @@ function testMithril(mock) {
 		deferred1.resolve("test")
 		return value[0] === "test" && value[1] === "foo"
 	})
+	test(function() {
+		var value = 1
+		m.sync([]).then(function() {value = 2})
+		return value == 2
+	})
 
 	//m.startComputation/m.endComputation
 	test(function() {
@@ -1574,7 +1696,17 @@ function testMithril(mock) {
 
 }
 
-//mocks
-testMithril(mock.window)
+//test reporting for saucelabs
+if (typeof window != "undefined") {
+	window.global_test_results = {
+		tests: [],
+		duration: 0,
+		passed: 0,
+		failed: 0
+	};
+}
 
-test.print(console.log)
+//mock
+testMithril(mock.window);
+
+test.print(function(value) {console.log(value)})

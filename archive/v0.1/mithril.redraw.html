@@ -60,7 +60,7 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="m-redraw">m.redraw</h2>
-<p>Redraws the view for the currently active module. Use <a href="mithril.module"><code>m.module()</code></a> to activate a module.</p>
+<p>Redraws the view for the currently active module. Use <a href="mithril.module.html"><code>m.module()</code></a> to activate a module.</p>
 <p>This method is called internally by Mithril&#39;s auto-redrawing system and is only documented for completeness; you should avoid calling it manually unless you explicitly want a multi-pass redraw cycle.</p>
 <p>A multi-pass redraw cycle is usually only useful if you need non-trivial UI metrics measurements. A multi-pass cycle may span multiple browser repaints and therefore could cause flash of unbehaviored content (FOUC) and performance degradation.</p>
 <p>By default, if you&#39;re using either <a href="mithril.route.html"><code>m.route</code></a> or <a href="mithril.module.html"><code>m.module</code></a>, <code>m.redraw()</code> is called automatically by Mithril&#39;s auto-redrawing system once the controller finishes executing.</p>
