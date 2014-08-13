@@ -1,7 +1,7 @@
 Mithril = m = new function app(window, undefined) {
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
-	
+
 	function m() {
 		var args = arguments
 		var hasAttrs = args[1] !== undefined && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
@@ -19,9 +19,9 @@ Mithril = m = new function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
-		
+
 		cell.children = hasAttrs ? args[2] : args[1]
-		
+
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
 			else cell.attrs[attrName] = attrs[attrName]
@@ -40,7 +40,7 @@ Mithril = m = new function app(window, undefined) {
 		//`editable` is a flag that indicates whether an ancestor is contenteditable
 		//`namespace` indicates the closest HTML namespace as it cascades down from an ancestor
 		//`configs` is a list of config functions to run after the topmost `build` call finishes running
-		
+
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
 		//- it simplifies diffing code
@@ -64,7 +64,7 @@ Mithril = m = new function app(window, undefined) {
 		if (dataType == "[object Array]") {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
-			
+
 			//key algorithm: sort elements without recreating them if keys are present
 			//1) create a map of all existing keys, and mark all for deletion
 			//2) add new keys to map and mark them for addition
@@ -93,7 +93,7 @@ Mithril = m = new function app(window, undefined) {
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
 				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index})
 				var newCached = cached.slice()
-				
+
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
 						clear(cached[change.index].nodes, cached[change.index])
@@ -105,7 +105,7 @@ Mithril = m = new function app(window, undefined) {
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
-					
+
 					if (change.action == MOVE) {
 						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
@@ -123,7 +123,7 @@ Mithril = m = new function app(window, undefined) {
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
 			//end key algorithm
-			
+
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
@@ -145,7 +145,7 @@ Mithril = m = new function app(window, undefined) {
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
-			
+
 		}
 		else if (data !== undefined && dataType == "[object Object]") {
 			//if an element is different enough from the one in cache, recreate it
@@ -362,16 +362,32 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.prop = function(store) {
+		function isPromise(obj) {
+			return typeof store === 'object' && typeof store.then === 'function'
+		}
+
 		var prop = function() {
-			if (arguments.length) store = arguments[0]
-			return store
+			if (arguments.length) {
+				store = arguments[0]
+				if (isPromise(store)) {
+					store.then(prop)
+				}
+			}
+
+			return isPromise(store) ? undefined : store
 		}
+
 		prop.toJSON = function() {
-			return store
+			return isPromise(store) ? undefined : store
 		}
+
+		if (isPromise(store)) {
+			store.then(prop)
+		}
+
 		return prop
 	}
-	
+
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -472,7 +488,7 @@ Mithril = m = new function app(window, undefined) {
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
 
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
-			
+
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
@@ -724,7 +740,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 		}
 		else deferred.resolve()
-		
+
 		return deferred.promise
 	}
 	function identity(value) {return value}
@@ -817,37 +833,42 @@ if (typeof define == "function" && define.amd) define(function() {return m})
 ;;;
 
 function test(condition) {
-	var duration = 0;
-	var start = 0;
-	var result = true;
+	var duration = 0
+	var start = 0
+	var result = true
 	test.total++
 
+	if (typeof performance != "undefined") {
+		start = performance.now()
+	}
+	try {
+		if (!condition()) throw new Error()
+	}
+	catch (e) {
+		result = false
+		console.error(e)
+		test.failures.push(condition)
+	}
+	if (typeof performance != "undefined") {
+		duration = performance.now() - start
+	}
+
+	test_obj = {
+		name: "" + test.total,
+		result: result,
+		duration: duration
+	}
+
 	if (typeof window != "undefined") {
-		if (typeof performance != "undefined") {
-			start = performance.now();
-		}
-		try {if (!condition()) throw new Error}
-		catch (e) {result = false;console.error(e);test.failures.push(condition)}
-		if (typeof performance != "undefined") {
-			duration = performance.now() - start;
-		}
-
-
-		test_obj = {
-			name: "" + test.total,
-			result: result,
-			duration: duration
-		}
 		if (!result) {
-			message: "failed: " + condition,
 			window.global_test_results.tests.push(test_obj)
 		}
 
-		window.global_test_results.duration += duration;
+		window.global_test_results.duration += duration
 		if (result) {
-			window.global_test_results.passed++;
+			window.global_test_results.passed++
 		} else {
-			window.global_test_results.failed++;
+			window.global_test_results.failed++
 		}
 	}
 }
@@ -1715,7 +1736,7 @@ function testMithril(mock) {
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
 		m.redraw() //should run synchronously
-		
+
 		m.redraw() //rest should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
@@ -2391,6 +2412,31 @@ function testMithril(mock) {
 	test(function() {
 		var obj = {prop: m.prop("test")}
 		return JSON.stringify(obj) === '{"prop":"test"}'
+	})
+	test(function() {
+		var prop = m.prop({
+			then: function(cb) {cb("test")}
+		})
+		return prop() === "test"
+	})
+	test(function() {
+		var prop = m.prop({
+			then: function() {}
+		})
+
+		return prop() === undefined
+	})
+	test(function() {
+		var promise = {
+			then: function(cb) {this.cb = cb},
+			resolve: function (x) {
+				this.cb(x)
+			}
+		}
+		var prop = m.prop(promise)
+		promise.resolve("test")
+
+		return prop() === "test"
 	})
 
 	//m.request

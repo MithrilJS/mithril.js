@@ -736,7 +736,7 @@ function testMithril(mock) {
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
 		m.redraw() //should run synchronously
-		
+
 		m.redraw() //rest should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
@@ -1412,6 +1412,31 @@ function testMithril(mock) {
 	test(function() {
 		var obj = {prop: m.prop("test")}
 		return JSON.stringify(obj) === '{"prop":"test"}'
+	})
+	test(function() {
+		var prop = m.prop({
+			then: function(cb) {cb("test")}
+		})
+		return prop() === "test"
+	})
+	test(function() {
+		var prop = m.prop({
+			then: function() {}
+		})
+
+		return prop() === undefined
+	})
+	test(function() {
+		var promise = {
+			then: function(cb) {this.cb = cb},
+			resolve: function (x) {
+				this.cb(x)
+			}
+		}
+		var prop = m.prop(promise)
+		promise.resolve("test")
+
+		return prop() === "test"
 	})
 
 	//m.request
