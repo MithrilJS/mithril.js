@@ -406,10 +406,10 @@ Mithril = m = new function app(window, undefined) {
 			m.endComputation()
 		}
 	}
-	m.redraw = function() {
+	m.redraw = function(force) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		if (lastRedrawId) {
+		if (lastRedrawId && !force) {
 			cancel(lastRedrawId)
 			lastRedrawId = defer(redraw, 0)
 		}
@@ -1739,6 +1739,25 @@ function testMithril(mock) {
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
 		return count === 3
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		var count = 0
+		var root = mock.document.createElement("div")
+		m.module(root, {
+			controller: function() {},
+			view: function(ctrl) {
+				count++
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		m.redraw(true) //should run synchronously
+
+		m.redraw(true) //forced to run synchronously
+		m.redraw(true)
+		m.redraw(true)
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count === 5
 	})
 
 	//m.route

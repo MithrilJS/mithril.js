@@ -743,6 +743,25 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //teardown
 		return count === 3
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		var count = 0
+		var root = mock.document.createElement("div")
+		m.module(root, {
+			controller: function() {},
+			view: function(ctrl) {
+				count++
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		m.redraw(true) //should run synchronously
+
+		m.redraw(true) //forced to run synchronously
+		m.redraw(true)
+		m.redraw(true)
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count === 5
+	})
 
 	//m.route
 	test(function() {

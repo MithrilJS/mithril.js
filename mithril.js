@@ -406,10 +406,10 @@ Mithril = m = new function app(window, undefined) {
 			m.endComputation()
 		}
 	}
-	m.redraw = function() {
+	m.redraw = function(force) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		if (lastRedrawId) {
+		if (lastRedrawId && !force) {
 			cancel(lastRedrawId)
 			lastRedrawId = defer(redraw, 0)
 		}
