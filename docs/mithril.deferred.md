@@ -195,7 +195,7 @@ where:
 	
 	The `then` method returns another promise whose computations (if any) receive their inputs from the parent promise's computation.
 	
-	A promise is also a getter-setter (see [`m.prop`](mithril.prop)). After a call to either `resolve` or `reject`, it holds the result of the parent's computation (or the `resolve`/`reject` value, if the promise has no parent promises)
+	A promise is also a getter-setter (see [`m.prop`](mithril.prop.md)). After a call to either `resolve` or `reject`, it holds the result of the parent's computation (or the `resolve`/`reject` value, if the promise has no parent promises)
 	
 	-	**Promise then([any successCallback(any value) [, any errorCallback(any value)]])**
 	

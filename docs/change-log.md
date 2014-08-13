@@ -2,9 +2,15 @@
 
 [v0.1.20](/mithril/archive/v0.1.20) - maintenance
 
+### News:
+
+-	redraw strategy can now be modified via `m.redraw.strategy`
+-	`math` tags now automatically get created with the MathML namespace
+
 ### Bug Fixes:
 
 -	fixed IE8 null reference exception in `m`
+-	fixed IE8 empty-text-node-in-input issue [#195](https://github.com/lhorie/mithril.js/issues/195)
 -	fixed `m.sync` resolution when passed an empty array [#191](https://github.com/lhorie/mithril.js/issues/191)
 
 ---

@@ -18,7 +18,7 @@ Because Mithril encourages all entity logic to be done in the model layer, it's 
 
 Models are also responsible for centralizing tasks such as filtering of entity lists and validation routines, so that access to these methods is available across the application.
 
-DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw), but, if possible, it's preferable to abstract this into a service which integrates with Mithril's auto-redrawing system (see [`m.startComputation` / `m.endComputation`](mithril.computation)).
+DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw.md), but, if possible, it's preferable to abstract this into a service which integrates with Mithril's auto-redrawing system (see [`m.startComputation` / `m.endComputation`](mithril.computation.md)).
 
 ---
 

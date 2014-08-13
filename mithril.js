@@ -1,7 +1,7 @@
 Mithril = m = new function app(window, undefined) {
 	var type = {}.toString
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
-	
+
 	function m() {
 		var args = arguments
 		var hasAttrs = args[1] !== undefined && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
@@ -19,9 +19,9 @@ Mithril = m = new function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
-		
+
 		cell.children = hasAttrs ? args[2] : args[1]
-		
+
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
 			else cell.attrs[attrName] = attrs[attrName]
@@ -40,7 +40,7 @@ Mithril = m = new function app(window, undefined) {
 		//`editable` is a flag that indicates whether an ancestor is contenteditable
 		//`namespace` indicates the closest HTML namespace as it cascades down from an ancestor
 		//`configs` is a list of config functions to run after the topmost `build` call finishes running
-		
+
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
 		//- it simplifies diffing code
@@ -64,7 +64,7 @@ Mithril = m = new function app(window, undefined) {
 		if (dataType == "[object Array]") {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
-			
+
 			//key algorithm: sort elements without recreating them if keys are present
 			//1) create a map of all existing keys, and mark all for deletion
 			//2) add new keys to map and mark them for addition
@@ -93,7 +93,7 @@ Mithril = m = new function app(window, undefined) {
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
 				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index})
 				var newCached = cached.slice()
-				
+
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
 						clear(cached[change.index].nodes, cached[change.index])
@@ -105,7 +105,7 @@ Mithril = m = new function app(window, undefined) {
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
-					
+
 					if (change.action == MOVE) {
 						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
@@ -123,7 +123,7 @@ Mithril = m = new function app(window, undefined) {
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
 			//end key algorithm
-			
+
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
@@ -145,7 +145,7 @@ Mithril = m = new function app(window, undefined) {
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
-			
+
 		}
 		else if (data !== undefined && dataType == "[object Object]") {
 			//if an element is different enough from the one in cache, recreate it
@@ -309,6 +309,7 @@ Mithril = m = new function app(window, undefined) {
 	function autoredraw(callback, object, group) {
 		return function(e) {
 			e = e || event
+			m.redraw.strategy("diff")
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
@@ -339,12 +340,13 @@ Mithril = m = new function app(window, undefined) {
 		childNodes: []
 	}
 	var nodeCache = [], cellCache = {}
-	m.render = function(root, cell) {
+	m.render = function(root, cell, forceRecreation) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var id = getCellCacheKey(root)
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
 		if (cellCache[id] === undefined) clear(node.childNodes)
+		if (forceRecreation === true) reset(root)
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
 	}
@@ -359,6 +361,31 @@ Mithril = m = new function app(window, undefined) {
 		return value
 	}
 
+	function _prop(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0]
+			return store
+		}
+
+		prop.toJSON = function() {
+			return store
+		}
+
+		return prop
+	}
+
+	m.prop = function (store) {
+		if ((typeof store === 'object' || typeof store === 'function') &&
+				typeof store.then === 'function') {
+			var prop = _prop()
+			newPromisedProp(prop, store).then(prop)
+
+			return prop
+		}
+
+		return _prop(store)
+	}
+
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -371,6 +398,7 @@ Mithril = m = new function app(window, undefined) {
 			controllers[index].onunload(event)
 		}
 		if (!isPrevented) {
+			m.redraw.strategy("all")
 			m.startComputation()
 			roots[index] = root
 			modules[index] = module
@@ -390,15 +418,18 @@ Mithril = m = new function app(window, undefined) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
+	m.redraw.strategy = m.prop()
 	function redraw() {
+		var mode = m.redraw.strategy()
 		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
+			if (controllers[i] && mode != "none") m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
 		}
 		if (computePostRedrawHook) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
 		lastRedrawId = null
+		m.redraw.strategy("diff")
 	}
 
 	var pendingRequests = 0
@@ -455,7 +486,7 @@ Mithril = m = new function app(window, undefined) {
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
 
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
-			
+
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
@@ -480,7 +511,6 @@ Mithril = m = new function app(window, undefined) {
 
 		for (var route in router) {
 			if (route == path) {
-				reset(root)
 				m.module(root, router[route])
 				return true
 			}
@@ -488,7 +518,6 @@ Mithril = m = new function app(window, undefined) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 			if (matcher.test(path)) {
-				reset(root)
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
@@ -498,11 +527,6 @@ Mithril = m = new function app(window, undefined) {
 				return true
 			}
 		}
-	}
-	function reset(root) {
-		var cacheKey = getCellCacheKey(root)
-		clear(root.childNodes, cellCache[cacheKey])
-		cellCache[cacheKey] = undefined
 	}
 	function routeUnobtrusive(e) {
 		e = e || event
@@ -533,62 +557,162 @@ Mithril = m = new function app(window, undefined) {
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
-
-	//model
-	m.prop = function(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0]
-			return store
-		}
-		prop.toJSON = function() {
-			return store
-		}
-		return prop
+	function reset(root) {
+		var cacheKey = getCellCacheKey(root)
+		clear(root.childNodes, cellCache[cacheKey])
+		cellCache[cacheKey] = undefined
 	}
 
 	var none = {}
-	m.deferred = function() {
-		var resolvers = [], rejecters = [], resolved = none, rejected = none, promise = m.prop()
-		var object = {
-			resolve: function(value) {
-				if (resolved === none) promise(resolved = value)
-				for (var i = 0; i < resolvers.length; i++) resolvers[i](value)
-				resolvers.length = rejecters.length = 0
-			},
-			reject: function(value) {
-				if (rejected === none) rejected = value
-				for (var i = 0; i < rejecters.length; i++) rejecters[i](value)
-				resolvers.length = rejecters.length = 0
-			},
-			promise: promise
+	function newPromisedProp(prop, promise) {
+		prop.then = function () {
+			var newProp = m.prop()
+			return newPromisedProp(newProp,
+				promise.then.apply(promise, arguments).then(newProp))
 		}
-		object.promise.resolvers = resolvers
-		object.promise.then = function(success, error) {
-			var next = m.deferred()
-			if (!success) success = identity
-			if (!error) error = identity
-			function callback(method, callback) {
-				return function(value) {
-					try {
-						var result = callback(value)
-						if (result && typeof result.then == "function") result.then(next[method], error)
-						else next[method](result !== undefined ? result : value)
-					}
-					catch (e) {
-						if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
-						else next.reject(e)
-					}
+		prop.promise = prop
+		prop.resolve = function (val) {
+			prop(val)
+			promise = promise.resolve.apply(promise, arguments)
+			return prop
+		}
+		prop.reject = function () {
+			promise = promise.reject.apply(promise, arguments)
+			return prop
+		}
+
+		return prop
+	}
+	m.deferred = function () {
+
+		// Promiz.mithril.js | Zolmeister | MIT
+		function Deferred(fn, er) {
+			// states
+			// 0: pending
+			// 1: resolving
+			// 2: rejecting
+			// 3: resolved
+			// 4: rejected
+			var self = this,
+				state = 0,
+				val = 0,
+				next = [];
+
+			self['promise'] = self
+
+			self['resolve'] = function (v) {
+				if (!state) {
+					val = v
+					state = 1
+
+					fire()
 				}
+				return this
 			}
-			if (resolved !== none) callback("resolve", success)(resolved)
-			else if (rejected !== none) callback("reject", error)(rejected)
-			else {
-				resolvers.push(callback("resolve", success))
-				rejecters.push(callback("reject", error))
+
+			self['reject'] = function (v) {
+				if (!state) {
+					val = v
+					state = 2
+
+					fire()
+				}
+				return this
 			}
-			return next.promise
+
+			self['then'] = function (fn, er) {
+				var d = new Deferred(fn, er)
+				if (state == 3) {
+					d.resolve(val)
+				}
+				else if (state == 4) {
+					d.reject(val)
+				}
+				else {
+					next.push(d)
+				}
+				return d
+			}
+
+			var finish = function (type) {
+				state = type || 4
+				next.map(function (p) {
+					state == 3 && p.resolve(val) || p.reject(val)
+				})
+			}
+
+			// ref : reference to 'then' function
+			// cb, ec, cn : successCallback, failureCallback, notThennableCallback
+			function thennable (ref, cb, ec, cn) {
+				if ((typeof val == 'object' || typeof val == 'function') && typeof ref == 'function') {
+					try {
+
+						// cnt protects against abuse calls from spec checker
+						var cnt = 0
+						ref.call(val, function (v) {
+							if (cnt++) return
+							val = v
+							cb()
+						}, function (v) {
+							if (cnt++) return
+							val = v
+							ec()
+						})
+					} catch (e) {
+						val = e
+						ec()
+					}
+				} else {
+					cn()
+				}
+			};
+
+			function fire() {
+
+				// check if it's a thenable
+				var ref;
+				try {
+					ref = val && val.then
+				} catch (e) {
+					val = e
+					state = 2
+					return fire()
+				}
+				thennable(ref, function () {
+					state = 1
+					fire()
+				}, function () {
+					state = 2
+					fire()
+				}, function () {
+					try {
+						if (state == 1 && typeof fn == 'function') {
+							val = fn(val)
+						}
+
+						else if (state == 2 && typeof er == 'function') {
+							val = er(val)
+							state = 1
+						}
+					} catch (e) {
+						val = e
+						return finish()
+					}
+
+					if (val == self) {
+						val = TypeError()
+						finish()
+					} else thennable(ref, function () {
+							finish(3)
+						}, finish, function () {
+							finish(state == 1 && 3)
+						})
+
+				})
+			}
 		}
-		return object
+
+		return newPromisedProp(m.prop(), new Deferred())
 	}
 	m.sync = function(args) {
 		var method = "resolve"
@@ -613,7 +737,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 		}
 		else deferred.resolve()
-		
+
 		return deferred.promise
 	}
 	function identity(value) {return value}
