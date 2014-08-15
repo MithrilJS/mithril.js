@@ -29,6 +29,21 @@ Mithril = m = new function app(window, undefined) {
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
+		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
+
+		//`parentElement` is a DOM element used for W3C DOM API calls
+		//`parentTag` is only used for handling a corner case for textarea values
+		//`parentCache` is used to remove nodes in some multi-node cases
+		//`parentIndex` and `index` are used to figure out the offset of nodes. They're artifacts from before arrays started being flattened and are likely refactorable
+		//`data` and `cached` are, respectively, the new and old nodes being diffed
+		//`shouldReattach` is a flag indicating whether a parent node was recreated (if so, and if this node is reused, then this node must reattach itself to the new parent)
+		//`editable` is a flag that indicates whether an ancestor is contenteditable
+		//`namespace` indicates the closest HTML namespace as it cascades down from an ancestor
+		//`configs` is a list of config functions to run after the topmost `build` call finishes running
+		
+		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
+		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
+		//- it simplifies diffing code
 		if (data === undefined || data === null) data = ""
 		if (data.subtree === "retain") return cached
 
@@ -40,7 +55,7 @@ Mithril = m = new function app(window, undefined) {
 					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
-				else clear(cached.nodes, cached)
+				else if (cached.nodes) clear(cached.nodes, cached)
 			}
 			cached = new data.constructor
 			cached.nodes = []
@@ -50,6 +65,12 @@ Mithril = m = new function app(window, undefined) {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 			
+			//key algorithm: sort elements without recreating them if keys are present
+			//1) create a map of all existing keys, and mark all for deletion
+			//2) add new keys to map and mark them for addition
+			//3) if key exists in new list, change action from deletion to a move
+			//4) for each key, handle its corresponding action as marked in previous steps
+			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false
 			for (var i = 0; i < cached.length; i++) {
@@ -86,7 +107,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 					
 					if (change.action == MOVE) {
-						if (parentElement.childNodes[change.index] !== change.element) {
+						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
 						}
 						newCached[change.index] = cached[change.from]
@@ -101,6 +122,7 @@ Mithril = m = new function app(window, undefined) {
 				cached.nodes = []
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
+			//end key algorithm
 			
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
@@ -125,7 +147,8 @@ Mithril = m = new function app(window, undefined) {
 			}
 			
 		}
-		else if (dataType == "[object Object]") {
+		else if (data !== undefined && dataType == "[object Object]") {
+			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)
 				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
@@ -135,12 +158,13 @@ Mithril = m = new function app(window, undefined) {
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
+			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML"
 			if (isNew) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
 					tag: data.tag,
 					//process children before attrs so that select.value works correctly
-					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
+					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : [],
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					nodes: [node]
 				}
@@ -149,15 +173,17 @@ Mithril = m = new function app(window, undefined) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
+				cached.children = data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : []
 				cached.nodes.intact = true
-				if (shouldReattach === true) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				if (shouldReattach === true && node !== null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
+			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
 				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
 			}
 		}
-		else {
+		else if (typeof dataType != "function") {
+			//handle text nodes
 			var nodes
 			if (cached.nodes.length === 0) {
 				if (data.$trusted) {
@@ -178,6 +204,7 @@ Mithril = m = new function app(window, undefined) {
 						nodes = injectHTML(parentElement, index, data)
 					}
 					else {
+						//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
 						if (parentTag === "textarea") parentElement.value = data
 						else if (editable) editable.innerHTML = data
 						else {
@@ -282,6 +309,7 @@ Mithril = m = new function app(window, undefined) {
 	function autoredraw(callback, object, group) {
 		return function(e) {
 			e = e || event
+			m.redraw.strategy("diff")
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
@@ -312,12 +340,13 @@ Mithril = m = new function app(window, undefined) {
 		childNodes: []
 	}
 	var nodeCache = [], cellCache = {}
-	m.render = function(root, cell) {
+	m.render = function(root, cell, forceRecreation) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var id = getCellCacheKey(root)
 		var node = root == window.document || root == window.document.documentElement ? documentNode : root
 		if (cellCache[id] === undefined) clear(node.childNodes)
+		if (forceRecreation === true) reset(root)
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
 	}
@@ -332,6 +361,17 @@ Mithril = m = new function app(window, undefined) {
 		return value
 	}
 
+	m.prop = function(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0]
+			return store
+		}
+		prop.toJSON = function() {
+			return store
+		}
+		return prop
+	}
+	
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -344,6 +384,7 @@ Mithril = m = new function app(window, undefined) {
 			controllers[index].onunload(event)
 		}
 		if (!isPrevented) {
+			m.redraw.strategy("all")
 			m.startComputation()
 			roots[index] = root
 			modules[index] = module
@@ -352,11 +393,6 @@ Mithril = m = new function app(window, undefined) {
 		}
 	}
 	m.redraw = function() {
-		if (prevented) {
-			prevented = false
-			return
-		}
-		
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId) {
@@ -368,16 +404,18 @@ Mithril = m = new function app(window, undefined) {
 			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
 		}
 	}
-	m.preventRedraw = function() {prevented = true}
+	m.redraw.strategy = m.prop()
 	function redraw() {
+		var mode = m.redraw.strategy()
 		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]))
+			if (controllers[i] && mode != "none") m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
 		}
 		if (computePostRedrawHook) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
 		lastRedrawId = null
+		m.redraw.strategy("diff")
 	}
 
 	var pendingRequests = 0
@@ -459,7 +497,6 @@ Mithril = m = new function app(window, undefined) {
 
 		for (var route in router) {
 			if (route == path) {
-				reset(root)
 				m.module(root, router[route])
 				return true
 			}
@@ -467,7 +504,6 @@ Mithril = m = new function app(window, undefined) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 			if (matcher.test(path)) {
-				reset(root)
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
@@ -477,11 +513,6 @@ Mithril = m = new function app(window, undefined) {
 				return true
 			}
 		}
-	}
-	function reset(root) {
-		var cacheKey = getCellCacheKey(root)
-		clear(root.childNodes, cellCache[cacheKey])
-		cellCache[cacheKey] = undefined
 	}
 	function routeUnobtrusive(e) {
 		e = e || event
@@ -512,17 +543,10 @@ Mithril = m = new function app(window, undefined) {
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
-
-	//model
-	m.prop = function(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0]
-			return store
-		}
-		prop.toJSON = function() {
-			return store
-		}
-		return prop
+	function reset(root) {
+		var cacheKey = getCellCacheKey(root)
+		clear(root.childNodes, cellCache[cacheKey])
+		cellCache[cacheKey] = undefined
 	}
 
 	var none = {}
@@ -1532,6 +1556,27 @@ function testMithril(mock) {
 		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
 		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "012345"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/157
+		var root = mock.document.createElement("div")
+		m.render(root, m("input", {value: "a"}))
+		m.render(root, m("input", {value: "aa"}))
+		return root.childNodes[0].childNodes.length == 0
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/157
+		var root = mock.document.createElement("div")
+		m.render(root, m("br", {class: "a"}))
+		m.render(root, m("br", {class: "aa"}))
+		return root.childNodes[0].childNodes.length == 0
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/194
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 4}), m("li", {key: 5})]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "01245"
+	})
 	//end m.render
 
 	//m.redraw
@@ -2123,6 +2168,101 @@ function testMithril(mock) {
 		m.route("/bar1")
 		mock.requestAnimationFrame.$resolve() //teardown
 		return unloaded == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("none")
+				},
+				view: function() {
+					return m("div");
+				}
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && root.childNodes.length == 0
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy, count = 0
+		var config = function(el, init) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+			"/bar1": {
+				controller: function() {
+					strategy = m.redraw.strategy()
+					m.redraw.strategy("redraw")
+				},
+				view: function() {
+					return m("div", {config: config});
+				}
+			},
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route("/bar1")
+		mock.requestAnimationFrame.$resolve() //teardown
+		return strategy == "all" && count == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var strategy
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {this.number = 1},
+				view: function(ctrl) {
+					return m("div", {onclick: function() {
+						strategy = m.redraw.strategy()
+						ctrl.number++
+						m.redraw.strategy("none")
+					}}, ctrl.number);
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var count = 0
+		var config = function(el, init ) {if (!init) count++}
+		m.route.mode = "search"
+		m.route(root, "/foo1", {
+			"/foo1": {
+				controller: function() {},
+				view: function(ctrl) {
+					return m("div", {config: config, onclick: function() {
+						m.redraw.strategy("all")
+					}});
+				}
+			}
+		})
+		root.childNodes[0].onclick({})
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count == 2
 	})
 	//end m.route
 
