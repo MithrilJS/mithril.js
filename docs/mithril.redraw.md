@@ -67,11 +67,15 @@ m.redraw(true) // force
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void redraw([Boolean force=false]) { GetterSetter strategy }
+void redraw([Boolean forceSync]) { GetterSetter strategy }
 
 where:
 	GetterSetter :: String getterSetter([String value])
 ```
+
+-	**Boolean forceSync** (optional)
+	
+	If set to true, forces the redraw to be synchronous. By default, event handlers schedule redraws to be done asynchronously in order to allow simultaneous events to run before redrawing (for example, the keypress and input are often used together for inputs). Defaults to `false`
 
 -	<a name="strategy"></a>
 
