@@ -736,12 +736,31 @@ function testMithril(mock) {
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
 		m.redraw() //should run synchronously
-		
+
 		m.redraw() //rest should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
 		return count === 3
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		var count = 0
+		var root = mock.document.createElement("div")
+		m.module(root, {
+			controller: function() {},
+			view: function(ctrl) {
+				count++
+			}
+		})
+		mock.requestAnimationFrame.$resolve() //teardown
+		m.redraw(true) //should run synchronously
+
+		m.redraw(true) //forced to run synchronously
+		m.redraw(true)
+		m.redraw(true)
+		mock.requestAnimationFrame.$resolve() //teardown
+		return count === 5
 	})
 
 	//m.route
@@ -1413,6 +1432,22 @@ function testMithril(mock) {
 		var obj = {prop: m.prop("test")}
 		return JSON.stringify(obj) === '{"prop":"test"}'
 	})
+	test(function() {
+		var defer = m.deferred()
+		var prop = m.prop(defer.promise)
+		defer.resolve("test")
+
+		return prop() === "test"
+	})
+	test(function() {
+		var defer = m.deferred()
+		var prop = m.prop(defer.promise).then(function () {
+			return "test2"
+		})
+		defer.resolve("test")
+
+		return prop() === "test2"
+	})
 
 	//m.request
 	test(function() {
@@ -1439,7 +1474,7 @@ function testMithril(mock) {
 		var error = m.prop("no error")
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}}).then(null, error)
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
-		return prop() === undefined && error().message === "error occurred"
+		return prop().message === "error occurred" && error().message === "error occurred"
 	})
 	test(function() {
 		var error = m.prop("no error"), exception
@@ -1482,7 +1517,7 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
-		deferred.promise.then(null, function(data) {return "foo"}).then(null, function(data) {value = data})
+		deferred.promise.then(null, function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
 	})
@@ -1656,7 +1691,7 @@ function testMithril(mock) {
 		controller.value = "foo"
 		m.endComputation()
 		mock.requestAnimationFrame.$resolve()
-		
+
 		return root.childNodes[0].nodeValue === "foo"
 	})
 
