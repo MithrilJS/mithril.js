@@ -137,10 +137,10 @@ Mithril = m = new function app(window, undefined) {
 					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				}
 				for (var i = 0, node; node = cached.nodes[i]; i++) {
-					if (node.parentNode !== null && nodes.indexOf(node) < 0) node.parentNode.removeChild(node)
+					if (node.parentNode != null && nodes.indexOf(node) < 0) node.parentNode.removeChild(node)
 				}
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
-					if (node.parentNode === null) parentElement.appendChild(node)
+					if (node.parentNode == null) parentElement.appendChild(node)
 				}
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
@@ -175,7 +175,7 @@ Mithril = m = new function app(window, undefined) {
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
 				cached.children = data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : []
 				cached.nodes.intact = true
-				if (shouldReattach === true && node !== null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
