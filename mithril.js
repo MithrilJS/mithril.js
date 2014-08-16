@@ -409,7 +409,7 @@ Mithril = m = new function app(window, undefined) {
 	m.redraw = function(force) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		if (lastRedrawId && !force) {
+		if (lastRedrawId && force !== true) {
 			cancel(lastRedrawId)
 			lastRedrawId = defer(redraw, 0)
 		}
