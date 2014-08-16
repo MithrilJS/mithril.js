@@ -68,11 +68,11 @@ setTimeout(function() {
 //asynchronous service
 var greetAsync = function() {
 	m.startComputation();
-	
+
 	var deferred = m.deferred();
 	setTimeout(function() {
 		deferred.resolve("hello");
-		
+
 		m.endComputation();
 	}, 1000);
 	return deferred.promise;
@@ -81,80 +81,10 @@ var greetAsync = function() {
 
 ---
 
-### Recoverable vs Unrecoverable errors
-
-Recoverable errors are exceptions that are deliberately thrown by the application developer to signal an abnormal condition in the business logic. You can throw errors in this way if a computation needs to forward a failure condition to downstream promises.
-
-In the example below we throw a recoverable error. It rejects the subsequent promise, and logs the string `"error"` to the console
-
-```javascript
-//standalone usage
-var greetAsync = function() {
-	var deferred = m.deferred();
-	setTimeout(function() {
-		deferred.resolve("hello");
-	}, 1000);
-	return deferred.promise;
-};
-
-greetAsync()
-	.then(function(data) {
-		if (data != "hi") throw new Error("wrong greeting")
-	})
-	.then(function() {
-		console.log("success")
-	}, function() {
-		console.log("error")
-	})
-```
-
-Unrecoverable errors are exceptions that happen at runtime due to bugs in the code.
-
-In the example below, calling the inexistent `foo.bar.baz` triggers a `ReferenceError`. Mithril does not handle this error in any way: it aborts execution and dumps the error information in the console.
-
-```javascript
-//standalone usage
-var greetAsync = function() {
-	var deferred = m.deferred();
-	setTimeout(function() {
-		deferred.resolve("hello");
-	}, 1000);
-	return deferred.promise;
-};
-
-greetAsync().then(function() {
-	foo.bar.baz()
-})
-```
-
----
-
 ### Differences from Promises/A+
 
-For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but with a few key differences:
-
-Mithril promises forward a value downstream if a resolution callback returns `undefined`. This allows simpler debugging of promise chains:
-
-```javascript
-//a FP-friendly console.log
-var log = function(value) {
-	console.log(value)
-}
-
-var data = m.request({method: "GET", url: "/data"})
-	.then(log) //Mithril promises let us debug like this
-	.then(doStuff)
-	
-var data = m.request({method: "GET", url: "/data"})
-	.then(function(value) {
-		console.log(value) // here's the debugging snippet
-		return value // Promises/A+ requires us to return a value
-	})
-	.then(doStuff) // or else `doStuff` will break
-
-```
-
-Another subtle difference is that the Promises/A+ require a callback to run in a different execution context than its respective `then` method. This requirement exists to support an obscure edge cases and incurs [a significant performance hit on each link of a promise chain](http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/). To be more specific, the performance hit can come either in the form of a 4ms minimum delay (if the implementation uses `setTimeout`), or from having to load a [bunch of hacky polyfill code](https://raw.githubusercontent.com/NobleJS/setImmediate/master/setImmediate.js) for a [feature that is not being considered for addition by some browser vendors](https://developer.mozilla.org/en-US/docs/Web/API/Window.setImmediate).
+For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but has one difference:  
+Mithril promises atempt to execute synchronously if possible.
 
 To illustrate the difference between Mithril and A+ promises, consider the code below:
 
@@ -171,8 +101,6 @@ console.log(2)
 ```
 
 In the example above, A+ promises are required to log `2` before logging `1`, whereas Mithril logs `1` before `2`. Typically `resolve`/`reject` are called asynchronously after the `then` method is called, so normally this difference does not matter.
-
-One final difference is in how Mithril handles exceptions: if exceptions are thrown from within a success or error callbacks, A+ promises always reject the downstreams (and thus swallow the exception). Mithril does so only with errors that are subclasses of the Error class. Errors that are instances of the Error class itself are not caught by Mithril. This allows unrecoverable runtime errors to get thrown to the console w/ standard stack traces, while allowing developers to create application-space errors normally.
 
 ---
 
@@ -192,41 +120,37 @@ where:
 -	**GetterSetter { Promise then([any successCallback(any value) [, any errorCallback(any value)]]) } promise**
 
 	A promise has a method called `then` which takes two computation callbacks as parameters.
-	
+
 	The `then` method returns another promise whose computations (if any) receive their inputs from the parent promise's computation.
-	
+
 	A promise is also a getter-setter (see [`m.prop`](mithril.prop.md)). After a call to either `resolve` or `reject`, it holds the result of the parent's computation (or the `resolve`/`reject` value, if the promise has no parent promises)
-	
+
 	-	**Promise then([any successCallback(any value) [, any errorCallback(any value)]])**
-	
+
 		This method accepts two callbacks which process a value passed to the `resolve` and `reject` methods, respectively, and pass the processed value to the returned promise
-		
+
 		-	**any successCallback(any value)** (optional)
-		
+
 			The `successCallback` is called if `resolve` is called in the root `deferred`.
-			
+
 			The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
-			
+
 			If this function returns undefined, then it passes the `value` argument to the next step in the thennable queue, if any
-			
+
 		-	**any errorCallback(any value)** (optional)
-		
+
 			The `errorCallback` is called if `reject` is called in the root `deferred`.
-			
+
 			The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
-			
+
 			If this function returns undefined, then it passes the `value` argument to the next step in the thennable queue, if any
-			
+
 		-	**returns Promise promise**
 
 -	**void resolve(any value)**
-	
-	This method passes a value to the `successCallback` of the deferred object's child promise
-	
--	**void reject(any value)**
-	
-	This method passes a value to the `errorCallback` of the deferred object's child promise
-	
-	
 
-	
+	This method passes a value to the `successCallback` of the deferred object's child promise
+
+-	**void reject(any value)**
+
+	This method passes a value to the `errorCallback` of the deferred object's child promise
