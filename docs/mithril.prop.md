@@ -56,6 +56,25 @@ m.request({method: "GET", url: "/users"})
 
 ---
 
+### Third-party promise library support
+
+If a promise is passed into `m.prop()`, its value will populate the prop after resolution.  
+Until the promise is resolved, the value of the prop will resolve to `undefined`
+
+Example using [Q](https://github.com/kriskowal/q)
+
+```javascript
+var deferred = Q.defer()
+var users = m.prop(deferred.promise)
+
+users() // undefined
+
+deferred.resolve("Hello")
+users() // Hello
+```
+
+---
+
 ### Serializing getter-setters
 
 Getter-setters are JSON-serializable:
@@ -83,18 +102,17 @@ where:
 -	**any initialValue** (optional)
 
 	An initialization value. If not provided, the value of the getter-setter's internal store defaults to `undefined`.
-	
+
 -	**returns any getterSetter([any value])**
 
 	A getter-setter method.
-	
+
 	-	**any value** (optional)
-		
+
 		If provided, it updates the getter-setter's internal store to the provided value.
-		
+
 		If not provided, return the current internally stored value.
-		
+
 	-	**returns any value**
-	
+
 		This method always returns the value of the internal store, regardless of whether it was updated or not.
-		
