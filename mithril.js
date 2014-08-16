@@ -44,11 +44,11 @@ Mithril = m = new function app(window, undefined) {
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
 		//- it simplifies diffing code
-		if (data === undefined || data === null) data = ""
+		if (data == null) data = ""
 		if (data.subtree === "retain") return cached
 
 		var cachedType = type.call(cached), dataType = type.call(data)
-		if (cached === undefined || cached === null || cachedType != dataType) {
+		if (cached == null || cachedType != dataType) {
 			if (cached !== null && cached !== undefined) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
