@@ -1412,6 +1412,22 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //teardown
 		return count == 2
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var value
+		m.route(root, "/foo+bar", {
+			"/:arg": {
+				controller: function() {value = m.route.param("arg")},
+				view: function(ctrl) {
+					return ""
+				}
+			}
+		})
+		return value == "foo+bar"
+	})
 	//end m.route
 
 	//m.prop
