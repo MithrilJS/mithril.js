@@ -12,7 +12,7 @@ Note that calling this method will not do anything if a module was not activated
 
 If there are pending [`m.request`](mithril.request.md) calls in either a controller constructor or event handler, the auto-redrawing system waits for all the AJAX requests to complete before calling `m.redraw`.
 
-This method may also be called manually from within a controller if more granular updates to the view are needed, however doing so is generally not recommended, as it may degrade performance. Model classes should never call this method. 
+This method may also be called manually from within a controller if more granular updates to the view are needed, however doing so is generally not recommended, as it may degrade performance. Model classes should never call this method.
 
 If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should use [`m.startComputation` and `m.endComputation`](mithril.computation.md) to integrate with Mithril's auto-redrawing system instead.
 
@@ -52,12 +52,22 @@ m("input", {onkeydown: function(e) {
 
 ---
 
+### Forcing redraw
+
+If you find yourself needing to redraw before the browsers normal redraw cycle, you can force it.
+
+```javascript
+m.redraw(true) // force
+```
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void redraw() { GetterSetter strategy }
+void redraw([Boolean force=false]) { GetterSetter strategy }
 
 where:
 	GetterSetter :: String getterSetter([String value])
@@ -66,17 +76,15 @@ where:
 -	<a name="strategy"></a>
 
 	### m.redraw.strategy
-	
+
 	**GetterSetter strategy**
-	
+
 	The `m.redraw.strategy` getter-setter indicates how the next module redraw will occur. It can be one of three values:
-	
+
 	-	`"all"` - recreates the DOM tree from scratch
 	-	`"diff"` - updates only DOM elements if needed
 	-	`"none"` - leaves the DOM tree intact
-	
-	This value can be programmatically changed in controllers and event handlers to modify the next redrawing strategy. It is modified internally by Mithril to the value `"all"` before running controller constructors, and to the value `"diff"` after all redraws.
-	
-	Calling this function without arguments returns the currently assigned redraw strategy.
 
-	
+	This value can be programmatically changed in controllers and event handlers to modify the next redrawing strategy. It is modified internally by Mithril to the value `"all"` before running controller constructors, and to the value `"diff"` after all redraws.
+
+	Calling this function without arguments returns the currently assigned redraw strategy.
