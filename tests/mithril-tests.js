@@ -706,6 +706,20 @@ function testMithril(mock) {
 		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 4}), m("li", {key: 5})]))
 		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "01245"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/206
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", undefined))
+		m.render(root, m("div", [m("div")]))
+		return root.childNodes[0].childNodes.length == 1
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/206
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", null))
+		m.render(root, m("div", [m("div")]))
+		return root.childNodes[0].childNodes.length == 1
+	})
 	//end m.render
 
 	//m.redraw

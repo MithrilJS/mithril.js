@@ -4,7 +4,7 @@ Mithril = m = new function app(window, undefined) {
 
 	function m() {
 		var args = arguments
-		var hasAttrs = args[1] !== undefined && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var hasAttrs = args[1] != null && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -49,7 +49,7 @@ Mithril = m = new function app(window, undefined) {
 
 		var cachedType = type.call(cached), dataType = type.call(data)
 		if (cached == null || cachedType != dataType) {
-			if (cached !== null && cached !== undefined) {
+			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
 					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
@@ -74,7 +74,7 @@ Mithril = m = new function app(window, undefined) {
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false
 			for (var i = 0; i < cached.length; i++) {
-				if (cached[i] && cached[i].attrs && cached[i].attrs.key !== undefined) {
+				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
@@ -82,7 +82,7 @@ Mithril = m = new function app(window, undefined) {
 			if (shouldMaintainIdentities) {
 				for (var i = 0; i < data.length; i++) {
 					if (data[i] && data[i].attrs) {
-						if (data[i].attrs.key !== undefined) {
+						if (data[i].attrs.key != null) {
 							var key = data[i].attrs.key
 							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
 							else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
@@ -134,10 +134,10 @@ Mithril = m = new function app(window, undefined) {
 			}
 			if (!intact) {
 				for (var i = 0; i < data.length; i++) {
-					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
+					if (cached[i] != null) nodes = nodes.concat(cached[i].nodes)
 				}
 				for (var i = 0, node; node = cached.nodes[i]; i++) {
-					if (node.parentNode != null && nodes.indexOf(node) < 0) node.parentNode.removeChild(node)
+					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]])
 				}
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
 					if (node.parentNode == null) parentElement.appendChild(node)
@@ -145,9 +145,8 @@ Mithril = m = new function app(window, undefined) {
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
-
 		}
-		else if (data !== undefined && dataType == "[object Object]") {
+		else if (data != null && dataType == "[object Object]") {
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)
@@ -164,7 +163,7 @@ Mithril = m = new function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//process children before attrs so that select.value works correctly
-					children: data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : [],
+					children: data.children != null ? build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined,
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
 					nodes: [node]
 				}
@@ -173,7 +172,7 @@ Mithril = m = new function app(window, undefined) {
 			else {
 				node = cached.nodes[0]
 				setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = data.children !== undefined ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : []
+				cached.children = data.children != null ? build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs) : undefined
 				cached.nodes.intact = true
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
@@ -238,13 +237,13 @@ Mithril = m = new function app(window, undefined) {
 				}
 				else if (attrName === "style" && typeof dataAttr == "object") {
 					for (var rule in dataAttr) {
-						if (cachedAttr === undefined || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+						if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
 					}
 					for (var rule in cachedAttr) {
 						if (!(rule in dataAttr)) node.style[rule] = ""
 					}
 				}
-				else if (namespace !== undefined) {
+				else if (namespace != null) {
 					if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
 					else if (attrName === "className") node.setAttribute("class", dataAttr)
 					else node.setAttribute(attrName, dataAttr)
@@ -754,7 +753,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 		if (typeof options.config == "function") {
 			var maybeXhr = options.config(xhr, options)
-			if (maybeXhr !== undefined) xhr = maybeXhr
+			if (maybeXhr != null) xhr = maybeXhr
 		}
 		xhr.send(options.method == "GET" ? "" : options.data)
 		return xhr
