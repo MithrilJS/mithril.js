@@ -907,4 +907,4 @@ function testMithril(mock) {
 //mocks
 testMithril(mock.window)
 
-test.print(console.log)
+test.print(console.log.bind(console))
