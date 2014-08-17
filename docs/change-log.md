@@ -1,5 +1,21 @@
 ## Change Log
 
+[v0.1.21](/mithril/archive/v0.1.21) - maintenance
+
+### News:
+
+-	passing a promise to an `m.prop` now populates it with the resolved value upon resolution, and returns `undefined` otherwise
+-	`m.redraw` can now be forced to called synchronously
+
+### Bug Fixes:
+
+-	fixed handling of `+` character in `m.route.param` [#204](https://github.com/lhorie/mithril.js/issues/204)
+-	fixed corner case for undefined children in diff [#206](https://github.com/lhorie/mithril.js/issues/206)
+-	fixed context.onunload for array items [#200](https://github.com/lhorie/mithril.js/issues/200)
+-	fixed handling on comments in HTML converter tool
+
+---
+
 [v0.1.20](/mithril/archive/v0.1.20) - maintenance
 
 ### News:
