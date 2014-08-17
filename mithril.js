@@ -230,9 +230,20 @@ Mithril = m = new function app(window, undefined) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
-			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
+			var isFunc = (typeof cachedAttr === 'function' && typeof dataAttr === 'function');
+
+			if (isFunc || !(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
 				cachedAttrs[attrName] = dataAttr
 				if (attrName === "config") continue
+				//	Override/custom bindings
+				else if(m.bindings && attrName in m.bindings){
+					for(cBind in m.bindings) {if(m.bindings.hasOwnProperty(cBind)){
+						var binder = m.bindings[cBind];
+						if(attrName === cBind && typeof binder == 'function') {
+							binder(node, tag, dataAttr);
+						}
+					}}
+				}
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
 					node[attrName] = autoredraw(dataAttr, node)
 				}
@@ -704,3 +715,4 @@ if (typeof module != "undefined" && module !== null) module.exports = m
 if (typeof define == "function" && define.amd) define(function() {return m})
 
 ;;;
+
