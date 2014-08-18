@@ -132,7 +132,7 @@ Mithril = m = new function app(window, undefined) {
 				subArrayCount += isArray ? item.length : 1
 				cached[cacheCount++] = item
 			}
-			if (!intact) {
+			if (!intact && cached.nodes) {
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] !== undefined) nodes = nodes.concat(cached[i].nodes)
 				}
