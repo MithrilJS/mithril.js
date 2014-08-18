@@ -237,12 +237,10 @@ Mithril = m = new function app(window, undefined) {
 				if (attrName === "config") continue
 				//	Override/custom bindings
 				else if(m.bindings && attrName in m.bindings){
-					for(cBind in m.bindings) {if(m.bindings.hasOwnProperty(cBind)){
-						var binder = m.bindings[cBind];
-						if(attrName === cBind && typeof binder == 'function') {
-							binder(node, tag, dataAttr);
-						}
-					}}
+					var binder = m.bindings[attrName];
+					if(typeof binder == 'function') {
+						binder(node, tag, dataAttr);
+					}
 				}
 				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
 					node[attrName] = autoredraw(dataAttr, node)
