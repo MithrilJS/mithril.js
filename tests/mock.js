@@ -70,6 +70,23 @@ mock.window = new function() {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
+	window.document.getElementsByTagName = function(name){
+		name = name.toLowerCase();
+		var out = [];
+
+		var traverse = function(node){
+			if(node.childNodes && node.childNodes.length > 0){
+				node.childNodes.forEach(function(curr){
+					if(curr.nodeName.toLowerCase() === name)
+						out.push(curr);
+					traverse(curr);
+				});
+			}
+		};
+
+		traverse(window.document);
+		return out;
+	}
 	window.scrollTo = function() {}
 	window.cancelAnimationFrame = function() {}
 	window.requestAnimationFrame = function(callback) {
