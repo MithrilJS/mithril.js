@@ -744,6 +744,12 @@ function testMithril(mock) {
 		
 		return unloaded1 === true && unloaded2 === true
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, [m("div.blue")])
+		m.render(root, [m("div.green", [m("div")]), m("div.blue")])
+		return root.childNodes.length == 2
+	})
 	//end m.render
 
 	//m.redraw
