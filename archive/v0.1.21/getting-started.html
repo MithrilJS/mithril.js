@@ -362,13 +362,19 @@ m.module(document, todo);
 <pre><code class="lang-javascript">this.description = m.prop(data.description)</code></pre>
 <p>becomes:</p>
 <pre><code class="lang-javascript">//private store
-var description = data.description;
+var description;
 
 //public getter-setter
 this.description = function(value) {
     if (arguments.length &gt; 0) description = value.toUpperCase();
     return description;
-}</code></pre>
+}
+
+//make it serializable
+this.description.toJSON = function() {return description}
+
+//set the value
+this.description(data.description)</code></pre>
 <p>According to Mithril&#39;s philosophy, <code>list</code> and <code>description</code> are also considered model-level entities. This is a subtle but important point: model entities don&#39;t need to be full-blown custom classes.</p>
 <p>Native Javascript classes are quite appropriate for storing primitive and structured data. Since in this case they are indeed being used to store data - even if temporarily - they are model entities!</p>
 <p>Be aware that by using the native Array class for a list, we&#39;re making an implicit statement that we are going to support all of the standard Array methods as part of our API.</p>
