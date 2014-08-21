@@ -393,7 +393,7 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.prop = function (store) {
-		if ((typeof store === 'object' || typeof store === 'function') &&
+		if ((typeof store === 'object' || typeof store === 'function') && store !== null &&
 				typeof store.then === 'function') {
 			var prop = _prop()
 			newPromisedProp(prop, store).then(prop)
