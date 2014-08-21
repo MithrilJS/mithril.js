@@ -473,13 +473,19 @@ becomes:
 
 ```javascript
 //private store
-var description = data.description;
+var description;
 
 //public getter-setter
 this.description = function(value) {
 	if (arguments.length > 0) description = value.toUpperCase();
 	return description;
 }
+
+//make it serializable
+this.description.toJSON = function() {return description}
+
+//set the value
+this.description(data.description)
 ```
 
 According to Mithril's philosophy, `list` and `description` are also considered model-level entities. This is a subtle but important point: model entities don't need to be full-blown custom classes.
