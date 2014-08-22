@@ -1508,6 +1508,10 @@ function testMithril(mock) {
 
 		return prop() === "test2"
 	})
+	test(function() {
+		var prop = m.prop(null)
+		return prop() === null
+	})
 
 	//m.request
 	test(function() {
