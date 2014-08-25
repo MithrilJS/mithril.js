@@ -31,6 +31,16 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
+		//the diff algorithm can be summarized as this:
+		//1 - compare `data` and `cached`
+		//2 - if they are different, copy `data` to `cached` and update the DOM based on what the difference is
+		//3 - recursively apply this algorithm for every array and for the children of every virtual element
+		
+		//the `cached` data structure is essentially the same as the previous redraw's `data` data structure, with a few additions:
+		//- `cached` always has a property called `nodes`, which is a list of DOM elements that correspond to the data represented by the respective virtual element
+		//- in order to support attaching `nodes` as a property of `cached`, `cached` is *always* a non-primitive object, i.e. if the data was a string, then cached is a String instance. If data was `null` or `undefined`, cached is `new String("")`
+		//- `cached also has a `configContext` property, which is the state storage object exposed by config(element, isInitialized, context)
+		//- when `cached` is an Object, it represents a virtual element; when it's an Array, it represents a list of elements; when it's a String, Number or Boolean, it represents a text node
 
 		//`parentElement` is a DOM element used for W3C DOM API calls
 		//`parentTag` is only used for handling a corner case for textarea values
@@ -66,7 +76,7 @@ Mithril = m = new function app(window, undefined) {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 
-			//key algorithm: sort elements without recreating them if keys are present
+			//keys algorithm: sort elements without recreating them if keys are present
 			//1) create a map of all existing keys, and mark all for deletion
 			//2) add new keys to map and mark them for addition
 			//3) if key exists in new list, change action from deletion to a move
@@ -126,6 +136,7 @@ Mithril = m = new function app(window, undefined) {
 			//end key algorithm
 
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
+				//diff each item in the array
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
@@ -134,12 +145,18 @@ Mithril = m = new function app(window, undefined) {
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
+				//diff the array itself
+				
+				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] != null) nodes = nodes.concat(cached[i].nodes)
 				}
+				//remove items from the end of the array if the new array is shorter than the old one
+				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
 				for (var i = 0, node; node = cached.nodes[i]; i++) {
 					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]])
 				}
+				//add items to the end if the new array is longer than the old one
 				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
 					if (node.parentNode == null) parentElement.appendChild(node)
 				}
@@ -205,6 +222,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 					else {
 						//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
+						//we need to update the value property of the parent textarea or the innerHTML of the contenteditable element instead
 						if (parentTag === "textarea") parentElement.value = data
 						else if (editable) editable.innerHTML = data
 						else {
@@ -375,7 +393,7 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.prop = function (store) {
-		if ((typeof store === 'object' || typeof store === 'function') &&
+		if ((typeof store === 'object' || typeof store === 'function') && store !== null &&
 				typeof store.then === 'function') {
 			var prop = _prop()
 			newPromisedProp(prop, store).then(prop)
@@ -1836,6 +1854,12 @@ function testMithril(mock) {
 		
 		return unloaded1 === true && unloaded2 === true
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, [m("div.blue")])
+		m.render(root, [m("div.green", [m("div")]), m("div.blue")])
+		return root.childNodes.length == 2
+	})
 	//end m.render
 
 	//m.redraw
@@ -2593,6 +2617,10 @@ function testMithril(mock) {
 		defer.resolve("test")
 
 		return prop() === "test2"
+	})
+	test(function() {
+		var prop = m.prop(null)
+		return prop() === null
 	})
 
 	//m.request

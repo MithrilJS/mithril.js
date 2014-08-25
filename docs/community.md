@@ -10,9 +10,17 @@ Go to the [Mithril Blog](http://lhorie.github.io/mithril-blog)
 
 ### Mailing List
 
-Got questions about Mithril? Suggestions?
+Looking for a place to talk about Mithril? Suggestions?
 
 Feel free to post on the [mailing list](https://groups.google.com/forum/#!forum/mithriljs)
+
+---
+
+### StackOverflow
+
+Looking for help on StackOverflow? Tag your questions with `mithril.js`.
+
+Want to help fellow Mithril developers and gain karma while at it? [Keep an eye on the tagged questions](http://stackoverflow.com/questions/tagged/mithril.js)
 
 ---
 
