@@ -35,7 +35,7 @@ Mithril = m = new function app(window, undefined) {
 		//1 - compare `data` and `cached`
 		//2 - if they are different, copy `data` to `cached` and update the DOM based on what the difference is
 		//3 - recursively apply this algorithm for every array and for the children of every virtual element
-		
+
 		//the `cached` data structure is essentially the same as the previous redraw's `data` data structure, with a few additions:
 		//- `cached` always has a property called `nodes`, which is a list of DOM elements that correspond to the data represented by the respective virtual element
 		//- in order to support attaching `nodes` as a property of `cached`, `cached` is *always* a non-primitive object, i.e. if the data was a string, then cached is a String instance. If data was `null` or `undefined`, cached is `new String("")`
@@ -146,7 +146,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			if (!intact) {
 				//diff the array itself
-				
+
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] != null) nodes = nodes.concat(cached[i].nodes)
@@ -196,7 +196,15 @@ Mithril = m = new function app(window, undefined) {
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
-				configs.push(data.attrs["config"].bind(window, node, !isNew, cached.configContext = cached.configContext || {}, cached))
+				var context = cached.configContext = cached.configContext || {}
+				
+				// bind
+				configs.push((function (data, node, isNew, context, cached) {
+					var args = [node, !isNew, context, cached]
+					return function () {
+						return data.attrs["config"].apply(data, args.concat(Array.prototype.slice.call(arguments, 0)))
+					}
+				})(data, node, isNew, context, cached))
 			}
 		}
 		else if (typeof dataType != "function") {
