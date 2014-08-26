@@ -393,7 +393,7 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.prop = function (store) {
-		if ((typeof store === 'object' || typeof store === 'function') &&
+		if ((typeof store === 'object' || typeof store === 'function') && store !== null &&
 				typeof store.then === 'function') {
 			var prop = _prop()
 			newPromisedProp(prop, store).then(prop)
@@ -758,24 +758,102 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function identity(value) {return value}
 
-	function ajax(options) {
-		var xhr = new window.XMLHttpRequest
-		xhr.open(options.method, options.url, true, options.user, options.password)
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4) {
-				if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
-				else options.onerror({type: "error", target: xhr})
+	function serializeArray(array, prefix){
+		var idx, out = [];
+		for(idx in array){
+			var formatted = (prefix ? prefix : "") + "[]";
+			if(prefix && typeof array[idx] === "object")
+				formatted = formatted.replace(/\[\]$/i, "[" + idx + "]");
+			if(typeof array[idx] === "object" && JSON.stringify(array[idx]) === "{}"){
+				continue;
 			}
+			if(array[idx] instanceof Array)
+				out.push(serializeArray(array[idx], formatted));
+			else if(typeof array[idx] === "object")
+				out.push(serializeObject(array[idx], formatted));
+			else
+				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(array[idx]));
 		}
-		if (options.serialize == JSON.stringify && options.method != "GET") {
-			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+		return out.join("&");
+	}
+
+	function serializeObject(obj, prefix) {
+		var key, out = [];
+		for(key in obj){
+			var formatted = prefix ? prefix + "[" + key + "]" : key;
+			if(obj[key] instanceof Array){
+				if(obj[key].length < 1)
+					continue;
+				out.push(serializeArray(obj[key], formatted));
+			}else if(typeof obj[key] === "object"){
+				if(JSON.stringify(obj[key]) === "{}")
+					continue;
+				out.push(serializeObject(obj[key], formatted));
+			}else{
+				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(obj[key]));
+			}
+		};
+		return out.join("&");
+	}
+
+	function ajax(options) {
+		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
+			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
+			var script = window.document.createElement("script");
+			
+			window[callbackKey] = function(resp){
+				delete window[callbackKey];
+				window.document.body.removeChild(script);
+				options.onload({ type: "load", target: {
+					responseText: resp 
+				} });
+			};
+
+			script.onerror = function(e){
+				delete window[callbackKey];
+				window.document.body.removeChild(script);
+
+				options.onerror({ type: "error", target: {
+					status: 500,
+					responseText: JSON.stringify({ error: "Error making jsonp request" })
+				} });
+
+				e.preventDefault();
+				e.stopPropagation();
+			};
+
+			script.onload = function(e){
+				e.preventDefault();
+				e.stopPropagation();
+			};
+			
+
+			script.src = options.url
+				+ (options.url.indexOf("?") > 0 ? "&" : "?")
+				+ (options.callbackKey ? options.callbackKey : "callback")
+				+ "=" + callbackKey
+				+ "&" + serializeObject(options.data || {});
+			window.document.body.appendChild(script);
+		}else{
+			var xhr = new window.XMLHttpRequest
+			xhr.open(options.method, options.url, true, options.user, options.password)
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
+					else options.onerror({type: "error", target: xhr})
+				}
+			}
+			if (options.serialize == JSON.stringify && options.method != "GET") {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+			}
+			if (typeof options.config == "function") {
+				var maybeXhr = options.config(xhr, options)
+				if (maybeXhr != null) xhr = maybeXhr
+			}
+
+			xhr.send(options.method == "GET" ? "" : options.data)
+			return xhr
 		}
-		if (typeof options.config == "function") {
-			var maybeXhr = options.config(xhr, options)
-			if (maybeXhr != null) xhr = maybeXhr
-		}
-		xhr.send(options.method == "GET" ? "" : options.data)
-		return xhr
 	}
 	function bindData(xhrOptions, data, serialize) {
 		if (data && Object.keys(data).length > 0) {
@@ -801,8 +879,10 @@ Mithril = m = new function app(window, undefined) {
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
-		var serialize = xhrOptions.serialize = xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = xhrOptions.deserialize || JSON.parse
+		var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+			? identity : xhrOptions.serialize || JSON.stringify
+		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp" 
+			? identity : xhrOptions.deserialize || JSON.parse
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		}
@@ -969,6 +1049,23 @@ mock.window = new function() {
 		var index = this.childNodes.indexOf(child)
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
+	}
+	window.document.getElementsByTagName = function(name){
+		name = name.toLowerCase();
+		var out = [];
+
+		var traverse = function(node){
+			if(node.childNodes && node.childNodes.length > 0){
+				node.childNodes.forEach(function(curr){
+					if(curr.nodeName.toLowerCase() === name)
+						out.push(curr);
+					traverse(curr);
+				});
+			}
+		};
+
+		traverse(window.document);
+		return out;
 	}
 	window.scrollTo = function() {}
 	window.cancelAnimationFrame = function() {}
@@ -2521,6 +2618,10 @@ function testMithril(mock) {
 
 		return prop() === "test2"
 	})
+	test(function() {
+		var prop = m.prop(null)
+		return prop() === null
+	})
 
 	//m.request
 	test(function() {
@@ -2563,6 +2664,133 @@ function testMithril(mock) {
 		var xhr = mock.XMLHttpRequest.$instances.pop()
 		xhr.onreadystatechange()
 		return xhr.$headers["Content-Type"] == "application/json; charset=utf-8"
+	})
+	
+	// m.request over jsonp
+	test(function(){
+		// script tags cannot be appended directly on the document
+		var body = mock.document.createElement("body");
+		mock.document.body = body;
+		mock.document.appendChild(body);
+
+		var _window = mock;
+		var	error = m.prop("no error");
+		var req = m.request({ 
+			url: "/test", 
+			dataType: "jsonp",
+			background: true
+		}).then(null, error);
+		var callbackKeys = [];
+		Object.keys(_window).forEach(function(globalKey){
+			if(globalKey.indexOf("mithril_callback") > -1)
+				callbackKeys.push(globalKey);
+		});
+		var foundScriptTag = false, scriptTag = null;
+		mock.document.getElementsByTagName("script").forEach(function(script){
+			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
+				scriptTag = script;
+		});
+		if(scriptTag){
+			foundScriptTag = true;
+			delete _window[callbackKeys[0]];
+			mock.document.body.removeChild(scriptTag);
+		}
+		mock.document.removeChild(body);
+		return callbackKeys.length === 1 && foundScriptTag;
+	})
+	test(function(){
+		var body = mock.document.createElement("body");
+		mock.document.body = body;
+		mock.document.appendChild(body);
+
+		var _window = mock;
+		var error = m.prop(false);
+		var req = m.request({
+			url: "/test",
+			dataType: "jsonp",
+			background: true,
+			callbackKey: "jsonpCallback"
+		}).then(null, error);
+		var callbackKeys = [];
+		Object.keys(_window).forEach(function(globalKey){
+			if(globalKey.indexOf("mithril_callback") > -1)
+				callbackKeys.push(globalKey);
+		});
+		var scriptTag = null;
+		mock.document.getElementsByTagName("script").forEach(function(script){
+			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
+				scriptTag = script;
+		});
+		var correctCallback = false;
+		if(scriptTag){
+			correctCallback = scriptTag.src.indexOf("jsonpCallback") > -1;
+			delete _window[callbackKeys[0]];
+			mock.document.body.removeChild(scriptTag);
+		}
+		mock.document.removeChild(body);
+		return correctCallback;
+	})
+	test(function(){
+		var body = mock.document.createElement("body");
+		mock.document.body = body;
+		mock.document.appendChild(body);
+
+		var _window = mock;
+		var req = m.request({
+			url: "/test",
+			dataType: "jsonp",
+			background: true
+		});
+		var callbackKeys = [];
+		Object.keys(_window).forEach(function(globalKey){
+			if(globalKey.indexOf("mithril_callback") > -1)
+				callbackKeys.push(globalKey);
+		});
+		var scriptTag = null;
+		mock.document.getElementsByTagName("script").forEach(function(script){
+			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
+				scriptTag = script;
+		});
+		var out = { foo: "bar" };
+		if(scriptTag && callbackKeys.length > 0){
+			_window[callbackKeys[0]](out);
+			mock.document.body.removeChild(scriptTag);
+			delete _window[callbackKeys[0]];
+		}		
+		mock.document.removeChild(body);
+		return JSON.stringify(out) === JSON.stringify(req());
+	})
+	test(function(){
+		var body = mock.document.createElement("body");
+		mock.document.body = body;
+		mock.document.appendChild(body);
+
+		var _window = mock;
+		var error = m.prop(false);
+		var req = m.request({
+			url: "/test",
+			dataType: "jsonp",
+			data: { foo: "bar" },
+			background: true
+		});
+		var callbackKeys = [];
+		Object.keys(_window).forEach(function(globalKey){
+			if(globalKey.indexOf("mithril_callback") > -1)
+				callbackKeys.push(globalKey);
+		});
+		var scriptTag = null;
+		mock.document.getElementsByTagName("script").forEach(function(script){
+			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
+				scriptTag = script;
+		});
+		var correctData = false;
+		if(scriptTag){
+			correctData = scriptTag.src.indexOf("foo=bar") > -1;
+			mock.document.body.removeChild(scriptTag);
+			delete _window[callbackKeys[0]];
+		}
+		mock.document.removeChild(body);
+		return correctData;
 	})
 
 	//m.deferred

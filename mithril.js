@@ -758,24 +758,102 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function identity(value) {return value}
 
-	function ajax(options) {
-		var xhr = new window.XMLHttpRequest
-		xhr.open(options.method, options.url, true, options.user, options.password)
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4) {
-				if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
-				else options.onerror({type: "error", target: xhr})
+	function serializeArray(array, prefix){
+		var idx, out = [];
+		for(idx in array){
+			var formatted = (prefix ? prefix : "") + "[]";
+			if(prefix && typeof array[idx] === "object")
+				formatted = formatted.replace(/\[\]$/i, "[" + idx + "]");
+			if(typeof array[idx] === "object" && JSON.stringify(array[idx]) === "{}"){
+				continue;
 			}
+			if(array[idx] instanceof Array)
+				out.push(serializeArray(array[idx], formatted));
+			else if(typeof array[idx] === "object")
+				out.push(serializeObject(array[idx], formatted));
+			else
+				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(array[idx]));
 		}
-		if (options.serialize == JSON.stringify && options.method != "GET") {
-			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+		return out.join("&");
+	}
+
+	function serializeObject(obj, prefix) {
+		var key, out = [];
+		for(key in obj){
+			var formatted = prefix ? prefix + "[" + key + "]" : key;
+			if(obj[key] instanceof Array){
+				if(obj[key].length < 1)
+					continue;
+				out.push(serializeArray(obj[key], formatted));
+			}else if(typeof obj[key] === "object"){
+				if(JSON.stringify(obj[key]) === "{}")
+					continue;
+				out.push(serializeObject(obj[key], formatted));
+			}else{
+				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(obj[key]));
+			}
+		};
+		return out.join("&");
+	}
+
+	function ajax(options) {
+		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
+			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
+			var script = window.document.createElement("script");
+			
+			window[callbackKey] = function(resp){
+				delete window[callbackKey];
+				window.document.body.removeChild(script);
+				options.onload({ type: "load", target: {
+					responseText: resp 
+				} });
+			};
+
+			script.onerror = function(e){
+				delete window[callbackKey];
+				window.document.body.removeChild(script);
+
+				options.onerror({ type: "error", target: {
+					status: 500,
+					responseText: JSON.stringify({ error: "Error making jsonp request" })
+				} });
+
+				e.preventDefault();
+				e.stopPropagation();
+			};
+
+			script.onload = function(e){
+				e.preventDefault();
+				e.stopPropagation();
+			};
+			
+
+			script.src = options.url
+				+ (options.url.indexOf("?") > 0 ? "&" : "?")
+				+ (options.callbackKey ? options.callbackKey : "callback")
+				+ "=" + callbackKey
+				+ "&" + serializeObject(options.data || {});
+			window.document.body.appendChild(script);
+		}else{
+			var xhr = new window.XMLHttpRequest
+			xhr.open(options.method, options.url, true, options.user, options.password)
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
+					else options.onerror({type: "error", target: xhr})
+				}
+			}
+			if (options.serialize == JSON.stringify && options.method != "GET") {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+			}
+			if (typeof options.config == "function") {
+				var maybeXhr = options.config(xhr, options)
+				if (maybeXhr != null) xhr = maybeXhr
+			}
+
+			xhr.send(options.method == "GET" ? "" : options.data)
+			return xhr
 		}
-		if (typeof options.config == "function") {
-			var maybeXhr = options.config(xhr, options)
-			if (maybeXhr != null) xhr = maybeXhr
-		}
-		xhr.send(options.method == "GET" ? "" : options.data)
-		return xhr
 	}
 	function bindData(xhrOptions, data, serialize) {
 		if (data && Object.keys(data).length > 0) {
@@ -801,8 +879,10 @@ Mithril = m = new function app(window, undefined) {
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
-		var serialize = xhrOptions.serialize = xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = xhrOptions.deserialize || JSON.parse
+		var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+			? identity : xhrOptions.serialize || JSON.stringify
+		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp" 
+			? identity : xhrOptions.deserialize || JSON.parse
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		}
