@@ -3,8 +3,21 @@ Mithril = m = new function app(window, undefined) {
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TR‌​ACK|WBR/
 
+	/*
+	 * @typedef {String} Tag
+	 * A string that looks like -> div.classname#id[param=one][param2=two]
+	 * Which describes a DOM node
+	 */
+
+	/*
+	 *
+	 * @param {Tag} The DOM node tag
+	 * @param {Object=[]} optional key-value pairs to be mapped to DOM attrs
+	 * @param {...mNode=[]} Zero or more Mithril child nodes. Can be an array, or splat (optional)
+	 *
+	 */
 	function m() {
-		var args = arguments
+		var args = Array.prototype.slice.call(arguments, 0)
 		var hasAttrs = args[1] != null && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
@@ -21,7 +34,14 @@ Mithril = m = new function app(window, undefined) {
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
 
-		cell.children = hasAttrs ? args[2] : args[1]
+
+		var children = hasAttrs ? args[2] : args[1]
+		if (children instanceof Array) {
+			cell.children = children
+		}
+		else {
+			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
+		}
 
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
@@ -197,7 +217,7 @@ Mithril = m = new function app(window, undefined) {
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === "function") {
 				var context = cached.configContext = cached.configContext || {}
-				
+
 				// bind
 				configs.push((function (data, node, isNew, context, cached) {
 					var args = [node, !isNew, context, cached]
@@ -808,12 +828,12 @@ Mithril = m = new function app(window, undefined) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
 			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
 			var script = window.document.createElement("script");
-			
+
 			window[callbackKey] = function(resp){
 				delete window[callbackKey];
 				window.document.body.removeChild(script);
 				options.onload({ type: "load", target: {
-					responseText: resp 
+					responseText: resp
 				} });
 			};
 
@@ -834,7 +854,7 @@ Mithril = m = new function app(window, undefined) {
 				e.preventDefault();
 				e.stopPropagation();
 			};
-			
+
 
 			script.src = options.url
 				+ (options.url.indexOf("?") > 0 ? "&" : "?")
@@ -889,7 +909,7 @@ Mithril = m = new function app(window, undefined) {
 		var deferred = m.deferred()
 		var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
 			? identity : xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp" 
+		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
 			? identity : xhrOptions.deserialize || JSON.parse
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
