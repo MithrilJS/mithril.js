@@ -199,12 +199,12 @@ Mithril = m = new function app(window, undefined) {
 				var context = cached.configContext = cached.configContext || {}
 				
 				// bind
-				configs.push((function (data, node, isNew, context, cached) {
-					var args = [node, !isNew, context, cached]
-					return function () {
-						return data.attrs["config"].apply(data, args.concat(Array.prototype.slice.call(arguments, 0)))
+				var callback = function(data, args) {
+					return function() {
+						return data.attrs["config"].apply(data, args)
 					}
-				})(data, node, isNew, context, cached))
+				}
+				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
 		else if (typeof dataType != "function") {
