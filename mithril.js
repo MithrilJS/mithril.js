@@ -612,128 +612,120 @@ Mithril = m = new function app(window, undefined) {
 		return newPromisedProp(m.prop(), new Deferred())
 	}
 	// Promiz.mithril.js | Zolmeister | MIT
-	function Deferred(fn, er) {
-		// states
-		// 0: pending
-		// 1: resolving
-		// 2: rejecting
-		// 3: resolved
-		// 4: rejected
-		var self = this,
-			state = 0,
-			val = 0,
-			next = [];
+	function Deferred(successCallback, failureCallback) {
+		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4
+		var self = this, state = 0, promiseValue = 0, next = []
 
-		self['promise'] = self
+		self["promise"] = self
 
-		self['resolve'] = function (v) {
+		self["resolve"] = function(value) {
 			if (!state) {
-				val = v
-				state = 1
+				promiseValue = value
+				state = RESOLVING
 
 				fire()
 			}
 			return this
 		}
 
-		self['reject'] = function (v) {
+		self["reject"] = function(value) {
 			if (!state) {
-				val = v
-				state = 2
-
+				promiseValue = value
+				state = REJECTING
+				
 				fire()
 			}
 			return this
 		}
 
-		self['then'] = function (fn, er) {
-			var d = new Deferred(fn, er)
-			if (state == 3) {
-				d.resolve(val)
+		self["then"] = function(successCallback, failureCallback) {
+			var deferred = new Deferred(successCallback, failureCallback)
+			if (state == RESOLVED) {
+				deferred.resolve(promiseValue)
 			}
-			else if (state == 4) {
-				d.reject(val)
+			else if (state == REJECTED) {
+				deferred.reject(promiseValue)
 			}
 			else {
-				next.push(d)
+				next.push(deferred)
 			}
-			return d
+			return deferred
 		}
 
-		var finish = function (type) {
-			state = type || 4
+		function finish(type) {
+			state = type || REJECTED
 			next.map(function (p) {
-				state == 3 && p.resolve(val) || p.reject(val)
+				state == RESOLVED && p.resolve(promiseValue) || p.reject(promiseValue)
 			})
 		}
 
-		// ref : reference to 'then' function
-		// cb, ec, cn : successCallback, failureCallback, notThennableCallback
-		function thennable (ref, cb, ec, cn) {
-			if ((typeof val == 'object' || typeof val == 'function') && typeof ref == 'function') {
+		function thennable(then, successCallback, failureCallback, notThennableCallback) {
+			if ((typeof promiseValue == "object" || typeof promiseValue == "function") && typeof then == "function") {
 				try {
-
-					// cnt protects against abuse calls from spec checker
-					var cnt = 0
-					ref.call(val, function (v) {
-						if (cnt++) return
-						val = v
-						cb()
-					}, function (v) {
-						if (cnt++) return
-						val = v
-						ec()
+					// count protects against abuse calls from spec checker
+					var count = 0
+					then.call(promiseValue, function(value) {
+						if (count++) return
+						promiseValue = value
+						successCallback()
+					}, function (value) {
+						if (count++) return
+						promiseValue = value
+						failureCallback()
 					})
-				} catch (e) {
-					val = e
-					ec()
+				}
+				catch (e) {
+					promiseValue = e
+					failureCallback()
 				}
 			} else {
-				cn()
+				notThennableCallback()
 			}
-		};
+		}
 
 		function fire() {
-
 			// check if it's a thenable
-			var ref;
+			var then
 			try {
-				ref = val && val.then
-			} catch (e) {
-				val = e
-				state = 2
+				then = promiseValue && promiseValue.then
+			}
+			catch (e) {
+				promiseValue = e
+				state = REJECTING
 				return fire()
 			}
-			thennable(ref, function () {
-				state = 1
+			thennable(then, function() {
+				state = RESOLVING
 				fire()
-			}, function () {
-				state = 2
+			}, function() {
+				state = REJECTING
 				fire()
-			}, function () {
+			}, function() {
 				try {
-					if (state == 1 && typeof fn == 'function') {
-						val = fn(val)
+					if (state == RESOLVING && typeof successCallback == "function") {
+						promiseValue = successCallback(promiseValue)
 					}
-
-					else if (state == 2 && typeof er == 'function') {
-						val = er(val)
-						state = 1
+					else if (state == REJECTING && typeof failureCallback == "function") {
+						promiseValue = failureCallback(promiseValue)
+						state = RESOLVING
 					}
-				} catch (e) {
-					val = e
+				}
+				catch (e) {
+					promiseValue = e
 					return finish()
 				}
 
-				if (val == self) {
-					val = TypeError()
+				if (promiseValue == self) {
+					promiseValue = TypeError()
 					finish()
-				} else thennable(ref, function () {
-						finish(3)
+				}
+				else {
+					thennable(then, function () {
+						finish(RESOLVED)
 					}, finish, function () {
-						finish(state == 1 && 3)
+						finish(state == RESOLVING && RESOLVED)
 					})
-
+				}
 			})
 		}
 	}
