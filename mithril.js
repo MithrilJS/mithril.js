@@ -887,10 +887,9 @@ Mithril = m = new function app(window, undefined) {
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation()
 		var deferred = m.deferred()
-		var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
-			? identity : xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp" 
-			? identity : xhrOptions.deserialize || JSON.parse
+		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify
+		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		}
