@@ -278,7 +278,7 @@ Mithril = m = new function app(window, undefined) {
 				else if (attrName === "value" && tag === "input") {
 					if (node.value !== dataAttr) node.value = dataAttr
 				}
-				else if (attrName in node && !(attrName == "list" || attrName == "style")) {
+				else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
 					node[attrName] = dataAttr
 				}
 				else node.setAttribute(attrName, dataAttr)
