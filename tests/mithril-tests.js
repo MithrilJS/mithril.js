@@ -9,16 +9,19 @@ function testMithril(mock) {
 	test(function() {return m("[title=bar]").attrs.title === "bar"})
 	test(function() {return m("[title=\'bar\']").attrs.title === "bar"})
 	test(function() {return m("[title=\"bar\"]").attrs.title === "bar"})
-	test(function() {return m("div", "test").children === "test"})
+	test(function() {return m("div", "test").children[0] === "test"})
+	test(function() {return m("div", "test", "test2").children[1] === "test2"})
 	test(function() {return m("div", ["test"]).children[0] === "test"})
 	test(function() {return m("div", {title: "bar"}, "test").attrs.title === "bar"})
-	test(function() {return m("div", {title: "bar"}, "test").children === "test"})
+	test(function() {return m("div", {title: "bar"}, "test").children[0] === "test"})
 	test(function() {return m("div", {title: "bar"}, ["test"]).children[0] === "test"})
-	test(function() {return m("div", {title: "bar"}, m("div")).children.tag === "div"})
+	test(function() {return m("div", {title: "bar"}, m("div")).children[0].tag === "div"})
 	test(function() {return m("div", {title: "bar"}, [m("div")]).children[0].tag === "div"})
+	test(function() {return m("div", {title: "bar"}, "test0", "test1", "test2", "test3").children[3] === "test3"}) // splat
+	test(function() {return m("div", {title: "bar"}, m("div"), m("i"), m("span")).children[2].tag === "span"})
 	test(function() {return m("div", ["a", "b"]).children.length === 2})
 	test(function() {return m("div", [m("div")]).children[0].tag === "div"})
-	test(function() {return m("div", m("div")).children.tag === "div"}) //yes, this is expected behavior: see method signature
+	test(function() {return m("div", m("div")).children[0].tag === "div"}) //yes, this is expected behavior: see method signature
 	test(function() {return m("div", [undefined]).tag === "div"})
 	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
 	test(function() {return m("svg", [m("g")])})
@@ -723,7 +726,7 @@ function testMithril(mock) {
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/200
 		var root = mock.document.createElement("div")
-		
+
 		var unloaded1 = false
 		function unloadable1(element, isInit, context) {
 			context.onunload = function() {
@@ -732,7 +735,7 @@ function testMithril(mock) {
 		}
 		m.render(root, [ m("div", {config: unloadable1}) ])
 		m.render(root, [ ])
-		
+
 		var unloaded2 = false
 		function unloadable2(element, isInit, context) {
 			context.onunload = function() {
@@ -741,7 +744,7 @@ function testMithril(mock) {
 		}
 		m.render(root, [ m("div", {config: unloadable2}) ])
 		m.render(root, [ ])
-		
+
 		return unloaded1 === true && unloaded2 === true
 	})
 	test(function() {
@@ -1555,7 +1558,7 @@ function testMithril(mock) {
 		xhr.onreadystatechange()
 		return xhr.$headers["Content-Type"] == "application/json; charset=utf-8"
 	})
-	
+
 	// m.request over jsonp
 	test(function(){
 		// script tags cannot be appended directly on the document
@@ -1621,7 +1624,7 @@ function testMithril(mock) {
 			_window[callbackKeys[0]](out);
 			mock.document.body.removeChild(scriptTag);
 			delete _window[callbackKeys[0]];
-		}		
+		}
 		mock.document.removeChild(body);
 		return JSON.stringify(out) === JSON.stringify(req());
 	})
