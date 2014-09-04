@@ -83,10 +83,11 @@ var greetAsync = function() {
 
 ### Differences from Promises/A+
 
-For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but has one difference:  
-Mithril promises atempt to execute synchronously if possible.
+For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but they have a few differences.
 
-To illustrate the difference between Mithril and A+ promises, consider the code below:
+#### Synchronous execution
+
+Mithril promises attempt to execute synchronously if possible. To illustrate the difference between Mithril and A+ promises, consider the code below:
 
 ```javascript
 var deferred = m.deferred()
@@ -101,6 +102,29 @@ console.log(2)
 ```
 
 In the example above, A+ promises are required to log `2` before logging `1`, whereas Mithril logs `1` before `2`. Typically `resolve`/`reject` are called asynchronously after the `then` method is called, so normally this difference does not matter.
+
+There are a couple of reasons why Mithril runs callbacks synchronously. Conforming to the spec requires either a `setImmediate` polyfill (which is a significantly large library), or `setTimeout` (which is required to take at least 4 milliseconds per call, according to its specs). Neither of these trade-offs are acceptable, given Mithril's focus on nimbleness and performance.
+
+#### Unchecked Error Handling
+
+Mithril does not swallow errors if these errors are subclasses of the Error class. Manually throwing an instance of the Error class itself (or any other objects or primitives) does trigger the rejection callback path as per the Promises/A+ spec.
+
+This deviation from the spec is there to make it easier for developers to find common logical errors such as typos that lead to null reference exceptions. By default, the spec requires that all thrown errors trigger rejection, which result in silent failures if the developer forgets to explicitly handle the failure case.
+
+For example, there is simply never a case where a developer would want to programmatically handle the error of accessing the property of a nullable entity without first checking for its existence. The only reasonable course of action to prevent the potential null reference exceptions in this case is to add the existence check in the source code. It is expected that such an error would bubble up to the console and display a developer-friendly error message and line number there.
+
+The other side of the coin is still supported: if a developer needs to signal an exceptional condition within a promise callback, they can manually throw a `new Error` (for example, if a validation rule failed, and there should be an error message displayed to the user).
+
+---
+
+### Replacing the built-in Promise implementation
+
+If strict adherence to the Promises/A+ spec is required, Mithril allows its built-in implementation to be swapped out. Here's how one would configure Mithril to use the ES6 Promise class that ships with Chrome and Firefox:
+
+```javascript
+//use ES6 Promises as the promise engine
+m.deferred.constructor = Promise
+```
 
 ---
 

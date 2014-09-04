@@ -387,7 +387,7 @@ Mithril = m = new function app(window, undefined) {
 		return value
 	}
 
-	function _prop(store) {
+	function gettersetter(store) {
 		var prop = function() {
 			if (arguments.length) store = arguments[0]
 			return store
@@ -400,16 +400,15 @@ Mithril = m = new function app(window, undefined) {
 		return prop
 	}
 
-	m.prop = function (store) {
-		if ((typeof store === 'object' || typeof store === 'function') && store !== null &&
-				typeof store.then === 'function') {
-			var prop = _prop()
+	m.prop = function(store) {
+		if ((typeof store == "object" || typeof store == "function") && store !== null && typeof store.then == "function") {
+			var prop = gettersetter()
 			newPromisedProp(prop, store).then(prop)
 
 			return prop
 		}
 
-		return _prop(store)
+		return gettersetter(store)
 	}
 
 	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
@@ -589,29 +588,21 @@ Mithril = m = new function app(window, undefined) {
 		cellCache[cacheKey] = undefined
 	}
 
-	function newPromisedProp(prop, promise) {
-		prop.then = function () {
-			var newProp = m.prop()
-			return newPromisedProp(newProp,
-				promise.then.apply(promise, arguments).then(newProp))
-		}
-		prop.promise = prop
-		prop.resolve = function (val) {
-			prop(val)
-			promise = promise.resolve.apply(promise, arguments)
-			return prop
-		}
-		prop.reject = function () {
-			promise = promise.reject.apply(promise, arguments)
-			return prop
-		}
-
-		return prop
-	}
 	m.deferred = function () {
-		return newPromisedProp(m.prop(), new Deferred())
+		var resolve, reject, executor = function(a, b) {
+			resolve = a, reject = b
+		}
+		return newPromisedProp(m.prop(), new m.deferred.constructor(executor))
 	}
-	// Promiz.mithril.js | Zolmeister | MIT
+	m.deferred.constructor = function(executor) {
+		var deferred = new Deferred()
+		executor(deferred.resolve, deferred.reject)
+		return deferred
+	}
+	//Promiz.mithril.js | Zolmeister | MIT
+	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
+	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
+	//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
 	function Deferred(successCallback, failureCallback) {
 		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4
 		var self = this, state = 0, promiseValue = 0, next = []
@@ -675,6 +666,7 @@ Mithril = m = new function app(window, undefined) {
 					})
 				}
 				catch (e) {
+					rethrowUnchecked(e)
 					promiseValue = e
 					failureCallback()
 				}
@@ -690,6 +682,7 @@ Mithril = m = new function app(window, undefined) {
 				then = promiseValue && promiseValue.then
 			}
 			catch (e) {
+				rethrowUnchecked(e)
 				promiseValue = e
 				state = REJECTING
 				return fire()
@@ -711,6 +704,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 				}
 				catch (e) {
+					rethrowUnchecked(e)
 					promiseValue = e
 					return finish()
 				}
@@ -728,6 +722,28 @@ Mithril = m = new function app(window, undefined) {
 				}
 			})
 		}
+	}
+	function newPromisedProp(prop, promise) {
+		prop.then = function () {
+			var newProp = m.prop()
+			return newPromisedProp(newProp,
+				promise.then.apply(promise, arguments).then(newProp))
+		}
+		prop.promise = prop
+		prop.resolve = function (val) {
+			prop(val)
+			promise = promise.resolve.apply(promise, arguments)
+			return prop
+		}
+		prop.reject = function () {
+			promise = promise.reject.apply(promise, arguments)
+			return prop
+		}
+
+		return prop
+	}
+	function rethrowUnchecked(e) {
+		if (type.call(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
 	}
 
 	m.sync = function(args) {
@@ -902,8 +918,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			catch (e) {
 				if (e instanceof SyntaxError) throw new SyntaxError("Could not parse HTTP response. See http://lhorie.github.io/mithril/mithril.request.html#using-variable-data-formats")
-				else if (type.call(e) == "[object Error]" && e.constructor !== Error) throw e
-				else deferred.reject(e)
+				else if (!rethrowUnchecked(e)) deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
 		}
