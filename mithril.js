@@ -272,7 +272,6 @@ Mithril = m = new function app(window, undefined) {
 		return cached
 	}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
-		var groups = {}
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
