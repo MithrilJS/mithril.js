@@ -277,30 +277,36 @@ Mithril = m = new function app(window, undefined) {
 			var cachedAttr = cachedAttrs[attrName]
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
 				cachedAttrs[attrName] = dataAttr
-				if (attrName === "config") continue
-				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
-					node[attrName] = autoredraw(dataAttr, node)
-				}
-				else if (attrName === "style" && typeof dataAttr == "object") {
-					for (var rule in dataAttr) {
-						if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+				try {
+					if (attrName === "config") continue
+					else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
+						node[attrName] = autoredraw(dataAttr, node)
 					}
-					for (var rule in cachedAttr) {
-						if (!(rule in dataAttr)) node.style[rule] = ""
+					else if (attrName === "style" && typeof dataAttr == "object") {
+						for (var rule in dataAttr) {
+							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+						}
+						for (var rule in cachedAttr) {
+							if (!(rule in dataAttr)) node.style[rule] = ""
+						}
 					}
-				}
-				else if (namespace != null) {
-					if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
-					else if (attrName === "className") node.setAttribute("class", dataAttr)
+					else if (namespace != null) {
+						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
+						else if (attrName === "className") node.setAttribute("class", dataAttr)
+						else node.setAttribute(attrName, dataAttr)
+					}
+					else if (attrName === "value" && tag === "input") {
+						if (node.value !== dataAttr) node.value = dataAttr
+					}
+					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
+						node[attrName] = dataAttr
+					}
 					else node.setAttribute(attrName, dataAttr)
 				}
-				else if (attrName === "value" && tag === "input") {
-					if (node.value !== dataAttr) node.value = dataAttr
+				catch (e) {
+					//swallow IE's invalid argument errors to mimic HTML's fallback-to-doing-nothing-on-invalid-attributes behavior
+					if (e.message.indexOf("Invalid argument") < 0) throw e
 				}
-				else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-					node[attrName] = dataAttr
-				}
-				else node.setAttribute(attrName, dataAttr)
 			}
 		}
 		return cachedAttrs
