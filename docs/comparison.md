@@ -128,7 +128,7 @@ Vue is a relatively new templating engine, but it boasts impressive results in i
 
 It is not a full MVC framework, but it is similar to Angular templates, and uses the same terminology for its features (e.g. directives and filters).
 
-The most relevant difference is that Vue uses browser features that don't work (and cannot be made to work) in Internet Explorer 8. Mithril allows developers to support browsers all the way back to IE6 and Blackberry.
+The most relevant difference is that Vue uses [browser features that don't work (and cannot be made to work) in Internet Explorer 8 and lower](https://github.com/yyx990803/vue/wiki/FAQ). Mithril does not rely on unpolyfillable features, so developers can support browsers all the way back to IE6 and Blackberry by using shims if support for those older browsers is required.
 
 Vue's implementation cleverly hijacks array methods, but it should be noted that Javascript Arrays cannot be truly subclassed and as such, Vue suffers from abstraction leaks.
 

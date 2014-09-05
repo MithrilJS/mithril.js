@@ -57,11 +57,11 @@ You can use it by adding a reference to your Typescript files. This will allow t
 
 ### Internet Explorer Compatibility
 
-Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Object::keys` and `Function::bind`, as well as the `JSON` object.
+Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Array::map` and `Object::keys`, as well as the `JSON` object.
 
 You can use polyfill libraries to support these features in IE7.
 
--	[ES5 Shim](https://github.com/es-shims/es5-shim) or Mozilla.org's [Array::indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf), [Object::keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys) and [Function::bind](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) polyfills
+-	[ES5 Shim](https://github.com/es-shims/es5-shim) or Mozilla.org's [Array::indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf), [Array::map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) and [Object::keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
 
 -	[JSON2.js](https://github.com/douglascrockford/JSON-js/blob/master/json2.js)
 
