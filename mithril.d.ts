@@ -55,9 +55,9 @@ interface MithrilXHROptions {
 	unwrapError?(data: any): any;
 	serialize?(dataToSerialize: any): string;
 	deserialize?(dataToDeserialize: string): any;
-	extract?(xhr: XMLHttpRequest, options: MithrilXHROptions);
+	extract?(xhr: XMLHttpRequest, options: MithrilXHROptions): string;
 	type?(data: Object): void;
-	config?(xhr: XMLHttpRequest, options: MithrilXHROptions)
+	config?(xhr: XMLHttpRequest, options: MithrilXHROptions): XMLHttpRequest;
 }
 
 declare var Mithril: MithrilStatic;
