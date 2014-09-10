@@ -147,7 +147,7 @@ module1.controller = function() {
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void module(DOMElement rootElement, Module module)
+Object module(DOMElement rootElement, Module module)
 
 where:
 	Module :: Object { Controller, void view(Object controllerInstance) }
@@ -162,9 +162,9 @@ where:
 -	**Module module**
 
 	A module is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript class constructor function
-	
-	The controller class is instantiated immediately upon calling `m.module`.
-	
+
+	The controller class is instantiated immediately and a reference is returned upon calling `m.module`.
+
 	Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view's constructor.
 
 	Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can instantiate child views and manually pass the child controller instances down the the child view constructors.
