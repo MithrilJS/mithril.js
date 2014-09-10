@@ -455,6 +455,7 @@ Mithril = m = new function app(window, undefined) {
 			modules[index] = module
 			controllers[index] = new module.controller
 			m.endComputation()
+			return controllers[index]
 		}
 	}
 	m.redraw = function(force) {
