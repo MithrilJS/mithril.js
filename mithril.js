@@ -905,36 +905,40 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.request = function(xhrOptions) {
-		if (xhrOptions.background !== true) m.startComputation()
-		var deferred = m.deferred()
-		var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
-			? identity : xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
-			? identity : xhrOptions.deserialize || JSON.parse
-		var extract = xhrOptions.extract || function(xhr) {
-			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
-		}
-		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
-		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
-		xhrOptions.onload = xhrOptions.onerror = function(e) {
-			try {
-				e = e || event
-				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
-				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
-				if (e.type == "load") {
-					if (type.call(response) == "[object Array]" && xhrOptions.type) {
-						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+		try {
+			if (xhrOptions.background !== true) m.startComputation()
+			var deferred = m.deferred()
+			var serialize = xhrOptions.serialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+				? identity : xhrOptions.serialize || JSON.stringify
+			var deserialize = xhrOptions.deserialize = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+				? identity : xhrOptions.deserialize || JSON.parse
+			var extract = xhrOptions.extract || function(xhr) {
+				return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
+			}
+			xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
+			xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
+			xhrOptions.onload = xhrOptions.onerror = function(e) {
+				try {
+					e = e || event
+					var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
+					var response = unwrap(deserialize(extract(e.target, xhrOptions)))
+					if (e.type == "load") {
+						if (type.call(response) == "[object Array]" && xhrOptions.type) {
+							for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
+						}
+						else if (xhrOptions.type) response = new xhrOptions.type(response)
 					}
-					else if (xhrOptions.type) response = new xhrOptions.type(response)
+					deferred[e.type == "load" ? "resolve" : "reject"](response)
 				}
-				deferred[e.type == "load" ? "resolve" : "reject"](response)
+				catch (e) {
+					deferred.reject(e)
+				}
+				if (xhrOptions.background !== true) m.endComputation()
 			}
-			catch (e) {
-				deferred.reject(e)
-			}
-			if (xhrOptions.background !== true) m.endComputation()
+			ajax(xhrOptions)
+		} catch (e) {
+			deferred.reject(e)
 		}
-		ajax(xhrOptions)
 		return deferred.promise
 	}
 
