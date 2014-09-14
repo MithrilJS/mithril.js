@@ -1,10 +1,18 @@
 ## m.render
 
+---
+
+[Usage](#usage)
+[Subtree directives](#subtree directives)
+[Signature](#signature)
+
+---
+
 This method generates a DOM tree inside of a given HTML element.
 
 If the method is run more than once with the same root element, it diffs the new tree against the existing one and intelligently modifies only the portions that have changed.
 
-Note that, unlike many templating engines, this "smart diff" feature does not affect things like cursor placement in inputs and focus, and is therefore safe to call during user interactions.
+Note that, unlike many templating engines, this "smart diff" feature does not affect things like cursor placement in inputs and focus, and is therefore safe to call during user interactions. There are, however, some limitations to the diff algorithm that require you to add [key attributes](mithril.md#dealing-with-focus) in some edge cases.
 
 ---
 

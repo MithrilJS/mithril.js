@@ -1,8 +1,8 @@
 ## Integrating with Other Libraries
 
-Integration with third party libraries can be achieved via the `config` attribute of virtual elements.
+Integration with third party libraries or vanilla javascript code can be achieved via the [`config` attribute of virtual elements](mithril.md#accessing-the-real-dom).
 
-It's recommended that you encapsulate integration code in a component.
+It's recommended that you encapsulate integration code in a component or a helper function.
 
 The example below shows a simple component that integrates with the [select2 library](http://ivaynberg.github.io/select2/).
 

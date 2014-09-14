@@ -1,6 +1,15 @@
 ## m.startComputation / m.endComputation
 
-Typically, `m.startComputation` / `m.endComputation` don't need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously.
+---
+
+[How auto-redrawing-works](#how-auto-redrawing-works)
+[Integrating multiple execution threads](#integrating-multiple-execution-threads)
+[Integrating to legacy code](#integrating-to-legacy-code)
+[Signature](#signature)
+
+---
+
+Typically, `m.startComputation` / `m.endComputation` don't need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously, or when calling vanilla javascript asynchronous functions from template [`config`](mithril.md#accessing-the-real-dom) functions.
 
 If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, or that you're being forced to call [`m.redraw`](mithril.redraw.md) manually, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
 
@@ -50,6 +59,20 @@ window.onfocus = function() {
 	}
 }
 ```
+
+---
+
+### How auto-redrawing works
+
+The auto-redrawing system in Mithril is not affected by changes in values of `m.prop` getter-setters. Instead, Mithril relies on `m.startComputation` and `m.endComputation` calls to figure out when to redraw.
+
+Mithril has an internal counter, which is incremented every time `m.startComputation` is called, and decremented every time `m.endComputation` is called. Once the counter reaches zero, Mithril redraws. Mithril internally calls this pair of functions when you call [`m.module`](mithril.module.md), [`m.route`](mithril.route.md), [`m.request`](mithril.request.md), and whenever an event defined with [`m()`](mithril.md) is triggered.
+
+So calling `m.request` multiple times from a controller context increments the internal counter. Once each request completes, the counter is decremented. The end result is that Mithril waits for all requests to complete before attempting to redraw. This also applies for asynchronous functions called from 3rd party libraries or from vanilla javascript, if they call this pair of functions.
+
+The reason Mithril waits for all asynchronous services to complete before redrawing is to avoid wasteful browser repaints, and to minimize the need for null reference checks in templates.
+
+It's possible to opt out of the redrawing schedule by using the `background` option for `m.request`, or by simply not calling `m.startComputation` / `m.endComputation` when calling non-Mithril asynchronous functions.
 
 ---
 
@@ -126,7 +149,7 @@ var doSomething = function(callback) {
 
 ---
 
-## Integrating to legacy code
+### Integrating to legacy code
 
 If you need to add separate widgets to different places on a same page, you can simply initialize each widget as you would a regular Mithril application (i.e. use `m.render`, `m.module` or `m.route`).
 

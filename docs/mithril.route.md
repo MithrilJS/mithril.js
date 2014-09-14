@@ -1,5 +1,17 @@
 ## m.route
 
+---
+
+[Defining routes](#defining-routes)
+[Variadic routes](#variadic-routes)
+[Routes with querystrings](#routes-with-querystrings)
+[Running clean up code on route change](#running-clean-up-code-on-route-change)
+[Redirecting](#redirecting)
+[Reading the currently active route](#reading-the-currently-active-route)
+[Mode abstraction](#mode abstraction)
+
+---
+
 Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a page to another without causing a full browser refresh.
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
@@ -17,8 +29,6 @@ This method overloads four different units of functionality:
 Routing is single-page-application (SPA) friendly, and can be implemented using either `location.hash`, HTML5 URL rewriting or `location.querystring`. See [`m.route.mode`](#mode) for the caveats of each implementation.
 
 ---
-
-<a name="defining-routes"></a>
 
 ### Defining routes
 

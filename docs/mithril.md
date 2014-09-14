@@ -1,5 +1,18 @@
 ## m
 
+---
+
+[Usage](#usage)
+[Using HTML entities](#using-html-entities)
+[Accessing the real DOM element](#accessing-the-real-dom-element)
+[Persisting config data](#persisting-config-data)
+[Destructors](#destructors)
+[SVG](#svg)
+[Dealing with focus](#dealing-with-focus)
+[Signature](#signature)
+
+---
+
 This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render.md).
 
 You are encouraged to use CSS selectors to define virtual elements. See "Signature" section for details.
@@ -154,6 +167,22 @@ m("div[style='text-align:center']"); //yields <div style="text-align:center;"></
 ```
 
 One caveat of using the CSS syntax is that it clobbers the `style` attribute in the DOM element on redraws, so this syntax is not appropriate if you need to use it in conjunction with 3rd party tools that modify the element's style outside of Mithril's templates (e.g. via `config`, which is explained below)
+
+---
+
+### Using HTML entities
+
+By default, Mithril escapes HTML strings in order to help prevent XSS attacks.
+
+```javascript
+m("div", "&times;") //becomes <div>&amp;times;</div>
+```
+
+You can unescape trusted HTML strings by using [`m.trust`](mithril.trust.md)
+
+```javascript
+m("div", m.trust("&times;"() //becomes <div>&times;</div>
+```
 
 ---
 

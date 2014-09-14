@@ -1,6 +1,17 @@
 ## m.prop
 
+---
+
+[Usage](#usage)
+[Third-party promise library support](#third-party-promise-library-support)
+[Serializing getter-setters](#serializing-getter-setters)
+[Signature](#signature)
+
+---
+
 This is a getter-setter factory utility. It returns a function that stores information.
+
+Note that modifying the values of `m.prop` getter-setters does not trigger redrawing. Instead, Mithril's redrawing system relies on [`m.startComputation` and `m.endComputation`](mithril.computation.md). These functions are internally called by Mithril when you initialize a module via [`m.module`](mithril.module.md) or [`m.route`](mithril.route.md), and when you trigger event handlers that were created within templates with [`m()`](mithril.md). 
 
 ---
 
