@@ -1,5 +1,20 @@
 ## Change Log
 
+[v0.1.22](/mithril/archive/v0.1.22) - maintenance
+
+### News:
+
+-	docs now have anchor links for easier navigation
+-	there is more documentation for things that weren't that clear
+-	json-p support added
+-	`m()` now supports splat for children (e.g. `m("div", m("a"), m("b"), m("i"))` for nicer Coffeescript syntax
+
+### Bug Fixes:
+
+-	gracefully degrade on IE exceptions when setting invalid values
+
+---
+
 [v0.1.21](/mithril/archive/v0.1.21) - maintenance
 
 ### News:

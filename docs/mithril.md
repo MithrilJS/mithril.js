@@ -1,5 +1,18 @@
 ## m
 
+---
+
+[Usage](#usage)
+[Using HTML entities](#using-html-entities)
+[Accessing the real DOM element](#accessing-the-real-dom-element)
+[Persisting config data](#persisting-config-data)
+[Destructors](#destructors)
+[SVG](#svg)
+[Dealing with focus](#dealing-with-focus)
+[Signature](#signature)
+
+---
+
 This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render.md).
 
 You are encouraged to use CSS selectors to define virtual elements. See "Signature" section for details.
@@ -157,6 +170,22 @@ One caveat of using the CSS syntax is that it clobbers the `style` attribute in 
 
 ---
 
+### Using HTML entities
+
+By default, Mithril escapes HTML strings in order to help prevent XSS attacks.
+
+```javascript
+m("div", "&times;") //becomes <div>&amp;times;</div>
+```
+
+You can unescape trusted HTML strings by using [`m.trust`](mithril.trust.md)
+
+```javascript
+m("div", m.trust("&times;"() //becomes <div>&times;</div>
+```
+
+---
+
 #### Accessing the real DOM element
 
 You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
@@ -297,7 +326,7 @@ m("li", {class: selected ? "active" : ""})
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-VirtualElement m(String selector [, Attributes attributes] [, Children children])
+VirtualElement m(String selector [, Attributes attributes] [, Children... children])
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }

@@ -1,5 +1,13 @@
 ## m.module
 
+---
+
+[Usage](#usage)
+[Unloading modules](#unloading-modules)
+[Signature](#signature)
+
+---
+
 A module is an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function.
 
 When using `m.module`, Mithril instantiates controllers as if they were class constructors. However, controllers may return objects if you want to use that Javascript feature to have more fine-grained control over a controller's lifecycle.

@@ -710,6 +710,14 @@ function testMithril(mock) {
 		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "01245"
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/194
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
+		m.render(root, m("ul", [m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5}), m("li", {key: 6})]))
+		m.render(root, m("ul", [m("li", {key: 12}), m("li", {key: 13}), m("li", {key: 14}), m("li", {key: 15}), m("li", {key: 16}), m("li", {key: 17})]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join(",") == "12,13,14,15,16,17"
+	})
+	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/206
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", undefined))

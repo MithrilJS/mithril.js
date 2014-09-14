@@ -272,36 +272,41 @@ Mithril = m = new function app(window, undefined) {
 		return cached
 	}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
-		var groups = {}
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
 				cachedAttrs[attrName] = dataAttr
-				if (attrName === "config") continue
-				else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
-					node[attrName] = autoredraw(dataAttr, node)
-				}
-				else if (attrName === "style" && typeof dataAttr == "object") {
-					for (var rule in dataAttr) {
-						if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+				try {
+					if (attrName === "config") continue
+					else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
+						node[attrName] = autoredraw(dataAttr, node)
 					}
-					for (var rule in cachedAttr) {
-						if (!(rule in dataAttr)) node.style[rule] = ""
+					else if (attrName === "style" && typeof dataAttr == "object") {
+						for (var rule in dataAttr) {
+							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+						}
+						for (var rule in cachedAttr) {
+							if (!(rule in dataAttr)) node.style[rule] = ""
+						}
 					}
-				}
-				else if (namespace != null) {
-					if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
-					else if (attrName === "className") node.setAttribute("class", dataAttr)
+					else if (namespace != null) {
+						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
+						else if (attrName === "className") node.setAttribute("class", dataAttr)
+						else node.setAttribute(attrName, dataAttr)
+					}
+					else if (attrName === "value" && tag === "input") {
+						if (node.value !== dataAttr) node.value = dataAttr
+					}
+					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
+						node[attrName] = dataAttr
+					}
 					else node.setAttribute(attrName, dataAttr)
 				}
-				else if (attrName === "value" && tag === "input") {
-					if (node.value !== dataAttr) node.value = dataAttr
+				catch (e) {
+					//swallow IE's invalid argument errors to mimic HTML's fallback-to-doing-nothing-on-invalid-attributes behavior
+					if (e.message.indexOf("Invalid argument") < 0) throw e
 				}
-				else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-					node[attrName] = dataAttr
-				}
-				else node.setAttribute(attrName, dataAttr)
 			}
 		}
 		return cachedAttrs
@@ -319,7 +324,9 @@ Mithril = m = new function app(window, undefined) {
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
 		if (cached.children) {
-			if (type.call(cached.children) == "[object Array]") for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+			if (type.call(cached.children) == "[object Array]") {
+				for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+			}
 			else if (cached.children.tag) unload(cached.children)
 		}
 	}
@@ -359,7 +366,7 @@ Mithril = m = new function app(window, undefined) {
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
-				if (!lastRedrawId) lastRedrawId = -1;
+				if (!lastRedrawId) lastRedrawId = -1
 				m.endComputation()
 			}
 		}
@@ -576,7 +583,8 @@ Mithril = m = new function app(window, undefined) {
 	function routeUnobtrusive(e) {
 		e = e || event
 		if (e.ctrlKey || e.metaKey || e.which == 2) return
-		e.preventDefault()
+		if (e.preventDefault) e.preventDefault()
+		else e.returnValue = false
 		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
 	}
 	function setScroll() {
@@ -795,82 +803,79 @@ Mithril = m = new function app(window, undefined) {
 	function identity(value) {return value}
 
 	function serializeArray(array, prefix){
-		var idx, out = [];
-		for(idx in array){
-			var formatted = (prefix ? prefix : "") + "[]";
-			if(prefix && typeof array[idx] === "object")
-				formatted = formatted.replace(/\[\]$/i, "[" + idx + "]");
-			if(typeof array[idx] === "object" && JSON.stringify(array[idx]) === "{}"){
-				continue;
-			}
-			if(array[idx] instanceof Array)
-				out.push(serializeArray(array[idx], formatted));
-			else if(typeof array[idx] === "object")
-				out.push(serializeObject(array[idx], formatted));
-			else
-				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(array[idx]));
+		var idx, out = []
+		for (idx in array) {
+			var formatted = (prefix ? prefix : "") + "[]"
+			if (prefix && typeof array[idx] === "object") formatted = formatted.replace(/\[\]$/i, "[" + idx + "]")
+			if (typeof array[idx] === "object" && JSON.stringify(array[idx]) === "{}") continue
+			if (array[idx] instanceof Array) out.push(serializeArray(array[idx], formatted))
+			else if(typeof array[idx] === "object") out.push(serializeObject(array[idx], formatted))
+			else out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(array[idx]))
 		}
-		return out.join("&");
+		return out.join("&")
 	}
 
 	function serializeObject(obj, prefix) {
-		var key, out = [];
-		for(key in obj){
-			var formatted = prefix ? prefix + "[" + key + "]" : key;
-			if(obj[key] instanceof Array){
-				if(obj[key].length < 1)
-					continue;
-				out.push(serializeArray(obj[key], formatted));
-			}else if(typeof obj[key] === "object"){
-				if(JSON.stringify(obj[key]) === "{}")
-					continue;
-				out.push(serializeObject(obj[key], formatted));
-			}else{
-				out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(obj[key]));
+		var key, out = []
+		for (key in obj) {
+			var formatted = prefix ? prefix + "[" + key + "]" : key
+			if (obj[key] instanceof Array) {
+				if(obj[key].length < 1) continue
+				out.push(serializeArray(obj[key], formatted))
 			}
-		};
-		return out.join("&");
+			else if(typeof obj[key] === "object") {
+				if(JSON.stringify(obj[key]) === "{}") continue
+				out.push(serializeObject(obj[key], formatted))
+			}
+			else out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(obj[key]))
+		}
+		return out.join("&")
 	}
 
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
-			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
-			var script = window.document.createElement("script");
+			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
+			var script = window.document.createElement("script")
 
 			window[callbackKey] = function(resp){
-				delete window[callbackKey];
-				window.document.body.removeChild(script);
-				options.onload({ type: "load", target: {
-					responseText: resp
-				} });
-			};
+				delete window[callbackKey]
+				window.document.body.removeChild(script)
+				options.onload({
+					type: "load",
+					target: {
+						responseText: resp
+					}
+				})
+			}
 
-			script.onerror = function(e){
-				delete window[callbackKey];
-				window.document.body.removeChild(script);
+			script.onerror = function(e) {
+				delete window[callbackKey]
+				window.document.body.removeChild(script)
 
-				options.onerror({ type: "error", target: {
-					status: 500,
-					responseText: JSON.stringify({ error: "Error making jsonp request" })
-				} });
+				options.onerror({
+					type: "error",
+					target: {
+						status: 500,
+						responseText: JSON.stringify({error: "Error making jsonp request"})
+					}
+				})
 
-				e.preventDefault();
-				e.stopPropagation();
-			};
+				return false
+			}
 
-			script.onload = function(e){
-				e.preventDefault();
-				e.stopPropagation();
-			};
+			script.onload = function(e) {
+				return false
+			}
 
 
 			script.src = options.url
 				+ (options.url.indexOf("?") > 0 ? "&" : "?")
 				+ (options.callbackKey ? options.callbackKey : "callback")
 				+ "=" + callbackKey
-				+ "&" + serializeObject(options.data || {});
-			window.document.body.appendChild(script);
-		}else{
+				+ "&" + serializeObject(options.data || {})
+			window.document.body.appendChild(script)
+		}
+		else {
 			var xhr = new window.XMLHttpRequest
 			xhr.open(options.method, options.url, true, options.user, options.password)
 			xhr.onreadystatechange = function() {
@@ -880,7 +885,7 @@ Mithril = m = new function app(window, undefined) {
 				}
 			}
 			if (options.serialize == JSON.stringify && options.method != "GET") {
-				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof options.config == "function") {
 				var maybeXhr = options.config(xhr, options)

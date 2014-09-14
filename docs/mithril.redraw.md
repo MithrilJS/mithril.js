@@ -1,5 +1,14 @@
 ## m.redraw
 
+---
+
+[Changing redraw strategy](#changing-redraw-strategy)
+[Preventing redraws on events](#preventing-redraws-on-events)
+[Forcing redraw](#forcing-redraw)
+[Signature](#signature)
+
+---
+
 Redraws the view for the currently active module. Use [`m.module()`](mithril.module.md) to activate a module.
 
 This method is called internally by Mithril's auto-redrawing system. Usually you don't need to call it manually unless you are doing recurring asynchronous operations (i.e. using `setInterval`) or if you want to decouple slow running background requests from the rendering context (see the `background` option in [`m.request`](mithril.request.md).
@@ -37,11 +46,19 @@ module1.config = function(el, isInit, ctx) {
 }
 ```
 
+Common reasons why one might need to change redraw strategy are:
+
+- in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components
+- in order to prevent redraw when dealing with `keypress` events where the event's keyCode is not of interest
+
+Note that the redraw strategy is a global setting that affects the entire template trees of all modules on the page. In order to prevent redraws in *some parts* of an application, but not others, see [subtree directives](mithril.render.md#subtree-directives)
+
 ---
 
 ### Preventing redraws on events
 
-Similarly, it's possible to skip redrawing altogether by calling `m.redraw.strategy("none")`
+Sometimes you only care about a particular condition in an event and want to ignore it if this condition is not met. 
+For example, you might only be interested in running a redraw if a user presses the space bar, and you might not want to waste a redraw if the user presses any other key. In that case, it's possible to skip redrawing altogether by calling `m.redraw.strategy("none")`
 
 ```javascript
 m("input", {onkeydown: function(e) {
@@ -54,11 +71,13 @@ m("input", {onkeydown: function(e) {
 
 ### Forcing redraw
 
-If you find yourself needing to redraw before the browsers normal redraw cycle, you can force it.
+If you find yourself needing to redraw before the browsers normal redraw cycle, you can force a synchronous redraw by passing a boolean `true` as a parameter to `m.redraw`.
 
 ```javascript
 m.redraw(true) // force
 ```
+
+Normally, you should only do this if you need to synchronously read a value from the DOM that requires a browser repaint (e.g. `offsetTop` or a CSS rule). If you need to read DOM values, try to read them all at once, because alternating reading and writing to the DOM causes multiple browser repaints, and repaints are expensive.
 
 ---
 

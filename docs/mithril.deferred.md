@@ -1,5 +1,15 @@
 ## m.deferred
 
+---
+
+[Usage](#usage)
+[Retrieving a value via the getter-setter API](#retrieving-a-value-via-the-getter-setter-api)
+[Integrating to the Mithril redrawing system](#integrating-to-the-mithril-redrawing-system)
+[Differences from Promises/A+](#differences-from-promises-a-)
+[Signature](#signature)
+
+---
+
 This is a low-level method in Mithril. It's a modified version of the Thenable API.
 
 A deferred is an asynchrony monad. It exposes a `promise` property which can *bind* callbacks to build a computation tree.
@@ -37,6 +47,8 @@ greetAsync()
 
 #### Retrieving a value via the getter-setter API
 
+The promise object is actually a getter-setter function that gets populated when the promise is fulfilled.
+
 ```javascript
 //asynchronous service
 var greetAsync = function() {
@@ -64,16 +76,40 @@ setTimeout(function() {
 
 #### Integrating to the Mithril redrawing system
 
+By default, promises are not integrated to the Mithril auto-redrawing system. When dealing with asynchronous functions, you must call [`m.startComputation` / `m.endComputation`] if you want the asynchronous payload to affect the view.
+
 ```javascript
 //asynchronous service
 var greetAsync = function() {
+	//tell Mithril to wait for this service to complete before redrawing
 	m.startComputation();
 
 	var deferred = m.deferred();
 	setTimeout(function() {
 		deferred.resolve("hello");
 
+		//the service is done, tell Mithril that it may redraw
 		m.endComputation();
+	}, 1000);
+	return deferred.promise;
+};
+```
+
+Some cases may not require a redraw upon completion of the asynchronous callbacks. In such cases, simply omit the m.startComputation/m.endComputation calls.
+
+Some asynchronous operations might need to affect redrawing both before and after their completion. In those cases, you can call [`m.redraw`](mithril.redraw.md) instead of using m.startComputation/m.endComputation.
+
+```javascript
+//asynchronous service
+var greetAsync = function() {
+	//don't wait for this service; redraw right away
+	
+	var deferred = m.deferred();
+	setTimeout(function() {
+		deferred.resolve("hello");
+
+		//redraw again
+		m.redraw()
 	}, 1000);
 	return deferred.promise;
 };

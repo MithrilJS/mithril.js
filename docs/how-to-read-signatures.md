@@ -174,3 +174,24 @@ XMLHttpRequest? config()
 ```
 
 In the example above, the `config` function is expected to return either an instance of the XMLHttpRequest object or `undefined`
+
+### Splat
+
+An ellipsis `...` means that an array argument can instead be a list of arguments
+
+```clike
+VirtualElement m(String selector [, Attributes attributes] [, Children... children])
+```
+
+In the example above, we can define children as an array:
+
+```javascript
+m("div", {title: "foo"}, ["child 1", "child 2", "child 3"])
+```
+
+And we also define it as a list of arguments (note that lack of square brackets)
+
+```javascript
+m("div", {title: "foo"}, "child 1", "child 2", "child 3")
+```
+
