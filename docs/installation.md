@@ -16,6 +16,8 @@ In order to use Mithril, extract it from the zip file and point a script tag to 
 <script src="mithril.min.js"></script>
 ```
 
+Note that in order to support older versions of IE, you need to include [some shims](tools.md#internet-explorer-compatibility).
+
 ---
 
 ### CDNs (Content Delivery Networks)

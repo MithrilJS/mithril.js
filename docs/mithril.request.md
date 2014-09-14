@@ -319,11 +319,12 @@ transport().abort();
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-Promise request(XHROptions options)
+Promise request(Options options)
 
 where:
 	Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)) }
 	GetterSetter :: any getterSetter([any value])
+	Options :: XHROptions | JSONPOptions
 	XHROptions :: Object {
 		String method,
 		String url,
@@ -338,6 +339,12 @@ where:
 		[any extract(XMLHttpRequest xhr, XHROptions options),]
 		[void type(Object<any> data),]
 		[XMLHttpRequest? config(XMLHttpRequest xhr, XHROptions options)]
+	}
+	JSONPOptions :: Object {
+		String dataType,
+		String url,
+		String callbackKey,
+		Object<any> data
 	}
 ```
 
@@ -478,4 +485,28 @@ where:
 
 	returns a promise that can bind callbacks which get called on completion of the AJAX request.
 
+---
+
+-	**JSONPOptions options**
+
+	A map of options for JSONP requests
 	
+	-	**String dataType**
+	
+		Must be the string "jsonp"
+		
+	-	**String url**
+	
+		The URL to request. If the URL is not in the same domain as the application, the target server must be configured to accept cross-domain requests from the application's domain, i.e. its responses must include the header `Access-Control-Allow-Origin: *`.
+
+	-	**String callbackKey**
+	
+		The name of the querystring key that defines the name of the callback function to be called by the response. Defaults to "callback"
+		
+		This option is useful for web services that use uncommon conventions for defining jsonp callbacks (e.g. foo.com/?jsonpCallback=doSomething)
+		
+	-	**Object<any> data** (optional)
+	
+		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
+		
+		

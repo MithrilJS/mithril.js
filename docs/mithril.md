@@ -326,7 +326,7 @@ m("li", {class: selected ? "active" : ""})
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-VirtualElement m(String selector [, Attributes attributes] [, Children children])
+VirtualElement m(String selector [, Attributes attributes] [, Children... children])
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
