@@ -5,7 +5,7 @@ interface MithrilStatic {
 	(selector: string, children?: any): MithrilVirtualElement;
 	prop(value?: any): (value?: any) => any;
 	withAttr(property: string, callback: (value: any) => void): (e: Event) => any;
-	module(rootElement: Element, module: MithrilModule): Object;
+	module(rootElement: Node, module: MithrilModule): Object;
 	trust(html: string): String;
 	render(rootElement: Element, children?: any): void;
 	render(rootElement: HTMLDocument, children?: any): void;
@@ -55,9 +55,9 @@ interface MithrilXHROptions {
 	unwrapError?(data: any): any;
 	serialize?(dataToSerialize: any): string;
 	deserialize?(dataToDeserialize: string): any;
-	extract?(xhr: XMLHttpRequest, options: MithrilXHROptions);
+	extract?(xhr: XMLHttpRequest, options: MithrilXHROptions): string;
 	type?(data: Object): void;
-	config?(xhr: XMLHttpRequest, options: MithrilXHROptions)
+	config?(xhr: XMLHttpRequest, options: MithrilXHROptions): XMLHttpRequest;
 }
 
 declare var Mithril: MithrilStatic;
