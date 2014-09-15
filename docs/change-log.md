@@ -12,6 +12,7 @@
 ### Bug Fixes:
 
 -	gracefully degrade on IE exceptions when setting invalid values
+-	fixes for Typescript definition file
 
 ---
 
