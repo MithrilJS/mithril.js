@@ -118,7 +118,7 @@ Mithril = m = new function app(window, undefined) {
 							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
 							else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i]})
+						else unkeyed.push({index: i, element: parentElement.childNodes[i] || window.document.createElement("dummy")})
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
@@ -131,7 +131,7 @@ Mithril = m = new function app(window, undefined) {
 						newCached.splice(change.index, 1)
 					}
 					if (change.action == INSERTION) {
-						var dummy = window.document.createElement("div")
+						var dummy = window.document.createElement("dummy2")
 						dummy.key = data[change.index].attrs.key
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
