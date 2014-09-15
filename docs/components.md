@@ -99,7 +99,7 @@ autocompleter.controller = function(data, getter) {
     this.change = function(value) {
         this.value(value);
 
-        var list = value === "" ? [] : data.filter(function(item) {
+        var list = value === "" ? [] : data().filter(function(item) {
             return this.getter(item).toLowerCase().indexOf(value.toLowerCase()) > -1;
         }, this);
         this.data(list);
@@ -130,7 +130,7 @@ var dashboard = {}
 
 dashboard.controller = function() {
     this.names = m.prop([{id: 1, name: "John"}, {id: 2, name: "Bob"}, {id: 2, name: "Mary"}]);
-    this.autocompleter = new autocompleter.controller(this.names(), function(item) {
+    this.autocompleter = new autocompleter.controller(this.names, function(item) {
         return item.name;
     });
 };
