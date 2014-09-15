@@ -456,6 +456,7 @@ Mithril = m = new function app(window, undefined) {
 			modules[index] = module
 			controllers[index] = new module.controller
 			m.endComputation()
+			return controllers[index]
 		}
 	}
 	m.redraw = function(force) {
@@ -802,36 +803,6 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function identity(value) {return value}
 
-	function serializeArray(array, prefix){
-		var idx, out = []
-		for (idx in array) {
-			var formatted = (prefix ? prefix : "") + "[]"
-			if (prefix && typeof array[idx] === "object") formatted = formatted.replace(/\[\]$/i, "[" + idx + "]")
-			if (typeof array[idx] === "object" && JSON.stringify(array[idx]) === "{}") continue
-			if (array[idx] instanceof Array) out.push(serializeArray(array[idx], formatted))
-			else if(typeof array[idx] === "object") out.push(serializeObject(array[idx], formatted))
-			else out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(array[idx]))
-		}
-		return out.join("&")
-	}
-
-	function serializeObject(obj, prefix) {
-		var key, out = []
-		for (key in obj) {
-			var formatted = prefix ? prefix + "[" + key + "]" : key
-			if (obj[key] instanceof Array) {
-				if(obj[key].length < 1) continue
-				out.push(serializeArray(obj[key], formatted))
-			}
-			else if(typeof obj[key] === "object") {
-				if(JSON.stringify(obj[key]) === "{}") continue
-				out.push(serializeObject(obj[key], formatted))
-			}
-			else out.push(encodeURIComponent(formatted) + "=" + encodeURIComponent(obj[key]))
-		}
-		return out.join("&")
-	}
-
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
 			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
@@ -872,7 +843,7 @@ Mithril = m = new function app(window, undefined) {
 				+ (options.url.indexOf("?") > 0 ? "&" : "?")
 				+ (options.callbackKey ? options.callbackKey : "callback")
 				+ "=" + callbackKey
-				+ "&" + serializeObject(options.data || {})
+				+ "&" + buildQueryString(options.data || {})
 			window.document.body.appendChild(script)
 		}
 		else {

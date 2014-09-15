@@ -70,13 +70,13 @@ The example below shows a component module called `user` being included in a par
 var dashboard = {
 	controller: function() {
 		this.greeting = "Hello";
-		
+
 		this.user = new user.controller();
 	},
 	view: function(controller) {
 		return [
 			m("h1", controller.greeting),
-			
+
 			user.view(controller.user)
 		];
 	}
@@ -155,7 +155,7 @@ module1.controller = function() {
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void module(DOMElement rootElement, Module module)
+Object module(DOMElement rootElement, Module module)
 
 where:
 	Module :: Object { Controller, void view(Object controllerInstance) }
@@ -166,19 +166,19 @@ where:
 -	**DOMElement rootElement**
 
 	A DOM element which will contain the view's template.
-	
+
 -	**Module module**
 
 	A module is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript class constructor function
-	
-	The controller class is instantiated immediately upon calling `m.module`.
-	
+
+	The controller class is instantiated immediately and a reference is returned upon calling `m.module`.
+
 	Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view's constructor.
-	
+
 	Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can instantiate child views and manually pass the child controller instances down the the child view constructors.
-	
+
 	This "[turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down)" approach is the heart of Mithril's component system.
-	
+
 	Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components), and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).
 
 
