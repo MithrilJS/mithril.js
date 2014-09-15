@@ -120,7 +120,7 @@ var greetAsync = function() {
 ### Differences from Promises/A+
 
 For the most part, Mithril promises behave as you'd expect a [Promise/A+](http://promises-aplus.github.io/promises-spec/) promise to behave, but has one difference:  
-Mithril promises atempt to execute synchronously if possible.
+Mithril promises attempt to execute synchronously if possible.
 
 To illustrate the difference between Mithril and A+ promises, consider the code below:
 
