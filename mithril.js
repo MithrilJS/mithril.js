@@ -429,10 +429,7 @@ Mithril = m = new function app(window, undefined) {
 
 	m.prop = function(store) {
 		if ((typeof store == "object" || typeof store == "function") && store !== null && typeof store.then == "function") {
-			var prop = gettersetter()
-			newPromisedProp(prop, store).then(prop)
-
-			return prop
+			return propify(store)
 		}
 
 		return gettersetter(store)
@@ -618,15 +615,23 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.deferred = function () {
-		var resolve, reject, executor = function(a, b) {
-			resolve = a, reject = b
-		}
-		return newPromisedProp(m.prop(), new m.deferred.constructor(executor))
+		var deferred = {}, resolve, reject
+		deferred.promise = propify(new Promise(function(a, b) {deferred.resolve = a, deferred.reject = b}))
+		return deferred
 	}
-	m.deferred.constructor = function(executor) {
+	function propify(promise) {
+		prop = m.prop()
+		promise.then(prop)
+		prop.then = function(resolve, reject) {
+			return propify(promise.then(resolve, reject))
+		}
+		return prop
+	}
+
+	function Promise(executor) {
 		var deferred = new Deferred()
 		executor(deferred.resolve, deferred.reject)
-		return deferred
+		return deferred.promise
 	}
 	//Promiz.mithril.js | Zolmeister | MIT
 	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
@@ -636,7 +641,7 @@ Mithril = m = new function app(window, undefined) {
 		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4
 		var self = this, state = 0, promiseValue = 0, next = []
 
-		self["promise"] = self
+		self["promise"] = m.prop()
 
 		self["resolve"] = function(value) {
 			if (!state) {
@@ -658,7 +663,7 @@ Mithril = m = new function app(window, undefined) {
 			return this
 		}
 
-		self["then"] = function(successCallback, failureCallback) {
+		self.promise["then"] = function(successCallback, failureCallback) {
 			var deferred = new Deferred(successCallback, failureCallback)
 			if (state == RESOLVED) {
 				deferred.resolve(promiseValue)
@@ -669,13 +674,13 @@ Mithril = m = new function app(window, undefined) {
 			else {
 				next.push(deferred)
 			}
-			return deferred
+			return deferred.promise
 		}
 
 		function finish(type) {
 			state = type || REJECTED
-			next.map(function (p) {
-				state == RESOLVED && p.resolve(promiseValue) || p.reject(promiseValue)
+			next.map(function(deferred) {
+				state == RESOLVED && deferred.resolve(promiseValue) || deferred.reject(promiseValue)
 			})
 		}
 
@@ -751,25 +756,6 @@ Mithril = m = new function app(window, undefined) {
 				}
 			})
 		}
-	}
-	function newPromisedProp(prop, promise) {
-		prop.then = function () {
-			var newProp = m.prop()
-			return newPromisedProp(newProp,
-				promise.then.apply(promise, arguments).then(newProp))
-		}
-		prop.promise = prop
-		prop.resolve = function (val) {
-			prop(val)
-			promise = promise.resolve.apply(promise, arguments)
-			return prop
-		}
-		prop.reject = function () {
-			promise = promise.reject.apply(promise, arguments)
-			return prop
-		}
-
-		return prop
 	}
 	function rethrowUnchecked(e) {
 		if (type.call(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
