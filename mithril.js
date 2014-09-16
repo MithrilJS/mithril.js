@@ -615,8 +615,8 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.deferred = function () {
-		var deferred = {}, resolve, reject
-		deferred.promise = propify(new Promise(function(a, b) {deferred.resolve = a, deferred.reject = b}))
+		var deferred = new Deferred()
+		deferred.promise = propify(deferred.promise)
 		return deferred
 	}
 	function propify(promise) {
@@ -627,12 +627,6 @@ Mithril = m = new function app(window, undefined) {
 		}
 		return prop
 	}
-
-	function Promise(executor) {
-		var deferred = new Deferred()
-		executor(deferred.resolve, deferred.reject)
-		return deferred.promise
-	}
 	//Promiz.mithril.js | Zolmeister | MIT
 	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
 	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
@@ -641,7 +635,7 @@ Mithril = m = new function app(window, undefined) {
 		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4
 		var self = this, state = 0, promiseValue = 0, next = []
 
-		self["promise"] = m.prop()
+		self["promise"] = {}
 
 		self["resolve"] = function(value) {
 			if (!state) {
@@ -676,7 +670,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			return deferred.promise
 		}
-
+		
 		function finish(type) {
 			state = type || REJECTED
 			next.map(function(deferred) {
