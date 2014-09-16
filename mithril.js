@@ -118,7 +118,7 @@ Mithril = m = new function app(window, undefined) {
 							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
 							else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i]})
+						else unkeyed.push({index: i, element: parentElement.childNodes[i] || window.document.createElement("div")})
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})

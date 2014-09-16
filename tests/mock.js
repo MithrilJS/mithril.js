@@ -15,7 +15,11 @@ mock.window = new function() {
 			insertBefore: function(node, reference) {
 				node.parentNode = this
 				var referenceIndex = this.childNodes.indexOf(reference)
-				if (referenceIndex < 0) this.childNodes.push(node)
+				if (referenceIndex < 0) {
+					var index = this.childNodes.indexOf(node)
+					if (index > -1) this.childNodes.splice(index, 1) 
+					this.childNodes.push(node)
+				}
 				else {
 					var index = this.childNodes.indexOf(node)
 					if (index > -1) this.childNodes.splice(index, 1)

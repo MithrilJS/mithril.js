@@ -585,6 +585,17 @@ function testMithril(mock) {
 		return firstBefore === firstAfter && secondBefore === secondAfter && thirdBefore === thirdAfter && fourthBefore === fourthAfter && fifthBefore === fifthAfter
 	})
 	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/246
+		//insert at beginning with non-keyed in the middle
+		var root = mock.document.createElement("div")
+		m.render(root, [m("a", {key: 1})])
+		var firstBefore = root.childNodes[0]
+		m.render(root, [m("a", {key: 2}), m("br"), m("a", {key: 1})])
+		var firstAfter = root.childNodes[2]
+		console.log(root.childNodes)
+		return firstBefore == firstAfter && root.childNodes[0].key == 2 && root.childNodes.length == 3
+	})
+	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/134
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", {contenteditable: true}, "test"))

@@ -13,6 +13,7 @@
 
 -	gracefully degrade on IE exceptions when setting invalid values
 -	fixes for Typescript definition file
+-	fixed bug in keys algorithm when mixing keyed and unkeyed elements [#246](https://github.com/lhorie/mithril.js/issues/246)
 
 ---
 
