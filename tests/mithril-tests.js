@@ -592,7 +592,6 @@ function testMithril(mock) {
 		var firstBefore = root.childNodes[0]
 		m.render(root, [m("a", {key: 2}), m("br"), m("a", {key: 1})])
 		var firstAfter = root.childNodes[2]
-		console.log(root.childNodes)
 		return firstBefore == firstAfter && root.childNodes[0].key == 2 && root.childNodes.length == 3
 	})
 	test(function() {

@@ -74,6 +74,71 @@ The reason Mithril waits for all asynchronous services to complete before redraw
 
 It's possible to opt out of the redrawing schedule by using the `background` option for `m.request`, or by simply not calling `m.startComputation` / `m.endComputation` when calling non-Mithril asynchronous functions.
 
+```javascript
+//`background` option example
+var module = {}
+module.controller = function() {
+	//setting `background` allows the module to redraw immediately, without waiting for the request to complete
+	m.request({method: "GET", url: "/foo", background: true})
+}
+```
+
+It's also possible to modify the strategy that Mithril uses for any given redraw, by using [`m.redraw.strategy`](mithril.redraw.md#changing-redraw-strategy). Note that changing the redraw strategy only affects the next scheduled redraw. After that, Mithril resets the `m.redraw.strategy` flag to either "all" or "diff" depending on whether the redraw was due to a route change or whether it was triggered by some other action.
+
+```javascript
+//diff when routing, instead of redrawing from scratch
+//this preserves the `<input>` element and its 3rd party plugin after route changes, since the `<input>` doesn't change
+var module1 = {}
+module1.controller = function() {
+	m.redraw.strategy("diff")
+}
+module1.view = function() {
+	return [
+		m("h1", "Hello Foo"),
+		m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+	]
+}
+
+var module2 = {}
+module2.controller = function() {
+	m.redraw.strategy("diff")
+}
+module2.view = function() {
+	return [
+		m("h1", "Hello Bar"),
+		m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+	]
+}
+
+m.route(document.body, "/foo", {
+	"/foo": module1,
+	"/bar": module2,
+})
+```
+
+```javascript
+//model
+var saved = false
+function save(e) {
+	if (e.keyCode == 13) {
+		//this causes a redraw, since event handlers active auto-redrawing by default
+		saved = true
+	}
+	else {
+		//we don't care about other keys, so don't redraw
+		m.redraw.strategy("none")
+	}
+}
+
+//view
+var view = function() {
+	return [
+		m("button[type=button]", {onkeypress: save}, "Save"),
+		saved ? "Saved" : ""
+	]
+}
+```
+
 ---
 
 ### Integrating multiple execution threads
