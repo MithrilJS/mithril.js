@@ -93,8 +93,11 @@ mock.window = new function() {
 	}
 	window.requestAnimationFrame.$id = 1
 	window.requestAnimationFrame.$resolve = function() {
-		if (window.requestAnimationFrame.$callback) window.requestAnimationFrame.$callback()
-		window.requestAnimationFrame.$callback = null
+		if (window.requestAnimationFrame.$callback) {
+			var callback = window.requestAnimationFrame.$callback
+			window.requestAnimationFrame.$callback = null
+			callback()
+		}
 	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {
