@@ -465,11 +465,11 @@ Mithril = m = new function app(window, undefined) {
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId && force !== true) {
 			cancel(lastRedrawId)
-			lastRedrawId = defer(redraw, 0)
+			lastRedrawId = defer(redraw, 16) //60 frames per second = 1 call per 16 ms
 		}
 		else {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
+			lastRedrawId = defer(function() {lastRedrawId = null}, 16)
 		}
 	}
 	m.redraw.strategy = m.prop()
