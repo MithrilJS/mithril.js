@@ -439,7 +439,7 @@ Mithril = m = new function app(window, undefined) {
 		return _prop(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
+	var roots = [], modules = [], controllers = [], lastRedrawId = 0, redrawAgain = false, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
@@ -464,12 +464,19 @@ Mithril = m = new function app(window, undefined) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId && force !== true) {
-			cancel(lastRedrawId)
-			lastRedrawId = defer(redraw, 16) //60 frames per second = 1 call per 16 ms
+			redrawAgain = true
 		}
 		else {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, 16)
+			lastRedrawId = defer(delay, 16) //60 frames per second = 1 call per 16 ms
+		}
+
+		function delay() {
+			lastRedrawId = null
+			if (redrawAgain) {
+				redrawAgain = false
+				m.redraw()
+			}
 		}
 	}
 	m.redraw.strategy = m.prop()
