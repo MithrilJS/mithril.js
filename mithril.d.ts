@@ -20,6 +20,7 @@ interface MithrilStatic {
 	sync(promises: MithrilPromise[]): MithrilPromise;
 	startComputation(): void;
 	endComputation(): void;
+	deps(window: any): any;
 }
 
 interface MithrilVirtualElement {
