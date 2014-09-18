@@ -65,6 +65,8 @@ You can use polyfill libraries to support these features in IE7.
 
 -	[JSON2.js](https://github.com/douglascrockford/JSON-js/blob/master/json2.js)
 
+Alternatively, you can include [this polyfill service](https://polyfill.io/readable/gimme(array.prototype.indexof,object.keys,function.prototype.bind,array.prototype.foreach,JSON))
+
 Mithril also has a dependency on XMLHttpRequest. If you wish to support IE6, you'll need [a shim for it](https://gist.github.com/Contra/2709462). IE7 and lower do not support cross-domain AJAX requests.
 
 In addition, note that most `m.route` modes rely on `history.pushState` in order to allow moving from one page to another without a browser refresh. [IE9 and lower](http://caniuse.com/#search=pushstate) do not support this feature and will gracefully degrade to page refreshes instead.
