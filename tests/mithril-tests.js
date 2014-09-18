@@ -1525,6 +1525,38 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //teardown
 		return mock.location.search == "?/test23/" && root.childNodes[0].nodeValue === "bar"
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var value
+		m.route(root, String("/foo+bar"), {
+			"/:arg": {
+				controller: function() {value = m.route.param("arg")},
+				view: function(ctrl) {
+					return ""
+				}
+			}
+		})
+		return value == "foo+bar"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var value
+		m.route(root, new String("/foo+bar"), {
+			"/:arg": {
+				controller: function() {value = m.route.param("arg")},
+				view: function(ctrl) {
+					return ""
+				}
+			}
+		})
+		return value == "foo+bar"
+	})
 	//end m.route
 
 	//m.prop

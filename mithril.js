@@ -517,7 +517,7 @@ Mithril = m = new function app(window, undefined) {
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
-		else if (arguments.length === 3 && typeof arguments[1] == "string") {
+		else if (arguments.length === 3 && isStr(arguments[1])) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source)
