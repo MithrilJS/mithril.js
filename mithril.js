@@ -1,9 +1,10 @@
 Mithril = m = new function app(window, undefined) {
-	var sObj = "[object Object]", sArr = "[object Array]";
+	var sObj = "[object Object]", sArr = "[object Array]", sStr = "[object String]"
 	function type(obj) {return {}.toString.call(obj)}
 	function isObj(obj) {return type(obj) == sObj}
 	function isArr(obj) {return type(obj) == sArr}
 	function isFn(obj) {return typeof obj == "function"}
+	function isStr(obj){ return type(obj) == sStr}
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TR‌​ACK|WBR/
 
@@ -544,7 +545,7 @@ Mithril = m = new function app(window, undefined) {
 				element.addEventListener("click", routeUnobtrusive)
 			}
 		}
-		else if (typeof arguments[0] == "string") {
+		else if (isStr(arguments[0])) {
 			currentRoute = arguments[0]
 			var querystring = isObj(arguments[1]) ? buildQueryString(arguments[1]) : null
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
