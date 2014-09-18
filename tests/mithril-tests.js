@@ -1454,6 +1454,7 @@ function testMithril(mock) {
 			}
 		})
 		root.childNodes[0].onclick({})
+		mock.requestAnimationFrame.$resolve() //teardown
 		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
 	})
 	test(function() {
