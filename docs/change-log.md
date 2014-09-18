@@ -8,6 +8,7 @@
 -	there is more documentation for things that weren't that clear
 -	json-p support added
 -	`m()` now supports splat for children (e.g. `m("div", m("a"), m("b"), m("i"))` for nicer Coffeescript syntax
+-	by popular demand, `m.module` now returns a controller instance
 
 ### Bug Fixes:
 

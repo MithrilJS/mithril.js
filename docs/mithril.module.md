@@ -181,5 +181,6 @@ where:
 
 	Components are nothing more than decoupled classes that can be dynamically brought together as required. This permits the swapping of implementations at a routing level (for example, if implementing widgetized versions of existing components), and class dependency hierarchies can be structurally organized to provide uniform interfaces (for unit tests, for example).
 
+-	**returns Object controllerInstance**
 
-
+	An instance of the controller constructor
