@@ -510,14 +510,19 @@ Mithril = m = new function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"}
-	var redirect = function() {}, routeParams = {}, currentRoute
+	var redirect = function() {}, routeParams = {}, router = {_map: {},_count: 0}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
 		else if (arguments.length === 3 && typeof arguments[1] == "string") {
-			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
+			var root = arguments[0], defaultRoute = arguments[1], routes = arguments[2], path, i
+			for (path in routes) {
+				router[path] = router[path] || []
+				i = router._map[path] = router._map[path] || ++router._count
+				router[path][i] = {root: root, module: routes[path]}
+			}
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source)
-				if (!routeByValue(root, router, path)) {
+				if (!routeByValue(path)) {
 					m.route(defaultRoute, true)
 				}
 			}
@@ -558,11 +563,14 @@ Mithril = m = new function app(window, undefined) {
 			else window.location[m.route.mode] = currentRoute
 		}
 	}
-	m.route.clear = function() {redirect = function() {}}
+	m.route.clear = function() {
+		redirect = function() {}
+		router = {_map: {},_count: 0}
+	}
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
-	function routeByValue(root, router, path) {
+	function routeByValue(path) {
 		routeParams = {}
 
 		var queryStart = path.indexOf("?")
@@ -573,7 +581,7 @@ Mithril = m = new function app(window, undefined) {
 
 		for (var route in router) {
 			if (route == path) {
-				m.module(root, router[route])
+				router[route].forEach(function(route) {m.module(route.root, route.module)})
 				return true
 			}
 
@@ -584,7 +592,7 @@ Mithril = m = new function app(window, undefined) {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
 					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-					m.module(root, router[route])
+					router[route].forEach(function(route) {m.module(route.root, route.module)})
 				})
 				return true
 			}
