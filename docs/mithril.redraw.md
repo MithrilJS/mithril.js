@@ -145,9 +145,10 @@ Normally, you should only do this if you need to synchronously read a value from
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void redraw([Boolean forceSync]) { GetterSetter strategy }
+RequestID redraw([Boolean forceSync]) { GetterSetter strategy }
 
 where:
+	RequestID :: Number getter()
 	GetterSetter :: String getterSetter([String value])
 ```
 
@@ -170,3 +171,11 @@ where:
 	This value can be programmatically changed in controllers and event handlers to modify the next redrawing strategy. It is modified internally by Mithril to the value `"all"` before running controller constructors, and to the value `"diff"` after all redraws.
 
 	Calling this function without arguments returns the currently assigned redraw strategy.
+
+-	**returns RequestId**
+
+	A getter method.
+
+-	**returns Number value**
+
+		This method returns the value of the `requestID` or `timeoutID` for the next render. If no render is queued, it will return 0.
