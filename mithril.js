@@ -194,7 +194,7 @@ Mithril = m = new function app(window, undefined) {
 				clear(cached.nodes)
 				if (cached.configContext && isFn(cached.configContext.onunload)) cached.configContext.onunload()
 			}
-			if (typeof data.tag != "string") return
+			if (!isStr(data.tag)) return
 
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns

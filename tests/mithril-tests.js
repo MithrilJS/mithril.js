@@ -156,6 +156,18 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{tag: "b", attrs: {}}]))
+		return root.childNodes[0].childNodes[0].nodeName == "B"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{tag: new String("b"), attrs: {}}]))
+		return root.childNodes[0].childNodes[0].nodeName == "B"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li", [m("a")])]))
 		m.render(root, m("ul", [{subtree: "retain"}]))
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
