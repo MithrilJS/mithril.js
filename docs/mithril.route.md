@@ -250,6 +250,13 @@ where:
 	-	**returns String value**
 	
 		The value that maps to the parameter specified by `key`
+-	<a name="clear"></a>
+
+	#### m.route.clear
+	
+	**void clear()**
+	
+	`m.route.clear` will clear all routes, including the default path. Although it can be used to dynamically change routes while an application is running, its intended use is for clearing routes between tests in a testing suite.
 
 ---
 
