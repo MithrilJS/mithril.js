@@ -558,6 +558,7 @@ Mithril = m = new function app(window, undefined) {
 			else window.location[m.route.mode] = currentRoute
 		}
 	}
+	m.route.clear = function() {redirect = function() {}}
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
