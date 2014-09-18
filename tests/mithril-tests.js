@@ -784,6 +784,15 @@ function testMithril(mock) {
 		m.render(root, [m("div.green", [m("div")]), m("div.blue")])
 		return root.childNodes.length == 2
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		var change = function() {
+			m.render(root, m("ul", arguments))
+		}
+		change(m("b"));
+		return root.childNodes[0].childNodes[0].nodeName == "B"
+	})
 	//end m.render
 
 	//m.redraw

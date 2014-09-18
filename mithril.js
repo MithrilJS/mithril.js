@@ -22,7 +22,8 @@ Mithril = m = new function app(window, undefined) {
 	 *
 	 */
 	function m() {
-		var args = Array.prototype.slice.call(arguments, 0)
+		var arrSlice = Array.prototype.slice;
+		var args = arrSlice.call(arguments, 0)
 		var hasAttrs = args[1] != null && isObj(args[1]) && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
@@ -41,8 +42,8 @@ Mithril = m = new function app(window, undefined) {
 
 
 		var children = hasAttrs ? args[2] : args[1]
-		if (children instanceof Array) {
-			cell.children = children
+		if (isArr(children) || type(children) == "[object Arguments]") {
+			cell.children = arrSlice.call(children, 0)
 		}
 		else {
 			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
