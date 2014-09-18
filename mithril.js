@@ -510,14 +510,14 @@ Mithril = m = new function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"}
-	var redirect = function() {}, routeParams = {}, router = {_map: {},_count: 0}, currentRoute
+	var redirect = function() {}, routeParams = {}, router = {}, map = {}, count = 0, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
 		else if (arguments.length === 3 && typeof arguments[1] == "string") {
 			var root = arguments[0], defaultRoute = arguments[1], routes = arguments[2], path, i
 			for (path in routes) {
 				router[path] = router[path] || []
-				i = router._map[path] = router._map[path] || ++router._count
+				i = map[path] = map[path] || ++count
 				router[path][i] = {root: root, module: routes[path]}
 			}
 			redirect = function(source) {
@@ -563,10 +563,7 @@ Mithril = m = new function app(window, undefined) {
 			else window.location[m.route.mode] = currentRoute
 		}
 	}
-	m.route.clear = function() {
-		redirect = function() {}
-		router = {_map: {},_count: 0}
-	}
+	m.route.clear = function() {redirect = function() {}, map = {}, count = 0}
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
