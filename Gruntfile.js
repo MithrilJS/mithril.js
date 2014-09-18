@@ -37,6 +37,7 @@ module.exports = function(grunt) {
 		"mithril.prop",
 		"mithril.redraw",
 		"mithril.render",
+		"mithril.deps",
 		"mithril.request",
 		"mithril.route",
 		"mithril.sync",
