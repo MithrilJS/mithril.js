@@ -59,13 +59,16 @@ You can use it by adding a reference to your Typescript files. This will allow t
 
 Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Array::map` and `Object::keys`, as well as the `JSON` object.
 
-You can use polyfill libraries to support these features in IE7.
+The easiest way to polyfill these features is to include this script:
+```markup
+<script src="https://polyfill.io/readable/gimme(array.prototype.indexof,object.keys,function.prototype.bind,array.prototype.foreach,JSON)"></script>
+```
+
+You can also use other polyfills to support these features in IE7.
 
 -	[ES5 Shim](https://github.com/es-shims/es5-shim) or Mozilla.org's [Array::indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf), [Array::map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) and [Object::keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
 
 -	[JSON2.js](https://github.com/douglascrockford/JSON-js/blob/master/json2.js)
-
-Alternatively, you can include [this polyfill service](https://polyfill.io/readable/gimme(array.prototype.indexof,object.keys,function.prototype.bind,array.prototype.foreach,JSON))
 
 Mithril also has a dependency on XMLHttpRequest. If you wish to support IE6, you'll need [a shim for it](https://gist.github.com/Contra/2709462). IE7 and lower do not support cross-domain AJAX requests.
 
