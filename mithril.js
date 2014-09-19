@@ -474,7 +474,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 		else {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, delay)
+			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
 	}
 	m.redraw.strategy = m.prop()
