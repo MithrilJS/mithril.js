@@ -359,7 +359,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 		return flattened
 	}
-	function autoredraw(callback, object, group) {
+	function autoredraw(callback, object) {
 		return function(e) {
 			e = e || event
 			m.redraw.strategy("diff")
