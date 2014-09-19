@@ -840,6 +840,7 @@ function testMithril(mock) {
 			"/test1": {controller: function() {}, view: function() {return "foo"}}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test1" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
@@ -852,6 +853,7 @@ function testMithril(mock) {
 			"/test2": {controller: function() {}, view: function() {return "foo"}}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.pathname == "/test2" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
@@ -864,6 +866,7 @@ function testMithril(mock) {
 			"/test3": {controller: function() {}, view: function() {return "foo"}}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.hash == "#/test3" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
@@ -876,6 +879,7 @@ function testMithril(mock) {
 			"/test4/:test": {controller: function() {}, view: function() {return m.route.param("test")}}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test4/foo" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
@@ -895,6 +899,7 @@ function testMithril(mock) {
 		m.route("/")
 		var paramValueAfter = m.route.param("test")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
@@ -914,6 +919,7 @@ function testMithril(mock) {
 		m.route("/")
 		var paramValueAfter = m.route.param("a1")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/" && paramValueBefore === "foo" && paramValueAfter === undefined
 	})
 	test(function() {
@@ -934,6 +940,7 @@ function testMithril(mock) {
 		m.route("/")
 		var routeValueAfter = m.route()
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return routeValueBefore === "/test7/foo" && routeValueAfter === "/"
 	})
 	test(function() {
@@ -951,6 +958,7 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test8/foo/SEP/bar/baz" && root.childNodes[0].nodeValue === "foo_bar/baz"
 	})
 	test(function() {
@@ -968,6 +976,7 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test9/foo/bar/SEP/baz" && root.childNodes[0].nodeValue === "foo/bar_baz"
 	})
 	test(function() {
@@ -985,6 +994,7 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return root.childNodes[0].nodeValue === "foo bar"
 	})
 	test(function() {
@@ -1000,6 +1010,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test11/")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test11/" && root.childNodes[0].nodeValue === "bar"
 	})
 	test(function() {
@@ -1015,6 +1026,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test12?a=foo&b=bar")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
 	})
 	test(function() {
@@ -1030,6 +1042,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test13/foo?test=bar")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test13/foo?test=bar" && root.childNodes[0].nodeValue === "foo"
 	})
 	test(function() {
@@ -1045,6 +1058,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === true && m.route.param("test2") === ""
 	})
 	test(function() {
@@ -1060,6 +1074,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test12", {a: "foo", b: "bar"})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return mock.location.search == "?/test12?a=foo&b=bar" && m.route.param("a") == "foo" && m.route.param("b") == "bar"
 	})
 	test(function() {
@@ -1076,6 +1091,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test13")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return route1 == "/" && route2 == "/test13"
 	})
 	test(function() {
@@ -1103,6 +1119,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1138,6 +1155,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test15")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1170,6 +1188,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test16")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1204,6 +1223,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test17")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1236,6 +1256,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test18")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1280,6 +1301,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test20")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1323,6 +1345,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test21")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1349,6 +1372,7 @@ function testMithril(mock) {
 		var foo = root.childNodes[0].childNodes[0].nodeValue;
 		m.route("/bar")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		var bar = root.childNodes[0].childNodes[0].nodeValue;
 		return (foo === "foo" && bar === "bar")
 	})
@@ -1381,6 +1405,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/bar1")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return unloaded == 1
 	})
 	test(function() {
@@ -1402,6 +1427,7 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return strategy == "all" && root.childNodes.length == 0
 	})
 	test(function() {
@@ -1432,6 +1458,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/bar1")
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return strategy == "all" && count == 1
 	})
 	test(function() {
@@ -1455,6 +1482,7 @@ function testMithril(mock) {
 		})
 		root.childNodes[0].onclick({})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
 	})
 	test(function() {
@@ -1477,6 +1505,7 @@ function testMithril(mock) {
 		})
 		root.childNodes[0].onclick({})
 		mock.requestAnimationFrame.$resolve() //teardown
+		m.route.clear()
 		return count == 2
 	})
 	test(function() {
