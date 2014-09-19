@@ -460,21 +460,20 @@ Mithril = m = new function app(window, undefined) {
 	m.redraw = function(force) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		var delay = new Date - lastRedrawCallTime
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawId is -1 if the redraw is the first one in a event handler (see #151)
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if (delay > FRAME_BUDGET || defer == window.requestAnimationFrame) {
+			if (defer == window.setTimeout && new Date - lastRedrawCallTime > FRAME_BUDGET) {
 				if (lastRedrawId > 0) cancel(lastRedrawId)
-				lastRedrawId = defer(redraw, delay)
+				lastRedrawId = defer(redraw, FRAME_BUDGET)
 			}
 		}
 		else {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, delay)
+			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
 	}
 	m.redraw.strategy = m.prop()
