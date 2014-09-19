@@ -509,35 +509,41 @@ Mithril = m = new function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"}
-	var redirect = function() {}, routeParams = {}, currentRoute
+	var redirect = noop, routeParams = {}, router = {}, routes = {}, defaultModules = {}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
-		else if (arguments.length === 3 && typeof arguments[1] == "string") {
-			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
-			redirect = function(source) {
-				var path = currentRoute = normalizeRoute(source)
-				if (!routeByValue(root, router, path)) {
-					m.route(defaultRoute, true)
+		if (arguments[0].nodeType) {
+			if (typeof arguments[1] == "object") {
+				var root = getCellCacheKey(arguments[0]), routeMap = arguments[1]
+				for (var route in routeMap) routes[route] = true
+				router[root] = routeMap
+				defaultModules[root] = arguments[2] || {controller: noop, view: noop}
+
+				var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
+				if (redirect === noop) {
+					redirect = function(source) {
+						var path = currentRoute = normalizeRoute(source)
+						routeByValue(path)
+					}
+					window[listener] = function() {
+						if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
+							redirect(window.location[m.route.mode])
+						}
+					}
+					computePostRedrawHook = setScroll
 				}
+				window[listener]()
 			}
-			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
-			window[listener] = function() {
-				if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
-					redirect(window.location[m.route.mode])
+			else if (arguments[0].addEventListener) {
+				var element = arguments[0]
+				var isInitialized = arguments[1]
+				if (element.href.indexOf(modes[m.route.mode]) < 0) {
+					element.href = window.location.pathname + modes[m.route.mode] + element.pathname
 				}
-			}
-			computePostRedrawHook = setScroll
-			window[listener]()
-		}
-		else if (arguments[0].addEventListener) {
-			var element = arguments[0]
-			var isInitialized = arguments[1]
-			if (element.href.indexOf(modes[m.route.mode]) < 0) {
-				element.href = window.location.pathname + modes[m.route.mode] + element.pathname
-			}
-			if (!isInitialized) {
-				element.removeEventListener("click", routeUnobtrusive)
-				element.addEventListener("click", routeUnobtrusive)
+				if (!isInitialized) {
+					element.removeEventListener("click", routeUnobtrusive)
+					element.addEventListener("click", routeUnobtrusive)
+				}
 			}
 		}
 		else if (typeof arguments[0] == "string") {
@@ -560,7 +566,7 @@ Mithril = m = new function app(window, undefined) {
 	m.route.param = function(key) {return routeParams[key]}
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
-	function routeByValue(root, router, path) {
+	function routeByValue(path) {
 		routeParams = {}
 
 		var queryStart = path.indexOf("?")
@@ -569,10 +575,10 @@ Mithril = m = new function app(window, undefined) {
 			path = path.substr(0, queryStart)
 		}
 
-		for (var route in router) {
+		for (var route in routes) {
 			if (route == path) {
-				m.module(root, router[route])
-				return true
+				renderRoute(route)
+				return
 			}
 
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
@@ -582,9 +588,20 @@ Mithril = m = new function app(window, undefined) {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
 					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-					m.module(root, router[route])
+					renderRoute(route)
 				})
-				return true
+				return
+			}
+		}
+
+		renderRoute()
+
+		function renderRoute(route) {
+			for (var root in router) {
+				module = arguments.length ?
+					router[root][route] || defaultModules[root] :
+					defaultModules[root]
+				m.module(nodeCache[root], module)
 			}
 		}
 	}
@@ -623,6 +640,7 @@ Mithril = m = new function app(window, undefined) {
 		clear(root.childNodes, cellCache[cacheKey])
 		cellCache[cacheKey] = undefined
 	}
+	function noop() {}
 
 	m.deferred = function () {
 		var deferred = new Deferred()
