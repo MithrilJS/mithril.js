@@ -225,6 +225,10 @@ where:
 
 	This method passes a value to the `errorCallback` of the deferred object's child promise
 
--	**static void onerror(Error e)**
+-	<a name="onerror"></a>
+
+	#### m.deferred.onerror
+
+	**void onerror(Error e)**
 
 	This method gets called every time an exception is thrown inside a promise callback. By default, it rethrows to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications.
