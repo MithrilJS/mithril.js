@@ -31,6 +31,10 @@ If you are developing an asynchronous model-level service and finding that Mithr
 
 If you need to change how Mithril performs redraws, you can change the value of the `m.redraw.strategy` getter-setter to either `"all"`, `"diff"` or `"none"`. By default, this value is set to `"all"` when running controller constructors, and it's set to `"diff"` for all subsequent redraws.
 
+The strategy flag is meant to only be changed in a context where Mithril auto-redraws. This means `m.redraw.strategy` can be called from controller constructors and from template event handlers. Note that changing this flag only affects the next scheduled redraw. 
+
+After the redraw, Mithril resets the value of the flag to either "all" or "diff", depending on whether the redraw was due to a route change or not.
+
 ```javascript
 var module1 = {}
 module1.controller = function() {
@@ -39,17 +43,72 @@ module1.controller = function() {
 	m.redraw.strategy("diff")
 }
 module1.view = function() {
-	return m("h1", {config: module1.config}, "test")
+	return m("h1", {config: module1.config}, "test") //assume all routes display the same thing
 }
 module1.config = function(el, isInit, ctx) {
-	if (!isInit) ctx.data = "foo"
+	if (!isInit) ctx.data = "foo" //we wish to initialize this only once, even if the route changes
 }
 ```
 
 Common reasons why one might need to change redraw strategy are:
 
-- in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components
-- in order to prevent redraw when dealing with `keypress` events where the event's keyCode is not of interest
+-	in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components
+
+	```javascript
+	//diff when routing, instead of redrawing from scratch
+	//this preserves the `<input>` element and its 3rd party plugin after route changes, since the `<input>` doesn't change
+	var module1 = {}
+	module1.controller = function() {
+		m.redraw.strategy("diff")
+	}
+	module1.view = function() {
+		return [
+			m("h1", "Hello Foo"),
+			m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+		]
+	}
+
+	var module2 = {}
+	module2.controller = function() {
+		m.redraw.strategy("diff")
+	}
+	module2.view = function() {
+		return [
+			m("h1", "Hello Bar"),
+			m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+		]
+	}
+
+	m.route(document.body, "/foo", {
+		"/foo": module1,
+		"/bar": module2,
+	})
+	```
+
+-	in order to prevent redraw when dealing with `keypress` events where the event's keyCode is not of interest
+
+	```javascript
+	//model
+	var saved = false
+	function save(e) {
+		if (e.keyCode == 13) {
+			//this causes a redraw, since event handlers active auto-redrawing by default
+			saved = true
+		}
+		else {
+			//we don't care about other keys, so don't redraw
+			m.redraw.strategy("none")
+		}
+	}
+
+	//view
+	var view = function() {
+		return [
+			m("button[type=button]", {onkeypress: save}, "Save"),
+			saved ? "Saved" : ""
+		]
+	}
+	```
 
 Note that the redraw strategy is a global setting that affects the entire template trees of all modules on the page. In order to prevent redraws in *some parts* of an application, but not others, see [subtree directives](mithril.render.md#subtree-directives)
 

@@ -1,5 +1,5 @@
 Mithril = m = new function app(window, undefined) {
-	var type = {}.toString
+	var type = function(obj) {return {}.toString.call(obj)}
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TR‌​ACK|WBR/
 
@@ -18,7 +18,7 @@ Mithril = m = new function app(window, undefined) {
 	 */
 	function m() {
 		var args = Array.prototype.slice.call(arguments, 0)
-		var hasAttrs = args[1] != null && type.call(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var hasAttrs = args[1] != null && type(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -78,7 +78,7 @@ Mithril = m = new function app(window, undefined) {
 		if (data == null) data = ""
 		if (data.subtree === "retain") return cached
 
-		var cachedType = type.call(cached), dataType = type.call(data)
+		var cachedType = type(cached), dataType = type(data)
 		if (cached == null || cachedType != dataType) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
@@ -160,7 +160,7 @@ Mithril = m = new function app(window, undefined) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
-				var isArray = type.call(item) == "[object Array]"
+				var isArray = type(item) == "[object Array]"
 				subArrayCount += isArray ? item.length : 1
 				cached[cacheCount++] = item
 			}
@@ -324,7 +324,7 @@ Mithril = m = new function app(window, undefined) {
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
 		if (cached.children) {
-			if (type.call(cached.children) == "[object Array]") {
+			if (type(cached.children) == "[object Array]") {
 				for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
 			}
 			else if (cached.children.tag) unload(cached.children)
@@ -354,7 +354,7 @@ Mithril = m = new function app(window, undefined) {
 		var flattened = []
 		for (var i = 0; i < data.length; i++) {
 			var item = data[i]
-			if (type.call(item) == "[object Array]") flattened.push.apply(flattened, flatten(item))
+			if (type(item) == "[object Array]") flattened.push.apply(flattened, flatten(item))
 			else flattened.push(item)
 		}
 		return flattened
@@ -435,7 +435,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = 0, computePostRedrawHook = null, prevented = false
+	var roots = [], modules = [], controllers = [], lastRedrawId = 0, redrawAgain = false, computePostRedrawHook = null, prevented = false
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
@@ -460,12 +460,19 @@ Mithril = m = new function app(window, undefined) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		if (lastRedrawId && force !== true) {
-			cancel(lastRedrawId)
-			lastRedrawId = defer(redraw, 0)
+			redrawAgain = true
 		}
 		else {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, 0)
+			lastRedrawId = defer(delay, 16) //60 frames per second = 1 call per 16 ms
+		}
+
+		function delay() {
+			lastRedrawId = null
+			if (redrawAgain) {
+				redrawAgain = false
+				m.redraw()
+			}
 		}
 	}
 	m.redraw.strategy = m.prop()
@@ -885,7 +892,7 @@ Mithril = m = new function app(window, undefined) {
 				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
 				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
 				if (e.type == "load") {
-					if (type.call(response) == "[object Array]" && xhrOptions.type) {
+					if (type(response) == "[object Array]" && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 					}
 					else if (xhrOptions.type) response = new xhrOptions.type(response)
@@ -893,8 +900,7 @@ Mithril = m = new function app(window, undefined) {
 				deferred[e.type == "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
-				if (e instanceof SyntaxError) throw new SyntaxError("Could not parse HTTP response. See http://lhorie.github.io/mithril/mithril.request.html#using-variable-data-formats")
-				else if (!rethrowUnchecked(e)) deferred.reject(e)
+				if (!rethrowUnchecked(e)) deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
 		}

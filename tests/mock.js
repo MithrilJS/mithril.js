@@ -15,16 +15,10 @@ mock.window = new function() {
 			insertBefore: function(node, reference) {
 				node.parentNode = this
 				var referenceIndex = this.childNodes.indexOf(reference)
-				if (referenceIndex < 0) {
-					var index = this.childNodes.indexOf(node)
-					if (index > -1) this.childNodes.splice(index, 1) 
-					this.childNodes.push(node)
-				}
-				else {
-					var index = this.childNodes.indexOf(node)
-					if (index > -1) this.childNodes.splice(index, 1)
-					this.childNodes.splice(referenceIndex, 0, node)
-				}
+				var index = this.childNodes.indexOf(node)
+				if (index > -1) this.childNodes.splice(index, 1)
+				if (referenceIndex < 0) this.childNodes.push(node)
+				else this.childNodes.splice(referenceIndex, 0, node)
 			},
 			insertAdjacentHTML: function(position, html) {
 				//todo: accept markup
@@ -99,8 +93,11 @@ mock.window = new function() {
 	}
 	window.requestAnimationFrame.$id = 1
 	window.requestAnimationFrame.$resolve = function() {
-		if (window.requestAnimationFrame.$callback) window.requestAnimationFrame.$callback()
-		window.requestAnimationFrame.$callback = null
+		if (window.requestAnimationFrame.$callback) {
+			var callback = window.requestAnimationFrame.$callback
+			window.requestAnimationFrame.$callback = null
+			callback()
+		}
 	}
 	window.XMLHttpRequest = new function() {
 		var request = function() {

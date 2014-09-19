@@ -69,10 +69,11 @@ m.request({method: "GET", url: "/users"})
 
 ### Third-party promise library support
 
-If a promise is passed into `m.prop()`, its value will populate the prop after resolution.  
+If a promise is passed into `m.prop()`, a Mithril promise is returned. Mithril promises are also getter-setter functions, which are populated with the resolved value if the promise is fulfilled successfully.
+
 Until the promise is resolved, the value of the prop will resolve to `undefined`
 
-Example using [Q](https://github.com/kriskowal/q)
+Here's an example using the [Q](https://github.com/kriskowal/q) promise library:
 
 ```javascript
 var deferred = Q.defer()
@@ -82,6 +83,9 @@ users() // undefined
 
 deferred.resolve("Hello")
 users() // Hello
+users.then(function(value) {
+	console.log(value) //Hello
+})
 ```
 
 ---
