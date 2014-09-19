@@ -15,6 +15,8 @@
 -	gracefully degrade on IE exceptions when setting invalid values
 -	fixes for Typescript definition file
 -	fixed bug in keys algorithm when mixing keyed and unkeyed elements [#246](https://github.com/lhorie/mithril.js/issues/246)
+-	added promise exception monitor and reverted promise exception handling semantics to v0.1.19 semantics (see [mithril.deferred.md#unchecked-error-handling]
+-	fixed redraw scheduling bug in old version of IE
 
 ---
 
