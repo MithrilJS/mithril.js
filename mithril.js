@@ -762,7 +762,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 	}
 	m.deferred.onerror = function(e) {
-		if (type.call(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
+		if (type(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
 	}
 
 	m.sync = function(args) {
