@@ -12,6 +12,7 @@
 [Using Different Data Transfer Formats](#using-different-data-transfer-formats)
 [Using variable data formats](#using-variable-data-formats)
 [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
+[Custom request rejections](#custom-request-rejections)
 [Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
 [Aborting a request](#aborting-a-request)
 [Signature](#signature)
@@ -280,6 +281,32 @@ var extract = function(xhr, xhrOptions) {
 
 m.request({method: "POST", url: "/foo", extract: extract});
 ```
+
+---
+
+### Custom request rejections
+
+If you want to be able to handle a condition as an error in a promise rejection handler, you can throw an `Error` from `extract` to reject the promise.
+
+This is useful, for example, if you received invalid JSON from the server in production and you want to display a message to the user saying that the server is offline.
+
+```javascript
+var extract = function(xhr, xhrOptions) {
+	try {
+		return JSON.stringify(xhr.responseText)
+	}
+	catch (e) {
+		//e instanceof SyntaxError == true
+		//by default `e` would be caught by Mithril's promise exception monitor and rethrown to the console
+		//this new error follows Promises/A+ specifications and triggers a rejection in the downstream promises without hitting the console.
+		throw new Error("Server is offline")
+	}
+}
+
+m.request({method: "POST", url: "/foo", extract: extract});
+```
+
+You can read more about the [promise exception monitor here](mithril.deferred.md#unchecked-error-handling).
 
 ---
 

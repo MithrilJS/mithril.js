@@ -703,7 +703,7 @@ Mithril = m = new function app(window, undefined) {
 					})
 				}
 				catch (e) {
-					rethrowUnchecked(e)
+					m.deferred.onerror(e)
 					promiseValue = e
 					failureCallback()
 				}
@@ -719,7 +719,7 @@ Mithril = m = new function app(window, undefined) {
 				then = promiseValue && promiseValue.then
 			}
 			catch (e) {
-				rethrowUnchecked(e)
+				m.deferred.onerror(e)
 				promiseValue = e
 				state = REJECTING
 				return fire()
@@ -741,7 +741,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 				}
 				catch (e) {
-					rethrowUnchecked(e)
+					m.deferred.onerror(e)
 					promiseValue = e
 					return finish()
 				}
@@ -760,7 +760,7 @@ Mithril = m = new function app(window, undefined) {
 			})
 		}
 	}
-	function rethrowUnchecked(e) {
+	m.deferred.onerror = function(e) {
 		if (type.call(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
 	}
 
@@ -902,7 +902,8 @@ Mithril = m = new function app(window, undefined) {
 				deferred[e.type == "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
-				if (!rethrowUnchecked(e)) deferred.reject(e)
+				m.deferred.onerror(e)
+				deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
 		}

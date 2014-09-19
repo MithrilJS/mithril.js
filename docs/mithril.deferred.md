@@ -6,6 +6,7 @@
 [Retrieving a value via the getter-setter API](#retrieving-a-value-via-the-getter-setter-api)
 [Integrating to the Mithril redrawing system](#integrating-to-the-mithril-redrawing-system)
 [Differences from Promises/A+](#differences-from-promises-a-)
+[The exception monitor](#the-exception-monitor)
 [Signature](#signature)
 
 ---
@@ -143,7 +144,7 @@ There are a couple of reasons why Mithril runs callbacks synchronously. Conformi
 
 #### Unchecked Error Handling
 
-Mithril does not swallow errors if these errors are subclasses of the Error class. Manually throwing an instance of the Error class itself (or any other objects or primitives) does trigger the rejection callback path as per the Promises/A+ spec.
+By default, Mithril does not swallow errors if these errors are subclasses of the Error class. Manually throwing an instance of the Error class itself (or any other objects or primitives) does trigger the rejection callback path as per the Promises/A+ spec.
 
 This deviation from the spec is there to make it easier for developers to find common logical errors such as typos that lead to null reference exceptions. By default, the spec requires that all thrown errors trigger rejection, which result in silent failures if the developer forgets to explicitly handle the failure case.
 
@@ -151,15 +152,24 @@ For example, there is simply never a case where a developer would want to progra
 
 The other side of the coin is still supported: if a developer needs to signal an exceptional condition within a promise callback, they can manually throw a `new Error` (for example, if a validation rule failed, and there should be an error message displayed to the user).
 
+Note that the default promise exception handling semantics can be modified. See the next section.
+
 ---
 
-### Replacing the built-in Promise implementation
+### The exception monitor
 
-If strict adherence to the Promises/A+ spec is required, Mithril allows its built-in implementation to be swapped out. Here's how one would configure Mithril to use the ES6 Promise class that ships with Chrome and Firefox:
+Any time an exception is thrown inside a promise callback, Mithril calls `m.deferred.onerror(e)`.
 
-```javascript
-//use ES6 Promises as the promise engine
-m.deferred.constructor = Promise
+By default, this event handler rethrows the exception to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications. It does this because developers expect unexpected errors like null reference exceptions to be thrown to the console for debugging purposes, and these errors are always subclasses of Error. On the other hand, javascript developers rarely ever throw errors that are subclasses of Error.
+
+The `onerror` function can be safely replaced if the default error monitoring semantics are not desired.
+
+```
+//swallow all errors
+m.deferred.onerror = function() {}
+
+//only log errors
+m.deferred.onerror = function(e) {console.error(e)}
 ```
 
 ---
@@ -169,7 +179,7 @@ m.deferred.constructor = Promise
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-Deferred deferred()
+Deferred deferred() {void onerror(Error e)}
 
 where:
 	Deferred :: Object { Promise promise, void resolve(any value), void reject(any value) }
@@ -214,3 +224,7 @@ where:
 -	**void reject(any value)**
 
 	This method passes a value to the `errorCallback` of the deferred object's child promise
+
+-	**static void onerror(Error e)**
+
+	This method gets called every time an exception is thrown inside a promise callback. By default, it rethrows to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications.
