@@ -466,7 +466,7 @@ Mithril = m = new function app(window, undefined) {
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if (defer == window.setTimeout && new Date - lastRedrawCallTime > FRAME_BUDGET) {
+			if (new Date - lastRedrawCallTime > FRAME_BUDGET || defer == window.requestAnimationFrame) {
 				if (lastRedrawId > 0) cancel(lastRedrawId)
 				lastRedrawId = defer(redraw, FRAME_BUDGET)
 			}
