@@ -366,7 +366,6 @@ Mithril = m = new function app(window, undefined) {
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
-				if (!lastRedrawId) lastRedrawId = -1 //force asynchronous redraw for event handlers, to prevent double redraw in cases like onkeypress+oninput
 				m.endComputation()
 			}
 		}
@@ -432,7 +431,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = 0, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false
 	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -457,20 +456,16 @@ Mithril = m = new function app(window, undefined) {
 	m.redraw = function(force) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
-		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
-		//lastRedrawId is -1 if the redraw is the first one in a event handler (see #151)
-		//lastRedrawID is null if it's the first redraw and not an event handler
-		if (lastRedrawId && force !== true) {
-			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
-			//when rAF: always reschedule redraw
-			if (new Date - lastRedrawCallTime > FRAME_BUDGET || defer == window.requestAnimationFrame) {
-				if (lastRedrawId > 0) cancel(lastRedrawId)
-				lastRedrawId = defer(redraw, FRAME_BUDGET)
-			}
+
+		if (lastRedrawId) {
+			cancel(lastRedrawId);
+			lastRedrawId = null;
 		}
-		else {
+
+		if (force) {
 			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
+		} else {
+			lastRedrawId = defer(redraw, FRAME_BUDGET);
 		}
 	}
 	m.redraw.strategy = m.prop()
@@ -483,8 +478,6 @@ Mithril = m = new function app(window, undefined) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
-		lastRedrawId = null
-		lastRedrawCallTime = new Date
 		m.redraw.strategy("diff")
 	}
 
