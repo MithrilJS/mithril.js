@@ -20,6 +20,7 @@ Once you have a [copy of Mithril](installation.md), getting started is surprisin
 
 ```markup
 <!doctype html>
+<title>Todo app</title>
 <script src="mithril.js"></script>
 <script>
 //app goes here
