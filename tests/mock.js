@@ -68,6 +68,7 @@ mock.window = new function() {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
+	//getElementsByTagName is only used by JSONP tests, it's not required by Mithril
 	window.document.getElementsByTagName = function(name){
 		name = name.toLowerCase();
 		var out = [];
