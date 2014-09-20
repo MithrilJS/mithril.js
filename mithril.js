@@ -380,12 +380,10 @@ Mithril = m = new function app(window, undefined) {
 		},
 		appendChild: function(node) {
 			if (html === undefined) html = window.document.createElement("html")
-			if (node.nodeName == "HTML") html = node
-			else html.appendChild(node)
-			if (window.document.documentElement && window.document.documentElement !== html) {
-				window.document.replaceChild(html, window.document.documentElement)
+			if (window.document.documentElement && window.document.documentElement !== node) {
+				window.document.replaceChild(node, window.document.documentElement)
 			}
-			else window.document.appendChild(html)
+			else window.document.appendChild(node)
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)
@@ -397,7 +395,9 @@ Mithril = m = new function app(window, undefined) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var id = getCellCacheKey(root)
-		var node = root == window.document || root == window.document.documentElement ? documentNode : root
+		var isDocumentRoot = root == window.document
+		var node = isDocumentRoot || root == window.document.documentElement ? documentNode : root
+		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell}
 		if (cellCache[id] === undefined) clear(node.childNodes)
 		if (forceRecreation === true) reset(root)
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
