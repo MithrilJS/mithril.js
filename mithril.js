@@ -374,16 +374,13 @@ Mithril = m = new function app(window, undefined) {
 
 	var html
 	var documentNode = {
-		insertAdjacentHTML: function(_, data) {
-			window.document.write(data)
-			window.document.close()
-		},
 		appendChild: function(node) {
 			if (html === undefined) html = window.document.createElement("html")
 			if (window.document.documentElement && window.document.documentElement !== node) {
 				window.document.replaceChild(node, window.document.documentElement)
 			}
 			else window.document.appendChild(node)
+			this.childNodes = window.document.childNodes
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)
