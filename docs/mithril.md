@@ -9,6 +9,7 @@
 [Destructors](#destructors)
 [SVG](#svg)
 [Dealing with focus](#dealing-with-focus)
+[Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
 [Signature](#signature)
 
 ---
@@ -318,6 +319,24 @@ m("li", selected ? {class: "active"} : {})
 //use this idiom instead
 m("li", {class: selected ? "active" : ""})
 ```
+
+---
+
+### Dealing with sorting and deleting in lists
+
+As with input focus, we can maintain referential integrity between data in a list and the respective DOM representation by using keys.
+
+```javascript
+m("ul", [
+	ctrl.items.map(function(item) {
+		return m("li", {key: item.id}, [
+			m("input")
+		]);
+	})
+]);
+```
+
+You should always use keys if you need to sort lists, remove items from them or splice them in any way.
 
 ---
 

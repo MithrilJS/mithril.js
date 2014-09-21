@@ -104,3 +104,9 @@ If you call this method more often than that, Mithril may ignore calls or defer 
 If calls are more expensive than a repaint window, the browser may drop frames, resulting in choppy animations. It's your responsibility to make sure single iterations of animation rendering code don't take longer than 16ms (for a frequency of 60 frames-per-second).
 
 In addition, note that template performance, both in Mithril templates as well as in general, is dependent on markup complexity. You are responsible for ensuring that templates aren't too big to render efficiently.
+
+---
+
+## Usage of keys
+
+If you need to sort lists, or delete items from them, or splice them in any way, you should [use the `key` attribute](mithril.md#dealing-with-sorting-and-deleting-in-lists) to maintain referential integrity between the data and the DOM.

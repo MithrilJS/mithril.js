@@ -29,11 +29,17 @@ If you are developing an asynchronous model-level service and finding that Mithr
 
 ### Changing redraw strategy
 
-If you need to change how Mithril performs redraws, you can change the value of the `m.redraw.strategy` getter-setter to either `"all"`, `"diff"` or `"none"`. By default, this value is set to `"all"` when running controller constructors, and it's set to `"diff"` for all subsequent redraws.
-
-The strategy flag is meant to only be changed in a context where Mithril auto-redraws. This means `m.redraw.strategy` can be called from controller constructors and from template event handlers. Note that changing this flag only affects the next scheduled redraw. 
+If you need to change how Mithril performs a redraw, you can change the value of the `m.redraw.strategy` getter-setter to either `"all"`, `"diff"` or `"none"`. The new strategy will apply to the next scheduled redraw, if any. By default, Mithril sets this value to `"all"` before running controller constructors, and it sets it to `"diff"` before event handlers are triggered.
 
 After the redraw, Mithril resets the value of the flag to either "all" or "diff", depending on whether the redraw was due to a route change or not.
+
+Changing the flag outside of a redrawable context does nothing since the flag gets reset when entering one of the documented redrawable contexts above.
+
+When the flag is set to "all", Mithril throws away the current view and redraws from scratch. This is the default for going from one route to another.
+
+When the flag is set to "diff", Mithril performs a diff between the old view and the new view and applies patches to the DOM only where needed.
+
+When the flag is set to "none", Mithril skips the next redraw. You don't need to change this flag to something else again later, since Mithril does that for you.
 
 ```javascript
 var module1 = {}

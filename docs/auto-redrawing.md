@@ -1,8 +1,24 @@
-## Integrating with The Auto-Redrawing System
+## The Auto-Redrawing System
+
+Mithril is designed around the principle that data always flows from the model to the view. This makes it easy to reason about the state of the UI and to test it. In order to implement this principle, the rendering engine must run a redraw algorithm globally to ensure no parts of the UI are out of sync with the data. While at first glance, it may seem expensive to run a global redraw every time data changes, Mithril makes it possible to do this efficiently thanks to its fast diffing algorithm, which only updates the DOM where it needs to be updated. Because the DOM is by far the largest bottleneck in rendering engines, Mithril's approach of running a diff against a virtual representation of the DOM and only batching changes to the real DOM as needed is surprisingly performant.
+
+In addition, Mithril attempts to intelligently redraw only when it is appropriate in an application lifecycle. Most frameworks redraw aggressively and err on the side of redrawing too many times because, as it turns out, determining the best time to do a redraw is quite complicated if we want to be as efficient as possible.
+
+Mithril employs a variety of mechanisms to decide the best time and the best strategy to redraw. By default, Mithril is configured to auto-redraw from scratch after module controllers are initialized, and it is configured to diff after event handlers are triggered. In addition, it's possible for non-Mithril asynchronous callbacks to trigger auto-redrawing by calling `m.startComputation` and `m.endComputation` in appropriate places (see below). Any code that is between a `m.startComputation` and its respective `m.endComputation` call is said to live in the *context* of its respective pair of function calls.
+
+It's possible to defer a redraw by calling `m.request` or by manually nesting [`m.startComputation` and `m.endComputation`](mithril.computation.md) contexts. The way the redrawing engine defers redrawing is by keeping an internal counter that is incremented by `m.startComputation` and decremented by `m.endComputation`. Once that counter reaches zero, Mithril redraws. By strategically placing calls to this pair of functions, it is possible to stack asynchronous data services in any number of ways within a context without the need to pass state variables around the entire application. The end result is that you can call `m.request` and other integrated data services seamlessly, and Mithril will wait for all of the asynchronous operations to complete before attempting to redraw.
+
+In addition to being aware of data availability when deciding to redraw, Mithril is also aware of browser availability: if several redraws are triggered in a short amount of time, Mithril batches them so that at most only one redraw happens within a single animation frame (around 16ms). Since computer screens are not able to display changes faster than a frame, this optimization saves CPU cycles and helps UIs stay responsive even in the face of spammy data changes.
+
+Mithril also provides several hooks to control its redrawing behavior with a deep level of granularity: [`m.startComputation` and `m.endComputation`](mithril.computation.md) create redrawable contexts. [`m.redraw`](mithril.redraw.md) forces a redraw to happen in the next available frame (or optionally, it can redraw immediately for synchronous processing). [`m.redraw.strategy`](mithril.redraw.md#strategy) can change the way Mithril runs the next scheduled redraw. Finally, the low-level [`m.render`](mithril.render.md) can also be used if a developer chooses to opt out of rest of the framework altogether.
+
+---
+
+### Integrating with The Auto-Redrawing System
 
 If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, or that you're being forced to call [`m.redraw`](mithril.redraw.md) manually, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
 
-In order to integrate asynchronous code to Mithril's autoredrawing system, you should call `m.startComputation` BEFORE making an asynchronous call, and `m.endComputation` after the asynchronous callback completes.
+In order to integrate asynchronous code to Mithril's autoredrawing system, you should call `m.startComputation` BEFORE making an asynchronous call, and `m.endComputation` at the end of the asynchronous callback.
 
 ```javascript
 //this service waits 1 second, logs "hello" and then notifies the view that
