@@ -3,6 +3,7 @@
 ---
 
 [Usage](#usage)
+[Binding to data](#binding-to-data)
 [Using HTML entities](#using-html-entities)
 [Accessing the real DOM element](#accessing-the-real-dom-element)
 [Persisting config data](#persisting-config-data)
@@ -168,6 +169,39 @@ m("div[style='text-align:center']"); //yields <div style="text-align:center;"></
 ```
 
 One caveat of using the CSS syntax is that it clobbers the `style` attribute in the DOM element on redraws, so this syntax is not appropriate if you need to use it in conjunction with 3rd party tools that modify the element's style outside of Mithril's templates (e.g. via `config`, which is explained below)
+
+---
+
+### Binding to data
+
+In order to stay flexible, Mithril doesn't provide helpers for bi-directional bindings out of the box. However, bindings can be implemented easily:
+
+```javascript
+//a data store
+var name = m.prop("")
+
+//binding the data store in a view
+m("input", {oninput: m.withAttr("value", name), value: name()})
+```
+
+In the code above, the `oninput` event handler updates the `name` getter-setter, and the Mithril auto-redrawing system redraws the template in order to update the displayed value. You can read more about the [`m.prop` getter-setter utility here](mithril.prop.md) and the [`m.withAttr` event handler factory here](mithril.withattr.md). You can also [learn how the redrawing system works here](auto-redrawing.md).
+
+Verbosity can be abstracted away using standard refactoring techniques:
+
+```javascript
+//refactor the binding to a simple helper
+var input = function(prop) {
+	return m("input", {oninput: m.withAttr("value", prop), value: prop()})
+}
+
+//a data store
+var name = m.prop("")
+
+//binding the data store in a view
+input(name)
+```
+
+Alternatively, you can also explore other techniques in order to achieve better [performance](http://lhorie.github.io/mithril-blog/asymmetrical-data-bindings.html) and [expressiveness](http://lhorie.github.io/mithril-blog/extending-the-view-language.html).
 
 ---
 
