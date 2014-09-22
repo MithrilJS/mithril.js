@@ -186,7 +186,30 @@ m("input", {oninput: m.withAttr("value", name), value: name()})
 
 In the code above, the `oninput` event handler updates the `name` getter-setter, and the Mithril auto-redrawing system redraws the template in order to update the displayed value. You can read more about the [`m.prop` getter-setter utility here](mithril.prop.md) and the [`m.withAttr` event handler factory here](mithril.withattr.md). You can also [learn how the redrawing system works here](auto-redrawing.md).
 
-Verbosity can be abstracted away using standard refactoring techniques:
+Note that Mithril always considers the model layer data to be canonical. This means that in the code below, the input on screen will overwritten by the model data any time a redraw happens:
+
+```javascript
+//note that we are not updating the value of the `name` getter-setter via an event handler
+//redraws will always overwrite the current UI value with the value of `name()`
+m("input", {value: name()})
+```
+
+Expressiveness can be achieved using standard refactoring techniques:
+
+```javascript
+//refactor the binding to a simple helper
+var binds = function(prop) {
+	return {oninput: m.withAttr("value", prop), value: prop()}
+}
+
+//a data store
+var name = m.prop("")
+
+//binding the data store in a view
+m("input", binds(name))
+```
+
+Here's an example of a more aggressive refactor:
 
 ```javascript
 //refactor the binding to a simple helper
