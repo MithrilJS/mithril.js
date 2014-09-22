@@ -781,13 +781,11 @@ function testMithril(mock) {
 			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
-		m.redraw() //should run synchronously
-
-		m.redraw() //rest should run asynchronously since they're spamming
+		m.redraw() //should run asynchronously since they're spamming
 		m.redraw()
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
-		return count === 3
+		return count === 2
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
@@ -1433,6 +1431,7 @@ function testMithril(mock) {
 				}
 			}
 		})
+		mock.requestAnimationFrame.$resolve()
 		root.childNodes[0].onclick({})
 		mock.requestAnimationFrame.$resolve() //teardown
 		return strategy == "diff" && root.childNodes[0].childNodes[0].nodeValue == "1"
@@ -1455,6 +1454,7 @@ function testMithril(mock) {
 				}
 			}
 		})
+		mock.requestAnimationFrame.$resolve()
 		root.childNodes[0].onclick({})
 		mock.requestAnimationFrame.$resolve() //teardown
 		return count == 2
