@@ -275,8 +275,7 @@ Mithril = m = new function app(window, undefined) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
-			//see #29 for the reason behind `activeElement` usage
-			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || node === window.document.activeElement) {
+			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr)) {
 				cachedAttrs[attrName] = dataAttr
 				try {
 					//`config` isn't a real attributes, so ignore it
@@ -299,10 +298,6 @@ Mithril = m = new function app(window, undefined) {
 						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
 						else if (attrName === "className") node.setAttribute("class", dataAttr)
 						else node.setAttribute(attrName, dataAttr)
-					}
-					//part of fix for #29
-					else if (attrName === "value" && tag === "input") {
-						if (node.value !== dataAttr) node.value = dataAttr
 					}
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
