@@ -279,6 +279,7 @@ Mithril = m = new function app(window, undefined) {
 				cachedAttrs[attrName] = dataAttr
 				try {
 					//`config` isn't a real attributes, so ignore it
+					//we don't ignore `key` because it must be unique and having it on the DOM helps debugging
 					if (attrName === "config") continue
 					//hook event handlers to the auto-redrawing system
 					else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
@@ -303,7 +304,14 @@ Mithril = m = new function app(window, undefined) {
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-						node[attrName] = dataAttr
+						//FIXME: don't clobber value if still typing (see #151 and #214)
+						//it appears browsers work like this:
+						//- user types, updates UI immediately
+						//- event handler, however, does NOT fire immediately if there's javascript running (because js is single threaded)
+						//- once js finishes, then it runs rAF callback, which clobbers the input if we're using naive bidirectional bindings
+						//- THEN it fires the event handler with the new input value
+						//so if the input value is updated during the small window between registering a UI change natively and the end of non-idle js time, the input loses the value update from that event
+						if (!(node === window.document.activeElement && attrName == "value")) node[attrName] = dataAttr
 					}
 					else node.setAttribute(attrName, dataAttr)
 				}
@@ -370,7 +378,9 @@ Mithril = m = new function app(window, undefined) {
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
-				if (!lastRedrawId) lastRedrawId = -1 //force asynchronous redraw for event handlers, to prevent double redraw in cases like onkeypress+oninput
+				//FIXME: force asynchronous redraw for event handlers, to prevent double redraw in cases like onkeypress+oninput (#151)
+				//this solution isn't ideal because it creates a small window of opportunity for events to get lost (see #214).
+				if (!lastRedrawId) lastRedrawId = -1
 				m.endComputation()
 			}
 		}
@@ -436,7 +446,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = 0, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false
 	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -483,6 +493,7 @@ Mithril = m = new function app(window, undefined) {
 		for (var i = 0; i < roots.length; i++) {
 			if (controllers[i] && mode != "none") m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
 		}
+		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
 		if (computePostRedrawHook) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
@@ -593,7 +604,8 @@ Mithril = m = new function app(window, undefined) {
 		if (e.ctrlKey || e.metaKey || e.which == 2) return
 		if (e.preventDefault) e.preventDefault()
 		else e.returnValue = false
-		m.route(e.currentTarget[m.route.mode].slice(modes[m.route.mode].length))
+		var currentTarget = e.currentTarget || this
+		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length))
 	}
 	function setScroll() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
