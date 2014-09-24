@@ -19,6 +19,7 @@
 -	fixed redraw scheduling bug in old version of IE
 -	fixed incorrect diff when document is root, and html element is omitted
 -	fixed querystring clobbering in links w/ config:m.route [#261](https://github.com/lhorie/mithril.js/issues/261)
+-	fixed rare bug that made events get dropped [#214](https://github.com/lhorie/mithril.js/issues/214)
 
 ---
 
