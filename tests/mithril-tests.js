@@ -752,6 +752,17 @@ function testMithril(mock) {
 		m.render(root, [m("div.green", [m("div")]), m("div.blue")])
 		return root.childNodes.length == 2
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/277
+		var root = mock.document.createElement("div")
+		function Field() {
+			this.tag = "div";
+			this.attrs = {};
+			this.children = "hello";
+		}
+		m.render(root, new Field())
+		return root.childNodes.length == 1
+	})
 	//end m.render
 
 	//m.redraw
