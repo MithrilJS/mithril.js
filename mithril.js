@@ -857,7 +857,7 @@ Mithril = m = new function app(window, undefined) {
 					else options.onerror({type: "error", target: xhr})
 				}
 			}
-			if (options.serialize == JSON.stringify && options.method != "GET") {
+			if (options.serialize == JSON.stringify && options.data && options.method != "GET") {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof options.config == "function") {
