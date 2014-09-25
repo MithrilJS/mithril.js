@@ -1553,10 +1553,17 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var error = m.prop("no error")
-		var prop = m.request({method: "POST", url: "test"}).then(null, error)
+		var prop = m.request({method: "POST", url: "test", data: {foo: 1}}).then(null, error)
 		var xhr = mock.XMLHttpRequest.$instances.pop()
 		xhr.onreadystatechange()
 		return xhr.$headers["Content-Type"] == "application/json; charset=utf-8"
+	})
+	test(function() {
+		var error = m.prop("no error")
+		var prop = m.request({method: "POST", url: "test"}).then(null, error)
+		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.onreadystatechange()
+		return xhr.$headers["Content-Type"] === undefined
 	})
 
 	// m.request over jsonp
