@@ -150,7 +150,23 @@ This deviation from the spec is there to make it easier for developers to find c
 
 For example, there is simply never a case where a developer would want to programmatically handle the error of accessing the property of a nullable entity without first checking for its existence. The only reasonable course of action to prevent the potential null reference exceptions in this case is to add the existence check in the source code. It is expected that such an error would bubble up to the console and display a developer-friendly error message and line number there.
 
+```javascript
+m.request({method: "GET", url: "/things"})
+	.then(function(items) {
+		item.foreach(doSomething) //programmer error: typo will throw runtime error to the console
+	})
+```
+
 The other side of the coin is still supported: if a developer needs to signal an exceptional condition within a promise callback, they can manually throw a `new Error` (for example, if a validation rule failed, and there should be an error message displayed to the user).
+
+```javascript
+var error = m.prop()
+m.request({method: "GET", url: "/user/:id", data: {id: 1}})
+	.then(function(user) {
+		if (user.isAdmin) throw new Error("Sorry, you don't have permissions")
+	})
+	.then(null, error) //handle the application error: bind to a getter-setter for diplaying it on the template
+```
 
 Note that the default promise exception handling semantics can be modified. See the next section.
 
@@ -160,7 +176,9 @@ Note that the default promise exception handling semantics can be modified. See 
 
 Any time an exception is thrown inside a promise callback, Mithril calls `m.deferred.onerror(e)`.
 
-By default, this event handler rethrows the exception to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications. It does this because developers expect unexpected errors like null reference exceptions to be thrown to the console for debugging purposes, and these errors are always subclasses of Error. On the other hand, javascript developers rarely ever throw errors that are subclasses of Error.
+By default, this event handler rethrows the exception to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications. It does this because people expect unexpected errors like null reference exceptions to be thrown to the console for debugging purposes, and these errors are always subclasses of Error.
+
+On the other hand, javascript developers rarely ever throw errors that are subclasses of Error, and for the purposes of application error handling, the underlying prototypal chain of the error class is typically not relevant.
 
 The `onerror` function can be safely replaced if the default error monitoring semantics are not desired.
 
