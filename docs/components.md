@@ -2,15 +2,9 @@
 
 Components are Mithril's mechanism for [hierarchical MVC](http://en.wikipedia.org/wiki/Hierarchical_model%E2%80%93view%E2%80%93controller).
 
-They allow complex, repeating logic to be abstracted into a logical unit of code, and they help modularize applications with widgets or multi-concern views (e.g. dashboards).
+[Mithril modules](mithril.module.md) can usually be used as components, in scenarios where components don't need to cross-communicate a lot (for example, a dashboard full of unrelated widgets).
 
-You can also use components for a number of other advanced techniques, like recursive templating (e.g. tree views) and partial template mixins (i.e. injecting part of a template into another).
-
----
-
-### Nesting components
-
-Here's an example of nested modules in a widgetization scenario:
+Here's an example of a hierarchy of such components:
 
 ```javascript
 //root module
@@ -22,58 +16,80 @@ dashboard.controller = function() {
 }
 
 dashboard.view = function(ctrl) {
-	return m("#example", [
-		m(".profile", [
-			userProfile.view(ctrl.userProfile)
-		]),
-		m(".projects", [
-			projectList.view(ctrl.projectList)
-		])
-	])
-}
-
-
-
-//components
-
-//user profile component
-var userProfile = {};
-
-userProfile.controller = function() {
-	this.name = m.prop("John Doe");
-};
-
-userProfile.view = function(ctrl) {
 	return [
-		m("h1", "Profile"),
-		"Name: " + ctrl.name()
-	];
-};
-
-
-
-//project list component
-var projectList = {};
-
-projectList.controller = function() {};
-
-projectList.view = function(ctrl) {
-	return "There are no projects";
-};
-
-
-
-//initialize
-m.module(document.body, dashboard);
+		userProfile.view(ctrl.userProfile)
+		projectList.view(ctrl.projectList)
+	]
+}
 ```
 
-As you can see, components look exactly like regular modules - it's [turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down)! Remember that modules are simply dumb containers for `controller` and `view` classes.
+In the snippet above, there are three modules: `dashboard`, `userProfile` and `projectList`. Each of the sub-components can reasonably be rendered as a standalone page, but here we see how we can put them together to create a bigger page.
 
-This means components are decoupled both *horizontally* and *vertically*. It's possible to refactor each component as an isolated unit of logic (which itself follows the MVC pattern). And we can do so without touching the rest of the application (as long as the component API stays the same).
+An important point to note is that you should never instantiate a controller class from a view (or call a function that does it). Views are re-rendered as a result of events firing, and can clobber state from sub-component controllers.
 
-Similarly, it's possible to mix and match different classes to make mix-in anonymous components (e.g. it's straightforward to build several views - for, say, a mobile app - that use the same controller).
+---
 
-It's also possible to keep references to parent and even sibling components. This is useful, for example, when implementing notification badges in a navigation component, which are triggered and managed by other components in the system.
+### Organizing components
+
+Another common reason why people need components is that some pages are inherently large and complex, and need to be sub-divided into smaller pieces in order to help keep code maintainable.
+
+In these cases, components often need to communicate with one another frequently and in often unexpected ways. Because of the requirement of interconnectedness, the pattern of importing independent modules to build bigger modules is not a good fit.
+
+Instead, the best way to organize these types of components is to move code out of controllers into view-models. Here's an example: Suppose we have a module that displays a list of users.
+
+```javascript
+var userList = {}
+
+userList.controller = function() {
+	this.users = m.request({method: "GET", url: "/users"})
+}
+
+userList.view = function(ctrl) {
+	return ctrl.users().map(function(user) {
+		return user.name
+	})
+}
+```
+
+Here you can see that the controller holds the state for the list of users. The problem with this is that with a large hierarchy of components, it becomes difficult to find this particular controller instance from any given view.
+
+The solution is to refactor the code into a globally available entity: a view-model
+
+```javascript
+var userList = {}
+
+userList.controller = function() {
+	userList.vm.init()
+}
+
+userList.vm = {}
+userList.vm.init = function() {
+	this.users = m.request({method: "GET", url: "/users"})
+}
+
+userList.view = function() {
+	return userList.vm.users().map(function(user) {
+		return user.name
+	})
+}
+```
+
+This pattern allows us to access the data for the userList module from anywhere in the application, as long as the view model has been initialized. Notice that refactoring from the fat controller is easy: we simply moved the controller function body into the `init` function of the view model, and changed the reference to the controller in the view.
+
+It's then possible to extend this pattern to create view-model dependency trees:
+
+```javascript
+userList.vm.init = function() {
+	//here we specify that this view will interact with a `search`, a `filters` and a `grid` modules
+	search.vm.init()
+	filters.vm.init()
+	grid.vm.init()
+}
+```
+
+With that, we have a guarantee that all data and all methods from the specified view-models will be available from anywhere within this group of modules.
+
+We can also optionally backfill controllers for each module so that they follow the same pattern as the `userList.controller`, if we need to use those modules as top-level modules in independent pages.
 
 ---
 
@@ -148,7 +164,3 @@ var log = function(value) {console.log(value)}
 //initialize
 m.module(document.body, dashboard);
 ```
-
-It's recommended that libraries that provide extra functionality to Mithril be implemented using this modular pattern, as opposed to trying to hide implementation in a [virtual element's `config` attribute](mithril.md).
-
-You should only consider using `config`-based components when leveraging existing libraries.
