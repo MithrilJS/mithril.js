@@ -77,7 +77,6 @@ Mithril = m = new function app(window, undefined) {
 		//- it simplifies diffing code
 		if (data == null) data = ""
 		if (data.subtree === "retain") return cached
-
 		var cachedType = type(cached), dataType = type(data)
 		if (cached == null || cachedType != dataType) {
 			if (cached != null) {
@@ -89,6 +88,7 @@ Mithril = m = new function app(window, undefined) {
 				else if (cached.nodes) clear(cached.nodes, cached)
 			}
 			cached = new data.constructor
+			if (cached.tag) cached = {} //if constructor creates a virtual dom element, use a blank object as the base cached node instead of copying the virtual el (#277)
 			cached.nodes = []
 		}
 
@@ -116,7 +116,12 @@ Mithril = m = new function app(window, undefined) {
 						if (data[i].attrs.key != null) {
 							var key = data[i].attrs.key
 							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
-							else existing[key] = {action: MOVE, index: i, from: existing[key].index, element: parentElement.childNodes[existing[key].index]}
+							else existing[key] = {
+								action: MOVE,
+								index: i,
+								from: existing[key].index,
+								element: parentElement.childNodes[existing[key].index] || window.document.createElement("div")
+							}
 						}
 						else unkeyed.push({index: i, element: parentElement.childNodes[i] || window.document.createElement("div")})
 					}
@@ -191,7 +196,6 @@ Mithril = m = new function app(window, undefined) {
 				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
 			}
 			if (typeof data.tag != "string") return
-
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
