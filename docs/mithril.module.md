@@ -49,67 +49,26 @@ Typically, however, modules and namespaces are used interchangeably.
 //`dashboard` is both a namespace and a module
 var dashboard = {}
 
-//controller class
+//view-model
+dashboard.vm = {}
+
+//controller
 dashboard.controller = function() {
-	this.greeting = "Hello";
+	dashboard.vm.greeting = "Hello";
 };
 
-//view class
-dashboard.view = function(ctrl) {
-	return m("h1", ctrl.greeting);
+//view
+dashboard.view = function(vm) {
+	return m("h1", dashboard.vm.greeting);
 };
 
 //initialize it
 m.module(document.body, dashboard);
 ```
 
-The example below shows a component module called `user` being included in a parent module `dashboard`.
+Modules can also be used as components in order to assemble bigger systems. You can [read more about componentization here](components.md)
 
-```javascript
-//this is a sample module
-var dashboard = {
-	controller: function() {
-		this.greeting = "Hello";
-
-		this.user = new user.controller();
-	},
-	view: function(controller) {
-		return [
-			m("h1", controller.greeting),
-
-			user.view(controller.user)
-		];
-	}
-};
-
-//this module is being included as a component
-var user = {
-	//model
-	User: function(name) {
-		this.name = name;
-	},
-	//controller
-	controller: function() {
-		this.user = new user.User("John Doe");
-	},
-	//view
-	view: function(controller) {
-		return m("div", controller.user.name);
-	}
-};
-
-//activate the dashboard module
-m.module(document.body, dashboard);
-```
-
-yields:
-
-```markup
-<body>
-	<h1>Hello</h1>
-	<div>John Doe</div>
-</body>
-```
+---
 
 ### Unloading modules
 

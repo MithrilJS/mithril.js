@@ -127,7 +127,7 @@ For example, you might only be interested in running a redraw if a user presses 
 
 ```javascript
 m("input", {onkeydown: function(e) {
-	if (e.keyCode == 13) ctrl.save() //do things and re-render only if the `enter` key was pressed
+	if (e.keyCode == 13) vm.save() //do things and re-render only if the `enter` key was pressed
 	else m.redraw.strategy("none") //otherwise, ignore
 }})
 ```

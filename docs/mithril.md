@@ -357,7 +357,7 @@ To maintain the identities of DOM elements, you need to add a `key` property to 
 
 ```javascript
 m("ul", [
-	ctrl.items.map(function(item) {
+	items.map(function(item) {
 		return m("li", {key: item.id}, [
 			m("input")
 		]);
@@ -365,7 +365,7 @@ m("ul", [
 ]);
 ```
 
-In the example above, input focus would be maintained correctly after a redraw even if `ctrl.items` got sorted or reversed. The key is defined in the `li`, which is the closest element to the `ctrl.items` array, not directly on the `input`, even though we want to track focus on the input.
+In the example above, input focus would be maintained correctly after a redraw even if `items` got sorted or reversed. The key is defined in the `li`, which is the closest element to the `items` array, not directly on the `input`, even though we want to track focus on the input.
 
 Note that in addition to the presence of the `key` attribute, diffing rules also apply in determining whether an element is recreated. Elements are recreated if either their node name changes, or if the list of attribute names change, or if the ID attribute changes. To avoid surprises, be sure to change only attribute values, using `undefined` or `null` as values if appropriate, rather than conditionally substituting attribute dictionaries altogether.
 
@@ -385,7 +385,7 @@ As with input focus, we can maintain referential integrity between data in a lis
 
 ```javascript
 m("ul", [
-	ctrl.items.map(function(item) {
+	items.map(function(item) {
 		return m("li", {key: item.id}, [
 			m("input")
 		]);

@@ -33,9 +33,9 @@ Yes, this is valid HTML 5! According to the specs, the `<html>`, `<head>` and `<
 
 ### Model
 
-In Mithril, an application typically lives in a namespace and contains modules. Modules are merely structures that represent a viewable "page" or component.
+In Mithril, an application typically lives in a namespace and contains modules. Modules are merely structures that represent a viewable "page" or a part of a page. In addition, an application can be organizationally divided into three major layers: Model, Controller and View.
 
-For simplicity, our application will have only one module, and we're going to use it as the namespace for our application:
+For simplicity, our application will have only one module, and we're going to use it as the namespace for our application.
 
 ```markup
 <script>
@@ -102,23 +102,29 @@ var list = new todo.TodoList();
 list.length; //0
 ```
 
----
+According to the classic definition of the MVC pattern, the model layer is responsible for data storage, state management and business logic.
 
-### Controller
+You can see that our classes above fit the criteria: they have all the methods and properties that they need to be assembled into a meaningful state. A `Todo` can be instantiated, and have its properties changed. The list can have todo items added to it via the `push` method. And so on.
 
-Our next step is to write a controller that will use our model classes.
+#### View-Model
+
+Our next step is to write a view-model that will use our model classes. A view-model is a model level entity that stores UI state. In many frameworks UI state is typically stored in a controller, but doing so makes the code harder to scale since controllers aren't designed to be data providers. In Mithril, UI state is understood to be model data, even though it doesn't necessarily map to a database ORM entity.
+
+View-models are also responsible for handling business logic that revolves around UI-specific restrictions. For example a form might have an input and a cancel button. In such a case, it's the view-model's responsibility to track the current state of the input vs the original state and to apply a cancellation, if required. In the event the form was saved, then view-model would delegate saving to a more appropriate ORM model entity.
+
+In the case of our todo application, the view-model needs a few things: it needs to track a running list of todos and a field for adding new todos, and it needs to handle the logic of adding to the todo and the implications of this action of the UI.
 
 ```javascript
-//the controller uses three model-level entities, of which one is a custom defined class:
-//`Todo` is the central class in this application
-//`list` is merely a generic array, with standard array methods
-//`description` is a temporary storage box that holds a string
-//
-//the `add` method simply adds a new todo to the list
-todo.controller = function() {
+//define the view-model
+todo.vm = {}
+todo.vm.init = function() {
+	//a running list of todos
 	this.list = new todo.TodoList();
+	
+	//a slot to store the name of a new todo before it is created
 	this.description = m.prop("");
 	
+	//adds a todo to the list, and clears the description field for user convenience
 	this.add = function(description) {
 		if (description()) {
 			this.list.push(new todo.Todo({description: description()}));
@@ -128,25 +134,40 @@ todo.controller = function() {
 }
 ```
 
-The code above defines a controller class. It has three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string. Later in this guide, we'll pass the `description` property as the parameter to this function. I'll explain why we're passing it as an argument when we get there.
+The code above defines the view-model object. It has three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string. Later in this guide, we'll pass the `description` property as the parameter to this function. When we get there, I'll explain why we're passing description as an argument instead of simply using OOP-style member association.
 
-You can use the controller like this:
+You can use the view-model like this:
 
 ```javascript
-var ctrl = new todo.controller();
+//initialize our view-model
+todo.vm.init();
 
-ctrl.description(); //[empty string]
+todo.vm.description(); //[empty string]
 
 //try adding a to-do
-ctrl.add(ctrl.description);
-ctrl.list.length; //0
-
-//you can't add a to-do with an empty description
+todo.vm.add(todo.vm.description);
+todo.vm.list.length; //0, because you can't add a to-do with an empty description
 
 //add it properly
-ctrl.description("Write code");
-ctrl.add(ctrl.description);
-ctrl.list.length; //1
+todo.vm.description("Write code");
+todo.vm.add(todo.vm.description);
+todo.vm.list.length; //1
+```
+
+---
+
+### Controller
+
+In classic MVC, the role of the controller is to dispatch actions from the view to the model layer. In traditional server-side frameworks, the controller layer is of large significance because the nature of HTTP requests, responses and the framework abstractions that are exposed to developers require that the controller act as an adapter layer to transform the serialized data from HTTP requests to something that can be passed to ORM model methods.
+
+In client-side MVC, however, this dissonance doesn't exist, and controllers can be extremely simple. Mithril controllers can be stripped down to a bare minimum, so that they only perform a single essential role: to expose a scoped set of model-level functionality. As you may recall, models are responsible for encapsulating business logic, and view-models encapsulate logic that pertains specifically to UI state, so there's really nothing else for a controller to abstract away, and all it needs to do is expose a slice of the model layer that pertains to the UI that is currently in view.
+
+In other words, all our controller needs to do is this:
+
+```javascript
+todo.controller = function() {
+	todo.vm.init()
+}
 ```
 
 ---
@@ -156,7 +177,7 @@ ctrl.list.length; //1
 The next step is to write a view so users can interact with the application
 
 ```javascript
-todo.view = function(ctrl) {
+todo.view = function() {
 	return m("html", [
 		m("body", [
 			m("input"),
@@ -176,11 +197,10 @@ todo.view = function(ctrl) {
 
 The utility method `m()` creates virtual DOM elements. As you can see, you can use CSS selectors to specify attributes. You can also use the `.` syntax to add CSS classes and the `#` to add an id.
 
-The view can be rendered using the `m.render` method:
+For the purposes of testing out our code so far, the view can be rendered using the `m.render` method:
 
 ```javascript
-//assuming the `ctrl` variable from earlier
-m.render(document, todo.view(ctrl));
+m.render(document, todo.view());
 ```
 
 Notice that we pass a root DOM element to attach our template to, as well as the template itself.
@@ -202,6 +222,8 @@ This renders the following markup:
 </html>
 ```
 
+Note that `m.render` is a very low level method in Mithril that draws only once and doesn't attempt to run the auto-redrawing system. In order to enable auto-redrawing, the `todo` module must be initialized by either calling `m.module` or by creating a route definition with `m.route`. Also note that, unlike observable-based frameworks like Knockout.js, setting a value in a `m.prop` getter-setter does NOT trigger redrawing side-effects in Mithril.
+
 ---
 
 #### Data Bindings
@@ -209,71 +231,71 @@ This renders the following markup:
 Let's implement a **data binding** on the text input. Data bindings connect a DOM element to a Javascript variable so that updating one updates the other.
 
 ```javascript
-m("input")
-
-//becomes
-m("input", {value: ctrl.description()})
+//binding a model value to an input in a template
+m("input", {value: todo.vm.description()})
 ```
 
-This binds the `description` getter-setter to the text input. Updating the value of the description updates the input when Mithril redraws.
+This binds the `description` getter-setter to the text input. Updating the value of the description in the model updates the DOM input when Mithril redraws.
 
 ```javascript
-var ctrl = new todo.controller();
-ctrl.description(); // empty string
-m.render(document, todo.view(ctrl)); // input is empty
-ctrl.description("Write code"); //set the description in the controller
-m.render(document, todo.view(ctrl)); // input now says "Write code"
+todo.vm.init();
+
+todo.vm.description(); // empty string
+m.render(document, todo.view()); // input is blank
+
+todo.vm.description("Write code"); //set the description in the controller
+m.render(document, todo.view()); // input now says "Write code"
 ```
 
-Note that calling the `todo.view` method multiple times does not re-render the entire template.
+At a glance it may seem like we're doing something very expensive by redrawing, but as it turns out, calling the `todo.view` method multiple times does not actually re-render the entire template. Internally, Mithril keeps a virtual representation of the DOM in cache, scans for changes, and then only modifies the absolute minimum required to apply the change to the DOM. In practice, this results in surprisingly fast re-rendering.
 
-Internally, Mithril keeps a virtual representation of the DOM in cache, scans for changes, and then only modifies the minimum required to apply the change.
+In the case above, Mithril only touches the `value` attribute of the input.
 
-In this case, Mithril only touches the `value` attribute of the input.
+Note that the example above only *sets* the value of the input element in the DOM, but it never *reads* it. This means that typing something on the input and then re-rendering will clobber the text on screen.
 
 ---
 
-Bindings can also be **bi-directional**: that is, they can be made such that, in addition to what we saw just now, a user typing on the input updates the description getter-setter.
+Fortunately, bindings can also be **bi-directional**: that is, they can be coded in such a way that, in addition to setting the DOM value, it's also possible to read it as a user types, and then update the `description` getter-setter in the view-model.
 
-Here's the idiomatic way of implementing the view-to-controller part of the binding:
+Here's the most basic way of implementing the view-to-model part of the binding:
 
 ```javascript
-m("input", {onchange: m.withAttr("value", ctrl.description), value: ctrl.description()})
+m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()})
 ```
 
-The code bound to the `onchange` can be read like this: "with the attribute value, set ctrl.description".
+The code bound to the `onchange` can be read like this: "with the attribute value, set todo.vm.description".
 
 Note that Mithril does not prescribe how the binding updates: you can bind it to `onchange`, `onkeypress`, `oninput`, `onblur` or any other event that you prefer.
 
 You can also specify what attribute to bind. This means that just as you are able to bind the `value` attribute in an `<select>`, you are also able to bind the `selectedIndex` property, if needed for whatever reason.
 
-The `m.withAttr` utility is a functional programming tool provided by Mithril to minimize the need for ugly anonymous functions in the view.
+The `m.withAttr` utility is a functional programming tool provided by Mithril to minimize the need for anonymous functions in the view.
 
-The `m.withAttr("value", ctrl.description)` call above returns a function that is the rough equivalent of this code:
+The `m.withAttr("value", todo.vm.description)` call above returns a function that is the rough equivalent of this code:
 
 ```javascript
 onchange: function(e) {
-	ctrl.description(e.target["value"]);
+	todo.vm.description(e.target["value"]);
 }
 ```
 
-The difference, aside from the cosmetic avoidance of anonymous functions, is that the `m.withAttr` idiom also takes care of catching the correct event target and selecting the appropriate source of the data - i.e. whether it should come from a Javascript property or from `DOMElement::getAttribute()`
+The difference, aside from avoiding an anonymous function, is that the `m.withAttr` idiom also takes care of catching the correct event target and selecting the appropriate source of the data - i.e. whether it should come from a Javascript property or from `DOMElement::getAttribute()`
 
 ---
 
 In addition to bi-directional data binding, we can also bind parameterized functions to events:
 
 ```javascript
-m("button", {onclick: ctrl.add.bind(ctrl, ctrl.description)}, "Add")
+m("button", {onclick: todo.vm.add.bind(todo.vm, todo.vm.description)}, "Add")
 ```
 
 In the code above, we are simply using the native Javascript `Function::bind` method. This creates a new function with the parameter already set. In functional programming, this is called [*partial application*](http://en.wikipedia.org/wiki/Partial_application).
 
-The `ctrl.add.bind(ctrl, ctrl.description)` expression above returns a function that is equivalent to this code:
+The `todo.vm.add.bind(todo.vm, todo.vm.description)` expression above returns a function that is equivalent to this code:
 
 ```javascript
 onclick: function(e) {
-	ctrl.add(ctrl.description)
+	todo.vm.add(todo.vm.description)
 }
 ```
 
@@ -283,7 +305,7 @@ Hopefully by now, you're starting to see why Mithril encourages the usage of `m.
 
 Mithril uses them in other interesting ways elsewhere.
 
-As a side note, some readers have pointed out that we can refactor the `add` method like this:
+Clever readers will probably notice that we can refactor the `add` method to make it much simpler:
 
 ```javascript
 this.add = function() {
@@ -294,24 +316,24 @@ this.add = function() {
 }.bind(this);
 ```
 
-The difference is that `add` no longer takes an argument, and we call `.bind(this)` at the end to lock the scoping of `this` inside of the `add` method
+The difference with the modified version is that `add` no longer takes an argument, and we call `.bind(this)` at the end to lock the scoping of `this` inside of the `add` method.
 
-Then we can make the `onclick` binding on the template much simpler:
+With this, we can make the `onclick` binding on the template *much* simpler:
 
 ```
-m("button", {onclick: ctrl.add}, "Add")
+m("button", {onclick: todo.vm.add}, "Add")
 ```
 
-The only reason I talked about partial application here was to make you aware of that technique, since it becomes useful when dealing with parameterized event handlers. In real life, given a choice, you should always pick the simplest idiom for your use case, as we just did here.
+The only reason I talked about partial application here was to make you aware of that technique, since it becomes useful when dealing with parameterized event handlers. In real life, given a choice, you should always pick the simplest idiom for your use case.
 
 ---
 
-To implement flow control in Mithril views, we simply use Javascript:
+To implement flow control in Mithril views, we simply use Javascript Array methods:
 
 ```javascript
 //here's the view
 m("table", [
-	ctrl.list.map(function(task, index) {
+	todo.vm.list.map(function(task, index) {
 		return m("tr", [
 			m("td", [
 				m("input[type=checkbox]")
@@ -322,7 +344,7 @@ m("table", [
 ])
 ```
 
-In the code above, `ctrl.list` is an Array, and `map` is one of its native functional methods. It allows us to iterate over the list and merge transformed versions of the list items into an output array.
+In the code above, `todo.vm.list` is an Array, and `map` is one of its native functional methods. It allows us to iterate over the list and merge transformed versions of the list items into an output array.
 
 As you can see, we return a partial template with two `<td>`'s. The second one has a data binding to the `description` getter-setter of the Todo class instance.
 
@@ -333,13 +355,13 @@ You're probably starting to notice that Javascript has strong support for functi
 The rest of the code can be implemented using idioms we already covered. The complete view looks like this:
 
 ```javascript
-todo.view = function(ctrl) {
+todo.view = function() {
 	return m("html", [
 		m("body", [
-			m("input", {onchange: m.withAttr("value", ctrl.description), value: ctrl.description()}),
-			m("button", {onclick: ctrl.add}, "Add"),
+			m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
+			m("button", {onclick: todo.vm.add}, "Add"),
 			m("table", [
-				ctrl.list.map(function(task, index) {
+				todo.vm.list.map(function(task, index) {
 					return m("tr", [
 						m("td", [
 							m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
@@ -356,8 +378,8 @@ todo.view = function(ctrl) {
 Here are the highlights of the template above:
 
 -	The template is rendered as a child of the implicit `<html>` element of the document.
--	The text input saves its value to the `ctrl.description` getter-setter we defined earlier.
--	The button calls the `ctrl.add` method when clicked.
+-	The text input saves its value to the `todo.vm.description` getter-setter we defined earlier.
+-	The button calls the `todo.vm.add` method when clicked.
 -	The table lists all the existing to-dos, if any.
 -	The checkboxes save their value to the `task.done` getter setter.
 -	The description gets crossed out via CSS if the task is marked as done.
@@ -365,19 +387,16 @@ Here are the highlights of the template above:
 
 ---
 
-When running the classes in this application separately, you have full control and full responsibility for determining when to redraw the view.
-
-However, Mithril does provide another utility to make this task automatic: [the Auto-Redrawing System](http://lhorie.github.io/mithril/auto-redrawing.html).
-
-In order to enable Mithril's auto-redrawing system, we run the code as a Mithril module:
+So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` module via `m.module`.
 
 ```javascript
+//render the todo module inside the document DOM node
 m.module(document, todo);
 ```
 
-Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads.
+Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing. 
 
-Also note that this mechanism itself is not asynchronous if it doesn't need to be: Mithril does not need to wait for the next browser repaint frame to redraw - it doesn't even need to wait for the document ready event on the first redraw - it will redraw immediately upon script completion, if able to.
+You can learn more about how redrawing heuristics work [here](auto-redrawing.md).
 
 ---
 
@@ -403,13 +422,12 @@ todo.Todo = function(data) {
 //the TodoList class is a list of Todo's
 todo.TodoList = Array;
 
-//the controller uses three model-level entities, of which one is a custom defined class:
-//`Todo` is the central class in this application
-//`list` is merely a generic array, with standard array methods
-//`description` is a temporary storage box that holds a string
-//
-//the `add` method simply adds a new todo to the list
-todo.controller = function() {
+//the view-model tracks a running list of todos,
+//stores a description for new todos before they are created
+//and takes care of the logic surrounding when adding is permitted
+//and clearing the input after adding a todo to the list
+todo.vm = {}
+todo.vm.init = function() {
 	this.list = new todo.TodoList();
 	this.description = m.prop("");
 	
@@ -421,14 +439,20 @@ todo.controller = function() {
 	}.bind(this);
 };
 
+//the controller defines what part of the model is relevant for the current page
+//in our case, there's only one view-model that handles everything
+todo.controller = function() {
+	todo.vm.init()
+}
+
 //here's the view
-todo.view = function(ctrl) {
+todo.view = function() {
 	return m("html", [
 		m("body", [
-			m("input", {onchange: m.withAttr("value", ctrl.description), value: ctrl.description()}),
-			m("button", {onclick: ctrl.add}, "Add"),
+			m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
+			m("button", {onclick: todo.vm.add}, "Add"),
 			m("table", [
-				ctrl.list.map(function(task, index) {
+				todo.vm.list.map(function(task, index) {
 					return m("tr", [
 						m("td", [
 							m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
@@ -450,17 +474,13 @@ m.module(document, todo);
 
 ## Notes on Architecture
 
-Let's look at each MVC layer in detail to illustrate some of Mithril's design principles and philosophies:
-
-### Model
-
 Idiomatic Mithril code is meant to apply good programming conventions and be easy to refactor.
 
 In the application above, notice how the Todo class can easily be moved to a different module if code re-organization is required.
 
 Todos are self-contained and their data aren't tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it's a plain-vanilla Javascript class, and so has almost no framework-specific learning curve.
 
-[`m.prop`](mithril.prop.md) is a simple but surprisingly versatile tool: it's composable, it enables [uniform data access](http://en.wikipedia.org/wiki/Uniform_data_access) and allows a higher degree of decoupling when major refactoring is required.
+[`m.prop`](mithril.prop.md) is a simple but surprisingly versatile tool: it's functionally composable, it enables [uniform data access](http://en.wikipedia.org/wiki/Uniform_data_access) and allows a higher degree of decoupling when major refactoring is required.
 
 When refactoring is unavoidable, the developer can simply replace the `m.prop` call with an appropriate getter-setter implementation, instead of having to grep for API usage across the entire application.
 
@@ -489,11 +509,7 @@ this.description.toJSON = function() {return description}
 this.description(data.description)
 ```
 
-According to Mithril's philosophy, `list` and `description` are also considered model-level entities. This is a subtle but important point: model entities don't need to be full-blown custom classes.
-
-Native Javascript classes are quite appropriate for storing primitive and structured data. Since in this case they are indeed being used to store data - even if temporarily - they are model entities!
-
-Be aware that by using the native Array class for a list, we're making an implicit statement that we are going to support all of the standard Array methods as part of our API.
+In the view-model, we aliased the native Array class for `TodoList`. Be aware that by using the native Array class, we're making an implicit statement that we are going to support all of the standard Array methods as part of our API.
 
 While this decision allows better API discoverability, the trade-off is that we're largely giving up on custom constraints and behavior. For example, if we wanted to change the application to make the list be persisted, a native Array would most certainly not be a suitable class to use.
 
@@ -518,32 +534,6 @@ Hopefully these examples give you an idea of ways requirements can change over t
 
 ---
 
-### Controller
-
-Mithril follows a data binding paradigm that is familiar to developers that use server-side MVC frameworks like Rails and Django.
-
-The difference, as mentioned earlier, is that Mithril philosophy considers any form of data storage as being a model entity - even data from a text input waiting to be saved!
-
-In Mithril, controllers are not meant to progressively operate on model entities. Instead, model entities should expose methods that atomically act on themselves.
-
-What this rule means is that controllers can have conditional logic, as is the case in the `add` method in the application above, but **each action that touches a model entity should not leave it in an unstable state.**
-
-This is in contrast to the ActiveRecord pattern of other frameworks, which allows entities to be in potentially invalid states (for example, a to-do with no description), so long as they are not "saved".
-
-The idea of disallowing unstable states hinges largely on the developer deciding what constitutes validity:
-
--	An empty description in the context of the text input in the UI is a perfectly valid state, and a string is an appropriate type to express that.
-
--	A to-do with no description is not valid, therefore we avoid writing code that ever leaves the Todo class instance in a unstable state.
-
-Mithril doesn't programmatically define the scope of each model entity or in what states an entity is considered valid - validity is something the developer is responsible for defining.
-
-Mithril's philosophical framework simply encourages that the developer map validity to static types. This is a key step in ensuring programs are robust and refactorable.
-
----
-
-### View
-
 The first and most obvious thing you may have noticed in the view layer is that the view is not written in HTML.
 
 While superficially this may seem like an odd design, this actually has a lot of benefits:
@@ -554,11 +544,11 @@ While superficially this may seem like an odd design, this actually has a lot of
 
 -	Mithril views can provide accurate and informative error reporting, with line numbers and meaningful stack traces.
 
--	You get the ability to automate linting, unit testing and minifying of the entire view layer - and you are even able to use Closure Compiler's Advanced Mode without needing extensive annotations.
+-	You get the ability to automate linting, unit testing and minifying of the entire view layer.
 
 -	It provides full Turing completeness: full control over evaluation eagerness/laziness and caching in templates. You can even build components that take other components as first-class-citizen parameters!
 
--	[Turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down): you don't need write custom data binding code in jQuery for every possible user interaction, and you don't need to support a complicated "directive" layer to be able to fit some types of components into the system.
+And if you really do want to use HTML syntax after all, [you can use a package called MSX](https://github.com/insin/msx).
 
 Views in Mithril use a virtual DOM diff implementation, which sidesteps performance problems related to opaque dirty-checking and excessive browser repaint that are present in some frameworks.
 

@@ -34,7 +34,7 @@ Routing is single-page-application (SPA) friendly, and can be implemented using 
 
 #### Usage
 
-To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.module.md) to be rendered.
+To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.module.md) to be rendered. You don't need to call `m.module` to initialize your modules if you define a list of routes - `m.route` calls it for you.
 
 The example below defines three routes, to be rendered in `<body>`. `home`, `login` and `dashboard` are modules. We'll see how to define a module in a bit.
 
