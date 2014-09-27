@@ -156,6 +156,18 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{tag: "b", attrs: {}}]))
+		return root.childNodes[0].childNodes[0].nodeName == "B"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		m.render(root, m("ul", [{tag: new String("b"), attrs: {}}]))
+		return root.childNodes[0].childNodes[0].nodeName == "B"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li", [m("a")])]))
 		m.render(root, m("ul", [{subtree: "retain"}]))
 		return root.childNodes[0].childNodes[0].childNodes[0].nodeName === "A"
@@ -762,6 +774,15 @@ function testMithril(mock) {
 		}
 		m.render(root, new Field())
 		return root.childNodes.length == 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("ul", [m("li")]))
+		var change = function() {
+			m.render(root, m("ul", arguments))
+		}
+		change(m("b"));
+		return root.childNodes[0].childNodes[0].nodeName == "B"
 	})
 	//end m.render
 
@@ -1477,6 +1498,68 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var value
 		m.route(root, "/foo+bar", {
+			"/:arg": {
+				controller: function() {value = m.route.param("arg")},
+				view: function(ctrl) {
+					return ""
+				}
+			}
+		})
+		return value == "foo+bar"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() {return "foo"}},
+			"/test22": {controller: function() {}, view: function() {return "bar"}}
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route(String("/test22/"))
+		mock.requestAnimationFrame.$resolve() //teardown
+		return mock.location.search == "?/test22/" && root.childNodes[0].nodeValue === "bar"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() {return "foo"}},
+			"/test23": {controller: function() {}, view: function() {return "bar"}}
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route(new String("/test23/"))
+		mock.requestAnimationFrame.$resolve() //teardown
+		return mock.location.search == "?/test23/" && root.childNodes[0].nodeValue === "bar"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var value
+		m.route(root, String("/foo+bar"), {
+			"/:arg": {
+				controller: function() {value = m.route.param("arg")},
+				view: function(ctrl) {
+					return ""
+				}
+			}
+		})
+		return value == "foo+bar"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve() //setup
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var value
+		m.route(root, new String("/foo+bar"), {
 			"/:arg": {
 				controller: function() {value = m.route.param("arg")},
 				view: function(ctrl) {

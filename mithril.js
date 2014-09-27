@@ -1,5 +1,10 @@
 Mithril = m = new function app(window, undefined) {
-	var type = function(obj) {return {}.toString.call(obj)}
+	var sObj = "[object Object]", sArr = "[object Array]", sStr = "[object String]"
+	function type(obj) {return {}.toString.call(obj)}
+	function isObj(obj) {return type(obj) == sObj}
+	function isArr(obj) {return type(obj) == sArr}
+	function isFn(obj) {return typeof obj == "function"}
+	function isStr(obj){ return type(obj) == sStr}
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TR‌​ACK|WBR/
 
@@ -17,8 +22,9 @@ Mithril = m = new function app(window, undefined) {
 	 *
 	 */
 	function m() {
-		var args = Array.prototype.slice.call(arguments, 0)
-		var hasAttrs = args[1] != null && type(args[1]) == "[object Object]" && !("tag" in args[1]) && !("subtree" in args[1])
+		var arrSlice = Array.prototype.slice;
+		var args = arrSlice.call(arguments, 0)
+		var hasAttrs = args[1] != null && isObj(args[1]) && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -36,8 +42,8 @@ Mithril = m = new function app(window, undefined) {
 
 
 		var children = hasAttrs ? args[2] : args[1]
-		if (children instanceof Array) {
-			cell.children = children
+		if (isArr(children) || type(children) == "[object Arguments]") {
+			cell.children = arrSlice.call(children, 0)
 		}
 		else {
 			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
@@ -82,7 +88,7 @@ Mithril = m = new function app(window, undefined) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex
-					var end = offset + (dataType == "[object Array]" ? data : cached.nodes).length
+					var end = offset + (dataType == sArr ? data : cached.nodes).length
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
 				else if (cached.nodes) clear(cached.nodes, cached)
@@ -92,7 +98,7 @@ Mithril = m = new function app(window, undefined) {
 			cached.nodes = []
 		}
 
-		if (dataType == "[object Array]") {
+		if (dataType == sArr) {
 			data = flatten(data)
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
 
@@ -165,8 +171,7 @@ Mithril = m = new function app(window, undefined) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
-				var isArray = type(item) == "[object Array]"
-				subArrayCount += isArray ? item.length : 1
+				subArrayCount += isArr(item) ? item.length : 1
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
@@ -189,13 +194,14 @@ Mithril = m = new function app(window, undefined) {
 				cached.nodes = nodes
 			}
 		}
-		else if (data != null && dataType == "[object Object]") {
+		else if (data != null && dataType == sObj) {
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)
-				if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
+				if (cached.configContext && isFn(cached.configContext.onunload)) cached.configContext.onunload()
 			}
-			if (typeof data.tag != "string") return
+			if (!isStr(data.tag)) return
+
 			var node, isNew = cached.nodes.length === 0
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
@@ -219,7 +225,7 @@ Mithril = m = new function app(window, undefined) {
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
-			if (typeof data.attrs["config"] === "function") {
+			if (isFn(data.attrs["config"])) {
 				var context = cached.configContext = cached.configContext || {}
 
 				// bind
@@ -231,7 +237,7 @@ Mithril = m = new function app(window, undefined) {
 				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
-		else if (typeof dataType != "function") {
+		else if (!isFn(dataType)) {
 			//handle text nodes
 			var nodes
 			if (cached.nodes.length === 0) {
@@ -286,11 +292,11 @@ Mithril = m = new function app(window, undefined) {
 					//we don't ignore `key` because it must be unique and having it on the DOM helps debugging
 					if (attrName === "config") continue
 					//hook event handlers to the auto-redrawing system
-					else if (typeof dataAttr == "function" && attrName.indexOf("on") == 0) {
+					else if (isFn(dataAttr) && attrName.indexOf("on") == 0) {
 						node[attrName] = autoredraw(dataAttr, node)
 					}
 					//handle `style: {...}`
-					else if (attrName === "style" && typeof dataAttr == "object") {
+					else if (attrName === "style" && isObj(dataAttr)) {
 						for (var rule in dataAttr) {
 							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
 						}
@@ -338,9 +344,9 @@ Mithril = m = new function app(window, undefined) {
 		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload == "function") cached.configContext.onunload()
+		if (cached.configContext && isFn(cached.configContext.onunload)) cached.configContext.onunload()
 		if (cached.children) {
-			if (type(cached.children) == "[object Array]") {
+			if (isArr(cached.children)) {
 				for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
 			}
 			else if (cached.children.tag) unload(cached.children)
@@ -370,7 +376,7 @@ Mithril = m = new function app(window, undefined) {
 		var flattened = []
 		for (var i = 0; i < data.length; i++) {
 			var item = data[i]
-			if (type(item) == "[object Array]") flattened.push.apply(flattened, flatten(item))
+			if (isArr(item)) flattened.push.apply(flattened, flatten(item))
 			else flattened.push(item)
 		}
 		return flattened
@@ -442,8 +448,8 @@ Mithril = m = new function app(window, undefined) {
 		return prop
 	}
 
-	m.prop = function(store) {
-		if ((typeof store == "object" || typeof store == "function") && store !== null && typeof store.then == "function") {
+	m.prop = function (store) {
+		if ((isObj(store) || isFn(store)) && store !== null && isFn(store.then)) {
 			return propify(store)
 		}
 
@@ -456,7 +462,7 @@ Mithril = m = new function app(window, undefined) {
 		var index = roots.indexOf(root)
 		if (index < 0) index = roots.length
 		var isPrevented = false
-		if (controllers[index] && typeof controllers[index].onunload == "function") {
+		if (controllers[index] && isFn(controllers[index].onunload)) {
 			var event = {
 				preventDefault: function() {isPrevented = true}
 			}
@@ -527,7 +533,7 @@ Mithril = m = new function app(window, undefined) {
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
 		if (arguments.length === 0) return currentRoute
-		else if (arguments.length === 3 && typeof arguments[1] == "string") {
+		else if (arguments.length === 3 && isStr(arguments[1])) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source)
@@ -555,9 +561,9 @@ Mithril = m = new function app(window, undefined) {
 				element.addEventListener("click", routeUnobtrusive)
 			}
 		}
-		else if (typeof arguments[0] == "string") {
+		else if (isStr(arguments[0])) {
 			currentRoute = arguments[0]
-			var querystring = typeof arguments[1] == "object" ? buildQueryString(arguments[1]) : null
+			var querystring = isObj(arguments[1]) ? buildQueryString(arguments[1]) : null
 			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
 
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
@@ -619,7 +625,7 @@ Mithril = m = new function app(window, undefined) {
 		var str = []
 		for(var prop in object) {
 			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
-			str.push(typeof value == "object" ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+			str.push(isObj(value) ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
 		}
 		return str.join("&")
 	}
@@ -705,7 +711,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 
 		function thennable(then, successCallback, failureCallback, notThennableCallback) {
-			if ((typeof promiseValue == "object" || typeof promiseValue == "function") && typeof then == "function") {
+			if ((isObj(promiseValue) || isFn(promiseValue)) && isFn(then)) {
 				try {
 					// count protects against abuse calls from spec checker
 					var count = 0
@@ -749,10 +755,10 @@ Mithril = m = new function app(window, undefined) {
 				fire()
 			}, function() {
 				try {
-					if (state == RESOLVING && typeof successCallback == "function") {
+					if (state == RESOLVING && isFn(successCallback)) {
 						promiseValue = successCallback(promiseValue)
 					}
-					else if (state == REJECTING && typeof failureCallback == "function") {
+					else if (state == REJECTING && isFn(failureCallback)) {
 						promiseValue = failureCallback(promiseValue)
 						state = RESOLVING
 					}
@@ -867,7 +873,7 @@ Mithril = m = new function app(window, undefined) {
 			if (options.deserialize == JSON.parse) {
 				xhr.setRequestHeader("Accept", "application/json, text/*");
 			}
-			if (typeof options.config == "function") {
+			if (isFn(options.config)) {
 				var maybeXhr = options.config(xhr, options)
 				if (maybeXhr != null) xhr = maybeXhr
 			}
@@ -914,7 +920,7 @@ Mithril = m = new function app(window, undefined) {
 				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
 				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
 				if (e.type == "load") {
-					if (type(response) == "[object Array]" && xhrOptions.type) {
+					if (isArr(response) && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 					}
 					else if (xhrOptions.type) response = new xhrOptions.type(response)
