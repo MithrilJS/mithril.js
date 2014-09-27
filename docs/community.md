@@ -1,10 +1,10 @@
 ## Community
 
-### Blog
+### Learn Mithril
 
-Read Mithril tutorials and articles about web app development. Join the discussion!
+Read Mithril tutorials and articles about web app development.
 
-Go to the [Mithril Blog](http://lhorie.github.io/mithril-blog)
+Go to the [Learn Mithril site](http://lhorie.github.io/mithril-blog)
 
 ---
 
