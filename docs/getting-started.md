@@ -286,12 +286,14 @@ The difference, aside from avoiding an anonymous function, is that the `m.withAt
 In addition to bi-directional data binding, we can also bind parameterized functions to events:
 
 ```javascript
-m("button", {onclick: todo.vm.add.bind(todo.vm, todo.vm.description)}, "Add")
+var vm = todo.vm
+
+m("button", {onclick: vm.add.bind(vm, vm.description)}, "Add")
 ```
 
 In the code above, we are simply using the native Javascript `Function::bind` method. This creates a new function with the parameter already set. In functional programming, this is called [*partial application*](http://en.wikipedia.org/wiki/Partial_application).
 
-The `todo.vm.add.bind(todo.vm, todo.vm.description)` expression above returns a function that is equivalent to this code:
+The `vm.add.bind(vm, vm.description)` expression above returns a function that is equivalent to this code:
 
 ```javascript
 onclick: function(e) {

@@ -33,19 +33,24 @@ var app = {};
 app.PageList = function() {
 	return m.request({method: "GET", url: "pages.json"});
 };
-```
 
-```javascript
-//app.controller.js
-app.controller = function() {
+app.vm = {};
+app.vm.init = function() {
 	this.pages = new app.PageList();
 };
 ```
 
 ```javascript
+//app.controller.js
+app.controller = function() {
+	app.vm.init();
+};
+```
+
+```javascript
 //app.view.js
-app.view = function(ctrl) {
-	return ctrl.pages().map(function(page) {
+app.view = function() {
+	return app.vm.pages().map(function(page) {
 		return m("a", {href: page.url}, page.title);
 	});
 };

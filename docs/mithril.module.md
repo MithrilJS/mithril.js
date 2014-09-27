@@ -29,14 +29,20 @@ Modules and namespaces are often used interchangeably, but namespaces that do no
 You can make anonymous modules out of existing classes
 
 ```javascript
-//controller class
-var dashboardController = function() {
+//model object
+var dashboardViewModel = {};
+dashboardViewModel.init = function() {
 	this.greeting = "Hello";
 };
 
+//controller class
+var dashboardController = function() {
+	dashboardViewModel.init();
+};
+
 //view class
-var dashboardView = function(ctrl) {
-	return m("h1", ctrl.greeting);
+var dashboardView = function() {
+	return m("h1", dashboardViewModel.greeting);
 };
 
 //initialize an anonymous module

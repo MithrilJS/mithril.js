@@ -17,11 +17,11 @@ It is useful for teams where styling and functionality are done by different peo
 The tool allows you to write code like this:
 
 ```javascript
-todo.view = function(ctrl) {
+todo.view = function() {
 	return <html>
 		<body>
-			<input onchange={m.withAttr("value", ctrl.description)} value={ctrl.description()}/>
-			<button onclick={ctrl.add.bind(ctrl, ctrl.description)}>Add</button>
+			<input onchange={m.withAttr("value", app.vm.description)} value={app.vm.description()}/>
+			<button onclick={app.vm.add}>Add</button>
 		</body>
 	</html>
 };

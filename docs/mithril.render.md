@@ -77,7 +77,7 @@ app.bindOnce = new function() {
 }
 
 //here's the view
-app.view = function(ctrl) {
+app.view = function() {
 	m(".layout", [
 		app.bindOnce(function() {
 			//this only runs once in order to boost performance
