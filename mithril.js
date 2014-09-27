@@ -864,6 +864,9 @@ Mithril = m = new function app(window, undefined) {
 			if (options.serialize == JSON.stringify && options.data && options.method != "GET") {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
+			if (options.deserialize == JSON.parse) {
+				xhr.setRequestHeader("Accept", "application/json, text/*");
+			}
 			if (typeof options.config == "function") {
 				var maybeXhr = options.config(xhr, options)
 				if (maybeXhr != null) xhr = maybeXhr
