@@ -21,7 +21,7 @@ Once you have a [copy of Mithril](installation.md), getting started is surprisin
 ```markup
 <!doctype html>
 <title>Todo app</title>
-<script src="mithril.js"></script>
+<script src="mithril.min.js"></script>
 <script>
 //app goes here
 </script>
@@ -408,7 +408,7 @@ Here's the application code in its entirety:
 
 ```markup
 <!doctype html>
-<script src="mithril.js"></script>
+<script src="mithril.min.js"></script>
 <script>
 //this application only has one module: todo
 var todo = {};
