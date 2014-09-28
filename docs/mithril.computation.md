@@ -2,10 +2,10 @@
 
 ---
 
-[How auto-redrawing-works](#how-auto-redrawing-works)
-[Integrating multiple execution threads](#integrating-multiple-execution-threads)
-[Integrating to legacy code](#integrating-to-legacy-code)
-[Signature](#signature)
+- [How auto-redrawing-works](#how-auto-redrawing-works)
+- [Integrating multiple execution threads](#integrating-multiple-execution-threads)
+- [Integrating to legacy code](#integrating-to-legacy-code)
+- [Signature](#signature)
 
 ---
 

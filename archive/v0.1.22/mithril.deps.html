@@ -77,8 +77,10 @@
 						<div class="col(9,9,12)">
 							<h2 id="m-deps">m.deps</h2>
 <hr>
-<p><a href="#usage">Usage</a>
-<a href="#signature">Signature</a></p>
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
 <hr>
 <p>This function overwrites the reference to the <code>window</code> object that is used internally by Mithril. It is useful for injecting a mock <code>window</code> dependency for the purposes of testing and for running Mithril in non-browser environments. The mock object used by Mithril for its own test suite <a href="https://github.com/lhorie/mithril.js/blob/next/tests/mock.js">can be found in the development repo</a>.</p>
 <p>By default, Mithril uses <code>window</code> itself as the dependency. Note that Mithril only uses the mock object for browser APIs such as the DOM API and <code>requestAnimationFrame</code>, but relies on the environment for ECMAScript features like <code>Object.keys</code>.</p>

@@ -77,10 +77,12 @@
 						<div class="col(9,9,12)">
 							<h2 id="m-startcomputation-m-endcomputation">m.startComputation / m.endComputation</h2>
 <hr>
-<p><a href="#how-auto-redrawing-works">How auto-redrawing-works</a>
-<a href="#integrating-multiple-execution-threads">Integrating multiple execution threads</a>
-<a href="#integrating-to-legacy-code">Integrating to legacy code</a>
-<a href="#signature">Signature</a></p>
+<ul>
+<li><a href="#how-auto-redrawing-works">How auto-redrawing-works</a></li>
+<li><a href="#integrating-multiple-execution-threads">Integrating multiple execution threads</a></li>
+<li><a href="#integrating-to-legacy-code">Integrating to legacy code</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
 <hr>
 <p>Typically, <code>m.startComputation</code> / <code>m.endComputation</code> don&#39;t need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously, or when calling vanilla javascript asynchronous functions from template <a href="mithril.html#accessing-the-real-dom"><code>config</code></a> functions.</p>
 <p>If you need to do custom asynchronous calls without using Mithril&#39;s API, and find that your views are not redrawing, or that you&#39;re being forced to call <a href="mithril.redraw.html"><code>m.redraw</code></a> manually, you should consider using <code>m.startComputation</code> / <code>m.endComputation</code> so that Mithril can intelligently auto-redraw once your custom code finishes running.</p>

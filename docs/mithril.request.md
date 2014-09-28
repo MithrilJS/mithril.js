@@ -2,20 +2,20 @@
 
 ---
 
-[Basic usage](#basic-usage)
-[Processing-web-service-data](#processing-web-service-data)
-[Bind redirection code](#bind-redirection-code)
-[Binding errors](#binding-errors)
-[Queuing operations](#queuing-operations)
-[Casting the Response Data to a Class](#casting-the-response-data-to-a-class)
-[Unwrapping Response Data](#unwrapping-response-data)
-[Using Different Data Transfer Formats](#using-different-data-transfer-formats)
-[Using variable data formats](#using-variable-data-formats)
-[Extracting Metadata from the Response](#extracting-metadata-from-the-response)
-[Custom request rejections](#custom-request-rejections)
-[Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
-[Aborting a request](#aborting-a-request)
-[Signature](#signature)
+- [Basic usage](#basic-usage)
+- [Processing-web-service-data](#processing-web-service-data)
+- [Bind redirection code](#bind-redirection-code)
+- [Binding errors](#binding-errors)
+- [Queuing operations](#queuing-operations)
+- [Casting the Response Data to a Class](#casting-the-response-data-to-a-class)
+- [Unwrapping Response Data](#unwrapping-response-data)
+- [Using Different Data Transfer Formats](#using-different-data-transfer-formats)
+- [Using variable data formats](#using-variable-data-formats)
+- [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
+- [Custom request rejections](#custom-request-rejections)
+- [Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
+- [Aborting a request](#aborting-a-request)
+- [Signature](#signature)
 
 ---
 

@@ -2,9 +2,9 @@
 
 ---
 
-[Usage](#usage)
-[Subtree directives](#subtree directives)
-[Signature](#signature)
+- [Usage](#usage)
+- [Subtree directives](#subtree directives)
+- [Signature](#signature)
 
 ---
 

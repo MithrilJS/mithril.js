@@ -2,10 +2,10 @@
 
 ---
 
-[Changing redraw strategy](#changing-redraw-strategy)
-[Preventing redraws on events](#preventing-redraws-on-events)
-[Forcing redraw](#forcing-redraw)
-[Signature](#signature)
+- [Changing redraw strategy](#changing-redraw-strategy)
+- [Preventing redraws on events](#preventing-redraws-on-events)
+- [Forcing redraw](#forcing-redraw)
+- [Signature](#signature)
 
 ---
 

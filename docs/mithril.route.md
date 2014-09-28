@@ -2,13 +2,13 @@
 
 ---
 
-[Defining routes](#defining-routes)
-[Variadic routes](#variadic-routes)
-[Routes with querystrings](#routes-with-querystrings)
-[Running clean up code on route change](#running-clean-up-code-on-route-change)
-[Redirecting](#redirecting)
-[Reading the currently active route](#reading-the-currently-active-route)
-[Mode abstraction](#mode abstraction)
+- [Defining routes](#defining-routes)
+- [Variadic routes](#variadic-routes)
+- [Routes with querystrings](#routes-with-querystrings)
+- [Running clean up code on route change](#running-clean-up-code-on-route-change)
+- [Redirecting](#redirecting)
+- [Reading the currently active route](#reading-the-currently-active-route)
+- [Mode abstraction](#mode abstraction)
 
 ---
 

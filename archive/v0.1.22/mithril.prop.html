@@ -77,10 +77,12 @@
 						<div class="col(9,9,12)">
 							<h2 id="m-prop">m.prop</h2>
 <hr>
-<p><a href="#usage">Usage</a>
-<a href="#third-party-promise-library-support">Third-party promise library support</a>
-<a href="#serializing-getter-setters">Serializing getter-setters</a>
-<a href="#signature">Signature</a></p>
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#third-party-promise-library-support">Third-party promise library support</a></li>
+<li><a href="#serializing-getter-setters">Serializing getter-setters</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
 <hr>
 <p>This is a getter-setter factory utility. It returns a function that stores information.</p>
 <p>Note that modifying the values of <code>m.prop</code> getter-setters does not trigger redrawing. Instead, Mithril&#39;s redrawing system relies on <a href="mithril.computation.html"><code>m.startComputation</code> and <code>m.endComputation</code></a>. These functions are internally called by Mithril when you initialize a module via <a href="mithril.module.html"><code>m.module</code></a> or <a href="mithril.route.html"><code>m.route</code></a>, and when you trigger event handlers that were created within templates with <a href="mithril.html"><code>m()</code></a>. </p>

@@ -2,8 +2,8 @@
 
 ---
 
-[Usage](#usage)
-[Signature](#signature)
+- [Usage](#usage)
+- [Signature](#signature)
 
 ---
 

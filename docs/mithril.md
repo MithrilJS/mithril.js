@@ -2,16 +2,16 @@
 
 ---
 
-[Usage](#usage)
-[Binding to data](#binding-to-data)
-[Using HTML entities](#using-html-entities)
-[Accessing the real DOM element](#accessing-the-real-dom-element)
-[Persisting config data](#persisting-config-data)
-[Destructors](#destructors)
-[SVG](#svg)
-[Dealing with focus](#dealing-with-focus)
-[Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
-[Signature](#signature)
+- [Usage](#usage)
+- [Binding to data](#binding-to-data)
+- [Using HTML entities](#using-html-entities)
+- [Accessing the real DOM element](#accessing-the-real-dom-element)
+- [Persisting config data](#persisting-config-data)
+- [Destructors](#destructors)
+- [SVG](#svg)
+- [Dealing with focus](#dealing-with-focus)
+- [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
+- [Signature](#signature)
 
 ---
 

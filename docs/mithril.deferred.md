@@ -2,12 +2,12 @@
 
 ---
 
-[Usage](#usage)
-[Retrieving a value via the getter-setter API](#retrieving-a-value-via-the-getter-setter-api)
-[Integrating to the Mithril redrawing system](#integrating-to-the-mithril-redrawing-system)
-[Differences from Promises/A+](#differences-from-promises-a-)
-[The exception monitor](#the-exception-monitor)
-[Signature](#signature)
+- [Usage](#usage)
+- [Retrieving a value via the getter-setter API](#retrieving-a-value-via-the-getter-setter-api)
+- [Integrating to the Mithril redrawing system](#integrating-to-the-mithril-redrawing-system)
+- [Differences from Promises/A+](#differences-from-promises-a-)
+- [The exception monitor](#the-exception-monitor)
+- [Signature](#signature)
 
 ---
 

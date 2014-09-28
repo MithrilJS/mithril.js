@@ -2,10 +2,10 @@
 
 ---
 
-[Usage](#usage)
-[Third-party promise library support](#third-party-promise-library-support)
-[Serializing getter-setters](#serializing-getter-setters)
-[Signature](#signature)
+- [Usage](#usage)
+- [Third-party promise library support](#third-party-promise-library-support)
+- [Serializing getter-setters](#serializing-getter-setters)
+- [Signature](#signature)
 
 ---
 

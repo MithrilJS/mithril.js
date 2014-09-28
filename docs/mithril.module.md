@@ -2,9 +2,9 @@
 
 ---
 
-[Usage](#usage)
-[Unloading modules](#unloading-modules)
-[Signature](#signature)
+- [Usage](#usage)
+- [Unloading modules](#unloading-modules)
+- [Signature](#signature)
 
 ---
 
