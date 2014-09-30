@@ -463,7 +463,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule
+	var roots = [], modules = [], controllers = [], computePostRedrawHook = null, prevented = false, topModule
 	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -491,26 +491,7 @@ Mithril = m = new function app(window, undefined) {
 			return controllers[index]
 		}
 	}
-	m.redraw = function(force) {
-		var cancel = window.cancelAnimationFrame || window.clearTimeout
-		var defer = window.requestAnimationFrame || window.setTimeout
-		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
-		//lastRedrawID is null if it's the first redraw and not an event handler
-		if (lastRedrawId && force !== true) {
-			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
-			//when rAF: always reschedule redraw
-			if (new Date - lastRedrawCallTime > FRAME_BUDGET || defer == window.requestAnimationFrame) {
-				if (lastRedrawId > 0) cancel(lastRedrawId)
-				lastRedrawId = defer(redraw, FRAME_BUDGET)
-			}
-		}
-		else {
-			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
-		}
-	}
-	m.redraw.strategy = m.prop()
-	function redraw() {
+	m.redraw = function() {
 		var mode = m.redraw.strategy()
 		for (var i = 0; i < roots.length; i++) {
 			if (controllers[i] && mode != "none") {
@@ -522,10 +503,9 @@ Mithril = m = new function app(window, undefined) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
-		lastRedrawId = null
-		lastRedrawCallTime = new Date
 		m.redraw.strategy("diff")
 	}
+	m.redraw.strategy = m.prop()
 
 	var pendingRequests = 0
 	m.startComputation = function() {pendingRequests++}
