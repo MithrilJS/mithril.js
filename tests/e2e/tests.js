@@ -262,3 +262,39 @@ asyncTest('issue214 regression', function() {
 			start()
 		})
 })
+
+asyncTest('issue288 regression', function() {
+	// see https://github.com/lhorie/mithril.js/issues/288
+	// this test will pass using phantomjs, because phantomjs
+	// doesn't provide window.requestAnimationFrame
+	expect(2)
+
+	function controller() {
+		this.inputValue = m.prop('')
+
+		this.submit = function() {
+			if (this.inputValue()) {
+				this.inputValue('')
+			}
+		}.bind(this);
+	}
+
+	function view(ctrl) {
+		return m('form', { onsubmit: ctrl.submit }, [
+			m('input#testinput', {
+				onkeyup: m.withAttr('value', ctrl.inputValue),
+				value: ctrl.inputValue()
+			}),
+      m('button[type=submit]')
+    ])
+	}
+
+	var ctrl = m.module(dummyEl, { controller: controller, view: view })
+
+	Syn.click({}, 'testinput')
+	  .type('abcd[enter]', function() {
+			equal(ctrl.inputValue(), '')
+			equal(document.getElementById('testinput').value, '')
+			start()
+		})
+})
