@@ -235,3 +235,30 @@ test('node identity shuffle and remove', function() {
 	equal(dummyEl.firstChild.firstChild.nextSibling.nextSibling, e1, 'e1 is third element')
 	equal(dummyEl.firstChild.firstChild.nextSibling.nextSibling.nextSibling, e2, 'e2 is fourth element')
 })
+
+asyncTest('issue214 regression', function() {
+	// see https://github.com/lhorie/mithril.js/issues/214
+	// this test will pass using phantomjs, because phantomjs
+	// doesn't provide window.requestAnimationFrame
+	expect(2)
+
+	function controller() {
+		this.inputValue = m.prop('')
+	}
+
+	function view(ctrl) {
+		return m('input#testinput', {
+			value: ctrl.inputValue(),
+			onkeyup: m.withAttr('value', ctrl.inputValue)
+		})
+	}
+
+	var ctrl = m.module(dummyEl, { controller: controller, view: view })
+
+	Syn.click({}, 'testinput')
+		.type('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', function() {
+			equal(ctrl.inputValue(), 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+			equal(document.getElementById('testinput').value, 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+			start()
+		})
+})
