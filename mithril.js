@@ -50,7 +50,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 		return cell
 	}
-	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
+	function build(module, parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
 		//the diff algorithm can be summarized as this:
 		//1 - compare `data` and `cached`
@@ -63,6 +63,7 @@ Mithril = m = new function app(window, undefined) {
 		//- `cached also has a `configContext` property, which is the state storage object exposed by config(element, isInitialized, context)
 		//- when `cached` is an Object, it represents a virtual element; when it's an Array, it represents a list of elements; when it's a String, Number or Boolean, it represents a text node
 
+		//`module` is an optional object that contains a controller object, view function, and root node for the parent module or submodule
 		//`parentElement` is a DOM element used for W3C DOM API calls
 		//`parentTag` is only used for handling a corner case for textarea values
 		//`parentCache` is used to remove nodes in some multi-node cases
@@ -163,7 +164,7 @@ Mithril = m = new function app(window, undefined) {
 
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				//diff each item in the array
-				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
+				var item = build(module, parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
 				if (item.$trusted) {
@@ -216,21 +217,21 @@ Mithril = m = new function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
-					attrs: dataAttrKeys.length ? setAttributes(node, data.tag, data.attrs, {}, namespace) : {},
+					attrs: dataAttrKeys.length ? setAttributes(data._module || module, node, data.tag, data.attrs, {}, namespace) : {},
 					children: data.children != null && data.children.length > 0 ?
-						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
+						build(data._module || module, node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
 						data.children,
 					nodes: [node]
 				}
 				if (cached.children && !cached.children.nodes) cached.children.nodes = []
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
-				if (data.tag == "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace)
+				if (data.tag == "select" && data.attrs.value) setAttributes(data._module || module, node, data.tag, {value: data.attrs.value}, {}, namespace)
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			else {
 				node = cached.nodes[0]
-				if (dataAttrKeys.length) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
+				if (dataAttrKeys.length) setAttributes(data._module || module, node, data.tag, data.attrs, cached.attrs, namespace)
+				cached.children = build(data._module || module, node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
 				cached.nodes.intact = true
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
@@ -245,6 +246,13 @@ Mithril = m = new function app(window, undefined) {
 					}
 				}
 				configs.push(callback(data, [node, !isNew, context, cached]))
+			}
+
+			if (data._module) {
+				data._module.node = node
+
+				var id = getCellCacheKey(node)
+				cellCache[id] = cached
 			}
 		}
 		else if (typeof dataType != sFn) {
@@ -291,7 +299,7 @@ Mithril = m = new function app(window, undefined) {
 
 		return cached
 	}
-	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
+	function setAttributes(module, node, tag, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName]
 			var cachedAttr = cachedAttrs[attrName]
@@ -303,7 +311,7 @@ Mithril = m = new function app(window, undefined) {
 					if (attrName === "config") continue
 					//hook event handlers to the auto-redrawing system
 					else if (typeof dataAttr == sFn && attrName.indexOf("on") == 0) {
-						node[attrName] = autoredraw(dataAttr, node)
+						node[attrName] = autoredraw(module, dataAttr, node)
 					}
 					//handle `style: {...}`
 					else if (attrName === "style" && dataAttr != null && type.call(dataAttr) == sObj) {
@@ -390,10 +398,11 @@ Mithril = m = new function app(window, undefined) {
 		}
 		return data
 	}
-	function autoredraw(callback, object) {
+	function autoredraw(module, callback, object) {
 		return function(e) {
 			e = e || event
 			m.redraw.strategy("diff")
+			m.redraw.target(module)
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
@@ -418,7 +427,7 @@ Mithril = m = new function app(window, undefined) {
 		childNodes: []
 	}
 	var nodeCache = [], cellCache = {}
-	m.render = function(root, cell, forceRecreation) {
+	m.render = function(root, cell, forceRecreation, module) {
 		var configs = []
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
 		var id = getCellCacheKey(root)
@@ -427,7 +436,7 @@ Mithril = m = new function app(window, undefined) {
 		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell}
 		if (cellCache[id] === undefined) clear(node.childNodes)
 		if (forceRecreation === true) reset(root)
-		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
+		cellCache[id] = build(module, node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
 		for (var i = 0; i < configs.length; i++) configs[i]()
 	}
 	function getCellCacheKey(element) {
@@ -493,9 +502,14 @@ Mithril = m = new function app(window, undefined) {
 	}
 	m.redraw = function() {
 		var mode = m.redraw.strategy()
-		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i] && mode != "none") {
-				m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
+		var target = m.redraw.target()
+		if (mode != "none") {
+			if (target) {
+				m.render(target.node, target.view(target.controller), mode == "all", target)
+			} else {
+				for (var i = 0; i < roots.length; i++) {
+					if (controllers[i]) m.render(roots[i], modules[i].view(controllers[i]), mode == "all", { node: roots[i], controller: controllers[i], view: modules[i].view })
+				}
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -503,15 +517,23 @@ Mithril = m = new function app(window, undefined) {
 			computePostRedrawHook()
 			computePostRedrawHook = null
 		}
+		m.redraw.target(undefined)
 		m.redraw.strategy("diff")
 	}
 	m.redraw.strategy = m.prop()
+	m.redraw.target = m.prop()
 
 	var pendingRequests = 0
 	m.startComputation = function() {pendingRequests++}
 	m.endComputation = function() {
 		pendingRequests = Math.max(pendingRequests - 1, 0)
 		if (pendingRequests == 0) m.redraw()
+	}
+
+	m.submodule = function(controller, view) {
+		var vdom = view(controller)
+		vdom._module = { controller: controller, view: view }
+		return vdom
 	}
 
 	m.withAttr = function(prop, withAttrCallback) {
