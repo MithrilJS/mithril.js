@@ -6,7 +6,7 @@ Mithril = m = new function app(window, undefined) {
 	function isFn(obj) {return typeof obj == "function"}
 	function isStr(obj){ return type(obj) == sStr}
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
-	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TR‌​ACK|WBR/
+	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR/
 
 	/*
 	 * @typedef {String} Tag
