@@ -314,14 +314,7 @@ Mithril = m = new function app(window, undefined) {
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-						//FIXME: don't clobber value if still typing (see #151 and #214)
-						//it appears browsers work like this:
-						//- user types, updates UI immediately
-						//- event handler, however, does NOT fire immediately if there's javascript running (because js is single threaded)
-						//- once js finishes, then it runs rAF callback, which clobbers the input if we're using naive bidirectional bindings
-						//- THEN it fires the event handler with the new input value
-						//so if the input value is updated during the small window between registering a UI change natively and the end of non-idle js time, the input loses the value update from that event
-						if (!(node === window.document.activeElement && attrName == "value")) node[attrName] = dataAttr
+						node[attrName] = dataAttr
 					}
 					else node.setAttribute(attrName, dataAttr)
 				}
@@ -388,9 +381,6 @@ Mithril = m = new function app(window, undefined) {
 			m.startComputation()
 			try {return callback.call(object, e)}
 			finally {
-				//FIXME: force asynchronous redraw for event handlers, to prevent double redraw in cases like onkeypress+oninput (#151)
-				//this solution isn't ideal because it creates a small window of opportunity for events to get lost (see #214).
-				if (!lastRedrawId) lastRedrawId = -1
 				m.endComputation()
 			}
 		}
@@ -482,7 +472,6 @@ Mithril = m = new function app(window, undefined) {
 		var cancel = window.cancelAnimationFrame || window.clearTimeout
 		var defer = window.requestAnimationFrame || window.setTimeout
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
-		//lastRedrawId is -1 if the redraw is the first one in a event handler (see #151)
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
