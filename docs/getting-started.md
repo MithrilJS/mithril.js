@@ -65,16 +65,16 @@ todo.TodoList = Array;
 
 ```javascript
 //define a getter-setter with initial value `John`
-var name = m.prop("John");
+var a_name = m.prop("John");
 
 //read the value
-var a = name(); //a == "John"
+var a = a_name(); //a == "John"
 
 //set the value to `Mary`
-name("Mary"); //Mary
+a_name("Mary"); //Mary
 
 //read the value
-var b = name(); //b == "Mary"
+var b = a_name(); //b == "Mary"
 ```
 
 Note that the `Todo` and `TodoList` classes we defined above are plain vanilla Javascript constructors. They can be initialized and used like this:
