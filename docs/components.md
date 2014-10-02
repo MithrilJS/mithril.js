@@ -212,7 +212,7 @@ var autocompleter = function() {
 
 As you can see, the code is exactly the same as before, with the exception that it is wrapped in a function that returns the module. This allows us to easily create copies of the autocompleter:
 
-```
+```javascript
 //here's an example of using the autocompleter
 var dashboard = {}
 dashboard.controller = function() {

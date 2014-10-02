@@ -134,7 +134,9 @@ todo.vm.init = function() {
 }
 ```
 
-The code above defines the view-model object. It has three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string. Later in this guide, we'll pass the `description` property as the parameter to this function. When we get there, I'll explain why we're passing description as an argument instead of simply using OOP-style member association.
+The code above defines a view-model object called `vm`. It is simply a javascript object that has a `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.
+
+Later in this guide, we'll pass the `description` property as the parameter to this function. When we get there, I'll explain why we're passing description as an argument instead of simply using OOP-style member association.
 
 You can use the view-model like this:
 
@@ -393,7 +395,7 @@ So far, we've been using `m.render` to manually redraw after we made a change to
 
 ```javascript
 //render the todo module inside the document DOM node
-m.module(document, todo);
+m.module(document, {controller: todo.controller, view: todo.view});
 ```
 
 Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing. 
@@ -468,7 +470,7 @@ todo.view = function() {
 };
 
 //initialize the application
-m.module(document, todo);
+m.module(document, {controller: todo.controller, view: todo.view});
 </script>
 ```
 
