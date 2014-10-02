@@ -839,7 +839,6 @@ Mithril = m = new function app(window, undefined) {
 				return false
 			}
 
-
 			script.src = options.url
 				+ (options.url.indexOf("?") > 0 ? "&" : "?")
 				+ (options.callbackKey ? options.callbackKey : "callback")
