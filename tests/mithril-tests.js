@@ -1761,6 +1761,39 @@ function testMithril(mock) {
 		mock.document.removeChild(body);
 		return correctData;
 	})
+	test(function(){
+		var body = mock.document.createElement("body");
+		mock.document.body = body;
+		mock.document.appendChild(body);
+
+		var _window = mock;
+		var error = m.prop(false);
+		var req = m.request({
+			url: "/test",
+			dataType: "jsonp",
+			method: "GET",
+			data: { foo: "bar" },
+			background: true
+		});
+		var callbackKeys = [];
+		Object.keys(_window).forEach(function(globalKey){
+			if(globalKey.indexOf("mithril_callback") > -1)
+				callbackKeys.push(globalKey);
+		});
+		var scriptTag = null;
+		mock.document.getElementsByTagName("script").forEach(function(script){
+			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
+				scriptTag = script;
+		});
+		var correctData = false;
+		if(scriptTag){
+			correctData = scriptTag.src.match(/foo=bar/g).length == 1;
+			mock.document.body.removeChild(scriptTag);
+			delete _window[callbackKeys[0]];
+		}
+		mock.document.removeChild(body);
+		return correctData;
+	})
 
 	//m.deferred
 	test(function() {

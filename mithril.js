@@ -872,7 +872,7 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function bindData(xhrOptions, data, serialize) {
 		if (data && Object.keys(data).length > 0) {
-			if (xhrOptions.method == "GET") {
+			if (xhrOptions.method == "GET" && xhrOptions.dataType != "jsonp") {
 				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + buildQueryString(data)
 			}
 			else xhrOptions.data = serialize(data)
