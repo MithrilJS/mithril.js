@@ -215,12 +215,14 @@ where:
 	
 		Example URL: `http://server/#/path/to/page`
 	
-	-	`pathname` mode allows routing URLs that contains no special characters, however this mode requires server-side setup in order to support bookmarking and page refreshes. It also causes page refreshes in IE8.
+	-	`pathname` mode allows routing URLs that contains no special characters, however this mode requires server-side setup in order to support bookmarking and page refreshes. It always causes page refreshes in IE8.
 		
 		Example URL: `http://server/path/to/page`
 	
 		The simplest server-side setup possible to support pathname mode is to serve the same content regardless of what URL is requested. In Apache, this URL rewriting can be achieved using ModRewrite.
-
+		
+		Note that in order to use the `pathname` mode, the application must be run from the root URL.
+		
 -	<a name="param"></a>
 
 	#### m.route.param
