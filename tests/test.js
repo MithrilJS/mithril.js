@@ -1,10 +1,15 @@
+if (!this.console) {
+	var log = function(value) {document.write("<pre>" + value + "</pre>")}
+	this.console = {log: log, error: log}
+}
+
 function test(condition) {
 	var duration = 0
 	var start = 0
 	var result = true
 	test.total++
 
-	if (typeof performance != "undefined") {
+	if (this.performance != null && performance.now) {
 		start = performance.now()
 	}
 	try {
@@ -15,7 +20,7 @@ function test(condition) {
 		console.error(e)
 		test.failures.push(condition)
 	}
-	if (typeof performance != "undefined") {
+	if (this.performance != null && performance.now) {
 		duration = performance.now() - start
 	}
 

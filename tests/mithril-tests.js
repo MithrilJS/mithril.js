@@ -26,7 +26,7 @@ function testMithril(mock) {
 	test(function() {return m("div", [{foo: "bar"}])}) //as long as it doesn't throw errors, it's fine
 	test(function() {return m("svg", [m("g")])})
 	test(function() {return m("svg", [m("a[href='http://google.com']")])})
-	test(function() {return m(".foo", {class: "bar"}).attrs.class == "foo bar"})
+	test(function() {return m(".foo", {"class": "bar"}).attrs["class"] == "foo bar"})
 	test(function() {return m(".foo", {className: "bar"}).attrs.className == "foo bar"})
 
 	//m.module
@@ -70,9 +70,9 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-		m.render(root, m("div", {class: "a"}))
+		m.render(root, m("div", {"class": "a"}))
 		var elementBefore = root.childNodes[0]
-		m.render(root, m("div", {class: "b"}))
+		m.render(root, m("div", {"class": "b"}))
 		var elementAfter = root.childNodes[0]
 		return elementBefore === elementAfter
 	})
@@ -701,8 +701,8 @@ function testMithril(mock) {
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/157
 		var root = mock.document.createElement("div")
-		m.render(root, m("br", {class: "a"}))
-		m.render(root, m("br", {class: "aa"}))
+		m.render(root, m("br", {"class": "a"}))
+		m.render(root, m("br", {"class": "aa"}))
 		return root.childNodes[0].childNodes.length == 0
 	})
 	test(function() {
