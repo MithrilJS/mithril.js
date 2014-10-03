@@ -121,7 +121,7 @@ module.exports = function(grunt) {
 		md2html: md2htmlTasks,
 		uglify: {
 			options: {banner: "/*\nMithril v" + version + "\nhttp://github.com/lhorie/mithril.js\n(c) Leo Horie\nLicense: MIT\n*/", sourceMap: true},
-			mithril: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.min.js"}
+			mithril: {src: "mithril.js", dest: "mithril.min.js"}
 		},
 		concat: {
 			test: {src: ["mithril.js", "./tests/test.js", "./tests/mock.js", "./tests/mithril-tests.js"], dest: currentVersionArchiveFolder + "/mithril-tests.js"}
@@ -147,6 +147,8 @@ module.exports = function(grunt) {
 			tools: {expand: true, cwd: inputFolder + "/layout/tools/", src: "./**", dest: currentVersionArchiveFolder + "/tools/"},
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
+			minified: {src: "mithril.min.js", dest: currentVersionArchiveFolder + "/mithril.min.js"},
+			map: {src: "mithril.min.map", dest: currentVersionArchiveFolder + "/mithril.min.map"},
 			typescript: {src: "mithril.d.ts", dest: currentVersionArchiveFolder + "/mithril.d.ts"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
 			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version},
