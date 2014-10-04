@@ -38,7 +38,9 @@ mock.window = new function() {
 			},
 			getAttribute: function(name, value) {
 				return this[name]
-			}
+			},
+			addEventListener: function () {},
+			removeEventListener: function () {}
 		}
 	}
 	window.document.createElementNS = function(namespace, tag) {
