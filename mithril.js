@@ -210,11 +210,13 @@ Mithril = m = new function app(window, undefined) {
 				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
 				cached = {
 					tag: data.tag,
-					//process children before attrs so that select.value works correctly
-					children: build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs),
+					//set attributes first, then create children
 					attrs: setAttributes(node, data.tag, data.attrs, {}, namespace),
+					children: build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs),
 					nodes: [node]
 				}
+				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
+				if (data.tag == "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace)
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			else {
@@ -927,7 +929,7 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	//testing API
-	m.deps = function(mock) {return window = mock}
+	m.deps = function(mock) {return window = mock || window}
 	//for internal testing only, do not use `m.deps.factory`
 	m.deps.factory = app
 
