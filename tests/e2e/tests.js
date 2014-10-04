@@ -238,8 +238,6 @@ test('node identity shuffle and remove', function() {
 
 asyncTest('issue214 regression', function() {
 	// see https://github.com/lhorie/mithril.js/issues/214
-	// this test will pass using phantomjs, because phantomjs
-	// doesn't provide window.requestAnimationFrame
 	expect(2)
 
 	function controller() {
@@ -328,8 +326,6 @@ asyncTest('issue214 regression', function() {
 
 asyncTest('issue288 regression', function() {
 	// see https://github.com/lhorie/mithril.js/issues/288
-	// this test will pass using phantomjs, because phantomjs
-	// doesn't provide window.requestAnimationFrame
 	expect(2)
 
 	function controller() {
@@ -364,4 +360,39 @@ asyncTest('issue288 regression', function() {
 			equal(document.getElementById('testinput').value, '')
 			start()
 		})
+})
+
+test('issue278 regression', function() {
+	// see https://github.com/lhorie/mithril.js/issues/278
+	expect(1)
+
+	var test = {
+		controller: function() {
+			this.values = [1, 2, 3, 4, 5]
+			this.value = m.prop([2, 3])
+		},
+
+		view: function(ctrl) {
+			return m('select#testselect', {
+				size: ctrl.values.length,
+				multiple: 'multiple'
+			}, [
+				ctrl.values.map(function(v){
+					var opts = {value: v}
+					if (ctrl.value().indexOf(v) !== -1) opts.selected = 'selected'
+					return m('option', opts, v)
+				})
+			])
+		}
+	}
+
+	m.render(dummyEl, test.view(new test.controller))
+
+	var select = document.getElementById('testselect')
+
+	for (var i = 0, selected = 0; i < select.options.length; i++) {
+		if (select.options[i].selected) selected++
+	}
+
+	equal(selected, 2)
 })
