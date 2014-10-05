@@ -13,7 +13,7 @@ macro m {
 	case { _ ($selector, $partial) } => {
 		var partialSyntax = #{$partial};
 		var partial = unwrapSyntax(partialSyntax);
-		return partial.value == "{}" ? #{m($selector, $partial, [])} : #{m($selector, {}, partial)};
+		return partial.value == "{}" ? #{m($selector, $partial, [])} : #{m($selector, {}, $partial)};
 	}
 	case { _ ($selector, $dynAttrs, $children) } => { 
 		var selectorSyntax = #{$selector};
@@ -21,6 +21,9 @@ macro m {
 		
 		var dynAttrsSyntax = #{$dynAttrs};
 		var dynAttrs = unwrapSyntax(dynAttrsSyntax);
+		
+		var childrenSyntax = #{$children};
+		var children = unwrapSyntax(childrenSyntax);
 		
 		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g;
 		var attrParser = /\[(.+?)=("|'|)(.+?)\2\]/;
@@ -60,5 +63,3 @@ macro m {
 		return #{Mithril};
 	}
 }
-
-export m;
