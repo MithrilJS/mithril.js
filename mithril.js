@@ -548,7 +548,7 @@ Mithril = m = new function app(window, undefined) {
 			var context = arguments[2]
 			if (!isInitialized) {
 				context.href = element.getAttribute("href")
-				element.href = window.location.pathname + modes[m.route.mode] + context.href
+				element.href = (m.route.mode !== 'pathname' ? window.location.pathname : '') + modes[m.route.mode] + context.href
 				element.removeEventListener("click", routeUnobtrusive)
 				element.addEventListener("click", routeUnobtrusive)
 			}
