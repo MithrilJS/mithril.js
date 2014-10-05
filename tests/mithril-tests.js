@@ -861,10 +861,20 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.route.mode = "pathname"
 		m.route(root, "/test2", {
-			"/test2": {controller: function() {}, view: function() {return "foo"}}
+			"/test2": {
+				controller: function() {},
+				view: function() {
+					return [
+						"foo",
+						m("a", { href: "/test2", config: m.route }, "Test2")
+					]
+				}
+			}
 		})
 		mock.requestAnimationFrame.$resolve() //teardown
-		return mock.location.pathname == "/test2" && root.childNodes[0].nodeValue === "foo"
+		return mock.location.pathname == "/test2" &&
+			root.childNodes[0].nodeValue === "foo" &&
+			root.childNodes[1].href == "/test2"
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
