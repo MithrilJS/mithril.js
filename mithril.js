@@ -22,15 +22,14 @@ Mithril = m = new function app(window, undefined) {
 	 *
 	 */
 	function m() {
-		var arrSlice = Array.prototype.slice;
-		var args = arrSlice.call(arguments, 0)
+		var args = [].slice.call(arguments)
 		var hasAttrs = args[1] != null && isObj(args[1]) && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
 		var match, classes = []
 		while (match = parser.exec(args[0])) {
-			if (match[1] == "") cell.tag = match[2]
+			if (match[1] == "" && match[2]) cell.tag = match[2]
 			else if (match[1] == "#") cell.attrs.id = match[2]
 			else if (match[1] == ".") classes.push(match[2])
 			else if (match[3][0] == "[") {
@@ -42,8 +41,8 @@ Mithril = m = new function app(window, undefined) {
 
 
 		var children = hasAttrs ? args[2] : args[1]
-		if (isArr(children) || type(children) == "[object Arguments]") {
-			cell.children = arrSlice.call(children, 0)
+		if (isArr(children)) {
+			cell.children = children
 		}
 		else {
 			cell.children = hasAttrs ? args.slice(2) : args.slice(1)

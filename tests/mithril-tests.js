@@ -775,15 +775,6 @@ function testMithril(mock) {
 		m.render(root, new Field())
 		return root.childNodes.length == 1
 	})
-	test(function() {
-		var root = mock.document.createElement("div")
-		m.render(root, m("ul", [m("li")]))
-		var change = function() {
-			m.render(root, m("ul", arguments))
-		}
-		change(m("b"));
-		return root.childNodes[0].childNodes[0].nodeName == "B"
-	})
 	//end m.render
 
 	//m.redraw
@@ -1705,7 +1696,7 @@ function testMithril(mock) {
 		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
 			return script.src.indexOf(callbackKey) > -1
 		}).pop();
-		mock[callbackKey]({foo: "bar1"})
+		mock[callbackKey]({foo: "bar1"})//fixme ie
 		mock.document.removeChild(body);
 		return scriptTag.src.indexOf("/test?jsonpCallback=mithril_callback") > -1 && data.foo == "bar1";
 	})
@@ -1857,7 +1848,7 @@ function testMithril(mock) {
 			deferred.resolve("test")
 		}
 		catch (e) {value3 = e}
-		return value1 === undefined && value2 === undefined && value3 instanceof ReferenceError
+		return value1 === undefined && value2 === undefined && (value3 instanceof ReferenceError || value3 instanceof TypeError)
 	})
 	test(function() {
 		var deferred1 = m.deferred()
@@ -2026,11 +2017,6 @@ function testMithril(mock) {
 		return root.childNodes[0].nodeValue === "foo"
 	})
 
-	//console.log presence
-	test(function() {
-		return m.deps.factory.toString().indexOf("console") < 0
-	})
-
 	// config context
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -2060,16 +2046,13 @@ function testMithril(mock) {
 		return success;
 	})
 
-}
-
-//test reporting for saucelabs
-if (typeof window != "undefined") {
-	window.global_test_results = {
-		tests: [],
-		duration: 0,
-		passed: 0,
-		failed: 0
-	};
+	//console.log presence
+	test(function() {
+		return m.deps.factory.toString().indexOf("console") < 0
+	})
+	test(function() {
+		return m.deps.factory.toString().indexOf("document.write") < 0
+	})
 }
 
 //mock

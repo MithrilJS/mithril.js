@@ -1,3 +1,37 @@
+if (!Array.prototype.indexOf) {
+	Array.prototype.indexOf = function(item) {
+		for (var i = 0; i < this.length; i++) {
+			if (this[i] === item) return i
+		}
+		return -1
+	}
+}
+if (!Array.prototype.map) {
+	Array.prototype.map = function(callback) {
+		var results = []
+		for (var i = 0; i < this.length; i++) {
+			results[i] = callback(this[i], i, this)
+		}
+		return results
+	}
+}
+if (!Array.prototype.filter) {
+	Array.prototype.filter = function(callback) {
+		var results = []
+		for (var i = 0; i < this.length; i++) {
+			if (callback(this[i], i, this)) results.push(this[i])
+		}
+		return results
+	}
+}
+if (!Object.keys) {
+	Object.keys = function() {
+		var keys = []
+		for (var i in this) keys.push(i)
+		return keys
+	}
+}
+
 var mock = {}
 mock.window = new function() {
 	var window = {}
@@ -77,7 +111,7 @@ mock.window = new function() {
 
 		var traverse = function(node){
 			if(node.childNodes && node.childNodes.length > 0){
-				node.childNodes.forEach(function(curr){
+				node.childNodes.map(function(curr){
 					if(curr.nodeName.toLowerCase() === name)
 						out.push(curr);
 					traverse(curr);

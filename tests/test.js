@@ -1,3 +1,13 @@
+//test reporting for saucelabs
+if (typeof window != "undefined") {
+	window.global_test_results = {
+		tests: [],
+		duration: 0,
+		passed: 0,
+		failed: 0
+	};
+}
+
 if (!this.console) {
 	var log = function(value) {document.write("<pre>" + value + "</pre>")}
 	this.console = {log: log, error: log}
@@ -13,7 +23,7 @@ function test(condition) {
 		start = performance.now()
 	}
 	try {
-		if (!condition()) throw new Error()
+		if (!condition()) throw new Error("failed")
 	}
 	catch (e) {
 		result = false
