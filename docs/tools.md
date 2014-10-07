@@ -60,6 +60,13 @@ You can use it by adding a reference to your Typescript files. This will allow t
 Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Array::map` and `Object::keys`, as well as the `JSON` object.
 
 The easiest way to polyfill these features is to include this script:
+
+```javascript
+<script src="https://polyfill.io/"></script>
+```
+
+This will provide all the polyfills required for the browser. You can alternatively include only specific polyfills:
+
 ```markup
 <script src="https://polyfill.io/readable/gimme(array.prototype.indexof,object.keys,function.prototype.bind,array.prototype.foreach,JSON)"></script>
 ```
