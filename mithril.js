@@ -812,7 +812,6 @@ Mithril = m = new function app(window, undefined) {
 			var script = window.document.createElement("script")
 
 			window[callbackKey] = function(resp){
-				window[callbackKey] = undefined
 				window.document.body.removeChild(script)
 				options.onload({
 					type: "load",
@@ -820,6 +819,7 @@ Mithril = m = new function app(window, undefined) {
 						responseText: resp
 					}
 				})
+				delete window[callbackKey]
 			}
 
 			script.onerror = function(e) {
