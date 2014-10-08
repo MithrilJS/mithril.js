@@ -1,7 +1,7 @@
 Mithril = m = new function app(window, undefined) {
 	var sObj = "[object Object]", sArr = "[object Array]", sStr = "[object String]"
 	function type(obj) {return {}.toString.call(obj)}
-	function isObj(obj) {return type(obj) == sObj}
+	function isObj(obj) {return obj != null && type(obj) == sObj}
 	function isArr(obj) {return type(obj) == sArr}
 	function isFn(obj) {return typeof obj == "function"}
 	function isStr(obj){ return type(obj) == sStr}
@@ -812,7 +812,7 @@ Mithril = m = new function app(window, undefined) {
 			var script = window.document.createElement("script")
 
 			window[callbackKey] = function(resp){
-				delete window[callbackKey]
+				window[callbackKey] = undefined
 				window.document.body.removeChild(script)
 				options.onload({
 					type: "load",
