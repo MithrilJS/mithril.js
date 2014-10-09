@@ -432,8 +432,16 @@ Mithril = m = new function app(window, undefined) {
 			return store
 		}
 
-		prop.toJSON = prop.valueOf = function() {
+		prop.toJSON = function() {
 			return store
+		}
+
+		prop.toString = function(){
+			return store.toString();
+		}
+
+		prop.valueOf = function(){
+			return store.valueOf();
 		}
 
 		return prop
