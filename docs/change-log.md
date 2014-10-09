@@ -1,5 +1,16 @@
 ## Change Log
 
+[v0.1.23](/mithril/archive/v0.1.23) - maintenance
+
+-	fixed a bunch of IE8 issues [#298](https://github.com/lhorie/mithril.js/issues/298)
+-	fixed handling of `method` option in JSONP mode [#292](https://github.com/lhorie/mithril.js/issues/292)
+-	fixed source map files
+-	fixed handling of select[multiple]
+-	fixed template compiler edge case [#286](https://github.com/lhorie/mithril.js/issues/286)
+-	fixed pathname bug in m.route [#290](https://github.com/lhorie/mithril.js/issues/290)
+
+---
+
 [v0.1.22](/mithril/archive/v0.1.22) - maintenance
 
 ### News:
