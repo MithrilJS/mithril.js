@@ -37,7 +37,7 @@ This tool is also available as a [Rails gem](https://github.com/mrsweaters/mithr
 
 You can pre-compile Mithril templates to make them run faster. For more information see this page:
 
-[Compiling Templates](compiling-templates.md)
+[Compiling Templates](optimizing-performance.md#compiling-templates)
 
 ---
 

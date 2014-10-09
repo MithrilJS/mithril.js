@@ -116,21 +116,24 @@ In the case of our todo application, the view-model needs a few things: it needs
 
 ```javascript
 //define the view-model
-todo.vm = {}
-todo.vm.init = function() {
-	//a running list of todos
-	this.list = new todo.TodoList();
-	
-	//a slot to store the name of a new todo before it is created
-	this.description = m.prop("");
-	
-	//adds a todo to the list, and clears the description field for user convenience
-	this.add = function(description) {
-		if (description()) {
-			this.list.push(new todo.Todo({description: description()}));
-			this.description("");
-		}
-	};
+todo.vm = new function() {
+	var vm = {}
+	vm.init = function() {
+		//a running list of todos
+		vm.list = new todo.TodoList();
+		
+		//a slot to store the name of a new todo before it is created
+		vm.description = m.prop("");
+		
+		//adds a todo to the list, and clears the description field for user convenience
+		vm.add = function(description) {
+			if (description()) {
+				vm.list.push(new todo.Todo({description: description()}));
+				vm.description("");
+			}
+		};
+	}
+	return vm
 }
 ```
 
@@ -312,10 +315,10 @@ Mithril uses them in other interesting ways elsewhere.
 Clever readers will probably notice that we can refactor the `add` method to make it much simpler:
 
 ```javascript
-this.add = function() {
-	if (this.description()) {
-		this.list.push(new todo.Todo({description: this.description()}));
-		this.description("");
+vm.add = function() {
+	if (vm.description()) {
+		vm.list.push(new todo.Todo({description: vm.description()}));
+		vm.description("");
 	}
 }.bind(this);
 ```
@@ -430,18 +433,25 @@ todo.TodoList = Array;
 //stores a description for new todos before they are created
 //and takes care of the logic surrounding when adding is permitted
 //and clearing the input after adding a todo to the list
-todo.vm = {}
-todo.vm.init = function() {
-	this.list = new todo.TodoList();
-	this.description = m.prop("");
-	
-	this.add = function() {
-		if (this.description()) {
-			this.list.push(new todo.Todo({description: this.description()}));
-			this.description("");
-		}
-	}.bind(this);
-};
+todo.vm = new function() {
+	var vm = {}
+	vm.init = function() {
+		//a running list of todos
+		vm.list = new todo.TodoList();
+		
+		//a slot to store the name of a new todo before it is created
+		vm.description = m.prop("");
+		
+		//adds a todo to the list, and clears the description field for user convenience
+		vm.add = function() {
+			if (vm.description()) {
+				vm.list.push(new todo.Todo({description: vm.description()}));
+				vm.description("");
+			}
+		};
+	}
+	return vm
+}
 
 //the controller defines what part of the model is relevant for the current page
 //in our case, there's only one view-model that handles everything
@@ -578,7 +588,7 @@ Mithril provides a few more facilities that are not demonstrated in this page. T
 
 ## Advanced Topics
 
--	[Compiling templates](compiling-templates)
+-	[Optimizing performance](optimizing-performance.md)
 -	[Integrating with the Auto-Redrawing System](auto-redrawing.md)
 -	[Integrating with Other Libraries](integration.md)
 

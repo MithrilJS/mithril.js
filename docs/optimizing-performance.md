@@ -1,4 +1,14 @@
-## Compiling Templates
+## Optimizing Performance
+
+There's a number of ways to improve Mithril performance for the rare cases where pages are too complex for their own good.
+
+First and foremost, you should think hard about whether performance optimization is truly your last resort. By nature, optimizing performance make aggressive assumptions that can break in edge cases and it yields difficult to understand code. As a rule of thumb, you should *never* implement performance optimizations if another solution is available.
+
+For example, if you are building a table with thousands of rows and finding that the template is slow, you should first consider making the table show less items, because from a user experience perspective, no one is realistically going to scan through thousands of records. The effort to make the table paginated, searchable or filterable can improve the user experience in addition to solving the performance problem both on redraws and on initial page load.
+
+---
+
+## Compiling templates
 
 You can optionally pre-compile templates that use `m()` by running the [`template-compiler.sjs`](tools/template-compiler.sjs) macro with [Sweet.js](https://github.com/mozilla/sweet.js). This step isn't required in order to use Mithril, but it's an easy way to squeeze a little bit more performance out of an application, without the need for code changes.
 

@@ -115,3 +115,6 @@ In addition, note that template performance, both in Mithril templates as well a
 ## Usage of keys
 
 If you need to sort lists, or delete items from them, or splice them in any way, you should [use the `key` attribute](mithril.md#dealing-with-sorting-and-deleting-in-lists) to maintain referential integrity between the data and the DOM.
+
+Not using keys still works in some cases, but might trigger more expensive code paths within the redrawing algorithm.
+
