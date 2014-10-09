@@ -23,7 +23,7 @@ Mithril = m = new function app(window, undefined) {
 	 */
 	function m() {
 		var args = [].slice.call(arguments)
-		var hasAttrs = args[1] != null && isObj(args[1]) && !("tag" in args[1]) && !("subtree" in args[1])
+		var hasAttrs = isObj(args[1]) && !("tag" in args[1]) && !("subtree" in args[1])
 		var attrs = hasAttrs ? args[1] : {}
 		var classAttrName = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
@@ -143,20 +143,20 @@ Mithril = m = new function app(window, undefined) {
 					if (change.action == INSERTION) {
 						var dummy = window.document.createElement("div")
 						dummy.key = data[change.index].attrs.key
-						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
+						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null)
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
 
 					if (change.action == MOVE) {
 						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
-							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
+							parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
 						}
 						newCached[change.index] = cached[change.from]
 					}
 				}
 				for (var i = 0; i < unkeyed.length; i++) {
 					var change = unkeyed[i]
-					parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
+					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
 					newCached[change.index] = cached[change.index]
 				}
 				cached = newCached
@@ -352,7 +352,7 @@ Mithril = m = new function app(window, undefined) {
 			var isElement = nextSibling.nodeType != 1
 			var placeholder = window.document.createElement("span")
 			if (isElement) {
-				parentElement.insertBefore(placeholder, nextSibling)
+				parentElement.insertBefore(placeholder, nextSibling || null)
 				placeholder.insertAdjacentHTML("beforebegin", data)
 				parentElement.removeChild(placeholder)
 			}
@@ -810,8 +810,8 @@ Mithril = m = new function app(window, undefined) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
 			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
 			var script = window.document.createElement("script")
-
-			window[callbackKey] = function(resp){
+			
+			window[callbackKey] = function(resp) {
 				window.document.body.removeChild(script)
 				options.onload({
 					type: "load",
@@ -819,11 +819,10 @@ Mithril = m = new function app(window, undefined) {
 						responseText: resp
 					}
 				})
-				delete window[callbackKey]
+				window[callbackKey] = undefined
 			}
 
 			script.onerror = function(e) {
-				delete window[callbackKey]
 				window.document.body.removeChild(script)
 
 				options.onerror({
@@ -833,6 +832,7 @@ Mithril = m = new function app(window, undefined) {
 						responseText: JSON.stringify({error: "Error making jsonp request"})
 					}
 				})
+				window[callbackKey] = undefined
 
 				return false
 			}

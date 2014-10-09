@@ -1,6 +1,6 @@
 function testMithril(mock) {
 	m.deps(mock)
-
+	
 	//m
 	test(function() {return m("div").tag === "div"})
 	test(function() {return m(".foo").tag === "div"})
@@ -1664,136 +1664,91 @@ function testMithril(mock) {
 	// m.request over jsonp
 	test(function(){
 		// script tags cannot be appended directly on the document
+		var body = mock.document.createElement("body")
+		mock.document.body = body
+		mock.document.appendChild(body)
+
+		var	error = m.prop("no error")
+		var data
+		var req = m.request({url: "/test", dataType: "jsonp"}).then(function(received) {data = received}, error)
+		var callbackKey = Object.keys(mock).filter(function(globalKey){
+			return globalKey.indexOf("mithril_callback") > -1
+		}).pop()
+		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
+			return script.src.indexOf(callbackKey) > -1
+		}).pop()
+		mock[callbackKey]({foo: "bar"})
+		mock.document.removeChild(body)
+		return scriptTag.src.indexOf("/test?callback=mithril_callback") > -1 && data.foo == "bar"
+	})
+	test(function(){
+		// script tags cannot be appended directly on the document
+		var body = mock.document.createElement("body")
+		mock.document.body = body
+		mock.document.appendChild(body)
+
+		var	error = m.prop("no error")
+		var data
+		var req = m.request({url: "/test", dataType: "jsonp", callbackKey: "jsonpCallback"}).then(function(received) {data = received}, error);
+		var callbackKey = Object.keys(mock).filter(function(globalKey){
+			return globalKey.indexOf("mithril_callback") > -1
+		}).pop()
+		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
+			return script.src.indexOf(callbackKey) > -1
+		}).pop()
+		mock[callbackKey]({foo: "bar1"})
+		mock.document.removeChild(body)
+		return scriptTag.src.indexOf("/test?jsonpCallback=mithril_callback") > -1 && data.foo == "bar1"
+	})
+	test(function(){
+		var body = mock.document.createElement("body")
+		mock.document.body = body
+		mock.document.appendChild(body)
+
+		var req = m.request({url: "/test", dataType: "jsonp"})
+		var callbackKey = Object.keys(mock).filter(function(globalKey){
+			return globalKey.indexOf("mithril_callback") > -1
+		}).pop()
+		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
+			return script.src.indexOf(callbackKey) > -1
+		}).pop();
+		mock[callbackKey]({foo: "bar1"})
+		var out = {foo: "bar1"}
+		mock.document.removeChild(body)
+		return JSON.stringify(out) === JSON.stringify(req())
+	})
+	test(function(){
+		var body = mock.document.createElement("body")
+		mock.document.body = body
+		mock.document.appendChild(body)
+
+		var req = m.request({url: "/test", dataType: "jsonp", data: {foo: "bar"}})
+		var callbackKey = Object.keys(mock).filter(function(globalKey){
+			return globalKey.indexOf("mithril_callback") > -1
+		}).pop()
+		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
+			return script.src.indexOf(callbackKey) > -1
+		}).pop();
+		mock[callbackKey]({foo: "bar"})
+		return scriptTag.src.indexOf("foo=bar") > -1
+	})
+	test(function(){
 		var body = mock.document.createElement("body");
 		mock.document.body = body;
 		mock.document.appendChild(body);
 
-		var	error = m.prop("no error");
-		var data
-		var req = m.request({url: "/test", dataType: "jsonp"}).then(function(received) {data = received}, error);
+		var _window = mock;
+		var error = m.prop(false);
+		var req = m.request({url: "/test", dataType: "jsonp", method: "GET", data: {foo: "bar"}});
 		var callbackKey = Object.keys(mock).filter(function(globalKey){
 			return globalKey.indexOf("mithril_callback") > -1
-		}).pop();
+		}).pop()
 		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
 			return script.src.indexOf(callbackKey) > -1
 		}).pop();
 		mock[callbackKey]({foo: "bar"})
 		mock.document.removeChild(body);
-		return scriptTag.src.indexOf("/test?callback=mithril_callback") > -1 && data.foo == "bar";
-	})
-	test(function(){
-		// script tags cannot be appended directly on the document
-		var body = mock.document.createElement("body");
-		mock.document.body = body;
-		mock.document.appendChild(body);
-
-		var	error = m.prop("no error");
-		var data
-		var req = m.request({url: "/test", dataType: "jsonp", callbackKey: "jsonpCallback"}).then(function(received) {data = received}, error);
-		var callbackKey = Object.keys(mock).filter(function(globalKey){
-			return globalKey.indexOf("mithril_callback") > -1
-		}).pop();
-		var scriptTag = [].slice.call(mock.document.getElementsByTagName("script")).filter(function(script){
-			return script.src.indexOf(callbackKey) > -1
-		}).pop();
-		mock[callbackKey]({foo: "bar1"})//fixme ie
-		mock.document.removeChild(body);
-		return scriptTag.src.indexOf("/test?jsonpCallback=mithril_callback") > -1 && data.foo == "bar1";
-	})
-	test(function(){
-		var body = mock.document.createElement("body");
-		mock.document.body = body;
-		mock.document.appendChild(body);
-
-		var _window = mock;
-		var req = m.request({
-			url: "/test",
-			dataType: "jsonp",
-			background: true
-		});
-		var callbackKeys = [];
-		Object.keys(_window).forEach(function(globalKey){
-			if(globalKey.indexOf("mithril_callback") > -1)
-				callbackKeys.push(globalKey);
-		});
-		var scriptTag = null;
-		mock.document.getElementsByTagName("script").forEach(function(script){
-			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
-				scriptTag = script;
-		});
-		var out = { foo: "bar" };
-		if(scriptTag && callbackKeys.length > 0){
-			_window[callbackKeys[0]](out);
-			mock.document.body.removeChild(scriptTag);
-			delete _window[callbackKeys[0]];
-		}
-		mock.document.removeChild(body);
-		return JSON.stringify(out) === JSON.stringify(req());
-	})
-	test(function(){
-		var body = mock.document.createElement("body");
-		mock.document.body = body;
-		mock.document.appendChild(body);
-
-		var _window = mock;
-		var error = m.prop(false);
-		var req = m.request({
-			url: "/test",
-			dataType: "jsonp",
-			data: { foo: "bar" },
-			background: true
-		});
-		var callbackKeys = [];
-		Object.keys(_window).forEach(function(globalKey){
-			if(globalKey.indexOf("mithril_callback") > -1)
-				callbackKeys.push(globalKey);
-		});
-		var scriptTag = null;
-		mock.document.getElementsByTagName("script").forEach(function(script){
-			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
-				scriptTag = script;
-		});
-		var correctData = false;
-		if(scriptTag){
-			correctData = scriptTag.src.indexOf("foo=bar") > -1;
-			mock.document.body.removeChild(scriptTag);
-			delete _window[callbackKeys[0]];
-		}
-		mock.document.removeChild(body);
-		return correctData;
-	})
-	test(function(){
-		var body = mock.document.createElement("body");
-		mock.document.body = body;
-		mock.document.appendChild(body);
-
-		var _window = mock;
-		var error = m.prop(false);
-		var req = m.request({
-			url: "/test",
-			dataType: "jsonp",
-			method: "GET",
-			data: { foo: "bar" },
-			background: true
-		});
-		var callbackKeys = [];
-		Object.keys(_window).forEach(function(globalKey){
-			if(globalKey.indexOf("mithril_callback") > -1)
-				callbackKeys.push(globalKey);
-		});
-		var scriptTag = null;
-		mock.document.getElementsByTagName("script").forEach(function(script){
-			if(!scriptTag && script.src.indexOf(callbackKeys[0]) > -1)
-				scriptTag = script;
-		});
-		var correctData = false;
-		if(scriptTag){
-			correctData = scriptTag.src.match(/foo=bar/g).length == 1;
-			mock.document.body.removeChild(scriptTag);
-			delete _window[callbackKeys[0]];
-		}
-		mock.document.removeChild(body);
-		return correctData;
+		return scriptTag.src.match(/foo=bar/g).length == 1;
 	})
 
 	//m.deferred
@@ -2000,10 +1955,9 @@ function testMithril(mock) {
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
 
-		var controller
 		var root = mock.document.createElement("div")
-		m.module(root, {
-			controller: function() {controller = this},
+		var controller = m.module(root, {
+			controller: function() {},
 			view: function(ctrl) {return ctrl.value}
 		})
 
@@ -2013,7 +1967,6 @@ function testMithril(mock) {
 		controller.value = "foo"
 		m.endComputation()
 		mock.requestAnimationFrame.$resolve()
-
 		return root.childNodes[0].nodeValue === "foo"
 	})
 
