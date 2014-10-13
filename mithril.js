@@ -441,7 +441,7 @@ Mithril = m = new function app(window, undefined) {
 
 	m.prop = function (store) {
 		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if ((isObj(store) || isFn(store)) && store != null && isFn(store.then)) {
+		if ((isObj(store) || isFn(store)) && isFn(store.then)) {
 			return propify(store)
 		}
 
