@@ -8,6 +8,7 @@
 -	fixed handling of select[multiple]
 -	fixed template compiler edge case [#286](https://github.com/lhorie/mithril.js/issues/286)
 -	fixed pathname bug in m.route [#290](https://github.com/lhorie/mithril.js/issues/290)
+-	fixed pathname querystring bug in routed links [#304](https://github.com/lhorie/mithril.js/issues/304)
 
 ---
 
