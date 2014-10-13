@@ -644,7 +644,7 @@ Mithril = m = new function app(window, undefined) {
 		return deferred
 	}
 	function propify(promise) {
-		prop = m.prop()
+		var prop = m.prop()
 		promise.then(prop)
 		prop.then = function(resolve, reject) {
 			return propify(promise.then(resolve, reject))
