@@ -49,7 +49,7 @@ npm install -g sweet.js
 To compile a file, type:
 
 ```
-sjs --module /mithril.compile.sjs --output <output-filename>.js <input-filename>.js
+sjs --module /template-compiler.sjs --output <output-filename>.js <input-filename>.js
 ```
 
 ---
@@ -84,7 +84,7 @@ Once installed, create two files in the root of your project, `package.json` and
 module.exports = function(grunt) {
 	grunt.initConfig({
 		sweetjs: {
-			modules: ["mithril.compile.sjs"],
+			modules: ["template-compiler.sjs"],
 			compile: {expand: true, cwd: ".", src: "**/*.js", dest: "destination-folder-goes-here/"}
 		}
 	});
