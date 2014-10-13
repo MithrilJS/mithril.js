@@ -606,7 +606,8 @@ Mithril = m = new function app(window, undefined) {
 		if (e.preventDefault) e.preventDefault()
 		else e.returnValue = false
 		var currentTarget = e.currentTarget || this
-		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length))
+		var args = m.route.mode == "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {}
+		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
 		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
