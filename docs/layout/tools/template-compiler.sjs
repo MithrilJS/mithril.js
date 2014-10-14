@@ -3,7 +3,7 @@ Compiles Mithril templates
 
 Requires sweet.js (https://github.com/mozilla/sweet.js)
 Installation: npm install -g sweet.js
-Usage: sjs --module /mithril.compile.sjs --output <output-filename>.js <input-filename>.js
+Usage: sjs --module /template-compiler.sjs --output <output-filename>.js <input-filename>.js
 */
 
 macro m {
@@ -63,3 +63,5 @@ macro m {
 		return #{Mithril};
 	}
 }
+
+export m;

@@ -49,7 +49,7 @@ npm install -g sweet.js
 To compile a file, type:
 
 ```
-sjs --module /template-compiler.sjs --output <output-filename>.js <input-filename>.js
+sjs -r -m /template-compiler.sjs -o <output-filename>.js <input-filename>.js
 ```
 
 ---
