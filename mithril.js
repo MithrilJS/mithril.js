@@ -298,12 +298,11 @@ Mithril = m = new function app(window, undefined) {
 					}
 					//handle `style: {...}`
 					else if (attrName === "style" && isObj(dataAttr)) {
+						var rules = []
 						for (var rule in dataAttr) {
-							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+							rules.push(rule + ":" + dataAttr[rule])
 						}
-						for (var rule in cachedAttr) {
-							if (!(rule in dataAttr)) node.style[rule] = ""
-						}
+						node.setAttribute("style", rules.join(";"))
 					}
 					//handle SVG
 					else if (namespace != null) {
