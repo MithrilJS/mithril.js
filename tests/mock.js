@@ -39,7 +39,7 @@ mock.window = new function() {
 	window.document.childNodes = []
 	window.document.createElement = function(tag) {
 		return {
-			style: {},
+			style: "",
 			childNodes: [],
 			nodeType: 1,
 			nodeName: tag.toUpperCase(),
