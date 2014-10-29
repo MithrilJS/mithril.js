@@ -110,7 +110,7 @@ If you need to add separate widgets to different places on a same page, you can 
 
 There's just one caveat: while simply initializing multiple "islands" in this fashion works, their initialization calls are not aware of each other and can cause redraws too frequently. To optimize rendering, you should add a `m.startComputation` call before the first widget initialization call, and a `m.endComputation` after the last widget initialization call in each execution thread.
 
-```
+```javascript
 m.startComputation()
 
 m.module(document.getElementById("widget1-container"), widget1)

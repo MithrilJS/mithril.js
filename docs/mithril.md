@@ -132,9 +132,11 @@ m("div", {class: "widget"}); //yields <div class="widget"></div>
 
 m("div", {className: "widget"}); //yields <div class="widget"></div>
 
-m("input", {readonly: true}); //yields <input readonly />
-
 m("button", {onclick: alert}); //yields <button></button>, which alerts its event argument when clicked
+
+//note this uses the Javascript syntax (uppercase "O") for `readonly`
+//in order to set the boolean javascript property instead of the HTML attribute
+m("input", {readOnly: true}); //yields <input readonly />
 ```
 
 ---
@@ -157,10 +159,14 @@ Mithril also does not auto-camel-case CSS properties on inline style attributes,
 
 ```javascript
 m("div", {style: {textAlign: "center"}}); //yields <div style="text-align:center;"></div>
+m("div", {style: {cssFloat: "left"}}); //yields <div style="float:left;"></div>
 
 //this does not work
 m("div", {style: {"text-align": "center"}});
+m("div", {style: {float: "left"}});
 ```
+
+You can find the [Javascript syntax for all the CSS rules here](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Properties_Reference).
 
 You can, however, use CSS syntax when defining style rules as inline strings:
 
@@ -184,7 +190,7 @@ var name = m.prop("")
 m("input", {oninput: m.withAttr("value", name), value: name()})
 ```
 
-In the code above, the `oninput` event handler updates the `name` getter-setter, and the Mithril auto-redrawing system redraws the template in order to update the displayed value. You can read more about the [`m.prop` getter-setter utility here](mithril.prop.md) and the [`m.withAttr` event handler factory here](mithril.withattr.md). You can also [learn how the redrawing system works here](auto-redrawing.md).
+In the code above, the `oninput` event handler updates the `name` getter-setter, and the Mithril auto-redrawing system redraws the template in order to update the displayed value. You can read more about the [`m.prop` getter-setter utility here](mithril.prop.md) and the [`m.withAttr` event handler factory here](mithril.withAttr.md). You can also [learn how the redrawing system works here](auto-redrawing.md).
 
 Note that Mithril always considers the model layer data to be canonical. This means that in the code below, the input on screen will overwritten by the model data any time a redraw happens:
 

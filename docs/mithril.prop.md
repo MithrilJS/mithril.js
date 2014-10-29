@@ -31,7 +31,7 @@ name("Mary"); //Mary
 var b = name(); //b == "Mary"
 ```
 
-It can be used in conjunction with [`m.withAttr`](mithril.withattr.md) to implement data binding in the view-to-model direction and to provide uniform data access for model entity properties.
+It can be used in conjunction with [`m.withAttr`](mithril.withAttr.md) to implement data binding in the view-to-model direction and to provide uniform data access for model entity properties.
 
 ```javascript
 //a contrived example of bi-directional data binding

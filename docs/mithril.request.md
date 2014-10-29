@@ -10,6 +10,7 @@
 - [Casting the Response Data to a Class](#casting-the-response-data-to-a-class)
 - [Unwrapping Response Data](#unwrapping-response-data)
 - [Using Different Data Transfer Formats](#using-different-data-transfer-formats)
+- [File uploads with FormData](#file-uploads-with-form-data)
 - [Using variable data formats](#using-variable-data-formats)
 - [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
 - [Custom request rejections](#custom-request-rejections)
@@ -248,6 +249,26 @@ var file = m.request({
 	url: "myfile.txt",
 	deserialize: function(value) {return value;}
 });
+```
+
+---
+
+### File uploads with FormData
+
+To use the HTML5 FormData object as the payload for a request, you need to override the `serialize` option. By default, `serialize` converts an object to JSON, but in the case of a FormData payload, you want to pass the object intact.
+
+```javascript
+//assume the file comes from an HTML5 drag-n-drop event
+var file = e.dataTransfer.files[0]
+
+var data = new FormData();
+data.append("file", file)
+
+m.request({
+	method: "POST",
+	url: "/upload",
+	serialize: function(data) {return data}
+})
 ```
 
 ---

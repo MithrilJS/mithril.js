@@ -102,7 +102,7 @@ Checking whether there is a controller for a unit of functionality gives you a d
 
 If we decide that a unit of functionality is indeed a reusable component, we can simply add a controller to it so that it follows the module interface.
 
-```
+```javascript
 //assuming we already have a view in `search`, adding a controller lets us use `search` as an independent component
 search.controller = function() {
 	search.vm.init()
