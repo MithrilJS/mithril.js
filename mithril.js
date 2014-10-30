@@ -448,7 +448,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, top
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule
 	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
