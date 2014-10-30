@@ -448,7 +448,7 @@ Mithril = m = new function app(window, undefined) {
 		return gettersetter(store)
 	}
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, top
 	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
 		var index = roots.indexOf(root)
@@ -464,8 +464,14 @@ Mithril = m = new function app(window, undefined) {
 			m.redraw.strategy("all")
 			m.startComputation()
 			roots[index] = root
-			modules[index] = module
-			controllers[index] = new module.controller
+			var currentModule = topModule = module
+			var controller = new module.controller
+			//controllers may call m.module recursively (via m.route redirects, for example)
+			//this conditional ensures only the last recursive m.module call is applied
+			if (currentModule == topModule) {
+				controllers[index] = controller
+				modules[index] = module
+			}
 			m.endComputation()
 			return controllers[index]
 		}
@@ -492,7 +498,9 @@ Mithril = m = new function app(window, undefined) {
 	function redraw() {
 		var mode = m.redraw.strategy()
 		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i] && mode != "none") m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
+			if (controllers[i] && mode != "none") {
+				m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
+			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
 		if (computePostRedrawHook) {

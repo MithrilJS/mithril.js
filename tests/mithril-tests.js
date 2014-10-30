@@ -1570,6 +1570,28 @@ function testMithril(mock) {
 		})
 		return value == "foo+bar"
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {m.route("/b")}
+		a.view = function() {return "a"}
+
+		var b = {}
+		b.controller = function() {}
+		b.view = function(ctrl) {return "b"}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes[0].nodeValue == "b"
+	})
 	//end m.route
 
 	//m.prop
