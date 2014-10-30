@@ -24,6 +24,12 @@ Want to help fellow Mithril developers and gain karma while at it? [Keep an eye 
 
 ---
 
+### IRC
+
+Join the #mithriljs IRC channel on [Freenode](http://webchat.freenode.net).
+
+---
+
 ### Projects and Snippets
 
 A collection of projects and snippets created by Mithril users. A great place to find useful tools.
