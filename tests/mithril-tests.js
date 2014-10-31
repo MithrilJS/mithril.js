@@ -775,6 +775,11 @@ function testMithril(mock) {
 		m.render(root, new Field())
 		return root.childNodes.length == 1
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, {foo: 123})
+		return root.childNodes.length == 0
+	})
 	//end m.render
 
 	//m.redraw

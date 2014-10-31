@@ -37,6 +37,20 @@ In Mithril, an application typically lives in a namespace and contains modules. 
 
 For simplicity, our application will have only one module, and we're going to use it as the namespace for our application.
 
+In Mithril, a *module* is an object that contains two functions: `controller` and `view`.
+
+```
+//an empty Mithril module
+var myModule = {
+	controller: function() {},
+	view: function() {}
+}
+```
+
+In addition to holding a controller and a view, a module is typically also used to store data that pertains to it.
+
+Let's create a module.
+
 ```markup
 <script>
 //this application only has one module: todo
@@ -44,7 +58,7 @@ var todo = {};
 </script>
 ```
 
-This object will namespace our two Model classes:
+Typically, model entities are reusable and live outside of modules (e.g. `var User = ...`). In our example, since the whole application lives in one module, we're going to use the module as a namespace for our model entities.
 
 ```javascript
 var todo = {};

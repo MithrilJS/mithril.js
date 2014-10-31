@@ -77,14 +77,13 @@
 						<h2>Sample code</h2>
 						
 <pre><code class="language-javascript">//namespace
-var app = {};
-
 //model
-app.PageList = function() {
+var PageList = function() {
 	return m.request({method: "GET", url: "pages.json"});
 };
 
 //controller
+var app = {};
 app.controller = function() {
 	this.pages = app.PageList();
 	

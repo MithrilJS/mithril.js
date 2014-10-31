@@ -170,7 +170,13 @@ Mithril = m = new function app(window, undefined) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
 				if (!item.nodes.intact) intact = false
-				subArrayCount += isArr(item) ? item.length : 1
+				if (item.$trusted) {
+					//fix offset of next element if item was a trusted string w/ more than one html element
+					//the first clause in the regexp matches elements
+					//the second clause (after the pipe) matches text nodes
+					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || []).length
+				}
+				else subArrayCount += isArr(item) ? item.length : 1
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
@@ -194,6 +200,8 @@ Mithril = m = new function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType == sObj) {
+			if (!data.attrs) data.attrs = {}
+			if (!cached.attrs) cached.attrs = {}
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				clear(cached.nodes)

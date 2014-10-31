@@ -1,3 +1,6 @@
+//make "use strict" and nodejs happy
+var window = this
+
 //test reporting for saucelabs
 if (typeof window != "undefined") {
 	window.global_test_results = {
@@ -19,7 +22,7 @@ function test(condition) {
 	var result = true
 	test.total++
 
-	if (this.performance != null && performance.now) {
+	if (typeof performance != "undefined" && performance.now) {
 		start = performance.now()
 	}
 	try {
@@ -30,11 +33,11 @@ function test(condition) {
 		console.error(e)
 		test.failures.push(condition)
 	}
-	if (this.performance != null && performance.now) {
+	if (typeof performance != "undefined" && performance.now) {
 		duration = performance.now() - start
 	}
 
-	test_obj = {
+	window.test_obj = {
 		name: "" + test.total,
 		result: result,
 		duration: duration
@@ -42,7 +45,7 @@ function test(condition) {
 
 	if (typeof window != "undefined") {
 		if (!result) {
-			window.global_test_results.tests.push(test_obj)
+			window.global_test_results.tests.push(window.test_obj)
 		}
 
 		window.global_test_results.duration += duration

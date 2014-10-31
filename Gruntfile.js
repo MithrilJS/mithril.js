@@ -204,6 +204,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-saucelabs');
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
+	grunt.registerTask("testall", ["test", "teste2e"]);
 	grunt.registerTask("test", ["concat", "execute"]);
 	grunt.registerTask('teste2e', ['connect', 'qunit']);
 	grunt.registerTask("default", ["build"]);

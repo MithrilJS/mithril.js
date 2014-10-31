@@ -396,3 +396,15 @@ test('issue278 regression', function() {
 
 	equal(selected, 2)
 })
+test("mixing trusted content", function() {
+	m.render(dummyEl, [m.trust("<p>1</p><p>2</p>"), m("i", "foo")])
+	equal(dummyEl.childNodes[2].nodeName, "I")
+})
+test("mixing trusted content w/ text nodes", function() {
+	m.render(dummyEl, [m.trust("<p>1</p>123<p>2</p>"), m("i", "foo")])
+	equal(dummyEl.childNodes[3].nodeName, "I")
+})
+test("mixing trusted content w/ td", function() {
+	m.render(dummyEl, [m.trust("<td>1</td><td>2</td>"), m("i", "foo")])
+	equal(dummyEl.childNodes[1].nodeName, "I")
+})
