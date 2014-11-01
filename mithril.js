@@ -885,6 +885,7 @@ Mithril = m = new function app(window, undefined) {
 				if (maybeXhr != null) xhr = maybeXhr
 			}
 
+			if (!isStr(options.data) && options.data.constructor != window.FormData) throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`"
 			xhr.send(options.method == "GET" || !options.data ? "" : options.data)
 			return xhr
 		}
