@@ -817,7 +817,7 @@ Mithril = m = new function app(window, undefined) {
 				args[i].then(synchronizer(i, true), synchronizer(i, false))
 			}
 		}
-		else deferred.resolve()
+		else deferred.resolve([])
 
 		return deferred.promise
 	}
@@ -885,17 +885,18 @@ Mithril = m = new function app(window, undefined) {
 				if (maybeXhr != null) xhr = maybeXhr
 			}
 
+			if (options.data && (!isStr(options.data) && options.data.constructor != window.FormData)) throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`"
 			xhr.send(options.method == "GET" || !options.data ? "" : options.data)
 			return xhr
 		}
 	}
 	function bindData(xhrOptions, data, serialize) {
-		if (data && Object.keys(data).length > 0) {
-			if (xhrOptions.method == "GET" && xhrOptions.dataType != "jsonp") {
-				xhrOptions.url = xhrOptions.url + (xhrOptions.url.indexOf("?") < 0 ? "?" : "&") + buildQueryString(data)
-			}
-			else xhrOptions.data = serialize(data)
+		if (xhrOptions.method == "GET" && xhrOptions.dataType != "jsonp") {
+			var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&"
+			var querystring = buildQueryString(data)
+			xhrOptions.url = xhrOptions.url + (querystring ? prefix + querystring : "")
 		}
+		else xhrOptions.data = serialize(data)
 		return xhrOptions
 	}
 	function parameterizeUrl(url, data) {

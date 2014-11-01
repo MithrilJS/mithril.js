@@ -1642,6 +1642,7 @@ function testMithril(mock) {
 	test(function() {
 		var prop = m.request({method: "GET", url: "test"})
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		console.log(prop())
 		return prop().method === "GET" && prop().url === "test"
 	})
 	test(function() {
@@ -1976,6 +1977,11 @@ function testMithril(mock) {
 		var value = 1
 		m.sync([]).then(function() {value = 2})
 		return value == 2
+	})
+	test(function() {
+		var success
+		m.sync([]).then(function(value) {success = value instanceof Array})
+		return success
 	})
 
 	//m.startComputation/m.endComputation
