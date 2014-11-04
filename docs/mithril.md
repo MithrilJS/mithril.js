@@ -245,7 +245,7 @@ m("div", "&times;") //becomes <div>&amp;times;</div>
 You can unescape trusted HTML strings by using [`m.trust`](mithril.trust.md)
 
 ```javascript
-m("div", m.trust("&times;"() //becomes <div>&times;</div>
+m("div", m.trust("&times;")) //becomes <div>&times;</div>
 ```
 
 ---
@@ -260,7 +260,7 @@ This is useful, for example, if you declare a `canvas` element and want to use t
 function draw(element, isInitialized, context) {
 	//don't redraw if we did once already
 	if (isInitialized) return;
-	
+
 	var ctx = element.getContext("2d");
 	/* draws stuff */
 }
@@ -325,7 +325,7 @@ function unloadable(element, isInit, context) {
 	context.timer = setTimeout(function() {
 		alert("timed out!");
 	}, 1000);
-	
+
 	context.onunload = function() {
 		clearTimeout(context.timer);
 		console.log("unloaded the div");
@@ -424,9 +424,9 @@ where:
 	Only tag, id, class and attribute selectors are supported.
 
 	If the tag selector is omitted, it defaults to `div`.
-	
+
 	Note that if the same attribute is defined in the both `selector` and `attributes` parameters, the value in `attributes` is used.
-	
+
 	For developer convenience, Mithril makes an exception for the `class` attribute: if there are classes defined in both parameters, they are concatenated as a space separated list. It does not, however, de-dupe classes if the same class is declared twice.
 
 	*Examples:*
@@ -444,7 +444,7 @@ where:
 	`".active#container"`
 
 -	**Attributes attributes** (optional)
-  
+
 	This key-value map should define a list of HTML attributes and their respective values.
 
 	You can use both HTML and Javascript attribute names. For example, both `class` and `className` are valid.
@@ -453,28 +453,28 @@ where:
 
 	For example, the value for `className` should be a string.
 
-	When a attribute name expects different types for the value in HTML and Javascript, the Javascript type should be used. 
+	When a attribute name expects different types for the value in HTML and Javascript, the Javascript type should be used.
 
 	For example, the value for the `onclick` attribute should be a function.
 
 	Similar, setting the value of attribute `readonly` to `false` is equivalent to removing the attribute in HTML.
 
 	It's also possible to set values to Javascript-only properties, such as `hash` in a `<a>` element.
-	
+
 	Note that if the same attribute is defined in the both `selector` and `attributes` parameters, the value in `attributes` is used.
-	
+
 	For developer convenience, Mithril makes an exception for the `class` attribute: if there are classes defined in both parameters, they are concatenated as a space separated list. It does not, however, de-dupe classes if the same class is declared twice.
-	
+
 	*Examples:*
 
 	`{ title: "Application" }`
 
 	`{ onclick: function(e) { /*do stuff*/ } }`
-	
+
 	`{ style: {border: "1px solid red"} }`
-	
+
 -	#### The `config` attribute
-	
+
 	**void config(DOMElement element, Boolean isInitialized, Object context)** (optional)
 
 	You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
@@ -485,24 +485,24 @@ where:
 	function draw(element, isInitialized) {
 		//don't redraw if we did once already
 		if (isInitialized) return;
-		
+
 		var ctx = element.getContext("2d");
 		/* draws stuff */
 	}
-	
+
 	var view = [
 		m("canvas", {config: draw})
 	]
-	
+
 	//this creates the canvas element, and therefore, `isInitialized` is false
 	m.render(document.body, view);
-	
+
 	//here, isInitialized is `true`
 	m.render(document.body, view);
 	```
-  
+
 	One common way of using `config` is in conjunction with [`m.route`](mithril.route.md), which is an unobtrusive extension to links that allow Mithril's routing system to work transparently regardless of which routing mode is used.
-	
+
 	```javascript
 	//this link can use any of Mithril's routing system modes
 	//(i.e. it can use either the hash, the querystring or the pathname as the router implementation)
@@ -511,27 +511,27 @@ where:
 	```
 
 	The `config` mechanism can also be used to put focus on form inputs, and call methods that would not be possible to execute via the regular attribute syntax.
-	
+
 	It is only meant to be used to call methods on DOM elements that cannot be called otherwise.
-	
+
 	It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
-	
+
 	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.module` call.
-	
+
 	You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
-	
+
 	-	**DOMElement element**
-	
+
 	The DOM element that corresponds to virtual element defined by the `m()` call.
-	
+
 	-	**Boolean isInitialized**
-	
+
 	Whether this is the first time we are running this function on this element. This flag is false the first time it runs on an element, and true on redraws that happen after the element has been created.
 
 	-	**Object context**
-	
+
 	An object that retains its state across redraws. It can be used to store instances of 3rd party classes that need to be accessed more than one time throughout the lifecycle of a page.
-	
+
 	The example below shows a contrived redraw counter. In it, the count is stored in the context object and re-accessed on each redraw.
 
 	```javascript
@@ -542,7 +542,7 @@ where:
 
 	m("div", {config: alertsRedrawCount})
 	```
-	
+
 	If the `context` object that is passed to a `config` function has a property called `onunload`, this function will be called when the element gets detached from the document by Mithril's diff engine.
 
 	This is useful if there are cleanup tasks that need to be run when an element is destroyed (e.g. clearing `setTimeout`'s, etc)
@@ -552,7 +552,7 @@ where:
 		context.timer = setTimeout(function() {
 			alert("timed out!");
 		}, 1000);
-		
+
 		context.onunload = function() {
 			clearTimeout(context.timer);
 			console.log("unloaded the div");
@@ -563,18 +563,17 @@ where:
 
 	m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 	```
-	
+
 -	**Children children** (optional)
 
 	If this argument is a string, it will be rendered as a text node. To render a string as HTML, see [`m.trust`](mithril.trust.md)
-	
+
 	If it's a VirtualElement, it will be rendered as a DOM Element.
-	
+
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.
-	
+
 	If it's a SubtreeDirective with the value "retain", it will retain the existing DOM tree in place, if any. See [subtree directives.md](mithril.render.md#subtree-directives) for more information.
 
 -	**returns** VirtualElement
 
 	The returned VirtualElement is a Javascript data structure that represents the DOM element to be rendered by [`m.render`](mithril.render.md)
-
