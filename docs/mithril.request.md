@@ -16,6 +16,7 @@
 - [Custom request rejections](#custom-request-rejections)
 - [Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
 - [Aborting a request](#aborting-a-request)
+- [Using JSON-P](#using-json-p)
 - [Signature](#signature)
 
 ---
@@ -358,6 +359,26 @@ m.request({method: "POST", url: "/foo", config: transport});
 
 //the `transport` getter-setter contains an instance of XMLHttpRequest
 transport().abort();
+```
+
+---
+
+### Using JSON-P
+
+To make JSON-P requests, add the `dataType` option instead of `method`. You should not add the `callback` querystring parameter; Mithril already does that internally.
+
+```javascript
+m.request({dataType: "jsonp", url: "/api/User"});
+```
+
+Some services (e.g. Flickr) don't follow the convention of calling the `callback` parameter `callback`. In order to specify the name of the querystring parameter that indicates the callback function, use the `callbackKey` option:
+
+```javascript
+m.request({
+	dataType: "jsonp",
+	callbackKey: "jsoncallback",
+	url: "http://api.flickr.com/services/feeds/photos_public.gne?tags=monkey&tagmode=any&format=json"
+});
 ```
 
 ---
