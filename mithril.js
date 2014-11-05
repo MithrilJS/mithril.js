@@ -539,6 +539,7 @@ Mithril = m = new function app(window, undefined) {
 	var modes = {pathname: "", hash: "#", search: "?"}
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
+		//m.route()
 		if (arguments.length === 0) return currentRoute
 		else if (arguments.length === 3 && isStr(arguments[1])) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
@@ -557,17 +558,16 @@ Mithril = m = new function app(window, undefined) {
 			computePostRedrawHook = setScroll
 			window[listener]()
 		}
+		//config: m.route
 		else if (arguments[0].addEventListener) {
 			var element = arguments[0]
 			var isInitialized = arguments[1]
 			var context = arguments[2]
-			if (!isInitialized) {
-				context.href = element.getAttribute("href")
-				element.href = (m.route.mode !== 'pathname' ? window.location.pathname : '') + modes[m.route.mode] + context.href
-				element.removeEventListener("click", routeUnobtrusive)
-				element.addEventListener("click", routeUnobtrusive)
-			}
+			element.href = (m.route.mode !== 'pathname' ? window.location.pathname : '') + modes[m.route.mode] + this.attrs.href
+			element.removeEventListener("click", routeUnobtrusive)
+			element.addEventListener("click", routeUnobtrusive)
 		}
+		//m.route(route)
 		else if (isStr(arguments[0])) {
 			currentRoute = arguments[0]
 			var querystring = isObj(arguments[1]) ? buildQueryString(arguments[1]) : null
