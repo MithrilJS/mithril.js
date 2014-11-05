@@ -137,6 +137,9 @@ m("button", {onclick: alert}); //yields <button></button>, which alerts its even
 //note this uses the Javascript syntax (uppercase "O") for `readonly`
 //in order to set the boolean javascript property instead of the HTML attribute
 m("input", {readOnly: true}); //yields <input readonly />
+
+//using the HTML attribute name will call `setAttribute`, which may not be what you want
+m("input", {readonly: false}); //yields <input readonly="false" />, which is still readonly
 ```
 
 ---
