@@ -64,16 +64,16 @@
 <hr>
 <h3 id="usage">Usage</h3>
 <pre><code class="lang-javascript">//define a getter-setter with initial value `John`
-var name = m.prop(&quot;John&quot;);
+var firstName = m.prop(&quot;John&quot;);
 
 //read the value
-var a = name(); //a == &quot;John&quot;
+var a = firstName(); //a == &quot;John&quot;
 
 //set the value to `Mary`
-name(&quot;Mary&quot;); //Mary
+firstName(&quot;Mary&quot;); //Mary
 
 //read the value
-var b = name(); //b == &quot;Mary&quot;</code></pre>
+var b = firstName(); //b == &quot;Mary&quot;</code></pre>
 <p>It can be used in conjunction with <a href="mithril.withattr.html"><code>m.withAttr</code></a> to implement data binding in the view-to-model direction and to provide uniform data access for model entity properties.</p>
 <pre><code class="lang-javascript">//a contrived example of bi-directional data binding
 var user = {
