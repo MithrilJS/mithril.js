@@ -81,16 +81,16 @@ todo.Todo = function(data) {
 todo.TodoList = Array;</code></pre>
 <p><a href="mithril.prop.html"><code>m.prop</code></a> is simply a factory for a getter-setter function. Getter-setters work like this:</p>
 <pre><code class="lang-javascript">//define a getter-setter with initial value `John`
-var firstName = m.prop(&quot;John&quot;);
+var name = m.prop(&quot;John&quot;);
 
 //read the value
-var a = firstName(); //a == &quot;John&quot;
+var a = name(); //a == &quot;John&quot;
 
 //set the value to `Mary`
-firstName(&quot;Mary&quot;); //Mary
+name(&quot;Mary&quot;); //Mary
 
 //read the value
-var b = firstName(); //b == &quot;Mary&quot;</code></pre>
+var b = name(); //b == &quot;Mary&quot;</code></pre>
 <p>Note that the <code>Todo</code> and <code>TodoList</code> classes we defined above are plain vanilla Javascript constructors. They can be initialized and used like this:</p>
 <pre><code class="lang-javascript">var myTask = new todo.Todo({description: &quot;Write code&quot;});
 
