@@ -6,7 +6,7 @@ Installation: npm install -g sweet.js
 Usage: sjs --module /template-compiler.sjs --output <output-filename>.js <input-filename>.js
 */
 
-macro m {
+macro m_impl {
 	case { _ ($selector, $dynAttrs ..., $children ...) } => {
 		var selectorSyntax = #{$selector};
 		var selector = unwrapSyntax(selectorSyntax);
@@ -47,7 +47,7 @@ macro m {
 			return #{ ({tag: $tag, attrs: $attrs , children: $children ...}) };
 		}
 		catch (e) {
-			return #{ m($tag, {}, [$dynAttrs ..., $children ...]) }
+			return #{ m_impl($tag, {}, [$dynAttrs ..., $children ...]) }
 		}
 	}
 	case { _ ($selector, $partial ...) } => {
@@ -55,17 +55,29 @@ macro m {
 		try {
 			var partial = unwrapSyntax(partialSyntax);
 			var isTag = partial.inner && partial.inner.length > 2 && (partial.inner[0].token.value == "tag" && partial.inner[1].token.value == ":")
-			return !isTag ? #{m($selector, $partial ..., [])} : #{m($selector, {}, $partial ...)};
+			return !isTag ? #{m_impl($selector, $partial ..., [])} : #{m_impl($selector, {}, $partial ...)};
 		}
 		catch (e) {
-			return #{m($selector, {}, $partial ...)}
+			return #{m_impl($selector, {}, $partial ...)}
 		}
 	}
 	case { _ ($selector) } => {
-		return #{m($selector, {}, [])};
+		return #{m_impl($selector, {}, [])};
+	}
+}
+	
+let m = macro {
+	case { _ ($selector, $dynAttrs ..., $children ...) } => {
+		return #{m_impl($selector, $dynAttrs ..., $children ...)}
+	}
+	case { _ ($selector, $partial ...) } => {
+		return #{m_impl($selector, $partial ...)}
+	}
+	case { _ ($selector) } => {
+		return #{m_impl($selector, {}, [])};
 	}
 	case { _ } => {
-		return #{Mithril};
+		return #{m};
 	}
 }
 
