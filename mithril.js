@@ -4,6 +4,20 @@ Mithril = m = new function app(window, undefined) {
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR/;
 
+	// caching commonly used variables
+	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
+
+	// self invoking function needed because of the way mocks work
+	function initialize(window){
+		$document = window.document;
+		$location = window.location;
+		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
+		$requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+	}
+
+	initialize(window);
+
+
 	/*
 	 * @typedef {String} Tag
 	 * A string that looks like -> div.classname#id[param=one][param2=two]
@@ -121,10 +135,10 @@ Mithril = m = new function app(window, undefined) {
 								action: MOVE,
 								index: i,
 								from: existing[key].index,
-								element: parentElement.childNodes[existing[key].index] || window.document.createElement("div")
+								element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
 							}
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i] || window.document.createElement("div")})
+						else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 					}
 				}
 				var actions = Object.keys(existing).map(function(key) {return existing[key]});
@@ -137,7 +151,7 @@ Mithril = m = new function app(window, undefined) {
 						newCached.splice(change.index, 1)
 					}
 					if (change.action == INSERTION) {
-						var dummy = window.document.createElement("div");
+						var dummy = $document.createElement("div");
 						dummy.key = data[change.index].attrs.key;
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
@@ -198,7 +212,7 @@ Mithril = m = new function app(window, undefined) {
 		else if (data != null && dataType == sObj) {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
-			
+
 			var dataAttrKeys = Object.keys(data.attrs);
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
@@ -212,7 +226,7 @@ Mithril = m = new function app(window, undefined) {
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
 			if (isNew) {
-				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag);
+				node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
@@ -255,7 +269,7 @@ Mithril = m = new function app(window, undefined) {
 					nodes = injectHTML(parentElement, index, data)
 				}
 				else {
-					nodes = [window.document.createTextNode(data)];
+					nodes = [$document.createTextNode(data)];
 					if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
 				}
 				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data;
@@ -263,7 +277,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
 				nodes = cached.nodes;
-				if (!editable || editable !== window.document.activeElement) {
+				if (!editable || editable !== $document.activeElement) {
 					if (data.$trusted) {
 						clear(nodes, cached);
 						nodes = injectHTML(parentElement, index, data)
@@ -276,7 +290,7 @@ Mithril = m = new function app(window, undefined) {
 						else {
 							if (nodes[0].nodeType == 1 || nodes.length > 1) { //was a trusted string
 								clear(cached.nodes, cached);
-								nodes = [window.document.createTextNode(data)]
+								nodes = [$document.createTextNode(data)]
 							}
 							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
 							nodes[0].nodeValue = data
@@ -359,7 +373,7 @@ Mithril = m = new function app(window, undefined) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
 			var isElement = nextSibling.nodeType != 1;
-			var placeholder = window.document.createElement("span");
+			var placeholder = $document.createElement("span");
 			if (isElement) {
 				parentElement.insertBefore(placeholder, nextSibling || null);
 				placeholder.insertAdjacentHTML("beforebegin", data);
@@ -405,12 +419,12 @@ Mithril = m = new function app(window, undefined) {
 	var html;
 	var documentNode = {
 		appendChild: function(node) {
-			if (html === undefined) html = window.document.createElement("html");
-			if (window.document.documentElement && window.document.documentElement !== node) {
-				window.document.replaceChild(node, window.document.documentElement)
+			if (html === undefined) html = $document.createElement("html");
+			if ($document.documentElement && $document.documentElement !== node) {
+				$document.replaceChild(node, $document.documentElement)
 			}
-			else window.document.appendChild(node);
-			this.childNodes = window.document.childNodes
+			else $document.appendChild(node);
+			this.childNodes = $document.childNodes
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)
@@ -422,8 +436,8 @@ Mithril = m = new function app(window, undefined) {
 		var configs = [];
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
 		var id = getCellCacheKey(root);
-		var isDocumentRoot = root == window.document;
-		var node = isDocumentRoot || root == window.document.documentElement ? documentNode : root;
+		var isDocumentRoot = root == $document;
+		var node = isDocumentRoot || root == $document.documentElement ? documentNode : root;
 		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell};
 		if (cellCache[id] === undefined) clear(node.childNodes);
 		if (forceRecreation === true) reset(root);
@@ -492,21 +506,19 @@ Mithril = m = new function app(window, undefined) {
 		}
 	};
 	m.redraw = function(force) {
-		var cancel = window.cancelAnimationFrame || window.clearTimeout;
-		var defer = window.requestAnimationFrame || window.setTimeout;
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if (new Date - lastRedrawCallTime > FRAME_BUDGET || defer == window.requestAnimationFrame) {
-				if (lastRedrawId > 0) cancel(lastRedrawId);
-				lastRedrawId = defer(redraw, FRAME_BUDGET)
+			if (new Date - lastRedrawCallTime > FRAME_BUDGET || $requestAnimationFrame == window.requestAnimationFrame) {
+				if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
+				lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
 			}
 		}
 		else {
 			redraw();
-			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
+			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
 	};
 	m.redraw.strategy = m.prop();
@@ -558,8 +570,8 @@ Mithril = m = new function app(window, undefined) {
 			};
 			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate";
 			window[listener] = function() {
-				if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
-					redirect(window.location[m.route.mode])
+				if (currentRoute != normalizeRoute($location[m.route.mode])) {
+					redirect($location[m.route.mode])
 				}
 			};
 			computePostRedrawHook = setScroll;
@@ -570,7 +582,7 @@ Mithril = m = new function app(window, undefined) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
-			element.href = (m.route.mode !== 'pathname' ? window.location.pathname : '') + modes[m.route.mode] + this.attrs.href;
+			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
 			element.removeEventListener("click", routeUnobtrusive);
 			element.addEventListener("click", routeUnobtrusive)
 		}
@@ -584,12 +596,12 @@ Mithril = m = new function app(window, undefined) {
 
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
-					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute);
+					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, $document.title, modes[m.route.mode] + currentRoute);
 					setScroll()
 				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
-			else window.location[m.route.mode] = currentRoute
+			else $location[m.route.mode] = currentRoute
 		}
 	};
 	m.route.param = function(key) {return routeParams[key]};
@@ -633,7 +645,7 @@ Mithril = m = new function app(window, undefined) {
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
-		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash;
+		if (m.route.mode != "hash" && $location.hash) $location.hash = $location.hash;
 		else window.scrollTo(0, 0)
 	}
 	function buildQueryString(object, prefix) {
@@ -698,7 +710,7 @@ Mithril = m = new function app(window, undefined) {
 			if (!state) {
 				promiseValue = value;
 				state = REJECTING;
-				
+
 				fire()
 			}
 			return this
@@ -717,7 +729,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			return deferred.promise
 		};
-		
+
 		function finish(type) {
 			state = type || REJECTED;
 			next.map(function(deferred) {
@@ -833,10 +845,10 @@ Mithril = m = new function app(window, undefined) {
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
 			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
-			var script = window.document.createElement("script");
-			
+			var script = $document.createElement("script");
+
 			window[callbackKey] = function(resp) {
-				window.document.body.removeChild(script);
+				$document.body.removeChild(script);
 				options.onload({
 					type: "load",
 					target: {
@@ -847,7 +859,7 @@ Mithril = m = new function app(window, undefined) {
 			};
 
 			script.onerror = function(e) {
-				window.document.body.removeChild(script);
+				$document.body.removeChild(script);
 
 				options.onerror({
 					type: "error",
@@ -870,7 +882,7 @@ Mithril = m = new function app(window, undefined) {
 				+ (options.callbackKey ? options.callbackKey : "callback")
 				+ "=" + callbackKey
 				+ "&" + buildQueryString(options.data || {});
-			window.document.body.appendChild(script)
+			$document.body.appendChild(script)
 		}
 		else {
 			var xhr = new window.XMLHttpRequest;
@@ -953,7 +965,10 @@ Mithril = m = new function app(window, undefined) {
 	};
 
 	//testing API
-	m.deps = function(mock) {return window = mock || window};
+	m.deps = function(mock) {
+		initialize(window = mock || window);
+		return window;
+	};
 	//for internal testing only, do not use `m.deps.factory`
 	m.deps.factory = app;
 
@@ -961,6 +976,4 @@ Mithril = m = new function app(window, undefined) {
 }(typeof window != "undefined" ? window : {});
 
 if (typeof module != "undefined" && module !== null) module.exports = m;
-if (typeof define == "function" && define.amd) define(function() {return m})
-
-;;;
+if (typeof define == "function" && define.amd) define(function() {return m});
