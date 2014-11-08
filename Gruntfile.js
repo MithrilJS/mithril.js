@@ -1,14 +1,14 @@
 module.exports = function(grunt) {
 	_ = require('lodash');
 
-	var version = "0.1.23"
+	var version = "0.1.23";
 
-	var inputFolder = "./docs"
-	var tempFolder = "./temp"
-	var archiveFolder = "./archive"
-	var outputFolder = "../mithril"
+	var inputFolder = "./docs";
+	var tempFolder = "./temp";
+	var archiveFolder = "./archive";
+	var outputFolder = "../mithril";
 
-	var guideLayout = "guide"
+	var guideLayout = "guide";
 	var guide = [
 		"auto-redrawing",
 		"benchmarks",
@@ -23,9 +23,9 @@ module.exports = function(grunt) {
 		"refactoring",
 		"routing",
 		"tools",
-		"web-services",
-	]
-	var apiLayout = "api"
+		"web-services"
+	];
+	var apiLayout = "api";
 	var api = [
 		"change-log",
 		"roadmap",
@@ -44,11 +44,11 @@ module.exports = function(grunt) {
 		"mithril.trust",
 		"mithril.withAttr",
 		"mithril.xhr"
-	]
+	];
 
 
 
-	var md2htmlTasks = {}
+	var md2htmlTasks = {};
 	var makeTasks = function(layout, pages) {
 		pages.map(function(name) {
 			md2htmlTasks[name] = {
@@ -56,9 +56,9 @@ module.exports = function(grunt) {
 				files: [{src: [inputFolder + "/" + name + ".md"], dest: tempFolder + "/" + name + ".html"}]
 			}
 		})
-	}
-	makeTasks("guide", guide)
-	makeTasks("api", api)
+	};
+	makeTasks("guide", guide);
+	makeTasks("api", api);
 
 	var sauceBrowsers =[
 		{ browserName: 'firefox', version: '19', platform: 'XP' },
@@ -67,7 +67,7 @@ module.exports = function(grunt) {
 		{ browserName: "iPad", platform: "OS X 10.9", version: "7.1"},
 		{ browserName: "opera", platform: "Linux", version: "12"},
 		{ browserName: "chrome", platform: "XP", version: "26"},
-		{ browserName: "chrome", platform: "Windows 8", version: "26"},
+		{ browserName: "chrome", platform: "Windows 8", version: "26"}
 	];
 
 	var sauceOnTestComplete = function(result, callback) {
@@ -116,7 +116,7 @@ module.exports = function(grunt) {
 	};
 	_.assign(sauceQunitOptions, sauceBaseOptions);
 
-	var currentVersionArchiveFolder = archiveFolder + "/v" + version
+	var currentVersionArchiveFolder = archiveFolder + "/v" + version;
 	grunt.initConfig({
 		md2html: md2htmlTasks,
 		uglify: {
