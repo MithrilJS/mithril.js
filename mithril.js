@@ -949,7 +949,7 @@ Mithril = m = new function app(window, undefined) {
 			if (xhrOptions.background !== true) m.endComputation()
 		}
 		ajax(xhrOptions)
-		deferred.promise(xhrOptions.default)
+		deferred.promise(xhrOptions.initialValue)
 		return deferred.promise
 	}
 
