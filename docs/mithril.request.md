@@ -457,8 +457,6 @@ where:
 		m.request({method: "GET", url: "/foo", background: true})
 			.then(m.redraw); //force redraw
 		```
-
-		The return value of a background `m.request` should not be exposed to controllers or views, since without the blocking effect of redraw-blocking effect of `m.startComputation` it is liable to be invoked before it resolves, which can lead to runtime errors.
 		
 	-	**any unwrapSuccess(any data)** (optional)
 
