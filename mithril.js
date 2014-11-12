@@ -212,7 +212,7 @@ Mithril = m = new function app(window, undefined) {
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML"
 			if (isNew) {
-				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
+				node = namespace === undefined ? window.document.createElement(data.tag, data.attrs.is) : window.document.createElementNS(namespace, data.tag, data.attrs.is)
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
