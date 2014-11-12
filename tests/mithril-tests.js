@@ -1687,6 +1687,18 @@ function testMithril(mock) {
 		xhr.onreadystatechange()
 		return xhr.$headers["Content-Type"] === undefined
 	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "test", initialValue: "foo"})
+		var initialValue = prop();
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+
+		return initialValue === "foo"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "test", initialValue: "foo"}).then(function(value) {return "bar"})
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop() === "bar"
+	})
 
 	// m.request over jsonp
 	test(function(){
