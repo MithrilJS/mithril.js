@@ -333,6 +333,9 @@ Mithril = m = new function app(window, undefined) {
 					if (e.message.indexOf("Invalid argument") < 0) throw e
 				}
 			}
+			else if (attrName === "value" && tag === "input" && node.value !== dataAttr) {
+				node.value = dataAttr
+			}
 		}
 		return cachedAttrs
 	}
