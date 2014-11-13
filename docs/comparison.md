@@ -1,6 +1,6 @@
 ## How is Mithril Different from Other Frameworks
 
-There are a lot of different Javascript MVC frameworks and evaluating their merits and shortcomings can be a daunting task.
+There are a lot of different Javascript frameworks and evaluating their merits and shortcomings can be a daunting task.
 
 This page aims to provide a comparison between Mithril and some of the most widely used frameworks, as well as some of the younger, but relevant ones.
 
@@ -104,7 +104,7 @@ Ember is also more opinionated in terms of how application architecture should l
 
 ### React
 
-React is a templating engine developed by Facebook. It's relevant for comparison because it uses the same architecture as Mithril's templating engine: i.e. it acknowledges that DOM operations are the bottleneck of templating systems, and implements a virtual DOM tree which keeps track of changes and only applies diffs to the real DOM where needed.
+React is a component engine developed by Facebook. It's relevant for comparison because it uses the same architecture as Mithril's templating engine: i.e. it acknowledges that DOM operations are the bottleneck of templating systems, and implements a virtual DOM tree which keeps track of changes and only applies diffs to the real DOM where needed.
 
 The most visible difference between React and Mithril is that React's *JSX* syntax does not run natively in the browser, whereas Mithril's uncompiled templates do. Both can be compiled, but React's compiled code still has function calls for each virtual DOM element; Mithril templates compile into static Javascript data structures.
 

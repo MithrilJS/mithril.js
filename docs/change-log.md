@@ -2,6 +2,14 @@
 
 [v0.1.23](/mithril/archive/v0.1.23) - maintenance
 
+### News:
+
+-	There's now support for extended custom elements (e.g. `m("button[is=my-button]")`)
+-	`m.request` now supports a `initialValue` option to help prevent type errors in views when using the `background` option
+
+### Bug Fixes:
+
+-	docs now have anchor links for easier navigation
 -	fixed a bunch of IE8 issues [#298](https://github.com/lhorie/mithril.js/issues/298)
 -	fixed handling of `method` option in JSONP mode [#292](https://github.com/lhorie/mithril.js/issues/292)
 -	fixed source map files

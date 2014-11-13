@@ -77,19 +77,22 @@
 						<h2>Sample code</h2>
 						
 <pre><code class="language-javascript">//namespace
+var app = {};
+
 //model
-var PageList = function() {
+app.PageList = function() {
 	return m.request({method: "GET", url: "pages.json"});
 };
 
 //controller
-var app = {};
 app.controller = function() {
-	this.pages = app.PageList();
-	
-	this.rotate = function() {
-		this.pages().push(this.pages().shift())
-	}.bind(this)
+	var pages = app.PageList();
+	return {
+		pages: pages,
+		rotate: function() {
+			pages().push(pages().shift());
+		}
+	}
 };
 
 //view
@@ -98,7 +101,7 @@ app.view = function(ctrl) {
 		ctrl.pages().map(function(page) {
 			return m("a", {href: page.url}, page.title);
 		}),
-		m("a", {onclick: ctrl.rotate}, "Rotate links")
+		m("button", {onclick: ctrl.rotate}, "Rotate links")
 	];
 };
 
@@ -121,11 +124,13 @@ app.PageList = function() {
 
 //controller
 app.controller = function() {
-	this.pages = app.PageList();
-	
-	this.rotate = function() {
-		this.pages().push(this.pages().shift())
-	}.bind(this)
+	var pages = app.PageList();
+	return {
+		pages: pages,
+		rotate: function() {
+			pages().push(pages().shift());
+		}
+	}
 };
 
 //view

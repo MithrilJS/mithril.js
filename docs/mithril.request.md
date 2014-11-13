@@ -17,6 +17,7 @@
 - [Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
 - [Aborting a request](#aborting-a-request)
 - [Using JSON-P](#using-json-p)
+- [Rendering before web service requests finish](#rendering-before-web-service-requests-finish)
 - [Signature](#signature)
 
 ---
@@ -383,6 +384,35 @@ m.request({
 
 ---
 
+### Rendering before web service requests finish
+
+By default, Mithril waits for web service requests to complete before attempting a redraw. This ensures that data being accessed in the view isn't nullable as a result of asynchronous data not being available yet.
+
+However, sometimes we do want to be able to redraw before a web service request completes, either because one web service out of many is slow, or because we don't need its response in order to redraw.
+
+Setting the `background` option to `true` prevents a request from affecting redrawing. This means it's possible for a view to attempt to use data before it is available. You can specify an initial value for the `m.request` getter-setter in order to avoid having to write defensive code against potential null reference exceptions:
+
+```javascript
+var demo = {}
+
+demo.controller = function() {
+	return {
+		users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []})
+	}
+}
+
+//in the view
+demo.view = function(ctrl) {
+	//This view gets rendered before the request above completes
+	//Calling .map doesn't throw an error because we defined the initial value to be an empty array, instead of undefined
+	return ctrl.users().map(function() {
+		return m("div", user.name)
+	})
+}
+```
+
+---
+
 ### Signature
 
 [How to read signatures](how-to-read-signatures.md)
@@ -401,6 +431,7 @@ where:
 		[String password,]
 		[Object<any> data,]
 		[Boolean background,]
+		[any initialValue,]
 		[any unwrapSuccess(any data),]
 		[any unwrapError(any data),]
 		[String serialize(any dataToSerialize),]
@@ -454,9 +485,31 @@ where:
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md)
 		
 		```javascript
-		m.request({method: "GET", url: "/foo", background: true})
-			.then(m.redraw); //force redraw
+		var demo = {}
+		
+		demo.controller = function() {
+			return {
+				users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []}).then(function(value) {
+					//force redraw
+					m.redraw()
+					return value
+				})
+			}
+		}
+		
+		demo.view = function(ctrl) {
+			//this view renders twice (once immediately, and once after the request above completes)
+			return ctrl.users.map(function(user) {
+				return m("div", user.name)
+			})
+		}
 		```
+		
+		It's recommended that you always set an `initialValue` when setting the `background` option to true.
+		
+	-	**any initialValue** (optional)
+	
+		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
 		
 	-	**any unwrapSuccess(any data)** (optional)
 
