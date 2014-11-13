@@ -17,6 +17,7 @@
 -	fixed template compiler edge case [#286](https://github.com/lhorie/mithril.js/issues/286)
 -	fixed pathname bug in m.route [#290](https://github.com/lhorie/mithril.js/issues/290)
 -	fixed pathname querystring bug in routed links [#304](https://github.com/lhorie/mithril.js/issues/304)
+-	fixed handling of value in inputs when model value is not in sync with input value [#336](https://github.com/lhorie/mithril.js/issues/336)
 
 ---
 
