@@ -1699,6 +1699,11 @@ function testMithril(mock) {
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop() === "bar"
 	})
+	test(function() {
+		var prop = m.request({method: "GET", url: "test", data: {foo: 1}})
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().url === "test?foo=1"
+	})
 
 	// m.request over jsonp
 	test(function(){
