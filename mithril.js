@@ -194,7 +194,11 @@ Mithril = m = new function app(window, undefined) {
 
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0; i < data.length; i++) {
-					if (cached[i] != null) nodes = nodes.concat(cached[i].nodes)
+					if (cached[i] != null) {
+						for (var j = 0; j < cached[i].nodes.length; j++) {
+							nodes.push(cached[i].nodes[j]);
+						}
+					}
 				}
 				//remove items from the end of the array if the new array is shorter than the old one
 				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
