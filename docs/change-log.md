@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.24](/mithril/archive/v0.1.24) - maintenance
+
+### Bug Fixes:
+
+-	Prevent rogue `is` attribute from being created in Chrome
+-	Fix `data` regression in `m.request`
+
+---
+
 [v0.1.23](/mithril/archive/v0.1.23) - maintenance
 
 ### News:
