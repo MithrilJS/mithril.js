@@ -108,6 +108,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 
 		if (dataType == sArr) {
+			new function a() {
 			data = flatten(data);
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
@@ -194,11 +195,7 @@ Mithril = m = new function app(window, undefined) {
 
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0; i < data.length; i++) {
-					if (cached[i] != null) {
-						for (var j = 0; j < cached[i].nodes.length; j++) {
-							nodes.push(cached[i].nodes[j]);
-						}
-					}
+					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
 				}
 				//remove items from the end of the array if the new array is shorter than the old one
 				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
@@ -212,8 +209,10 @@ Mithril = m = new function app(window, undefined) {
 				if (data.length < cached.length) cached.length = data.length;
 				cached.nodes = nodes
 			}
+			}
 		}
 		else if (data != null && dataType == sObj) {
+			new function b() {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
@@ -264,6 +263,7 @@ Mithril = m = new function app(window, undefined) {
 					}
 				};
 				configs.push(callback(data, [node, !isNew, context, cached]))
+			}
 			}
 		}
 		else if (typeof dataType != sFn) {
