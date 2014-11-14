@@ -394,17 +394,12 @@ Mithril = m = new function app(window, undefined) {
 		return nodes
 	}
 	function flatten(data) {
-		var index = 0;
-		loop: while (true) {
-			for (var i = index; i < data.length; i++) {
-				var item = data[i];
-				if (type.call(data[i]) == sArr) {
-					index = i;
-					data = data.concat.apply([], data);
-					continue loop
-				}
+		//recursive flatten
+		for (var i = 0; i < data.length; i++) {
+			if (type.call(data[i]) == sArr) {
+				data = data.concat.apply([], data);
+				i-- //check current index again and flatten until there are no more nested arrays at that index
 			}
-			break
 		}
 		return data
 	}
