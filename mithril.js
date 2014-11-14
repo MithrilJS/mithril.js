@@ -108,7 +108,6 @@ Mithril = m = new function app(window, undefined) {
 		}
 
 		if (dataType == sArr) {
-			new function a() {
 			data = flatten(data);
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
@@ -209,10 +208,8 @@ Mithril = m = new function app(window, undefined) {
 				if (data.length < cached.length) cached.length = data.length;
 				cached.nodes = nodes
 			}
-			}
 		}
 		else if (data != null && dataType == sObj) {
-			new function b() {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
@@ -263,7 +260,6 @@ Mithril = m = new function app(window, undefined) {
 					}
 				};
 				configs.push(callback(data, [node, !isNew, context, cached]))
-			}
 			}
 		}
 		else if (typeof dataType != sFn) {
