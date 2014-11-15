@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 		"auto-redrawing",
 		"benchmarks",
 		"community",
-		"compiling-templates",
+		"optimizing-performance",
 		"comparison",
 		"components",
 		"getting-started",
