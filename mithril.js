@@ -235,7 +235,7 @@ Mithril = m = new function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
-					attrs: dataAttrKeys.length ? setAttributes(node, data.tag, data.attrs, {}, namespace) : {},
+					attrs: hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : {},
 					children: data.children != null && data.children.length > 0 ?
 						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
 						data.children,
@@ -248,7 +248,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			else {
 				node = cached.nodes[0];
-				if (dataAttrKeys.length) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
+				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -318,8 +318,7 @@ Mithril = m = new function app(window, undefined) {
 				cachedAttrs[attrName] = dataAttr;
 				try {
 					//`config` isn't a real attributes, so ignore it
-					//we don't ignore `key` because it must be unique and having it on the DOM helps debugging
-					if (attrName === "config") continue;
+					if (attrName === "config" || attrName == "key") continue;
 					//hook event handlers to the auto-redrawing system
 					else if (typeof dataAttr == sFn && attrName.indexOf("on") == 0) {
 						node[attrName] = autoredraw(dataAttr, node)
