@@ -2,7 +2,7 @@ Mithril = m = new function app(window, undefined) {
 	var sObj = "[object Object]", sArr = "[object Array]", sStr = "[object String]", sFn = "function";
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
-	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR/;
+	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
@@ -191,7 +191,7 @@ Mithril = m = new function app(window, undefined) {
 			}
 			if (!intact) {
 				//diff the array itself
-
+				
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0; i < data.length; i++) {
 					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
@@ -200,10 +200,6 @@ Mithril = m = new function app(window, undefined) {
 				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
 				for (var i = 0, node; node = cached.nodes[i]; i++) {
 					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]])
-				}
-				//add items to the end if the new array is longer than the old one
-				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
-					if (node.parentNode == null) parentElement.appendChild(node)
 				}
 				if (data.length < cached.length) cached.length = data.length;
 				cached.nodes = nodes
@@ -214,6 +210,7 @@ Mithril = m = new function app(window, undefined) {
 			if (!cached.attrs) cached.attrs = {};
 
 			var dataAttrKeys = Object.keys(data.attrs);
+			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				if (cached.nodes.length) clear(cached.nodes);
