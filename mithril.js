@@ -108,7 +108,14 @@ Mithril = m = new function app(window, undefined) {
 		}
 
 		if (dataType == sArr) {
-			data = flatten(data);
+			//recursively flatten array
+			for (var i = 0; i < data.length; i++) {
+				if (type.call(data[i]) == sArr) {
+					data = data.concat.apply([], data);
+					i-- //check current index again and flatten until there are no more nested arrays at that index
+				}
+			}
+			
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -389,16 +396,6 @@ Mithril = m = new function app(window, undefined) {
 			index++
 		}
 		return nodes
-	}
-	function flatten(data) {
-		//recursive flatten
-		for (var i = 0; i < data.length; i++) {
-			if (type.call(data[i]) == sArr) {
-				data = data.concat.apply([], data);
-				i-- //check current index again and flatten until there are no more nested arrays at that index
-			}
-		}
-		return data
 	}
 	function autoredraw(callback, object) {
 		return function(e) {
