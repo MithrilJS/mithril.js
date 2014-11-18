@@ -88,7 +88,7 @@ Mithril = m = new function app(window, undefined) {
 		//`configs` is a list of config functions to run after the topmost `build` call finishes running
 
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
-		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
+		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
 		if (data == null) data = "";
 		if (data.subtree === "retain") return cached;
