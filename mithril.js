@@ -343,7 +343,8 @@ Mithril = m = new function app(window, undefined) {
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-						node[attrName] = dataAttr
+						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
+						if (node[attrName] != dataAttr) node[attrName] = dataAttr
 					}
 					else node.setAttribute(attrName, dataAttr)
 				}
@@ -352,7 +353,8 @@ Mithril = m = new function app(window, undefined) {
 					if (e.message.indexOf("Invalid argument") < 0) throw e
 				}
 			}
-			else if (attrName === "value" && tag === "input" && node.value !== dataAttr) {
+			//#348 dataAttr may not be a string, so use loose comparison (double equal) instead of strict (triple equal)
+			else if (attrName === "value" && tag === "input" && node.value != dataAttr) {
 				node.value = dataAttr
 			}
 		}
