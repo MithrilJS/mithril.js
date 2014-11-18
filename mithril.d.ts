@@ -63,3 +63,7 @@ interface MithrilXHROptions {
 
 declare var Mithril: MithrilStatic;
 declare var m: MithrilStatic;
+
+declare module 'mithril' {
+    export = MithrilStatic;
+}
