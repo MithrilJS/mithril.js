@@ -129,7 +129,7 @@ module.exports = function(grunt) {
 		zip: {
 			distribution: {
 				cwd: currentVersionArchiveFolder + "/",
-				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.map", currentVersionArchiveFolder + "/mithril.js"],
+				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.js.map", currentVersionArchiveFolder + "/mithril.js"],
 				dest: currentVersionArchiveFolder + "/mithril.min.zip"
 			}
 		},
@@ -148,16 +148,10 @@ module.exports = function(grunt) {
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
 			minified: {src: "mithril.min.js", dest: currentVersionArchiveFolder + "/mithril.min.js"},
-			map: {src: "mithril.min.map", dest: currentVersionArchiveFolder + "/mithril.min.map"},
+			map: {src: "mithril.min.js.map", dest: currentVersionArchiveFolder + "/mithril.min.js.map"},
 			typescript: {src: "mithril.d.ts", dest: currentVersionArchiveFolder + "/mithril.d.ts"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
 			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version},
-			cdnjs1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.js"},
-			cdnjs2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.js"},
-			cdnjs3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.map"},
-			jsdelivr1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.js"},
-			jsdelivr2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.js"},
-			jsdelivr3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.map"}
 		},
 		execute: {
 			tests: {src: [currentVersionArchiveFolder + "/mithril-tests.js"]}
