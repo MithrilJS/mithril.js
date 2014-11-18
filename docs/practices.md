@@ -100,7 +100,7 @@ In the unlikely case that you have another global variable called `m` in your pa
 
 Calling this method while using `m.module` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
 
-If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.emdComputation`](mithril.computation.md) instead.
+If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.endComputation`](mithril.computation.md) instead.
 
 This is the most potentially expensive method in Mithril and should not be used at a rate faster than the rate at which the native `requestAnimationFrame` method fires (i.e. the rate at which browsers are comfortable calling recurring rendering-intensive code). Typically, this rate is around 60 calls per second.
 
