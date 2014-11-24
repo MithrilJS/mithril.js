@@ -974,5 +974,5 @@ Mithril = m = new function app(window, undefined) {
 	return m
 }(typeof window != "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null) module.exports = m;
+if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 if (typeof define == "function" && define.amd) define(function() {return m});
