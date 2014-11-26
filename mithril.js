@@ -216,7 +216,7 @@ var m = (function app(window, undefined) {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
-			var dataAttrKeys = Object.keys(data.attrs);
+			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
@@ -235,7 +235,7 @@ var m = (function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
-					attrs: hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : {},
+					attrs: hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : data.attrs,
 					children: data.children != null && data.children.length > 0 ?
 						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
 						data.children,
