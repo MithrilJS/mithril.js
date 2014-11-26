@@ -68,32 +68,6 @@ That organization pattern needlessly ties unrelated aspects of the application t
 
 ---
 
-## Global Namespace Hygiene
-
-For developer convenience, Mithril uses the global `m` variable as a namespace, much like jQuery uses `$`.
-
-If you want to ensure global namespace hygiene, you can wrap your code in "islands" like this:
-
-```javascript
-new function(m) {
-
-	//your code goes here
-	
-}(Mithril);
-```
-
-If you are creating components to be used by 3rd parties, it's recommended that you always use this idiom.
-
-In the unlikely case that you have another global variable called `m` in your page, you should consider renaming it to make it more descriptive, or use the idiom below to keep it intact.
-
-```markup
-<script>_temp = m</script>
-<script src="mithril.js"></script>
-<script>m = _temp</script>
-```
-
----
-
 ## Usage of m.redraw
 
 `m.redraw` is a method that allows you to render a template outside the scope of Mithril's auto-redrawing system.
