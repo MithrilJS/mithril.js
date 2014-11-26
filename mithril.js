@@ -547,7 +547,9 @@ Mithril = m = new function app(window, undefined) {
 	var redirect = function() {}, routeParams = {}, currentRoute
 	m.route = function() {
 		//m.route()
-		if (arguments.length === 0) return currentRoute
+		if (arguments.length === 0) {
+			return checkRouteInit() && currentRoute
+		}
 		else if (arguments.length === 3 && type.call(arguments[1]) == sStr) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
 			redirect = function(source) {
@@ -592,7 +594,9 @@ Mithril = m = new function app(window, undefined) {
 			else window.location[m.route.mode] = currentRoute
 		}
 	}
-	m.route.param = function(key) {return routeParams[key]}
+	m.route.param = function(key) {
+		return checkRouteInit() && routeParams[key]
+	}
 	m.route.mode = "search"
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
@@ -654,6 +658,9 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
+	}
+	function checkRouteInit(){
+		return currentRoute == null || throw "Attempted to query m.route, but m.route was not initialized";
 	}
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root)
