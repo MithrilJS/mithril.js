@@ -148,9 +148,10 @@ var m = (function app(window, undefined) {
 						else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 					}
 				}
-				var actions = Object.keys(existing).map(function(key) {return existing[key]});
-				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index});
-				var newCached = cached.slice();
+				var actions = []
+				for (var prop in existing) actions.push(existing[prop])
+				var changes = actions.sort(sortChanges);
+				var newCached = new Array(cached.length)
 
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
@@ -177,8 +178,8 @@ var m = (function app(window, undefined) {
 					newCached[change.index] = cached[change.index]
 				}
 				cached = newCached;
-				cached.nodes = [];
-				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
+				cached.nodes = new Array(parentElement.childNodes.length);
+				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 			}
 			//end key algorithm
 
@@ -310,6 +311,7 @@ var m = (function app(window, undefined) {
 
 		return cached
 	}
+	function sortChanges(a, b) {return a.action - b.action || a.index - b.index}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName];
