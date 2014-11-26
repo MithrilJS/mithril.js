@@ -363,7 +363,8 @@ var m = (function app(window, undefined) {
 	function clear(nodes, cached) {
 		for (var i = nodes.length - 1; i > -1; i--) {
 			if (nodes[i] && nodes[i].parentNode) {
-				nodes[i].parentNode.removeChild(nodes[i]);
+				try {nodes[i].parentNode.removeChild(nodes[i])}
+				catch (e) {} //ignore if this fails due to order of events (see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
 				cached = [].concat(cached);
 				if (cached[i]) unload(cached[i])
 			}
