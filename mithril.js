@@ -696,6 +696,9 @@ var m = (function app(window, undefined) {
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
+	function checkRouteInit(){
+		return currentRoute == null || throw "Attempted to query m.route, but m.route was not initialized";
+	}
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
