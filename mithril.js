@@ -1,4 +1,4 @@
-Mithril = m = new function app(window, undefined) {
+var m = (function app(window, undefined) {
 	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
@@ -581,11 +581,16 @@ Mithril = m = new function app(window, undefined) {
 			element.removeEventListener("click", routeUnobtrusive);
 			element.addEventListener("click", routeUnobtrusive)
 		}
-		//m.route(route)
+		//m.route(route, params)
 		else if (type.call(arguments[0]) == STRING) {
 			currentRoute = arguments[0];
-			var querystring = arguments[1] != null && type.call(arguments[1]) == OBJECT ? buildQueryString(arguments[1]) : null;
-			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring;
+			var args = arguments[1] || {}
+			var queryIndex = currentRoute.indexOf("?")
+			var params = queryIndex > -1 ? parseQueryString(currentRoute.slice(queryIndex + 1)) : {}
+			for (var i in args) params[i] = args[i]
+			var querystring = buildQueryString(params)
+			var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute
+			if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
 
 			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true;
 
@@ -655,7 +660,7 @@ Mithril = m = new function app(window, undefined) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0; i < pairs.length; i++) {
 			var pair = pairs[i].split("=");
-			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : (pair.length === 1 ? true : "")
+			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : ""
 		}
 		return params
 	}
@@ -972,7 +977,7 @@ Mithril = m = new function app(window, undefined) {
 	m.deps.factory = app;
 
 	return m
-}(typeof window != "undefined" ? window : {});
+})(typeof window != "undefined" ? window : {});
 
 if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
-if (typeof define == "function" && define.amd) define(function() {return m});
+else if (typeof define == "function" && define.amd) define(function() {return m});

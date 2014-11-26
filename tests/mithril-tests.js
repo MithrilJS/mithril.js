@@ -1063,7 +1063,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
 		mock.requestAnimationFrame.$resolve() //teardown
-		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === true && m.route.param("test2") === ""
+		return mock.location.search == "?/test14?test=&test2=" && m.route.param("test") === "" && m.route.param("test2") === ""
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
@@ -1596,6 +1596,30 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return root.childNodes[0].nodeValue == "b"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {
+			m.route("/b?foo=1", {foo: 2})
+		}
+		a.view = function() {return "a"}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {return "b"}
+
+		m.route(root, "/", {
+			"/": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		return mock.location.search == "?/b?foo=2"
 	})
 	//end m.route
 
