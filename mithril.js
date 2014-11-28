@@ -127,59 +127,70 @@ var m = (function app(window, undefined) {
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
 			for (var i = 0; i < cached.length; i++) {
-				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
+				if (cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true;
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
 			if (shouldMaintainIdentities) {
-				for (var i = 0; i < data.length; i++) {
-					if (data[i] && data[i].attrs) {
-						if (data[i].attrs.key != null) {
-							var key = data[i].attrs.key;
-							if (!existing[key]) existing[key] = {action: INSERTION, index: i};
-							else existing[key] = {
-								action: MOVE,
-								index: i,
-								from: existing[key].index,
-								element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+				var keysDiffer = false
+				if (data.length != cached.length) keysDiffer = true
+				else for (var i = 0; i < data.length; i++) {
+					if (cached[i].attrs && data[i].attrs && cached[i].attrs.key != data[i].attrs.key) {
+						keysDiffer = true
+						break
+					}
+				}
+				
+				if (keysDiffer) {
+					for (var i = 0; i < data.length; i++) {
+						if (data[i].attrs) {
+							if (data[i].attrs.key != null) {
+								var key = data[i].attrs.key;
+								if (!existing[key]) existing[key] = {action: INSERTION, index: i};
+								else existing[key] = {
+									action: MOVE,
+									index: i,
+									from: existing[key].index,
+									element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+								}
 							}
+							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 					}
-				}
-				var actions = []
-				for (var prop in existing) actions.push(existing[prop])
-				var changes = actions.sort(sortChanges);
-				var newCached = new Array(cached.length)
+					var actions = []
+					for (var prop in existing) actions.push(existing[prop])
+					var changes = actions.sort(sortChanges);
+					var newCached = new Array(cached.length)
 
-				for (var i = 0, change; change = changes[i]; i++) {
-					if (change.action == DELETION) {
-						clear(cached[change.index].nodes, cached[change.index]);
-						newCached.splice(change.index, 1)
-					}
-					if (change.action == INSERTION) {
-						var dummy = $document.createElement("div");
-						dummy.key = data[change.index].attrs.key;
-						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
-						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
-					}
-
-					if (change.action == MOVE) {
-						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
-							parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
+					for (var i = 0, change; change = changes[i]; i++) {
+						if (change.action == DELETION) {
+							clear(cached[change.index].nodes, cached[change.index]);
+							newCached.splice(change.index, 1)
 						}
-						newCached[change.index] = cached[change.from]
+						if (change.action == INSERTION) {
+							var dummy = $document.createElement("div");
+							dummy.key = data[change.index].attrs.key;
+							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
+							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
+						}
+
+						if (change.action == MOVE) {
+							if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
+								parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
+							}
+							newCached[change.index] = cached[change.from]
+						}
 					}
+					for (var i = 0; i < unkeyed.length; i++) {
+						var change = unkeyed[i];
+						parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
+						newCached[change.index] = cached[change.index]
+					}
+					cached = newCached;
+					cached.nodes = new Array(parentElement.childNodes.length);
+					for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 				}
-				for (var i = 0; i < unkeyed.length; i++) {
-					var change = unkeyed[i];
-					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
-					newCached[change.index] = cached[change.index]
-				}
-				cached = newCached;
-				cached.nodes = new Array(parentElement.childNodes.length);
-				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 			}
 			//end key algorithm
 
