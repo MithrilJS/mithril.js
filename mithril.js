@@ -38,6 +38,7 @@ var m = (function app(window, undefined) {
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
 		var match, classes = [];
+		if (type.call(args[0]) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string")
 		while (match = parser.exec(args[0])) {
 			if (match[1] == "" && match[2]) cell.tag = match[2];
 			else if (match[1] == "#") cell.attrs.id = match[2];
