@@ -1,5 +1,16 @@
 ## Change Log
 
+[v0.1.25](/mithril/archive/v0.1.25) - maintenance
+
+### Bug Fixes:
+
+-	fixed input cursor jumping regression
+-	fixed interop bug when QUnit and AMD are used at the same time [#355](https://github.com/lhorie/mithril.js/issues/355)
+-	fixed route arg duplication in edge case [#352](https://github.com/lhorie/mithril.js/issues/352)
+-	prevented meaningless error in Chrome edge case [#358](https://github.com/lhorie/mithril.js/issues/358)
+
+---
+
 [v0.1.24](/mithril/archive/v0.1.24) - maintenance
 
 ### Bug Fixes:
