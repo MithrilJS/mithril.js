@@ -553,10 +553,11 @@ var m = (function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
-	var redirect = function() {}, routeParams = {}, currentRoute;
+	var redirect = function() {}, routeParams, currentRoute;
 	m.route = function() {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
+		//m.route(el, defaultRoute, routes)
 		else if (arguments.length === 3 && type.call(arguments[1]) == STRING) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2];
 			redirect = function(source) {
@@ -606,7 +607,10 @@ var m = (function app(window, undefined) {
 			else $location[m.route.mode] = currentRoute
 		}
 	};
-	m.route.param = function(key) {return routeParams[key]};
+	m.route.param = function(key) {
+		if (!routeParams) throw new Error("You must call m.route(element, defaultRoute, routes) before calling m.route.param()")
+		return routeParams[key]
+	};
 	m.route.mode = "search";
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
