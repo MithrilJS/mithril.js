@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.1.26](/mithril/archive/v0.1.26) - maintenance
+
+### Bug Fixes:
+
+-	make sure input[type] is CSS-targetable [#364](https://github.com/lhorie/mithril.js/issues/364)
+-	throw error if m.route.param is called before initializing routes [#361](https://github.com/lhorie/mithril.js/issues/361)
+
+---
+
 [v0.1.25](/mithril/archive/v0.1.25) - maintenance
 
 ### Bug Fixes:
