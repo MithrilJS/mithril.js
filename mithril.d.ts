@@ -9,7 +9,10 @@ interface MithrilStatic {
 	trust(html: string): String;
 	render(rootElement: Element, children?: any): void;
 	render(rootElement: HTMLDocument, children?: any): void;
-	redraw(): void;
+	redraw: {
+		(): void;
+		strategy(key: string);
+	};
 	route: {
 		(rootElement:Element, defaultRoute:string, routes:{ [key: string]: MithrilModule }): void
 		(element: Element, isInitialized: boolean): void;
