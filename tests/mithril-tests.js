@@ -28,6 +28,8 @@ function testMithril(mock) {
 	test(function() {return m("svg", [m("a[href='http://google.com']")])})
 	test(function() {return m(".foo", {"class": "bar"}).attrs["class"] == "foo bar"})
 	test(function() {return m(".foo", {className: "bar"}).attrs.className == "foo bar"})
+	test(function() {return m("span .foo").tag == "span"})
+	test(function() {return m("span .foo").attrs.className == "foo"})
 
 	//m.module
 	test(function() {
