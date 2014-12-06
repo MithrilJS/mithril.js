@@ -408,3 +408,9 @@ test("mixing trusted content w/ td", function() {
 	m.render(dummyEl, [m.trust("<td>1</td><td>2</td>"), m("i", "foo")])
 	equal(dummyEl.childNodes[1].nodeName, "I")
 })
+
+test("", function() {
+	m.render(dummyEl, m("input", {value: ""}))
+	m.render(dummyEl, m("input", {value: 0}))
+	equal(dummyEl.childNodes[0].value, "0")
+})
