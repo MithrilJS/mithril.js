@@ -334,10 +334,10 @@ vm.add = function() {
 		vm.list.push(new todo.Todo({description: vm.description()}));
 		vm.description("");
 	}
-}.bind(this);
+};
 ```
 
-The difference with the modified version is that `add` no longer takes an argument, and we call `.bind(this)` at the end to lock the scoping of `this` inside of the `add` method.
+The difference with the modified version is that `add` no longer takes an argument.
 
 With this, we can make the `onclick` binding on the template *much* simpler:
 
