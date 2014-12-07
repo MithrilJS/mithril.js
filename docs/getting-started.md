@@ -130,7 +130,7 @@ In the case of our todo application, the view-model needs a few things: it needs
 
 ```javascript
 //define the view-model
-todo.vm = new function() {
+todo.vm = (function() {
 	var vm = {}
 	vm.init = function() {
 		//a running list of todos
@@ -148,7 +148,7 @@ todo.vm = new function() {
 		};
 	}
 	return vm
-}
+}())
 ```
 
 The code above defines a view-model object called `vm`. It is simply a javascript object that has a `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.
@@ -447,7 +447,7 @@ todo.TodoList = Array;
 //stores a description for new todos before they are created
 //and takes care of the logic surrounding when adding is permitted
 //and clearing the input after adding a todo to the list
-todo.vm = new function() {
+todo.vm = (function() {
 	var vm = {}
 	vm.init = function() {
 		//a running list of todos
@@ -465,7 +465,7 @@ todo.vm = new function() {
 		};
 	}
 	return vm
-}
+}())
 
 //the controller defines what part of the model is relevant for the current page
 //in our case, there's only one view-model that handles everything
