@@ -110,7 +110,7 @@ var m = (function app(window, undefined) {
 
 		if (dataType === ARRAY) {
 			//recursively flatten array
-			for (var i = 0; i < data.length; i++) {
+			for (var i = 0, len = data.length; i < len; i++) {
 				if (type.call(data[i]) === ARRAY) {
 					data = data.concat.apply([], data);
 					i-- //check current index again and flatten until there are no more nested arrays at that index
@@ -127,7 +127,7 @@ var m = (function app(window, undefined) {
 			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
-			for (var i = 0; i < cached.length; i++) {
+			for (var i = 0, len = cached.length; i < len; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true;
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
@@ -135,7 +135,7 @@ var m = (function app(window, undefined) {
 			}
 			if (shouldMaintainIdentities) {
 				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
-				for (var i = 0; i < data.length; i++) {
+				for (var i = 0, len = data.length; i < len; i++) {
 					if (data[i] && data[i].attrs) {
 						if (data[i].attrs.key != null) {
 							var key = data[i].attrs.key;
@@ -173,7 +173,7 @@ var m = (function app(window, undefined) {
 						newCached[change.index] = cached[change.from]
 					}
 				}
-				for (var i = 0; i < unkeyed.length; i++) {
+				for (var i = 0, len = unkeyed.length; i < len; i++) {
 					var change = unkeyed[i];
 					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
 					newCached[change.index] = cached[change.index]
@@ -184,7 +184,7 @@ var m = (function app(window, undefined) {
 			}
 			//end key algorithm
 
-			for (var i = 0, cacheCount = 0; i < data.length; i++) {
+			for (var i = 0, cacheCount = 0, len = data.length; i < len; i++) {
 				//diff each item in the array
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
 				if (item === undefined) continue;
@@ -202,7 +202,7 @@ var m = (function app(window, undefined) {
 				//diff the array itself
 				
 				//update the list of DOM nodes by collecting the nodes from each item
-				for (var i = 0; i < data.length; i++) {
+				for (var i = 0, len = data.length; i < len; i++) {
 					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
 				}
 				//remove items from the end of the array if the new array is shorter than the old one
@@ -377,7 +377,7 @@ var m = (function app(window, undefined) {
 		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
-				for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
 			}
 			else if (cached.children.tag) unload(cached.children)
 		}
@@ -440,7 +440,7 @@ var m = (function app(window, undefined) {
 		if (cellCache[id] === undefined) clear(node.childNodes);
 		if (forceRecreation === true) reset(root);
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
-		for (var i = 0; i < configs.length; i++) configs[i]()
+		for (var i = 0, len = configs.length; i < len; i++) configs[i]()
 	};
 	function getCellCacheKey(element) {
 		var index = nodeCache.indexOf(element);
@@ -522,9 +522,9 @@ var m = (function app(window, undefined) {
 	m.redraw.strategy = m.prop();
 	function redraw() {
 		var mode = m.redraw.strategy();
-		for (var i = 0; i < roots.length; i++) {
+		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i] && mode != "none") {
-				m.render(roots[i], modules[i].view(controllers[i]), mode === "all")
+				m.render(root, modules[i].view(controllers[i]), mode === "all")
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -635,7 +635,7 @@ var m = (function app(window, undefined) {
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || [];
 					var values = [].slice.call(arguments, 1, -2);
-					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					m.module(root, router[route])
 				});
 				return true
@@ -665,7 +665,7 @@ var m = (function app(window, undefined) {
 	}
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
-		for (var i = 0; i < pairs.length; i++) {
+		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
 			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : ""
 		}
