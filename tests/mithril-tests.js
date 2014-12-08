@@ -780,6 +780,14 @@ function testMithril(mock) {
 		m.render(root, {foo: 123})
 		return root.childNodes.length == 0
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/299
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("div", {key: 1}, 1), m("div", {key: 2}, 2), m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key: 5}, 5), null, null, null, null, null, null, null, null, null, null]))
+		m.render(root, m("div", [null, null, m("div", {key: 3}, 3), null, null, m("div", {key: 6}, 6), null, null, m("div", {key: 9}, 9), null, null, m("div", {key: 12}, 12), null, null, m("div", {key: 15}, 15)]))
+		m.render(root, m("div", [m("div", {key: 1}, 1), m("div", {key: 2}, 2), m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key: 5}, 5), null, null, null, null, null, null, null, null, null, null]))
+		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).slice(0, 5).join("") == "12345"
+	})
 	//end m.render
 
 	//m.redraw

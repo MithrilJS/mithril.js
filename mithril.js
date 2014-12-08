@@ -134,6 +134,7 @@ var m = (function app(window, undefined) {
 				}
 			}
 			if (shouldMaintainIdentities) {
+				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
 				for (var i = 0; i < data.length; i++) {
 					if (data[i] && data[i].attrs) {
 						if (data[i].attrs.key != null) {
