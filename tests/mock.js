@@ -33,7 +33,7 @@ if (!Object.keys) {
 }
 
 var mock = {}
-mock.window = new function() {
+mock.window = (function() {
 	var window = {}
 	window.document = {}
 	window.document.childNodes = []
@@ -136,7 +136,7 @@ mock.window = new function() {
 			callback()
 		}
 	}
-	window.XMLHttpRequest = new function() {
+	window.XMLHttpRequest = (function() {
 		var request = function() {
 			this.$headers = {}
 			this.setRequestHeader = function(key, value) {
@@ -155,7 +155,7 @@ mock.window = new function() {
 		}
 		request.$instances = []
 		return request
-	}
+	}())
 	window.location = {search: "", pathname: "", hash: ""},
 	window.history = {}
 	window.history.pushState = function(data, title, url) {
@@ -165,4 +165,4 @@ mock.window = new function() {
 		window.location.pathname = window.location.search = window.location.hash = url
 	}
 	return window
-}
+}())
