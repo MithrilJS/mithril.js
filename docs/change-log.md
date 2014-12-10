@@ -1,7 +1,44 @@
 ## Change Log
 
+[v0.1.26](/mithril/archive/v0.1.26) - maintenance
+
+### Bug Fixes:
+
+-	make sure input[type] is CSS-targetable [#364](https://github.com/lhorie/mithril.js/issues/364)
+-	throw error if m.route.param is called before initializing routes [#361](https://github.com/lhorie/mithril.js/issues/361)
+
+---
+
+[v0.1.25](/mithril/archive/v0.1.25) - maintenance
+
+### Bug Fixes:
+
+-	fixed input cursor jumping regression
+-	fixed interop bug when QUnit and AMD are used at the same time [#355](https://github.com/lhorie/mithril.js/issues/355)
+-	fixed route arg duplication in edge case [#352](https://github.com/lhorie/mithril.js/issues/352)
+-	prevented meaningless error in Chrome edge case [#358](https://github.com/lhorie/mithril.js/issues/358)
+
+---
+
+[v0.1.24](/mithril/archive/v0.1.24) - maintenance
+
+### Bug Fixes:
+
+-	Prevent rogue `is` attribute from being created in Chrome
+-	Fix `data` regression in `m.request`
+
+---
+
 [v0.1.23](/mithril/archive/v0.1.23) - maintenance
 
+### News:
+
+-	There's now support for extended custom elements (e.g. `m("button[is=my-button]")`)
+-	`m.request` now supports a `initialValue` option to help prevent type errors in views when using the `background` option
+
+### Bug Fixes:
+
+-	docs now have anchor links for easier navigation
 -	fixed a bunch of IE8 issues [#298](https://github.com/lhorie/mithril.js/issues/298)
 -	fixed handling of `method` option in JSONP mode [#292](https://github.com/lhorie/mithril.js/issues/292)
 -	fixed source map files
@@ -9,6 +46,7 @@
 -	fixed template compiler edge case [#286](https://github.com/lhorie/mithril.js/issues/286)
 -	fixed pathname bug in m.route [#290](https://github.com/lhorie/mithril.js/issues/290)
 -	fixed pathname querystring bug in routed links [#304](https://github.com/lhorie/mithril.js/issues/304)
+-	fixed handling of value in inputs when model value is not in sync with input value [#336](https://github.com/lhorie/mithril.js/issues/336)
 
 ---
 

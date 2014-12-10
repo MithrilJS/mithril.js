@@ -9,12 +9,19 @@ interface MithrilStatic {
 	trust(html: string): String;
 	render(rootElement: Element, children?: any): void;
 	render(rootElement: HTMLDocument, children?: any): void;
-	redraw(): void;
-	route(rootElement: Element, defaultRoute: string, routes: { [key: string]: MithrilModule }): void;
-	route(rootElement: HTMLDocument, defaultRoute: string, routes: { [key: string]: MithrilModule }): void;
-	route(path: string, params?: any, shouldReplaceHistory?: boolean): void;
-	route(): string;
-	route(element: Element, isInitialized: boolean): void;
+	redraw: {
+		(): void;
+		strategy(key: string);
+	};
+	route: {
+		(rootElement:Element, defaultRoute:string, routes:{ [key: string]: MithrilModule }): void
+		(element: Element, isInitialized: boolean): void;
+		(rootElement:HTMLDocument, defaultRoute:string, routes:{ [key: string]: MithrilModule }): void;
+		(path:string, params?:any, shouldReplaceHistory?:boolean): void;
+		(): string;
+		param(key:string): string;
+		mode: string;
+	};
 	request(options: MithrilXHROptions): MithrilPromise;
 	deferred(): MithrilDeferred;
 	sync(promises: MithrilPromise[]): MithrilPromise;
@@ -63,3 +70,7 @@ interface MithrilXHROptions {
 
 declare var Mithril: MithrilStatic;
 declare var m: MithrilStatic;
+
+declare module 'mithril' {
+	export = MithrilStatic;
+}

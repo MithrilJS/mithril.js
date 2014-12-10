@@ -780,6 +780,26 @@ function testMithril(mock) {
 		m.render(root, {foo: 123})
 		return root.childNodes.length == 0
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/299
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("div", {key: 1}, 1), m("div", {key: 2}, 2), m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key: 5}, 5), null, null, null, null, null, null, null, null, null, null]))
+		m.render(root, m("div", [null, null, m("div", {key: 3}, 3), null, null, m("div", {key: 6}, 6), null, null, m("div", {key: 9}, 9), null, null, m("div", {key: 12}, 12), null, null, m("div", {key: 15}, 15)]))
+		m.render(root, m("div", [m("div", {key: 1}, 1), m("div", {key: 2}, 2), m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key: 5}, 5), null, null, null, null, null, null, null, null, null, null]))
+		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).slice(0, 5).join("") == "12345"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/377
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("div", 1), m("div", 2), [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
+		m.render(root, m("div", [m("div", 1), null, [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
+		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).slice(0, 5).join("") == "13456"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [console.log()])) //don't throw in Firefox
+		return true
+	})
 	//end m.render
 
 	//m.redraw
@@ -1063,7 +1083,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
 		mock.requestAnimationFrame.$resolve() //teardown
-		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === true && m.route.param("test2") === ""
+		return mock.location.search == "?/test14?test=&test2=" && m.route.param("test") === "" && m.route.param("test2") === ""
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
@@ -1597,6 +1617,30 @@ function testMithril(mock) {
 		
 		return root.childNodes[0].nodeValue == "b"
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {
+			m.route("/b?foo=1", {foo: 2})
+		}
+		a.view = function() {return "a"}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {return "b"}
+
+		m.route(root, "/", {
+			"/": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		return mock.location.search == "?/b?foo=2"
+	})
 	//end m.route
 
 	//m.prop
@@ -1686,6 +1730,28 @@ function testMithril(mock) {
 		var xhr = mock.XMLHttpRequest.$instances.pop()
 		xhr.onreadystatechange()
 		return xhr.$headers["Content-Type"] === undefined
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "test", initialValue: "foo"})
+		var initialValue = prop();
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+
+		return initialValue === "foo"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "test", initialValue: "foo"}).then(function(value) {return "bar"})
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop() === "bar"
+	})
+	test(function() {
+		var prop = m.request({method: "GET", url: "test", data: {foo: 1}})
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().url === "test?foo=1"
+	})
+	test(function() {
+		var prop = m.request({method: "POST", url: "test", data: {foo: 1}})
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().url === "test"
 	})
 
 	// m.request over jsonp

@@ -62,7 +62,7 @@ Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Array::
 The easiest way to polyfill these features is to include this script:
 
 ```javascript
-<script src="https://polyfill.io/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-shim.min.js"></script>
 ```
 
 This will provide all the polyfills required for the browser. You can alternatively include only specific polyfills:

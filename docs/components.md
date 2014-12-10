@@ -136,7 +136,7 @@ myApp.users.index.view = function() {
 There's no rule for how you should organize code, and given that namespacing is often achieved with simple javascript, you can use simple javascript patterns to alias a long namespace and reduce the amount of typing:
 
 ```javascript
-new function() {
+!function() {
 	var module = myApp.users.index = {}
 
 	module.vm = {/*...*/}
@@ -148,7 +148,7 @@ new function() {
 		
 		return vm.something
 	}
-}
+}()
 ```
 
 ---

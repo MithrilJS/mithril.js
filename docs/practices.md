@@ -18,7 +18,7 @@ Because Mithril encourages all entity logic to be done in the model layer, it's 
 
 Models are also responsible for centralizing tasks such as filtering of entity lists and validation routines, so that access to these methods is available across the application.
 
-DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw.md), but, if possible, it's preferable to abstract this into a service which integrates with Mithril's auto-redrawing system (see [`m.startComputation` / `m.endComputation`](mithril.computation.md)).
+DOM manipulation should be done in the view via [`m()` and `config`](mithril). Controllers may explicitly call [`m.redraw`](mithril.redraw.md), but, if possible, it's preferable to abstract this into a service which integrates with Mithril's auto-redrawing system (see [`m.startComputation` / `m.endComputation`](mithril.computation.md)). You should avoid instantiating controller classes from views.
 
 ---
 
@@ -68,39 +68,13 @@ That organization pattern needlessly ties unrelated aspects of the application t
 
 ---
 
-## Global Namespace Hygiene
-
-For developer convenience, Mithril uses the global `m` variable as a namespace, much like jQuery uses `$`.
-
-If you want to ensure global namespace hygiene, you can wrap your code in "islands" like this:
-
-```javascript
-new function(m) {
-
-	//your code goes here
-	
-}(Mithril);
-```
-
-If you are creating components to be used by 3rd parties, it's recommended that you always use this idiom.
-
-In the unlikely case that you have another global variable called `m` in your page, you should consider renaming it to make it more descriptive, or use the idiom below to keep it intact.
-
-```markup
-<script>_temp = m</script>
-<script src="mithril.js"></script>
-<script>m = _temp</script>
-```
-
----
-
 ## Usage of m.redraw
 
 `m.redraw` is a method that allows you to render a template outside the scope of Mithril's auto-redrawing system.
 
 Calling this method while using `m.module` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
 
-If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.emdComputation`](mithril.computation.md) instead.
+If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.endComputation`](mithril.computation.md) instead.
 
 This is the most potentially expensive method in Mithril and should not be used at a rate faster than the rate at which the native `requestAnimationFrame` method fires (i.e. the rate at which browsers are comfortable calling recurring rendering-intensive code). Typically, this rate is around 60 calls per second.
 

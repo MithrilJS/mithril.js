@@ -64,17 +64,17 @@ The example below shows how to use a SubtreeDirective object to create a static 
 var app = {}
 
 //here's an example plugin that determines whether data has changes.
-//in this case, it simply assume data has changed the first time, and never changes after that.
-app.bindOnce = new function() {
+//in this case, it simply assumes data has changed the first time, and never changes after that.
+app.bindOnce = (function() {
 	var cache = {}
-	function(view) {
+	return function(view) {
 		if (!cache[view.toString()]) {
 			cache[view.toString()] = true
 			return view()
 		}
 		else return {subtree: "retain"}
 	}
-}
+}())
 
 //here's the view
 app.view = function() {

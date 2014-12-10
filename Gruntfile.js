@@ -1,19 +1,19 @@
 module.exports = function(grunt) {
 	_ = require('lodash');
 
-	var version = "0.1.23"
+	var version = "0.1.26";
 
-	var inputFolder = "./docs"
-	var tempFolder = "./temp"
-	var archiveFolder = "./archive"
-	var outputFolder = "../mithril"
+	var inputFolder = "./docs";
+	var tempFolder = "./temp";
+	var archiveFolder = "./archive";
+	var outputFolder = "../mithril";
 
-	var guideLayout = "guide"
+	var guideLayout = "guide";
 	var guide = [
 		"auto-redrawing",
 		"benchmarks",
 		"community",
-		"compiling-templates",
+		"optimizing-performance",
 		"comparison",
 		"components",
 		"getting-started",
@@ -23,9 +23,9 @@ module.exports = function(grunt) {
 		"refactoring",
 		"routing",
 		"tools",
-		"web-services",
-	]
-	var apiLayout = "api"
+		"web-services"
+	];
+	var apiLayout = "api";
 	var api = [
 		"change-log",
 		"roadmap",
@@ -44,11 +44,11 @@ module.exports = function(grunt) {
 		"mithril.trust",
 		"mithril.withAttr",
 		"mithril.xhr"
-	]
+	];
 
 
 
-	var md2htmlTasks = {}
+	var md2htmlTasks = {};
 	var makeTasks = function(layout, pages) {
 		pages.map(function(name) {
 			md2htmlTasks[name] = {
@@ -56,9 +56,9 @@ module.exports = function(grunt) {
 				files: [{src: [inputFolder + "/" + name + ".md"], dest: tempFolder + "/" + name + ".html"}]
 			}
 		})
-	}
-	makeTasks("guide", guide)
-	makeTasks("api", api)
+	};
+	makeTasks("guide", guide);
+	makeTasks("api", api);
 
 	var sauceBrowsers =[
 		{ browserName: 'firefox', version: '19', platform: 'XP' },
@@ -67,7 +67,7 @@ module.exports = function(grunt) {
 		{ browserName: "iPad", platform: "OS X 10.9", version: "7.1"},
 		{ browserName: "opera", platform: "Linux", version: "12"},
 		{ browserName: "chrome", platform: "XP", version: "26"},
-		{ browserName: "chrome", platform: "Windows 8", version: "26"},
+		{ browserName: "chrome", platform: "Windows 8", version: "26"}
 	];
 
 	var sauceOnTestComplete = function(result, callback) {
@@ -116,7 +116,7 @@ module.exports = function(grunt) {
 	};
 	_.assign(sauceQunitOptions, sauceBaseOptions);
 
-	var currentVersionArchiveFolder = archiveFolder + "/v" + version
+	var currentVersionArchiveFolder = archiveFolder + "/v" + version;
 	grunt.initConfig({
 		md2html: md2htmlTasks,
 		uglify: {
@@ -129,7 +129,7 @@ module.exports = function(grunt) {
 		zip: {
 			distribution: {
 				cwd: currentVersionArchiveFolder + "/",
-				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.map", currentVersionArchiveFolder + "/mithril.js"],
+				src: [currentVersionArchiveFolder + "/mithril.min.js", currentVersionArchiveFolder + "/mithril.min.js.map", currentVersionArchiveFolder + "/mithril.js"],
 				dest: currentVersionArchiveFolder + "/mithril.min.zip"
 			}
 		},
@@ -148,16 +148,10 @@ module.exports = function(grunt) {
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
 			minified: {src: "mithril.min.js", dest: currentVersionArchiveFolder + "/mithril.min.js"},
-			map: {src: "mithril.min.map", dest: currentVersionArchiveFolder + "/mithril.min.map"},
+			map: {src: "mithril.min.js.map", dest: currentVersionArchiveFolder + "/mithril.min.js.map"},
 			typescript: {src: "mithril.d.ts", dest: currentVersionArchiveFolder + "/mithril.d.ts"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
 			archive: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder + "/archive/v" + version},
-			cdnjs1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.js"},
-			cdnjs2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.js"},
-			cdnjs3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../cdnjs/ajax/libs/mithril/" + version + "/mithril.min.map"},
-			jsdelivr1: {src: currentVersionArchiveFolder + "/mithril.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.js"},
-			jsdelivr2: {src: currentVersionArchiveFolder + "/mithril.min.js", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.js"},
-			jsdelivr3: {src: currentVersionArchiveFolder + "/mithril.min.map", dest: "../jsdelivr/files/mithril/" + version + "/mithril.min.map"}
 		},
 		execute: {
 			tests: {src: [currentVersionArchiveFolder + "/mithril-tests.js"]}
