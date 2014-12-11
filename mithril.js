@@ -1,8 +1,22 @@
-Mithril = m = new function app(window, undefined) {
-	var sObj = "[object Object]", sArr = "[object Array]", sStr = "[object String]", sFn = "function"
-	var type = {}.toString
-	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
-	var voidElements = /AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR/
+var m = (function app(window, undefined) {
+	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
+	var type = {}.toString;
+	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
+	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
+
+	// caching commonly used variables
+	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
+
+	// self invoking function needed because of the way mocks work
+	function initialize(window){
+		$document = window.document;
+		$location = window.location;
+		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
+		$requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+	}
+
+	initialize(window);
+
 
 	/*
 	 * @typedef {String} Tag
@@ -18,26 +32,27 @@ Mithril = m = new function app(window, undefined) {
 	 *
 	 */
 	function m() {
-		var args = [].slice.call(arguments)
-		var hasAttrs = args[1] != null && type.call(args[1]) == sObj && !("tag" in args[1]) && !("subtree" in args[1])
-		var attrs = hasAttrs ? args[1] : {}
-		var classAttrName = "class" in attrs ? "class" : "className"
-		var cell = {tag: "div", attrs: {}}
-		var match, classes = []
+		var args = [].slice.call(arguments);
+		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
+		var attrs = hasAttrs ? args[1] : {};
+		var classAttrName = "class" in attrs ? "class" : "className";
+		var cell = {tag: "div", attrs: {}};
+		var match, classes = [];
+		if (type.call(args[0]) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string")
 		while (match = parser.exec(args[0])) {
-			if (match[1] == "" && match[2]) cell.tag = match[2]
-			else if (match[1] == "#") cell.attrs.id = match[2]
-			else if (match[1] == ".") classes.push(match[2])
-			else if (match[3][0] == "[") {
-				var pair = attrParser.exec(match[3])
+			if (match[1] === "" && match[2]) cell.tag = match[2];
+			else if (match[1] === "#") cell.attrs.id = match[2];
+			else if (match[1] === ".") classes.push(match[2]);
+			else if (match[3][0] === "[") {
+				var pair = attrParser.exec(match[3]);
 				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true)
 			}
 		}
-		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ")
+		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
 
 
-		var children = hasAttrs ? args[2] : args[1]
-		if (type.call(children) == sArr) {
+		var children = hasAttrs ? args[2] : args[1];
+		if (type.call(children) === ARRAY) {
 			cell.children = children
 		}
 		else {
@@ -45,7 +60,7 @@ Mithril = m = new function app(window, undefined) {
 		}
 
 		for (var attrName in attrs) {
-			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
+			if (attrName === classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
 			else cell.attrs[attrName] = attrs[attrName]
 		}
 		return cell
@@ -74,28 +89,35 @@ Mithril = m = new function app(window, undefined) {
 		//`configs` is a list of config functions to run after the topmost `build` call finishes running
 
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
-		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements
+		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
-		if (data == null) data = ""
-		if (data.subtree === "retain") return cached
-		var cachedType = type.call(cached), dataType = type.call(data)
-		if (cached == null || cachedType != dataType) {
+		if (data == null || data.toString() == null) data = "";
+		if (data.subtree === "retain") return cached;
+		var cachedType = type.call(cached), dataType = type.call(data);
+		if (cached == null || cachedType !== dataType) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
-					var offset = index - parentIndex
-					var end = offset + (dataType == sArr ? data : cached.nodes).length
+					var offset = index - parentIndex;
+					var end = offset + (dataType === ARRAY ? data : cached.nodes).length;
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end))
 				}
 				else if (cached.nodes) clear(cached.nodes, cached)
 			}
-			cached = new data.constructor
-			if (cached.tag) cached = {} //if constructor creates a virtual dom element, use a blank object as the base cached node instead of copying the virtual el (#277)
+			cached = new data.constructor;
+			if (cached.tag) cached = {}; //if constructor creates a virtual dom element, use a blank object as the base cached node instead of copying the virtual el (#277)
 			cached.nodes = []
 		}
 
-		if (dataType == sArr) {
-			data = flatten(data)
-			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
+		if (dataType === ARRAY) {
+			//recursively flatten array
+			for (var i = 0, len = data.length; i < len; i++) {
+				if (type.call(data[i]) === ARRAY) {
+					data = data.concat.apply([], data);
+					i-- //check current index again and flatten until there are no more nested arrays at that index
+				}
+			}
+			
+			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
 			//1) create a map of all existing keys, and mark all for deletion
@@ -103,116 +125,115 @@ Mithril = m = new function app(window, undefined) {
 			//3) if key exists in new list, change action from deletion to a move
 			//4) for each key, handle its corresponding action as marked in previous steps
 			//5) copy unkeyed items into their respective gaps
-			var DELETION = 1, INSERTION = 2 , MOVE = 3
-			var existing = {}, unkeyed = [], shouldMaintainIdentities = false
-			for (var i = 0; i < cached.length; i++) {
+			var DELETION = 1, INSERTION = 2 , MOVE = 3;
+			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
+			for (var i = 0, len = cached.length; i < len; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
-					shouldMaintainIdentities = true
+					shouldMaintainIdentities = true;
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
 			if (shouldMaintainIdentities) {
-				for (var i = 0; i < data.length; i++) {
+				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
+				for (var i = 0, len = data.length; i < len; i++) {
 					if (data[i] && data[i].attrs) {
 						if (data[i].attrs.key != null) {
-							var key = data[i].attrs.key
-							if (!existing[key]) existing[key] = {action: INSERTION, index: i}
+							var key = data[i].attrs.key;
+							if (!existing[key]) existing[key] = {action: INSERTION, index: i};
 							else existing[key] = {
 								action: MOVE,
 								index: i,
 								from: existing[key].index,
-								element: parentElement.childNodes[existing[key].index] || window.document.createElement("div")
+								element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
 							}
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i] || window.document.createElement("div")})
+						else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 					}
 				}
-				var actions = Object.keys(existing).map(function(key) {return existing[key]})
-				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index})
-				var newCached = cached.slice()
+				var actions = Object.keys(existing).map(function(key) {return existing[key]});
+				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index});
+				var newCached = cached.slice();
 
 				for (var i = 0, change; change = changes[i]; i++) {
-					if (change.action == DELETION) {
-						clear(cached[change.index].nodes, cached[change.index])
+					if (change.action === DELETION) {
+						clear(cached[change.index].nodes, cached[change.index]);
 						newCached.splice(change.index, 1)
 					}
-					if (change.action == INSERTION) {
-						var dummy = window.document.createElement("div")
-						dummy.key = data[change.index].attrs.key
-						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null)
+					if (change.action === INSERTION) {
+						var dummy = $document.createElement("div");
+						dummy.key = data[change.index].attrs.key;
+						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
 
-					if (change.action == MOVE) {
+					if (change.action === MOVE) {
 						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
 						}
 						newCached[change.index] = cached[change.from]
 					}
 				}
-				for (var i = 0; i < unkeyed.length; i++) {
-					var change = unkeyed[i]
-					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
+				for (var i = 0, len = unkeyed.length; i < len; i++) {
+					var change = unkeyed[i];
+					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
 					newCached[change.index] = cached[change.index]
 				}
-				cached = newCached
-				cached.nodes = []
+				cached = newCached;
+				cached.nodes = [];
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
 			//end key algorithm
 
-			for (var i = 0, cacheCount = 0; i < data.length; i++) {
+			for (var i = 0, cacheCount = 0, len = data.length; i < len; i++) {
 				//diff each item in the array
-				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
-				if (item === undefined) continue
-				if (!item.nodes.intact) intact = false
+				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
+				if (item === undefined) continue;
+				if (!item.nodes.intact) intact = false;
 				if (item.$trusted) {
 					//fix offset of next element if item was a trusted string w/ more than one html element
 					//the first clause in the regexp matches elements
 					//the second clause (after the pipe) matches text nodes
 					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || []).length
 				}
-				else subArrayCount += type.call(item) == sArr ? item.length : 1
+				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
 				cached[cacheCount++] = item
 			}
 			if (!intact) {
 				//diff the array itself
-
+				
 				//update the list of DOM nodes by collecting the nodes from each item
-				for (var i = 0; i < data.length; i++) {
-					if (cached[i] != null) nodes = nodes.concat(cached[i].nodes)
+				for (var i = 0, len = data.length; i < len; i++) {
+					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
 				}
 				//remove items from the end of the array if the new array is shorter than the old one
 				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
 				for (var i = 0, node; node = cached.nodes[i]; i++) {
 					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]])
 				}
-				//add items to the end if the new array is longer than the old one
-				for (var i = cached.nodes.length, node; node = nodes[i]; i++) {
-					if (node.parentNode == null) parentElement.appendChild(node)
-				}
-				if (data.length < cached.length) cached.length = data.length
+				if (data.length < cached.length) cached.length = data.length;
 				cached.nodes = nodes
 			}
 		}
-		else if (data != null && dataType == sObj) {
-			if (!data.attrs) data.attrs = {}
-			if (!cached.attrs) cached.attrs = {}
-			
-			var dataAttrKeys = Object.keys(data.attrs)
+		else if (data != null && dataType === OBJECT) {
+			if (!data.attrs) data.attrs = {};
+			if (!cached.attrs) cached.attrs = {};
+
+			var dataAttrKeys = Object.keys(data.attrs);
+			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
-				if (cached.nodes.length) clear(cached.nodes)
-				if (cached.configContext && typeof cached.configContext.onunload == sFn) cached.configContext.onunload()
+				if (cached.nodes.length) clear(cached.nodes);
+				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 			}
-			if (type.call(data.tag) != sStr) return
+			if (type.call(data.tag) != STRING) return;
 
-			var node, isNew = cached.nodes.length === 0
-			if (data.attrs.xmlns) namespace = data.attrs.xmlns
-			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg"
-			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML"
+			var node, isNew = cached.nodes.length === 0;
+			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
+			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
+			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
 			if (isNew) {
-				node = namespace === undefined ? window.document.createElement(data.tag) : window.document.createElementNS(namespace, data.tag)
+				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
+				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
@@ -221,69 +242,69 @@ Mithril = m = new function app(window, undefined) {
 						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
 						data.children,
 					nodes: [node]
-				}
-				if (cached.children && !cached.children.nodes) cached.children.nodes = []
+				};
+				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
-				if (data.tag == "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace)
+				if (data.tag === "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			else {
-				node = cached.nodes[0]
-				if (dataAttrKeys.length) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs)
-				cached.nodes.intact = true
+				node = cached.nodes[0];
+				if (dataAttrKeys.length) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
+				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
+				cached.nodes.intact = true;
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
-			if (typeof data.attrs["config"] == sFn) {
-				var context = cached.configContext = cached.configContext || {}
+			if (typeof data.attrs["config"] === FUNCTION) {
+				var context = cached.configContext = cached.configContext || {};
 
 				// bind
 				var callback = function(data, args) {
 					return function() {
 						return data.attrs["config"].apply(data, args)
 					}
-				}
+				};
 				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
-		else if (typeof dataType != sFn) {
+		else if (typeof dataType != FUNCTION) {
 			//handle text nodes
-			var nodes
+			var nodes;
 			if (cached.nodes.length === 0) {
 				if (data.$trusted) {
 					nodes = injectHTML(parentElement, index, data)
 				}
 				else {
-					nodes = [window.document.createTextNode(data)]
+					nodes = [$document.createTextNode(data)];
 					if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
 				}
-				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data
+				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data;
 				cached.nodes = nodes
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
-				nodes = cached.nodes
-				if (!editable || editable !== window.document.activeElement) {
+				nodes = cached.nodes;
+				if (!editable || editable !== $document.activeElement) {
 					if (data.$trusted) {
-						clear(nodes, cached)
+						clear(nodes, cached);
 						nodes = injectHTML(parentElement, index, data)
 					}
 					else {
 						//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
 						//we need to update the value property of the parent textarea or the innerHTML of the contenteditable element instead
-						if (parentTag === "textarea") parentElement.value = data
-						else if (editable) editable.innerHTML = data
+						if (parentTag === "textarea") parentElement.value = data;
+						else if (editable) editable.innerHTML = data;
 						else {
-							if (nodes[0].nodeType == 1 || nodes.length > 1) { //was a trusted string
-								clear(cached.nodes, cached)
-								nodes = [window.document.createTextNode(data)]
+							if (nodes[0].nodeType === 1 || nodes.length > 1) { //was a trusted string
+								clear(cached.nodes, cached);
+								nodes = [$document.createTextNode(data)]
 							}
-							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
+							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
 							nodes[0].nodeValue = data
 						}
 					}
 				}
-				cached = new data.constructor(data)
+				cached = new data.constructor(data);
 				cached.nodes = nodes
 			}
 			else cached.nodes.intact = true
@@ -293,20 +314,20 @@ Mithril = m = new function app(window, undefined) {
 	}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
-			var dataAttr = dataAttrs[attrName]
-			var cachedAttr = cachedAttrs[attrName]
+			var dataAttr = dataAttrs[attrName];
+			var cachedAttr = cachedAttrs[attrName];
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr)) {
-				cachedAttrs[attrName] = dataAttr
+				cachedAttrs[attrName] = dataAttr;
 				try {
 					//`config` isn't a real attributes, so ignore it
 					//we don't ignore `key` because it must be unique and having it on the DOM helps debugging
-					if (attrName === "config") continue
+					if (attrName === "config") continue;
 					//hook event handlers to the auto-redrawing system
-					else if (typeof dataAttr == sFn && attrName.indexOf("on") == 0) {
+					else if (typeof dataAttr === FUNCTION && attrName.indexOf("on") === 0) {
 						node[attrName] = autoredraw(dataAttr, node)
 					}
 					//handle `style: {...}`
-					else if (attrName === "style" && dataAttr != null && type.call(dataAttr) == sObj) {
+					else if (attrName === "style" && dataAttr != null && type.call(dataAttr) === OBJECT) {
 						for (var rule in dataAttr) {
 							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
 						}
@@ -316,15 +337,16 @@ Mithril = m = new function app(window, undefined) {
 					}
 					//handle SVG
 					else if (namespace != null) {
-						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr)
-						else if (attrName === "className") node.setAttribute("class", dataAttr)
+						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr);
+						else if (attrName === "className") node.setAttribute("class", dataAttr);
 						else node.setAttribute(attrName, dataAttr)
 					}
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
-					else if (attrName in node && !(attrName == "list" || attrName == "style" || attrName == "form")) {
-						node[attrName] = dataAttr
+					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
+						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
+						if (attrName != "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
 					}
 					else node.setAttribute(attrName, dataAttr)
 				}
@@ -333,352 +355,349 @@ Mithril = m = new function app(window, undefined) {
 					if (e.message.indexOf("Invalid argument") < 0) throw e
 				}
 			}
+			//#348 dataAttr may not be a string, so use loose comparison (double equal) instead of strict (triple equal)
+			else if (attrName === "value" && tag === "input" && node.value != dataAttr) {
+				node.value = dataAttr
+			}
 		}
 		return cachedAttrs
 	}
 	function clear(nodes, cached) {
 		for (var i = nodes.length - 1; i > -1; i--) {
 			if (nodes[i] && nodes[i].parentNode) {
-				nodes[i].parentNode.removeChild(nodes[i])
-				cached = [].concat(cached)
+				try {nodes[i].parentNode.removeChild(nodes[i])}
+				catch (e) {} //ignore if this fails due to order of events (see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
+				cached = [].concat(cached);
 				if (cached[i]) unload(cached[i])
 			}
 		}
 		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload == sFn) cached.configContext.onunload()
+		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
 		if (cached.children) {
-			if (type.call(cached.children) == sArr) {
-				for (var i = 0; i < cached.children.length; i++) unload(cached.children[i])
+			if (type.call(cached.children) === ARRAY) {
+				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
 			}
 			else if (cached.children.tag) unload(cached.children)
 		}
 	}
 	function injectHTML(parentElement, index, data) {
-		var nextSibling = parentElement.childNodes[index]
+		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
-			var isElement = nextSibling.nodeType != 1
-			var placeholder = window.document.createElement("span")
+			var isElement = nextSibling.nodeType != 1;
+			var placeholder = $document.createElement("span");
 			if (isElement) {
-				parentElement.insertBefore(placeholder, nextSibling || null)
-				placeholder.insertAdjacentHTML("beforebegin", data)
+				parentElement.insertBefore(placeholder, nextSibling || null);
+				placeholder.insertAdjacentHTML("beforebegin", data);
 				parentElement.removeChild(placeholder)
 			}
 			else nextSibling.insertAdjacentHTML("beforebegin", data)
 		}
-		else parentElement.insertAdjacentHTML("beforeend", data)
-		var nodes = []
+		else parentElement.insertAdjacentHTML("beforeend", data);
+		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {
-			nodes.push(parentElement.childNodes[index])
+			nodes.push(parentElement.childNodes[index]);
 			index++
 		}
 		return nodes
 	}
-	function flatten(data) {
-		var index = 0
-		loop: while (true) {
-			for (var i = index; i < data.length; i++) {
-				var item = data[i]
-				if (type.call(data[i]) == sArr) {
-					index = i
-					data = data.concat.apply([], data)
-					continue loop
-				}
-			}
-			break
-		}
-		return data
-	}
 	function autoredraw(callback, object) {
 		return function(e) {
-			e = e || event
-			m.redraw.strategy("diff")
-			m.startComputation()
+			e = e || event;
+			m.redraw.strategy("diff");
+			m.startComputation();
 			try {return callback.call(object, e)}
 			finally {
-				m.endComputation()
+				endFirstComputation()
 			}
 		}
 	}
 
-	var html
+	var html;
 	var documentNode = {
 		appendChild: function(node) {
-			if (html === undefined) html = window.document.createElement("html")
-			if (window.document.documentElement && window.document.documentElement !== node) {
-				window.document.replaceChild(node, window.document.documentElement)
+			if (html === undefined) html = $document.createElement("html");
+			if ($document.documentElement && $document.documentElement !== node) {
+				$document.replaceChild(node, $document.documentElement)
 			}
-			else window.document.appendChild(node)
-			this.childNodes = window.document.childNodes
+			else $document.appendChild(node);
+			this.childNodes = $document.childNodes
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)
 		},
 		childNodes: []
-	}
-	var nodeCache = [], cellCache = {}
+	};
+	var nodeCache = [], cellCache = {};
 	m.render = function(root, cell, forceRecreation) {
-		var configs = []
-		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.")
-		var id = getCellCacheKey(root)
-		var isDocumentRoot = root == window.document
-		var node = isDocumentRoot || root == window.document.documentElement ? documentNode : root
-		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell}
-		if (cellCache[id] === undefined) clear(node.childNodes)
-		if (forceRecreation === true) reset(root)
-		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs)
-		for (var i = 0; i < configs.length; i++) configs[i]()
-	}
+		var configs = [];
+		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
+		var id = getCellCacheKey(root);
+		var isDocumentRoot = root === $document;
+		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
+		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell};
+		if (cellCache[id] === undefined) clear(node.childNodes);
+		if (forceRecreation === true) reset(root);
+		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
+		for (var i = 0, len = configs.length; i < len; i++) configs[i]()
+	};
 	function getCellCacheKey(element) {
-		var index = nodeCache.indexOf(element)
+		var index = nodeCache.indexOf(element);
 		return index < 0 ? nodeCache.push(element) - 1 : index
 	}
 
 	m.trust = function(value) {
-		value = new String(value)
-		value.$trusted = true
+		value = new String(value);
+		value.$trusted = true;
 		return value
-	}
+	};
 
 	function gettersetter(store) {
 		var prop = function() {
-			if (arguments.length) store = arguments[0]
+			if (arguments.length) store = arguments[0];
 			return store
-		}
+		};
 
 		prop.toJSON = function() {
 			return store
-		}
+		};
 
 		return prop
 	}
 
 	m.prop = function (store) {
 		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if (((store != null && type.call(store) == sObj) || typeof store == sFn) && typeof store.then == sFn) {
+		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
 			return propify(store)
 		}
 
 		return gettersetter(store)
-	}
+	};
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule
-	var FRAME_BUDGET = 16 //60 frames per second = 1 call per 16 ms
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
+	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
-		var index = roots.indexOf(root)
-		if (index < 0) index = roots.length
-		var isPrevented = false
-		if (controllers[index] && typeof controllers[index].onunload == sFn) {
+		var index = roots.indexOf(root);
+		if (index < 0) index = roots.length;
+		var isPrevented = false;
+		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
 			var event = {
 				preventDefault: function() {isPrevented = true}
-			}
+			};
 			controllers[index].onunload(event)
 		}
 		if (!isPrevented) {
-			m.redraw.strategy("all")
-			m.startComputation()
-			roots[index] = root
-			var currentModule = topModule = module
-			var controller = new module.controller
+			m.redraw.strategy("all");
+			m.startComputation();
+			roots[index] = root;
+			var currentModule = topModule = module;
+			var controller = new module.controller;
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
-			if (currentModule == topModule) {
-				controllers[index] = controller
+			if (currentModule === topModule) {
+				controllers[index] = controller;
 				modules[index] = module
 			}
-			m.endComputation()
+			endFirstComputation();
 			return controllers[index]
 		}
-	}
+	};
 	m.redraw = function(force) {
-		var cancel = window.cancelAnimationFrame || window.clearTimeout
-		var defer = window.requestAnimationFrame || window.setTimeout
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if (new Date - lastRedrawCallTime > FRAME_BUDGET || defer == window.requestAnimationFrame) {
-				if (lastRedrawId > 0) cancel(lastRedrawId)
-				lastRedrawId = defer(redraw, FRAME_BUDGET)
+			if (new Date - lastRedrawCallTime > FRAME_BUDGET || $requestAnimationFrame === window.requestAnimationFrame) {
+				if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
+				lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
 			}
 		}
 		else {
-			redraw()
-			lastRedrawId = defer(function() {lastRedrawId = null}, FRAME_BUDGET)
+			redraw();
+			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
-	}
-	m.redraw.strategy = m.prop()
+	};
+	m.redraw.strategy = m.prop();
 	function redraw() {
-		var mode = m.redraw.strategy()
-		for (var i = 0; i < roots.length; i++) {
-			if (controllers[i] && mode != "none") {
-				m.render(roots[i], modules[i].view(controllers[i]), mode == "all")
+		var forceRedraw = m.redraw.strategy() === "all";
+		for (var i = 0, root; root = roots[i]; i++) {
+			if (controllers[i]) {
+				m.render(root, modules[i].view(controllers[i]), forceRedraw)
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
 		if (computePostRedrawHook) {
-			computePostRedrawHook()
+			computePostRedrawHook();
 			computePostRedrawHook = null
 		}
-		lastRedrawId = null
-		lastRedrawCallTime = new Date
+		lastRedrawId = null;
+		lastRedrawCallTime = new Date;
 		m.redraw.strategy("diff")
 	}
 
-	var pendingRequests = 0
-	m.startComputation = function() {pendingRequests++}
+	var pendingRequests = 0;
+	m.startComputation = function() {pendingRequests++};
 	m.endComputation = function() {
-		pendingRequests = Math.max(pendingRequests - 1, 0)
-		if (pendingRequests == 0) m.redraw()
+		pendingRequests = Math.max(pendingRequests - 1, 0);
+		if (pendingRequests === 0) m.redraw()
+	};
+	var endFirstComputation = function() {
+		if (m.redraw.strategy() == "none") {
+			pendingRequests--
+			m.redraw.strategy("diff")
+		}
+		else m.endComputation();
 	}
 
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
-			e = e || event
-			var currentTarget = e.currentTarget || this
+			e = e || event;
+			var currentTarget = e.currentTarget || this;
 			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
-	}
+	};
 
 	//routing
-	var modes = {pathname: "", hash: "#", search: "?"}
-	var redirect = function() {}, routeParams = {}, currentRoute
+	var modes = {pathname: "", hash: "#", search: "?"};
+	var redirect = function() {}, routeParams, currentRoute;
 	m.route = function() {
 		//m.route()
-		if (arguments.length === 0) {
-			return checkRouteInit() && currentRoute
-		}
-		else if (arguments.length === 3 && type.call(arguments[1]) == sStr) {
-			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2]
+		if (arguments.length === 0) return currentRoute;
+		//m.route(el, defaultRoute, routes)
+		else if (arguments.length === 3 && type.call(arguments[1]) === STRING) {
+			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2];
 			redirect = function(source) {
-				var path = currentRoute = normalizeRoute(source)
+				var path = currentRoute = normalizeRoute(source);
 				if (!routeByValue(root, router, path)) {
 					m.route(defaultRoute, true)
 				}
-			}
-			var listener = m.route.mode == "hash" ? "onhashchange" : "onpopstate"
+			};
+			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
 			window[listener] = function() {
-				if (currentRoute != normalizeRoute(window.location[m.route.mode])) {
-					redirect(window.location[m.route.mode])
+				if (currentRoute != normalizeRoute($location[m.route.mode])) {
+					redirect($location[m.route.mode])
 				}
-			}
-			computePostRedrawHook = setScroll
+			};
+			computePostRedrawHook = setScroll;
 			window[listener]()
 		}
 		//config: m.route
 		else if (arguments[0].addEventListener) {
-			var element = arguments[0]
-			var isInitialized = arguments[1]
-			var context = arguments[2]
-			element.href = (m.route.mode !== 'pathname' ? window.location.pathname : '') + modes[m.route.mode] + this.attrs.href
-			element.removeEventListener("click", routeUnobtrusive)
+			var element = arguments[0];
+			var isInitialized = arguments[1];
+			var context = arguments[2];
+			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
+			element.removeEventListener("click", routeUnobtrusive);
 			element.addEventListener("click", routeUnobtrusive)
 		}
-		//m.route(route)
-		else if (type.call(arguments[0]) == sStr) {
-			currentRoute = arguments[0]
-			var querystring = arguments[1] != null && type.call(arguments[1]) == sObj ? buildQueryString(arguments[1]) : null
-			if (querystring) currentRoute += (currentRoute.indexOf("?") === -1 ? "?" : "&") + querystring
+		//m.route(route, params)
+		else if (type.call(arguments[0]) === STRING) {
+			currentRoute = arguments[0];
+			var args = arguments[1] || {}
+			var queryIndex = currentRoute.indexOf("?")
+			var params = queryIndex > -1 ? parseQueryString(currentRoute.slice(queryIndex + 1)) : {}
+			for (var i in args) params[i] = args[i]
+			var querystring = buildQueryString(params)
+			var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute
+			if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
 
-			var shouldReplaceHistoryEntry = (arguments.length == 3 ? arguments[2] : arguments[1]) === true
+			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true;
 
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
-					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, window.document.title, modes[m.route.mode] + currentRoute)
+					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, $document.title, modes[m.route.mode] + currentRoute);
 					setScroll()
-				}
+				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
-			else window.location[m.route.mode] = currentRoute
+			else $location[m.route.mode] = currentRoute
 		}
-	}
+	};
 	m.route.param = function(key) {
-		return checkRouteInit() && routeParams[key]
-	}
-	m.route.mode = "search"
+		if (!routeParams) throw new Error("You must call m.route(element, defaultRoute, routes) before calling m.route.param()")
+		return routeParams[key]
+	};
+	m.route.mode = "search";
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
-		routeParams = {}
+		routeParams = {};
 
-		var queryStart = path.indexOf("?")
+		var queryStart = path.indexOf("?");
 		if (queryStart !== -1) {
-			routeParams = parseQueryString(path.substr(queryStart + 1, path.length))
+			routeParams = parseQueryString(path.substr(queryStart + 1, path.length));
 			path = path.substr(0, queryStart)
 		}
 
 		for (var route in router) {
-			if (route == path) {
-				m.module(root, router[route])
+			if (route === path) {
+				m.module(root, router[route]);
 				return true
 			}
 
-			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$");
 
 			if (matcher.test(path)) {
 				path.replace(matcher, function() {
-					var keys = route.match(/:[^\/]+/g) || []
-					var values = [].slice.call(arguments, 1, -2)
-					for (var i = 0; i < keys.length; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+					var keys = route.match(/:[^\/]+/g) || [];
+					var values = [].slice.call(arguments, 1, -2);
+					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					m.module(root, router[route])
-				})
+				});
 				return true
 			}
 		}
 	}
 	function routeUnobtrusive(e) {
-		e = e || event
-		if (e.ctrlKey || e.metaKey || e.which == 2) return
-		if (e.preventDefault) e.preventDefault()
-		else e.returnValue = false
-		var currentTarget = e.currentTarget || this
-		var args = m.route.mode == "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {}
+		e = e || event;
+		if (e.ctrlKey || e.metaKey || e.which === 2) return;
+		if (e.preventDefault) e.preventDefault();
+		else e.returnValue = false;
+		var currentTarget = e.currentTarget || this;
+		var args = m.route.mode === "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {};
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
-		if (m.route.mode != "hash" && window.location.hash) window.location.hash = window.location.hash
+		if (m.route.mode != "hash" && $location.hash) $location.hash = $location.hash;
 		else window.scrollTo(0, 0)
 	}
 	function buildQueryString(object, prefix) {
-		var str = []
+		var str = [];
 		for(var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop]
-			str.push(value != null && type.call(value) == sObj ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop];
+			str.push(value != null && type.call(value) === OBJECT ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
 		}
 		return str.join("&")
 	}
 	function parseQueryString(str) {
-		var pairs = str.split("&"), params = {}
-		for (var i = 0; i < pairs.length; i++) {
-			var pair = pairs[i].split("=")
-			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : (pair.length === 1 ? true : "")
+		var pairs = str.split("&"), params = {};
+		for (var i = 0, len = pairs.length; i < len; i++) {
+			var pair = pairs[i].split("=");
+			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : ""
 		}
 		return params
 	}
 	function decodeSpace(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
-	function checkRouteInit(){
-		return currentRoute == null || throw "Attempted to query m.route, but m.route was not initialized";
-	}
 	function reset(root) {
-		var cacheKey = getCellCacheKey(root)
-		clear(root.childNodes, cellCache[cacheKey])
+		var cacheKey = getCellCacheKey(root);
+		clear(root.childNodes, cellCache[cacheKey]);
 		cellCache[cacheKey] = undefined
 	}
 
 	m.deferred = function () {
-		var deferred = new Deferred()
-		deferred.promise = propify(deferred.promise)
+		var deferred = new Deferred();
+		deferred.promise = propify(deferred.promise);
 		return deferred
-	}
+	};
 	function propify(promise) {
-		var prop = m.prop()
-		promise.then(prop)
+		var prop = m.prop();
+		promise.then(prop);
 		prop.then = function(resolve, reject) {
 			return propify(promise.then(resolve, reject))
-		}
+		};
 		return prop
 	}
 	//Promiz.mithril.js | Zolmeister | MIT
@@ -686,70 +705,70 @@ Mithril = m = new function app(window, undefined) {
 	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
 	//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
 	function Deferred(successCallback, failureCallback) {
-		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4
-		var self = this, state = 0, promiseValue = 0, next = []
+		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
+		var self = this, state = 0, promiseValue = 0, next = [];
 
-		self["promise"] = {}
+		self["promise"] = {};
 
 		self["resolve"] = function(value) {
 			if (!state) {
-				promiseValue = value
-				state = RESOLVING
+				promiseValue = value;
+				state = RESOLVING;
 
 				fire()
 			}
 			return this
-		}
+		};
 
 		self["reject"] = function(value) {
 			if (!state) {
-				promiseValue = value
-				state = REJECTING
-				
+				promiseValue = value;
+				state = REJECTING;
+
 				fire()
 			}
 			return this
-		}
+		};
 
 		self.promise["then"] = function(successCallback, failureCallback) {
-			var deferred = new Deferred(successCallback, failureCallback)
-			if (state == RESOLVED) {
+			var deferred = new Deferred(successCallback, failureCallback);
+			if (state === RESOLVED) {
 				deferred.resolve(promiseValue)
 			}
-			else if (state == REJECTED) {
+			else if (state === REJECTED) {
 				deferred.reject(promiseValue)
 			}
 			else {
 				next.push(deferred)
 			}
 			return deferred.promise
-		}
-		
+		};
+
 		function finish(type) {
-			state = type || REJECTED
+			state = type || REJECTED;
 			next.map(function(deferred) {
-				state == RESOLVED && deferred.resolve(promiseValue) || deferred.reject(promiseValue)
+				state === RESOLVED && deferred.resolve(promiseValue) || deferred.reject(promiseValue)
 			})
 		}
 
 		function thennable(then, successCallback, failureCallback, notThennableCallback) {
-			if (((promiseValue != null && type.call(promiseValue) == sObj) || typeof promiseValue == sFn) && typeof then == sFn) {
+			if (((promiseValue != null && type.call(promiseValue) === OBJECT) || typeof promiseValue === FUNCTION) && typeof then === FUNCTION) {
 				try {
 					// count protects against abuse calls from spec checker
-					var count = 0
+					var count = 0;
 					then.call(promiseValue, function(value) {
-						if (count++) return
-						promiseValue = value
+						if (count++) return;
+						promiseValue = value;
 						successCallback()
 					}, function (value) {
-						if (count++) return
-						promiseValue = value
+						if (count++) return;
+						promiseValue = value;
 						failureCallback()
 					})
 				}
 				catch (e) {
-					m.deferred.onerror(e)
-					promiseValue = e
+					m.deferred.onerror(e);
+					promiseValue = e;
 					failureCallback()
 				}
 			} else {
@@ -759,102 +778,102 @@ Mithril = m = new function app(window, undefined) {
 
 		function fire() {
 			// check if it's a thenable
-			var then
+			var then;
 			try {
 				then = promiseValue && promiseValue.then
 			}
 			catch (e) {
-				m.deferred.onerror(e)
-				promiseValue = e
-				state = REJECTING
+				m.deferred.onerror(e);
+				promiseValue = e;
+				state = REJECTING;
 				return fire()
 			}
 			thennable(then, function() {
-				state = RESOLVING
+				state = RESOLVING;
 				fire()
 			}, function() {
-				state = REJECTING
+				state = REJECTING;
 				fire()
 			}, function() {
 				try {
-					if (state == RESOLVING && typeof successCallback == sFn) {
+					if (state === RESOLVING && typeof successCallback === FUNCTION) {
 						promiseValue = successCallback(promiseValue)
 					}
-					else if (state == REJECTING && typeof failureCallback == "function") {
-						promiseValue = failureCallback(promiseValue)
+					else if (state === REJECTING && typeof failureCallback === "function") {
+						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING
 					}
 				}
 				catch (e) {
-					m.deferred.onerror(e)
-					promiseValue = e
+					m.deferred.onerror(e);
+					promiseValue = e;
 					return finish()
 				}
 
-				if (promiseValue == self) {
-					promiseValue = TypeError()
+				if (promiseValue === self) {
+					promiseValue = TypeError();
 					finish()
 				}
 				else {
 					thennable(then, function () {
 						finish(RESOLVED)
 					}, finish, function () {
-						finish(state == RESOLVING && RESOLVED)
+						finish(state === RESOLVING && RESOLVED)
 					})
 				}
 			})
 		}
 	}
 	m.deferred.onerror = function(e) {
-		if (type.call(e) == "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
-	}
+		if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) throw e
+	};
 
 	m.sync = function(args) {
-		var method = "resolve"
+		var method = "resolve";
 		function synchronizer(pos, resolved) {
 			return function(value) {
-				results[pos] = value
-				if (!resolved) method = "reject"
-				if (--outstanding == 0) {
-					deferred.promise(results)
+				results[pos] = value;
+				if (!resolved) method = "reject";
+				if (--outstanding === 0) {
+					deferred.promise(results);
 					deferred[method](results)
 				}
 				return value
 			}
 		}
 
-		var deferred = m.deferred()
-		var outstanding = args.length
-		var results = new Array(outstanding)
+		var deferred = m.deferred();
+		var outstanding = args.length;
+		var results = new Array(outstanding);
 		if (args.length > 0) {
 			for (var i = 0; i < args.length; i++) {
 				args[i].then(synchronizer(i, true), synchronizer(i, false))
 			}
 		}
-		else deferred.resolve([])
+		else deferred.resolve([]);
 
 		return deferred.promise
-	}
+	};
 	function identity(value) {return value}
 
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
-			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
-			var script = window.document.createElement("script")
-			
+			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
+			var script = $document.createElement("script");
+
 			window[callbackKey] = function(resp) {
-				window.document.body.removeChild(script)
+				$document.body.removeChild(script);
 				options.onload({
 					type: "load",
 					target: {
 						responseText: resp
 					}
-				})
+				});
 				window[callbackKey] = undefined
-			}
+			};
 
 			script.onerror = function(e) {
-				window.document.body.removeChild(script)
+				$document.body.removeChild(script);
 
 				options.onerror({
 					type: "error",
@@ -862,63 +881,66 @@ Mithril = m = new function app(window, undefined) {
 						status: 500,
 						responseText: JSON.stringify({error: "Error making jsonp request"})
 					}
-				})
-				window[callbackKey] = undefined
+				});
+				window[callbackKey] = undefined;
 
 				return false
-			}
+			};
 
 			script.onload = function(e) {
 				return false
-			}
+			};
 
 			script.src = options.url
 				+ (options.url.indexOf("?") > 0 ? "&" : "?")
 				+ (options.callbackKey ? options.callbackKey : "callback")
 				+ "=" + callbackKey
-				+ "&" + buildQueryString(options.data || {})
-			window.document.body.appendChild(script)
+				+ "&" + buildQueryString(options.data || {});
+			$document.body.appendChild(script)
 		}
 		else {
-			var xhr = new window.XMLHttpRequest
-			xhr.open(options.method, options.url, true, options.user, options.password)
+			var xhr = new window.XMLHttpRequest;
+			xhr.open(options.method, options.url, true, options.user, options.password);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
-					if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr})
+					if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
 					else options.onerror({type: "error", target: xhr})
 				}
-			}
-			if (options.serialize == JSON.stringify && options.data && options.method != "GET") {
+			};
+			if (options.serialize === JSON.stringify && options.data && options.method !== "GET") {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (options.deserialize == JSON.parse) {
+			if (options.deserialize === JSON.parse) {
 				xhr.setRequestHeader("Accept", "application/json, text/*");
 			}
-			if (typeof options.config == sFn) {
-				var maybeXhr = options.config(xhr, options)
+			if (typeof options.config === FUNCTION) {
+				var maybeXhr = options.config(xhr, options);
 				if (maybeXhr != null) xhr = maybeXhr
 			}
 
-			if (options.data && (type.call(options.data) != sStr && options.data.constructor != window.FormData)) throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`"
-			xhr.send(options.method == "GET" || !options.data ? "" : options.data)
+			var data = options.method === "GET" || !options.data ? "" : options.data
+			if (data && (type.call(data) != STRING && data.constructor != window.FormData)) {
+				throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`";
+			}
+			xhr.send(data);
 			return xhr
 		}
 	}
 	function bindData(xhrOptions, data, serialize) {
-		if (xhrOptions.method == "GET" && xhrOptions.dataType != "jsonp") {
-			var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&"
-			var querystring = buildQueryString(data)
+		if (xhrOptions.method === "GET" && xhrOptions.dataType != "jsonp") {
+			var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&";
+			var querystring = buildQueryString(data);
 			xhrOptions.url = xhrOptions.url + (querystring ? prefix + querystring : "")
 		}
-		else xhrOptions.data = serialize(data)
+		else xhrOptions.data = serialize(data);
 		return xhrOptions
 	}
 	function parameterizeUrl(url, data) {
-		var tokens = url.match(/:[a-z]\w+/gi)
+		var tokens = url.match(/:[a-z]\w+/gi);
 		if (tokens && data) {
 			for (var i = 0; i < tokens.length; i++) {
-				var key = tokens[i].slice(1)
-				url = url.replace(tokens[i], data[key])
+				var key = tokens[i].slice(1);
+				url = url.replace(tokens[i], data[key]);
 				delete data[key]
 			}
 		}
@@ -926,48 +948,50 @@ Mithril = m = new function app(window, undefined) {
 	}
 
 	m.request = function(xhrOptions) {
-		if (xhrOptions.background !== true) m.startComputation()
-		var deferred = m.deferred()
-		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
-		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify
-		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse
+		if (xhrOptions.background !== true) m.startComputation();
+		var deferred = m.deferred();
+		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
+		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
+		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
-		}
-		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data)
-		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize)
+		};
+		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
+		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
 			try {
-				e = e || event
-				var unwrap = (e.type == "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity
-				var response = unwrap(deserialize(extract(e.target, xhrOptions)))
-				if (e.type == "load") {
-					if (type.call(response) == sArr && xhrOptions.type) {
+				e = e || event;
+				var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
+				var response = unwrap(deserialize(extract(e.target, xhrOptions)));
+				if (e.type === "load") {
+					if (type.call(response) === ARRAY && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
 					}
 					else if (xhrOptions.type) response = new xhrOptions.type(response)
 				}
-				deferred[e.type == "load" ? "resolve" : "reject"](response)
+				deferred[e.type === "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
-				m.deferred.onerror(e)
+				m.deferred.onerror(e);
 				deferred.reject(e)
 			}
 			if (xhrOptions.background !== true) m.endComputation()
-		}
-		ajax(xhrOptions)
+		};
+		ajax(xhrOptions);
+		deferred.promise(xhrOptions.initialValue);
 		return deferred.promise
-	}
+	};
 
 	//testing API
-	m.deps = function(mock) {return window = mock || window}
+	m.deps = function(mock) {
+		initialize(window = mock || window);
+		return window;
+	};
 	//for internal testing only, do not use `m.deps.factory`
-	m.deps.factory = app
+	m.deps.factory = app;
 
 	return m
-}(typeof window != "undefined" ? window : {})
+})(typeof window != "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null) module.exports = m
-if (typeof define == "function" && define.amd) define(function() {return m})
-
-;;;
+if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
+else if (typeof define === "function" && define.amd) define(function() {return m});
