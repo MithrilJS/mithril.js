@@ -409,7 +409,7 @@ var m = (function app(window, undefined) {
 			m.startComputation();
 			try {return callback.call(object, e)}
 			finally {
-				m.endComputation()
+				endFirstComputation()
 			}
 		}
 	}
@@ -499,7 +499,7 @@ var m = (function app(window, undefined) {
 				controllers[index] = controller;
 				modules[index] = module
 			}
-			m.endComputation();
+			endFirstComputation();
 			return controllers[index]
 		}
 	};
@@ -523,7 +523,7 @@ var m = (function app(window, undefined) {
 	function redraw() {
 		var mode = m.redraw.strategy();
 		for (var i = 0, root; root = roots[i]; i++) {
-			if (controllers[i] && mode != "none") {
+			if (controllers[i]) {
 				m.render(root, modules[i].view(controllers[i]), mode === "all")
 			}
 		}
@@ -543,6 +543,13 @@ var m = (function app(window, undefined) {
 		pendingRequests = Math.max(pendingRequests - 1, 0);
 		if (pendingRequests === 0) m.redraw()
 	};
+	var endFirstComputation = function() {
+		if (m.redraw.strategy() == "none") {
+			pendingRequests--
+			m.redraw.strategy("diff")
+		}
+		else m.endComputation();
+	}
 
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
