@@ -1,5 +1,36 @@
 ## Change Log
 
+[v0.1.27](/mithril/archive/v0.1.27) - maintenance
+
+### Bug Fixes:
+
+-	prevent strategy("none") event contamination [#378](https://github.com/lhorie/mithril.js/issues/378)
+-	fix equality strictness [#379](https://github.com/lhorie/mithril.js/issues/379)
+-	fix keys bug when list has nulls [#299](https://github.com/lhorie/mithril.js/issues/299)
+-	make sure empty value in option tag creates attribute [#380](https://github.com/lhorie/mithril.js/issues/380)
+
+---
+
+[v0.1.26](/mithril/archive/v0.1.26) - maintenance
+
+### Bug Fixes:
+
+-	make sure input[type] is CSS-targetable [#364](https://github.com/lhorie/mithril.js/issues/364)
+-	throw error if m.route.param is called before initializing routes [#361](https://github.com/lhorie/mithril.js/issues/361)
+
+---
+
+[v0.1.25](/mithril/archive/v0.1.25) - maintenance
+
+### Bug Fixes:
+
+-	fixed input cursor jumping regression
+-	fixed interop bug when QUnit and AMD are used at the same time [#355](https://github.com/lhorie/mithril.js/issues/355)
+-	fixed route arg duplication in edge case [#352](https://github.com/lhorie/mithril.js/issues/352)
+-	prevented meaningless error in Chrome edge case [#358](https://github.com/lhorie/mithril.js/issues/358)
+
+---
+
 [v0.1.24](/mithril/archive/v0.1.24) - maintenance
 
 ### Bug Fixes:

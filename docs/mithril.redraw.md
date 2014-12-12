@@ -122,7 +122,7 @@ Note that the redraw strategy is a global setting that affects the entire templa
 
 ### Preventing redraws on events
 
-Sometimes you only care about a particular condition in an event and want to ignore it if this condition is not met. 
+Sometimes you only care about a particular condition in an event and want the event to not trigger a redraw if this condition is not met. 
 For example, you might only be interested in running a redraw if a user presses the space bar, and you might not want to waste a redraw if the user presses any other key. In that case, it's possible to skip redrawing altogether by calling `m.redraw.strategy("none")`
 
 ```javascript
@@ -131,6 +131,14 @@ m("input", {onkeydown: function(e) {
 	else m.redraw.strategy("none") //otherwise, ignore
 }})
 ```
+
+There are some important semantic caveats for `m.redraw.strategy("none")` that you should be aware of: Setting the strategy to `"none"` only affects **synchronous** redraws. As soon as the event handler returns, the strategy is set back to "diff".
+
+If you set strategy to `"none"` but then proceed to trigger a redraw asynchronously, either via `start/endComputation`, `m.redraw` or `m.request`, a redraw *will* occur, using the `"diff"` strategy.
+
+Additionally, calling `m.redraw` synchronously after calling `m.redraw.strategy("none")` resets the strategy to `"diff"`.
+
+Lastly, be aware that if a user action triggers more than one event handler (for example, oninput and onkeypress, or an event bubbling up to event handlers in multiple ancestor elements), every event triggers a redraw by default. Setting strategy to none in any one of those handlers will not affect the redrawing strategy of other handlers (and remember that `strategy("none")` has no effect on asynchronous redraws).
 
 ---
 
