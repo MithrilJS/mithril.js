@@ -134,17 +134,18 @@ var m = (function app(window, undefined) {
 				}
 			}
 			if (shouldMaintainIdentities) {
+				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
+				
 				var keysDiffer = false
 				if (data.length != cached.length) keysDiffer = true
-				else for (var i = 0; i < data.length; i++) {
-					if (cached[i].attrs && data[i].attrs && cached[i].attrs.key != data[i].attrs.key) {
+				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
+					if (cachedCell.attrs && dataCell.attrs && cachedCell.attrs.key != dataCell.attrs.key) {
 						keysDiffer = true
 						break
 					}
 				}
 				
 				if (keysDiffer) {
-					if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
 					for (var i = 0, len = data.length; i < len; i++) {
 						if (data[i] && data[i].attrs) {
 							if (data[i].attrs.key != null) {
