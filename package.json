@@ -18,6 +18,7 @@
 		"grunt-contrib-qunit": "*",
 		"grunt-contrib-connect": "*",
 		"grunt-zip": "*",
+		"grunt-jsfmt": "git://github.com/ysimonson/grunt-jsfmt",
 
 		"grunt-contrib-connect": "~0.7.1",
 		"grunt-contrib-jshint": "~0.10.0",
