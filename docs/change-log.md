@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.28](/mithril/archive/v0.1.28) - maintenance
+
+### Bug Fixes:
+
+-	throw error if root element is null in m.module/m.route [#388](https://github.com/lhorie/mithril.js/issues/388)
+
+---
+
 [v0.1.27](/mithril/archive/v0.1.27) - maintenance
 
 ### Bug Fixes:
