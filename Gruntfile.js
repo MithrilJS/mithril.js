@@ -182,6 +182,16 @@ module.exports = function(grunt) {
 		clean: {
 			options: {force: true},
 			generated: [tempFolder]
+		},
+		jsfmt: {
+			default: {
+				files: [{
+					expand: true,
+					src: ['mithril.js'],
+					cwd: '.',
+					dest: '.'
+				}]
+			}
 		}
 	});
 
@@ -196,6 +206,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-saucelabs');
+	grunt.loadNpmTasks('grunt-jsfmt');
 
 	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("testall", ["test", "teste2e"]);
