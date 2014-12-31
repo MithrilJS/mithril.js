@@ -34,3 +34,13 @@ To run the execution time tests below, click on their respective links, run the 
 </div>
 
 Feel free to implement versions of the tests above in other frameworks, if you wish. The code is very simple.
+
+---
+
+### TodoMVC Benchmark
+
+There's a TodoMVC benchmark with a variety of popular and obscure frameworks here:
+
+[http://matt-esch.github.io/mercury-perf/](http://matt-esch.github.io/mercury-perf/)
+
+The benchmark consists of creating 100 todos, marking them as completed, and then deleting them. It aims to give an idea of how frameworks perform under real-world-ish conditions running idiomatic code (as opposed to micro-benchmarks, which tend to take advantage of obscure tricks and aggressive optimizations that sacrifice maintainability for extra speed).
