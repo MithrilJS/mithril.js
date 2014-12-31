@@ -346,7 +346,7 @@ var m = (function app(window, undefined) {
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
-						if (attrName != "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
+						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
 					}
 					else node.setAttribute(attrName, dataAttr)
 				}
@@ -478,6 +478,7 @@ var m = (function app(window, undefined) {
 	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
+		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		var isPrevented = false;
