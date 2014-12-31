@@ -478,6 +478,7 @@ var m = (function app(window, undefined) {
 	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	m.module = function(root, module) {
+		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		var isPrevented = false;
