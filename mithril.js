@@ -127,7 +127,7 @@ var m = (function app(window, undefined) {
 			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
-			for (var i = 0, len = cached.length; i < len; i++) {
+			for (var i = 0; i < cached.length; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true;
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
@@ -135,52 +135,65 @@ var m = (function app(window, undefined) {
 			}
 			if (shouldMaintainIdentities) {
 				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
-				for (var i = 0, len = data.length; i < len; i++) {
-					if (data[i] && data[i].attrs) {
-						if (data[i].attrs.key != null) {
-							var key = data[i].attrs.key;
-							if (!existing[key]) existing[key] = {action: INSERTION, index: i};
-							else existing[key] = {
-								action: MOVE,
-								index: i,
-								from: existing[key].index,
-								element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+				
+				var keysDiffer = false
+				if (data.length != cached.length) keysDiffer = true
+				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
+					if (cachedCell.attrs && dataCell.attrs && cachedCell.attrs.key != dataCell.attrs.key) {
+						keysDiffer = true
+						break
+					}
+				}
+				
+				if (keysDiffer) {
+					for (var i = 0, len = data.length; i < len; i++) {
+						if (data[i] && data[i].attrs) {
+							if (data[i].attrs.key != null) {
+								var key = data[i].attrs.key;
+								if (!existing[key]) existing[key] = {action: INSERTION, index: i};
+								else existing[key] = {
+									action: MOVE,
+									index: i,
+									from: existing[key].index,
+									element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+								}
 							}
+							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 						}
-						else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 					}
-				}
-				var actions = Object.keys(existing).map(function(key) {return existing[key]});
-				var changes = actions.sort(function(a, b) {return a.action - b.action || a.index - b.index});
-				var newCached = cached.slice();
+					var actions = []
+					for (var prop in existing) actions.push(existing[prop])
+					var changes = actions.sort(sortChanges);
+					var newCached = new Array(cached.length)
 
-				for (var i = 0, change; change = changes[i]; i++) {
-					if (change.action === DELETION) {
-						clear(cached[change.index].nodes, cached[change.index]);
-						newCached.splice(change.index, 1)
-					}
-					if (change.action === INSERTION) {
-						var dummy = $document.createElement("div");
-						dummy.key = data[change.index].attrs.key;
-						parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
-						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
-					}
-
-					if (change.action === MOVE) {
-						if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
-							parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
+					for (var i = 0, change; change = changes[i]; i++) {
+						if (change.action === DELETION) {
+							clear(cached[change.index].nodes, cached[change.index]);
+							newCached.splice(change.index, 1)
 						}
-						newCached[change.index] = cached[change.from]
+						if (change.action === INSERTION) {
+							var dummy = $document.createElement("div");
+							dummy.key = data[change.index].attrs.key;
+							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
+							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
+						}
+
+						if (change.action === MOVE) {
+							if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
+								parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
+							}
+							newCached[change.index] = cached[change.from]
+						}
 					}
+					for (var i = 0, len = unkeyed.length; i < len; i++) {
+						var change = unkeyed[i];
+						parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
+						newCached[change.index] = cached[change.index]
+					}
+					cached = newCached;
+					cached.nodes = new Array(parentElement.childNodes.length);
+					for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 				}
-				for (var i = 0, len = unkeyed.length; i < len; i++) {
-					var change = unkeyed[i];
-					parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
-					newCached[change.index] = cached[change.index]
-				}
-				cached = newCached;
-				cached.nodes = [];
-				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
 			//end key algorithm
 
@@ -218,7 +231,7 @@ var m = (function app(window, undefined) {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
-			var dataAttrKeys = Object.keys(data.attrs);
+			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
@@ -237,7 +250,7 @@ var m = (function app(window, undefined) {
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
-					attrs: dataAttrKeys.length ? setAttributes(node, data.tag, data.attrs, {}, namespace) : {},
+					attrs: hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : data.attrs,
 					children: data.children != null && data.children.length > 0 ?
 						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
 						data.children,
@@ -250,7 +263,7 @@ var m = (function app(window, undefined) {
 			}
 			else {
 				node = cached.nodes[0];
-				if (dataAttrKeys.length) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
+				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -312,6 +325,7 @@ var m = (function app(window, undefined) {
 
 		return cached
 	}
+	function sortChanges(a, b) {return a.action - b.action || a.index - b.index}
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
 		for (var attrName in dataAttrs) {
 			var dataAttr = dataAttrs[attrName];
@@ -320,8 +334,7 @@ var m = (function app(window, undefined) {
 				cachedAttrs[attrName] = dataAttr;
 				try {
 					//`config` isn't a real attributes, so ignore it
-					//we don't ignore `key` because it must be unique and having it on the DOM helps debugging
-					if (attrName === "config") continue;
+					if (attrName === "config" || attrName == "key") continue;
 					//hook event handlers to the auto-redrawing system
 					else if (typeof dataAttr === FUNCTION && attrName.indexOf("on") === 0) {
 						node[attrName] = autoredraw(dataAttr, node)

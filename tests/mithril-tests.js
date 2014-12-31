@@ -509,55 +509,55 @@ function testMithril(mock) {
 		//https://github.com/lhorie/mithril.js/issues/98
 		//insert at beginning
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		m.render(root, [m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3)])
 		var firstBefore = root.childNodes[0]
-		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		m.render(root, [m("a", {key: 4}, 4), m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3)])
 		var firstAfter = root.childNodes[1]
-		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 4
+		return firstBefore == firstAfter && root.childNodes[0].childNodes[0].nodeValue == "4" && root.childNodes.length == 4
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/98
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		m.render(root, [m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3)])
 		var firstBefore = root.childNodes[0]
-		m.render(root, [m("a", {key: 4}), m("a", {key: 1}), m("a", {key: 2})])
+		m.render(root, [m("a", {key: 4}, 4), m("a", {key: 1}, 1), m("a", {key: 2}, 2)])
 		var firstAfter = root.childNodes[1]
-		return firstBefore == firstAfter && root.childNodes[0].key == 4 && root.childNodes.length == 3
+		return firstBefore == firstAfter && root.childNodes[0].childNodes[0].nodeValue == 4 && root.childNodes.length == 3
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/98
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3})])
+		m.render(root, [m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3)])
 		var firstBefore = root.childNodes[1]
-		m.render(root, [m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4})])
+		m.render(root, [m("a", {key: 2}, 2), m("a", {key: 3}, 3), m("a", {key: 4}, 4)])
 		var firstAfter = root.childNodes[0]
-		return firstBefore == firstAfter && root.childNodes[0].key === "2" && root.childNodes.length === 3
+		return firstBefore == firstAfter && root.childNodes[0].childNodes[0].nodeValue === "2" && root.childNodes.length === 3
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/98
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		m.render(root, [m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3), m("a", {key: 4}, 4), m("a", {key: 5}, 5)])
 		var firstBefore = root.childNodes[0]
 		var secondBefore = root.childNodes[1]
 		var fourthBefore = root.childNodes[3]
-		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 1}), m("a", {key: 2})])
+		m.render(root, [m("a", {key: 4}, 4), m("a", {key: 10}, 10), m("a", {key: 1}, 1), m("a", {key: 2}, 2)])
 		var firstAfter = root.childNodes[2]
 		var secondAfter = root.childNodes[3]
 		var fourthAfter = root.childNodes[0]
-		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes.length === 4
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].childNodes[0].nodeValue == "10" && root.childNodes.length === 4
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/98
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("a", {key: 4}), m("a", {key: 5})])
+		m.render(root, [m("a", {key: 1}, 1), m("a", {key: 2}, 2), m("a", {key: 3}, 3), m("a", {key: 4}, 4), m("a", {key: 5}, 5)])
 		var firstBefore = root.childNodes[0]
 		var secondBefore = root.childNodes[1]
 		var fourthBefore = root.childNodes[3]
-		m.render(root, [m("a", {key: 4}), m("a", {key: 10}), m("a", {key: 2}), m("a", {key: 1}), m("a", {key: 6}), m("a", {key: 7})])
+		m.render(root, [m("a", {key: 4}, 4), m("a", {key: 10}, 10), m("a", {key: 2}, 2), m("a", {key: 1}, 1), m("a", {key: 6}, 6), m("a", {key: 7}, 7)])
 		var firstAfter = root.childNodes[3]
 		var secondAfter = root.childNodes[2]
 		var fourthAfter = root.childNodes[0]
-		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].key == "10" && root.childNodes[4].key == "6" && root.childNodes[5].key == "7" && root.childNodes.length === 6
+		return firstBefore === firstAfter && secondBefore === secondAfter && fourthBefore === fourthAfter && root.childNodes[1].childNodes[0].nodeValue == "10" && root.childNodes[4].childNodes[0].nodeValue == "6" && root.childNodes[5].childNodes[0].nodeValue == "7" && root.childNodes.length === 6
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/149
@@ -580,11 +580,11 @@ function testMithril(mock) {
 		//https://github.com/lhorie/mithril.js/issues/246
 		//insert at beginning with non-keyed in the middle
 		var root = mock.document.createElement("div")
-		m.render(root, [m("a", {key: 1})])
+		m.render(root, [m("a", {key: 1}, 1)])
 		var firstBefore = root.childNodes[0]
-		m.render(root, [m("a", {key: 2}), m("br"), m("a", {key: 1})])
+		m.render(root, [m("a", {key: 2}, 2), m("br"), m("a", {key: 1}, 1)])
 		var firstAfter = root.childNodes[2]
-		return firstBefore == firstAfter && root.childNodes[0].key == 2 && root.childNodes.length == 3
+		return firstBefore == firstAfter && root.childNodes[0].childNodes[0].nodeValue == 2 && root.childNodes.length == 3
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/134
@@ -687,9 +687,9 @@ function testMithril(mock) {
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/157
 		var root = mock.document.createElement("div")
-		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 2}), m("li", {key: 4})]))
-		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
-		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "012345"
+		m.render(root, m("ul", [m("li", {key: 0}, 0), m("li", {key: 2}, 2), m("li", {key: 4}, 4)]))
+		m.render(root, m("ul", [m("li", {key: 0}, 0), m("li", {key: 1}, 1), m("li", {key: 2}, 2), m("li", {key: 3}, 3), m("li", {key: 4}, 4), m("li", {key: 5}, 5)]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.childNodes[0].nodeValue}).join("") == "012345"
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/157
@@ -708,17 +708,17 @@ function testMithril(mock) {
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/194
 		var root = mock.document.createElement("div")
-		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
-		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 4}), m("li", {key: 5})]))
-		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join("") == "01245"
+		m.render(root, m("ul", [m("li", {key: 0}, 0), m("li", {key: 1}, 1), m("li", {key: 2}, 2), m("li", {key: 3}, 3), m("li", {key: 4}, 4), m("li", {key: 5}, 5)]))
+		m.render(root, m("ul", [m("li", {key: 0}, 0), m("li", {key: 1}, 1), m("li", {key: 2}, 2), m("li", {key: 4}, 4), m("li", {key: 5}, 5)]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.childNodes[0].nodeValue}).join("") == "01245"
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/194
 		var root = mock.document.createElement("div")
-		m.render(root, m("ul", [m("li", {key: 0}), m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5})]))
-		m.render(root, m("ul", [m("li", {key: 1}), m("li", {key: 2}), m("li", {key: 3}), m("li", {key: 4}), m("li", {key: 5}), m("li", {key: 6})]))
-		m.render(root, m("ul", [m("li", {key: 12}), m("li", {key: 13}), m("li", {key: 14}), m("li", {key: 15}), m("li", {key: 16}), m("li", {key: 17})]))
-		return root.childNodes[0].childNodes.map(function(n) {return n.key}).join(",") == "12,13,14,15,16,17"
+		m.render(root, m("ul", [m("li", {key: 0}, 0), m("li", {key: 1}, 1), m("li", {key: 2}, 2), m("li", {key: 3}, 3), m("li", {key: 4}, 4), m("li", {key: 5}, 5)]))
+		m.render(root, m("ul", [m("li", {key: 1}, 1), m("li", {key: 2}, 2), m("li", {key: 3}, 3), m("li", {key: 4}, 4), m("li", {key: 5}, 5), m("li", {key: 6}, 6)]))
+		m.render(root, m("ul", [m("li", {key: 12}, 12), m("li", {key: 13}, 13), m("li", {key: 14}, 14), m("li", {key: 15}, 15), m("li", {key: 16}, 16), m("li", {key: 17}, 17)]))
+		return root.childNodes[0].childNodes.map(function(n) {return n.childNodes[0].nodeValue}).join(",") == "12,13,14,15,16,17"
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/206
