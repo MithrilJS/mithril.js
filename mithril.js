@@ -18,13 +18,13 @@ var m = (function app(window, undefined) {
 	initialize(window);
 
 
-	/*
+	/**
 	 * @typedef {String} Tag
 	 * A string that looks like -> div.classname#id[param=one][param2=two]
 	 * Which describes a DOM node
 	 */
 
-	/*
+	/**
 	 *
 	 * @param {Tag} The DOM node tag
 	 * @param {Object=[]} optional key-value pairs to be mapped to DOM attrs
