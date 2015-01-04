@@ -51,9 +51,11 @@ module.exports = function(grunt) {
 	var md2htmlTasks = {};
 	var makeTasks = function(layout, pages) {
 		pages.map(function(name) {
+			var src = inputFolder + "/" + name + ".md";
+			var title = (grunt.file.exists(src)) ? grunt.file.read(src).split(/\n/)[0].substring(3) + ' - ' : '';
 			md2htmlTasks[name] = {
-				options: {layout: inputFolder + "/layout/" + layout + ".html"},
-				files: [{src: [inputFolder + "/" + name + ".md"], dest: tempFolder + "/" + name + ".html"}]
+				options: {layout: inputFolder + "/layout/" + layout + ".html", templateData: { "topic": title }},
+				files: [{src: [src], dest: tempFolder + "/" + name + ".html"}]
 			}
 		})
 	};
