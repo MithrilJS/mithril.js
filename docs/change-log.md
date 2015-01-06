@@ -1,5 +1,28 @@
 ## Change Log
 
+[v0.1.28](/mithril/archive/v0.1.28) - maintenance
+
+### News:
+
+-	Landed some performance improvements
+
+### Bug Fixes:
+
+-	throw error if root element is null in m.module/m.route [#388](https://github.com/lhorie/mithril.js/issues/388)
+
+---
+
+[v0.1.27](/mithril/archive/v0.1.27) - maintenance
+
+### Bug Fixes:
+
+-	prevent strategy("none") event contamination [#378](https://github.com/lhorie/mithril.js/issues/378)
+-	fix equality strictness [#379](https://github.com/lhorie/mithril.js/issues/379)
+-	fix keys bug when list has nulls [#299](https://github.com/lhorie/mithril.js/issues/299)
+-	make sure empty value in option tag creates attribute [#380](https://github.com/lhorie/mithril.js/issues/380)
+
+---
+
 [v0.1.26](/mithril/archive/v0.1.26) - maintenance
 
 ### Bug Fixes:

@@ -82,10 +82,16 @@ var users = m.prop(deferred.promise)
 users() // undefined
 
 deferred.resolve("Hello")
-users() // Hello
-users.then(function(value) {
-	console.log(value) //Hello
-})
+
+//wait for next tick for Q's A+ compliant promise to actually resolve
+setTimeout(function() {
+
+	users() // Hello
+	users.then(function(value) {
+		console.log(value) //Hello
+	})
+	
+}, 1000)
 ```
 
 ---
