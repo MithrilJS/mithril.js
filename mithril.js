@@ -674,12 +674,9 @@ var m = (function app(window, undefined) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
-			params[decodeSpace(pair[0])] = pair[1] ? decodeSpace(pair[1]) : ""
+			params[decodeURIComponent(pair[0])] = pair[1] ? decodeURIComponent(pair[1]) : ""
 		}
 		return params
-	}
-	function decodeSpace(string) {
-		return decodeURIComponent(string.replace(/\+/g, " "))
 	}
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
