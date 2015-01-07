@@ -693,9 +693,6 @@ var m = (function app(window, undefined) {
 		}
 		return params
 	}
-	function checkRouteInit(){
-		return currentRoute == null || throw "Attempted to query m.route, but m.route was not initialized";
-	}
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
