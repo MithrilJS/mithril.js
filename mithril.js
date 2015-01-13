@@ -635,6 +635,27 @@ var m = (function app(window, undefined) {
 		return routeParams[key]
 	};
 	m.route.mode = "search";
+	m.route.previous = function() {
+		var delimiter = "/";
+		var previous;
+
+		var route = m.route() || delimiter;
+		if (route.length >= 1) {
+			var arr = route.split(delimiter);
+
+			arr.pop();
+
+			previous = arr.join(delimiter);
+		}
+		else {
+			previous = delimiter;
+		}
+
+		return previous;
+	};
+	m.route.back = function() {
+		m.route(m.route.previous());
+	};
 	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
 	function routeByValue(root, router, path) {
 		routeParams = {};
