@@ -11,8 +11,8 @@ var m = (function app(window, undefined) {
 	function initialize(window){
 		$document = window.document;
 		$location = window.location;
-		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
-		$requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+		$cancelAnimationFrame = (window.cancelAnimationFrame || window.clearTimeout).bind(window);
+		$requestAnimationFrame = (window.requestAnimationFrame || window.setTimeout).bind(window);
 	}
 
 	initialize(window);
