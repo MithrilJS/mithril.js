@@ -55,6 +55,29 @@ function testMithril(mock) {
 		return (root1.childNodes[0].nodeValue === "test1" && root2.childNodes[0].nodeValue === "test2")
 			&& (mod1.value && mod1.value === "test1") && (mod2.value && mod2.value === "test2")
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var unloaded = false
+		var mod = m.module(root, {
+			controller: function() {
+				this.value = "test1"
+				this.onunload = function() {
+					unloaded = true
+				}
+			},
+			view: function(ctrl) {return ctrl.value}
+		})
+
+		mock.requestAnimationFrame.$resolve()
+
+		m.module(root, null)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return unloaded
+	})
 
 	//m.withAttr
 	test(function() {

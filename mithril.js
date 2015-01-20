@@ -508,8 +508,8 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			var currentModule = topModule = module;
-			var controller = new module.controller;
+			var currentModule = topModule = module = module || {};
+			var controller = new (module.controller || function() {});
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
 			if (currentModule === topModule) {
@@ -537,11 +537,12 @@ var m = (function app(window, undefined) {
 		}
 	};
 	m.redraw.strategy = m.prop();
+	var blank = function() {return ""}
 	function redraw() {
 		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				m.render(root, modules[i].view(controllers[i]), forceRedraw)
+				m.render(root, (modules[i].view || blank)(controllers[i]), forceRedraw)
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState

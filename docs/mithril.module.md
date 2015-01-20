@@ -118,6 +118,12 @@ module1.controller = function() {
 }
 ```
 
+To unload a module without loading another module, you can simply call `m.module` without a module parameter:
+
+```javascript
+m.module(rootElement, null);
+```
+
 ---
 
 ### Signature
@@ -145,7 +151,7 @@ where:
 
 	Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view's constructor.
 
-	Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can instantiate child views and manually pass the child controller instances down the the child view constructors. You should avoid instantiating controllers from views, since views can be rendered many times across the lifecycle of a page, and a redraw might wipe out sub-controller data, if it houses any.
+	Note that controllers can manually instantiate child controllers (since they are simply Javascript constructors), and likewise, views can call child views and manually pass the child controller instances down the the child view constructors. You should avoid instantiating controllers from views, since views can be rendered many times across the lifecycle of a page, and a redraw might wipe out sub-controller data, if it houses any.
 
 	This "[turtles all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down)" approach is the heart of Mithril's component system.
 
