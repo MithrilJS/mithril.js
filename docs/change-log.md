@@ -1,5 +1,17 @@
 ## Change Log
 
+[v0.1.29](/mithril/archive/v0.1.29) - maintenance
+
+### News:
+
+-	Calling m.module without a module now unloads the current one [#420](https://github.com/lhorie/mithril.js/issues/420)
+
+### Bug Fixes:
+
+-	prevent empty class attributes [#382](https://github.com/lhorie/mithril.js/issues/382)
+
+---
+
 [v0.1.28](/mithril/archive/v0.1.28) - maintenance
 
 ### News:
