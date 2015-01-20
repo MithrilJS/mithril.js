@@ -118,6 +118,8 @@ module1.controller = function() {
 }
 ```
 
+Normally, calling `m.module` will return the controller instance for that module, but there's one corner case: if `preventDefault` is called from a controller's `onunload` method as a result of calling `m.module`, then the `m.module` call will not instantiate the new controller, and will return `undefined`.
+
 To unload a module without loading another module, you can simply call `m.module` without a module parameter:
 
 ```javascript
