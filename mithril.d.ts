@@ -5,7 +5,7 @@ interface MithrilStatic {
 	(selector: string, children?: any): MithrilVirtualElement;
 	prop(value?: any): (value?: any) => any;
 	withAttr(property: string, callback: (value: any) => void): (e: Event) => any;
-	module(rootElement: Node, module: MithrilModule): Object;
+	module(rootElement: Node, module?: MithrilModule): Object;
 	trust(html: string): String;
 	render(rootElement: Element, children?: any): void;
 	render(rootElement: HTMLDocument, children?: any): void;
