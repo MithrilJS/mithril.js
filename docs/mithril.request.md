@@ -468,10 +468,6 @@ where:
 	
 		A password for HTTP authentication. Defaults to `undefined`
 		
-	-	**String password** (optional)
-	
-		A password for HTTP authentication. Defaults to `undefined`
-		
 	-	**Object<any> data** (optional)
 	
 		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
