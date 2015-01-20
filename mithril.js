@@ -877,7 +877,7 @@ var m = (function app(window, undefined) {
 			var script = $document.createElement("script");
 
 			window[callbackKey] = function(resp) {
-				$document.body.removeChild(script);
+				script.parentNode.removeChild(script);
 				options.onload({
 					type: "load",
 					target: {
@@ -888,7 +888,7 @@ var m = (function app(window, undefined) {
 			};
 
 			script.onerror = function(e) {
-				$document.body.removeChild(script);
+				script.parentNode.removeChild(script);
 
 				options.onerror({
 					type: "error",
