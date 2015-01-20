@@ -28,6 +28,11 @@ function testMithril(mock) {
 	test(function() {return m("svg", [m("a[href='http://google.com']")])})
 	test(function() {return m(".foo", {"class": "bar"}).attrs["class"] == "foo bar"})
 	test(function() {return m(".foo", {className: "bar"}).attrs.className == "foo bar"})
+	test(function() {return m(".foo", {className: ""}).attrs.className == "foo"})
+	test(function() {return m("div", {className: ""}).attrs.className === undefined}) //https://github.com/lhorie/mithril.js/issues/382
+	test(function() {return m("div", {class: ""}).attrs.className === undefined})
+	test(function() {return m("div", {className: ""}).attrs.class === undefined})
+	test(function() {return m("div", {class: ""}).attrs.class === undefined})
 
 	//m.module
 	test(function() {
