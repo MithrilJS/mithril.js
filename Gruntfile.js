@@ -150,6 +150,7 @@ module.exports = function(grunt) {
 			comparisons: {expand: true, cwd: inputFolder + "/layout/comparisons/", src: "./**", dest: currentVersionArchiveFolder + "/comparisons/"},
 			unminified: {src: "mithril.js", dest: currentVersionArchiveFolder + "/mithril.js"},
 			minified: {src: "mithril.min.js", dest: currentVersionArchiveFolder + "/mithril.min.js"},
+			readme: {src: "README.md", dest: currentVersionArchiveFolder + "/README.md"},
 			map: {src: "mithril.min.js.map", dest: currentVersionArchiveFolder + "/mithril.min.js.map"},
 			typescript: {src: "mithril.d.ts", dest: currentVersionArchiveFolder + "/mithril.d.ts"},
 			publish: {expand: true, cwd: currentVersionArchiveFolder, src: "./**", dest: outputFolder},
