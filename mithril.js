@@ -231,6 +231,19 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
+			var module = m.tags[data.tag], controller = cached.controller
+			if (module) {
+				if (!controller) {
+					var constructor = module.controller || m.prop()
+					controller = constructor.call(data, data) || data
+				}
+				else {
+					controller.tag = data.tag
+					for (var attr in data.attrs) controller.attrs[attr] = data.attrs[attr]
+					controller.children = data.children
+				}
+				data = module.view(controller)
+			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
@@ -249,14 +262,7 @@ var m = (function app(window, undefined) {
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
 			
-			var module = m.tags[data.tag]
 			if (isNew) {
-				if (module) {
-					var constructor = module.controller || m.prop()
-					var controller = new constructor(data)
-					data = module.view(controller)
-				}
-				
 				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
 				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
 				cached = {
@@ -268,7 +274,6 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				
 				if (module) cached.controller = controller
 				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
@@ -277,8 +282,6 @@ var m = (function app(window, undefined) {
 				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			else {
-				if (cached.controller) data = module.view(cached.controller)
-				
 				node = cached.nodes[0];
 				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
