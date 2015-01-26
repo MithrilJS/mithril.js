@@ -235,14 +235,15 @@ var m = (function app(window, undefined) {
 			if (module) {
 				if (!controller) {
 					var constructor = module.controller || m.prop()
+					for (var prop in constructor.prototype) data[prop] = constructor.prototype[prop]
 					controller = constructor.call(data, data) || data
+					if (!controller.attrs) controller.attrs = {}
 				}
-				else {
-					controller.tag = data.tag
-					for (var attr in data.attrs) controller.attrs[attr] = data.attrs[attr]
-					controller.children = data.children
-				}
+				controller.tag = data.tag
+				for (var attr in data.attrs) controller.attrs[attr] = data.attrs[attr]
+				controller.children = data.children
 				data = module.view(controller)
+				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.");
 			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
