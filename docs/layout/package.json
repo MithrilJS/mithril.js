@@ -7,5 +7,5 @@
 	"repository": {"type": "git", "url": "https://github.com/lhorie/mithril"},
 	"main": "mithril.js",
 	"licenses": [{"type": "MIT", "url": "http://opensource.org/licenses/MIT"}],
-	"files": ["mithril.min.js", "mithril.min.map", "mithril.js"]
+	"files": ["mithril.min.js", "mithril.min.map", "mithril.js", "README.*"]
 }
