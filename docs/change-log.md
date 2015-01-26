@@ -9,6 +9,7 @@
 ### Bug Fixes:
 
 -	prevent empty class attributes [#382](https://github.com/lhorie/mithril.js/issues/382)
+-	array-to-querystring serialization in `m.request` now behaves like jQuery [#426](https://github.com/lhorie/mithril.js/issues/426)
 
 ---
 
