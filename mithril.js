@@ -594,8 +594,10 @@ var m = (function app(window, undefined) {
 			};
 			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
 			window[listener] = function() {
-				if (currentRoute != normalizeRoute($location[m.route.mode])) {
-					redirect($location[m.route.mode])
+				var path = $location[m.route.mode]
+				if (m.route.mode === "pathname") path += $location.search
+				if (currentRoute != normalizeRoute(path)) {
+					redirect(path)
 				}
 			};
 			computePostRedrawHook = setScroll;
@@ -638,7 +640,9 @@ var m = (function app(window, undefined) {
 		return routeParams[key]
 	};
 	m.route.mode = "search";
-	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
+	function normalizeRoute(route) {
+		return route.slice(modes[m.route.mode].length)
+	}
 	function routeByValue(root, router, path) {
 		routeParams = {};
 
