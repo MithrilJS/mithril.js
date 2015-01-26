@@ -684,10 +684,17 @@ var m = (function app(window, undefined) {
 		var str = [];
 		for(var prop in object) {
 			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop];
-			str.push(value != null && type.call(value) === OBJECT ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+			var valueType = type.call(value)
+			var pair = value != null && (valueType === OBJECT) ?
+				buildQueryString(value, key) :
+				valueType === ARRAY ?
+					value.map(function(item) {return encodeURIComponent(key) + "=" + encodeURIComponent(item)}).join("&") :
+					encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			str.push(pair)
 		}
 		return str.join("&")
 	}
+	
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
