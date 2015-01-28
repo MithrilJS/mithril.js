@@ -5,11 +5,15 @@
 ### News:
 
 -	Calling m.module without a module now unloads the current one [#420](https://github.com/lhorie/mithril.js/issues/420)
+-	Both `controller` and `view` properties in modules are now optional
 
 ### Bug Fixes:
 
 -	prevent empty class attributes [#382](https://github.com/lhorie/mithril.js/issues/382)
 -	array-to-querystring serialization in `m.request` now behaves like jQuery [#426](https://github.com/lhorie/mithril.js/issues/426)
+-	fix querystring detection bug in pathname mode [#425](https://github.com/lhorie/mithril.js/issues/425)
+-	don't add history entry if reloading from a link [#428](https://github.com/lhorie/mithril.js/issues/428)
+-	fix key association when DOM order is modified by external code [#424](https://github.com/lhorie/mithril.js/issues/424)
 
 ---
 

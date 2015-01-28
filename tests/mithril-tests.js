@@ -828,6 +828,21 @@ function testMithril(mock) {
 		m.render(root, m("div", [console.log()])) //don't throw in Firefox
 		return true
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, [
+			m("#div-1", {key: 1}),
+			m("#div-2", {key: 2}),
+			m("#div-3", {key: 3})
+		])
+		root.appendChild(root.childNodes[1])
+		m.render(root, [
+			m("#div-1", {key: 1}),
+			m("#div-3", {key: 3}),
+			m("#div-2", {key: 2})
+		])
+		return root.childNodes.map(function(node) {return node.id}).join() == "div-1,div-3,div-2"
+	})
 	//end m.render
 
 	//m.redraw
