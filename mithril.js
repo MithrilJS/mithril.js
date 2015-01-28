@@ -158,7 +158,7 @@ var m = (function app(window, undefined) {
 									action: MOVE,
 									index: i,
 									from: existing[key].index,
-									element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+									element: cached.nodes[existing[key].index] || $document.createElement("div")
 								}
 							}
 							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
