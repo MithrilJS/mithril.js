@@ -231,30 +231,15 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			var module = m.tags[data.tag], controller = cached.controller
-			if (module) {
-				if (!controller) {
-					var constructor = module.controller || m.prop()
-					for (var prop in constructor.prototype) data[prop] = constructor.prototype[prop]
-					controller = constructor.call(data, data) || data
-					if (!controller.attrs) controller.attrs = {}
-				}
-				controller.tag = data.tag
-				for (var attr in data.attrs) controller.attrs[attr] = data.attrs[attr]
-				controller.children = data.children
-				data = module.view(controller)
-				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.");
-			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
-				if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}})
 			}
 			if (type.call(data.tag) != STRING) return;
 
@@ -262,7 +247,6 @@ var m = (function app(window, undefined) {
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
-			
 			if (isNew) {
 				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
 				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
@@ -275,8 +259,6 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (module) cached.controller = controller
-				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
 				if (data.tag === "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
@@ -409,7 +391,6 @@ var m = (function app(window, undefined) {
 	}
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
-		if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}});
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -465,7 +446,6 @@ var m = (function app(window, undefined) {
 		childNodes: []
 	};
 	var nodeCache = [], cellCache = {};
-	m.tags = {}
 	m.render = function(root, cell, forceRecreation) {
 		var configs = [];
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
@@ -529,8 +509,7 @@ var m = (function app(window, undefined) {
 			m.startComputation();
 			roots[index] = root;
 			var currentModule = topModule = module = module || {};
-			var constructor = module.controller || m.prop()
-			var controller = new constructor;
+			var controller = new (module.controller || function() {});
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
 			if (currentModule === topModule) {
