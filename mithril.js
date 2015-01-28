@@ -133,7 +133,7 @@ var m = (function app(window, undefined) {
 			for (var i = 0; i < cached.length; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true;
-					existing[cached[i].attrs.key] = {action: DELETION, index: i, element: cached[i].nodes[0]}
+					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
 			if (shouldMaintainIdentities) {
@@ -154,13 +154,11 @@ var m = (function app(window, undefined) {
 							if (data[i].attrs.key != null) {
 								var key = data[i].attrs.key;
 								if (!existing[key]) existing[key] = {action: INSERTION, index: i};
-								else {
-									existing[key] = {
-										action: MOVE,
-										index: i,
-										from: existing[key].index,
-										element: existing[key].element || $document.createElement("div")
-									}
+								else existing[key] = {
+									action: MOVE,
+									index: i,
+									from: existing[key].index,
+									element: cached.nodes[existing[key].index] || $document.createElement("div")
 								}
 							}
 							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
