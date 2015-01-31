@@ -231,19 +231,13 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			var module = m.tags[data.tag], controller = cached.controller
-			if (module) {
-				if (!controller) {
-					var constructor = module.controller || m.prop()
-					for (var prop in constructor.prototype) data[prop] = constructor.prototype[prop]
-					controller = constructor.call(data, data) || data
-					if (!controller.attrs) controller.attrs = {}
-				}
-				controller.tag = data.tag
-				for (var attr in data.attrs) controller.attrs[attr] = data.attrs[attr]
-				controller.children = data.children
+			if (data.controller) {
+				var module = data
+				var controller = cached.controller || new (module.controller || function() {})
+				if (cached.controller && typeof cached.controller.onupdate === FUNCTION) controller.onupdate.apply(controller, args)
+				controller.args = module.controller.$$args
 				data = module.view(controller)
-				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.");
+				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
 			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
@@ -275,7 +269,7 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (module) cached.controller = controller
+				if (controller) cached.controller = controller
 				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
@@ -513,8 +507,20 @@ var m = (function app(window, undefined) {
 
 	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
+	function submodule(module, args) {
+		var controller = function() {
+			this.args = args
+			return module.controller.apply(this, args) || this
+		}
+		controller.$$args = args //private, do not use
+		return {
+			controller: controller,
+			view: module.view,
+		}
+	}
 	m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
+		if (root.controller) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		var isPrevented = false;
@@ -528,6 +534,7 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
+			if (arguments.length > 2) module = submodule(module, [].slice.call(arguments, 2))
 			var currentModule = topModule = module = module || {};
 			var constructor = module.controller || m.prop()
 			var controller = new constructor;
@@ -541,6 +548,12 @@ var m = (function app(window, undefined) {
 			return controllers[index]
 		}
 	};
+	m.module.create = function(module) {
+		var module = submodule(module, [].slice.call(arguments, 1))
+		var controller = new module.controller
+		controller.view = function() {return module.view(controller)}
+		return controller
+	}
 	m.redraw = function(force) {
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
