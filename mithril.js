@@ -459,7 +459,6 @@ var m = (function app(window, undefined) {
 		childNodes: []
 	};
 	var nodeCache = [], cellCache = {};
-	m.tags = {}
 	m.render = function(root, cell, forceRecreation) {
 		var configs = [];
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
