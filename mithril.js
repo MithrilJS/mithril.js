@@ -693,7 +693,7 @@ var m = (function app(window, undefined) {
 			var pair = value != null && (valueType === OBJECT) ?
 				buildQueryString(value, key) :
 				valueType === ARRAY ?
-					value.map(function(item) {return encodeURIComponent(key) + "=" + encodeURIComponent(item)}).join("&") :
+					value.map(function(item) {return encodeURIComponent(key + "[]") + "=" + encodeURIComponent(item)}).join("&") :
 					encodeURIComponent(key) + "=" + encodeURIComponent(value)
 			str.push(pair)
 		}
