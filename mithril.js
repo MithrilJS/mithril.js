@@ -567,7 +567,7 @@ var m = (function app(window, undefined) {
 		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : controllers[i]
+				var args = modules[i].controller && modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : [controllers[i]]
 				m.render(root, (modules[i].view || blank).apply(modules[i], args), forceRedraw)
 			}
 		}
