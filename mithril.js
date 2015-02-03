@@ -234,9 +234,8 @@ var m = (function app(window, undefined) {
 			if (data.controller) {
 				var module = data
 				var controller = cached.controller || new (module.controller || function() {})
-				if (cached.controller && typeof cached.controller.onupdate === FUNCTION) controller.onupdate.apply(controller, args)
-				controller.args = module.controller.$$args
-				data = module.view(controller)
+				var args = module.controller.$$args ? [controller].concat(module.controller.$$args) : controller
+				data = module.view.apply(module, args)
 				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
 			}
 			if (!data.attrs) data.attrs = {};
@@ -508,7 +507,6 @@ var m = (function app(window, undefined) {
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function submodule(module, args) {
 		var controller = function() {
-			this.args = args
 			return module.controller.apply(this, args) || this
 		}
 		controller.$$args = args //private, do not use
@@ -547,12 +545,6 @@ var m = (function app(window, undefined) {
 			return controllers[index]
 		}
 	};
-	m.module.create = function(module) {
-		var module = submodule(module, [].slice.call(arguments, 1))
-		var controller = new module.controller
-		controller.view = function() {return module.view(controller)}
-		return controller
-	}
 	m.redraw = function(force) {
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
@@ -575,7 +567,8 @@ var m = (function app(window, undefined) {
 		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				m.render(root, (modules[i].view || blank)(controllers[i]), forceRedraw)
+				var args = modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : controllers[i]
+				m.render(root, (modules[i].view || blank).apply(modules[i], args), forceRedraw)
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
