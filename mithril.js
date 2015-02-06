@@ -34,11 +34,10 @@ var m = (function app(window, undefined) {
 	function m() {
 		var args = [].slice.call(arguments);
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
-		var tag = args.shift();
+		var tag   = args.shift();
 		var attrs = hasAttrs ? args.shift() : {};
-		var children = (type.call(args[0] === ARRAY))? args[0]: args;
+		var cell  = { tag: "div", attrs: {}, children: args };
 		var classAttrName = "class" in attrs ? "class" : "className";
-		var cell = {tag: "div", attrs: {}, children: children};
 		var match, classes = [];
 		
 		if (type.call(tag) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string")
