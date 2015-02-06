@@ -36,7 +36,8 @@ var m = (function app(window, undefined) {
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
 		var tag   = args.shift();
 		var attrs = hasAttrs ? args.shift() : {};
-		var cell  = { tag: "div", attrs: {}, children: args };
+		var children = (args.length === 1 && type.call(args[0])===ARRAY)? args[0]: args;
+		var cell  = { tag: "div", attrs: {}, children: children };
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var match, classes = [];
 		
