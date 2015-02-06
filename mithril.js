@@ -34,12 +34,15 @@ var m = (function app(window, undefined) {
 	function m() {
 		var args = [].slice.call(arguments);
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
-		var attrs = hasAttrs ? args[1] : {};
+		var tag = args.shift();
+		var attrs = hasAttrs ? args.shift() : {};
+		var children = (type.call(args[0] === ARRAY))? args[0]: args;
 		var classAttrName = "class" in attrs ? "class" : "className";
-		var cell = {tag: "div", attrs: {}};
+		var cell = {tag: "div", attrs: {}, children: children};
 		var match, classes = [];
-		if (type.call(args[0]) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string")
-		while (match = parser.exec(args[0])) {
+		
+		if (type.call(tag) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string")
+		while (match = parser.exec(tag)) {
 			if (match[1] === "" && match[2]) cell.tag = match[2];
 			else if (match[1] === "#") cell.attrs.id = match[2];
 			else if (match[1] === ".") classes.push(match[2]);
@@ -49,16 +52,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
-
-
-		var children = hasAttrs ? args[2] : args[1];
-		if (type.call(children) === ARRAY) {
-			cell.children = children
-		}
-		else {
-			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
-		}
-
+		
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
 				if (attrs[attrName] !== "") cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
