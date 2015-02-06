@@ -18,6 +18,7 @@ function testMithril(mock) {
 	test(function() {return m("div", {title: "bar"}, m("div")).children[0].tag === "div"})
 	test(function() {return m("div", {title: "bar"}, [m("div")]).children[0].tag === "div"})
 	test(function() {return m("div", {title: "bar"}, "test0", "test1", "test2", "test3").children[3] === "test3"}) // splat
+	test(function() {return m("div", {title: "bar"}, ["test0", "test1"], "test2", "test3").children[2] === "test3"})
 	test(function() {return m("div", {title: "bar"}, m("div"), m("i"), m("span")).children[2].tag === "span"})
 	test(function() {return m("div", ["a", "b"]).children.length === 2})
 	test(function() {return m("div", [m("div")]).children[0].tag === "div"})
