@@ -33,6 +33,14 @@ function testMithril(mock) {
 	test(function() {return m("div", {class: ""}).attrs.className === undefined})
 	test(function() {return m("div", {className: ""}).attrs.class === undefined})
 	test(function() {return m("div", {class: ""}).attrs.class === undefined})
+	test(function() {return m("div", [1, 2, 3], 4).children.length === 2})
+	test(function() {return m("div", [1, 2, 3], 4).children[0].length === 3})
+	test(function() {return m("div", [1, 2, 3], 4).children[1] === 4})
+	test(function() {return m("div", [1, 2, 3]).children.length === 3})
+	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children.length === 2})
+	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[0].length === 3})
+	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[1].length === 4})
+	test(function() {return m("div", [1], [2], [3]).children.length === 3})
 
 	//m.module
 	test(function() {
@@ -1683,6 +1691,60 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return mock.location.search == "?/b?foo=2"
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		mock.history.$$length = 0
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {return "a"}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {return "b"}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return mock.history.$$length == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		mock.history.$$length = 0
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {return "a"}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {return "b"}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/a")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return mock.history.$$length == 0
 	})
 	//end m.route
 
