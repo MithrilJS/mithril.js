@@ -234,8 +234,7 @@ var m = (function app(window, undefined) {
 			if (data.controller) {
 				var module = data
 				var controller = cached.controller || new (module.controller || function() {})
-				var args = module.controller.$$args ? [controller].concat(module.controller.$$args) : controller
-				data = module.view.apply(module, args)
+				data = module.view(controller)
 				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
 			}
 			if (!data.attrs) data.attrs = {};
@@ -509,11 +508,15 @@ var m = (function app(window, undefined) {
 		var controller = function() {
 			return module.controller.apply(this, args) || this
 		}
-		controller.$$args = args //private, do not use
-		return {
-			controller: controller,
-			view: module.view,
+		var view = function(ctrl) {
+			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
+			var template = module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
+			if (args[0] && args[0].key != null) template.attrs.key = args[0].key
+			return template
 		}
+		var output = {controller: controller, view: view}
+		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
+		return output
 	}
 	m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
@@ -533,7 +536,7 @@ var m = (function app(window, undefined) {
 			roots[index] = root;
 			if (arguments.length > 2) module = submodule(module, [].slice.call(arguments, 2))
 			var currentModule = topModule = module = module || {};
-			var constructor = module.controller || m.prop()
+			var constructor = module.controller || function() {}
 			var controller = new constructor;
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied

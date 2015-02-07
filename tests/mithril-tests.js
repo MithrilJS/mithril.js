@@ -86,6 +86,243 @@ function testMithril(mock) {
 		
 		return unloaded
 	})
+	test(function() {
+		//module should pass args to both controller and view
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var slot1, slot2
+		var module = {
+			controller: function(options) {slot1 = options.a},
+			view: function(ctrl, options) {slot2 = options.a}
+		}
+		m.module(root, module, {a: 1})
+
+		mock.requestAnimationFrame.$resolve()
+
+		return slot1 == 1 && slot2 == 1
+	})
+	test(function() {
+		//arguments should update in component's view
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var args = {a: 1}
+		var slot1, slot2
+		var module = {
+			controller: function() {},
+			view: function(ctrl, options) {
+				return m.module(sub, args)
+			}
+		}
+		var sub = {
+			controller: function(options) {slot1 = options.a},
+			view: function(ctrl, options) {
+				slot2 = options.a
+				return m("div")
+			}
+		}
+		m.module(root, module)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		args.a = 2
+		m.redraw(true)
+		
+		mock.requestAnimationFrame.$resolve()
+
+		return slot1 == 1 && slot2 == 2
+	})
+	test(function() {
+		//module(mod, args) should also pass args to both controller and view
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var slot1, slot2
+		var module = {
+			controller: function(options) {slot1 = options.a},
+			view: function(ctrl, options) {slot2 = options.a}
+		}
+		var moduleWithArgs = m.module(module, {a: 1})
+		m.module(root, moduleWithArgs)
+
+		mock.requestAnimationFrame.$resolve()
+
+		return slot1 == 1 && slot2 == 1
+	})
+	test(function() {
+		//component controller should only run once
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var count1 = 0, count2 = 0
+		var module = {
+			view: function(ctrl) {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function() {
+				count1++
+			},
+			view: function(ctrl) {
+				count2++
+				return m("div", "test")
+			}
+		}
+		m.module(root, module)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		return count1 == 1 && count2 == 2
+	})
+	test(function() {
+		//keys in components should work
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
+		//keys in components should work even if component internally messes them up
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div", {key: 1})
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
+		//component identity should stay intact if components are descendants of keyed elements
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m("div", {key: i}, m.module(sub))
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0].childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2].childNodes[0]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
+		//component should call onunload when removed from template
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var unloaded
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+				this.onunload = function() {
+					unloaded = opts.key
+				}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.pop()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		return unloaded === 3
+	})
 
 	//m.withAttr
 	test(function() {
