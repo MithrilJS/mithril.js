@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.30](/mithril/archive/v0.1.30) - maintenance
+
+### Bug Fixes:
+
+-	fix history.back() regression [#435](https://github.com/lhorie/mithril.js/issues/435)
+-	fix module.view's `this` association regression in Haxe environment [#434](https://github.com/lhorie/mithril.js/issues/434)
+-	fix array serialization syntax in querystrings [#440](https://github.com/lhorie/mithril.js/issues/440)
+
 [v0.1.29](/mithril/archive/v0.1.29) - maintenance
 
 ### News:

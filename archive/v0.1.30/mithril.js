@@ -51,12 +51,12 @@ var m = (function app(window, undefined) {
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
 
 
-		var children = hasAttrs ? args.slice(2) : args.slice(1);
-		if (children.length === 1 && type.call(children[0]) === ARRAY) {
-			cell.children = children[0]
+		var children = hasAttrs ? args[2] : args[1];
+		if (type.call(children) === ARRAY) {
+			cell.children = children
 		}
 		else {
-			cell.children = children
+			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
 		}
 
 		for (var attrName in attrs) {
@@ -231,23 +231,15 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			if (data.controller) {
-				var module = data
-				var controller = cached.controller || new (module.controller || function() {})
-				var args = module.controller.$$args ? [controller].concat(module.controller.$$args) : controller
-				data = module.view.apply(module, args)
-				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
-			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
-				if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}})
 			}
 			if (type.call(data.tag) != STRING) return;
 
@@ -255,7 +247,6 @@ var m = (function app(window, undefined) {
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
-			
 			if (isNew) {
 				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
 				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
@@ -268,8 +259,6 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (controller) cached.controller = controller
-				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
 				if (data.tag === "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
@@ -402,7 +391,6 @@ var m = (function app(window, undefined) {
 	}
 	function unload(cached) {
 		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
-		if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}});
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -505,19 +493,8 @@ var m = (function app(window, undefined) {
 
 	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
-	function submodule(module, args) {
-		var controller = function() {
-			return module.controller.apply(this, args) || this
-		}
-		controller.$$args = args //private, do not use
-		return {
-			controller: controller,
-			view: module.view,
-		}
-	}
 	m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-		if (root.controller) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		var isPrevented = false;
@@ -531,10 +508,8 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) module = submodule(module, [].slice.call(arguments, 2))
 			var currentModule = topModule = module = module || {};
-			var constructor = module.controller || m.prop()
-			var controller = new constructor;
+			var controller = new (module.controller || function() {});
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
 			if (currentModule === topModule) {
@@ -567,8 +542,7 @@ var m = (function app(window, undefined) {
 		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = modules[i].controller && modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : [controllers[i]]
-				m.render(root, modules[i].view ? modules[i].view(controllers[i], args) : blank(), forceRedraw)
+				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank(), forceRedraw)
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
