@@ -51,12 +51,12 @@ var m = (function app(window, undefined) {
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
 
 
-		var children = hasAttrs ? args[2] : args[1];
-		if (type.call(children) === ARRAY) {
-			cell.children = children
+		var children = hasAttrs ? args.slice(2) : args.slice(1);
+		if (children.length === 1 && type.call(children[0]) === ARRAY) {
+			cell.children = children[0]
 		}
 		else {
-			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
+			cell.children = children
 		}
 
 		for (var attrName in attrs) {
