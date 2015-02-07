@@ -989,7 +989,7 @@ var m = (function app(window, undefined) {
 			try {
 				e = e || event;
 				var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
-				var response = unwrap(deserialize(extract(e.target, xhrOptions)));
+				var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
 				if (e.type === "load") {
 					if (type.call(response) === ARRAY && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
