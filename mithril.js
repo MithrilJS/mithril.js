@@ -548,7 +548,10 @@ var m = (function app(window, undefined) {
 			return controllers[index]
 		}
 	};
+	var redrawing = false
 	m.redraw = function(force) {
+		if (redrawing) return
+		redrawing = true
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
@@ -563,6 +566,7 @@ var m = (function app(window, undefined) {
 			redraw();
 			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
+		redrawing = false
 	};
 	m.redraw.strategy = m.prop();
 	var blank = function() {return ""}

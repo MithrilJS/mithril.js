@@ -323,6 +323,33 @@ function testMithril(mock) {
 		
 		return unloaded === 3
 	})
+	test(function() {
+		//calling m.redraw synchronously from controller constructor should not trigger extra redraws
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var count = 0
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+				m.redraw()
+			},
+			view: function() {
+				count++
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return count === 1
+	})
 
 	//m.withAttr
 	test(function() {
@@ -1123,6 +1150,7 @@ function testMithril(mock) {
 		m.redraw()
 		m.redraw()
 		mock.requestAnimationFrame.$resolve() //teardown
+		
 		return count === 3
 	})
 	test(function() {
