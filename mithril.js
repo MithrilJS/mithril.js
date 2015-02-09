@@ -502,11 +502,13 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function submodule(module, args) {
 		var controller = function() {
-			return module.controller.apply(this, args) || this
+			var instance = module.controller.apply(this, args) || this
+			if (instance.onunload) unloaders.push({controller: instance, handler: instance.onunload})
+			return instance
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
@@ -523,13 +525,22 @@ var m = (function app(window, undefined) {
 		if (root.controller) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
+		
 		var isPrevented = false;
+		var event = {preventDefault: function() {isPrevented = true}};
+		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
+			unloader.handler(event)
+			unloader.controller.onunload = null
+		}
+		if (isPrevented) {
+			for (var i = 0, unloader; unloader = unloaders[i]; i++) unloader.controller.onunload = unloader.handler
+		}
+		else unloaders = []
+		
 		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
-			var event = {
-				preventDefault: function() {isPrevented = true}
-			};
 			controllers[index].onunload(event)
 		}
+		
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
