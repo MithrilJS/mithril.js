@@ -119,7 +119,7 @@ var m = (function app(window, undefined) {
 					i-- //check current index again and flatten until there are no more nested arrays at that index
 				}
 			}
-			
+
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -138,7 +138,7 @@ var m = (function app(window, undefined) {
 			}
 			if (shouldMaintainIdentities) {
 				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
-				
+
 				var keysDiffer = false
 				if (data.length != cached.length) keysDiffer = true
 				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
@@ -147,7 +147,7 @@ var m = (function app(window, undefined) {
 						break
 					}
 				}
-				
+
 				if (keysDiffer) {
 					for (var i = 0, len = data.length; i < len; i++) {
 						if (data[i] && data[i].attrs) {
@@ -216,7 +216,7 @@ var m = (function app(window, undefined) {
 			}
 			if (!intact) {
 				//diff the array itself
-				
+
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0, len = data.length; i < len; i++) {
 					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
@@ -653,6 +653,15 @@ var m = (function app(window, undefined) {
 			path = path.substr(0, queryStart)
 		}
 
+		// Get all routes and check if there's
+		// an exact match for the current path
+		var keys = Object.keys(router);
+		var index = keys.indexOf(path);
+		if(index !== -1){
+			m.module(root, router[keys [index]]);
+			return true;
+		}
+
 		for (var route in router) {
 			if (route === path) {
 				m.module(root, router[route]);
@@ -699,7 +708,7 @@ var m = (function app(window, undefined) {
 		}
 		return str.join("&")
 	}
-	
+
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
