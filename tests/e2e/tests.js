@@ -69,6 +69,14 @@ test('m.trust w/ html entities', function() {
 	equal(dummyEl.innerHTML, '<div>a&amp;b</div>', 'view1 rendered correctly')
 })
 
+test('m.trust w/ html entities 2', function() {
+	expect(1)
+	var view1 = m('div', "a", m.trust("&amp;"), "b", m.trust("&amp;"), "c")
+
+	m.render(dummyEl, view1)
+	equal(dummyEl.innerHTML, '<div>a&amp;b&amp;c</div>', 'view1 rendered correctly')
+})
+
 test('array item removal', function() {
 	expect(2)
 	var view1 = m('div', {}, [
