@@ -276,7 +276,7 @@ redirects to `http://server/#/dashboard/marysue`
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(String path [, any params])
+void route(String path [, any params] [, Boolean shouldReplaceHistory])
 ```
 
 -	**String path**
@@ -286,6 +286,10 @@ void route(String path [, any params])
 -	**any params**
 
 	Parameters to pass as a querystring
+
+-	**Boolean shouldReplaceHistory**
+
+	If set to true, replaces the current history entry, instead of adding a new one. Defaults to false.
 
 ---
 
