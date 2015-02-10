@@ -234,6 +234,7 @@ var m = (function app(window, undefined) {
 			if (data.controller) {
 				var module = data
 				var controller = cached.controller || new (module.controller || function() {})
+				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
 				data = module.view(controller)
 				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
 			}
@@ -506,9 +507,7 @@ var m = (function app(window, undefined) {
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function submodule(module, args) {
 		var controller = function() {
-			var instance = module.controller.apply(this, args) || this
-			if (instance.onunload) unloaders.push({controller: instance, handler: instance.onunload})
-			return instance
+			return module.controller.apply(this, args) || this
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))

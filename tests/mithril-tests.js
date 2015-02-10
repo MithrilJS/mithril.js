@@ -350,6 +350,80 @@ function testMithril(mock) {
 		
 		return count === 1
 	})
+	test(function() {
+		//calling preventDefault from component's onunload should prevent route change
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var loaded = false
+		var testEnabled = true
+		var module = {
+			controller: function() {},
+			view: function() {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+				controller = this
+				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.route(root, "/a", {
+			"/a": module,
+			"/b": {controller: function() {loaded = true}, view: function() {}}
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		testEnabled = false
+		
+		return loaded === false
+	})
+	test(function() {
+		//calling preventDefault from non-curried component's onunload should prevent route change
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var loaded = false
+		var testEnabled = true
+		var module = {
+			controller: function() {},
+			view: function() {
+				return sub
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+				controller = this
+				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.route(root, "/a", {
+			"/a": module,
+			"/b": {controller: function() {loaded = true}, view: function() {}}
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		testEnabled = false
+		
+		return loaded === false
+	})
 
 	//m.withAttr
 	test(function() {
