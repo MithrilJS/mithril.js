@@ -61,6 +61,14 @@ test('Mithril accessible as window.m', function() {
 	ok(window.m)
 })
 
+test('m.trust w/ html entities', function() {
+	expect(1)
+	var view1 = m('div', "a", m.trust("&amp;"), "b")
+
+	m.render(dummyEl, view1)
+	equal(dummyEl.innerHTML, '<div>a&amp;b</div>', 'view1 rendered correctly')
+})
+
 test('array item removal', function() {
 	expect(2)
 	var view1 = m('div', {}, [
