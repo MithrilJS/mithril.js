@@ -1,76 +1,162 @@
 //Mithril type definitions for Typescript
 
 interface MithrilStatic {
-	(selector: string, attributes: Object, children?: any): MithrilVirtualElement;
-	(selector: string, children?: any): MithrilVirtualElement;
-	prop(value?: any): (value?: any) => any;
-	withAttr(property: string, callback: (value: any) => void): (e: Event) => any;
-	module(rootElement: Node, module?: MithrilModule): Object;
-	trust(html: string): String;
-	render(rootElement: Element, children?: any): void;
-	render(rootElement: HTMLDocument, children?: any): void;
-	redraw: {
-		(): void;
-		strategy(key: string);
-	};
-	route: {
-		(rootElement:Element, defaultRoute:string, routes:{ [key: string]: MithrilModule }): void
-		(element: Element, isInitialized: boolean): void;
-		(rootElement:HTMLDocument, defaultRoute:string, routes:{ [key: string]: MithrilModule }): void;
-		(path:string, params?:any, shouldReplaceHistory?:boolean): void;
-		(): string;
-		param(key:string): string;
-		mode: string;
-	};
-	request(options: MithrilXHROptions): MithrilPromise;
-	deferred(): MithrilDeferred;
-	sync(promises: MithrilPromise[]): MithrilPromise;
-	startComputation(): void;
-	endComputation(): void;
-	deps(Object: any): Object;
+
+       (selector: string, attributes: MithrilAttributes, ...children: Array<string|MithrilVirtualElement>): MithrilVirtualElement;
+       (selector: string, ...children: Array<string|MithrilVirtualElement>): MithrilVirtualElement;
+
+       prop<T>(promise: MithrilPromise<T>) : MithrilPromiseProperty<T>;
+       prop<T>(value: T): MithrilProperty<T>;
+       prop(): MithrilProperty<Object>; // might be that this should be Property<any>
+
+       withAttr(property: string, callback: (value: any) => void): (e: MithrilEvent) => any;
+
+       module<T extends MithrilController>(rootElement: Node, module: MithrilModule<T>): T;
+       module<T extends MithrilController>(rootElement: Node): T;
+
+       trust(html: string): string;
+
+       render(rootElement: Element|HTMLDocument): void;
+       render(rootElement: Element|HTMLDocument, children: MithrilVirtualElement, forceRecreation?: boolean): void;
+       render(rootElement: Element|HTMLDocument, children: MithrilVirtualElement[], forceRecreation?: boolean): void;
+
+       redraw: {
+              (force?: boolean): void;
+              strategy: MithrilProperty<string>;
+       }
+
+       route: {
+              <T extends MithrilController>(rootElement: HTMLDocument, defaultRoute: string, routes: MithrilRoutes<T>): void;
+              <T extends MithrilController>(rootElement: Element, defaultRoute: string, routes: MithrilRoutes<T>): void;
+
+              (element: Element, isInitialized: boolean): void;
+              (path: string, params?: any, shouldReplaceHistory?: boolean): void;
+              (): string;
+
+              param(key: string): string;
+              mode: string;
+       }
+
+       request<T>(options: MithrilXHROptions): MithrilPromise<T>;
+
+       deferred: {
+              onerror(e: Error): void;
+              <T>(): MithrilDeferred<T>;
+       }
+
+       sync<T>(promises: MithrilPromise<T>[]): MithrilPromise<T[]>;
+
+       startComputation(): void;
+       endComputation(): void;
+
+       // For test suite
+       deps: {
+              (mockWindow: Window): Window;
+              factory: Object;
+       }
+
 }
 
 interface MithrilVirtualElement {
-	tag: string;
-	attrs: Object;
-	children: any;
+       key?: number;
+       tag?: string;
+       attrs?: MithrilAttributes;
+       children?: any[];
 }
 
-interface MithrilModule {
-	controller: Function;
-	view: Function;
+// Configuration function for an element
+interface MithrilElementConfig {
+       (element: Element, isInitialized: boolean, context?: any): void;
 }
 
-interface MithrilDeferred {
-	resolve(value?: any): void;
-	reject(value?: any): void;
-	promise: MithrilPromise;
+// Attributes on a virtual element
+interface MithrilAttributes {
+       title?: string;
+       className?: string;
+       class?: string;
+       config?: MithrilElementConfig;
 }
 
-interface MithrilPromise {
-	(value?: any): any;
-	then(successCallback?: (value: any) => any, errorCallback?: (value: any) => any): MithrilPromise;
+// Defines the subset of Event that Mithril needs
+interface MithrilEvent {
+       currentTarget: Element;
 }
 
+interface MithrilController {
+       (): any;
+       onunload?(evt: Event): any;
+}
+
+interface MithrilView<T extends MithrilController> {
+       (ctrl: T): string|MithrilVirtualElement;
+}
+
+interface MithrilModule<T extends MithrilController> {
+       controller: T;
+       view: MithrilView<T>;
+}
+
+interface MithrilProperty<T> {
+       (): T;
+       (value: T): T;
+       toJSON(): T;
+}
+
+interface MithrilPromiseProperty<T> extends MithrilPromise<T> {
+       (): T;
+       (value: T): T;
+       toJSON(): T;
+}
+
+interface MithrilRoutes<T extends MithrilController> {
+       [key: string]: MithrilModule<T>;
+}
+
+
+interface MithrilDeferred<T> {
+       resolve(value?: T): void;
+       reject(value?: any): void;
+       promise: MithrilPromise<T>;
+}
+
+interface MithrilSuccessCallback<T, U> {
+       (value: T): U;
+       (value: T): MithrilPromise<U>;
+}
+
+interface MithrilErrorCallback<U> {
+       (value: Error): U;
+       (value: string): U;
+}
+
+interface MithrilPromise<T> {
+       (): T;
+       (value: T): T;
+       then<U>(success: (value: T) => U): MithrilPromise<U>;
+       then<U>(success: (value: T) => MithrilPromise<U>): MithrilPromise<U>;
+       then<U,V>(success: (value: T) => U, error: (value: Error) => V): MithrilPromise<U>|MithrilPromise<V>;
+       then<U,V>(success: (value: T) => MithrilPromise<U>, error: (value: Error) => V): MithrilPromise<U>|MithrilPromise<V>;
+}
 interface MithrilXHROptions {
-	method: string;
-	url: string;
-	user?: string;
-	password?: string;
-	data?: any;
-	background?: boolean;
-	unwrapSuccess?(data: any): any;
-	unwrapError?(data: any): any;
-	serialize?(dataToSerialize: any): string;
-	deserialize?(dataToDeserialize: string): any;
-	extract?(xhr: XMLHttpRequest, options: MithrilXHROptions): string;
-	type?(data: Object): void;
-	config?(xhr: XMLHttpRequest, options: MithrilXHROptions): XMLHttpRequest;
+       method?: string;
+       url: string;
+       user?: string;
+       password?: string;
+       data?: any;
+       background?: boolean;
+       unwrapSuccess?(data: any): any;
+       unwrapError?(data: any): any;
+       serialize?(dataToSerialize: any): string;
+       deserialize?(dataToDeserialize: string): any;
+       extract?(xhr: XMLHttpRequest, options: MithrilXHROptions): string;
+       type?(data: Object): void;
+       config?(xhr: XMLHttpRequest, options: MithrilXHROptions): XMLHttpRequest;
+       dataType?: string;
 }
 
 declare var Mithril: MithrilStatic;
 declare var m: MithrilStatic;
 
 declare module 'mithril' {
-	export = MithrilStatic;
+       export = m;
 }
