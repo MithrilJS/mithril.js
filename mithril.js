@@ -120,7 +120,7 @@ var m = (function app(window, undefined) {
 					len = data.length
 				}
 			}
-			
+
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -695,6 +695,15 @@ var m = (function app(window, undefined) {
 		if (queryStart !== -1) {
 			routeParams = parseQueryString(path.substr(queryStart + 1, path.length));
 			path = path.substr(0, queryStart)
+		}
+
+		// Get all routes and check if there's
+		// an exact match for the current path
+		var keys = Object.keys(router);
+		var index = keys.indexOf(path);
+		if(index !== -1){
+			m.module(root, router[keys [index]]);
+			return true;
 		}
 
 		for (var route in router) {
