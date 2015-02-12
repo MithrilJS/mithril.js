@@ -117,6 +117,7 @@ var m = (function app(window, undefined) {
 				if (type.call(data[i]) === ARRAY) {
 					data = data.concat.apply([], data);
 					i-- //check current index again and flatten until there are no more nested arrays at that index
+					len = data.length
 				}
 			}
 			
@@ -209,7 +210,7 @@ var m = (function app(window, undefined) {
 					//fix offset of next element if item was a trusted string w/ more than one html element
 					//the first clause in the regexp matches elements
 					//the second clause (after the pipe) matches text nodes
-					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || []).length
+					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]|&/g) || []).length
 				}
 				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
 				cached[cacheCount++] = item
@@ -1032,7 +1033,7 @@ var m = (function app(window, undefined) {
 			try {
 				e = e || event;
 				var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
-				var response = unwrap(deserialize(extract(e.target, xhrOptions)));
+				var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
 				if (e.type === "load") {
 					if (type.call(response) === ARRAY && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])
