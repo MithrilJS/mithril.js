@@ -238,7 +238,7 @@ var m = (function app(window, undefined) {
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.reuse !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.reuse === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 			}
@@ -391,7 +391,10 @@ var m = (function app(window, undefined) {
 		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
+		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
+			cached.configContext.onunload();
+			cached.configContext.onunload = null
+		}
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -540,10 +543,9 @@ var m = (function app(window, undefined) {
 	m.redraw.strategy = m.prop();
 	var blank = function() {return ""}
 	function redraw() {
-		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank(), forceRedraw)
+				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank())
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
