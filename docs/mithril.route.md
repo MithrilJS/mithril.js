@@ -73,7 +73,7 @@ m.route(document.body, "/dashboard/johndoe", {
 This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 
 ```markup
-<body>johndoe</body>
+<body><div>johndoe</div></body>
 ```
 
 Above, `dashboard` is a module. It contains a `controller` and a `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
