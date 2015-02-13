@@ -164,6 +164,7 @@ In the example below, we take advantage of queuing to debug the AJAX response da
 //a FP-friendly console.log
 var log = function(value) {
 	console.log(value)
+	return value
 }
 
 var users = m.request({method: "GET", url: "/user"})
