@@ -83,8 +83,11 @@ interface MithrilEvent {
 }
 
 interface MithrilController {
-       (): any;
        onunload?(evt: Event): any;
+}
+
+interface MithrilControllerFunction extends MithrilController {
+       (): any;
 }
 
 interface MithrilView<T extends MithrilController> {
@@ -92,7 +95,7 @@ interface MithrilView<T extends MithrilController> {
 }
 
 interface MithrilModule<T extends MithrilController> {
-       controller: T;
+       controller: MithrilControllerFunction|{ new(): T };
        view: MithrilView<T>;
 }
 
