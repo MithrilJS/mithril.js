@@ -32,6 +32,46 @@ if (!Object.keys) {
 	}
 }
 
+// no tabs or newlines: output not as pretty, but avoids creating a bunch of
+// whitespace text nodes, which makes creating the vdom faster/simpler
+// make this an option?
+var _serialize = function _serialize(el) {
+	var tag = el.nodeName.toLowerCase();
+	var openTagStart = '<' + tag + _serializeAttrs(el);
+	var openTagEnd, innerHTML, closeTag;
+	if (el.childNodes.length > 0) {
+		openTagEnd = '>';
+		innerHTML = _serializeChildren(el.childNodes);
+		closeTag = '</' + tag + '>';
+	}
+	else {
+		openTagEnd = ' />';
+		innerHTML = '';
+		closeTag = '';
+	}
+	el._innerHTML = innerHTML;
+	el._outerHTML = openTagStart + openTagEnd + innerHTML + closeTag;
+};
+
+var _serializeAttrs = function _serializeAttrs(el) {
+	var attrs = [];
+	var k, v;
+	for (k in el.attributes) {
+		v = el.attributes[k];
+		// do not include event handlers
+		if (typeof v !== 'function') {
+			attrs.push(k + '=' + '"' + (v == null ? '' : v.toString()) + '"');
+		}
+	}
+	return attrs.length > 0 ? (' ' + attrs.join(' ')) : '';;
+};
+
+var _serializeChildren = function _serializeChildren(childNodes) {
+	return childNodes.map(function(el){
+		return el.outerHTML;
+	}).join('');
+};
+
 var mock = {}
 mock.window = (function() {
 	var window = {}
@@ -39,6 +79,7 @@ mock.window = (function() {
 	window.document.childNodes = []
 	window.document.createElement = function(tag) {
 		return {
+			attributes: {},
 			style: {},
 			childNodes: [],
 			nodeType: 1,
@@ -46,6 +87,16 @@ mock.window = (function() {
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,
 			replaceChild: window.document.replaceChild,
+			_outerHTML: '',
+			_innerHTML: '',
+			get outerHTML() {
+				_serialize(this);
+				return this._outerHTML;
+			},
+			get innerHTML() {
+				_serialize(this);
+				return this._innerHTML;
+			},
 			insertBefore: function(node, reference) {
 				node.parentNode = this
 				var referenceIndex = this.childNodes.indexOf(reference)
@@ -64,14 +115,18 @@ mock.window = (function() {
 				}
 			},
 			setAttribute: function(name, value) {
-				this[name] = value.toString()
+				var val = value && value.toString && value.toString() || null
+				this[name] = val;
+				this.attributes[name] = val;
 			},
 			setAttributeNS: function(namespace, name, value) {
-				this.namespaceURI = namespace
-				this[name] = value.toString()
+				var val = value && value.toString && value.toString() || null
+				this.namespaceURI = namespace;
+				this[name] = val;
+				this.attributes[name] = val;
 			},
 			getAttribute: function(name, value) {
-				return this[name]
+				return this.attributes[name]
 			},
 			addEventListener: function () {},
 			removeEventListener: function () {}
@@ -83,7 +138,12 @@ mock.window = (function() {
 		return element
 	}
 	window.document.createTextNode = function(text) {
-		return {nodeValue: text.toString()}
+		var s = text.toString();
+		return {
+			nodeValue: s,
+			outerHTML: s,
+			innerHTML: s
+		};
 	}
 	window.document.documentElement = window.document.createElement("html")
 	window.document.replaceChild = function(newChild, oldChild) {

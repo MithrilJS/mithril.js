@@ -249,8 +249,21 @@ var m = (function app(window, undefined) {
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
 			if (isNew) {
-				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
-				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
+				if (m.redraw.strategy() === "existing") {
+					node = parentElement.childNodes[index];
+					if (!node || !node.tagName || node.tagName.toUpperCase() != data.tag.toUpperCase()) {
+						var actual = node.tagName.toUpperCase();
+						var branch = parentElement.tagName.toUpperCase() + "[" + index + "]";
+						for (node = parentElement.parentElement; node != null && node !== document; node = node.parentElement) {
+							branch = node.tagName.toUpperCase() + '.' + branch;
+						}
+						throw "Found `" + actual + "` at `" + branch + "`, expecting `" + data.tag.toUpperCase() + "` when initializing virtual dom from existing dom";
+					}
+				}
+				else {
+					if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
+					else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
+				}
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
@@ -263,7 +276,9 @@ var m = (function app(window, undefined) {
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
 				if (data.tag === "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
-				parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				if (m.redraw.strategy() !== "existing") {
+					parentElement.insertBefore(node, parentElement.childNodes[index] || null)
+				}
 			}
 			else {
 				node = cached.nodes[0];
@@ -289,12 +304,17 @@ var m = (function app(window, undefined) {
 			//handle text nodes
 			var nodes;
 			if (cached.nodes.length === 0) {
-				if (data.$trusted) {
-					nodes = injectHTML(parentElement, index, data)
+				if (m.redraw.strategy() === "existing") {
+					nodes = [parentElement.childNodes[0]];
 				}
 				else {
-					nodes = [$document.createTextNode(data)];
-					if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
+					if (data.$trusted) {
+						nodes = injectHTML(parentElement, index, data)
+					}
+					else {
+						nodes = [$document.createTextNode(data)];
+						if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
+					}
 				}
 				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data;
 				cached.nodes = nodes
@@ -343,29 +363,31 @@ var m = (function app(window, undefined) {
 					else if (typeof dataAttr === FUNCTION && attrName.indexOf("on") === 0) {
 						node[attrName] = autoredraw(dataAttr, node)
 					}
-					//handle `style: {...}`
-					else if (attrName === "style" && dataAttr != null && type.call(dataAttr) === OBJECT) {
-						for (var rule in dataAttr) {
-							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+					else if (m.redraw.strategy() !== "existing") {
+						//handle `style: {...}`
+						if (attrName === "style" && dataAttr != null && type.call(dataAttr) === OBJECT) {
+							for (var rule in dataAttr) {
+								if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule]
+							}
+							for (var rule in cachedAttr) {
+								if (!(rule in dataAttr)) node.style[rule] = ""
+							}
 						}
-						for (var rule in cachedAttr) {
-							if (!(rule in dataAttr)) node.style[rule] = ""
+						//handle SVG
+						else if (namespace != null) {
+							if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr);
+							else if (attrName === "className") node.setAttribute("class", dataAttr);
+							else node.setAttribute(attrName, dataAttr)
 						}
-					}
-					//handle SVG
-					else if (namespace != null) {
-						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr);
-						else if (attrName === "className") node.setAttribute("class", dataAttr);
+						//handle cases that are properties (but ignore cases where we should use setAttribute instead)
+						//- list and form are typically used as strings, but are DOM element references in js
+						//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
+						else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
+							//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
+							if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
+						}
 						else node.setAttribute(attrName, dataAttr)
 					}
-					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
-					//- list and form are typically used as strings, but are DOM element references in js
-					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
-					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
-						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
-						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
-					}
-					else node.setAttribute(attrName, dataAttr)
 				}
 				catch (e) {
 					//swallow IE's invalid argument errors to mimic HTML's fallback-to-doing-nothing-on-invalid-attributes behavior
@@ -454,7 +476,7 @@ var m = (function app(window, undefined) {
 		var isDocumentRoot = root === $document;
 		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
 		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell};
-		if (cellCache[id] === undefined) clear(node.childNodes);
+		if (cellCache[id] === undefined && m.redraw.strategy() !== "existing") clear(node.childNodes);
 		if (forceRecreation === true) reset(root);
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
 		for (var i = 0, len = configs.length; i < len; i++) configs[i]()
@@ -506,7 +528,7 @@ var m = (function app(window, undefined) {
 			controllers[index].onunload(event)
 		}
 		if (!isPrevented) {
-			m.redraw.strategy("all");
+			if (m.redraw.strategy() !== "existing") m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
 			var currentModule = topModule = module = module || {};
@@ -585,8 +607,12 @@ var m = (function app(window, undefined) {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
 		//m.route(el, defaultRoute, routes)
-		else if (arguments.length === 3 && type.call(arguments[1]) === STRING) {
+		else if (arguments.length > 2 && type.call(arguments[1]) === STRING) {
 			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2];
+			// reset route flag for server rendering
+			if (arguments[3]) {
+				currentRoute = false;
+			}
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source);
 				if (!routeByValue(root, router, path)) {
@@ -719,7 +745,7 @@ var m = (function app(window, undefined) {
 		}
 		return str.join("&")
 	}
-	
+
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
