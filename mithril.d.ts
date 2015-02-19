@@ -2,8 +2,8 @@
 
 interface MithrilStatic {
 
-    (selector: string, attributes: MithrilAttributes, ...children: Array<string|MithrilVirtualElement>): MithrilVirtualElement;
-    (selector: string, ...children: Array<string|MithrilVirtualElement>): MithrilVirtualElement;
+    (selector: string, attributes: MithrilAttributes, ...children: Array<string|MithrilVirtualElement|MithrilModule>): MithrilVirtualElement;
+    (selector: string, ...children: Array<string|MithrilVirtualElement|MithrilModule>): MithrilVirtualElement;
 
     prop<T>(promise: MithrilPromise<T>) : MithrilPromiseProperty<T>;
     prop<T>(value: T): MithrilProperty<T>;
