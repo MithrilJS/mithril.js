@@ -285,6 +285,7 @@ m.module(document.body, MyApp)
 There are a few caveats to using modules as components:
 
 1 - component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error. This limitation exists in order to support the correctness of unloading semantics component identity.
+
 2 - components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers).
 
 ---
