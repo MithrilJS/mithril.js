@@ -13,6 +13,7 @@
 
 -	fix routing bug in IE9 [#320](https://github.com/lhorie/mithril.js/issues/320)
 -	fix ordering bug in m.trust when using HTML entities [#453](https://github.com/lhorie/mithril.js/issues/453)
+-	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
 
 ---
 
