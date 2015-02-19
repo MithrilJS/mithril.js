@@ -648,13 +648,19 @@ var m = (function app(window, undefined) {
 			window[listener]()
 		}
 		//config: m.route
-		else if (arguments[0].addEventListener) {
+		else if (arguments[0].addEventListener || arguments[0].attachEvent) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
 			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
-			element.removeEventListener("click", routeUnobtrusive);
-			element.addEventListener("click", routeUnobtrusive)
+			if (element.addEventListener) {
+				element.removeEventListener("click", routeUnobtrusive);
+				element.addEventListener("click", routeUnobtrusive)
+			}
+			else {
+				element.detachEvent("onclick", routeUnobtrusive);
+				element.attachEvent("onclick", routeUnobtrusive)
+			}
 		}
 		//m.route(route, params)
 		else if (type.call(arguments[0]) === STRING) {
@@ -677,7 +683,10 @@ var m = (function app(window, undefined) {
 				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
-			else $location[m.route.mode] = currentRoute
+			else {
+				$location[m.route.mode] = currentRoute
+				redirect(modes[m.route.mode] + currentRoute)
+			}
 		}
 	};
 	m.route.param = function(key) {
@@ -730,8 +739,9 @@ var m = (function app(window, undefined) {
 		if (e.ctrlKey || e.metaKey || e.which === 2) return;
 		if (e.preventDefault) e.preventDefault();
 		else e.returnValue = false;
-		var currentTarget = e.currentTarget || this;
+		var currentTarget = e.currentTarget || e.srcElement;
 		var args = m.route.mode === "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {};
+		while (currentTarget && currentTarget.nodeName.toUpperCase() != "A") currentTarget = currentTarget.parentNode
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
