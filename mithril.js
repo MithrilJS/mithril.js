@@ -743,7 +743,8 @@ var m = (function app(window, undefined) {
 		var prop = m.prop();
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
-			return propify(promise.then(resolve, reject))
+			promise = promise.then(resolve, reject).then(prop);
+			return prop;
 		};
 		return prop
 	}
