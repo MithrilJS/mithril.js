@@ -57,7 +57,7 @@ You can use it by adding a reference to your Typescript files. This will allow t
 
 ### Internet Explorer Compatibility
 
-Mithril relies on some Ecmascript 5 features, namely: `Array::indexOf`, `Array::map` and `Object::keys`, as well as the `JSON` object.
+Mithril relies on some ECMAScript 5 features, namely: `Array::indexOf`, `Array::map` and `Object::keys`, as well as the `JSON` object. Internet Explorer 8 lacks native support for some of these features.
 
 The easiest way to polyfill these features is to include this script:
 
