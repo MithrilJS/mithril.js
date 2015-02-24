@@ -424,7 +424,44 @@ function testMithril(mock) {
 		
 		return loaded === false
 	})
+	test(function() {
+		// nested modules under keyed components should render
+		mock.requestAnimationFrame.$resolve()
 
+		var root = mock.document.createElement("div")
+		var count = 0
+		var App = {
+			controller: function() {},
+			view: function(ctrl) {
+				return  m('.outer', [
+					m('.inner', m.module(CommentList, { list: [1, 2, 3] }))
+				])
+			}
+		}
+		var CommentList = {
+			controller: function() {},
+			view: function(ctrl, props) {
+				return m('.list', props.list.map(function(i) {
+					return m('.comment', [
+						m.module(Reply, {key: i})
+					])
+				}))
+			}
+		}
+		var Reply = {
+			controller: function() {},
+			view: function() {
+				count++
+				return m(".reply")
+			}
+		}
+		m.module(root, App)
+
+		mock.requestAnimationFrame.$resolve()
+
+		return count === 3
+	})
+	
 	//m.withAttr
 	test(function() {
 		var value

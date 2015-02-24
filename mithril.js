@@ -33,7 +33,7 @@ var m = (function app(window, undefined) {
 	 */
 	function m() {
 		var args = [].slice.call(arguments);
-		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
+		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
 		var attrs = hasAttrs ? args[1] : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
@@ -58,7 +58,7 @@ var m = (function app(window, undefined) {
 		else {
 			cell.children = children
 		}
-
+		
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
 				if (attrs[attrName] !== "") cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
@@ -232,7 +232,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			if (data.controller) {
+			if (data.view) {
 				var module = data
 				var controller = cached.controller || new (module.controller || function() {})
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
