@@ -237,7 +237,7 @@ var m = (function app(window, undefined) {
 				var controller = cached.controller || new (module.controller || function() {})
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
 				data = module.view(controller)
-				if (!data.tag) throw new Error(module.view.toString() + "\n\nThis template must return a virtual element, not an array, string, etc.")
+				if (!data.tag) throw new Error("Component template must return a virtual element, not an array, string, etc.")
 			}
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
