@@ -103,6 +103,21 @@ function testMithril(mock) {
 		return slot1 == 1 && slot2 == 1
 	})
 	test(function() {
+		//module should work without controller
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var slot1, slot2
+		var module = {
+			view: function(ctrl, options) {slot2 = options.a}
+		}
+		m.module(root, module, {a: 1})
+
+		mock.requestAnimationFrame.$resolve()
+
+		return slot2 == 1
+	})
+	test(function() {
 		//arguments should update in component's view
 		mock.requestAnimationFrame.$resolve()
 

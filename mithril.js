@@ -508,7 +508,7 @@ var m = (function app(window, undefined) {
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function submodule(module, args) {
 		var controller = function() {
-			return module.controller.apply(this, args) || this
+			return (module.controller || function() {}).apply(this, args) || this
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
@@ -522,7 +522,7 @@ var m = (function app(window, undefined) {
 	}
 	m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-		if (root.controller) return submodule(root, [].slice.call(arguments, 1))
+		if (root.view) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		
