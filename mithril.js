@@ -233,10 +233,10 @@ var m = (function app(window, undefined) {
 		}
 		else if (data != null && dataType === OBJECT) {
 			if (data.view) {
-				var module = data
+				var module = data, onunload
 				var controller = cached.controller || new (module.controller || function() {})
+				data = pendingRequests == 0 ? module.view(controller) : {tag: "placeholder"}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
-				data = module.view(controller)
 				if (!data.tag) throw new Error("Component template must return a virtual element, not an array, string, etc.")
 			}
 			if (!data.attrs) data.attrs = {};
@@ -269,7 +269,15 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (controller) cached.controller = controller
+				if (controller) {
+					cached.controller = controller
+					if (controller.onunload.$old) controller.onunload = controller.onunload.$old
+					if (pendingRequests && controller.onunload) {
+						var onunload = controller.onunload
+						controller.onunload = function() {}
+						controller.onunload.$old = onunload
+					}
+				}
 				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
