@@ -39,6 +39,7 @@ m.module(document.body, MyApp)
 Modules can have arguments "preloaded" into them. Calling `m.module` without a DOM element as an argument will create copy of the module with parameters already bound as arguments to the controller and view functions
 
 ```javascript
+//declare a component
 var MyModule = {}
 MyModule.controller = function(options, extras) {
 	this.greeting = "Hello"
@@ -125,7 +126,17 @@ m.module(document.body, MyApp)
 
 ---
 
-### Component limitations
+### Asynchronous components
+
+Since components are Mithril modules, it's possible to encapsulate asynchronous behavior. Under regular circumstances, Mithril waits for all asynchronous tasks to complete, but when using components, a component's parent view renders before the component completes its asynchronous tasks (because the existence of the component only becomes known to the diff engine at the time when the template is rendered).
+
+When a component has asynchronous payloads and they are queued by the [auto-redrawing system](auto-redrawing.md), its view is NOT rendered until all asynchronous operations complete. When the component's asynchronous operations complete, another redraw is triggered and the entire template tree is evaluated again. This means that the virtual dom tree may take two or more redraws (depending on how many nested asynchronous components there are) to be fully rendered.
+
+For this reason, it's recommended to refactor code in such a way that asynchronous operations happen in the root module and avoid making AJAX calls within components.
+
+---
+
+### Component limitations and caveats
 
 There are a few caveats to using modules as components:
 
