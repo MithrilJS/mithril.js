@@ -164,6 +164,7 @@ In the example below, we take advantage of queuing to debug the AJAX response da
 //a FP-friendly console.log
 var log = function(value) {
 	console.log(value)
+	return value
 }
 
 var users = m.request({method: "GET", url: "/user"})
@@ -432,8 +433,8 @@ where:
 		[Object<any> data,]
 		[Boolean background,]
 		[any initialValue,]
-		[any unwrapSuccess(any data),]
-		[any unwrapError(any data),]
+		[any unwrapSuccess(any data, XMLHttpRequest xhr),]
+		[any unwrapError(any data, XMLHttpRequest xhr),]
 		[String serialize(any dataToSerialize),]
 		[any deserialize(String dataToDeserialize),]
 		[any extract(XMLHttpRequest xhr, XHROptions options),]
@@ -507,7 +508,7 @@ where:
 	
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
 		
-	-	**any unwrapSuccess(any data)** (optional)
+	-	**any unwrapSuccess(any data, XMLHttpRequest xhr)** (optional)
 
 		A preprocessor function to unwrap the data from a success response in case the response contains metadata wrapping the data.
 		
@@ -523,7 +524,7 @@ where:
 		
 			The unwrapped data
 
-	-	**any unwrapError(any data)** (optional)
+	-	**any unwrapError(any data, XMLHttpRequest xhr)** (optional)
 
 		A preprocessor function to unwrap the data from an error response in case the response contains metadata wrapping the data.
 		

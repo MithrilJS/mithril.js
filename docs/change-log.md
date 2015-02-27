@@ -1,5 +1,22 @@
 ## Change Log
 
+[v0.1.31](/mithril/archive/v0.1.31) - maintenance
+
+### News:
+
+-	Typescript definitions are more strongly typed
+-	m.request's `unwrapSuccess` and `unwrapError` callbacks now receive the XMLHttpRequest instance as a second parameter
+-	3rd parameter for `m.route(route, params, shouldReplaceHistory)` is now public
+-	exact routes now have higher precedence than routes w/ variables [#452](https://github.com/lhorie/mithril.js/issues/452)
+
+### Bug Fixes:
+
+-	fix routing bug in IE9 [#320](https://github.com/lhorie/mithril.js/issues/320)
+-	fix ordering bug in m.trust when using HTML entities [#453](https://github.com/lhorie/mithril.js/issues/453)
+-	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
+
+---
+
 [v0.1.30](/mithril/archive/v0.1.30) - maintenance
 
 ### Bug Fixes:
@@ -7,6 +24,8 @@
 -	fix history.back() regression [#435](https://github.com/lhorie/mithril.js/issues/435)
 -	fix module.view's `this` association regression in Haxe environment [#434](https://github.com/lhorie/mithril.js/issues/434)
 -	fix array serialization syntax in querystrings [#440](https://github.com/lhorie/mithril.js/issues/440)
+
+---
 
 [v0.1.29](/mithril/archive/v0.1.29) - maintenance
 
