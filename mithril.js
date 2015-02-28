@@ -93,8 +93,8 @@ var m = (function app(window, undefined) {
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
-		//data.toString() is null if data is the return value of Console.log in Firefox
-		if (data == null || data.toString() == null) data = "";
+		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
+		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
 		if (cached == null || cachedType !== dataType) {
@@ -271,7 +271,7 @@ var m = (function app(window, undefined) {
 				};
 				if (controller) {
 					cached.controller = controller
-					if (controller.onunload.$old) controller.onunload = controller.onunload.$old
+					if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
 					if (pendingRequests && controller.onunload) {
 						var onunload = controller.onunload
 						controller.onunload = function() {}
