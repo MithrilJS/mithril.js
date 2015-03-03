@@ -94,7 +94,7 @@ var m = (function app(window, undefined) {
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
 		//data.toString() is null if data is the return value of Console.log in Firefox
-		if (data == null || data.toString() == null) data = "";
+		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
 		if (cached == null || cachedType !== dataType) {
@@ -120,7 +120,7 @@ var m = (function app(window, undefined) {
 					len = data.length
 				}
 			}
-
+			
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -238,7 +238,7 @@ var m = (function app(window, undefined) {
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.reuse !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.reuse === false)) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 			}
@@ -274,7 +274,7 @@ var m = (function app(window, undefined) {
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === FUNCTION) {
-				var context = cached.configContext = cached.configContext || {};
+				var context = cached.configContext = cached.configContext || {retain: m.redraw.strategy() == "diff"};
 
 				// bind
 				var callback = function(data, args) {

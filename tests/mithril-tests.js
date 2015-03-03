@@ -1784,13 +1784,55 @@ function testMithril(mock) {
 		mock.location.search = "?"
 		
 		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return value === false
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return value === true
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
 		var initCount = 0
 		
 		var a = {}
 		a.controller = function() {}
 		a.view = function() {
 			return m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}})
 		}
@@ -1822,7 +1864,7 @@ function testMithril(mock) {
 		a.controller = function() {}
 		a.view = function() {
 			return m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}})
 		}
@@ -1885,7 +1927,7 @@ function testMithril(mock) {
 		a.controller = function() {m.redraw.strategy("diff")}
 		a.view = function() {
 			return m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}})
 		}
@@ -1917,7 +1959,7 @@ function testMithril(mock) {
 		a.controller = function() {m.redraw.strategy("diff")}
 		a.view = function() {
 			return m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}})
 		}
@@ -1949,7 +1991,7 @@ function testMithril(mock) {
 		a.controller = function() {}
 		a.view = function() {
 			return m("div", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}}))
 		}
@@ -1958,7 +2000,7 @@ function testMithril(mock) {
 		b.controller = function() {}
 		b.view = function() {
 			return m("section", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}}))
 		}
@@ -1986,7 +2028,7 @@ function testMithril(mock) {
 		a.controller = function() {}
 		a.view = function() {
 			return m("div", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}}))
 		}
@@ -1995,7 +2037,7 @@ function testMithril(mock) {
 		b.controller = function() {}
 		b.view = function() {
 			return m("section", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}}))
 		}
@@ -2058,7 +2100,7 @@ function testMithril(mock) {
 		a.controller = function() {m.redraw.strategy("diff")}
 		a.view = function() {
 			return m("div", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}}))
 		}
@@ -2067,7 +2109,7 @@ function testMithril(mock) {
 		b.controller = function() {m.redraw.strategy("diff")}
 		b.view = function() {
 			return m("section", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = true
+				ctx.retain = true
 				if (!init) initCount++
 			}}))
 		}
@@ -2095,7 +2137,7 @@ function testMithril(mock) {
 		a.controller = function() {m.redraw.strategy("diff")}
 		a.view = function() {
 			return m("div", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}}))
 		}
@@ -2104,7 +2146,7 @@ function testMithril(mock) {
 		b.controller = function() {m.redraw.strategy("diff")}
 		b.view = function() {
 			return m("section", m("a", {config: function(el, init, ctx) {
-				ctx.reuse = false
+				ctx.retain = false
 				if (!init) initCount++
 			}}))
 		}
