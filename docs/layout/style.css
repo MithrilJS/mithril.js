@@ -19,7 +19,7 @@
 [class*=',12)'] {width:100%;}
 }
 
-html {background:#999;color:#222;font:14px Helvetica;}
+html {background:#999;color:#222;font:14px/1.4 Helvetica;}
 html,body {margin:0;padding:0;}
 header,footer {background:#999;}
 nav {text-align:right;}
