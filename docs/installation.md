@@ -120,7 +120,7 @@ It includes support for the [MSX](https://github.com/insin/msx) HTML templating 
 
 You can also fork the latest stable project [directly from Github](https://github.com/lhorie/mithril).
 
-If you want to use the bleeding edge version, you can [fork the development repository](https://github.com/lhorie/mithril).
+If you want to use the bleeding edge version, you can [fork the development repository](https://github.com/lhorie/mithril.js).
 
 Note that Mithril uses the `next` branch as the stable branch, instead of `master`, because contributors usually use `master` for pull requests. Therefore, the `master` branch should be considered unstable, and should not be used.
 

@@ -20,11 +20,9 @@ Mithril 可以从很多地方获得:
 
 ---
 
-### CDNs (Content Delivery Networks)
+### CDN 镜像加速 (Content Delivery Networks)
 
-You can also find Mithril in [cdnjs](http://cdnjs.com/libraries/mithril/) and [jsDelivr](http://www.jsdelivr.com/#!mithril).
-
-Content delivery networks allow the library to be cached across different websites that use the same version of the framework, and help reduce latency by serving the files from a server that is physically near the user's location.
+你也可以通过CDN使用 Mithril ，它们在 [cdnjs](http://cdnjs.com/libraries/mithril/) 和 [jsDelivr](http://www.jsdelivr.com/#!mithril).
 
 #### cdnjs
 
@@ -42,15 +40,14 @@ Content delivery networks allow the library to be cached across different websit
 
 ### NPM
 
-NPM is the default package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use NPM to conveniently keep up-to-date with Mithril versions.
-
-Assuming you have NodeJS installed,  you can download Mithril by typing this:
+NPM 是 [NodeJS](http://nodejs.org/) 默认的包管理工具.
+假设你已经安装了 NodeJS 并带有 NPM,  你可以输入如下指令安装 Mithril:
 
 ```
 npm install mithril
 ```
 
-Then, to use Mithril, point a script tag to the downloaded file:
+然后, 要使用 Mithril 用 script 标签引用下载的文件:
 
 ```markup
 <script src="/node_modules/mithril/mithril.min.js"></script>
@@ -60,21 +57,20 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Bower
 
-[Bower](http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
-
-Assuming you have NodeJS installed, you can install Bower by typing this in the command line:
+[Bower](http://bower.io) 也可以管理 [NodeJS](http://nodejs.org/) 包.
+假设你已经安装了 NodeJS 并带有 NPM,  你可以输入如下指令安装 bower:
 
 ```
 npm install -g bower
 ```
 
-And you can download Mithril by typing this:
+你可以输入如下指令安装 Mithril:
 
 ```
 bower install mithril
 ```
 
-Then, to use Mithril, point a script tag to the downloaded file:
+然后, 要使用 Mithril 用 script 标签引用下载的文件:
 
 ```markup
 <script src="/bower_components/mithril/mithril.min.js"></script>
@@ -84,21 +80,20 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Component
 
-[Component](http://component.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
-
-Assuming you have NodeJS installed, you can install Component by typing this in the command line:
+[Component](http://component.io) 是另一个 [NodeJS](http://nodejs.org/) 包管理工具.
+假设你已经安装了 NodeJS 并带有 NPM,  你可以输入如下指令安装 component:
 
 ```
 npm install -g component
 ```
 
-And you can download Mithril by typing this:
+你可以输入如下指令安装 Mithril:
 
 ```
 component install lhorie/mithril
 ```
 
-Then, to use Mithril, point a script tag to the downloaded file:
+然后, 要使用 Mithril 用 script 标签引用下载的文件:
 
 ```markup
 <script src="/components/lhorie/mithril/master/mithril.js"></script>
@@ -108,22 +103,22 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Rails
 
-Jordan Humphreys created a gem to allow integration with Rails:
+Jordan Humphreys 创建了一个 gem 允许你把它集成到 Rails:
 
 [Mithril-Rails](https://github.com/mrsweaters/mithril-rails)
 
-It includes support for the [MSX](https://github.com/insin/msx) HTML templating syntax from Jonathan Buchanan.
+它包含了 [MSX](https://github.com/insin/msx) HTML 模版语法，出自 Jonathan Buchanan 之手.
 
 ---
 
 ### Github
 
-You can also fork the latest stable project [directly from Github](https://github.com/lhorie/mithril).
+你也可以 fork 最新的项目 [directly from Github](https://github.com/lhorie/mithril).
 
-If you want to use the bleeding edge version, you can [fork the development repository](https://github.com/lhorie/mithril).
+如果你想要最前沿的版本, 你可以 [fork 开发版本库](https://github.com/lhorie/mithril.js).
 
-Note that Mithril uses the `next` branch as the stable branch, instead of `master`, because contributors usually use `master` for pull requests. Therefore, the `master` branch should be considered unstable, and should not be used.
+注意 Mithril 使用 `next` 分支作为稳定分支, 而不是 `master`, 因为贡献者使用 `master` 分支来 pull request。 所以,  `master` 分支应被认为是不稳定的。
 
-Be aware that even though Mithril has tests running in a continuous integration environment, the bleeding edge version might occasionally break. If you're interested in helping improve Mithril, you're welcome to use the bleeding edge version and report any bugs that you find.
+你要意识到尽管 Mithril 在一个持续集成环境中测试, 前沿版会偶尔崩溃。 如果你有兴趣帮助改进 Mithril, 欢迎使用前言版本并报告 bug 。
 
-In order to update a forked version of Mithril, [follow the instructions on this page](https://help.github.com/articles/syncing-a-fork).
+要更新一个 fork 版本的 Mithril, [请看这篇介绍](https://help.github.com/articles/syncing-a-fork).
