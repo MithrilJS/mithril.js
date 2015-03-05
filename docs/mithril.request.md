@@ -337,7 +337,7 @@ You can read more about the [promise exception monitor here](mithril.deferred.md
 
 The `config` option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise.
 
-The example below show how to configure a request where the server expects requests to have a `Content-Type: application/json` header
+The example below shows how to configure a request where the server expects requests to have a `Content-Type: application/json` header
 
 ```javascript
 var xhrConfig = function(xhr) {
