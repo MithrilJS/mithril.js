@@ -167,7 +167,7 @@ var log = function(value) {
 }
 
 var users = m.request({method: "GET", url: "/user"})
-	.then(log);
+	.then(log)
 	.then(function(users) {
 		//add one more user to the response
 		return users.concat({name: "Jane"})
