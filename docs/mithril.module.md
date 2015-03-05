@@ -100,7 +100,7 @@ m.module(document, module1);
 
 var module2 = {};
 module2.controller = function() {};
-module1.view = function() {};
+module2.view = function() {};
 
 m.module(document, module2); // logs "unloading module 1"
 ```
