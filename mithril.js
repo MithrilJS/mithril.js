@@ -120,7 +120,7 @@ var m = (function app(window, undefined) {
 					len = data.length
 				}
 			}
-
+			
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -245,7 +245,7 @@ var m = (function app(window, undefined) {
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 				if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}})
@@ -293,7 +293,7 @@ var m = (function app(window, undefined) {
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === FUNCTION) {
-				var context = cached.configContext = cached.configContext || {};
+				var context = cached.configContext = cached.configContext || {retain: m.redraw.strategy() == "diff"};
 
 				// bind
 				var callback = function(data, args) {
@@ -410,7 +410,10 @@ var m = (function app(window, undefined) {
 		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
+		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
+			cached.configContext.onunload();
+			cached.configContext.onunload = null
+		}
 		if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}});
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
@@ -590,11 +593,10 @@ var m = (function app(window, undefined) {
 	m.redraw.strategy = m.prop();
 	var blank = function() {return ""}
 	function redraw() {
-		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
 				var args = modules[i].controller && modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : [controllers[i]]
-				m.render(root, modules[i].view ? modules[i].view(controllers[i], args) : blank(), forceRedraw)
+				m.render(root, modules[i].view ? modules[i].view(controllers[i], args) : blank())
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState

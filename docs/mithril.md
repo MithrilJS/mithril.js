@@ -8,6 +8,7 @@
 - [Accessing the real DOM element](#accessing-the-real-dom-element)
 - [Persisting config data](#persisting-config-data)
 - [Destructors](#destructors)
+- [Persising DOM elements across route changes](#persising-dom-elements-across-route-changes)
 - [SVG](#svg)
 - [Dealing with focus](#dealing-with-focus)
 - [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
@@ -339,6 +340,67 @@ m.render(document, m("div", {config: unloadable}));
 
 m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 ```
+
+---
+
+#### Persising DOM elements across route changes
+
+When using the [router](mithril.route.md), a route change recreates the DOM tree from scratch in order to unload plugins from the previous page. If you want to keep a DOM element intact across a route change, you can set the `retain` flag in the config's context object.
+
+In the example below, there are two routes, each of which loads a module when a user navigates to their respective URLs. Both modules use a `menu` template, which contains links for navigation between the two modules, and an expensive-to-reinitialize element. Setting `context.retain = true` in the element's config function allows the span to stay intact after a route change.
+
+```javascript
+//a menu template
+var menu = function() {
+	return m("div", [
+		m("a[href='/']", {config: m.route}, "Home"),
+		m("a[href='/contact']", {config: m.route}, "Contact"),
+		//an expensive-to-initialize DOM element
+		m("span", {config: persistent})
+	])
+}
+//a configuration that persists across route changes
+function persistent(el, isInit, context) {
+	context.retain = true
+	
+	if (!isInit) {
+		//only runs once, even if you move back and forth between `/` and `/contact`
+		doSomethingExpensive(el)
+	}
+}
+
+//modules that use the menu above
+var Home = {
+	controller: function() {},
+	view: function() {
+		return [
+			menu(),
+			m("h1", "Home")
+		]
+	}
+}
+var Contact = {
+	view: function() {
+		return [
+			menu(),
+			m("h2", "Contact")
+		]
+	}
+}
+
+m.route(document.body, "/", {
+	"/": Home,
+	"/contact": Contact
+})
+```
+
+Note that even if you set `context.retain = true`, the element will still be destroyed and recreated if it is different enough from the existing element. An element is considered "different enough" if:
+
+- the tag name changes, or
+- the list of HTML attributes changes, or
+- the value of the element's id attribute changes
+
+In addition, setting `context.retain = false` will also cause the element to be recreated, even if it is not considered different enough.
 
 ---
 

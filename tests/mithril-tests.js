@@ -476,6 +476,19 @@ function testMithril(mock) {
 
 		return count === 3
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var module = {}, unloaded = false
+		module.controller = function() {
+			this.onunload = function() {unloaded = true}
+		}
+		module.view = function() {}
+		m.module(root, module)
+		m.module(root, {controller: function() {}, view: function() {}})
+		
+		return unloaded === true
+	})
+	m.redraw.strategy(undefined) //teardown for m.module tests
 	
 	//m.withAttr
 	test(function() {
@@ -791,17 +804,6 @@ function testMithril(mock) {
 		return valueBefore === "red" && valueAfter === undefined
 	})
 	test(function() {
-		var root = mock.document.createElement("div")
-		var module = {}, unloaded = false
-		module.controller = function() {
-			this.onunload = function() {unloaded = true}
-		}
-		module.view = function() {}
-		m.module(root, module)
-		m.module(root, {controller: function() {}, view: function() {}})
-		return unloaded === true
-	})
-	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/87
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [[m("a"), m("a")], m("button")]))
@@ -880,7 +882,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-
+		
 		var success = false
 		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data = 1}}))
 		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data === 1}}))
@@ -1765,7 +1767,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
-
+		
 		var root = mock.document.createElement("div")
 		var unloaded = 0
 		m.route.mode = "search"
@@ -2136,6 +2138,456 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return mock.history.$$length == 0
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return value === false
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return value === true
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
 	})
 	//end m.route
 
