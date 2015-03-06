@@ -2589,6 +2589,44 @@ function testMithril(mock) {
 		
 		return initCount == 1
 	})
+	test(function() {
+		//retain flag should work inside component
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": {view: function() {return m("div", a)}},
+			"/b": {view: function() {return m("div", b)}},
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
 	//end m.route
 
 	//m.prop
