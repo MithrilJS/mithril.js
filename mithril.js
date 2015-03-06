@@ -51,16 +51,18 @@ var m = (function app(window, undefined) {
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
 
 
-		var children = hasAttrs ? args[2] : args[1];
-		if (type.call(children) === ARRAY) {
-			cell.children = children
+		var children = hasAttrs ? args.slice(2) : args.slice(1);
+		if (children.length === 1 && type.call(children[0]) === ARRAY) {
+			cell.children = children[0]
 		}
 		else {
-			cell.children = hasAttrs ? args.slice(2) : args.slice(1)
+			cell.children = children
 		}
 
 		for (var attrName in attrs) {
-			if (attrName === classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
+			if (attrName === classAttrName) {
+				if (attrs[attrName] !== "") cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
+			}
 			else cell.attrs[attrName] = attrs[attrName]
 		}
 		return cell
@@ -115,9 +117,10 @@ var m = (function app(window, undefined) {
 				if (type.call(data[i]) === ARRAY) {
 					data = data.concat.apply([], data);
 					i-- //check current index again and flatten until there are no more nested arrays at that index
+					len = data.length
 				}
 			}
-			
+
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -156,7 +159,7 @@ var m = (function app(window, undefined) {
 									action: MOVE,
 									index: i,
 									from: existing[key].index,
-									element: parentElement.childNodes[existing[key].index] || $document.createElement("div")
+									element: cached.nodes[existing[key].index] || $document.createElement("div")
 								}
 							}
 							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
@@ -207,7 +210,7 @@ var m = (function app(window, undefined) {
 					//fix offset of next element if item was a trusted string w/ more than one html element
 					//the first clause in the regexp matches elements
 					//the second clause (after the pipe) matches text nodes
-					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || []).length
+					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]|&/g) || []).length
 				}
 				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
 				cached[cacheCount++] = item
@@ -506,8 +509,8 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			var currentModule = topModule = module;
-			var controller = new module.controller;
+			var currentModule = topModule = module = module || {};
+			var controller = new (module.controller || function() {});
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
 			if (currentModule === topModule) {
@@ -535,11 +538,12 @@ var m = (function app(window, undefined) {
 		}
 	};
 	m.redraw.strategy = m.prop();
+	var blank = function() {return ""}
 	function redraw() {
 		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				m.render(root, modules[i].view(controllers[i]), forceRedraw)
+				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank(), forceRedraw)
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -591,24 +595,33 @@ var m = (function app(window, undefined) {
 			};
 			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
 			window[listener] = function() {
-				if (currentRoute != normalizeRoute($location[m.route.mode])) {
-					redirect($location[m.route.mode])
+				var path = $location[m.route.mode]
+				if (m.route.mode === "pathname") path += $location.search
+				if (currentRoute != normalizeRoute(path)) {
+					redirect(path)
 				}
 			};
 			computePostRedrawHook = setScroll;
 			window[listener]()
 		}
 		//config: m.route
-		else if (arguments[0].addEventListener) {
+		else if (arguments[0].addEventListener || arguments[0].attachEvent) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
 			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
-			element.removeEventListener("click", routeUnobtrusive);
-			element.addEventListener("click", routeUnobtrusive)
+			if (element.addEventListener) {
+				element.removeEventListener("click", routeUnobtrusive);
+				element.addEventListener("click", routeUnobtrusive)
+			}
+			else {
+				element.detachEvent("onclick", routeUnobtrusive);
+				element.attachEvent("onclick", routeUnobtrusive)
+			}
 		}
 		//m.route(route, params)
 		else if (type.call(arguments[0]) === STRING) {
+			var oldRoute = currentRoute;
 			currentRoute = arguments[0];
 			var args = arguments[1] || {}
 			var queryIndex = currentRoute.indexOf("?")
@@ -618,7 +631,7 @@ var m = (function app(window, undefined) {
 			var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute
 			if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
 
-			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true;
+			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true || oldRoute === arguments[0];
 
 			if (window.history.pushState) {
 				computePostRedrawHook = function() {
@@ -627,7 +640,10 @@ var m = (function app(window, undefined) {
 				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
-			else $location[m.route.mode] = currentRoute
+			else {
+				$location[m.route.mode] = currentRoute
+				redirect(modes[m.route.mode] + currentRoute)
+			}
 		}
 	};
 	m.route.param = function(key) {
@@ -635,7 +651,9 @@ var m = (function app(window, undefined) {
 		return routeParams[key]
 	};
 	m.route.mode = "search";
-	function normalizeRoute(route) {return route.slice(modes[m.route.mode].length)}
+	function normalizeRoute(route) {
+		return route.slice(modes[m.route.mode].length)
+	}
 	function routeByValue(root, router, path) {
 		routeParams = {};
 
@@ -643,6 +661,15 @@ var m = (function app(window, undefined) {
 		if (queryStart !== -1) {
 			routeParams = parseQueryString(path.substr(queryStart + 1, path.length));
 			path = path.substr(0, queryStart)
+		}
+
+		// Get all routes and check if there's
+		// an exact match for the current path
+		var keys = Object.keys(router);
+		var index = keys.indexOf(path);
+		if(index !== -1){
+			m.module(root, router[keys [index]]);
+			return true;
 		}
 
 		for (var route in router) {
@@ -669,8 +696,9 @@ var m = (function app(window, undefined) {
 		if (e.ctrlKey || e.metaKey || e.which === 2) return;
 		if (e.preventDefault) e.preventDefault();
 		else e.returnValue = false;
-		var currentTarget = e.currentTarget || this;
+		var currentTarget = e.currentTarget || e.srcElement;
 		var args = m.route.mode === "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {};
+		while (currentTarget && currentTarget.nodeName.toUpperCase() != "A") currentTarget = currentTarget.parentNode
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
@@ -681,10 +709,17 @@ var m = (function app(window, undefined) {
 		var str = [];
 		for(var prop in object) {
 			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop];
-			str.push(value != null && type.call(value) === OBJECT ? buildQueryString(value, key) : encodeURIComponent(key) + "=" + encodeURIComponent(value))
+			var valueType = type.call(value)
+			var pair = value != null && (valueType === OBJECT) ?
+				buildQueryString(value, key) :
+				valueType === ARRAY ?
+					value.map(function(item) {return encodeURIComponent(key + "[]") + "=" + encodeURIComponent(item)}).join("&") :
+					encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			str.push(pair)
 		}
 		return str.join("&")
 	}
+	
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
@@ -708,7 +743,8 @@ var m = (function app(window, undefined) {
 		var prop = m.prop();
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
-			return propify(promise.then(resolve, reject))
+			promise = promise.then(resolve, reject).then(prop);
+			return prop;
 		};
 		return prop
 	}
@@ -874,7 +910,7 @@ var m = (function app(window, undefined) {
 			var script = $document.createElement("script");
 
 			window[callbackKey] = function(resp) {
-				$document.body.removeChild(script);
+				script.parentNode.removeChild(script);
 				options.onload({
 					type: "load",
 					target: {
@@ -885,7 +921,7 @@ var m = (function app(window, undefined) {
 			};
 
 			script.onerror = function(e) {
-				$document.body.removeChild(script);
+				script.parentNode.removeChild(script);
 
 				options.onerror({
 					type: "error",
@@ -974,7 +1010,7 @@ var m = (function app(window, undefined) {
 			try {
 				e = e || event;
 				var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
-				var response = unwrap(deserialize(extract(e.target, xhrOptions)));
+				var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
 				if (e.type === "load") {
 					if (type.call(response) === ARRAY && xhrOptions.type) {
 						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i])

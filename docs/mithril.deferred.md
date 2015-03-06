@@ -163,7 +163,7 @@ The other side of the coin is still supported: if a developer needs to signal an
 var error = m.prop()
 m.request({method: "GET", url: "/user/:id", data: {id: 1}})
 	.then(function(user) {
-		if (user.isAdmin) throw new Error("Sorry, you don't have permissions")
+		if (!user.isAdmin) throw new Error("Sorry, you don't have permissions")
 	})
 	.then(null, error) //handle the application error: bind to a getter-setter for diplaying it on the template
 ```

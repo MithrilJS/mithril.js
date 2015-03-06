@@ -73,7 +73,7 @@ m.route(document.body, "/dashboard/johndoe", {
 This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 
 ```markup
-<body>johndoe</body>
+<body><div>johndoe</div></body>
 ```
 
 Above, `dashboard` is a module. It contains a `controller` and a `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
@@ -276,7 +276,7 @@ redirects to `http://server/#/dashboard/marysue`
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(String path [, any params])
+void route(String path [, any params] [, Boolean shouldReplaceHistory])
 ```
 
 -	**String path**
@@ -286,6 +286,10 @@ void route(String path [, any params])
 -	**any params**
 
 	Parameters to pass as a querystring
+
+-	**Boolean shouldReplaceHistory**
+
+	If set to true, replaces the current history entry, instead of adding a new one. Defaults to false.
 
 ---
 
