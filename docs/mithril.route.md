@@ -78,7 +78,7 @@ This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 
 Above, `dashboard` is a module. It contains a `controller` and a `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
 
-In this case, since there's only route, the app redirects to the default route `"/dashboard/johndoe"`.
+In this case, since there's only one route, the app redirects to the default route `"/dashboard/johndoe"`.
 
 The string `johndoe` is bound to the `:userID` parameter, which can be retrieved programmatically in the controller via `m.route.param("userID")`.
 
