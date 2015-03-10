@@ -285,7 +285,7 @@ var m = (function app(window, undefined) {
 				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
-		else if (typeof dataType != FUNCTION) {
+		else if (typeof data != FUNCTION) {
 			//handle text nodes
 			var nodes;
 			if (cached.nodes.length === 0) {

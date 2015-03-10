@@ -41,7 +41,7 @@ function testMithril(mock) {
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[0].length === 3})
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[1].length === 4})
 	test(function() {return m("div", [1], [2], [3]).children.length === 3})
-
+	
 	//m.module
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
@@ -852,6 +852,11 @@ function testMithril(mock) {
 			m("#div-2", {key: 2})
 		])
 		return root.childNodes.map(function(node) {return node.id}).join() == "div-1,div-3,div-2"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", function() {}))
+		return root.childNodes[0].childNodes.length == 0
 	})
 	//end m.render
 
