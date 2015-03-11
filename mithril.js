@@ -304,7 +304,7 @@ var m = (function app(window, undefined) {
 				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
-		else if (typeof dataType != FUNCTION) {
+		else if (typeof data != FUNCTION) {
 			//handle text nodes
 			var nodes;
 			if (cached.nodes.length === 0) {
@@ -380,7 +380,7 @@ var m = (function app(window, undefined) {
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
-					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
+					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type" || attrName === "width" || attrName === "height")) {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
 						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
 					}
