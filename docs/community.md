@@ -27,6 +27,11 @@ Want to help fellow Mithril developers and gain karma while at it? [Keep an eye 
 ### IRC
 
 Join the #mithriljs IRC channel on [Freenode](http://webchat.freenode.net).
+---
+
+### Gitter
+
+There's also a [Gitter chat room](https://gitter.im/lhorie/mithril.js).
 
 ---
 
