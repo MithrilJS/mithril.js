@@ -2,6 +2,8 @@
 
 # Mithril
 
+[![Join the chat at https://gitter.im/lhorie/mithril.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lhorie/mithril.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Javascript Framework for Building Brilliant Applications
 
 See the [website](http://lhorie.github.io/mithril) for documentation
