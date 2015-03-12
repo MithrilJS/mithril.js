@@ -234,7 +234,8 @@ var m = (function app(window, undefined) {
 		else if (data != null && dataType === OBJECT) {
 			if (data.view) {
 				var module = data, onunload
-				var controller = cached.controller || new (module.controller || function() {})
+				var controllerConstructor = module.controller.$original || module.controller
+				var controller = controllerConstructor === cached.controllerConstructor ? cached.controller : new (module.controller || function() {})
 				data = pendingRequests == 0 ? module.view(controller) : {tag: "placeholder"}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
 				if (!data.tag) throw new Error("Component template must return a virtual element, not an array, string, etc.")
@@ -270,6 +271,7 @@ var m = (function app(window, undefined) {
 					nodes: [node]
 				};
 				if (controller) {
+					cached.controllerConstructor = controllerConstructor
 					cached.controller = controller
 					if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
 					if (pendingRequests && controller.onunload) {
@@ -289,6 +291,10 @@ var m = (function app(window, undefined) {
 				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
+				if (controller) {
+					cached.controllerConstructor = controllerConstructor
+					cached.controller = controller
+				}
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
@@ -527,6 +533,7 @@ var m = (function app(window, undefined) {
 			if (args[0] && args[0].key != null) template.attrs.key = args[0].key
 			return template
 		}
+		controller.$original = module.controller
 		var output = {controller: controller, view: view}
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
 		return output

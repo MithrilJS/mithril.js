@@ -477,6 +477,51 @@ function testMithril(mock) {
 		return count === 3
 	})
 	test(function() {
+		// a route change should initialize a component's controller
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var countA = 0
+		var countB = 0
+		var subA = {
+			controller: function(){ countA += 1 },
+			view: function() { return m("div") }
+		}
+		var subB = {
+			controller: function() { countB += 1 },
+			view: function() { return m("div") }
+		}
+		m.route(root, "/a", {
+			"/a": {
+				view: function () {
+					return m('.page-a', [
+						m('h1'), m.module(subA, { x: 11 })
+					])
+				}
+			},
+			"/b": {
+				view: function() {
+					return m('.page-b', [
+						m('h2'), m.module(subB, { y: 22 })
+					])
+				}
+			}
+		})
+
+		mock.requestAnimationFrame.$resolve()
+
+		m.route("/b")
+
+		mock.requestAnimationFrame.$resolve()
+
+		m.route("/a")
+
+		mock.requestAnimationFrame.$resolve()
+
+		return countA === 2 && countB === 1
+	})
+	test(function() {
 		var root = mock.document.createElement("div")
 		var module = {}, unloaded = false
 		module.controller = function() {
