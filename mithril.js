@@ -169,6 +169,7 @@ var m = (function app(window, undefined) {
 					for (var prop in existing) actions.push(existing[prop])
 					var changes = actions.sort(sortChanges);
 					var newCached = new Array(cached.length)
+					newCached.nodes = []
 
 					for (var i = 0, change; change = changes[i]; i++) {
 						if (change.action === DELETION) {
@@ -180,6 +181,7 @@ var m = (function app(window, undefined) {
 							dummy.key = data[change.index].attrs.key;
 							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
 							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
+							newCached.nodes[change.index] = dummy
 						}
 
 						if (change.action === MOVE) {
@@ -187,16 +189,16 @@ var m = (function app(window, undefined) {
 								parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
 							}
 							newCached[change.index] = cached[change.from]
+							newCached.nodes[change.index] = change.element
 						}
 					}
 					for (var i = 0, len = unkeyed.length; i < len; i++) {
 						var change = unkeyed[i];
 						parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
 						newCached[change.index] = cached[change.index]
+						newCached.nodes[change.index] = change.element
 					}
 					cached = newCached;
-					cached.nodes = new Array(parentElement.childNodes.length);
-					for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 				}
 			}
 			//end key algorithm
