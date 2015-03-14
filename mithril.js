@@ -274,7 +274,7 @@ var m = (function app(window, undefined) {
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === FUNCTION) {
-				var context = cached.configContext = cached.configContext || {retain: m.redraw.strategy() == "diff"};
+				var context = cached.configContext = cached.configContext || {retain: (m.redraw.strategy() == "diff") || undefined};
 
 				// bind
 				var callback = function(data, args) {

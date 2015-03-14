@@ -98,6 +98,27 @@ function testMithril(mock) {
 		
 		return unloaded === true
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		var module = {}
+		module.view = function() {
+			return m("div", {config: function(el, init) {
+				if (!init) initCount++
+			}})
+		}
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
 	m.redraw.strategy(undefined) //teardown for m.module tests
 
 	//m.withAttr
@@ -1803,7 +1824,7 @@ function testMithril(mock) {
 			"/a": a
 		})
 		
-		return value === false
+		return !value
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
@@ -1824,7 +1845,7 @@ function testMithril(mock) {
 			"/a": a
 		})
 		
-		return value === true
+		return value
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
