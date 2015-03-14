@@ -554,6 +554,44 @@ function testMithril(mock) {
 		
 		return initCount == 1
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		
+		var dom = mock.document.createElement("div")
+		
+		var show = true
+
+		var module = {
+			view: function() {
+				return [
+					m(".foo", {key: 1, config: test, onclick: function() {show = !show}}),
+					show ? m(".bar", {key: 2}) : null
+				]
+			}
+		}
+
+		function test(el, init) {
+			if (!init) {
+				root.appendChild(dom)
+			}
+		}
+
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = false
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = true
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes.length == 3
+	})
 	m.redraw.strategy(undefined) //teardown for m.module tests
 	
 	//m.withAttr
