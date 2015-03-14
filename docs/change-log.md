@@ -8,12 +8,15 @@
 -	m.request's `unwrapSuccess` and `unwrapError` callbacks now receive the XMLHttpRequest instance as a second parameter
 -	3rd parameter for `m.route(route, params, shouldReplaceHistory)` is now public
 -	exact routes now have higher precedence than routes w/ variables [#452](https://github.com/lhorie/mithril.js/issues/452)
+-	there's now a `retain` flag to control on-route-change diff strategy on a per-element basis
 
 ### Bug Fixes:
 
 -	fix routing bug in IE9 [#320](https://github.com/lhorie/mithril.js/issues/320)
 -	fix ordering bug in m.trust when using HTML entities [#453](https://github.com/lhorie/mithril.js/issues/453)
 -	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
+-	fix dom element ownership bug when mixing keyed elements and third party plugin elements [#463](https://github.com/lhorie/mithril.js/issues/463)
+-	fix edge case in flatten algorithm [#448](https://github.com/lhorie/mithril.js/issues/448)
 
 ---
 
