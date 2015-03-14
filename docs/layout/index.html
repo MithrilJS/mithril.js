@@ -76,17 +76,19 @@
 					<div class="col(8,8,12)">
 						<h2>Sample code</h2>
 						
-<pre><code class="language-javascript">//namespace
-var app = {};
-
+<pre><code class="language-javascript">
 //model
-app.PageList = function() {
-	return m.request({method: "GET", url: "pages.json"});
+var Page = {
+	list: function() {
+		return m.request({method: "GET", url: "pages.json"});
+	}
 };
 
 //controller
-app.controller = function() {
-	var pages = app.PageList();
+var Demo = {};
+
+Demo.controller = function() {
+	var pages = Page.list();
 	return {
 		pages: pages,
 		rotate: function() {
@@ -96,7 +98,7 @@ app.controller = function() {
 };
 
 //view
-app.view = function(ctrl) {
+Demo.view = function(ctrl) {
 	return [
 		ctrl.pages().map(function(page) {
 			return m("a", {href: page.url}, page.title);
@@ -106,7 +108,7 @@ app.view = function(ctrl) {
 };
 
 //initialize
-m.module(document.getElementById("example"), app);</code></pre>
+m.module(document.getElementById("example"), Demo);</code></pre>
 
 					</div>
 					<div class="col(4,4,12)">
@@ -114,17 +116,18 @@ m.module(document.getElementById("example"), app);</code></pre>
 						<div id="example" class="example output">
 							<script src="mithril.min.js"></script>
 							<script>
-//namespace
-var app = {};
-
 //model
-app.PageList = function() {
-	return m.request({method: "GET", url: "pages.json"});
+var Page = {
+	list: function() {
+		return m.request({method: "GET", url: "pages.json"});
+	}
 };
 
 //controller
-app.controller = function() {
-	var pages = app.PageList();
+var Demo = {};
+
+Demo.controller = function() {
+	var pages = Page.list();
 	return {
 		pages: pages,
 		rotate: function() {
@@ -134,7 +137,7 @@ app.controller = function() {
 };
 
 //view
-app.view = function(ctrl) {
+Demo.view = function(ctrl) {
 	return [
 		ctrl.pages().map(function(page) {
 			return m("a", {href: page.url}, page.title);
@@ -144,7 +147,7 @@ app.view = function(ctrl) {
 };
 
 //initialize
-m.module(document.getElementById("example"), app);
+m.module(document.getElementById("example"), Demo);
 							</script>
 						</div>
 					</div>

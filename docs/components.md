@@ -91,6 +91,96 @@ Note that adding a `key` property in the list of attributes (`{name: "users"}` a
 
 ---
 
+### Dealing with state
+
+#### Stateless components
+
+Controllers receive arguments passed to the `m.module` call, but this does not mean controllers are a necessary middle man in a component.
+
+Instead of copying arguments to the controller object, and then passing the controller object to the view, it is often desirable that views always update based on the most current list of arguments being passed to a component.
+
+The following example illustrates this pattern:
+
+```javascript
+var MyApp = {
+	controller: function() {
+		this.temp = m.prop(10) //kelvin
+	},
+	view: function(ctrl) {
+		return m("div", [
+			m("input", {oninput: m.withAttr("value", ctrl.temp), value: ctrl.temp()}), "K",
+			m("br"),
+			m.module(TemperatureConverter, {value: ctrl.temp()})
+		]);
+	}
+};
+var TemperatureConverter = {
+	controller: function() {
+		//note how the controller does not handle the input arguments
+		
+		//define some helper functions to be called from the view
+		this.kelvinToCelsius = function(value) {
+			return value - 273.15
+		}
+		this.kelvinToFahrenheit = function() {
+			return (value 9 / 5 * (v - 273.15)) + 32
+		}
+	},
+	view: function(ctrl, options) {
+		return m('div', [
+			"celsius:", ctrl.kelvinToCelsius(options.value),
+			m("br"),
+			"fahrenheit:", ctrl.kelvinToFahrenheit(options.value),
+		]);
+	}
+};
+m.module(document.body, MyApp);
+```
+
+Here, the temperature value from the input is passed to the TemperatureConverter view directly, and transformation functions are called from there. This should be the preferred pattern for components that display data that is always derived from the most current input.
+
+#### Parameterized initial state
+
+The ability to handle arguments in the controller is useful for setting up the initial state for a component whose state depends on input data:
+
+```javascript
+var MyComponent = {
+	controller: function(args) {
+		//we only want to make this call once
+		this.things = m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+	},
+	view: function(ctrl) {
+		return m("ul", [
+			ctrl.things().map(function(name) {
+				return m("li", thing.name)
+			})
+		]);
+	}
+};
+```
+
+#### Data-driven component identity
+
+A component can be re-initialized from scratch by changing the `key` associated with it. This is useful for re-running ajax calls for different model entities.
+
+```javascript
+var people = [
+	{id: 1, name: "John"},
+	{id: 2, name: "Mary"}
+]
+
+//ajax and display a list of projects for John
+m.render(document.body, m.module(ProjectList, {key: people[0].id, value: people[0]})
+
+//ajax and display a list of projects for Mary
+//here, since the key is different, the ProjectList component is recreated from scratch, which runs the controller, re-generates the DOM, and re-initializes any applicable 3rd party plugins in configs
+m.render(document.body, m.module(ProjectList, {key: people[1].id, value: people[1]})
+```
+
+Note that the rules for keys apply for components the same way they do for regular elements: it is not allowed to have duplicate keys as children of the same parent, and they must be either strings or numbers (or something with a `.toString()` implementation that makes the entity locally uniquely identifiable when serialized).
+
+---
+
 ### Unloading components
 
 Modules declared in templates can also call `onunload` and its `e.preventDefault()` like regular modules. The `onunload` event is called if an instantiated module is removed from a virtual element tree via a redraw.

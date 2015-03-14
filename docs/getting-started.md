@@ -47,7 +47,7 @@ var myModule = {
 }
 ```
 
-In addition to holding a controller and a view, a module is typically also used to store data that pertains to it.
+In addition to holding a controller and a view, a module can also be used to store data that pertains to it.
 
 Let's create a module.
 
