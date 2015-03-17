@@ -137,6 +137,10 @@ var m = (function app(window, undefined) {
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
+			var guid = 0
+			for (var i = 0, len = data.length; i < len; i++) {
+				if (data[i] && data[i].attrs && data[i].attrs.key == null) data[i].attrs.key = "__mithril__" + guid++
+			}
 			if (shouldMaintainIdentities) {
 				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
 				
@@ -212,7 +216,7 @@ var m = (function app(window, undefined) {
 					//fix offset of next element if item was a trusted string w/ more than one html element
 					//the first clause in the regexp matches elements
 					//the second clause (after the pipe) matches text nodes
-					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]|&/g) || []).length
+					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length
 				}
 				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
 				cached[cacheCount++] = item

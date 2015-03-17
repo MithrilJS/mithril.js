@@ -17,6 +17,7 @@
 -	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
 -	fix dom element ownership bug when mixing keyed elements and third party plugin elements [#463](https://github.com/lhorie/mithril.js/issues/463)
 -	fix edge case in flatten algorithm [#448](https://github.com/lhorie/mithril.js/issues/448)
+-	prevent unnecessary DOM move operation when mixing keyed and unkeyed elements [#398](https://github.com/lhorie/mithril.js/issues/398)
 
 ---
 
