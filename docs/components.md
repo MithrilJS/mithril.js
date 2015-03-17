@@ -637,7 +637,7 @@ var Uploader = {
 		return m(".uploader", {
 			config: function(element, isInitialized) {
 				if (!isInitialized) {
-					dragdrop(element, {onchange: args.onchange})
+					Uploader.dragdrop(element, {onchange: args.onchange})
 				}
 			}
 		})
@@ -648,15 +648,15 @@ var Uploader = {
 var Demo = {
 	controller: function() {
 		this.files = m.prop([])
-		
+
 		this.upload = function() {
 			Uploader.upload(this.files())
 		}.bind(this)
-	}
+	},
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
-			m.module(Uploader, {onchange: ctrl.files})
+			m.module(Uploader, {onchange: ctrl.files}),
 			m("button[type=button]", {onclick: ctrl.upload})
 		]
 	}
