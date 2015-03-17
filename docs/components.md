@@ -657,7 +657,7 @@ var Demo = {
 		return [
 			m("h1", "Uploader demo"),
 			m.module(Uploader, {onchange: ctrl.files}),
-			m("button[type=button]", {onclick: ctrl.upload})
+			m("button[type=button]", {onclick: ctrl.upload}, "Upload")
 		]
 	}
 }
