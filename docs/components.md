@@ -10,6 +10,7 @@
 - [Asynchronous components](#asynchronous-components)
 - [Component limitations and caveats](#component-limitations-and-caveats)
 - [Application architecture with components](#application-architecture-with-components)
+- [Example: HTML5 drag-n-drop file uploader component](#example-html5-drag-n-drop-file-uploader-component)
 
 ---
 
@@ -591,3 +592,75 @@ m.module(document.body, ContactsWidget)
 Here, the data fetching is still centralized in the top-level component, so that we can avoid duplicate AJAX requests when fetching data.
 
 And moving the responsibility of saving to the `ContactForm` component alleviates the need to send data back up the component tree, making the handling of non-idempotent operations less prone to pass-through argument noise.
+
+---
+
+### Example: HTML5 drag-n-drop file uploader component
+
+```javascript
+var Uploader = {
+	dragdrop: function(element, options) {
+		options = options || {}
+
+		element.addEventListener("dragover", activate)
+		element.addEventListener("dragleave", deactivate)
+		element.addEventListener("dragend", deactivate)
+		element.addEventListener("drop", deactivate)
+		element.addEventListener("drop", update)
+
+		function activate(e) {
+			e.preventDefault()
+		}
+		function deactivate() {}
+		function update(e) {
+			e.preventDefault()
+			if (typeof options.onchange == "function") {
+				options.onchange((e.dataTransfer || e.target).files)
+			}
+		}
+	},
+	upload: function(files) {
+		var formData = new FormData
+		for (var i = 0; i < files.length; i++) {
+			formData.append("file" + i, files[i])
+		}
+
+		return m.request({
+			method: "POST",
+			url: "/api/files",
+			data: formData,
+			//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
+			serialize: function(value) {return value}
+		})
+	},
+	view: function(ctrl, args) {
+		return m(".uploader", {
+			config: function(element, isInitialized) {
+				if (!isInitialized) {
+					dragdrop(element, {onchange: args.onchange})
+				}
+			}
+		})
+	}
+}
+
+//usage demo
+var Demo = {
+	controller: function() {
+		this.files = m.prop([])
+		
+		this.upload = function() {
+			Uploader.upload(this.files())
+		}.bind(this)
+	}
+	view: function(ctrl) {
+		return [
+			m("h1", "Uploader demo"),
+			m.module(Uploader, {onchange: ctrl.files})
+			m("button[type=button]", {onclick: ctrl.upload})
+		]
+	}
+}
+
+m.module(document.body, Demo)
+```
