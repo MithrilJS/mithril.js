@@ -276,9 +276,9 @@ For this reason, it's recommended to refactor code in such a way that asynchrono
 
 There are a few caveats to using modules as components:
 
-1 - component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error. This limitation exists in order to support the correctness of unloading semantics component identity.
+1. component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error. This limitation exists in order to support the correctness of unloading semantics component identity.
 
-2 - components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers).
+2. components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers).
 
 ---
 
@@ -369,9 +369,11 @@ The `ContactList` component displays a table showing all the contact entities th
 
 The most interesting component is `ContactsWidget`:
 
-1 - on initialization, it fetches the list of contacts (`this.contacts = Contact.list`)
-2 - when `save` is called, it saves a contact (`Contact.save(contact)`)
-3 - after saving the contact, it reloads the list (`.then(update.bind(this))`)
+1. on initialization, it fetches the list of contacts (`this.contacts = Contact.list`)
+
+2. when `save` is called, it saves a contact (`Contact.save(contact)`)
+
+3. after saving the contact, it reloads the list (`.then(update.bind(this))`)
 
 `update` is the controller function itself, so defining it as a promise callback simply means that the controller is re-initialized after the previous asynchronous operation (`Contact.save()`)
 
