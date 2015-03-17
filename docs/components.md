@@ -243,7 +243,7 @@ var MyApp = {
 		return [
 			m("button[type=button]", {onclick: function() {ctrl.loaded = false}}),
 			ctrl.loaded ? m.module(MyComponent) : ""
-		])
+		]
 	}
 }
 
