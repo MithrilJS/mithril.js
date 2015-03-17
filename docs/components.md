@@ -634,10 +634,11 @@ var Uploader = {
 		})
 	},
 	view: function(ctrl, args) {
+		var self = this;
 		return m(".uploader", {
 			config: function(element, isInitialized) {
 				if (!isInitialized) {
-					dragdrop(element, {onchange: args.onchange})
+					self.dragdrop(element, {onchange: args.onchange})
 				}
 			}
 		})
@@ -652,12 +653,12 @@ var Demo = {
 		this.upload = function() {
 			Uploader.upload(this.files())
 		}.bind(this)
-	}
+	},
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
-			m.module(Uploader, {onchange: ctrl.files})
-			m("button[type=button]", {onclick: ctrl.upload})
+			m.module(Uploader, {onchange: ctrl.files}),
+			m("button[type=button]", {onclick: ctrl.upload}, "Upload")
 		]
 	}
 }
