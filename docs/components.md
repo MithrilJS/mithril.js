@@ -10,16 +10,22 @@
 - [Asynchronous components](#asynchronous-components)
 - [Component limitations and caveats](#component-limitations-and-caveats)
 - [Application architecture with components](#application-architecture-with-components)
+	- [Aggregation of responsibility](#aggregation-of-responsibility)
+	- [Distribution of concrete responsibilities](#distribution-of-concrete-responsibilities)
+	- [Cross-communication in single-purpose components](#cross-communication-in-single-purpose-components)
+	- [The observer pattern](#the-observer-pattern)
+	- [Hybrid architecture](#hybrid-architecture)
+	- [Classic MVC](#classic-mvc)
 - [Example: HTML5 drag-n-drop file uploader component](#example-html5-drag-n-drop-file-uploader-component)
 
 ---
 
 Components are self-contained units of functionality that may hold state and communicate with a larger application via input parameters and events.
 
-In Mithril, components are simply [modules](mithril.module.md). In order to use a module as a component, simply put it in a template:
+In Mithril, components are nothing more than [modules](mithril.module.md). In order to use a module as a component, simply put it in a template:
 
 ```javascript
-//first declare a component (it's just a module)
+//first declare a component (it's really just a module)
 var MyComponent = {
 	controller: function() {
 		this.greeting = "Hello"
@@ -261,6 +267,8 @@ var MyComponent = {
 m.module(document.body, MyApp)
 ```
 
+Calling `e.preventDefault()` from a component's `onunload` aborts route changes, but it does not abort, rollback or affect the current redraw in any way.
+
 ---
 
 ### Asynchronous components
@@ -269,7 +277,7 @@ Since components are Mithril modules, it's possible to encapsulate asynchronous 
 
 When a component has asynchronous payloads and they are queued by the [auto-redrawing system](auto-redrawing.md), its view is NOT rendered until all asynchronous operations complete. When the component's asynchronous operations complete, another redraw is triggered and the entire template tree is evaluated again. This means that the virtual dom tree may take two or more redraws (depending on how many nested asynchronous components there are) to be fully rendered.
 
-For this reason, it's recommended to refactor code in such a way that asynchronous operations happen in the root module and avoid making AJAX calls within components.
+There are [different ways to organize components](#application-architecture-with-components) that can side-step the need for multiple redraws (although you could still force multiple redraws to happen by using the [`background`](mithril.request.md#rendering-before-web-service-requests-finish) and `initialValue` options in `m.request`.)
 
 ---
 
@@ -277,9 +285,9 @@ For this reason, it's recommended to refactor code in such a way that asynchrono
 
 There are a few caveats to using modules as components:
 
-1. component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error. This limitation exists in order to support the correctness of unloading semantics component identity.
+1.	Component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
 
-2. components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers).
+2.	Components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persising-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
 
 ---
 
@@ -386,7 +394,7 @@ This architecture can yield highly flexible and reusable code, but flexibility c
 
 ---
 
-### Concrete components
+### Distribution of concrete responsibilities
 
 Another way of organizing code is to distribute concrete responsibilities across multiple modules.
 
@@ -447,7 +455,7 @@ Also, notice that since these components are designed to encapsulate their behav
 Here's one way to implement cross-communication between single purpose components:
 
 ```javascript
-var Reloadable = function() {
+var Observable = function() {
 	var controllers = []
 	return {
 		register: function(controller) {
@@ -483,7 +491,7 @@ var ContactForm = {
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
-			Contact.save(contact).then(Reloadable.update)
+			Contact.save(contact).then(Observable.update)
 		}
 	},
 	view: function() {
@@ -502,7 +510,7 @@ var ContactForm = {
 }
 
 var ContactList = {
-	controller: Reloadable.register(function() {
+	controller: Observable.register(function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
@@ -523,23 +531,58 @@ m.module(document.body, ContactsWidget)
 
 In this iteration, both the `ContactForm` and `ContactList` components are now children of the `ContactsWidget` component and they appear simultaneously on the same page.
 
-The `Reloadable` object exposes two methods: `register` which marks a controller as a reloadable entity, and `update` which reloads controllers marked by `register`. Controllers are deregistered when their `onunload` event is triggered.
+The `Observable` object exposes two methods: `register` which marks a controller as a Observable entity, and `update` which reloads controllers marked by `register`. Controllers are deregistered when their `onunload` event is triggered.
 
-The `ContactList` component's controller is marked as reloadable, and the `save` event handler in `ContactForm` calls `Reloadable.update` after saving.
+The `ContactList` component's controller is marked as Observable, and the `save` event handler in `ContactForm` calls `Observable.update` after saving.
 
-This mechanism allows multiple components to be reloaded in response to non-idempotent operations. `Reloadable` can be further refactored so that `update` broadcasts to "channels", which controllers can subscribe to.
+This mechanism allows multiple components to be reloaded in response to non-idempotent operations.
 
-One extremely important aspect of this architecture is that since components encapsulate their internal state, by definition it's harder to reason about AJAX request redundancy (i.e. how to prevent two identical AJAX requests originating from two different components).
+One extremely important aspect of this architecture is that since components encapsulate their internal state, then by definition it's harder to reason about AJAX request redundancy (i.e. how to prevent two identical AJAX requests originating from two different components).
+
+### The observer pattern
+
+The `Observable` object can be further refactored so that `update` broadcasts to "channels", which controllers can subscribe to. This is known, appropriately, as the [observer pattern](http://en.wikipedia.org/wiki/Observer_pattern).
+
+```javascript
+var Observable = function() {
+	var channels = {}
+	return {
+		register: function(subcriptions, controller) {
+			return function() {
+				var ctrl = new controller
+				ctrl.onunload = function() {
+					subscriptions.forEach(function(subscription) {
+						channels[subscription].splice(controllers.indexOf(ctrl), 1)
+					})
+				}
+				subscriptions.forEach(function(subscription) {
+					if (!channels[subscription]) channels[subscription] = []
+					channels[subscription].push({instance: ctrl, controller: controller})
+				})
+				return ctrl
+			}
+		},
+		broadcast: function(channel, args) {
+			channels[channel].map(function(c) {
+				ctrl = new c.controller(args)
+				for (var i in ctrl) c.instance[i] = ctrl[i]
+			})
+		}
+	}
+}.call()
+```
+
+This pattern is useful to decouple chains of dependencies (however care should be taken to avoid "come-from hell", i.e. difficulty in following a chains of events because they are too numerous and arbitrarily inter-dependent)
 
 ### Hybrid architecture
 
-It's of course possible to use both the aggregation of responsibility and the pub/sub pattern at the same time.
+It's of course possible to use both aggregation of responsibility and the observer pattern at the same time.
 
 The example below shows a variation of the contacts app where `ContactForm` is responsible for saving.
 
 ```javascript
 var ContactsWidget = {
-	controller: Reloadable.register(function() {
+	controller: Observable.register(["updateContact"], function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
@@ -554,7 +597,7 @@ var ContactForm = {
 	controller: function(args) {
 		this.contact = m.prop(args.contact || new Contact())
 		this.save = function() {
-			Contact.save(contact).then(Reloadable.update)
+			Contact.save(contact).then(Observable.broadcast("updateContact"))
 		}
 	},
 	view: function(ctrl, args) {
@@ -595,72 +638,172 @@ And moving the responsibility of saving to the `ContactForm` component alleviate
 
 ---
 
-### Example: HTML5 drag-n-drop file uploader component
+### Classic MVC
+
+Here's one last, but relevant variation of the pattern above.
 
 ```javascript
-var Uploader = {
-	dragdrop: function(element, options) {
-		options = options || {}
+//model layer observer
+Observable.register(["saveContact"], function(data) {
+	Contact.save(data.contact).then(Observable.broadcast("updateContact"))
+})
 
-		element.addEventListener("dragover", activate)
-		element.addEventListener("dragleave", deactivate)
-		element.addEventListener("dragend", deactivate)
-		element.addEventListener("drop", deactivate)
-		element.addEventListener("drop", update)
-
-		function activate(e) {
-			e.preventDefault()
-		}
-		function deactivate() {}
-		function update(e) {
-			e.preventDefault()
-			if (typeof options.onchange == "function") {
-				options.onchange((e.dataTransfer || e.target).files)
-			}
-		}
-	},
-	upload: function(files) {
-		var formData = new FormData
-		for (var i = 0; i < files.length; i++) {
-			formData.append("file" + i, files[i])
-		}
-
-		return m.request({
-			method: "POST",
-			url: "/api/files",
-			data: formData,
-			//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
-			serialize: function(value) {return value}
-		})
-	},
-	view: function(ctrl, args) {
-		return m(".uploader", {
-			config: function(element, isInitialized) {
-				if (!isInitialized) {
-					Uploader.dragdrop(element, {onchange: args.onchange})
-				}
-			}
-		})
+//ContactsWidget is the same as before
+var ContactsWidget = {
+	controller: Observable.register(["updateContact"], function() {
+		this.contacts = Contact.list()
+	}),
+	view: function(ctrl) {
+		return [
+			m.module(ContactForm),
+			m.module(ContactList, {contacts: contacts})
+		]
 	}
 }
 
-//usage demo
-var Demo = {
+//ContactList no longer calls `Contact.save`
+var ContactForm = {
+	controller: function(args) {
+		this.contact = m.prop(args.contact || new Contact())
+		this.save = function(contact) {
+			Observable.broadcast("updateContact", {contact: contact})
+		}
+	},
+	view: function(ctrl, args) {
+		var contact = ctrl.contact()
+		
+		return m("form", [
+			m("label", "Name"),
+			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
+			
+			m("label", "Email"),
+			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
+			
+			m("button", {onclick: args.onsave.bind(this, contact)}, "Save")
+		])
+	}
+}
+
+//ContactList is the same as before
+var ContactList = {
+	view: function(ctrl, args) {
+		return m("table", [
+			args.contacts().map(function(contact) {
+				return m("tr", [
+					m("td", contact.id()),
+					m("td", contact.name()),
+					m("td", contact.email())
+				])
+			})
+		])
+	}
+}
+
+m.module(document.body, ContactsWidget)
+```
+
+Here we've moved `Contact.save(contact).then(Observable.broadcast("updateContact"))` out of the `ContactForm` component and into the model layer. In its place, `ContactForm` merely emits an action, which is then handled by this model layer observer.
+
+This allows swapping the implementation of the `saveContact` handler without changing the `ContactForm` component.
+
+---
+
+### Example: HTML5 drag-n-drop file uploader component
+
+Here's an example of a not-so-trivial component: a drag-n-drop file uploader. In addition to the `controller` and `view` properties that make the `Uploader` object usable as a component, it also has an `upload` convenience function that provides a basic upload model method, and a `serialize` function that allows files to be serialized as JSON in regular requests encoded as `application/x-www-form-urlencoded`.
+
+These two functions are here to illustrate the ability to expose APIs to component consumers that complement the component's user interface. By bundling model methods in the component, we avoid hard-coding how files are handled once they're dropped in, and instead, we provide a useful library of functions that can be consumed flexibly to meet the demands on an application.
+
+```javascript
+var Uploader = {
+	upload: function(options) {
+		var formData = new FormData
+		for (var key in options.data) {
+			for (var i = 0; i < options.data[key].length; i++) {
+				formData.append(key, files[i])
+			}
+		}
+		
+		//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
+		options.serialize = function(value) {return value}
+		options.data = formData
+
+		return m.request(options)
+	},
+	serialize: function(files) {
+		var promises = Array.prototype.slice.call(files).map(function(file) {
+			var deferred = m.deferred()
+			
+			var reader = new FileReader
+			reader.readAsDataURL()
+			reader.onloadend = function(e) {
+				deferred.resolve(e.result)
+			}
+			reader.onerror = deferred.reject
+			return deferred
+		})
+		return m.sync(promises)
+	},
+	
+	controller: function(args) {
+		this.noop = function(e) {
+			e.preventDefault()
+		}
+		this.update = function(e) {
+			e.preventDefault()
+			if (typeof args.onchange == "function") {
+				args.onchange((e.dataTransfer || e.target).files)
+			}
+		}
+	},
+	view: function(ctrl, args) {
+		return m(".uploader", {ondragover: ctrl.noop, ondrop: ctrl.update})
+	}
+}
+```
+
+Below are some examples of consuming the `Uploader` component:
+
+```javascript
+//usage demo 1: standalone multipart/form-data upload when files are dropped into the component
+var Demo1 = {
+	controller: function() {
+		this.upload = function(files) {
+			Uploader.upload({method: "POST", url: "/api/files", {data: {files: files}}})
+		}
+	},
+	view: function(ctrl) {
+		return [
+			m("h1", "Uploader demo"),
+			m.module(Uploader, {onchange: ctrl.upload})
+		]
+	}
+}
+
+//usage demo 2: upload as base-64 encoded data url from a parent form
+var Demo2 = {
+	Asset: {
+		save: function(data) {
+			return m.request({method: "POST", url: "/api/assets", data: data})
+		}
+	},
+	
 	controller: function() {
 		this.files = m.prop([])
-
-		this.upload = function() {
-			Uploader.upload(this.files())
+		this.save = function() {
+			Uploader.serialize(this.files).then(function(files) {
+				Asset.save({files: files})
+			})
 		}.bind(this)
 	},
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
-			m.module(Uploader, {onchange: ctrl.files}),
-			m("button[type=button]", {onclick: ctrl.upload}, "Upload")
+			m("form", [
+				m.module(Uploader, {onchange: ctrl.files}),
+				m("button[type=button]", {onclick: ctrl.save})
+			])
 		]
 	}
 }
-
-m.module(document.body, Demo)
 ```

@@ -477,9 +477,9 @@ where:
 	
 		Determines whether the `m.request` can affect template rendering. Defaults to false.
 		
-		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
+		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention). It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
 		
-		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md)
+		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
 		
 		```javascript
 		var demo = {}
@@ -507,6 +507,8 @@ where:
 	-	**any initialValue** (optional)
 	
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
+		
+		It is strongly recommended that you always set this option to avoid future surprises.
 		
 	-	**any unwrapSuccess(any data, XMLHttpRequest xhr)** (optional)
 

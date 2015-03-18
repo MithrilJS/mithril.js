@@ -118,6 +118,8 @@ Common reasons why one might need to change redraw strategy are:
 
 Note that the redraw strategy is a global setting that affects the entire template trees of all modules on the page. In order to prevent redraws in *some parts* of an application, but not others, see [subtree directives](mithril.render.md#subtree-directives)
 
+You can also configure individual elements to always be diffed, instead of recreated from scratch (even across route changes), by using the [`ctx.retain` flag](mithril.md#persising-dom-elements-across-route-changes)
+
 ---
 
 ### Preventing redraws on events
