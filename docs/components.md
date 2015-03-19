@@ -348,7 +348,7 @@ var ContactForm = {
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
 			
-			m("button", {onclick: args.onsave.bind(this, contact)}, "Save")
+			m("button[type=button]", {onclick: args.onsave.bind(this, contact)}, "Save")
 		])
 	}
 }
@@ -418,7 +418,7 @@ var ContactForm = {
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
 			
-			m("button", {onclick: ctrl.save.bind(this, contact)}, "Save")
+			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
 }
@@ -468,7 +468,7 @@ var Observable = function() {
 				return ctrl
 			}
 		},
-		update: function() {
+		trigger: function() {
 			controllers.map(function(c) {
 				ctrl = new c.controller
 				for (var i in ctrl) c.instance[i] = ctrl[i]
@@ -491,7 +491,7 @@ var ContactForm = {
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
-			Contact.save(contact).then(Observable.update)
+			Contact.save(contact).then(Observable.trigger)
 		}
 	},
 	view: function() {
@@ -504,7 +504,7 @@ var ContactForm = {
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
 			
-			m("button", {onclick: ctrl.save.bind(this, contact)}, "Save")
+			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
 }
@@ -531,9 +531,9 @@ m.module(document.body, ContactsWidget)
 
 In this iteration, both the `ContactForm` and `ContactList` components are now children of the `ContactsWidget` component and they appear simultaneously on the same page.
 
-The `Observable` object exposes two methods: `register` which marks a controller as a Observable entity, and `update` which reloads controllers marked by `register`. Controllers are deregistered when their `onunload` event is triggered.
+The `Observable` object exposes two methods: `register` which marks a controller as a Observable entity, and `trigger` which reloads controllers marked by `register`. Controllers are deregistered when their `onunload` event is triggered.
 
-The `ContactList` component's controller is marked as Observable, and the `save` event handler in `ContactForm` calls `Observable.update` after saving.
+The `ContactList` component's controller is marked as Observable, and the `save` event handler in `ContactForm` calls `Observable.trigger` after saving.
 
 This mechanism allows multiple components to be reloaded in response to non-idempotent operations.
 
@@ -541,31 +541,39 @@ One extremely important aspect of this architecture is that since components enc
 
 ### The observer pattern
 
-The `Observable` object can be further refactored so that `update` broadcasts to "channels", which controllers can subscribe to. This is known, appropriately, as the [observer pattern](http://en.wikipedia.org/wiki/Observer_pattern).
+The `Observable` object can be further refactored so that `trigger` broadcasts to "channels", which controllers can subscribe to. This is known, appropriately, as the [observer pattern](http://en.wikipedia.org/wiki/Observer_pattern).
 
 ```javascript
 var Observable = function() {
 	var channels = {}
 	return {
-		register: function(subcriptions, controller) {
-			return function() {
+		register: function(subscriptions, controller) {
+			return function self() {
 				var ctrl = new controller
+				var reload = controller.bind(ctrl)
+				Observable.on(subscriptions, reload)
 				ctrl.onunload = function() {
-					subscriptions.forEach(function(subscription) {
-						channels[subscription].splice(controllers.indexOf(ctrl), 1)
-					})
+					Observable.off(reload)
 				}
-				subscriptions.forEach(function(subscription) {
-					if (!channels[subscription]) channels[subscription] = []
-					channels[subscription].push({instance: ctrl, controller: controller})
-				})
 				return ctrl
 			}
 		},
-		broadcast: function(channel, args) {
-			channels[channel].map(function(c) {
-				ctrl = new c.controller(args)
-				for (var i in ctrl) c.instance[i] = ctrl[i]
+		on: function(subscriptions, callback) {
+			subscriptions.forEach(function(subscription) {
+				if (!channels[subscription]) channels[subscription] = []
+				channels[subscription].push(callback)
+			})
+		},
+		off: function(callback) {
+			for (var channel in channels) {
+				var index = channels[channel].indexOf(callback)
+				if (index > -1) channels[channel].splice(index, 1)
+			}
+		},
+		trigger: function(channel, args) {
+			console.log(channel)
+			channels[channel].map(function(callback) {
+				callback(args)
 			})
 		}
 	}
@@ -588,16 +596,16 @@ var ContactsWidget = {
 	view: function(ctrl) {
 		return [
 			m.module(ContactForm),
-			m.module(ContactList, {contacts: contacts})
+			m.module(ContactList, {contacts: ctrl.contacts})
 		]
 	}
 }
 
 var ContactForm = {
 	controller: function(args) {
-		this.contact = m.prop(args.contact || new Contact())
-		this.save = function() {
-			Contact.save(contact).then(Observable.broadcast("updateContact"))
+		this.contact = m.prop(new Contact())
+		this.save = function(contact) {
+			Contact.save(contact).then(Observable.trigger("updateContact"))
 		}
 	},
 	view: function(ctrl, args) {
@@ -610,7 +618,7 @@ var ContactForm = {
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
 			
-			m("button", {onclick: args.onsave.bind(this, contact)}, "Save")
+			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
 }
@@ -644,8 +652,8 @@ Here's one last, but relevant variation of the pattern above.
 
 ```javascript
 //model layer observer
-Observable.register(["saveContact"], function(data) {
-	Contact.save(data.contact).then(Observable.broadcast("updateContact"))
+Observable.on(["saveContact"], function(data) {
+	Contact.save(data.contact).then(Observable.trigger("updateContact"))
 })
 
 //ContactsWidget is the same as before
@@ -656,7 +664,7 @@ var ContactsWidget = {
 	view: function(ctrl) {
 		return [
 			m.module(ContactForm),
-			m.module(ContactList, {contacts: contacts})
+			m.module(ContactList, {contacts: ctrl.contacts})
 		]
 	}
 }
@@ -664,9 +672,9 @@ var ContactsWidget = {
 //ContactList no longer calls `Contact.save`
 var ContactForm = {
 	controller: function(args) {
-		this.contact = m.prop(args.contact || new Contact())
+		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
-			Observable.broadcast("updateContact", {contact: contact})
+			Observable.trigger("saveContact", {contact: contact})
 		}
 	},
 	view: function(ctrl, args) {
@@ -679,7 +687,7 @@ var ContactForm = {
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
 			
-			m("button", {onclick: args.onsave.bind(this, contact)}, "Save")
+			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
 }
