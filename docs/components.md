@@ -61,12 +61,12 @@ Modules can have arguments "preloaded" into them. Calling `m.module` without a D
 ```javascript
 //declare a component
 var MyModule = {}
-MyModule.controller = function(options, extras) {
+MyModule.controller = function(args, extras) {
 	this.greeting = "Hello"
-	console.log(options.name, extras)
+	console.log(args.name, extras)
 }
-MyModule.view = function(ctrl, options, extras) {
-	return m("h1", ctrl.greeting + " " + options.name + " " + extras)
+MyModule.view = function(ctrl, args, extras) {
+	return m("h1", ctrl.greeting + " " + args.name + " " + extras)
 }
 
 
@@ -148,11 +148,11 @@ var TemperatureConverter = {
 			return (value 9 / 5 * (v - 273.15)) + 32
 		}
 	},
-	view: function(ctrl, options) {
+	view: function(ctrl, args) {
 		return m('div', [
-			"celsius:", ctrl.kelvinToCelsius(options.value),
+			"celsius:", ctrl.kelvinToCelsius(args.value),
 			m("br"),
-			"fahrenheit:", ctrl.kelvinToFahrenheit(options.value),
+			"fahrenheit:", ctrl.kelvinToFahrenheit(args.value),
 		]);
 	}
 };
