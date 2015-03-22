@@ -329,7 +329,7 @@ var ContactsWidget = {
 	view: function(ctrl) {
 		return [
 			m.module(ContactForm, {onsave: ctrl.save}),
-			m.module(ContactList, {contacts: contacts})
+			m.module(ContactList, {contacts: ctrl.contacts})
 		]
 	}
 }
