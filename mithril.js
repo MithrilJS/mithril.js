@@ -535,7 +535,10 @@ var m = (function app(window, undefined) {
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
-			var template = module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
+			var viewArgs = args ? [ctrl].concat(args) : [ctrl];
+			var template = module.view.apply(module, viewArgs)
+			// template may be a submodule
+			if (template.view) return template.view.apply(template, viewArgs)
 			if (args[0] && args[0].key != null) template.attrs.key = args[0].key
 			return template
 		}
