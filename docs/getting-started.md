@@ -130,25 +130,23 @@ In the case of our todo application, the view-model needs a few things: it needs
 
 ```javascript
 //define the view-model
-todo.vm = (function() {
-	var vm = {}
-	vm.init = function() {
+todo.vm = {
+	init: function() {
 		//a running list of todos
-		vm.list = new todo.TodoList();
+		todo.vm.list = new todo.TodoList();
 		
 		//a slot to store the name of a new todo before it is created
-		vm.description = m.prop("");
+		todo.vm.description = m.prop('');
 		
 		//adds a todo to the list, and clears the description field for user convenience
-		vm.add = function(description) {
+		todo.vm.add = function(description) {
 			if (description()) {
-				vm.list.push(new todo.Todo({description: description()}));
-				vm.description("");
+				todo.vm.list.push(new todo.Todo({description: description()}));
+				todo.vm.description("");
 			}
 		};
 	}
-	return vm
-}())
+};
 ```
 
 The code above defines a view-model object called `vm`. It is simply a javascript object that has a `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.

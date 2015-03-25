@@ -18,6 +18,7 @@
 -	fix dom element ownership bug when mixing keyed elements and third party plugin elements [#463](https://github.com/lhorie/mithril.js/issues/463)
 -	fix edge case in flatten algorithm [#448](https://github.com/lhorie/mithril.js/issues/448)
 -	prevent unnecessary DOM move operation when mixing keyed and unkeyed elements [#398](https://github.com/lhorie/mithril.js/issues/398)
+-	revert [#382](https://github.com/lhorie/mithril.js/issues/382) due to diff regression [#512](https://github.com/lhorie/mithril.js/issues/512)
 
 ---
 

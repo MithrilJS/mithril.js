@@ -29,10 +29,10 @@ function testMithril(mock) {
 	test(function() {return m(".foo", {"class": "bar"}).attrs["class"] == "foo bar"})
 	test(function() {return m(".foo", {className: "bar"}).attrs.className == "foo bar"})
 	test(function() {return m(".foo", {className: ""}).attrs.className == "foo"})
-	test(function() {return m("div", {className: ""}).attrs.className === undefined}) //https://github.com/lhorie/mithril.js/issues/382
+	test(function() {return m("div", {className: ""}).attrs.className === ""}) //https://github.com/lhorie/mithril.js/issues/382 and 512
 	test(function() {return m("div", {class: ""}).attrs.className === undefined})
 	test(function() {return m("div", {className: ""}).attrs.class === undefined})
-	test(function() {return m("div", {class: ""}).attrs.class === undefined})
+	test(function() {return m("div", {class: ""}).attrs.class === ""})
 	test(function() {return m("div", [1, 2, 3], 4).children.length === 2})
 	test(function() {return m("div", [1, 2, 3], 4).children[0].length === 3})
 	test(function() {return m("div", [1, 2, 3], 4).children[1] === 4})

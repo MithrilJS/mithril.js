@@ -61,7 +61,8 @@ var m = (function app(window, undefined) {
 		
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
-				if (attrs[attrName] !== "") cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
+				var className = cell.attrs[attrName]
+				cell.attrs[attrName] = (className && attrs[attrName] ? className + " " : className || "") + attrs[attrName];
 			}
 			else cell.attrs[attrName] = attrs[attrName]
 		}
