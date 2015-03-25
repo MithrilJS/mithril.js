@@ -239,14 +239,22 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			if (data.view) {
-				var module = data, onunload
-				var controllerConstructor = module.controller.$original || module.controller
-				var controller = controllerConstructor === cached.controllerConstructor ? cached.controller : new (module.controller || function() {})
-				data = pendingRequests == 0 ? module.view(controller) : {tag: "placeholder"}
+			var controllerConstructors = [], controllers = []
+			while (data.view) {
+				var controllerConstructor = data.controller.$original || data.controller
+				var controllerIndex = cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
+				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
+				var key = data && data.attrs && data.attrs.key
+				data = pendingRequests == 0 ? data.view(controller) : {tag: "placeholder"}
+				if (key) {
+					if (!data.attrs) data.attrs = {}
+					data.attrs.key = key
+				}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
-				if (!data.tag) throw new Error("Component template must return a virtual element, not an array, string, etc.")
+				controllerConstructors.push(controllerConstructor)
+				controllers.push(controller)
 			}
+			if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.")
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
@@ -256,7 +264,11 @@ var m = (function app(window, undefined) {
 			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
-				if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}})
+				if (cached.controllers) {
+					for (var i = 0, controller; controller = cached.controllers[i]; i++) {
+						if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}})
+					}
+				}
 			}
 			if (type.call(data.tag) != STRING) return;
 
@@ -277,14 +289,16 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (controller) {
-					cached.controllerConstructor = controllerConstructor
-					cached.controller = controller
-					if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
-					if (pendingRequests && controller.onunload) {
-						var onunload = controller.onunload
-						controller.onunload = function() {}
-						controller.onunload.$old = onunload
+				if (controllers.length) {
+					cached.controllerConstructors = controllerConstructors
+					cached.controllers = controllers
+					for (var i = 0, controller; controller = controllers[i]; i++) {
+						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
+						if (pendingRequests && controller.onunload) {
+							var onunload = controller.onunload
+							controller.onunload = function() {}
+							controller.onunload.$old = onunload
+						}
 					}
 				}
 				
@@ -298,9 +312,9 @@ var m = (function app(window, undefined) {
 				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
-				if (controller) {
-					cached.controllerConstructor = controllerConstructor
-					cached.controller = controller
+				if (controllers.length) {
+					cached.controllerConstructors = controllerConstructors
+					cached.controllers = controllers
 				}
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
@@ -427,7 +441,11 @@ var m = (function app(window, undefined) {
 			cached.configContext.onunload();
 			cached.configContext.onunload = null
 		}
-		if (cached.controller && typeof cached.controller.onunload === FUNCTION) cached.controller.onunload({preventDefault: function() {}});
+		if (cached.controllers) {
+			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
+				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}});
+			}
+		}
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -536,9 +554,7 @@ var m = (function app(window, undefined) {
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
-			var template = module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
-			if (args[0] && args[0].key != null) template.attrs.key = args[0].key
-			return template
+			return module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
 		}
 		controller.$original = module.controller
 		var output = {controller: controller, view: view}

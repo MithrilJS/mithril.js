@@ -196,6 +196,45 @@ function testMithril(mock) {
 		return count1 == 1 && count2 == 2
 	})
 	test(function() {
+		//sub component controller should only run once
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var count1 = 0, count2 = 0, count3 = 0, count4 = 0
+		var module = {
+			view: function(ctrl) {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function() {
+				count1++
+			},
+			view: function(ctrl) {
+				count2++
+				return subsub
+			}
+		}
+		var subsub = {
+			controller: function() {
+				count3++
+			},
+			view: function(ctrl) {
+				count4++
+				return m("div", "test")
+			}
+		}
+		m.module(root, module)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		return count1 == 1 && count2 == 2 && count3 == 1 && count4 == 2
+	})
+	test(function() {
 		//keys in components should work
 		mock.requestAnimationFrame.$resolve()
 
@@ -210,6 +249,46 @@ function testMithril(mock) {
 			}
 		}
 		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
+		//keys in subcomponents should work
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			view: function() {
+				return m.module(subsub)
+			}
+		}
+		var subsub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
@@ -266,6 +345,47 @@ function testMithril(mock) {
 		return firstBefore === firstAfter
 	})
 	test(function() {
+		//keys in subcomponents should work even if component internally messes them up
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return subsub
+			}
+		}
+		var subsub = {
+			controller: function() {},
+			view: function() {
+				return m("div", {key: 1})
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
 		//component identity should stay intact if components are descendants of keyed elements
 		mock.requestAnimationFrame.$resolve()
 
@@ -280,6 +400,47 @@ function testMithril(mock) {
 			}
 		}
 		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0].childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		var firstAfter = root.childNodes[2].childNodes[0]
+		
+		return firstBefore === firstAfter
+	})
+	test(function() {
+		//subcomponent identity should stay intact if components are descendants of keyed elements
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m("div", {key: i}, m.module(sub))
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return subsub
+			}
+		}
+		var subsub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
@@ -339,6 +500,54 @@ function testMithril(mock) {
 		return unloaded === 3
 	})
 	test(function() {
+		//subcomponent should call onunload when removed from template
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var unloaded1, unloaded2
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return list.map(function(i) {
+					return m.module(sub, {key: i})
+				})
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+				this.onunload = function() {
+					unloaded1 = opts.key
+				}
+			},
+			view: function(ctrl, opts) {
+				return m.module(subsub, {key: opts.key})
+			}
+		}
+		var subsub = {
+			controller: function(opts) {
+				this.onunload = function() {
+					unloaded2 = opts.key
+				}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		var firstBefore = root.childNodes[0]
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		list.pop()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+		
+		return unloaded1 === 3 && unloaded2 === 3
+	})
+	test(function() {
 		//calling m.redraw synchronously from controller constructor should not trigger extra redraws
 		mock.requestAnimationFrame.$resolve()
 
@@ -351,6 +560,39 @@ function testMithril(mock) {
 			}
 		}
 		var sub = {
+			controller: function(opts) {
+				m.redraw()
+			},
+			view: function() {
+				count++
+				return m("div")
+			}
+		}
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return count === 1
+	})
+	test(function() {
+		//calling m.redraw synchronously from controller constructor should not trigger extra redraws
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var count = 0
+		var module = {
+			controller: function() {},
+			view: function(ctrl) {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function(opts) {},
+			view: function() {
+				return subsub
+			}
+		}
+		var subsub = {
 			controller: function(opts) {
 				m.redraw()
 			},
@@ -403,6 +645,50 @@ function testMithril(mock) {
 		return loaded === false
 	})
 	test(function() {
+		//calling preventDefault from subcomponent's onunload should prevent route change
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var loaded = false
+		var testEnabled = true
+		var module = {
+			controller: function() {},
+			view: function() {
+				return m.module(sub)
+			}
+		}
+		var sub = {
+			controller: function(opts) {
+			},
+			view: function() {
+				return m.module(subsub)
+			}
+		}
+		var subsub = {
+			controller: function(opts) {
+				controller = this
+				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.route(root, "/a", {
+			"/a": module,
+			"/b": {controller: function() {loaded = true}, view: function() {}}
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		testEnabled = false
+		
+		return loaded === false
+	})
+	test(function() {
 		//calling preventDefault from non-curried component's onunload should prevent route change
 		mock.requestAnimationFrame.$resolve()
 		mock.location.search = "?"
@@ -417,6 +703,49 @@ function testMithril(mock) {
 			}
 		}
 		var sub = {
+			controller: function(opts) {
+				controller = this
+				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
+			},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.route(root, "/a", {
+			"/a": module,
+			"/b": {controller: function() {loaded = true}, view: function() {}}
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		testEnabled = false
+		
+		return loaded === false
+	})
+	test(function() {
+		//calling preventDefault from non-curried subcomponent's onunload should prevent route change
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var loaded = false
+		var testEnabled = true
+		var module = {
+			controller: function() {},
+			view: function() {
+				return sub
+			}
+		}
+		var sub = {
+			controller: function(opts) {},
+			view: function() {
+				return subsub
+			}
+		}
+		var subsub = {
 			controller: function(opts) {
 				controller = this
 				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
