@@ -151,6 +151,29 @@ todo.vm = (function() {
 }())
 ```
 
+or
+
+```javascript
+//define the view-model
+todo.vm = {
+	init: function() {
+		//a running list of todos
+		this.list = new todo.TodoList();
+		
+		//a slot to store the name of a new todo before it is created
+		this.description = m.prop('');
+		
+		//adds a todo to the list, and clears the description field for user convenience
+		this.add = function(description) {
+			if (description()) {
+				this.list.push(new todo.Todo({description: description()}));
+				this.description("");
+			}
+		};
+	}
+};
+```
+
 The code above defines a view-model object called `vm`. It is simply a javascript object that has a `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.
 
 Later in this guide, we'll pass the `description` property as the parameter to this function. When we get there, I'll explain why we're passing description as an argument instead of simply using OOP-style member association.
