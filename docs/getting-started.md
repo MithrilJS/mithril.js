@@ -130,44 +130,19 @@ In the case of our todo application, the view-model needs a few things: it needs
 
 ```javascript
 //define the view-model
-todo.vm = (function() {
-	var vm = {}
-	vm.init = function() {
-		//a running list of todos
-		vm.list = new todo.TodoList();
-		
-		//a slot to store the name of a new todo before it is created
-		vm.description = m.prop("");
-		
-		//adds a todo to the list, and clears the description field for user convenience
-		vm.add = function(description) {
-			if (description()) {
-				vm.list.push(new todo.Todo({description: description()}));
-				vm.description("");
-			}
-		};
-	}
-	return vm
-}())
-```
-
-or
-
-```javascript
-//define the view-model
 todo.vm = {
 	init: function() {
 		//a running list of todos
-		this.list = new todo.TodoList();
+		todo.vm.list = new todo.TodoList();
 		
 		//a slot to store the name of a new todo before it is created
-		this.description = m.prop('');
+		todo.vm.description = m.prop('');
 		
 		//adds a todo to the list, and clears the description field for user convenience
-		this.add = function(description) {
+		todo.vm.add = function(description) {
 			if (description()) {
-				this.list.push(new todo.Todo({description: description()}));
-				this.description("");
+				todo.vm.list.push(new todo.Todo({description: description()}));
+				todo.vm.description("");
 			}
 		};
 	}
