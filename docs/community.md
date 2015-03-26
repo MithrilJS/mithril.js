@@ -8,6 +8,14 @@ Go to the [Learn Mithril site](http://lhorie.github.io/mithril-blog)
 
 ---
 
+### Gitter
+
+There's a [Gitter chat room](https://gitter.im/lhorie/mithril.js). This is a great place to ask questions, discuss ideas and connect with Mithril users.
+
+You can sign in with your Github credentials. 
+
+---
+
 ### Mailing List
 
 Looking for a place to talk about Mithril? Suggestions?
@@ -27,11 +35,6 @@ Want to help fellow Mithril developers and gain karma while at it? [Keep an eye 
 ### IRC
 
 Join the #mithriljs IRC channel on [Freenode](http://webchat.freenode.net).
----
-
-### Gitter
-
-There's also a [Gitter chat room](https://gitter.im/lhorie/mithril.js).
 
 ---
 
