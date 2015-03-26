@@ -1200,7 +1200,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
 		mock.requestAnimationFrame.$resolve() //teardown
-		return mock.location.search == "?/test14?test=&test2=" && m.route.param("test") === "" && m.route.param("test2") === ""
+		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === null && m.route.param("test2") === ""
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
@@ -2264,6 +2264,31 @@ function testMithril(mock) {
 	})
 	//end m.route
 
+	//m.route.parseQueryString
+	test(function() {
+		var args = m.route.parseQueryString("foo=bar&hello%5B%5D=world&hello%5B%5D=mars&hello%5B%5D=pluto")
+		return args["hello[]"] instanceof Array && args["hello[]"].indexOf("world") > -1 && args["hello[]"].indexOf("mars") > -1 && args["hello[]"].indexOf("pluto") > -1
+	})
+	test(function() {
+		var args = m.route.parseQueryString("foo=bar&hello=world&hello=mars&bam=&yup")
+		return args.foo === "bar" && args.hello[0] === "world" && args.hello[1] === "mars" && args.bam === "" && args.yup === null
+	})
+	
+	//m.route.buildQueryString
+	test(function() {
+		var string = m.route.buildQueryString({
+			foo: "bar",
+			hello: ["world", "mars", "mars"],
+			world: {
+				test:3 
+			},
+			bam: "",
+			yup: null,
+			removed: undefined
+		})
+		return string === "foo=bar&hello=world&hello=mars&world%5Btest%5D=3&bam=&yup"
+	})
+	
 	//m.prop
 	test(function() {
 		var prop = m.prop("test")
@@ -2384,7 +2409,7 @@ function testMithril(mock) {
 	test(function() {
 		var prop = m.request({method: "GET", url: "test", data: {foo: [1, 2]}})
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
-		return prop().url === "test?foo%5B%5D=1&foo%5B%5D=2"
+		return prop().url === "test?foo=1&foo=2"
 	})
 
 	// m.request over jsonp

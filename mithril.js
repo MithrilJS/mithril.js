@@ -715,28 +715,44 @@ var m = (function app(window, undefined) {
 		else window.scrollTo(0, 0)
 	}
 	function buildQueryString(object, prefix) {
-		var str = [];
-		for(var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop];
+		var duplicates = {}
+		var str = []
+		for (var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop
+			var value = object[prop]
 			var valueType = type.call(value)
-			var pair = value != null && (valueType === OBJECT) ?
-				buildQueryString(value, key) :
-				valueType === ARRAY ?
-					value.map(function(item) {return encodeURIComponent(key + "[]") + "=" + encodeURIComponent(item)}).join("&") :
-					encodeURIComponent(key) + "=" + encodeURIComponent(value)
-			str.push(pair)
+			var pair = (value === null) ? encodeURIComponent(key) :
+				valueType === OBJECT ? buildQueryString(value, key) :
+				valueType === ARRAY ? value.reduce(function(memo, item) {
+					if (!duplicates[key]) duplicates[key] = {}
+					if (!duplicates[key][item]) {
+						duplicates[key][item] = true
+						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
+					}
+					return memo
+				}, []).join("&") :
+				encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			if (value !== undefined) str.push(pair)
 		}
 		return str.join("&")
 	}
-	
 	function parseQueryString(str) {
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
-			params[decodeURIComponent(pair[0])] = pair[1] ? decodeURIComponent(pair[1]) : ""
+			var key = decodeURIComponent(pair[0])
+			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
+			if (params[key] != null) {
+				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
+				params[key].push(value)
+			}
+			else params[key] = value
 		}
 		return params
 	}
+	m.route.buildQueryString = buildQueryString
+	m.route.parseQueryString = parseQueryString
+	
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
