@@ -169,7 +169,7 @@ This mechanism is useful to clear timers and unsubscribe event handlers. If you 
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement rootElement, String defaultRoute, Object<Module> routes) { String mode, String param(String key) }
+void route(DOMElement rootElement, String defaultRoute, Object<Module> routes) { String mode, String param(String key), String buildQueryString(Object data), Object parseQueryString(String data) }
 
 where:
 	Module :: Object { void controller(), void view(Object controllerInstance) }
@@ -253,6 +253,38 @@ where:
 	
 		The value that maps to the parameter specified by `key`
 
+-	<a name="buildQueryString"></a>
+
+	#### m.route.buildQueryString
+	
+	**String buildQueryString(Object data)**
+	
+	Serializes an object into its URI encoded querystring representation, following the same serialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
+	
+	-	**Object data**
+	
+		An object to be serialized
+	
+	-	**returns String querystring**
+	
+		The serialized representation of the input data
+	
+-	<a name="parseQueryString"></a>
+
+	#### m.route.parseQueryString
+	
+	**Object parseQueryString(String data)**
+	
+	Deserializes an object into from a URI encoded querystring representation, following the same deserialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
+	
+	-	**Object data**
+	
+		An object to be deserialized
+	
+	-	**returns String querystring**
+	
+		The deserialized representation of the input data
+	
 ---
 
 <a name="redirecting"></a>
