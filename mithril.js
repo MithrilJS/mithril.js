@@ -174,7 +174,7 @@ var m = (function app(window, undefined) {
 					for (var prop in existing) actions.push(existing[prop])
 					var changes = actions.sort(sortChanges);
 					var newCached = new Array(cached.length)
-					newCached.nodes = []
+					newCached.nodes = cached.nodes.slice()
 
 					for (var i = 0, change; change = changes[i]; i++) {
 						if (change.action === DELETION) {
