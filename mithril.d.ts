@@ -35,6 +35,8 @@ declare module _mithril {
 
 			param(key: string): string;
 			mode: string;
+			buildQueryString(data: Object): String
+			parseQueryString(data: String): Object
 		}
 
 		request<T>(options: MithrilXHROptions): MithrilPromise<T>;
