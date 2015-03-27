@@ -33,7 +33,7 @@ var m = (function app(window, undefined) {
 	 */
 	function m() {
 		var args = [].slice.call(arguments);
-		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
+		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1]) && !("subtree" in args[1]);
 		var attrs = hasAttrs ? args[1] : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
@@ -58,7 +58,7 @@ var m = (function app(window, undefined) {
 		else {
 			cell.children = children
 		}
-		
+
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
 				var className = cell.attrs[attrName]
@@ -94,7 +94,7 @@ var m = (function app(window, undefined) {
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
-		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
+		//data.toString() is null if data is the return value of Console.log in Firefox
 		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
@@ -239,36 +239,15 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			var controllerConstructors = [], controllers = []
-			while (data.view) {
-				var controllerConstructor = data.controller.$original || data.controller
-				var controllerIndex = cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
-				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
-				var key = data && data.attrs && data.attrs.key
-				data = pendingRequests == 0 ? data.view(controller) : {tag: "placeholder"}
-				if (key) {
-					if (!data.attrs) data.attrs = {}
-					data.attrs.key = key
-				}
-				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
-				controllerConstructors.push(controllerConstructor)
-				controllers.push(controller)
-			}
-			if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.")
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
-				if (cached.controllers) {
-					for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-						if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}})
-					}
-				}
 			}
 			if (type.call(data.tag) != STRING) return;
 
@@ -276,7 +255,6 @@ var m = (function app(window, undefined) {
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
-			
 			if (isNew) {
 				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
 				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
@@ -289,19 +267,6 @@ var m = (function app(window, undefined) {
 						data.children,
 					nodes: [node]
 				};
-				if (controllers.length) {
-					cached.controllerConstructors = controllerConstructors
-					cached.controllers = controllers
-					for (var i = 0, controller; controller = controllers[i]; i++) {
-						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
-						if (pendingRequests && controller.onunload) {
-							var onunload = controller.onunload
-							controller.onunload = function() {}
-							controller.onunload.$old = onunload
-						}
-					}
-				}
-				
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
 				if (data.tag === "select" && data.attrs.value) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
@@ -312,10 +277,6 @@ var m = (function app(window, undefined) {
 				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
-				if (controllers.length) {
-					cached.controllerConstructors = controllerConstructors
-					cached.controllers = controllers
-				}
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
 			}
 			//schedule configs to be called. They are called after `build` finishes running
@@ -441,11 +402,6 @@ var m = (function app(window, undefined) {
 			cached.configContext.onunload();
 			cached.configContext.onunload = null
 		}
-		if (cached.controllers) {
-			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}});
-			}
-		}
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -546,50 +502,25 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule, unloaders = [];
+	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule;
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
-	function submodule(module, args) {
-		var controller = function() {
-			return (module.controller || function() {}).apply(this, args) || this
-		}
-		var view = function(ctrl) {
-			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
-			return module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
-		}
-		controller.$original = module.controller
-		var output = {controller: controller, view: view}
-		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
-		return output
-	}
 	m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-		if (root.view) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
-		
 		var isPrevented = false;
-		var event = {preventDefault: function() {isPrevented = true}};
-		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
-			unloader.handler(event)
-			unloader.controller.onunload = null
-		}
-		if (isPrevented) {
-			for (var i = 0, unloader; unloader = unloaders[i]; i++) unloader.controller.onunload = unloader.handler
-		}
-		else unloaders = []
-		
 		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
+			var event = {
+				preventDefault: function() {isPrevented = true}
+			};
 			controllers[index].onunload(event)
 		}
-		
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) module = submodule(module, [].slice.call(arguments, 2))
 			var currentModule = topModule = module = module || {};
-			var constructor = module.controller || function() {}
-			var controller = new constructor;
+			var controller = new (module.controller || function() {});
 			//controllers may call m.module recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.module call is applied
 			if (currentModule === topModule) {
@@ -600,10 +531,7 @@ var m = (function app(window, undefined) {
 			return controllers[index]
 		}
 	};
-	var redrawing = false
 	m.redraw = function(force) {
-		if (redrawing) return
-		redrawing = true
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
@@ -618,15 +546,13 @@ var m = (function app(window, undefined) {
 			redraw();
 			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
-		redrawing = false
 	};
 	m.redraw.strategy = m.prop();
 	var blank = function() {return ""}
 	function redraw() {
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = modules[i].controller && modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : [controllers[i]]
-				m.render(root, modules[i].view ? modules[i].view(controllers[i], args) : blank())
+				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank())
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -838,11 +764,12 @@ var m = (function app(window, undefined) {
 		deferred.promise = propify(deferred.promise);
 		return deferred
 	};
-	function propify(promise, initialValue) {
-		var prop = m.prop(initialValue);
+	function propify(promise) {
+		var prop = m.prop();
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
-			return propify(promise.then(resolve, reject), initialValue)
+			promise = promise.then(resolve, reject).then(prop);
+			return prop;
 		};
 		return prop
 	}
@@ -1095,7 +1022,7 @@ var m = (function app(window, undefined) {
 
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation();
-		var deferred = new Deferred();
+		var deferred = m.deferred();
 		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
 		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
 		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
@@ -1124,7 +1051,7 @@ var m = (function app(window, undefined) {
 			if (xhrOptions.background !== true) m.endComputation()
 		};
 		ajax(xhrOptions);
-		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
+		deferred.promise(xhrOptions.initialValue);
 		return deferred.promise
 	};
 
