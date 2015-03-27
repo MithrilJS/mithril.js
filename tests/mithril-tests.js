@@ -2417,6 +2417,17 @@ function testMithril(mock) {
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop().url === "test?foo=1&foo=2"
 	})
+	test(function() {
+		var value
+		var prop1 = m.request({method: "GET", url: "test", initialValue: 123})
+		var val1 = prop1()
+		var prop2 = prop1.then(function() {return 1})
+		var val2 = prop2()
+		var prop3 = prop1.then(function(v) {value = v})
+		var val3 = prop3()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return val1 === 123 && val2 === 123 && val3 === 123 && value.method === "GET" && value.url === "test"
+	})
 
 	// m.request over jsonp
 	test(function(){

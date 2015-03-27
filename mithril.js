@@ -764,12 +764,11 @@ var m = (function app(window, undefined) {
 		deferred.promise = propify(deferred.promise);
 		return deferred
 	};
-	function propify(promise) {
-		var prop = m.prop();
+	function propify(promise, initialValue) {
+		var prop = m.prop(initialValue);
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
-			promise = promise.then(resolve, reject).then(prop);
-			return prop;
+			return propify(promise.then(resolve, reject), initialValue)
 		};
 		return prop
 	}
@@ -1022,7 +1021,7 @@ var m = (function app(window, undefined) {
 
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation();
-		var deferred = m.deferred();
+		var deferred = new Deferred();
 		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
 		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
 		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
@@ -1051,7 +1050,7 @@ var m = (function app(window, undefined) {
 			if (xhrOptions.background !== true) m.endComputation()
 		};
 		ajax(xhrOptions);
-		deferred.promise(xhrOptions.initialValue);
+		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
 		return deferred.promise
 	};
 
