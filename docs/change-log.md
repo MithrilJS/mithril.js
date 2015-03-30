@@ -1,5 +1,23 @@
 ## Change Log
 
+[v0.1.33](/mithril/archive/v0.1.33) - maintenance
+
+### Bug Fixes:
+
+-	fix diff bug when mixing `undefined` in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
+-	fix reference to map file in package.json for cdnjs
+-	fix links in documentation
+
+---
+
+[v0.1.32](/mithril/archive/v0.1.32) - maintenance
+
+### Bug Fixes:
+
+-	fix regression caused by [#454](https://github.com/lhorie/mithril.js/issues/454)
+
+---
+
 [v0.1.31](/mithril/archive/v0.1.31) - maintenance
 
 ### News:
