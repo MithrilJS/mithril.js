@@ -68,7 +68,6 @@ function testMithril(mock) {
 		
 		return root.childNodes.length
 	})
-	
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
 
@@ -946,6 +945,43 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return root.childNodes.length == 3
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var show = true
+		var testcomponent = {
+			controller: function() {},
+			view: function() {
+				return m('div', 'component');
+			}
+		};
+
+		var app = {
+			view: function(scope) {
+				return show ? [
+					m('h1', '1'),
+					testcomponent
+				] : [
+					m('h1', '2'),
+				];
+			}
+		};
+
+		m.module(root, app);
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = false
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = true
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes.length == 2
 	})
 	m.redraw.strategy(undefined) //teardown for m.module tests
 	
