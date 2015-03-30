@@ -1,5 +1,5 @@
 {
-	"name": "mithril-beta",
+	"name": "mithril",
 	"description": "Mithril.js beta build - use this to help us test the releases before they are released",
 	"version": "0.1.34-beta.0",
     "repository": {
