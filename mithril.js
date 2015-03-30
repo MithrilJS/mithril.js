@@ -138,13 +138,15 @@ var m = (function app(window, undefined) {
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
+			
+			data = data.filter(function(x) {return x != null})
+			
 			var guid = 0
 			for (var i = 0, len = data.length; i < len; i++) {
 				if (data[i] && data[i].attrs && data[i].attrs.key == null) data[i].attrs.key = "__mithril__" + guid++
 			}
+			
 			if (shouldMaintainIdentities) {
-				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
-				
 				var keysDiffer = false
 				if (data.length != cached.length) keysDiffer = true
 				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
