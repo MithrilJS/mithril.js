@@ -3,7 +3,7 @@
 ---
 
 - [Usage](#usage)
-- [Subtree directives](#subtree directives)
+- [Subtree directives](#subtree-directives)
 - [Signature](#signature)
 
 ---
