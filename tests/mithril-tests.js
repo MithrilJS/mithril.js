@@ -2808,8 +2808,6 @@ function testMithril(mock) {
 }
 
 //mock
-var start = performance.now()
 testMithril(mock.window);
-console.log("test finished running in:", performance.now() - start, "ms")
 
 test.print(function(value) {console.log(value)})
