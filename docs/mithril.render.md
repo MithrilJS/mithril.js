@@ -3,7 +3,7 @@
 ---
 
 - [Usage](#usage)
-- [Subtree directives](#subtree directives)
+- [Subtree directives](#subtree-directives)
 - [Signature](#signature)
 
 ---
@@ -60,7 +60,7 @@ This mechanism is only intended to be used as a last resort optimization tool. I
 
 The example below shows how to use a SubtreeDirective object to create a static header that doesn't incur diff costs once it has been rendered. This means that we are avoiding the creation of the header subtree (and therefore skipping the diff algorithm) altogether, but it also means that dynamic variables will NOT be updated within the header.
 
-```
+```javascript
 var app = {}
 
 //here's an example plugin that determines whether data has changes.
@@ -78,7 +78,7 @@ app.bindOnce = (function() {
 
 //here's the view
 app.view = function() {
-	m(".layout", [
+	return m(".layout", [
 		app.bindOnce(function() {
 			//this only runs once in order to boost performance
 			//dynamic variables are not updated here

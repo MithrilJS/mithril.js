@@ -10,7 +10,7 @@
 - [Casting the Response Data to a Class](#casting-the-response-data-to-a-class)
 - [Unwrapping Response Data](#unwrapping-response-data)
 - [Using Different Data Transfer Formats](#using-different-data-transfer-formats)
-- [File uploads with FormData](#file-uploads-with-form-data)
+- [File uploads with FormData](#file-uploads-with-formdata)
 - [Using variable data formats](#using-variable-data-formats)
 - [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
 - [Custom request rejections](#custom-request-rejections)
