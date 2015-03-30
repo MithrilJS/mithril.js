@@ -61,12 +61,12 @@ Modules can have arguments "preloaded" into them. Calling `m.module` without a D
 ```javascript
 //declare a component
 var MyModule = {}
-MyModule.controller = function(options, extras) {
+MyModule.controller = function(args, extras) {
 	this.greeting = "Hello"
-	console.log(options.name, extras)
+	console.log(args.name, extras)
 }
-MyModule.view = function(ctrl, options, extras) {
-	return m("h1", ctrl.greeting + " " + options.name + " " + extras)
+MyModule.view = function(ctrl, args, extras) {
+	return m("h1", ctrl.greeting + " " + args.name + " " + extras)
 }
 
 
@@ -88,7 +88,7 @@ var MyApp = {
 	view: function() {
 		return m("div", [
 			m("h1", "My app"),
-			
+
 			//a parameterized module
 			m.module(MyModule, {name: "users"}, "from component"),
 		])
@@ -139,7 +139,7 @@ var MyApp = {
 var TemperatureConverter = {
 	controller: function() {
 		//note how the controller does not handle the input arguments
-		
+
 		//define some helper functions to be called from the view
 		this.kelvinToCelsius = function(value) {
 			return value - 273.15
@@ -148,11 +148,11 @@ var TemperatureConverter = {
 			return (value 9 / 5 * (v - 273.15)) + 32
 		}
 	},
-	view: function(ctrl, options) {
+	view: function(ctrl, args) {
 		return m('div', [
-			"celsius:", ctrl.kelvinToCelsius(options.value),
+			"celsius:", ctrl.kelvinToCelsius(args.value),
 			m("br"),
-			"fahrenheit:", ctrl.kelvinToFahrenheit(options.value),
+			"fahrenheit:", ctrl.kelvinToFahrenheit(args.value),
 		]);
 	}
 };
@@ -329,7 +329,7 @@ var ContactsWidget = {
 	view: function(ctrl) {
 		return [
 			m.module(ContactForm, {onsave: ctrl.save}),
-			m.module(ContactList, {contacts: contacts})
+			m.module(ContactList, {contacts: ctrl.contacts})
 		]
 	}
 }
@@ -340,14 +340,14 @@ var ContactForm = {
 	},
 	view: function(ctrl, args) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: args.onsave.bind(this, contact)}, "Save")
 		])
 	}
@@ -408,16 +408,16 @@ var ContactForm = {
 			Contact.save(contact)
 		}
 	},
-	view: function() {
+	view: function(ctrl) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
@@ -494,16 +494,16 @@ var ContactForm = {
 			Contact.save(contact).then(Observable.trigger)
 		}
 	},
-	view: function() {
+	view: function(ctrl) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
@@ -610,14 +610,14 @@ var ContactForm = {
 	},
 	view: function(ctrl, args) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
@@ -679,14 +679,14 @@ var ContactForm = {
 	},
 	view: function(ctrl, args) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
@@ -731,7 +731,7 @@ var Uploader = {
 				formData.append(key, files[i])
 			}
 		}
-		
+
 		//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
 		options.serialize = function(value) {return value}
 		options.data = formData
@@ -741,7 +741,7 @@ var Uploader = {
 	serialize: function(files) {
 		var promises = Array.prototype.slice.call(files).map(function(file) {
 			var deferred = m.deferred()
-			
+
 			var reader = new FileReader
 			reader.readAsDataURL()
 			reader.onloadend = function(e) {
@@ -752,7 +752,7 @@ var Uploader = {
 		})
 		return m.sync(promises)
 	},
-	
+
 	controller: function(args) {
 		this.noop = function(e) {
 			e.preventDefault()
@@ -795,7 +795,7 @@ var Demo2 = {
 			return m.request({method: "POST", url: "/api/assets", data: data})
 		}
 	},
-	
+
 	controller: function() {
 		this.files = m.prop([])
 		this.save = function() {
