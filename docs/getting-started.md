@@ -447,6 +447,8 @@ m.module(document, todo);
 
 ---
 
+This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias/fbgypzbr/1/).
+
 ## Notes on Architecture
 
 Let's look at each MVC layer in detail to illustrate some of Mithril's design principles and philosophies:
