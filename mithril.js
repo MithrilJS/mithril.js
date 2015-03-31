@@ -558,9 +558,14 @@ var m = (function app(window, undefined) {
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
 		return output
 	}
-	m.module = function(root, module) {
+	m.component = function(module) {
+		return function() {
+			return submodule(module, [].slice.call(arguments))
+		}
+	}
+	//m.module is deprecated, use m.mount
+	m.mount = m.module = function(root, module) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-		if (root.view) return submodule(root, [].slice.call(arguments, 1))
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
 		
@@ -583,7 +588,6 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) module = submodule(module, [].slice.call(arguments, 2))
 			var currentModule = topModule = module = module || {};
 			var constructor = module.controller || function() {}
 			var controller = new constructor;
