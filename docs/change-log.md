@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.1.34](/mithril/archive/v0.1.34) - maintenance
+
+### Bug Fixes:
+
+-	fix identity bug when mixing unkeyable elements in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
+
+---
+
 [v0.1.33](/mithril/archive/v0.1.33) - maintenance
 
 ### Bug Fixes:
