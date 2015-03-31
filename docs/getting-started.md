@@ -498,6 +498,8 @@ m.module(document, {controller: todo.controller, view: todo.view});
 
 ---
 
+This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias/fbgypzbr/1/).
+
 ## Notes on Architecture
 
 Idiomatic Mithril code is meant to apply good programming conventions and be easy to refactor.
