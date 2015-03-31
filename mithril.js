@@ -129,7 +129,6 @@ var m = (function app(window, undefined) {
 			//2) add new keys to map and mark them for addition
 			//3) if key exists in new list, change action from deletion to a move
 			//4) for each key, handle its corresponding action as marked in previous steps
-			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
 			for (var i = 0; i < cached.length; i++) {
@@ -139,11 +138,14 @@ var m = (function app(window, undefined) {
 				}
 			}
 			
-			data = data.filter(function(x) {return x != null})
-			
 			var guid = 0
 			for (var i = 0, len = data.length; i < len; i++) {
-				if (data[i] && data[i].attrs && data[i].attrs.key == null) data[i].attrs.key = "__mithril__" + guid++
+				if (data[i] && data[i].attrs && data[i].attrs.key != null) {
+					for (var j = 0, len = data.length; j < len; j++) {
+						if (data[j] && data[j].attrs && data[j].attrs.key == null) data[j].attrs.key = "__mithril__" + guid++
+					}
+					break
+				}
 			}
 			
 			if (shouldMaintainIdentities) {
@@ -169,7 +171,6 @@ var m = (function app(window, undefined) {
 									element: cached.nodes[existing[key].index] || $document.createElement("div")
 								}
 							}
-							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 						}
 					}
 					var actions = []
@@ -198,12 +199,6 @@ var m = (function app(window, undefined) {
 							newCached[change.index] = cached[change.from]
 							newCached.nodes[change.index] = change.element
 						}
-					}
-					for (var i = 0, len = unkeyed.length; i < len; i++) {
-						var change = unkeyed[i];
-						parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
-						newCached[change.index] = cached[change.index]
-						newCached.nodes[change.index] = change.element
 					}
 					cached = newCached;
 				}
