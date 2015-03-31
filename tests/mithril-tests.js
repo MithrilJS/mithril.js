@@ -245,7 +245,7 @@ function testMithril(mock) {
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
-		return root.childNodes[0].childNodes.length === 0
+		return root.childNodes[0].childNodes[0].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -268,19 +268,19 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes.length == 1
+		return root.childNodes[0].childNodes[1].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li"), m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes.length == 1
+		return root.childNodes[0].childNodes[1].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [undefined]))
-		return root.childNodes[0].childNodes.length == 0
+		return root.childNodes[0].childNodes[0].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -463,18 +463,18 @@ function testMithril(mock) {
 		m.render(root, m("div", [m("button"), m("ul")]))
 		var valueBefore = root.childNodes[0].childNodes[0].nodeName
 		m.render(root, m("div", [undefined, m("ul")]))
-		var valueAfter = root.childNodes[0].childNodes[0].nodeName
-		return valueBefore === "BUTTON" && valueAfter === "UL"
+		var valueAfter = root.childNodes[0].childNodes[0].nodeValue
+		return valueBefore === "BUTTON" && valueAfter === ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [m("ul"), undefined]))
 		var valueBefore1 = root.childNodes[0].childNodes[0].nodeName
-		var valueBefore2 = root.childNodes[0].childNodes.length
+		var valueBefore2 = root.childNodes[0].childNodes[1].nodeValue
 		m.render(root, m("div", [undefined, m("ul")]))
-		var valueAfter1 = root.childNodes[0].childNodes[0].nodeName
-		var valueAfter2 = root.childNodes[0].childNodes.length
-		return valueBefore1 === "UL" && valueAfter1 === "UL" && valueBefore2 === 1 && valueAfter2 === 1
+		var valueAfter1 = root.childNodes[0].childNodes[0].nodeValue
+		var valueAfter2 = root.childNodes[0].childNodes[1].nodeName
+		return valueBefore1 === "UL" && valueAfter1 === "" && valueBefore2 === "" && valueAfter2 === "UL"
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/79
@@ -916,7 +916,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [m("div", 1), m("div", 2), [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
 		m.render(root, m("div", [m("div", 1), null, [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
-		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).slice(0, 5).join("") == "13456"
+		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).join("") == "13456"
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -948,6 +948,57 @@ function testMithril(mock) {
 		m.render(root, m("div", "foo", m("a")))
 		m.render(root, m("div", "test"))
 		return root.childNodes[0].childNodes.length == 1
+	})
+	test(function() {
+		//if an element is preceded by a conditional, it should not lose its identity
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a"), m("input[autofocus]")]))
+		var before = root.childNodes[0].childNodes[1]
+		m.render(root, m("div", [undefined, m("input[autofocus]")]))
+		var after = root.childNodes[0].childNodes[1]
+		return before === after
+	})
+	test(function() {
+		//unkeyed element should maintain identity if mixed w/ keyed elements and identity can be inferred
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[3]
+		m.render(root, m("div", [m("b", {key: 3}), m("b", {key: 4}), m("i"), m("b", {key: 1})]))
+		var after = root.childNodes[0].childNodes[2]
+		return before === after
+	})
+	test(function() {
+		//unkeyed element should maintain identity if mixed w/ keyed elements and text nodes and identity can be inferred
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), "foo", m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), "bar", m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), null, m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), null, m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), undefined, m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), undefined, m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), m.trust("a"), m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), m.trust("a"), m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
 	})
 	//end m.render
 
