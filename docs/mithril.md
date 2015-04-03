@@ -100,10 +100,12 @@ var links = [
 ];
 
 m.render(document.body, [
-    m("ul.nav", [
-        m("li", links.map(function(link) {
-            return m("a", {href: link.url}, link.title)
-        }))
+    m("ul.nav", 
+        links.map(function(link) {
+            return m("li",
+                m("a", {href: link.url}, link.title) 
+            );
+        })
     ])
 ]);
 ```
