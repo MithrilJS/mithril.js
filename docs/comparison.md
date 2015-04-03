@@ -118,8 +118,6 @@ Knockout is a library focused on data binding. It is not an MVC framework in the
 
 A Knockout view model is an amalgamation of model and controller layers in a single class. In contrast, Mithril separates the two layers more distinctly.
 
-Generally speaking, Knockout applications tend to be more tightly coupled than Mithril since Knockout doesn't provide an equivalent to Mithril's modules and components.
-
 As with Angular, Knockout templates are written in HTML, and therefore have the same pros and cons as Angular templates.
 
 ### Vue

@@ -33,15 +33,15 @@ Yes, this is valid HTML 5! According to the specs, the `<html>`, `<head>` and `<
 
 ### Model
 
-In Mithril, an application typically lives in a namespace and contains modules. Modules are merely structures that represent a viewable "page" or a part of a page. In addition, an application can be organizationally divided into three major layers: Model, Controller and View.
+In Mithril, an application typically lives in a namespace and contains components. Components are merely structures that represent a viewable "page" or a part of a page. In addition, an application can be organizationally divided into three major layers: Model, Controller and View.
 
-For simplicity, our application will have only one module, and we're going to use it as the namespace for our application.
+For simplicity, our application will have only one component, and we're going to use it as the namespace for our application.
 
-In Mithril, a *module* is an object that contains two functions: `controller` and `view`.
+In Mithril, a *component* is an object that contains two functions: `controller` and `view`.
 
 ```
-//an empty Mithril module
-var myModule = {
+//an empty Mithril component
+var myComponent = {
 	controller: function() {},
 	view: function() {}
 }
