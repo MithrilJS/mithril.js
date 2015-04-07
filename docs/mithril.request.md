@@ -99,7 +99,7 @@ User.listEven = function() {
 
 //controller
 var controller = function() {
-	this.users = User.listEven()
+	return {users: User.listEven()}
 }
 ```
 
@@ -112,9 +112,11 @@ In the example below, we use the previously defined `listEven` model method and 
 ```javascript
 //controller
 var controller = function() {
-	this.users = User.listEven().then(function(users) {
-		if (users.length == 0) m.route("/add");
-	})
+	return {
+		users: User.listEven().then(function(users) {
+			if (users.length == 0) m.route("/add");
+		})
+	}
 }
 ```
 

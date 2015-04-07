@@ -295,7 +295,7 @@ It is only meant to be used to call methods on DOM elements that cannot be calle
 
 It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
 
-Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.module` call.
+Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
 
@@ -347,7 +347,7 @@ m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets cal
 
 When using the [router](mithril.route.md), a route change recreates the DOM tree from scratch in order to unload plugins from the previous page. If you want to keep a DOM element intact across a route change, you can set the `retain` flag in the config's context object.
 
-In the example below, there are two routes, each of which loads a module when a user navigates to their respective URLs. Both modules use a `menu` template, which contains links for navigation between the two modules, and an expensive-to-reinitialize element. Setting `context.retain = true` in the element's config function allows the span to stay intact after a route change.
+In the example below, there are two routes, each of which loads a component when a user navigates to their respective URLs. Both components use a `menu` template, which contains links for navigation between the two components, and an expensive-to-reinitialize element. Setting `context.retain = true` in the element's config function allows the span to stay intact after a route change.
 
 ```javascript
 //a menu template
@@ -369,22 +369,22 @@ function persistent(el, isInit, context) {
 	}
 }
 
-//modules that use the menu above
+//components that use the menu above
 var Home = {
 	controller: function() {},
 	view: function() {
-		return [
+		return m("div", [
 			menu(),
 			m("h1", "Home")
-		]
+		])
 	}
 }
 var Contact = {
 	view: function() {
-		return [
+		return m("div", [
 			menu(),
 			m("h2", "Contact")
-		]
+		])
 	}
 }
 
@@ -478,8 +478,8 @@ VirtualElement m(String selector [, Attributes attributes] [, Children... childr
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
     Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context)>
-	Children :: String text | VirtualElement virtualElement | Module | SubtreeDirective directive | Array<Children children>
-	Module :: Object { Function controller, Function view }
+	Children :: String text | VirtualElement virtualElement | Component | SubtreeDirective directive | Array<Children children>
+	Component :: Object { Function? controller, Function view }
 	SubtreeDirective :: Object { String subtree }
 ```
 
@@ -582,7 +582,7 @@ where:
 
 	It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
 
-	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.module` call.
+	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 	You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
 
@@ -636,7 +636,7 @@ where:
 
 	If it's a VirtualElement, it will be rendered as a DOM Element.
 
-	If it's a Mithril [module](mithril.module.md), the module will be instantiated and managed internally by Mithril as a [component](components.md)
+	If it's a [component](mithril.component.md), the component will be instantiated and managed internally by Mithril
 	
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.
 

@@ -66,7 +66,7 @@ window.onfocus = function() {
 
 The auto-redrawing system in Mithril is not affected by changes in values of `m.prop` getter-setters. Instead, Mithril relies on `m.startComputation` and `m.endComputation` calls to figure out when to redraw.
 
-Mithril has an internal counter, which is incremented every time `m.startComputation` is called, and decremented every time `m.endComputation` is called. Once the counter reaches zero, Mithril redraws. Mithril internally calls this pair of functions when you call [`m.module`](mithril.module.md), [`m.route`](mithril.route.md), [`m.request`](mithril.request.md), and whenever an event defined with [`m()`](mithril.md) is triggered.
+Mithril has an internal counter, which is incremented every time `m.startComputation` is called, and decremented every time `m.endComputation` is called. Once the counter reaches zero, Mithril redraws. Mithril internally calls this pair of functions when you call [`m.mount`](mithril.mount.md), [`m.route`](mithril.route.md), [`m.request`](mithril.request.md), and whenever an event defined with [`m()`](mithril.md) is triggered.
 
 So calling `m.request` multiple times from a controller context increments the internal counter. Once each request completes, the counter is decremented. The end result is that Mithril waits for all requests to complete before attempting to redraw. This also applies for asynchronous functions called from 3rd party libraries or from vanilla javascript, if they call this pair of functions.
 
@@ -76,11 +76,13 @@ It's possible to opt out of the redrawing schedule by using the `background` opt
 
 ```javascript
 //`background` option example
-var module = {}
-module.controller = function() {
-	//setting `background` allows the module to redraw immediately, without waiting for the request to complete
-	m.request({method: "GET", url: "/foo", background: true})
-}
+var component = m.component({
+	controller: function() {
+		//setting `background` allows the component to redraw immediately, without waiting for the request to complete
+		m.request({method: "GET", url: "/foo", background: true})
+	},
+	//...
+})
 ```
 
 It's also possible to modify the strategy that Mithril uses for any given redraw, by using [`m.redraw.strategy`](mithril.redraw.md#changing-redraw-strategy). Note that changing the redraw strategy only affects the next scheduled redraw. After that, Mithril resets the `m.redraw.strategy` flag to either "all" or "diff" depending on whether the redraw was due to a route change or whether it was triggered by some other action.
@@ -88,31 +90,33 @@ It's also possible to modify the strategy that Mithril uses for any given redraw
 ```javascript
 //diff when routing, instead of redrawing from scratch
 //this preserves the `<input>` element and its 3rd party plugin after route changes, since the `<input>` doesn't change
-var module1 = {}
-module1.controller = function() {
-	m.redraw.strategy("diff")
-}
-module1.view = function() {
-	return [
-		m("h1", "Hello Foo"),
-		m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
-	]
-}
+var Component1 = m.component({
+	controller: function() {
+		m.redraw.strategy("diff")
+	},
+	view: function() {
+		return m("div", [
+			m("h1", "Hello Foo"),
+			m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+		])
+	}
+})
 
-var module2 = {}
-module2.controller = function() {
-	m.redraw.strategy("diff")
-}
-module2.view = function() {
-	return [
-		m("h1", "Hello Bar"),
-		m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
-	]
-}
+var Component2 = m.component({
+	controller: function() {
+		m.redraw.strategy("diff")
+	},
+	view: function() {
+		return m("div", [
+			m("h1", "Hello Bar"),
+			m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
+		])
+	}
+})
 
 m.route(document.body, "/foo", {
-	"/foo": module1,
-	"/bar": module2,
+	"/foo": Component1,
+	"/bar": Component2,
 })
 ```
 
@@ -132,10 +136,10 @@ function save(e) {
 
 //view
 var view = function() {
-	return [
+	return m("div", [
 		m("button[type=button]", {onkeypress: save}, "Save"),
 		saved ? "Saved" : ""
-	]
+	])
 }
 ```
 
@@ -216,16 +220,16 @@ var doSomething = function(callback) {
 
 ### Integrating to legacy code
 
-If you need to add separate widgets to different places on a same page, you can simply initialize each widget as you would a regular Mithril application (i.e. use `m.render`, `m.module` or `m.route`).
+If you need to add separate widgets to different places on a same page, you can simply initialize each widget as you would a regular Mithril application (i.e. use `m.render`, `m.mount` or `m.route`).
 
 There's just one caveat: while simply initializing multiple "islands" in this fashion works, their initialization calls are not aware of each other and can cause redraws too frequently. To optimize rendering, you should add a `m.startComputation` call before the first widget initialization call, and a `m.endComputation` after the last widget initialization call in each execution thread.
 
 ```
 m.startComputation()
 
-m.module(document.getElementById("widget1-container"), widget1)
+m.mount(document.getElementById("widget1-container"), Widget1)
 
-m.module(document.getElementById("widget2-container"), widget1)
+m.mount(document.getElementById("widget2-container"), Widget2)
 
 m.endComputation()
 ```

@@ -26,25 +26,25 @@ In Mithril, components are nothing more than [modules](mithril.module.md). In or
 
 ```javascript
 //first declare a component (it's really just a module)
-var MyComponent = {
+var MyComponent = m.component({
 	controller: function() {
-		this.greeting = "Hello"
+		return {greeting: "Hello"}
 	},
 	view: function(ctrl) {
 		return m("p", ctrl.greeting)
 	}
-}
+})
 
 //now use it in an app
-var MyApp = {
+var MyApp = m.component({
 	controller: function() {},
 	view: function() {
 		return m("div", [
 			m("h1", "My app"),
-			MyComponent
+			MyComponent()
 		])
 	}
-}
+})
 
 m.module(document.body, MyApp)
 
@@ -60,14 +60,15 @@ Modules can have arguments "preloaded" into them. Calling `m.module` without a D
 
 ```javascript
 //declare a component
-var MyModule = {}
-MyModule.controller = function(args, extras) {
-	this.greeting = "Hello"
-	console.log(args.name, extras)
-}
-MyModule.view = function(ctrl, args, extras) {
-	return m("h1", ctrl.greeting + " " + args.name + " " + extras)
-}
+var MyComponent = m.component({
+	controller: function(args, extras) {
+		console.log(args.name, extras)
+		return {greeting: "Hello"}
+	},
+	view: function(ctrl, args, extras) {
+		return m("h1", ctrl.greeting + " " + args.name + " " + extras)
+	}
+})
 
 
 //note the lack of a DOM element in the list of parameters
@@ -126,7 +127,7 @@ The following example illustrates this pattern:
 ```javascript
 var MyApp = {
 	controller: function() {
-		this.temp = m.prop(10) //kelvin
+		return {temp: m.prop(10)} //kelvin
 	},
 	view: function(ctrl) {
 		return m("div", [
@@ -141,11 +142,13 @@ var TemperatureConverter = {
 		//note how the controller does not handle the input arguments
 
 		//define some helper functions to be called from the view
-		this.kelvinToCelsius = function(value) {
-			return value - 273.15
-		}
-		this.kelvinToFahrenheit = function(value) {
-			return (value 9 / 5 * (v - 273.15)) + 32
+		return {
+			kelvinToCelsius: function(value) {
+				return value - 273.15
+			},
+			kelvinToFahrenheit: function(value) {
+				return (value 9 / 5 * (v - 273.15)) + 32
+			}
 		}
 	},
 	view: function(ctrl, args) {
@@ -198,7 +201,9 @@ The ability to handle arguments in the controller is useful for setting up the i
 var MyComponent = {
 	controller: function(args) {
 		//we only want to make this call once
-		this.things = m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+		return {
+			things: m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+		}
 	},
 	view: function(ctrl) {
 		return m("ul", [
@@ -241,30 +246,32 @@ Modules declared in templates can also call `onunload` and its `e.preventDefault
 In the example below, clicking the button triggers the component's `onunload` event and logs "unloaded!".
 
 ```javascript
-var MyApp = {
+var MyApp = m.component({
 	controller: function() {
-		this.loaded = true
+		return {loaded: true}
 	},
 	view: function(ctrl) {
-		return [
+		return m("div", [
 			m("button[type=button]", {onclick: function() {ctrl.loaded = false}}),
 			ctrl.loaded ? m.module(MyComponent) : ""
-		]
+		])
 	}
-}
+})
 
-var MyComponent = {
+var MyComponent = m.component({
 	controller: function() {
-		this.onunload = function() {
-			console.log("unloaded!")
+		return {
+			onunload: function() {
+				console.log("unloaded!")
+			}
 		}
 	},
 	view: function() {
 		return m("h1", "My component")
 	}
-}
+})
 
-m.module(document.body, MyApp)
+m.module(document.body, MyApp())
 ```
 
 Calling `e.preventDefault()` from a component's `onunload` aborts route changes, but it does not abort, rollback or affect the current redraw in any way.
@@ -319,7 +326,7 @@ Here, we've defined a class called `Contact`. A contact has an id, a name and an
 One way of organizing components is to use component parameter lists to send data downstream, and to define events to bubble data back upstream to a centralized module who is responsible for interfacing with the model layer.
 
 ```javascript
-var ContactsWidget = {
+var ContactsWidget = m.component({
 	controller: function update() {
 		this.contacts = Contact.list()
 		this.save = function(contact) {
@@ -328,13 +335,13 @@ var ContactsWidget = {
 	},
 	view: function(ctrl) {
 		return [
-			m.module(ContactForm, {onsave: ctrl.save}),
-			m.module(ContactList, {contacts: ctrl.contacts})
+			ContactForm({onsave: ctrl.save}),
+			ContactList({contacts: ctrl.contacts})
 		]
 	}
-}
+})
 
-var ContactForm = {
+var ContactForm = m.component({
 	controller: function(args) {
 		this.contact = m.prop(args.contact || new Contact())
 	},
@@ -351,9 +358,9 @@ var ContactForm = {
 			m("button[type=button]", {onclick: args.onsave.bind(this, contact)}, "Save")
 		])
 	}
-}
+})
 
-var ContactList = {
+var ContactList = m.component({
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -365,9 +372,9 @@ var ContactList = {
 			})
 		])
 	}
-}
+})
 
-m.module(document.body, ContactsWidget)
+m.module(document.body, ContactsWidget())
 ```
 
 In the example above, there are 3 components. `ContactsWidget` is the top level module being rendered to `document.body`, and it is the module that has the responsibility of talking to our Model entity `Contact`, which we defined earlier.
@@ -401,7 +408,7 @@ Another way of organizing code is to distribute concrete responsibilities across
 Here's a refactored version of the sample app above to illustrate:
 
 ```javascript
-var ContactForm = {
+var ContactForm = m.component({
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -421,7 +428,7 @@ var ContactForm = {
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-}
+})
 
 var ContactList = {
 	controller: function() {
@@ -441,8 +448,8 @@ var ContactList = {
 }
 
 m.route(document.body, "/", {
-	"/list": ContactList,
-	"/create": ContactForm
+	"/list": ContactList(),
+	"/create": ContactForm()
 })
 ```
 
@@ -478,16 +485,16 @@ var Observable = function() {
 }.call()
 
 
-var ContactsWidget = {
+var ContactsWidget = m.component({
 	view: function(ctrl) {
 		return [
 			m.module(ContactForm),
 			m.module(ContactList)
 		]
 	}
-}
+})
 
-var ContactForm = {
+var ContactForm = m.component({
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -507,9 +514,9 @@ var ContactForm = {
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-}
+})
 
-var ContactList = {
+var ContactList = m.component({
 	controller: Observable.register(function() {
 		this.contacts = Contact.list()
 	}),
@@ -524,9 +531,9 @@ var ContactList = {
 			})
 		])
 	}
-}
+})
 
-m.module(document.body, ContactsWidget)
+m.module(document.body, ContactsWidget())
 ```
 
 In this iteration, both the `ContactForm` and `ContactList` components are now children of the `ContactsWidget` component and they appear simultaneously on the same page.
@@ -589,19 +596,19 @@ It's of course possible to use both aggregation of responsibility and the observ
 The example below shows a variation of the contacts app where `ContactForm` is responsible for saving.
 
 ```javascript
-var ContactsWidget = {
+var ContactsWidget = m.component({
 	controller: Observable.register(["updateContact"], function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
 		return [
-			m.module(ContactForm),
-			m.module(ContactList, {contacts: ctrl.contacts})
+			ContactForm(),
+			ContactList({contacts: ctrl.contacts})
 		]
 	}
-}
+})
 
-var ContactForm = {
+var ContactForm = m.component({
 	controller: function(args) {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -621,9 +628,9 @@ var ContactForm = {
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-}
+})
 
-var ContactList = {
+var ContactList = m.component({
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -635,9 +642,9 @@ var ContactList = {
 			})
 		])
 	}
-}
+})
 
-m.module(document.body, ContactsWidget)
+m.mount(document.body, ContactsWidget())
 ```
 
 Here, the data fetching is still centralized in the top-level component, so that we can avoid duplicate AJAX requests when fetching data.
@@ -657,20 +664,20 @@ Observable.on(["saveContact"], function(data) {
 })
 
 //ContactsWidget is the same as before
-var ContactsWidget = {
+var ContactsWidget = m.component({
 	controller: Observable.register(["updateContact"], function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
 		return [
-			m.module(ContactForm),
-			m.module(ContactList, {contacts: ctrl.contacts})
+			ContactForm(),
+			ContactList({contacts: ctrl.contacts})
 		]
 	}
-}
+})
 
 //ContactList no longer calls `Contact.save`
-var ContactForm = {
+var ContactForm = m.component({
 	controller: function(args) {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -690,10 +697,10 @@ var ContactForm = {
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-}
+})
 
 //ContactList is the same as before
-var ContactList = {
+var ContactList = m.component({
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -705,9 +712,9 @@ var ContactList = {
 			})
 		])
 	}
-}
+})
 
-m.module(document.body, ContactsWidget)
+m.mount(document.body, ContactsWidget())
 ```
 
 Here we've moved `Contact.save(contact).then(Observable.broadcast("updateContact"))` out of the `ContactForm` component and into the model layer. In its place, `ContactForm` merely emits an action, which is then handled by this model layer observer.
@@ -723,36 +730,7 @@ Here's an example of a not-so-trivial component: a drag-n-drop file uploader. In
 These two functions are here to illustrate the ability to expose APIs to component consumers that complement the component's user interface. By bundling model methods in the component, we avoid hard-coding how files are handled once they're dropped in, and instead, we provide a useful library of functions that can be consumed flexibly to meet the demands on an application.
 
 ```javascript
-var Uploader = {
-	upload: function(options) {
-		var formData = new FormData
-		for (var key in options.data) {
-			for (var i = 0; i < options.data[key].length; i++) {
-				formData.append(key, files[i])
-			}
-		}
-
-		//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
-		options.serialize = function(value) {return value}
-		options.data = formData
-
-		return m.request(options)
-	},
-	serialize: function(files) {
-		var promises = Array.prototype.slice.call(files).map(function(file) {
-			var deferred = m.deferred()
-
-			var reader = new FileReader
-			reader.readAsDataURL()
-			reader.onloadend = function(e) {
-				deferred.resolve(e.result)
-			}
-			reader.onerror = deferred.reject
-			return deferred
-		})
-		return m.sync(promises)
-	},
-
+var Uploader = m.component({
 	controller: function(args) {
 		this.noop = function(e) {
 			e.preventDefault()
@@ -767,6 +745,34 @@ var Uploader = {
 	view: function(ctrl, args) {
 		return m(".uploader", {ondragover: ctrl.noop, ondrop: ctrl.update})
 	}
+})
+Uploader.upload = function(options) {
+	var formData = new FormData
+	for (var key in options.data) {
+		for (var i = 0; i < options.data[key].length; i++) {
+			formData.append(key, files[i])
+		}
+	}
+
+	//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
+	options.serialize = function(value) {return value}
+	options.data = formData
+
+	return m.request(options)
+}
+Uploader.serialize = function(files) {
+	var promises = Array.prototype.slice.call(files).map(function(file) {
+		var deferred = m.deferred()
+
+		var reader = new FileReader
+		reader.readAsDataURL()
+		reader.onloadend = function(e) {
+			deferred.resolve(e.result)
+		}
+		reader.onerror = deferred.reject
+		return deferred
+	})
+	return m.sync(promises)
 }
 ```
 
@@ -776,14 +782,16 @@ Below are some examples of consuming the `Uploader` component:
 //usage demo 1: standalone multipart/form-data upload when files are dropped into the component
 var Demo1 = {
 	controller: function() {
-		this.upload = function(files) {
-			Uploader.upload({method: "POST", url: "/api/files", {data: {files: files}}})
+		treturn {
+			upload: function(files) {
+				Uploader.upload({method: "POST", url: "/api/files", {data: {files: files}}})
+			}
 		}
 	},
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
-			m.module(Uploader, {onchange: ctrl.upload})
+			Uploader({onchange: ctrl.upload})
 		]
 	}
 }
@@ -797,18 +805,21 @@ var Demo2 = {
 	},
 
 	controller: function() {
-		this.files = m.prop([])
-		this.save = function() {
-			Uploader.serialize(this.files).then(function(files) {
-				Asset.save({files: files})
-			})
-		}.bind(this)
+		var files = m.prop([])
+		return {
+			files: files,
+			save: function() {
+				Uploader.serialize(files).then(function(files) {
+					Asset.save({files: files})
+				})
+			}
+		}
 	},
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
 			m("form", [
-				m.module(Uploader, {onchange: ctrl.files}),
+				Uploader({onchange: ctrl.files}),
 				m("button[type=button]", {onclick: ctrl.save})
 			])
 		]

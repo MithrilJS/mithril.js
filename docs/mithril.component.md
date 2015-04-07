@@ -231,7 +231,9 @@ The ability to handle arguments in the controller is useful for setting up the i
 var MyComponent = {
 	controller: function(args) {
 		//we only want to make this call once
-		this.things = m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+		return {
+			things: m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+		}
 	},
 	view: function(ctrl) {
 		return m("ul", [
@@ -309,16 +311,21 @@ This mechanism is useful to clear timers and unsubscribe event handlers.
 You can also use this event to prevent a component from being unloaded in the context of a route change (e.g. to alert a user to save their changes before navigating away from a page)
 
 ```javascript
-var component = {}
-component.controller = function() {
-	this.unsaved = false
-	
-	this.onunload = function(e) {
-		if (this.unsaved) {
-			e.preventDefault()
+var component = m.component({
+	controller: function() {
+		var unsaved = m.prop(false)
+		return {
+			unsaved: unsaved,
+			
+			onunload: function(e) {
+				if (unsaved()) {
+					e.preventDefault()
+				}
+			}
 		}
-	}
-}
+	},
+	//...
+})
 ```
 
 Normally, calling `m.mount` will return the controller instance for that component, but there's one corner case: if `e.preventDefault()` is called from a controller's `onunload` method, then the `m.mount` call will not instantiate the new controller, and will return `undefined`.
@@ -347,7 +354,7 @@ In the example below, clicking the button triggers the component's `onunload` ev
 ```javascript
 var MyApp = m.component({
 	controller: function() {
-		this.loaded = true
+		return {loaded: true}
 	},
 	view: function(ctrl) {
 		return [
@@ -359,8 +366,10 @@ var MyApp = m.component({
 
 var MyComponent = m.component({
 	controller: function() {
-		this.onunload = function() {
-			console.log("unloaded!")
+		return {
+			onunload: function() {
+				console.log("unloaded!")
+			}
 		}
 	},
 	view: function() {
@@ -389,7 +398,7 @@ There are [different ways to organize components](#application-architecture-with
 
 There are a few caveats when nesting components:
 
-1.	Nested component views must return a virtual element. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
+1.	Nested component views must return either a virtual element or another component. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
 
 2.	Nested components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persising-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
 
@@ -402,7 +411,7 @@ If a component controller does not return an object to be passed to the view, it
 ```javascript
 var MyComponent = m.component({
 	controller: function() {
-		this.greeting = "Hello"
+		return {greeting: "Hello"}
 	},
 	view: function(ctrl) {
 		return m("h1", ctrl.greeting)

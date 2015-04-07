@@ -47,23 +47,23 @@ var myComponent = {
 }
 ```
 
-In addition to holding a controller and a view, a module can also be used to store data that pertains to it.
+In addition to holding a controller and a view, a component can also be used to store data that pertains to it.
 
-Let's create a module.
+Let's create a component.
 
 ```markup
 <script>
-//this application only has one module: todo
+//this application only has one component: todo
 var todo = {};
 </script>
 ```
 
-Typically, model entities are reusable and live outside of modules (e.g. `var User = ...`). In our example, since the whole application lives in one module, we're going to use the module as a namespace for our model entities.
+Typically, model entities are reusable and live outside of components (e.g. `var User = ...`). In our example, since the whole application lives in one component, we're going to use the component as a namespace for our model entities.
 
 ```javascript
 var todo = {};
 
-//for simplicity, we use this module to namespace the model classes
+//for simplicity, we use this component to namespace the model classes
 
 //the Todo class has two properties
 todo.Todo = function(data) {
@@ -239,7 +239,7 @@ This renders the following markup:
 </html>
 ```
 
-Note that `m.render` is a very low level method in Mithril that draws only once and doesn't attempt to run the auto-redrawing system. In order to enable auto-redrawing, the `todo` module must be initialized by either calling `m.module` or by creating a route definition with `m.route`. Also note that, unlike observable-based frameworks like Knockout.js, setting a value in a `m.prop` getter-setter does NOT trigger redrawing side-effects in Mithril.
+Note that `m.render` is a very low level method in Mithril that draws only once and doesn't attempt to run the auto-redrawing system. In order to enable auto-redrawing, the `todo` component must be initialized by either calling `m.mount` or by creating a route definition with `m.route`. Also note that, unlike observable-based frameworks like Knockout.js, setting a value in a `m.prop` getter-setter does NOT trigger redrawing side-effects in Mithril.
 
 ---
 
@@ -406,11 +406,11 @@ Here are the highlights of the template above:
 
 ---
 
-So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` module via `m.module`.
+So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` component via `m.mount`.
 
 ```javascript
-//render the todo module inside the document DOM node
-m.module(document, {controller: todo.controller, view: todo.view});
+//render the todo component inside the document DOM node
+m.mount(document, {controller: todo.controller, view: todo.view});
 ```
 
 Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing. 
@@ -427,10 +427,10 @@ Here's the application code in its entirety:
 <!doctype html>
 <script src="mithril.min.js"></script>
 <script>
-//this application only has one module: todo
+//this application only has one component: todo
 var todo = {};
 
-//for simplicity, we use this module to namespace the model classes
+//for simplicity, we use this component to namespace the model classes
 
 //the Todo class has two properties
 todo.Todo = function(data) {
@@ -492,7 +492,7 @@ todo.view = function() {
 };
 
 //initialize the application
-m.module(document, {controller: todo.controller, view: todo.view});
+m.mount(document, {controller: todo.controller, view: todo.view});
 </script>
 ```
 
@@ -504,7 +504,7 @@ This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias
 
 Idiomatic Mithril code is meant to apply good programming conventions and be easy to refactor.
 
-In the application above, notice how the Todo class can easily be moved to a different module if code re-organization is required.
+In the application above, notice how the Todo class can easily be moved to a different component if code re-organization is required.
 
 Todos are self-contained and their data aren't tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it's a plain-vanilla Javascript class, and so has almost no framework-specific learning curve.
 

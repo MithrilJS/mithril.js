@@ -84,31 +84,32 @@ var Page = {
 	}
 };
 
-//controller
-var Demo = {};
-
-Demo.controller = function() {
-	var pages = Page.list();
-	return {
-		pages: pages,
-		rotate: function() {
-			pages().push(pages().shift());
+var Demo = m.component({
+	//controller
+	controller: function() {
+		var pages = Page.list();
+		return {
+			pages: pages,
+			rotate: function() {
+				pages().push(pages().shift());
+			}
 		}
-	}
-};
+	},
 
-//view
-Demo.view = function(ctrl) {
-	return [
-		ctrl.pages().map(function(page) {
-			return m("a", {href: page.url}, page.title);
-		}),
-		m("button", {onclick: ctrl.rotate}, "Rotate links")
-	];
-};
+	//view
+	view: function(ctrl) {
+		return m("div", [
+			ctrl.pages().map(function(page) {
+				return m("a", {href: page.url}, page.title);
+			}),
+			m("button", {onclick: ctrl.rotate}, "Rotate links")
+		]);
+	};
+});
+
 
 //initialize
-m.module(document.getElementById("example"), Demo);</code></pre>
+m.mount(document.getElementById("example"), Demo);</code></pre>
 
 					</div>
 					<div class="col(4,4,12)">
@@ -123,31 +124,32 @@ var Page = {
 	}
 };
 
-//controller
-var Demo = {};
-
-Demo.controller = function() {
-	var pages = Page.list();
-	return {
-		pages: pages,
-		rotate: function() {
-			pages().push(pages().shift());
+var Demo = m.component({
+	//controller
+	controller: function() {
+		var pages = Page.list();
+		return {
+			pages: pages,
+			rotate: function() {
+				pages().push(pages().shift());
+			}
 		}
-	}
-};
+	},
 
-//view
-Demo.view = function(ctrl) {
-	return [
-		ctrl.pages().map(function(page) {
-			return m("a", {href: page.url}, page.title);
-		}),
-		m("button", {onclick: ctrl.rotate}, "Rotate links")
-	];
-};
+	//view
+	view: function(ctrl) {
+		return m("div", [
+			ctrl.pages().map(function(page) {
+				return m("a", {href: page.url}, page.title);
+			}),
+			m("button", {onclick: ctrl.rotate}, "Rotate links")
+		]);
+	};
+});
+
 
 //initialize
-m.module(document.getElementById("example"), Demo);
+m.mount(document.getElementById("example"), Demo);
 							</script>
 						</div>
 					</div>

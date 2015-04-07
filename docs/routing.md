@@ -34,7 +34,7 @@ The example below shows a route that takes a `userID` parameter.
 //a sample module
 var dashboard = {
 	controller: function() {
-		this.id = m.route.param("userID");
+		return {id: m.route.param("userID")};
 	},
 	view: function(controller) {
 		return m("div", controller.id);

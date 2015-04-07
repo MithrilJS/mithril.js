@@ -11,7 +11,7 @@
 
 This is a getter-setter factory utility. It returns a function that stores information.
 
-Note that modifying the values of `m.prop` getter-setters does not trigger redrawing. Instead, Mithril's redrawing system relies on [`m.startComputation` and `m.endComputation`](mithril.computation.md). These functions are internally called by Mithril when you initialize a module via [`m.module`](mithril.module.md) or [`m.route`](mithril.route.md), and when you trigger event handlers that were created within templates with [`m()`](mithril.md). 
+Note that modifying the values of `m.prop` getter-setters does not trigger redrawing. Instead, Mithril's redrawing system relies on [`m.startComputation` and `m.endComputation`](mithril.computation.md). These functions are internally called by Mithril when you initialize a component via [`m.mount`](mithril.mount.md) or [`m.route`](mithril.route.md), and when you trigger event handlers that were created within templates with [`m()`](mithril.md). 
 
 ---
 
@@ -35,7 +35,7 @@ It can be used in conjunction with [`m.withAttr`](mithril.withAttr.md) to implem
 
 ```javascript
 //a contrived example of bi-directional data binding
-var user = {
+var User = m.component({
 	model: function(name) {
 		this.name = m.prop(name);
 	},
@@ -47,7 +47,7 @@ var user = {
 			m("input", {onchange: m.withAttr("value", controller.user.name), value: controller.user.name()})
 		]);
 	}
-};
+});
 ```
 
 In the example above, the usage of `m.prop` allows the developer to change the implementation of the user name getter/setter without the need for code changes in the controller and view.

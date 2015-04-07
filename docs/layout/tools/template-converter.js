@@ -82,9 +82,9 @@ templateConverter.controller = function() {
 };
 
 templateConverter.view = function(ctrl) {
-	return [
+	return m("div", [
 		m("textarea", {autofocus: true, style: {width:"100%", height: "40%"}, onchange: m.withAttr("value", ctrl.source)}, ctrl.source()),
 		m("button", {onclick: ctrl.convert.bind(ctrl)}, "Convert"),
 		m("textarea", {style: {width:"100%", height: "40%"}}, ctrl.output())
-	];
+	]);
 };

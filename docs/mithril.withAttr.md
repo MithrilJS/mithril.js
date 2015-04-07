@@ -28,7 +28,7 @@ var user = {
 		this.name = m.prop(name);
 	},
 	controller: function() {
-		this.user = new user.model("John Doe");
+		return {user: new user.model("John Doe")};
 	},
 	view: function(controller) {
 		m.render("body", [
