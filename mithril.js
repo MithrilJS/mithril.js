@@ -734,7 +734,12 @@ var m = (function app(window, undefined) {
 		return str.join("&")
 	}
 	function parseQueryString(str) {
-		var pairs = str.split("&"), params = {};
+		if (str[0] === "?") {
+			str = str.substring(1);
+		}
+
+		var pairs = str.split("&"), 
+			params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
 			var key = decodeURIComponent(pair[0])
