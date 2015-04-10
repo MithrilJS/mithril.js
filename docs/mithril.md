@@ -100,10 +100,12 @@ var links = [
 ];
 
 m.render(document.body, [
-    m("ul.nav", [
-        m("li", links.map(function(link) {
-            return m("a", {href: link.url}, link.title)
-        }))
+    m("ul.nav", 
+        links.map(function(link) {
+            return m("li",
+                m("a", {href: link.url}, link.title) 
+            );
+        })
     ])
 ]);
 ```
@@ -113,11 +115,9 @@ yields:
 ```markup
 <body>
     <ul class="nav">
-        <li>
-            <a href="/item1">item 1</a>
-            <a href="/item2">item 2</a>
-            <a href="/item3">item 3</a>
-        </li>
+        <li><a href="/item1">item 1</a></li>
+        <li><a href="/item2">item 2</a></li>
+        <li><a href="/item3">item 3</a></li>
     </ul>
 </body>
 ```
