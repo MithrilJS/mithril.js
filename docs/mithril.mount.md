@@ -9,7 +9,7 @@
 
 Mounting is the process of rendering a [component](mithril.component.md) into a DOM element.
 
-The different between `m.mount` and [`m.render` ](mithril.render.md) is that a component rendered via `m.mount` auto-redraws automatically when event handlers are triggered, whereas components rendered via `m.render` do not.
+The different between `m.mount` and [`m.render`](mithril.render.md) is that a component rendered via `m.mount` auto-redraws automatically when event handlers are triggered, whereas components rendered via `m.render` do not.
 
 In order to allow a user to navigate between different pages by loading and unloading components, consider using [`m.route`](mithril.route.md) instead.
 
@@ -19,19 +19,19 @@ In order to allow a user to navigate between different pages by loading and unlo
 
 ### Usage
 
-Calling `m.mount` with a DOM element as the first argument and a component as the second argument will instantiate the component's controller, and call the component's view function with the controller instance as the first argument.
+Calling `m.mount` with a DOM element as the first argument and a component as the second argument will call the component's controller function, and then call the component's view function. The return value of the controller function is passed to the view function as its first argument.
 
 ```javascript
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function() {
 		return {greeting: "Hello"}
 	},
 	view: function(ctrl) {
 		return m("h1", ctrl.greeting)
 	}
-})
+}
 
-m.mount(document.body, MyComponent())
+m.mount(document.body, MyComponent)
 
 //<body><h1>Hello</h1></body>
 ```

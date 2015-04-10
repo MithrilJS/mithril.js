@@ -52,14 +52,14 @@ The example below shows a route that takes an `userID` parameter
 
 ```javascript
 //a sample component
-var Dashboard = m.component({
+var Dashboard = {
 	controller: function() {
 		return {id: m.route.param("userID")}
 	},
 	view: function(controller) {
 		return m("div", controller.id);
 	}
-})
+}
 
 //setup routes to start w/ the `#` symbol
 m.route.mode = "hash";
@@ -139,7 +139,7 @@ var dir = m.route.param("dir") // "desc"
 If a component's controller implements an instance method called `onunload`, this method will be called when a route changes.
 
 ```javascript
-var Home = m.component({
+var Home = {
 	controller: function() {
 		return {
 			onunload: function() {
@@ -150,12 +150,12 @@ var Home = m.component({
 	view: function() {
 		return m("div", "Home")
 	}
-});
+};
 
-var Dashboard = m.component({
+var Dashboard = {
 	controller: function() {},
 	view: function() {}
-});
+};
 
 //go to the default route (home)
 m.route(document.body, "/", {

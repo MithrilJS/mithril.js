@@ -1,0 +1,94 @@
+<style type="text/css">
+.uploader {background:#eee;height:200px;width:300px;}
+</style>
+<body><div id="test" style="background:#eee;height:100%;width:100%;"></div></body>
+<script src="mithril.js"></script>
+<script>
+//drag and drop micro-library
+function dragdrop(element, options) {
+	options = options || {}
+	
+	element.addEventListener("dragover", activate)
+	element.addEventListener("dragleave", deactivate)
+	element.addEventListener("dragend", deactivate)
+	//element.addEventListener("drop", deactivate)
+	element.addEventListener("drop", update)
+	window.addEventListener("blur", deactivate)
+
+	function activate(e) {
+		e.preventDefault()
+	}
+	function deactivate() {}
+	function update(e) {
+		e.preventDefault()
+		if (typeof options.onchange == "function") {
+			options.onchange((e.dataTransfer || e.target).files)
+		}
+	}
+}
+
+//model entity
+var Uploader = {}
+
+Uploader.upload = function(files) {
+	var formData = new FormData
+	for (var i = 0; i < files.length; i++) {
+		formData.append("file" + i, files[i])
+	}
+	
+	return m.request({
+		method: "POST",
+		url: "http://localhost/api/files",
+		data: formData,
+		//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
+		serialize: function(value) {return value}
+	})
+}
+
+//an uploader module
+var uploader = {}
+
+uploader.controller = function(options) {
+	options = options || {}
+	return {
+		onchange: options.onchange
+	}
+}
+
+uploader.view = function(ctrl) {
+	return m(".uploader", {
+		config: function(element, isInitialized) {
+			if (!isInitialized) {
+				dragdrop(element, {onchange: ctrl.onchange})
+			}
+		}
+	})
+}
+
+//demo module
+var demo = {}
+
+demo.controller = function() {
+	return {
+		title: m.prop("Upload something"),
+		uploader: submodule(uploader, {
+			onchange: Uploader.upload
+		})
+	}
+}
+
+demo.view = function(ctrl) {
+	return [
+		m("h1", ctrl.title()),
+		ctrl.uploader(),
+		m("p", "more stuff")
+	]
+}
+
+m.module(document.body, demo)
+
+//submodule helper
+function submodule(module, args) {
+	return module.view.bind(this, new module.controller(args))
+}
+</script>

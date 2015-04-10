@@ -8,48 +8,101 @@ Components are the building blocks of Mithril applications: they allow developer
 
 ### Rendering components
 
-Components are nothing more than objects that have a `controller` and a `view` functions.
-
-There are three ways to render a component: via [`m.route`](mithril.route.md) (if you are building a single-page application that has multiple pages), [`m.mount`](mithril.mount.md) (if your app only has one page), and [`m.render`](mithril.render.md) (if you are integrating Mithril's rendering engine into a larger framework and wish to manage redrawing yourself).
-
-In addition, you can pass a controller/view pair to `m.component` to create a factory function. This factory allows you to create parameterized components.
-
-At first glance, the technical description of these APIs may seem daunting, but in practice, rendering a typical component is simple:
+In Mithril, a component is nothing more than an object that has a `controller` and a `view` functions.
 
 ```javascript
-var MyComponent = m.component({
-	controller: function() {
+var MyComponent = {
+	controller: function(data) {
 		return {greeting: "Hello"}
 	},
 	view: function(ctrl) {
 		return m("h1", ctrl.greeting)
 	}
-})
+}
 
-m.mount(document.body, MyComponent()) // renders <h1>Hello</h1>
+m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
 ```
 
-When a component runs, the corresponding controller function is called. When the controller finishes running, the view function is called, and the return value of the controller is passed as the first argument to it.
+The `controller` function creates an object that is meant to contain methods for a view to call. Those methods (and the `controller` function itself) may call model methods, and the controller may be used to store contextual data returned from model methods (for example, a [promise](mithril.deferred.md) from a [request](mithril.request.md)).
 
-Note that controllers are optional. If a controller function is not defined, an empty object is passed to the view function as its first argument.
+The `view` function creates a representation of a template that may consume model data and call controller methods to affect the model.
 
-The return value of the view function is NOT a DOM element. Rather, it's a Javascript data structure that represents a DOM tree. Internally, Mithril uses this data representation of the DOM to probe for data changes and update the DOM only where necessary. This rendering technique is known as *virtual DOM diffing*.
+Note that there's no requirement to tightly couple a controller and view while organizing code. It's perfectly valid to define controllers and views separately, and only bring them together when mounting them:
+
+```javascript
+//controller.js
+var controller = function(data) {
+	return {greeting: "Hello"}
+}
+
+//view.js
+var view = function(ctrl) {
+	return m("h1", ctrl.greeting)
+}
+
+//render
+m.mount(document.body, {controller: controller, view: view}) // renders <h1>Hello</h1>
+```
+
+There are three ways to render a component: via [`m.route`](mithril.route.md) (if you are building a single-page application that has multiple pages), [`m.mount`](mithril.mount.md) (if your app only has one page), and [`m.render`](mithril.render.md) (if you are integrating Mithril's rendering engine into a larger framework and wish to manage redrawing yourself).
+
+When a component is rendered, the `controller` function is called, then the `view` function is called. The return value of the `controller` function is passed to `view` as its first argument.
+
+---
+
+### Optional controller
+
+The `controller` function is optional and defaults to an empty function.
+
+```javascript
+//a component without a controller
+var MyComponent = {
+	view: function() {
+		return m("h1", "Hello")
+	}
+}
+
+m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
+```
+
+---
+
+### Controller as a class constructor
+
+A controller can also be used as a class constructor (i.e. it's possible to attach properties to the `this` object within the constructor, instead of returning a value.
+
+```javascript
+var MyComponent = {
+	controller: function(data) {
+		this.greeting = "Hello"
+	},
+	view: function(ctrl) {
+		return m("h1", ctrl.greeting)
+	}
+}
+
+m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
+```
+
+---
+
+### Notes on the view function
+
+The `view` function does not create a DOM tree when called. The return value of the view function is merely a plain Javascript data structure that represents a DOM tree. Internally, Mithril uses this data representation of the DOM to probe for data changes and update the DOM only where necessary. This rendering technique is known as *virtual DOM diffing*.
 
 Later, any time event handlers are triggered by user input (or any time a redraw is required), the view function is run again and its return value is used to diff against the previous virtual DOM tree.
 
 It may sound expensive to recompute an entire view any time there's a change to be displayed, but this operation actually turns out to be quite fast, compared to rendering strategies used by older frameworks. Mithril's diffing algorithm makes sure expensive DOM operations are only performed if absolutely necessary, and as an extra benefit, the global nature of the redraw makes it easy to reason about and troubleshoot the state of the application.
 
-Within components, controllers are meant to be used to call model layer methods. Views consume model data (via the function's argument list), and call controller methods in response to user events.
-
 ---
 
 ### Parameterized components
 
-Components can receive parameters when run
+Components can have arguments "preloaded". In practice, what this means is that calling `m.component(MyComponent, {foo: "bar"})` will return a component that behaves exactly the same as `MyComponent`, but that binds `{foo: "bar"}` as an argument to both the `controller` and `view` functions.
 
 ```javascript
 //declare a component
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function(args, extras) {
 		console.log(args.name, extras)
 		return {greeting: "Hello"}
@@ -57,10 +110,10 @@ var MyComponent = m.component({
 	view: function(ctrl, args, extras) {
 		return m("h1", ctrl.greeting + " " + args.name + " " + extras)
 	}
-})
+}
 
-
-var component = MyComponent({name: "world"}, "this is a test")
+//create a component whose controller and view functions receive some arguments
+var component = m.component(MyComponent, {name: "world"}, "this is a test")
 
 var ctrl = new component.controller() // logs "world", "this is a test"
 
@@ -69,7 +122,7 @@ m.render(document.body, component.view(ctrl)) // render the virtual DOM tree man
 //<body><h1>Hello world this is a test</h1></body>
 ```
 
-When designing components, the first parameter should be an object (e.g. `{name: "world"}`, above). Subsequent parameters have no restrictions (e.g. `"this is a test"`)
+The first parameter after the component object is meant to be used as an attribute map and should be an object (e.g. `{name: "world"}`, above). Subsequent parameters have no restrictions (e.g. `"this is a test"`)
 
 ---
 
@@ -78,27 +131,27 @@ When designing components, the first parameter should be an object (e.g. `{name:
 Component views can include other components:
 
 ```javascript
-var App = m.component({
+var App = {
 	view: function() {
 		return m(".app", [
 			m("h1", "My App"),
 			
 			//nested component
-			MyComponent({message: "Hello"})
+			m.component(MyComponent, {message: "Hello"})
 		])
 	}
 })
 
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function(args) {
 		return {greeting: args.message}
 	},
 	view: function(ctrl) {
 		return m("h2", ctrl.greeting)
 	}
-})
+}
 
-m.mount(document.body, App())
+m.mount(document.body, App)
 
 // <div class="app">
 // 	 <h1>My App</h1>
@@ -109,7 +162,7 @@ m.mount(document.body, App())
 Components can be placed anywhere a regular element would. If you have components inside of a sortable list, you can - and should - add `key` attributes to your components to ensure that DOM elements are merely moved, if possible, instead of being recreated from scratch:
 
 ```javascript
-var App = m.component({
+var App = {
 	ctrl: function() {
 		return {data: [1, 2, 3]}
 	}
@@ -120,22 +173,22 @@ var App = m.component({
 			
 			ctrl.data.map(function(item) {
 				//the key ensures the components aren't recreated from scratch, if they merely exchanged places
-				return MyComponent({message: "Hello " + item, key: item})
+				return m.component(MyComponent, {message: "Hello " + item, key: item})
 			})
 		])
 	}
-})
+}
 
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function(args) {
 		return {greeting: args.message}
 	},
 	view: function(ctrl) {
 		return m("h2", ctrl.greeting)
 	}
-})
+}
 
-m.mount(document.body, App())
+m.mount(document.body, App)
 ```
 
 Keys must be unique within a list of sibling DOM elements, and they must be either a string or a number.
@@ -153,7 +206,7 @@ Instead of copying arguments to the controller object (thereby creating internal
 The following example illustrates this pattern:
 
 ```javascript
-var MyApp = m.component({
+var MyApp = {
 	controller: function() {
 		return {
 			temp: m.prop(10) // kelvin
@@ -163,11 +216,11 @@ var MyApp = m.component({
 		return m("div", [
 			m("input", {oninput: m.withAttr("value", ctrl.temp), value: ctrl.temp()}), "K",
 			m("br"),
-			TemperatureConverter({value: ctrl.temp()})
+			m.component(TemperatureConverter, {value: ctrl.temp()})
 		]);
 	}
-});
-var TemperatureConverter = m.component({
+};
+var TemperatureConverter = {
 	controller: function() {
 		//note how the controller does not handle the input arguments
 
@@ -188,8 +241,8 @@ var TemperatureConverter = m.component({
 			"fahrenheit:", ctrl.kelvinToFahrenheit(args.value),
 		]);
 	}
-});
-m.mount(document.body, MyApp());
+};
+m.mount(document.body, MyApp);
 ```
 
 In the example above, the text input is bi-directionally bound to a `temp` getter-setter. Changing the temperature value from the input updates the temperature value, which is passed to the TemperatureConverter view directly, and transformation functions are called from there. The TemperatureConverter controller never stores the value.
@@ -198,7 +251,7 @@ Testing the various parts of the component is trivial:
 
 ```javascript
 //test a transformation function in the controller
-var ctrl = new TemperatureConverter();
+var ctrl = new TemperatureConverter.controller();
 assert(ctrl.kelvinToCelsius(273.15) == 0)
 
 //test the template
@@ -280,7 +333,7 @@ Remember that the rules for keys apply for components the same way they do for r
 If a component's controller contains an function called `onunload`, it will be called when a new `m.mount` call updates the root DOM element tied to the component in question, or  when a route changes (if you are using [`m.route`](mithril.route.md)).
 
 ```javascript
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function() {
 		return {
 			onunload = function() {
@@ -291,19 +344,19 @@ var MyComponent = m.component({
 	view: function() {
 		return m("div", "test")
 	};
-});
+};
 
-m.mount(document, MyComponent());
+m.mount(document, MyComponent);
 
 
 
-var AnotherComponent = m.component({
+var AnotherComponent = {
 	view: function() {
 		return m("div", "another")
 	}
-});
+};
 
-m.mount(document, AnotherComponent()); // logs "unloading my component"
+m.mount(document, AnotherComponent); // logs "unloading my component"
 ```
 
 This mechanism is useful to clear timers and unsubscribe event handlers.
@@ -311,7 +364,7 @@ This mechanism is useful to clear timers and unsubscribe event handlers.
 You can also use this event to prevent a component from being unloaded in the context of a route change (e.g. to alert a user to save their changes before navigating away from a page)
 
 ```javascript
-var component = m.component({
+var component = {
 	controller: function() {
 		var unsaved = m.prop(false)
 		return {
@@ -325,7 +378,7 @@ var component = m.component({
 		}
 	},
 	//...
-})
+}
 ```
 
 Normally, calling `m.mount` will return the controller instance for that component, but there's one corner case: if `e.preventDefault()` is called from a controller's `onunload` method, then the `m.mount` call will not instantiate the new controller, and will return `undefined`.
@@ -352,19 +405,19 @@ Components that are nested in other components can also call `onunload` and its 
 In the example below, clicking the button triggers the component's `onunload` event and logs "unloaded!".
 
 ```javascript
-var MyApp = m.component({
+var MyApp = {
 	controller: function() {
 		return {loaded: true}
 	},
 	view: function(ctrl) {
 		return [
 			m("button[type=button]", {onclick: function() {ctrl.loaded = false}}),
-			ctrl.loaded ? MyComponent() : ""
+			ctrl.loaded ? MyComponent : ""
 		]
 	}
-})
+}
 
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function() {
 		return {
 			onunload: function() {
@@ -375,9 +428,9 @@ var MyComponent = m.component({
 	view: function() {
 		return m("h1", "My component")
 	}
-})
+}
 
-m.mount(document.body, MyApp())
+m.mount(document.body, MyApp)
 ```
 
 Calling `e.preventDefault()` from a component's `onunload` aborts route changes, but it does not abort, rollback or affect the current redraw in any way.
@@ -404,40 +457,21 @@ There are a few caveats when nesting components:
 
 ---
 
-### Constructors as controllers
-
-If a component controller does not return an object to be passed to the view, it uses `this` as the controller return value:
-
-```javascript
-var MyComponent = m.component({
-	controller: function() {
-		return {greeting: "Hello"}
-	},
-	view: function(ctrl) {
-		return m("h1", ctrl.greeting)
-	}
-})
-
-m.mount(document.body, MyComponent()) // <h1>Hello</h1>
-```
-
----
-
 ### Opting out of the auto redrawing system
 
 Components can be rendered without enabling the [auto-redrawing system](auto-redrawing.md), via [`m.render`](mithril.render.md):
 
 ```javascript
-var MyComponent = m.component({
+var MyComponent = {
 	controller: function() {
 		return {greeting: "Hello"}
 	},
 	view: function(ctrl) {
 		return m("h1", ctrl.greeting)
 	}
-})
+}
 
-m.render(document.body, MyComponent())
+m.render(document.body, MyComponent)
 ```
 
 However, using [`m.render`](mithril.render.md) is only recommended if you want to use Mithril as part of a larger framework that manages the rendering lifecycle on its own. The vast majority of times, it's advisable to use `m.mount` instead.
@@ -449,7 +483,7 @@ However, using [`m.render`](mithril.render.md) is only recommended if you want t
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-ComponentFactory component(Component component)
+Component component(Component component [, Object attributes [, any... args]])
 
 where:
 	Component :: Object { Controller, View }
@@ -458,14 +492,21 @@ where:
 	UnloadableController :: void controller([Object attributes [, any... args]]) { prototype: void unload(UnloadEvent e) }
 	UnloadEvent :: Object {void preventDefault()}
 	View :: void view(Object controllerInstance [, Object attributes [, any... args]])
-	ComponentFactory :: Component factory([Object attributes [, any... args]])
 ```
 
 -	**Component component**
 
 	A component is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function
 
--	**returns ComponentFactory factory**
+-	**Object attributes**
 
-	A function that returns a component. Arguments passed into this function are applied to the argument list of the controller and view functions of the component.
+	A key/value map of attributes that gets bound as an argument to the `controller` and `view` functions of the component.
+
+-	**any... args**
+
+	Other arguments to be bound as arguments to the `controller` and `view` functions
+
+-	**returns Component parameterizedComponent**
+
+	A component with arguments bound
 

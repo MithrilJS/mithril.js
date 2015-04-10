@@ -35,7 +35,7 @@ It can be used in conjunction with [`m.withAttr`](mithril.withAttr.md) to implem
 
 ```javascript
 //a contrived example of bi-directional data binding
-var User = m.component({
+var User = {
 	model: function(name) {
 		this.name = m.prop(name);
 	},
@@ -47,7 +47,7 @@ var User = m.component({
 			m("input", {onchange: m.withAttr("value", controller.user.name), value: controller.user.name()})
 		]);
 	}
-});
+};
 ```
 
 In the example above, the usage of `m.prop` allows the developer to change the implementation of the user name getter/setter without the need for code changes in the controller and view.

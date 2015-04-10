@@ -238,7 +238,7 @@ var m = (function app(window, undefined) {
 		else if (data != null && dataType === OBJECT) {
 			var controllerConstructors = [], controllers = []
 			while (data.view) {
-				var controllerConstructor = data.controller.$original || data.controller
+				var controllerConstructor = (data.controller || {}).$original || data.controller || function() {}
 				var controllerIndex = cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
 				var key = data && data.attrs && data.attrs.key
@@ -543,28 +543,25 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], modules = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topModule, unloaders = [];
+	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
-	function submodule(module, args) {
+	function parameterize(component, args) {
 		var controller = function() {
-			return (module.controller || function() {}).apply(this, args) || this
+			return (component.controller || function() {}).apply(this, args) || this
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
-			return module.view.apply(module, args ? [ctrl].concat(args) : [ctrl])
+			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
 		}
-		controller.$original = module.controller
+		controller.$original = component.controller
 		var output = {controller: controller, view: view}
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
 		return output
 	}
-	m.component = function(module) {
-		return function() {
-			return submodule(module, [].slice.call(arguments))
-		}
+	m.component = function(component) {
+		return parameterize(component, [].slice.call(arguments, 1))
 	}
-	//m.module is deprecated, use m.mount
-	m.mount = m.module = function(root, module) {
+	m.mount = m.module = function(root, component) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
@@ -588,14 +585,15 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			var currentModule = topModule = module = module || {};
-			var constructor = module.controller || function() {}
+			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2))
+			var currentComponent = topComponent = component = component || {};
+			var constructor = component.controller || function() {}
 			var controller = new constructor;
-			//controllers may call m.module recursively (via m.route redirects, for example)
-			//this conditional ensures only the last recursive m.module call is applied
-			if (currentModule === topModule) {
+			//controllers may call m.mount recursively (via m.route redirects, for example)
+			//this conditional ensures only the last recursive m.mount call is applied
+			if (currentComponent === topComponent) {
 				controllers[index] = controller;
-				modules[index] = module
+				components[index] = component
 			}
 			endFirstComputation();
 			return controllers[index]
@@ -626,8 +624,8 @@ var m = (function app(window, undefined) {
 	function redraw() {
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = modules[i].controller && modules[i].controller.$$args ? [controllers[i]].concat(modules[i].controller.$$args) : [controllers[i]]
-				m.render(root, modules[i].view ? modules[i].view(controllers[i], args) : blank())
+				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]]
+				m.render(root, components[i].view ? components[i].view(controllers[i], args) : blank())
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -752,13 +750,13 @@ var m = (function app(window, undefined) {
 		var keys = Object.keys(router);
 		var index = keys.indexOf(path);
 		if(index !== -1){
-			m.module(root, router[keys [index]]);
+			m.mount(root, router[keys [index]]);
 			return true;
 		}
 
 		for (var route in router) {
 			if (route === path) {
-				m.module(root, router[route]);
+				m.mount(root, router[route]);
 				return true
 			}
 
@@ -769,7 +767,7 @@ var m = (function app(window, undefined) {
 					var keys = route.match(/:[^\/]+/g) || [];
 					var values = [].slice.call(arguments, 1, -2);
 					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-					m.module(root, router[route])
+					m.mount(root, router[route])
 				});
 				return true
 			}
@@ -1140,5 +1138,5 @@ var m = (function app(window, undefined) {
 	return m
 })(typeof window != "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
+if (typeof component != "undefined" && component !== null && component.exports) component.exports = m;
 else if (typeof define === "function" && define.amd) define(function() {return m});

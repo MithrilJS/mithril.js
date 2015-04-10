@@ -112,52 +112,35 @@ function testMithril(mock) {
 		return unloaded
 	})
 	test(function() {
-		//module should pass args to both controller and view
+		//component should pass args to both controller and view
 		mock.requestAnimationFrame.$resolve()
 
 		var root = mock.document.createElement("div")
 		var slot1, slot2
-		var module = m.component({
+		var component = {
 			controller: function(options) {slot1 = options.a},
 			view: function(ctrl, options) {slot2 = options.a}
-		})
-		m.mount(root, module({a: 1}))
+		}
+		m.mount(root, m.component(component, {a: 1}))
 
 		mock.requestAnimationFrame.$resolve()
 
 		return slot1 == 1 && slot2 == 1
 	})
 	test(function() {
-		//module should work without controller
+		//component should work without controller
 		mock.requestAnimationFrame.$resolve()
 
 		var root = mock.document.createElement("div")
 		var slot1, slot2
-		var module = m.component({
+		var component = {
 			view: function(ctrl, options) {slot2 = options.a}
-		})
-		m.mount(root, module({a: 1}))
+		}
+		m.mount(root, m.component(component, {a: 1}))
 
 		mock.requestAnimationFrame.$resolve()
 
 		return slot2 == 1
-	})
-	test(function() {
-		//component(mod)(args) should also pass args to both controller and view
-		mock.requestAnimationFrame.$resolve()
-
-		var root = mock.document.createElement("div")
-		var slot1, slot2
-		var module = m.component({
-			controller: function(options) {slot1 = options.a},
-			view: function(ctrl, options) {slot2 = options.a}
-		})
-		var moduleWithArgs = module({a: 1})
-		m.mount(root, moduleWithArgs)
-
-		mock.requestAnimationFrame.$resolve()
-
-		return slot1 == 1 && slot2 == 1
 	})
 	test(function() {
 		//component controller should only run once
@@ -165,12 +148,12 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var count1 = 0, count2 = 0
-		var module = {
+		var component = {
 			view: function(ctrl) {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {
 				count1++
 			},
@@ -178,8 +161,8 @@ function testMithril(mock) {
 				count2++
 				return m("div", "test")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 
 		mock.requestAnimationFrame.$resolve()
 		
@@ -195,12 +178,12 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var count1 = 0, count2 = 0, count3 = 0, count4 = 0
-		var module = {
+		var component = {
 			view: function(ctrl) {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {
 				count1++
 			},
@@ -208,7 +191,7 @@ function testMithril(mock) {
 				count2++
 				return subsub
 			}
-		})
+		}
 		var subsub = {
 			controller: function() {
 				count3++
@@ -218,7 +201,7 @@ function testMithril(mock) {
 				return m("div", "test")
 			}
 		}
-		m.mount(root, module)
+		m.mount(root, component)
 
 		mock.requestAnimationFrame.$resolve()
 		
@@ -234,21 +217,21 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -269,26 +252,26 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			view: function() {
-				return subsub()
+				return subsub
 			}
-		})
-		var subsub = m.component({
+		}
+		var subsub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -309,21 +292,21 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {},
 			view: function() {
 				return m("div", {key: 1})
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -344,27 +327,27 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {},
 			view: function() {
 				return subsub
 			}
-		})
+		}
 		var subsub = {
 			controller: function() {},
 			view: function() {
 				return m("div", {key: 1})
 			}
 		}
-		m.mount(root, module)
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -385,21 +368,21 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return m("div", {key: i}, sub())
+					return m("div", {key: i}, sub)
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0].childNodes[0]
 		
@@ -420,27 +403,27 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return m("div", {key: i}, sub())
+					return m("div", {key: i}, sub)
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function() {},
 			view: function() {
 				return subsub
 			}
-		})
+		}
 		var subsub = {
 			controller: function() {},
 			view: function() {
 				return m("div")
 			}
 		}
-		m.mount(root, module)
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0].childNodes[0]
 		
@@ -462,15 +445,15 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
 		var unloaded
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {
 				this.onunload = function() {
 					unloaded = opts.key
@@ -479,8 +462,8 @@ function testMithril(mock) {
 			view: function() {
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -500,25 +483,25 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var list = [1, 2, 3]
 		var unloaded1, unloaded2
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
 				return list.map(function(i) {
-					return sub({key: i})
+					return m.component(sub, {key: i})
 				})
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {
 				this.onunload = function() {
 					unloaded1 = opts.key
 				}
 			},
 			view: function(ctrl, opts) {
-				return subsub({key: opts.key})
+				return m.component(subsub, {key: opts.key})
 			}
-		})
-		var subsub = m.component({
+		}
+		var subsub = {
 			controller: function(opts) {
 				this.onunload = function() {
 					unloaded2 = opts.key
@@ -527,8 +510,8 @@ function testMithril(mock) {
 			view: function() {
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		var firstBefore = root.childNodes[0]
 		
@@ -547,13 +530,13 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var count = 0
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {
 				m.redraw()
 			},
@@ -561,8 +544,8 @@ function testMithril(mock) {
 				count++
 				return m("div")
 			}
-		})
-		m.mount(root, module)
+		}
+		m.mount(root, component)
 		
 		mock.requestAnimationFrame.$resolve()
 		
@@ -574,18 +557,18 @@ function testMithril(mock) {
 
 		var root = mock.document.createElement("div")
 		var count = 0
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function(ctrl) {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {},
 			view: function() {
 				return subsub
 			}
-		})
+		}
 		var subsub = {
 			controller: function(opts) {
 				m.redraw()
@@ -595,7 +578,7 @@ function testMithril(mock) {
 				return m("div")
 			}
 		}
-		m.mount(root, module)
+		m.mount(root, component)
 		
 		mock.requestAnimationFrame.$resolve()
 		
@@ -609,13 +592,13 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var loaded = false
 		var testEnabled = true
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function() {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {
 				controller = this
 				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
@@ -623,9 +606,9 @@ function testMithril(mock) {
 			view: function() {
 				return m("div")
 			}
-		})
+		}
 		m.route(root, "/a", {
-			"/a": module,
+			"/a": component,
 			"/b": {controller: function() {loaded = true}, view: function() {}}
 		})
 		
@@ -646,20 +629,20 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var loaded = false
 		var testEnabled = true
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function() {
-				return sub()
+				return sub
 			}
 		}
-		var sub = m.component({
+		var sub = {
 			controller: function(opts) {
 			},
 			view: function() {
-				return subsub()
+				return subsub
 			}
-		})
-		var subsub = m.component({
+		}
+		var subsub = {
 			controller: function(opts) {
 				controller = this
 				this.onunload = function(e) {if (testEnabled) e.preventDefault()}
@@ -667,9 +650,9 @@ function testMithril(mock) {
 			view: function() {
 				return m("div")
 			}
-		})
+		}
 		m.route(root, "/a", {
-			"/a": module,
+			"/a": component,
 			"/b": {controller: function() {loaded = true}, view: function() {}}
 		})
 		
@@ -690,7 +673,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var loaded = false
 		var testEnabled = true
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function() {
 				return sub
@@ -706,7 +689,7 @@ function testMithril(mock) {
 			}
 		}
 		m.route(root, "/a", {
-			"/a": module,
+			"/a": component,
 			"/b": {controller: function() {loaded = true}, view: function() {}}
 		})
 		
@@ -727,7 +710,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var loaded = false
 		var testEnabled = true
-		var module = {
+		var component = {
 			controller: function() {},
 			view: function() {
 				return sub
@@ -749,7 +732,7 @@ function testMithril(mock) {
 			}
 		}
 		m.route(root, "/a", {
-			"/a": module,
+			"/a": component,
 			"/b": {controller: function() {loaded = true}, view: function() {}}
 		})
 		
@@ -763,7 +746,7 @@ function testMithril(mock) {
 		return loaded === false
 	})
 	test(function() {
-		// nested modules under keyed components should render
+		// nested components under keyed components should render
 		mock.requestAnimationFrame.$resolve()
 
 		var root = mock.document.createElement("div")
@@ -772,27 +755,27 @@ function testMithril(mock) {
 			controller: function() {},
 			view: function(ctrl) {
 				return  m('.outer', [
-					m('.inner', CommentList({ list: [1, 2, 3] }))
+					m('.inner', m.component(CommentList, { list: [1, 2, 3] }))
 				])
 			}
 		}
-		var CommentList = m.component({
+		var CommentList = {
 			controller: function() {},
 			view: function(ctrl, props) {
 				return m('.list', props.list.map(function(i) {
 					return m('.comment', [
-						Reply({key: i})
+						m.component(Reply, {key: i})
 					])
 				}))
 			}
-		})
-		var Reply = m.component({
+		}
+		var Reply = {
 			controller: function() {},
 			view: function() {
 				count++
 				return m(".reply")
 			}
-		})
+		}
 		m.mount(root, App)
 
 		mock.requestAnimationFrame.$resolve()
@@ -807,26 +790,26 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var countA = 0
 		var countB = 0
-		var subA = m.component({
+		var subA = {
 			controller: function(){ countA += 1 },
 			view: function() { return m("div") }
-		})
-		var subB = m.component({
+		}
+		var subB = {
 			controller: function() { countB += 1 },
 			view: function() { return m("div") }
-		})
+		}
 		m.route(root, "/a", {
 			"/a": {
 				view: function () {
 					return m('.page-a', [
-						m('h1'), subA({ x: 11 })
+						m('h1'), m.component(subA, { x: 11 })
 					])
 				}
 			},
 			"/b": {
 				view: function() {
 					return m('.page-b', [
-						m('h2'), subB({ y: 22 })
+						m('h2'), m.component(subB, { y: 22 })
 					])
 				}
 			}
@@ -846,12 +829,12 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-		var module = {}, unloaded = false
-		module.controller = function() {
+		var component = {}, unloaded = false
+		component.controller = function() {
 			this.onunload = function() {unloaded = true}
 		}
-		module.view = function() {}
-		m.mount(root, module)
+		component.view = function() {}
+		m.mount(root, component)
 		m.mount(root, {controller: function() {}, view: function() {}})
 		
 		return unloaded === true
@@ -861,13 +844,13 @@ function testMithril(mock) {
 		
 		var root = mock.document.createElement("div")
 		var initCount = 0
-		var module = {}
-		module.view = function() {
+		var component = {}
+		component.view = function() {
 			return m("div", {config: function(el, init) {
 				if (!init) initCount++
 			}})
 		}
-		m.mount(root, module)
+		m.mount(root, component)
 		
 		mock.requestAnimationFrame.$resolve()
 		
@@ -884,7 +867,7 @@ function testMithril(mock) {
 		
 		var show = true
 
-		var module = {
+		var component = {
 			view: function() {
 				return [
 					m(".foo", {key: 1, config: test, onclick: function() {show = !show}}),
@@ -899,7 +882,7 @@ function testMithril(mock) {
 			}
 		}
 
-		m.mount(root, module)
+		m.mount(root, component)
 		
 		mock.requestAnimationFrame.$resolve()
 		
@@ -951,6 +934,31 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return root.childNodes.length == 2
+	})
+	test(function() {
+		// Components should not require a view
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var Component = {
+			view: function () {
+			  return m('.comp')
+			}
+		}
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/foo", {
+			"/foo": {
+				view: function() {
+					return [ Component ]
+				}
+			}
+		})
+
+		mock.requestAnimationFrame.$resolve()
+
+		return root.childNodes[0].nodeName == "DIV"
 	})
 	m.redraw.strategy(undefined) //teardown for m.mount tests
 	
@@ -1890,13 +1898,13 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
-		var module = {controller: function() {}, view: function() {return m.route.param("test")}}
+		var component = {controller: function() {}, view: function() {return m.route.param("test")}}
 
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test5/foo", {
-			"/": module,
-			"/test5/:test": module
+			"/": component,
+			"/test5/:test": component
 		})
 		var paramValueBefore = m.route.param("test")
 		mock.requestAnimationFrame.$resolve()
@@ -1909,13 +1917,13 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
-		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
+		var component = {controller: function() {}, view: function() {return m.route.param("a1")}}
 
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test6/foo", {
-			"/": module,
-			"/test6/:a1": module
+			"/": component,
+			"/test6/:a1": component
 		})
 		var paramValueBefore = m.route.param("a1")
 		mock.requestAnimationFrame.$resolve()
@@ -1929,13 +1937,13 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
 
-		var module = {controller: function() {}, view: function() {return m.route.param("a1")}}
+		var component = {controller: function() {}, view: function() {return m.route.param("a1")}}
 
 		var root = mock.document.createElement("div")
 		m.route.mode = "search"
 		m.route(root, "/test7/foo", {
-			"/": module,
-			"/test7/:a1": module
+			"/": component,
+			"/test7/:a1": component
 		})
 		var routeValueBefore = m.route()
 		mock.requestAnimationFrame.$resolve()

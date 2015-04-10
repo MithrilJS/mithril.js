@@ -8,7 +8,7 @@ The example below shows a simple component that integrates with the [select2 lib
 
 ```javascript
 //Select2 component (assumes both jQuery and Select2 are included in the page)
-var Select2 = m.component({
+var Select2 = {
 	//this view implements select2's `<select>` progressive enhancement mode
 	view: function(ctrl) {
 		return m("select", {config: select2.config(ctrl)}, [
@@ -17,7 +17,7 @@ var Select2 = m.component({
 			})
 		]);
 	}
-});
+};
 
 /**
 Select2 config factory. The params in this doc refer to properties of the `ctrl` argument
@@ -56,7 +56,7 @@ Select2.config = function(ctrl) {
 
 
 //usage
-var Dashboard = m.component({
+var Dashboard = {
 	controller: function() {
 		//list of users to show
 		var data = [{id: 1, name: "John"}, {id: 2, name: "Mary"}, {id: 3, name: "Jane"}]
@@ -76,10 +76,10 @@ var Dashboard = m.component({
 	view: function(ctrl) {
 		return m("div", [
 			m("label", "User:"),
-			Select2({data: ctrl.data, value: ctrl.currentUser.id, onchange: ctrl.changeUser})
+			m.component(Select2, {data: ctrl.data, value: ctrl.currentUser.id, onchange: ctrl.changeUser})
 		]);
 	}
-});
+};
 
 
 m.mount(document.body, Dashboard);

@@ -84,7 +84,7 @@ var Page = {
 	}
 };
 
-var Demo = m.component({
+var Demo = {
 	//controller
 	controller: function() {
 		var pages = Page.list();
@@ -105,7 +105,7 @@ var Demo = m.component({
 			m("button", {onclick: ctrl.rotate}, "Rotate links")
 		]);
 	};
-});
+};
 
 
 //initialize
@@ -124,7 +124,7 @@ var Page = {
 	}
 };
 
-var Demo = m.component({
+var Demo = {
 	//controller
 	controller: function() {
 		var pages = Page.list();
@@ -145,7 +145,7 @@ var Demo = m.component({
 			m("button", {onclick: ctrl.rotate}, "Rotate links")
 		]);
 	};
-});
+};
 
 
 //initialize

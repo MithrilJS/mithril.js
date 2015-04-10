@@ -41,7 +41,7 @@ Here, we've defined a class called `Contact`. A contact has an id, a name and an
 One way of organizing components is to use component parameter lists to send data downstream, and to define events to bubble data back upstream to a centralized module who is responsible for interfacing with the model layer.
 
 ```javascript
-var ContactsWidget = m.component({
+var ContactsWidget = {
 	controller: function update() {
 		this.contacts = Contact.list()
 		this.save = function(contact) {
@@ -50,13 +50,13 @@ var ContactsWidget = m.component({
 	},
 	view: function(ctrl) {
 		return [
-			ContactForm({onsave: ctrl.save}),
-			ContactList({contacts: ctrl.contacts})
+			m.component(ContactForm, {onsave: ctrl.save}),
+			m.component(ContactList, {contacts: ctrl.contacts})
 		]
 	}
-})
+}
 
-var ContactForm = m.component({
+var ContactForm = {
 	controller: function(args) {
 		this.contact = m.prop(args.contact || new Contact())
 	},
@@ -73,9 +73,9 @@ var ContactForm = m.component({
 			m("button[type=button]", {onclick: args.onsave.bind(this, contact)}, "Save")
 		])
 	}
-})
+}
 
-var ContactList = m.component({
+var ContactList = {
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -87,9 +87,9 @@ var ContactList = m.component({
 			})
 		])
 	}
-})
+}
 
-m.module(document.body, ContactsWidget())
+m.mount(document.body, ContactsWidget)
 ```
 
 In the example above, there are 3 components. `ContactsWidget` is the top level module being rendered to `document.body`, and it is the module that has the responsibility of talking to our Model entity `Contact`, which we defined earlier.
@@ -123,7 +123,7 @@ Another way of organizing code is to distribute concrete responsibilities across
 Here's a refactored version of the sample app above to illustrate:
 
 ```javascript
-var ContactForm = m.component({
+var ContactForm = {
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -143,7 +143,7 @@ var ContactForm = m.component({
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-})
+}
 
 var ContactList = {
 	controller: function() {
@@ -163,8 +163,8 @@ var ContactList = {
 }
 
 m.route(document.body, "/", {
-	"/list": ContactList(),
-	"/create": ContactForm()
+	"/list": ContactList,
+	"/create": ContactForm
 })
 ```
 
@@ -200,16 +200,16 @@ var Observable = function() {
 }.call()
 
 
-var ContactsWidget = m.component({
+var ContactsWidget = {
 	view: function(ctrl) {
 		return [
-			m.module(ContactForm),
-			m.module(ContactList)
+			ContactForm,
+			ContactList
 		]
 	}
-})
+}
 
-var ContactForm = m.component({
+var ContactForm = {
 	controller: function() {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -229,9 +229,9 @@ var ContactForm = m.component({
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-})
+}
 
-var ContactList = m.component({
+var ContactList = {
 	controller: Observable.register(function() {
 		this.contacts = Contact.list()
 	}),
@@ -246,9 +246,9 @@ var ContactList = m.component({
 			})
 		])
 	}
-})
+}
 
-m.module(document.body, ContactsWidget())
+m.module(document.body, ContactsWidget)
 ```
 
 In this iteration, both the `ContactForm` and `ContactList` components are now children of the `ContactsWidget` component and they appear simultaneously on the same page.
@@ -311,19 +311,19 @@ It's of course possible to use both aggregation of responsibility and the observ
 The example below shows a variation of the contacts app where `ContactForm` is responsible for saving.
 
 ```javascript
-var ContactsWidget = m.component({
+var ContactsWidget = {
 	controller: Observable.register(["updateContact"], function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
 		return [
-			ContactForm(),
-			ContactList({contacts: ctrl.contacts})
+			m.component(ContactForm),
+			m.component(ContactList, {contacts: ctrl.contacts})
 		]
 	}
-})
+}
 
-var ContactForm = m.component({
+var ContactForm = {
 	controller: function(args) {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -343,9 +343,9 @@ var ContactForm = m.component({
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-})
+}
 
-var ContactList = m.component({
+var ContactList = {
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -357,9 +357,9 @@ var ContactList = m.component({
 			})
 		])
 	}
-})
+}
 
-m.mount(document.body, ContactsWidget())
+m.mount(document.body, ContactsWidget)
 ```
 
 Here, the data fetching is still centralized in the top-level component, so that we can avoid duplicate AJAX requests when fetching data.
@@ -379,20 +379,20 @@ Observable.on(["saveContact"], function(data) {
 })
 
 //ContactsWidget is the same as before
-var ContactsWidget = m.component({
+var ContactsWidget = {
 	controller: Observable.register(["updateContact"], function() {
 		this.contacts = Contact.list()
 	}),
 	view: function(ctrl) {
 		return [
-			ContactForm(),
-			ContactList({contacts: ctrl.contacts})
+			m.component(ContactForm),
+			m.component(ContactList, {contacts: ctrl.contacts})
 		]
 	}
-})
+}
 
 //ContactList no longer calls `Contact.save`
-var ContactForm = m.component({
+var ContactForm = {
 	controller: function(args) {
 		this.contact = m.prop(new Contact())
 		this.save = function(contact) {
@@ -412,10 +412,10 @@ var ContactForm = m.component({
 			m("button[type=button]", {onclick: ctrl.save.bind(this, contact)}, "Save")
 		])
 	}
-})
+}
 
 //ContactList is the same as before
-var ContactList = m.component({
+var ContactList = {
 	view: function(ctrl, args) {
 		return m("table", [
 			args.contacts().map(function(contact) {
@@ -427,9 +427,9 @@ var ContactList = m.component({
 			})
 		])
 	}
-})
+}
 
-m.mount(document.body, ContactsWidget())
+m.mount(document.body, ContactsWidget)
 ```
 
 Here we've moved `Contact.save(contact).then(Observable.broadcast("updateContact"))` out of the `ContactForm` component and into the model layer. In its place, `ContactForm` merely emits an action, which is then handled by this model layer observer.
@@ -445,7 +445,35 @@ Here's an example of a not-so-trivial component: a drag-n-drop file uploader. In
 These two functions are here to illustrate the ability to expose APIs to component consumers that complement the component's user interface. By bundling model methods in the component, we avoid hard-coding how files are handled once they're dropped in, and instead, we provide a useful library of functions that can be consumed flexibly to meet the demands on an application.
 
 ```javascript
-var Uploader = m.component({
+var Uploader = {
+	upload: function(options) {
+		var formData = new FormData
+		for (var key in options.data) {
+			for (var i = 0; i < options.data[key].length; i++) {
+				formData.append(key, files[i])
+			}
+		}
+
+		//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
+		options.serialize = function(value) {return value}
+		options.data = formData
+
+		return m.request(options)
+	},
+	serialize: function(files) {
+		var promises = Array.prototype.slice.call(files).map(function(file) {
+			var deferred = m.deferred()
+
+			var reader = new FileReader
+			reader.readAsDataURL()
+			reader.onloadend = function(e) {
+				deferred.resolve(e.result)
+			}
+			reader.onerror = deferred.reject
+			return deferred
+		})
+		return m.sync(promises)
+	},
 	controller: function(args) {
 		this.noop = function(e) {
 			e.preventDefault()
@@ -460,34 +488,6 @@ var Uploader = m.component({
 	view: function(ctrl, args) {
 		return m(".uploader", {ondragover: ctrl.noop, ondrop: ctrl.update})
 	}
-})
-Uploader.upload = function(options) {
-	var formData = new FormData
-	for (var key in options.data) {
-		for (var i = 0; i < options.data[key].length; i++) {
-			formData.append(key, files[i])
-		}
-	}
-
-	//simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify'ing it
-	options.serialize = function(value) {return value}
-	options.data = formData
-
-	return m.request(options)
-}
-Uploader.serialize = function(files) {
-	var promises = Array.prototype.slice.call(files).map(function(file) {
-		var deferred = m.deferred()
-
-		var reader = new FileReader
-		reader.readAsDataURL()
-		reader.onloadend = function(e) {
-			deferred.resolve(e.result)
-		}
-		reader.onerror = deferred.reject
-		return deferred
-	})
-	return m.sync(promises)
 }
 ```
 
@@ -506,7 +506,7 @@ var Demo1 = {
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
-			Uploader({onchange: ctrl.upload})
+			m.component(Uploader, {onchange: ctrl.upload})
 		]
 	}
 }
@@ -534,7 +534,7 @@ var Demo2 = {
 		return [
 			m("h1", "Uploader demo"),
 			m("form", [
-				Uploader({onchange: ctrl.files}),
+				m.component(Uploader, {onchange: ctrl.files}),
 				m("button[type=button]", {onclick: ctrl.save})
 			])
 		]

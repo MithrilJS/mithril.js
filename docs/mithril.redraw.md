@@ -42,7 +42,7 @@ When the flag is set to "diff", Mithril performs a diff between the old view and
 When the flag is set to "none", Mithril skips the next redraw. You don't need to change this flag to something else again later, since Mithril does that for you.
 
 ```javascript
-var Component1 = m.component({
+var Component1 = {
 	controller: function() {
 		//this component will attempt to diff its template when routing, as opposed to re-creating the view from scratch.
 		//this allows config contexts to live across route changes, if its element does not need to be recreated by the diff
@@ -50,10 +50,10 @@ var Component1 = m.component({
 	},
 	view: function() {
 		return m("h1", {config: Component1.config}, "test") //assume all routes display the same thing
+	},
+	config: function(el, isInit, ctx) {
+		if (!isInit) ctx.data = "foo" //we wish to initialize this only once, even if the route changes
 	}
-})
-Component1.config = function(el, isInit, ctx) {
-	if (!isInit) ctx.data = "foo" //we wish to initialize this only once, even if the route changes
 }
 ```
 
@@ -64,7 +64,7 @@ Common reasons why one might need to change redraw strategy are:
 	```javascript
 	//diff when routing, instead of redrawing from scratch
 	//this preserves the `<input>` element and its 3rd party plugin after route changes, since the `<input>` doesn't change
-	var Component1 = m.component({
+	var Component1 = {
 		controller: function() {
 			m.redraw.strategy("diff")
 		},
@@ -74,9 +74,9 @@ Common reasons why one might need to change redraw strategy are:
 				m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
 			])
 		}
-	})
+	}
 
-	var Component2 = m.component({
+	var Component2 = {
 		controller: function() {
 			m.redraw.strategy("diff")
 		},
@@ -86,7 +86,7 @@ Common reasons why one might need to change redraw strategy are:
 				m("input", {config: plugin}) //assuming `plugin` initializes a 3rd party library
 			])
 		}
-	})
+	}
 
 	m.route(document.body, "/foo", {
 		"/foo": Component1,
