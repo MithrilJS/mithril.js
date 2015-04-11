@@ -60,6 +60,7 @@ background-size: 20px 20px;
 .logo :before {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.10em;}
 .logo :after {content:"\25CB";position:absolute;margin:-0.17em 0 0 -0.5em;}
 .button,.button:visited {background:#5a5;color:#fff;display:inline-block;font:normal bold 16px Helvetica;margin:0 10px 10px;padding:10px 30px;text-decoration:none;}
+.changelog {display:inline-block;margin:0 10px;vertical-align:7px;}
 .features {background:#fff;padding:30px 0 0;}
 .feature {margin:0 0 30px;padding:0 20px 0 0;}
 .sample {background:#f5f5f5;padding:30px 0 10px;}
