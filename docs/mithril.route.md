@@ -273,17 +273,17 @@ where:
 
 	#### m.route.parseQueryString
 	
-	**Object parseQueryString(String data)**
+	**Object parseQueryString(String querystring)**
 	
-	Deserializes an object into from a URI encoded querystring representation, following the same deserialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
+	Deserializes an object from an URI encoded querystring representation, following the same deserialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
 	
-	-	**Object data**
+	-	**String querystring**
 	
-		An object to be deserialized
+		An URI encoded querystring to be deserialized
 	
-	-	**returns String querystring**
+	-	**returns Object data**
 	
-		The deserialized representation of the input data
+		The deserialized object
 	
 ---
 
