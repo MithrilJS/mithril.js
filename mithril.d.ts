@@ -68,7 +68,7 @@ declare module _mithril {
 
 	// Configuration function for an element
 	interface MithrilElementConfig {
-		(element: Element, isInitialized: boolean, context?: any): void;
+		(element: Element, isInitialized: boolean, context?: any, vdom: MithrilVirtualElement): void;
 	}
 
 	// Attributes on a virtual element

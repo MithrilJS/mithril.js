@@ -13,7 +13,7 @@
 - [Dealing with focus](#dealing-with-focus)
 - [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
 - [Signature](#signature)
-
+- [The `config` attribute](#the-config-attribute)
 ---
 
 This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render.md).
@@ -475,7 +475,7 @@ VirtualElement m(String selector [, Attributes attributes] [, Children... childr
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context)>
+    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context, VirtualElement vdom)>
 	Children :: String text | VirtualElement virtualElement | Component | SubtreeDirective directive | Array<Children children>
 	Component :: Object { Function? controller, Function view }
 	SubtreeDirective :: Object { String subtree }
@@ -539,7 +539,7 @@ where:
 
 -	#### The `config` attribute
 
-	**void config(DOMElement element, Boolean isInitialized, Object context)** (optional)
+	**void config(DOMElement element, Boolean isInitialized, Object context, VirtualElement vdom)** (optional)
 
 	You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
 
@@ -625,6 +625,10 @@ where:
 
 	m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 	```
+	
+	-	**VirtualElement vdom**
+	
+	The virtual DOM element to which the `config` function is attached
 
 -	**Children children** (optional)
 
