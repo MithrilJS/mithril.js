@@ -2,13 +2,31 @@
 
 ---
 
-Components are the building blocks of Mithril applications: they allow developers to encapsulate functionality into reusable units.
+- [Rendering components](#rendering-components)
+	- [Optional controller](#optional-controller)
+	- [Controller as a class constructor](#controller-as-a-class-constructor)
+	- [Notes on the view function](#notes on the view function)
+- [Parameterized components](#parameterized-components)
+- [Nesting components](#nesting-components)
+- [Dealing with state](#dealing-with-state)
+	- [Stateless components](#stateless-components)
+	- [Stateful components](#stateful-components)
+	- [Parameterized initial state](#parameterized-initial-state)
+- [Data-driven component identity](#data-driven-component-identity)
+- [Unloading components](#unloading-components)
+- [Nested asynchronous components](#nested-asynchronous-components)
+- [Limitations and caveats](#limitations-and-caveats)
+- [Opting out of auto-redrawing](#opting-out-of-auto-redrawing)
+- [Signature](#signature)	
+---
+
+Components are building blocks for Mithril applications. They allow developers to encapsulate functionality into reusable units.
 
 ---
 
 ### Rendering components
 
-In Mithril, a component is nothing more than an object that has a `controller` and a `view` functions.
+In Mithril, a component is nothing more than an object that has a `view` functions and, optionally, a `controller` function.
 
 ```javascript
 var MyComponent = {
@@ -20,12 +38,44 @@ var MyComponent = {
 	}
 }
 
-m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
+m.mount(document.body, MyComponent) // renders <h1>Hello</h1> into <body>
 ```
 
-The `controller` function creates an object that is meant to contain methods for a view to call. Those methods (and the `controller` function itself) may call model methods, and the controller may be used to store contextual data returned from model methods (for example, a [promise](mithril.deferred.md) from a [request](mithril.request.md)).
+The `controller` function, if present, creates an object that is meant to contain methods for a view to call. Those methods (and the `controller` function itself) may call model methods, and the controller may be used to store contextual data returned from model methods (for example, a [promise](mithril.deferred.md) from a [request](mithril.request.md)), or a reference to a view model.
 
 The `view` function creates a representation of a template that may consume model data and call controller methods to affect the model.
+
+```javascript
+//a simple MVC example
+
+//a sample model that exposes a value
+var model = {count: 0}
+
+var MyComponent = {
+	controller: function(data) {
+		return {
+			increment: function() {
+				//This is a simplication for the sake of the example.
+				//Typically, values are modified via model methods,
+				//rather than modified directly
+				model.count++
+			}
+		}
+	},
+	view: function(ctrl) {
+		return m("a[href=javascript:;]", {
+			onclick: ctrl.increment //view calls controller method on click
+		}, "Count: " + model.count)
+	}
+}
+
+m.mount(document.body, MyComponent)
+
+//renders:
+//<a href="javascript:;">Count: 0</a>
+//
+//the number increments when the link is clicked
+```
 
 Note that there's no requirement to tightly couple a controller and view while organizing code. It's perfectly valid to define controllers and views separately, and only bring them together when mounting them:
 
@@ -48,9 +98,7 @@ There are three ways to render a component: via [`m.route`](mithril.route.md) (i
 
 When a component is rendered, the `controller` function is called, then the `view` function is called. The return value of the `controller` function is passed to `view` as its first argument.
 
----
-
-### Optional controller
+#### Optional controller
 
 The `controller` function is optional and defaults to an empty function.
 
@@ -65,9 +113,7 @@ var MyComponent = {
 m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
 ```
 
----
-
-### Controller as a class constructor
+#### Controller as a class constructor
 
 A controller can also be used as a class constructor (i.e. it's possible to attach properties to the `this` object within the constructor, instead of returning a value.
 
@@ -84,9 +130,7 @@ var MyComponent = {
 m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
 ```
 
----
-
-### Notes on the view function
+#### Notes on the view function
 
 The `view` function does not create a DOM tree when called. The return value of the view function is merely a plain Javascript data structure that represents a DOM tree. Internally, Mithril uses this data representation of the DOM to probe for data changes and update the DOM only where necessary. This rendering technique is known as *virtual DOM diffing*.
 
@@ -447,7 +491,7 @@ There are [different ways to organize components](#application-architecture-with
 
 ---
 
-### Nested component limitations and caveats
+### Limitations and caveats
 
 There are a few caveats when nesting components:
 

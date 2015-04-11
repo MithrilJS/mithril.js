@@ -291,13 +291,11 @@ m("a[href='/dashboard']", {config: m.route}, "Dashboard");
 
 The `config` mechanism can also be used to put focus on form inputs, and call methods that would not be possible to execute via the regular attribute syntax.
 
-It is only meant to be used to call methods on DOM elements that cannot be called otherwise.
-
-It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
-
 Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
+
+You can also use it to attach events to other elements (for example, `window.onresize`), but you should remove such event handlers via `ctx.onunload` to avoid surprises.
 
 ---
 
@@ -578,13 +576,11 @@ where:
 
 	The `config` mechanism can also be used to put focus on form inputs, and call methods that would not be possible to execute via the regular attribute syntax.
 
-	It is only meant to be used to call methods on DOM elements that cannot be called otherwise.
-
-	It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
-
 	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 	You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
+	
+	You can also use it to attach events to other elements (for example, `window.onresize`), but you should remove such event handlers via `ctx.onunload` to avoid surprises.
 
 	-	**DOMElement element**
 
