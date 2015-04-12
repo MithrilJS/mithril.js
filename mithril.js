@@ -48,8 +48,6 @@ var m = (function app(window, undefined) {
 				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true)
 			}
 		}
-		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
-
 
 		var children = hasAttrs ? args.slice(2) : args.slice(1);
 		if (children.length === 1 && type.call(children[0]) === ARRAY) {
@@ -60,12 +58,13 @@ var m = (function app(window, undefined) {
 		}
 		
 		for (var attrName in attrs) {
-			if (attrName === classAttrName) {
-				var className = cell.attrs[attrName]
-				cell.attrs[attrName] = (className && attrs[attrName] ? className + " " : className || "") + attrs[attrName];
+			if (attrName === classAttrName && attrs[attrName] != null && attrs[attrName] !== "") {
+				classes.push(attrs[attrName])
 			}
 			else cell.attrs[attrName] = attrs[attrName]
 		}
+		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
+		
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
