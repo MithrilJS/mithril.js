@@ -1139,5 +1139,5 @@ var m = (function app(window, undefined) {
 	return m
 })(typeof window != "undefined" ? window : {});
 
-if (typeof component != "undefined" && component !== null && component.exports) component.exports = m;
+if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 else if (typeof define === "function" && define.amd) define(function() {return m});
