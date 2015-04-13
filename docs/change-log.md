@@ -1,5 +1,21 @@
 ## Change Log
 
+---
+
+[v0.2.0](/mithril/archive/v0.2.0) - improved components
+
+### News:
+
+-	Mithril modules will be referred to as *components* from now on.
+-	Virtual DOM tree can now contain [components](mithril.component.md)
+-	Components can now be parameterized via `m.component`
+
+### Deprecations:
+
+-	`m.module` has been renamed `m.mount`. Calling `m.module` will still work, but should be considered deprecated. Rationale: Mithril modules and components are the same thing, therefore from now on, they will be referred to as components, since that name is more descriptive of their purpose, and causes less confusion in the face of ES6 modules.
+
+---
+
 [v0.1.34](/mithril/archive/v0.1.34) - maintenance
 
 ### Bug Fixes:

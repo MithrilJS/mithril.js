@@ -1,0 +1,8 @@
+<body></body>
+<script src="mithril.js"></script>
+<script type="text/javascript">
+m.request({ url: "invalid" }).then(null, function() {console.log(1);})
+m.deferred.onerror = function() {
+    console.log(2)
+}
+</script>

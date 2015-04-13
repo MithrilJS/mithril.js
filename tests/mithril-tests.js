@@ -1780,7 +1780,6 @@ function testMithril(mock) {
 	test(function() {
 		var root = mock.document.createElement("div")
 		var vdom = m("div.a", {class: undefined})
-		console.log(vdom)
 		m.render(root, vdom)
 		return root.childNodes[0].class == "a"
 	})
