@@ -8,7 +8,7 @@
 - [Accessing the real DOM element](#accessing-the-real-dom-element)
 - [Persisting config data](#persisting-config-data)
 - [Destructors](#destructors)
-- [Persising DOM elements across route changes](#persising-dom-elements-across-route-changes)
+- [Persisting DOM elements across route changes](#persisting-dom-elements-across-route-changes)
 - [SVG](#svg)
 - [Dealing with focus](#dealing-with-focus)
 - [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
@@ -341,7 +341,7 @@ m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets cal
 
 ---
 
-#### Persising DOM elements across route changes
+#### Persisting DOM elements across route changes
 
 When using the [router](mithril.route.md), a route change recreates the DOM tree from scratch in order to unload plugins from the previous page. If you want to keep a DOM element intact across a route change, you can set the `retain` flag in the config's context object.
 
