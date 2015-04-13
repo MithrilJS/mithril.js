@@ -568,7 +568,7 @@ var m = (function app(window, undefined) {
 		var isPrevented = false;
 		var event = {preventDefault: function() {isPrevented = true}};
 		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
-			unloader.handler(event)
+			unloader.handler.call(unloader.controller, event)
 			unloader.controller.onunload = null
 		}
 		if (isPrevented) {
