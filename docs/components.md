@@ -450,7 +450,7 @@ var Uploader = {
 		var formData = new FormData
 		for (var key in options.data) {
 			for (var i = 0; i < options.data[key].length; i++) {
-				formData.append(key, files[i])
+				formData.append(key, options.data[key][i])
 			}
 		}
 
@@ -461,7 +461,7 @@ var Uploader = {
 		return m.request(options)
 	},
 	serialize: function(files) {
-		var promises = Array.prototype.slice.call(files).map(function(file) {
+		var promises = files.map(function(file) {
 			var deferred = m.deferred()
 
 			var reader = new FileReader
@@ -470,7 +470,7 @@ var Uploader = {
 				deferred.resolve(e.result)
 			}
 			reader.onerror = deferred.reject
-			return deferred
+			return deferred.promise
 		})
 		return m.sync(promises)
 	},
@@ -481,7 +481,7 @@ var Uploader = {
 		this.update = function(e) {
 			e.preventDefault()
 			if (typeof args.onchange == "function") {
-				args.onchange((e.dataTransfer || e.target).files)
+				args.onchange([].slice.call((e.dataTransfer || e.target).files))
 			}
 		}
 	},
@@ -497,9 +497,11 @@ Below are some examples of consuming the `Uploader` component:
 //usage demo 1: standalone multipart/form-data upload when files are dropped into the component
 var Demo1 = {
 	controller: function() {
-		treturn {
+		return {
 			upload: function(files) {
-				Uploader.upload({method: "POST", url: "/api/files", {data: {files: files}}})
+				Uploader.upload({method: "POST", url: "/api/files", data: {files: files}}).then(function() {
+					alert("uploaded!")
+				})
 			}
 		}
 	},
@@ -510,7 +512,11 @@ var Demo1 = {
 		]
 	}
 }
+```
 
+[Demo](http://jsfiddle.net/vL22kjvs/5/)
+
+```javascript
 //usage demo 2: upload as base-64 encoded data url from a parent form
 var Demo2 = {
 	Asset: {
@@ -524,8 +530,10 @@ var Demo2 = {
 		return {
 			files: files,
 			save: function() {
-				Uploader.serialize(files).then(function(files) {
-					Asset.save({files: files})
+				Uploader.serialize(files()).then(function(files) {
+					Demo2.Asset.save({files: files}).then(function() {
+						alert("Uploaded!")
+					})
 				})
 			}
 		}
@@ -533,11 +541,18 @@ var Demo2 = {
 	view: function(ctrl) {
 		return [
 			m("h1", "Uploader demo"),
+			m("p", "Drag and drop a file below. An alert box will appear when the upload finishes"),
 			m("form", [
 				m.component(Uploader, {onchange: ctrl.files}),
-				m("button[type=button]", {onclick: ctrl.save})
+				ctrl.files().map(function(file) {
+					return file.name
+				}).join(),
+				m("button[type=button]", {onclick: ctrl.save}, "Upload")
 			])
 		]
 	}
 }
 ```
+
+[Demo](http://jsfiddle.net/vL22kjvs/6/)
+

@@ -496,9 +496,9 @@ m.mount(document, {controller: todo.controller, view: todo.view});
 </script>
 ```
 
----
-
 This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias/fbgypzbr/1/).
+
+---
 
 ## Notes on Architecture
 
