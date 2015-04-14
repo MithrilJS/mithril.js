@@ -184,7 +184,7 @@ var App = {
 			m.component(MyComponent, {message: "Hello"})
 		])
 	}
-})
+}
 
 var MyComponent = {
 	controller: function(args) {
