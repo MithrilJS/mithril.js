@@ -58,10 +58,12 @@ var m = (function app(window, undefined) {
 		}
 		
 		for (var attrName in attrs) {
-			if (attrName === classAttrName && attrs[attrName] != null && attrs[attrName] !== "") {
-				classes.push(attrs[attrName])
+			if (attrs.hasOwnProperty(attrName)) {
+				if (attrName === classAttrName && attrs[attrName] != null && attrs[attrName] !== "") {
+					classes.push(attrs[attrName])
+				}
+				else cell.attrs[attrName] = attrs[attrName]
 			}
-			else cell.attrs[attrName] = attrs[attrName]
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
 		
@@ -254,10 +256,10 @@ var m = (function app(window, undefined) {
 			if (!data.attrs) data.attrs = {};
 			if (!cached.attrs) cached.attrs = {};
 
-			var dataAttrKeys = Object.getOwnPropertyNames(data.attrs)
+			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.getOwnPropertyNames(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 				if (cached.controllers) {
@@ -746,7 +748,7 @@ var m = (function app(window, undefined) {
 
 		// Get all routes and check if there's
 		// an exact match for the current path
-		var keys = Object.getOwnPropertyNames(router);
+		var keys = Object.keys(router);
 		var index = keys.indexOf(path);
 		if(index !== -1){
 			m.mount(root, router[keys [index]]);
