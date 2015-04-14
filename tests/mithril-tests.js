@@ -960,6 +960,79 @@ function testMithril(mock) {
 
 		return root.childNodes[0].nodeName == "DIV"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/551
+		var root = mock.document.createElement("div")
+		var a = false, found = false, unloaded = false
+		var Root = {
+			view: function() {
+				return Comp
+			}
+		}
+		var Comp = {
+			view: function() {
+				return m("div", {config: Comp.config}, [
+					m("div", {onclick: function() {
+						a = !a
+						m.redraw(true)
+						found = root.childNodes[0].childNodes[1]
+					}}, "asd"),
+					a ? m("#a", "aaa") : null,
+					"test"
+				])
+			},
+			config: function(el, init, ctx) {
+				if (!init) ctx.onunload = function() {
+					unloaded = true
+				}
+			}
+		}
+		m.mount(root, Root)
+		
+		var target = root.childNodes[0].childNodes[0]
+		target.onclick({currentTarget: target})
+		
+		mock.requestAnimationFrame.$resolve()
+
+		return !unloaded && found.id === "a"
+	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/551
+		var root = mock.document.createElement("div")
+		var a = false, found = false, unloaded = false
+		var Root = {
+			view: function() {
+				return Comp
+			}
+		}
+		var Comp = {
+			view: function() {
+				return m("div", {config: Comp.config}, [
+					m("div", {onclick: function() {
+						a = !a
+						m.redraw(true)
+						found = root.childNodes[0].childNodes[1]
+						m.redraw.strategy("none")
+					}}, "asd"),
+					a ? m("#a", "aaa") : null,
+					"test"
+				])
+			},
+			config: function(el, init, ctx) {
+				if (!init) ctx.onunload = function() {
+					unloaded = true
+				}
+			}
+		}
+		m.mount(root, Root)
+		
+		var target = root.childNodes[0].childNodes[0]
+		target.onclick({currentTarget: target})
+		
+		mock.requestAnimationFrame.$resolve()
+
+		return !unloaded && found.id === "a"
+	})
 	m.redraw.strategy(undefined) //teardown for m.mount tests
 	
 	//m.withAttr
