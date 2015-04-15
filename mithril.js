@@ -240,7 +240,7 @@ var m = (function app(window, undefined) {
 			var controllerConstructors = [], controllers = []
 			while (data.view) {
 				var controllerConstructor = (data.controller || {}).$original || data.controller || function() {}
-				var controllerIndex = cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
+				var controllerIndex = m.redraw.strategy() == "diff" && cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
 				var key = data && data.attrs && data.attrs.key
 				data = pendingRequests == 0 || cached ? data.view(controller) : {tag: "placeholder"}

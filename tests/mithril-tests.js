@@ -1033,6 +1033,48 @@ function testMithril(mock) {
 
 		return !unloaded && found.id === "a"
 	})
+	test(function() {
+		//https://github.com/lhorie/mithril.js/issues/555
+		var root = mock.document.createElement("div")
+		var MyComponent = {
+			controller: function(args) {
+				this.name = args.name;
+			},
+			view: function(ctrl) {
+				return m('div', ctrl.name);
+			}
+		}
+		var FooPage = {
+			view: function() {
+			return m('div', [
+				m('a[href=/]', {config: m.route}, 'foo'),
+				m('a[href=/bar]', {config: m.route}, 'bar'),
+				m.component(MyComponent, {name: 'Jane'})
+			]);
+			}
+		};
+		var BarPage = {
+			view: function() {
+			return m('div', [
+				m('a[href=/]', {config: m.route}, 'foo'),
+				m('a[href=/bar]', {config: m.route}, 'bar'),
+				m.component(MyComponent, {name: 'Bob'})
+			]);
+			}
+		};
+		m.route(root, '/', {
+			'/': FooPage,
+			'/bar': BarPage
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/bar")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes[0].childNodes[2].childNodes[0].nodeValue == "Bob"
+	})
 	m.redraw.strategy(undefined) //teardown for m.mount tests
 	
 	//m.withAttr
