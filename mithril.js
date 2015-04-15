@@ -599,6 +599,7 @@ var m = (function app(window, undefined) {
 			endFirstComputation();
 			return controllers[index]
 		}
+		else computePostRedrawHook = null
 	};
 	var redrawing = false
 	m.redraw = function(force) {
