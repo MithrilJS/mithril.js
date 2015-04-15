@@ -167,7 +167,7 @@ m.route(document.body, "/", {
 m.route("/dashboard"); // logs "unloading home"
 ```
 
-This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `unload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
+This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `onunload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
 
 ---
 
