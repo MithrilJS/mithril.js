@@ -41,6 +41,12 @@ function testMithril(mock) {
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[0].length === 3})
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[1].length === 4})
 	test(function() {return m("div", [1], [2], [3]).children.length === 3})
+	test(function() {
+		//class changes shouldn't trigger dom recreation
+		var v1 = m(".foo", {class: "", onclick: function() {}})
+		var v2 = m(".foo", {class: "bar", onclick: function() {}})
+		return Object.keys(v1.attrs).join() === Object.keys(v2.attrs).join()
+	})
 	
 	//m.mount
 	test(function() {
