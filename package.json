@@ -11,6 +11,7 @@
 	},
 	"main": "mithril.js",
 	"devDependencies": {
+		"grunt": "*",
 		"grunt-cli": "*",
 		"grunt-contrib-copy": "*",
 		"grunt-contrib-uglify": "*",
