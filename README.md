@@ -11,6 +11,12 @@ There's also a [blog](http://lhorie.github.io/mithril-blog) and a [mailing list]
 
 ---
 
+## Fork information:
+
+This fork aims for adaptating Mithril to native ES6 promises. All test cases which rely on the sync behavior need to be adapted to be asyncronous. Also this fork aims to remove the code from "Unchecked Error Handling" as actual browsers are now doing this, athough shims aren't.
+
+---
+
 ## What is Mithril?
 
 Mithril is a client-side MVC framework - a tool to organize code in a way that is easy to think about and to maintain.
