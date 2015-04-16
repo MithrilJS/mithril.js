@@ -131,6 +131,6 @@ In order to update a forked version of Mithril, [follow the instructions on this
 To use the bleeding edge version from npm, use the following command:
 
 ```
-npm install git://github.com/lhorie/mithril.js/tarball/next --save
+npm install git://github.com/lhorie/mithril.js#next --save
 ```
 
