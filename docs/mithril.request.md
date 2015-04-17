@@ -479,7 +479,7 @@ where:
 	
 		Determines whether the `m.request` can affect template rendering. Defaults to false.
 		
-		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention). It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
+		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
 		
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
 		
@@ -504,8 +504,8 @@ where:
 		}
 		```
 		
-		It's recommended that you always set an `initialValue` when setting the `background` option to true.
-		
+		It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
+
 	-	**any initialValue** (optional)
 	
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
