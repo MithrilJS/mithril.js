@@ -1904,6 +1904,12 @@ function testMithril(mock) {
 		m.render(root, vdom)
 		return root.childNodes[0].class == "a"
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m(".a", [1]))
+		m.render(root, m(".a", []))
+		return root.childNodes[0].childNodes.length == 0
+	})
 	//end m.render
 
 	//m.redraw
