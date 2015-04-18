@@ -132,7 +132,7 @@ var m = (function app(window, undefined) {
 			//3) if key exists in new list, change action from deletion to a move
 			//4) for each key, handle its corresponding action as marked in previous steps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
-			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
+			var existing = {}, shouldMaintainIdentities = false;
 			for (var i = 0; i < cached.length; i++) {
 				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
 					shouldMaintainIdentities = true;
