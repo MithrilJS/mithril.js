@@ -54,7 +54,7 @@ macro m_impl {
 		var partialSyntax = #{$partial ...};
 		try {
 			var partial = unwrapSyntax(partialSyntax);
-			var isTag = partial.inner && partial.inner.length > 2 && (partial.inner[0].token.value == "tag" && partial.inner[1].token.value == ":")
+			var isTag = partial.inner && partial.inner.length > 2 && (partial.inner[0].token.value == "tag" && partial.inner[1].token.value == ":") || typeof partial != "object" || partial.value == "[]"
 			return !isTag ? #{m_impl($selector, $partial ..., [])} : #{m_impl($selector, {}, $partial ...)};
 		}
 		catch (e) {
