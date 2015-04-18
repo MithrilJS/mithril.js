@@ -623,12 +623,11 @@ var m = (function app(window, undefined) {
 		redrawing = false
 	};
 	m.redraw.strategy = m.prop();
-	var blank = function() {return ""}
 	function redraw() {
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
 				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]]
-				m.render(root, components[i].view ? components[i].view(controllers[i], args) : blank())
+				m.render(root, components[i].view ? components[i].view(controllers[i], args) : "")
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
