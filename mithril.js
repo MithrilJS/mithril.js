@@ -545,7 +545,7 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
+	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
 		var controller = function() {
@@ -600,7 +600,7 @@ var m = (function app(window, undefined) {
 			endFirstComputation();
 			return controllers[index]
 		}
-		else computePostRedrawHook = null
+		else computePreRedrawHook = computePostRedrawHook = null
 	};
 	var redrawing = false
 	m.redraw = function(force) {
@@ -624,6 +624,10 @@ var m = (function app(window, undefined) {
 	};
 	m.redraw.strategy = m.prop();
 	function redraw() {
+		if (computePreRedrawHook) {
+			computePreRedrawHook()
+			computePreRedrawHook = null
+		}
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
 				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]]
@@ -685,7 +689,7 @@ var m = (function app(window, undefined) {
 					redirect(path)
 				}
 			};
-			computePostRedrawHook = setScroll;
+			computePreRedrawHook = setScroll;
 			window[listener]()
 		}
 		//config: m.route
@@ -718,9 +722,9 @@ var m = (function app(window, undefined) {
 			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true || oldRoute === arguments[0];
 
 			if (window.history.pushState) {
+				computePreRedrawHook = setScroll
 				computePostRedrawHook = function() {
 					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, $document.title, modes[m.route.mode] + currentRoute);
-					setScroll()
 				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
