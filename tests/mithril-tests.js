@@ -1134,6 +1134,9 @@ function testMithril(mock) {
 		return redraws == 1 && data.url == "/foo"
 	})
 	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
 		var root = mock.document.createElement("div")
 		var redraws1 = 0, redraws2 = 0
 		var Root = {
@@ -1168,6 +1171,59 @@ function testMithril(mock) {
 		
 		mock.requestAnimationFrame.$resolve()
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		mock.requestAnimationFrame.$resolve()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		mock.requestAnimationFrame.$resolve()
+		m.mount(root, null)
+		mock.requestAnimationFrame.$resolve()
+		
+		return redraws1 == 1 && redraws2 == 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var redraws1 = 0, redraws2 = 0
+		var Root1 = {
+			view: function() {
+				return Comp1
+			}
+		}
+		var Root2 = {
+			view: function() {
+				return Comp2
+			}
+		}
+		
+		var Comp1 = {
+			controller: function() {
+				this.foo = m.request({method: "GET", url: "/foo"})
+			},
+			view: function(ctrl) {
+				redraws1++
+				return m("div")
+			}
+		}
+		var Comp2 = {
+			controller: function() {
+				this.bar = m.request({method: "GET", url: "/bar"})
+			},
+			view: function(ctrl) {
+				redraws2++
+				return m("div")
+			}
+		}
+		
+		m.route(root, "/", {
+			"/": Root1,
+			"/root2": Root2
+		})
+		
+		mock.requestAnimationFrame.$resolve()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		m.route("/root2")
+		
 		
 		mock.requestAnimationFrame.$resolve()
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()

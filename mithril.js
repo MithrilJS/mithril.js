@@ -3,6 +3,7 @@ var m = (function app(window, undefined) {
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
+	var noop = function() {}
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
@@ -240,11 +241,11 @@ var m = (function app(window, undefined) {
 		else if (data != null && dataType === OBJECT) {
 			var controllerConstructors = [], controllers = []
 			while (data.view) {
-				var controllerConstructor = (data.controller || {}).$original || data.controller || function() {}
+				var controllerConstructor = (data.controller || {}).$original || data.controller || noop
 				var controllerIndex = m.redraw.strategy() == "diff" && cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
-				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
+				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
-				data = pendingRequests == 0 || (cached && cached.controllers) ? data.view(controller) : {tag: "placeholder"}
+				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
 				if (key) {
 					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
@@ -265,7 +266,7 @@ var m = (function app(window, undefined) {
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 				if (cached.controllers) {
 					for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-						if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}})
+						if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop})
 					}
 				}
 			}
@@ -295,7 +296,7 @@ var m = (function app(window, undefined) {
 						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
 						if (pendingRequests && controller.onunload) {
 							var onunload = controller.onunload
-							controller.onunload = function() {}
+							controller.onunload = noop
 							controller.onunload.$old = onunload
 						}
 					}
@@ -442,7 +443,7 @@ var m = (function app(window, undefined) {
 		}
 		if (cached.controllers) {
 			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function() {}});
+				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
 			}
 		}
 		if (cached.children) {
@@ -549,7 +550,7 @@ var m = (function app(window, undefined) {
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
 		var controller = function() {
-			return (component.controller || function() {}).apply(this, args) || this
+			return (component.controller || noop).apply(this, args) || this
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
@@ -588,8 +589,8 @@ var m = (function app(window, undefined) {
 			m.startComputation();
 			roots[index] = root;
 			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2))
-			var currentComponent = topComponent = component = component || {};
-			var constructor = component.controller || function() {}
+			var currentComponent = topComponent = component = component || {controller: function() {}};
+			var constructor = component.controller || noop
 			var controller = new constructor;
 			//controllers may call m.mount recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.mount call is applied
@@ -668,7 +669,7 @@ var m = (function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
-	var redirect = function() {}, routeParams, currentRoute;
+	var redirect = noop, routeParams, currentRoute;
 	m.route = function() {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
