@@ -969,7 +969,7 @@ function testMithril(mock) {
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/551
 		var root = mock.document.createElement("div")
-		var a = false, found = false, unloaded = false
+		var a = false, found = false, unloaded = false, redraws = 0
 		var Root = {
 			view: function() {
 				return Comp
@@ -977,6 +977,7 @@ function testMithril(mock) {
 		}
 		var Comp = {
 			view: function() {
+				redraws++
 				return m("div", {config: Comp.config}, [
 					m("div", {onclick: function() {
 						a = !a
@@ -1000,12 +1001,12 @@ function testMithril(mock) {
 		
 		mock.requestAnimationFrame.$resolve()
 
-		return !unloaded && found.id === "a"
+		return !unloaded && found.id === "a" && redraws == 3
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/551
 		var root = mock.document.createElement("div")
-		var a = false, found = false, unloaded = false
+		var a = false, found = false, unloaded = false, redraws = 0
 		var Root = {
 			view: function() {
 				return Comp
@@ -1013,6 +1014,7 @@ function testMithril(mock) {
 		}
 		var Comp = {
 			view: function() {
+				redraws++
 				return m("div", {config: Comp.config}, [
 					m("div", {onclick: function() {
 						a = !a
@@ -1037,7 +1039,26 @@ function testMithril(mock) {
 		
 		mock.requestAnimationFrame.$resolve()
 
-		return !unloaded && found.id === "a"
+		return !unloaded && found.id === "a" && redraws == 2
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var redraws = 0
+		var Root = {
+			view: function() {
+				redraws++
+				return m("div", {onclick: function() {m.redraw(true)}})
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		var target = root.childNodes[0]
+		target.onclick({currentTarget: target})
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return redraws == 3
 	})
 	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/555
@@ -1080,6 +1101,82 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		
 		return root.childNodes[0].childNodes[2].childNodes[0].nodeValue == "Bob"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var redraws = 0, data
+		var Root = {
+			view: function() {
+				return Comp
+			}
+		}
+		
+		var Comp = {
+			controller: function() {
+				this.foo = m.request({method: "GET", url: "/foo"})
+			},
+			view: function(ctrl) {
+				redraws++
+				data = ctrl.foo()
+				return m("div")
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		mock.requestAnimationFrame.$resolve()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		mock.requestAnimationFrame.$resolve()
+		m.mount(root, null)
+		mock.requestAnimationFrame.$resolve()
+		
+		return redraws == 1 && data.url == "/foo"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var redraws1 = 0, redraws2 = 0
+		var Root = {
+			view: function() {
+				return m("div", [
+					Comp1,
+					Comp2
+				])
+			}
+		}
+		
+		var Comp1 = {
+			controller: function() {
+				this.foo = m.request({method: "GET", url: "/foo"})
+			},
+			view: function(ctrl) {
+				redraws1++
+				return m("div")
+			}
+		}
+		var Comp2 = {
+			controller: function() {
+				this.bar = m.request({method: "GET", url: "/bar"})
+			},
+			view: function(ctrl) {
+				redraws2++
+				return m("div")
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		mock.requestAnimationFrame.$resolve()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		mock.requestAnimationFrame.$resolve()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		
+		mock.requestAnimationFrame.$resolve()
+		m.mount(root, null)
+		mock.requestAnimationFrame.$resolve()
+		
+		return redraws1 == 1 && redraws2 == 1
 	})
 	m.redraw.strategy(undefined) //teardown for m.mount tests
 	

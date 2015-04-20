@@ -244,7 +244,7 @@ var m = (function app(window, undefined) {
 				var controllerIndex = m.redraw.strategy() == "diff" && cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || function() {})
 				var key = data && data.attrs && data.attrs.key
-				data = pendingRequests == 0 || cached ? data.view(controller) : {tag: "placeholder"}
+				data = pendingRequests == 0 || (cached && cached.controllers) ? data.view(controller) : {tag: "placeholder"}
 				if (key) {
 					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
