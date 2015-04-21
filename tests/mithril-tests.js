@@ -1234,6 +1234,111 @@ function testMithril(mock) {
 		
 		return redraws1 == 1 && redraws2 == 1
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		
+		var cond = true
+		var controller1 = null, controller2 = null
+		var Root = {
+			view: function() {
+				return cond ? Comp1 : Comp2
+			}
+		}
+		
+		var Comp1 = {
+			view: function(ctrl) {
+				controller1 = ctrl
+				return m("div")
+			}
+		}
+		var Comp2 = {
+			view: function(ctrl) {
+				controller2 = ctrl
+				return m("div")
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		cond = false
+		m.redraw(true)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return controller1 !== controller2
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		
+		var cond = true
+		var unloaded = false
+		var Root = {
+			view: function() {
+				return cond ? Comp1 : Comp2
+			}
+		}
+		
+		var Comp1 = {
+			view: function(ctrl) {
+				return m("div", {config: function(el, init, ctx) {
+					ctx.onunload = function() {unloaded = true}
+				}})
+			}
+		}
+		var Comp2 = {
+			view: function(ctrl) {
+				return m("div")
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		cond = false
+		m.redraw(true)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return unloaded
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		
+		var cond = true
+		var initialized = null
+		var Root = {
+			view: function() {
+				return cond ? Comp1 : Comp2
+			}
+		}
+		
+		var Comp1 = {
+			view: function(ctrl) {
+				return m("div")
+			}
+		}
+		var Comp2 = {
+			view: function(ctrl) {
+				return m("div", {config: function(el, init) {
+					initialized = init
+				}})
+			}
+		}
+		
+		m.mount(root, Root)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		cond = false
+		m.redraw(true)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initialized === false
+	})
 	m.redraw.strategy(undefined) //teardown for m.mount tests
 	
 	//m.withAttr

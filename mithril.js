@@ -239,10 +239,10 @@ var m = (function app(window, undefined) {
 			}
 		}
 		else if (data != null && dataType === OBJECT) {
-			var controllerConstructors = [], controllers = []
+			var views = [], controllers = []
 			while (data.view) {
-				var controllerConstructor = (data.controller || {}).$original || data.controller || noop
-				var controllerIndex = m.redraw.strategy() == "diff" && cached.controllerConstructors ? cached.controllerConstructors.indexOf(controllerConstructor) : -1
+				var view = data.view.$original || data.view
+				var controllerIndex = m.redraw.strategy() == "diff" && cached.views ? cached.views.indexOf(view) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
 				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
@@ -251,7 +251,7 @@ var m = (function app(window, undefined) {
 					data.attrs.key = key
 				}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
-				controllerConstructors.push(controllerConstructor)
+				views.push(view)
 				controllers.push(controller)
 			}
 			if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.")
@@ -290,7 +290,7 @@ var m = (function app(window, undefined) {
 					nodes: [node]
 				};
 				if (controllers.length) {
-					cached.controllerConstructors = controllerConstructors
+					cached.views = views
 					cached.controllers = controllers
 					for (var i = 0, controller; controller = controllers[i]; i++) {
 						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old
@@ -313,7 +313,7 @@ var m = (function app(window, undefined) {
 				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
 				cached.nodes.intact = true;
 				if (controllers.length) {
-					cached.controllerConstructors = controllerConstructors
+					cached.views = views
 					cached.controllers = controllers
 				}
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null)
@@ -556,7 +556,7 @@ var m = (function app(window, undefined) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
 		}
-		controller.$original = component.controller
+		view.$original = component.view
 		var output = {controller: controller, view: view}
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
 		return output
