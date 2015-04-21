@@ -14,6 +14,11 @@
 
 -	`m.module` has been renamed `m.mount`. Calling `m.module` will still work, but should be considered deprecated. Rationale: Mithril modules and components are the same thing, therefore from now on, they will be referred to as components, since that name is more descriptive of their purpose, and causes less confusion in the face of ES6 modules.
 
+### Bug Fixes:
+
+-	fix diff edge case in `<select>` [#569](https://github.com/lhorie/mithril.js/issues/569)
+-	fix support for arrays in template compiler
+
 ---
 
 [v0.1.34](/mithril/archive/v0.1.34) - maintenance
