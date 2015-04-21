@@ -3,6 +3,7 @@
 ---
 
 - [How auto-redrawing works](#how-auto-redrawing-works)
+- [Difference between computation methods and m.redraw](#difference-between-computation-methods-and-m-redraw)
 - [Integrating multiple execution threads](#integrating-multiple-execution-threads)
 - [Integrating to legacy code](#integrating-to-legacy-code)
 - [Signature](#signature)
@@ -11,7 +12,7 @@
 
 Typically, `m.startComputation` / `m.endComputation` don't need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously, or when calling vanilla javascript asynchronous functions from template [`config`](mithril.md#accessing-the-real-dom) functions.
 
-If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, or that you're being forced to call [`m.redraw`](mithril.redraw.md) manually, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
+If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
 
 In order to integrate an asynchronous code to Mithril's autoredrawing system, you should call `m.startComputation` BEFORE making an asynchronous call, and `m.endComputation` after the asynchronous callback completes.
 
@@ -142,6 +143,18 @@ var view = function() {
 	])
 }
 ```
+
+---
+
+### Difference between computation methods and m.redraw
+
+The `m.startComputation` / `m.endComputation` pair is designed to be "stacked", i.e. multiple asynchronous services can each call this pair of functions to indicate that they want the redrawing algorithm to wait for them to finish before a redraw occurs. In contrast, `m.redraw` is "aggressive": it redraws as many times as it is called (with the caveat that redraws are batched if they occur less than one animation frame apart in time). In practice, this means that calling `m.redraw` may cause a redraw to happen before some AJAX calls have finished, which in turn, may cause null reference exceptions in templates that try to use the data from these requests without first checking that the data exists.
+
+Therefore, using the computation methods is recommended in order to reduce the amount of intermediate redraws that would otherwise occur as multiple asynchronous services are resolved.
+
+When computation methods are used dilligently and religiously, templates are never redrawn with incomplete data. However, it's important to always write conditional tests in templates to account for the possibility of nullables, because redraws may come to occur more aggressively than data is available (perhaps because a newly introduced 3rd party library calls `m.redraw`, or because you might want a more aggressive redraw policy to implement a specific feature down the road).
+
+Defending against nullables can typically be achieved via the `initialValue` option in [`m.request`](mithril.request.md) and basic null checks (e.g. `data ? m("div", data) : null`).
 
 ---
 

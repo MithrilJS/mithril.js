@@ -487,7 +487,9 @@ Since controllers can call model methods, it's possible for nested components to
 
 When a component has asynchronous payloads and they are queued by the [auto-redrawing system](auto-redrawing.md), its view is NOT rendered until all asynchronous operations complete. When the component's asynchronous operations complete, another redraw is triggered and the entire template tree is evaluated again. This means that the virtual dom tree may take two or more redraws (depending on how many nested asynchronous components there are) to be fully rendered.
 
-There are [different ways to organize components](#application-architecture-with-components) that can side-step the need for multiple redraws (although you could still force multiple redraws to happen by using the [`background`](mithril.request.md#rendering-before-web-service-requests-finish) and `initialValue` options in `m.request`.)
+There are [different ways to organize components](components.md#application-architecture-with-components) that can side-step the need for multiple redraws. Regardless, you could also force multiple redraws to happen by using the [`background`](mithril.request.md#rendering-before-web-service-requests-finish) and `initialValue` options in `m.request`, or by manually calling [`m.redraw()`](mithril.redraw.md).
+
+If a component A contains another component B that calls asynchronous services, then when component A is rendered, a `<placeholder>` tag is rendered in place of component B until B's asynchronous services resolve. Once they do, the placeholder is replaced with component B's view.
 
 ---
 

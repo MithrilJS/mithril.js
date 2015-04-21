@@ -10,13 +10,13 @@ It's possible to defer a redraw by calling `m.request` or by manually nesting [`
 
 In addition to being aware of data availability when deciding to redraw, Mithril is also aware of browser availability: if several redraws are triggered in a short amount of time, Mithril batches them so that at most only one redraw happens within a single animation frame (around 16ms). Since computer screens are not able to display changes faster than a frame, this optimization saves CPU cycles and helps UIs stay responsive even in the face of spammy data changes.
 
-Mithril also provides several hooks to control its redrawing behavior with a deep level of granularity: [`m.startComputation` and `m.endComputation`](mithril.computation.md) create redrawable contexts. [`m.redraw`](mithril.redraw.md) forces a redraw to happen in the next available frame (or optionally, it can redraw immediately for synchronous processing). [`m.redraw.strategy`](mithril.redraw.md#strategy) can change the way Mithril runs the next scheduled redraw. Finally, the low-level [`m.render`](mithril.render.md) can also be used if a developer chooses to opt out of rest of the framework altogether.
+Mithril also provides several hooks to control its redrawing behavior with a deep level of granularity: [`m.startComputation` and `m.endComputation`](mithril.computation.md) create redrawable contexts. [`m.redraw`](mithril.redraw.md) forces a redraw to happen in the next available frame (or optionally, it can redraw immediately for synchronous processing). The [config's retain flag](mithril.md#persisting-dom-elements-across-route-changes) can be used to change how specific elements are redrawn when routes change. [`m.redraw.strategy`](mithril.redraw.md#strategy) can change the way Mithril runs the next scheduled redraw. Finally, the low-level [`m.render`](mithril.render.md) can also be used if a developer chooses to opt out of rest of the framework altogether.
 
 ---
 
 ### Integrating with The Auto-Redrawing System
 
-If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, or that you're being forced to call [`m.redraw`](mithril.redraw.md) manually, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
+If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing automatically, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
 
 In order to integrate asynchronous code to Mithril's autoredrawing system, you should call `m.startComputation` BEFORE making an asynchronous call, and `m.endComputation` at the end of the asynchronous callback.
 
@@ -48,8 +48,17 @@ window.onfocus = function() {
 
 For each `m.startComputation` call a library makes, it MUST also make one and ONLY one corresponding `m.endComputation` call.
 
-You should not use these methods if your code is intended to run repeatedly (e.g. by using `setInterval`). If you want to repeatedly redraw the view without necessarily waiting for user input, you should manually call [`m.redraw`](mithril.redraw.md) within the repeatable context.
+If you want to a recurring callback (such as `setInterval` or a web socket event handler) to trigger redraws, you should call `m.startComputation` at the beginning of the function, not outside of it.
 
+```
+setInterval(function() {
+	m.startComputation(); //call before everything else in the event handler
+	
+	doStuff();
+	
+	m.endComputation(); //call after everything else in the event handler
+})
+```
 
 ---
 

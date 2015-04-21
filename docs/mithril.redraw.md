@@ -3,27 +3,32 @@
 ---
 
 - [Changing redraw strategy](#changing-redraw-strategy)
+- [Difference between computation methods and m.redraw](#difference-between-computation-methods-and-m-redraw)
 - [Preventing redraws on events](#preventing-redraws-on-events)
 - [Forcing redraw](#forcing-redraw)
 - [Signature](#signature)
 
 ---
 
-Redraws the view for the currently active component. Use [`m.mount()`](mithril.mount.md) to activate a component.
+Redraws the view for the currently active component. Use [`m.mount()`](mithril.mount.md) or [`m.route()`](mithril.route.md) to activate a component.
 
-This method is called internally by Mithril's auto-redrawing system. Usually you don't need to call it manually unless you are doing recurring asynchronous operations (i.e. using `setInterval`) or if you want to decouple slow running background requests from the rendering context (see the `background` option in [`m.request`](mithril.request.md).
-
-By default, if you're using either [`m.route`](mithril.route.md) or [`m.mount`](mithril.mount.md), `m.redraw()` is called automatically by Mithril's auto-redrawing system once the controller finishes executing.
-
-`m.redraw` is also called automatically on event handlers defined in virtual elements.
-
-Note that calling this method will not do anything if a component was not activated via either [`m.mount()`](mithril.mount.md) or [`m.route()`](mithril.route.md). This means that `m.redraw` doesn't do anything when instantiating controllers and rendering views via `m.render` manually.
-
-If there are pending [`m.request`](mithril.request.md) calls in either a controller constructor or event handler, the auto-redrawing system waits for all the AJAX requests to complete before calling `m.redraw`.
-
-This method may also be called manually from within a controller if more granular updates to the view are needed, however doing so is generally not recommended, as it may degrade performance. Model classes should never call this method.
+Calling `m.redraw` triggers a redraw regardless of whether AJAX requests (and other asynchronous services) are completed. Therefore, you should ensure that templates have null checks in place to account for the possibility of variables being unitialized when the forced redraw occurs.
 
 If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should use [`m.startComputation` and `m.endComputation`](mithril.computation.md) to integrate with Mithril's auto-redrawing system instead.
+
+Assuming your templates have appropriate null checks in place, `m.redraw` is useful for transient state such as loading indicators and to commit state to the DOM for the purposes of reading back computed values (for example, `offsetWidth` or `scrollHeight`)
+
+---
+
+### Difference between computation methods and m.redraw
+
+The [`m.startComputation` / `m.endComputation` pair](mithril.computation.md) is designed to be "stacked", i.e. multiple asynchronous services can each call this pair of functions to indicate that they want the redrawing algorithm to wait for them to finish before a redraw occurs. In contrast, `m.redraw` is "aggressive": it redraws as many times as it is called (with the caveat that redraws are batched if they occur less than one animation frame apart in time). In practice, this means that calling `m.redraw` may cause a redraw to happen before some AJAX calls have finished, which in turn, may cause null reference exceptions in templates that try to use the data from these requests without first checking that the data exists.
+
+Therefore, using the computation methods is recommended in order to reduce the amount of intermediate redraws that would otherwise occur as multiple asynchronous services are resolved.
+
+When computation methods are used dilligently and religiously, templates are never redrawn with incomplete data. However, it's important to always write conditional tests in templates to account for the possibility of nullables, because redraws may come to occur more aggressively than data is available (perhaps because a newly introduced 3rd party library calls `m.redraw`, or because you might want a more aggressive redraw policy to implement a specific feature down the road).
+
+Defending against nullables can typically be achieved via the `initialValue` option in [`m.request`](mithril.request.md) and basic null checks (e.g. `data ? m("div", data) : null`).
 
 ---
 
@@ -59,7 +64,32 @@ var Component1 = {
 
 Common reasons why one might need to change redraw strategy are:
 
--	in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components
+-	in order to prevent redraw when dealing with `keypress` events where the event's keyCode is not of interest
+
+	```javascript
+	//model
+	var saved = false
+	function save(e) {
+		if (e.keyCode == 13) {
+			//this causes a redraw, since event handlers active auto-redrawing by default
+			saved = true
+		}
+		else {
+			//we don't care about other keys, so don't redraw
+			m.redraw.strategy("none")
+		}
+	}
+
+	//view
+	var view = function() {
+		return m("div", [
+			m("button[type=button]", {onkeypress: save}, "Save"),
+			saved ? "Saved" : ""
+		])
+	}
+	```
+
+-	in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components.
 
 	```javascript
 	//diff when routing, instead of redrawing from scratch
@@ -94,34 +124,9 @@ Common reasons why one might need to change redraw strategy are:
 	})
 	```
 
--	in order to prevent redraw when dealing with `keypress` events where the event's keyCode is not of interest
-
-	```javascript
-	//model
-	var saved = false
-	function save(e) {
-		if (e.keyCode == 13) {
-			//this causes a redraw, since event handlers active auto-redrawing by default
-			saved = true
-		}
-		else {
-			//we don't care about other keys, so don't redraw
-			m.redraw.strategy("none")
-		}
-	}
-
-	//view
-	var view = function() {
-		return m("div", [
-			m("button[type=button]", {onkeypress: save}, "Save"),
-			saved ? "Saved" : ""
-		])
-	}
-	```
-
 Note that the redraw strategy is a global setting that affects the entire template trees of all components on the page. In order to prevent redraws in *some parts* of an application, but not others, see [subtree directives](mithril.render.md#subtree-directives)
 
-You can also configure individual elements to always be diffed, instead of recreated from scratch (even across route changes), by using the [`ctx.retain` flag](mithril.md#persising-dom-elements-across-route-changes)
+You can also configure individual elements to always be diffed, instead of recreated from scratch (even across route changes), by using the [`ctx.retain` flag](mithril.md#persising-dom-elements-across-route-changes). If you need to persist DOM state across route changes, it's recommended that you use the `ctx.retain` flag instead of `m.redraw.strategy("diff")`.
 
 ---
 
