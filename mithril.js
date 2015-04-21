@@ -570,7 +570,10 @@ var m = (function app(window, undefined) {
 		if (index < 0) index = roots.length;
 		
 		var isPrevented = false;
-		var event = {preventDefault: function() {isPrevented = true}};
+		var event = {preventDefault: function() {
+			isPrevented = true;
+			computePreRedrawHook = computePostRedrawHook = null;
+		}};
 		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
 			unloader.handler.call(unloader.controller, event)
 			unloader.controller.onunload = null
@@ -601,7 +604,6 @@ var m = (function app(window, undefined) {
 			endFirstComputation();
 			return controllers[index]
 		}
-		else computePreRedrawHook = computePostRedrawHook = null
 	};
 	var redrawing = false
 	m.redraw = function(force) {
