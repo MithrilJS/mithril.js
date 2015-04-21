@@ -12,11 +12,11 @@
 
 Redraws the view for the currently active component. Use [`m.mount()`](mithril.mount.md) or [`m.route()`](mithril.route.md) to activate a component.
 
-Calling `m.redraw` triggers a redraw regardless of whether AJAX requests (and other asynchronous services) are completed. Therefore, you should ensure that templates have null checks in place to account for the possibility of variables being unitialized when the forced redraw occurs.
+Calling `m.redraw` triggers a redraw regardless of whether AJAX requests (and other asynchronous services) are completed. Therefore, you should ensure that templates have null checks in place to account for the possibility of variables being uninitialized when the forced redraw occurs.
 
-If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should use [`m.startComputation` and `m.endComputation`](mithril.computation.md) to integrate with Mithril's auto-redrawing system instead.
+If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should consider using [`m.startComputation` and `m.endComputation`](mithril.computation.md) to integrate with Mithril's auto-redrawing system instead.
 
-Assuming your templates have appropriate null checks in place, `m.redraw` is useful for transient state such as loading indicators and to commit state to the DOM for the purposes of reading back computed values (for example, `offsetWidth` or `scrollHeight`)
+Assuming your templates have appropriate null checks in place, `m.redraw` is useful for transient DOM state such as loading indicators and to commit state to the DOM for the purposes of reading back computed values (for example, `offsetWidth` or `scrollHeight`)
 
 ---
 
