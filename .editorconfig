@@ -1,0 +1,8 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+[*.js]
+indent_style = tab
+indent_size = 2
+trim_trailing_whitespace = false
