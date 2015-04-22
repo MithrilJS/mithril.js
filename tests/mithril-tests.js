@@ -3774,8 +3774,11 @@ function testMithril(mock) {
 		m.route("/b")
 		
 		mock.requestAnimationFrame.$resolve()
+		var result = !root.childNodes[0].childNodes[0].modified;
+
+		m.mount(root, null) //teardown
 		
-		return !root.childNodes[0].childNodes[0].modified;
+		return result
 	});
 	//end m.route
 
