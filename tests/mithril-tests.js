@@ -1339,7 +1339,6 @@ function testMithril(mock) {
 		
 		return initialized === false
 	})
-	m.redraw.strategy(undefined) //teardown for m.mount tests
 	
 	//m.withAttr
 	test(function() {
