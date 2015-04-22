@@ -495,7 +495,13 @@ If a component A contains another component B that calls asynchronous services, 
 
 ### Limitations and caveats
 
-There are a few caveats when nesting components:
+One important limitation to be aware of when using components is that you cannot call Mithril's redrawing methods ([`m.startComputation` / `m.endComputation`](mithril.computation.md) and [`m.redraw`](mithril.redraw.md)) from templates.
+
+In addition, you cannot call `m.request` from templates.
+
+Doing so will trigger another redraw, which will result in an infinite loop.
+
+There are a few other technical caveats when nesting components:
 
 1.	Nested component views must return either a virtual element or another component. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
 
