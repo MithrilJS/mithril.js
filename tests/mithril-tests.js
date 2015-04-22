@@ -3744,6 +3744,39 @@ function testMithril(mock) {
 		
 		return result
 	})
+	test(function() {
+		// https://github.com/lhorie/mithril.js/pull/571
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", {config: function(elm, init, ctx) {
+				elm.childNodes[0].modified = true
+			}}, m("div"))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("div", m("div"))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return !root.childNodes[0].childNodes[0].modified;
+	});
 	//end m.route
 
 	//m.route.parseQueryString
