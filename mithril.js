@@ -615,7 +615,7 @@ var m = (function app(window, undefined) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
-			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
+			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + (this.attrs ? this.attrs.href : '');
 			if (element.addEventListener) {
 				element.removeEventListener("click", routeUnobtrusive);
 				element.addEventListener("click", routeUnobtrusive)
