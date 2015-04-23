@@ -191,7 +191,7 @@ todo.controller = function() {
 
 ### View
 
-The next step is to write a view so users can interact with the application
+The next step is to write a view so users can interact with the application. In Mithril, views are plain Javascript. This comes with several benefits (proper error reporting, proper lexical scoping, etc.), while still allowing [HTML syntax to be used via a preprocessor tool](https://github.com/insin/msx)
 
 ```javascript
 todo.view = function() {
