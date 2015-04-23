@@ -503,7 +503,7 @@ var m = (function app(window, undefined) {
 	var nodeCache = [], cellCache = {};
 	m.render = function(root, cell, forceRecreation) {
 		var configs = [];
-		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
+		if (!root) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.");
 		var id = getCellCacheKey(root);
 		var isDocumentRoot = root === $document;
 		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
