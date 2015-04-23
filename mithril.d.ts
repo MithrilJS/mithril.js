@@ -29,7 +29,7 @@ declare module _mithril {
 			<T extends MithrilController>(rootElement: HTMLDocument, defaultRoute: string, routes: MithrilRoutes<T>): void;
 			<T extends MithrilController>(rootElement: Element, defaultRoute: string, routes: MithrilRoutes<T>): void;
 
-			(element: Element, isInitialized: boolean): void;
+			(element: Element, isInitialized: boolean, context: Object, vdom: Object): void;
 			(path: string, params?: any, shouldReplaceHistory?: boolean): void;
 			(): string;
 

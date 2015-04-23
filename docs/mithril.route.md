@@ -389,7 +389,7 @@ See [`m()`](mithril.md) for more information on virtual elements.
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement element, Boolean isInitialized)
+void route(DOMElement element, Boolean isInitialized, Object context, Object vdom)
 ```
 
 -	**DOMElement element**
@@ -399,3 +399,11 @@ void route(DOMElement element, Boolean isInitialized)
 -	**Boolean isInitialized**
 
 	the method does not run if this flag is set to true. This is to make the method compatible with virtual DOM elements' `config` attribute (see [`m()`](mithril))
+
+-	**Object context**
+
+	an object that retains its state across redraws
+	
+-	**Object vdom**
+
+	The virtual DOM data structure to which the config is applied to
