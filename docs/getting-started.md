@@ -214,6 +214,8 @@ todo.view = function() {
 
 The utility method `m()` creates virtual DOM elements. As you can see, you can use CSS selectors to specify attributes. You can also use the `.` syntax to add CSS classes and the `#` to add an id.
 
+In fact, when not using the [MSX](https://github.com/insin/msx) HTML syntax preprocessor, it's recommended that you embrace using CSS selectors (e.g. `m(".modal-body")`) to really benefit from their inherent semantic expressiveness.
+
 For the purposes of testing out our code so far, the view can be rendered using the `m.render` method:
 
 ```javascript
