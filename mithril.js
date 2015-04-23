@@ -62,6 +62,19 @@ var m = (function app(window, undefined) {
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
 				var className = cell.attrs[attrName]
+				if(type.call(attrs[attrName]) === OBJECT){
+					var keys = Object.keys( attrs[attrName] );
+
+					attrs[attrName] = keys.filter(function(key){
+						return !!attrs[attrName][key];
+					} )
+					.map(function(key){
+						var value = attrs[attrName][key];
+						if(type.call(value) === STRING) return value;
+						return key;
+					})
+					.join( ' ' );
+				}
 				cell.attrs[attrName] = (className && attrs[attrName] ? className + " " : className || "") + attrs[attrName];
 			}
 			else cell.attrs[attrName] = attrs[attrName]
