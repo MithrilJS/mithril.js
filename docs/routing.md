@@ -58,7 +58,7 @@ This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 
 Above, `dashboard` is a module. It contains `controller` and `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
 
-In this case, since there's only one route, the app redirects to the default route `"/dashboard/johndoe"` and, under the hood, it calls `m.module(document.body, dashboard)`.
+In this case, since there's only one route, the app redirects to the default route `"/dashboard/johndoe"` and, under the hood, it calls `m.mount(document.body, dashboard)`.
 
 The string `johndoe` is bound to the `:userID` parameter, which can be retrieved programmatically in the controller via `m.route.param("userID")`.
 

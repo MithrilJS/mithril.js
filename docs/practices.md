@@ -72,7 +72,7 @@ That organization pattern needlessly ties unrelated aspects of the application t
 
 `m.redraw` is a method that allows you to render a template outside the scope of Mithril's auto-redrawing system.
 
-Calling this method while using `m.module` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
+Calling this method while using `m.mount` or `m.route` should only be done if you have recurring asynchronous view updates (i.e. something that uses setInterval).
 
 If you're integrating other non-recurring services (e.g. calling setTimeout), you should use [`m.startComputation` / `m.endComputation`](mithril.computation.md) instead.
 

@@ -248,7 +248,7 @@ var ContactList = {
 	}
 }
 
-m.module(document.body, ContactsWidget)
+m.mount(document.body, ContactsWidget)
 ```
 
 In this iteration, both the `ContactForm` and `ContactList` components are now children of the `ContactsWidget` component and they appear simultaneously on the same page.
