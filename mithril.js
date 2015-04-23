@@ -703,6 +703,7 @@ var m = (function app(window, undefined) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
+			var vdom = arguments[3];
 			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
 			if (element.addEventListener) {
 				element.removeEventListener("click", routeUnobtrusive);
