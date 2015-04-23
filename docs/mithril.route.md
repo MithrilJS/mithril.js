@@ -266,7 +266,7 @@ where:
 	
 	**String buildQueryString(Object data)**
 	
-	Serializes an object into its URI encoded querystring representation, following the same serialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
+	Serializes an object into its URI encoded querystring representation, following the same serialization conventions as [URI.js](https://medialize.github.io/URI.js/)
 	
 	-	**Object data**
 	
@@ -282,7 +282,7 @@ where:
 	
 	**Object parseQueryString(String querystring)**
 	
-	Deserializes an object from an URI encoded querystring representation, following the same deserialization conventions as [URI.js](http://http://medialize.github.io/URI.js/)
+	Deserializes an object from an URI encoded querystring representation, following the same deserialization conventions as [URI.js](https://medialize.github.io/URI.js/)
 	
 	-	**String querystring**
 	
