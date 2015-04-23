@@ -671,7 +671,7 @@ var m = (function app(window, undefined) {
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
-	var redirect = noop, routeParams, currentRoute;
+	var redirect = noop, routeParams, currentRoute, isDefaultRoute = false;
 	m.route = function() {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
@@ -681,7 +681,10 @@ var m = (function app(window, undefined) {
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source);
 				if (!routeByValue(root, router, path)) {
+					if (isDefaultRoute) throw new Error("Ensure the default route matches one of the routes defined in m.route")
+					isDefaultRoute = true
 					m.route(defaultRoute, true)
+					isDefaultRoute = false
 				}
 			};
 			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
@@ -710,7 +713,7 @@ var m = (function app(window, undefined) {
 				element.attachEvent("onclick", routeUnobtrusive)
 			}
 		}
-		//m.route(route, params)
+		//m.route(route, params, shouldReplaceHistoryEntry)
 		else if (type.call(arguments[0]) === STRING) {
 			var oldRoute = currentRoute;
 			currentRoute = arguments[0];
