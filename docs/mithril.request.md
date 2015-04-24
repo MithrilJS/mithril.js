@@ -479,28 +479,26 @@ where:
 	
 		Determines whether the `m.request` can affect template rendering. Defaults to false.
 		
-		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
+		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md) internally, and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
 		
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
 		
 		```javascript
 		var demo = {}
-		
+
 		demo.controller = function() {
-			return {
-				users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []}).then(function(value) {
-					//force redraw
-					m.redraw()
-					return value
-				})
-			}
+			var users = m.request({method: "GET", url: "test.json", background: true, initialValue: []})
+			users.then(m.redraw)
+			return {users: users}
 		}
-		
+
 		demo.view = function(ctrl) {
 			//this view renders twice (once immediately, and once after the request above completes)
-			return ctrl.users.map(function(user) {
-				return m("div", user.name)
-			})
+			return m("div", [
+				ctrl.users().map(function(user) {
+					return m("div", user.name)
+				})
+			])
 		}
 		```
 		
