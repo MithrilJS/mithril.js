@@ -394,17 +394,23 @@ However, sometimes we do want to be able to redraw before a web service request 
 Setting the `background` option to `true` prevents a request from affecting redrawing. This means it's possible for a view to attempt to use data before it is available. You can specify an initial value for the `m.request` getter-setter in order to avoid having to write defensive code against potential null reference exceptions:
 
 ```javascript
+var getUsers = function() {
+	return m.request({method: "GET", url: "/api/user", background: true, initialValue: []})
+}
+
 var demo = {}
 
 demo.controller = function() {
-	return {
-		users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []})
-	}
+	this.users = getUsers().then(function (users) {
+		this.users = m.prop(users)
+		//force redraw
+		m.redraw()
+	}.bind(this))
 }
 
 //in the view
 demo.view = function(ctrl) {
-	//This view gets rendered before the request above completes
+	//This view renders twice (once immediately, and once after the request above completes)
 	//Calling .map doesn't throw an error because we defined the initial value to be an empty array, instead of undefined
 	return ctrl.users().map(function() {
 		return m("div", user.name)
@@ -480,27 +486,6 @@ where:
 		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
 		
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
-		
-		```javascript
-		var demo = {}
-		
-		demo.controller = function() {
-			return {
-				users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []}).then(function(value) {
-					//force redraw
-					m.redraw()
-					return value
-				})
-			}
-		}
-		
-		demo.view = function(ctrl) {
-			//this view renders twice (once immediately, and once after the request above completes)
-			return ctrl.users.map(function(user) {
-				return m("div", user.name)
-			})
-		}
-		```
 		
 		It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
 
