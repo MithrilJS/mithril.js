@@ -394,12 +394,17 @@ However, sometimes we do want to be able to redraw before a web service request 
 Setting the `background` option to `true` prevents a request from affecting redrawing. This means it's possible for a view to attempt to use data before it is available. You can specify an initial value for the `m.request` getter-setter in order to avoid having to write defensive code against potential null reference exceptions:
 
 ```javascript
+var getUsers = function() {
+	return m.request({method: "GET", url: "/api/user", background: true, initialValue: []})
+}
+
 var demo = {}
 
 demo.controller = function() {
-	return {
-		users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []})
-	}
+	this.users = getUsers().then(function (users) {
+		this.users = m.prop(users)
+		m.redraw()
+	}.bind(this))
 }
 
 //in the view
