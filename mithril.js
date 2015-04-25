@@ -68,7 +68,21 @@ var m = (function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
-		
+
+
+		// loop over output for custom attribute transformations
+		for (attrName in cell.attrs){
+			if (attrs.hasOwnProperty(attrName) && attrName in transformations){
+				var value = cell.attrs[attrName]
+
+				delete cell.attrs[attrName]
+
+				var transformed = transformations[attrName](cell, value)
+
+				if (transformed !== undefined) cell = transformed
+			}
+		}
+
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
@@ -668,6 +682,12 @@ var m = (function app(window, undefined) {
 			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
 	};
+
+	// custom attributes register
+	var transformations = {}
+	m.attr = function(key, transformation){
+		return transformations[key] = transformation
+	}
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
