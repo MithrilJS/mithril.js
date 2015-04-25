@@ -4329,7 +4329,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}))
 
-		return root.childNodes[0].value === value
+		return root.childNodes[0].childNodes[0].nodeValue === value
 	})
 	test(function() {
 		// replaces node when return value is defined
@@ -4342,7 +4342,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}))
 
-		return root.childNodes[0].value === value
+		return root.childNodes[0].nodeValue === value
 	})
 	test(function() {
 		// leaves node intact when noop
@@ -4353,20 +4353,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}, value))
 
-		return root.childNodes[0].value === value
-	})
-	test(function() {
-		// doesn't re-execute when parsed multiple times
-		var root     = mock.document.createElement("div")
-		var executed = false
-
-		m.attr("x", function() {
-			executed = !executed
-		} )
-
-		m.render(root, m(m("div", {x:true})))
-
-		return executed === true
+		return root.childNodes[0].childNodes[0].nodeValue === value
 	})
 	test(function() {
 		// returns a reference to the transform function
