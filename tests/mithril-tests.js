@@ -4329,7 +4329,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}))
 
-		return root.textContent === value
+		return root.childNodes[0].value === value
 	})
 	test(function() {
 		// replaces node when return value is defined
@@ -4342,7 +4342,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}))
 
-		return root.textContent === value
+		return root.childNodes[0].value === value
 	})
 	test(function() {
 		// leaves node intact when noop
@@ -4353,7 +4353,7 @@ function testMithril(mock) {
 
 		m.render(root, m("div", {x:true}, value))
 
-		return root.textContent === value
+		return root.childNodes[0].value === value
 	})
 	test(function() {
 		// doesn't re-execute when parsed multiple times
