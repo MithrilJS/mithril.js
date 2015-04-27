@@ -72,12 +72,12 @@ var m = (function app(window, undefined) {
 
 		// loop over output for custom attribute transformations
 		for (attrName in cell.attrs){
-			if (attrs.hasOwnProperty(attrName) && attrName in transformations){
+			if (attrs.hasOwnProperty(attrName) && attrName in m.attrs){
 				var value = cell.attrs[attrName]
 
 				delete cell.attrs[attrName]
 
-				var transformed = transformations[attrName](cell, value)
+				var transformed = m.attrs[attrName](cell, value)
 
 				if (transformed !== undefined) cell = transformed
 			}
@@ -684,10 +684,7 @@ var m = (function app(window, undefined) {
 	};
 
 	// custom attributes register
-	var transformations = {}
-	m.attr = function(key, transformation){
-		return transformations[key] = transformation
-	}
+	m.attrs = {}
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};

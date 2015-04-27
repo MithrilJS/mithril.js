@@ -4297,9 +4297,9 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var executed = false
 
-		m.attr("x", function() {
+		m.attrs.x = function() {
 			executed = true
-		} )
+		}
 
 		m.render(root, m("div", {x:true}))
 
@@ -4310,9 +4310,9 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var executed = false
 
-		m.attr("x", function() {
+		m.attrs.x = function() {
 			executed = true
-		} )
+		}
 
 		m.render(root, m("div"))
 
@@ -4323,9 +4323,9 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var value = "hi"
 
-		m.attr("x", function(node) {
+		m.attrs.x = function(node) {
 			node.children = [value]
-		} )
+		}
 
 		m.render(root, m("div", {x:true}))
 
@@ -4336,9 +4336,9 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var value = "hi"
 
-		m.attr("x", function() {
+		m.attrs.x = function() {
 			return value
-		} )
+		}
 
 		m.render(root, m("div", {x:true}))
 
@@ -4348,7 +4348,7 @@ function testMithril(mock) {
 		// removes the associated key attribute
 		var root = mock.document.createElement("div")
 
-		m.attr("x", function() {} )
+		m.attrs.x = function() {}
 
 		var node = m("div", {x:true})
 
@@ -4359,56 +4359,11 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		var value = "hi"
 
-		m.attr("x", function() {} )
+		m.attrs.x = function() {}
 
 		m.render(root, m("div", {x:true}, value))
 
 		return root.childNodes[0].childNodes[0].nodeValue === value
-	})
-	test(function() {
-		// returns a reference to the transform function
-		var root = mock.document.createElement("div")
-		var transform = function() {}
-		var output = m.attr("x", transform )
-
-		return output === transform
-	})
-	test(function() {
-		// allows re-binding
-		var root = mock.document.createElement("div")
-		var transformations = 0
-
-		m.attr("x", function(){
-			transformations++
-		})
-		m.attr("x", function(){
-			transformations++
-		})
-
-		m.render(root, m("div", {x:true}))
-
-		return transformations === 1
-	})
-	test(function() {
-		// allows user re-binding
-		var root = mock.document.createElement("div")
-		// imagine this is included 3rd party code
-		var first = m.attr("x", function(){
-			firstExecuted  = true
-		})
-		// ...and this
-		var second = m.attr("x", function(){
-			secondExecuted = true
-		})
-		var firstExecuted = false
-		var secondExecuted = false
-
-		// ...but this is application code
-		m.attr("x", first)
-
-		m.render(root, m("div", {x:true}))
-
-		return firstExecuted === true && secondExecuted === false
 	})
 }
 
