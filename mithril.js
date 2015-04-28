@@ -246,6 +246,7 @@ var m = (function app(window, undefined) {
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
 				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
+				if (data.subtree === "retain") return cached;
 				if (key) {
 					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
@@ -614,7 +615,7 @@ var m = (function app(window, undefined) {
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if (new Date - lastRedrawCallTime > FRAME_BUDGET || $requestAnimationFrame === window.requestAnimationFrame) {
+			if ($requestAnimationFrame === window.requestAnimationFrame || new Date - lastRedrawCallTime > FRAME_BUDGET) {
 				if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
 				lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
 			}
