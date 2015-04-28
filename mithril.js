@@ -99,7 +99,6 @@ var m = (function app(window, undefined) {
 		//- it simplifies diffing code
 		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
 		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
-		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
 		if (cached == null || cachedType !== dataType) {
 			if (cached != null) {
@@ -246,6 +245,7 @@ var m = (function app(window, undefined) {
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
 				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
+                                if (data.subtree === "retain") return cached;
 				if (key) {
 					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
