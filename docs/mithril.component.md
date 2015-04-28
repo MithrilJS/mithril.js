@@ -497,15 +497,25 @@ If a component A contains another component B that calls asynchronous services, 
 
 One important limitation to be aware of when using components is that you cannot call Mithril's redrawing methods ([`m.startComputation` / `m.endComputation`](mithril.computation.md) and [`m.redraw`](mithril.redraw.md)) from templates.
 
-In addition, you cannot call `m.request` from templates.
-
-Doing so will trigger another redraw, which will result in an infinite loop.
+In addition, you cannot call `m.request` from templates. Doing so will trigger another redraw, which will result in an infinite loop.
 
 There are a few other technical caveats when nesting components:
 
 1.	Nested component views must return either a virtual element or another component. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
 
 2.	Nested components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persising-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
+
+3.	The root DOM element in a component's view must not be changed during the lifecycle of the component, otherwise undefined behavior will occur. In other words, don't do this:
+	
+	```javascript
+	var MyComponent = {
+		view: function() {
+			return someCondition ? m("a") : m("b")
+		}
+	}
+	```
+
+4.	If a component's root element is a subtree directive on its first rendering pass, undefined behavior will occur.
 
 ---
 
