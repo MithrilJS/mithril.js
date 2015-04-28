@@ -73,8 +73,6 @@ yields
 */
 ```
 
-Be aware that when nesting virtual elements, the child elements must be in an Array.
-
 ---
 
 The CSS selector syntax (e.g. `a#google.external[href='http://google.com']`) is meant to be used for declaring static attributes in the element, i.e. attribute values that don't change dynamically when the user interacts with the app.
