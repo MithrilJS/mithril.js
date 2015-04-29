@@ -251,7 +251,7 @@ m.mount(document.body, App)
 
 A component is said to be stateless when it does not store data internally. Instead, it's composed of [pure functions](http://en.wikipedia.org/wiki/Pure_function). It's a good practice to make components stateless because they are more predictable, and easier to reason about, test and troubleshoot.
 
-Instead of copying arguments to the controller object and then passing the controller object to the view (thereby creating internal state in the component), it is often desirable that views update based on the current value of arguments passed to a component.
+Instead of copying arguments to the controller object and then passing the controller object to the view (thereby creating internal state in the component), it is often desirable that views update based on the current value of arguments initially passed to a component.
 
 The following example illustrates this pattern:
 
@@ -320,7 +320,7 @@ Note that the sample component above is illustrative. Ideally, temperature conve
 
 ### Stateful components
 
-Usually it's recommended that you store application state outside of components (either in a view-model or in the top-level component in the case of nested components). Components *can* be stateful, but the purpose of component state is to prevent the pollution of the model layer with aspects that are inherently related to the component. For example, an autocompleter component may need to internally store a flag to indicate whether the dropdown is visible, but this kind of state is not relevant to an application's business logic.
+Usually it's recommended that you store application state outside of components (either in a [view-model](http://lhorie.github.io/mithril-blog/what-is-a-view-model.html) or in the top-level component in the case of nested components). Components *can* be stateful, but the purpose of component state is to prevent the pollution of the model layer with aspects that are inherently related to the component. For example, an autocompleter component may need to internally store a flag to indicate whether the dropdown is visible, but this kind of state is not relevant to an application's business logic.
 
 You might also elect to maintain component state when it's not meaningful outside the scope of a single component. For example, you might have a `UserForm` component that lives alongside other unrelated components on a bigger page, but it probably doesn't make sense for the parent page to be aware of the unsaved user data stored within the `UserForm` component.
 
@@ -348,7 +348,7 @@ var MyComponent = {
 };
 ```
 
-However, it's recommended that you aggregate all of your requests in a single place instead of scattering them across multiple components. Aggregating requests in a top-level component makes it easier to replay the request chain (for example, fetching an updated list of items after you've saved something that changes that list), and it ensures the entire data set is loaded in memory before drilling down into nested components, avoiding redundant AJAX calls for sibling components that need the same data. Be sure to read the [Application Architecture section](components.md#application-architecture-with-components) to learn more about organizing componentized code.
+However, it's recommended that you aggregate all of your requests in a single place instead of scattering them across multiple components. Aggregating requests in a top-level component makes it easier to replay the request chain (i.e. fetching an updated list of items after you've saved something that changes that list), and it ensures the entire data set is loaded in memory before drilling down into nested components, avoiding redundant AJAX calls for sibling components that need the same data. Be sure to read the [Application Architecture section](components.md#application-architecture-with-components) to learn more about organizing componentized code.
 
 ---
 
@@ -374,16 +374,16 @@ m.render(document.body, ProjectList({key: people[1].id, value: people[1]})
 
 In the example above, since the key is different, the ProjectList component is recreated from scratch. As a result, the controller runs again, the DOM is re-generated, and any applicable 3rd party plugins in configs are re-initialized.
 
-Remember that the rules for keys apply for components the same way they do for regular elements: it is not allowed to have duplicate keys on children of the same parent, and they must be either strings or numbers (or something with a `.toString()` implementation that makes the entity uniquely identifiable in the local scope when serialized). You can learn more about keys [here](mithril.md#dealing-with-focus)
+Remember that the rules for keys apply to components the same way they do to regular elements: it is not allowed to have duplicate keys on children of the same parent, and they must be either strings or numbers (or something with a `.toString()` implementation that makes the entity uniquely identifiable in the local scope when serialized). You can learn more about keys [here](mithril.md#dealing-with-focus).
 
 ---
 
 ### Unloading components
 
-If a component's controller contains the function `onunload`, it will be called under two circumstances:
+If a component's controller contains the function `onunload`, it will be called under one of these circumstances:
 
 - when a new call to `m.mount` updates the root DOM element of the component in question
-- when a route changes (if you are using [`m.route`](mithril.route.md)).
+- when a route changes (if you are using [`m.route`](mithril.route.md))
 
 To unload a component without loading another component, you can simply call `m.mount` with a `null` as the component parameter:
 
@@ -391,7 +391,7 @@ To unload a component without loading another component, you can simply call `m.
 m.mount(rootElement, null);
 ```
 
-Often, you will want to do some work before the component is unloaded (i.e. clear timers or unsubscribe event handlers).
+Often, you will want to do some work before the component is unloaded (i.e. clear timers or unsubscribe event handlers):
 
 ```javascript
 var MyComponent = {
