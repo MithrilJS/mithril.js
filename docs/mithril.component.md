@@ -576,7 +576,7 @@ where:
 
 -	**any... args**
 
-	Other arguments to be bound as arguments to the `controller` and `view` functions
+	Other arguments to be bound as arguments to both the `controller` and `view` functions
 
 -	**returns Component parameterizedComponent**
 
