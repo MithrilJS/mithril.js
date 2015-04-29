@@ -2,8 +2,8 @@
 declare module _mithril {
 	interface MithrilStatic {
 
-		(selector: string, attributes: MithrilAttributes, ...children: Array<string|MithrilVirtualElement|MithrilModule>): MithrilVirtualElement;
-		(selector: string, ...children: Array<string|MithrilVirtualElement|MithrilModule>): MithrilVirtualElement;
+		<T extends MithrilController>(selector: string, attributes: MithrilAttributes, ...children: Array<string|MithrilVirtualElement|MithrilComponent<T>>): MithrilVirtualElement;
+		<T extends MithrilController>(selector: string, ...children: Array<string|MithrilVirtualElement|MithrilComponent<T>>): MithrilVirtualElement;
 
 		prop<T>(promise: MithrilPromise<T>) : MithrilPromiseProperty<T>;
 		prop<T>(value: T): MithrilProperty<T>;
@@ -11,9 +11,13 @@ declare module _mithril {
 
 		withAttr(property: string, callback: (value: any) => void): (e: MithrilEvent) => any;
 
-		module<T extends MithrilController>(rootElement: Node, module: MithrilModule<T>): T;
+		module<T extends MithrilController>(rootElement: Node, component: MithrilComponent<T>): T;
 		module<T extends MithrilController>(rootElement: Node): T;
+		mount<T extends MithrilController>(rootElement: Node, component: MithrilComponent<T>): T;
+		mount<T extends MithrilController>(rootElement: Node): T;
 
+		component<T extends MithrilController>(component: MithrilComponent<T>, ...args: Array<any>): MithrilComponent<T>
+		
 		trust(html: string): string;
 
 		render(rootElement: Element|HTMLDocument): void;
@@ -96,7 +100,7 @@ declare module _mithril {
 		(ctrl: T): string|MithrilVirtualElement;
 	}
 
-	interface MithrilModule<T extends MithrilController> {
+	interface MithrilComponent<T extends MithrilController> {
 		controller: MithrilControllerFunction|{ new(): T };
 		view: MithrilView<T>;
 	}
@@ -114,7 +118,7 @@ declare module _mithril {
 	}
 
 	interface MithrilRoutes<T extends MithrilController> {
-		[key: string]: MithrilModule<T>;
+		[key: string]: MithrilComponent<T>;
 	}
 
 
