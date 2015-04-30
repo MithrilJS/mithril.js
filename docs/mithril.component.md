@@ -329,7 +329,7 @@ var MyComponent = {
 	controller: function(args) {
 		//we only want to make this call once
 		return {
-			things: m.request({method: "GET", url: "/api/things/", {data: args}}) //slice the data in some way
+			things: m.request({method: "GET", url: "/api/things/", data: args}) //slice the data in some way
 		}
 	},
 	view: function(ctrl) {
