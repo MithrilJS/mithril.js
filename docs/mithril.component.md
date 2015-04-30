@@ -5,7 +5,7 @@
 - [Rendering components](#rendering-components)
 	- [Optional controller](#optional-controller)
 	- [Controller as a class constructor](#controller-as-a-class-constructor)
-	- [Notes on the view function](#notes on the view function)
+	- [Notes on the view function](#notes-on-the-view-function)
 - [Parameterized components](#parameterized-components)
 - [Nesting components](#nesting-components)
 - [Dealing with state](#dealing-with-state)
@@ -16,8 +16,9 @@
 - [Unloading components](#unloading-components)
 - [Nested asynchronous components](#nested-asynchronous-components)
 - [Limitations and caveats](#limitations-and-caveats)
-- [Opting out of auto-redrawing](#opting-out-of-auto-redrawing)
-- [Signature](#signature)	
+- [Opting out of the auto redrawing system](#opting-out-of-the-auto-redrawing-system)
+- [Signature](#signature)
+
 ---
 
 Components are building blocks for Mithril applications. They allow developers to encapsulate functionality into reusable units.
@@ -26,7 +27,7 @@ Components are building blocks for Mithril applications. They allow developers t
 
 ### Rendering components
 
-In Mithril, a component is nothing more than an object that has a `view` functions and, optionally, a `controller` function.
+In Mithril, a component is nothing more than an object that has a `view` function and, optionally, a `controller` function.
 
 ```javascript
 var MyComponent = {
@@ -41,9 +42,14 @@ var MyComponent = {
 m.mount(document.body, MyComponent) // renders <h1>Hello</h1> into <body>
 ```
 
-The `controller` function, if present, creates an object that is meant to contain methods for a view to call. Those methods (and the `controller` function itself) may call model methods, and the controller may be used to store contextual data returned from model methods (for example, a [promise](mithril.deferred.md) from a [request](mithril.request.md)), or a reference to a view model.
+The optional `controller` function creates an object that may be used in the following recommended ways: 
 
-The `view` function creates a representation of a template that may consume model data and call controller methods to affect the model.
+- It can contain methods meant to be called by a `view`.
+- It can call model methods directly or from methods inside the resulting object.
+- It can store contextual data returned from model methods (i.e. a [promise](mithril.deferred.md) from a [request](mithril.request.md)).
+- It can hold a reference to a view model.
+
+The `view` has access to methods and properties that the controller chooses to expose in the returned object. With those methods and properties, it creates a template that can consume model data and call controller methods to affect the model. This is the recommended way for views and models to exchange data.
 
 ```javascript
 //a simple MVC example
@@ -77,7 +83,7 @@ m.mount(document.body, MyComponent)
 //the number increments when the link is clicked
 ```
 
-Note that there's no requirement to tightly couple a controller and view while organizing code. It's perfectly valid to define controllers and views separately, and only bring them together when mounting them:
+Note that there is no requirement to tightly couple a controller and view while organizing code. It's perfectly valid to define controllers and views separately, and only bring them together when mounting them:
 
 ```javascript
 //controller.js
@@ -94,13 +100,17 @@ var view = function(ctrl) {
 m.mount(document.body, {controller: controller, view: view}) // renders <h1>Hello</h1>
 ```
 
-There are three ways to render a component: via [`m.route`](mithril.route.md) (if you are building a single-page application that has multiple pages), [`m.mount`](mithril.mount.md) (if your app only has one page), and [`m.render`](mithril.render.md) (if you are integrating Mithril's rendering engine into a larger framework and wish to manage redrawing yourself).
+There are three ways to render a component:
 
-When a component is rendered, the `controller` function is called, then the `view` function is called. The return value of the `controller` function is passed to `view` as its first argument.
+- [`m.route`](mithril.route.md) (if you are building a single-page application that has multiple pages)
+- [`m.mount`](mithril.mount.md) (if your app only has one page)
+- [`m.render`](mithril.render.md) (if you are integrating Mithril's rendering engine into a larger framework and wish to manage redrawing yourself).
+
+The `controller` function is called *once* when the component is rendered. Subsequently, the `view` function is called and will be called again anytime a redraw is required. The return value of the `controller` function is passed to the `view` as its first argument.
 
 #### Optional controller
 
-The `controller` function is optional and defaults to an empty function.
+The `controller` function is optional and defaults to an empty function   `controller: function() {}`
 
 ```javascript
 //a component without a controller
@@ -115,7 +125,7 @@ m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
 
 #### Controller as a class constructor
 
-A controller can also be used as a class constructor (i.e. it's possible to attach properties to the `this` object within the constructor, instead of returning a value.
+A controller can also be used as a class constructor (i.e. it's possible to attach properties to the `this` object within the constructor, instead of returning a value).
 
 ```javascript
 var MyComponent = {
@@ -134,15 +144,15 @@ m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
 
 The `view` function does not create a DOM tree when called. The return value of the view function is merely a plain Javascript data structure that represents a DOM tree. Internally, Mithril uses this data representation of the DOM to probe for data changes and update the DOM only where necessary. This rendering technique is known as *virtual DOM diffing*.
 
-Later, any time event handlers are triggered by user input (or any time a redraw is required), the view function is run again and its return value is used to diff against the previous virtual DOM tree.
+The view function is run again whenever a redraw is required (i.e. whenever event handlers are triggered by user input). Its return value is used to diff against the previous virtual DOM tree.
 
-It may sound expensive to recompute an entire view any time there's a change to be displayed, but this operation actually turns out to be quite fast, compared to rendering strategies used by older frameworks. Mithril's diffing algorithm makes sure expensive DOM operations are only performed if absolutely necessary, and as an extra benefit, the global nature of the redraw makes it easy to reason about and troubleshoot the state of the application.
+It may sound expensive to recompute an entire view any time there's a change to be displayed, but this operation actually turns out to be quite fast, compared to rendering strategies used by older frameworks. Mithril's diffing algorithm makes sure expensive DOM operations are performed only if absolutely necessary, and as an extra benefit, the global nature of the redraw makes it easy to reason about and troubleshoot the state of the application.
 
 ---
 
 ### Parameterized components
 
-Components can have arguments "preloaded". In practice, what this means is that calling `m.component(MyComponent, {foo: "bar"})` will return a component that behaves exactly the same as `MyComponent`, but that binds `{foo: "bar"}` as an argument to both the `controller` and `view` functions.
+Components can have arguments "preloaded". In practice, this means that calling `m.component(MyComponent, {foo: "bar"})` will return a component that behaves exactly the same as `MyComponent`, but `{foo: "bar"}` will be bound as an argument to both the `controller` and `view` functions.
 
 ```javascript
 //declare a component
@@ -166,7 +176,7 @@ m.render(document.body, component.view(ctrl)) // render the virtual DOM tree man
 //<body><h1>Hello world this is a test</h1></body>
 ```
 
-The first parameter after the component object is meant to be used as an attribute map and should be an object (e.g. `{name: "world"}`, above). Subsequent parameters have no restrictions (e.g. `"this is a test"`)
+The first parameter after the component object is meant to be used as an attribute map and should be an object (e.g. `{name: "world"}`). Subsequent parameters have no restrictions (e.g. `"this is a test"`)
 
 ---
 
@@ -203,7 +213,7 @@ m.mount(document.body, App)
 // </div>
 ```
 
-Components can be placed anywhere a regular element would. If you have components inside of a sortable list, you can - and should - add `key` attributes to your components to ensure that DOM elements are merely moved, if possible, instead of being recreated from scratch:
+Components can be placed anywhere a regular element can. If you have components inside a sortable list, you should add `key` attributes to your components to ensure that DOM elements are not recreated from scratch, but merely moved when possible. Keys must be unique within a list of sibling DOM elements, and they must be either a string or a number:
 
 ```javascript
 var App = {
@@ -235,17 +245,13 @@ var MyComponent = {
 m.mount(document.body, App)
 ```
 
-Keys must be unique within a list of sibling DOM elements, and they must be either a string or a number.
-
----
-
 ### Dealing with state
 
 #### Stateless components
 
 A component is said to be stateless when it does not store data internally. Instead, it's composed of [pure functions](http://en.wikipedia.org/wiki/Pure_function). It's a good practice to make components stateless because they are more predictable, and easier to reason about, test and troubleshoot.
 
-Instead of copying arguments to the controller object (thereby creating internal state in the component), and then passing the controller object to the view, it is often desirable that views always update based on the most current list of arguments being passed to a component.
+Instead of copying arguments to the controller object and then passing the controller object to the view (thereby creating internal state in the component), it is often desirable that views update based on the current value of arguments initially passed to a component.
 
 The following example illustrates this pattern:
 
@@ -314,9 +320,9 @@ Note that the sample component above is illustrative. Ideally, temperature conve
 
 ### Stateful components
 
-Usually it's recommended that you store application state outside of components (either in a view-model or at the top-level component). Components *can* be stateful, but the purpose of component state is to prevent the pollution of the model layer with aspects that are inherently about the component. For example, an autocompleter component may need to internally store a flag to indicate whether the dropdown is visible, but this kind of state is not relevant to an application's business logic.
+Usually it's recommended that you store application state outside of components (either in a [view-model](http://lhorie.github.io/mithril-blog/what-is-a-view-model.html) or in the top-level component in the case of nested components). Components *can* be stateful, but the purpose of component state is to prevent the pollution of the model layer with aspects that are inherently related to the component. For example, an autocompleter component may need to internally store a flag to indicate whether the dropdown is visible, but this kind of state is not relevant to an application's business logic.
 
-You may also elect to use component state for application state that is not meaningful outside the scope of a single component. For example, you might have a `UserForm` component that lives alongside other unrelated components on a bigger page, but it probably doesn't make sense for the parent page to be aware of the unsaved user entity stored within the `UserForm` component.
+You might also elect to maintain component state when it's not meaningful outside the scope of a single component. For example, you might have a `UserForm` component that lives alongside other unrelated components on a bigger page, but it probably doesn't make sense for the parent page to be aware of the unsaved user data stored within the `UserForm` component.
 
 ---
 
@@ -342,7 +348,7 @@ var MyComponent = {
 };
 ```
 
-However, it's recommended that you aggregate all of your requests in a single place instead of scattering them across multiple components. Aggregating requests in a top-level component makes it easier to replay the request chain (for example, you may need to fetch an updated list of items after you've saved something related to it) and it ensures the entire data set is loaded in memory before drilling down into the components (thus preventing the need for redundant AJAX calls for sibling components that need the same data). Be sure to read the [Application Architecture section](components.md#application-architecture-with-components) to learn more about organizing componentized code.
+However, it's recommended that you aggregate all of your requests in a single place instead of scattering them across multiple components. Aggregating requests in a top-level component makes it easier to replay the request chain (i.e. fetching an updated list of items after you've saved something that changes that list), and it ensures the entire data set is loaded in memory before drilling down into nested components, avoiding redundant AJAX calls for sibling components that need the same data. Be sure to read the [Application Architecture section](components.md#application-architecture-with-components) to learn more about organizing componentized code.
 
 ---
 
@@ -368,13 +374,24 @@ m.render(document.body, ProjectList({key: people[1].id, value: people[1]})
 
 In the example above, since the key is different, the ProjectList component is recreated from scratch. As a result, the controller runs again, the DOM is re-generated, and any applicable 3rd party plugins in configs are re-initialized.
 
-Remember that the rules for keys apply for components the same way they do for regular elements: it is not allowed to have duplicate keys as children of the same parent, and they must be either strings or numbers (or something with a `.toString()` implementation that makes the entity locally uniquely identifiable when serialized). You can learn more about keys [here](mithril.md#dealing-with-focus)
+Remember that the rules for keys apply to components the same way they do to regular elements: it is not allowed to have duplicate keys on children of the same parent, and they must be either strings or numbers (or something with a `.toString()` implementation that makes the entity uniquely identifiable in the local scope when serialized). You can learn more about keys [here](mithril.md#dealing-with-focus).
 
 ---
 
 ### Unloading components
 
-If a component's controller contains an function called `onunload`, it will be called when a new `m.mount` call updates the root DOM element tied to the component in question, or  when a route changes (if you are using [`m.route`](mithril.route.md)).
+If a component's controller contains the function `onunload`, it will be called under one of these circumstances:
+
+- when a new call to `m.mount` updates the root DOM element of the component in question
+- when a route changes (if you are using [`m.route`](mithril.route.md))
+
+To unload a component without loading another component, you can simply call `m.mount` with a `null` as the component parameter:
+
+```javascript
+m.mount(rootElement, null);
+```
+
+Often, you will want to do some work before the component is unloaded (i.e. clear timers or unsubscribe event handlers):
 
 ```javascript
 var MyComponent = {
@@ -390,9 +407,9 @@ var MyComponent = {
 	};
 };
 
-m.mount(document, MyComponent);
+m.mount(document.body, MyComponent);
 
-
+//...
 
 var AnotherComponent = {
 	view: function() {
@@ -400,12 +417,11 @@ var AnotherComponent = {
 	}
 };
 
-m.mount(document, AnotherComponent); // logs "unloading my component"
+// mount on the same DOM element, replacing MyComponent
+m.mount(document.body, AnotherComponent); // logs "unloading my component"
 ```
 
-This mechanism is useful to clear timers and unsubscribe event handlers.
-
-You can also use this event to prevent a component from being unloaded in the context of a route change (e.g. to alert a user to save their changes before navigating away from a page)
+You can also use the `onunload` function to PREVENT a component from being unloaded in the context of a route change (i.e. to alert a user to save their changes before navigating away from a page)
 
 ```javascript
 var component = {
@@ -427,12 +443,6 @@ var component = {
 
 Normally, calling `m.mount` will return the controller instance for that component, but there's one corner case: if `e.preventDefault()` is called from a controller's `onunload` method, then the `m.mount` call will not instantiate the new controller, and will return `undefined`.
 
-To unload a component without loading another component, you can simply call `m.mount` with a `null` as the component parameter:
-
-```javascript
-m.mount(rootElement, null);
-```
-
 Mithril does not hook into the browser's `onbeforeunload` event. To prevent unloading when attempting to navigate away from a page, you can check the return value of `m.mount`
 
 ```javascript
@@ -444,7 +454,7 @@ window.onbeforeunload = function() {
 }
 ```
 
-Components that are nested in other components can also call `onunload` and its `e.preventDefault()` like top-level components. The `onunload` event is called if an instantiated component is removed from a virtual element tree via a redraw.
+Components that are nested inside other components can also call `onunload` and its `e.preventDefault()` like top-level components. The `onunload` event is called if an instantiated component is removed from a virtual element tree via a redraw.
 
 In the example below, clicking the button triggers the component's `onunload` event and logs "unloaded!".
 
@@ -477,19 +487,19 @@ var MyComponent = {
 m.mount(document.body, MyApp)
 ```
 
-Calling `e.preventDefault()` from a component's `onunload` aborts route changes, but it does not abort, rollback or affect the current redraw in any way.
+Calling `e.preventDefault()` from a component's `onunload` function aborts route changes, but it does not abort rollback or affect the current redraw in any way.
 
 ---
 
 ### Nested asynchronous components
 
-Since controllers can call model methods, it's possible for nested components to encapsulate asynchronous behavior. When components aren't nested, Mithril waits for all asynchronous tasks to complete, but when nesting components, a component's parent view renders before the component completes its asynchronous tasks (because the existence of the component only becomes known to the diff engine at the time when the template is rendered).
+Since controllers can call model methods, it's possible for nested components to encapsulate asynchronous behavior. When components aren't nested, Mithril waits for all asynchronous tasks to complete, but when components are nested, a component's parent view renders before the component completes its asynchronous tasks. The existence of the component only becomes known to the diff engine at the time when the template is rendered.
 
 When a component has asynchronous payloads and they are queued by the [auto-redrawing system](auto-redrawing.md), its view is NOT rendered until all asynchronous operations complete. When the component's asynchronous operations complete, another redraw is triggered and the entire template tree is evaluated again. This means that the virtual dom tree may take two or more redraws (depending on how many nested asynchronous components there are) to be fully rendered.
 
 There are [different ways to organize components](components.md#application-architecture-with-components) that can side-step the need for multiple redraws. Regardless, you could also force multiple redraws to happen by using the [`background`](mithril.request.md#rendering-before-web-service-requests-finish) and `initialValue` options in `m.request`, or by manually calling [`m.redraw()`](mithril.redraw.md).
 
-If a component A contains another component B that calls asynchronous services, then when component A is rendered, a `<placeholder>` tag is rendered in place of component B until B's asynchronous services resolve. Once they do, the placeholder is replaced with component B's view.
+If a component A contains another component B that calls asynchronous services, when component A is rendered, a `<placeholder>` tag is rendered in place of component B until B's asynchronous services resolve. Once resolved, the placeholder is replaced with component B's view.
 
 ---
 
@@ -558,15 +568,15 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
 
 -	**Object attributes**
 
-	A key/value map of attributes that gets bound as an argument to the `controller` and `view` functions of the component.
+	A key/value map of attributes that gets bound as an argument to both the `controller` and `view` functions of the component.
 
 -	**any... args**
 
-	Other arguments to be bound as arguments to the `controller` and `view` functions
+	Other arguments to be bound as arguments to both the `controller` and `view` functions
 
 -	**returns Component parameterizedComponent**
 
