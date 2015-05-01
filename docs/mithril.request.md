@@ -10,7 +10,7 @@
 - [Casting the Response Data to a Class](#casting-the-response-data-to-a-class)
 - [Unwrapping Response Data](#unwrapping-response-data)
 - [Using Different Data Transfer Formats](#using-different-data-transfer-formats)
-- [File uploads with FormData](#file-uploads-with-form-data)
+- [File uploads with FormData](#file-uploads-with-formdata)
 - [Using variable data formats](#using-variable-data-formats)
 - [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
 - [Custom request rejections](#custom-request-rejections)
@@ -168,7 +168,7 @@ var log = function(value) {
 }
 
 var users = m.request({method: "GET", url: "/user"})
-	.then(log);
+	.then(log)
 	.then(function(users) {
 		//add one more user to the response
 		return users.concat({name: "Jane"})
@@ -338,7 +338,7 @@ You can read more about the [promise exception monitor here](mithril.deferred.md
 
 The `config` option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise.
 
-The example below show how to configure a request where the server expects requests to have a `Content-Type: application/json` header
+The example below shows how to configure a request where the server expects requests to have a `Content-Type: application/json` header
 
 ```javascript
 var xhrConfig = function(xhr) {
@@ -479,7 +479,7 @@ where:
 		
 		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
 		
-		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md)
+		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
 		
 		```javascript
 		var demo = {}
@@ -502,11 +502,13 @@ where:
 		}
 		```
 		
-		It's recommended that you always set an `initialValue` when setting the `background` option to true.
-		
+		It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
+
 	-	**any initialValue** (optional)
 	
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
+		
+		It is strongly recommended that you always set this option to avoid future surprises.
 		
 	-	**any unwrapSuccess(any data, XMLHttpRequest xhr)** (optional)
 

@@ -26,7 +26,7 @@
       "files": [
         "mithril.js",
         "mithril.min.js",
-        "mithril.min.map"
+        "mithril.min.js.map"
       ]
     }
   ]

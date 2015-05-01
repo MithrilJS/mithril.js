@@ -29,10 +29,10 @@ function testMithril(mock) {
 	test(function() {return m(".foo", {"class": "bar"}).attrs["class"] == "foo bar"})
 	test(function() {return m(".foo", {className: "bar"}).attrs.className == "foo bar"})
 	test(function() {return m(".foo", {className: ""}).attrs.className == "foo"})
-	test(function() {return m("div", {className: ""}).attrs.className === undefined}) //https://github.com/lhorie/mithril.js/issues/382
+	test(function() {return m("div", {className: ""}).attrs.className === ""}) //https://github.com/lhorie/mithril.js/issues/382 and 512
 	test(function() {return m("div", {class: ""}).attrs.className === undefined})
 	test(function() {return m("div", {className: ""}).attrs.class === undefined})
-	test(function() {return m("div", {class: ""}).attrs.class === undefined})
+	test(function() {return m("div", {class: ""}).attrs.class === ""})
 	test(function() {return m("div", [1, 2, 3], 4).children.length === 2})
 	test(function() {return m("div", [1, 2, 3], 4).children[0].length === 3})
 	test(function() {return m("div", [1, 2, 3], 4).children[1] === 4})
@@ -41,8 +41,34 @@ function testMithril(mock) {
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[0].length === 3})
 	test(function() {return m("div", [1, 2, 3], [4, 5, 6, 7]).children[1].length === 4})
 	test(function() {return m("div", [1], [2], [3]).children.length === 3})
-
+	
 	//m.module
+	test(function() {
+		var root = mock.document.createElement("div")
+		var whatever = 1
+		var app = {
+			view: function() {
+				return [
+					whatever % 2 ? m('span', '% 2') : undefined,
+					m('div', 'bugs'),
+					m('a'),
+				]
+			}
+		}
+		m.module(root, app)
+		mock.requestAnimationFrame.$resolve()
+		
+		whatever++
+		m.redraw()
+		mock.requestAnimationFrame.$resolve()
+		
+		whatever++
+		m.redraw()
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes.length
+	})
+	
 	test(function() {
 		mock.requestAnimationFrame.$resolve()
 
@@ -86,6 +112,78 @@ function testMithril(mock) {
 		
 		return unloaded
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var module = {}, unloaded = false
+		module.controller = function() {
+			this.onunload = function() {unloaded = true}
+		}
+		module.view = function() {}
+		m.module(root, module)
+		m.module(root, {controller: function() {}, view: function() {}})
+		
+		return unloaded === true
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		var module = {}
+		module.view = function() {
+			return m("div", {config: function(el, init) {
+				if (!init) initCount++
+			}})
+		}
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		
+		var dom = mock.document.createElement("div")
+		
+		var show = true
+
+		var module = {
+			view: function() {
+				return [
+					m(".foo", {key: 1, config: test, onclick: function() {show = !show}}),
+					show ? m(".bar", {key: 2}) : null
+				]
+			}
+		}
+
+		function test(el, init) {
+			if (!init) {
+				root.appendChild(dom)
+			}
+		}
+
+		m.module(root, module)
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = false
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		show = true
+		m.redraw()
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return root.childNodes.length == 3
+	})
+	m.redraw.strategy(undefined) //teardown for m.module tests
 
 	//m.withAttr
 	test(function() {
@@ -147,7 +245,7 @@ function testMithril(mock) {
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
-		return root.childNodes[0].childNodes[0].nodeValue === ""
+		return root.childNodes[0].childNodes[0].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -170,19 +268,19 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes[1].nodeValue === ""
+		return root.childNodes[0].childNodes[1].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li"), m("li")]))
 		m.render(root, m("ul", [m("li"), undefined]))
-		return root.childNodes[0].childNodes.length == 2 && root.childNodes[0].childNodes[1].nodeValue === ""
+		return root.childNodes[0].childNodes[1].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
 		m.render(root, m("ul", [m("li")]))
 		m.render(root, m("ul", [undefined]))
-		return root.childNodes[0].childNodes[0].nodeValue === ""
+		return root.childNodes[0].childNodes[0].nodeValue == ""
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -401,17 +499,6 @@ function testMithril(mock) {
 		return valueBefore === "red" && valueAfter === undefined
 	})
 	test(function() {
-		var root = mock.document.createElement("div")
-		var module = {}, unloaded = false
-		module.controller = function() {
-			this.onunload = function() {unloaded = true}
-		}
-		module.view = function() {}
-		m.module(root, module)
-		m.module(root, {controller: function() {}, view: function() {}})
-		return unloaded === true
-	})
-	test(function() {
 		//https://github.com/lhorie/mithril.js/issues/87
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [[m("a"), m("a")], m("button")]))
@@ -490,7 +577,7 @@ function testMithril(mock) {
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
-
+		
 		var success = false
 		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {ctx.data = 1}}))
 		m.render(root, m("div", {config: function(elem, isInitialized, ctx) {success = ctx.data === 1}}))
@@ -829,7 +916,7 @@ function testMithril(mock) {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [m("div", 1), m("div", 2), [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
 		m.render(root, m("div", [m("div", 1), null, [m("div", {key: 3}, 3), m("div", {key: 4}, 4), m("div", {key:5}, 5)], [m("div", {key: 6}, 6)]]))
-		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).slice(0, 5).join("") == "13456"
+		return root.childNodes[0].childNodes.map(function(c) {return c.childNodes ? c.childNodes[0].nodeValue: c.nodeValue}).join("") == "13456"
 	})
 	test(function() {
 		var root = mock.document.createElement("div")
@@ -850,6 +937,68 @@ function testMithril(mock) {
 			m("#div-2", {key: 2})
 		])
 		return root.childNodes.map(function(node) {return node.id}).join() == "div-1,div-3,div-2"
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", function() {}))
+		return root.childNodes[0].childNodes.length == 0
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", "foo", m("a")))
+		m.render(root, m("div", "test"))
+		return root.childNodes[0].childNodes.length == 1
+	})
+	test(function() {
+		//if an element is preceded by a conditional, it should not lose its identity
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a"), m("input[autofocus]")]))
+		var before = root.childNodes[0].childNodes[1]
+		m.render(root, m("div", [undefined, m("input[autofocus]")]))
+		var after = root.childNodes[0].childNodes[1]
+		return before === after
+	})
+	test(function() {
+		//unkeyed element should maintain identity if mixed w/ keyed elements and identity can be inferred
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[3]
+		m.render(root, m("div", [m("b", {key: 3}), m("b", {key: 4}), m("i"), m("b", {key: 1})]))
+		var after = root.childNodes[0].childNodes[2]
+		return before === after
+	})
+	test(function() {
+		//unkeyed element should maintain identity if mixed w/ keyed elements and text nodes and identity can be inferred
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), "foo", m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), "bar", m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), null, m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), null, m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), undefined, m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), undefined, m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
+	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [m("a", {key: 1}), m("a", {key: 2}), m.trust("a"), m("a", {key: 3}), m("i")]))
+		var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [m("a", {key: 3}), m("a", {key: 4}), m.trust("a"), m("i"), m("a", {key: 1})]))
+		var after = root.childNodes[0].childNodes[3]
+		return before === after
 	})
 	//end m.render
 
@@ -1134,7 +1283,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test14?test&test2=")
 		mock.requestAnimationFrame.$resolve() //teardown
-		return mock.location.search == "?/test14?test=&test2=" && m.route.param("test") === "" && m.route.param("test2") === ""
+		return mock.location.search == "?/test14?test&test2=" && m.route.param("test") === null && m.route.param("test2") === ""
 	})
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
@@ -1374,7 +1523,7 @@ function testMithril(mock) {
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
-
+		
 		var root = mock.document.createElement("div")
 		var unloaded = 0
 		m.route.mode = "search"
@@ -1746,8 +1895,483 @@ function testMithril(mock) {
 		
 		return mock.history.$$length == 0
 	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return !value
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var value
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				value = ctx.retain
+			}})
+		}
+		
+		m.route(root, "/a", {
+			"/a": a
+		})
+		
+		return value
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}})
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = a.view
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = true
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				ctx.retain = false
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 2
+	})
+	test(function() {
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+		
+		var root = mock.document.createElement("div")
+		var initCount = 0
+		
+		var a = {}
+		a.controller = function() {m.redraw.strategy("diff")}
+		a.view = function() {
+			return m("div", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+		
+		var b = {}
+		b.controller = function() {m.redraw.strategy("diff")}
+		b.view = function() {
+			return m("section", m("a", {config: function(el, init, ctx) {
+				if (!init) initCount++
+			}}))
+		}
+
+		m.route(root, "/a", {
+			"/a": a,
+			"/b": b,
+		})
+		mock.requestAnimationFrame.$resolve()
+		
+		m.route("/b")
+		
+		mock.requestAnimationFrame.$resolve()
+		
+		return initCount == 1
+	})
 	//end m.route
 
+	//m.route.parseQueryString
+	test(function() {
+		var args = m.route.parseQueryString("foo=bar&hello%5B%5D=world&hello%5B%5D=mars&hello%5B%5D=pluto")
+		return args["hello[]"] instanceof Array && args["hello[]"].indexOf("world") > -1 && args["hello[]"].indexOf("mars") > -1 && args["hello[]"].indexOf("pluto") > -1
+	})
+	test(function() {
+		var args = m.route.parseQueryString("foo=bar&hello=world&hello=mars&bam=&yup")
+		return args.foo === "bar" && args.hello[0] === "world" && args.hello[1] === "mars" && args.bam === "" && args.yup === null
+	})
+	
+	//m.route.buildQueryString
+	test(function() {
+		var string = m.route.buildQueryString({
+			foo: "bar",
+			hello: ["world", "mars", "mars"],
+			world: {
+				test:3 
+			},
+			bam: "",
+			yup: null,
+			removed: undefined
+		})
+		return string === "foo=bar&hello=world&hello=mars&world%5Btest%5D=3&bam=&yup"
+	})
+	
 	//m.prop
 	test(function() {
 		var prop = m.prop("test")
@@ -1868,7 +2492,18 @@ function testMithril(mock) {
 	test(function() {
 		var prop = m.request({method: "GET", url: "test", data: {foo: [1, 2]}})
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
-		return prop().url === "test?foo%5B%5D=1&foo%5B%5D=2"
+		return prop().url === "test?foo=1&foo=2"
+	})
+	test(function() {
+		var value
+		var prop1 = m.request({method: "GET", url: "test", initialValue: 123})
+		var val1 = prop1()
+		var prop2 = prop1.then(function() {return 1})
+		var val2 = prop2()
+		var prop3 = prop1.then(function(v) {value = v})
+		var val3 = prop3()
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return val1 === 123 && val2 === 123 && val3 === 123 && value.method === "GET" && value.url === "test"
 	})
 
 	// m.request over jsonp

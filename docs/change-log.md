@@ -1,5 +1,31 @@
 ## Change Log
 
+[v0.1.34](/mithril/archive/v0.1.34) - maintenance
+
+### Bug Fixes:
+
+-	fix identity bug when mixing unkeyable elements in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
+
+---
+
+[v0.1.33](/mithril/archive/v0.1.33) - maintenance
+
+### Bug Fixes:
+
+-	fix diff bug when mixing `undefined` in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
+-	fix reference to map file in package.json for cdnjs
+-	fix links in documentation
+
+---
+
+[v0.1.32](/mithril/archive/v0.1.32) - maintenance
+
+### Bug Fixes:
+
+-	fix regression caused by [#454](https://github.com/lhorie/mithril.js/issues/454)
+
+---
+
 [v0.1.31](/mithril/archive/v0.1.31) - maintenance
 
 ### News:
@@ -8,12 +34,17 @@
 -	m.request's `unwrapSuccess` and `unwrapError` callbacks now receive the XMLHttpRequest instance as a second parameter
 -	3rd parameter for `m.route(route, params, shouldReplaceHistory)` is now public
 -	exact routes now have higher precedence than routes w/ variables [#452](https://github.com/lhorie/mithril.js/issues/452)
+-	there's now a `retain` flag to control on-route-change diff strategy on a per-element basis
 
 ### Bug Fixes:
 
 -	fix routing bug in IE9 [#320](https://github.com/lhorie/mithril.js/issues/320)
 -	fix ordering bug in m.trust when using HTML entities [#453](https://github.com/lhorie/mithril.js/issues/453)
 -	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
+-	fix dom element ownership bug when mixing keyed elements and third party plugin elements [#463](https://github.com/lhorie/mithril.js/issues/463)
+-	fix edge case in flatten algorithm [#448](https://github.com/lhorie/mithril.js/issues/448)
+-	prevent unnecessary DOM move operation when mixing keyed and unkeyed elements [#398](https://github.com/lhorie/mithril.js/issues/398)
+-	revert [#382](https://github.com/lhorie/mithril.js/issues/382) due to diff regression [#512](https://github.com/lhorie/mithril.js/issues/512)
 
 ---
 

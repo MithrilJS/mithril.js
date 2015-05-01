@@ -8,7 +8,7 @@
 - [Running clean up code on route change](#running-clean-up-code-on-route-change)
 - [Redirecting](#redirecting)
 - [Reading the currently active route](#reading-the-currently-active-route)
-- [Mode abstraction](#mode abstraction)
+- [Mode abstraction](#mode-abstraction)
 
 ---
 
@@ -78,7 +78,7 @@ This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 
 Above, `dashboard` is a module. It contains a `controller` and a `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
 
-In this case, since there's only route, the app redirects to the default route `"/dashboard/johndoe"`.
+In this case, since there's only one route, the app redirects to the default route `"/dashboard/johndoe"`.
 
 The string `johndoe` is bound to the `:userID` parameter, which can be retrieved programmatically in the controller via `m.route.param("userID")`.
 
@@ -160,7 +160,7 @@ m.route(document.body, "/", {
 m.route("/dashboard"); // logs "unloading home"
 ```
 
-This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `unload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
+This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `onunload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
 
 ---
 
@@ -169,7 +169,7 @@ This mechanism is useful to clear timers and unsubscribe event handlers. If you 
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement rootElement, String defaultRoute, Object<Module> routes) { String mode, String param(String key) }
+void route(DOMElement rootElement, String defaultRoute, Object<Module> routes) { String mode, String param(String key), String buildQueryString(Object data), Object parseQueryString(String data) }
 
 where:
 	Module :: Object { void controller(), void view(Object controllerInstance) }
@@ -253,6 +253,38 @@ where:
 	
 		The value that maps to the parameter specified by `key`
 
+-	<a name="buildQueryString"></a>
+
+	#### m.route.buildQueryString
+	
+	**String buildQueryString(Object data)**
+	
+	Serializes an object into its URI encoded querystring representation, following the same serialization conventions as [URI.js](https://medialize.github.io/URI.js/)
+	
+	-	**Object data**
+	
+		An object to be serialized
+	
+	-	**returns String querystring**
+	
+		The serialized representation of the input data
+	
+-	<a name="parseQueryString"></a>
+
+	#### m.route.parseQueryString
+	
+	**Object parseQueryString(String querystring)**
+	
+	Deserializes an object from an URI encoded querystring representation, following the same deserialization conventions as [URI.js](https://medialize.github.io/URI.js/)
+	
+	-	**String querystring**
+	
+		An URI encoded querystring to be deserialized
+	
+	-	**returns Object data**
+	
+		The deserialized object
+	
 ---
 
 <a name="redirecting"></a>

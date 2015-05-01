@@ -61,7 +61,8 @@ var m = (function app(window, undefined) {
 
 		for (var attrName in attrs) {
 			if (attrName === classAttrName) {
-				if (attrs[attrName] !== "") cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName];
+				var className = cell.attrs[attrName]
+				cell.attrs[attrName] = (className && attrs[attrName] ? className + " " : className || "") + attrs[attrName];
 			}
 			else cell.attrs[attrName] = attrs[attrName]
 		}
@@ -94,7 +95,7 @@ var m = (function app(window, undefined) {
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
 		//data.toString() is null if data is the return value of Console.log in Firefox
-		if (data == null || data.toString() == null) data = "";
+		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
 		if (cached == null || cachedType !== dataType) {
@@ -120,7 +121,7 @@ var m = (function app(window, undefined) {
 					len = data.length
 				}
 			}
-
+			
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -128,7 +129,6 @@ var m = (function app(window, undefined) {
 			//2) add new keys to map and mark them for addition
 			//3) if key exists in new list, change action from deletion to a move
 			//4) for each key, handle its corresponding action as marked in previous steps
-			//5) copy unkeyed items into their respective gaps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, unkeyed = [], shouldMaintainIdentities = false;
 			for (var i = 0; i < cached.length; i++) {
@@ -137,9 +137,18 @@ var m = (function app(window, undefined) {
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
+			
+			var guid = 0
+			for (var i = 0, len = data.length; i < len; i++) {
+				if (data[i] && data[i].attrs && data[i].attrs.key != null) {
+					for (var j = 0, len = data.length; j < len; j++) {
+						if (data[j] && data[j].attrs && data[j].attrs.key == null) data[j].attrs.key = "__mithril__" + guid++
+					}
+					break
+				}
+			}
+			
 			if (shouldMaintainIdentities) {
-				if (data.indexOf(null) > -1) data = data.filter(function(x) {return x != null})
-				
 				var keysDiffer = false
 				if (data.length != cached.length) keysDiffer = true
 				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
@@ -162,13 +171,13 @@ var m = (function app(window, undefined) {
 									element: cached.nodes[existing[key].index] || $document.createElement("div")
 								}
 							}
-							else unkeyed.push({index: i, element: parentElement.childNodes[i] || $document.createElement("div")})
 						}
 					}
 					var actions = []
 					for (var prop in existing) actions.push(existing[prop])
 					var changes = actions.sort(sortChanges);
 					var newCached = new Array(cached.length)
+					newCached.nodes = cached.nodes.slice()
 
 					for (var i = 0, change; change = changes[i]; i++) {
 						if (change.action === DELETION) {
@@ -180,6 +189,7 @@ var m = (function app(window, undefined) {
 							dummy.key = data[change.index].attrs.key;
 							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
 							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
+							newCached.nodes[change.index] = dummy
 						}
 
 						if (change.action === MOVE) {
@@ -187,16 +197,10 @@ var m = (function app(window, undefined) {
 								parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null)
 							}
 							newCached[change.index] = cached[change.from]
+							newCached.nodes[change.index] = change.element
 						}
 					}
-					for (var i = 0, len = unkeyed.length; i < len; i++) {
-						var change = unkeyed[i];
-						parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
-						newCached[change.index] = cached[change.index]
-					}
 					cached = newCached;
-					cached.nodes = new Array(parentElement.childNodes.length);
-					for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes[i] = child
 				}
 			}
 			//end key algorithm
@@ -210,7 +214,7 @@ var m = (function app(window, undefined) {
 					//fix offset of next element if item was a trusted string w/ more than one html element
 					//the first clause in the regexp matches elements
 					//the second clause (after the pipe) matches text nodes
-					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]|&/g) || []).length
+					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length
 				}
 				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
 				cached[cacheCount++] = item
@@ -238,7 +242,7 @@ var m = (function app(window, undefined) {
 			var dataAttrKeys = Object.keys(data.attrs)
 			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
 			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
+			if (data.tag != cached.tag || dataAttrKeys.join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id || (m.redraw.strategy() == "all" && cached.configContext && cached.configContext.retain !== true) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
 				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload()
 			}
@@ -274,7 +278,7 @@ var m = (function app(window, undefined) {
 			}
 			//schedule configs to be called. They are called after `build` finishes running
 			if (typeof data.attrs["config"] === FUNCTION) {
-				var context = cached.configContext = cached.configContext || {};
+				var context = cached.configContext = cached.configContext || {retain: (m.redraw.strategy() == "diff") || undefined};
 
 				// bind
 				var callback = function(data, args) {
@@ -285,7 +289,7 @@ var m = (function app(window, undefined) {
 				configs.push(callback(data, [node, !isNew, context, cached]))
 			}
 		}
-		else if (typeof dataType != FUNCTION) {
+		else if (typeof data != FUNCTION) {
 			//handle text nodes
 			var nodes;
 			if (cached.nodes.length === 0) {
@@ -361,7 +365,7 @@ var m = (function app(window, undefined) {
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
-					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type")) {
+					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type" || attrName === "width" || attrName === "height")) {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
 						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr
 					}
@@ -391,7 +395,10 @@ var m = (function app(window, undefined) {
 		if (nodes.length != 0) nodes.length = 0
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
+		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
+			cached.configContext.onunload();
+			cached.configContext.onunload = null
+		}
 		if (cached.children) {
 			if (type.call(cached.children) === ARRAY) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
@@ -540,10 +547,9 @@ var m = (function app(window, undefined) {
 	m.redraw.strategy = m.prop();
 	var blank = function() {return ""}
 	function redraw() {
-		var forceRedraw = m.redraw.strategy() === "all";
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank(), forceRedraw)
+				m.render(root, modules[i].view ? modules[i].view(controllers[i]) : blank())
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
@@ -609,7 +615,7 @@ var m = (function app(window, undefined) {
 			var element = arguments[0];
 			var isInitialized = arguments[1];
 			var context = arguments[2];
-			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + this.attrs.href;
+			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + (this.attrs ? this.attrs.href : '');
 			if (element.addEventListener) {
 				element.removeEventListener("click", routeUnobtrusive);
 				element.addEventListener("click", routeUnobtrusive)
@@ -706,28 +712,46 @@ var m = (function app(window, undefined) {
 		else window.scrollTo(0, 0)
 	}
 	function buildQueryString(object, prefix) {
-		var str = [];
-		for(var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop, value = object[prop];
+		var duplicates = {}
+		var str = []
+		for (var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop
+			var value = object[prop]
 			var valueType = type.call(value)
-			var pair = value != null && (valueType === OBJECT) ?
-				buildQueryString(value, key) :
-				valueType === ARRAY ?
-					value.map(function(item) {return encodeURIComponent(key + "[]") + "=" + encodeURIComponent(item)}).join("&") :
-					encodeURIComponent(key) + "=" + encodeURIComponent(value)
-			str.push(pair)
+			var pair = (value === null) ? encodeURIComponent(key) :
+				valueType === OBJECT ? buildQueryString(value, key) :
+				valueType === ARRAY ? value.reduce(function(memo, item) {
+					if (!duplicates[key]) duplicates[key] = {}
+					if (!duplicates[key][item]) {
+						duplicates[key][item] = true
+						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
+					}
+					return memo
+				}, []).join("&") :
+				encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			if (value !== undefined) str.push(pair)
 		}
 		return str.join("&")
 	}
-	
 	function parseQueryString(str) {
+		if (str.charAt(0) === "?") str = str.substring(1);
+		
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
-			params[decodeURIComponent(pair[0])] = pair[1] ? decodeURIComponent(pair[1]) : ""
+			var key = decodeURIComponent(pair[0])
+			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
+			if (params[key] != null) {
+				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
+				params[key].push(value)
+			}
+			else params[key] = value
 		}
 		return params
 	}
+	m.route.buildQueryString = buildQueryString
+	m.route.parseQueryString = parseQueryString
+	
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
@@ -739,12 +763,11 @@ var m = (function app(window, undefined) {
 		deferred.promise = propify(deferred.promise);
 		return deferred
 	};
-	function propify(promise) {
-		var prop = m.prop();
+	function propify(promise, initialValue) {
+		var prop = m.prop(initialValue);
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
-			promise = promise.then(resolve, reject).then(prop);
-			return prop;
+			return propify(promise.then(resolve, reject), initialValue)
 		};
 		return prop
 	}
@@ -997,13 +1020,14 @@ var m = (function app(window, undefined) {
 
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation();
-		var deferred = m.deferred();
+		var deferred = new Deferred();
 		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
 		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
 		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
 		var extract = xhrOptions.extract || function(xhr) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText
 		};
+		xhrOptions.method = (xhrOptions.method || 'GET').toUpperCase();
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
@@ -1026,7 +1050,7 @@ var m = (function app(window, undefined) {
 			if (xhrOptions.background !== true) m.endComputation()
 		};
 		ajax(xhrOptions);
-		deferred.promise(xhrOptions.initialValue);
+		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
 		return deferred.promise
 	};
 
