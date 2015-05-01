@@ -3873,6 +3873,12 @@ function testMithril(mock) {
 		return prop().message === "error occurred" && error().message === "error occurred"
 	})
 	test(function() {
+		var error = m.prop("no error")
+		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}}).catch(error)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().message === "error occurred" && error().message === "error occurred"
+	})
+	test(function() {
 		var error = m.prop("no error"), exception
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new TypeError("error occurred")}}).then(null, error)
 		try {mock.XMLHttpRequest.$instances.pop().onreadystatechange()}
@@ -4055,7 +4061,21 @@ function testMithril(mock) {
 	test(function() {
 		var value
 		var deferred = m.deferred()
+		deferred.promise.catch(function(data) {value = data})
+		deferred.reject("test")
+		return value === "test"
+	})
+	test(function() {
+		var value
+		var deferred = m.deferred()
 		deferred.promise.then(null, function(data) {return "foo"}).then(function(data) {value = data})
+		deferred.reject("test")
+		return value === "foo"
+	})
+	test(function() {
+		var value
+		var deferred = m.deferred()
+		deferred.promise.catch(function(data) {return "foo"}).then(function(data) {value = data})
 		deferred.reject("test")
 		return value === "foo"
 	})
@@ -4223,6 +4243,13 @@ function testMithril(mock) {
 		deferred2.resolve("foo")
 		deferred1.resolve("test")
 		return value[0] === "test" && value[1] === "foo"
+	})
+	test(function() {
+		var value
+		var deferred = m.deferred()
+		m.sync([deferred.promise]).catch(function(data) {value = data})
+		deferred.reject("fail")
+		return value[0] === "fail"
 	})
 	test(function() {
 		var value = 1
