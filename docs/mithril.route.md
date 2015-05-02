@@ -18,7 +18,7 @@ It enables seamless navigability while preserving the ability to bookmark each p
 
 This method overloads four different units of functionality:
 
-- `m.route(rootElement, defaultRoute, routes)` - defines the available URLs in an application, and their respective modules
+- `m.route(rootElement, defaultRoute, routes)` - defines the available URLs in an application, and their respective components
 
 - `m.route(path)` - redirects to another route
 
@@ -34,15 +34,15 @@ Routing is single-page-application (SPA) friendly, and can be implemented using 
 
 #### Usage
 
-To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.module.md) to be rendered. You don't need to call `m.module` to initialize your modules if you define a list of routes - `m.route` calls it for you.
+To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [components](mithril.component.md) to be rendered. You don't need to call [`m.mount`](mithril.mount.md) to initialize your components if you define a list of routes - `m.route` calls it for you.
 
-The example below defines three routes, to be rendered in `<body>`. `home`, `login` and `dashboard` are modules. We'll see how to define a module in a bit.
+The example below defines three routes, to be rendered in `<body>`. `Home`, `Login` and `Dashboard` are components. We'll see how to define a component in a bit.
 
 ```javascript
 m.route(document.body, "/", {
-	"/": home,
-	"/login": login,
-	"/dashboard": dashboard,
+	"/": Home,
+	"/login": Login,
+	"/dashboard": Dashboard,
 });
 ```
 
@@ -51,10 +51,10 @@ Routes can take arguments, by prefixing words with a colon `:`
 The example below shows a route that takes an `userID` parameter
 
 ```javascript
-//a sample module
-var dashboard = {
+//a sample component
+var Dashboard = {
 	controller: function() {
-		this.id = m.route.param("userID");
+		return {id: m.route.param("userID")}
 	},
 	view: function(controller) {
 		return m("div", controller.id);
@@ -66,7 +66,7 @@ m.route.mode = "hash";
 
 //define a route
 m.route(document.body, "/dashboard/johndoe", {
-	"/dashboard/:userID": dashboard
+	"/dashboard/:userID": Dashboard
 });
 ```
 
@@ -76,7 +76,7 @@ This redirects to the URL `http://server/#/dashboard/johndoe` and yields:
 <body><div>johndoe</div></body>
 ```
 
-Above, `dashboard` is a module. It contains a `controller` and a `view` properties. When the URL matches a route, the respective module's controller is instantiated and passed as a parameter to the view.
+Above, `dashboard` is a component. It contains a `controller` and a `view` properties. When the URL matches a route, the respective component's controller is instantiated and passed as a parameter to the view.
 
 In this case, since there's only one route, the app redirects to the default route `"/dashboard/johndoe"`.
 
@@ -110,8 +110,8 @@ Note that Mithril checks for route matches in the order the routes are defined, 
 
 ```
 m.route(document.body, "/blog/archive/2014", {
-	"/blog/:date...": module1, //for the default path in the line above, this route matches first!
-	"/blog/archive/:year": module2
+	"/blog/:date...": Component1, //for the default path in the line above, this route matches first!
+	"/blog/archive/:year": Component2
 });
 
 m.route.param("date") === "archive/2014"
@@ -136,24 +136,31 @@ var dir = m.route.param("dir") // "desc"
 
 #### Running clean up code on route change
 
-If a module's controller implements an instance method called `onunload`, this method will be called when a route changes.
+If a component's controller implements an instance method called `onunload`, this method will be called when a route changes.
 
 ```javascript
-var home = {};
-home.controller = function() {
-	this.onunload = function() {
-		console.log("unloading home module");
-	};
+var Home = {
+	controller: function() {
+		return {
+			onunload: function() {
+				console.log("unloading home component");
+			}
+		};
+	},
+	view: function() {
+		return m("div", "Home")
+	}
 };
 
-var dashboard = {};
-dashboard.controller = function() {};
-dashboard.view = function() {};
+var Dashboard = {
+	controller: function() {},
+	view: function() {}
+};
 
 //go to the default route (home)
 m.route(document.body, "/", {
-	"/": home,
-	"/dashboard": dashboard,
+	"/": Home,
+	"/dashboard": Dashboard,
 });
 
 //re-route to dashboard
@@ -169,10 +176,10 @@ This mechanism is useful to clear timers and unsubscribe event handlers. If you 
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement rootElement, String defaultRoute, Object<Module> routes) { String mode, String param(String key), String buildQueryString(Object data), Object parseQueryString(String data) }
+void route(DOMElement rootElement, String defaultRoute, Object<Component> routes) { String mode, String param(String key), String buildQueryString(Object data), Object parseQueryString(String data) }
 
 where:
-	Module :: Object { void controller(), void view(Object controllerInstance) }
+	Component :: Object { void controller(), void view(Object controllerInstance) }
 ```
 
 -	**DOMElement root**
@@ -183,21 +190,21 @@ where:
 	
 	The route to redirect to if the current URL does not match any of the defined routes
 	
--	**Object<Module> routes**
+-	**Object<Component> routes**
 	
-	A key-value map of possible routes and their respective modules. Keys are expected to be absolute pathnames, but can include dynamic parameters. Dynamic parameters are words preceded by a colon `:`
+	A key-value map of possible routes and their respective components. Keys are expected to be absolute pathnames, but can include dynamic parameters. Dynamic parameters are words preceded by a colon `:`
 	
-	`{'/path/to/page/': pageModule}` - a route with a basic pathname
+	`{'/path/to/page/': pageComponent}` - a route with a basic pathname
   
-	`{'/path/to/page/:id': pageModule}` - a route with a pathname that contains a dynamic parameter called `id`. This route would be selected if the URL was `/path/to/page/1`, `/path/to/page/test`, etc
+	`{'/path/to/page/:id': pageComponent}` - a route with a pathname that contains a dynamic parameter called `id`. This route would be selected if the URL was `/path/to/page/1`, `/path/to/page/test`, etc
 
-	`{'/user/:userId/book/:bookId': userBookModule}` - a route with a pathname that contains two parameters
+	`{'/user/:userId/book/:bookId': userBookComponent}` - a route with a pathname that contains two parameters
 
-	Dynamic parameters are wild cards that allow selecting a module based on a URL pattern. The values that replace the dynamic parameters in a URL are available via `m.route.param()`
+	Dynamic parameters are wild cards that allow selecting a component based on a URL pattern. The values that replace the dynamic parameters in a URL are available via `m.route.param()`
 
 	Note that the URL component used to resolve routes is dependent on `m.route.mode`. By default, the querystring is considered the URL component to test against the routes collection
 
-	If the current page URL matches a route, its respective module is activated. See `m.module` for information on modules.
+	If the current page URL matches a route, its respective component is activated. See [`m.component`](mithril.component.md) for information on components.
 
 -	<a name="mode"></a>
 
@@ -382,7 +389,7 @@ See [`m()`](mithril.md) for more information on virtual elements.
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-void route(DOMElement element, Boolean isInitialized)
+void route(DOMElement element, Boolean isInitialized, Object context, Object vdom)
 ```
 
 -	**DOMElement element**
@@ -392,3 +399,11 @@ void route(DOMElement element, Boolean isInitialized)
 -	**Boolean isInitialized**
 
 	the method does not run if this flag is set to true. This is to make the method compatible with virtual DOM elements' `config` attribute (see [`m()`](mithril))
+
+-	**Object context**
+
+	an object that retains its state across redraws
+	
+-	**Object vdom**
+
+	The virtual DOM data structure to which the config is applied to

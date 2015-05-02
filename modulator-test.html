@@ -1,0 +1,274 @@
+<body></body>
+<script src="mithril.js"></script>
+<script type="text/javascript">
+var mod = ( function initModulator(){
+  if( !Map ){
+    // A naive shim for maps functionality
+    var Map     = shim;
+    var WeakMap = shim;
+  }
+ 
+  // Garbage collection flag
+  mod.cleanup = true;
+  
+  // Registry of instantiation contexts
+  var contexts    = new WeakMap();
+  // All automated counts
+  var counts      = new Map();
+  // Prevent infinite recursion if a modulated controller calls redraw
+  var pauseRedraw = ( function(){
+    var snapRedraw = m.redraw;
+    var redraw;
+    var forced;
+ 
+    for( var key in m.redraw ){
+      queueRedraw[ key ] = snapRedraw[ key ] = m.redraw[ key ];
+    }
+ 
+    return function pause(){
+      m.redraw = queueRedraw;
+ 
+      setTimeout( function unpause(){
+        m.redraw = snapRedraw;
+ 
+        if( redraw ) m.redraw( forced );
+ 
+        redraw = forced = false;
+      } );
+    }
+ 
+    function queueRedraw( force ){
+      redraw = true;
+ 
+      if( force ) forced = true;
+    }
+  }() );
+  var unique      = {};
+  
+  // Clear counts at the begninning of every redraw
+  m.module( document.createElement( 'x' ), {
+    view : counts.clear.bind( counts )
+  } );
+ 
+  // Shorthand for a component which will always return the same instance
+  mod.unique = function( component ){
+    return mod( component, unique, unique );
+  };
+  // Shorthand for a keyed component with a global context
+  mod.global = function( x ){
+		return mod( x, unique );
+  };
+ 
+  // Extend controllers with extra utility functions
+  mod.extend = true;
+ 
+  return mod;
+ 
+  function mod( component, context, key ){
+		// Stand in for m.module, eg mod( document.body, component, context );
+		if( component instanceof HTMLElement ){
+			// Stand in for m.route
+			if( !component.controller && !component.view ){
+				var routes = {};
+ 
+				for( var route in context ){
+					routes[ route ].controller = mod.unique( {
+						controller : context[ route ].controller || noop
+					} ).bind();
+				}
+ 
+				return m.route( component, routes );
+			}
+ 
+			return m.module( component, mod.apply( undefined, [].slice.call( arguments, 1 ) ) )();
+		}
+ 
+		var components = register( contexts, context || unique, WeakMap );
+		var keys       = register( components, component, WeakMap );
+ 
+		return function identify( key ){
+			var count = key === undefined && register( counts, keys, m.prop.bind( undefined, 0 ) );
+			// eg. ctrl.mod( profile ).mapWith( users(), 'username' );
+			apply.mapWith = function( collection ){
+				var path = [].slice.call( arguments, 1 );
+ 
+				return Object.keys( collection ).map( function getItemIdentifier( index ){
+					var key;
+ 
+					if( path.length ){
+						key = path.reduce( function getKeyValue( source, segment ){
+							var node = source[ segment ];
+ 
+							if( node instanceof Function ) node = node.call( source );
+ 
+							return node;
+						}, collection[ index ] );
+					}
+					else {
+						key = index;
+					}
+ 
+					return identify( key )( collection[ index ] );
+				} );
+			};
+ 
+			return apply;
+ 
+			function apply(){
+				var args = [].slice.call( arguments );
+				var view;
+ 
+				if( count ){
+					key = count( count() + 1 );
+				}
+ 
+				var ctrl = register( keys, key, function newController(){
+					pauseRedraw();
+ 
+					var controller = component.controller || noop;
+					var instance   = new ( controller.bind.apply( controller, [ controller ].concat( args ) ) )();
+ 
+					if( mod.cleanup ){
+						garbageCollect( instance );
+					}
+ 
+					if( mod.extend ){
+						// Shorthand for instantiatin sub-modules
+						instance.mod     = function( component, key ){
+							return mod( component, instance, key );
+						};
+						// Force a re-instantiation of this controller on next redraw.
+						// Returns m.redraw to allow instant re-instantiation.
+						// So, to re-initialise with the same arguments and run a forced
+						// redraw immediately:
+						// ctrl.refresh( [].slice.call( arguments, 1 ) )()
+						instance.refresh = function(){
+							args = [].slice.call( arguments );
+							ctrl = register( keys, key, newController, true );
+ 
+							return m.redraw;
+						};
+					}
+ 
+					return instance;
+				} );
+ 
+				// Return the controller instance if the component is view-less.
+				if( component.view ){
+					if( args.length ){
+						view = component.view.apply( undefined, [ ctrl ].concat( args ) );
+					}
+					else {
+						view = component.view( ctrl );
+					}
+ 
+					if( view instanceof Object ){
+						view.ctrl = ctrl;
+					}
+ 
+					return view;
+				}
+ 
+				return ctrl;
+			}
+		}( key );
+ 
+		// Performance: when controllers succesfully unload, destroy their associated maps
+		function garbageCollect( ctrl ){
+			onunload = ctrl.onunload;
+ 
+			if( onunload === teardown ){
+				return;
+			}
+ 
+			ctrl.onunload = teardown;
+ 
+			function teardown( e ){
+				var go = true;
+ 
+				if( onunload ){
+					onunload( {
+						preventDefault : function(){
+							go = false;
+						}
+					} );
+				}
+ 
+				if( go ){
+					contexts.delete( context );
+				}
+			}
+		}
+	}
+ 
+	// Convenience map method: retrieve key from map. If it's not registered, set it first with Constructor.
+	function register( map, key, Constructor, force ){
+		return !force && map.has( key ) ? map.get( key ) : map.set( key, new Constructor() ).get( key );
+	}
+ 
+	function shim(){
+		var keys   = [];
+		var values = [];
+		var map    = {
+			get    : function( key ){
+				var index = keys.indexOf( key );
+ 
+				return values[ index ];
+			},
+			has    : function( key ){
+				var index = keys.indexOf( key );
+ 
+				return index > -1;
+			},
+			set    : function( key, value ){
+				var index = map.has( key ) ? keys.indexOf( key ) : keys.length;
+ 
+				keys[ index ]   = key;
+				values[ index ] = value;
+ 
+				return map;
+			},
+			clear  : function(){
+				keys   = [];
+				values = [];
+			},
+			delete : function( key ){
+				var index = keys.indexOf( key );
+ 
+				if( index > -1 ){
+					keys.splice( index, 1 );
+					values.splice( index, 1 );
+ 
+					return true;
+				}
+ 
+				return false;
+			}
+		};
+ 
+		return map;
+	}
+ 
+	function noop(){}
+}() );
+</script>
+<script type="text/javascript">
+var count = 0
+
+var a = {}
+a.view = function() {
+    return [
+        m("a", {onclick: function() {count++}}, "count"),
+        mod(b)(count)
+    ]
+}
+
+var b = {}
+b.controller = function(count) {
+    this.count = count
+}
+b.view = function(ctrl, count) {
+    return m("li", count)
+}
+
+m.module(document.body, a)</script>

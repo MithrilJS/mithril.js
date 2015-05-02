@@ -6,7 +6,7 @@ This page aims to provide a comparison between Mithril and some of the most wide
 
 ### Code Size
 
-One of the most obvious differences between Mithril and most frameworks is in file size: Mithril is around 5kb gzipped and has no dependencies on other libraries.
+One of the most obvious differences between Mithril and most frameworks is in file size: Mithril is around 12kb gzipped and has no dependencies on other libraries.
 
 Note that while a small gzipped size can look appealing, that number is often used to "hide the weight" of the uncompressed code: remember that the decompressed Javascript still needs to be parsed and evaluated on every page load, and this cost (which can be in the dozens of milliseconds range for some frameworks in some browsers) cannot be cached.
 
@@ -117,8 +117,6 @@ Note also that, despite having a bigger scope, Mithril has a smaller file size t
 Knockout is a library focused on data binding. It is not an MVC framework in the traditional sense, but idiomatic Knockout code uses the similar concept of view models.
 
 A Knockout view model is an amalgamation of model and controller layers in a single class. In contrast, Mithril separates the two layers more distinctly.
-
-Generally speaking, Knockout applications tend to be more tightly coupled than Mithril since Knockout doesn't provide an equivalent to Mithril's modules and components.
 
 As with Angular, Knockout templates are written in HTML, and therefore have the same pros and cons as Angular templates.
 

@@ -13,7 +13,7 @@
 - [Dealing with focus](#dealing-with-focus)
 - [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
 - [Signature](#signature)
-
+- [The `config` attribute](#the-config-attribute)
 ---
 
 This is a convenience method to compose virtual elements that can be rendered via [`m.render()`](mithril.render.md).
@@ -72,8 +72,6 @@ yields
 </ul>
 */
 ```
-
-Be aware that when nesting virtual elements, the child elements must be in an Array.
 
 ---
 
@@ -291,13 +289,11 @@ m("a[href='/dashboard']", {config: m.route}, "Dashboard");
 
 The `config` mechanism can also be used to put focus on form inputs, and call methods that would not be possible to execute via the regular attribute syntax.
 
-It is only meant to be used to call methods on DOM elements that cannot be called otherwise.
-
-It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
-
-Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.module` call.
+Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
+
+You can also use it to attach events to other elements (for example, `window.onresize`), but you should remove such event handlers via `ctx.onunload` to avoid surprises.
 
 ---
 
@@ -347,7 +343,7 @@ m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets cal
 
 When using the [router](mithril.route.md), a route change recreates the DOM tree from scratch in order to unload plugins from the previous page. If you want to keep a DOM element intact across a route change, you can set the `retain` flag in the config's context object.
 
-In the example below, there are two routes, each of which loads a module when a user navigates to their respective URLs. Both modules use a `menu` template, which contains links for navigation between the two modules, and an expensive-to-reinitialize element. Setting `context.retain = true` in the element's config function allows the span to stay intact after a route change.
+In the example below, there are two routes, each of which loads a component when a user navigates to their respective URLs. Both components use a `menu` template, which contains links for navigation between the two components, and an expensive-to-reinitialize element. Setting `context.retain = true` in the element's config function allows the span to stay intact after a route change.
 
 ```javascript
 //a menu template
@@ -369,22 +365,22 @@ function persistent(el, isInit, context) {
 	}
 }
 
-//modules that use the menu above
+//components that use the menu above
 var Home = {
 	controller: function() {},
 	view: function() {
-		return [
+		return m("div", [
 			menu(),
 			m("h1", "Home")
-		]
+		])
 	}
 }
 var Contact = {
 	view: function() {
-		return [
+		return m("div", [
 			menu(),
 			m("h2", "Contact")
-		]
+		])
 	}
 }
 
@@ -477,8 +473,9 @@ VirtualElement m(String selector [, Attributes attributes] [, Children... childr
 
 where:
 	VirtualElement :: Object { String tag, Attributes attributes, Children children }
-    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context)>
-	Children :: String text | VirtualElement virtualElement | SubtreeDirective directive | Array<Children children>
+    Attributes :: Object<any | void config(DOMElement element, Boolean isInitialized, Object context, VirtualElement vdom)>
+	Children :: String text | VirtualElement virtualElement | Component | SubtreeDirective directive | Array<Children children>
+	Component :: Object { Function? controller, Function view }
 	SubtreeDirective :: Object { String subtree }
 ```
 
@@ -540,7 +537,7 @@ where:
 
 -	#### The `config` attribute
 
-	**void config(DOMElement element, Boolean isInitialized, Object context)** (optional)
+	**void config(DOMElement element, Boolean isInitialized, Object context, VirtualElement vdom)** (optional)
 
 	You can define a non-HTML-standard attribute called `config`. This special parameter allows you to call methods on the DOM element after it gets created.
 
@@ -577,13 +574,11 @@ where:
 
 	The `config` mechanism can also be used to put focus on form inputs, and call methods that would not be possible to execute via the regular attribute syntax.
 
-	It is only meant to be used to call methods on DOM elements that cannot be called otherwise.
-
-	It is NOT a "free out-of-jail card". You should not use this method to modify element properties that could be modified via the `attributes` argument, nor values outside of the DOM element in question.
-
-	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.module` call.
+	Also note that the `config` callback only runs after a rendering lifecycle is done. Therefore, you should not use `config` to modify controller and model values, if you expect these changes to render immediately. Changes to controller and model values in this fashion will only render on the next `m.render` or `m.mount` call.
 
 	You can use this mechanism to attach custom event listeners to controller methods (for example, when integrating with third party libraries), but you are responsible for making sure the integration with Mithril's autoredrawing system is in place. See the [integration guide](integration.md) for more information.
+	
+	You can also use it to attach events to other elements (for example, `window.onresize`), but you should remove such event handlers via `ctx.onunload` to avoid surprises.
 
 	-	**DOMElement element**
 
@@ -628,6 +623,10 @@ where:
 
 	m.render(document, m("a")); //logs `unloaded the div` and `alert` never gets called
 	```
+	
+	-	**VirtualElement vdom**
+	
+	The virtual DOM element to which the `config` function is attached
 
 -	**Children children** (optional)
 
@@ -635,6 +634,8 @@ where:
 
 	If it's a VirtualElement, it will be rendered as a DOM Element.
 
+	If it's a [component](mithril.component.md), the component will be instantiated and managed internally by Mithril
+	
 	If it's a list, its contents will recursively be rendered as appropriate and appended as children of the element being created.
 
 	If it's a SubtreeDirective with the value "retain", it will retain the existing DOM tree in place, if any. See [subtree directives.md](mithril.render.md#subtree-directives) for more information.

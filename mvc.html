@@ -1,0 +1,96 @@
+<body></body>
+<script src="mithril.js"></script>
+<script>
+var Reloadable = new function() {
+	var controllers = []
+	var reloadable = function(controller) {
+		return function() {
+			var ctrl = new controller
+			ctrl.onunload = function() {
+				controllers.splice(controllers.indexOf(ctrl), 1)
+			}
+			controllers.push({instance: ctrl, controller: controller})
+			return ctrl
+		}
+	}
+	reloadable.update = function() {
+		controllers.map(function(c) {
+			ctrl = new c.controller
+			for (var i in ctrl) c.instance[i] = ctrl[i]
+		})
+	}
+	return reloadable
+}
+
+var saved = []
+
+var Contact = function(data) {
+	data = data || {}
+	this.id = m.prop(data.id)
+	this.name = m.prop(data.name || "")
+	this.email = m.prop(data.email || "")
+}
+Contact.list = function(data) {
+	return m.request({method: "GET", url: "test.json", data: data, type: Contact})
+		.then(function(contacts) {return contacts.concat(saved)})
+}
+Contact.create = function(data) {
+	data.id(saved.push(data) + 2)
+	return Contact.list()
+}
+
+var ContactsWidget = {
+	controller: function() {
+	},
+	view: function(ctrl) {
+		return [
+			m.module(ContactForm),
+			m.module(ContactList)
+		]
+	}
+}
+
+var ContactForm = {
+	controller: function(args) {
+		var contact = m.prop(new Contact())
+		return {
+			contact: contact,
+			createContact: function() {
+				Contact.create(contact()).then(Reloadable.update)
+			},
+		}
+	},
+	view: function(ctrl) {
+		var contact = ctrl.contact()
+		
+		return m("form", [
+			m("label", "Name"),
+			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
+			
+			m("label", "Email"),
+			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
+			
+			m("button[type=button]", {onclick: ctrl.createContact}, "Create")
+		])
+	}
+}
+
+var ContactList = {
+	controller: Reloadable(function() {
+		return {contacts: Contact.list()}
+	}),
+	view: function(ctrl) {
+		return m("table", [
+			ctrl.contacts().map(function(contact) {
+				return m("tr", [
+					m("td", contact.id()),
+					m("td", contact.name()),
+					m("td", contact.email())
+				])
+			})
+		])
+	}
+}
+
+m.module(document.body, ContactsWidget)
+</script>

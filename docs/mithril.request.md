@@ -99,7 +99,7 @@ User.listEven = function() {
 
 //controller
 var controller = function() {
-	this.users = User.listEven()
+	return {users: User.listEven()}
 }
 ```
 
@@ -112,9 +112,11 @@ In the example below, we use the previously defined `listEven` model method and 
 ```javascript
 //controller
 var controller = function() {
-	this.users = User.listEven().then(function(users) {
-		if (users.length == 0) m.route("/add");
-	})
+	return {
+		users: User.listEven().then(function(users) {
+			if (users.length == 0) m.route("/add");
+		})
+	}
 }
 ```
 
@@ -477,33 +479,65 @@ where:
 	
 		Determines whether the `m.request` can affect template rendering. Defaults to false.
 		
-		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md), and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
+		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md) internally, and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
 		
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
 		
 		```javascript
 		var demo = {}
-		
+
 		demo.controller = function() {
-			return {
-				users: m.request({method: "GET", url: "/api/user", background: true, initialValue: []}).then(function(value) {
-					//force redraw
-					m.redraw()
-					return value
-				})
-			}
+			var users = m.request({method: "GET", url: "/api/users", background: true, initialValue: []})
+			users.then(m.redraw)
+			return {users: users}
 		}
-		
+
 		demo.view = function(ctrl) {
 			//this view renders twice (once immediately, and once after the request above completes)
-			return ctrl.users.map(function(user) {
-				return m("div", user.name)
-			})
+			return m("div", [
+				ctrl.users().map(function(user) {
+					return m("div", user.name)
+				})
+			])
 		}
 		```
 		
 		It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
+		
+		When calling multiple background AJAX requests, it's recommended that you use [`m.sync`](mithril.sync.md) to batch redraw once at the end of all requests, as opposed to repeatedly redrawing after every request:
 
+		```javascript
+		var demo = {}
+
+		demo.controller = function() {
+			var users = m.request({method: "GET", url: "/api/users", background: true, initialValue: []})
+			var projects = m.request({method: "GET", url: "/api/projects", background: true, initialValue: []})
+			
+			m.sync([users, projects]).then(m.redraw)
+			
+			return {users: users, projects: projects}
+		}
+		```
+		
+		Make sure to add null checks if your request value can be null
+		
+		```javascript
+		var demo = {}
+
+		demo.controller = function() {
+			var user = m.request({method: "GET", url: "/api/users/1", background: true, initialValue: null})
+			user.then(m.redraw)
+			return {user: user}
+		}
+
+		demo.view = function(ctrl) {
+			return m("div", [
+				//in the first redraw, there's no user, so ensure we don't throw an error
+				ctrl.user ? ctrl.user.name : "no user"
+			])
+		}
+		```
+		
 	-	**any initialValue** (optional)
 	
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.

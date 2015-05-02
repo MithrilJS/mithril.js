@@ -84,7 +84,7 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Component
 
-[Component](http://component.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
+[Component](http://component.github.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
 
 Assuming you have NodeJS installed, you can install Component by typing this in the command line:
 
@@ -131,6 +131,6 @@ In order to update a forked version of Mithril, [follow the instructions on this
 To use the bleeding edge version from npm, use the following command:
 
 ```
-npm install git://github.com/lhorie/mithril.js/tarball/next --save
+npm install git://github.com/lhorie/mithril.js#next --save
 ```
 

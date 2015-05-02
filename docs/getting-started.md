@@ -4,7 +4,7 @@
 
 Mithril is a client-side Javascript MVC framework, i.e. it's a tool to make application code divided into a data layer (called **M**odel), a UI layer (called **V**iew), and a glue layer (called **C**ontroller)
 
-Mithril is around 5kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
+Mithril is around 12kb gzipped thanks to its [small, focused, API](mithril.md). It provides a templating engine with a virtual DOM diff implementation for performant rendering, utilities for high-level modelling via functional composition, as well as support for routing and componentization.
 
 The goal of the framework is to make application code discoverable, readable and maintainable, and hopefully help you become an even better developer.
 
@@ -33,37 +33,37 @@ Yes, this is valid HTML 5! According to the specs, the `<html>`, `<head>` and `<
 
 ### Model
 
-In Mithril, an application typically lives in a namespace and contains modules. Modules are merely structures that represent a viewable "page" or a part of a page. In addition, an application can be organizationally divided into three major layers: Model, Controller and View.
+In Mithril, an application typically lives in a namespace and contains components. Components are merely structures that represent a viewable "page" or a part of a page. In addition, an application can be organizationally divided into three major layers: Model, Controller and View.
 
-For simplicity, our application will have only one module, and we're going to use it as the namespace for our application.
+For simplicity, our application will have only one component, and we're going to use it as the namespace for our application.
 
-In Mithril, a *module* is an object that contains two functions: `controller` and `view`.
+In Mithril, a *component* is an object that contains two functions: `controller` and `view`.
 
 ```
-//an empty Mithril module
-var myModule = {
+//an empty Mithril component
+var myComponent = {
 	controller: function() {},
 	view: function() {}
 }
 ```
 
-In addition to holding a controller and a view, a module is typically also used to store data that pertains to it.
+In addition to holding a controller and a view, a component can also be used to store data that pertains to it.
 
-Let's create a module.
+Let's create a component.
 
 ```markup
 <script>
-//this application only has one module: todo
+//this application only has one component: todo
 var todo = {};
 </script>
 ```
 
-Typically, model entities are reusable and live outside of modules (e.g. `var User = ...`). In our example, since the whole application lives in one module, we're going to use the module as a namespace for our model entities.
+Typically, model entities are reusable and live outside of components (e.g. `var User = ...`). In our example, since the whole application lives in one component, we're going to use the component as a namespace for our model entities.
 
 ```javascript
 var todo = {};
 
-//for simplicity, we use this module to namespace the model classes
+//for simplicity, we use this component to namespace the model classes
 
 //the Todo class has two properties
 todo.Todo = function(data) {
@@ -191,7 +191,7 @@ todo.controller = function() {
 
 ### View
 
-The next step is to write a view so users can interact with the application
+The next step is to write a view so users can interact with the application. In Mithril, views are plain Javascript. This comes with several benefits (proper error reporting, proper lexical scoping, etc.), while still allowing [HTML syntax to be used via a preprocessor tool](https://github.com/insin/msx)
 
 ```javascript
 todo.view = function() {
@@ -213,6 +213,8 @@ todo.view = function() {
 ```
 
 The utility method `m()` creates virtual DOM elements. As you can see, you can use CSS selectors to specify attributes. You can also use the `.` syntax to add CSS classes and the `#` to add an id.
+
+In fact, when not using the [MSX](https://github.com/insin/msx) HTML syntax preprocessor, it's recommended that you embrace using CSS selectors (e.g. `m(".modal-body")`) to really benefit from their inherent semantic expressiveness.
 
 For the purposes of testing out our code so far, the view can be rendered using the `m.render` method:
 
@@ -239,7 +241,7 @@ This renders the following markup:
 </html>
 ```
 
-Note that `m.render` is a very low level method in Mithril that draws only once and doesn't attempt to run the auto-redrawing system. In order to enable auto-redrawing, the `todo` module must be initialized by either calling `m.module` or by creating a route definition with `m.route`. Also note that, unlike observable-based frameworks like Knockout.js, setting a value in a `m.prop` getter-setter does NOT trigger redrawing side-effects in Mithril.
+Note that `m.render` is a very low level method in Mithril that draws only once and doesn't attempt to run the auto-redrawing system. In order to enable auto-redrawing, the `todo` component must be initialized by either calling `m.mount` or by creating a route definition with `m.route`. Also note that, unlike observable-based frameworks like Knockout.js, setting a value in a `m.prop` getter-setter does NOT trigger redrawing side-effects in Mithril.
 
 ---
 
@@ -406,11 +408,11 @@ Here are the highlights of the template above:
 
 ---
 
-So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` module via `m.module`.
+So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` component via `m.mount`.
 
 ```javascript
-//render the todo module inside the document DOM node
-m.module(document, {controller: todo.controller, view: todo.view});
+//render the todo component inside the document DOM node
+m.mount(document, {controller: todo.controller, view: todo.view});
 ```
 
 Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing. 
@@ -427,10 +429,10 @@ Here's the application code in its entirety:
 <!doctype html>
 <script src="mithril.min.js"></script>
 <script>
-//this application only has one module: todo
+//this application only has one component: todo
 var todo = {};
 
-//for simplicity, we use this module to namespace the model classes
+//for simplicity, we use this component to namespace the model classes
 
 //the Todo class has two properties
 todo.Todo = function(data) {
@@ -492,19 +494,19 @@ todo.view = function() {
 };
 
 //initialize the application
-m.module(document, {controller: todo.controller, view: todo.view});
+m.mount(document, {controller: todo.controller, view: todo.view});
 </script>
 ```
 
----
-
 This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias/fbgypzbr/1/).
+
+---
 
 ## Notes on Architecture
 
 Idiomatic Mithril code is meant to apply good programming conventions and be easy to refactor.
 
-In the application above, notice how the Todo class can easily be moved to a different module if code re-organization is required.
+In the application above, notice how the Todo class can easily be moved to a different component if code re-organization is required.
 
 Todos are self-contained and their data aren't tied to the DOM like in typical jQuery based code. The Todo class API is reusable and unit-test friendly, and in addition, it's a plain-vanilla Javascript class, and so has almost no framework-specific learning curve.
 

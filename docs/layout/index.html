@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
 		<link href="lib/prism/prism.css" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 	</head>
@@ -30,10 +31,10 @@
 						<a class="button" href="mithril.min.zip">Download v$version</a>
 					</p>
 					
-					<iframe src="ghbtns.html?user=lhorie&repo=mithril.js&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20"></iframe>
+					<iframe src="ghbtns.html?user=lhorie&amp;repo=mithril.js&amp;type=watch&amp;count=true" frameborder="0" scrolling="0" width="100" height="20"></iframe>
 					
 					<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://lhorie.github.io/mithril" data-via="LeoHorie">Tweet</a>
-					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='//platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 					
 					<a href="http://flattr.com/thing/2778375/lhoriemithril-js-on-GitHub" target="_blank"><img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr" title="Flattr" border="0" /></a>
 					<a class="changelog" href="change-log.html"><small>Change Log</small></a>
@@ -49,7 +50,7 @@
 					<div class="feature col(4,4,12)">
 						<h2>Light-weight</h2>
 						<ul>
-							<li>Only 5kb gzipped, no dependencies</li>
+							<li>Only 12kb gzipped, no dependencies</li>
 							<li>Small API, small learning curve</li>
 						</ul>
 					</div>
@@ -77,37 +78,40 @@
 					<div class="col(8,8,12)">
 						<h2>Sample code</h2>
 						
-<pre><code class="language-javascript">//namespace
-var app = {};
-
+<pre><code class="language-javascript">
 //model
-app.PageList = function() {
-	return m.request({method: "GET", url: "pages.json"});
-};
-
-//controller
-app.controller = function() {
-	var pages = app.PageList();
-	return {
-		pages: pages,
-		rotate: function() {
-			pages().push(pages().shift());
-		}
+var Page = {
+	list: function() {
+		return m.request({method: "GET", url: "pages.json"});
 	}
 };
 
-//view
-app.view = function(ctrl) {
-	return [
-		ctrl.pages().map(function(page) {
-			return m("a", {href: page.url}, page.title);
-		}),
-		m("button", {onclick: ctrl.rotate}, "Rotate links")
-	];
+var Demo = {
+	//controller
+	controller: function() {
+		var pages = Page.list();
+		return {
+			pages: pages,
+			rotate: function() {
+				pages().push(pages().shift());
+			}
+		}
+	},
+
+	//view
+	view: function(ctrl) {
+		return m("div", [
+			ctrl.pages().map(function(page) {
+				return m("a", {href: page.url}, page.title);
+			}),
+			m("button", {onclick: ctrl.rotate}, "Rotate links")
+		]);
+	};
 };
 
+
 //initialize
-m.module(document.getElementById("example"), app);</code></pre>
+m.mount(document.getElementById("example"), Demo);</code></pre>
 
 					</div>
 					<div class="col(4,4,12)">
@@ -115,37 +119,39 @@ m.module(document.getElementById("example"), app);</code></pre>
 						<div id="example" class="example output">
 							<script src="mithril.min.js"></script>
 							<script>
-//namespace
-var app = {};
-
 //model
-app.PageList = function() {
-	return m.request({method: "GET", url: "pages.json"});
-};
-
-//controller
-app.controller = function() {
-	var pages = app.PageList();
-	return {
-		pages: pages,
-		rotate: function() {
-			pages().push(pages().shift());
-		}
+var Page = {
+	list: function() {
+		return m.request({method: "GET", url: "pages.json"});
 	}
 };
 
-//view
-app.view = function(ctrl) {
-	return [
-		ctrl.pages().map(function(page) {
-			return m("a", {href: page.url}, page.title);
-		}),
-		m("button", {onclick: ctrl.rotate}, "Rotate links")
-	];
+var Demo = {
+	//controller
+	controller: function() {
+		var pages = Page.list();
+		return {
+			pages: pages,
+			rotate: function() {
+				pages().push(pages().shift());
+			}
+		}
+	},
+
+	//view
+	view: function(ctrl) {
+		return m("div", [
+			ctrl.pages().map(function(page) {
+				return m("a", {href: page.url}, page.title);
+			}),
+			m("button", {onclick: ctrl.rotate}, "Rotate links")
+		]);
+	}
 };
 
+
 //initialize
-m.module(document.getElementById("example"), app);
+m.mount(document.getElementById("example"), Demo);
 							</script>
 						</div>
 					</div>
@@ -244,15 +250,15 @@ m.module(document.getElementById("example"), app);
 						<div style="padding:0 1em 0 0;">
 						<blockquote class="twitter-tweet" lang="en"><p>Just converted the MELPA site from Angular to <a href="https://twitter.com/LeoHorie">@LeoHorie</a>&#39;s tiny mithril.js: very pleasant. <a href="http://t.co/R7JKfo9vJ1">http://t.co/R7JKfo9vJ1</a> <a href="https://t.co/7IrR3L84OY">https://t.co/7IrR3L84OY</a></p>&mdash; Steve Purcell (@sanityinc) <a href="https://twitter.com/sanityinc/statuses/471358494101504000">May 27, 2014</a></blockquote>
 						
-						<blockquote class="twitter-tweet" lang="en"><p><a href="https://twitter.com/marijnjh">@marijnjh</a> Mithril is well worth checking out: <a href="http://t.co/RT61djMFxD">http://t.co/RT61djMFxD</a> Functional style, elegant design and powerful and only 3kb gzipped.</p>&mdash; Tom Atkins (@knitatoms) <a href="https://twitter.com/knitatoms/statuses/467061326859476992">May 15, 2014</a></blockquote>
+						<blockquote class="twitter-tweet" lang="en"><p><a href="https://twitter.com/LeoHorie">@<b>LeoHorie</b></a> I've long opposed JS frameworks, but I *really* dig Mithril! Major major kudos for making my life easier!</p>&mdash; i80and (@i80and) <a href="https://twitter.com/i80and/status/586170085691252736">Apr 9, 2015</a></blockquote>
 						</div>
 					</div>	
 					<div class="col(6,12,12)">
 						<blockquote class="twitter-tweet" lang="en"><p>Mithril.js m.prop feature is plain brilliant. I spent years yearning for an approach that lightweight <a href="http://t.co/KgzOxoa2WR">http://t.co/KgzOxoa2WR</a></p>&mdash; Xavier Via (@xaviervia) <a href="https://twitter.com/xaviervia/statuses/454635992360554497">April 11, 2014</a></blockquote>
 						
-						<blockquote class="twitter-tweet" lang="en"><p>Mithril: The newest JavaScript MVC library 3Kb. <a href="http://twitter.com/LeoHorie">@LeoHorie</a> got it right: It's all about good guides/docs: <a href="http://lhorie.github.io/mithril/comparison.html">lhorie.github.io/mithril/comparison.html</a></p> &mdash; David Corbacho (@dcorbacho) <a href="https://twitter.com/dcorbacho/status/446926407843991552">March 21, 2014</a></blockquote>
+						<blockquote class="twitter-tweet" lang="en"><p>Ported my angularjs based WebGL ui editor to mithril and got a big speed boost. <a href="https://twitter.com/hashtag/mithriljs">#<b>mithriljs</b></a> love the small api and docs!</p> &mdash; geekrelief (@geekrelief) <a href="https://twitter.com/geekrelief/status/554214299460435969">January 11, 2015</a></blockquote>
 						
-						<script async src="https://platform.twitter.com/widgets.js"></script>
+						<script async src="//platform.twitter.com/widgets.js"></script>
 					</div>
 				</div>
 			</section>
