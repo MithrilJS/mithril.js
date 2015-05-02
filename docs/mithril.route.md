@@ -164,7 +164,7 @@ m.route(document.body, "/", {
 });
 
 //re-route to dashboard
-m.route("/dashboard"); // logs "unloading home"
+m.route("/dashboard"); // logs "unloading home component"
 ```
 
 This mechanism is useful to clear timers and unsubscribe event handlers. If you have a hierarchy of components, you can recursively call `onunload` on all the components in the tree or use a [pubsub](http://microjs.com/#pubsub) library to unload specific components on demand.
