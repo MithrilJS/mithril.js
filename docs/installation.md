@@ -84,7 +84,7 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Component
 
-[Component](http://component.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
+[Component](http://component.github.io) is another package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Component to conveniently keep up-to-date with Mithril versions.
 
 Assuming you have NodeJS installed, you can install Component by typing this in the command line:
 

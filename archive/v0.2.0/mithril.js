@@ -68,21 +68,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
-
-
-		// loop over output for custom attribute transformations
-		for (attrName in cell.attrs){
-			if (attrs.hasOwnProperty(attrName) && attrName in m.attrs){
-				var value = cell.attrs[attrName]
-
-				delete cell.attrs[attrName]
-
-				var transformed = m.attrs[attrName](cell, value)
-
-				if (transformed !== undefined) cell = transformed
-			}
-		}
-
+		
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
@@ -683,9 +669,6 @@ var m = (function app(window, undefined) {
 			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
 	};
-
-	// custom attributes register
-	m.attrs = {}
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
