@@ -217,7 +217,7 @@ Components can be placed anywhere a regular element can. If you have components 
 
 ```javascript
 var App = {
-	ctrl: function() {
+	controller: function() {
 		return {data: [1, 2, 3]}
 	}
 	view: function(ctrl) {
