@@ -27,7 +27,7 @@ var Contact = function(data) {
 	this.email = m.prop(data.email)
 }
 Contact.list = function(data) {
-	return m.request({method: "GET", url: "/api/contact", data: data})
+	return m.request({method: "GET", url: "/api/contact", type: Contact})
 }
 Contact.save = function(data) {
 	return m.request({method: "POST", url: "/api/contact", data: data})
