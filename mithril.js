@@ -859,6 +859,7 @@ var m = (function app(window, undefined) {
 		prop.then = function(resolve, reject) {
 			return propify(promise.then(resolve, reject), initialValue)
 		};
+		prop.catch = prop.then.bind(null, null)
 		return prop
 	}
 	//Promiz.mithril.js | Zolmeister | MIT
