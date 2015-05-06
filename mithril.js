@@ -245,7 +245,7 @@ var m = (function app(window, undefined) {
 				var controllerIndex = m.redraw.strategy() == "diff" && cached.views ? cached.views.indexOf(view) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
-				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
+				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
 				if (data.subtree === "retain") return cached;
 				if (key) {
 					if (!data.attrs) data.attrs = {}
@@ -606,10 +606,11 @@ var m = (function app(window, undefined) {
 			return controllers[index]
 		}
 	};
-	var redrawing = false
+	var redrawing = false, forcing = false
 	m.redraw = function(force) {
 		if (redrawing) return
 		redrawing = true
+		if (force) forcing = true
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 		//lastRedrawID is null if it's the first redraw and not an event handler
 		if (lastRedrawId && force !== true) {
@@ -624,7 +625,7 @@ var m = (function app(window, undefined) {
 			redraw();
 			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
-		redrawing = false
+		redrawing = forcing = false
 	};
 	m.redraw.strategy = m.prop();
 	function redraw() {

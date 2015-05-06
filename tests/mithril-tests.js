@@ -1339,6 +1339,32 @@ function testMithril(mock) {
 		
 		return initialized === false
 	})
+	test(function() {
+		var root = mock.document.createElement("div")
+		var el
+		var FooPage = {
+			view: function(ctrl) {
+				return m('div', [
+					m('button', {onclick: function() {
+						ctrl.bar = true;
+						m.redraw(true);
+						el = root.childNodes[0].childNodes[1]
+					}}, 'click me'),
+					ctrl.bar ? m.component(BarComponent) : ''
+				]);
+			}
+		};
+		var BarComponent = {
+			view: function() {
+				return m('#bar', 'test');
+			}
+		};
+		m.mount(root, FooPage);
+		
+		root.childNodes[0].childNodes[0].onclick({})
+		
+		return el.id == "bar"
+	})
 	
 	//m.withAttr
 	test(function() {
