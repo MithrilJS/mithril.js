@@ -62,7 +62,7 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function. If the `controller` is omitted, Mithril will provide one, pointing to an empty function.
 
 	When `m.mount` is called, the controller function runs, and its return value is returned by the `m.mount` call.
 
