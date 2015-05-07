@@ -499,7 +499,7 @@ m.mount(document, {controller: todo.controller, view: todo.view});
 ```
 
 This example is also available as a [jsFiddle](http://jsfiddle.net/milesmatthias/fbgypzbr/1/).
-Theres is also [Extended example](http://jsfiddle.net/glebcha/q7tvLxsa/) available on jsfiddle.
+There is also [Extended example](http://jsfiddle.net/glebcha/q7tvLxsa/) available on jsfiddle.
 
 ---
 
