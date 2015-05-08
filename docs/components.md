@@ -432,7 +432,7 @@ var ContactList = {
 m.mount(document.body, ContactsWidget)
 ```
 
-Here we've moved `Contact.save(contact).then(Observable.broadcast("updateContact"))` out of the `ContactForm` component and into the model layer. In its place, `ContactForm` merely emits an action, which is then handled by this model layer observer.
+Here we've moved `Contact.save(contact).then(Observable.trigger("updateContact"))` out of the `ContactForm` component and into the model layer. In its place, `ContactForm` merely emits an action, which is then handled by this model layer observer.
 
 This allows swapping the implementation of the `saveContact` handler without changing the `ContactForm` component.
 
