@@ -280,7 +280,7 @@ var TemperatureConverter = {
 				return value - 273.15
 			},
 			kelvinToFahrenheit: function(value) {
-				return (value 9 / 5 * (v - 273.15)) + 32
+				return (9 / 5 * (value - 273.15)) + 32
 			}
 		}
 	},
