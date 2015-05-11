@@ -1,3 +1,4 @@
+var m = window.m;
 if (!this.console) {
 	var log = function(value) {document.write("<pre>" + value + "</pre>")}
 	this.console = {log: log, error: log}

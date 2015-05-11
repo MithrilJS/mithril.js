@@ -126,7 +126,7 @@ module.exports = function(grunt) {
 			mithril: {src: "mithril.js", dest: "mithril.min.js"}
 		},
 		concat: {
-			test: {src: ["mithril.js", "./tests/test.js", "./tests/mock.js", "./tests/mithril-tests.js"], dest: currentVersionArchiveFolder + "/mithril-tests.js"}
+			test: {src: ["./tests/windowstub.js", "mithril.js", "./tests/test.js", "./tests/mock.js", "./tests/mithril-tests.js"], dest: currentVersionArchiveFolder + "/mithril-tests.js"}
 		},
 		zip: {
 			distribution: {

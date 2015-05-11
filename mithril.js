@@ -1,4 +1,4 @@
-var m = (function app(window, undefined) {
+;(function app(window, undefined) {
 	var type = {}.toString;
 	var slice = [].slice;
 	var OBJECT = type.call({}), ARRAY = type.call([]), STRING = type.call(""), FUNCTION = "function";
@@ -11,6 +11,7 @@ var m = (function app(window, undefined) {
 
 	// self invoking function needed because of the way mocks work
 	function initialize(window){
+	window.m = m;
 		$document = window.document;
 		$location = window.location;
 		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
@@ -1157,6 +1158,5 @@ var m = (function app(window, undefined) {
 	if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 	else if (typeof define === FUNCTION && define.amd) define(function() {return m});
 
-	return m
 })(typeof window != "undefined" ? window : {});
 
