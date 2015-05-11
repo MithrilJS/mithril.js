@@ -11,7 +11,6 @@
 
 	// self invoking function needed because of the way mocks work
 	function initialize(window){
-	window.m = m;
 		$document = window.document;
 		$location = window.location;
 		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
@@ -103,7 +102,7 @@
 		try {if (data == null || data.toString() == null) data = "";} catch (e) {data = ""}
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
-		if (cached == null || cachedType !== dataType) {
+		if (cachedType !== dataType) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex;
@@ -239,7 +238,7 @@
 				cached.nodes = nodes
 			}
 		}
-		else if (data != null && dataType === OBJECT) {
+		else if (dataType === OBJECT) {
 			var views = [], controllers = []
 			while (data.view) {
 				var view = data.view.$original || data.view
@@ -1158,5 +1157,6 @@
 	if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 	else if (typeof define === FUNCTION && define.amd) define(function() {return m});
 
+	window.m = m;
 })(typeof window != "undefined" ? window : {});
 
