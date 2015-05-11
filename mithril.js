@@ -251,7 +251,7 @@ var m = (function app(window, undefined) {
 					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
 				}
-				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
+				if (controller.onunload && unloaders.indexOf({controller: controller, handler: controller.onunload}) !== -1) unloaders.push({controller: controller, handler: controller.onunload})
 				views.push(view)
 				controllers.push(controller)
 			}
