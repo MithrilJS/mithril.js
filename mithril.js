@@ -1,6 +1,7 @@
 var m = (function app(window, undefined) {
-	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
 	var type = {}.toString;
+	var slice = [].slice;
+	var OBJECT = type.call({}), ARRAY = type.call([]), STRING = type.call(""), FUNCTION = "function";
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
 	var noop = function() {}
@@ -33,7 +34,7 @@ var m = (function app(window, undefined) {
 	 *
 	 */
 	function m() {
-		var args = [].slice.call(arguments);
+		var args = slice.call(arguments);
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
 		var attrs = hasAttrs ? args[1] : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
@@ -152,9 +153,8 @@ var m = (function app(window, undefined) {
 			}
 			
 			if (shouldMaintainIdentities) {
-				var keysDiffer = false
-				if (data.length != cached.length) keysDiffer = true
-				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
+				var keysDiffer = !intact
+				if (!keysDiffer) for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
 					if (cachedCell.attrs && dataCell.attrs && cachedCell.attrs.key != dataCell.attrs.key) {
 						keysDiffer = true
 						break
@@ -554,7 +554,7 @@ var m = (function app(window, undefined) {
 			return (component.controller || noop).apply(this, args) || this
 		}
 		var view = function(ctrl) {
-			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
+			if (arguments.length > 1) args = args.concat(slice.call(arguments, 1))
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
 		}
 		view.$original = component.view
@@ -563,7 +563,7 @@ var m = (function app(window, undefined) {
 		return output
 	}
 	m.component = function(component) {
-		return parameterize(component, [].slice.call(arguments, 1))
+		return parameterize(component, slice.call(arguments, 1))
 	}
 	m.mount = m.module = function(root, component) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
@@ -592,7 +592,7 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2))
+			if (arguments.length > 2) component = subcomponent(component, slice.call(arguments, 2))
 			var currentComponent = topComponent = component = component || {controller: function() {}};
 			var constructor = component.controller || noop
 			var controller = new constructor;
@@ -780,7 +780,7 @@ var m = (function app(window, undefined) {
 			if (matcher.test(path)) {
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || [];
-					var values = [].slice.call(arguments, 1, -2);
+					var values = slice.call(arguments, 1, -2);
 					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					m.mount(root, router[route])
 				});
@@ -962,7 +962,7 @@ var m = (function app(window, undefined) {
 					if (state === RESOLVING && typeof successCallback === FUNCTION) {
 						promiseValue = successCallback(promiseValue)
 					}
-					else if (state === REJECTING && typeof failureCallback === "function") {
+					else if (state === REJECTING && typeof failureCallback === FUNCTION) {
 						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING
 					}
@@ -1154,8 +1154,9 @@ var m = (function app(window, undefined) {
 	//for internal testing only, do not use `m.deps.factory`
 	m.deps.factory = app;
 
+	if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
+	else if (typeof define === FUNCTION && define.amd) define(function() {return m});
+
 	return m
 })(typeof window != "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
-else if (typeof define === "function" && define.amd) define(function() {return m});
