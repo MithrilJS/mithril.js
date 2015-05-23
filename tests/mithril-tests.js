@@ -64,6 +64,32 @@ function testMithril(mock) {
 		return c1.args === args && c1.args == c2.args
 	})
 
+
+	//nested selectors
+	test(function() {
+		var v1 = m("div.x > span", { class: "y" })
+		var v2 = v1.children[0]
+		return v1.tag === "div" && v1.attrs.className == "x" &&
+					 v2.tag === "span" && v2.attrs.class == "y"
+	})
+	test(function() {
+		// Gracefully handle any number of spaces
+		var v1 = m(".form-group  >.inner>label",
+			"Full Name:",
+			m("input[type=text]")
+		)
+		var inner = v1.children[0]
+		var label = v1.children[0].children[0]
+		var text  = v1.children[0].children[0].children[0]
+		var input = v1.children[0].children[0].children[1]
+
+		return v1.tag === "div" && v1.attrs.className === "form-group" &&
+		       inner.tag === "div" && inner.attrs.className === "inner" &&
+		       label.tag === "label" &&
+		       text      === "Full Name:" &&
+		       input.tag === "input" && input.attrs.type === "text"
+	})
+
 	//m.mount
 	test(function() {
 		var root = mock.document.createElement("div")
