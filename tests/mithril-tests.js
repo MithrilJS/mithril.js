@@ -4343,6 +4343,81 @@ function testMithril(mock) {
 	test(function() {
 		return m.deps.factory.toString().indexOf("document.write") < 0
 	})
+
+	// m.attrs
+	test(function() {
+		// executes when the registered key is present
+		var root = mock.document.createElement("div")
+		var executed = false
+
+		m.attrs.x = function() {
+			executed = true
+		}
+
+		m.render(root, m("div", {x:true}))
+
+		return executed === true
+	})
+	test(function() {
+		// doesn't execute when not keyed
+		var root = mock.document.createElement("div")
+		var executed = false
+
+		m.attrs.x = function() {
+			executed = true
+		}
+
+		m.render(root, m("div"))
+
+		return executed === false
+	})
+	test(function() {
+		// modifies node content
+		var root = mock.document.createElement("div")
+		var value = "hi"
+
+		m.attrs.x = function(node) {
+			node.children = [value]
+		}
+
+		m.render(root, m("div", {x:true}))
+
+		return root.childNodes[0].childNodes[0].nodeValue === value
+	})
+	test(function() {
+		// replaces node when return value is defined
+		var root = mock.document.createElement("div")
+		var value = "hi"
+
+		m.attrs.x = function() {
+			return value
+		}
+
+		m.render(root, m("div", {x:true}))
+
+		return root.childNodes[0].nodeValue === value
+	})
+	test(function() {
+		// removes the associated key attribute
+		var root = mock.document.createElement("div")
+
+		m.attrs.x = function() {}
+
+		var node = m("div", {x:true})
+
+		return !('x' in node.attrs)
+	})
+	test(function() {
+		// leaves node intact when noop
+		var root = mock.document.createElement("div")
+		var value = "hi"
+
+		m.attrs.x = function() {}
+
+		m.render(root, m("div", {x:true}, value))
+
+		return root.childNodes[0].childNodes[0].nodeValue === value
+	})
 }
 
 //mock
