@@ -80,6 +80,13 @@ var m = (function app(window, undefined) {
 
 		return cell
 	}
+	// Returns a version of m extended with the custom attributes specified
+	m.extend = function(attrs){
+		var extended = m.bind()
+		for(var key in m) extend[key] = m[key]
+		extended.attrs = attrs || {};
+		return extended
+	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
 		//the diff algorithm can be summarized as this:
@@ -254,7 +261,7 @@ var m = (function app(window, undefined) {
 				var controllerIndex = m.redraw.strategy() == "diff" && cached.views ? cached.views.indexOf(view) : -1
 				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop)
 				var key = data && data.attrs && data.attrs.key
-				data = pendingRequests == 0 || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
+				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
 				if (data.subtree === "retain") return cached;
 				if (key) {
 					if (!data.attrs) data.attrs = {}
@@ -644,7 +651,11 @@ var m = (function app(window, undefined) {
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
 				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]]
-				m.render(root, components[i].view ? components[i].view(controllers[i], args) : "")
+				m.render(root, components[i].view
+					? components[i].attrs
+						? components[i].view(m.extend(components[i].attrs), controllers[i], args)
+						: components[i].view(controllers[i], args)
+					: "")
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
