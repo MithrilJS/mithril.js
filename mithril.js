@@ -571,6 +571,7 @@ var m = (function app(window, undefined) {
 		}
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
+			if (component.attrs) args.unshift(m.extend(component.attrs))
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
 		}
 		view.$original = component.view
