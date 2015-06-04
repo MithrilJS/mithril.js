@@ -37,7 +37,7 @@ In Mithril, an application typically lives in a namespace and contains component
 
 For simplicity, our application will have only one component, and we're going to use it as the namespace for our application.
 
-In Mithril, a *component* is an object that contains two functions: `controller` and `view`.
+In Mithril, a *component* is an object that contains a `view` function and optionally a `controller` function.
 
 ```
 //an empty Mithril component
@@ -149,7 +149,7 @@ todo.vm = {
 };
 ```
 
-The code above defines a view-model object called `vm`. It is simply a javascript object that has a `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.
+The code above defines a view-model object called `vm`. It is simply a javascript object that has an `init` function. This function initializes the `vm` object with three members: `list`, which is simply an array, `description`, which is an `m.prop` getter-setter function with an empty string as the initial value, and `add`, which is a method that adds a new Todo instance to `list` if an input description getter-setter is not an empty string.
 
 Later in this guide, we'll pass the `description` property as the parameter to this function. When we get there, I'll explain why we're passing description as an argument instead of simply using OOP-style member association.
 
