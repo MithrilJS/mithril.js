@@ -47,7 +47,23 @@ function testMithril(mock) {
 		var v2 = m(".foo", {class: "bar", onclick: function() {}})
 		return Object.keys(v1.attrs).join() === Object.keys(v2.attrs).join()
 	})
-	
+	test(function() {
+		//m should proxy object first arg to m.component
+		var component = {
+			controller: function(args) {
+				this.args = args
+			},
+			view: function(ctrl) {
+				return m("div", "testing")
+			}
+		}
+		var args = {age: 12}
+		var c1 = m(component, args).controller()
+		var c2 = m.component(component, args).controller()
+
+		return c1.args === args && c1.args == c2.args
+	})
+
 	//m.mount
 	test(function() {
 		var root = mock.document.createElement("div")
