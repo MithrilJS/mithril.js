@@ -548,7 +548,7 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
+	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
 		var controller = function() {
@@ -704,8 +704,6 @@ var m = (function app(window, undefined) {
 		//config: m.route
 		else if (arguments[0].addEventListener || arguments[0].attachEvent) {
 			var element = arguments[0];
-			var isInitialized = arguments[1];
-			var context = arguments[2];
 			var vdom = arguments[3];
 			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
 			if (element.addEventListener) {
