@@ -195,6 +195,19 @@ module.exports = function(grunt) {
 					dest: '.'
 				}]
 			}
+		},
+		webpack: {
+			options: {
+				entry: {
+					mithril: ["./src/index.js"]
+				},
+			    output: {
+			        path: "",
+			        filename: "[name].js",
+			    }
+			},
+			build: {
+			}
 		}
 	});
 
@@ -210,8 +223,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.loadNpmTasks('grunt-jsfmt');
+	grunt.loadNpmTasks('grunt-webpack');
 
-	grunt.registerTask("build", ["test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
+	grunt.registerTask("build", ["webpack:build", "test", "uglify", "zip", "md2html", "replace", "copy", "clean"]);
 	grunt.registerTask("testall", ["test", "teste2e"]);
 	grunt.registerTask("test", ["concat", "execute"]);
 	grunt.registerTask('teste2e', ['connect', 'qunit']);
