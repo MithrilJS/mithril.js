@@ -551,9 +551,8 @@ var m = (function app(window, undefined) {
 	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
-		var controller = function() {
-			return (component.controller || noop).apply(this, args) || this
-		}
+		var constructor = component.controller || noop;
+		var controller = new constructor;
 		var view = function(ctrl) {
 			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
