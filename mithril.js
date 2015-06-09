@@ -34,6 +34,7 @@ var m = (function app(window, undefined) {
 	 */
 	function m() {
 		var args = [].slice.call(arguments);
+		if (type.call(args[0]) === OBJECT) return parameterize(args[0], args.slice(1));
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
 		var attrs = hasAttrs ? args[1] : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
@@ -547,7 +548,7 @@ var m = (function app(window, undefined) {
 		return gettersetter(store)
 	};
 
-	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
+	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
 		var controller = function() {
@@ -703,8 +704,6 @@ var m = (function app(window, undefined) {
 		//config: m.route
 		else if (arguments[0].addEventListener || arguments[0].attachEvent) {
 			var element = arguments[0];
-			var isInitialized = arguments[1];
-			var context = arguments[2];
 			var vdom = arguments[3];
 			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
 			if (element.addEventListener) {

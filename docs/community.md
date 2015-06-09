@@ -38,11 +38,11 @@ Join the #mithriljs IRC channel on [Freenode](http://webchat.freenode.net).
 
 ---
 
-### Projects and Snippets
+### Github Wiki
 
-A collection of projects and snippets created by Mithril users. A great place to find useful tools.
+A collection of community projects, tutorials, starter kits and snippets created by Mithril users. A great place to find useful tools.
 
-Go to the [Mithril wiki](https://github.com/lhorie/mithril.js/wiki/Community-Projects-and-Snippets)
+Go to the [Mithril wiki](https://github.com/lhorie/mithril.js/wiki)
 
 ---
 
