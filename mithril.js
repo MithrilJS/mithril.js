@@ -364,8 +364,11 @@ var m = (function app(window, undefined) {
 								clear(cached.nodes, cached);
 								nodes = [$document.createTextNode(data)]
 							}
-							try {parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);} catch (e) {} //IE erroneously throws error when appending an empty text node after a null
-							nodes[0].nodeValue = data
+							try {
+								parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
+								nodes[0].nodeValue = data
+							}
+							catch (e) {} //IE erroneously throws error when appending an empty text node after a null
 						}
 					}
 				}
