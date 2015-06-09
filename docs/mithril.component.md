@@ -219,7 +219,7 @@ Components can be placed anywhere a regular element can. If you have components 
 var App = {
 	controller: function() {
 		return {data: [1, 2, 3]}
-	}
+	},
 	view: function(ctrl) {
 		return m(".app", [
 			//pressing the button reverses the list
