@@ -223,7 +223,7 @@ where:
 
 			The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
 
-			If this function returns undefined, then it passes the `value` argument to the next step in the thennable queue, if any
+			If this function returns undefined, then it passes the `value` argument to the next step in the thenable queue, if any
 
 		-	**any errorCallback(any value)** (optional)
 
@@ -231,7 +231,7 @@ where:
 
 			The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
 
-			If this function returns undefined, then it passes the `value` argument to the next step in the thennable queue, if any
+			If this function returns undefined, then it passes the `value` argument to the next step in the thenable queue, if any
 
 		-	**returns Promise promise**
 
