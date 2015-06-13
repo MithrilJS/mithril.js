@@ -1,23 +1,147 @@
-var m = (function app(window, undefined) {
-	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
-	var type = {}.toString;
-	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
-	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
-	var noop = function() {}
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
 
-	// caching commonly used variables
-	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
 
-	// self invoking function needed because of the way mocks work
-	function initialize(window){
-		$document = window.document;
-		$location = window.location;
-		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
-		$requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(1);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {var assign = __webpack_require__(3);
+
+	var m = __webpack_require__(4);
+
+	assign(m, 
+		__webpack_require__(9), 
+		__webpack_require__(8), 
+		__webpack_require__(10),
+		__webpack_require__(11)
+	);
+
+	if (typeof global != "undefined") global.m = m;
+
+	if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
+	else if (true) !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {return m}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	else if (typeof window != "undefined") window.m = m;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(2)(module)))
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
 	}
 
-	initialize(window);
 
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//polyfill from https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+	function assign(target) {
+	  'use strict';
+	  if (target === undefined || target === null) {
+	    throw new TypeError('Cannot convert first argument to object');
+	  }
+
+	  var to = Object(target);
+	  for (var i = 1; i < arguments.length; i++) {
+	    var nextSource = arguments[i];
+	    if (nextSource === undefined || nextSource === null) {
+	      continue;
+	    }
+	    nextSource = Object(nextSource);
+
+	    var keysArray = Object.keys(Object(nextSource));
+	    for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+	      var nextKey = keysArray[nextIndex];
+	      var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+	      if (desc !== undefined && desc.enumerable) {
+	        to[nextKey] = nextSource[nextKey];
+	      }
+	    }
+	  }
+	  return to;
+	}
+
+	module.exports = assign
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		ARRAY = types.ARRAY,
+		STRING = types.STRING,
+		OBJECT = types.OBJECT;
+
+	var fns = __webpack_require__(6),
+		clear = fns.clear,
+		getCellCacheKey = fns.getCellCacheKey;
+
+
+	var $ = __webpack_require__(7);
+
+	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
+	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
+
+	var noop = function(){};
 
 	/**
 	 * @typedef {String} Tag
@@ -72,6 +196,8 @@ var m = (function app(window, undefined) {
 		
 		return cell
 	}
+
+
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
 		//the diff algorithm can be summarized as this:
@@ -172,7 +298,7 @@ var m = (function app(window, undefined) {
 									action: MOVE,
 									index: i,
 									from: existing[key].index,
-									element: cached.nodes[existing[key].index] || $document.createElement("div")
+									element: cached.nodes[existing[key].index] || $.document.createElement("div")
 								}
 							}
 						}
@@ -189,7 +315,7 @@ var m = (function app(window, undefined) {
 							newCached.splice(change.index, 1)
 						}
 						if (change.action === INSERTION) {
-							var dummy = $document.createElement("div");
+							var dummy = $.document.createElement("div");
 							dummy.key = data[change.index].attrs.key;
 							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
 							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
@@ -280,8 +406,8 @@ var m = (function app(window, undefined) {
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
 			
 			if (isNew) {
-				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
-				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
+				if (data.attrs.is) node = namespace === undefined ? $.document.createElement(data.tag, data.attrs.is) : $.document.createElementNS(namespace, data.tag, data.attrs.is);
+				else node = namespace === undefined ? $.document.createElement(data.tag) : $.document.createElementNS(namespace, data.tag);
 				cached = {
 					tag: data.tag,
 					//set attributes first, then create children
@@ -341,7 +467,7 @@ var m = (function app(window, undefined) {
 					nodes = injectHTML(parentElement, index, data)
 				}
 				else {
-					nodes = [$document.createTextNode(data)];
+					nodes = [$.document.createTextNode(data)];
 					if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null)
 				}
 				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data;
@@ -349,7 +475,7 @@ var m = (function app(window, undefined) {
 			}
 			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
 				nodes = cached.nodes;
-				if (!editable || editable !== $document.activeElement) {
+				if (!editable || editable !== $.document.activeElement) {
 					if (data.$trusted) {
 						clear(nodes, cached);
 						nodes = injectHTML(parentElement, index, data)
@@ -362,7 +488,7 @@ var m = (function app(window, undefined) {
 						else {
 							if (nodes[0].nodeType === 1 || nodes.length > 1) { //was a trusted string
 								clear(cached.nodes, cached);
-								nodes = [$document.createTextNode(data)]
+								nodes = [$.document.createTextNode(data)]
 							}
 							parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
 							nodes[0].nodeValue = data
@@ -427,39 +553,13 @@ var m = (function app(window, undefined) {
 		}
 		return cachedAttrs
 	}
-	function clear(nodes, cached) {
-		for (var i = nodes.length - 1; i > -1; i--) {
-			if (nodes[i] && nodes[i].parentNode) {
-				try {nodes[i].parentNode.removeChild(nodes[i])}
-				catch (e) {} //ignore if this fails due to order of events (see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
-				cached = [].concat(cached);
-				if (cached[i]) unload(cached[i])
-			}
-		}
-		if (nodes.length != 0) nodes.length = 0
-	}
-	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
-			cached.configContext.onunload();
-			cached.configContext.onunload = null
-		}
-		if (cached.controllers) {
-			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
-			}
-		}
-		if (cached.children) {
-			if (type.call(cached.children) === ARRAY) {
-				for (var i = 0, child; child = cached.children[i]; i++) unload(child)
-			}
-			else if (cached.children.tag) unload(cached.children)
-		}
-	}
+
+
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
 			var isElement = nextSibling.nodeType != 1;
-			var placeholder = $document.createElement("span");
+			var placeholder = $.document.createElement("span");
 			if (isElement) {
 				parentElement.insertBefore(placeholder, nextSibling || null);
 				placeholder.insertAdjacentHTML("beforebegin", data);
@@ -490,12 +590,12 @@ var m = (function app(window, undefined) {
 	var html;
 	var documentNode = {
 		appendChild: function(node) {
-			if (html === undefined) html = $document.createElement("html");
-			if ($document.documentElement && $document.documentElement !== node) {
-				$document.replaceChild(node, $document.documentElement)
+			if (html === undefined) html = $.document.createElement("html");
+			if ($.document.documentElement && $.document.documentElement !== node) {
+				$.document.replaceChild(node, $.document.documentElement)
 			}
-			else $document.appendChild(node);
-			this.childNodes = $document.childNodes
+			else $.document.appendChild(node);
+			this.childNodes = $.document.childNodes
 		},
 		insertBefore: function(node) {
 			this.appendChild(node)
@@ -507,48 +607,22 @@ var m = (function app(window, undefined) {
 		var configs = [];
 		if (!root) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.");
 		var id = getCellCacheKey(root);
-		var isDocumentRoot = root === $document;
-		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
+		var isDocumentRoot = root === $.document;
+		var node = isDocumentRoot || root === $.document.documentElement ? documentNode : root;
 		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell};
 		if (cellCache[id] === undefined) clear(node.childNodes);
 		if (forceRecreation === true) reset(root);
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
 		for (var i = 0, len = configs.length; i < len; i++) configs[i]()
 	};
-	function getCellCacheKey(element) {
-		var index = nodeCache.indexOf(element);
-		return index < 0 ? nodeCache.push(element) - 1 : index
-	}
 
 	m.trust = function(value) {
 		value = new String(value);
 		value.$trusted = true;
-		return value
+		return value;
 	};
 
-	function gettersetter(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0];
-			return store
-		};
-
-		prop.toJSON = function() {
-			return store
-		};
-
-		return prop
-	}
-
-	m.prop = function (store) {
-		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
-			return propify(store)
-		}
-
-		return gettersetter(store)
-	};
-
-	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, prevented = false, topComponent, unloaders = [];
+	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, prevented = false, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
 		var controller = function() {
@@ -574,7 +648,7 @@ var m = (function app(window, undefined) {
 		var isPrevented = false;
 		var event = {preventDefault: function() {
 			isPrevented = true;
-			computePreRedrawHook = computePostRedrawHook = null;
+			m.route.computePreRedrawHook = m.route.computePostRedrawHook = null;
 		}};
 		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
 			unloader.handler.call(unloader.controller, event)
@@ -588,7 +662,6 @@ var m = (function app(window, undefined) {
 		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
 			controllers[index].onunload(event)
 		}
-		
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
@@ -610,6 +683,8 @@ var m = (function app(window, undefined) {
 	var redrawing = false, forcing = false
 	m.redraw = function(force) {
 		if (redrawing) return
+		//these only work with the right context
+		var raf = $.requestAnimationFrame, caf = $.cancelAnimationFrame;
 		redrawing = true
 		if (force) forcing = true
 		//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
@@ -617,33 +692,34 @@ var m = (function app(window, undefined) {
 		if (lastRedrawId && force !== true) {
 			//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 			//when rAF: always reschedule redraw
-			if ($requestAnimationFrame === window.requestAnimationFrame || new Date - lastRedrawCallTime > FRAME_BUDGET) {
-				if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
-				lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
+			if (raf === window.requestAnimationFrame || new Date - lastRedrawCallTime > FRAME_BUDGET) {
+				if (lastRedrawId > 0) caf(lastRedrawId);
+				lastRedrawId = raf(redraw, FRAME_BUDGET)
 			}
 		}
 		else {
 			redraw();
-			lastRedrawId = $requestAnimationFrame(function() {lastRedrawId = null}, FRAME_BUDGET)
+			lastRedrawId = raf(function() {lastRedrawId = null}, FRAME_BUDGET)
 		}
 		redrawing = forcing = false
 	};
-	m.redraw.strategy = m.prop();
+
+	m.redraw.strategy = __webpack_require__(8).prop();
 	function redraw() {
-		if (computePreRedrawHook) {
-			computePreRedrawHook()
-			computePreRedrawHook = null
+		if (m.route && m.route.computePreRedrawHook) {
+			m.route.computePreRedrawHook()
+			m.route.computePreRedrawHook = null
 		}
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]]
+				var args = components[i].controller && components[i].controller.$args ? [controllers[i]].concat(components[i].controller.$args) : [controllers[i]]
 				m.render(root, components[i].view ? components[i].view(controllers[i], args) : "")
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
-		if (computePostRedrawHook) {
-			computePostRedrawHook();
-			computePostRedrawHook = null
+		if (m.route && m.route.computePostRedrawHook) {
+			m.route.computePostRedrawHook();
+			m.route.computePostRedrawHook = null
 		}
 		lastRedrawId = null;
 		lastRedrawCallTime = new Date;
@@ -664,6 +740,165 @@ var m = (function app(window, undefined) {
 		else m.endComputation();
 	}
 
+	module.exports = m;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+		OBJECT: "[object Object]",
+		ARRAY: "[object Array]",
+		STRING: "[object String]",
+		FUNCTION: "function",
+		type: {}.toString,
+	}	
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		ARRAY = types.ARRAY;
+		OBJECT = types.OBJECT;
+
+	var noop = function(){};
+
+	function propify(promise, initialValue) {
+			var prop = m.prop(initialValue);
+			promise.then(prop);
+			prop.then = function(resolve, reject) {
+				return propify(promise.then(resolve, reject), initialValue)
+			};
+			prop.catch = prop.then.bind(null, null)
+			return prop
+		}
+
+	function clear(nodes, cached) {
+			for (var i = nodes.length - 1; i > -1; i--) {
+				if (nodes[i] && nodes[i].parentNode) {
+					try {nodes[i].parentNode.removeChild(nodes[i])}
+					catch (e) {} //ignore if this fails due to order of events (see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
+					cached = [].concat(cached);
+					if (cached[i]) unload(cached[i])
+				}
+			}
+			if (nodes.length != 0) nodes.length = 0
+		}
+
+	function unload(cached) {
+			if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
+				cached.configContext.onunload();
+				cached.configContext.onunload = null
+			}
+			if (cached.controllers) {
+				for (var i = 0, controller; controller = cached.controllers[i]; i++) {
+					if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
+				}
+			}
+			if (cached.children) {
+				if (type.call(cached.children) === ARRAY) {
+					for (var i = 0, child; child = cached.children[i]; i++) unload(child)
+				}
+				else if (cached.children.tag) unload(cached.children)
+			}
+		}
+
+	var nodeCache = [];
+	function getCellCacheKey(element) {
+			var index = nodeCache.indexOf(element);
+			return index < 0 ? nodeCache.push(element) - 1 : index
+	}
+
+	function parseQueryString(str) {
+		if (str.charAt(0) === "?") str = str.substring(1);
+		
+		var pairs = str.split("&"), params = {};
+		for (var i = 0, len = pairs.length; i < len; i++) {
+			var pair = pairs[i].split("=");
+			var key = decodeURIComponent(pair[0])
+			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
+			if (params[key] != null) {
+				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
+				params[key].push(value)
+			}
+			else params[key] = value
+		}
+		return params
+	}
+
+	function buildQueryString(object, prefix) {
+		var duplicates = {}
+		var str = []
+		for (var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop
+			var value = object[prop]
+			var valueType = type.call(value)
+			var pair = (value === null) ? encodeURIComponent(key) :
+				valueType === OBJECT ? buildQueryString(value, key) :
+				valueType === ARRAY ? value.reduce(function(memo, item) {
+					if (!duplicates[key]) duplicates[key] = {}
+					if (!duplicates[key][item]) {
+						duplicates[key][item] = true
+						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
+					}
+					return memo
+				}, []).join("&") :
+				encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			if (value !== undefined) str.push(pair)
+		}
+		return str.join("&")
+	}
+
+	module.exports = {
+		propify: propify,
+		clear: clear,
+		unload: unload,
+		getCellCacheKey: getCellCacheKey,
+		buildQueryString: buildQueryString,
+		parseQueryString: parseQueryString
+	}
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = {
+		initialize: initialize
+	};
+
+	// self invoking function needed because of the way mocks work
+	function initialize(window){
+		$.document = window.document;
+		$.location = window.location;
+		$.cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
+		$.requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+
+	}
+
+	initialize(typeof window !== 'undefined' ? window : {});
+
+	module.exports = $;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var m = {};
+
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		OBJECT = types.OBJECT;
+
+	var propify = __webpack_require__(6).propify;
+
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
 			e = e || event;
@@ -671,6 +906,55 @@ var m = (function app(window, undefined) {
 			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
 		}
 	};
+
+	function gettersetter(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0];
+			return store
+		};
+
+		prop.toJSON = function() {
+			return store
+		};
+
+		return prop
+	}
+
+	m.prop = function (store) {
+		//note: using non-strict equality check here because we're checking if store is null OR undefined
+		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
+			return propify(store)
+		}
+
+		return gettersetter(store)
+	};
+
+	module.exports = m;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var mDOM = __webpack_require__(4);
+
+	var m = {};
+
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		ARRAY = types.ARRAY,
+		STRING = types.STRING,
+		OBJECT = types.OBJECT;
+
+	var fns = __webpack_require__(6),
+		clear = fns.clear,
+		buildQueryString = fns.buildQueryString,
+		parseQueryString = fns.parseQueryString;
+
+	var $ = __webpack_require__(7)
+
+	var noop = function(){};
 
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
@@ -692,13 +976,13 @@ var m = (function app(window, undefined) {
 			};
 			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
 			window[listener] = function() {
-				var path = $location[m.route.mode]
-				if (m.route.mode === "pathname") path += $location.search
+				var path = $.location[m.route.mode]
+				if (m.route.mode === "pathname") path += $.location.search
 				if (currentRoute != normalizeRoute(path)) {
 					redirect(path)
 				}
 			};
-			computePreRedrawHook = setScroll;
+			m.route.computePreRedrawHook = setScroll;
 			window[listener]()
 		}
 		//config: m.route
@@ -707,7 +991,7 @@ var m = (function app(window, undefined) {
 			var isInitialized = arguments[1];
 			var context = arguments[2];
 			var vdom = arguments[3];
-			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
+			element.href = (m.route.mode !== 'pathname' ? $.location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
 			if (element.addEventListener) {
 				element.removeEventListener("click", routeUnobtrusive);
 				element.addEventListener("click", routeUnobtrusive)
@@ -732,14 +1016,14 @@ var m = (function app(window, undefined) {
 			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true || oldRoute === arguments[0];
 
 			if (window.history.pushState) {
-				computePreRedrawHook = setScroll
-				computePostRedrawHook = function() {
-					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, $document.title, modes[m.route.mode] + currentRoute);
+				m.route.computePreRedrawHook = setScroll
+				m.route.computePostRedrawHook = function() {
+					window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](null, $.document.title, modes[m.route.mode] + currentRoute);
 				};
 				redirect(modes[m.route.mode] + currentRoute)
 			}
 			else {
-				$location[m.route.mode] = currentRoute
+				$.location[m.route.mode] = currentRoute
 				redirect(modes[m.route.mode] + currentRoute)
 			}
 		}
@@ -766,13 +1050,13 @@ var m = (function app(window, undefined) {
 		var keys = Object.keys(router);
 		var index = keys.indexOf(path);
 		if(index !== -1){
-			m.mount(root, router[keys [index]]);
+			mDOM.mount(root, router[keys [index]]);
 			return true;
 		}
 
 		for (var route in router) {
 			if (route === path) {
-				m.mount(root, router[route]);
+				mDOM.mount(root, router[route]);
 				return true
 			}
 
@@ -783,7 +1067,7 @@ var m = (function app(window, undefined) {
 					var keys = route.match(/:[^\/]+/g) || [];
 					var values = [].slice.call(arguments, 1, -2);
 					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-					m.mount(root, router[route])
+					mDOM.mount(root, router[route])
 				});
 				return true
 			}
@@ -800,70 +1084,49 @@ var m = (function app(window, undefined) {
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args)
 	}
 	function setScroll() {
-		if (m.route.mode != "hash" && $location.hash) $location.hash = $location.hash;
+		if (m.route.mode != "hash" && $.location.hash) $.location.hash = $.location.hash;
 		else window.scrollTo(0, 0)
 	}
-	function buildQueryString(object, prefix) {
-		var duplicates = {}
-		var str = []
-		for (var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop
-			var value = object[prop]
-			var valueType = type.call(value)
-			var pair = (value === null) ? encodeURIComponent(key) :
-				valueType === OBJECT ? buildQueryString(value, key) :
-				valueType === ARRAY ? value.reduce(function(memo, item) {
-					if (!duplicates[key]) duplicates[key] = {}
-					if (!duplicates[key][item]) {
-						duplicates[key][item] = true
-						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
-					}
-					return memo
-				}, []).join("&") :
-				encodeURIComponent(key) + "=" + encodeURIComponent(value)
-			if (value !== undefined) str.push(pair)
-		}
-		return str.join("&")
-	}
-	function parseQueryString(str) {
-		if (str.charAt(0) === "?") str = str.substring(1);
-		
-		var pairs = str.split("&"), params = {};
-		for (var i = 0, len = pairs.length; i < len; i++) {
-			var pair = pairs[i].split("=");
-			var key = decodeURIComponent(pair[0])
-			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
-			if (params[key] != null) {
-				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
-				params[key].push(value)
-			}
-			else params[key] = value
-		}
-		return params
-	}
+
 	m.route.buildQueryString = buildQueryString
 	m.route.parseQueryString = parseQueryString
-	
+
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
 		cellCache[cacheKey] = undefined
 	}
 
+	module.exports = m;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var mDOM = __webpack_require__(4);
+
+	var m = {};
+
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		ARRAY = types.ARRAY,
+		STRING = types.STRING,
+		OBJECT = types.OBJECT;
+
+	var fns = __webpack_require__(6),
+		buildQueryString = fns.buildQueryString,
+		propify = fns.propify;
+
+	var $ = __webpack_require__(7);
+
 	m.deferred = function () {
 		var deferred = new Deferred();
 		deferred.promise = propify(deferred.promise);
 		return deferred
 	};
-	function propify(promise, initialValue) {
-		var prop = m.prop(initialValue);
-		promise.then(prop);
-		prop.then = function(resolve, reject) {
-			return propify(promise.then(resolve, reject), initialValue)
-		};
-		prop.catch = prop.then.bind(null, null)
-		return prop
-	}
+
 	//Promiz.mithril.js | Zolmeister | MIT
 	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
 	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
@@ -1023,7 +1286,7 @@ var m = (function app(window, undefined) {
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
 			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
-			var script = $document.createElement("script");
+			var script = $.document.createElement("script");
 
 			window[callbackKey] = function(resp) {
 				script.parentNode.removeChild(script);
@@ -1060,7 +1323,7 @@ var m = (function app(window, undefined) {
 				+ (options.callbackKey ? options.callbackKey : "callback")
 				+ "=" + callbackKey
 				+ "&" + buildQueryString(options.data || {});
-			$document.body.appendChild(script)
+			$.document.body.appendChild(script)
 		}
 		else {
 			var xhr = new window.XMLHttpRequest;
@@ -1112,7 +1375,7 @@ var m = (function app(window, undefined) {
 	}
 
 	m.request = function(xhrOptions) {
-		if (xhrOptions.background !== true) m.startComputation();
+		if (xhrOptions.background !== true) mDOM.startComputation();
 		var deferred = new Deferred();
 		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
 		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
@@ -1140,23 +1403,31 @@ var m = (function app(window, undefined) {
 				m.deferred.onerror(e);
 				deferred.reject(e)
 			}
-			if (xhrOptions.background !== true) m.endComputation()
+			if (xhrOptions.background !== true) mDOM.endComputation()
 		};
 		ajax(xhrOptions);
 		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
 		return deferred.promise
 	};
 
-	//testing API
-	m.deps = function(mock) {
-		initialize(window = mock || window);
-		return window;
-	};
-	//for internal testing only, do not use `m.deps.factory`
-	m.deps.factory = app;
+	module.exports = m;
 
-	return m
-})(typeof window != "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
-else if (typeof define === "function" && define.amd) define(function() {return m});
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(7);
+
+	var m = {
+		deps: function(mock) {
+			$.initialize(window = mock || window);
+			return window;
+		}
+	}
+
+	module.exports = m;
+
+
+/***/ }
+/******/ ]);
