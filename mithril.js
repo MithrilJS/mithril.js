@@ -558,8 +558,8 @@ var m = (function app(window, undefined) {
 			return (component.controller || noop).apply(this, args) || this
 		}
 		var view = function(ctrl) {
-			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1))
-			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl])
+			var currentArgs = arguments.length > 1 ? args.concat([].slice.call(arguments, 1)) : args
+			return component.view.apply(component, currentArgs ? [ctrl].concat(currentArgs) : [ctrl])
 		}
 		view.$original = component.view
 		var output = {controller: controller, view: view}
