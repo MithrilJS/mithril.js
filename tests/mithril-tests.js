@@ -3925,8 +3925,9 @@ function testMithril(mock) {
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new TypeError("error occurred")}}).then(null, error)
 		try {mock.XMLHttpRequest.$instances.pop().onreadystatechange()}
 		catch (e) {exception = e}
-		m.endComputation()
-		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
+		return prop().toString() == "TypeError: error occurred"
+			&& error().toString() == "TypeError: error occurred"
+			&& exception.message == "error occurred"
 	})
 	test(function() {
 		var error = m.prop("no error")
@@ -4076,6 +4077,45 @@ function testMithril(mock) {
 		mock[callbackKey]({foo: "bar"})
 		mock.document.removeChild(body);
 		return scriptTag.src.match(/foo=bar/g).length == 1;
+	})
+
+	//m.request with SyntaxError still auto-redraws
+	test(function() {
+
+		// Setup document to redraw on computation
+		var root = mock.document.createElement("div");
+		var controller = m.mount(root, {
+			controller: function() {
+				this.failed = m.prop();
+				this.value = m.prop();
+			},
+			view: function(ctrl) {return ctrl.value(); }
+		});
+
+		// Perform first redraw
+		mock.requestAnimationFrame.$resolve();
+
+		// Initiate request
+		m.request({
+			method: "GET",
+			url: "test",
+			deserialize: function() { throw new SyntaxError("unable to parse JSON"); }
+		}).then(function() {
+			controller.failed(false);
+			controller.value("autoredraw");
+		}, function() {
+			controller.failed(true);
+			controller.value("autoredraw");
+		});
+
+		try {
+			mock.XMLHttpRequest.$instances.pop().onreadystatechange();
+		} catch (e) {
+			// ignore
+		}
+
+		// Should have failed and the node should have been redrawn
+		return controller.failed() && root.childNodes[0].nodeValue === "autoredraw";
 	})
 
 	//m.deferred

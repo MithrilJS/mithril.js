@@ -1138,10 +1138,12 @@ var m = (function app(window, undefined) {
 				deferred[e.type === "load" ? "resolve" : "reject"](response)
 			}
 			catch (e) {
-				m.deferred.onerror(e);
 				deferred.reject(e)
+				m.deferred.onerror(e);
 			}
-			if (xhrOptions.background !== true) m.endComputation()
+			finally {
+				if (xhrOptions.background !== true) m.endComputation()
+			}
 		};
 		ajax(xhrOptions);
 		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
