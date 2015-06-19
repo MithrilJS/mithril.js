@@ -964,7 +964,7 @@ var m = (function app(window, undefined) {
 					if (state === RESOLVING && typeof successCallback === FUNCTION) {
 						promiseValue = successCallback(promiseValue)
 					}
-					else if (state === REJECTING && typeof failureCallback === "function") {
+					else if (state === REJECTING && typeof failureCallback === FUNCTION) {
 						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING
 					}
