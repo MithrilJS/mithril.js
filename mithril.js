@@ -254,6 +254,16 @@ var m = (function app(window, undefined) {
 				}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
 				views.push(view)
+        //FIX for REDRAW
+        if (controller.redrawSelf) {
+          controller.redrawSelf = (function(ctrl) {
+            return function() {
+              m.redraw.strategy('none');
+              var newData = view(ctrl)
+              build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);
+            }
+          })(controller);
+        }
 				controllers.push(controller)
 			}
 			if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.")
@@ -964,7 +974,7 @@ var m = (function app(window, undefined) {
 					if (state === RESOLVING && typeof successCallback === FUNCTION) {
 						promiseValue = successCallback(promiseValue)
 					}
-					else if (state === REJECTING && typeof failureCallback === FUNCTION) {
+					else if (state === REJECTING && typeof failureCallback === "function") {
 						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING
 					}
@@ -1161,3 +1171,4 @@ var m = (function app(window, undefined) {
 
 if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 else if (typeof define === "function" && define.amd) define(function() {return m});
+
