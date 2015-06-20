@@ -58,7 +58,7 @@ var m = (function app(window, undefined) {
 		else {
 			cell.children = children
 		}
-		
+
 		for (var attrName in attrs) {
 			if (attrs.hasOwnProperty(attrName)) {
 				if (attrName === classAttrName && attrs[attrName] != null && attrs[attrName] !== "") {
@@ -69,7 +69,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
-		
+
 		return cell
 	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
@@ -125,7 +125,7 @@ var m = (function app(window, undefined) {
 					len = data.length
 				}
 			}
-			
+
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
 
 			//keys algorithm: sort elements without recreating them if keys are present
@@ -141,7 +141,7 @@ var m = (function app(window, undefined) {
 					existing[cached[i].attrs.key] = {action: DELETION, index: i}
 				}
 			}
-			
+
 			var guid = 0
 			for (var i = 0, len = data.length; i < len; i++) {
 				if (data[i] && data[i].attrs && data[i].attrs.key != null) {
@@ -151,7 +151,7 @@ var m = (function app(window, undefined) {
 					break
 				}
 			}
-			
+
 			if (shouldMaintainIdentities) {
 				var keysDiffer = false
 				if (data.length != cached.length) keysDiffer = true
@@ -161,7 +161,7 @@ var m = (function app(window, undefined) {
 						break
 					}
 				}
-				
+
 				if (keysDiffer) {
 					for (var i = 0, len = data.length; i < len; i++) {
 						if (data[i] && data[i].attrs) {
@@ -225,7 +225,7 @@ var m = (function app(window, undefined) {
 			}
 			if (!intact) {
 				//diff the array itself
-				
+
 				//update the list of DOM nodes by collecting the nodes from each item
 				for (var i = 0, len = data.length; i < len; i++) {
 					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
@@ -249,7 +249,6 @@ var m = (function app(window, undefined) {
 				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"}
 				if (data.subtree === "retain") return cached;
 				if (key) {
-					if (!data.attrs) data.attrs = {}
 					data.attrs.key = key
 				}
 				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload})
@@ -278,7 +277,7 @@ var m = (function app(window, undefined) {
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
 			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
 			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
-			
+
 			if (isNew) {
 				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
 				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
@@ -303,7 +302,7 @@ var m = (function app(window, undefined) {
 						}
 					}
 				}
-				
+
 				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
 				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
 				if (data.tag === "select" && "value" in data.attrs) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
@@ -573,7 +572,7 @@ var m = (function app(window, undefined) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
 		var index = roots.indexOf(root);
 		if (index < 0) index = roots.length;
-		
+
 		var isPrevented = false;
 		var event = {preventDefault: function() {
 			isPrevented = true;
@@ -587,11 +586,11 @@ var m = (function app(window, undefined) {
 			for (var i = 0, unloader; unloader = unloaders[i]; i++) unloader.controller.onunload = unloader.handler
 		}
 		else unloaders = []
-		
+
 		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
 			controllers[index].onunload(event)
 		}
-		
+
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
@@ -828,7 +827,7 @@ var m = (function app(window, undefined) {
 	}
 	function parseQueryString(str) {
 		if (str.charAt(0) === "?") str = str.substring(1);
-		
+
 		var pairs = str.split("&"), params = {};
 		for (var i = 0, len = pairs.length; i < len; i++) {
 			var pair = pairs[i].split("=");
@@ -844,7 +843,7 @@ var m = (function app(window, undefined) {
 	}
 	m.route.buildQueryString = buildQueryString
 	m.route.parseQueryString = parseQueryString
-	
+
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root);
 		clear(root.childNodes, cellCache[cacheKey]);
