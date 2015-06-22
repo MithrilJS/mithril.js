@@ -3925,7 +3925,6 @@ function testMithril(mock) {
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new TypeError("error occurred")}}).then(null, error)
 		try {mock.XMLHttpRequest.$instances.pop().onreadystatechange()}
 		catch (e) {exception = e}
-		m.endComputation()
 		return prop() === undefined && error() === "no error" && exception.message == "error occurred"
 	})
 	test(function() {
