@@ -60,7 +60,7 @@ Then, to use Mithril, point a script tag to the downloaded file:
 
 ### Bower
 
-[Bower](http://bower.io) is a package manager for [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
+[Bower](http://bower.io) is a frontend package manager built in [NodeJS](http://nodejs.org/). If you're using NodeJS already or planning on using [Grunt](http://gruntjs.com/) to create a build system, you can use Bower to conveniently keep up-to-date with Mithril versions.
 
 Assuming you have NodeJS installed, you can install Bower by typing this in the command line:
 

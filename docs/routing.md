@@ -62,7 +62,7 @@ In this case, since there's only one route, the app redirects to the default rou
 
 The string `johndoe` is bound to the `:userID` parameter, which can be retrieved programmatically in the controller via `m.route.param("userID")`.
 
-The `m.route.mode` property defines which URL portion is used to implement the routing mechanism. Its value can be set to either "search", "hash" or "pathname". The default value is "search".
+The `m.route.mode` property defines which URL portion is used to implement the routing mechanism. It should be set before any calls to `m.route`.  Its value can be set to either "search", "hash" or "pathname". The default value is "search".
 
 -	`search` mode uses the querystring. This allows named anchors (i.e. `<a href="#top">Back to top</a>`, `<a name="top"></a>`) to work on the page, but routing changes causes page refreshes in IE8, due to its lack of support for `history.pushState`.
 

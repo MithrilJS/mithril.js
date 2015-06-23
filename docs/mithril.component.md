@@ -219,7 +219,7 @@ Components can be placed anywhere a regular element can. If you have components 
 var App = {
 	controller: function() {
 		return {data: [1, 2, 3]}
-	}
+	},
 	view: function(ctrl) {
 		return m(".app", [
 			//pressing the button reverses the list
@@ -513,7 +513,7 @@ There are a few other technical caveats when nesting components:
 
 1.	Nested component views must return either a virtual element or another component. Returning an array, a string, a number, boolean, falsy value, etc will result in an error.
 
-2.	Nested components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persising-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
+2.	Nested components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persisting-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
 
 3.	The root DOM element in a component's view must not be changed during the lifecycle of the component, otherwise undefined behavior will occur. In other words, don't do this:
 	
