@@ -248,7 +248,7 @@ var m = (function app(window, undefined) {
 				var key = data && data.attrs && data.attrs.key;
 				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"};
 				if (data.subtree === "retain") return cached;
-				if (typeof key !== 'undefined' && key !== null) {
+				if (key != null) {
 					if (!data.attrs) data.attrs = {};
 					data.attrs.key = key;
 				}
