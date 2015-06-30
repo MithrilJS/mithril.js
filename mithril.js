@@ -1129,6 +1129,7 @@ var m = (function app(window, undefined) {
 			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText;
 		};
 		xhrOptions.method = (xhrOptions.method || 'GET').toUpperCase();
+		if (!xhrOptions.url) throw new Error("url is a required parameter in `m.request`.");
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
