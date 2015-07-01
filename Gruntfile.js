@@ -204,7 +204,8 @@ module.exports = function(grunt) {
 			    output: {
 			        path: "",
 			        filename: "[name].js",
-			    }
+			    },
+			    module: {}
 			},
 			build: {
 			}
