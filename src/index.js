@@ -1,8 +1,6 @@
 var assign = require('./helpers/Object.assign');
 
-var m = require('./modules/DOM');
-
-assign(m, 
+var m = assign(require('./modules/DOM'), 
 	require('./modules/router'), 
 	require('./modules/utils'), 
 	require('./modules/http'),

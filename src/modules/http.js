@@ -1,19 +1,18 @@
-var mDOM = require('./DOM');
+var mDOM = require('./DOM'),
 
-var m = {};
+    m = {},
 
-var types = require('../core/types'),
+    types = require('../core/types'),
 	type = types.type,
 	FUNCTION = types.FUNCTION,
 	ARRAY = types.ARRAY,
 	STRING = types.STRING,
-	OBJECT = types.OBJECT;
+	OBJECT = types.OBJECT,
 
-var fns = require('../core/fns'),
-	buildQueryString = fns.buildQueryString,
-	propify = fns.propify;
+    propify = require('../core/fns').propify,
+    buildQueryString = require('../core/query-str').buildQueryString,
 
-var $ = require('../core/init');
+    $ = require('../core/init');
 
 m.deferred = function () {
 	var deferred = new Deferred();

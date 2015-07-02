@@ -9,10 +9,11 @@ var types = require('../core/types'),
 	STRING = types.STRING,
 	OBJECT = types.OBJECT;
 
-var fns = require('../core/fns'),
-	clear = fns.clear,
-	buildQueryString = fns.buildQueryString,
-	parseQueryString = fns.parseQueryString;
+var clear = require('../core/fns').clear;
+
+var qStr = require('../core/query-str'),
+	buildQueryString = qStr.buildQueryString,
+	parseQueryString = qStr.parseQueryString;
 
 var $ = require('../core/init')
 

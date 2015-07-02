@@ -53,13 +53,11 @@
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {var assign = __webpack_require__(3);
 
-	var m = __webpack_require__(4);
-
-	assign(m, 
+	var m = assign(__webpack_require__(4), 
 		__webpack_require__(9), 
 		__webpack_require__(8), 
-		__webpack_require__(10),
-		__webpack_require__(11)
+		__webpack_require__(11),
+		__webpack_require__(12)
 	);
 
 	if (typeof global != "undefined") global.m = m;
@@ -90,35 +88,17 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	//polyfill from https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-	function assign(target) {
-	  'use strict';
-	  if (target === undefined || target === null) {
-	    throw new TypeError('Cannot convert first argument to object');
-	  }
-
-	  var to = Object(target);
+	module.exports = function (target) {
 	  for (var i = 1; i < arguments.length; i++) {
-	    var nextSource = arguments[i];
-	    if (nextSource === undefined || nextSource === null) {
-	      continue;
-	    }
-	    nextSource = Object(nextSource);
-
-	    var keysArray = Object.keys(Object(nextSource));
-	    for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-	      var nextKey = keysArray[nextIndex];
-	      var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-	      if (desc !== undefined && desc.enumerable) {
-	        to[nextKey] = nextSource[nextKey];
+	    var obj = arguments[i];
+	    for (var prop in obj) {
+	      if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+	        target[prop] = obj[prop];
 	      }
 	    }
 	  }
-	  return to;
-	}
-
-	module.exports = assign
-
+	  return target;
+	};
 
 /***/ },
 /* 4 */
@@ -766,16 +746,36 @@
 		ARRAY = types.ARRAY;
 		OBJECT = types.OBJECT;
 
-	var noop = function(){};
+	function gettersetter(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0];
+			return store
+		};
+
+		prop.toJSON = function() {
+			return store
+		};
+
+		return prop
+	}
+
+	function prop(store) {
+		//note: using non-strict equality check here because we're checking if store is null OR undefined
+		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
+			return propify(store)
+		}
+
+		return gettersetter(store)
+	};
 
 	function propify(promise, initialValue) {
-			var prop = m.prop(initialValue);
-			promise.then(prop);
-			prop.then = function(resolve, reject) {
+			var _prop = prop(initialValue);
+			promise.then(_prop);
+			_prop.then = function(resolve, reject) {
 				return propify(promise.then(resolve, reject), initialValue)
 			};
-			prop.catch = prop.then.bind(null, null)
-			return prop
+			_prop.catch = _prop.then.bind(null, null)
+			return _prop
 		}
 
 	function clear(nodes, cached) {
@@ -797,7 +797,7 @@
 			}
 			if (cached.controllers) {
 				for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-					if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
+					if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function(){}});
 				}
 			}
 			if (cached.children) {
@@ -814,53 +814,12 @@
 			return index < 0 ? nodeCache.push(element) - 1 : index
 	}
 
-	function parseQueryString(str) {
-		if (str.charAt(0) === "?") str = str.substring(1);
-		
-		var pairs = str.split("&"), params = {};
-		for (var i = 0, len = pairs.length; i < len; i++) {
-			var pair = pairs[i].split("=");
-			var key = decodeURIComponent(pair[0])
-			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
-			if (params[key] != null) {
-				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
-				params[key].push(value)
-			}
-			else params[key] = value
-		}
-		return params
-	}
-
-	function buildQueryString(object, prefix) {
-		var duplicates = {}
-		var str = []
-		for (var prop in object) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop
-			var value = object[prop]
-			var valueType = type.call(value)
-			var pair = (value === null) ? encodeURIComponent(key) :
-				valueType === OBJECT ? buildQueryString(value, key) :
-				valueType === ARRAY ? value.reduce(function(memo, item) {
-					if (!duplicates[key]) duplicates[key] = {}
-					if (!duplicates[key][item]) {
-						duplicates[key][item] = true
-						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
-					}
-					return memo
-				}, []).join("&") :
-				encodeURIComponent(key) + "=" + encodeURIComponent(value)
-			if (value !== undefined) str.push(pair)
-		}
-		return str.join("&")
-	}
-
 	module.exports = {
 		propify: propify,
+		prop: prop,
 		clear: clear,
 		unload: unload,
-		getCellCacheKey: getCellCacheKey,
-		buildQueryString: buildQueryString,
-		parseQueryString: parseQueryString
+		getCellCacheKey: getCellCacheKey
 	}
 
 
@@ -890,16 +849,7 @@
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var m = {};
-
-	var types = __webpack_require__(5),
-		type = types.type,
-		FUNCTION = types.FUNCTION,
-		OBJECT = types.OBJECT;
-
-	var propify = __webpack_require__(6).propify;
-
-	m.withAttr = function(prop, withAttrCallback) {
+	exports.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
 			e = e || event;
 			var currentTarget = e.currentTarget || this;
@@ -907,29 +857,7 @@
 		}
 	};
 
-	function gettersetter(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0];
-			return store
-		};
-
-		prop.toJSON = function() {
-			return store
-		};
-
-		return prop
-	}
-
-	m.prop = function (store) {
-		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
-			return propify(store)
-		}
-
-		return gettersetter(store)
-	};
-
-	module.exports = m;
+	exports.prop = __webpack_require__(6).prop;
 
 
 /***/ },
@@ -947,10 +875,11 @@
 		STRING = types.STRING,
 		OBJECT = types.OBJECT;
 
-	var fns = __webpack_require__(6),
-		clear = fns.clear,
-		buildQueryString = fns.buildQueryString,
-		parseQueryString = fns.parseQueryString;
+	var clear = __webpack_require__(6).clear;
+
+	var qStr = __webpack_require__(10),
+		buildQueryString = qStr.buildQueryString,
+		parseQueryString = qStr.parseQueryString;
 
 	var $ = __webpack_require__(7)
 
@@ -1104,22 +1033,76 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mDOM = __webpack_require__(4);
-
-	var m = {};
-
 	var types = __webpack_require__(5),
+		type = types.type,
+		ARRAY = types.ARRAY;
+		OBJECT = types.OBJECT;
+
+	function parseQueryString(str) {
+		if (str.charAt(0) === "?") str = str.substring(1);
+		
+		var pairs = str.split("&"), params = {};
+		for (var i = 0, len = pairs.length; i < len; i++) {
+			var pair = pairs[i].split("=");
+			var key = decodeURIComponent(pair[0])
+			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
+			if (params[key] != null) {
+				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
+				params[key].push(value)
+			}
+			else params[key] = value
+		}
+		return params
+	}
+
+	function buildQueryString(object, prefix) {
+		var duplicates = {}
+		var str = []
+		for (var prop in object) {
+			var key = prefix ? prefix + "[" + prop + "]" : prop
+			var value = object[prop]
+			var valueType = type.call(value)
+			var pair = (value === null) ? encodeURIComponent(key) :
+				valueType === OBJECT ? buildQueryString(value, key) :
+				valueType === ARRAY ? value.reduce(function(memo, item) {
+					if (!duplicates[key]) duplicates[key] = {}
+					if (!duplicates[key][item]) {
+						duplicates[key][item] = true
+						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
+					}
+					return memo
+				}, []).join("&") :
+				encodeURIComponent(key) + "=" + encodeURIComponent(value)
+			if (value !== undefined) str.push(pair)
+		}
+		return str.join("&")
+	}
+
+	module.exports = {
+		buildQueryString: buildQueryString,
+		parseQueryString: parseQueryString
+	}
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var mDOM = __webpack_require__(4),
+
+	    m = {},
+
+	    types = __webpack_require__(5),
 		type = types.type,
 		FUNCTION = types.FUNCTION,
 		ARRAY = types.ARRAY,
 		STRING = types.STRING,
-		OBJECT = types.OBJECT;
+		OBJECT = types.OBJECT,
 
-	var fns = __webpack_require__(6),
-		buildQueryString = fns.buildQueryString,
-		propify = fns.propify;
+	    propify = __webpack_require__(6).propify,
+	    buildQueryString = __webpack_require__(10).buildQueryString,
 
-	var $ = __webpack_require__(7);
+	    $ = __webpack_require__(7);
 
 	m.deferred = function () {
 		var deferred = new Deferred();
@@ -1414,19 +1397,15 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
 
-	var m = {
-		deps: function(mock) {
-			$.initialize(window = mock || window);
-			return window;
-		}
+	exports.deps = function(mock) {
+		$.initialize(window = mock || window);
+		return window;
 	}
-
-	module.exports = m;
 
 
 /***/ }

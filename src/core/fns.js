@@ -4,16 +4,36 @@ var types = require('./types'),
 	ARRAY = types.ARRAY;
 	OBJECT = types.OBJECT;
 
-var noop = function(){};
+function gettersetter(store) {
+	var prop = function() {
+		if (arguments.length) store = arguments[0];
+		return store
+	};
+
+	prop.toJSON = function() {
+		return store
+	};
+
+	return prop
+}
+
+function prop(store) {
+	//note: using non-strict equality check here because we're checking if store is null OR undefined
+	if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
+		return propify(store)
+	}
+
+	return gettersetter(store)
+};
 
 function propify(promise, initialValue) {
-		var prop = m.prop(initialValue);
-		promise.then(prop);
-		prop.then = function(resolve, reject) {
+		var _prop = prop(initialValue);
+		promise.then(_prop);
+		_prop.then = function(resolve, reject) {
 			return propify(promise.then(resolve, reject), initialValue)
 		};
-		prop.catch = prop.then.bind(null, null)
-		return prop
+		_prop.catch = _prop.then.bind(null, null)
+		return _prop
 	}
 
 function clear(nodes, cached) {
@@ -35,7 +55,7 @@ function unload(cached) {
 		}
 		if (cached.controllers) {
 			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
+				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: function(){}});
 			}
 		}
 		if (cached.children) {
@@ -52,51 +72,10 @@ function getCellCacheKey(element) {
 		return index < 0 ? nodeCache.push(element) - 1 : index
 }
 
-function parseQueryString(str) {
-	if (str.charAt(0) === "?") str = str.substring(1);
-	
-	var pairs = str.split("&"), params = {};
-	for (var i = 0, len = pairs.length; i < len; i++) {
-		var pair = pairs[i].split("=");
-		var key = decodeURIComponent(pair[0])
-		var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null
-		if (params[key] != null) {
-			if (type.call(params[key]) !== ARRAY) params[key] = [params[key]]
-			params[key].push(value)
-		}
-		else params[key] = value
-	}
-	return params
-}
-
-function buildQueryString(object, prefix) {
-	var duplicates = {}
-	var str = []
-	for (var prop in object) {
-		var key = prefix ? prefix + "[" + prop + "]" : prop
-		var value = object[prop]
-		var valueType = type.call(value)
-		var pair = (value === null) ? encodeURIComponent(key) :
-			valueType === OBJECT ? buildQueryString(value, key) :
-			valueType === ARRAY ? value.reduce(function(memo, item) {
-				if (!duplicates[key]) duplicates[key] = {}
-				if (!duplicates[key][item]) {
-					duplicates[key][item] = true
-					return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item))
-				}
-				return memo
-			}, []).join("&") :
-			encodeURIComponent(key) + "=" + encodeURIComponent(value)
-		if (value !== undefined) str.push(pair)
-	}
-	return str.join("&")
-}
-
 module.exports = {
 	propify: propify,
+	prop: prop,
 	clear: clear,
 	unload: unload,
-	getCellCacheKey: getCellCacheKey,
-	buildQueryString: buildQueryString,
-	parseQueryString: parseQueryString
+	getCellCacheKey: getCellCacheKey
 }
