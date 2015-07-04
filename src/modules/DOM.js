@@ -578,7 +578,7 @@ m.redraw = function(force) {
 	redrawing = forcing = false
 };
 
-m.redraw.strategy = require('./utils').prop();
+m.redraw.strategy = require('../core/prop').prop();
 function redraw() {
 	if (m.route && m.route.computePreRedrawHook) {
 		m.route.computePreRedrawHook()

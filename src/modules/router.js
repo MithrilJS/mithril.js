@@ -9,7 +9,9 @@ var types = require('../core/types'),
 	STRING = types.STRING,
 	OBJECT = types.OBJECT;
 
-var clear = require('../core/fns').clear;
+var fns = require('../core/fns'),
+	clear = fns.clear,
+	getCellCacheKey = fns.getCellCacheKey;
 
 var qStr = require('../core/query-str'),
 	buildQueryString = qStr.buildQueryString,

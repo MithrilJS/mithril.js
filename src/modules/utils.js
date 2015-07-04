@@ -6,4 +6,4 @@ exports.withAttr = function(prop, withAttrCallback) {
 	}
 };
 
-exports.prop = require('../core/fns').prop;
+exports.prop = require('../core/prop').prop;

@@ -9,10 +9,12 @@ var mDOM = require('./DOM'),
 	STRING = types.STRING,
 	OBJECT = types.OBJECT,
 
-    propify = require('../core/fns').propify,
+    propify = require('../core/prop').propify,
     buildQueryString = require('../core/query-str').buildQueryString,
 
-    $ = require('../core/init');
+    $ = require('../core/init'),
+
+    Deferred = require('../core/deferred');
 
 m.deferred = function () {
 	var deferred = new Deferred();

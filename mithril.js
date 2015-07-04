@@ -55,9 +55,9 @@
 
 	var m = assign(__webpack_require__(4), 
 		__webpack_require__(9), 
-		__webpack_require__(8), 
-		__webpack_require__(11),
-		__webpack_require__(12)
+		__webpack_require__(11), 
+		__webpack_require__(12),
+		__webpack_require__(14)
 	);
 
 	if (typeof global != "undefined") global.m = m;
@@ -744,39 +744,6 @@
 		type = types.type,
 		FUNCTION = types.FUNCTION,
 		ARRAY = types.ARRAY;
-		OBJECT = types.OBJECT;
-
-	function gettersetter(store) {
-		var prop = function() {
-			if (arguments.length) store = arguments[0];
-			return store
-		};
-
-		prop.toJSON = function() {
-			return store
-		};
-
-		return prop
-	}
-
-	function prop(store) {
-		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
-			return propify(store)
-		}
-
-		return gettersetter(store)
-	};
-
-	function propify(promise, initialValue) {
-			var _prop = prop(initialValue);
-			promise.then(_prop);
-			_prop.then = function(resolve, reject) {
-				return propify(promise.then(resolve, reject), initialValue)
-			};
-			_prop.catch = _prop.then.bind(null, null)
-			return _prop
-		}
 
 	function clear(nodes, cached) {
 			for (var i = nodes.length - 1; i > -1; i--) {
@@ -815,8 +782,6 @@
 	}
 
 	module.exports = {
-		propify: propify,
-		prop: prop,
 		clear: clear,
 		unload: unload,
 		getCellCacheKey: getCellCacheKey
@@ -849,15 +814,47 @@
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.withAttr = function(prop, withAttrCallback) {
-		return function(e) {
-			e = e || event;
-			var currentTarget = e.currentTarget || this;
-			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
+	var types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION,
+		OBJECT = types.OBJECT;
+
+	function gettersetter(store) {
+		var prop = function() {
+			if (arguments.length) store = arguments[0];
+			return store
+		};
+
+		prop.toJSON = function() {
+			return store
+		};
+
+		return prop
+	}
+
+	function prop(store) {
+		//note: using non-strict equality check here because we're checking if store is null OR undefined
+		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
+			return propify(store)
 		}
+
+		return gettersetter(store)
 	};
 
-	exports.prop = __webpack_require__(6).prop;
+	function propify(promise, initialValue) {
+			var _prop = prop(initialValue);
+			promise.then(_prop);
+			_prop.then = function(resolve, reject) {
+				return propify(promise.then(resolve, reject), initialValue)
+			};
+			_prop.catch = _prop.then.bind(null, null)
+			return _prop
+		}
+
+	module.exports = {
+		propify: propify,
+		prop: prop
+	}
 
 
 /***/ },
@@ -875,7 +872,9 @@
 		STRING = types.STRING,
 		OBJECT = types.OBJECT;
 
-	var clear = __webpack_require__(6).clear;
+	var fns = __webpack_require__(6),
+		clear = fns.clear,
+		getCellCacheKey = fns.getCellCacheKey;
 
 	var qStr = __webpack_require__(10),
 		buildQueryString = qStr.buildQueryString,
@@ -1088,6 +1087,21 @@
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
+	exports.withAttr = function(prop, withAttrCallback) {
+		return function(e) {
+			e = e || event;
+			var currentTarget = e.currentTarget || this;
+			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop))
+		}
+	};
+
+	exports.prop = __webpack_require__(8).prop;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var mDOM = __webpack_require__(4),
 
 	    m = {},
@@ -1099,10 +1113,12 @@
 		STRING = types.STRING,
 		OBJECT = types.OBJECT,
 
-	    propify = __webpack_require__(6).propify,
+	    propify = __webpack_require__(8).propify,
 	    buildQueryString = __webpack_require__(10).buildQueryString,
 
-	    $ = __webpack_require__(7);
+	    $ = __webpack_require__(7),
+
+	    Deferred = __webpack_require__(13);
 
 	m.deferred = function () {
 		var deferred = new Deferred();
@@ -1395,9 +1411,143 @@
 
 	module.exports = m;
 
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	types = __webpack_require__(5),
+		type = types.type,
+		FUNCTION = types.FUNCTION;
+
+	//Promiz.mithril.js | Zolmeister | MIT
+	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
+	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
+	//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
+	module.exports = function Deferred(successCallback, failureCallback) {
+		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
+		var self = this, state = 0, promiseValue = 0, next = [];
+
+		self["promise"] = {};
+
+		self["resolve"] = function(value) {
+			if (!state) {
+				promiseValue = value;
+				state = RESOLVING;
+
+				fire()
+			}
+			return this
+		};
+
+		self["reject"] = function(value) {
+			if (!state) {
+				promiseValue = value;
+				state = REJECTING;
+
+				fire()
+			}
+			return this
+		};
+
+		self.promise["then"] = function(successCallback, failureCallback) {
+			var deferred = new Deferred(successCallback, failureCallback);
+			if (state === RESOLVED) {
+				deferred.resolve(promiseValue)
+			}
+			else if (state === REJECTED) {
+				deferred.reject(promiseValue)
+			}
+			else {
+				next.push(deferred)
+			}
+			return deferred.promise
+		};
+
+		function finish(_type) {
+			state = _type || REJECTED;
+			next.map(function(deferred) {
+				state === RESOLVED && deferred.resolve(promiseValue) || deferred.reject(promiseValue)
+			})
+		}
+
+		function thennable(then, successCallback, failureCallback, notThennableCallback) {
+			if (((promiseValue != null && type.call(promiseValue) === OBJECT) || typeof promiseValue === FUNCTION) && typeof then === FUNCTION) {
+				try {
+					// count protects against abuse calls from spec checker
+					var count = 0;
+					then.call(promiseValue, function(value) {
+						if (count++) return;
+						promiseValue = value;
+						successCallback()
+					}, function (value) {
+						if (count++) return;
+						promiseValue = value;
+						failureCallback()
+					})
+				}
+				catch (e) {
+					m.deferred.onerror(e);
+					promiseValue = e;
+					failureCallback()
+				}
+			} else {
+				notThennableCallback()
+			}
+		}
+
+		function fire() {
+			// check if it's a thenable
+			var then;
+			try {
+				then = promiseValue && promiseValue.then
+			}
+			catch (e) {
+				m.deferred.onerror(e);
+				promiseValue = e;
+				state = REJECTING;
+				return fire()
+			}
+			thennable(then, function() {
+				state = RESOLVING;
+				fire()
+			}, function() {
+				state = REJECTING;
+				fire()
+			}, function() {
+				try {
+					if (state === RESOLVING && typeof successCallback === FUNCTION) {
+						promiseValue = successCallback(promiseValue)
+					}
+					else if (state === REJECTING && typeof failureCallback === "function") {
+						promiseValue = failureCallback(promiseValue);
+						state = RESOLVING
+					}
+				}
+				catch (e) {
+					m.deferred.onerror(e);
+					promiseValue = e;
+					return finish()
+				}
+
+				if (promiseValue === self) {
+					promiseValue = TypeError();
+					finish()
+				}
+				else {
+					thennable(then, function () {
+						finish(RESOLVED)
+					}, finish, function () {
+						finish(state === RESOLVING && RESOLVED)
+					})
+				}
+			})
+		}
+	}
+
+
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
