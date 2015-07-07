@@ -13,7 +13,7 @@
 	- [Stateful components](#stateful-components)
 	- [Parameterized initial state](#parameterized-initial-state)
 - [Data-driven component identity](#data-driven-component-identity)
-- [Unloading components](#unloading-components)
+- [Unloading/Unmounting components](#unloading-components)
 - [Nested asynchronous components](#nested-asynchronous-components)
 - [Limitations and caveats](#limitations-and-caveats)
 - [Opting out of the auto redrawing system](#opting-out-of-the-auto-redrawing-system)
@@ -385,7 +385,7 @@ If a component's controller contains the function `onunload`, it will be called 
 - when a new call to `m.mount` updates the root DOM element of the component in question
 - when a route changes (if you are using [`m.route`](mithril.route.md))
 
-To unload a component without loading another component, you can simply call `m.mount` with a `null` as the component parameter:
+To unload/unmount a component without loading another component, you can simply call `m.mount` with a `null` as the component parameter:
 
 ```javascript
 m.mount(rootElement, null);

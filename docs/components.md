@@ -22,9 +22,9 @@ Let's create a simple model entity which we'll use in a simple application, to i
 ```javascript
 var Contact = function(data) {
 	data = data || {}
-	this.id = m.prop(data.id)
-	this.name = m.prop(data.name)
-	this.email = m.prop(data.email)
+	this.id = m.prop(data.id || "")
+	this.name = m.prop(data.name || "")
+	this.email = m.prop(data.email || "")
 }
 Contact.list = function(data) {
 	return m.request({method: "GET", url: "/api/contact", type: Contact})
@@ -293,7 +293,7 @@ var Observable = function() {
 			}
 		},
 		trigger: function(channel, args) {
-			console.log(channel)
+			console.log("triggered: " + channel)
 			channels[channel].map(function(callback) {
 				callback(args)
 			})
@@ -386,7 +386,9 @@ var ContactsWidget = {
 	view: function(ctrl) {
 		return [
 			m.component(ContactForm),
-			m.component(ContactList, {contacts: ctrl.contacts})
+			ctrl.contacts() === undefined
+			  ? m("div", "loading contacts...") //waiting for promise to resolve
+			  : m.component(ContactList, {contacts: ctrl.contacts})
 		]
 	}
 }
@@ -394,10 +396,13 @@ var ContactsWidget = {
 //ContactList no longer calls `Contact.save`
 var ContactForm = {
 	controller: function(args) {
-		this.contact = m.prop(new Contact())
-		this.save = function(contact) {
+	        ctrl = this
+		ctrl.contact = m.prop(new Contact())
+		ctrl.save = function(contact) {
 			Observable.trigger("saveContact", {contact: contact})
+			ctrl.contact = m.prop(new Contact()) //reset to empty contact
 		}
+		return ctrl
 	},
 	view: function(ctrl, args) {
 		var contact = ctrl.contact()
