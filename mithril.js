@@ -72,6 +72,32 @@ var m = (function app(window, undefined) {
 
 		return cell;
 	}
+	function forEach(list, f) {
+		for (var i = 0; i < list.length && !f(list[i], i++);) {}
+	}
+	function forKeys(list, f) {
+		forEach(list, function (attrs, i) {
+			return (attrs = attrs && attrs.attrs) && attrs.key != null && f(attrs, i);
+		});
+	}
+	// This function was causing deopts in Chrome.
+	function dataToString(data) {
+		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
+		try {
+			if (data == null || data.toString() == null) data = "";
+		} catch (e) {
+			data = "";
+		}
+		return data;
+	}
+	// This function was causing deopts in Chrome.
+	function injectTextNode(parentElement, first, index, data) {
+		try {
+			parentElement.insertBefore(first, parentElement.childNodes[index] || null);
+			first.nodeValue = data;
+		}
+		catch (e) {} //IE erroneously throws error when appending an empty text node after a null
+	}
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
 		//the diff algorithm can be summarized as this:
@@ -98,8 +124,7 @@ var m = (function app(window, undefined) {
 		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
 		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
-		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
-		try { if (data == null || data.toString() == null) data = ""; } catch (e) { data = ""; }
+		data = dataToString(data);
 		if (data.subtree === "retain") return cached;
 		var cachedType = type.call(cached), dataType = type.call(data);
 		if (cached == null || cachedType !== dataType) {
@@ -118,11 +143,10 @@ var m = (function app(window, undefined) {
 
 		if (dataType === ARRAY) {
 			//recursively flatten array
-			for (var i = 0, len = data.length; i < len; i++) {
+			for (var i = 0; i < data.length; i++) {
 				if (type.call(data[i]) === ARRAY) {
 					data = data.concat.apply([], data);
 					i--; //check current index again and flatten until there are no more nested arrays at that index
-					len = data.length;
 				}
 			}
 
@@ -135,55 +159,51 @@ var m = (function app(window, undefined) {
 			//4) for each key, handle its corresponding action as marked in previous steps
 			var DELETION = 1, INSERTION = 2 , MOVE = 3;
 			var existing = {}, shouldMaintainIdentities = false;
-			for (var i = 0; i < cached.length; i++) {
-				if (cached[i] && cached[i].attrs && cached[i].attrs.key != null) {
-					shouldMaintainIdentities = true;
-					existing[cached[i].attrs.key] = {action: DELETION, index: i};
-				}
-			}
+			forKeys(cached, function (attrs, i) {
+				shouldMaintainIdentities = true;
+				existing[cached[i].attrs.key] = {action: DELETION, index: i};
+			});
 
 			var guid = 0;
-			for (var i = 0, len = data.length; i < len; i++) {
-				if (data[i] && data[i].attrs && data[i].attrs.key != null) {
-					for (var j = 0, len = data.length; j < len; j++) {
-						if (data[j] && data[j].attrs && data[j].attrs.key == null) data[j].attrs.key = "__mithril__" + guid++;
+			forKeys(data, function () {
+				forEach(data, function (attrs) {
+					if ((attrs = attrs && attrs.attrs) && attrs.key == null) {
+						attrs.key = "__mithril__" + guid++;
 					}
-					break;
-				}
-			}
+				});
+				return 1;
+			});
 
 			if (shouldMaintainIdentities) {
-				var keysDiffer = false;
-				if (data.length != cached.length) keysDiffer = true;
-				else for (var i = 0, cachedCell, dataCell; cachedCell = cached[i], dataCell = data[i]; i++) {
-					if (cachedCell.attrs && dataCell.attrs && cachedCell.attrs.key != dataCell.attrs.key) {
-						keysDiffer = true;
-						break;
-					}
+				var keysDiffer = data.length != cached.length;
+				if (!keysDiffer) {
+					forKeys(data, function (attrs, i) {
+						var cachedCell = cached[i];
+						return keysDiffer = cachedCell && cachedCell.attrs && cachedCell.attrs.key != attrs.key;
+					});
 				}
 
 				if (keysDiffer) {
-					for (var i = 0, len = data.length; i < len; i++) {
-						if (data[i] && data[i].attrs) {
-							if (data[i].attrs.key != null) {
-								var key = data[i].attrs.key;
-								if (!existing[key]) existing[key] = {action: INSERTION, index: i};
-								else existing[key] = {
-									action: MOVE,
-									index: i,
-									from: existing[key].index,
-									element: cached.nodes[existing[key].index] || $document.createElement("div")
-								};
-							}
+					forKeys(data, function (attrs, i) {
+						var key = attrs.key;
+						if (existing[key]) {
+							existing[key] = {
+								action: MOVE,
+								index: i,
+								from: existing[key].index,
+								element: cached.nodes[existing[key].index] || $document.createElement("div")
+							};
+						} else {
+							existing[key] = {action: INSERTION, index: i};
 						}
-					}
+					});
 					var actions = [];
 					for (var prop in existing) actions.push(existing[prop]);
 					var changes = actions.sort(sortChanges);
 					var newCached = new Array(cached.length);
 					newCached.nodes = cached.nodes.slice();
 
-					for (var i = 0, change; change = changes[i]; i++) {
+					forEach(changes, function (change) {
 						if (change.action === DELETION) {
 							clear(cached[change.index].nodes, cached[change.index]);
 							newCached.splice(change.index, 1);
@@ -203,38 +223,41 @@ var m = (function app(window, undefined) {
 							newCached[change.index] = cached[change.from];
 							newCached.nodes[change.index] = change.element;
 						}
-					}
+					});
 					cached = newCached;
 				}
 			}
 			//end key algorithm
 
-			for (var i = 0, cacheCount = 0, len = data.length; i < len; i++) {
+			var cacheCount = 0;
+			forEach(data, function (entry) {
 				//diff each item in the array
-				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
-				if (item === undefined) continue;
-				if (!item.nodes.intact) intact = false;
-				if (item.$trusted) {
-					//fix offset of next element if item was a trusted string w/ more than one html element
-					//the first clause in the regexp matches elements
-					//the second clause (after the pipe) matches text nodes
-					subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length;
+				var item = build(parentElement, parentTag, cached, index, entry, cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
+				if (item !== undefined) {
+					if (!item.nodes.intact) intact = false;
+					if (item.$trusted) {
+						//fix offset of next element if item was a trusted string w/ more than one html element
+						//the first clause in the regexp matches elements
+						//the second clause (after the pipe) matches text nodes
+						subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length;
+					}
+					else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
+					cached[cacheCount++] = item;
 				}
-				else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
-				cached[cacheCount++] = item;
-			}
+			});
+
 			if (!intact) {
 				//diff the array itself
 
 				//update the list of DOM nodes by collecting the nodes from each item
-				for (var i = 0, len = data.length; i < len; i++) {
+				forEach(data, function (_, i) {
 					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes);
-				}
+				});
 				//remove items from the end of the array if the new array is shorter than the old one
 				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
-				for (var i = 0, node; node = cached.nodes[i]; i++) {
+				forEach(cached.nodes, function (node, i) {
 					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]]);
-				}
+				});
 				if (data.length < cached.length) cached.length = data.length;
 				cached.nodes = nodes;
 			}
@@ -364,11 +387,7 @@ var m = (function app(window, undefined) {
 								clear(cached.nodes, cached);
 								nodes = [$document.createTextNode(data)];
 							}
-							try {
-								parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
-								nodes[0].nodeValue = data;
-							}
-							catch (e) {} //IE erroneously throws error when appending an empty text node after a null
+							injectTextNode(parentElement, nodes[0], index, data)
 						}
 					}
 				}
