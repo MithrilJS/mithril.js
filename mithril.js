@@ -701,18 +701,17 @@ var m = (function app(window, undefined) {
 	//routing
 	var modes = {pathname: "", hash: "#", search: "?"};
 	var redirect = noop, routeParams, currentRoute, isDefaultRoute = false;
-	m.route = function() {
+	m.route = function(root, arg1, arg2, vdom) {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
 		//m.route(el, defaultRoute, routes)
-		else if (arguments.length === 3 && type.call(arguments[1]) === STRING) {
-			var root = arguments[0], defaultRoute = arguments[1], router = arguments[2];
+		else if (arguments.length === 3 && type.call(arg1) === STRING) {
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source);
-				if (!routeByValue(root, router, path)) {
+				if (!routeByValue(root, arg2, path)) {
 					if (isDefaultRoute) throw new Error("Ensure the default route matches one of the routes defined in m.route");
 					isDefaultRoute = true;
-					m.route(defaultRoute, true);
+					m.route(arg1, true);
 					isDefaultRoute = false;
 				}
 			};
@@ -728,32 +727,30 @@ var m = (function app(window, undefined) {
 			window[listener]();
 		}
 		//config: m.route
-		else if (arguments[0].addEventListener || arguments[0].attachEvent) {
-			var element = arguments[0];
-			var vdom = arguments[3];
-			element.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
-			if (element.addEventListener) {
-				element.removeEventListener("click", routeUnobtrusive);
-				element.addEventListener("click", routeUnobtrusive);
+		else if (root.addEventListener || root.attachEvent) {
+			root.href = (m.route.mode !== 'pathname' ? $location.pathname : '') + modes[m.route.mode] + vdom.attrs.href;
+			if (root.addEventListener) {
+				root.removeEventListener("click", routeUnobtrusive);
+				root.addEventListener("click", routeUnobtrusive);
 			}
 			else {
-				element.detachEvent("onclick", routeUnobtrusive);
-				element.attachEvent("onclick", routeUnobtrusive);
+				root.detachEvent("onclick", routeUnobtrusive);
+				root.attachEvent("onclick", routeUnobtrusive);
 			}
 		}
 		//m.route(route, params, shouldReplaceHistoryEntry)
-		else if (type.call(arguments[0]) === STRING) {
+		else if (type.call(root) === STRING) {
 			var oldRoute = currentRoute;
-			currentRoute = arguments[0];
-			var args = arguments[1] || {};
+			currentRoute = root;
+			arg1 || {};
 			var queryIndex = currentRoute.indexOf("?");
 			var params = queryIndex > -1 ? parseQueryString(currentRoute.slice(queryIndex + 1)) : {};
-			for (var i in args) params[i] = args[i];
+			for (var i in arg1) params[i] = arg1[i];
 			var querystring = buildQueryString(params);
 			var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute;
 			if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
 
-			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arguments[2] : arguments[1]) === true || oldRoute === arguments[0];
+			var shouldReplaceHistoryEntry = (arguments.length === 3 ? arg2 : arg1) === true || oldRoute === root;
 
 			if (window.history.pushState) {
 				computePreRedrawHook = setScroll;
