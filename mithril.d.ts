@@ -17,7 +17,7 @@ declare module _mithril {
 		mount<T extends MithrilController>(rootElement: Node): T;
 
 		component<T extends MithrilController>(component: MithrilComponent<T>, ...args: Array<any>): MithrilComponent<T>
-		
+
 		trust(html: string): string;
 
 		render(rootElement: Element|HTMLDocument): void;
