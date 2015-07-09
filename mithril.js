@@ -32,16 +32,16 @@ var m = (function app(window, undefined) {
 	 * @param {...mNode=[]} Zero or more Mithril child nodes. Can be an array, or splat (optional)
 	 *
 	 */
-	function m() {
-		var args = [].slice.call(arguments);
-		if (type.call(args[0]) === OBJECT) return parameterize(args[0], args.slice(1));
-		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
-		var attrs = hasAttrs ? args[1] : {};
+	function m(tag, attrs) {
+		var args = [].slice.call(arguments, 1);
+		if (type.call(tag) === OBJECT) return parameterize(tag, args);
+		var hasAttrs = attrs != null && type.call(attrs) === OBJECT && !("tag" in attrs || "view" in attrs) && !("subtree" in attrs);
+		var attrs = hasAttrs ? attrs : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
 		var match, classes = [];
-		if (type.call(args[0]) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string");
-		while (match = parser.exec(args[0])) {
+		if (type.call(tag) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string");
+		while (match = parser.exec(tag)) {
 			if (match[1] === "" && match[2]) cell.tag = match[2];
 			else if (match[1] === "#") cell.attrs.id = match[2];
 			else if (match[1] === ".") classes.push(match[2]);
@@ -51,7 +51,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 
-		var children = hasAttrs ? args.slice(2) : args.slice(1);
+		var children = hasAttrs ? args.slice(1) : args;
 		if (children.length === 1 && type.call(children[0]) === ARRAY) {
 			cell.children = children[0];
 		}
@@ -68,7 +68,7 @@ var m = (function app(window, undefined) {
 				else cell.attrs[attrName] = attrs[attrName];
 			}
 		}
-		if (classes.length > 0) cell.attrs[classAttrName] = classes.join(" ");
+		if (classes.length) cell.attrs[classAttrName] = classes.join(" ");
 
 		return cell;
 	}
