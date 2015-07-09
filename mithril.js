@@ -37,10 +37,30 @@ var m = (function app(window, undefined) {
 		if (type.call(args[0]) === OBJECT) return parameterize(args[0], args.slice(1));
 		var hasAttrs = args[1] != null && type.call(args[1]) === OBJECT && !("tag" in args[1] || "view" in args[1]) && !("subtree" in args[1]);
 		var attrs = hasAttrs ? args[1] : {};
+		var children = hasAttrs ? args.slice(2) : args.slice(1);
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
 		var match, classes = [];
 		if (type.call(args[0]) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string");
+
+		// Build support for nested selectors
+		if (args[0].indexOf('>') >= 0) {
+			// Trimming here should be faster than doing it for every m call
+			args[0] = args[0].trim && args[0].trim() || args[0].replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
+
+			var selectors = args[0].split(/ *> */);
+			// Make sure we do in fact have nested elements (we may have trimmed a trailing bracket instead)
+			if (selectors.length >= 2) {
+				// Treat the inner-most child as the primary element
+				var virtualElem = m(selectors.pop(), attrs, children);
+				// Build ancestory
+				while (selectors.length) virtualElem = m(selectors.pop(), virtualElem);
+				// All done.
+				return virtualElem;
+			}
+		}
+
+
 		while (match = parser.exec(args[0])) {
 			if (match[1] === "" && match[2]) cell.tag = match[2];
 			else if (match[1] === "#") cell.attrs.id = match[2];
@@ -51,7 +71,6 @@ var m = (function app(window, undefined) {
 			}
 		}
 
-		var children = hasAttrs ? args.slice(2) : args.slice(1);
 		if (children.length === 1 && type.call(children[0]) === ARRAY) {
 			cell.children = children[0];
 		}
