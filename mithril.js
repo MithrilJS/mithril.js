@@ -1,9 +1,20 @@
 var m = (function app(window, undefined) {
-	var OBJECT = "[object Object]", ARRAY = "[object Array]", STRING = "[object String]", FUNCTION = "function";
+	function isFunction(object) {
+		return typeof object === "function";
+	}
+	function isObject(object) {
+		return type.call(object) === "[object Object]";
+	}
+	function isString(object) {
+		return type.call(object) === "[object String]";
+	}
+	var isArray = Array.isArray || function (object) {
+		return type.call(object) === "[object Array]";
+	};
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
-	var noop = function() {};
+	var noop = function () {};
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
@@ -32,15 +43,17 @@ var m = (function app(window, undefined) {
 	 * @param {...mNode=[]} Zero or more Mithril child nodes. Can be an array, or splat (optional)
 	 *
 	 */
-	function m(tag, attrs) {
-		var args = [].slice.call(arguments, 1);
-		if (type.call(tag) === OBJECT) return parameterize(tag, args);
-		var hasAttrs = attrs != null && type.call(attrs) === OBJECT && !("tag" in attrs || "view" in attrs) && !("subtree" in attrs);
-		var attrs = hasAttrs ? attrs : {};
+	function m(tag, pairs) {
+		for (var args = [], i = 1; i < arguments.length; i++) {
+			args[i - 1] = arguments[i];
+		}
+		if (isObject(tag)) return parameterize(tag, args);
+		var hasAttrs = pairs != null && isObject(pairs) && !("tag" in pairs || "view" in pairs || "subtree" in pairs);
+		var attrs = hasAttrs ? pairs : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
 		var cell = {tag: "div", attrs: {}};
 		var match, classes = [];
-		if (type.call(tag) != STRING) throw new Error("selector in m(selector, attrs, children) should be a string");
+		if (!isString(tag)) throw new Error("selector in m(selector, attrs, children) should be a string");
 		while (match = parser.exec(tag)) {
 			if (match[1] === "" && match[2]) cell.tag = match[2];
 			else if (match[1] === "#") cell.attrs.id = match[2];
@@ -52,7 +65,7 @@ var m = (function app(window, undefined) {
 		}
 
 		var children = hasAttrs ? args.slice(1) : args;
-		if (children.length === 1 && type.call(children[0]) === ARRAY) {
+		if (children.length === 1 && isArray(children[0])) {
 			cell.children = children[0];
 		}
 		else {
@@ -131,7 +144,7 @@ var m = (function app(window, undefined) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex;
-					var end = offset + (dataType === ARRAY ? data : cached.nodes).length;
+					var end = offset + (isArray(data) ? data : cached.nodes).length;
 					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end));
 				}
 				else if (cached.nodes) clear(cached.nodes, cached);
@@ -141,10 +154,10 @@ var m = (function app(window, undefined) {
 			cached.nodes = [];
 		}
 
-		if (dataType === ARRAY) {
+		if (isArray(data)) {
 			//recursively flatten array
 			for (var i = 0; i < data.length; i++) {
-				if (type.call(data[i]) === ARRAY) {
+				if (isArray(data[i])) {
 					data = data.concat.apply([], data);
 					i--; //check current index again and flatten until there are no more nested arrays at that index
 				}
@@ -241,7 +254,7 @@ var m = (function app(window, undefined) {
 						//the second clause (after the pipe) matches text nodes
 						subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length;
 					}
-					else subArrayCount += type.call(item) === ARRAY ? item.length : 1;
+					else subArrayCount += isArray(item) ? item.length : 1;
 					cached[cacheCount++] = item;
 				}
 			});
@@ -262,7 +275,7 @@ var m = (function app(window, undefined) {
 				cached.nodes = nodes;
 			}
 		}
-		else if (data != null && dataType === OBJECT) {
+		else if (data != null && isObject(data)) {
 			var views = [], controllers = [];
 			while (data.view) {
 				var view = data.view.$original || data.view;
@@ -288,14 +301,14 @@ var m = (function app(window, undefined) {
 			//if an element is different enough from the one in cache, recreate it
 			if (data.tag != cached.tag || dataAttrKeys.sort().join() != Object.keys(cached.attrs).sort().join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && (!cached.configContext || cached.configContext.retain !== true)) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
 				if (cached.nodes.length) clear(cached.nodes);
-				if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) cached.configContext.onunload();
+				if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
 				if (cached.controllers) {
 					for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-						if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
+						if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
 					}
 				}
 			}
-			if (type.call(data.tag) != STRING) return;
+			if (!isString(data.tag)) return;
 
 			var node, isNew = cached.nodes.length === 0;
 			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
@@ -344,7 +357,7 @@ var m = (function app(window, undefined) {
 				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null);
 			}
 			//schedule configs to be called. They are called after `build` finishes running
-			if (typeof data.attrs["config"] === FUNCTION) {
+			if (isFunction(data.attrs["config"])) {
 				var context = cached.configContext = cached.configContext || {};
 
 				// bind
@@ -356,7 +369,7 @@ var m = (function app(window, undefined) {
 				configs.push(callback(data, [node, !isNew, context, cached]));
 			}
 		}
-		else if (typeof data != FUNCTION) {
+		else if (!isFunction(data)) {
 			//handle text nodes
 			var nodes;
 			if (cached.nodes.length === 0) {
@@ -410,11 +423,11 @@ var m = (function app(window, undefined) {
 					//`config` isn't a real attributes, so ignore it
 					if (attrName === "config" || attrName == "key") continue;
 					//hook event handlers to the auto-redrawing system
-					else if (typeof dataAttr === FUNCTION && attrName.indexOf("on") === 0) {
+					else if (isFunction(dataAttr) && attrName.indexOf("on") === 0) {
 						node[attrName] = autoredraw(dataAttr, node);
 					}
 					//handle `style: {...}`
-					else if (attrName === "style" && dataAttr != null && type.call(dataAttr) === OBJECT) {
+					else if (attrName === "style" && dataAttr != null && isObject(dataAttr)) {
 						for (var rule in dataAttr) {
 							if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) node.style[rule] = dataAttr[rule];
 						}
@@ -461,17 +474,17 @@ var m = (function app(window, undefined) {
 		if (nodes.length != 0) nodes.length = 0;
 	}
 	function unload(cached) {
-		if (cached.configContext && typeof cached.configContext.onunload === FUNCTION) {
+		if (cached.configContext && isFunction(cached.configContext.onunload)) {
 			cached.configContext.onunload();
 			cached.configContext.onunload = null;
 		}
 		if (cached.controllers) {
 			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-				if (typeof controller.onunload === FUNCTION) controller.onunload({preventDefault: noop});
+				if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
 			}
 		}
 		if (cached.children) {
-			if (type.call(cached.children) === ARRAY) {
+			if (isArray(cached.children)) {
 				for (var i = 0, child; child = cached.children[i]; i++) unload(child);
 			}
 			else if (cached.children.tag) unload(cached.children);
@@ -563,7 +576,7 @@ var m = (function app(window, undefined) {
 
 	m.prop = function (store) {
 		//note: using non-strict equality check here because we're checking if store is null OR undefined
-		if (((store != null && type.call(store) === OBJECT) || typeof store === FUNCTION) && typeof store.then === FUNCTION) {
+		if ((store != null && isObject(store) || isFunction(store)) && isFunction(store.then)) {
 			return propify(store);
 		}
 
@@ -577,7 +590,7 @@ var m = (function app(window, undefined) {
 			return (component.controller || noop).apply(this, args) || this;
 		};
 		var view = function(ctrl) {
-			if (arguments.length > 1) args = args.concat([].slice.call(arguments, 1));
+			for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl]);
 		};
 		view.$original = component.view;
@@ -586,7 +599,8 @@ var m = (function app(window, undefined) {
 		return output;
 	}
 	m.component = function(component) {
-		return parameterize(component, [].slice.call(arguments, 1));
+		for (var args = [], i = 1; i < arguments.length; i++) args[i - 1] = arguments[i];
+		return parameterize(component, args);
 	};
 	m.mount = m.module = function(root, component) {
 		if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
@@ -607,7 +621,7 @@ var m = (function app(window, undefined) {
 		}
 		else unloaders = [];
 
-		if (controllers[index] && typeof controllers[index].onunload === FUNCTION) {
+		if (controllers[index] && isFunction(controllers[index].onunload)) {
 			controllers[index].onunload(event);
 		}
 
@@ -616,7 +630,7 @@ var m = (function app(window, undefined) {
 			m.startComputation();
 			roots[index] = root;
 			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2));
-			var currentComponent = topComponent = component = component || {controller: function() {}};
+			var currentComponent = topComponent = component = component || {controller: noop};
 			var constructor = component.controller || noop;
 			var controller = new constructor;
 			//controllers may call m.mount recursively (via m.route redirects, for example)
@@ -637,7 +651,7 @@ var m = (function app(window, undefined) {
 		try {
 			//lastRedrawId is a positive number if a second redraw is requested before the next animation frame
 			//lastRedrawID is null if it's the first redraw and not an event handler
-			if (lastRedrawId && force !== true) {
+			if (lastRedrawId && !force) {
 				//when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame, otherwise keep currently scheduled timeout
 				//when rAF: always reschedule redraw
 				if ($requestAnimationFrame === window.requestAnimationFrame || new Date - lastRedrawCallTime > FRAME_BUDGET) {
@@ -705,7 +719,7 @@ var m = (function app(window, undefined) {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
 		//m.route(el, defaultRoute, routes)
-		else if (arguments.length === 3 && type.call(arg1) === STRING) {
+		else if (arguments.length === 3 && isString(arg1)) {
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source);
 				if (!routeByValue(root, arg2, path)) {
@@ -739,7 +753,7 @@ var m = (function app(window, undefined) {
 			}
 		}
 		//m.route(route, params, shouldReplaceHistoryEntry)
-		else if (type.call(root) === STRING) {
+		else if (isString(root)) {
 			var oldRoute = currentRoute;
 			currentRoute = root;
 			arg1 || {};
@@ -832,8 +846,8 @@ var m = (function app(window, undefined) {
 			var value = object[prop];
 			var valueType = type.call(value);
 			var pair = (value === null) ? encodeURIComponent(key) :
-				valueType === OBJECT ? buildQueryString(value, key) :
-				valueType === ARRAY ? value.reduce(function(memo, item) {
+				isObject(value) ? buildQueryString(value, key) :
+				isArray(value) ? value.reduce(function(memo, item) {
 					if (!duplicates[key]) duplicates[key] = {};
 					if (!duplicates[key][item]) {
 						duplicates[key][item] = true;
@@ -855,7 +869,7 @@ var m = (function app(window, undefined) {
 			var key = decodeURIComponent(pair[0]);
 			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null;
 			if (params[key] != null) {
-				if (type.call(params[key]) !== ARRAY) params[key] = [params[key]];
+				if (!isArray(params[key])) params[key] = [params[key]];
 				params[key].push(value);
 			}
 			else params[key] = value;
@@ -937,7 +951,7 @@ var m = (function app(window, undefined) {
 		}
 
 		function thennable(then, successCallback, failureCallback, notThennableCallback) {
-			if (((promiseValue != null && type.call(promiseValue) === OBJECT) || typeof promiseValue === FUNCTION) && typeof then === FUNCTION) {
+			if (((promiseValue != null && isObject(promiseValue)) || isFunction(promiseValue)) && isFunction(then)) {
 				try {
 					// count protects against abuse calls from spec checker
 					var count = 0;
@@ -981,10 +995,10 @@ var m = (function app(window, undefined) {
 				fire();
 			}, function() {
 				try {
-					if (state === RESOLVING && typeof successCallback === FUNCTION) {
+					if (state === RESOLVING && isFunction(successCallback)) {
 						promiseValue = successCallback(promiseValue);
 					}
-					else if (state === REJECTING && typeof failureCallback === FUNCTION) {
+					else if (state === REJECTING && isFunction(failureCallback)) {
 						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING;
 					}
@@ -1101,13 +1115,13 @@ var m = (function app(window, undefined) {
 			if (options.deserialize === JSON.parse) {
 				xhr.setRequestHeader("Accept", "application/json, text/*");
 			}
-			if (typeof options.config === FUNCTION) {
+			if (isFunction(options.config)) {
 				var maybeXhr = options.config(xhr, options);
 				if (maybeXhr != null) xhr = maybeXhr;
 			}
 
 			var data = options.method === "GET" || !options.data ? "" : options.data;
-			if (data && (type.call(data) != STRING && data.constructor != window.FormData)) {
+			if (data && (!isString(data) && data.constructor != window.FormData)) {
 				throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`";
 			}
 			xhr.send(data);
@@ -1153,8 +1167,10 @@ var m = (function app(window, undefined) {
 				var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
 				var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
 				if (e.type === "load") {
-					if (type.call(response) === ARRAY && xhrOptions.type) {
-						for (var i = 0; i < response.length; i++) response[i] = new xhrOptions.type(response[i]);
+					if (isArray(response) && xhrOptions.type) {
+						forEach(response, function (res, i) {
+							response[i] = new xhrOptions.type(res);
+						});
 					}
 					else if (xhrOptions.type) response = new xhrOptions.type(response);
 				}
