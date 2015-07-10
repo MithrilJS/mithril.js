@@ -139,8 +139,7 @@ var m = (function app(window, undefined) {
 		//- it simplifies diffing code
 		data = dataToString(data);
 		if (data.subtree === "retain") return cached;
-		var cachedType = type.call(cached), dataType = type.call(data);
-		if (cached == null || cachedType !== dataType) {
+		if (cached == null || type.call(cached) !== type.call(data)) {
 			if (cached != null) {
 				if (parentCache && parentCache.nodes) {
 					var offset = index - parentIndex;
