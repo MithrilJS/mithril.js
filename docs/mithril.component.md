@@ -5,6 +5,7 @@
 - [Rendering components](#rendering-components)
 	- [Optional controller](#optional-controller)
 	- [Controller as a class constructor](#controller-as-a-class-constructor)
+	- [Component as a class constructor](#component-as-a-class-constructor)
 	- [Notes on the view function](#notes-on-the-view-function)
 - [Parameterized components](#parameterized-components)
 - [Nesting components](#nesting-components)
@@ -138,6 +139,51 @@ var MyComponent = {
 }
 
 m.mount(document.body, MyComponent) // renders <h1>Hello</h1>
+```
+
+#### Component as a class constructor
+
+A whole component can also be used as a class constructor. In that case, properties attached to the `this` object within the constructor will be available in `this` within the `view` method.
+
+```javascript
+function MyComponent(options) {
+	this.greeting = options.greeting
+}
+
+MyComponent.prototype.view = function() {
+	return m("h1", this.greeting)
+}
+
+m.mount(document.body, m(MyComponent, {greeting: "Hello"})) // renders <h1>Hello</h1>
+```
+
+The same results can be achieved using ECMAScript 2015:
+
+```javascript
+class MyComponent {
+	constructor({greeting} = {}) {
+		this.greeting = greeting
+	}
+
+	view() {
+		return m("h1", this.greeting)
+	}
+}
+
+m.mount(document.body, m(MyComponent, {greeting: "Hello"})) // renders <h1>Hello</h1>
+```
+
+or CoffeeScript:
+
+```coffeescript
+class MyComponent
+	constructor: ({@greeting} = {}) ->
+
+	view: ->
+		m("h1", @greeting)
+
+m.mount document.body, m MyComponent, greeting: "Hello" # renders <h1>Hello</h1>
+
 ```
 
 #### Notes on the view function
@@ -558,17 +604,22 @@ However, using [`m.render`](mithril.render.md) is only recommended if you want t
 Component component(Component component [, Object attributes [, any... args]])
 
 where:
-	Component :: Object { Controller, View }
+	Component :: Object { Controller, View } | ClassComponent
 	Controller :: SimpleController | UnloadableController
 	SimpleController :: void controller([Object attributes [, any... args]])
 	UnloadableController :: void controller([Object attributes [, any... args]]) { prototype: void unload(UnloadEvent e) }
 	UnloadEvent :: Object {void preventDefault()}
 	View :: void view(Object controllerInstance [, Object attributes [, any... args]])
+	ClassComponent :: SimpleClassComponent | UnloadableClassComponent
+	SimpleClassComponent :: void classConstructor([Object attributes [, any... args]]) { prototype: View }
+	UnloadableClassComponent :: void classConstructor([Object attributes [, any... args]]) { prototype: View, void unload(UnloadEvent e) }
 ```
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+	One option for component is to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+
+	The second option for the component is to be a constructor function, which is suppose to return an instance with methods `view` and (optionaly) `unload` available.
 
 -	**Object attributes**
 

@@ -48,20 +48,34 @@ function testMithril(mock) {
 		return Object.keys(v1.attrs).join() === Object.keys(v2.attrs).join()
 	})
 	test(function() {
-		//m should proxy object first arg to m.component
+		// Parameterized components should receive arguments
+		mock.requestAnimationFrame.$resolve()
+
+		var root1 = mock.document.createElement("div")
+		var root2 = mock.document.createElement("div")
+		var results = []
+
 		var component = {
-			controller: function(args) {
-				this.args = args
+			controller: function(args, str) {
+				results.push(args.age)
+				results.push(str)
 			},
-			view: function(ctrl) {
+			view: function(ctrl, args, str) {
+				results.push(args.age * 2)
+				results.push(str + str)
 				return m("div", "testing")
 			}
 		}
 		var args = {age: 12}
-		var c1 = m(component, args).controller()
-		var c2 = m.component(component, args).controller()
+		var c1 = m(component, args, "hello")
+		var c2 = m.component(component, args, "hello")
 
-		return c1.args === args && c1.args == c2.args
+		m.mount(root1, c1)
+		m.mount(root2, c2)
+
+		mock.requestAnimationFrame.$resolve()
+
+		return results.toString() === "12,hello,24,hellohello,12,hello,24,hellohello,24,hellohello"
 	})
 
 	//m.mount
@@ -4349,6 +4363,129 @@ function testMithril(mock) {
 		node = m("div", {config: checkConfig});
 		m.render(root, [node, node]);
 		return success;
+	})
+
+	test(function() {
+		//view should be able to access component properties
+
+		mock.requestAnimationFrame.$resolve()
+		var root = mock.document.createElement("div")
+
+		var component = {
+			data: "sample",
+			controller: function() {
+			},
+			view: function() {
+				this.data = "replaced"
+			}
+		}
+		m.mount(root, m(component))
+
+		mock.requestAnimationFrame.$resolve()
+
+		return component.data === "replaced"
+	})
+
+	test(function() {
+		// Class should be instantiated,
+		// view should be called in the context of created instance,
+
+		mock.requestAnimationFrame.$resolve()
+		var root = mock.document.createElement("div")
+
+		var Class
+
+		Class = (function() {
+			function Class() {
+				this.name = "foo"
+			}
+
+			Class.prototype.view = function(ctrl) {
+				return this === ctrl && this.name
+			}
+
+			return Class
+		})()
+
+		m.mount(root, Class)
+
+		mock.requestAnimationFrame.$resolve()
+
+		return root.childNodes[0].nodeValue === "foo"
+	})
+
+	test(function() {
+		// Class should be instantiated,
+		// view should be called in the context of created instance,
+		// both constructor and view should receive the same argument
+
+		mock.requestAnimationFrame.$resolve()
+		var root = mock.document.createElement("div")
+		var Class
+		var firstResult
+
+		Class = (function() {
+			function Class(name) {
+				this.name = name
+			}
+
+			Class.prototype.view = function(ctrl, name) {
+				return this.name === name && this === ctrl && name
+			}
+
+			return Class
+		})()
+
+		m.mount(root, m.component(Class, "foo"))
+
+		mock.requestAnimationFrame.$resolve()
+
+		firstResult = root.childNodes[0].nodeValue
+
+		m.mount(root, m(Class, "bar"))
+
+		mock.requestAnimationFrame.$resolve()
+
+		return root.childNodes[0].nodeValue === "bar" && firstResult === "foo"
+	})
+
+	test(function() {
+		// Class should be instantiated,
+		// unloader in the context of instance should be called
+
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+
+		var Class
+		var unloaded = false
+
+		Class = (function() {
+			function Class() {
+				this.name = "foo"
+			}
+
+			Class.prototype.view = function(ctrl) {
+				return this === ctrl && this.name
+			}
+
+			Class.prototype.onunload = function() {
+				if(this.name === "foo")
+					unloaded = true
+			}
+
+			return Class
+		})()
+
+		m.mount(root, Class)
+
+		mock.requestAnimationFrame.$resolve()
+
+		m.mount(root, null)
+
+		mock.requestAnimationFrame.$resolve()
+
+		return unloaded
 	})
 
 	//console.log presence
