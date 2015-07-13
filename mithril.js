@@ -755,10 +755,10 @@ var m = (function app(window, undefined) {
 		else if (isString(root)) {
 			var oldRoute = currentRoute;
 			currentRoute = root;
-			arg1 = arg1 || {};
+			var args = arg1 || {};
 			var queryIndex = currentRoute.indexOf("?");
 			var params = queryIndex > -1 ? parseQueryString(currentRoute.slice(queryIndex + 1)) : {};
-			for (var i in arg1) params[i] = arg1[i];
+			for (var i in arg1) params[i] = args[i];
 			var querystring = buildQueryString(params);
 			var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute;
 			if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
