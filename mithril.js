@@ -588,7 +588,7 @@ var m = (function app(window, undefined) {
 		var controller = function() {
 			return (component.controller || noop).apply(this, args) || this;
 		};
-		if (component.controller) controller.prototype = component.controller.prototype
+		if (component.controller) controller.prototype = component.controller.prototype;
 		var view = function(ctrl) {
 			for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
 			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl]);
