@@ -396,7 +396,7 @@ var ContactsWidget = {
 //ContactList no longer calls `Contact.save`
 var ContactForm = {
 	controller: function(args) {
-	        ctrl = this
+	        var ctrl = this
 		ctrl.contact = m.prop(new Contact())
 		ctrl.save = function(contact) {
 			Observable.trigger("saveContact", {contact: contact})

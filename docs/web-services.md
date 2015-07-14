@@ -1,8 +1,8 @@
 ## Web Services
 
-Mithril provides a high-level utility for working with web services, which allows writing asynchronous code relatively procedurally.
+Mithril allows writing asynchronous code in a procedural way through a high-level utility for working with web services.
 
-It provides a number of useful features out of the box:
+This utility provides a number of useful features out of the box:
 
 -	The ability to get an early reference to a container that will hold the asynchronous response
 -	The ability to queue operations to be performed after the asynchronous request completes
