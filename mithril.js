@@ -47,7 +47,7 @@ var m = (function app(window, undefined) {
 		for (var args = [], i = 1; i < arguments.length; i++) {
 			args[i - 1] = arguments[i];
 		}
-		if (isObject(tag)) return parameterize(tag, args);
+		if (isObject(tag) || isFunction(tag)) return parameterize(tag, args);
 		var hasAttrs = pairs != null && isObject(pairs) && !("tag" in pairs || "view" in pairs || "subtree" in pairs);
 		var attrs = hasAttrs ? pairs : {};
 		var classAttrName = "class" in attrs ? "class" : "className";
@@ -279,9 +279,15 @@ var m = (function app(window, undefined) {
 			while (data.view) {
 				var view = data.view.$original || data.view;
 				var controllerIndex = m.redraw.strategy() == "diff" && cached.views ? cached.views.indexOf(view) : -1;
-				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop);
+				var controller = (controllerIndex > -1) ? cached.controllers[controllerIndex]
+					: applyNew(data.controller || noop, data.args || []);
 				var key = data && data.attrs && data.attrs.key;
-				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"};
+				data = (pendingRequests == 0 || forcing) ||
+					(cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ?
+					data.view.apply(
+						data.isClass ? controller : (data.origComponent || data),
+						[controller].concat(data.args || []))
+					: {tag: "placeholder"};
 				if (data.subtree === "retain") return cached;
 				if (key != null) {
 					if (!data.attrs) data.attrs = {};
@@ -330,11 +336,11 @@ var m = (function app(window, undefined) {
 					cached.views = views;
 					cached.controllers = controllers;
 					for (var i = 0, controller; controller = controllers[i]; i++) {
-						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old;
+						if (controller.onunload && controller.__old_onunload) controller.onunload = controller.__old_onunload;
 						if (pendingRequests && controller.onunload) {
 							var onunload = controller.onunload;
 							controller.onunload = noop;
-							controller.onunload.$old = onunload;
+							controller.__old_onunload = onunload;
 						}
 					}
 				}
@@ -520,6 +526,30 @@ var m = (function app(window, undefined) {
 			}
 		};
 	}
+	function applyNew(Constructor, args){
+		var AuxilaryConstructor, createdInstance, constructorResult;
+		if (Constructor.bind) {
+		  // Should be supported in Chrome 7, Firefox 4, IE 9, Opera 11.60, Safari 5.1
+		  // Tested in IE 9-11, Safari 8, Chrome 43, Firefox 39
+			AuxilaryConstructor = Constructor.bind.apply(Constructor, [null].concat(args));
+			constructorResult = new AuxilaryConstructor;
+		}
+		else if (Object.create){ // Should be supported in Chrome 5, Safari 5
+			createdInstance = Object.create(Constructor.prototype);
+			constructorResult = Constructor.apply(createdInstance, args);
+		}
+		else { // Tested in IE 6-8
+			AuxilaryConstructor = function(){};
+			AuxilaryConstructor.prototype = Constructor.prototype;
+			createdInstance = new AuxilaryConstructor;
+			constructorResult = Constructor.apply(createdInstance, args);
+		}
+		return (
+				createdInstance === undefined ||
+				constructorResult !== null &&
+				typeof constructorResult === "object" // new (function(){return new String("foo")}) == "foo"
+			) ? constructorResult : createdInstance;
+	}
 
 	var html;
 	var documentNode = {
@@ -585,15 +615,17 @@ var m = (function app(window, undefined) {
 	var roots = [], components = [], controllers = [], lastRedrawId = null, lastRedrawCallTime = 0, computePreRedrawHook = null, computePostRedrawHook = null, topComponent, unloaders = [];
 	var FRAME_BUDGET = 16; //60 frames per second = 1 call per 16 ms
 	function parameterize(component, args) {
-		var controller = function() {
-			return (component.controller || noop).apply(this, args) || this;
-		};
-		var view = function(ctrl) {
-			for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
-			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl]);
-		};
-		view.$original = component.view;
-		var output = {controller: controller, view: view};
+		var output = isFunction(component) ?
+			{
+				controller: component,
+				view: component.prototype.view,
+				isClass: true
+			} : {
+				controller: component.controller || noop,
+				view: component.view,
+				origComponent: component
+			}
+		output.args = args;
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key};
 		return output;
 	}
@@ -628,10 +660,16 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2));
+			if (isFunction(component))
+				component = {
+					controller: component,
+					view: component.prototype.view,
+					isClass: true
+				}
 			var currentComponent = topComponent = component = component || {controller: noop};
 			var constructor = component.controller || noop;
-			var controller = new constructor;
+			var controller = applyNew(constructor, component.args || [])
+
 			//controllers may call m.mount recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.mount call is applied
 			if (currentComponent === topComponent) {
@@ -675,8 +713,11 @@ var m = (function app(window, undefined) {
 		}
 		for (var i = 0, root; root = roots[i]; i++) {
 			if (controllers[i]) {
-				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]];
-				m.render(root, components[i].view ? components[i].view(controllers[i], args) : "");
+				m.render(root, components[i].view ?
+					components[i].view.apply(
+						components[i].isClass ? controllers[i] : (components[i].origComponent || components[i]),
+						[controllers[i]].concat(components[i].args || []))
+					: "");
 			}
 		}
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState

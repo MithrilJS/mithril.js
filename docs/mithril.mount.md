@@ -48,12 +48,15 @@ For more information on components, see [`m.component`](mithril.component.md).
 Object mount(DOMElement rootElement, Component component)
 
 where:
-	Component :: Object { Controller, View }
+	Component :: Object { Controller, View } | ClassComponent
 	Controller :: SimpleController | UnloadableController
 	SimpleController :: void controller([Object attributes [, any... args]])
 	UnloadableController :: void controller([Object attributes [, any... args]]) { prototype: void unload(UnloadEvent e) }
 	UnloadEvent :: Object {void preventDefault()}
 	View :: void view(Object controllerInstance [, Object attributes [, any... args]])
+	ClassComponent :: SimpleClassComponent | UnloadableClassComponent
+	SimpleClassComponent :: void classConstructor([Object attributes [, any... args]]) { prototype: View }
+	UnloadableClassComponent :: void classConstructor([Object attributes [, any... args]]) { prototype: View, void unload(UnloadEvent e) }
 ```
 
 -	**DOMElement rootElement**
@@ -62,11 +65,13 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function. If the `controller` is omitted, Mithril will provide one, pointing to an empty function.
+	One option for component is to be an Object with two keys: `controller` and `view`. Each of those should point to a Javascript function. If the `controller` is omitted, Mithril will provide one, pointing to an empty function.
 
 	When `m.mount` is called, the controller function runs, and its return value is returned by the `m.mount` call.
 
 	Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view's constructor.
+
+	The second option for the component is to be a constructor function, which is suppose to return an instance with methods `view` and (optionaly) `unload` available.
 
 -	**returns Object controllerInstance**
 
