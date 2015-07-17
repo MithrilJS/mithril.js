@@ -1,4 +1,6 @@
 var m = (function app(window, undefined) {
+  var VERSION = "v0.2.0-next";
+
 	function isFunction(object) {
 		return typeof object === "function";
 	}
@@ -29,6 +31,9 @@ var m = (function app(window, undefined) {
 
 	initialize(window);
 
+  m.version = function(){
+    return VERSION;
+  };
 
 	/**
 	 * @typedef {String} Tag
