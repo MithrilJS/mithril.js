@@ -1,4 +1,3 @@
-/* eslint-disable no-extend-native, strict */
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(item) {
 		for (var i = 0; i < this.length; i++) {
@@ -32,11 +31,9 @@ if (!Object.keys) {
 		return keys
 	}
 }
-/* eslint-enable no-extend-native, strict */
 
 var mock = {}
 mock.window = (function() {
-	"use strict"
 	var window = {}
 	window.document = {}
 	window.document.childNodes = []
@@ -60,10 +57,9 @@ mock.window = (function() {
 			insertAdjacentHTML: function(position, html) {
 				// todo: accept markup
 				if (position === "beforebegin") {
-					this.parentNode.insertBefore(
-						window.document.createTextNode(html),
-						this)
-				} else if (position === "beforeend") {
+					this.parentNode.insertBefore(window.document.createTextNode(html), this)
+				}
+				else if (position === "beforeend") {
 					this.appendChild(window.document.createTextNode(html))
 				}
 			},
@@ -74,7 +70,7 @@ mock.window = (function() {
 				this.namespaceURI = namespace
 				this[name] = value.toString()
 			},
-			getAttribute: function(name) {
+			getAttribute: function(name, value) {
 				return this[name]
 			},
 			addEventListener: function () {},
@@ -111,22 +107,22 @@ mock.window = (function() {
 	// getElementsByTagName is only used by JSONP tests, it's not required by
 	// Mithril
 	window.document.getElementsByTagName = function(name){
-		name = name.toLowerCase()
-		var out = []
+		name = name.toLowerCase();
+		var out = [];
 
 		var traverse = function(node){
 			if(node.childNodes && node.childNodes.length > 0){
 				node.childNodes.map(function(curr){
 					if (curr.nodeName.toLowerCase() === name) {
-						out.push(curr)
+						out.push(curr);
 					}
-					traverse(curr)
-				})
+					traverse(curr);
+				});
 			}
 		}
 
-		traverse(window.document)
-		return out
+		traverse(window.document);
+		return out;
 	}
 	window.scrollTo = function() {}
 	window.cancelAnimationFrame = function() {}
@@ -167,12 +163,10 @@ mock.window = (function() {
 	window.history.$$length = 0
 	window.history.pushState = function(data, title, url) {
 		window.history.$$length++
-		window.location.pathname = window.location.search =
-		window.location.hash = url
+		window.location.pathname = window.location.search = window.location.hash = url
 	}
 	window.history.replaceState = function(data, title, url) {
-		window.location.pathname = window.location.search =
-		window.location.hash = url
+		window.location.pathname = window.location.search = window.location.hash = url
 	}
 	return window
 }())

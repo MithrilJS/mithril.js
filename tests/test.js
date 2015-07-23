@@ -1,19 +1,15 @@
-/* eslint-disable no-console */
 if (!this.console) {
-	var log = function(value) {
-		"use strict"
-		document.write("<pre>" + value + "</pre>")
-	}
+	var log = function(value) {document.write("<pre>" + value + "</pre>")}
 	this.console = {log: log, error: log}
 }
 
 function test(condition) {
-	"use strict"
 	test.total++
 
 	try {
 		if (!condition()) throw new Error("failed")
-	} catch (e) {
+	}
+	catch (e) {
 		console.error(e)
 		test.failures.push(condition)
 	}
@@ -21,7 +17,6 @@ function test(condition) {
 test.total = 0
 test.failures = []
 test.print = function(print) {
-	"use strict"
 	for (var i = 0; i < test.failures.length; i++) {
 		print(test.failures[i].toString())
 	}
