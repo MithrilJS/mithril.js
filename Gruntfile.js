@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 	var _ = require("lodash");
-	var version = "0.4.0";
+	var version = "0.2.0";
 
 	var inputFolder = "./docs";
 	var tempFolder = "./temp";

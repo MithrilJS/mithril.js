@@ -2,6 +2,7 @@ function testMithril(mock) {
 	m.deps(mock)
 
 	//m
+  test(function() {return m.version().constructor === String})
 	test(function() {return m("div").tag === "div"})
 	test(function() {return m(".foo").tag === "div"})
 	test(function() {return m(".foo").attrs.className === "foo"})
