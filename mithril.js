@@ -1,6 +1,6 @@
 var m = (function app(window, undefined) {
-  var VERSION = "v0.2.0-next";
-
+	"use strict";
+  	var VERSION = "v0.2.0-next";
 	function isFunction(object) {
 		return typeof object === "function";
 	}
@@ -59,7 +59,7 @@ var m = (function app(window, undefined) {
 		var cell = {tag: "div", attrs: {}};
 		var match, classes = [];
 		if (!isString(tag)) throw new Error("selector in m(selector, attrs, children) should be a string");
-		while (match = parser.exec(tag)) {
+		while ((match = parser.exec(tag)) != null) {
 			if (match[1] === "" && match[2]) cell.tag = match[2];
 			else if (match[1] === "#") cell.attrs.id = match[2];
 			else if (match[1] === ".") classes.push(match[2]);
@@ -102,319 +102,451 @@ var m = (function app(window, undefined) {
 	function dataToString(data) {
 		//data.toString() might throw or return null if data is the return value of Console.log in Firefox (behavior depends on version)
 		try {
-			if (data == null || data.toString() == null) data = "";
+			if (data == null || data.toString() == null) return "";
 		} catch (e) {
-			data = "";
+			return "";
 		}
 		return data;
 	}
 	// This function was causing deopts in Chrome.
 	function injectTextNode(parentElement, first, index, data) {
 		try {
-			parentElement.insertBefore(first, parentElement.childNodes[index] || null);
+			insertNode(parentElement, first, index);
 			first.nodeValue = data;
-		}
-		catch (e) {} //IE erroneously throws error when appending an empty text node after a null
+		} catch (e) {} //IE erroneously throws error when appending an empty text node after a null
 	}
+
+	function flatten(list) {
+		//recursively flatten array
+		for (var i = 0; i < list.length; i++) {
+			if (isArray(list[i])) {
+				list = list.concat.apply([], list);
+				//check current index again and flatten until there are no more nested arrays at that index
+				i--;
+			}
+		}
+		return list;
+	}
+
+	function insertNode(parentElement, node, index) {
+		parentElement.insertBefore(node, parentElement.childNodes[index] || null);
+	}
+
+	var DELETION = 1, INSERTION = 2, MOVE = 3;
+
+	function handleKeysDiffer(data, existing, cached, parentElement) {
+		forKeys(data, function (key, i) {
+			existing[key = key.key] = existing[key] ? {
+				action: MOVE,
+				index: i,
+				from: existing[key].index,
+				element: cached.nodes[existing[key].index] || $document.createElement("div")
+			} : {action: INSERTION, index: i};
+		});
+		var actions = [];
+		for (var prop in existing) actions.push(existing[prop]);
+		var changes = actions.sort(sortChanges), newCached = new Array(cached.length);
+		newCached.nodes = cached.nodes.slice();
+
+		forEach(changes, function (change) {
+			var index = change.index;
+			if (change.action === DELETION) {
+				clear(cached[index].nodes, cached[index]);
+				newCached.splice(index, 1);
+			}
+			if (change.action === INSERTION) {
+				var dummy = $document.createElement("div");
+				dummy.key = data[index].attrs.key;
+				insertNode(parentElement, dummy, index);
+				newCached.splice(index, 0, {
+					attrs: {key: data[index].attrs.key},
+					nodes: [dummy]
+				});
+				newCached.nodes[index] = dummy;
+			}
+
+			if (change.action === MOVE) {
+				var changeElement = change.element;
+				var maybeChanged = parentElement.childNodes[index];
+				if (maybeChanged !== changeElement && changeElement !== null) {
+					parentElement.insertBefore(changeElement, maybeChanged || null);
+				}
+				newCached[index] = cached[change.from];
+				newCached.nodes[index] = changeElement;
+			}
+		});
+
+		return newCached;
+	}
+
+	function diffKeys(data, cached, existing, parentElement) {
+		var keysDiffer = data.length !== cached.length;
+		if (!keysDiffer) {
+			forKeys(data, function (attrs, i) {
+				var cachedCell = cached[i];
+				return keysDiffer = cachedCell && cachedCell.attrs && cachedCell.attrs.key !== attrs.key;
+			});
+		}
+
+		return keysDiffer ? handleKeysDiffer(data, existing, cached, parentElement) : cached;
+	}
+
+	function diffArray(data, cached, nodes) {
+		//diff the array itself
+
+		//update the list of DOM nodes by collecting the nodes from each item
+		forEach(data, function (_, i) {
+			if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes);
+		})
+		//remove items from the end of the array if the new array is shorter than the old one. if errors ever happen here, the issue is most likely
+		//a bug in the construction of the `cached` data structure somewhere earlier in the program
+		forEach(cached.nodes, function (node, i) {
+			if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]]);
+		})
+		if (data.length < cached.length) cached.length = data.length;
+		cached.nodes = nodes;
+	}
+
+	function buildArrayKeys(data) {
+		var guid = 0;
+		forKeys(data, function () {
+			forEach(data, function (attrs) {
+				if ((attrs = attrs && attrs.attrs) && attrs.key == null) attrs.key = "__mithril__" + guid++;
+			})
+			return 1;
+		});
+	}
+
+	function maybeRecreateObject(data, cached, dataAttrKeys) {
+		//if an element is different enough from the one in cache, recreate it
+		if (data.tag !== cached.tag ||
+				dataAttrKeys.sort().join() !== Object.keys(cached.attrs).sort().join() ||
+				data.attrs.id !== cached.attrs.id ||
+				data.attrs.key !== cached.attrs.key ||
+				(m.redraw.strategy() === "all" && (!cached.configContext || cached.configContext.retain !== true)) ||
+				(m.redraw.strategy() === "diff" && cached.configContext && cached.configContext.retain === false)) {
+			if (cached.nodes.length) clear(cached.nodes);
+			if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
+			if (cached.controllers) {
+				forEach(cached.controllers, function (controller) {
+					if (controller.unload) controller.onunload({preventDefault: noop});
+				});
+			}
+		}
+	}
+
+	function getObjectNamespace(data, namespace) {
+		return data.attrs.xmlns ? data.attrs.xmlns :
+			data.tag === "svg" ? "http://www.w3.org/2000/svg" :
+			data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
+			namespace;
+	}
+
+	function unloadCachedControllers(cached, views, controllers) {
+		if (controllers.length) {
+			cached.views = views;
+			cached.controllers = controllers;
+			forEach(controllers, function (controller) {
+				if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old;
+				if (pendingRequests && controller.onunload) {
+					var onunload = controller.onunload;
+					controller.onunload = noop;
+					controller.onunload.$old = onunload;
+				}
+			});
+		}
+	}
+
+	function scheduleConfigsToBeCalled(configs, data, node, isNew, cached) {
+		//schedule configs to be called. They are called after `build`
+		//finishes running
+		if (isFunction(data.attrs.config)) {
+			var context = cached.configContext = cached.configContext || {};
+
+			//bind
+			configs.push(function() {
+				return data.attrs.config.call(data, node, !isNew, context, cached);
+			});
+		}
+	}
+
+	function buildUpdatedNode(cached, data, editable, hasKeys, namespace, views, configs, controllers) {
+		var node = cached.nodes[0];
+		if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
+		cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
+		cached.nodes.intact = true;
+
+		if (controllers.length) {
+			cached.views = views;
+			cached.controllers = controllers;
+		}
+
+		return node;
+	}
+
+	function handleNonexistentNodes(data, parentElement, index) {
+		var nodes;
+		if (data.$trusted) {
+			nodes = injectHTML(parentElement, index, data);
+		}
+		else {
+			nodes = [$document.createTextNode(data)];
+			if (!parentElement.nodeName.match(voidElements)) insertNode(parentElement, nodes[0], index);
+		}
+
+		var cached = typeof data === "string" || typeof data === "number" || typeof data === "boolean" ? new data.constructor(data) : data;
+		cached.nodes = nodes;
+		return cached;
+	}
+
+	function reattachNodes(data, cached, parentElement, editable, index, parentTag) {
+		var nodes = cached.nodes;
+		if (!editable || editable !== $document.activeElement) {
+			if (data.$trusted) {
+				clear(nodes, cached);
+				nodes = injectHTML(parentElement, index, data);
+			}
+			//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
+			//we need to update the value property of the parent textarea or the innerHTML of the contenteditable element instead
+			else if (parentTag === "textarea") {
+				parentElement.value = data;
+			}
+			else if (editable) {
+				editable.innerHTML = data;
+			}
+			else {
+				//was a trusted string
+				if (nodes[0].nodeType === 1 || nodes.length > 1) {
+					clear(cached.nodes, cached);
+					nodes = [$document.createTextNode(data)];
+				}
+				injectTextNode(parentElement, nodes[0], index, data);
+			}
+		}
+		cached = new data.constructor(data);
+		cached.nodes = nodes;
+		return cached;
+	}
+
+	function handleText(cached, data, index, parentElement, shouldReattach, editable, parentTag) {
+		//handle text nodes
+		return cached.nodes.length === 0 ? handleNonexistentNodes(data, parentElement, index) :
+			cached.valueOf() !== data.valueOf() || shouldReattach === true ?
+				reattachNodes(data, cached, parentElement, editable, index, parentTag) :
+			(cached.nodes.intact = true, cached);
+	}
+
+	function getSubArrayCount(item) {
+		if (item.$trusted) {
+			//fix offset of next element if item was a trusted string w/ more than one html element
+			//the first clause in the regexp matches elements
+			//the second clause (after the pipe) matches text nodes
+			var match = item.match(/<[^\/]|\>\s*[^<]/g);
+			if (match != null) return match.length;
+		}
+		else if (isArray(item)) {
+			return item.length;
+		}
+		return 1;
+	}
+
+	function buildArray(data, cached, parentElement, index, parentTag, shouldReattach, editable, namespace, configs) {
+		data = flatten(data);
+		var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
+
+		//keys algorithm: sort elements without recreating them if keys are present
+		//1) create a map of all existing keys, and mark all for deletion
+		//2) add new keys to map and mark them for addition
+		//3) if key exists in new list, change action from deletion to a move
+		//4) for each key, handle its corresponding action as marked in previous steps
+		var existing = {}, shouldMaintainIdentities = false;
+		forKeys(cached, function (attrs, i) {
+			shouldMaintainIdentities = true;
+			existing[cached[i].attrs.key] = {action: DELETION, index: i};
+		});
+
+		buildArrayKeys(data);
+		if (shouldMaintainIdentities) cached = diffKeys(data, cached, existing, parentElement);
+		//end key algorithm
+
+		var cacheCount = 0;
+		//faster explicitly written
+		for (var i = 0, len = data.length; i < len; i++) {
+			//diff each item in the array
+			var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
+
+			if (item !== undefined) {
+				intact = intact && item.nodes.intact;
+				subArrayCount += getSubArrayCount(item);
+				cached[cacheCount++] = item;
+			}
+		}
+
+		if (!intact) diffArray(data, cached, nodes);
+		return cached
+	}
+
+	function makeCache(data, cached, index, parentIndex, parentCache) {
+		if (cached != null) {
+			if (type.call(cached) === type.call(data)) return cached;
+
+			if (parentCache && parentCache.nodes) {
+				var offset = index - parentIndex, end = offset + (isArray(data) ? data : cached.nodes).length;
+				clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end));
+			} else if (cached.nodes) {
+				clear(cached.nodes, cached);
+			}
+		}
+
+		cached = new data.constructor();
+		//if constructor creates a virtual dom element, use a blank object
+		//as the base cached node instead of copying the virtual el (#277)
+		if (cached.tag) cached = {};
+		cached.nodes = [];
+		return cached;
+	}
+
+	function constructNode(data, namespace) {
+		return namespace === undefined ?
+			data.attrs.is ? $document.createElement(data.tag, data.attrs.is) : $document.createElement(data.tag) :
+			data.attrs.is ? $document.createElementNS(namespace, data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag);
+	}
+
+	function constructAttrs(data, node, namespace, hasKeys) {
+		return hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : data.attrs;
+	}
+
+	function constructChildren(data, node, cached, editable, namespace, configs) {
+		return data.children != null && data.children.length > 0 ?
+			build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
+			data.children;
+	}
+
+	function reconstructCached(data, attrs, children, node, namespace, views, controllers) {
+		var cached = {tag: data.tag, attrs: attrs, children: children, nodes: [node]};
+		unloadCachedControllers(cached, views, controllers);
+		if (cached.children && !cached.children.nodes) cached.children.nodes = [];
+		//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
+		if (data.tag === "select" && "value" in data.attrs) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
+		return cached
+	}
+
+	function getController(views, view, cachedControllers, controller) {
+		var controllerIndex = m.redraw.strategy() === "diff" && views ? views.indexOf(view) : -1;
+		return controllerIndex > -1 ? cachedControllers[controllerIndex] :
+			typeof controller === "function" ? new controller() : {};
+	}
+
+	function updateLists(views, controllers, view, controller) {
+		if (controller.onunload != null) unloaders.push({controller: controller, handler: controller.onunload});
+		views.push(view);
+		controllers.push(controller);
+	}
+
+	function checkView(data, view, cached, cachedControllers, controllers, views) {
+		var controller = getController(cached.views, view, cachedControllers, data.controller);
+		//Faster to coerce to number and check for NaN
+		var key = +(data && data.attrs && data.attrs.key);
+		data = pendingRequests === 0 || forcing || cachedControllers && cachedControllers.indexOf(controller) > -1 ? data.view(controller) : {tag: "placeholder"};
+		if (data.subtree === "retain") return cached;
+		if (key === key) (data.attrs = data.attrs || {}).key = key;
+		updateLists(views, controllers, view, controller);
+		return data;
+	}
+
+	function markViews(data, cached, views, controllers) {
+		var cachedControllers = cached && cached.controllers;
+		while (data.view != null) data = checkView(data, data.view.$original || data.view, cached, cachedControllers, controllers, views);
+		return data;
+	}
+
+	function buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) {
+		var views = [], controllers = [];
+		data = markViews(data, cached, views, controllers);
+		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
+		data.attrs = data.attrs || {};
+		cached.attrs = cached.attrs || {};
+		var dataAttrKeys = Object.keys(data.attrs);
+		var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0);
+		maybeRecreateObject(data, cached, dataAttrKeys);
+		if (!isString(data.tag)) return;
+		var isNew = cached.nodes.length === 0;
+		namespace = getObjectNamespace(data, namespace);
+		var node;
+		if (isNew) {
+			node = constructNode(data, namespace);
+			//set attributes first, then create children
+			var attrs = constructAttrs(data, node, namespace, hasKeys)
+			var children = constructChildren(data, node, cached, editable, namespace, configs);
+			cached = reconstructCached(data, attrs, children, node, namespace, views, controllers);
+		}
+		else {
+			node = buildUpdatedNode(cached, data, editable, hasKeys, namespace, views, configs, controllers);
+		}
+		if (isNew || shouldReattach === true && node != null) insertNode(parentElement, node, index);
+		//schedule configs to be called. They are called after `build`
+		//finishes running
+		scheduleConfigsToBeCalled(configs, data, node, isNew, cached);
+		return cached
+	}
+
 	function build(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
-		//`build` is a recursive function that manages creation/diffing/removal of DOM elements based on comparison between `data` and `cached`
+		//`build` is a recursive function that manages creation/diffing/removal
+		//of DOM elements based on comparison between `data` and `cached`
 		//the diff algorithm can be summarized as this:
 		//1 - compare `data` and `cached`
-		//2 - if they are different, copy `data` to `cached` and update the DOM based on what the difference is
-		//3 - recursively apply this algorithm for every array and for the children of every virtual element
+		//2 - if they are different, copy `data` to `cached` and update the DOM
+		//    based on what the difference is
+		//3 - recursively apply this algorithm for every array and for the
+		//    children of every virtual element
 
-		//the `cached` data structure is essentially the same as the previous redraw's `data` data structure, with a few additions:
-		//- `cached` always has a property called `nodes`, which is a list of DOM elements that correspond to the data represented by the respective virtual element
-		//- in order to support attaching `nodes` as a property of `cached`, `cached` is *always* a non-primitive object, i.e. if the data was a string, then cached is a String instance. If data was `null` or `undefined`, cached is `new String("")`
-		//- `cached also has a `configContext` property, which is the state storage object exposed by config(element, isInitialized, context)
-		//- when `cached` is an Object, it represents a virtual element; when it's an Array, it represents a list of elements; when it's a String, Number or Boolean, it represents a text node
+		//the `cached` data structure is essentially the same as the previous
+		//redraw's `data` data structure, with a few additions:
+		//- `cached` always has a property called `nodes`, which is a list of
+		//   DOM elements that correspond to the data represented by the
+		//   respective virtual element
+		//- in order to support attaching `nodes` as a property of `cached`,
+		//   `cached` is *always* a non-primitive object, i.e. if the data was
+		//   a string, then cached is a String instance. If data was `null` or
+		//   `undefined`, cached is `new String("")`
+		//- `cached also has a `configContext` property, which is the state
+		//   storage object exposed by config(element, isInitialized, context)
+		//- when `cached` is an Object, it represents a virtual element; when
+		//   it's an Array, it represents a list of elements; when it's a
+		//   String, Number or Boolean, it represents a text node
 
 		//`parentElement` is a DOM element used for W3C DOM API calls
-		//`parentTag` is only used for handling a corner case for textarea values
+		//`parentTag` is only used for handling a corner case for textarea
+		//values
 		//`parentCache` is used to remove nodes in some multi-node cases
-		//`parentIndex` and `index` are used to figure out the offset of nodes. They're artifacts from before arrays started being flattened and are likely refactorable
-		//`data` and `cached` are, respectively, the new and old nodes being diffed
-		//`shouldReattach` is a flag indicating whether a parent node was recreated (if so, and if this node is reused, then this node must reattach itself to the new parent)
-		//`editable` is a flag that indicates whether an ancestor is contenteditable
-		//`namespace` indicates the closest HTML namespace as it cascades down from an ancestor
-		//`configs` is a list of config functions to run after the topmost `build` call finishes running
+		//`parentIndex` and `index` are used to figure out the offset of nodes.
+		//They're artifacts from before arrays started being flattened and are
+		//likely refactorable
+		//`data` and `cached` are, respectively, the new and old nodes being
+		//diffed
+		//`shouldReattach` is a flag indicating whether a parent node was
+		//recreated (if so, and if this node is reused, then this node must
+		//reattach itself to the new parent)
+		//`editable` is a flag that indicates whether an ancestor is
+		//contenteditable
+		//`namespace` indicates the closest HTML namespace as it cascades down
+		//from an ancestor
+		//`configs` is a list of config functions to run after the topmost
+		//`build` call finishes running
 
-		//there's logic that relies on the assumption that null and undefined data are equivalent to empty strings
-		//- this prevents lifecycle surprises from procedural helpers that mix implicit and explicit return statements (e.g. function foo() {if (cond) return m("div")}
+		//there's logic that relies on the assumption that null and undefined
+		//data are equivalent to empty strings
+		//- this prevents lifecycle surprises from procedural helpers that mix
+		//  implicit and explicit return statements (e.g.
+		//  function foo() {if (cond) return m("div")}
 		//- it simplifies diffing code
 		data = dataToString(data);
 		if (data.subtree === "retain") return cached;
-		if (cached == null || type.call(cached) !== type.call(data)) {
-			if (cached != null) {
-				if (parentCache && parentCache.nodes) {
-					var offset = index - parentIndex;
-					var end = offset + (isArray(data) ? data : cached.nodes).length;
-					clear(parentCache.nodes.slice(offset, end), parentCache.slice(offset, end));
-				}
-				else if (cached.nodes) clear(cached.nodes, cached);
-			}
-			cached = new data.constructor;
-			if (cached.tag) cached = {}; //if constructor creates a virtual dom element, use a blank object as the base cached node instead of copying the virtual el (#277)
-			cached.nodes = [];
-		}
-
-		if (isArray(data)) {
-			//recursively flatten array
-			for (var i = 0; i < data.length; i++) {
-				if (isArray(data[i])) {
-					data = data.concat.apply([], data);
-					i--; //check current index again and flatten until there are no more nested arrays at that index
-				}
-			}
-
-			var nodes = [], intact = cached.length === data.length, subArrayCount = 0;
-
-			//keys algorithm: sort elements without recreating them if keys are present
-			//1) create a map of all existing keys, and mark all for deletion
-			//2) add new keys to map and mark them for addition
-			//3) if key exists in new list, change action from deletion to a move
-			//4) for each key, handle its corresponding action as marked in previous steps
-			var DELETION = 1, INSERTION = 2 , MOVE = 3;
-			var existing = {}, shouldMaintainIdentities = false;
-			forKeys(cached, function (attrs, i) {
-				shouldMaintainIdentities = true;
-				existing[cached[i].attrs.key] = {action: DELETION, index: i};
-			});
-
-			var guid = 0;
-			forKeys(data, function () {
-				forEach(data, function (attrs) {
-					if ((attrs = attrs && attrs.attrs) && attrs.key == null) {
-						attrs.key = "__mithril__" + guid++;
-					}
-				});
-				return 1;
-			});
-
-			if (shouldMaintainIdentities) {
-				var keysDiffer = data.length != cached.length;
-				if (!keysDiffer) {
-					forKeys(data, function (attrs, i) {
-						var cachedCell = cached[i];
-						return keysDiffer = cachedCell && cachedCell.attrs && cachedCell.attrs.key != attrs.key;
-					});
-				}
-
-				if (keysDiffer) {
-					forKeys(data, function (attrs, i) {
-						var key = attrs.key;
-						if (existing[key]) {
-							existing[key] = {
-								action: MOVE,
-								index: i,
-								from: existing[key].index,
-								element: cached.nodes[existing[key].index] || $document.createElement("div")
-							};
-						} else {
-							existing[key] = {action: INSERTION, index: i};
-						}
-					});
-					var actions = [];
-					for (var prop in existing) actions.push(existing[prop]);
-					var changes = actions.sort(sortChanges);
-					var newCached = new Array(cached.length);
-					newCached.nodes = cached.nodes.slice();
-
-					forEach(changes, function (change) {
-						if (change.action === DELETION) {
-							clear(cached[change.index].nodes, cached[change.index]);
-							newCached.splice(change.index, 1);
-						}
-						if (change.action === INSERTION) {
-							var dummy = $document.createElement("div");
-							dummy.key = data[change.index].attrs.key;
-							parentElement.insertBefore(dummy, parentElement.childNodes[change.index] || null);
-							newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]});
-							newCached.nodes[change.index] = dummy;
-						}
-
-						if (change.action === MOVE) {
-							if (parentElement.childNodes[change.index] !== change.element && change.element !== null) {
-								parentElement.insertBefore(change.element, parentElement.childNodes[change.index] || null);
-							}
-							newCached[change.index] = cached[change.from];
-							newCached.nodes[change.index] = change.element;
-						}
-					});
-					cached = newCached;
-				}
-			}
-			//end key algorithm
-
-			var cacheCount = 0;
-			forEach(data, function (entry) {
-				//diff each item in the array
-				var item = build(parentElement, parentTag, cached, index, entry, cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs);
-				if (item !== undefined) {
-					if (!item.nodes.intact) intact = false;
-					if (item.$trusted) {
-						//fix offset of next element if item was a trusted string w/ more than one html element
-						//the first clause in the regexp matches elements
-						//the second clause (after the pipe) matches text nodes
-						subArrayCount += (item.match(/<[^\/]|\>\s*[^<]/g) || [0]).length;
-					}
-					else subArrayCount += isArray(item) ? item.length : 1;
-					cached[cacheCount++] = item;
-				}
-			});
-
-			if (!intact) {
-				//diff the array itself
-
-				//update the list of DOM nodes by collecting the nodes from each item
-				forEach(data, function (_, i) {
-					if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes);
-				});
-				//remove items from the end of the array if the new array is shorter than the old one
-				//if errors ever happen here, the issue is most likely a bug in the construction of the `cached` data structure somewhere earlier in the program
-				forEach(cached.nodes, function (node, i) {
-					if (node.parentNode != null && nodes.indexOf(node) < 0) clear([node], [cached[i]]);
-				});
-				if (data.length < cached.length) cached.length = data.length;
-				cached.nodes = nodes;
-			}
-		}
-		else if (data != null && isObject(data)) {
-			var views = [], controllers = [];
-			while (data.view) {
-				var view = data.view.$original || data.view;
-				var controllerIndex = m.redraw.strategy() == "diff" && cached.views ? cached.views.indexOf(view) : -1;
-				var controller = controllerIndex > -1 ? cached.controllers[controllerIndex] : new (data.controller || noop);
-				var key = data && data.attrs && data.attrs.key;
-				data = (pendingRequests == 0 || forcing) || (cached && cached.controllers && cached.controllers.indexOf(controller) > -1) ? data.view(controller) : {tag: "placeholder"};
-				if (data.subtree === "retain") return cached;
-				if (key != null) {
-					if (!data.attrs) data.attrs = {};
-					data.attrs.key = key;
-				}
-				if (controller.onunload) unloaders.push({controller: controller, handler: controller.onunload});
-				views.push(view);
-				controllers.push(controller);
-			}
-			if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
-			if (!data.attrs) data.attrs = {};
-			if (!cached.attrs) cached.attrs = {};
-
-			var dataAttrKeys = Object.keys(data.attrs);
-			var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0);
-			//if an element is different enough from the one in cache, recreate it
-			if (data.tag != cached.tag || dataAttrKeys.sort().join() != Object.keys(cached.attrs).sort().join() || data.attrs.id != cached.attrs.id || data.attrs.key != cached.attrs.key || (m.redraw.strategy() == "all" && (!cached.configContext || cached.configContext.retain !== true)) || (m.redraw.strategy() == "diff" && cached.configContext && cached.configContext.retain === false)) {
-				if (cached.nodes.length) clear(cached.nodes);
-				if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
-				if (cached.controllers) {
-					for (var i = 0, controller; controller = cached.controllers[i]; i++) {
-						if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
-					}
-				}
-			}
-			if (!isString(data.tag)) return;
-
-			var node, isNew = cached.nodes.length === 0;
-			if (data.attrs.xmlns) namespace = data.attrs.xmlns;
-			else if (data.tag === "svg") namespace = "http://www.w3.org/2000/svg";
-			else if (data.tag === "math") namespace = "http://www.w3.org/1998/Math/MathML";
-
-			if (isNew) {
-				if (data.attrs.is) node = namespace === undefined ? $document.createElement(data.tag, data.attrs.is) : $document.createElementNS(namespace, data.tag, data.attrs.is);
-				else node = namespace === undefined ? $document.createElement(data.tag) : $document.createElementNS(namespace, data.tag);
-				cached = {
-					tag: data.tag,
-					//set attributes first, then create children
-					attrs: hasKeys ? setAttributes(node, data.tag, data.attrs, {}, namespace) : data.attrs,
-					children: data.children != null && data.children.length > 0 ?
-						build(node, data.tag, undefined, undefined, data.children, cached.children, true, 0, data.attrs.contenteditable ? node : editable, namespace, configs) :
-						data.children,
-					nodes: [node]
-				};
-				if (controllers.length) {
-					cached.views = views;
-					cached.controllers = controllers;
-					for (var i = 0, controller; controller = controllers[i]; i++) {
-						if (controller.onunload && controller.onunload.$old) controller.onunload = controller.onunload.$old;
-						if (pendingRequests && controller.onunload) {
-							var onunload = controller.onunload;
-							controller.onunload = noop;
-							controller.onunload.$old = onunload;
-						}
-					}
-				}
-
-				if (cached.children && !cached.children.nodes) cached.children.nodes = [];
-				//edge case: setting value on <select> doesn't work before children exist, so set it again after children have been created
-				if (data.tag === "select" && "value" in data.attrs) setAttributes(node, data.tag, {value: data.attrs.value}, {}, namespace);
-				parentElement.insertBefore(node, parentElement.childNodes[index] || null);
-			}
-			else {
-				node = cached.nodes[0];
-				if (hasKeys) setAttributes(node, data.tag, data.attrs, cached.attrs, namespace);
-				cached.children = build(node, data.tag, undefined, undefined, data.children, cached.children, false, 0, data.attrs.contenteditable ? node : editable, namespace, configs);
-				cached.nodes.intact = true;
-				if (controllers.length) {
-					cached.views = views;
-					cached.controllers = controllers;
-				}
-				if (shouldReattach === true && node != null) parentElement.insertBefore(node, parentElement.childNodes[index] || null);
-			}
-			//schedule configs to be called. They are called after `build` finishes running
-			if (isFunction(data.attrs["config"])) {
-				var context = cached.configContext = cached.configContext || {};
-
-				// bind
-				var callback = function(data, args) {
-					return function() {
-						return data.attrs["config"].apply(data, args);
-					};
-				};
-				configs.push(callback(data, [node, !isNew, context, cached]));
-			}
-		}
-		else if (!isFunction(data)) {
-			//handle text nodes
-			var nodes;
-			if (cached.nodes.length === 0) {
-				if (data.$trusted) {
-					nodes = injectHTML(parentElement, index, data);
-				}
-				else {
-					nodes = [$document.createTextNode(data)];
-					if (!parentElement.nodeName.match(voidElements)) parentElement.insertBefore(nodes[0], parentElement.childNodes[index] || null);
-				}
-				cached = "string number boolean".indexOf(typeof data) > -1 ? new data.constructor(data) : data;
-				cached.nodes = nodes;
-			}
-			else if (cached.valueOf() !== data.valueOf() || shouldReattach === true) {
-				nodes = cached.nodes;
-				if (!editable || editable !== $document.activeElement) {
-					if (data.$trusted) {
-						clear(nodes, cached);
-						nodes = injectHTML(parentElement, index, data);
-					}
-					else {
-						//corner case: replacing the nodeValue of a text node that is a child of a textarea/contenteditable doesn't work
-						//we need to update the value property of the parent textarea or the innerHTML of the contenteditable element instead
-						if (parentTag === "textarea") parentElement.value = data;
-						else if (editable) editable.innerHTML = data;
-						else {
-							if (nodes[0].nodeType === 1 || nodes.length > 1) { //was a trusted string
-								clear(cached.nodes, cached);
-								nodes = [$document.createTextNode(data)];
-							}
-							injectTextNode(parentElement, nodes[0], index, data)
-						}
-					}
-				}
-				cached = new data.constructor(data);
-				cached.nodes = nodes;
-			}
-			else cached.nodes.intact = true;
-		}
-
-		return cached;
+		cached = makeCache(data, cached, index, parentIndex, parentCache);
+		return isArray(data) ? buildArray(data, cached, parentElement, index, parentTag, shouldReattach, editable, namespace, configs) :
+			data != null && isObject(data) ? buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) :
+			!isFunction(data) ? handleText(cached, data, index, parentElement, shouldReattach, editable, parentTag) :
+			cached;
 	}
 	function sortChanges(a, b) { return a.action - b.action || a.index - b.index; }
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
@@ -425,9 +557,9 @@ var m = (function app(window, undefined) {
 				cachedAttrs[attrName] = dataAttr;
 				try {
 					//`config` isn't a real attributes, so ignore it
-					if (attrName === "config" || attrName == "key") continue;
+					if (attrName === "config" || attrName === "key") continue;
 					//hook event handlers to the auto-redrawing system
-					else if (isFunction(dataAttr) && attrName.indexOf("on") === 0) {
+					else if (isFunction(dataAttr) && attrName.slice(0, 2) === "on") {
 						node[attrName] = autoredraw(dataAttr, node);
 					}
 					//handle `style: {...}`
@@ -442,13 +574,12 @@ var m = (function app(window, undefined) {
 					//handle SVG
 					else if (namespace != null) {
 						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr);
-						else if (attrName === "className") node.setAttribute("class", dataAttr);
-						else node.setAttribute(attrName, dataAttr);
+						else node.setAttribute(attrName === "className" ? "class" : attrName, dataAttr);
 					}
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
-					else if (attrName in node && !(attrName === "list" || attrName === "style" || attrName === "form" || attrName === "type" || attrName === "width" || attrName === "height")) {
+					else if (attrName in node && attrName !== "list" && attrName !== "style" && attrName !== "form" && attrName !== "type" && attrName !== "width" && attrName !== "height") {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
 						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr;
 					}
@@ -475,7 +606,7 @@ var m = (function app(window, undefined) {
 				if (cached[i]) unload(cached[i]);
 			}
 		}
-		if (nodes.length != 0) nodes.length = 0;
+		nodes.length = 0;
 	}
 	function unload(cached) {
 		if (cached.configContext && isFunction(cached.configContext.onunload)) {
@@ -483,21 +614,19 @@ var m = (function app(window, undefined) {
 			cached.configContext.onunload = null;
 		}
 		if (cached.controllers) {
-			for (var i = 0, controller; controller = cached.controllers[i]; i++) {
+			forEach(cached.controllers, function (controller) {
 				if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
-			}
+			});
 		}
 		if (cached.children) {
-			if (isArray(cached.children)) {
-				for (var i = 0, child; child = cached.children[i]; i++) unload(child);
-			}
+			if (isArray(cached.children)) forEach(cached.children, unload);
 			else if (cached.children.tag) unload(cached.children);
 		}
 	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
-			var isElement = nextSibling.nodeType != 1;
+			var isElement = nextSibling.nodeType !== 1;
 			var placeholder = $document.createElement("span");
 			if (isElement) {
 				parentElement.insertBefore(placeholder, nextSibling || null);
@@ -548,11 +677,11 @@ var m = (function app(window, undefined) {
 		var id = getCellCacheKey(root);
 		var isDocumentRoot = root === $document;
 		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
-		if (isDocumentRoot && cell.tag != "html") cell = {tag: "html", attrs: {}, children: cell};
+		if (isDocumentRoot && cell.tag !== "html") cell = {tag: "html", attrs: {}, children: cell};
 		if (cellCache[id] === undefined) clear(node.childNodes);
 		if (forceRecreation === true) reset(root);
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
-		for (var i = 0, len = configs.length; i < len; i++) configs[i]();
+		forEach(configs, function (config) { config(); });
 	};
 	function getCellCacheKey(element) {
 		var index = nodeCache.indexOf(element);
@@ -596,7 +725,7 @@ var m = (function app(window, undefined) {
 		if (component.controller) controller.prototype = component.controller.prototype;
 		var view = function(ctrl) {
 			for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
-			return component.view.apply(component, args ? [ctrl].concat(args) : [ctrl]);
+			return component.view.apply(component, [ctrl].concat(args));
 		};
 		view.$original = component.view;
 		var output = {controller: controller, view: view};
@@ -604,7 +733,7 @@ var m = (function app(window, undefined) {
 		return output;
 	}
 	m.component = function(component) {
-		for (var args = [], i = 1; i < arguments.length; i++) args[i - 1] = arguments[i];
+		for (var args = [], i = 1; i < arguments.length; i++) args.push(arguments[i]);
 		return parameterize(component, args);
 	};
 	m.mount = m.module = function(root, component) {
@@ -617,12 +746,16 @@ var m = (function app(window, undefined) {
 			isPrevented = true;
 			computePreRedrawHook = computePostRedrawHook = null;
 		}};
-		for (var i = 0, unloader; unloader = unloaders[i]; i++) {
+
+		forEach(unloaders, function (unloader) {
 			unloader.handler.call(unloader.controller, event);
 			unloader.controller.onunload = null;
-		}
+		});
+
 		if (isPrevented) {
-			for (var i = 0, unloader; unloader = unloaders[i]; i++) unloader.controller.onunload = unloader.handler;
+			forEach(unloaders, function (unloader) {
+				unloader.controller.onunload = unloader.handler;
+			});
 		}
 		else unloaders = [];
 
@@ -634,10 +767,8 @@ var m = (function app(window, undefined) {
 			m.redraw.strategy("all");
 			m.startComputation();
 			roots[index] = root;
-			if (arguments.length > 2) component = subcomponent(component, [].slice.call(arguments, 2));
-			var currentComponent = topComponent = component = component || {controller: noop};
-			var constructor = component.controller || noop;
-			var controller = new constructor;
+			var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
+			var controller = new (component.controller || noop)();
 			//controllers may call m.mount recursively (via m.route redirects, for example)
 			//this conditional ensures only the last recursive m.mount call is applied
 			if (currentComponent === topComponent) {
@@ -679,12 +810,14 @@ var m = (function app(window, undefined) {
 			computePreRedrawHook();
 			computePreRedrawHook = null;
 		}
-		for (var i = 0, root; root = roots[i]; i++) {
+		forEach(roots, function (root, i) {
+			var component = components[i];
 			if (controllers[i]) {
-				var args = components[i].controller && components[i].controller.$$args ? [controllers[i]].concat(components[i].controller.$$args) : [controllers[i]];
-				m.render(root, components[i].view ? components[i].view(controllers[i], args) : "");
+				var args = [controllers[i]];
+				if (component.controller && component.controller.$$args) args = args.concat(component.controller.$$args);
+				m.render(root, component.view ? component.view(controllers[i], args) : "");
 			}
-		}
+		});
 		//after rendering within a routed context, we need to scroll back to the top, and fetch the document title for history.pushState
 		if (computePostRedrawHook) {
 			computePostRedrawHook();
@@ -698,16 +831,20 @@ var m = (function app(window, undefined) {
 	var pendingRequests = 0;
 	m.startComputation = function() { pendingRequests++; };
 	m.endComputation = function() {
-		pendingRequests = Math.max(pendingRequests - 1, 0);
-		if (pendingRequests === 0) m.redraw();
-	};
-	var endFirstComputation = function() {
-		if (m.redraw.strategy() == "none") {
+		if (pendingRequests > 1) pendingRequests--;
+		else {
+			pendingRequests = 0;
+			m.redraw();
+		}
+	}
+
+	function endFirstComputation() {
+		if (m.redraw.strategy() === "none") {
 			pendingRequests--;
 			m.redraw.strategy("diff");
 		}
 		else m.endComputation();
-	};
+	}
 
 	m.withAttr = function(prop, withAttrCallback) {
 		return function(e) {
@@ -738,10 +875,9 @@ var m = (function app(window, undefined) {
 			window[listener] = function() {
 				var path = $location[m.route.mode];
 				if (m.route.mode === "pathname") path += $location.search;
-				if (currentRoute != normalizeRoute(path)) {
-					redirect(path);
-				}
+				if (currentRoute !== normalizeRoute(path)) redirect(path);
 			};
+
 			computePreRedrawHook = setScroll;
 			window[listener]();
 		}
@@ -822,7 +958,9 @@ var m = (function app(window, undefined) {
 				path.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || [];
 					var values = [].slice.call(arguments, 1, -2);
-					for (var i = 0, len = keys.length; i < len; i++) routeParams[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i]);
+					forEach(keys, function (key, i) {
+						routeParams[key.replace(/:|\./g, "")] = decodeURIComponent(values[i]);
+					})
 					m.mount(root, router[route]);
 				});
 				return true;
@@ -831,16 +969,19 @@ var m = (function app(window, undefined) {
 	}
 	function routeUnobtrusive(e) {
 		e = e || event;
+
 		if (e.ctrlKey || e.metaKey || e.which === 2) return;
+
 		if (e.preventDefault) e.preventDefault();
 		else e.returnValue = false;
+
 		var currentTarget = e.currentTarget || e.srcElement;
 		var args = m.route.mode === "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {};
-		while (currentTarget && currentTarget.nodeName.toUpperCase() != "A") currentTarget = currentTarget.parentNode;
+		while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args);
 	}
 	function setScroll() {
-		if (m.route.mode != "hash" && $location.hash) $location.hash = $location.hash;
+		if (m.route.mode !== "hash" && $location.hash) $location.hash = $location.hash;
 		else window.scrollTo(0, 0);
 	}
 	function buildQueryString(object, prefix) {
@@ -849,36 +990,42 @@ var m = (function app(window, undefined) {
 		for (var prop in object) {
 			var key = prefix ? prefix + "[" + prop + "]" : prop;
 			var value = object[prop];
-			var valueType = type.call(value);
-			var pair = (value === null) ? encodeURIComponent(key) :
-				isObject(value) ? buildQueryString(value, key) :
-				isArray(value) ? value.reduce(function(memo, item) {
-					if (!duplicates[key]) duplicates[key] = {};
+
+			if (value === null) {
+				str.push(encodeURIComponent(key));
+			} else if (isObject(value)) {
+				str.push(buildQueryString(value, key));
+			} else if (isArray(value)) {
+				var keys = [];
+				duplicates[key] = duplicates[key] || {};
+				forEach(value, function (item) {
 					if (!duplicates[key][item]) {
 						duplicates[key][item] = true;
-						return memo.concat(encodeURIComponent(key) + "=" + encodeURIComponent(item));
+						keys.push(encodeURIComponent(key) + "=" + encodeURIComponent(item));
 					}
-					return memo;
-				}, []).join("&") :
-				encodeURIComponent(key) + "=" + encodeURIComponent(value);
-			if (value !== undefined) str.push(pair);
+				});
+				str.push(keys.join("&"));
+			} else if (value !== undefined) {
+				str.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+			}
 		}
 		return str.join("&");
 	}
 	function parseQueryString(str) {
-		if (str.charAt(0) === "?") str = str.substring(1);
+		if (str.charAt(0) === "?") str = str.slice(1);
 
 		var pairs = str.split("&"), params = {};
-		for (var i = 0, len = pairs.length; i < len; i++) {
-			var pair = pairs[i].split("=");
+		forEach(pairs, function (string) {
+			var pair = string.split("=");
 			var key = decodeURIComponent(pair[0]);
-			var value = pair.length == 2 ? decodeURIComponent(pair[1]) : null;
+			var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null;
 			if (params[key] != null) {
 				if (!isArray(params[key])) params[key] = [params[key]];
 				params[key].push(value);
 			}
 			else params[key] = value;
-		}
+		});
+
 		return params;
 	}
 	m.route.buildQueryString = buildQueryString;
@@ -912,9 +1059,9 @@ var m = (function app(window, undefined) {
 		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
 		var self = this, state = 0, promiseValue = 0, next = [];
 
-		self["promise"] = {};
+		self.promise = {};
 
-		self["resolve"] = function(value) {
+		self.resolve = function(value) {
 			if (!state) {
 				promiseValue = value;
 				state = RESOLVING;
@@ -924,7 +1071,7 @@ var m = (function app(window, undefined) {
 			return this;
 		};
 
-		self["reject"] = function(value) {
+		self.reject = function(value) {
 			if (!state) {
 				promiseValue = value;
 				state = REJECTING;
@@ -934,8 +1081,8 @@ var m = (function app(window, undefined) {
 			return this;
 		};
 
-		self.promise["then"] = function(successCallback, failureCallback) {
-			var deferred = new Deferred(successCallback, failureCallback);
+		self.promise.then = function(successCallback, failureCallback) {
+			var deferred = new Deferred(successCallback, failureCallback)
 			if (state === RESOLVED) {
 				deferred.resolve(promiseValue);
 			}
@@ -945,13 +1092,13 @@ var m = (function app(window, undefined) {
 			else {
 				next.push(deferred);
 			}
-			return deferred.promise;
+			return deferred.promise
 		};
 
 		function finish(type) {
 			state = type || REJECTED;
 			next.map(function(deferred) {
-				state === RESOLVED && deferred.resolve(promiseValue) || deferred.reject(promiseValue);
+				state === RESOLVED ? deferred.resolve(promiseValue) : deferred.reject(promiseValue);
 			});
 		}
 
@@ -992,6 +1139,7 @@ var m = (function app(window, undefined) {
 				state = REJECTING;
 				return fire();
 			}
+
 			thennable(then, function() {
 				state = RESOLVING;
 				fire();
@@ -1017,8 +1165,7 @@ var m = (function app(window, undefined) {
 				if (promiseValue === self) {
 					promiseValue = TypeError();
 					finish();
-				}
-				else {
+				} else {
 					thennable(then, function () {
 						finish(RESOLVED);
 					}, finish, function () {
@@ -1037,6 +1184,7 @@ var m = (function app(window, undefined) {
 
 	m.sync = function(args) {
 		var method = "resolve";
+
 		function synchronizer(pos, resolved) {
 			return function(value) {
 				results[pos] = value;
@@ -1053,9 +1201,9 @@ var m = (function app(window, undefined) {
 		var outstanding = args.length;
 		var results = new Array(outstanding);
 		if (args.length > 0) {
-			for (var i = 0; i < args.length; i++) {
-				args[i].then(synchronizer(i, true), synchronizer(i, false));
-			}
+			forEach(args, function (arg, i) {
+				arg.then(synchronizer(i, true), synchronizer(i, false));
+			});
 		}
 		else deferred.resolve([]);
 
@@ -1065,7 +1213,7 @@ var m = (function app(window, undefined) {
 
 	function ajax(options) {
 		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
-			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36);
+			var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
 			var script = $document.createElement("script");
 
 			window[callbackKey] = function(resp) {
@@ -1079,22 +1227,24 @@ var m = (function app(window, undefined) {
 				window[callbackKey] = undefined;
 			};
 
-			script.onerror = function(e) {
+			script.onerror = function() {
 				script.parentNode.removeChild(script);
 
 				options.onerror({
 					type: "error",
 					target: {
 						status: 500,
-						responseText: JSON.stringify({error: "Error making jsonp request"})
+						responseText: JSON.stringify({
+							error: "Error making jsonp request"
+						})
 					}
 				});
 				window[callbackKey] = undefined;
 
 				return false;
-			};
+			}
 
-			script.onload = function(e) {
+			script.onload = function() {
 				return false;
 			};
 
@@ -1106,7 +1256,7 @@ var m = (function app(window, undefined) {
 			$document.body.appendChild(script);
 		}
 		else {
-			var xhr = new window.XMLHttpRequest;
+			var xhr = new window.XMLHttpRequest();
 			xhr.open(options.method, options.url, true, options.user, options.password);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -1126,15 +1276,16 @@ var m = (function app(window, undefined) {
 			}
 
 			var data = options.method === "GET" || !options.data ? "" : options.data;
-			if (data && (!isString(data) && data.constructor != window.FormData)) {
-				throw "Request data should be either be a string or FormData. Check the `serialize` option in `m.request`";
+			if (data && (!isString(data) && data.constructor !== window.FormData)) {
+				throw new Error("Request data should be either be a string or FormData. Check the `serialize` option in `m.request`");
 			}
 			xhr.send(data);
 			return xhr;
 		}
 	}
+
 	function bindData(xhrOptions, data, serialize) {
-		if (xhrOptions.method === "GET" && xhrOptions.dataType != "jsonp") {
+		if (xhrOptions.method === "GET" && xhrOptions.dataType !== "jsonp") {
 			var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&";
 			var querystring = buildQueryString(data);
 			xhrOptions.url = xhrOptions.url + (querystring ? prefix + querystring : "");
@@ -1142,14 +1293,15 @@ var m = (function app(window, undefined) {
 		else xhrOptions.data = serialize(data);
 		return xhrOptions;
 	}
+
 	function parameterizeUrl(url, data) {
 		var tokens = url.match(/:[a-z]\w+/gi);
 		if (tokens && data) {
-			for (var i = 0; i < tokens.length; i++) {
-				var key = tokens[i].slice(1);
-				url = url.replace(tokens[i], data[key]);
+			forEach(tokens, function (token) {
+				var key = token.slice(1);
+				url = url.replace(token, data[key]);
 				delete data[key];
-			}
+			});
 		}
 		return url;
 	}
@@ -1157,13 +1309,17 @@ var m = (function app(window, undefined) {
 	m.request = function(xhrOptions) {
 		if (xhrOptions.background !== true) m.startComputation();
 		var deferred = new Deferred();
-		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp";
+		var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
 		var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
 		var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
-		var extract = isJSONP ? function(jsonp) { return jsonp.responseText; } : xhrOptions.extract || function(xhr) {
-			return xhr.responseText.length === 0 && deserialize === JSON.parse ? null : xhr.responseText;
+		var extract = isJSONP ? function(jsonp) { return jsonp.responseText } : xhrOptions.extract || function(xhr) {
+			if (xhr.responseText.length === 0 && deserialize === JSON.parse) {
+				return null
+			} else {
+				return xhr.responseText
+			}
 		};
-		xhrOptions.method = (xhrOptions.method || 'GET').toUpperCase();
+		xhrOptions.method = (xhrOptions.method || "GET").toUpperCase();
 		xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
 		xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
 		xhrOptions.onload = xhrOptions.onerror = function(e) {
@@ -1176,17 +1332,20 @@ var m = (function app(window, undefined) {
 						forEach(response, function (res, i) {
 							response[i] = new xhrOptions.type(res);
 						});
+					} else if (xhrOptions.type) {
+						response = new xhrOptions.type(response);
 					}
-					else if (xhrOptions.type) response = new xhrOptions.type(response);
 				}
+
 				deferred[e.type === "load" ? "resolve" : "reject"](response);
-			}
-			catch (e) {
+			} catch (e) {
 				m.deferred.onerror(e);
 				deferred.reject(e);
 			}
-			if (xhrOptions.background !== true) m.endComputation();
-		};
+
+			if (xhrOptions.background !== true) m.endComputation()
+		}
+
 		ajax(xhrOptions);
 		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
 		return deferred.promise;
@@ -1201,7 +1360,7 @@ var m = (function app(window, undefined) {
 	m.deps.factory = app;
 
 	return m;
-})(typeof window != "undefined" ? window : {});
+})(typeof window !== "undefined" ? window : {});
 
-if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
-else if (typeof define === "function" && define.amd) define(function() { return m; });
+if (typeof module === "object" && module != null && module.exports) module.exports = m;
+else if (typeof define === "function" && define.amd) define(function() { return m });

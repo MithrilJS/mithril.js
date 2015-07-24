@@ -55,11 +55,11 @@ mock.window = (function() {
 				else this.childNodes.splice(referenceIndex, 0, node)
 			},
 			insertAdjacentHTML: function(position, html) {
-				//todo: accept markup
-				if (position == "beforebegin") {
+				// todo: accept markup
+				if (position === "beforebegin") {
 					this.parentNode.insertBefore(window.document.createTextNode(html), this)
 				}
-				else if (position == "beforeend") {
+				else if (position === "beforeend") {
 					this.appendChild(window.document.createTextNode(html))
 				}
 			},
@@ -104,7 +104,8 @@ mock.window = (function() {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
-	//getElementsByTagName is only used by JSONP tests, it's not required by Mithril
+	// getElementsByTagName is only used by JSONP tests, it's not required by
+	// Mithril
 	window.document.getElementsByTagName = function(name){
 		name = name.toLowerCase();
 		var out = [];
@@ -112,12 +113,13 @@ mock.window = (function() {
 		var traverse = function(node){
 			if(node.childNodes && node.childNodes.length > 0){
 				node.childNodes.map(function(curr){
-					if(curr.nodeName.toLowerCase() === name)
+					if (curr.nodeName.toLowerCase() === name) {
 						out.push(curr);
+					}
 					traverse(curr);
 				});
 			}
-		};
+		}
 
 		traverse(window.document);
 		return out;
@@ -156,13 +158,13 @@ mock.window = (function() {
 		request.$instances = []
 		return request
 	}())
-	window.location = {search: "", pathname: "", hash: ""},
+	window.location = {search: "", pathname: "", hash: ""}
 	window.history = {}
 	window.history.$$length = 0
 	window.history.pushState = function(data, title, url) {
 		window.history.$$length++
 		window.location.pathname = window.location.search = window.location.hash = url
-	},
+	}
 	window.history.replaceState = function(data, title, url) {
 		window.location.pathname = window.location.search = window.location.hash = url
 	}

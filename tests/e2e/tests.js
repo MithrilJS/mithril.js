@@ -1,6 +1,6 @@
 //saucelabs reporting; see https://github.com/axemclion/grunt-saucelabs#test-result-details-with-qunit
+
 var log = []
-var testName
 
 QUnit.done(function (test_results) {
 	var tests = []
@@ -85,7 +85,7 @@ test('array item removal', function() {
 		m('div', {}, '2')
 	])
 
-	var view2= m('div', {}, [
+	var view2 = m('div', {}, [
 		m('div', {}, '0')
 	])
 
@@ -105,7 +105,7 @@ test('issue99 regression', function() {
 		m('div', {}, '2')
 	])
 
-	var view2= m('div', {}, [
+	var view2 = m('div', {}, [
 		m('span', {}, '0')
 	])
 
@@ -124,7 +124,7 @@ test('config handler context', function() {
 	}})
 	m.render(dummyEl, view)
 
-	var view = m('div', {config: function(evt, isInitialized, context) {
+	view = m('div', {config: function(evt, isInitialized, context) {
 		equal(context instanceof Object, true)
 		equal(context.data, 1)
 	}})

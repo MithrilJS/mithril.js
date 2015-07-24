@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
-	_ = require('lodash');
-
+	var _ = require("lodash");
 	var version = "0.2.0";
 
 	var inputFolder = "./docs";
@@ -8,7 +7,6 @@ module.exports = function(grunt) {
 	var archiveFolder = "./archive";
 	var outputFolder = "../mithril";
 
-	var guideLayout = "guide";
 	var guide = [
 		"auto-redrawing",
 		"benchmarks",
@@ -25,7 +23,6 @@ module.exports = function(grunt) {
 		"tools",
 		"web-services"
 	];
-	var apiLayout = "api";
 	var api = [
 		"change-log",
 		"roadmap",
@@ -46,8 +43,6 @@ module.exports = function(grunt) {
 		"mithril.withAttr",
 		"mithril.xhr"
 	];
-
-
 
 	var md2htmlTasks = {};
 	var makeTasks = function(layout, pages) {
@@ -83,7 +78,7 @@ module.exports = function(grunt) {
 			url: ['https://saucelabs.com/rest/v1', user, 'jobs', result.job_id].join('/'),
 			auth: { user: user, pass: pass },
 			json: { passed: result.passed }
-		}, function (error, response, body) {
+		}, function (error, response) {
 			if (error) {
 				callback(error);
 			} else if (response.statusCode !== 200) {
