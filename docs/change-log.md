@@ -1,6 +1,6 @@
 ## Change Log
 
-[v0.2.1](/mithril/archive/v0.2.1)
+[v0.2.1](http://mithril.js.org/archive/v0.2.1)
 
 ### News:
 
@@ -17,7 +17,7 @@
 
 ---
 
-[v0.2.0](/mithril/archive/v0.2.0) - improved components
+[v0.2.0](http://mithril.js.org/archive/v0.2.0) - improved components
 
 ### News:
 
@@ -38,7 +38,7 @@
 
 ---
 
-[v0.1.34](/mithril/archive/v0.1.34) - maintenance
+[v0.1.34](http://mithril.js.org/archive/v0.1.34) - maintenance
 
 ### Bug Fixes:
 
@@ -46,7 +46,7 @@
 
 ---
 
-[v0.1.33](/mithril/archive/v0.1.33) - maintenance
+[v0.1.33](http://mithril.js.org/archive/v0.1.33) - maintenance
 
 ### Bug Fixes:
 
@@ -56,7 +56,7 @@
 
 ---
 
-[v0.1.32](/mithril/archive/v0.1.32) - maintenance
+[v0.1.32](http://mithril.js.org/archive/v0.1.32) - maintenance
 
 ### Bug Fixes:
 
@@ -64,7 +64,7 @@
 
 ---
 
-[v0.1.31](/mithril/archive/v0.1.31) - maintenance
+[v0.1.31](http://mithril.js.org/archive/v0.1.31) - maintenance
 
 ### News:
 
@@ -86,7 +86,7 @@
 
 ---
 
-[v0.1.30](/mithril/archive/v0.1.30) - maintenance
+[v0.1.30](http://mithril.js.org/archive/v0.1.30) - maintenance
 
 ### Bug Fixes:
 
@@ -96,7 +96,7 @@
 
 ---
 
-[v0.1.29](/mithril/archive/v0.1.29) - maintenance
+[v0.1.29](http://mithril.js.org/archive/v0.1.29) - maintenance
 
 ### News:
 
@@ -113,7 +113,7 @@
 
 ---
 
-[v0.1.28](/mithril/archive/v0.1.28) - maintenance
+[v0.1.28](http://mithril.js.org/archive/v0.1.28) - maintenance
 
 ### News:
 
@@ -125,7 +125,7 @@
 
 ---
 
-[v0.1.27](/mithril/archive/v0.1.27) - maintenance
+[v0.1.27](http://mithril.js.org/archive/v0.1.27) - maintenance
 
 ### Bug Fixes:
 
@@ -136,7 +136,7 @@
 
 ---
 
-[v0.1.26](/mithril/archive/v0.1.26) - maintenance
+[v0.1.26](http://mithril.js.org/archive/v0.1.26) - maintenance
 
 ### Bug Fixes:
 
@@ -145,7 +145,7 @@
 
 ---
 
-[v0.1.25](/mithril/archive/v0.1.25) - maintenance
+[v0.1.25](http://mithril.js.org/archive/v0.1.25) - maintenance
 
 ### Bug Fixes:
 
@@ -156,7 +156,7 @@
 
 ---
 
-[v0.1.24](/mithril/archive/v0.1.24) - maintenance
+[v0.1.24](http://mithril.js.org/archive/v0.1.24) - maintenance
 
 ### Bug Fixes:
 
@@ -165,7 +165,7 @@
 
 ---
 
-[v0.1.23](/mithril/archive/v0.1.23) - maintenance
+[v0.1.23](http://mithril.js.org/archive/v0.1.23) - maintenance
 
 ### News:
 
@@ -186,7 +186,7 @@
 
 ---
 
-[v0.1.22](/mithril/archive/v0.1.22) - maintenance
+[v0.1.22](http://mithril.js.org/archive/v0.1.22) - maintenance
 
 ### News:
 
@@ -210,7 +210,7 @@
 
 ---
 
-[v0.1.21](/mithril/archive/v0.1.21) - maintenance
+[v0.1.21](http://mithril.js.org/archive/v0.1.21) - maintenance
 
 ### News:
 
@@ -226,7 +226,7 @@
 
 ---
 
-[v0.1.20](/mithril/archive/v0.1.20) - maintenance
+[v0.1.20](http://mithril.js.org/archive/v0.1.20) - maintenance
 
 ### News:
 
@@ -241,7 +241,7 @@
 
 ---
 
-[v0.1.19](/mithril/archive/v0.1.19) - maintenance
+[v0.1.19](http://mithril.js.org/archive/v0.1.19) - maintenance
 
 ### Bug Fixes:
 
@@ -253,7 +253,7 @@
 
 ---
 
-[v0.1.18](/mithril/archive/v0.1.18) - maintenance
+[v0.1.18](http://mithril.js.org/archive/v0.1.18) - maintenance
 
 ### Bug Fixes:
 
@@ -262,7 +262,7 @@
 
 ---
 
-[v0.1.17](/mithril/archive/v0.1.17) - maintenance
+[v0.1.17](http://mithril.js.org/archive/v0.1.17) - maintenance
 
 ### News:
 
@@ -280,7 +280,7 @@
 
 ---
 
-[v0.1.16](/mithril/archive/v0.1.16) - maintenance
+[v0.1.16](http://mithril.js.org/archive/v0.1.16) - maintenance
 
 ### News:
 
@@ -304,7 +304,7 @@
 
 ---
 
-[v0.1.15](/mithril/archive/v0.1.15) - maintenance
+[v0.1.15](http://mithril.js.org/archive/v0.1.15) - maintenance
 
 ### Bug Fixes:
 
@@ -314,7 +314,7 @@
 
 ---
 
-[v0.1.14](/mithril/archive/v0.1.14) - maintenance
+[v0.1.14](http://mithril.js.org/archive/v0.1.14) - maintenance
 
 ### News:
 
@@ -332,7 +332,7 @@
 
 ---
 
-[v0.1.13](/mithril/archive/v0.1.13) - maintenance
+[v0.1.13](http://mithril.js.org/archive/v0.1.13) - maintenance
 
 ### News:
 
@@ -344,7 +344,7 @@
 
 ---
 
-[v0.1.12](/mithril/archive/v0.1.12) - maintenance
+[v0.1.12](http://mithril.js.org/archive/v0.1.12) - maintenance
 
 ### News:
 
@@ -358,7 +358,7 @@
 
 ---
 
-[v0.1.11](/mithril/archive/v0.1.11) - maintenance
+[v0.1.11](http://mithril.js.org/archive/v0.1.11) - maintenance
 
 ### News:
 
@@ -372,7 +372,7 @@
 
 ---
 
-[v0.1.10](/mithril/archive/v0.1.10) - maintenance
+[v0.1.10](http://mithril.js.org/archive/v0.1.10) - maintenance
 
 ### News:
 
@@ -384,7 +384,7 @@
 
 ---
 
-[v0.1.9](/mithril/archive/v0.1.9) - maintenance
+[v0.1.9](http://mithril.js.org/archive/v0.1.9) - maintenance
 
 ### News:
 
@@ -404,7 +404,7 @@
 
 ---
 
-[v0.1.8](/mithril/archive/v0.1.8) - maintenance
+[v0.1.8](http://mithril.js.org/archive/v0.1.8) - maintenance
 
 ### News:
 
@@ -417,7 +417,7 @@
 
 ---
 
-[v0.1.7](/mithril/archive/v0.1.7) - maintenance
+[v0.1.7](http://mithril.js.org/archive/v0.1.7) - maintenance
 
 ### News:
 
@@ -429,7 +429,7 @@
 
 ---
 
-[v0.1.6](/mithril/archive/v0.1.6) - maintenance
+[v0.1.6](http://mithril.js.org/archive/v0.1.6) - maintenance
 
 ### Bug Fixes:
 
@@ -437,7 +437,7 @@
 
 ---
 
-[v0.1.5](/mithril/archive/v0.1.5) - maintenance
+[v0.1.5](http://mithril.js.org/archive/v0.1.5) - maintenance
 
 ### News:
 
@@ -449,7 +449,7 @@
 
 ---
 
-[v0.1.4](/mithril/archive/v0.1.4) - maintenance
+[v0.1.4](http://mithril.js.org/archive/v0.1.4) - maintenance
 
 ### News:
 
@@ -466,7 +466,7 @@
 
 ---
 
-[v0.1.3](/mithril/archive/v0.1.3) - maintenance
+[v0.1.3](http://mithril.js.org/archive/v0.1.3) - maintenance
 
 ### News:
 
@@ -481,7 +481,7 @@
 
 ---
 
-[v0.1.2](/mithril/archive/v0.1.2) - maintenance
+[v0.1.2](http://mithril.js.org/archive/v0.1.2) - maintenance
 
 ### News:
 
@@ -497,11 +497,11 @@
 
 ---
 
-[v0.1.1](/mithril/archive/v0.1.1) - maintenance
+[v0.1.1](http://mithril.js.org/archive/v0.1.1) - maintenance
 
 ### News:
 
--	Mithril is now available at [cdnjs](http://cdnjs.com/libraries/mithril/) and [jsdelivr](http://www.jsdelivr.com/#!mithril)
+-	Mithril is now available at [cdnjs](http://cdnjs.com/librarieshttp://mithril.js.org/) and [jsdelivr](http://www.jsdelivr.com/#!mithril)
 
 ### Bug Fixes:
 
@@ -523,4 +523,4 @@
 
 ---
 
-[v0.1](/mithril/archive/v0.1) - Initial release
+[v0.1](http://mithril.js.org/archive/v0.1) - Initial release
