@@ -1,5 +1,19 @@
 ## Change Log
 
+[v0.2.1](/mithril/archive/v0.2.1)
+
+### News:
+
+-	added `catch` to promises
+-	improvements and fixes in the documentation and wiki
+-	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @impinball)
+
+### Bug Fixes:
+
+-	errors thrown from the exception monitor no longer freeze redrawing
+-	fix edge case with falsy keys
+-	fix controller prototype inheritance in component controllers
+
 ---
 
 [v0.2.0](/mithril/archive/v0.2.0) - improved components
