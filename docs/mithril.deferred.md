@@ -201,7 +201,7 @@ Deferred deferred() {void onerror(Error e)}
 
 where:
 	Deferred :: Object { Promise promise, void resolve(any value), void reject(any value) }
-	Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)) }
+	Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)), Promise catch(any errorCallback(any value)) }
 	GetterSetter :: any getterSetter([any value])
 ```
 
@@ -212,6 +212,8 @@ where:
 	The `then` method returns another promise whose computations (if any) receive their inputs from the parent promise's computation.
 
 	A promise is also a getter-setter (see [`m.prop`](mithril.prop.md)). After a call to either `resolve` or `reject`, it holds the result of the parent's computation (or the `resolve`/`reject` value, if the promise has no parent promises)
+	
+	Promises also have a method called `catch`, which is equivalent to calling `then(null, errorCallback)`
 
 	-	**Promise then([any successCallback(any value) [, any errorCallback(any value)]])**
 
