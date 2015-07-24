@@ -13,6 +13,7 @@
 -	errors thrown from the exception monitor no longer freeze redrawing
 -	fix edge case with falsy keys
 -	fix controller prototype inheritance in component controllers
+-	fix return value of `parseQueryString` if input is empty string
 
 ---
 
