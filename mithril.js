@@ -1,6 +1,6 @@
 var m = (function app(window, undefined) {
 	"use strict";
-  	var VERSION = "v0.2.0-next";
+  	var VERSION = "v0.2.1";
 	function isFunction(object) {
 		return typeof object === "function";
 	}
