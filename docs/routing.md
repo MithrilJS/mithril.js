@@ -105,3 +105,9 @@ m("a[href='/dashboard/alicesmith']", {config: m.route});
 This makes the href behave correctly regardless of which `m.route.mode` is selected. It's a good practice to always use the idiom above, instead of hardcoding `?` or `#` in the href attribute.
 
 See [`m()`](mithril.md) for more information on virtual elements.
+
+---
+
+### Redrawing semantics of routing
+
+By default, changing routes causes templates to be re-rendered from scratch. This behavior can be changed either via the [retain flag in a config's context object](mithril.md#persisting-dom-elements-across-route-changes), or the [`m.redraw.strategy("diff")` hint](mithril.redraw.md#changing-redraw-strategy).
