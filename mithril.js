@@ -1017,6 +1017,7 @@ var m = (function app(window, undefined) {
 		return str.join("&");
 	}
 	function parseQueryString(str) {
+		if (str === "" || str == null) return {};
 		if (str.charAt(0) === "?") str = str.slice(1);
 
 		var pairs = str.split("&"), params = {};
