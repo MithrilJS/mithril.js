@@ -779,9 +779,9 @@ var m = (function app(window, undefined) {
 			return controllers[index];
 		}
 		if (!component) {
-			roots.splice(index, 1)
-			controllers.splice(index, 1)
-			components.splice(index, 1)
+			roots.splice(index, 1);
+			controllers.splice(index, 1);
+			components.splice(index, 1);
 		}
 	};
 	var redrawing = false, forcing = false;
@@ -819,7 +819,6 @@ var m = (function app(window, undefined) {
 			var component = components[i];
 			if (controllers[i]) {
 				var args = [controllers[i]];
-				if (component.controller && component.controller.$$args) args = args.concat(component.controller.$$args);
 				m.render(root, component.view ? component.view(controllers[i], args) : "");
 			}
 		});
