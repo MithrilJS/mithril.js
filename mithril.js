@@ -724,8 +724,8 @@ var m = (function app(window, undefined) {
 		};
 		if (component.controller) controller.prototype = component.controller.prototype;
 		var view = function(ctrl) {
-			for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
-			return component.view.apply(component, [ctrl].concat(args));
+			var currentArgs = arguments.length > 1 ? args.concat([].slice.call(arguments, 1)) : args;
+			return component.view.apply(component, currentArgs ? [ctrl].concat(currentArgs) : [ctrl]);
 		};
 		view.$original = component.view;
 		var output = {controller: controller, view: view};
