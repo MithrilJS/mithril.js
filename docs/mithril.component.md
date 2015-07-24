@@ -6,6 +6,7 @@
 	- [Optional controller](#optional-controller)
 	- [Controller as a class constructor](#controller-as-a-class-constructor)
 	- [Notes on the view function](#notes-on-the-view-function)
+	- [Shorthand syntax](#shorthand-syntax)
 - [Parameterized components](#parameterized-components)
 - [Nesting components](#nesting-components)
 - [Dealing with state](#dealing-with-state)
@@ -147,6 +148,27 @@ The `view` function does not create a DOM tree when called. The return value of 
 The view function is run again whenever a redraw is required (i.e. whenever event handlers are triggered by user input). Its return value is used to diff against the previous virtual DOM tree.
 
 It may sound expensive to recompute an entire view any time there's a change to be displayed, but this operation actually turns out to be quite fast, compared to rendering strategies used by older frameworks. Mithril's diffing algorithm makes sure expensive DOM operations are performed only if absolutely necessary, and as an extra benefit, the global nature of the redraw makes it easy to reason about and troubleshoot the state of the application.
+
+### Shorthand syntax
+
+If the first argument to `m()` is a component, it acts as an alias of `m.component()`
+
+```javascript
+var MyComponent = {
+	controller: function() {
+		return {greeting: "hello"}
+	},
+	view: function(ctrl, args) {
+		return m("h1", ctrl.greeting + " " + args.data)
+	}
+}
+
+m.render(document.body, [
+	//the two lines below are equivalent
+	m(component, {data: "world"}),
+	m.component(component, {data: "world"})
+])
+```
 
 ---
 

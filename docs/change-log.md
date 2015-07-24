@@ -7,6 +7,7 @@
 -	added `catch` to promises
 -	improvements and fixes in the documentation and wiki
 -	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @impinball)
+-	`m(component, ...args)` can now be used as a shorthand for `m.component(component, ...args)`
 
 ### Bug Fixes:
 

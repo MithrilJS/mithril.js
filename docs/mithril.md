@@ -12,6 +12,7 @@
 - [SVG](#svg)
 - [Dealing with focus](#dealing-with-focus)
 - [Dealing with sorting and deleting in lists](#dealing-with-sorting-and-deleting-in-lists)
+- [Component shorthand](#component-shorthand)
 - [Signature](#signature)
 - [The `config` attribute](#the-config-attribute)
 ---
@@ -461,6 +462,31 @@ m("ul", [
 ```
 
 You should always use keys if you need to sort lists, remove items from them or splice them in any way.
+
+---
+
+### Component Shorthand
+
+If the first argument to `m()` is a component, it acts as an alias of `m.component()`
+
+```javascript
+var MyComponent = {
+	controller: function() {
+		return {greeting: "hello"}
+	},
+	view: function(ctrl, args) {
+		return m("h1", ctrl.greeting + " " + args.data)
+	}
+}
+
+m.render(document.body, [
+	//the two lines below are equivalent
+	m(component, {data: "world"}),
+	m.component(component, {data: "world"})
+])
+```
+
+See [components](mithril.component.md) for more information.
 
 ---
 
