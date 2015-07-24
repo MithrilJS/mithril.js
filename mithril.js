@@ -778,6 +778,11 @@ var m = (function app(window, undefined) {
 			endFirstComputation();
 			return controllers[index];
 		}
+		if (!component) {
+			roots.splice(index, 1)
+			controllers.splice(index, 1)
+			components.splice(index, 1)
+		}
 	};
 	var redrawing = false, forcing = false;
 	m.redraw = function(force) {
