@@ -3821,7 +3821,10 @@ function testMithril(mock) {
 		var args = m.route.parseQueryString("foo=bar&hello=world&hello=mars&bam=&yup")
 		return args.foo === "bar" && args.hello[0] === "world" && args.hello[1] === "mars" && args.bam === "" && args.yup == null
 	})
-
+	test(function() {
+		var args = m.route.parseQueryString("")
+		return Object.keys(args).length === 0
+	})
 	//m.route.buildQueryString
 	test(function() {
 		var string = m.route.buildQueryString({
@@ -3836,7 +3839,10 @@ function testMithril(mock) {
 		})
 		return string === "foo=bar&hello=world&hello=mars&world%5Btest%5D=3&bam=&yup"
 	})
-
+	test(function() {
+		var string = m.route.buildQueryString({});
+		return string === ""
+	})
 	//m.prop
 	test(function() {
 		var prop = m.prop("test")
