@@ -606,7 +606,8 @@ var m = (function app(window, undefined) {
 				if (cached[i]) unload(cached[i]);
 			}
 		}
-		nodes.length = 0;
+		//release memory if nodes is an array. This check should fail if nodes is a NodeList (see loop above)
+		if (nodes.length) nodes.length = 0;
 	}
 	function unload(cached) {
 		if (cached.configContext && isFunction(cached.configContext.onunload)) {
