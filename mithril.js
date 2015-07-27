@@ -1055,8 +1055,8 @@ var m = (function app(window, undefined) {
 			return propify(promise.then(resolve, reject), initialValue);
 		};
 		prop["catch"] = prop.then.bind(null, null);
-		prop["finally"] = function(callback){
-			var _callback = function(value){return m.deferred().resolve(callback(value)).promise;};
+		prop["finally"] = function(callback) {
+			var _callback = function(value) {return m.deferred().resolve(callback(value)).promise;};
 			return prop.then(function(value) {
 				return propify(_callback(value).then(function() {return value;}), initialValue);
 			}, function(reason) {
