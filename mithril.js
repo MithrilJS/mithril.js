@@ -460,10 +460,23 @@ var m = (function app(window, undefined) {
 		return data;
 	}
 
-	function buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) {
+	function buildObject(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		var views = [], controllers = [];
 		data = markViews(data, cached, views, controllers);
 		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
+		// Single component redraw fix
+		for (var i = 0; i < controllers.length; i++) {
+			var controller = controllers[i];
+			if (isFunction(controller.redrawSelf)) {
+				controller.redrawSelf = (function(ctrl,view) {
+							return function() {
+								m.redraw.strategy('none');
+								var newData = view(ctrl);
+								build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);							
+							}
+						})(controller, views[i]);
+			}
+		}
 		data.attrs = data.attrs || {};
 		cached.attrs = cached.attrs || {};
 		var dataAttrKeys = Object.keys(data.attrs);
@@ -544,7 +557,7 @@ var m = (function app(window, undefined) {
 		if (data.subtree === "retain") return cached;
 		cached = makeCache(data, cached, index, parentIndex, parentCache);
 		return isArray(data) ? buildArray(data, cached, parentElement, index, parentTag, shouldReattach, editable, namespace, configs) :
-			data != null && isObject(data) ? buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) :
+			data != null && isObject(data) ? buildObject(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) :
 			!isFunction(data) ? handleText(cached, data, index, parentElement, shouldReattach, editable, parentTag) :
 			cached;
 	}
