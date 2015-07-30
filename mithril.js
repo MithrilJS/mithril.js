@@ -460,23 +460,18 @@ var m = (function app(window, undefined) {
 		return data;
 	}
 
+	function makeRedrawSelf(controller,view,parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs) {
+		return function() {
+			m.redraw.strategy('none');
+			var newData = view(controller);
+			build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);							
+		}
+	}
+
 	function buildObject(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		var views = [], controllers = [];
 		data = markViews(data, cached, views, controllers);
-		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
-		// Single component redraw fix
-		for (var i = 0; i < controllers.length; i++) {
-			var controller = controllers[i];
-			if (isFunction(controller.redrawSelf)) {
-				controller.redrawSelf = (function(ctrl,view) {
-							return function() {
-								m.redraw.strategy('none');
-								var newData = view(ctrl);
-								build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);							
-							}
-						})(controller, views[i]);
-			}
-		}
+		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");		
 		data.attrs = data.attrs || {};
 		cached.attrs = cached.attrs || {};
 		var dataAttrKeys = Object.keys(data.attrs);
@@ -500,6 +495,15 @@ var m = (function app(window, undefined) {
 		//schedule configs to be called. They are called after `build`
 		//finishes running
 		scheduleConfigsToBeCalled(configs, data, node, isNew, cached);
+		
+		// Single component redraw fix
+		for (var i = 0; i < controllers.length; i++) {
+			var controller = controllers[i];
+			if (isFunction(controller.redrawSelf)) {
+				controller.redrawSelf = makeRedrawSelf(controller,views[i],parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs);
+			}
+		}
+		
 		return cached
 	}
 
