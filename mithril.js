@@ -460,7 +460,7 @@ var m = (function app(window, undefined) {
 		return data;
 	}
 
-	function makeRedrawSelf(controller,view,parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs) {
+	function makeRedrawSelf(controller, view, parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs) {
 		return function() {
 			m.redraw.strategy('none');
 			var newData = view(controller);
@@ -471,7 +471,7 @@ var m = (function app(window, undefined) {
 	function buildObject(parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs) {
 		var views = [], controllers = [];
 		data = markViews(data, cached, views, controllers);
-		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");		
+		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
 		data.attrs = data.attrs || {};
 		cached.attrs = cached.attrs || {};
 		var dataAttrKeys = Object.keys(data.attrs);
@@ -500,7 +500,7 @@ var m = (function app(window, undefined) {
 		for (var i = 0; i < controllers.length; i++) {
 			var controller = controllers[i];
 			if (isFunction(controller.redrawSelf)) {
-				controller.redrawSelf = makeRedrawSelf(controller,views[i],parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs);
+				controller.redrawSelf = makeRedrawSelf(controller, views[i], parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs);
 			}
 		}
 		
