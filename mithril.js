@@ -851,11 +851,12 @@ var m = (function app(window, undefined) {
 		else m.endComputation();
 	}
 
-	m.withAttr = function(prop, withAttrCallback) {
+	m.withAttr = function(prop, withAttrCallback, callbackThis) {
 		return function(e) {
 			e = e || event;
 			var currentTarget = e.currentTarget || this;
-			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop));
+			var _this = callbackThis || this;
+			withAttrCallback.call(_this, prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop));
 		};
 	};
 
