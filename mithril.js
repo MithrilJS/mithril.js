@@ -22,7 +22,7 @@ var m = (function app(window, undefined) {
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
 
 	// self invoking function needed because of the way mocks work
-	function initialize(window){
+	function initialize(window) {
 		$document = window.document;
 		$location = window.location;
 		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
@@ -31,9 +31,9 @@ var m = (function app(window, undefined) {
 
 	initialize(window);
 
-  m.version = function(){
-    return VERSION;
-  };
+	m.version = function() {
+		return VERSION;
+	};
 
 	/**
 	 * @typedef {String} Tag
