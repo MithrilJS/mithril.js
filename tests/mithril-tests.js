@@ -1380,6 +1380,13 @@ function testMithril(mock) {
 		handler({currentTarget: {test: "foo"}})
 		return value === "foo"
 	})
+	test(function() {
+		var value
+		var _this
+		var handler = m.withAttr("test", function(data) {value = data}, _this)
+		handler({currentTarget: {test: "foo"}})
+		return value === "foo" && handler.this === _this
+	})
 
 	//m.trust
 	test(function() {return m.trust("test").valueOf() === "test"})
