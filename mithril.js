@@ -782,6 +782,8 @@ var m = (function app(window, undefined) {
 			controllers[index].onunload(event);
 		}
 
+		var isNullComponent = component === null;
+
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
@@ -795,14 +797,24 @@ var m = (function app(window, undefined) {
 				components[index] = component;
 			}
 			endFirstComputation();
+			if (isNullComponent) {
+				removeRootElement(root, index);
+			}
 			return controllers[index];
 		}
-		if (!component) {
-			roots.splice(index, 1);
-			controllers.splice(index, 1);
-			components.splice(index, 1);
+		if (isNullComponent) {
+			removeRootElement(root, index);
 		}
 	};
+
+	function removeRootElement(root, index) {
+		roots.splice(index, 1);
+		controllers.splice(index, 1);
+		components.splice(index, 1);
+		reset(root);
+		nodeCache.splice(getCellCacheKey(root), 1);
+	}
+
 	var redrawing = false, forcing = false;
 	m.redraw = function(force) {
 		if (redrawing) return;
