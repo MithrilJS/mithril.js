@@ -636,7 +636,12 @@ var m = (function app(window, undefined) {
 			}
 			else nextSibling.insertAdjacentHTML("beforebegin", data);
 		}
-		else parentElement.insertAdjacentHTML("beforeend", data);
+		else {
+			if (window.Range && window.Range.prototype.createContextualFragment) {
+				parentElement.appendChild($document.createRange().createContextualFragment(data));
+			}
+			else parentElement.insertAdjacentHTML("beforeend", data);
+		}
 		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {
 			nodes.push(parentElement.childNodes[index]);
