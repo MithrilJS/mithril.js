@@ -1,5 +1,6 @@
 var m = {
     "render": function () {},
+    "mount": function () {},
     "trust": function () {},
     "module": function () {},
     "redraw": function () {},
@@ -11,5 +12,6 @@ var m = {
     "deferred": function () {},
     "sync": function () {},
     "request": function () {},
-    "deps": function () {}
+    "deps": function () {},
+    "component": function() {}
 }

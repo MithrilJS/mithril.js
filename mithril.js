@@ -22,7 +22,7 @@ var m = (function app(window, undefined) {
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame;
 
 	// self invoking function needed because of the way mocks work
-	function initialize(window){
+	function initialize(window) {
 		$document = window.document;
 		$location = window.location;
 		$cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
@@ -31,9 +31,9 @@ var m = (function app(window, undefined) {
 
 	initialize(window);
 
-  m.version = function(){
-    return VERSION;
-  };
+	m.version = function() {
+		return VERSION;
+	};
 
 	/**
 	 * @typedef {String} Tag
@@ -624,6 +624,23 @@ var m = (function app(window, undefined) {
 			else if (cached.children.tag) unload(cached.children);
 		}
 	}
+
+	var insertAdjacentBeforeEnd = (function () {
+		var rangeStrategy = function (parentElement, data) {
+			parentElement.appendChild($document.createRange().createContextualFragment(data));
+		};
+		var insertAdjacentStrategy = function (parentElement, data) {
+			parentElement.insertAdjacentHTML("beforeend", data);
+		};
+
+		try {
+			$document.createRange().createContextualFragment('x');
+			return rangeStrategy;
+		} catch (e) {
+			return insertAdjacentStrategy;
+		}
+	})();
+
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
@@ -636,7 +653,8 @@ var m = (function app(window, undefined) {
 			}
 			else nextSibling.insertAdjacentHTML("beforebegin", data);
 		}
-		else parentElement.insertAdjacentHTML("beforeend", data);
+		else insertAdjacentBeforeEnd(parentElement, data);
+
 		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {
 			nodes.push(parentElement.childNodes[index]);
@@ -764,6 +782,8 @@ var m = (function app(window, undefined) {
 			controllers[index].onunload(event);
 		}
 
+		var isNullComponent = component === null;
+
 		if (!isPrevented) {
 			m.redraw.strategy("all");
 			m.startComputation();
@@ -777,14 +797,24 @@ var m = (function app(window, undefined) {
 				components[index] = component;
 			}
 			endFirstComputation();
+			if (isNullComponent) {
+				removeRootElement(root, index);
+			}
 			return controllers[index];
 		}
-		if (!component) {
-			roots.splice(index, 1);
-			controllers.splice(index, 1);
-			components.splice(index, 1);
+		if (isNullComponent) {
+			removeRootElement(root, index);
 		}
 	};
+
+	function removeRootElement(root, index) {
+		roots.splice(index, 1);
+		controllers.splice(index, 1);
+		components.splice(index, 1);
+		reset(root);
+		nodeCache.splice(getCellCacheKey(root), 1);
+	}
+
 	var redrawing = false, forcing = false;
 	m.redraw = function(force) {
 		if (redrawing) return;
@@ -851,11 +881,12 @@ var m = (function app(window, undefined) {
 		else m.endComputation();
 	}
 
-	m.withAttr = function(prop, withAttrCallback) {
+	m.withAttr = function(prop, withAttrCallback, callbackThis) {
 		return function(e) {
 			e = e || event;
 			var currentTarget = e.currentTarget || this;
-			withAttrCallback(prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop));
+			var _this = callbackThis || this;
+			withAttrCallback.call(_this, prop in currentTarget ? currentTarget[prop] : currentTarget.getAttribute(prop));
 		};
 	};
 
@@ -1055,6 +1086,14 @@ var m = (function app(window, undefined) {
 			return propify(promise.then(resolve, reject), initialValue);
 		};
 		prop["catch"] = prop.then.bind(null, null);
+		prop["finally"] = function(callback){
+			var _callback = function(value){return m.deferred().resolve(callback(value)).promise;};
+			return prop.then(function(value) {
+				return propify(_callback(value).then(function() {return value;}), initialValue);
+			}, function(reason) {
+				return propify(_callback(reason).then(function() {throw new Error(reason);}), initialValue);
+			});
+		};
 		return prop;
 	}
 	//Promiz.mithril.js | Zolmeister | MIT

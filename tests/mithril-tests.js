@@ -1380,6 +1380,13 @@ function testMithril(mock) {
 		handler({currentTarget: {test: "foo"}})
 		return value === "foo"
 	})
+	test(function() {
+		var value
+		var _this
+		var handler = m.withAttr("test", function(data) {value = data}, _this)
+		handler({currentTarget: {test: "foo"}})
+		return value === "foo" && handler.this === _this
+	})
 
 	//m.trust
 	test(function() {return m.trust("test").valueOf() === "test"})
@@ -3914,6 +3921,35 @@ function testMithril(mock) {
 		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}})["catch"](error)
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
 		return prop().message === "error occurred" && error().message === "error occurred"
+	})
+	test(function() {
+		// Data returned by then() functions propagate to finally().
+		var data = m.prop("");
+		var prop = m.request({method: "GET", url: "test"}).then(function() {return "foo"})["finally"](data)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop() === "foo" && data() === "foo"
+	})
+	test(function() {
+		// Data returned by finally() functions do *not* propagate to next promise.
+		var data = m.prop("");
+		var prop = m.request({method: "GET", url: "test"}).then(function() {return "foo"})["finally"](function() {return "bar"}).then(data)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop() === "foo" && data() === "foo"
+	})
+	test(function() {
+		// Errors thrown in finally() can be caught by next promise.
+		var error = m.prop("no error")
+		var prop = m.request({method: "GET", url: "test"}).then(function() {return "foo"})["finally"](function() {throw new Error("error occurred")})["catch"](error)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().message === "error occurred" && error().message === "error occurred"
+	})
+	test(function() {
+		// Promise finally() method occurrs after catch().
+		var error = m.prop("no error")
+		var lastly = function() { error("lastly") };
+		var prop = m.request({method: "GET", url: "test", deserialize: function() {throw new Error("error occurred")}})["catch"](error)["finally"](lastly)
+		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		return prop().message === "error occurred" && error() === "lastly"
 	})
 	test(function() {
 		var error = m.prop("no error"), exception
