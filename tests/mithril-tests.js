@@ -3923,11 +3923,11 @@ function testMithril(mock) {
 		return prop().message === "error occurred" && error().message === "error occurred"
 	})
 	test(function() {
-		// Data returned by then() functions propagate to finally().
+		// Data returned by then() functions do *not* propagate to finally().
 		var data = m.prop("");
 		var prop = m.request({method: "GET", url: "test"}).then(function() {return "foo"})["finally"](data)
 		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
-		return prop() === "foo" && data() === "foo"
+		return prop() === "foo" && data() === ""
 	})
 	test(function() {
 		// Data returned by finally() functions do *not* propagate to next promise.
