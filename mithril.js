@@ -624,6 +624,23 @@ var m = (function app(window, undefined) {
 			else if (cached.children.tag) unload(cached.children);
 		}
 	}
+
+	var insertAdjacentBeforeEnd = (function () {
+		var rangeStrategy = function (parentElement, data) {
+			parentElement.appendChild($document.createRange().createContextualFragment(data));
+		};
+		var insertAdjacentStrategy = function (parentElement, data) {
+			parentElement.insertAdjacentHTML("beforeend", data);
+		};
+
+		try {
+			$document.createRange().createContextualFragment('x');
+			return rangeStrategy;
+		} catch (e) {
+			return insertAdjacentStrategy;
+		}
+	})();
+
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
@@ -636,12 +653,8 @@ var m = (function app(window, undefined) {
 			}
 			else nextSibling.insertAdjacentHTML("beforebegin", data);
 		}
-		else {
-			if (window.Range && window.Range.prototype.createContextualFragment) {
-				parentElement.appendChild($document.createRange().createContextualFragment(data));
-			}
-			else parentElement.insertAdjacentHTML("beforeend", data);
-		}
+		else insertAdjacentBeforeEnd(parentElement, data);
+
 		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {
 			nodes.push(parentElement.childNodes[index]);
