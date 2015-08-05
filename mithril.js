@@ -35,6 +35,45 @@ var m = (function app(window, undefined) {
 		return VERSION;
 	};
 
+    function slice(x){
+        return Array.prototype.slice.call(x)
+    }
+
+    function getAttributes(node) {
+        return slice(node.attributes).reduce(function(a, v){
+            if(v.name === 'class'){
+                a.className = a.class
+            } else {
+                a[v.name] = v.value
+            }
+            return a;
+        }, {})
+    }
+
+    function rebuild(node){
+        if(node instanceof NodeList){
+            return Array.prototype.slice.call(node).map(rebuild)
+        } else if(node instanceof Text){
+            return {
+                children: [String(node.textContent)],
+                nodes: [node],
+                attrs: {},
+                intact: true
+            }
+        } else {
+            nodeCache.push(node)
+            var r = {
+                tag: node.tagName.toLowerCase(),
+                attrs: getAttributes(node),
+                children: rebuild(node.childNodes),
+                nodes: [node],
+                intact: true
+            }
+            r.children.nodes = Array.prototype.slice.call(node.childNodes)
+            return r
+        }
+    }
+
 	/**
 	 * @typedef {String} Tag
 	 * A string that looks like -> div.classname#id[param=one][param2=two]
@@ -697,7 +736,18 @@ var m = (function app(window, undefined) {
 		var isDocumentRoot = root === $document;
 		var node = isDocumentRoot || root === $document.documentElement ? documentNode : root;
 		if (isDocumentRoot && cell.tag !== "html") cell = {tag: "html", attrs: {}, children: cell};
-		if (cellCache[id] === undefined) clear(node.childNodes);
+		if (cellCache[id] === undefined) {
+            // if we have a single node in an array, just rebuild with a single node
+            // if we pass an array of nodes, rebuild all
+            // otherwise clear out the container
+            if(node.childNodes.length === 1) {
+                cellCache[id] = rebuild(node.childNodes[0])
+            } else if(node.childNodes.length){
+                cellCache[id] = rebuild(node.childNodes)
+            } else {
+                clear(node.childNodes)
+            }
+        }
 		if (forceRecreation === true) reset(root);
 		cellCache[id] = build(node, null, undefined, undefined, cell, cellCache[id], false, 0, null, undefined, configs);
 		forEach(configs, function (config) { config(); });
@@ -785,7 +835,7 @@ var m = (function app(window, undefined) {
 		var isNullComponent = component === null;
 
 		if (!isPrevented) {
-			m.redraw.strategy("all");
+			m.redraw.strategy("diff");
 			m.startComputation();
 			roots[index] = root;
 			var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
