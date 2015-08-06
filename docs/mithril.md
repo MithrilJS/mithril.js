@@ -424,13 +424,12 @@ Fortunately, with Mithril, it's possible for developers to attach an identity ke
 To maintain the identities of DOM elements, you need to add a `key` property to the direct children of the array that you're planning to modify. The key for each child must be unique among a list of sibling DOM elements, but it does not need to be globally unique. Also, keys must be either strings or numbers.
 
 ```javascript
-m("ul", [
-	items.map(function(item) {
+m("ul", items.map(function(item) {
 		return m("li", {key: item.id}, [
 			m("input")
 		]);
 	})
-]);
+);
 ```
 
 In the example above, input focus would be maintained correctly after a redraw even if `items` got sorted or reversed. The key is defined in the `li`, which is the closest element to the `items` array, not directly on the `input`, even though we want to track focus on the input.
