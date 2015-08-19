@@ -49,9 +49,12 @@ var m = (function app(window, undefined) {
 	 *
 	 */
 	function m(tag, pairs) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args[i - 1] = arguments[i];
+		// JSX compatibility with 'null' {pairs} argument
+		var i = pairs === null ? 2 : 1;
+		for (var args = []; i < arguments.length; ++i) {
+			args.push(arguments[i]);
 		}
+
 		if (isObject(tag)) return parameterize(tag, args);
 		var hasAttrs = pairs != null && isObject(pairs) && !("tag" in pairs || "view" in pairs || "subtree" in pairs);
 		var attrs = hasAttrs ? pairs : {};
