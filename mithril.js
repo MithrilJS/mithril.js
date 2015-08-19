@@ -959,7 +959,7 @@ var m = (function app(window, undefined) {
 	m.route.param = function(key) {
 		if (!routeParams) throw new Error("You must call m.route(element, defaultRoute, routes) before calling m.route.param()");
 		if( !key ){
-			return routeParams;
+			return JSON.parse(JSON.stringify(routeParams));
 		}
 		return routeParams[key];
 	};
