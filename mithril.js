@@ -13,6 +13,15 @@ var m = (function app(window, undefined) {
 	var isArray = Array.isArray || function (object) {
 		return type.call(object) === "[object Array]";
 	};
+	var clone = function clone(obj) {
+		var target = {};
+		for (var i in obj) {
+			if (obj.hasOwnProperty(i)) {
+				target[i] = obj[i];
+			}
+		}
+		return target;
+	};
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
@@ -220,26 +229,26 @@ var m = (function app(window, undefined) {
 	function maybeRecreateObject(data, cached, dataAttrKeys) {
 		//if an element is different enough from the one in cache, recreate it
 		if (data.tag !== cached.tag ||
-				dataAttrKeys.sort().join() !== Object.keys(cached.attrs).sort().join() ||
+			dataAttrKeys.sort().join() !== Object.keys(cached.attrs).sort().join() ||
 				data.attrs.id !== cached.attrs.id ||
-				data.attrs.key !== cached.attrs.key ||
-				(m.redraw.strategy() === "all" && (!cached.configContext || cached.configContext.retain !== true)) ||
-				(m.redraw.strategy() === "diff" && cached.configContext && cached.configContext.retain === false)) {
+					data.attrs.key !== cached.attrs.key ||
+						(m.redraw.strategy() === "all" && (!cached.configContext || cached.configContext.retain !== true)) ||
+							(m.redraw.strategy() === "diff" && cached.configContext && cached.configContext.retain === false)) {
 			if (cached.nodes.length) clear(cached.nodes);
-			if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
-			if (cached.controllers) {
-				forEach(cached.controllers, function (controller) {
-					if (controller.unload) controller.onunload({preventDefault: noop});
-				});
-			}
+		if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
+		if (cached.controllers) {
+			forEach(cached.controllers, function (controller) {
+				if (controller.unload) controller.onunload({preventDefault: noop});
+			});
+		}
 		}
 	}
 
 	function getObjectNamespace(data, namespace) {
 		return data.attrs.xmlns ? data.attrs.xmlns :
 			data.tag === "svg" ? "http://www.w3.org/2000/svg" :
-			data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
-			namespace;
+		data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
+		namespace;
 	}
 
 	function unloadCachedControllers(cached, views, controllers) {
@@ -332,7 +341,7 @@ var m = (function app(window, undefined) {
 		//handle text nodes
 		return cached.nodes.length === 0 ? handleNonexistentNodes(data, parentElement, index) :
 			cached.valueOf() !== data.valueOf() || shouldReattach === true ?
-				reattachNodes(data, cached, parentElement, editable, index, parentTag) :
+			reattachNodes(data, cached, parentElement, editable, index, parentTag) :
 			(cached.nodes.intact = true, cached);
 	}
 
@@ -574,7 +583,7 @@ var m = (function app(window, undefined) {
 					//handle SVG
 					else if (namespace != null) {
 						if (attrName === "href") node.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataAttr);
-						else node.setAttribute(attrName === "className" ? "class" : attrName, dataAttr);
+							else node.setAttribute(attrName === "className" ? "class" : attrName, dataAttr);
 					}
 					//handle cases that are properties (but ignore cases where we should use setAttribute instead)
 					//- list and form are typically used as strings, but are DOM element references in js
@@ -959,7 +968,7 @@ var m = (function app(window, undefined) {
 	m.route.param = function(key) {
 		if (!routeParams) throw new Error("You must call m.route(element, defaultRoute, routes) before calling m.route.param()");
 		if( !key ){
-			return JSON.parse(JSON.stringify(routeParams));
+			return clone(routeParams);
 		}
 		return routeParams[key];
 	};
@@ -1297,10 +1306,10 @@ var m = (function app(window, undefined) {
 			};
 
 			script.src = options.url
-				+ (options.url.indexOf("?") > 0 ? "&" : "?")
-				+ (options.callbackKey ? options.callbackKey : "callback")
-				+ "=" + callbackKey
-				+ "&" + buildQueryString(options.data || {});
+			+ (options.url.indexOf("?") > 0 ? "&" : "?")
+			+ (options.callbackKey ? options.callbackKey : "callback")
+			+ "=" + callbackKey
+			+ "&" + buildQueryString(options.data || {});
 			$document.body.appendChild(script);
 		}
 		else {
@@ -1394,9 +1403,9 @@ var m = (function app(window, undefined) {
 			if (xhrOptions.background !== true) m.endComputation()
 		}
 
-		ajax(xhrOptions);
-		deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
-		return deferred.promise;
+	ajax(xhrOptions);
+	deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
+	return deferred.promise;
 	};
 
 	//testing API
