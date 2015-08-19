@@ -14,7 +14,7 @@ Mithril provides utilities to handle three different aspect of routing:
 
 ### Defining routes
 
-To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.module.md) to be rendered.
+To define a list of routes, you need to specify a host DOM element, a default route and a key-value map of possible routes and respective [modules](mithril.mount.md) to be rendered. Note: `module` was renamed to `mount`. Documentation will be updated soon.
 
 The example below defines three routes, to be rendered in `<body>`. `home`, `login` and `dashboard` are modules. We'll see how to define a module in a bit.
 
