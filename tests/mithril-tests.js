@@ -2579,7 +2579,8 @@ function testMithril(mock) {
 
 		return result
 	})
-	test(function() { // test route params returning params object if no key is given
+	test(function() { 
+		// test route params returning params object if no key is given
 		mock.requestAnimationFrame.$resolve() //setup
 
 		var root = mock.document.createElement("div")
@@ -2600,6 +2601,31 @@ function testMithril(mock) {
 
 		return result
 	})
+	test(function() { 
+		// test mutating params object returned does not affect route param values
+		
+		mock.requestAnimationFrame.$resolve() //setup
+
+		var root = mock.document.createElement("div")
+		m.route.mode = "search"
+		m.route(root, "/", {
+			"/": {controller: function() {}, view: function() {}},
+			"/test12": {controller: function() {}, view: function() {}}
+		})
+		mock.requestAnimationFrame.$resolve()
+		m.route("/test12", {a: "foo", b: "bar"})
+		mock.requestAnimationFrame.$resolve()
+		
+		var params = m.route.param();
+		params.a = "lib";
+
+		var result = m.route.param("a") === "foo";
+
+		m.mount(root, null) //teardown
+
+		return result
+	})
+	
 	test(function() {
 		mock.requestAnimationFrame.$resolve() //setup
 		mock.location.search = "?"
