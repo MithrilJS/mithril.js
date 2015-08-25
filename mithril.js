@@ -1145,7 +1145,7 @@ var m = (function app(window, undefined) {
 
 		function finish(type) {
 			state = type || REJECTED;
-			next.map(function(deferred) {
+			forEach(next, function(deferred) {
 				state === RESOLVED ? deferred.resolve(promiseValue) : deferred.reject(promiseValue);
 			});
 		}
