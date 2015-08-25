@@ -1224,7 +1224,7 @@ var m = (function app(window, undefined) {
 		}
 	}
 	m.deferred.onerror = function(e) {
-		if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
+		if (type.call(e) === "[object Error]" && e.constructor !== Error) {
 			pendingRequests = 0;
 			throw e;
 		}
