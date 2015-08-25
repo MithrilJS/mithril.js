@@ -1375,20 +1375,26 @@ function testMithril(mock) {
 
 	//m.withAttr
 	test(function() {
-		var value
-		var handler = m.withAttr("test", function(data) {value = data})
-		handler({currentTarget: {test: "foo"}})
-		return value === "foo"
-	})
-	test(function() {
-		var _this = {}
-		var value, context
+		//the handler is called with the correct value & context when callbackThis not given
+		var _this = {};
+		var value, context;
 		var handler = m.withAttr("test", function(data) {
 			value = data;
 			context = this;
-		}, _this)
-		handler({currentTarget: {test: "foo"}})
-		return value === "foo" && context === _this
+		});
+		handler.call(_this, {currentTarget: {test: "foo"}});
+		return value === "foo" && context === _this;
+	})
+	test(function() {
+		//the handler is called with the correct value & context when callbackThis is given
+		var _this = {};
+		var value, context;
+		var handler = m.withAttr("test", function(data) {
+			value = data;
+			context = this;
+		}, _this);
+		handler({currentTarget: {test: "foo"}});
+		return value === "foo" && context === _this;
 	})
 
 	//m.trust
