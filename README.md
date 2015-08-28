@@ -68,7 +68,7 @@ app.view = function(ctrl) {
 
 
 //initialize
-m.module(document.getElementById("example"), app);
+m.mount(document.getElementById("example"), app);
 ```
 
 ---
