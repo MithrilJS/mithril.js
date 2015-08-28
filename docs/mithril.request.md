@@ -408,7 +408,7 @@ demo.controller = function() {
 demo.view = function(ctrl) {
 	//This view gets rendered before the request above completes
 	//Calling .map doesn't throw an error because we defined the initial value to be an empty array, instead of undefined
-	return ctrl.users().map(function() {
+	return ctrl.users().map(function(user) {
 		return m("div", user.name)
 	})
 }
