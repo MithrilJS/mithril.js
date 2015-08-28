@@ -48,7 +48,7 @@ Some of the older frameworks among the popular ones (out-of-the-box jQuery and B
 
 This can get noticeably bulky when you look at thing like collections: you often need to implement insertion code and deletion code, in addition to a "draw everything" routine for performance. And this is for every list that needs to be displayed in some way.
 
-Mithril's view layer paradigm is designed be **declarative**, much like HTML, such that the same code implicitly does everything it needs to. As it turns out, this design decision is actually a compromise: it offers the benefit of decreased application code complexity at the cost of some performance loss. However, as the performance tests in the homepage show, this does not necessarily hurt Mithril in a meaningful way.
+Mithril's view layer paradigm is designed to be **declarative**, much like HTML, such that the same code implicitly does everything it needs to. As it turns out, this design decision is actually a compromise: it offers the benefit of decreased application code complexity at the cost of some performance loss. However, as the performance tests in the homepage show, this does not necessarily hurt Mithril in a meaningful way.
 
 ---
 

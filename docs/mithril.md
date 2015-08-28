@@ -105,7 +105,7 @@ m.render(document.body, [
                 m("a", {href: link.url}, link.title) 
             );
         })
-    ])
+    )
 ]);
 ```
 

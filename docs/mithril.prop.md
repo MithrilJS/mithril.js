@@ -40,7 +40,7 @@ var User = {
 		this.name = m.prop(name);
 	},
 	controller: function() {
-		this.user = new user.model("John Doe");
+		this.user = new User.model("John Doe");
 	},
 	view: function(controller) {
 		m.render("body", [
