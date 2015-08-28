@@ -7,7 +7,7 @@
 //drag and drop micro-library
 function dragdrop(element, options) {
 	options = options || {}
-	
+
 	element.addEventListener("dragover", activate)
 	element.addEventListener("dragleave", deactivate)
 	element.addEventListener("dragend", deactivate)
@@ -35,7 +35,7 @@ Uploader.upload = function(files) {
 	for (var i = 0; i < files.length; i++) {
 		formData.append("file" + i, files[i])
 	}
-	
+
 	return m.request({
 		method: "POST",
 		url: "http://localhost/api/files",
@@ -85,7 +85,7 @@ demo.view = function(ctrl) {
 	]
 }
 
-m.module(document.body, demo)
+m.mount(document.body, demo)
 
 //submodule helper
 function submodule(module, args) {

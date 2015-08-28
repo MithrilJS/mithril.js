@@ -62,14 +62,14 @@ var ContactForm = {
 	},
 	view: function(ctrl) {
 		var contact = ctrl.contact()
-		
+
 		return m("form", [
 			m("label", "Name"),
 			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
-			
+
 			m("label", "Email"),
 			m("input", {oninput: m.withAttr("value", contact.email), value: contact.email()}),
-			
+
 			m("button[type=button]", {onclick: ctrl.createContact}, "Create")
 		])
 	}
@@ -92,5 +92,5 @@ var ContactList = {
 	}
 }
 
-m.module(document.body, ContactsWidget)
+m.mount(document.body, ContactsWidget)
 </script>
