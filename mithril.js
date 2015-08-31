@@ -464,7 +464,8 @@ var m = (function app(window, undefined) {
 		return function() {
 			m.redraw.strategy('none');
 			var newData = view(controller);
-			build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);							
+			build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);
+			forEach(configs, function (config) { config(); });
 		}
 	}
 
@@ -500,7 +501,7 @@ var m = (function app(window, undefined) {
 		for (var i = 0; i < controllers.length; i++) {
 			var controller = controllers[i];
 			if (isFunction(controller.redrawSelf)) {
-				controller.redrawSelf = makeRedrawSelf(controller, views[i], parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, configs);
+				controller.redrawSelf = makeRedrawSelf(controller, views[i], parentElement, parentTag, parentCache, parentIndex, data, cached, shouldReattach, index, editable, namespace, []);
 			}
 		}
 		
