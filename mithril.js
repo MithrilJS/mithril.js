@@ -462,6 +462,7 @@ var m = (function app(window, undefined) {
 
 	function makeRedrawSelf(controller, view, parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs) {
 		return function() {
+			configs = [];
 			m.redraw.strategy('none');
 			var newData = view(controller);
 			build(parentElement, parentTag, parentCache, parentIndex, newData, cached, shouldReattach, index, editable, namespace, configs);
