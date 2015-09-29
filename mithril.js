@@ -448,7 +448,7 @@ var m = (function app(window, undefined) {
 		//Faster to coerce to number and check for NaN
 		var key = +(data && data.attrs && data.attrs.key);
 		data = pendingRequests === 0 || forcing || cachedControllers && cachedControllers.indexOf(controller) > -1 ? data.view(controller) : {tag: "placeholder"};
-		if (data.subtree === "retain") return cached;
+		if (data.subtree === "retain") return data;
 		if (key === key) (data.attrs = data.attrs || {}).key = key;
 		updateLists(views, controllers, view, controller);
 		return data;
@@ -463,6 +463,7 @@ var m = (function app(window, undefined) {
 	function buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) {
 		var views = [], controllers = [];
 		data = markViews(data, cached, views, controllers);
+		if (data.subtree === "retain") return cached;
 		if (!data.tag && controllers.length) throw new Error("Component template must return a virtual element, not an array, string, etc.");
 		data.attrs = data.attrs || {};
 		cached.attrs = cached.attrs || {};
