@@ -431,10 +431,10 @@ declare module _mithril {
 			* @param defaultRoute The route to start with.
 			* @param routes A key-value mapping of pathname to controller.
 			*/
-			<T extends MithrilController>(
+			(
 				rootElement: Element,
 				defaultRoute: string,
-				routes: MithrilRoutes<T>
+				routes: MithrilRoutes
 			): void;
 
 			/**
@@ -447,7 +447,7 @@ declare module _mithril {
 			* m("a[href='/dashboard/alicesmith']", {config: m.route});
 			* ```
 			*/
-			<T extends MithrilController>(
+			(
 				element: Element,
 				isInitialized: boolean,
 				context?: MithrilContext,
@@ -876,12 +876,12 @@ declare module _mithril {
 	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
-	interface MithrilRoutes<T extends MithrilController> {
+	interface MithrilRoutes {
 		/**
 		* The key represents the route. The value represents the corresponding
 		* component.
 		*/
-		[key: string]: MithrilComponent<T>;
+		[key: string]: MithrilComponent<MithrilController>;
 	}
 
 	/**
