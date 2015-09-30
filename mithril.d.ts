@@ -20,13 +20,13 @@ declare module _mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
+		(
 			selector: string,
 			attributes: MithrilAttributes,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
-				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
+				MithrilVirtualElement |
+				MithrilComponent<MithrilController>>
+		): MithrilVirtualElement;
 		
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -56,12 +56,12 @@ declare module _mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
+		(
 			selector: string,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
-				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
+				MithrilVirtualElement |
+				MithrilComponent<MithrilController>>
+		): MithrilVirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -179,9 +179,9 @@ declare module _mithril {
 		* @param forceRecreation If true, overwrite the entire tree without
 		* diffing against it.
 		*/
-		render<T extends MithrilController>(
+		render(
 			rootElement: Element,
-			children: MithrilVirtualElement<T>|MithrilVirtualElement<T>[],
+			children: MithrilVirtualElement|MithrilVirtualElement[],
 			forceRecreation?: boolean
 		): void;
 
@@ -246,10 +246,10 @@ declare module _mithril {
 			* @param defaultRoute The route to start with.
 			* @param routes A key-value mapping of pathname to controller.
 			*/
-			<T extends MithrilController>(
+			(
 				rootElement: Element,
 				defaultRoute: string,
-				routes: MithrilRoutes<T>
+				routes: MithrilRoutes
 			): void;
 
 			/**
@@ -262,11 +262,11 @@ declare module _mithril {
 			* m("a[href='/dashboard/alicesmith']", {config: m.route});
 			* ```
 			*/
-			<T extends MithrilController>(
+			(
 				element: Element,
 				isInitialized: boolean,
 				context?: MithrilContext,
-				vdom?: MithrilVirtualElement<T>
+				vdom?: MithrilVirtualElement
 			): void;
 
 			/**
@@ -430,7 +430,7 @@ declare module _mithril {
 	*
 	* @see m
 	*/
-	interface MithrilVirtualElement<T extends MithrilController> {
+	interface MithrilVirtualElement {
 		/**
 		* A key to optionally associate with this element.
 		*/
@@ -449,7 +449,7 @@ declare module _mithril {
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|MithrilVirtualElement<T>|MithrilComponent<T>>;
+		children?: Array<string|MithrilVirtualElement|MithrilComponent<any>>;
 	}
 
 	/**
@@ -501,11 +501,11 @@ declare module _mithril {
 		* @param context The associated context for this element.
 		* @param vdom The associated virtual element.
 		*/
-		<T extends MithrilController>(
+		(
 			element: Element,
 			isInitialized: boolean,
 			context: MithrilContext,
-			vdom: MithrilVirtualElement<T>
+			vdom: MithrilVirtualElement
 		): void;
 	}
 
@@ -573,7 +573,7 @@ declare module _mithril {
 		/**
 		* Creates a view out of virtual elements.
 		*/
-		(ctrl: T): MithrilVirtualElement<T>;
+		(ctrl: T): MithrilVirtualElement;
 	}
 
 	/**
@@ -596,7 +596,7 @@ declare module _mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl: T): MithrilVirtualElement<T>;
+		view(ctrl: T): MithrilVirtualElement;
 	}
 
 	/**
@@ -667,12 +667,12 @@ declare module _mithril {
 	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
-	interface MithrilRoutes<T extends MithrilController> {
+	interface MithrilRoutes {
 		/**
 		* The key represents the route. The value represents the corresponding
 		* component.
 		*/
-		[key: string]: MithrilComponent<T>;
+		[key: string]: MithrilComponent<MithrilController>;
 	}
 
 	/**
