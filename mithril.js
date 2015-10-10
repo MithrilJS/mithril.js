@@ -751,6 +751,25 @@ var m = (function app(window, undefined) {
 		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key};
 		return output;
 	}
+	function getComponentRenderer(root, index, component) {
+		var currentComponent = component ?
+			(topComponent = component) :
+			(topComponent = component = {controller: noop});
+
+		return function(controller) {
+			m.redraw.strategy("all");
+			m.startComputation();
+			roots[index] = root;
+
+			//controllers may call m.mount recursively (via m.route redirects, for example)
+			//this conditional ensures only the last recursive m.mount call is applied
+			if (currentComponent === topComponent) {
+				controllers[index] = controller;
+				components[index] = component;
+			}
+			endFirstComputation();
+		}
+	}
 	m.component = function(component) {
 		for (var args = [], i = 1; i < arguments.length; i++) args.push(arguments[i]);
 		return parameterize(component, args);
@@ -785,21 +804,18 @@ var m = (function app(window, undefined) {
 		var isNullComponent = component === null;
 
 		if (!isPrevented) {
-			m.redraw.strategy("all");
-			m.startComputation();
-			roots[index] = root;
-			var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
-			var controller = new (component.controller || noop)();
-			//controllers may call m.mount recursively (via m.route redirects, for example)
-			//this conditional ensures only the last recursive m.mount call is applied
-			if (currentComponent === topComponent) {
-				controllers[index] = controller;
-				components[index] = component;
+			var Constructor = component.controller || noop
+			var controller = new Constructor()
+			var render = getComponentRenderer(root, index, component)
+
+			if (typeof controller.then === 'function') {
+				controller.then(render)
+			} else if (Constructor.length === 1) {
+				controller(render)
+			} else {
+				render(controller)
 			}
-			endFirstComputation();
-			if (isNullComponent) {
-				removeRootElement(root, index);
-			}
+
 			return controllers[index];
 		}
 		if (isNullComponent) {
