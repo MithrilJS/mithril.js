@@ -5,3 +5,5 @@ node_js:
 script:
   - grunt test
   - grunt teste2e
+
+sudo: false
