@@ -124,6 +124,16 @@ mock.window = (function() {
 		traverse(window.document);
 		return out;
 	}
+	try {
+		this.document.createRange().createContextualFragment('x')
+		window.document.createRange = function() {
+			return {
+				createContextualFragment: function (tagString) {
+					return window.document.createTextNode(tagString)
+				}
+			}
+		}
+	} catch (e) {}
 	window.scrollTo = function() {}
 	window.cancelAnimationFrame = function() {}
 	window.requestAnimationFrame = function(callback) {
