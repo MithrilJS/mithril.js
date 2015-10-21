@@ -49,7 +49,7 @@ var m = (function app(window, undefined) {
 	 *
 	 */
 	function m(tag, pairs) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
+	  for (var args = [], i = 1, len = arguments.length; i < len; i++) {
 			args[i - 1] = arguments[i];
 		}
 		if (isObject(tag)) return parameterize(tag, args);
@@ -91,7 +91,7 @@ var m = (function app(window, undefined) {
 		return cell;
 	}
 	function forEach(list, f) {
-		for (var i = 0; i < list.length && !f(list[i], i++);) {}
+	  for (var i = 0, len = list.length; i < len && !f(list[i], i++);) {}
 	}
 	function forKeys(list, f) {
 		forEach(list, function (attrs, i) {
@@ -118,7 +118,7 @@ var m = (function app(window, undefined) {
 
 	function flatten(list) {
 		//recursively flatten array
-		for (var i = 0; i < list.length; i++) {
+	  for (var i = 0, len = list.length; i < len; i++) {
 			if (isArray(list[i])) {
 				list = list.concat.apply([], list);
 				//check current index again and flatten until there are no more nested arrays at that index
@@ -752,7 +752,7 @@ var m = (function app(window, undefined) {
 		return output;
 	}
 	m.component = function(component) {
-		for (var args = [], i = 1; i < arguments.length; i++) args.push(arguments[i]);
+	  for (var args = [], i = 1, len = arguments.length; i < len; i++) args.push(arguments[i]);
 		return parameterize(component, args);
 	};
 	m.mount = m.module = function(root, component) {
