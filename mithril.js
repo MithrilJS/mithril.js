@@ -1017,6 +1017,8 @@ var m = (function app(window, undefined) {
 		var currentTarget = e.currentTarget || e.srcElement;
 		var args = m.route.mode === "pathname" && currentTarget.search ? parseQueryString(currentTarget.search.slice(1)) : {};
 		while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
+		// clear pendingRequests because we want an immediate route change
+		pendingRequests = 0;
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length), args);
 	}
 	function setScroll() {
