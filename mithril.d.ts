@@ -29,22 +29,6 @@ declare module _mithril {
 		): MithrilVirtualElement<T>;
 		
 		/**
-		* Initializes a component for use with m.render, m.mount, etc.
-		*
-		* @param component A component.
-		* @param args Arguments to optionally pass to the component.
-		* @return A component.
-		*
-		* @see m.render
-		* @see m.mount
-		* @see m
-		*/
-		<T extends MithrilController>(
-			component: MithrilComponent<T>,
-			...args: any[]
-		): MithrilComponent<T>;
-
-		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
 		*
 		* @param selector A simple CSS selector. Nested selectors are not
@@ -67,18 +51,121 @@ declare module _mithril {
 		* Initializes a component for use with m.render, m.mount, etc.
 		* Shorthand for m.component.
 		*
-		* @param selector A component.
-		* @param args Arguments to optionally pass to the component.
-		* @return A component.
+		* @param component A mithril component. 
+		* @return A mithril component.
 		*
 		* @see m.render
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
-			component: MithrilComponent<T>,
-			...args: any[]
-		): MithrilComponent<T>;
+		<TController extends MithrilController>(
+			component: MithrilComponent<TController>
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a component for use with m.render, m.mount, etc.
+		* Shorthand for m.component.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		<TController extends MithrilController, T1>(
+			component: ParameterizedMithrilComponent<TController, T1, void, void, void>,
+			arg1: T1
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a component for use with m.render, m.mount, etc.
+		* Shorthand for m.component.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		<TController extends MithrilController, T1, T2>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, void, void>,
+			arg1: T1,
+			arg2: T2
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a component for use with m.render, m.mount, etc.
+		* Shorthand for m.component.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		<TController extends MithrilController, T1, T2, T3>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, void>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		* Shorthand for m.component.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @param arg4 Fourth argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		<TController extends MithrilController, T1, T2, T3, T4>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, T4>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3,
+			arg4: T4
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		* Shorthand for m.component.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @param arg4 Fourth argument to bind to the component.
+		* @param args Additional optional arguments which are not type checked.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		<TController extends MithrilController, T1, T2, T3, T4>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, T4>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3,
+			arg4: T4,
+			...args:any[]
+		): MithrilComponent<TController>;
 
 		/**
 		* Creates a getter-setter function that wraps a Mithril promise. Useful
@@ -149,18 +236,116 @@ declare module _mithril {
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
 		*
-		* @param selector A component.
-		* @param args Arguments to optionally pass to the component.
-		* @return A component.
+		* @param component A mithril component. 
+		* @return A mithril component.
 		*
 		* @see m.render
 		* @see m.mount
 		* @see m
 		*/
-		component<T extends MithrilController>(
-			component: MithrilComponent<T>,
+		component<TController extends MithrilController>(
+			component: MithrilComponent<TController>
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m
+		*/
+		component<TController extends MithrilController, T1>(
+			component: ParameterizedMithrilComponent<TController, T1, void, void, void>,
+			arg1: T1
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m
+		*/
+		component<TController extends MithrilController, T1, T2>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, void, void>,
+			arg1: T1,
+			arg2: T2
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m
+		*/
+		component<TController extends MithrilController, T1, T2, T3>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, void>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @param arg4 Fourth argument to bind to the component.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m
+		*/
+		component<TController extends MithrilController, T1, T2, T3, T4>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, T4>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3,
+			arg4: T4
+		): MithrilComponent<TController>;
+
+		/**
+		* Initializes a parameterized component for use with m.render, m.mount, etc.
+		*
+		* @param component A parameterized component.
+		* @param arg1 First argument to bind to the component.
+		* @param arg2 Second argument to bind to the component.
+		* @param arg3 Third argument to bind to the component.
+		* @param arg4 Fourth argument to bind to the component.
+		* @param args Additional optional arguments which are not type checked.
+		* @return A component bound with the supplied arguments.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m
+		*/
+		component<TController extends MithrilController, T1, T2, T3, T4>(
+			component: ParameterizedMithrilComponent<TController, T1, T2, T3, T4>,
+			arg1: T1,
+			arg2: T2,
+			arg3: T3,
+			arg4: T4,
 			...args: any[]
-		): MithrilComponent<T>;
+		): MithrilComponent<TController>;
 
 		/**
 		* Trust this string of HTML.
@@ -597,6 +782,30 @@ declare module _mithril {
 		* @see m.component
 		*/
 		view(ctrl: T): MithrilVirtualElement<T>;
+	}
+
+	/**
+	* This represents a parameterized MithrilComponent with up to six parameters,
+	* intended to be instantiated via m.component().
+	*
+	* @see m
+	* @see m.component
+	*/
+	interface ParameterizedMithrilComponent<TController extends MithrilController, T1, T2, T3, T4> {
+		/**
+		* The component's controller.
+		*
+		* @see m.component
+		*/
+		controller: (arg1: T1, arg2: T2, arg3: T3, arg4: T4, ...args: any[]) => TController;
+
+
+		/**
+		* creates a view out of virtual elements.
+		*
+		* @see m.component
+		*/
+		view(ctrl: TController, arg1: T1, arg2: T2, arg3: T3, arg4: T4, ...args:any[]): MithrilVirtualElement<TController>;
 	}
 
 	/**
