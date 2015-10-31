@@ -1375,17 +1375,26 @@ function testMithril(mock) {
 
 	//m.withAttr
 	test(function() {
-		var value
-		var handler = m.withAttr("test", function(data) {value = data})
-		handler({currentTarget: {test: "foo"}})
-		return value === "foo"
+		//the handler is called with the correct value & context when callbackThis not given
+		var _this = {};
+		var value, context;
+		var handler = m.withAttr("test", function(data) {
+			value = data;
+			context = this;
+		});
+		handler.call(_this, {currentTarget: {test: "foo"}});
+		return value === "foo" && context === _this;
 	})
 	test(function() {
-		var value
-		var _this
-		var handler = m.withAttr("test", function(data) {value = data}, _this)
-		handler({currentTarget: {test: "foo"}})
-		return value === "foo" && handler.this === _this
+		//the handler is called with the correct value & context when callbackThis is given
+		var _this = {};
+		var value, context;
+		var handler = m.withAttr("test", function(data) {
+			value = data;
+			context = this;
+		}, _this);
+		handler({currentTarget: {test: "foo"}});
+		return value === "foo" && context === _this;
 	})
 
 	//m.trust
@@ -2591,7 +2600,7 @@ function testMithril(mock) {
 		mock.requestAnimationFrame.$resolve()
 		m.route("/test12", {a: "foo", b: "bar"})
 		mock.requestAnimationFrame.$resolve()
-		
+
 		var params = m.route.param();
 
 		var result = params.a === "foo" && params.b === "bar"
