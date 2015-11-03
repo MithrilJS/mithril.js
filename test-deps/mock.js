@@ -41,12 +41,19 @@
 	/* eslint-enable no-extend-native */
 })()
 
-window.mock = (function () {
+this.mock = (function (global) {
 	"use strict"
 
-	var window = {}
+	var window = {
+		// Some tests are only broken in PhantomJS 1.x, but successfully run in
+		// the browser. Still waiting on mocha-phantomjs to update to be
+		// compatible with PhantomJS 2.x.
+		phantom: global.window && global.window.navigator &&
+			/PhantomJS/.test(global.window.navigator.userAgent)
+	}
+
 	var document = window.document = {
-		// FIXME: add document.createRange().createContextualFragment()
+		// TODO: add document.createRange().createContextualFragment()
 
 		childNodes: [],
 
@@ -255,4 +262,4 @@ window.mock = (function () {
 	}
 
 	return window
-})()
+})(this)

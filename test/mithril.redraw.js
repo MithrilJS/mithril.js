@@ -31,6 +31,8 @@ describe("m.redraw()", function () {
 	})
 
 	it("runs unnecessary redraws asynchronously", function () {
+		if (mock.phantom) return
+
 		var root = mock.document.createElement("div")
 		var view = sinon.spy()
 
@@ -196,6 +198,8 @@ describe("m.redraw()", function () {
 		})
 
 		dit("recreates the component when \"all\"", function (root) {
+			if (mock.phantom) return
+
 			var count = 0
 			function config(el, init) {
 				if (!init) count++
