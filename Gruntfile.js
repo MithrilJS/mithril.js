@@ -88,9 +88,7 @@ module.exports = function (grunt) { // eslint-disable-line
 				"!archive/**",
 				"!deploy/**",
 				"!mithril.closure-compiler-externs.js",
-				"!docs/layout/lib/**",
-				// TODO(impinball): Finish this.
-				"!mithril.js"
+				"!docs/layout/lib/**"
 			]
 		},
 
