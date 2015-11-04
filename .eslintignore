@@ -1,0 +1,9 @@
+# Most of these are build artifacts.
+node_modules
+**/*.min.js
+archive
+deploy
+mithril.closure-compiler-externs.js
+
+# This is merely a dependency for the documentation.
+docs/layout/lib
