@@ -44,5 +44,10 @@
     "mithril.min.js.map",
     "mithril.js",
     "README.*"
-  ]
+  ],
+  "eslintConfig": {
+    "globals": {
+      "DEBUG": false
+    }
+  }
 }
