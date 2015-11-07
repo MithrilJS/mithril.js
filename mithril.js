@@ -1,7 +1,7 @@
 (function (global, factory) {
 	"use strict"
 	/* eslint-disable no-undef */
-	var m = factory(window)
+	var m = factory(typeof window !== "undefined" ? window : {})
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
 	} else if (typeof define === "function" && define.amd) {
