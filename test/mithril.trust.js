@@ -36,7 +36,7 @@ describe("m.trust()", function () {
 			var root = document.createElement("div")
 			m.render(root, [
 				m.trust("<p>1</p>123<p>2</p>"),
-				m("i", "foo")
+				m("i", "foo"),
 			])
 			expect(root.childNodes[3].tagName).to.equal("I")
 		})
@@ -49,7 +49,7 @@ describe("m.trust()", function () {
 
 			m.render(root, [
 				m.trust("<td>1</td><td>2</td>"),
-				m("td", "foo")
+				m("td", "foo"),
 			])
 
 			expect(root.childNodes[2].tagName).to.equal("td")

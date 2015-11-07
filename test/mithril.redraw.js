@@ -15,7 +15,7 @@ describe("m.redraw()", function () {
 
 		m.mount(root, {
 			controller: function () { ctx = this }, // eslint-disable-line
-			view: function (ctrl) { return ctrl.value }
+			view: function (ctrl) { return ctrl.value },
 		})
 
 		mock.requestAnimationFrame.$resolve()
@@ -38,7 +38,7 @@ describe("m.redraw()", function () {
 
 		m.mount(root, {
 			controller: function () {},
-			view: view
+			view: view,
 		})
 		mock.requestAnimationFrame.$resolve() // teardown
 		m.redraw()
@@ -57,7 +57,7 @@ describe("m.redraw()", function () {
 		var view = sinon.spy()
 		m.mount(root, {
 			controller: function () {},
-			view: view
+			view: view,
 		})
 		mock.requestAnimationFrame.$resolve() // teardown
 		m.redraw(true)
@@ -88,7 +88,7 @@ describe("m.redraw()", function () {
 		function pure(view) {
 			return {
 				controller: noop,
-				view: view
+				view: view,
 			}
 		}
 
@@ -138,8 +138,8 @@ describe("m.redraw()", function () {
 					},
 					view: function () {
 						return m("div")
-					}
-				}
+					},
+				},
 			})
 
 			expect(strategy).to.equal("all")
@@ -164,8 +164,8 @@ describe("m.redraw()", function () {
 					},
 					view: function () {
 						return m("div", {config: config})
-					}
-				}
+					},
+				},
 			})
 
 			route("/bar1")
@@ -185,10 +185,10 @@ describe("m.redraw()", function () {
 								strategy = m.redraw.strategy()
 								ctrl.number++
 								m.redraw.strategy("none")
-							}
+							},
 						}, ctrl.number)
-					}
-				}
+					},
+				},
 			})
 			root.childNodes[0].onclick({})
 			mock.requestAnimationFrame.$resolve()
@@ -211,9 +211,9 @@ describe("m.redraw()", function () {
 						config: config,
 						onclick: function () {
 							m.redraw.strategy("all")
-						}
+						},
 					})
-				})
+				}),
 			})
 			root.childNodes[0].onclick({})
 			mock.requestAnimationFrame.$resolve()

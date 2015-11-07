@@ -49,7 +49,7 @@ this.mock = (function (global) {
 		// the browser. Still waiting on mocha-phantomjs to update to be
 		// compatible with PhantomJS 2.x.
 		phantom: global.window && global.window.navigator &&
-			/PhantomJS/.test(global.window.navigator.userAgent)
+			/PhantomJS/.test(global.window.navigator.userAgent),
 	}
 
 	var document = window.document = {
@@ -102,7 +102,7 @@ this.mock = (function (global) {
 				},
 
 				addEventListener: function () {},
-				removeEventListener: function () {}
+				removeEventListener: function () {},
 			}
 		},
 
@@ -156,7 +156,7 @@ this.mock = (function (global) {
 
 			traverse(document)
 			return out
-		}
+		},
 	}
 
 	document.documentElement = document.createElement("html")
@@ -182,7 +182,7 @@ this.mock = (function (global) {
 			indices[id] = callbacks.length
 			callbacks.push({
 				callback: callback,
-				id: id
+				id: id,
 			})
 			return id
 		}
@@ -258,7 +258,7 @@ this.mock = (function (global) {
 
 		replaceState: function (data, title, url) {
 			location.pathname = location.search = location.hash = url
-		}
+		},
 	}
 
 	return window

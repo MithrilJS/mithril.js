@@ -15,11 +15,11 @@ describe("m.route.buildQueryString()", function () {
 				foo: "bar",
 				hello: ["world", "mars", "mars"],
 				world: {
-					test: 3
+					test: 3,
 				},
 				bam: "",
 				yup: null,
-				removed: undefined
+				removed: undefined,
 			})
 		).to.equal("foo=bar&hello=world&hello=mars&world%5Btest%5D=3&bam=&yup")
 	})

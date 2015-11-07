@@ -62,7 +62,7 @@ describe("m.render()", function () {
 		m.render(root, m("svg", [m("g")]))
 		expect(root.childNodes[0].childNodes[0]).to.contain.all.keys({
 			nodeName: "G",
-			namespaceURI: "http://www.w3.org/2000/svg"
+			namespaceURI: "http://www.w3.org/2000/svg",
 		})
 	})
 
@@ -237,7 +237,7 @@ describe("m.render()", function () {
 		m.render(root, m("#foo", [
 			[m("div", "a"), m("div", "b")],
 			[m("div", "c"), m("div", "d")],
-			m("#bar")
+			m("#bar"),
 		]))
 
 		expect(root.childNodes[0].childNodes[3].childNodes[0].nodeValue)
@@ -269,7 +269,7 @@ describe("m.render()", function () {
 			["a", "b", "c", "d"].map(function () {
 				return [m("div"), " "]
 			}),
-			m("span")
+			m("span"),
 		]))
 		expect(root.childNodes[0].childNodes[8].nodeName).to.equal("SPAN")
 	})
@@ -282,7 +282,7 @@ describe("m.render()", function () {
 
 		m.render(root, m("#foo", [
 			[m("div", "a"), m("div", "b"), m("div", "c")],
-			m("#bar")
+			m("#bar"),
 		]))
 
 		expect(root.childNodes[0].childNodes[2].childNodes[0].nodeValue)
@@ -295,12 +295,12 @@ describe("m.render()", function () {
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", [m("section"), m("nav")])
+			m("article", [m("section"), m("nav")]),
 		]))
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", [m("span"), m("nav")])
+			m("article", [m("span"), m("nav")]),
 		]))
 
 		expect(root.childNodes[0].childNodes[1].childNodes[0].nodeName)
@@ -313,12 +313,12 @@ describe("m.render()", function () {
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", [m("section"), m("nav")])
+			m("article", [m("section"), m("nav")]),
 		]))
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", ["test", m("nav")])
+			m("article", ["test", m("nav")]),
 		]))
 
 		expect(root.childNodes[0].childNodes[1].childNodes[0].nodeValue)
@@ -331,12 +331,12 @@ describe("m.render()", function () {
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", [m("section"), m("nav")])
+			m("article", [m("section"), m("nav")]),
 		]))
 
 		m.render(root, m("main", [
 			m("button"),
-			m("article", [m.trust("test"), m("nav")])
+			m("article", [m.trust("test"), m("nav")]),
 		]))
 
 		expect(root.childNodes[0].childNodes[1].childNodes[0].nodeValue)
@@ -550,7 +550,7 @@ describe("m.render()", function () {
 		var config = sinon.spy()
 
 		m.render(root, m("div", {
-			config: function (el, init, ctx) { ctx.data = 1 }
+			config: function (el, init, ctx) { ctx.data = 1 },
 		}))
 
 		m.render(root, m("div", {config: config}))
@@ -564,7 +564,7 @@ describe("m.render()", function () {
 		var index = 0
 
 		var node = m("div", {
-			config: function (el, init, ctx) { ctx.data = index++ }
+			config: function (el, init, ctx) { ctx.data = index++ },
 		})
 
 		m.render(root, [node, node])
@@ -604,7 +604,7 @@ describe("m.render()", function () {
 			m.render(root, m("div", [
 				["foo", "bar"],
 				["foo", "bar"],
-				["foo", "bar"]
+				["foo", "bar"],
 			]))
 
 			m.render(root, m("div", ["asdf", "asdf2", "asdf3"]))
@@ -619,7 +619,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("a", {key: 1}, 1),
 			m("a", {key: 2}, 2),
-			m("a", {key: 3}, 3)
+			m("a", {key: 3}, 3),
 		])
 
 		var firstBefore = root.childNodes[0]
@@ -628,7 +628,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}, 4),
 			m("a", {key: 1}, 1),
 			m("a", {key: 2}, 2),
-			m("a", {key: 3}, 3)
+			m("a", {key: 3}, 3),
 		])
 
 		var firstAfter = root.childNodes[1]
@@ -648,7 +648,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("a", {key: 1}, 1),
 			m("a", {key: 2}, 2),
-			m("a", {key: 3}, 3)
+			m("a", {key: 3}, 3),
 		])
 
 		var firstBefore = root.childNodes[0]
@@ -656,7 +656,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("a", {key: 4}, 4),
 			m("a", {key: 1}, 1),
-			m("a", {key: 2}, 2)
+			m("a", {key: 2}, 2),
 		])
 
 		var firstAfter = root.childNodes[1]
@@ -676,7 +676,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("a", {key: 1}, 1),
 			m("a", {key: 2}, 2),
-			m("a", {key: 3}, 3)
+			m("a", {key: 3}, 3),
 		])
 
 		var firstBefore = root.childNodes[1]
@@ -684,7 +684,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("a", {key: 2}, 2),
 			m("a", {key: 3}, 3),
-			m("a", {key: 4}, 4)
+			m("a", {key: 4}, 4),
 		])
 
 		var firstAfter = root.childNodes[0]
@@ -706,7 +706,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}, 2),
 			m("a", {key: 3}, 3),
 			m("a", {key: 4}, 4),
-			m("a", {key: 5}, 5)
+			m("a", {key: 5}, 5),
 		])
 
 		var firstBefore = root.childNodes[0]
@@ -717,7 +717,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}, 4),
 			m("a", {key: 10}, 10),
 			m("a", {key: 1}, 1),
-			m("a", {key: 2}, 2)
+			m("a", {key: 2}, 2),
 		])
 
 		var firstAfter = root.childNodes[2]
@@ -740,7 +740,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}, 2),
 			m("a", {key: 3}, 3),
 			m("a", {key: 4}, 4),
-			m("a", {key: 5}, 5)
+			m("a", {key: 5}, 5),
 		])
 
 		var firstBefore = root.childNodes[0]
@@ -753,7 +753,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}, 2),
 			m("a", {key: 1}, 1),
 			m("a", {key: 6}, 6),
-			m("a", {key: 7}, 7)
+			m("a", {key: 7}, 7),
 		])
 
 		var firstAfter = root.childNodes[3]
@@ -780,7 +780,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}),
 			m("a"),
 			m("a", {key: 4}),
-			m("a", {key: 5})
+			m("a", {key: 5}),
 		])
 
 		var firstBefore = root.childNodes[0]
@@ -794,7 +794,7 @@ describe("m.render()", function () {
 			m("a", {key: 5}),
 			m("a"),
 			m("a", {key: 1}),
-			m("a", {key: 2})
+			m("a", {key: 2}),
 		])
 
 		var firstAfter = root.childNodes[3]
@@ -848,8 +848,8 @@ describe("m.render()", function () {
 				key: 1,
 				config: function (el, init, ctx) {
 					ctx.onunload = spy
-				}
-			})
+				},
+			}),
 		])
 		m.render(root, [
 			m("div", {key: 2}),
@@ -857,8 +857,8 @@ describe("m.render()", function () {
 				key: 1,
 				config: function (el, init, ctx) {
 					ctx.onunload = spy
-				}
-			})
+				},
+			}),
 		])
 		expect(spy).to.not.have.been.called
 	})
@@ -918,7 +918,7 @@ describe("m.render()", function () {
 		m.render(root, m("ul", [
 			m("li", {key: 0}, 0),
 			m("li", {key: 2}, 2),
-			m("li", {key: 4}, 4)
+			m("li", {key: 4}, 4),
 		]))
 
 		m.render(root, m("ul", [
@@ -927,7 +927,7 @@ describe("m.render()", function () {
 			m("li", {key: 2}, 2),
 			m("li", {key: 3}, 3),
 			m("li", {key: 4}, 4),
-			m("li", {key: 5}, 5)
+			m("li", {key: 5}, 5),
 		]))
 
 		expect(
@@ -963,7 +963,7 @@ describe("m.render()", function () {
 			m("li", {key: 2}, 2),
 			m("li", {key: 3}, 3),
 			m("li", {key: 4}, 4),
-			m("li", {key: 5}, 5)
+			m("li", {key: 5}, 5),
 		]))
 
 		m.render(root, m("ul", [
@@ -971,7 +971,7 @@ describe("m.render()", function () {
 			m("li", {key: 1}, 1),
 			m("li", {key: 2}, 2),
 			m("li", {key: 4}, 4),
-			m("li", {key: 5}, 5)
+			m("li", {key: 5}, 5),
 		]))
 
 		expect(
@@ -991,7 +991,7 @@ describe("m.render()", function () {
 			m("li", {key: 2}, 2),
 			m("li", {key: 3}, 3),
 			m("li", {key: 4}, 4),
-			m("li", {key: 5}, 5)
+			m("li", {key: 5}, 5),
 		]))
 
 		m.render(root, m("ul", [
@@ -1000,7 +1000,7 @@ describe("m.render()", function () {
 			m("li", {key: 3}, 3),
 			m("li", {key: 4}, 4),
 			m("li", {key: 5}, 5),
-			m("li", {key: 6}, 6)
+			m("li", {key: 6}, 6),
 		]))
 
 		m.render(root, m("ul", [
@@ -1009,7 +1009,7 @@ describe("m.render()", function () {
 			m("li", {key: 14}, 14),
 			m("li", {key: 15}, 15),
 			m("li", {key: 16}, 16),
-			m("li", {key: 17}, 17)
+			m("li", {key: 17}, 17),
 		]))
 
 		expect(
@@ -1045,7 +1045,7 @@ describe("m.render()", function () {
 		m.render(root, [m("div", {
 			config: function (el, init, ctx) {
 				ctx.onunload = onunload1
-			}
+			},
 		})])
 
 		m.render(root, [])
@@ -1053,7 +1053,7 @@ describe("m.render()", function () {
 		m.render(root, [m("div", {
 			config: function (el, init, ctx) {
 				ctx.onunload = onunload2
-			}
+			},
 		})])
 
 		m.render(root, [])
@@ -1069,7 +1069,7 @@ describe("m.render()", function () {
 
 		m.render(root, [
 			m("div.green", [m("div")]),
-			m("div.blue")
+			m("div.blue"),
 		])
 
 		expect(root.childNodes).to.have.length(2)
@@ -1103,7 +1103,7 @@ describe("m.render()", function () {
 			m("div", {key: 3}, 3),
 			m("div", {key: 4}, 4),
 			m("div", {key: 5}, 5),
-			null, null, null, null, null, null, null, null, null, null
+			null, null, null, null, null, null, null, null, null, null,
 		]))
 
 		m.render(root, m("div", [
@@ -1116,7 +1116,7 @@ describe("m.render()", function () {
 			null, null,
 			m("div", {key: 12}, 12),
 			null, null,
-			m("div", {key: 15}, 15)
+			m("div", {key: 15}, 15),
 		]))
 
 		m.render(root, m("div", [
@@ -1125,7 +1125,7 @@ describe("m.render()", function () {
 			m("div", {key: 3}, 3),
 			m("div", {key: 4}, 4),
 			m("div", {key: 5}, 5),
-			null, null, null, null, null, null, null, null, null, null
+			null, null, null, null, null, null, null, null, null, null,
 		]))
 
 		expect(
@@ -1146,9 +1146,9 @@ describe("m.render()", function () {
 			[
 				m("div", {key: 3}, 3),
 				m("div", {key: 4}, 4),
-				m("div", {key: 5}, 5)
+				m("div", {key: 5}, 5),
 			],
-			[m("div", {key: 6}, 6)]
+			[m("div", {key: 6}, 6)],
 		]))
 
 		m.render(root, m("div", [
@@ -1157,9 +1157,9 @@ describe("m.render()", function () {
 			[
 				m("div", {key: 3}, 3),
 				m("div", {key: 4}, 4),
-				m("div", {key: 5}, 5)
+				m("div", {key: 5}, 5),
 			],
-			[m("div", {key: 6}, 6)]
+			[m("div", {key: 6}, 6)],
 		]))
 
 		expect(
@@ -1184,7 +1184,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("#div-1", {key: 1}),
 			m("#div-2", {key: 2}),
-			m("#div-3", {key: 3})
+			m("#div-3", {key: 3}),
 		])
 
 		root.appendChild(root.childNodes[1])
@@ -1192,7 +1192,7 @@ describe("m.render()", function () {
 		m.render(root, [
 			m("#div-1", {key: 1}),
 			m("#div-3", {key: 3}),
-			m("#div-2", {key: 2})
+			m("#div-2", {key: 2}),
 		])
 
 		expect(
@@ -1229,7 +1229,7 @@ describe("m.render()", function () {
 			m("a", {key: 1}),
 			m("a", {key: 2}),
 			m("a", {key: 3}),
-			m("i")
+			m("i"),
 		]))
 		var before = root.childNodes[0].childNodes[3]
 
@@ -1237,7 +1237,7 @@ describe("m.render()", function () {
 			m("b", {key: 3}),
 			m("b", {key: 4}),
 			m("i"),
-			m("b", {key: 1})
+			m("b", {key: 1}),
 		]))
 		var after = root.childNodes[0].childNodes[2]
 
@@ -1252,7 +1252,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}),
 			"foo",
 			m("a", {key: 3}),
-			m("i")
+			m("i"),
 		]))
 		var before = root.childNodes[0].childNodes[4]
 
@@ -1261,7 +1261,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}),
 			"bar",
 			m("i"),
-			m("a", {key: 1})
+			m("a", {key: 1}),
 		]))
 		var after = root.childNodes[0].childNodes[3]
 
@@ -1276,7 +1276,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}),
 			null,
 			m("a", {key: 3}),
-			m("i")
+			m("i"),
 		]))
 		var before = root.childNodes[0].childNodes[4]
 
@@ -1285,7 +1285,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}),
 			null,
 			m("i"),
-			m("a", {key: 1})
+			m("a", {key: 1}),
 		]))
 		var after = root.childNodes[0].childNodes[3]
 
@@ -1300,7 +1300,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}),
 			undefined,
 			m("a", {key: 3}),
-			m("i")
+			m("i"),
 		]))
 		var before = root.childNodes[0].childNodes[4]
 
@@ -1309,7 +1309,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}),
 			undefined,
 			m("i"),
-			m("a", {key: 1})
+			m("a", {key: 1}),
 		]))
 		var after = root.childNodes[0].childNodes[3]
 
@@ -1326,7 +1326,7 @@ describe("m.render()", function () {
 			m("a", {key: 2}),
 			m.trust("a"),
 			m("a", {key: 3}),
-			m("i")
+			m("i"),
 		]))
 		var before = root.childNodes[0].childNodes[4]
 
@@ -1335,7 +1335,7 @@ describe("m.render()", function () {
 			m("a", {key: 4}),
 			m.trust("a"),
 			m("i"),
-			m("a", {key: 1})
+			m("a", {key: 1}),
 		]))
 		var after = root.childNodes[0].childNodes[3]
 
@@ -1361,7 +1361,7 @@ describe("m.render()", function () {
 		m.render(root, m("div", {}, [
 			m("div", {}, "0"),
 			m("div", {}, "1"),
-			m("div", {}, "2")
+			m("div", {}, "2"),
 		]))
 
 		expect(
@@ -1371,7 +1371,7 @@ describe("m.render()", function () {
 		).to.eql(["0", "1", "2"])
 
 		m.render(root, m("div", {}, [
-			m("div", {}, "0")
+			m("div", {}, "0"),
 		]))
 
 		expect(
@@ -1386,7 +1386,7 @@ describe("m.render()", function () {
 		m.render(root, m("span", {}, [
 			m("div", {}, "0"),
 			m("div", {}, "1"),
-			m("div", {}, "2")
+			m("div", {}, "2"),
 		]))
 
 		expect(
@@ -1396,7 +1396,7 @@ describe("m.render()", function () {
 		).to.eql(["0", "1", "2"])
 
 		m.render(root, m("span", {}, [
-			m("div", {}, "0")
+			m("div", {}, "0"),
 		]))
 
 		expect(
@@ -1421,9 +1421,9 @@ describe("m.render()", function () {
 			view: function (ctrl) {
 				return m("input", {
 					value: ctrl.inputValue(),
-					onkeyup: m.withAttr("value", ctrl.inputValue)
+					onkeyup: m.withAttr("value", ctrl.inputValue),
 				})
-			}
+			},
 		})
 		mock.requestAnimationFrame.$resolve()
 
@@ -1467,11 +1467,11 @@ describe("m.render()", function () {
 				return m("form", {onsubmit: ctrl.submit}, [
 					m("input", {
 						onkeyup: m.withAttr("value", ctrl.inputValue),
-						value: ctrl.inputValue()
+						value: ctrl.inputValue(),
 					}),
-					m("button[type=submit]")
+					m("button[type=submit]"),
 				])
-			}
+			},
 		})
 
 		var form = root.childNodes[0]
@@ -1512,7 +1512,7 @@ describe("m.render()", function () {
 			view: function (ctrl) {
 				return m("select", {
 					size: ctrl.values.length,
-					multiple: "multiple"
+					multiple: "multiple",
 				}, [
 					ctrl.values.map(function (v) {
 						var opts = {value: v}
@@ -1520,9 +1520,9 @@ describe("m.render()", function () {
 							opts.selected = "selected"
 						}
 						return m("option", opts, v)
-					})
+					}),
 				])
-			}
+			},
 		})
 
 		mock.requestAnimationFrame.$resolve()

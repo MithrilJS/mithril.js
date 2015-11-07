@@ -231,7 +231,7 @@
 					index: i,
 					from: existing[key].index,
 					element: cached.nodes[existing[key].index] ||
-						$document.createElement("div")
+						$document.createElement("div"),
 				}
 			} else {
 				existing[key] = {action: INSERTION, index: i}
@@ -263,7 +263,7 @@
 				insertNode(parent, dummy, index)
 				newCached.splice(index, 0, {
 					attrs: {key: data[index].attrs.key},
-					nodes: [dummy]
+					nodes: [dummy],
 				})
 				newCached.nodes[index] = dummy
 				break
@@ -691,7 +691,7 @@
 			tag: data.tag,
 			attrs: attrs,
 			children: children,
-			nodes: [node]
+			nodes: [node],
 		}
 
 		unloadCachedControllers(cached, views, controllers)
@@ -729,7 +729,7 @@
 		if (controller.onunload != null) {
 			unloaders.push({
 				controller: controller,
-				handler: controller.onunload
+				handler: controller.onunload,
 			})
 		}
 
@@ -1130,7 +1130,7 @@
 			this.appendChild(node)
 		},
 
-		childNodes: []
+		childNodes: [],
 	}
 
 	var nodeCache = []
@@ -1293,7 +1293,7 @@
 			preventDefault: function () {
 				isPrevented = true
 				computePreRedrawHook = computePostRedrawHook = null
-			}
+			},
 		}
 
 		forEach(unloaders, function (unloader) {
@@ -1431,7 +1431,7 @@
 	var modes = {
 		pathname: "",
 		hash: "#",
-		search: "?"
+		search: "?",
 	}
 
 	var redirect = noop
@@ -1948,8 +1948,8 @@
 			options.onload({
 				type: "load",
 				target: {
-					responseText: resp
-				}
+					responseText: resp,
+				},
 			})
 
 			window[callbackKey] = undefined
@@ -1962,8 +1962,8 @@
 				type: "error",
 				target: {
 					status: 500,
-					responseText: '{"error": "Error making jsonp request"}'
-				}
+					responseText: '{"error": "Error making jsonp request"}',
+				},
 			})
 
 			window[callbackKey] = undefined

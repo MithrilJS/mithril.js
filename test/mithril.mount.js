@@ -22,7 +22,7 @@ describe("m.mount()", function () {
 	function pure(view) {
 		return {
 			controller: function () {},
-			view: view
+			view: view,
 		}
 	}
 
@@ -38,7 +38,7 @@ describe("m.mount()", function () {
 			return [
 				whatever % 2 ? m("span", "% 2") : undefined,
 				m("div", "bugs"),
-				m("a")
+				m("a"),
 			]
 		})
 
@@ -64,7 +64,7 @@ describe("m.mount()", function () {
 
 		var mod1 = m.mount(root1, {
 			controller: controller1,
-			view: view1
+			view: view1,
 		})
 
 		var controller2 = sinon.spy(function () { this.value = "test2" }) // eslint-disable-line
@@ -73,7 +73,7 @@ describe("m.mount()", function () {
 
 		var mod2 = mount(root2, {
 			controller: controller2,
-			view: view2
+			view: view2,
 		})
 
 		expect(controller1).to.have.been.called
@@ -97,7 +97,7 @@ describe("m.mount()", function () {
 			controller: function () {
 				this.onunload = spy
 			},
-			view: function () {}
+			view: function () {},
 		})
 
 		clear(root)
@@ -114,7 +114,7 @@ describe("m.mount()", function () {
 
 		var component = {
 			controller: ctrlSpy,
-			view: viewSpy
+			view: viewSpy,
 		}
 
 		var arg = {}
@@ -148,7 +148,7 @@ describe("m.mount()", function () {
 
 		var sub = {
 			controller: ctrlSpy,
-			view: viewSpy
+			view: viewSpy,
 		}
 
 		mount(root, pure(function () { return sub }))
@@ -168,7 +168,7 @@ describe("m.mount()", function () {
 
 		var subsub = {
 			controller: ctrl1,
-			view: view1
+			view: view1,
 		}
 
 		var ctrl2 = sinon.spy()
@@ -176,7 +176,7 @@ describe("m.mount()", function () {
 
 		var sub = {
 			controller: ctrl2,
-			view: view2
+			view: view2,
 		}
 
 		mount(root, pure(function () { return sub }))
@@ -326,7 +326,7 @@ describe("m.mount()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		mount(root, pure(function () {
@@ -358,7 +358,7 @@ describe("m.mount()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		var sub = {
@@ -367,7 +367,7 @@ describe("m.mount()", function () {
 			},
 			view: function (ctrl, opts) {
 				return m.component(subsub, {key: opts.key})
-			}
+			},
 		}
 
 		mount(root, pure(function () {
@@ -400,7 +400,7 @@ describe("m.mount()", function () {
 			controller: function () {
 				m.redraw()
 			},
-			view: spy
+			view: spy,
 		}
 
 		mount(root, pure(function () { return sub }))
@@ -418,7 +418,7 @@ describe("m.mount()", function () {
 			controller: function () {
 				m.redraw()
 			},
-			view: spy
+			view: spy,
 		}
 
 		var sub = pure(function () { return subsub })
@@ -439,14 +439,14 @@ describe("m.mount()", function () {
 		var CommentList = pure(function (ctrl, props) {
 			return m(".list", props.list.map(function (i) {
 				return m(".comment", [
-					m.component(Reply, {key: i})
+					m.component(Reply, {key: i}),
 				])
 			}))
 		})
 
 		mount(root, pure(function () {
 			return m(".outer", [
-				m(".inner", m.component(CommentList, {list: [1, 2, 3]}))
+				m(".inner", m.component(CommentList, {list: [1, 2, 3]})),
 			])
 		}))
 
@@ -461,7 +461,7 @@ describe("m.mount()", function () {
 			controller: function () {
 				this.onunload = spy
 			},
-			view: function () {}
+			view: function () {},
 		})
 
 		m.mount(root, pure(function () {}))
@@ -480,7 +480,7 @@ describe("m.mount()", function () {
 			return m("div", {
 				config: function (el, init) {
 					if (init) count += 1
-				}
+				},
 			})
 		}))
 
@@ -506,9 +506,9 @@ describe("m.mount()", function () {
 				m(".foo", {
 					key: 1,
 					config: test,
-					onclick: function () { show = !show }
+					onclick: function () { show = !show },
 				}),
-				show ? m(".bar", {key: 2}) : null
+				show ? m(".bar", {key: 2}) : null,
 			]
 		}))
 
@@ -530,9 +530,9 @@ describe("m.mount()", function () {
 		mount(root, pure(function () {
 			return show ? [
 				m("h1", "1"),
-				sub
+				sub,
 			] : [
-				m("h1", "2")
+				m("h1", "2"),
 			]
 		}))
 
@@ -561,10 +561,10 @@ describe("m.mount()", function () {
 						a = !a
 						m.redraw(true)
 						found = root.childNodes[0].childNodes[1]
-					}
+					},
 				}, "asd"),
 				a ? m("#a", "aaa") : null,
-				"test"
+				"test",
 			])
 		})
 
@@ -573,7 +573,7 @@ describe("m.mount()", function () {
 
 			config: function (el, init, ctx) {
 				if (!init) ctx.onunload = onunload
-			}
+			},
 		}
 
 		m.mount(root, pure(function () { return Comp }))
@@ -603,10 +603,10 @@ describe("m.mount()", function () {
 						m.redraw(true)
 						found = root.childNodes[0].childNodes[1]
 						m.redraw.strategy("none")
-					}
+					},
 				}, "asd"),
 				a ? m("#a", "aaa") : null,
-				"test"
+				"test",
 			])
 		})
 
@@ -615,7 +615,7 @@ describe("m.mount()", function () {
 
 			config: function (el, init, ctx) {
 				if (!init) ctx.onunload = onunload
-			}
+			},
 		}
 
 		m.mount(root, pure(function () { return Comp }))
@@ -635,7 +635,7 @@ describe("m.mount()", function () {
 
 		var root = mock.document.createElement("div")
 		var view = sinon.stub().returns(m("div", {
-			onclick: function () { m.redraw(true) }
+			onclick: function () { m.redraw(true) },
 		}))
 
 		m.mount(root, pure(view))
@@ -667,7 +667,7 @@ describe("m.mount()", function () {
 				this.foo = m.request({method: "GET", url: "/foo"})
 			},
 
-			view: view
+			view: view,
 		}
 
 		mount(root, pure(function () { return Comp }))
@@ -692,20 +692,20 @@ describe("m.mount()", function () {
 			controller: function () {
 				this.foo = m.request({method: "GET", url: "/foo"})
 			},
-			view: view1
+			view: view1,
 		}
 
 		var Comp2 = {
 			controller: function () {
 				this.bar = m.request({method: "GET", url: "/bar"})
 			},
-			view: view2
+			view: view2,
 		}
 
 		mount(root, pure(function () {
 			return m("div", [
 				Comp1,
-				Comp2
+				Comp2,
 			])
 		}))
 
@@ -752,7 +752,7 @@ describe("m.mount()", function () {
 			return m("div", {
 				config: function (el, init, ctx) {
 					ctx.onunload = onunload
-				}
+				},
 			})
 		})
 
@@ -795,9 +795,9 @@ describe("m.mount()", function () {
 						ctrl.bar = true
 						m.redraw(true)
 						el = root.childNodes[0].childNodes[1]
-					}
+					},
 				}, "click me"),
-				ctrl.bar ? m.component(sub) : ""
+				ctrl.bar ? m.component(sub) : "",
 			])
 		}))
 

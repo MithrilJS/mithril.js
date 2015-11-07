@@ -18,7 +18,7 @@ describe("m.route.parseQueryString()", function () {
 			foo: "bar",
 			hello: ["world", "mars"],
 			bam: "",
-			yup: null
+			yup: null,
 		})
 	})
 
@@ -28,7 +28,7 @@ describe("m.route.parseQueryString()", function () {
 
 		expect(args).to.eql({
 			foo: "bar",
-			"hello[]": ["world", "mars", "pluto"]
+			"hello[]": ["world", "mars", "pluto"],
 		})
 	})
 })

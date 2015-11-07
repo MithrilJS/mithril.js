@@ -57,20 +57,20 @@ m.render(document.getElementById("test"), [
 			height: 100,
 			width: 100,
 			transform: "translate(30) rotate(45 50 50)",
-			style: {stroke: "#000", fill: "#0086b2"}
+			style: {stroke: "#000", fill: "#0086b2"},
 		}),
 		m("a[href='http://google.com'][title='SVG link'][target=_new]", {
-			style: {textDecoration: "underline"}
+			style: {textDecoration: "underline"},
 		}, [
-			m("text[x=0][y=20]", "SVG Link")
-		])
+			m("text[x=0][y=20]", "SVG Link"),
+		]),
 	]),
 	m("svg[height=201px][width=201px]", [
 		m("image[href='http://placekitten.com/201/201']", {
 			height: "200px",
 			width: "200px",
-			title: "Cat picture"
-		})
+			title: "Cat picture",
+		}),
 	]),
 	m("svg[title='Line drawings']", {
 		"enable-background": "new 0 0 340 333",
@@ -78,7 +78,7 @@ m.render(document.getElementById("test"), [
 		viewBox: "0 0 340 333",
 		width: "340px",
 		x: "0px",
-		y: "0px"
+		y: "0px",
 	}, [
 		m("path.path", {
 			d: [
@@ -141,7 +141,7 @@ m.render(document.getElementById("test"), [
 						type: "rotate",
 						repeatCount: "indefinite",
 						dur: "12h",
-						by: 360
+						by: 360,
 					}),
 					m("circle[r=7]")
 				]),
@@ -151,7 +151,7 @@ m.render(document.getElementById("test"), [
 						y2: 93,
 						"stroke-linecap": "round",
 						stroke: "green",
-						opacity: 0.9
+						opacity: 0.9,
 					}),
 					m("animateTransform[attributeName=transform]", {
 						type: "rotate",
@@ -167,13 +167,13 @@ m.render(document.getElementById("test"), [
 						y1: -20,
 						y2: 102,
 						"stroke-linecap": "round",
-						stroke: "red"
+						stroke: "red",
 					}),
 					m("animateTransform[attributeName=transform]", {
 						type: "rotate",
 						repeatCount: "indefinite",
 						dur: "60s",
-						by: 360
+						by: 360,
 					}),
 					m("circle[r=4][fill=blue]")
 				])
@@ -207,8 +207,8 @@ m.render(document.getElementById("test"), [
 		}, m("div", {xmlns: "http://www.w3.org/1999/xhtml"}, [
 			m.trust("this is a piece of html rendered as " +
 				"<a href=\"http://www.w3.org/TR/SVG11/extend.html\">" +
-				"SVG foreignObject</a>")
-		]))
-	])
+				"SVG foreignObject</a>"),
+		])),
+	]),
 ])
 </script>

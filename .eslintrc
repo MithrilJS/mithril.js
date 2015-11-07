@@ -53,6 +53,7 @@
 		"block-spacing": 2,
 		"brace-style": [2, "1tbs", {"allowSingleLine": true}],
 		"camelcase": 2,
+		"comma-dangle": [2, "always-multiline"],
 		"comma-spacing": 2,
 		"comma-style": 2,
 		"consistent-this":  [2, "self"],

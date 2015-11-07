@@ -13,7 +13,7 @@ describe("m.route()", function () {
 		var types = {
 			search: "?",
 			hash: "#",
-			pathname: "/"
+			pathname: "/",
 		}
 
 		return function (type) {
@@ -32,7 +32,7 @@ describe("m.route()", function () {
 	function pure(view) {
 		return {
 			controller: noop,
-			view: view
+			view: view,
 		}
 	}
 
@@ -74,7 +74,7 @@ describe("m.route()", function () {
 		mode("search")
 
 		route(root, "/test1", {
-			"/test1": pure(function () { return "foo" })
+			"/test1": pure(function () { return "foo" }),
 		})
 
 		expect(mock.location.search).to.equal("?/test1")
@@ -88,12 +88,12 @@ describe("m.route()", function () {
 		route(root, "/", {
 			"/": {
 				controller: function () { route1 = m.route() },
-				view: noop
+				view: noop,
 			},
 			"/test13": {
 				controller: function () { route2 = m.route() },
-				view: noop
-			}
+				view: noop,
+			},
 		})
 
 		m.route("/test13")
@@ -113,7 +113,7 @@ describe("m.route()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		route(root, "/a", {
@@ -121,8 +121,8 @@ describe("m.route()", function () {
 
 			"/b": {
 				controller: spy,
-				view: noop
-			}
+				view: noop,
+			},
 		})
 
 		route("/b")
@@ -142,7 +142,7 @@ describe("m.route()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		var sub = pure(function () { return subsub })
@@ -152,8 +152,8 @@ describe("m.route()", function () {
 
 			"/b": {
 				controller: spy,
-				view: noop
-			}
+				view: noop,
+			},
 		})
 
 		route("/b")
@@ -173,7 +173,7 @@ describe("m.route()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		route(root, "/a", {
@@ -181,8 +181,8 @@ describe("m.route()", function () {
 
 			"/b": {
 				controller: spy,
-				view: noop
-			}
+				view: noop,
+			},
 		})
 
 		route("/b")
@@ -202,7 +202,7 @@ describe("m.route()", function () {
 			},
 			view: function () {
 				return m("div")
-			}
+			},
 		}
 
 		var sub = pure(function () { return subsub })
@@ -212,8 +212,8 @@ describe("m.route()", function () {
 
 			"/b": {
 				controller: spy,
-				view: noop
-			}
+				view: noop,
+			},
 		})
 
 		route("/b")
@@ -229,26 +229,26 @@ describe("m.route()", function () {
 
 		var sub1 = {
 			controller: ctrl1,
-			view: function () { return m("div") }
+			view: function () { return m("div") },
 		}
 
 		var sub2 = {
 			controller: ctrl2,
-			view: function () { return m("div") }
+			view: function () { return m("div") },
 		}
 
 		route(root, "/a", {
 			"/a": pure(function () {
 				return m(".page-a", [
-					m("h1"), m.component(sub1, {x: 11})
+					m("h1"), m.component(sub1, {x: 11}),
 				])
 			}),
 
 			"/b": pure(function () {
 				return m(".page-b", [
-					m("h2"), m.component(sub2, {y: 22})
+					m("h2"), m.component(sub2, {y: 22}),
 				])
-			})
+			}),
 		})
 
 		route("/b")
@@ -264,7 +264,7 @@ describe("m.route()", function () {
 		var Component = pure(function () { return m(".comp") })
 
 		route(root, "/foo", {
-			"/foo": pure(function () { return [Component] })
+			"/foo": pure(function () { return [Component] }),
 		})
 
 		expect(root.childNodes[0].nodeName).to.equal("DIV")
@@ -279,7 +279,7 @@ describe("m.route()", function () {
 
 			view: function (ctrl) {
 				return m("div", ctrl.name)
-			}
+			},
 		}
 
 		route(root, "/", {
@@ -287,7 +287,7 @@ describe("m.route()", function () {
 				return m("div", [
 					m("a[href=/]", {config: m.route}, "foo"),
 					m("a[href=/bar]", {config: m.route}, "bar"),
-					m.component(MyComponent, {name: "Jane"})
+					m.component(MyComponent, {name: "Jane"}),
 				])
 			}),
 
@@ -295,9 +295,9 @@ describe("m.route()", function () {
 				return m("div", [
 					m("a[href=/]", {config: m.route}, "foo"),
 					m("a[href=/bar]", {config: m.route}, "bar"),
-					m.component(MyComponent, {name: "Bob"})
+					m.component(MyComponent, {name: "Bob"}),
 				])
-			})
+			}),
 		})
 
 		route("/bar")
@@ -313,9 +313,9 @@ describe("m.route()", function () {
 			"/test2": pure(function () {
 				return [
 					"foo",
-					m("a", {href: "/test2", config: m.route}, "Test2")
+					m("a", {href: "/test2", config: m.route}, "Test2"),
 				]
-			})
+			}),
 		})
 
 		expect(mock.location.pathname).to.equal("/test2")
@@ -327,7 +327,7 @@ describe("m.route()", function () {
 		mode("hash")
 
 		route(root, "/test3", {
-			"/test3": pure(function () { return "foo" })
+			"/test3": pure(function () { return "foo" }),
 		})
 
 		expect(mock.location.hash).to.equal("#/test3")
@@ -338,7 +338,7 @@ describe("m.route()", function () {
 		mode("search")
 
 		route(root, "/test4/foo", {
-			"/test4/:test": pure(function () { return m.route.param("test") })
+			"/test4/:test": pure(function () { return m.route.param("test") }),
 		})
 
 		expect(mock.location.search).to.equal("?/test4/foo")
@@ -357,7 +357,7 @@ describe("m.route()", function () {
 
 			m.route(root, "/test5/foo", {
 				"/": component,
-				"/test5/:test": component
+				"/test5/:test": component,
 			})
 
 			var paramValueBefore = m.route.param("test")
@@ -381,7 +381,7 @@ describe("m.route()", function () {
 
 			m.route(root, "/test6/foo", {
 				"/": component,
-				"/test6/:a1": component
+				"/test6/:a1": component,
 			})
 
 			var paramValueBefore = m.route.param("a1")
@@ -406,7 +406,7 @@ describe("m.route()", function () {
 
 			m.route(root, "/test7/foo", {
 				"/": component,
-				"/test7/:a1": component
+				"/test7/:a1": component,
 			})
 
 			var routeValueBefore = m.route()
@@ -428,7 +428,7 @@ describe("m.route()", function () {
 			route(root, "/test8/foo/SEP/bar/baz", {
 				"/test8/:test/SEP/:path...": pure(function () {
 					return m.route.param("test") + "_" + m.route.param("path")
-				})
+				}),
 			})
 
 			expect(mock.location.search).to.equal("?/test8/foo/SEP/bar/baz")
@@ -441,7 +441,7 @@ describe("m.route()", function () {
 			route(root, "/test9/foo/bar/SEP/baz", {
 				"/test9/:test.../SEP/:path": pure(function () {
 					return m.route.param("test") + "_" + m.route.param("path")
-				})
+				}),
 			})
 
 			expect(mock.location.search).to.equal("?/test9/foo/bar/SEP/baz")
@@ -454,7 +454,7 @@ describe("m.route()", function () {
 			route(root, "/test10/foo%20bar", {
 				"/test10/:test": pure(function () {
 					return m.route.param("test")
-				})
+				}),
 			})
 
 			expect(root.childNodes[0].nodeValue).to.equal("foo bar")
@@ -465,7 +465,7 @@ describe("m.route()", function () {
 
 			route(root, "/", {
 				"/": pure(function () { return "foo" }),
-				"/test11": pure(function () { return "bar" })
+				"/test11": pure(function () { return "bar" }),
 			})
 
 			route("/test11/")
@@ -479,7 +479,7 @@ describe("m.route()", function () {
 
 			route(root, "/", {
 				"/": pure(noop),
-				"/test12": pure(noop)
+				"/test12": pure(noop),
 			})
 
 			route("/test12?a=foo&b=bar")
@@ -496,7 +496,7 @@ describe("m.route()", function () {
 				"/": pure(function () { return "bar" }),
 				"/test13/:test": pure(function () {
 					return m.route.param("test")
-				})
+				}),
 			})
 
 			route("/test13/foo?test=bar")
@@ -510,7 +510,7 @@ describe("m.route()", function () {
 
 			route(root, "/", {
 				"/": pure(function () { return "bar" }),
-				"/test14": pure(function () { return "foo" })
+				"/test14": pure(function () { return "foo" }),
 			})
 
 			route("/test14?test&test2=")
@@ -525,7 +525,7 @@ describe("m.route()", function () {
 
 			route(root, "/", {
 				"/": pure(noop),
-				"/test12": pure(noop)
+				"/test12": pure(noop),
 			})
 
 			route("/test12", {a: "foo", b: "bar"})
@@ -540,7 +540,7 @@ describe("m.route()", function () {
 
 			route(root, "/", {
 				"/": pure(noop),
-				"/test12": pure(noop)
+				"/test12": pure(noop),
 			})
 
 			route("/test12", {a: "foo", b: "bar"})
@@ -562,10 +562,10 @@ describe("m.route()", function () {
 				return m("div", {
 					config: function (el, init, ctx) {
 						ctx.onunload = onunload
-					}
+					},
 				})
 			}),
-			"/test14": pure(noop)
+			"/test14": pure(noop),
 		})
 
 		route("/test14")
@@ -585,11 +585,11 @@ describe("m.route()", function () {
 					m("div", {
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
 			}),
-			"/test15": pure(function () { return [m("div")] })
+			"/test15": pure(function () { return [m("div")] }),
 		})
 
 		route("/test15")
@@ -607,10 +607,10 @@ describe("m.route()", function () {
 				return m("div", {
 					config: function (el, init, ctx) {
 						ctx.onunload = onunload
-					}
+					},
 				})
 			}),
-			"/test16": pure(function () { return m("a") })
+			"/test16": pure(function () { return m("a") }),
 		})
 
 		route("/test16")
@@ -629,11 +629,11 @@ describe("m.route()", function () {
 					m("div", {
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
 			}),
-			"/test17": pure(function () { return m("a") })
+			"/test17": pure(function () { return m("a") }),
 		})
 
 		route("/test17")
@@ -651,10 +651,10 @@ describe("m.route()", function () {
 				return m("div", {
 					config: function (el, init, ctx) {
 						ctx.onunload = onunload
-					}
+					},
 				})
 			}),
-			"/test18": pure(function () { return [m("a")] })
+			"/test18": pure(function () { return [m("a")] }),
 		})
 
 		route("/test18")
@@ -674,8 +674,8 @@ describe("m.route()", function () {
 						key: 1,
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
 			}),
 			"/test20": pure(function () {
@@ -684,10 +684,10 @@ describe("m.route()", function () {
 						key: 2,
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
-			})
+			}),
 		})
 
 		route("/test20")
@@ -707,8 +707,8 @@ describe("m.route()", function () {
 						key: 1,
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
 			}),
 			"/test21": pure(function () {
@@ -716,10 +716,10 @@ describe("m.route()", function () {
 					m("div", {
 						config: function (el, init, ctx) {
 							ctx.onunload = onunload
-						}
-					})
+						},
+					}),
 				]
-			})
+			}),
 		})
 
 		route("/test21")
@@ -732,7 +732,7 @@ describe("m.route()", function () {
 
 		route(root, "/foo", {
 			"/foo": pure(function () { return m("div", "foo") }),
-			"/bar": pure(function () { return m("div", "bar") })
+			"/bar": pure(function () { return m("div", "bar") }),
 		})
 		var foo = root.childNodes[0].childNodes[0].nodeValue
 
@@ -757,7 +757,7 @@ describe("m.route()", function () {
 			}),
 			"/bar1": pure(function () {
 				return m("main", m("a", {config: config}, "foo"))
-			})
+			}),
 		})
 
 		route("/bar1")
@@ -774,8 +774,8 @@ describe("m.route()", function () {
 				controller: function () { value = m.route.param("arg") },
 				view: function () {
 					return ""
-				}
-			}
+				},
+			},
 		})
 		expect(value).to.equal("foo+bar")
 	})
@@ -785,7 +785,7 @@ describe("m.route()", function () {
 
 		route(root, "/", {
 			"/": pure(function () { return "foo" }),
-			"/test22": pure(function () { return "bar" })
+			"/test22": pure(function () { return "bar" }),
 		})
 
 		m.route("/test22/")
@@ -799,7 +799,7 @@ describe("m.route()", function () {
 
 		route(root, "/", {
 			"/": pure(function () { return "foo" }),
-			"/test23": pure(function () { return "bar" })
+			"/test23": pure(function () { return "bar" }),
 		})
 
 		route(new String("/test23/")) // eslint-disable-line no-new-wrappers
@@ -817,8 +817,8 @@ describe("m.route()", function () {
 				controller: function () { value = m.route.param("arg") },
 				view: function () {
 					return ""
-				}
-			}
+				},
+			},
 		})
 		expect(value).to.equal("foo+bar")
 	})
@@ -832,8 +832,8 @@ describe("m.route()", function () {
 				controller: function () { value = m.route.param("arg") },
 				view: function () {
 					return ""
-				}
-			}
+				},
+			},
 		})
 
 		expect(value).to.equal("foo+bar")
@@ -845,10 +845,10 @@ describe("m.route()", function () {
 		route(root, "/a", {
 			"/a": {
 				controller: function () { m.route("/b") },
-				view: function () { return "a" }
+				view: function () { return "a" },
 			},
 
-			"/b": pure(function () { return "b" })
+			"/b": pure(function () { return "b" }),
 		})
 
 		expect(root.childNodes[0].nodeValue).to.equal("b")
@@ -862,9 +862,9 @@ describe("m.route()", function () {
 				controller: function () {
 					m.route("/b?foo=1", {foo: 2})
 				},
-				view: function () { return "a" }
+				view: function () { return "a" },
 			},
-			"/b": pure(function () { return "b" })
+			"/b": pure(function () { return "b" }),
 		})
 
 		expect(mock.location.search).to.equal("?/b?foo=2")
@@ -876,7 +876,7 @@ describe("m.route()", function () {
 
 		route(root, "/a", {
 			"/a": pure(function () { return "a" }),
-			"/b": pure(function () { return "b" })
+			"/b": pure(function () { return "b" }),
 		})
 
 		route("/b")
@@ -890,7 +890,7 @@ describe("m.route()", function () {
 
 		route(root, "/a", {
 			"/a": pure(function () { return "a" }),
-			"/b": pure(function () { return "b" })
+			"/b": pure(function () { return "b" }),
 		})
 
 		route("/a")
@@ -908,13 +908,13 @@ describe("m.route()", function () {
 					return m("a", {
 						config: function (el, init) {
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": pure(a.view)
+					"/b": pure(a.view),
 				})
 
 				route("/b")
@@ -931,13 +931,13 @@ describe("m.route()", function () {
 						config: function (el, init, ctx) {
 							ctx.retain = false
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": pure(a.view)
+					"/b": pure(a.view),
 				})
 
 				route("/b")
@@ -954,13 +954,13 @@ describe("m.route()", function () {
 						config: function (el, init, ctx) {
 							ctx.retain = true
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": pure(a.view)
+					"/b": pure(a.view),
 				})
 
 				route("/b")
@@ -984,7 +984,7 @@ describe("m.route()", function () {
 					}),
 					"/b": pure(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				route("/b")
@@ -1006,7 +1006,7 @@ describe("m.route()", function () {
 					}),
 					"/b": pure(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				route("/b")
@@ -1028,7 +1028,7 @@ describe("m.route()", function () {
 					}),
 					"/b": pure(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				route("/b")
@@ -1042,7 +1042,7 @@ describe("m.route()", function () {
 		function diff(view) {
 			return {
 				controller: function () { m.redraw.strategy("diff") },
-				view: view
+				view: view,
 			}
 		}
 
@@ -1055,13 +1055,13 @@ describe("m.route()", function () {
 					return m("a", {
 						config: function (el, init) {
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": diff(a.view)
+					"/b": diff(a.view),
 				})
 
 				route("/b")
@@ -1078,13 +1078,13 @@ describe("m.route()", function () {
 						config: function (el, init, ctx) {
 							ctx.retain = true
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": diff(a.view)
+					"/b": diff(a.view),
 				})
 
 				route("/b")
@@ -1101,13 +1101,13 @@ describe("m.route()", function () {
 						config: function (el, init, ctx) {
 							ctx.retain = false
 							if (!init) initCount++
-						}
+						},
 					})
 				})
 
 				route(root, "/a", {
 					"/a": a,
-					"/b": diff(a.view)
+					"/b": diff(a.view),
 				})
 
 				route("/b")
@@ -1131,7 +1131,7 @@ describe("m.route()", function () {
 					}),
 					"/b": diff(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				route("/b")
@@ -1154,7 +1154,7 @@ describe("m.route()", function () {
 					}),
 					"/b": diff(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				route("/b")
@@ -1177,7 +1177,7 @@ describe("m.route()", function () {
 					}),
 					"/b": diff(function () {
 						return m("section", m("a", {config: config}))
-					})
+					}),
 				})
 
 				m.route("/b")
@@ -1204,12 +1204,12 @@ describe("m.route()", function () {
 			controller: function () { m.redraw.strategy("diff") },
 			view: function () {
 				return m("section", m("a", {config: config}))
-			}
+			},
 		}
 
 		route(root, "/a", {
 			"/a": pure(function () { return m("div", a) }),
-			"/b": pure(function () { return m("div", b) })
+			"/b": pure(function () { return m("div", b) }),
 		})
 
 		route("/b")
@@ -1226,10 +1226,10 @@ describe("m.route()", function () {
 				return m("div", {
 					config: function (el) {
 						el.childNodes[0].modified = true
-					}
+					},
 				}, m("div"))
 			}),
-			"/b": pure(function () { return m("div", m("div")) })
+			"/b": pure(function () { return m("div", m("div")) }),
 		})
 
 		route("/b")

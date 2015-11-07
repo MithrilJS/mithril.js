@@ -20,13 +20,13 @@
 function test(sel) {
 	return m("li", [
 		m("p", m("code", "m(" + JSON.stringify(sel) + ")")),
-		m.apply(null, arguments)
+		m.apply(null, arguments),
 	])
 }
 
 m.module(document.getElementById("test"), {
 	controller: function() {
-		this.title = m.prop("hello world");
+		this.title = m.prop("hello world")
 	},
 
 	view: function (ctrl) {
@@ -35,18 +35,18 @@ m.module(document.getElementById("test"), {
 			m("ul", [
 				test("input[list=data]", {
 					onkeyup: m.withAttr("value", ctrl.title),
-					value: ctrl.title()
+					value: ctrl.title(),
 				}),
 
 				test("datalist#data", [
 					m("option", "John"),
 					m("option", "Bob"),
-					m("option", "Mary")
+					m("option", "Mary"),
 				]),
 
 				test("textarea", {
 					onkeyup: m.withAttr("value", ctrl.title),
-					value: ctrl.title()
+					value: ctrl.title(),
 				}),
 
 				m("li", [
@@ -63,11 +63,11 @@ m.module(document.getElementById("test"), {
 						m("code", "m(\"div[contenteditable]\")")),
 					m("div[contenteditable]", {
 						style: {border: "1px solid #888"},
-						onkeyup: m.withAttr("innerHTML", ctrl.title)
+						onkeyup: m.withAttr("innerHTML", ctrl.title),
 					}, m.trust(ctrl.title())),
-				])
-			])
-		]);
-	}
-});
+				]),
+			]),
+		])
+	},
+})
 </script>
