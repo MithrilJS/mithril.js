@@ -1815,6 +1815,10 @@
 				return fire()
 			}
 
+			if (state === REJECTING) {
+	            d.onerror(promiseValue)
+	        }
+
 			thennable(then, function () {
 				state = RESOLVING
 				fire()
