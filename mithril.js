@@ -1816,8 +1816,8 @@
 			}
 
 			if (state === REJECTING) {
-	            d.onerror(promiseValue)
-	        }
+				m.deferred.onerror(promiseValue)
+			}
 
 			thennable(then, function () {
 				state = RESOLVING
