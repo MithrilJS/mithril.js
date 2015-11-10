@@ -52,8 +52,6 @@ This isn't checked for the tests, but still, keep it reasonable.
 
 Use Windows-style line endings (i.e. CRLF).
 
-End each file with a line break.
-
 ### Semicolons
 
 Avoid semicolons. (A few resources to help you understand this: [*](http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding) [*](http://inimino.org/~inimino/blog/javascript_semicolons) [*](http://jamesallardice.com/understanding-automatic-semi-colon-insertion-in-javascript/))
@@ -251,7 +249,7 @@ Please don't leave trailing whitespace anywhere. It makes diffs harder to read.
 
 Blank lines should have no indentation or spaces. It should be empty other than a line ending.
 
-All files should end with a trailing space. Some editors add this on their own, so it will result in unnecessary lines in later diffs if you don't.
+All files should end with a trailing line break. Some editors add this on their own, so it will result in unnecessary lines in later diffs if you don't.
 
 ### Indentation and vertical whitespace
 
