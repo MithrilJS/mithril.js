@@ -3,8 +3,9 @@
 Use the [issue tracker](https://github.com/lhorie/mithril.js/issues). Do check to make sure your bug hasn't already been filed. Please give the following information, where possible:
 
 1. The version of Mithril you're using, whether it's the dev version or [the version on npm](http://npm.im/mithril.js). The version on npm may not have all the latest bug fixes, so your bug might very well be fixed in the dev version.
-2. A detailed explanation of the bug.
-3. A test case. The simpler, the better.
+2. The name and version of the browser(s) affected.
+3. A detailed explanation of the bug.
+4. A test case. The simpler, the better.
 
 # Feature requests
 
