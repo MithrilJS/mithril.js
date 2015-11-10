@@ -19,7 +19,7 @@ Use the [issue tracker](https://github.com/lhorie/mithril.js/issues). Please do 
 
 We welcome any and all contributions. This is a community-driven project. Although we don't have a lot, we do have a few guidelines for contributions.
 
-1. Please adhere to the style guide. It's pretty lengthy, but most everything is checked by ESLint, and if anything fails to check, the build will fail, and you will know about it. Most of it is common practice and common sense. ESLint is also set up to check for other common errors, such as undeclared variables and invalid `typeof` values.
+1. Please adhere to the style guide. It's pretty lengthy, but most of it is checked by ESLint, and if anything fails to check, the build will fail, and you will know about it. Most of it is common practice and common sense. ESLint is also set up to check for other common errors, such as undeclared variables and invalid `typeof` values.
 2. Please make sure there are no regressions with your patch. Please don't disable existing tests, and please don't send a PR with new, disabled tests.
 	- There are a few known failing tests currently (PRs welcome): [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.deferred.js#L121-L125) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.render.js#L1321-L1343) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L106-L131) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L134-L162) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L165-L191) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L194-L222)
 3. For any new features introduced, be sure to write new unit tests for it. Maximum coverage is what we want.
