@@ -25,12 +25,13 @@ We welcome any and all contributions. This is a community-driven project. Althou
 3. For any new features introduced, be sure to write new unit tests for it. Maximum coverage is what we want.
 4. Try to not leave any extra `TODO`s, `FIXME`s, etc. in your code. ESLint will nag at you until you fix whatever problem it is.
 	- Note that it's only a warning, not an error. It won't fail the CI tests, and there's a few outstanding ones inside Mithril right now.
+	- If you must, use a `TODO(<your_username>): whatever` (or the equivalent `FIXME`, etc.) if it's something you are actively working on, or if it's something more general, file an issue titled "TODO: <short_description>" and reference the `TODO` comment itself.
 
-It is assumed that all contributions you make you have the appropriate rights to and that it may be made available under the MIT License, the license used for this project.
+It is assumed that you have the appropriate rights to all contributions that you make, and that they can be made available under the MIT License which is used for this project.
 
 # Style Guide
 
-The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but this shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if some sort of hack is impossible without violating this guide (e.g. if Mithril ever needs [Bluebird's infamous hack](https://stackoverflow.com/q/24987896)), just make sure the code is consistent with what's around it.
+The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but this shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if some sort of hack is impossible without violating this guide (e.g. if Mithril ever needs [Bluebird's infamous hack](https://stackoverflow.com/q/24987896)), just make sure the code is consistent with what's around it, and that you document how the hack works if you can, and why the hack was employed. If it's a more common one such as Bluebird's, a direct link to a description suffices for how.
 
 ### Line length
 
@@ -245,7 +246,11 @@ function iterate() {
 
 ### Trailing whitespace
 
-Please don't leave trailing spaces anywhere. It makes diffs harder to read.
+Please don't leave trailing whitespace anywhere. It makes diffs harder to read.
+
+Blank lines should have no indentation or spaces. It should be empty other than a line ending.
+
+All files should end with a trailing space. Some editors add this on their own, so it will result in unnecessary lines in later diffs if you don't.
 
 ### Indentation and vertical whitespace
 
@@ -791,6 +796,46 @@ else if (anotherCondition) {
 if (condition) {
 	doSomething()
 } else doSomethingElse()
+```
+
+### `do`-`while` loops
+
+This should be avoided in most cases, since the only good use case is if the intent is "do this, and then check" each iteration. This should only be used in cases like below:
+
+```js
+// Form 1
+doSomething()
+
+while (condition) {
+	doSomething()
+}
+
+// Form 2
+while (true) {
+	doSomething()
+	if (!condition) break
+}
+```
+
+Always use braces. Also, there must be a semicolon at the end of the `while` condition. This is the only exception to the semicolon rule, since the omission is a syntax error. The semicolon is never automatically inserted before ES6.
+
+```js
+// Good
+do {
+	doSomething()
+} while (condition);
+
+// Bad
+do doSomething()
+while (condition);
+
+// Syntax errors
+do {
+	doSomething()
+} while (condition)
+
+do doSomething()
+while (condition)
 ```
 
 ### Empty blocks
