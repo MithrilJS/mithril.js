@@ -33,12 +33,7 @@
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://opensource.org/licenses/MIT"
-    }
-  ],
+  "license": "MIT",
   "files": [
     "mithril.min.js",
     "mithril.min.js.map",
