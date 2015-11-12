@@ -217,9 +217,9 @@ Components can be placed anywhere a regular element can. If you have components 
 
 ```javascript
 var App = {
-	ctrl: function() {
+	controller: function() {
 		return {data: [1, 2, 3]}
-	}
+	},
 	view: function(ctrl) {
 		return m(".app", [
 			//pressing the button reverses the list
@@ -280,7 +280,7 @@ var TemperatureConverter = {
 				return value - 273.15
 			},
 			kelvinToFahrenheit: function(value) {
-				return (value 9 / 5 * (v - 273.15)) + 32
+				return ( 9 / 5 * (value - 273.15)) + 32
 			}
 		}
 	},
@@ -305,12 +305,12 @@ var ctrl = new TemperatureConverter.controller();
 assert(ctrl.kelvinToCelsius(273.15) == 0)
 
 //test the template
-var tpl = TemperatureConverter.view(null, {value: 273.15})
+var tpl = TemperatureConverter.view(ctrl, {value: 273.15})
 assert(tpl.children[1] == 0)
 
 //test with real DOM
 var testRoot = document.createElement("div")
-m.render(testRoot, TemperatureConverter.view(null, {value: 273.15}))
+m.render(testRoot, TemperatureConverter.view(ctrl, {value: 273.15}))
 assert(testRoot.innerHTML.indexOf("celsius:0") > -1)
 ```
 
@@ -397,14 +397,14 @@ Often, you will want to do some work before the component is unloaded (i.e. clea
 var MyComponent = {
 	controller: function() {
 		return {
-			onunload = function() {
+			onunload : function() {
 				console.log("unloading my component");
 			}
 		}
 	},
 	view: function() {
 		return m("div", "test")
-	};
+	}
 };
 
 m.mount(document.body, MyComponent);
