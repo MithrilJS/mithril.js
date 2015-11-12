@@ -83,7 +83,7 @@
 		}],
 		"space-before-keywords": 2,
 		"space-in-parens": 2,
-		"space-infix-ops": [2, {"int32Hint": false}],
+		"space-infix-ops": [2, {"int32Hint": true}],
 		"space-unary-ops": 2,
 		"spaced-comment": [2, "always"],
 		"max-depth": [2, 4],
