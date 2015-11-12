@@ -1,4 +1,4 @@
-(function (global, factory) {
+void (function (global, factory) {
 	"use strict"
 	/* eslint-disable no-undef */
 	var m = factory(window)
