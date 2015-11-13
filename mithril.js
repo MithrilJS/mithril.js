@@ -510,7 +510,10 @@ void (function (global, factory) { // eslint-disable-line
 				editable.innerHTML = data
 			} else {
 				// was a trusted string
-				if (nodes[0].nodeType === 1 || nodes.length > 1) {
+				if (nodes[0].nodeType === 1 ||
+					nodes.length > 1 ||
+					!nodes[0].nodeValue.trim()
+				) {
 					clear(cached.nodes, cached)
 					nodes = [$document.createTextNode(data)]
 				}
