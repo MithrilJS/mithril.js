@@ -512,7 +512,7 @@ void (function (global, factory) { // eslint-disable-line
 				// was a trusted string
 				if (nodes[0].nodeType === 1 ||
 					nodes.length > 1 ||
-					!nodes[0].nodeValue.trim()
+					(nodes[0].nodeValue.trim && !nodes[0].nodeValue.trim())
 				) {
 					clear(cached.nodes, cached)
 					nodes = [$document.createTextNode(data)]
