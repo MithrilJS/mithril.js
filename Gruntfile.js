@@ -108,7 +108,7 @@ module.exports = function (grunt) { // eslint-disable-line
 			options: {
 				banner: [
 					"/*",
-					pkg.name + " v" + pkg.version,
+					"Mithril v" + pkg.version,
 					pkg.homepage,
 					"(c) 2014-" + currentYear + " " + pkg.author.name,
 					"License: " + pkg.license,
