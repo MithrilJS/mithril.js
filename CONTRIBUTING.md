@@ -19,32 +19,49 @@ Use the [issue tracker](https://github.com/lhorie/mithril.js/issues). Please do 
 
 We welcome any and all contributions. This is a community-driven project. Although we don't have a lot, we do have a few guidelines for contributions.
 
-1. Please adhere to the style guide. It's pretty lengthy, but most everything is checked by ESLint, and if anything fails to check, the build will fail, and you will know about it. Most of it is common practice and common sense. ESLint is also set up to check for other common errors, such as undeclared variables and invalid `typeof` values.
+1. Please try to adhere to the style guide. Most of it is checked by ESLint. ESLint is also set up to check for other common errors, such as undeclared variables and invalid `typeof` values.
 2. Please make sure there are no regressions with your patch. Please don't disable existing tests, and please don't send a PR with new, disabled tests.
 	- There are a few known failing tests currently (PRs welcome): [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.deferred.js#L121-L125) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.render.js#L1321-L1343) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L106-L131) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L134-L162) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L165-L191) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L194-L222)
 3. For any new features introduced, be sure to write new unit tests for it. Maximum coverage is what we want.
 4. Try to not leave any extra `TODO`s, `FIXME`s, etc. in your code. ESLint will nag at you until you fix whatever problem it is.
 	- Note that it's only a warning, not an error. It won't fail the CI tests, and there's a few outstanding ones inside Mithril right now.
 
-It is assumed that all contributions you make you have the appropriate rights to and that it may be made available under the MIT License, the license used for this project.
+It is assumed that for all contributions you make, you have the appropriate rights to and it may be made available under the MIT License, the license used for this project.
 
 # Style Guide
 
-The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but this shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if some sort of hack is impossible without violating this guide (e.g. if Mithril ever needs [Bluebird's infamous hack](https://stackoverflow.com/q/24987896)), just make sure the code is consistent with what's around it.
+The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but it shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if you need some sort of hack that doesn't follow this style guide like [Bluebird's `toFastProperties` hack](https://stackoverflow.com/q/24987896), make sure the code is consistent with what's around it, and disable whatever ESLint warnings you need to. (In that case, you would use `no-eval` and `no-unused-expressions`).
+
+### EditorConfig
+
+This project has its own [EditorConfig](http://editorconfig.org/). Most common editors either support it natively or have a plugin to support it. Here's links for several editors:
+
+- [Atom](https://atom.io/packages/editorconfig)
+- [Nodepad++](https://github.com/editorconfig/editorconfig-notepad-plus-plus#readme)
+- [Sublime Text](https://packagecontrol.io/packages/EditorConfig)
+- [Vim](http://www.vim.org/scripts/script.php?script_id=3934)
+- [Emacs](https://marmalade-repo.org/packages/editorconfig)
+- IntelliJ, WebStorm: You're already set, since it supports EditorConfig natively.
+- [Eclipse](https://marketplace.eclipse.org/content/editorconfig-eclipse)
+- [Visual Studio](https://visualstudiogallery.msdn.microsoft.com/c8bccfe2-650c-4b42-bc5c-845e21f96328)
+- [Xcode](https://github.com/MarcoSero/EditorConfig-Xcode)
+- [Komodo](http://komodoide.com/packages/addons/editorconfig/)
+
+EditorConfig also has [their own curated list](http://editorconfig.org/#download) of plugins. Do note that Text Mate's plugin doesn't support multiple properties used in this repo's `.editorconfig`.
 
 ### Line length
 
-Keep lines down to a maximum of 80 characters. Minifiers are very good at compressing whitespace, so don't be afraid to use it.
+Please keep line length down to a maximum of 80 characters.
 
-The only exception to this rule is with long regexes. Append `// eslint-disable-line max-len` to the end of those lines.
+The only exception to this rule is with long regexes and test names. You can use `// eslint-disable-line max-len` to suppress this.
 
 ### Function length
 
-Keep function length to no more than 20 statements, including those in nested blocks.
+Please keep function length to no more than 20 statements, including those in nested blocks.
 
-The only exceptions are for revealing module wrappers and Mocha `describe` and `context` blocks.
+The only exceptions are for revealing module wrappers and Mocha `describe` and `context` blocks. If you need to suppress this, you can use `// eslint-disable-line max-statements` at the beginning of the function.
 
-This isn't checked for the tests, but still, keep it reasonable.
+This isn't checked for the tests, but still, please keep it reasonable.
 
 ### Line endings
 
@@ -54,25 +71,21 @@ End each file with a line break.
 
 ### Semicolons
 
-Avoid semicolons. (A few resources to help you understand this: [*](http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding) [*](http://inimino.org/~inimino/blog/javascript_semicolons) [*](http://jamesallardice.com/understanding-automatic-semi-colon-insertion-in-javascript/))
+Avoid semicolons. A few resources to help you understand this: [*](http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding) [*](http://inimino.org/~inimino/blog/javascript_semicolons) [*](http://jamesallardice.com/understanding-automatic-semi-colon-insertion-in-javascript/)
 
 ### Redundant expressions
 
-Don't use redundant parentheses, curly braces, `undefined`s, labels, ternaries, etc. Examples:
+Don't use redundant parentheses, curly braces, `undefined`s, ternaries, etc.
 
 - `var foo = value === 1 ? true : false` is better written as `var foo = value === 1`.
-- `var foo = (value === 1) ? bar : baz` is better written as `var foo = value === 1 ? bar : baz`.
 - `var foo = undefined` is better written as `var foo`.
 - `return undefined` is better written as `return`.
 - `delete(obj.foo)` is better written as `delete obj.foo`.
-- `return` at the end of a function if you're returning `undefined` should just be omitted.
-- If you're returning `null`, there's usually little reason to not just return `undefined`.
-- Unused variables should be removed.
-- An exception is detailed below for assignment in conditions.
+- As an exception, use an extra set of parentheses when assigning in conditions.
 
 ### Equality testing
 
-Use strict equality (`===`/`!==`), not loose equality (`==`/`!=`). The only exception is if you're testing for `null` or `undefined`, in which loose equality, `value == null` and `value != null` is preferred. The reason is for type safety with primitives.
+Prefer strict equality (`===`/`!==`) to loose equality (`==`/`!=`), unless you're comparing against `null` or `undefined`, where loose equality (`== null`/`!= null`) is preferred. It's more type-safe with primitives.
 
 ### `eval` and friends
 
@@ -84,14 +97,14 @@ Prefer double quotes to single quotes, but using single quotes to avoid escaping
 
 ### Strict mode
 
-All code must be in strict mode, preferably wrapped in an IIFE.
+Any code not in the global scope should be in strict mode unless there's a good reason it shouldn't be. Browsers run it faster, and there's certain things where it's safer.
 
 ## Comments
 
 Comments are helpful. Use descriptive comments where needed, so others can read it and understand it. If a non-obvious hack is used, explain it with a comment. But don't repeat yourself with a redundant comment when the code adequately describes itself.
 
 ```js
-// Good, code is self-descriptive
+// Good
 var CARD_DECK_SIZE = 52
 
 // Shuffle the deck of cards.
@@ -103,7 +116,7 @@ for (var i = 0; i < CARD_DECK_SIZE; i++) {
 	deck[j] = tmp
 }
 
-// Also good, requires a descriptive comment.
+// Also good
 function toFastProperties(obj) {
 	// Bluebird's toFastProperties hack. Forces V8 to optimize object as prototype,
 	// significantly speeding up property access.
@@ -117,7 +130,7 @@ function toFastProperties(obj) {
 	/* eslint-enable no-eval */
 }
 
-// Bad, redundant comments
+// Bad
 var CARD_DECK_SIZE = 52
 
 // Shuffle the deck of cards.
@@ -132,47 +145,8 @@ function shuffle(deck) {
 		deck[j] = tmp
 	}
 }
-```
 
-### Magic values
-
-Prefer constant variables to magic values where it helps with code readability. Also, don't use comments in place of a constant.
-
-```js
-// Good
-var CARD_DECK_SIZE = 52
-for (var i = 0; i < CARD_DECK_SIZE; i++) {
-	var j = i + (Math.random() * CARD_DECK_SIZE - i)|0
-	var tmp = a[i]
-	a[i] = a[j]
-	a[j] = tmp
-}
-
-// Bad, what's 52 for?
-for (var i = 0; i < 52; i++) {
-	var j = i + (Math.random() * 52 - i)|0
-	var tmp = a[i]
-	a[i] = a[j]
-	a[j] = tmp
-}
-
-// Also bad, comment not substitute for constant
-// 52 cards in a deck
-for (var i = 0; i < 52; i++) {
-	var j = i + (Math.random() * 52 - i)|0
-	var tmp = a[i]
-	a[i] = a[j]
-	a[j] = tmp
-}
-```
-
-### Distracting comments
-
-Don't comment *everything*. It's distracting, pointless, and a waste of time. Only comment when you need to.
-
-```js
-// Extremely bad. Don't *ever* do this.
-
+// Also bad
 // This function loops through each item in a list, calling `f` with each item
 // and their respective index. If the function `f` returns explicitly with
 // `false`, iteration stops. This function returns the original list for
@@ -192,6 +166,38 @@ function forEach(list, f) {
 }
 ```
 
+### Magic values
+
+Prefer constant variables to magic values where it helps with code readability. Also, don't use comments in place of a constant.
+
+```js
+// Good
+var CARD_DECK_SIZE = 52
+for (var i = 0; i < CARD_DECK_SIZE; i++) {
+	var j = i + (Math.random() * CARD_DECK_SIZE - i)|0
+	var tmp = a[i]
+	a[i] = a[j]
+	a[j] = tmp
+}
+
+// Bad
+for (var i = 0; i < 52; i++) {
+	var j = i + (Math.random() * 52 - i)|0
+	var tmp = a[i]
+	a[i] = a[j]
+	a[j] = tmp
+}
+
+// Also bad
+// Note: 52 cards in a deck
+for (var i = 0; i < 52; i++) {
+	var j = i + (Math.random() * 52 - i)|0
+	var tmp = a[i]
+	a[i] = a[j]
+	a[j] = tmp
+}
+```
+
 ### Initial whitespace
 
 Start your comments with a space. It's more readable.
@@ -206,7 +212,7 @@ Start your comments with a space. It's more readable.
 
 ### Grammar and spelling
 
-Use proper grammar and spelling in your comments. This shouldn't need explanation.
+Please try to use proper grammar and spelling. Not all of us are perfect English speakers (even us native ones struggle at times), but it's easier to understand down the road when reading the code.
 
 ## Whitespace
 
@@ -235,7 +241,7 @@ function iterate() {
 	for (var i = 0; i < list.length; i++) read(list[i])
 }
 
-// Even worse
+// Also bad
 function iterate() {
 	var list = []
 	for (var index = 0; hasNext(); list.push(next(index++))) {}
@@ -245,7 +251,7 @@ function iterate() {
 
 ### Trailing whitespace
 
-Please don't leave trailing spaces anywhere. It makes diffs harder to read.
+Please don't leave trailing spaces, even in blank likes. It makes diffs harder to read. If your [editor supports EditorConfig, or you've downloaded a plugin for it](http://editorconfig.org/#download), you're already set. Otherwise, searching "<editor> strip trailing whitespace blank lines" should help you.
 
 ### Indentation and vertical whitespace
 
@@ -255,7 +261,7 @@ Never mix tabs and spaces. Don't use smart tabs.
 
 ### Excessive whitespace
 
-Keep whitespace within reason. Limit vertical whitespace to no more than 2 consecutive blank lines, and don't start or end blocks with plain whitespace. Don't use more than one character of horizontal whitespace beyond indentation.
+Keep whitespace within reason. Limit vertical whitespace to no more than 1 consecutive blank line, and don't start or end blocks with plain whitespace. Don't use more than one character of horizontal whitespace beyond indentation.
 
 ```js
 // Bad
@@ -268,8 +274,6 @@ function iterate() {
 		index++
 	}
 
-	// Too many empty lines
-
 
 
 	for (var i = 0; i < list.length; i++) {
@@ -281,6 +285,8 @@ function iterate() {
 var a  =  2
 //   ^^ ^^
 ```
+
+If you're find yourself resorting to multiple consecutive blank lines to separate logic, consider refactoring the code into smaller functions if possible.
 
 ### Control keywords
 
@@ -298,25 +304,20 @@ Always surround any other binary operator with whitespace, including assignment 
 // Good
 var a = 1 + 2
 a = 3
-a += 4
 
 var a = 1 + 2 + 3 + 4 + 5 +
 	6 + 7 + 8 + 9 + 10
 
 // Bad
 var a = 1+2
-var a = 1 +2
-var a = 1+ 2
 var a=1+2
-var a=1 + 2
 a=3
-a+=4
 
 var a = 1 + 2 + 3 + 4 + 5
 	+ 6 + 7 + 8 + 9 + 10
 ```
 
-As an exception, casting to a 32-bit integer (i.e. `x|0`) doesn't require whitespace surrounding it.
+In the event you're casting to a 32-bit integer (i.e. `x|0`), it's okay to omit the whitespace. Mithril doesn't currently have any instances of this, but it may in the future.
 
 ```js
 // This is okay
@@ -332,30 +333,14 @@ Do not use spaces between any other unary operator and the value they apply to.
 ```js
 // Good
 !a
-!!a
-~~a
-a++
-++a
 -1
 ~1
 
-// Okay
-+!a
-
 // Bad
 ! a
-!! a
-! ! a
-++ a
-a ++
-+ ! a
-
-// Even worse
 - 1
 ~ 1
 ```
-
-Don't use `new function () {}`. Just use an object literal instead, and an IIFE if needed.
 
 ## Objects
 
@@ -398,8 +383,6 @@ var object = {foo: 1}
 // Bad
 var object = {foo:1}
 var object = {foo : 1}
-
-// Very bad
 var object = {foo :1}
 ```
 
@@ -419,6 +402,8 @@ var object = {
 // Bad
 var object = {foo: 1, bar: 2, baz: 3, quux: "string"}
 ```
+
+Prefer plain objects over `new function () {}`, but if you feel the latter is better, use `// eslint-disable-line no-new-func` on the first line.
 
 ### Comma placement
 
@@ -442,7 +427,7 @@ var object = {
 ,	bar: 2 // Comma first
 }
 
-// Trailing comma in single-line object
+// Also bad
 var object = {foo: 1,}
 ```
 
@@ -464,7 +449,7 @@ object.
 
 ### Property quoting
 
-Quote properties when needed. Never quote valid identifiers. This may lead to some inconsistency in whether properties are quoted or not in the object, but that inconsistency is okay, and is the only exception in consistency.
+Quote properties when needed. Never quote valid identifiers. This may lead to some inconsistency in whether properties are quoted or not in the object, but that inconsistency is okay.
 
 ```js
 // Good
@@ -502,7 +487,7 @@ Use `self` to capture `this` where needed. (i.e. `var self = this`)
 
 Prefer short but clear, descriptive, and self-documenting variable names.
 
-Single letter names are only okay in these contexts:
+Single letter names are generally okay in these contexts:
 
 - Loop variables: `i`, `j`, etc.
 - Function arguments in small, trivial functional utilities: `f`, `g`, etc.
@@ -517,15 +502,12 @@ function forEach(list, f) {
 	return list
 }
 
-function ajax(url, callback) {
-	var xhr = new XMLHttpRequest()
-	xhr.open("GET", url)
-	xhr.onreadystatechange = function () {
-		if (this.readyState === 4) {
-			callback(this.responseText, this.status)
-		}
+// Also good
+function forEach(list, func) {
+	for (var index = 0; index < list.length; index++) {
+		func(list[index], index)
 	}
-	xhr.send()
+	return list
 }
 
 // Bad
@@ -536,34 +518,12 @@ function iterateArray(listOfEntries, callback) {
 	return listOfEntries
 }
 
-function getRequestStringFromServer(serverLocation, functionToCall) {
-	var xmlHttpRequest = new XMLHttpRequest()
-	xmlHttpRequest.open("GET", serverLocation)
-	xmlHttpRequest.onreadystatechange = function () {
-		if (this.readyState === 4) {
-			functionToCall(this.responseText, this.status)
-		}
-	}
-	xmlHttpRequest.send()
-}
-
-// Even worse
+// Also bad
 function e(l, c) {
 	for (var x = 0; x < l.length; x++) {
 		c(l[x], x)
 	}
 	return l
-}
-
-function a(u, f) {
-	var x = new XMLHttpRequest()
-	x.open("GET", url)
-	x.onreadystatechange = function () {
-		if (this.readyState === 4) {
-			f(this.responseText,this.status)
-		}
-	}
-	x.send()
 }
 ```
 
@@ -596,7 +556,7 @@ for (var i = 0, test; (test = foo === 1); i++) {
 // Bad
 var a = 1, b = 2, c, d
 
-// Even worse
+// Also bad
 var foo, bar, baz, quux, spam, eggs, ham, shouldUpdate, initialize
 ```
 
@@ -615,7 +575,7 @@ Don't assign to a function declaration. Declarations look like static values, so
 function foo() { return 1 }
 foo = function () { return 2 }
 
-// Even worse
+// Also bad
 function foo() { return 1 }
 foo = 2
 ```
@@ -632,8 +592,9 @@ if (test) {
 }
 
 var test = foo === 1
-for (var i = 0; test; i++, test = foo === 1) {
+for (var i = 0; test; i++) {
 	doSomething(i)
+	test = foo === 1
 }
 
 if ((test = foo === 1)) {
@@ -793,6 +754,21 @@ if (condition) {
 } else doSomethingElse()
 ```
 
+## `do`-`while` loops
+
+Always use braces.
+
+```js
+// Good
+do {
+    doSomething()
+} while (condition)
+
+// Bad
+do doSomething()
+while (condition)
+```
+
 ### Empty blocks
 
 Mark empty blocks as intentionally empty via a comment or similar. Don't just leave an empty block and/or semicolon.
@@ -800,7 +776,12 @@ Mark empty blocks as intentionally empty via a comment or similar. Don't just le
 ```js
 // Good
 for (var i = 0; i < list.length && cond(list[i]); i++) {
-	// empty
+	// do nothing
+}
+
+// Even better
+for (var i = 0; i < list.length; i++) {
+	if (!cond(list[i])) break
 }
 
 // Bad
@@ -852,5 +833,3 @@ Don't nest curly braces beyond 4 levels deep. This includes blocks, loops, and f
 ### Brace style
 
 Put the `else`, `catch`, and `finally` on the same line as its closing brace.
-
-(Obviously, this doesn't apply to `if`-`else` statements that don't use curly braces.)

@@ -911,7 +911,6 @@ describe("m.render()", function () {
 		expect(root.childNodes[0].nodeName).to.equal("DIV")
 	})
 
-
 	// https://github.com/lhorie/mithril.js/issues/157
 	it("renders nodes with new keys correctly", function () {
 		var root = mock.document.createElement("div")

@@ -94,13 +94,13 @@ m.render(document.getElementById("test"), [
 				"s 11 -61 -11 -80",
 				"s -79 -7 -70 -41",
 				"C 46.039,146.545,53.039,128.545,66.039,133.545",
-				"z"
+				"z",
 			].join(" "),
 			fill: "#FFFFFF",
 			stroke: "#000000",
 			"stroke-miterlimit": 10,
-			"stroke-width": 4
-		})
+			"stroke-width": 4,
+		}),
 	]),
 	m("svg[height=270px][width=270px][viewBox='0 0 270 270']", [
 		m("g[transform='translate(150,150)'][title=Clock]", [
@@ -109,7 +109,7 @@ m.render(document.getElementById("test"), [
 					r: 108,
 					fill: "none",
 					"stroke-width": 4,
-					stroke: "gray"
+					stroke: "gray",
 				}),
 				m("circle", {
 					r: 97,
@@ -117,7 +117,7 @@ m.render(document.getElementById("test"), [
 					"stroke-width": 11,
 					stroke: "black",
 					"stroke-dasharray": "4,46.789082",
-					transform: "rotate(-1.5)"
+					transform: "rotate(-1.5)",
 				}),
 				m("circle", {
 					r: 100,
@@ -125,8 +125,8 @@ m.render(document.getElementById("test"), [
 					"stroke-width": 5,
 					stroke: "black",
 					"stroke-dasharray": "2,8.471976",
-					transform: "rotate(-.873)"
-				})
+					transform: "rotate(-.873)",
+				}),
 			]),
 			m("g[transform='rotate(180)']", [
 				m("g#hour", [
@@ -135,7 +135,7 @@ m.render(document.getElementById("test"), [
 						y2: 75,
 						"stroke-linecap": "round",
 						stroke: "blue",
-						opacity: 0.5
+						opacity: 0.5,
 					}),
 					m("animateTransform[attributeName=transform]", {
 						type: "rotate",
@@ -143,7 +143,7 @@ m.render(document.getElementById("test"), [
 						dur: "12h",
 						by: 360,
 					}),
-					m("circle[r=7]")
+					m("circle[r=7]"),
 				]),
 				m("g#minute", [
 					m("line", {
@@ -157,9 +157,9 @@ m.render(document.getElementById("test"), [
 						type: "rotate",
 						repeatCount: "indefinite",
 						dur: "60min",
-						by: 360
+						by: 360,
 					}),
-					m("circle[r=6][fill=red]")
+					m("circle[r=6][fill=red]"),
 				]),
 				m("g#second", [
 					m("line", {
@@ -175,9 +175,9 @@ m.render(document.getElementById("test"), [
 						dur: "60s",
 						by: 360,
 					}),
-					m("circle[r=4][fill=blue]")
-				])
-			])
+					m("circle[r=4][fill=blue]"),
+				]),
+			]),
 		]),
 		m("script", "(" + function () {
 			"use strict"
@@ -195,7 +195,7 @@ m.render(document.getElementById("test"), [
 			rotate("hour", 30 * (hours + minutes / 60 + seconds / 3600))
 			rotate("minute", 6 * (minutes + seconds / 60))
 			rotate("second", 6 * seconds)
-		}.toString() + ")()")
+		}.toString() + ")()"),
 	]),
 	m("svg[height=200px][width=200px]", [
 		m("foreignObject", {
@@ -203,7 +203,7 @@ m.render(document.getElementById("test"), [
 			y: 0,
 			width: "100px",
 			height: "100px",
-			transform: "translate(0,0)"
+			transform: "translate(0,0)",
 		}, m("div", {xmlns: "http://www.w3.org/1999/xhtml"}, [
 			m.trust("this is a piece of html rendered as " +
 				"<a href=\"http://www.w3.org/TR/SVG11/extend.html\">" +
