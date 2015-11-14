@@ -2,9 +2,17 @@
   "name": "mithril",
   "description": "Mithril.js beta build - use this to help us test the releases before they are released",
   "version": "0.2.1",
+  "homepage": "http://mithril.js.org",
+  "license": "MIT",
+  "author": {
+    "name": "Leo Horie"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:lhorie/mithril.js.git"
+  },
+  "bugs": {
+    "url" : "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
     "test": "grunt test"
@@ -33,12 +41,6 @@
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://opensource.org/licenses/MIT"
-    }
-  ],
   "files": [
     "mithril.min.js",
     "mithril.min.js.map",
