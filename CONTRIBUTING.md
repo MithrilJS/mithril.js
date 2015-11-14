@@ -3,8 +3,9 @@
 Use the [issue tracker](https://github.com/lhorie/mithril.js/issues). Do check to make sure your bug hasn't already been filed. Please give the following information, where possible:
 
 1. The version of Mithril you're using, whether it's the dev version or [the version on npm](http://npm.im/mithril.js). The version on npm may not have all the latest bug fixes, so your bug might very well be fixed in the dev version.
-2. A detailed explanation of the bug.
-3. A test case. The simpler, the better.
+2. The name and version of the browser(s) affected.
+3. A detailed explanation of the bug.
+4. A test case. The simpler, the better.
 
 # Feature requests
 
@@ -25,12 +26,15 @@ We welcome any and all contributions. This is a community-driven project. Althou
 3. For any new features introduced, be sure to write new unit tests for it. Maximum coverage is what we want.
 4. Try to not leave any extra `TODO`s, `FIXME`s, etc. in your code. ESLint will nag at you until you fix whatever problem it is.
 	- Note that it's only a warning, not an error. It won't fail the CI tests, and there's a few outstanding ones inside Mithril right now.
+	- If you must, use a `TODO(<your_username>): whatever` (or the equivalent `FIXME`, etc.) if it's something you are actively working on, or if it's something more general, file an issue titled "TODO: <short_description>" and reference the `TODO` comment itself.
 
 It is assumed that for all contributions you make, you have the appropriate rights to and it may be made available under the MIT License, the license used for this project.
 
 # Style Guide
 
-The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but it shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if you need some sort of hack that doesn't follow this style guide like [Bluebird's `toFastProperties` hack](https://stackoverflow.com/q/24987896), make sure the code is consistent with what's around it, and disable whatever ESLint warnings you need to. (In that case, you would use `no-eval` and `no-unused-expressions`).
+The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but it shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide.
+
+If you need some sort of hack that doesn't follow this style guide like [Bluebird's `toFastProperties` hack](https://stackoverflow.com/q/24987896), make sure the code is consistent with what's around it, and disable whatever ESLint warnings you need to. (In that case, you would use `no-eval` and `no-unused-expressions`). And please document the hack as best as you can and why you used it. If it's a hack that's already been explained elsewhere, like Bluebird's, a link to that is sufficient.
 
 ### EditorConfig
 
@@ -66,8 +70,6 @@ This isn't checked for the tests, but still, please keep it reasonable.
 ### Line endings
 
 Use Windows-style line endings (i.e. CRLF).
-
-End each file with a line break.
 
 ### Semicolons
 
@@ -251,7 +253,11 @@ function iterate() {
 
 ### Trailing whitespace
 
-Please don't leave trailing spaces, even in blank likes. It makes diffs harder to read. If your [editor supports EditorConfig, or you've downloaded a plugin for it](http://editorconfig.org/#download), you're already set. Otherwise, searching "<editor> strip trailing whitespace blank lines" should help you.
+Please don't leave trailing spaces, even in blank likes. It makes diffs harder to read.
+
+If your [editor supports EditorConfig, or you've downloaded a plugin for it](http://editorconfig.org/#download), you're already set. Otherwise, Googling "<your editor> strip trailing whitespace blank lines" should help you.
+
+Also, make sure to include a trailing line break. Several editors add this by default, and many of them offer no easy way to prevent it.
 
 ### Indentation and vertical whitespace
 
