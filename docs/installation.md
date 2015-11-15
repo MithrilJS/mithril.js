@@ -6,7 +6,7 @@ Mithril is available from a variety of sources:
 
 ### Direct download
 
-You can [download a zip of the latest version version here](http://lhorie.github.io/mithril/mithril.min.zip).
+You can [download a zip of the latest version version here](mithril.min.zip).
 
 Links to older versions can be found in the [change log](change-log.html).
 
