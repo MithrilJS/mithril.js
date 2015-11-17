@@ -39,7 +39,6 @@ describe("m.route()", function () {
 	// Use these instead of `it` and `xit` in this set of tests if you need a
 	// root element.
 	var dit = makeIt(it)
-	var xdit = makeIt(xit)
 
 	// Wraps the `it` function for dependency injection that doesn't require
 	// `this`
@@ -103,7 +102,7 @@ describe("m.route()", function () {
 	})
 
 	// FIXME: this causes others to fail
-	xdit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 		var spy = sinon.spy()
 
@@ -131,7 +130,7 @@ describe("m.route()", function () {
 	})
 
 	// FIXME: this causes others to fail
-	xdit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
 		var spy = sinon.spy()
@@ -162,7 +161,7 @@ describe("m.route()", function () {
 	})
 
 	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if non-curried component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
 		var spy = sinon.spy()
@@ -191,7 +190,7 @@ describe("m.route()", function () {
 	})
 
 	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if non-curried subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
 		var spy = sinon.spy()

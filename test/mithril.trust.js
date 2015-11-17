@@ -43,7 +43,7 @@ describe("m.trust()", function () {
 
 		// FIXME: this is a bug (trusted string's contents rendered as just
 		// textual contents)
-		xit("works with mixed trusted content in td", function () {
+		it("works with mixed trusted content in td", function () {
 			var root = document.createElement("table")
 			root.appendChild(root = document.createElement("tr"))
 
