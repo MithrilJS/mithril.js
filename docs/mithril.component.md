@@ -1,3 +1,7 @@
+---
+title: m.component
+---
+
 ## m.component
 
 ---

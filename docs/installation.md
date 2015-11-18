@@ -1,3 +1,7 @@
+---
+title: Installation
+---
+
 ## Installation
 
 Mithril is available from a variety of sources:
@@ -8,7 +12,7 @@ Mithril is available from a variety of sources:
 
 You can [download a zip of the latest version version here](http://lhorie.github.io/mithril/mithril.min.zip).
 
-Links to older versions can be found in the [change log](change-log.html).
+Links to older versions can be found in the [change log](change-log.md).
 
 In order to use Mithril, extract it from the zip file and point a script tag to the `.js` file:
 
@@ -29,13 +33,13 @@ Content delivery networks allow the library to be cached across different websit
 #### cdnjs
 
 ```markup
-<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/$version/mithril.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mithril/{{config.version}}/mithril.min.js"></script>
 ```
 
 #### jsDelivr
 
 ```markup
-<script src="//cdn.jsdelivr.net/mithril/$version/mithril.min.js"></script>
+<script src="//cdn.jsdelivr.net/mithril/{{config.version}}/mithril.min.js"></script>
 ```
 
 ---

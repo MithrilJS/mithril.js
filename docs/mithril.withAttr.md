@@ -1,3 +1,7 @@
+---
+title: m.withAttr
+---
+
 ## m.withAttr
 
 This is an event handler factory. It returns a method that can be bound to a DOM element's event listener.

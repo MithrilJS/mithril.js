@@ -2,7 +2,7 @@
 	"name": "mithril",
 	"description": "A Javascript Framework for building brilliant applications",
 	"keywords": ["mvc", "framework"],
-	"version": "$version",
+	"version": "{{config.version}}",
 	"author": "Leo Horie <leohorie@hotmail.com>",
 	"repository": {"type": "git", "url": "https://github.com/lhorie/mithril"},
 	"main": "mithril.js",

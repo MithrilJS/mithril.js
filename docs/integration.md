@@ -1,3 +1,7 @@
+---
+title: Integrating with Other Libraries
+---
+
 ## Integrating with Other Libraries
 
 Integration with third party libraries or vanilla javascript code can be achieved via the [`config` attribute of virtual elements](mithril.md#accessing-the-real-dom).

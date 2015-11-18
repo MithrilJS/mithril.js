@@ -1,3 +1,7 @@
+---
+title: Optimizing Performance
+---
+
 ## Optimizing Performance
 
 There's a number of ways to improve Mithril performance for the rare cases where pages are too complex for their own good.

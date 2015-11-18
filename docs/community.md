@@ -1,3 +1,7 @@
+---
+title: Community
+---
+
 ## Community
 
 ### Learn Mithril

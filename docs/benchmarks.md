@@ -1,3 +1,7 @@
+---
+title: Benchmarks
+---
+
 ## Benchmarks
 
 These benchmarks were designed to measure Javascript running time for Mithril in comparison with other popular Javascript MVC frameworks. Javascript running time is significant because the gzipped size of a framework can be misleading in terms of how much code actually runs on page loads. In my experience, page loads happen far more commonly than one would expect in single page applications: power users open multiple tabs, and mobile users open and close the browser very frequently. And as far as templating engines go, the initial page load represents the worst case for the rendering algorithm since there is very little room for performance optimization tricks. It's arguably also [one of the most important metrics when it comes to performance](http://blog.kissmetrics.com/loading-time/).
