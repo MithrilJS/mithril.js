@@ -117,8 +117,7 @@ describe("m.deferred()", function () {
 		expect(value2()).to.be.an("error")
 	})
 
-	// FIXME: this is a bug.
-	xit("synchronously throws subclasses of Errors on creation", function () {
+	it("synchronously throws subclasses of Errors on creation", function () {
 		expect(function () {
 			m.deferred().reject(new TypeError())
 		}).to.throw()

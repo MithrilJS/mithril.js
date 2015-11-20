@@ -53,12 +53,14 @@ describe("m.prop()", function () {
 	it("returns a thenable when wrapping a Mithril promise", function () {
 		var defer = m.deferred()
 
-		var prop = m.prop(defer.promise).then(function () {
+		var prop = m.prop(defer.promise)
+
+		var promise = prop.then(function () {
 			return "test2"
 		})
 
 		defer.resolve("test")
 
-		expect(prop()).to.equal("test2")
+		expect(promise()).to.equal("test2")
 	})
 })
