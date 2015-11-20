@@ -1,7 +1,8 @@
 /* eslint-env node */
 module.exports = function (grunt) { // eslint-disable-line
-	var version = "0.2.1"
 
+	var pkg = grunt.file.readJSON("package.json")
+	var currentYear = grunt.template.today("yyyy")
 	var inputFolder = "./docs"
 	var tempFolder = "./temp"
 	var archiveFolder = "./archive"
@@ -72,7 +73,7 @@ module.exports = function (grunt) { // eslint-disable-line
 	makeTasks("guide", guide)
 	makeTasks("api", api)
 
-	var currentVersionArchiveFolder = archiveFolder + "/v" + version
+	var currentVersionArchiveFolder = archiveFolder + "/v" + pkg.version
 
 	grunt.initConfig({
 		// Keep this in sync with the .eslintignore
@@ -107,10 +108,10 @@ module.exports = function (grunt) { // eslint-disable-line
 			options: {
 				banner: [
 					"/*",
-					"Mithril v" + version,
-					"http://github.com/lhorie/mithril.js",
-					"(c) Leo Horie",
-					"License: MIT",
+					"Mithril v" + pkg.version,
+					pkg.homepage,
+					"(c) 2014-" + currentYear + " " + pkg.author.name,
+					"License: " + pkg.license,
 					"*/"
 				].join("\n"),
 				compress: {
@@ -141,7 +142,7 @@ module.exports = function (grunt) { // eslint-disable-line
 				force: true,
 				patterns: [
 					{match: /\.md/g, replacement: ".html"},
-					{match: /\$version/g, replacement: version}
+					{match: /\$version/g, replacement: pkg.version}
 				]
 			},
 
@@ -238,7 +239,7 @@ module.exports = function (grunt) { // eslint-disable-line
 				expand: true,
 				cwd: currentVersionArchiveFolder,
 				src: "./**",
-				dest: outputFolder + "/archive/v" + version
+				dest: outputFolder + "/archive/v" + pkg.version
 			}
 		},
 

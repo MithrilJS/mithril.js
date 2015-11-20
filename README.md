@@ -1,6 +1,5 @@
 [![JS.ORG](https://img.shields.io/badge/js.org-mithril-ffb400.svg?style=flat-square)](http://js.org)
 [![Join the chat at https://gitter.im/lhorie/mithril.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lhorie/mithril.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Support and Consulting Services](https://s3-us-west-2.amazonaws.com/supportedsourceassets/buttons/supportandservices1.png)](http://supportedsource.org/consulting-services-and-support/Mithril)
 [![Build Status](https://travis-ci.org/lhorie/mithril.js.svg?branch=master)](https://travis-ci.org/lhorie/mithril.js)
 
 # Mithril

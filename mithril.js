@@ -1,7 +1,7 @@
-(function (global, factory) {
+void (function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
-	var m = factory(window)
+	var m = factory(typeof window !== "undefined" ? window : {})
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
 	} else if (typeof define === "function" && define.amd) {
@@ -512,7 +512,10 @@
 				editable.innerHTML = data
 			} else {
 				// was a trusted string
-				if (nodes[0].nodeType === 1 || nodes.length > 1) {
+				if (nodes[0].nodeType === 1 ||
+					nodes.length > 1 ||
+					(nodes[0].nodeValue.trim && !nodes[0].nodeValue.trim())
+				) {
 					clear(cached.nodes, cached)
 					nodes = [$document.createTextNode(data)]
 				}
@@ -1815,6 +1818,10 @@
 				promiseValue = e
 				state = REJECTING
 				return fire()
+			}
+
+			if (state === REJECTING) {
+				m.deferred.onerror(promiseValue)
 			}
 
 			thennable(then, function () {

@@ -419,14 +419,14 @@ Often, you will want to do some work before the component is unloaded (i.e. clea
 var MyComponent = {
 	controller: function() {
 		return {
-			onunload = function() {
+			onunload: function() {
 				console.log("unloading my component");
 			}
 		}
 	},
 	view: function() {
 		return m("div", "test")
-	};
+	}
 };
 
 m.mount(document.body, MyComponent);
