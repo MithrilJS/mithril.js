@@ -21,12 +21,12 @@ describe("m.request()", function () {
 	it("sets the correct properties on `GET`", function () {
 		var prop = request({
 			method: "GET",
-			url: "test",
+			url: "test"
 		})
 
 		expect(prop()).to.contain.keys({
 			method: "GET",
-			url: "test",
+			url: "test"
 		})
 	})
 
@@ -49,12 +49,12 @@ describe("m.request()", function () {
 		var prop = request({
 			method: "POST",
 			url: "http://domain.com:80",
-			data: {},
+			data: {}
 		})
 
 		expect(prop()).to.contain.keys({
 			method: "POST",
-			url: "http://domain.com:80",
+			url: "http://domain.com:80"
 		})
 	})
 
@@ -62,7 +62,7 @@ describe("m.request()", function () {
 		expect(request({
 			method: "POST",
 			url: "http://domain.com:80/:test1",
-			data: {test1: "foo"},
+			data: {test1: "foo"}
 		})().url).to.equal("http://domain.com:80/foo")
 	})
 
@@ -72,7 +72,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "GET",
 			url: "test",
-			deserialize: function () { throw new Error("error occurred") },
+			deserialize: function () { throw new Error("error occurred") }
 		}).then(null, error)
 		resolve()
 
@@ -86,7 +86,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "GET",
 			url: "test",
-			deserialize: function () { throw new Error("error occurred") },
+			deserialize: function () { throw new Error("error occurred") }
 		}).catch(error)
 		resolve()
 
@@ -99,7 +99,7 @@ describe("m.request()", function () {
 		var data = m.prop()
 		var prop = m.request({
 			method: "GET",
-			url: "test",
+			url: "test"
 		})
 		.then(function () { return "foo" })
 		.finally(data)
@@ -142,7 +142,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "GET",
 			url: "test",
-			deserialize: function () { throw new Error("error occurred") },
+			deserialize: function () { throw new Error("error occurred") }
 		})
 		.catch(error)
 		.finally(function () { error("finally") })
@@ -158,7 +158,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "GET",
 			url: "test",
-			deserialize: function () { throw new TypeError("error occurred") },
+			deserialize: function () { throw new TypeError("error occurred") }
 		}).then(null, error)
 
 		try {
@@ -178,7 +178,7 @@ describe("m.request()", function () {
 		m.request({
 			method: "POST",
 			url: "test",
-			data: {foo: 1},
+			data: {foo: 1}
 		}).then(null, error)
 
 		var xhr = mock.XMLHttpRequest.$instances.pop()
@@ -194,7 +194,7 @@ describe("m.request()", function () {
 
 		m.request({
 			method: "POST",
-			url: "test",
+			url: "test"
 		}).then(null, error)
 
 		var xhr = mock.XMLHttpRequest.$instances.pop()
@@ -207,7 +207,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "POST",
 			url: "test",
-			initialValue: "foo",
+			initialValue: "foo"
 		})
 
 		var initialValue = prop()
@@ -220,7 +220,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "POST",
 			url: "test",
-			initialValue: "foo",
+			initialValue: "foo"
 		}).then(function (value) { return value })
 
 		var initialValue = prop()
@@ -233,7 +233,7 @@ describe("m.request()", function () {
 		var prop = m.request({
 			method: "POST",
 			url: "test",
-			initialValue: "foo",
+			initialValue: "foo"
 		}).then(function () { return "bar" })
 
 		resolve()
@@ -290,7 +290,7 @@ describe("m.request()", function () {
 				url: "/test",
 				dataType: "jsonp",
 				data: data,
-				callbackKey: callbackKey,
+				callbackKey: callbackKey
 			})
 		}
 

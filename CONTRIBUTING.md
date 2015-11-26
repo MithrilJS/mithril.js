@@ -120,8 +120,8 @@ for (var i = 0; i < CARD_DECK_SIZE; i++) {
 
 // Also good
 function toFastProperties(obj) {
-	// Bluebird's toFastProperties hack. Forces V8 to optimize object as prototype,
-	// significantly speeding up property access.
+	// Bluebird's toFastProperties hack. Forces V8 to optimize object as
+	// prototype, significantly speeding up property access.
 
 	/* eslint-disable no-eval */
 	function C() {}
@@ -362,7 +362,7 @@ var object = {
 	foo: 1,
 	bar: 2,
 	baz: 3,
-	quux: "string",
+	quux: "string"
 }
 
 // Bad
@@ -373,7 +373,7 @@ var object = {
 	foo: 1,
 	bar: 2,
 	baz: 3,
-	quux: "string",
+	quux: "string"
 
 }
 ```
@@ -402,7 +402,7 @@ var object = {
 	foo: 1,
 	bar: 2,
 	baz: 3,
-	quux: "string",
+	quux: "string"
 }
 
 // Bad
@@ -413,28 +413,25 @@ Prefer plain objects over `new function () {}`, but if you feel the latter is be
 
 ### Comma placement
 
-Commas come last. Also, use trailing commas if the object takes multiple lines.
+Commas come last. Don't use trailing commas
 
 ```js
 // Good
 var object = {
 	foo: 1,
-	bar: 2,
+	bar: 2
 }
 
 // Bad
 var object = {
 	foo: 1,
-	bar: 2 // No trailing comma
+	bar: 2, // Trailing comma
 }
 
 var object = {
 	foo: 1
 ,	bar: 2 // Comma first
 }
-
-// Also bad
-var object = {foo: 1,}
 ```
 
 ### Member access
@@ -461,23 +458,23 @@ Quote properties when needed. Never quote valid identifiers. This may lead to so
 // Good
 var object = {
 	foo: 1,
-	bar: 2,
+	bar: 2
 }
 
 var object = {
 	foo: 1,
-	"non-identifier": 2,
+	"non-identifier": 2
 }
 
 // Bad
 var object = {
 	"foo": 1,
-	"bar": 2,
+	"bar": 2
 }
 
 var object = {
 	"foo": 1,
-	"non-identifier": 2,
+	"non-identifier": 2
 }
 ```
 

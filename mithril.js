@@ -231,7 +231,7 @@ void (function (global, factory) { // eslint-disable-line
 					index: i,
 					from: existing[key].index,
 					element: cached.nodes[existing[key].index] ||
-						$document.createElement("div"),
+						$document.createElement("div")
 				}
 			} else {
 				existing[key] = {action: INSERTION, index: i}
@@ -263,7 +263,7 @@ void (function (global, factory) { // eslint-disable-line
 				insertNode(parent, dummy, index)
 				newCached.splice(index, 0, {
 					attrs: {key: data[index].attrs.key},
-					nodes: [dummy],
+					nodes: [dummy]
 				})
 				newCached.nodes[index] = dummy
 				break
@@ -694,7 +694,7 @@ void (function (global, factory) { // eslint-disable-line
 			tag: data.tag,
 			attrs: attrs,
 			children: children,
-			nodes: [node],
+			nodes: [node]
 		}
 
 		unloadCachedControllers(cached, views, controllers)
@@ -732,7 +732,7 @@ void (function (global, factory) { // eslint-disable-line
 		if (controller.onunload != null) {
 			unloaders.push({
 				controller: controller,
-				handler: controller.onunload,
+				handler: controller.onunload
 			})
 		}
 
@@ -1133,7 +1133,7 @@ void (function (global, factory) { // eslint-disable-line
 			this.appendChild(node)
 		},
 
-		childNodes: [],
+		childNodes: []
 	}
 
 	var nodeCache = []
@@ -1296,7 +1296,7 @@ void (function (global, factory) { // eslint-disable-line
 			preventDefault: function () {
 				isPrevented = true
 				computePreRedrawHook = computePostRedrawHook = null
-			},
+			}
 		}
 
 		forEach(unloaders, function (unloader) {
@@ -1434,7 +1434,7 @@ void (function (global, factory) { // eslint-disable-line
 	var modes = {
 		pathname: "",
 		hash: "#",
-		search: "?",
+		search: "?"
 	}
 
 	var redirect = noop
@@ -1955,8 +1955,8 @@ void (function (global, factory) { // eslint-disable-line
 			options.onload({
 				type: "load",
 				target: {
-					responseText: resp,
-				},
+					responseText: resp
+				}
 			})
 
 			window[callbackKey] = undefined
@@ -1969,8 +1969,8 @@ void (function (global, factory) { // eslint-disable-line
 				type: "error",
 				target: {
 					status: 500,
-					responseText: '{"error": "Error making jsonp request"}',
-				},
+					responseText: '{"error": "Error making jsonp request"}'
+				}
 			})
 
 			window[callbackKey] = undefined

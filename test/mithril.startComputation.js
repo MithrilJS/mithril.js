@@ -12,7 +12,7 @@ describe("m.startComputation(), m.endComputation()", function () {
 		var root = mock.document.createElement("div")
 		var controller = m.mount(root, {
 			controller: function () {},
-			view: function (ctrl) { return ctrl.value },
+			view: function (ctrl) { return ctrl.value }
 		})
 
 		mock.requestAnimationFrame.$resolve()

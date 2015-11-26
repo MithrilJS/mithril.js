@@ -14,7 +14,7 @@ window.templateConverter = (function () {
 			return [
 				new DOMParser()
 					.parseFromString(markup, "text/html")
-					.childNodes[1],
+					.childNodes[1]
 			]
 		}
 
@@ -39,7 +39,7 @@ window.templateConverter = (function () {
 				list.push({
 					tag: el.nodeName.toLowerCase(),
 					attrs: attrs,
-					children: createVirtual(el.childNodes),
+					children: createVirtual(el.childNodes)
 				})
 			}
 		})
@@ -115,7 +115,7 @@ window.templateConverter = (function () {
 				var body = this.virtuals.join("," + tab)
 				return "[" + tab + body + tab.slice(0, -1) + "]"
 			}
-		},
+		}
 	}
 
 	return {
@@ -134,12 +134,12 @@ window.templateConverter = (function () {
 				m("textarea", {
 					autofocus: true,
 					style: {width: "100%", height: "40%"},
-					onchange: m.withAttr("value", ctrl.source),
+					onchange: m.withAttr("value", ctrl.source)
 				}, ctrl.source()),
 				m("button", {onclick: ctrl.convert}, "Convert"),
 				m("textarea", {style: {width: "100%", height: "40%"}},
-					ctrl.output()),
+					ctrl.output())
 			])
-		},
+		}
 	}
 })()

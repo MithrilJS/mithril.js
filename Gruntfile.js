@@ -22,7 +22,7 @@ module.exports = function (grunt) { // eslint-disable-line
 		"refactoring",
 		"routing",
 		"tools",
-		"web-services",
+		"web-services"
 	]
 
 	var api = [
@@ -43,7 +43,7 @@ module.exports = function (grunt) { // eslint-disable-line
 		"mithril.sync",
 		"mithril.trust",
 		"mithril.withAttr",
-		"mithril.xhr",
+		"mithril.xhr"
 	]
 
 	var md2htmlTasks = {}
@@ -60,12 +60,12 @@ module.exports = function (grunt) { // eslint-disable-line
 			md2htmlTasks[name] = {
 				options: {
 					layout: inputFolder + "/layout/" + layout + ".html",
-					templateData: {topic: title},
+					templateData: {topic: title}
 				},
 				files: [{
 					src: [src],
-					dest: tempFolder + "/" + name + ".html",
-				}],
+					dest: tempFolder + "/" + name + ".html"
+				}]
 			}
 		})
 	}
@@ -80,7 +80,7 @@ module.exports = function (grunt) { // eslint-disable-line
 		eslint: {
 			options: {
 				extensions: [".js"],
-				fix: true,
+				fix: true
 			},
 			all: [
 				"**/*.js",
@@ -89,17 +89,17 @@ module.exports = function (grunt) { // eslint-disable-line
 				"!archive/**",
 				"!deploy/**",
 				"!mithril.closure-compiler-externs.js",
-				"!docs/layout/lib/**",
-			],
+				"!docs/layout/lib/**"
+			]
 		},
 
 		mocha_phantomjs: { // eslint-disable-line camelcase
 			test: {
 				src: ["test/index.html"],
 				options: {
-					reporter: "dot",
-				},
-			},
+					reporter: "dot"
+				}
+			}
 		},
 
 		md2html: md2htmlTasks,
@@ -112,11 +112,11 @@ module.exports = function (grunt) { // eslint-disable-line
 					pkg.homepage,
 					"(c) 2014-" + currentYear + " " + pkg.author.name,
 					"License: " + pkg.license,
-					"*/",
+					"*/"
 				].join("\n"),
-				sourceMap: true,
+				sourceMap: true
 			},
-			mithril: {src: "mithril.js", dest: "mithril.min.js"},
+			mithril: {src: "mithril.js", dest: "mithril.min.js"}
 		},
 
 		zip: {
@@ -125,10 +125,10 @@ module.exports = function (grunt) { // eslint-disable-line
 				src: [
 					currentVersionArchiveFolder + "/mithril.min.js",
 					currentVersionArchiveFolder + "/mithril.min.js.map",
-					currentVersionArchiveFolder + "/mithril.js",
+					currentVersionArchiveFolder + "/mithril.js"
 				],
-				dest: currentVersionArchiveFolder + "/mithril.min.zip",
-			},
+				dest: currentVersionArchiveFolder + "/mithril.min.zip"
+			}
 		},
 
 		replace: {
@@ -136,105 +136,105 @@ module.exports = function (grunt) { // eslint-disable-line
 				force: true,
 				patterns: [
 					{match: /\.md/g, replacement: ".html"},
-					{match: /\$version/g, replacement: pkg.version},
-				],
+					{match: /\$version/g, replacement: pkg.version}
+				]
 			},
 
 			links: {
 				expand: true,
 				flatten: true,
 				src: [tempFolder + "/**/*.html"],
-				dest: currentVersionArchiveFolder + "/",
+				dest: currentVersionArchiveFolder + "/"
 			},
 
 			index: {
 				src: inputFolder + "/layout/index.html",
-				dest: currentVersionArchiveFolder + "/index.html",
+				dest: currentVersionArchiveFolder + "/index.html"
 			},
 
 			commonjs: {
 				expand: true,
 				flatten: true,
 				src: [inputFolder + "/layout/*.json"],
-				dest: currentVersionArchiveFolder,
+				dest: currentVersionArchiveFolder
 			},
 
 			cdnjs: {
 				src: "deploy/cdnjs-package.json",
-				dest: "../cdnjs/ajax/libs/mithril/package.json",
-			},
+				dest: "../cdnjs/ajax/libs/mithril/package.json"
+			}
 		},
 
 		copy: {
 			style: {
 				src: inputFolder + "/layout/style.css",
-				dest: currentVersionArchiveFolder + "/style.css",
+				dest: currentVersionArchiveFolder + "/style.css"
 			},
 
 			pages: {
 				src: inputFolder + "/layout/pages.json",
-				dest: currentVersionArchiveFolder + "/pages.json",
+				dest: currentVersionArchiveFolder + "/pages.json"
 			},
 
 			lib: {
 				expand: true,
 				cwd: inputFolder + "/layout/lib/",
 				src: "./**",
-				dest: currentVersionArchiveFolder + "/lib/",
+				dest: currentVersionArchiveFolder + "/lib/"
 			},
 
 			tools: {
 				expand: true,
 				cwd: inputFolder + "/layout/tools/",
 				src: "./**",
-				dest: currentVersionArchiveFolder + "/tools/",
+				dest: currentVersionArchiveFolder + "/tools/"
 			},
 
 			comparisons: {
 				expand: true,
 				cwd: inputFolder + "/layout/comparisons/",
 				src: "./**",
-				dest: currentVersionArchiveFolder + "/comparisons/",
+				dest: currentVersionArchiveFolder + "/comparisons/"
 			},
 
 			unminified: {
 				src: "mithril.js",
-				dest: currentVersionArchiveFolder + "/mithril.js",
+				dest: currentVersionArchiveFolder + "/mithril.js"
 			},
 
 			minified: {
 				src: "mithril.min.js",
-				dest: currentVersionArchiveFolder + "/mithril.min.js",
+				dest: currentVersionArchiveFolder + "/mithril.min.js"
 			},
 
 			readme: {
 				src: "README.md",
-				dest: currentVersionArchiveFolder + "/README.md",
+				dest: currentVersionArchiveFolder + "/README.md"
 			},
 
 			map: {
 				src: "mithril.min.js.map",
-				dest: currentVersionArchiveFolder + "/mithril.min.js.map",
+				dest: currentVersionArchiveFolder + "/mithril.min.js.map"
 			},
 
 			typescript: {
 				src: "mithril.d.ts",
-				dest: currentVersionArchiveFolder + "/mithril.d.ts",
+				dest: currentVersionArchiveFolder + "/mithril.d.ts"
 			},
 
 			publish: {
 				expand: true,
 				cwd: currentVersionArchiveFolder,
 				src: "./**",
-				dest: outputFolder,
+				dest: outputFolder
 			},
 
 			archive: {
 				expand: true,
 				cwd: currentVersionArchiveFolder,
 				src: "./**",
-				dest: outputFolder + "/archive/v" + pkg.version,
-			},
+				dest: outputFolder + "/archive/v" + pkg.version
+			}
 		},
 
 		"saucelabs-browsers": {
@@ -246,7 +246,7 @@ module.exports = function (grunt) { // eslint-disable-line
 						return version === "dev" || version === "beta" ||
 							+version >= 38 // The latest ESR version
 					})
-				},
+				}
 			},
 
 			chrome: {
@@ -257,7 +257,7 @@ module.exports = function (grunt) { // eslint-disable-line
 						return version === "dev" || version === "beta" ||
 							+version >= 41
 					})
-				},
+				}
 			},
 
 			ie: {
@@ -266,7 +266,7 @@ module.exports = function (grunt) { // eslint-disable-line
 						return browser.browserName === "internet explorer" &&
 							!/2003/.test(browser.platform)
 					})
-				},
+				}
 			},
 
 			edge: {
@@ -274,7 +274,7 @@ module.exports = function (grunt) { // eslint-disable-line
 					return browsers.filter(function (browser) {
 						return browser.browserName === "microsoftedge"
 					})
-				},
+				}
 			},
 
 			safari: {
@@ -282,7 +282,7 @@ module.exports = function (grunt) { // eslint-disable-line
 					return browsers.filter(function (browser) {
 						return browser.browserName === "safari"
 					})
-				},
+				}
 			},
 
 			opera: {
@@ -290,8 +290,8 @@ module.exports = function (grunt) { // eslint-disable-line
 					return browsers.filter(function (browser) {
 						return browser.browserName === "opera"
 					})
-				},
-			},
+				}
+			}
 		},
 
 		saucelabs: {
@@ -304,7 +304,7 @@ module.exports = function (grunt) { // eslint-disable-line
 					urls: ["http://localhost:8000/test/index.html"],
 					sauceConfig: {
 						"record-video": false,
-						"record-screenshots": false,
+						"record-screenshots": false
 					},
 					build: process.env.TRAVIS_JOB_ID,
 					onTestComplete: function (result, callback) {
@@ -313,13 +313,13 @@ module.exports = function (grunt) { // eslint-disable-line
 
 						var url = [
 							"https://saucelabs.com/rest/v1", user, "jobs",
-							result.job_id,
+							result.job_id
 						].join("/")
 
 						require("request").put({
 							url: url,
 							auth: {user: user, pass: pass},
-							json: {passed: result.passed},
+							json: {passed: result.passed}
 						}, function (error, response) {
 							if (error) {
 								return callback(error)
@@ -332,24 +332,24 @@ module.exports = function (grunt) { // eslint-disable-line
 							}
 						})
 					},
-					tunnelTimeout: 5,
-				},
-			},
+					tunnelTimeout: 5
+				}
+			}
 		},
 
 		connect: {
 			server: {
 				options: {
 					port: 8888,
-					base: ".",
-				},
-			},
+					base: "."
+				}
+			}
 		},
 
 		clean: {
 			options: {force: true},
-			generated: [tempFolder],
-		},
+			generated: [tempFolder]
+		}
 	})
 
 	grunt.loadNpmTasks("grunt-saucelabs-browsers")
@@ -371,7 +371,7 @@ module.exports = function (grunt) { // eslint-disable-line
 		"md2html",
 		"replace",
 		"copy",
-		"clean",
+		"clean"
 	])
 
 	grunt.registerTask("test", ["eslint:all", "mocha_phantomjs"])
@@ -380,6 +380,6 @@ module.exports = function (grunt) { // eslint-disable-line
 	grunt.registerTask("sauce", [
 		"saucelabs-browsers:all",
 		"connect",
-		"saucelabs",
+		"saucelabs"
 	])
 }

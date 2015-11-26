@@ -202,7 +202,7 @@ describe("m()", function () {
 			controller: spy,
 			view: function () {
 				return m("div", "testing")
-			},
+			}
 		}
 
 		var args = {age: 12}
