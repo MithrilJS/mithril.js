@@ -1212,8 +1212,8 @@ void (function (global, factory) { // eslint-disable-line
 
 		prop.then = function (fufill, reject) {
 			return promise.then(function () {
-				return prop()
-			}).then(fufill, reject)
+				return fufill(prop())
+			}, reject)
 		}
 
 		prop.catch = function (reject) {
