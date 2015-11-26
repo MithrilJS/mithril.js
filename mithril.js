@@ -1198,24 +1198,37 @@ void (function (global, factory) { // eslint-disable-line
 				isFunction(object.then)
 	}
 
+	function simpleResolve(p, callback) {
+		if (p.then) {
+			return p.then(callback)
+		} else {
+			return callback()
+		}
+	}
+
 	function propify(promise) {
 		var prop = m.prop()
 		promise.then(prop)
 
-		prop.then = promise.then.bind(promise)
-		prop.catch = promise.then.bind(promise, undefined)
+		prop.then = function (fufill, reject) {
+			return promise.then(function () {
+				return prop()
+			}).then(fufill, reject)
+		}
+
+		prop.catch = function (reject) {
+			return promise.then(function () {
+				return prop()
+			}, reject)
+		}
 
 		prop.finally = function (callback) {
-			function _callback() {
-				return m.deferred().resolve(callback()).promise
-			}
-
 			return promise.then(function (value) {
-				return _callback().then(function () {
+				return simpleResolve(callback(), function () {
 					return value
 				})
 			}, function (reason) {
-				return _callback().then(function () {
+				return simpleResolve(callback(), function () {
 					throw reason
 				})
 			})
