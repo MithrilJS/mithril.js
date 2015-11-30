@@ -29,7 +29,7 @@ m.render(document.body, [
     m("ul.nav", [
         m("li", links.map(function(link) {
             return m("a", {href: link.url, config: m.route}, link.title)
-        })
+        }))
     ])
 ]);
 ```
