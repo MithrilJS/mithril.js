@@ -1,6 +1,6 @@
 {
     "name": "mithril",
-    "version": "$version",
+    "version": "{{config.version}}",
     "main": "mithril.min.js",
     "description": "A Javascript Framework for building brilliant applications",
     "authors": ["Leo Horie <lhorie@hotmail.com>"],

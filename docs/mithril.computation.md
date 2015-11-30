@@ -1,3 +1,7 @@
+---
+title: m.startComputation / m.endComputation
+---
+
 ## m.startComputation / m.endComputation
 
 ---
@@ -10,7 +14,7 @@
 
 ---
 
-Typically, `m.startComputation` / `m.endComputation` don't need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously, or when calling vanilla javascript asynchronous functions from template [`config`](mithril.md#accessing-the-real-dom) functions.
+Typically, `m.startComputation` / `m.endComputation` don't need to be called from application space. These methods are only intended to be used by people who are writing libraries that do things asynchronously, or when calling vanilla javascript asynchronous functions from template [`config`](mithril.md#accessing-the-real-dom-element) functions.
 
 If you need to do custom asynchronous calls without using Mithril's API, and find that your views are not redrawing, you should consider using `m.startComputation` / `m.endComputation` so that Mithril can intelligently auto-redraw once your custom code finishes running.
 

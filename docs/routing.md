@@ -1,3 +1,7 @@
+---
+title: Routing
+---
+
 ## Routing
 
 Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from one page to another without causing a full browser refresh.

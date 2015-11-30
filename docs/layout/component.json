@@ -5,6 +5,6 @@
 	"repository": "lhorie/mithril",
 	"main": "mithril.js",
 	"scripts": ["mithril.js"],
-	"version": "$version",
+	"version": "{{config.version}}",
 	"license": "MIT"
 }

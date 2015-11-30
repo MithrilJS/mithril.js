@@ -1,3 +1,7 @@
+---
+title: The Auto-Redrawing System
+---
+
 ## The Auto-Redrawing System
 
 Mithril is designed around the principle that data always flows from the model to the view. This makes it easy to reason about the state of the UI and to test it. In order to implement this principle, the rendering engine must run a redraw algorithm globally to ensure no parts of the UI are out of sync with the data. While at first glance, it may seem expensive to run a global redraw every time data changes, Mithril makes it possible to do this efficiently thanks to its fast diffing algorithm, which only updates the DOM where it needs to be updated. Because the DOM is by far the largest bottleneck in rendering engines, Mithril's approach of running a diff against a virtual representation of the DOM and only batching changes to the real DOM as needed is surprisingly performant.

@@ -1,3 +1,7 @@
+---
+title: m.sync
+---
+
 ## m.sync
 
 This method takes a list of promises and returns a promise that resolves when all promises in the input list have resolved. See [`m.deferred`](mithril.deferred.md) for more information on promises.

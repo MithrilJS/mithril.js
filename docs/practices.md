@@ -1,3 +1,7 @@
+---
+title: How Should Code Be Organized
+---
+
 ## How Should Code Be Organized
 
 While Mithril doesn't dictate how to organize your code, it does provide some recommendations for structuring it.

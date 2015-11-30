@@ -3,77 +3,48 @@ module.exports = function (grunt) { // eslint-disable-line
 
 	var pkg = grunt.file.readJSON("package.json")
 	var currentYear = grunt.template.today("yyyy")
+
 	var inputFolder = "./docs"
-	var tempFolder = "./temp"
-	var archiveFolder = "./archive"
+	var layoutFolder = inputFolder + "/layout"
 	var outputFolder = "../mithril"
+	var archiveFolder = "./archive"
+	var currentVersionArchiveFolder = archiveFolder + "/v" + pkg.version
 
 	var guide = [
+		"installation",
+		"getting-started",
+		"routing",
+		"web-services",
+		"components",
 		"auto-redrawing",
-		"benchmarks",
-		"community",
+		"integration",
 		"optimizing-performance",
 		"comparison",
-		"components",
-		"getting-started",
-		"installation",
-		"integration",
+		"benchmarks",
 		"practices",
-		"refactoring",
-		"routing",
 		"tools",
-		"web-services"
+		"community"
 	]
 
 	var api = [
-		"change-log",
-		"roadmap",
-		"how-to-read-signatures",
 		"mithril",
-		"mithril.computation",
-		"mithril.deferred",
-		"mithril.mount",
 		"mithril.component",
+		"mithril.mount",
 		"mithril.prop",
-		"mithril.redraw",
-		"mithril.render",
-		"mithril.deps",
-		"mithril.request",
+		"mithril.withAttr",
 		"mithril.route",
+		"mithril.request",
+		"mithril.deferred",
 		"mithril.sync",
 		"mithril.trust",
-		"mithril.withAttr",
-		"mithril.xhr"
+		"mithril.render",
+		"mithril.redraw",
+		"mithril.computation",
+		"mithril.deps",
+		"roadmap",
+		"change-log",
+		"how-to-read-signatures"
 	]
-
-	var md2htmlTasks = {}
-	function makeTasks(layout, pages) {
-		pages.forEach(function (name) {
-			var src = inputFolder + "/" + name + ".md"
-			var title = ""
-
-			if (grunt.file.exists(src)) {
-				title = grunt.file.read(src).split(/\n/)[0].substring(3) +
-					" - "
-			}
-
-			md2htmlTasks[name] = {
-				options: {
-					layout: inputFolder + "/layout/" + layout + ".html",
-					templateData: {topic: title}
-				},
-				files: [{
-					src: [src],
-					dest: tempFolder + "/" + name + ".html"
-				}]
-			}
-		})
-	}
-
-	makeTasks("guide", guide)
-	makeTasks("api", api)
-
-	var currentVersionArchiveFolder = archiveFolder + "/v" + pkg.version
 
 	grunt.initConfig({
 		// Keep this in sync with the .eslintignore
@@ -102,7 +73,80 @@ module.exports = function (grunt) { // eslint-disable-line
 			}
 		},
 
-		md2html: md2htmlTasks,
+		jstatic: {
+			options: {
+				extraContext: [
+					{
+						config: pkg,
+						currentYear: currentYear
+					}
+				]
+			},
+			website: {
+				files: [
+					{
+						name: "index",
+						src: layoutFolder + "/index.html",
+						dest: currentVersionArchiveFolder,
+						generators: ["swig"]
+					},
+					{
+						name: "api",
+						src: api.map(function (file) {
+							return inputFolder + "/" + file + ".md"
+						}),
+						dest: currentVersionArchiveFolder,
+						generators: [
+							"yafm",
+							"markdown",
+							{
+								type: "swig",
+								layout: layoutFolder + "/api.html"
+							}
+						]
+					},
+					{
+						name: "guide",
+						src: guide.map(function (file) {
+							return inputFolder + "/" + file + ".md"
+						}),
+						dest: currentVersionArchiveFolder,
+						generators: [
+							"yafm",
+							"markdown",
+							{
+								type: "swig",
+								layout: layoutFolder + "/guide.html"
+							}
+						]
+					}
+				]
+			},
+			distribution: {
+				files: [
+					{
+						name: "commonjs",
+						src: layoutFolder + "/{bower,component,package}.json",
+						dest: currentVersionArchiveFolder,
+						outExt: ".json",
+						generators: ["swig"]
+					},
+					{
+						name: "cdnjs",
+						src: "deploy/cdnjs-package.json",
+						dest: "../cdnjs/ajax/libs/mithril/",
+						generators: [
+							"swig",
+							{
+								type: "destination",
+								dest: "package.json"
+							}
+						]
+					}
+
+				]
+			}
+		},
 
 		uglify: {
 			options: {
@@ -121,105 +165,45 @@ module.exports = function (grunt) { // eslint-disable-line
 
 		zip: {
 			distribution: {
-				cwd: currentVersionArchiveFolder + "/",
+				expand: true,
+				cwd: currentVersionArchiveFolder,
 				src: [
-					currentVersionArchiveFolder + "/mithril.min.js",
-					currentVersionArchiveFolder + "/mithril.min.js.map",
-					currentVersionArchiveFolder + "/mithril.js"
+					"mithril.js",
+					"mithril.min.js",
+					"mithril.min.js.map"
 				],
 				dest: currentVersionArchiveFolder + "/mithril.min.zip"
 			}
 		},
 
-		replace: {
-			options: {
-				force: true,
-				patterns: [
-					{match: /\.md/g, replacement: ".html"},
-					{match: /\$version/g, replacement: pkg.version}
-				]
-			},
-
-			links: {
-				expand: true,
-				flatten: true,
-				src: [tempFolder + "/**/*.html"],
-				dest: currentVersionArchiveFolder + "/"
-			},
-
-			index: {
-				src: inputFolder + "/layout/index.html",
-				dest: currentVersionArchiveFolder + "/index.html"
-			},
-
-			commonjs: {
-				expand: true,
-				flatten: true,
-				src: [inputFolder + "/layout/*.json"],
-				dest: currentVersionArchiveFolder
-			},
-
-			cdnjs: {
-				src: "deploy/cdnjs-package.json",
-				dest: "../cdnjs/ajax/libs/mithril/package.json"
-			}
-		},
-
 		copy: {
-			style: {
-				src: inputFolder + "/layout/style.css",
-				dest: currentVersionArchiveFolder + "/style.css"
-			},
-
-			pages: {
-				src: inputFolder + "/layout/pages.json",
-				dest: currentVersionArchiveFolder + "/pages.json"
-			},
-
-			lib: {
-				expand: true,
-				cwd: inputFolder + "/layout/lib/",
-				src: "./**",
-				dest: currentVersionArchiveFolder + "/lib/"
-			},
-
-			tools: {
-				expand: true,
-				cwd: inputFolder + "/layout/tools/",
-				src: "./**",
-				dest: currentVersionArchiveFolder + "/tools/"
-			},
-
-			comparisons: {
-				expand: true,
-				cwd: inputFolder + "/layout/comparisons/",
-				src: "./**",
-				dest: currentVersionArchiveFolder + "/comparisons/"
-			},
-
-			unminified: {
-				src: "mithril.js",
-				dest: currentVersionArchiveFolder + "/mithril.js"
-			},
-
-			minified: {
-				src: "mithril.min.js",
-				dest: currentVersionArchiveFolder + "/mithril.min.js"
-			},
-
-			readme: {
-				src: "README.md",
-				dest: currentVersionArchiveFolder + "/README.md"
-			},
-
-			map: {
-				src: "mithril.min.js.map",
-				dest: currentVersionArchiveFolder + "/mithril.min.js.map"
-			},
-
-			typescript: {
-				src: "mithril.d.ts",
-				dest: currentVersionArchiveFolder + "/mithril.d.ts"
+			assets: {
+				files: [
+					{
+						expand: true,
+						cwd: layoutFolder,
+						src: [
+							"ghbtns.html",
+							"style.css",
+							"pages.json",
+							"lib/**",
+							"tools/**",
+							"comparisons/**"
+						],
+						dest: currentVersionArchiveFolder
+					},
+					{
+						expand: true,
+						src: [
+							"mithril.js",
+							"mithril.min.js",
+							"mithril.min.js.map",
+							"mithril.d.ts",
+							"README.md"
+						],
+						dest: currentVersionArchiveFolder
+					}
+				]
 			},
 
 			publish: {
@@ -344,37 +328,43 @@ module.exports = function (grunt) { // eslint-disable-line
 					base: "."
 				}
 			}
-		},
-
-		clean: {
-			options: {force: true},
-			generated: [tempFolder]
 		}
 	})
 
 	grunt.loadNpmTasks("grunt-saucelabs-browsers")
-	grunt.loadNpmTasks("grunt-contrib-clean")
 	grunt.loadNpmTasks("grunt-contrib-copy")
 	grunt.loadNpmTasks("grunt-contrib-uglify")
-	grunt.loadNpmTasks("grunt-md2html")
-	grunt.loadNpmTasks("grunt-replace")
 	grunt.loadNpmTasks("grunt-zip")
 	grunt.loadNpmTasks("grunt-contrib-connect")
 	grunt.loadNpmTasks("grunt-saucelabs")
 	grunt.loadNpmTasks("grunt-eslint")
 	grunt.loadNpmTasks("grunt-mocha-phantomjs")
+	grunt.loadNpmTasks("jstatic")
+
+	grunt.registerTask("test", [
+		"eslint:all",
+		"mocha_phantomjs"
+	])
+
+	grunt.registerTask("website", [
+		"jstatic:website",
+		"copy:assets"
+	])
+
+	grunt.registerTask("publish", [
+		"jstatic:distribution",
+		"copy:publish",
+		"copy:archive"
+	])
 
 	grunt.registerTask("build", [
 		"test",
 		"uglify",
+		"website",
 		"zip",
-		"md2html",
-		"replace",
-		"copy",
-		"clean"
+		"publish"
 	])
 
-	grunt.registerTask("test", ["eslint:all", "mocha_phantomjs"])
 	grunt.registerTask("default", ["build"])
 
 	grunt.registerTask("sauce", [

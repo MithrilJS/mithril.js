@@ -1,3 +1,7 @@
+---
+title: m.trust
+---
+
 ## m.trust
 
 If you're writing a template for a view, use `m()` instead.

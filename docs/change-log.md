@@ -1,3 +1,7 @@
+---
+title: Change Log
+---
+
 ## Change Log
 
 [v0.2.1](http://mithril.js.org/archive/v0.2.1)

@@ -1,3 +1,7 @@
+---
+title: How is Mithril Different from Other Frameworks
+---
+
 ## How is Mithril Different from Other Frameworks
 
 There are a lot of different Javascript frameworks and evaluating their merits and shortcomings can be a daunting task.

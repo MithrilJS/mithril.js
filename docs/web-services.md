@@ -1,3 +1,7 @@
+---
+title: Web Services
+---
+
 ## Web Services
 
 Mithril allows writing asynchronous code in a procedural way through a high-level utility for working with web services.

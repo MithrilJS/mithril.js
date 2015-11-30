@@ -12,7 +12,7 @@
     "url": "git@github.com:lhorie/mithril.js.git"
   },
   "bugs": {
-    "url" : "http://github.com/lhorie/mithril.js/issues"
+    "url": "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
     "test": "grunt test"
@@ -23,17 +23,15 @@
     "eslint": "^1.7.3",
     "grunt": "*",
     "grunt-cli": "*",
-    "grunt-contrib-clean": "*",
     "grunt-contrib-connect": "~0.7.1",
     "grunt-contrib-copy": "*",
     "grunt-contrib-uglify": "*",
     "grunt-eslint": "^17.3.1",
-    "grunt-md2html": "*",
     "grunt-mocha-phantomjs": "^2.0.0",
-    "grunt-replace": "*",
     "grunt-saucelabs": "*",
     "grunt-saucelabs-browsers": "^0.2.0",
     "grunt-zip": "*",
+    "jstatic": "^2.2.0",
     "load-grunt-config": "^0.9.2",
     "mocha": "^2.3.3",
     "request": "~2.35.0",

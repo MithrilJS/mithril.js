@@ -1,7 +1,7 @@
 {
   "name": "mithril",
   "npmName": "mithril",
-  "version": "$version",
+  "version": "{{config.version}}",
   "filename": "mithril.min.js",
   "description": "A Javascript Framework for building brilliant applications",
   "homepage": "http://lhorie.github.io/mithril",

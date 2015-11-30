@@ -1,3 +1,7 @@
+---
+title: Roadmap
+---
+
 ## Roadmap
 
 Things that would be useful to have (though likely not as part of Mithril core)

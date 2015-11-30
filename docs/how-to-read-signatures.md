@@ -1,3 +1,7 @@
+---
+title: How to Read Signatures
+---
+
 ## How to Read Signatures
 
 Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old Javascript objects (POJOs) that match given signatures.
