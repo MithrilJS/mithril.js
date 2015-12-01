@@ -2087,7 +2087,7 @@ void (function (global, factory) { // eslint-disable-line
 		if (!options.dataType || options.dataType.toLowerCase() !== "jsonp") {
 			serialize = options.serialize || JSON.stringify
 			deserialize = options.deserialize || JSON.parse
-			extract = function (xhr) {
+			extract = options.extract || function (xhr) {
 				if (xhr.responseText.length === 0 &&
 						deserialize === JSON.parse) {
 					return null
