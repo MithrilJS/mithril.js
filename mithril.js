@@ -1425,7 +1425,7 @@ void (function (global, factory) { // eslint-disable-line
 				targetProp = currentTarget.getAttribute(prop)
 			}
 
-			withAttrCallback.call(_this, targetProp)
+			withAttrCallback.call(_this, targetProp, e)
 			/* eslint-enable no-invalid-this */
 		}
 	}
