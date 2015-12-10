@@ -2115,7 +2115,7 @@ void (function (global, factory) { // eslint-disable-line
 		options.onload = options.onerror = function (ev) {
 			ev = ev || event
 			var doSuccess = ev.type === "load"
-			var unwrap, response
+			var unwrap
 
 			if (doSuccess) {
 				unwrap = options.unwrapSuccess
@@ -2124,7 +2124,7 @@ void (function (global, factory) { // eslint-disable-line
 			}
 
 			try {
-				response = (unwrap || identity)(
+				var response = (unwrap || identity)(
 					deserialize(extract(ev.target, options)), ev.target)
 				if (doSuccess) {
 					if (isArray(response) && options.type) {
@@ -2134,16 +2134,15 @@ void (function (global, factory) { // eslint-disable-line
 					} else if (options.type) {
 						response = new options.type(response)
 					}
+					deferred.resolve(response)
+				} else {
+					deferred.reject(response)
 				}
 			} catch (e) {
-				m.deferred.onerror(e)
-				response = e
-				doSuccess = false
+				deferred.reject(e)
+			} finally {
+				if (options.background !== true) m.endComputation()
 			}
-
-			deferred[doSuccess ? "resolve" : "reject"](response)
-
-			if (options.background !== true) m.endComputation()
 		}
 
 		ajax(options)

@@ -52,7 +52,7 @@ describe("m.trust()", function () {
 				m("td", "foo")
 			])
 
-			expect(root.childNodes[2].tagName).to.equal("td")
+			expect(root.childNodes[2].tagName).to.equal("TD")
 		})
 	})
 })
