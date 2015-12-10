@@ -6,7 +6,7 @@ Mithril is available from a variety of sources:
 
 ### Direct download
 
-You can [download a zip of the latest version version here](mithril.min.zip).
+You can [download a zip of the latest version here](mithril.min.zip).
 
 Links to older versions can be found in the [change log](change-log.html).
 
@@ -133,4 +133,3 @@ To use the bleeding edge version from npm, use the following command:
 ```
 npm install git://github.com/lhorie/mithril.js#next --save
 ```
-
