@@ -2130,11 +2130,10 @@ void (function (global, factory) { // eslint-disable-line
 				m.deferred.onerror(e)
 				response = e
 				doSuccess = false
+			} finally {
+				deferred[doSuccess ? "resolve" : "reject"](response)
+				if (options.background !== true) m.endComputation()
 			}
-
-			deferred[doSuccess ? "resolve" : "reject"](response)
-
-			if (options.background !== true) m.endComputation()
 		}
 
 		ajax(options)
