@@ -13,6 +13,8 @@ void (function (global, factory) { // eslint-disable-line
 })(this, function (window, undefined) { // eslint-disable-line
 	"use strict"
 
+	if (typeof DEBUG === "undefined") window.DEBUG = true
+
 	var VERSION = "v0.2.1"
 
 	// Save these two.
@@ -156,7 +158,7 @@ void (function (global, factory) { // eslint-disable-line
 		var classAttr = "class" in attrs ? "class" : "className"
 		var cell = {tag: "div", attrs: {}}
 
-		if (!isString(tag)) {
+		if (!isString(tag) && DEBUG) {
 			throw new Error("selector in m(selector, attrs, children) should " +
 				"be a string")
 		}
@@ -838,7 +840,7 @@ void (function (global, factory) { // eslint-disable-line
 
 		data = markViews(data, cached, views, controllers)
 
-		if (!data.tag && controllers.length) {
+		if (!data.tag && controllers.length && DEBUG) {
 			throw new Error("Component template must return a virtual " +
 				"element, not an array, string, etc.")
 		}
@@ -1148,7 +1150,7 @@ void (function (global, factory) { // eslint-disable-line
 	var cellCache = {}
 
 	m.render = function (root, cell, forceRecreation) {
-		if (!root) {
+		if (!root && DEBUG) {
 			throw new Error("Ensure the DOM element being passed to " +
 				"m.route/m.mount/m.render is not undefined.")
 		}
@@ -1290,7 +1292,7 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	m.mount = m.module = function (root, component) {
-		if (!root) {
+		if (!root && DEBUG) {
 			throw new Error("Please ensure the DOM element exists before " +
 				"rendering a template into it.")
 		}
@@ -1528,7 +1530,7 @@ void (function (global, factory) { // eslint-disable-line
 			redirect = function (source) {
 				var path = currentRoute = normalizeRoute(source)
 				if (!routeByValue(root, arg2, path)) {
-					if (isDefaultRoute) {
+					if (isDefaultRoute && DEBUG) {
 						throw new Error("Ensure the default route matches " +
 							"one of the routes defined in m.route")
 					}
@@ -1558,7 +1560,7 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	m.route.param = function (key) {
-		if (!routeParams) {
+		if (!routeParams && DEBUG) {
 			throw new Error("You must call m.route(element, defaultRoute, " +
 				"routes) before calling m.route.param()")
 		}
@@ -2040,7 +2042,9 @@ void (function (global, factory) { // eslint-disable-line
 			data = options.data
 		}
 
-		if (data && (!isString(data) && data.constructor !== window.FormData)) {
+		if (data &&
+      (!isString(data) && data.constructor !== window.FormData) &&
+      DEBUG) {
 			throw new Error("Request data should be either be a string or " +
 				"FormData. Check the `serialize` option in `m.request`")
 		}

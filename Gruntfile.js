@@ -114,6 +114,12 @@ module.exports = function (grunt) { // eslint-disable-line
 					"License: " + pkg.license,
 					"*/"
 				].join("\n"),
+				compress: {
+					global_defs: { // eslint-disable-line camelcase
+						DEBUG: false
+					},
+					dead_code: true // eslint-disable-line camelcase
+				},
 				sourceMap: true
 			},
 			mithril: {src: "mithril.js", dest: "mithril.min.js"}
