@@ -1629,7 +1629,7 @@ void (function (global, factory) { // eslint-disable-line
 	function routeUnobtrusive(e) {
 		e = e || event
 
-		if (e.ctrlKey || e.metaKey || e.which === 2) return
+		if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
 
 		if (e.preventDefault) {
 			e.preventDefault()
