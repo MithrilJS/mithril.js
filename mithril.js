@@ -44,8 +44,10 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	function forOwn(obj, f) {
-		for (var prop in obj) if (hasOwn.call(obj, prop)) {
-			if (f(obj[prop], prop)) break
+		for (var prop in obj) {
+			if (hasOwn.call(obj, prop)) {
+				if (f(obj[prop], prop)) break
+			}
 		}
 	}
 
@@ -960,8 +962,10 @@ void (function (global, factory) { // eslint-disable-line
 				}
 			})
 
-			for (var rule in cachedAttr) if (hasOwn.call(cachedAttr, rule)) {
-				if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+			for (var rule in cachedAttr) {
+				if (hasOwn.call(cachedAttr, rule)) {
+					if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+				}
 			}
 		} else if (namespace != null) {
 			// handle SVG
