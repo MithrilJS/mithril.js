@@ -911,7 +911,6 @@ describe("m.render()", function () {
 		expect(root.childNodes[0].nodeName).to.equal("DIV")
 	})
 
-
 	// https://github.com/lhorie/mithril.js/issues/157
 	it("renders nodes with new keys correctly", function () {
 		var root = mock.document.createElement("div")
@@ -1318,7 +1317,7 @@ describe("m.render()", function () {
 
 	// FIXME: implement document.createRange().createContextualFragment() in the
 	// mock document to fix this test
-	xit("keeps unkeyed identity if mixed with elements/trusted text and identity can be inferred", function () { // eslint-disable-line
+	it("keeps unkeyed identity if mixed with elements/trusted text and identity can be inferred", function () { // eslint-disable-line
 		var root = mock.document.createElement("div")
 
 		m.render(root, m("div", [

@@ -102,7 +102,7 @@ describe("m.route()", function () {
 		expect(route2).to.equal("/test13")
 	})
 
-	// FIXME: this causes others to fail
+	// FIXME: this causes others to fail, even though it passes
 	xdit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 		var spy = sinon.spy()
@@ -130,7 +130,7 @@ describe("m.route()", function () {
 		expect(spy).to.not.have.been.called
 	})
 
-	// FIXME: this causes others to fail
+	// FIXME: this causes others to fail, even though it passes
 	xdit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
@@ -161,7 +161,7 @@ describe("m.route()", function () {
 		expect(spy).to.not.have.been.called
 	})
 
-	// FIXME: this causes others to fail
+	// FIXME: this causes others to fail, even though it passes
 	xdit("skips route change if non-curried component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
@@ -190,7 +190,7 @@ describe("m.route()", function () {
 		expect(spy).to.not.have.been.called
 	})
 
-	// FIXME: this causes others to fail
+	// FIXME: this causes others to fail, even though it passes
 	xdit("skips route change if non-curried subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
