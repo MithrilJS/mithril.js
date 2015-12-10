@@ -33,8 +33,10 @@
 
 	Object.keys = Object.keys || function (obj) {
 		var keys = []
-		for (var i in obj) if ({}.hasOwnProperty.call(obj, i)) {
-			keys.push(i)
+		for (var i in obj) {
+			if ({}.hasOwnProperty.call(obj, i)) {
+				keys.push(i)
+			}
 		}
 		return keys
 	}
@@ -53,7 +55,8 @@ this.mock = (function (global) {
 	}
 
 	var document = window.document = {
-		// TODO: add document.createRange().createContextualFragment()
+		// needs to be done:
+		// add document.createRange().createContextualFragment()
 
 		childNodes: [],
 
@@ -78,7 +81,7 @@ this.mock = (function (global) {
 				},
 
 				insertAdjacentHTML: function (position, html) {
-					// TODO: accept markup
+					// needs to be done: accept markup
 					if (position === "beforebegin") {
 						this.parentNode.insertBefore(
 							document.createTextNode(html),
