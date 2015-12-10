@@ -44,8 +44,10 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	function forOwn(obj, f) {
-		for (var prop in obj) if (hasOwn.call(obj, prop)) {
-			if (f(obj[prop], prop)) break
+		for (var prop in obj) {
+			if (hasOwn.call(obj, prop)) {
+				if (f(obj[prop], prop)) break
+			}
 		}
 	}
 
@@ -729,15 +731,19 @@ void (function (global, factory) { // eslint-disable-line
 	var unloaders = []
 
 	function updateLists(views, controllers, view, controller) {
-		if (controller.onunload != null) {
-			unloaders.push({
-				controller: controller,
-				handler: controller.onunload
-			})
-		}
-
 		views.push(view)
-		controllers.push(controller)
+		var idx = controllers.push(controller) - 1
+		unloaders[idx] = {
+			controller: controller,
+			handler: function () {
+				controllers.splice(controllers.indexOf(controller), 1)
+				views.splice(views.indexOf(view), 1)
+				var unload = controller && controller.onunload
+				if (type.call(unload) === "[object Function]") {
+					controller.onunload()
+				}
+			}
+		}
 	}
 
 	var forcing = false
@@ -960,8 +966,10 @@ void (function (global, factory) { // eslint-disable-line
 				}
 			})
 
-			for (var rule in cachedAttr) if (hasOwn.call(cachedAttr, rule)) {
-				if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+			for (var rule in cachedAttr) {
+				if (hasOwn.call(cachedAttr, rule)) {
+					if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+				}
 			}
 		} else if (namespace != null) {
 			// handle SVG
@@ -1300,6 +1308,7 @@ void (function (global, factory) { // eslint-disable-line
 		}
 
 		forEach(unloaders, function (unloader) {
+			if (unloader.controller == null) return
 			unloader.handler.call(unloader.controller, ev)
 			unloader.controller.onunload = null
 		})
