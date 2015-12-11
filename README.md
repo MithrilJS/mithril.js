@@ -74,6 +74,7 @@ m.mount(document.getElementById("example"), app);
 
 ### Learn more
 
+- [Installation](http://mithril.js.org/installation.html)
 - [Tutorial](http://mithril.js.org/getting-started.html)
 - [Differences from Other Frameworks](http://mithril.js.org/comparison.html)
 - [Benchmarks](http://mithril.js.org/benchmarks.html)

@@ -469,7 +469,6 @@ describe("m.mount()", function () {
 		expect(spy).to.have.been.called
 	})
 
-
 	it("calls config with truthy init only once", function () {
 		mock.requestAnimationFrame.$resolve()
 

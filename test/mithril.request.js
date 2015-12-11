@@ -345,4 +345,40 @@ describe("m.request()", function () {
 			expect(req()).to.eql({foo: "bar1"})
 		})
 	})
+
+	it("ends the computation when a SyntaxError is thrown from `options.extract`", function () { // eslint-disable-line max-len
+		var root = mock.document.createElement("div")
+		var viewSpy = sinon.spy(function () { return m("div") })
+		var resolved = sinon.spy()
+		var rejected = sinon.spy()
+
+		m.mount(root, {
+			controller: function () {
+				m.request({
+					url: "/test",
+					extract: function () {
+						throw new SyntaxError()
+					}
+				}).then(resolved, rejected)
+			},
+
+			view: viewSpy
+		})
+
+		// For good measure
+		mock.requestAnimationFrame.$resolve()
+
+		expect(function () {
+			resolve()
+		}).to.throw()
+
+		expect(resolved).to.not.have.been.called
+		expect(rejected).to.not.have.been.called
+
+		// The controller should throw, but the view should still render.
+		expect(viewSpy).to.have.been.called
+
+		// For good measure
+		mock.requestAnimationFrame.$resolve()
+	})
 })

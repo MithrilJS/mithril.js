@@ -26,7 +26,7 @@ function test(sel) {
 
 m.module(document.getElementById("test"), {
 	controller: function() {
-		this.title = m.prop("hello world");
+		this.title = m.prop("hello world")
 	},
 
 	view: function (ctrl) {
@@ -55,7 +55,7 @@ m.module(document.getElementById("test"), {
 					m("div[contenteditable]", {
 						style: {border: "1px solid #888"},
 						onkeyup: m.withAttr("innerHTML", ctrl.title)
-					}, ctrl.title()),
+					}, ctrl.title())
 				]),
 
 				m("li", [
@@ -64,10 +64,10 @@ m.module(document.getElementById("test"), {
 					m("div[contenteditable]", {
 						style: {border: "1px solid #888"},
 						onkeyup: m.withAttr("innerHTML", ctrl.title)
-					}, m.trust(ctrl.title())),
+					}, m.trust(ctrl.title()))
 				])
 			])
-		]);
+		])
 	}
-});
+})
 </script>
