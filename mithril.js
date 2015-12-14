@@ -735,12 +735,12 @@ void (function (global, factory) { // eslint-disable-line
 		var idx = controllers.push(controller) - 1
 		unloaders[idx] = {
 			controller: controller,
-			handler: function () {
+			handler: function (ev) {
 				controllers.splice(controllers.indexOf(controller), 1)
 				views.splice(views.indexOf(view), 1)
 				var unload = controller && controller.onunload
 				if (type.call(unload) === "[object Function]") {
-					controller.onunload()
+					controller.onunload(ev)
 				}
 			}
 		}
