@@ -1669,6 +1669,11 @@ void (function (global, factory) { // eslint-disable-line
 		}
 	}
 
+	// This is part of the logic to determine if special characters
+	// are URI encöded in routes.
+	var  aElement = $document.createElement("a")
+	aElement.href = "/ö?ö#ö"
+
 	function routeUnobtrusive(e) {
 		e = e || event
 
@@ -1680,11 +1685,21 @@ void (function (global, factory) { // eslint-disable-line
 			e.returnValue = false
 		}
 
+		var mode = m.routes.mode
+
+		// Depending on the Browser / `m.route.mode` combination, the route
+		// may or may not be URI encoded.
+		// In this context, `String` is the identity function. `decodeURI` is
+		// the right function to call (not `decodeURIComponent`), since URI
+		// components separators are not encoded in the raw routes.
+		// See issue #872 and PR #881.
+		var decode = /ö/.test(aElement[mode]) ? String : decodeURI
+
 		var currentTarget = e.currentTarget || e.srcElement
 
 		var args
 
-		if (m.route.mode === "pathname" && currentTarget.search) {
+		if (mode === "pathname" && currentTarget.search) {
 			args = parseQueryString(currentTarget.search.slice(1))
 		} else {
 			args = {}
@@ -1694,8 +1709,10 @@ void (function (global, factory) { // eslint-disable-line
 			currentTarget = currentTarget.parentNode
 		}
 
-		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length),
-			args)
+		m.route(
+			decode(currentTarget[mode].slice(modes[mode].length)),
+			args
+		)
 	}
 
 	function setScroll() {
