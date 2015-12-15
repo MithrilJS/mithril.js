@@ -10,8 +10,10 @@
 	var runButton
 
 	function forOwn(object, f) {
-		for (var key in object) if ({}.hasOwnProperty.call(object, key)) {
-			f(object[key], key)
+		for (var key in object) {
+			if ({}.hasOwnProperty.call(object, key)) {
+				f(object[key], key)
+			}
 		}
 	}
 
