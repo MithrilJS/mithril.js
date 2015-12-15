@@ -1783,6 +1783,9 @@
 			currentTarget = currentTarget.parentNode
 		}
 
+		// clear pendingRequests because we want an immediate route change
+		pendingRequests = 0
+
 		mroute(currentTarget[mroute.mode].slice(modes[mroute.mode].length),
 			args)
 	}
