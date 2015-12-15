@@ -1317,9 +1317,52 @@
 		return prop
 	}
 
+	function isPromise(object) {
+		return object != null && (isObject(object) || isFunction(object)) &&
+				isFunction(object.then)
+	}
+
+	function simpleResolve(p, callback) {
+		if (p.then) {
+			return p.then(callback)
+		} else {
+			return callback()
+		}
+	}
+
+	function propify(promise) {
+		var prop = m.prop()
+		promise.then(prop)
+
+		prop.then = function (resolve, reject) {
+			return promise.then(function () {
+				return resolve(prop())
+			}, reject)
+		}
+
+		prop.catch = function (reject) {
+			return promise.then(function () {
+				return prop()
+			}, reject)
+		}
+
+		prop.finally = function (callback) {
+			return promise.then(function (value) {
+				return simpleResolve(callback(), function () {
+					return value
+				})
+			}, function (reason) {
+				return simpleResolve(callback(), function () {
+					throw reason
+				})
+			})
+		}
+
+		return prop
+	}
+
 	m.prop = function (store) {
-		if ((store != null && isObject(store) || isFunction(store)) &&
-				isFunction(store.then)) {
+		if (isPromise(store)) {
 			return propify(store)
 		} else {
 			return gettersetter(store)
@@ -1849,164 +1892,167 @@
 
 	function Deferred(onSuccess, onFailure) {
 		var self = this
-		var state = 0
-		var promiseValue = 0
+		var promiseValue
 		var next = []
+		var func = push
 
-		self.promise = {}
+		function coerce(value, next, error) {
+			if (isPromise(value)) {
+				return value.then(function (value) {
+					coerce(value, next, error)
+				}, function (e) {
+					coerce(e, error, error)
+				})
+			} else {
+				return next(promiseValue = value)
+			}
+		}
+
+		function resolve(deferred) {
+			deferred.resolve(promiseValue)
+		}
+
+		function reject(deferred) {
+			deferred.reject(promiseValue)
+		}
+
+		function push(deferred) {
+			next.push(deferred)
+		}
+
+		function init(promise) {
+			if (func !== reject) promise(promiseValue)
+			return promise
+		}
 
 		self.resolve = function (value) {
-			if (!state) {
-				promiseValue = value
-				state = RESOLVING
-
-				fire()
+			if (func === push) {
+				fire(RESOLVING, value, self)
 			}
 			return this
 		}
 
 		self.reject = function (value) {
-			if (!state) {
-				promiseValue = value
-				state = REJECTING
-
-				fire()
+			if (func === push) {
+				fire(REJECTING, value, self)
 			}
 			return this
 		}
 
-		self.promise.then = function (onSuccess, onFailure) {
-			var deferred = new Deferred(onSuccess, onFailure)
-			if (state === RESOLVED) {
-				deferred.resolve(promiseValue)
-			} else if (state === REJECTED) {
-				deferred.reject(promiseValue)
-			} else {
-				next.push(deferred)
-			}
-			return deferred.promise
+		self.promise = function (value) {
+			if (arguments.length) coerce(value, noop, noop)
+			return func !== reject ? promiseValue : undefined
 		}
 
-		function finish(type) {
-			state = type || REJECTED
-			forEach(next, function (deferred) {
-				if (state === RESOLVED) {
-					deferred.resolve(promiseValue)
-				} else {
-					deferred.reject(promiseValue)
-				}
+		self.promise.then = function (onSuccess, onFailure) {
+			var deferred = new Deferred(onSuccess, onFailure)
+			func(deferred)
+			return init(deferred.promise)
+		}
+
+		self.promise.catch = function (callback) {
+			return self.promise.then(null, callback)
+		}
+
+		self.promise.finally = function (callback) {
+			function _callback() {
+				var p = new Deferred().resolve(callback()).promise
+				if (func !== reject) p(promiseValue)
+				return p
+			}
+
+			return self.promise.then(function () {
+				return _callback().then(function () {
+					return promiseValue
+				})
+			}, function () {
+				_callback().then(function () {
+					throw promiseValue
+				})
 			})
 		}
 
-		function thennable(then, success, fail, notThennable) {
-			if (((promiseValue != null && isObject(promiseValue)) ||
-					isFunction(promiseValue)) && isFunction(then)) {
-				try {
-					// count protects against abuse calls from spec checker
-					var count = 0
-					then.call(promiseValue, function (value) {
-						if (count++) return
-						promiseValue = value
-						success()
-					}, function (value) {
-						if (count++) return
-						promiseValue = value
-						fail()
-					})
-				} catch (e) {
-					m.deferred.onerror(e)
-					promiseValue = e
-					fail()
-				}
-			} else {
-				notThennable()
+		function run(callback) {
+			func = callback
+			forEach(next, callback)
+			// Clear these (which hold all the extra references)
+			finish = fire = null // eslint-disable-line no-func-assign
+		}
+
+		function finish(value, state) {
+			coerce(value, function () {
+				run(state === RESOLVED ? resolve : reject)
+			}, function () {
+				run(reject)
+			})
+		}
+
+		function doThen(value, deferred) {
+			// count protects against abuse calls from spec checker
+			var count = 0
+
+			try {
+				return value.then(function (value) {
+					if (count++) return
+					fire(RESOLVING, value, deferred)
+				}, function (value) {
+					if (count++) return
+					fire(REJECTING, value, deferred)
+				})
+			} catch (e) {
+				m.deferred.onerror(e)
+				return fire(REJECTING, e, deferred)
 			}
 		}
 
-		function fire() {
-			// check if it's a thenable
-			var then
+		function notThennable(value, state, deferred) {
 			try {
-				then = promiseValue && promiseValue.then
+				if (state === RESOLVING && isFunction(onSuccess)) {
+					value = onSuccess(value)
+				} else if (state === REJECTING && isFunction(onFailure)) {
+					value = onFailure(value)
+					state = RESOLVING
+				}
 			} catch (e) {
 				m.deferred.onerror(e)
-				promiseValue = e
-				state = REJECTING
-				return fire()
+				return finish(e, REJECTED)
+			}
+
+			if (value === deferred) {
+				return finish(TypeError(), REJECTED)
+			} else {
+				return finish(value, state === RESOLVING ? RESOLVED : REJECTED)
+			}
+		}
+
+		function fire(state, value, deferred) {
+			// check if it's a thenable
+			var thenable
+			try {
+				thenable = isPromise(value)
+			} catch (e) {
+				m.deferred.onerror(e)
+				return fire(REJECTING, e, deferred)
 			}
 
 			if (state === REJECTING) {
-				m.deferred.onerror(promiseValue)
+				m.deferred.onerror(value)
 			}
 
-			thennable(then, function () {
-				state = RESOLVING
-				fire()
-			}, function () {
-				state = REJECTING
-				fire()
-			}, function () {
-				try {
-					if (state === RESOLVING && isFunction(onSuccess)) {
-						promiseValue = onSuccess(promiseValue)
-					} else if (state === REJECTING && isFunction(onFailure)) {
-						promiseValue = onFailure(promiseValue)
-						state = RESOLVING
-					}
-				} catch (e) {
-					m.deferred.onerror(e)
-					promiseValue = e
-					return finish()
-				}
-
-				if (promiseValue === self) {
-					promiseValue = TypeError()
-					finish()
-				} else {
-					thennable(then, function () {
-						finish(RESOLVED)
-					}, finish, function () {
-						finish(state === RESOLVING && RESOLVED)
-					})
-				}
-			})
+			if (thenable) {
+				return doThen(value, deferred)
+			} else {
+				return notThennable(value, state, deferred)
+			}
 		}
 	}
 
 	m.deferred = function () {
-		var deferred = new Deferred()
-		deferred.promise = propify(deferred.promise)
-		return deferred
+		return new Deferred()
 	}
 
-	function propify(promise, initialValue) {
-		var prop = m.prop(initialValue)
-		promise.then(prop)
-
-		prop.then = function (resolve, reject) {
-			return propify(promise.then(resolve, reject), initialValue)
-		}
-
-		prop.catch = prop.then.bind(null, null)
-
-		prop.finally = function (callback) {
-			function _callback() {
-				return m.deferred().resolve(callback()).promise
-			}
-
-			return prop.then(function (value) {
-				return propify(_callback().then(function () {
-					return value
-				}), initialValue)
-			}, function (reason) {
-				return propify(_callback().then(function () {
-					throw new Error(reason)
-				}), initialValue)
-			})
-		}
-
-		return prop
-	}
+	m.deferred.prototype = Deferred.prototype
+	m.deferred.prototype.constructor = m.deferred
 
 	function isNativeError(e) {
 		return e instanceof EvalError ||
@@ -2025,7 +2071,7 @@
 	}
 
 	m.sync = function (args) {
-		var deferred = m.deferred()
+		var deferred = new Deferred()
 		var outstanding = args.length
 		var results = new Array(outstanding)
 		var method = "resolve"
@@ -2194,7 +2240,6 @@
 
 	m.request = function (options) {
 		if (options.background !== true) m.startComputation()
-
 		var deferred = new Deferred()
 
 		var serialize = identity
@@ -2254,7 +2299,7 @@
 		}
 
 		ajax(options)
-		deferred.promise = propify(deferred.promise, options.initialValue)
+		deferred.promise(options.initialValue)
 		return deferred.promise
 	}
 
