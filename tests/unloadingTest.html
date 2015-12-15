@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Mithril unloading test</title>
+        <!-- Reference: https://github.com/lhorie/mithril.js/issues/694 --> 
+    </head>
+
+    <body>
+        <script src="../mithril.js"></script>
+        <h4>This tests unloading of components which have an unloader method.</h4>
+        <p>
+            The test mounts Component1 on div "one" with a nested internal component and an "open" button.
+            The internal component displays its creation time and an input field. 
+            The open button when clicked will in turn mount Component2 on div "two" with a close button.
+            The close button will unmount the second component.
+        </p>
+        <p>When the second component is mounted or unmounted, the expected behavior is:</p>
+        <ul>
+            <li>The first component and its subcomponent should be redrawn.</li>
+            <li>The first component and internal component should <strong>not</strong> be reinitialized.</li>
+            <li>The time displayed in the internal component should <strong>not</strong> change.</li>
+            <li>Any text entered in the input component should <strong>not</strong> change.</li>
+        </ul>
+        <p>Check the console for logging as to redraws and unload events.</p>
+        <div id="one"></div>
+        <div id="two"></div>   
+    <script>
+var InternalComponent = {
+    controller: function(args) {
+        console.log("+ made internal for 1");
+        return {
+            text: "initial",
+            created: new Date().toISOString(),
+            onunload: function() {
+                console.log("- unload internal for 1");
+            }
+        };
+    },
+    view: function(controller, args) {
+        console.log("^ view internal for 1");
+        return m("div", [
+            controller.created,
+            m("br"),
+            m("input", {value: controller.text, onchange: function(event) { controller.text = event.target.value; } })
+        ]);
+    }
+}
+
+var Component1 = {
+    controller: function() {
+        console.log("+ made 1");
+        return {
+            onunload: function() {
+                console.log("- unload 1");
+            }
+        };
+    },
+    
+    view: function() {
+        console.log("^ view 1");
+        return m("div", [
+            "Component 1",
+            m.component(InternalComponent),
+            m('button', {onclick: function() {
+                console.log("==== mount 2");
+                m.mount(document.getElementById("two"), Component2);
+        }}, "Open")
+        ]);
+    }
+}
+
+var Component2 = {
+    controller: function() {
+        console.log("+ made 2");
+        return {
+            onunload: function() {
+                console.log("- unload 2");
+            }
+        };
+    },
+    
+    view: function() {
+        console.log("^ view 2");
+        return m("div", {style: "border: dotted"}, [
+            "Component 2",
+            m('button', {onclick: function() {
+            console.log("==== unmount 2");
+            m.mount(document.getElementById("two"), null);
+        }}, "Close")
+       ]);
+    }
+}
+
+console.log("==== mount 1");
+m.mount(document.getElementById("one"), Component1);
+        </script>
+    </body>
+</html>
+
