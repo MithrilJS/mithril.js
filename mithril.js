@@ -13,7 +13,9 @@
 })(this, function (window, undefined) { // eslint-disable-line
 	"use strict"
 
-	var VERSION = "v0.2.1"
+	m.version = function () {
+		return "v0.2.1"
+	}
 
 	// Save these two.
 	var type = {}.toString
@@ -37,21 +39,19 @@
 
 	function noop() {}
 
-	function forEach(list, f, inst) {
+	function forEach(list, f) {
 		for (var i = 0; i < list.length; i++) {
-			f.call(inst, list[i], i)
+			f(list[i], i)
 		}
 	}
 
-	function forOwn(obj, f, inst) {
+	function forOwn(obj, f) {
 		for (var prop in obj) {
 			if (hasOwn.call(obj, prop)) {
-				if (f.call(inst, obj[prop], prop)) break
+				f(obj[prop], prop)
 			}
 		}
 	}
-
-	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/ // eslint-disable-line max-len
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
@@ -74,8 +74,69 @@
 		return window
 	}
 
-	m.version = function () {
-		return VERSION
+	function gettersetter(store) {
+		function prop() {
+			if (arguments.length) store = arguments[0]
+			return store
+		}
+
+		prop.toJSON = function () {
+			return store
+		}
+
+		return prop
+	}
+
+	function isPromise(object) {
+		return object != null && (isObject(object) || isFunction(object)) &&
+				isFunction(object.then)
+	}
+
+	function simpleResolve(p, callback) {
+		if (p.then) {
+			return p.then(callback)
+		} else {
+			return callback()
+		}
+	}
+
+	function propify(promise) {
+		var prop = m.prop()
+		promise.then(prop)
+
+		prop.then = function (resolve, reject) {
+			return promise.then(function () {
+				return resolve(prop())
+			}, reject)
+		}
+
+		prop.catch = function (reject) {
+			return promise.then(function () {
+				return prop()
+			}, reject)
+		}
+
+		prop.finally = function (callback) {
+			return promise.then(function (value) {
+				return simpleResolve(callback(), function () {
+					return value
+				})
+			}, function (reason) {
+				return simpleResolve(callback(), function () {
+					throw reason
+				})
+			})
+		}
+
+		return prop
+	}
+
+	m.prop = function (store) {
+		if (isPromise(store)) {
+			return propify(store)
+		} else {
+			return gettersetter(store)
+		}
 	}
 
 	/**
@@ -220,11 +281,11 @@
 		return cell
 	}
 
-	function forKeys(list, f, inst) {
+	function forKeys(list, f) {
 		for (var i = 0; i < list.length; i++) {
 			var attrs = list[i]
 			attrs = attrs && attrs.attrs
-			if (attrs && attrs.key != null && f.call(inst, attrs, i)) {
+			if (attrs && attrs.key != null && f(attrs, i)) {
 				break
 			}
 		}
@@ -282,30 +343,29 @@
 	//    `cached` is *always* a non-primitive object, i.e. if the data was
 	//    a string, then cached is a String instance. If data was `null` or
 	//    `undefined`, cached is `new String("")`
-	// - `cached also has a `configContext` property, which is the state
+	// - `cached also has a `cfgCtx` property, which is the state
 	//    storage object exposed by config(element, isInitialized, context)
 	// - when `cached` is an Object, it represents a virtual element; when
 	//    it's an Array, it represents a list of elements; when it's a
 	//    String, Number or Boolean, it represents a text node
 	//
-	// `parentElement` is a DOM element used for W3C DOM API calls
-	// `parentTag` is only used for handling a corner case for textarea
-	// values
-	// `parentCache` is used to remove nodes in some multi-node cases
-	// `parentIndex` and `index` are used to figure out the offset of nodes.
+	// `parent` is a DOM element used for W3C DOM API calls
+	// `pTag` is only used for handling a corner case for textarea values
+	// `pCache` is used to remove nodes in some multi-node cases
+	// `pIndex` and `index` are used to figure out the offset of nodes.
 	// They're artifacts from before arrays started being flattened and are
 	// likely refactorable
 	// `data` and `cached` are, respectively, the new and old nodes being
 	// diffed
-	// `shouldReattach` is a flag indicating whether a parent node was
-	// recreated (if so, and if this node is reused, then this node must
-	// reattach itself to the new parent)
+	// `reattach` is a flag indicating whether a parent node was recreated (if
+	// so, and if this node is reused, then this node must reattach itself to
+	// the new parent)
 	// `editable` is a flag that indicates whether an ancestor is
 	// contenteditable
-	// `namespace` indicates the closest HTML namespace as it cascades down
-	// from an ancestor
-	// `configs` is a list of config functions to run after the topmost
-	// `build` call finishes running
+	// `ns` indicates the closest HTML namespace as it cascades down from an
+	// ancestor
+	// `cfgs` is a list of config functions to run after the topmost build call
+	// finishes running
 	//
 	// there's logic that relies on the assumption that null and undefined
 	// data are equivalent to empty strings
@@ -314,7 +374,7 @@
 	//   function foo() {if (cond) return m("div")}
 	// - it simplifies diffing code
 
-	function Builder(
+	function buildContext(
 		parentElement,
 		parentTag,
 		parentCache,
@@ -327,59 +387,61 @@
 		namespace,
 		configs
 	) {
-		this.parentElement = parentElement
-		this.parentTag = parentTag
-		this.parentCache = parentCache
-		this.parentIndex = parentIndex
-		this.data = data
-		this.cached = cached
-		this.shouldReattach = shouldReattach
-		this.index = index
-		this.editable = editable
-		this.namespace = namespace
-		this.configs = configs
-	}
-
-	Builder.prototype.build = function () {
-		this.data = dataToString(this.data)
-		if (this.data.subtree === "retain") return this.cached
-		this.makeCache()
-
-		if (isArray(this.data)) {
-			return this.buildArray()
-		} else if (this.data != null && isObject(this.data)) {
-			return this.buildObject()
-		} else if (isFunction(this.data)) {
-			return this.cached
-		} else {
-			return this.handleTextNode()
+		return {
+			parent: parentElement,
+			pTag: parentTag,
+			pCache: parentCache,
+			pIndex: parentIndex,
+			data: data,
+			cached: cached,
+			reattach: shouldReattach,
+			index: index,
+			editable: editable,
+			ns: namespace,
+			cfgs: configs
 		}
 	}
 
-	Builder.prototype.makeCache = function () {
-		if (this.cached != null) {
-			if (type.call(this.cached) === type.call(this.data)) {
+	function builderBuild(inst) {
+		inst.data = dataToString(inst.data)
+		if (inst.data.subtree === "retain") return inst.cached
+		builderMakeCache(inst)
+
+		if (isArray(inst.data)) {
+			return builderBuildArray(inst)
+		} else if (inst.data != null && isObject(inst.data)) {
+			return builderBuildObject(inst)
+		} else if (isFunction(inst.data)) {
+			return inst.cached
+		} else {
+			return builderHandleTextNode(inst)
+		}
+	}
+
+	function builderMakeCache(inst) {
+		if (inst.cached != null) {
+			if (type.call(inst.cached) === type.call(inst.data)) {
 				return
 			}
 
-			if (this.parentCache && this.parentCache.nodes) {
-				var offset = this.index - this.parentIndex
+			if (inst.pCache && inst.pCache.nodes) {
+				var offset = inst.index - inst.pIndex
 				var end = offset +
-					(isArray(this.data) ? this.data : this.cached.nodes).length
+					(isArray(inst.data) ? inst.data : inst.cached.nodes).length
 
 				clear(
-					this.parentCache.nodes.slice(offset, end),
-					this.parentCache.slice(offset, end))
-			} else if (this.cached.nodes) {
-				clear(this.cached.nodes, this.cached)
+					inst.pCache.nodes.slice(offset, end),
+					inst.pCache.slice(offset, end))
+			} else if (inst.cached.nodes) {
+				clear(inst.cached.nodes, inst.cached)
 			}
 		}
 
-		this.cached = new this.data.constructor()
+		inst.cached = new inst.data.constructor()
 		// if constructor creates a virtual dom element, use a blank object as
 		// the base cached node instead of copying the virtual el (#277)
-		if (this.cached.tag) this.cached = {}
-		this.cached.nodes = []
+		if (inst.cached.tag) inst.cached = {}
+		inst.cached.nodes = []
 	}
 
 	var DELETION = 1
@@ -399,26 +461,29 @@
 		})
 	}
 
-	Builder.prototype.buildArrayChild = function (child, cached, count) {
-		return new Builder(
-			this.parentElement,
-			this.parentTag,
-			this.cached,
-			this.index,
+	function builderBuildArrayChild(inst, child, cached, count) {
+		return builderBuild(buildContext(
+			inst.parent,
+			inst.pTag,
+			inst.cached,
+			inst.index,
 			child,
 			cached,
-			this.shouldReattach,
-			this.index + count || count,
-			this.editable,
-			this.namespace,
-			this.configs
-		).build()
+			inst.reattach,
+			inst.index + count || count,
+			inst.editable,
+			inst.ns,
+			inst.cfgs
+		))
 	}
 
-	Builder.prototype.buildArray = function () {
-		this.data = flatten(this.data)
+	// This is by far the most performance-sensitive method here. If you make
+	// any changes, be careful to avoid performance regressions. Note that
+	// variable caching doesn't help, even in the loop.
+	function builderBuildArray(inst) { // eslint-disable-line max-statements
+		inst.data = flatten(inst.data)
 		var nodes = []
-		var intact = this.cached.length === this.data.length
+		var intact = inst.cached.length === inst.data.length
 		var subArrayCount = 0
 
 		// keys algorithm:
@@ -431,7 +496,7 @@
 		//    previous steps
 		var existing = {}
 		var shouldMaintainIdentities = false
-		forKeys(this.cached, function (attrs, i) {
+		forKeys(inst.cached, function (attrs, i) {
 			shouldMaintainIdentities = true
 			existing[attrs.key] = {
 				action: DELETION,
@@ -439,65 +504,62 @@
 			}
 		})
 
-		buildArrayKeys(this.data)
+		buildArrayKeys(inst.data)
 		if (shouldMaintainIdentities) {
-			this.diffKeys(existing)
+			builderDiffKeys(inst, existing)
 		}
 		// end key algorithm
 
 		// don't change: faster than forEach
 		var cacheCount = 0
-		for (var i = 0, len = this.data.length; i < len; i++) {
+		for (var i = 0, len = inst.data.length; i < len; i++) {
 			// diff each item in the array
-			var item = this.buildArrayChild(
-				this.data[i],
-				this.cached[cacheCount],
+			var item = builderBuildArrayChild(
+				inst,
+				inst.data[i],
+				inst.cached[cacheCount],
 				subArrayCount
 			)
 
 			if (item !== undefined) {
 				intact = intact && item.nodes.intact
 				subArrayCount += getSubArrayCount(item)
-				this.cached[cacheCount++] = item
+				inst.cached[cacheCount++] = item
 			}
 		}
 
-		if (!intact) this.diffArray(nodes)
+		if (!intact) builderDiffArray(inst, nodes)
 
-		return this.cached
+		return inst.cached
 	}
 
-	Builder.prototype.diffKeys = function (existing) {
-		var keysDiffer = this.data.length !== this.cached.length
+	function builderDiffKeys(inst, existing) {
+		var keysDiffer = inst.data.length !== inst.cached.length
 
 		if (!keysDiffer) {
-			forKeys(this.data, function (attrs, i) {
-				var cachedCell = this[i] // eslint-disable-line no-invalid-this
+			forKeys(inst.data, function (attrs, i) {
+				var cachedCell = inst.cached[i]
 				return keysDiffer = cachedCell &&
 					cachedCell.attrs &&
 					cachedCell.attrs.key !== attrs.key
-			}, this.cached)
+			})
 		}
 
 		if (keysDiffer) {
-			this.handleKeysDiffer(existing)
+			builderHandleKeysDiffer(inst, existing)
 		}
 	}
 
-	// Simple `this` helper
-	function thisPush(value) {
-		this.push(value) // eslint-disable-line no-invalid-this
-	}
-
-	Builder.prototype.handleKeysDiffer = function (existing) {
-		forKeys(this.data, function (key, i) {
+	function builderHandleKeysDiffer(inst, existing) {
+		var cached = inst.cached.nodes
+		forKeys(inst.data, function (key, i) {
 			key = key.key
 			if (existing[key]) {
 				existing[key] = {
 					action: MOVE,
 					index: i,
 					from: existing[key].index,
-					element: this[existing[key].index] || // eslint-disable-line
+					element: cached[existing[key].index] ||
 						$document.createElement("div")
 				}
 			} else {
@@ -506,31 +568,32 @@
 					index: i
 				}
 			}
-		}, this.cached.nodes)
+		})
 
 		var actions = []
-		forOwn(existing, thisPush, actions)
+		forOwn(existing, function (value) {
+			actions.push(value)
+		})
 
 		var changes = actions.sort(sortChanges)
-		var newCached = new Array(this.cached.length)
-		newCached.nodes = this.cached.nodes.slice()
+		var newCached = new Array(inst.cached.length)
+		newCached.nodes = inst.cached.nodes.slice()
 
 		forEach(changes, function (change) {
-			/* eslint-disable no-invalid-this */
 			var index = change.index
 
 			switch (change.action) {
 			case DELETION:
-				clear(this.cached[index].nodes, this.cached[index])
+				clear(inst.cached[index].nodes, inst.cached[index])
 				newCached.splice(index, 1)
 				break
 
 			case INSERTION:
 				var dummy = $document.createElement("div")
-				dummy.key = this.data[index].attrs.key
-				insertNode(this.parentElement, dummy, index)
+				dummy.key = inst.data[index].attrs.key
+				insertNode(inst.parent, dummy, index)
 				newCached.splice(index, 0, {
-					attrs: {key: this.data[index].attrs.key},
+					attrs: {key: inst.data[index].attrs.key},
 					nodes: [dummy]
 				})
 				newCached.nodes[index] = dummy
@@ -538,29 +601,28 @@
 
 			case MOVE:
 				var changeElement = change.element
-				var maybeChanged = this.parentElement.childNodes[index]
-				if (maybeChanged !== changeElement && changeElement !== null) {
-					this.parentElement.insertBefore(
+				if (inst.parent.childNodes[index] !== changeElement &&
+						changeElement !== null) {
+					inst.parent.insertBefore(
 						changeElement,
-						maybeChanged || null
+						inst.parent.childNodes[index] || null
 					)
 				}
-				newCached[index] = this.cached[change.from]
+				newCached[index] = inst.cached[change.from]
 				newCached.nodes[index] = changeElement
 			}
-			/* eslint-enable no-invalid-this */
-		}, this)
+		})
 
-		this.cached = newCached
+		inst.cached = newCached
 	}
 
 	// diffs the array itself
-	Builder.prototype.diffArray = function (nodes) {
+	function builderDiffArray(inst, nodes) {
 		// update the list of DOM nodes by collecting the nodes from each item
-		for (var i = 0; i < this.data.length; i++) {
-			var cached = this.cached[i]
-			if (cached != null) {
-				nodes.push.apply(nodes, cached.nodes)
+		for (var i = 0, len = inst.data.length; i < len; i++) {
+			var item = inst.cached[i]
+			if (item != null) {
+				nodes.push.apply(nodes, item.nodes)
 			}
 		}
 
@@ -568,115 +630,135 @@
 		// than the old one. if errors ever happen here, the issue is most
 		// likely a bug in the construction of the `cached` data structure
 		// somewhere earlier in the program
-		forEach(this.cached.nodes, function (node, i) {
-			/* eslint-disable no-invalid-this */
+		forEach(inst.cached.nodes, function (node, i) {
 			if (node.parentNode != null && nodes.indexOf(node) < 0) {
-				clear([node], [this[i]])
+				clear([node], [inst.cached[i]])
 			}
-			/* eslint-enable no-invalid-this */
-		}, this.cached)
+		})
 
-		if (this.data.length < this.cached.length) {
-			this.cached.length = this.data.length
+		if (inst.data.length < inst.cached.length) {
+			inst.cached.length = inst.data.length
 		}
 
-		this.cached.nodes = nodes
+		inst.cached.nodes = nodes
 	}
 
-	Builder.prototype.initAttrs = function () {
-		var dataAttrs = this.data.attrs = this.data.attrs || {}
-		this.cached.attrs = this.cached.attrs || {}
+	function builderInitAttrs(inst) {
+		var dataAttrs = inst.data.attrs = inst.data.attrs || {}
+		inst.cached.attrs = inst.cached.attrs || {}
 
-		var dataAttrKeys = Object.keys(this.data.attrs)
-		this.maybeRecreateObject(dataAttrKeys)
+		var dataAttrKeys = Object.keys(inst.data.attrs)
+		builderMaybeRecreateObject(inst, dataAttrKeys)
 
 		return dataAttrKeys.length > +("key" in dataAttrs)
 	}
 
-	Builder.prototype.buildObject = function () {
+	function builderGetObjectNamespace(inst) {
+		var data = inst.data
+
+		return data.attrs.xmlns ? data.attrs.xmlns :
+			data.tag === "svg" ? "http://www.w3.org/2000/svg" :
+			data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
+			inst.ns
+	}
+
+	function builderBuildObject(inst) {
 		var views = []
 		var controllers = []
 
-		this.markViews(views, controllers)
+		builderMarkViews(inst, views, controllers)
 
-		if (!this.data.tag && controllers.length) {
+		if (!inst.data.tag && controllers.length) {
 			throw new Error("Component template must return a virtual " +
 				"element, not an array, string, etc.")
 		}
 
-		var hasKeys = this.initAttrs()
+		var hasKeys = builderInitAttrs(inst)
 
-		if (isString(this.data.tag)) {
-			return new ObjectBuilder(
-				this,
-				hasKeys,
-				views,
-				controllers
-			).build()
+		if (isString(inst.data.tag)) {
+			return objectBuild({
+				builder: inst,
+				hasKeys: hasKeys,
+				views: views,
+				controllers: controllers,
+				ns: builderGetObjectNamespace(inst)
+			})
 		}
 	}
 
-	Builder.prototype.markViews = function (views, controllers) {
-		var cached = this.cached && this.cached.controllers
-		while (this.data.view != null) {
-			this.checkView(cached, controllers, views)
+	function builderMarkViews(inst, views, controllers) {
+		var cached = inst.cached && inst.cached.controllers
+		while (inst.data.view != null) {
+			builderCheckView(inst, cached, controllers, views)
 		}
 	}
 
 	var forcing = false
 	var pendingRequests = 0
 
-	Builder.prototype.checkView = function (cached, controllers, views) {
-		var view = this.data.view.$original || this.data.view
+	function builderCheckView(inst, cached, controllers, views) {
+		var view = inst.data.view.$original || inst.data.view
 		var controller = getController(
-			this.cached.views,
+			inst.cached.views,
 			view,
 			cached,
-			this.data.controller
+			inst.data.controller
 		)
 
 		// Faster to coerce to number and check for NaN
-		var key = +(this.data && this.data.attrs && this.data.attrs.key)
+		var key = +(inst.data && inst.data.attrs && inst.data.attrs.key)
 
 		if (pendingRequests === 0 || forcing ||
 				cached && cached.indexOf(controller) > -1) {
-			this.data = this.data.view(controller)
+			inst.data = inst.data.view(controller)
 		} else {
-			this.data = {tag: "placeholder"}
+			inst.data = {tag: "placeholder"}
 		}
 
-		if (this.data.subtree === "retain") return this.cached
+		if (inst.data.subtree === "retain") return inst.cached
 		if (key === key) { // eslint-disable-line no-self-compare
-			(this.data.attrs = this.data.attrs || {}).key = key
+			(inst.data.attrs = inst.data.attrs || {}).key = key
 		}
 		updateLists(views, controllers, view, controller)
 	}
 
 	var unloaders = []
 
-	function updateLists(views, controllers, view, controller) {
-		views.push(view)
-		var idx = controllers.push(controller) - 1
-		unloaders[idx] = {
-			views: views,
-			view: view,
-			controller: controller,
-			controllers: controllers,
-			handler: function (ev) {
-				var i = this.controllers.indexOf(this.controller)
-				this.controllers.splice(i, 1)
-				i = this.views.indexOf(this.view)
-				this.views.splice(i, 1)
-				var unload = this.controller && this.controller.onunload
-				if (type.call(unload) === "[object Function]") {
-					this.controller.onunload(ev)
-				}
-			}
+	function unloaderHandler(inst, ev) {
+		inst.ctrls.splice(inst.ctrls.indexOf(inst.ctrl), 1)
+		inst.views.splice(inst.views.indexOf(inst.view), 1)
+		if (inst.ctrl && isFunction(inst.ctrl.onunload)) {
+			inst.ctrl.onunload(ev)
 		}
 	}
 
+	function updateLists(views, controllers, view, controller) {
+		views.push(view)
+		unloaders[controllers.push(controller) - 1] = {
+			views: views,
+			view: view,
+			ctrl: controller,
+			ctrls: controllers
+		}
+	}
+
+	var redrawing = false
+
+	m.redraw = function (force) {
+		if (redrawing) return
+		redrawing = true
+		if (force) forcing = true
+		try {
+			attemptRedraw(force)
+		} finally {
+			redrawing = forcing = false
+		}
+	}
+
+	var redrawStrategy = m.redraw.strategy = m.prop()
+
 	function getController(views, view, cached, controller) {
-		var index = m.redraw.strategy() === "diff" && views ?
+		var index = redrawStrategy() === "diff" && views ?
 			views.indexOf(view) :
 			-1
 
@@ -689,23 +771,21 @@
 		}
 	}
 
-	function unloadSingleController(controller) {
-		if (controller.unload) {
-			controller.onunload({preventDefault: noop})
-		}
-	}
-
-	Builder.prototype.maybeRecreateObject = function (dataAttrKeys) {
+	function builderMaybeRecreateObject(inst, dataAttrKeys) {
 		// if an element is different enough from the one in cache, recreate it
-		if (this.elemIsDifferentEnough(dataAttrKeys)) {
-			if (this.cached.nodes.length) clear(this.cached.nodes)
-			if (this.cached.configContext &&
-					isFunction(this.cached.configContext.onunload)) {
-				this.cached.configContext.onunload()
+		if (builderElemIsDifferentEnough(inst, dataAttrKeys)) {
+			if (inst.cached.nodes.length) clear(inst.cached.nodes)
+			if (inst.cached.cfgCtx &&
+					isFunction(inst.cached.cfgCtx.onunload)) {
+				inst.cached.cfgCtx.onunload()
 			}
 
-			if (this.cached.controllers) {
-				forEach(this.cached.controllers, unloadSingleController)
+			if (inst.cached.controllers) {
+				forEach(inst.cached.controllers, function (controller) {
+					if (controller.unload) {
+						controller.onunload({preventDefault: noop})
+					}
+				})
 			}
 		}
 	}
@@ -722,9 +802,9 @@
 		return true
 	}
 
-	Builder.prototype.elemIsDifferentEnough = function (dataAttrKeys) {
-		var data = this.data
-		var cached = this.cached
+	function builderElemIsDifferentEnough(inst, dataAttrKeys) {
+		var data = inst.data
+		var cached = inst.cached
 		if (data.tag !== cached.tag) return true
 		if (!arraySortCompare(dataAttrKeys, Object.keys(cached.attrs))) {
 			return true
@@ -733,81 +813,70 @@
 		if (data.attrs.id !== cached.attrs.id) return true
 		if (data.attrs.key !== cached.attrs.key) return true
 
-		if (m.redraw.strategy() === "all") {
-			return !cached.configContext || cached.configContext.retain !== true
-		} else if (m.redraw.strategy() === "diff") {
-			return cached.configContext && cached.configContext.retain === false
+		if (redrawStrategy() === "all") {
+			return !cached.cfgCtx || cached.cfgCtx.retain !== true
+		} else if (redrawStrategy() === "diff") {
+			return cached.cfgCtx && cached.cfgCtx.retain === false
 		} else {
 			return false
 		}
 	}
 
-	function getObjectNamespace(builder) {
-		var data = builder.data
-
-		return data.attrs.xmlns ? data.attrs.xmlns :
-			data.tag === "svg" ? "http://www.w3.org/2000/svg" :
-			data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
-			builder.namespace
-	}
-
-	function ObjectBuilder(builder, hasKeys, views, controllers) {
-		this.builder = builder
-		this.hasKeys = hasKeys
-		this.views = views
-		this.controllers = controllers
-		this.namespace = getObjectNamespace(builder)
-	}
-
-	ObjectBuilder.prototype.buildNewNode = function () {
-		var node = this.createNode()
-		this.builder.cached = this.reconstruct(
+	function objectBuildNewNode(inst) {
+		var node = objectCreateNode(inst)
+		inst.builder.cached = objectReconstruct(
+			inst,
 			node,
-			this.createAttrs(node),
-			this.buildChildren(node)
+			objectCreateAttrs(inst, node),
+			objectBuildChildren(inst, node)
 		)
 		return node
 	}
 
-	ObjectBuilder.prototype.build = function () {
-		var builder = this.builder
+	function objectBuild(inst) {
+		var builder = inst.builder
 		var isNew = builder.cached.nodes.length === 0
-		var node = isNew ? this.buildNewNode() : this.buildUpdatedNode()
-		if (isNew || builder.shouldReattach && node != null) {
-			insertNode(builder.parentElement, node, builder.index)
+
+		var node = isNew ?
+			objectBuildNewNode(inst) :
+			objectBuildUpdatedNode(inst)
+
+		if (isNew || builder.reattach && node != null) {
+			insertNode(builder.parent, node, builder.index)
 		}
-		builder.scheduleConfigs(node, isNew)
+
+		builderScheduleConfigs(builder, node, isNew)
 		return builder.cached
 	}
 
-	ObjectBuilder.prototype.createNode = function () {
-		var data = this.builder.data
-		if (this.namespace === undefined) {
+	function objectCreateNode(inst) {
+		var data = inst.builder.data
+		if (inst.ns === undefined) {
 			if (data.attrs.is) {
 				return $document.createElement(data.tag, data.attrs.is)
 			} else {
 				return $document.createElement(data.tag)
 			}
 		} else if (data.attrs.is) {
-			return $document.createElementNS(this.namespace, data.tag,
+			return $document.createElementNS(inst.ns, data.tag,
 				data.attrs.is)
 		} else {
-			return $document.createElementNS(this.namespace, data.tag)
+			return $document.createElementNS(inst.ns, data.tag)
 		}
 	}
 
-	ObjectBuilder.prototype.createAttrs = function (node) {
-		var data = this.builder.data
-		if (this.hasKeys) {
-			return setAttributes(node, data.tag, data.attrs, {}, this.namespace)
+	function objectCreateAttrs(inst, node) {
+		var data = inst.builder.data
+		if (inst.hasKeys) {
+			return setAttributes(node, data.tag, data.attrs, {}, inst.ns)
 		} else {
 			return data.attrs
 		}
 	}
 
-	ObjectBuilder.prototype.makeChild = function (node, shouldReattach) {
-		var builder = this.builder
-		return new Builder(
+	function objectMakeChild(inst, node, shouldReattach) {
+		var builder = inst.builder
+		return builderBuild(buildContext(
 			node,
 			builder.data.tag,
 			undefined,
@@ -817,22 +886,22 @@
 			shouldReattach,
 			0,
 			builder.data.attrs.contenteditable ? node : builder.editable,
-			this.namespace,
-			builder.configs
-		).build()
+			inst.ns,
+			builder.cfgs
+		))
 	}
 
-	ObjectBuilder.prototype.buildChildren = function (node) {
-		var data = this.builder.data
-		if (data.children != null && data.children.length !== 0) {
-			return this.makeChild(node, true)
+	function objectBuildChildren(inst, node) {
+		var children = inst.builder.data.children
+		if (children != null && children.length !== 0) {
+			return objectMakeChild(inst, node, true)
 		} else {
-			return data.children
+			return children
 		}
 	}
 
-	ObjectBuilder.prototype.reconstruct = function (node, attrs, children) {
-		var data = this.builder.data
+	function objectReconstruct(inst, node, attrs, children) {
+		var data = inst.builder.data
 		var cached = {
 			tag: data.tag,
 			attrs: attrs,
@@ -840,7 +909,7 @@
 			nodes: [node]
 		}
 
-		this.unloadCachedControllers(cached)
+		objectUnloadCachedControllers(inst, cached)
 
 		if (cached.children && !cached.children.nodes) {
 			cached.children.nodes = []
@@ -850,7 +919,7 @@
 		// exist, so set it again after children have been created
 		if (data.tag === "select" && "value" in data.attrs) {
 			setAttributes(node, data.tag, {value: data.attrs.value}, {},
-				this.namespace)
+				inst.ns)
 		}
 		return cached
 	}
@@ -867,85 +936,102 @@
 		}
 	}
 
-	ObjectBuilder.prototype.unloadCachedControllers = function (cached) {
-		if (this.controllers.length) {
-			cached.views = this.views
-			cached.controllers = this.controllers
-			forEach(this.controllers, unloadSingleCachedController)
+	function objectUnloadCachedControllers(inst, cached) {
+		if (inst.controllers.length) {
+			cached.views = inst.views
+			cached.controllers = inst.controllers
+			forEach(inst.controllers, unloadSingleCachedController)
 		}
 	}
 
-	ObjectBuilder.prototype.buildUpdatedNode = function () {
-		var builder = this.builder
-		var node = builder.cached.nodes[0]
-		if (this.hasKeys) {
+	function objectBuildUpdatedNode(inst) {
+		var cached = inst.builder.cached
+		var node = cached.nodes[0]
+		if (inst.hasKeys) {
 			setAttributes(
 				node,
-				builder.data.tag,
-				builder.data.attrs,
-				builder.cached.attrs,
-				this.namespace
+				inst.builder.data.tag,
+				inst.builder.data.attrs,
+				cached.attrs,
+				inst.ns
 			)
 		}
 
-		builder.cached.children = this.makeChild(node, false)
-		builder.cached.nodes.intact = true
+		cached.children = objectMakeChild(inst, node, false)
+		cached.nodes.intact = true
 
-		if (this.controllers.length) {
-			builder.cached.views = this.views
-			builder.cached.controllers = this.controllers
+		if (inst.controllers.length) {
+			cached.views = inst.views
+			cached.controllers = inst.controllers
 		}
 
 		return node
 	}
 
-	Builder.prototype.scheduleConfigs = function (node, isNew) {
-		var data = this.data
-		var cached = this.cached
-		// schedule configs to be called. They are called after `build` finishes
-		// running
+	function builderScheduleConfigs(inst, node, isNew) {
+		var data = inst.data
+		var cached = inst.cached
+		// They are called after the tree is fully built
 		var config = data.attrs.config
 		if (isFunction(config)) {
-			var context = cached.configContext = cached.configContext || {}
+			var context = cached.cfgCtx = cached.cfgCtx || {}
 
-			// bind
-			this.configs.push(function () {
+			inst.cfgs.push(function () {
 				return config.call(data, node, !isNew, context, cached)
 			})
 		}
 	}
 
-	Builder.prototype.handleTextNode = function () {
-		if (this.cached.nodes.length === 0) {
-			return this.handleNonexistentNodes()
-		} else if (this.cached.valueOf() !== this.data.valueOf() ||
-				this.shouldReattach) {
-			return this.reattachNodes()
+	function builderHandleTextNode(inst) {
+		if (inst.cached.nodes.length === 0) {
+			return builderHandleNonexistentNodes(inst)
+		} else if (inst.cached.valueOf() !== inst.data.valueOf() ||
+				inst.reattach) {
+			return builderReattachNodes(inst)
 		} else {
-			this.cached.nodes.intact = true
-			return this.cached
+			inst.cached.nodes.intact = true
+			return inst.cached
 		}
 	}
 
-	Builder.prototype.handleNonexistentNodes = function () {
+	function nodeHasBody(node) {
+		return node !== "AREA" &&
+			node !== "BASE" &&
+			node !== "BR" &&
+			node !== "COL" &&
+			node !== "COMMAND" &&
+			node !== "EMBED" &&
+			node !== "HR" &&
+			node !== "IMG" &&
+			node !== "INPUT" &&
+			node !== "KEYGEN" &&
+			node !== "LINK" &&
+			node !== "META" &&
+			node !== "PARAM" &&
+			node !== "SOURCE" &&
+			node !== "TRACK" &&
+			node !== "WBR"
+	}
+
+	function builderHandleNonexistentNodes(inst) {
 		var nodes
-		if (this.data.$trusted) {
-			nodes = injectHTML(this.parentElement, this.index, this.data)
+		if (inst.data.$trusted) {
+			nodes = injectHTML(inst.parent, inst.index, inst.data)
 		} else {
-			nodes = [$document.createTextNode(this.data)]
-			if (!voidElements.test(this.parentElement.nodeName)) {
-				insertNode(this.parentElement, nodes[0], this.index)
+			nodes = [$document.createTextNode(inst.data)]
+			if (nodeHasBody(inst.parent.nodeName)) {
+				insertNode(inst.parent, nodes[0], inst.index)
 			}
 		}
 
 		var cached
 
-		if (typeof this.data === "string" ||
-				typeof this.data === "number" ||
-				typeof this.data === "boolean") {
-			cached = new this.data.constructor(this.data)
+		if (typeof inst.data === "string" ||
+				typeof inst.data === "number" ||
+				typeof inst.data === "boolean") {
+			cached = new inst.data.constructor(inst.data)
 		} else {
-			cached = this.data
+			cached = inst.data
 		}
 
 		cached.nodes = nodes
@@ -953,50 +1039,52 @@
 		return cached
 	}
 
-	Builder.prototype.reattachNodes = function () {
-		var nodes = this.cached.nodes
-		if (!this.editable || this.editable !== $document.activeElement) {
-			if (this.data.$trusted) {
-				clear(nodes, this.cached)
-				nodes = injectHTML(this.parentElement, this.index, this.data)
-			} else if (this.parentTag === "textarea") {
+	function builderReattachNodes(inst) {
+		var nodes = inst.cached.nodes
+		if (!inst.editable || inst.editable !== $document.activeElement) {
+			if (inst.data.$trusted) {
+				clear(nodes, inst.cached)
+				nodes = injectHTML(inst.parent, inst.index, inst.data)
+			} else if (inst.pTag === "textarea") {
 				// <textarea> uses `value` instead of `nodeValue`.
-				this.parentElement.value = this.data
-			} else if (this.editable) {
+				inst.parent.value = inst.data
+			} else if (inst.editable) {
 				// contenteditable nodes use `innerHTML` instead of `nodeValue`.
-				this.editable.innerHTML = this.data
+				inst.editable.innerHTML = inst.data
 			} else {
 				// was a trusted string
 				if (nodes[0].nodeType === 1 ||
 					nodes.length > 1 ||
 					(nodes[0].nodeValue.trim && !nodes[0].nodeValue.trim())
 				) {
-					clear(this.cached.nodes, this.cached)
-					nodes = [$document.createTextNode(this.data)]
+					clear(inst.cached.nodes, inst.cached)
+					nodes = [$document.createTextNode(inst.data)]
 				}
 
-				this.injectTextNode(nodes[0])
+				builderInjectTextNode(inst, nodes[0])
 			}
 		}
 
-		this.cached = new this.data.constructor(this.data)
-		this.cached.nodes = nodes
-		return this.cached
+		inst.cached = new inst.data.constructor(inst.data)
+		inst.cached.nodes = nodes
+		return inst.cached
 	}
 
 	// This function was causing deopts in Chrome.
-	Builder.prototype.injectTextNode = function (first) {
+	function builderInjectTextNode(inst, first) {
 		try {
-			insertNode(this.parentElement, first, this.index)
-			first.nodeValue = this.data
+			insertNode(inst.parent, first, inst.index)
+			first.nodeValue = inst.data
 		} catch (e) {
 			// IE erroneously throws error when appending an empty text node
 			// after a null
 		}
 	}
 
-	m.startComputation = function () { pendingRequests++ }
-	m.endComputation = function () {
+	m.startComputation = startComputation
+	function startComputation() { pendingRequests++ }
+	m.endComputation = endComputation
+	function endComputation() {
 		if (pendingRequests > 1) {
 			pendingRequests--
 		} else {
@@ -1120,11 +1208,13 @@
 	}
 
 	function clear(nodes, cached) {
+		// If it's empty, there's nothing to clear
+		if (!nodes.length) return
+		cached = [].concat(cached)
 		for (var i = nodes.length - 1; i >= 0; i--) {
 			var node = nodes[i]
 			if (node != null && node.parentNode) {
-				clearSingle(nodes[i])
-				cached = [].concat(cached)
+				clearSingle(node)
 				if (cached[i]) unload(cached[i])
 			}
 		}
@@ -1134,19 +1224,17 @@
 		if (nodes.length) nodes.length = 0
 	}
 
-	function maybeCallControllerOnunload(controller) {
-		if (isFunction(controller.onunload)) {
-			controller.onunload({preventDefault: noop})
-		}
-	}
-
 	function unload(cached) {
-		if (cached.configContext && isFunction(cached.configContext.onunload)) {
-			cached.configContext.onunload()
-			cached.configContext.onunload = null
+		if (cached.cfgCtx && isFunction(cached.cfgCtx.onunload)) {
+			cached.cfgCtx.onunload()
+			cached.cfgCtx.onunload = null
 		}
 		if (cached.controllers) {
-			forEach(cached.controllers, maybeCallControllerOnunload)
+			forEach(cached.controllers, function (controller) {
+				if (isFunction(controller.onunload)) {
+					controller.onunload({preventDefault: noop})
+				}
+			})
 		}
 		if (cached.children) {
 			if (isArray(cached.children)) {
@@ -1171,14 +1259,13 @@
 		}
 	})()
 
+	var placeholder = $document.createElement("span")
+
 	function injectHTML(parent, index, data) {
 		var nextSibling = parent.childNodes[index]
 
 		if (nextSibling) {
-			var isElement = nextSibling.nodeType !== 1
-			var placeholder = $document.createElement("span")
-
-			if (isElement) {
+			if (nextSibling.nodeType !== 1) {
 				parent.insertBefore(placeholder, nextSibling || null)
 				placeholder.insertAdjacentHTML("beforebegin", data)
 				parent.removeChild(placeholder)
@@ -1191,32 +1278,25 @@
 
 		var nodes = []
 		while (parent.childNodes[index] !== nextSibling) {
-			nodes.push(parent.childNodes[index])
-			index++
+			nodes.push(parent.childNodes[index++])
 		}
 
 		return nodes
 	}
 	function autoredraw(callback, object) {
 		return function (e) {
-			e = e || event
-			m.redraw.strategy("diff")
-			m.startComputation()
+			redrawStrategy("diff")
+			startComputation()
 			try {
-				return callback.call(object, e)
+				return callback.call(object, e || event)
 			} finally {
 				endFirstComputation()
 			}
 		}
 	}
 
-	var html
 	var documentNode = {
 		appendChild: function (node) {
-			if (html === undefined) {
-				html = $document.createElement("html")
-			}
-
 			if ($document.documentElement &&
 					$document.documentElement !== node) {
 				$document.replaceChild(node, $document.documentElement)
@@ -1236,10 +1316,6 @@
 
 	var nodeCache = []
 	var cellCache = {}
-
-	function voidCall(func) {
-		func()
-	}
 
 	m.render = function (root, cell, forceRecreation) {
 		if (!root) {
@@ -1265,32 +1341,23 @@
 		if (cellCache[id] === undefined) clear(node.childNodes)
 		if (forceRecreation === true) reset(root)
 
-		cellCache[id] = new Builder(
-			// parentElement
+		cellCache[id] = builderBuild(buildContext(
 			node,
-			// parentTag
 			null,
-			// parentCache
 			undefined,
-			// parentIndex
 			undefined,
-			// data
 			cell,
-			// cached
 			cellCache[id],
-			// shouldReattach
 			false,
-			// index
 			0,
-			// editable
 			null,
-			// namespace
 			undefined,
-			// configs
 			configs
-		).build()
+		))
 
-		forEach(configs, voidCall)
+		forEach(configs, function (config) {
+			config()
+		})
 	}
 
 	function getCellCacheKey(element) {
@@ -1302,71 +1369,6 @@
 		value = new String(value) // eslint-disable-line no-new-wrappers
 		value.$trusted = true
 		return value
-	}
-
-	function gettersetter(store) {
-		function prop() {
-			if (arguments.length) store = arguments[0]
-			return store
-		}
-
-		prop.toJSON = function () {
-			return store
-		}
-
-		return prop
-	}
-
-	function isPromise(object) {
-		return object != null && (isObject(object) || isFunction(object)) &&
-				isFunction(object.then)
-	}
-
-	function simpleResolve(p, callback) {
-		if (p.then) {
-			return p.then(callback)
-		} else {
-			return callback()
-		}
-	}
-
-	function propify(promise) {
-		var prop = m.prop()
-		promise.then(prop)
-
-		prop.then = function (resolve, reject) {
-			return promise.then(function () {
-				return resolve(prop())
-			}, reject)
-		}
-
-		prop.catch = function (reject) {
-			return promise.then(function () {
-				return prop()
-			}, reject)
-		}
-
-		prop.finally = function (callback) {
-			return promise.then(function (value) {
-				return simpleResolve(callback(), function () {
-					return value
-				})
-			}, function (reason) {
-				return simpleResolve(callback(), function () {
-					throw reason
-				})
-			})
-		}
-
-		return prop
-	}
-
-	m.prop = function (store) {
-		if (isPromise(store)) {
-			return propify(store)
-		} else {
-			return gettersetter(store)
-		}
 	}
 
 	var roots = []
@@ -1381,14 +1383,14 @@
 		var isNullComponent = component === null
 
 		if (!isPrevented) {
-			m.redraw.strategy("all")
-			m.startComputation()
+			redrawStrategy("all")
+			startComputation()
 			roots[index] = root
 			component = topComponent = component || {controller: noop}
-			var controller = new (component.controller || noop)()
 			// controllers may call m.mount recursively (via m.route redirects,
-			// for example). this conditional ensures only the last recursive
-			// m.mount call is applied
+			// for example). This conditional ensures only the last recursive
+			// m.mount call is applied. Please don't change the order of this.
+			var controller = new (component.controller || noop)()
 			if (component === topComponent) {
 				controllers[index] = controller
 				components[index] = component
@@ -1408,18 +1410,8 @@
 		}
 	}
 
-	function callUnloaderHandler(unloader) {
-		if (unloader.controller != null) {
-			unloader.handler(this) // eslint-disable-line no-invalid-this
-			unloader.controller.onunload = null
-		}
-	}
-
-	function setPreventedUnloader(unloader) {
-		unloader.controller.onunload = unloader.handler
-	}
-
-	m.mount = m.module = function (root, component) {
+	m.mount = m.module = mmount
+	function mmount(root, component) {
 		if (!root) {
 			throw new Error("Please ensure the DOM element exists before " +
 				"rendering a template into it.")
@@ -1437,10 +1429,19 @@
 			}
 		}
 
-		forEach(unloaders, callUnloaderHandler, ev)
+		forEach(unloaders, function (unloader) {
+			if (unloader.ctrl != null) {
+				unloaderHandler(unloader, ev)
+				unloader.ctrl.onunload = null
+			}
+		})
 
 		if (isPrevented) {
-			forEach(unloaders, setPreventedUnloader)
+			forEach(unloaders, function (unloader) {
+				unloader.ctrl.onunload = function (ev) {
+					unloaderHandler(unloader, ev)
+				}
+			})
 		} else {
 			unloaders = []
 		}
@@ -1486,8 +1487,6 @@
 			}
 		}
 
-	var redrawing = false
-
 	function resetLastRedrawId() {
 		lastRedrawId = 0
 	}
@@ -1501,19 +1500,6 @@
 				FRAME_BUDGET)
 		}
 	}
-
-	m.redraw = function (force) {
-		if (redrawing) return
-		redrawing = true
-		if (force) forcing = true
-		try {
-			attemptRedraw(force)
-		} finally {
-			redrawing = forcing = false
-		}
-	}
-
-	m.redraw.strategy = m.prop()
 
 	function redraw() {
 		if (computePreRedrawHook) {
@@ -1544,15 +1530,15 @@
 
 		lastRedrawId = null
 		lastRedrawCallTime = new Date()
-		m.redraw.strategy("diff")
+		redrawStrategy("diff")
 	}
 
 	function endFirstComputation() {
-		if (m.redraw.strategy() === "none") {
+		if (redrawStrategy() === "none") {
 			pendingRequests--
-			m.redraw.strategy("diff")
+			redrawStrategy("diff")
 		} else {
-			m.endComputation()
+			endComputation()
 		}
 	}
 
@@ -1561,7 +1547,6 @@
 			/* eslint-disable no-invalid-this */
 			e = e || event
 			var currentTarget = e.currentTarget || this
-			var _this = callbackThis || this
 			var targetProp
 
 			if (prop in currentTarget) {
@@ -1570,7 +1555,7 @@
 				targetProp = currentTarget.getAttribute(prop)
 			}
 
-			withAttrCallback.call(_this, targetProp)
+			withAttrCallback.call(callbackThis || this, targetProp)
 			/* eslint-enable no-invalid-this */
 		}
 	}
@@ -1587,8 +1572,8 @@
 	var routeParams, currentRoute
 
 	function historyListener() {
-		var path = $location[m.route.mode]
-		if (m.route.mode === "pathname") path += $location.search
+		var path = $location[mroute.mode]
+		if (mroute.mode === "pathname") path += $location.search
 		if (currentRoute !== normalizeRoute(path)) redirect(path)
 	}
 
@@ -1599,38 +1584,38 @@
 	}
 
 	function getRouteBase() {
-		return (m.route.mode === "pathname" ? "" : $location.pathname) +
-			modes[m.route.mode]
+		return (mroute.mode === "pathname" ? "" : $location.pathname) +
+			modes[mroute.mode]
 	}
 
 	function windowPushState() {
 		window.history.pushState(null,
 			$document.title,
-			modes[m.route.mode] + currentRoute)
+			modes[mroute.mode] + currentRoute)
 	}
 
 	function windowReplaceState() {
 		window.history.replaceState(null,
 			$document.title,
-			modes[m.route.mode] + currentRoute)
+			modes[mroute.mode] + currentRoute)
 	}
 
-	function computeAndLaunchRedirect(shouldReplaceHistoryEntry) {
+	function computeAndLaunchRedirect(replaceHistory) {
 		if (window.history.pushState) {
 			computePreRedrawHook = setScroll
-			computePostRedrawHook = shouldReplaceHistoryEntry ?
+			computePostRedrawHook = replaceHistory ?
 				windowReplaceState :
 				windowPushState
-			redirect(modes[m.route.mode] + currentRoute)
+			redirect(modes[mroute.mode] + currentRoute)
 		} else {
-			$location[m.route.mode] = currentRoute
-			redirect(modes[m.route.mode] + currentRoute)
+			$location[mroute.mode] = currentRoute
+			redirect(modes[mroute.mode] + currentRoute)
 		}
 	}
 
-	function routeTo(route, params, shouldReplaceHistoryEntry) {
+	function routeTo(route, params, replaceHistory) {
 		if (arguments.length < 3 && typeof params !== "object") {
-			shouldReplaceHistoryEntry = params
+			replaceHistory = params
 			params = null
 		}
 
@@ -1658,11 +1643,11 @@
 			currentRoute = currentPath + delimiter + queryString
 		}
 
-		return computeAndLaunchRedirect(shouldReplaceHistoryEntry ||
-			oldRoute === route)
+		return computeAndLaunchRedirect(replaceHistory || oldRoute === route)
 	}
 
-	m.route = function (root, arg1, arg2, vdom) {
+	m.route = mroute
+	function mroute(root, arg1, arg2, vdom) {
 		if (arguments.length === 0) {
 			// m.route()
 			return currentRoute
@@ -1677,13 +1662,13 @@
 					}
 
 					isDefaultRoute = true
-					m.route(arg1, true)
+					mroute(arg1, true)
 					isDefaultRoute = false
 				}
 			}
 
 			runHistoryListener(
-				m.route.mode === "hash" ? "onhashchange" : "onpopstate")
+				mroute.mode === "hash" ? "onhashchange" : "onpopstate")
 		} else if (root.addEventListener || root.attachEvent) {
 			// config: m.route
 			root.href = getRouteBase() + vdom.attrs.href
@@ -1696,14 +1681,14 @@
 			}
 		} else if (isString(root)) {
 			// m.route(route, params, shouldReplaceHistoryEntry)
-			return routeTo.apply(this, arguments)
+			return routeTo.apply(null, arguments)
 		}
 	}
 
-	m.route.param = function (key) {
+	mroute.param = function (key) {
 		if (!routeParams) {
 			throw new Error("You must call m.route(element, defaultRoute, " +
-				"routes) before calling m.route.param()")
+				"routes) before calling mroute.param()")
 		}
 
 		if (key) {
@@ -1713,10 +1698,10 @@
 		}
 	}
 
-	m.route.mode = "search"
+	mroute.mode = "search"
 
 	function normalizeRoute(route) {
-		return route.slice(modes[m.route.mode].length)
+		return route.slice(modes[mroute.mode].length)
 	}
 
 	function routeByValue(root, router, path) {
@@ -1736,14 +1721,14 @@
 		var index = keys.indexOf(path)
 
 		if (index >= 0) {
-			m.mount(root, router[keys[index]])
+			mmount(root, router[keys[index]])
 			return true
 		}
 
 		for (var route in router) {
 			if (hasOwn.call(router, route)) {
 				if (route === path) {
-					m.mount(root, router[route])
+					mmount(root, router[route])
 					return true
 				}
 
@@ -1766,7 +1751,7 @@
 						})
 					})
 					/* eslint-enable no-loop-func */
-					m.mount(root, router[route])
+					mmount(root, router[route])
 					return true
 				}
 			}
@@ -1788,7 +1773,7 @@
 
 		var args
 
-		if (m.route.mode === "pathname" && currentTarget.search) {
+		if (mroute.mode === "pathname" && currentTarget.search) {
 			args = parseQueryString(currentTarget.search.slice(1))
 		} else {
 			args = {}
@@ -1798,12 +1783,12 @@
 			currentTarget = currentTarget.parentNode
 		}
 
-		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length),
+		mroute(currentTarget[mroute.mode].slice(modes[mroute.mode].length),
 			args)
 	}
 
 	function setScroll() {
-		if (m.route.mode !== "hash" && $location.hash) {
+		if (mroute.mode !== "hash" && $location.hash) {
 			$location.hash = $location.hash
 		} else {
 			window.scrollTo(0, 0)
@@ -1841,33 +1826,29 @@
 		return str.join("&")
 	}
 
-	function parseQueryPair(string) {
-		/* eslint-disable no-invalid-this */
-		var pair = string.split("=")
-		var key = decodeURIComponent(pair[0])
-		var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null
-		if (this[key] != null) {
-			if (!isArray(this[key])) this[key] = [this[key]]
-			this[key].push(value)
-		} else {
-			this[key] = value
-		}
-		/* eslint-enable no-invalid-this */
-	}
-
 	function parseQueryString(str) {
 		if (str === "" || str == null) return {}
 		if (str.charAt(0) === "?") str = str.slice(1)
 
 		var pairs = str.split("&")
 		var params = {}
-		forEach(pairs, parseQueryPair, params)
+		forEach(pairs, function (string) {
+			var pair = string.split("=")
+			var key = decodeURIComponent(pair[0])
+			var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null
+			if (params[key] != null) {
+				if (!isArray(params[key])) params[key] = [params[key]]
+				params[key].push(value)
+			} else {
+				params[key] = value
+			}
+		})
 
 		return params
 	}
 
-	m.route.buildQueryString = buildQueryString
-	m.route.parseQueryString = parseQueryString
+	mroute.buildQueryString = buildQueryString
+	mroute.parseQueryString = parseQueryString
 
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root)
@@ -1890,22 +1871,26 @@
 	var RESOLVED = 3
 	var REJECTED = 4
 
-	function Deferred(onSuccess, onFailure) {
+	function coerce(value, next, error, inst) {
+		if (isPromise(value)) {
+			return value.then(function (value) {
+				coerce(value, next, error, inst)
+			}, function (e) {
+				coerce(e, error, error, inst)
+			})
+		} else {
+			return next.call(inst, value)
+		}
+	}
+
+	function Deferred(onSuccess, onFailure) { // eslint-disable-line max-statements, max-len
 		var self = this
 		var promiseValue
 		var next = []
 		var func = push
 
-		function coerce(value, next, error) {
-			if (isPromise(value)) {
-				return value.then(function (value) {
-					coerce(value, next, error)
-				}, function (e) {
-					coerce(e, error, error)
-				})
-			} else {
-				return next(promiseValue = value)
-			}
+		function set(value) {
+			promiseValue = value
 		}
 
 		function resolve(deferred) {
@@ -1916,31 +1901,31 @@
 			deferred.reject(promiseValue)
 		}
 
-		function push(deferred) {
-			next.push(deferred)
-		}
-
 		function init(promise) {
 			if (func !== reject) promise(promiseValue)
 			return promise
+		}
+
+		function push(value) {
+			next.push(value)
 		}
 
 		self.resolve = function (value) {
 			if (func === push) {
 				fire(RESOLVING, value, self)
 			}
-			return this
+			return self
 		}
 
 		self.reject = function (value) {
 			if (func === push) {
 				fire(REJECTING, value, self)
 			}
-			return this
+			return self
 		}
 
 		self.promise = function (value) {
-			if (arguments.length) coerce(value, noop, noop)
+			if (arguments.length) coerce(value, set, set)
 			return func !== reject ? promiseValue : undefined
 		}
 
@@ -1954,19 +1939,19 @@
 			return self.promise.then(null, callback)
 		}
 
-		self.promise.finally = function (callback) {
-			function _callback() {
-				var p = new Deferred().resolve(callback()).promise
-				if (func !== reject) p(promiseValue)
-				return p
-			}
+		function wrapper(callback, func) {
+			var p = mdeferred().resolve(callback()).promise
+			if (func !== reject) p(promiseValue)
+			return p.then(func)
+		}
 
+		self.promise.finally = function (callback) {
 			return self.promise.then(function () {
-				return _callback().then(function () {
+				return wrapper(callback, function () {
 					return promiseValue
 				})
 			}, function () {
-				_callback().then(function () {
+				return wrapper(callback, function () {
 					throw promiseValue
 				})
 			})
@@ -1980,9 +1965,11 @@
 		}
 
 		function finish(value, state) {
-			coerce(value, function () {
+			coerce(value, function (value) {
+				promiseValue = value
 				run(state === RESOLVED ? resolve : reject)
-			}, function () {
+			}, function (value) {
+				promiseValue = value
 				run(reject)
 			})
 		}
@@ -2000,7 +1987,7 @@
 					fire(REJECTING, value, deferred)
 				})
 			} catch (e) {
-				m.deferred.onerror(e)
+				mdeferred.onerror(e)
 				return fire(REJECTING, e, deferred)
 			}
 		}
@@ -2014,7 +2001,7 @@
 					state = RESOLVING
 				}
 			} catch (e) {
-				m.deferred.onerror(e)
+				mdeferred.onerror(e)
 				return finish(e, REJECTED)
 			}
 
@@ -2031,12 +2018,12 @@
 			try {
 				thenable = isPromise(value)
 			} catch (e) {
-				m.deferred.onerror(e)
+				mdeferred.onerror(e)
 				return fire(REJECTING, e, deferred)
 			}
 
 			if (state === REJECTING) {
-				m.deferred.onerror(value)
+				mdeferred.onerror(value)
 			}
 
 			if (thenable) {
@@ -2047,12 +2034,13 @@
 		}
 	}
 
-	m.deferred = function () {
+	m.deferred = mdeferred
+	function mdeferred() {
 		return new Deferred()
 	}
 
-	m.deferred.prototype = Deferred.prototype
-	m.deferred.prototype.constructor = m.deferred
+	mdeferred.prototype = Deferred.prototype
+	mdeferred.prototype.constructor = mdeferred
 
 	function isNativeError(e) {
 		return e instanceof EvalError ||
@@ -2063,7 +2051,7 @@
 			e instanceof URIError
 	}
 
-	m.deferred.onerror = function (e) {
+	mdeferred.onerror = function (e) {
 		if (isNativeError(e)) {
 			pendingRequests = 0
 			throw e
@@ -2076,31 +2064,29 @@
 		var results = new Array(outstanding)
 		var method = "resolve"
 
-		function synchronizer(pos, resolved) {
-			return function (value) {
-				results[pos] = value
-				if (!resolved) method = "reject"
-				if (--outstanding === 0) {
-					deferred.promise(results)
-					deferred[method](results)
-				}
-				return value
+		function synchronizer(i, value) {
+			results[i] = value
+			if (--outstanding === 0) {
+				deferred.promise(results)
+				deferred[method](results)
 			}
+			return value
 		}
 
 		if (args.length > 0) {
 			forEach(args, function (arg, i) {
-				arg.then(synchronizer(i, true), synchronizer(i, false))
+				arg.then(function (value) {
+					return synchronizer(i, value)
+				}, function (value) {
+					method = "reject"
+					return synchronizer(i, value)
+				})
 			})
 		} else {
 			deferred.resolve([])
 		}
 
 		return deferred.promise
-	}
-
-	function identity(value) {
-		return value
 	}
 
 	function generateCallbackKey() {
@@ -2116,7 +2102,7 @@
 			script.parentNode.removeChild(script)
 
 			options.onload({
-				type: "load",
+				success: true,
 				target: {
 					responseText: resp
 				}
@@ -2129,7 +2115,7 @@
 			script.parentNode.removeChild(script)
 
 			options.onerror({
-				type: "error",
+				success: false,
 				target: {
 					status: 500,
 					responseText: '{"error": "Error making jsonp request"}'
@@ -2161,11 +2147,11 @@
 			options.password)
 
 		xhr.onreadystatechange = function () {
-			if (xhr.readyState === 4) {
-				if (xhr.status >= 200 && xhr.status < 300) {
-					options.onload({type: "load", target: xhr})
+			if (this.readyState === 4) {
+				if (this.status >= 200 && this.status < 300) {
+					options.onload({success: true, target: this})
 				} else {
-					options.onerror({type: "error", target: xhr})
+					options.onerror({success: false, target: this})
 				}
 			}
 		}
@@ -2194,7 +2180,7 @@
 			data = options.data
 		}
 
-		if (data && (!isString(data) && data.constructor !== window.FormData)) {
+		if (data && !isString(data) && data.constructor !== window.FormData) {
 			throw new Error("Request data should be either be a string or " +
 				"FormData. Check the `serialize` option in `m.request`")
 		}
@@ -2234,17 +2220,17 @@
 		return url
 	}
 
-	function defaultExtract(jsonp) {
-		return jsonp.responseText
-	}
-
 	m.request = function (options) {
-		if (options.background !== true) m.startComputation()
-		var deferred = new Deferred()
+		if (options.background !== true) startComputation()
+		var deferred = mdeferred()
 
-		var serialize = identity
-		var deserialize = identity
-		var extract = defaultExtract
+		var serialize = function (value) { // eslint-disable-line func-style
+			return value
+		}
+		var deserialize = serialize
+		var extract = function (jsonp) { // eslint-disable-line func-style
+			return jsonp.responseText
+		}
 
 		if (!options.dataType || options.dataType.toLowerCase() !== "jsonp") {
 			serialize = options.serialize || JSON.stringify
@@ -2267,7 +2253,7 @@
 		options = bindData(options, options.data, serialize)
 		options.onload = options.onerror = function (ev) {
 			ev = ev || event
-			var doSuccess = ev.type === "load"
+			var doSuccess = ev.success
 			var unwrap
 
 			if (doSuccess) {
@@ -2277,8 +2263,8 @@
 			}
 
 			try {
-				var response = (unwrap || identity)(
-					deserialize(extract(ev.target, options)), ev.target)
+				var response = deserialize(extract(ev.target, options))
+				if (unwrap) response = unwrap(response, ev.target)
 				if (doSuccess) {
 					if (isArray(response) && options.type) {
 						forEach(response, function (res, i) {
@@ -2294,7 +2280,7 @@
 			} catch (e) {
 				deferred.reject(e)
 			} finally {
-				if (options.background !== true) m.endComputation()
+				if (options.background !== true) endComputation()
 			}
 		}
 
