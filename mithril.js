@@ -1,4 +1,4 @@
-void (function (global, factory) { // eslint-disable-line
+;(function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
 	var m = factory(typeof window !== "undefined" ? window : {})
@@ -37,22 +37,20 @@ void (function (global, factory) { // eslint-disable-line
 
 	function noop() {}
 
-	function forEach(list, f) {
-		for (var i = 0; i < list.length && !f(list[i], i++);) {
-			// empty
+	function forEach(list, f, inst) {
+		for (var i = 0; i < list.length; i++) {
+			f.call(inst, list[i], i)
 		}
 	}
 
-	function forOwn(obj, f) {
+	function forOwn(obj, f, inst) {
 		for (var prop in obj) {
 			if (hasOwn.call(obj, prop)) {
-				if (f(obj[prop], prop)) break
+				if (f.call(inst, obj[prop], prop)) break
 			}
 		}
 	}
 
-	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g
-	var attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/ // eslint-disable-line max-len
 
 	// caching commonly used variables
@@ -87,23 +85,23 @@ void (function (global, factory) { // eslint-disable-line
 	*/
 
 	function checkForAttrs(pairs) {
-		return pairs != null &&
-			isObject(pairs) &&
+		return pairs != null && isObject(pairs) &&
 			!("tag" in pairs || "view" in pairs || "subtree" in pairs)
 	}
 
 	function parseSelector(tag, cell) {
 		var classes = []
+		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g
 		var match
 		while ((match = parser.exec(tag)) != null) {
-			if (match[1] === "" && match[2]) {
+			if (match[1] === "" && match[2] != null) {
 				cell.tag = match[2]
 			} else if (match[1] === "#") {
 				cell.attrs.id = match[2]
 			} else if (match[1] === ".") {
 				classes.push(match[2])
 			} else if (match[3][0] === "[") {
-				var pair = attrParser.exec(match[3])
+				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
 				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true)
 			}
 		}
@@ -111,33 +109,63 @@ void (function (global, factory) { // eslint-disable-line
 		return classes
 	}
 
-	function getChildrenFromList(hasAttrs, args) {
-		var children = hasAttrs ? args.slice(1) : args
-		if (children.length === 1 && isArray(children[0])) {
-			return children[0]
-		} else {
-			return children
-		}
-	}
-
-	function assignAttrs(cell, attrs, classAttr, classes) {
-		forOwn(attrs, function (value, attr) {
-			if (attr === classAttr &&
-					attrs[attr] != null &&
-					attrs[attr] !== "") {
-				classes.push(attrs[attr])
-
-				// create key in correct iteration order
-				cell.attrs[attr] = ""
-			} else {
-				cell.attrs[attr] = attrs[attr]
+	function assignAttrs(target, attrs, classAttr, classes) {
+		var hasClass = false
+		if (hasOwn.call(attrs, classAttr)) {
+			var value = attrs[classAttr]
+			if (value != null && value !== "") {
+				hasClass = true
+				classes.push(value)
 			}
+		}
+
+		forOwn(attrs, function (value, attr) {
+			target[attr] = attr === classAttr && hasClass ? "" : value
 		})
 
 		if (classes.length) {
-			cell.attrs[classAttr] = classes.join(" ")
+			target[classAttr] = classes.join(" ")
 		}
 	}
+
+	function parameterize(component) {
+		var args = []
+		for (var i = 1; i < arguments.length; i++) {
+			args.push(arguments[i])
+		}
+
+		var originalCtrl = component.controller || noop
+
+		function Ctrl() {
+			return originalCtrl.apply(this, args) || this
+		}
+
+		if (originalCtrl !== noop) {
+			Ctrl.prototype = originalCtrl.prototype
+		}
+
+		var originalView = component.view || noop
+
+		function view(ctrl) {
+			var rest = [ctrl].concat(args)
+			for (var i = 1; i < arguments.length; i++) {
+				rest.push(arguments[i])
+			}
+
+			return originalView.apply(component, rest)
+		}
+
+		view.$original = originalView
+		var output = {controller: Ctrl, view: view}
+
+		if (args[0] && args[0].key != null) {
+			output.attrs = {key: args[0].key}
+		}
+
+		return output
+	}
+
+	m.component = parameterize
 
 	/**
 	* @param {Tag} The DOM node tag
@@ -146,34 +174,60 @@ void (function (global, factory) { // eslint-disable-line
 	*                      or splat (optional)
 	*/
 	function m(tag, pairs) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args[i - 1] = arguments[i]
-		}
-
-		if (isObject(tag)) return parameterize(tag, args)
-		var hasAttrs = checkForAttrs(pairs)
-		var attrs = hasAttrs ? pairs : {}
-		var classAttr = "class" in attrs ? "class" : "className"
-		var cell = {tag: "div", attrs: {}}
+		// The arguments are passed directly like this to delay array
+		// allocation.
+		if (isObject(tag)) return parameterize.apply(null, arguments)
 
 		if (!isString(tag)) {
-			throw new Error("selector in m(selector, attrs, children) should " +
-				"be a string")
+			throw new TypeError("selector in m(selector, attrs, children) " +
+				"should be a string")
 		}
 
-		var classes = parseSelector(tag, cell)
-		cell.children = getChildrenFromList(hasAttrs, args)
+		// Degenerate case frequently trips people up. Check for it here so that
+		// people know it doesn't work.
+		if (!tag) {
+			throw new TypeError("selector cannot be an empty string")
+		}
 
-		assignAttrs(cell, attrs, classAttr, classes)
+		var hasAttrs = checkForAttrs(pairs)
+
+		var args = []
+		for (var i = hasAttrs ? 2 : 1; i < arguments.length; i++) {
+			args.push(arguments[i])
+		}
+
+		var children
+
+		if (args.length === 1 && isArray(args[0])) {
+			children = args[0]
+		} else {
+			children = args
+		}
+
+		var cell = {
+			tag: "div",
+			attrs: {},
+			children: children
+		}
+
+		assignAttrs(
+			cell.attrs,
+			hasAttrs ? pairs : {},
+			hasAttrs && "class" in pairs ? "class" : "className",
+			parseSelector(tag, cell)
+		)
 
 		return cell
 	}
 
-	function forKeys(list, f) {
-		forEach(list, function (attrs, i) {
+	function forKeys(list, f, inst) {
+		for (var i = 0; i < list.length; i++) {
+			var attrs = list[i]
 			attrs = attrs && attrs.attrs
-			return attrs && attrs.key != null && f(attrs, i)
-		})
+			if (attrs && attrs.key != null && f.call(inst, attrs, i)) {
+				break
+			}
+		}
 	}
 
 	// This function was causing deopts in Chrome.
@@ -189,17 +243,6 @@ void (function (global, factory) { // eslint-disable-line
 		}
 
 		return ""
-	}
-
-	// This function was causing deopts in Chrome.
-	function injectTextNode(parent, first, index, data) {
-		try {
-			insertNode(parent, first, index)
-			first.nodeValue = data
-		} catch (e) {
-			// IE erroneously throws error when appending an empty text node
-			// after a null
-		}
 	}
 
 	function flatten(list) {
@@ -220,110 +263,128 @@ void (function (global, factory) { // eslint-disable-line
 		parent.insertBefore(node, parent.childNodes[index] || null)
 	}
 
+	// the below recursively manages creation/diffing/removal of DOM elements
+	// based on comparison between `data` and `cached`
+	//
+	// the diff algorithm can be summarized as this:
+	// 1) compare `data` and `cached`
+	// 2) if they are different, copy `data` to `cached` and update the DOM
+	//    based on what the difference is
+	// 3) recursively apply this algorithm for every array and for the
+	//    children of every virtual element
+	//
+	// the `cached` data structure is essentially the same as the previous
+	// redraw's `data` data structure, with a few additions:
+	// - `cached` always has a property called `nodes`, which is a list of
+	//    DOM elements that correspond to the data represented by the
+	//    respective virtual element
+	// - in order to support attaching `nodes` as a property of `cached`,
+	//    `cached` is *always* a non-primitive object, i.e. if the data was
+	//    a string, then cached is a String instance. If data was `null` or
+	//    `undefined`, cached is `new String("")`
+	// - `cached also has a `configContext` property, which is the state
+	//    storage object exposed by config(element, isInitialized, context)
+	// - when `cached` is an Object, it represents a virtual element; when
+	//    it's an Array, it represents a list of elements; when it's a
+	//    String, Number or Boolean, it represents a text node
+	//
+	// `parentElement` is a DOM element used for W3C DOM API calls
+	// `parentTag` is only used for handling a corner case for textarea
+	// values
+	// `parentCache` is used to remove nodes in some multi-node cases
+	// `parentIndex` and `index` are used to figure out the offset of nodes.
+	// They're artifacts from before arrays started being flattened and are
+	// likely refactorable
+	// `data` and `cached` are, respectively, the new and old nodes being
+	// diffed
+	// `shouldReattach` is a flag indicating whether a parent node was
+	// recreated (if so, and if this node is reused, then this node must
+	// reattach itself to the new parent)
+	// `editable` is a flag that indicates whether an ancestor is
+	// contenteditable
+	// `namespace` indicates the closest HTML namespace as it cascades down
+	// from an ancestor
+	// `configs` is a list of config functions to run after the topmost
+	// `build` call finishes running
+	//
+	// there's logic that relies on the assumption that null and undefined
+	// data are equivalent to empty strings
+	// - this prevents lifecycle surprises from procedural helpers that mix
+	//   implicit and explicit return statements (e.g.
+	//   function foo() {if (cond) return m("div")}
+	// - it simplifies diffing code
+
+	function Builder(
+		parentElement,
+		parentTag,
+		parentCache,
+		parentIndex,
+		data,
+		cached,
+		shouldReattach,
+		index,
+		editable,
+		namespace,
+		configs
+	) {
+		this.parentElement = parentElement
+		this.parentTag = parentTag
+		this.parentCache = parentCache
+		this.parentIndex = parentIndex
+		this.data = data
+		this.cached = cached
+		this.shouldReattach = shouldReattach
+		this.index = index
+		this.editable = editable
+		this.namespace = namespace
+		this.configs = configs
+	}
+
+	Builder.prototype.build = function () {
+		this.data = dataToString(this.data)
+		if (this.data.subtree === "retain") return this.cached
+		this.makeCache()
+
+		if (isArray(this.data)) {
+			return this.buildArray()
+		} else if (this.data != null && isObject(this.data)) {
+			return this.buildObject()
+		} else if (isFunction(this.data)) {
+			return this.cached
+		} else {
+			return this.handleTextNode()
+		}
+	}
+
+	Builder.prototype.makeCache = function () {
+		if (this.cached != null) {
+			if (type.call(this.cached) === type.call(this.data)) {
+				return
+			}
+
+			if (this.parentCache && this.parentCache.nodes) {
+				var offset = this.index - this.parentIndex
+				var end = offset +
+					(isArray(this.data) ? this.data : this.cached.nodes).length
+
+				clear(
+					this.parentCache.nodes.slice(offset, end),
+					this.parentCache.slice(offset, end))
+			} else if (this.cached.nodes) {
+				clear(this.cached.nodes, this.cached)
+			}
+		}
+
+		this.cached = new this.data.constructor()
+		// if constructor creates a virtual dom element, use a blank object as
+		// the base cached node instead of copying the virtual el (#277)
+		if (this.cached.tag) this.cached = {}
+		this.cached.nodes = []
+	}
+
 	var DELETION = 1
 	var INSERTION = 2
 	var MOVE = 3
-
-	function handleKeysDiffer(data, existing, cached, parent) {
-		forKeys(data, function (key, i) {
-			key = key.key
-			if (existing[key]) {
-				existing[key] = {
-					action: MOVE,
-					index: i,
-					from: existing[key].index,
-					element: cached.nodes[existing[key].index] ||
-						$document.createElement("div")
-				}
-			} else {
-				existing[key] = {action: INSERTION, index: i}
-			}
-		})
-
-		var actions = []
-
-		forOwn(existing, function (value) {
-			actions.push(value)
-		})
-
-		var changes = actions.sort(sortChanges)
-		var newCached = new Array(cached.length)
-		newCached.nodes = cached.nodes.slice()
-
-		forEach(changes, function (change) {
-			var index = change.index
-
-			switch (change.action) {
-			case DELETION:
-				clear(cached[index].nodes, cached[index])
-				newCached.splice(index, 1)
-				break
-
-			case INSERTION:
-				var dummy = $document.createElement("div")
-				dummy.key = data[index].attrs.key
-				insertNode(parent, dummy, index)
-				newCached.splice(index, 0, {
-					attrs: {key: data[index].attrs.key},
-					nodes: [dummy]
-				})
-				newCached.nodes[index] = dummy
-				break
-
-			case MOVE:
-				var changeElement = change.element
-				var maybeChanged = parent.childNodes[index]
-				if (maybeChanged !== changeElement && changeElement !== null) {
-					parent.insertBefore(changeElement, maybeChanged || null)
-				}
-				newCached[index] = cached[change.from]
-				newCached.nodes[index] = changeElement
-			}
-		})
-
-		return newCached
-	}
-
-	function diffKeys(data, cached, existing, parentElement) {
-		var keysDiffer = data.length !== cached.length
-
-		if (!keysDiffer) {
-			forKeys(data, function (attrs, i) {
-				var cachedCell = cached[i]
-				return keysDiffer = cachedCell &&
-					cachedCell.attrs &&
-					cachedCell.attrs.key !== attrs.key
-			})
-		}
-
-		if (keysDiffer) {
-			return handleKeysDiffer(data, existing, cached, parentElement)
-		} else {
-			return cached
-		}
-	}
-
-	// diffs the array itself
-	function diffArray(data, cached, nodes) {
-		// update the list of DOM nodes by collecting the nodes from each item
-		forEach(data, function (_, i) {
-			if (cached[i] != null) nodes.push.apply(nodes, cached[i].nodes)
-		})
-
-		// remove items from the end of the array if the new array is shorter
-		// than the old one. if errors ever happen here, the issue is most
-		// likely a bug in the construction of the `cached` data structure
-		// somewhere earlier in the program
-		forEach(cached.nodes, function (node, i) {
-			if (node.parentNode != null && nodes.indexOf(node) < 0) {
-				clear([node], [cached[i]])
-			}
-		})
-
-		if (data.length < cached.length) cached.length = data.length
-
-		cached.nodes = nodes
-	}
 
 	function buildArrayKeys(data) {
 		var guid = 0
@@ -338,6 +399,317 @@ void (function (global, factory) { // eslint-disable-line
 		})
 	}
 
+	Builder.prototype.buildArrayChild = function (child, cached, count) {
+		return new Builder(
+			this.parentElement,
+			this.parentTag,
+			this.cached,
+			this.index,
+			child,
+			cached,
+			this.shouldReattach,
+			this.index + count || count,
+			this.editable,
+			this.namespace,
+			this.configs
+		).build()
+	}
+
+	Builder.prototype.buildArray = function () {
+		this.data = flatten(this.data)
+		var nodes = []
+		var intact = this.cached.length === this.data.length
+		var subArrayCount = 0
+
+		// keys algorithm:
+		// sort elements without recreating them if keys are present
+		//
+		// 1) create a map of all existing keys, and mark all for deletion
+		// 2) add new keys to map and mark them for addition
+		// 3) if key exists in new list, change action from deletion to a move
+		// 4) for each key, handle its corresponding action as marked in
+		//    previous steps
+		var existing = {}
+		var shouldMaintainIdentities = false
+		forKeys(this.cached, function (attrs, i) {
+			shouldMaintainIdentities = true
+			existing[attrs.key] = {
+				action: DELETION,
+				index: i
+			}
+		})
+
+		buildArrayKeys(this.data)
+		if (shouldMaintainIdentities) {
+			this.diffKeys(existing)
+		}
+		// end key algorithm
+
+		// don't change: faster than forEach
+		var cacheCount = 0
+		for (var i = 0, len = this.data.length; i < len; i++) {
+			// diff each item in the array
+			var item = this.buildArrayChild(
+				this.data[i],
+				this.cached[cacheCount],
+				subArrayCount
+			)
+
+			if (item !== undefined) {
+				intact = intact && item.nodes.intact
+				subArrayCount += getSubArrayCount(item)
+				this.cached[cacheCount++] = item
+			}
+		}
+
+		if (!intact) this.diffArray(nodes)
+
+		return this.cached
+	}
+
+	Builder.prototype.diffKeys = function (existing) {
+		var keysDiffer = this.data.length !== this.cached.length
+
+		if (!keysDiffer) {
+			forKeys(this.data, function (attrs, i) {
+				var cachedCell = this[i] // eslint-disable-line no-invalid-this
+				return keysDiffer = cachedCell &&
+					cachedCell.attrs &&
+					cachedCell.attrs.key !== attrs.key
+			}, this.cached)
+		}
+
+		if (keysDiffer) {
+			this.handleKeysDiffer(existing)
+		}
+	}
+
+	// Simple `this` helper
+	function thisPush(value) {
+		this.push(value) // eslint-disable-line no-invalid-this
+	}
+
+	Builder.prototype.handleKeysDiffer = function (existing) {
+		forKeys(this.data, function (key, i) {
+			key = key.key
+			if (existing[key]) {
+				existing[key] = {
+					action: MOVE,
+					index: i,
+					from: existing[key].index,
+					element: this[existing[key].index] || // eslint-disable-line
+						$document.createElement("div")
+				}
+			} else {
+				existing[key] = {
+					action: INSERTION,
+					index: i
+				}
+			}
+		}, this.cached.nodes)
+
+		var actions = []
+		forOwn(existing, thisPush, actions)
+
+		var changes = actions.sort(sortChanges)
+		var newCached = new Array(this.cached.length)
+		newCached.nodes = this.cached.nodes.slice()
+
+		forEach(changes, function (change) {
+			/* eslint-disable no-invalid-this */
+			var index = change.index
+
+			switch (change.action) {
+			case DELETION:
+				clear(this.cached[index].nodes, this.cached[index])
+				newCached.splice(index, 1)
+				break
+
+			case INSERTION:
+				var dummy = $document.createElement("div")
+				dummy.key = this.data[index].attrs.key
+				insertNode(this.parentElement, dummy, index)
+				newCached.splice(index, 0, {
+					attrs: {key: this.data[index].attrs.key},
+					nodes: [dummy]
+				})
+				newCached.nodes[index] = dummy
+				break
+
+			case MOVE:
+				var changeElement = change.element
+				var maybeChanged = this.parentElement.childNodes[index]
+				if (maybeChanged !== changeElement && changeElement !== null) {
+					this.parentElement.insertBefore(
+						changeElement,
+						maybeChanged || null
+					)
+				}
+				newCached[index] = this.cached[change.from]
+				newCached.nodes[index] = changeElement
+			}
+			/* eslint-enable no-invalid-this */
+		}, this)
+
+		this.cached = newCached
+	}
+
+	// diffs the array itself
+	Builder.prototype.diffArray = function (nodes) {
+		// update the list of DOM nodes by collecting the nodes from each item
+		for (var i = 0; i < this.data.length; i++) {
+			var cached = this.cached[i]
+			if (cached != null) {
+				nodes.push.apply(nodes, cached.nodes)
+			}
+		}
+
+		// remove items from the end of the array if the new array is shorter
+		// than the old one. if errors ever happen here, the issue is most
+		// likely a bug in the construction of the `cached` data structure
+		// somewhere earlier in the program
+		forEach(this.cached.nodes, function (node, i) {
+			/* eslint-disable no-invalid-this */
+			if (node.parentNode != null && nodes.indexOf(node) < 0) {
+				clear([node], [this[i]])
+			}
+			/* eslint-enable no-invalid-this */
+		}, this.cached)
+
+		if (this.data.length < this.cached.length) {
+			this.cached.length = this.data.length
+		}
+
+		this.cached.nodes = nodes
+	}
+
+	Builder.prototype.initAttrs = function () {
+		var dataAttrs = this.data.attrs = this.data.attrs || {}
+		this.cached.attrs = this.cached.attrs || {}
+
+		var dataAttrKeys = Object.keys(this.data.attrs)
+		this.maybeRecreateObject(dataAttrKeys)
+
+		return dataAttrKeys.length > +("key" in dataAttrs)
+	}
+
+	Builder.prototype.buildObject = function () {
+		var views = []
+		var controllers = []
+
+		this.markViews(views, controllers)
+
+		if (!this.data.tag && controllers.length) {
+			throw new Error("Component template must return a virtual " +
+				"element, not an array, string, etc.")
+		}
+
+		var hasKeys = this.initAttrs()
+
+		if (isString(this.data.tag)) {
+			return new ObjectBuilder(
+				this,
+				hasKeys,
+				views,
+				controllers
+			).build()
+		}
+	}
+
+	Builder.prototype.markViews = function (views, controllers) {
+		var cached = this.cached && this.cached.controllers
+		while (this.data.view != null) {
+			this.checkView(cached, controllers, views)
+		}
+	}
+
+	var forcing = false
+	var pendingRequests = 0
+
+	Builder.prototype.checkView = function (cached, controllers, views) {
+		var view = this.data.view.$original || this.data.view
+		var controller = getController(
+			this.cached.views,
+			view,
+			cached,
+			this.data.controller
+		)
+
+		// Faster to coerce to number and check for NaN
+		var key = +(this.data && this.data.attrs && this.data.attrs.key)
+
+		if (pendingRequests === 0 || forcing ||
+				cached && cached.indexOf(controller) > -1) {
+			this.data = this.data.view(controller)
+		} else {
+			this.data = {tag: "placeholder"}
+		}
+
+		if (this.data.subtree === "retain") return this.cached
+		if (key === key) { // eslint-disable-line no-self-compare
+			(this.data.attrs = this.data.attrs || {}).key = key
+		}
+		updateLists(views, controllers, view, controller)
+	}
+
+	var unloaders = []
+
+	function updateLists(views, controllers, view, controller) {
+		views.push(view)
+		var idx = controllers.push(controller) - 1
+		unloaders[idx] = {
+			views: views,
+			view: view,
+			controller: controller,
+			controllers: controllers,
+			handler: function (ev) {
+				var i = this.controllers.indexOf(this.controller)
+				this.controllers.splice(i, 1)
+				i = this.views.indexOf(this.view)
+				this.views.splice(i, 1)
+				var unload = this.controller && this.controller.onunload
+				if (type.call(unload) === "[object Function]") {
+					this.controller.onunload(ev)
+				}
+			}
+		}
+	}
+
+	function getController(views, view, cached, controller) {
+		var index = m.redraw.strategy() === "diff" && views ?
+			views.indexOf(view) :
+			-1
+
+		if (index > -1) {
+			return cached[index]
+		} else if (typeof controller === "function") {
+			return new controller()
+		} else {
+			return {}
+		}
+	}
+
+	function unloadSingleController(controller) {
+		if (controller.unload) {
+			controller.onunload({preventDefault: noop})
+		}
+	}
+
+	Builder.prototype.maybeRecreateObject = function (dataAttrKeys) {
+		// if an element is different enough from the one in cache, recreate it
+		if (this.elemIsDifferentEnough(dataAttrKeys)) {
+			if (this.cached.nodes.length) clear(this.cached.nodes)
+			if (this.cached.configContext &&
+					isFunction(this.cached.configContext.onunload)) {
+				this.cached.configContext.onunload()
+			}
+
+			if (this.cached.controllers) {
+				forEach(this.cached.controllers, unloadSingleController)
+			}
+		}
+	}
+
 	// shallow array compare, sorts
 	function arraySortCompare(a, b) {
 		a.sort()
@@ -350,7 +722,9 @@ void (function (global, factory) { // eslint-disable-line
 		return true
 	}
 
-	function elemIsDifferentEnough(data, cached, dataAttrKeys) {
+	Builder.prototype.elemIsDifferentEnough = function (dataAttrKeys) {
+		var data = this.data
+		var cached = this.cached
 		if (data.tag !== cached.tag) return true
 		if (!arraySortCompare(dataAttrKeys, Object.keys(cached.attrs))) {
 			return true
@@ -360,70 +734,174 @@ void (function (global, factory) { // eslint-disable-line
 		if (data.attrs.key !== cached.attrs.key) return true
 
 		if (m.redraw.strategy() === "all") {
-			return !(cached.configContext &&
-				cached.configContext.retain === true)
+			return !cached.configContext || cached.configContext.retain !== true
 		} else if (m.redraw.strategy() === "diff") {
-			return cached.configContext &&
-				cached.configContext.retain === false
+			return cached.configContext && cached.configContext.retain === false
+		} else {
+			return false
 		}
 	}
 
-	function maybeRecreateObject(data, cached, dataAttrKeys) {
-		// if an element is different enough from the one in cache, recreate it
-		if (elemIsDifferentEnough(data, cached, dataAttrKeys)) {
-			if (cached.nodes.length) clear(cached.nodes)
-			if (cached.configContext &&
-					isFunction(cached.configContext.onunload)) {
-				cached.configContext.onunload()
-			}
+	function getObjectNamespace(builder) {
+		var data = builder.data
 
-			if (cached.controllers) {
-				forEach(cached.controllers, function (controller) {
-					if (controller.unload) {
-						controller.onunload({preventDefault: noop})
-					}
-				})
-			}
-		}
-	}
-
-	function getObjectNamespace(data, namespace) {
 		return data.attrs.xmlns ? data.attrs.xmlns :
 			data.tag === "svg" ? "http://www.w3.org/2000/svg" :
 			data.tag === "math" ? "http://www.w3.org/1998/Math/MathML" :
-			namespace
+			builder.namespace
 	}
 
-	var pendingRequests = 0
-	m.startComputation = function () { pendingRequests++ }
-	m.endComputation = function () {
-		if (pendingRequests > 1) {
-			pendingRequests--
+	function ObjectBuilder(builder, hasKeys, views, controllers) {
+		this.builder = builder
+		this.hasKeys = hasKeys
+		this.views = views
+		this.controllers = controllers
+		this.namespace = getObjectNamespace(builder)
+	}
+
+	ObjectBuilder.prototype.buildNewNode = function () {
+		var node = this.createNode()
+		this.builder.cached = this.reconstruct(
+			node,
+			this.createAttrs(node),
+			this.buildChildren(node)
+		)
+		return node
+	}
+
+	ObjectBuilder.prototype.build = function () {
+		var builder = this.builder
+		var isNew = builder.cached.nodes.length === 0
+		var node = isNew ? this.buildNewNode() : this.buildUpdatedNode()
+		if (isNew || builder.shouldReattach && node != null) {
+			insertNode(builder.parentElement, node, builder.index)
+		}
+		builder.scheduleConfigs(node, isNew)
+		return builder.cached
+	}
+
+	ObjectBuilder.prototype.createNode = function () {
+		var data = this.builder.data
+		if (this.namespace === undefined) {
+			if (data.attrs.is) {
+				return $document.createElement(data.tag, data.attrs.is)
+			} else {
+				return $document.createElement(data.tag)
+			}
+		} else if (data.attrs.is) {
+			return $document.createElementNS(this.namespace, data.tag,
+				data.attrs.is)
 		} else {
-			pendingRequests = 0
-			m.redraw()
+			return $document.createElementNS(this.namespace, data.tag)
 		}
 	}
 
-	function unloadCachedControllers(cached, views, controllers) {
-		if (controllers.length) {
-			cached.views = views
-			cached.controllers = controllers
-			forEach(controllers, function (controller) {
-				if (controller.onunload && controller.onunload.$old) {
-					controller.onunload = controller.onunload.$old
-				}
-
-				if (pendingRequests && controller.onunload) {
-					var onunload = controller.onunload
-					controller.onunload = noop
-					controller.onunload.$old = onunload
-				}
-			})
+	ObjectBuilder.prototype.createAttrs = function (node) {
+		var data = this.builder.data
+		if (this.hasKeys) {
+			return setAttributes(node, data.tag, data.attrs, {}, this.namespace)
+		} else {
+			return data.attrs
 		}
 	}
 
-	function scheduleConfigsToBeCalled(configs, data, node, isNew, cached) {
+	ObjectBuilder.prototype.makeChild = function (node, shouldReattach) {
+		var builder = this.builder
+		return new Builder(
+			node,
+			builder.data.tag,
+			undefined,
+			undefined,
+			builder.data.children,
+			builder.cached.children,
+			shouldReattach,
+			0,
+			builder.data.attrs.contenteditable ? node : builder.editable,
+			this.namespace,
+			builder.configs
+		).build()
+	}
+
+	ObjectBuilder.prototype.buildChildren = function (node) {
+		var data = this.builder.data
+		if (data.children != null && data.children.length !== 0) {
+			return this.makeChild(node, true)
+		} else {
+			return data.children
+		}
+	}
+
+	ObjectBuilder.prototype.reconstruct = function (node, attrs, children) {
+		var data = this.builder.data
+		var cached = {
+			tag: data.tag,
+			attrs: attrs,
+			children: children,
+			nodes: [node]
+		}
+
+		this.unloadCachedControllers(cached)
+
+		if (cached.children && !cached.children.nodes) {
+			cached.children.nodes = []
+		}
+
+		// edge case: setting value on <select> doesn't work before children
+		// exist, so set it again after children have been created
+		if (data.tag === "select" && "value" in data.attrs) {
+			setAttributes(node, data.tag, {value: data.attrs.value}, {},
+				this.namespace)
+		}
+		return cached
+	}
+
+	function unloadSingleCachedController(controller) {
+		if (controller.onunload && controller.onunload.$old) {
+			controller.onunload = controller.onunload.$old
+		}
+
+		if (pendingRequests && controller.onunload) {
+			var onunload = controller.onunload
+			controller.onunload = noop
+			controller.onunload.$old = onunload
+		}
+	}
+
+	ObjectBuilder.prototype.unloadCachedControllers = function (cached) {
+		if (this.controllers.length) {
+			cached.views = this.views
+			cached.controllers = this.controllers
+			forEach(this.controllers, unloadSingleCachedController)
+		}
+	}
+
+	ObjectBuilder.prototype.buildUpdatedNode = function () {
+		var builder = this.builder
+		var node = builder.cached.nodes[0]
+		if (this.hasKeys) {
+			setAttributes(
+				node,
+				builder.data.tag,
+				builder.data.attrs,
+				builder.cached.attrs,
+				this.namespace
+			)
+		}
+
+		builder.cached.children = this.makeChild(node, false)
+		builder.cached.nodes.intact = true
+
+		if (this.controllers.length) {
+			builder.cached.views = this.views
+			builder.cached.controllers = this.controllers
+		}
+
+		return node
+	}
+
+	Builder.prototype.scheduleConfigs = function (node, isNew) {
+		var data = this.data
+		var cached = this.cached
 		// schedule configs to be called. They are called after `build` finishes
 		// running
 		var config = data.attrs.config
@@ -431,60 +909,43 @@ void (function (global, factory) { // eslint-disable-line
 			var context = cached.configContext = cached.configContext || {}
 
 			// bind
-			configs.push(function () {
+			this.configs.push(function () {
 				return config.call(data, node, !isNew, context, cached)
 			})
 		}
 	}
 
-	function buildUpdatedNode(
-		cached,
-		data,
-		editable,
-		hasKeys,
-		namespace,
-		views,
-		configs,
-		controllers
-	) {
-		var node = cached.nodes[0]
-		if (hasKeys) {
-			setAttributes(node, data.tag, data.attrs, cached.attrs, namespace)
+	Builder.prototype.handleTextNode = function () {
+		if (this.cached.nodes.length === 0) {
+			return this.handleNonexistentNodes()
+		} else if (this.cached.valueOf() !== this.data.valueOf() ||
+				this.shouldReattach) {
+			return this.reattachNodes()
+		} else {
+			this.cached.nodes.intact = true
+			return this.cached
 		}
-
-		cached.children = build(node, data.tag, undefined, undefined,
-			data.children, cached.children, false, 0,
-			data.attrs.contenteditable ? node : editable, namespace, configs)
-
-		cached.nodes.intact = true
-
-		if (controllers.length) {
-			cached.views = views
-			cached.controllers = controllers
-		}
-
-		return node
 	}
 
-	function handleNonexistentNodes(data, parent, index) {
+	Builder.prototype.handleNonexistentNodes = function () {
 		var nodes
-		if (data.$trusted) {
-			nodes = injectHTML(parent, index, data)
+		if (this.data.$trusted) {
+			nodes = injectHTML(this.parentElement, this.index, this.data)
 		} else {
-			nodes = [$document.createTextNode(data)]
-			if (!voidElements.test(parent.nodeName)) {
-				insertNode(parent, nodes[0], index)
+			nodes = [$document.createTextNode(this.data)]
+			if (!voidElements.test(this.parentElement.nodeName)) {
+				insertNode(this.parentElement, nodes[0], this.index)
 			}
 		}
 
 		var cached
 
-		if (typeof data === "string" ||
-				typeof data === "number" ||
-				typeof data === "boolean") {
-			cached = new data.constructor(data)
+		if (typeof this.data === "string" ||
+				typeof this.data === "number" ||
+				typeof this.data === "boolean") {
+			cached = new this.data.constructor(this.data)
 		} else {
-			cached = data
+			cached = this.data
 		}
 
 		cached.nodes = nodes
@@ -492,59 +953,55 @@ void (function (global, factory) { // eslint-disable-line
 		return cached
 	}
 
-	function reattachNodes(data,
-		cached,
-		parentElement,
-		editable,
-		index,
-		parentTag
-	) {
-		var nodes = cached.nodes
-		if (!editable || editable !== $document.activeElement) {
-			if (data.$trusted) {
-				clear(nodes, cached)
-				nodes = injectHTML(parentElement, index, data)
-			} else if (parentTag === "textarea") {
+	Builder.prototype.reattachNodes = function () {
+		var nodes = this.cached.nodes
+		if (!this.editable || this.editable !== $document.activeElement) {
+			if (this.data.$trusted) {
+				clear(nodes, this.cached)
+				nodes = injectHTML(this.parentElement, this.index, this.data)
+			} else if (this.parentTag === "textarea") {
 				// <textarea> uses `value` instead of `nodeValue`.
-				parentElement.value = data
-			} else if (editable) {
+				this.parentElement.value = this.data
+			} else if (this.editable) {
 				// contenteditable nodes use `innerHTML` instead of `nodeValue`.
-				editable.innerHTML = data
+				this.editable.innerHTML = this.data
 			} else {
 				// was a trusted string
 				if (nodes[0].nodeType === 1 ||
 					nodes.length > 1 ||
 					(nodes[0].nodeValue.trim && !nodes[0].nodeValue.trim())
 				) {
-					clear(cached.nodes, cached)
-					nodes = [$document.createTextNode(data)]
+					clear(this.cached.nodes, this.cached)
+					nodes = [$document.createTextNode(this.data)]
 				}
-				injectTextNode(parentElement, nodes[0], index, data)
+
+				this.injectTextNode(nodes[0])
 			}
 		}
 
-		cached = new data.constructor(data)
-		cached.nodes = nodes
-		return cached
+		this.cached = new this.data.constructor(this.data)
+		this.cached.nodes = nodes
+		return this.cached
 	}
 
-	function handleTextNode(
-		cached,
-		data,
-		index,
-		parent,
-		shouldReattach,
-		editable,
-		parentTag
-	) {
-		if (cached.nodes.length === 0) {
-			return handleNonexistentNodes(data, parent, index)
-		} else if (cached.valueOf() !== data.valueOf() || shouldReattach) {
-			return reattachNodes(data, cached, parent, editable, index,
-				parentTag)
+	// This function was causing deopts in Chrome.
+	Builder.prototype.injectTextNode = function (first) {
+		try {
+			insertNode(this.parentElement, first, this.index)
+			first.nodeValue = this.data
+		} catch (e) {
+			// IE erroneously throws error when appending an empty text node
+			// after a null
+		}
+	}
+
+	m.startComputation = function () { pendingRequests++ }
+	m.endComputation = function () {
+		if (pendingRequests > 1) {
+			pendingRequests--
 		} else {
-			cached.nodes.intact = true
-			return cached
+			pendingRequests = 0
+			m.redraw()
 		}
 	}
 
@@ -562,383 +1019,6 @@ void (function (global, factory) { // eslint-disable-line
 		}
 	}
 
-	function buildArray(
-		data,
-		cached,
-		parentElement,
-		index,
-		parentTag,
-		shouldReattach,
-		editable,
-		namespace,
-		configs
-	) {
-		data = flatten(data)
-		var nodes = []
-		var intact = cached.length === data.length
-		var subArrayCount = 0
-
-		// keys algorithm:
-		// sort elements without recreating them if keys are present
-		//
-		// 1) create a map of all existing keys, and mark all for deletion
-		// 2) add new keys to map and mark them for addition
-		// 3) if key exists in new list, change action from deletion to a move
-		// 4) for each key, handle its corresponding action as marked in
-		//    previous steps
-		var existing = {}
-		var shouldMaintainIdentities = false
-		forKeys(cached, function (attrs, i) {
-			shouldMaintainIdentities = true
-			existing[cached[i].attrs.key] = {action: DELETION, index: i}
-		})
-
-		buildArrayKeys(data)
-		if (shouldMaintainIdentities) {
-			cached = diffKeys(data, cached, existing, parentElement)
-		}
-		// end key algorithm
-
-		// don't change: faster than forEach
-		var cacheCount = 0
-		for (var i = 0, len = data.length; i < len; i++) {
-			// diff each item in the array
-			var item = build(parentElement, parentTag, cached, index, data[i],
-				cached[cacheCount], shouldReattach,
-				index + subArrayCount || subArrayCount,
-				editable, namespace, configs)
-
-			if (item !== undefined) {
-				intact = intact && item.nodes.intact
-				subArrayCount += getSubArrayCount(item)
-				cached[cacheCount++] = item
-			}
-		}
-
-		if (!intact) diffArray(data, cached, nodes)
-
-		return cached
-	}
-
-	function makeCache(data, cached, index, parentIndex, parentCache) {
-		if (cached != null) {
-			if (type.call(cached) === type.call(data)) return cached
-
-			if (parentCache && parentCache.nodes) {
-				var offset = index - parentIndex
-				var end = offset + (isArray(data) ? data : cached.nodes).length
-
-				clear(parentCache.nodes.slice(offset, end),
-					parentCache.slice(offset, end))
-			} else if (cached.nodes) {
-				clear(cached.nodes, cached)
-			}
-		}
-
-		cached = new data.constructor()
-		// if constructor creates a virtual dom element, use a blank object as
-		// the base cached node instead of copying the virtual el (#277)
-		if (cached.tag) cached = {}
-		cached.nodes = []
-		return cached
-	}
-
-	function constructNode(data, namespace) {
-		if (namespace === undefined) {
-			if (data.attrs.is) {
-				return $document.createElement(data.tag, data.attrs.is)
-			} else {
-				return $document.createElement(data.tag)
-			}
-		} else if (data.attrs.is) {
-			return $document.createElementNS(namespace, data.tag, data.attrs.is)
-		} else {
-			return $document.createElementNS(namespace, data.tag)
-		}
-	}
-
-	function constructAttrs(data, node, namespace, hasKeys) {
-		if (hasKeys) {
-			return setAttributes(node, data.tag, data.attrs, {}, namespace)
-		} else {
-			return data.attrs
-		}
-	}
-
-	function constructChildren(
-		data,
-		node,
-		cached,
-		editable,
-		namespace,
-		configs
-	) {
-		if (data.children != null && data.children.length !== 0) {
-			return build(node, data.tag, undefined, undefined, data.children,
-				cached.children, true, 0,
-				data.attrs.contenteditable ? node : editable, namespace,
-				configs)
-		} else {
-			return data.children
-		}
-	}
-
-	function reconstructCached(
-		data,
-		attrs,
-		children,
-		node,
-		namespace,
-		views,
-		controllers
-	) {
-		var cached = {
-			tag: data.tag,
-			attrs: attrs,
-			children: children,
-			nodes: [node]
-		}
-
-		unloadCachedControllers(cached, views, controllers)
-
-		if (cached.children && !cached.children.nodes) {
-			cached.children.nodes = []
-		}
-
-		// edge case: setting value on <select> doesn't work before children
-		// exist, so set it again after children have been created
-		if (data.tag === "select" && "value" in data.attrs) {
-			setAttributes(node, data.tag, {value: data.attrs.value}, {},
-				namespace)
-		}
-		return cached
-	}
-
-	function getController(views, view, cachedControllers, controller) {
-		var index = m.redraw.strategy() === "diff" && views ?
-			views.indexOf(view) :
-			-1
-
-		if (index > -1) {
-			return cachedControllers[index]
-		} else if (typeof controller === "function") {
-			return new controller()
-		} else {
-			return {}
-		}
-	}
-
-	var unloaders = []
-
-	function updateLists(views, controllers, view, controller) {
-		views.push(view)
-		var idx = controllers.push(controller) - 1
-		unloaders[idx] = {
-			controller: controller,
-			handler: function (ev) {
-				controllers.splice(controllers.indexOf(controller), 1)
-				views.splice(views.indexOf(view), 1)
-				var unload = controller && controller.onunload
-				if (type.call(unload) === "[object Function]") {
-					controller.onunload(ev)
-				}
-			}
-		}
-	}
-
-	var forcing = false
-
-	function checkView(
-		data,
-		view,
-		cached,
-		cachedControllers,
-		controllers,
-		views
-	) {
-		var controller = getController(cached.views, view, cachedControllers,
-			data.controller)
-
-		// Faster to coerce to number and check for NaN
-		var key = +(data && data.attrs && data.attrs.key)
-
-		if (pendingRequests === 0 || forcing ||
-				cachedControllers &&
-				cachedControllers.indexOf(controller) > -1) {
-			data = data.view(controller)
-		} else {
-			data = {tag: "placeholder"}
-		}
-
-		if (data.subtree === "retain") return cached
-		if (key === key) { // eslint-disable-line no-self-compare
-			(data.attrs = data.attrs || {}).key = key
-		}
-		updateLists(views, controllers, view, controller)
-		return data
-	}
-
-	function markViews(data, cached, views, controllers) {
-		var cachedControllers = cached && cached.controllers
-		while (data.view != null) {
-			data = checkView(data, data.view.$original || data.view, cached,
-				cachedControllers, controllers, views)
-		}
-		return data
-	}
-
-	function initObjectNode(
-		isNew,
-		data,
-		namespace,
-		hasKeys,
-		cached,
-		editable,
-		configs,
-		views,
-		controllers,
-		parentElement,
-		shouldReattach,
-		index
-	) {
-		var node
-		if (isNew) {
-			node = constructNode(data, namespace)
-			// set attributes first, then create children
-			var attrs = constructAttrs(data, node, namespace, hasKeys)
-			var children = constructChildren(data, node, cached, editable,
-				namespace, configs)
-			cached = reconstructCached(data, attrs, children, node, namespace,
-				views, controllers)
-		} else {
-			node = buildUpdatedNode(cached, data, editable, hasKeys, namespace,
-				views, configs, controllers)
-		}
-		if (isNew || shouldReattach && node != null) {
-			insertNode(parentElement, node, index)
-		}
-		// schedule configs to be called. They are called after `build` finishes
-		// running
-		scheduleConfigsToBeCalled(configs, data, node, isNew, cached)
-		return cached
-	}
-
-	function buildObject(
-		data,
-		cached,
-		editable,
-		parentElement,
-		index,
-		shouldReattach,
-		namespace,
-		configs
-	) {
-		var views = []
-		var controllers = []
-
-		data = markViews(data, cached, views, controllers)
-
-		if (!data.tag && controllers.length) {
-			throw new Error("Component template must return a virtual " +
-				"element, not an array, string, etc.")
-		}
-
-		data.attrs = data.attrs || {}
-		cached.attrs = cached.attrs || {}
-
-		var dataAttrKeys = Object.keys(data.attrs)
-		var hasKeys = dataAttrKeys.length > +("key" in data.attrs)
-
-		maybeRecreateObject(data, cached, dataAttrKeys)
-
-		if (isString(data.tag)) {
-			return initObjectNode(cached.nodes.length === 0, data,
-				getObjectNamespace(data, namespace), hasKeys, cached, editable,
-				configs, views, controllers, parentElement, shouldReattach,
-				index)
-		}
-	}
-
-	function build(
-		parentElement,
-		parentTag,
-		parentCache,
-		parentIndex,
-		data,
-		cached,
-		shouldReattach,
-		index,
-		editable,
-		namespace,
-		configs
-	) {
-		// `build` is a recursive function that manages creation/diffing/removal
-		// of DOM elements based on comparison between `data` and `cached`
-		//
-		// the diff algorithm can be summarized as this:
-		// 1) compare `data` and `cached`
-		// 2) if they are different, copy `data` to `cached` and update the DOM
-		//    based on what the difference is
-		// 3) recursively apply this algorithm for every array and for the
-		//    children of every virtual element
-		//
-		// the `cached` data structure is essentially the same as the previous
-		// redraw's `data` data structure, with a few additions:
-		// - `cached` always has a property called `nodes`, which is a list of
-		//    DOM elements that correspond to the data represented by the
-		//    respective virtual element
-		// - in order to support attaching `nodes` as a property of `cached`,
-		//    `cached` is *always* a non-primitive object, i.e. if the data was
-		//    a string, then cached is a String instance. If data was `null` or
-		//    `undefined`, cached is `new String("")`
-		// - `cached also has a `configContext` property, which is the state
-		//    storage object exposed by config(element, isInitialized, context)
-		// - when `cached` is an Object, it represents a virtual element; when
-		//    it's an Array, it represents a list of elements; when it's a
-		//    String, Number or Boolean, it represents a text node
-		//
-		// `parentElement` is a DOM element used for W3C DOM API calls
-		// `parentTag` is only used for handling a corner case for textarea
-		// values
-		// `parentCache` is used to remove nodes in some multi-node cases
-		// `parentIndex` and `index` are used to figure out the offset of nodes.
-		// They're artifacts from before arrays started being flattened and are
-		// likely refactorable
-		// `data` and `cached` are, respectively, the new and old nodes being
-		// diffed
-		// `shouldReattach` is a flag indicating whether a parent node was
-		// recreated (if so, and if this node is reused, then this node must
-		// reattach itself to the new parent)
-		// `editable` is a flag that indicates whether an ancestor is
-		// contenteditable
-		// `namespace` indicates the closest HTML namespace as it cascades down
-		// from an ancestor
-		// `configs` is a list of config functions to run after the topmost
-		// `build` call finishes running
-		//
-		// there's logic that relies on the assumption that null and undefined
-		// data are equivalent to empty strings
-		// - this prevents lifecycle surprises from procedural helpers that mix
-		//   implicit and explicit return statements (e.g.
-		//   function foo() {if (cond) return m("div")}
-		// - it simplifies diffing code
-		data = dataToString(data)
-		if (data.subtree === "retain") return cached
-		cached = makeCache(data, cached, index, parentIndex, parentCache)
-		if (isArray(data)) {
-			return buildArray(data, cached, parentElement, index, parentTag,
-				shouldReattach, editable, namespace, configs)
-		} else if (data != null && isObject(data)) {
-			return buildObject(data, cached, editable, parentElement, index,
-				shouldReattach, namespace, configs)
-		} else if (isFunction(data)) {
-			return cached
-		} else {
-			return handleTextNode(cached, data, index, parentElement,
-				shouldReattach, editable, parentTag)
-		}
-	}
-
 	function sortChanges(a, b) {
 		return a.action - b.action || a.index - b.index
 	}
@@ -953,10 +1033,11 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	function trySetAttribute(attr, dataAttr, cachedAttr, node, namespace, tag) {
-		// `config` isn't a real attributes, so ignore it
-		if (attr === "config" || attr === "key") return
-		// hook event handlers to the auto-redrawing system
-		else if (isFunction(dataAttr) && attr.slice(0, 2) === "on") {
+		if (attr === "config" || attr === "key") {
+			// `config` and `key` aren't real attributes
+			return
+		} else if (isFunction(dataAttr) && attr.slice(0, 2) === "on") {
+			// hook event handlers to the auto-redrawing system
 			node[attr] = autoredraw(dataAttr, node)
 		} else if (attr === "style" && dataAttr != null && isObject(dataAttr)) {
 			// handle `style: {...}`
@@ -1000,19 +1081,22 @@ void (function (global, factory) { // eslint-disable-line
 		}
 	}
 
+	function trySetSingle(attr, data, cached, node, namespace, tag) {
+		try {
+			trySetAttribute(attr, data, cached, node, namespace, tag)
+		} catch (e) {
+			// swallow IE's invalid argument errors to mimic HTML's
+			// fallback-to-doing-nothing-on-invalid-attributes behavior
+			if (e.message.indexOf("Invalid argument") < 0) throw e
+		}
+	}
+
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
 		forOwn(dataAttrs, function (dataAttr, attr) {
 			var cachedAttr = cachedAttrs[attr]
 			if (!(attr in cachedAttrs) || (cachedAttr !== dataAttr)) {
 				cachedAttrs[attr] = dataAttr
-				try {
-					trySetAttribute(attr, dataAttr, cachedAttr, node, namespace,
-						tag)
-				} catch (e) {
-					// swallow IE's invalid argument errors to mimic HTML's
-					// fallback-to-doing-nothing-on-invalid-attributes behavior
-					if (e.message.indexOf("Invalid argument") < 0) throw e
-				}
+				trySetSingle(attr, dataAttr, cachedAttr, node, namespace, tag)
 			} else if (attr === "value" && tag === "input" &&
 					// #348: dataAttr may not be a string, so use loose
 					// comparison
@@ -1024,18 +1108,22 @@ void (function (global, factory) { // eslint-disable-line
 		return cachedAttrs
 	}
 
+	function clearSingle(node) {
+		try {
+			node.parentNode.removeChild(node)
+		} catch (e) {
+			/* eslint-disable max-len */
+			// ignore if this fails due to order of events (see
+			// http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
+			/* eslint-enable max-len */
+		}
+	}
+
 	function clear(nodes, cached) {
 		for (var i = nodes.length - 1; i >= 0; i--) {
-			if (nodes[i] && nodes[i].parentNode) {
-				try {
-					nodes[i].parentNode.removeChild(nodes[i])
-				} catch (e) {
-					/* eslint-disable max-len */
-					// ignore if this fails due to order of events (see
-					// http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
-					/* eslint-enable max-len */
-				}
-
+			var node = nodes[i]
+			if (node != null && node.parentNode) {
+				clearSingle(nodes[i])
 				cached = [].concat(cached)
 				if (cached[i]) unload(cached[i])
 			}
@@ -1046,17 +1134,19 @@ void (function (global, factory) { // eslint-disable-line
 		if (nodes.length) nodes.length = 0
 	}
 
+	function maybeCallControllerOnunload(controller) {
+		if (isFunction(controller.onunload)) {
+			controller.onunload({preventDefault: noop})
+		}
+	}
+
 	function unload(cached) {
 		if (cached.configContext && isFunction(cached.configContext.onunload)) {
 			cached.configContext.onunload()
 			cached.configContext.onunload = null
 		}
 		if (cached.controllers) {
-			forEach(cached.controllers, function (controller) {
-				if (isFunction(controller.onunload)) {
-					controller.onunload({preventDefault: noop})
-				}
-			})
+			forEach(cached.controllers, maybeCallControllerOnunload)
 		}
 		if (cached.children) {
 			if (isArray(cached.children)) {
@@ -1147,10 +1237,14 @@ void (function (global, factory) { // eslint-disable-line
 	var nodeCache = []
 	var cellCache = {}
 
+	function voidCall(func) {
+		func()
+	}
+
 	m.render = function (root, cell, forceRecreation) {
 		if (!root) {
 			throw new Error("Ensure the DOM element being passed to " +
-				"m.route/m.mount/m.render is not undefined.")
+				"m.route/m.mount/m.render exists.")
 		}
 
 		var configs = []
@@ -1171,10 +1265,32 @@ void (function (global, factory) { // eslint-disable-line
 		if (cellCache[id] === undefined) clear(node.childNodes)
 		if (forceRecreation === true) reset(root)
 
-		cellCache[id] = build(node, null, undefined, undefined, cell,
-			cellCache[id], false, 0, null, undefined, configs)
+		cellCache[id] = new Builder(
+			// parentElement
+			node,
+			// parentTag
+			null,
+			// parentCache
+			undefined,
+			// parentIndex
+			undefined,
+			// data
+			cell,
+			// cached
+			cellCache[id],
+			// shouldReattach
+			false,
+			// index
+			0,
+			// editable
+			null,
+			// namespace
+			undefined,
+			// configs
+			configs
+		).build()
 
-		forEach(configs, function (config) { config() })
+		forEach(configs, voidCall)
 	}
 
 	function getCellCacheKey(element) {
@@ -1218,46 +1334,6 @@ void (function (global, factory) { // eslint-disable-line
 	var FRAME_BUDGET = 16 // 60 frames per second = 1 call per 16 ms
 	var topComponent
 
-	function parameterize(component, args) {
-		var originalCtrl = component.controller || noop
-		var originalView = component.view || noop
-
-		function Ctrl() {
-			return originalCtrl.apply(this, args) || this
-		}
-
-		if (originalCtrl !== noop) {
-			Ctrl.prototype = originalCtrl.prototype
-		}
-
-		function view(ctrl) {
-			var rest = [ctrl].concat(args)
-			for (var i = 1; i < arguments.length; i++) {
-				rest.push(arguments[i])
-			}
-
-			return originalView.apply(component, rest)
-		}
-
-		view.$original = originalView
-		var output = {controller: Ctrl, view: view}
-
-		if (args[0] && args[0].key != null) {
-			output.attrs = {key: args[0].key}
-		}
-
-		return output
-	}
-
-	m.component = function (component) {
-		var args = []
-		for (var i = 1; i < arguments.length; i++) {
-			args.push(arguments[i])
-		}
-
-		return parameterize(component, args)
-	}
-
 	function initComponent(component, root, index, isPrevented) {
 		var isNullComponent = component === null
 
@@ -1289,6 +1365,17 @@ void (function (global, factory) { // eslint-disable-line
 		}
 	}
 
+	function callUnloaderHandler(unloader) {
+		if (unloader.controller != null) {
+			unloader.handler(this) // eslint-disable-line no-invalid-this
+			unloader.controller.onunload = null
+		}
+	}
+
+	function setPreventedUnloader(unloader) {
+		unloader.controller.onunload = unloader.handler
+	}
+
 	m.mount = m.module = function (root, component) {
 		if (!root) {
 			throw new Error("Please ensure the DOM element exists before " +
@@ -1307,16 +1394,10 @@ void (function (global, factory) { // eslint-disable-line
 			}
 		}
 
-		forEach(unloaders, function (unloader) {
-			if (unloader.controller == null) return
-			unloader.handler.call(unloader.controller, ev)
-			unloader.controller.onunload = null
-		})
+		forEach(unloaders, callUnloaderHandler, ev)
 
 		if (isPrevented) {
-			forEach(unloaders, function (unloader) {
-				unloader.controller.onunload = unloader.handler
-			})
+			forEach(unloaders, setPreventedUnloader)
 		} else {
 			unloaders = []
 		}
@@ -1364,19 +1445,26 @@ void (function (global, factory) { // eslint-disable-line
 
 	var redrawing = false
 
+	function resetLastRedrawId() {
+		lastRedrawId = 0
+	}
+
+	function attemptRedraw(force) {
+		if (lastRedrawId && !force) {
+			performRedraw()
+		} else {
+			redraw()
+			lastRedrawId = $requestAnimationFrame(resetLastRedrawId,
+				FRAME_BUDGET)
+		}
+	}
+
 	m.redraw = function (force) {
 		if (redrawing) return
 		redrawing = true
 		if (force) forcing = true
 		try {
-			if (lastRedrawId && !force) {
-				performRedraw()
-			} else {
-				redraw()
-				lastRedrawId = $requestAnimationFrame(function () {
-					lastRedrawId = 0
-				}, FRAME_BUDGET)
-			}
+			attemptRedraw(force)
 		} finally {
 			redrawing = forcing = false
 		}
@@ -1390,14 +1478,19 @@ void (function (global, factory) { // eslint-disable-line
 			computePreRedrawHook = null
 		}
 
-		forEach(roots, function (root, i) {
+		for (var i = 0; i < roots.length; i++) {
+			var root = roots[i]
 			var component = components[i]
-			if (controllers[i]) {
-				var args = [controllers[i]]
-				m.render(root,
-					component.view ? component.view(controllers[i], args) : "")
+			var controller = controllers[i]
+			if (controller != null) {
+				m.render(
+					root,
+					component.view ?
+						component.view(controller, [controller]) :
+						""
+				)
 			}
-		})
+		}
 
 		// after rendering within a routed context, we need to scroll back to
 		// the top, and fetch the document title for history.pushState
@@ -1450,13 +1543,14 @@ void (function (global, factory) { // eslint-disable-line
 	var isDefaultRoute = false
 	var routeParams, currentRoute
 
-	function runHistoryListener(listener) {
-		window[listener] = function () {
-			var path = $location[m.route.mode]
-			if (m.route.mode === "pathname") path += $location.search
-			if (currentRoute !== normalizeRoute(path)) redirect(path)
-		}
+	function historyListener() {
+		var path = $location[m.route.mode]
+		if (m.route.mode === "pathname") path += $location.search
+		if (currentRoute !== normalizeRoute(path)) redirect(path)
+	}
 
+	function runHistoryListener(listener) {
+		window[listener] = historyListener
 		computePreRedrawHook = setScroll
 		window[listener]()
 	}
@@ -1466,18 +1560,24 @@ void (function (global, factory) { // eslint-disable-line
 			modes[m.route.mode]
 	}
 
+	function windowPushState() {
+		window.history.pushState(null,
+			$document.title,
+			modes[m.route.mode] + currentRoute)
+	}
+
+	function windowReplaceState() {
+		window.history.replaceState(null,
+			$document.title,
+			modes[m.route.mode] + currentRoute)
+	}
+
 	function computeAndLaunchRedirect(shouldReplaceHistoryEntry) {
 		if (window.history.pushState) {
 			computePreRedrawHook = setScroll
-			var method = shouldReplaceHistoryEntry ?
-				"replaceState" :
-				"pushState"
-			computePostRedrawHook = function () {
-				window.history[method](null,
-					$document.title,
-					modes[m.route.mode] + currentRoute)
-			}
-
+			computePostRedrawHook = shouldReplaceHistoryEntry ?
+				windowReplaceState :
+				windowPushState
 			redirect(modes[m.route.mode] + currentRoute)
 		} else {
 			$location[m.route.mode] = currentRoute
@@ -1611,15 +1711,19 @@ void (function (global, factory) { // eslint-disable-line
 				if (matcher.test(path)) {
 					/* eslint-disable no-loop-func */
 					path.replace(matcher, function () {
+						var values = []
+						for (var i = 1, end = arguments.length - 2; i < end;) {
+							values.push(arguments[i++])
+						}
+
 						var keys = route.match(/:[^\/]+/g) || []
-						var values = [].slice.call(arguments, 1, -2)
 						forEach(keys, function (key, i) {
 							key = key.replace(/:|\./g, "")
 							routeParams[key] = decodeURIComponent(values[i])
 						})
-						m.mount(root, router[route])
 					})
 					/* eslint-enable no-loop-func */
+					m.mount(root, router[route])
 					return true
 				}
 			}
@@ -1694,23 +1798,27 @@ void (function (global, factory) { // eslint-disable-line
 		return str.join("&")
 	}
 
+	function parseQueryPair(string) {
+		/* eslint-disable no-invalid-this */
+		var pair = string.split("=")
+		var key = decodeURIComponent(pair[0])
+		var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null
+		if (this[key] != null) {
+			if (!isArray(this[key])) this[key] = [this[key]]
+			this[key].push(value)
+		} else {
+			this[key] = value
+		}
+		/* eslint-enable no-invalid-this */
+	}
+
 	function parseQueryString(str) {
 		if (str === "" || str == null) return {}
 		if (str.charAt(0) === "?") str = str.slice(1)
 
 		var pairs = str.split("&")
 		var params = {}
-		forEach(pairs, function (string) {
-			var pair = string.split("=")
-			var key = decodeURIComponent(pair[0])
-			var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null
-			if (params[key] != null) {
-				if (!isArray(params[key])) params[key] = [params[key]]
-				params[key].push(value)
-			} else {
-				params[key] = value
-			}
-		})
+		forEach(pairs, parseQueryPair, params)
 
 		return params
 	}
