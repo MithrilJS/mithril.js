@@ -1695,7 +1695,7 @@ void (function (global, factory) { // eslint-disable-line
 		}
 
 		// clear pendingRequests because we want an immediate route change
-		pendingRequests = 0;
+		pendingRequests = 0
 
 		m.route(currentTarget[m.route.mode].slice(modes[m.route.mode].length),
 			args)
