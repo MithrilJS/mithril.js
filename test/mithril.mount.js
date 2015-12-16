@@ -648,7 +648,7 @@ describe("m.mount()", function () {
 	})
 
 	function resolveXhr() {
-		mock.XMLHttpRequest.$instances.pop().onreadystatechange()
+		mock.XMLHttpRequest.$instances.pop().$resolve()
 		mock.requestAnimationFrame.$resolve()
 	}
 

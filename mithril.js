@@ -1859,15 +1859,15 @@
 	var RESOLVED = 3
 	var REJECTED = 4
 
-	function coerce(value, next, error, inst) {
+	function coerce(value, next, error) {
 		if (isPromise(value)) {
 			return value.then(function (value) {
-				coerce(value, next, error, inst)
+				coerce(value, next, error)
 			}, function (e) {
-				coerce(e, error, error, inst)
+				coerce(e, error, error)
 			})
 		} else {
-			return next.call(inst, value)
+			return next(value)
 		}
 	}
 
