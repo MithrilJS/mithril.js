@@ -153,6 +153,7 @@ declare module _mithril {
 		password?: string;
 		data?: any;
 		background?: boolean;
+		initialValue?: any;
 		unwrapSuccess?(data: any): any;
 		unwrapError?(data: any): any;
 		serialize?(dataToSerialize: any): string;
