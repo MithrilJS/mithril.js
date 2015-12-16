@@ -1245,13 +1245,12 @@
 		}
 	})()
 
-	var placeholder = $document.createElement("span")
-
 	function injectHTML(parent, index, data) {
 		var nextSibling = parent.childNodes[index]
 
 		if (nextSibling) {
 			if (nextSibling.nodeType !== 1) {
+				var placeholder = $document.createElement("span")
 				parent.insertBefore(placeholder, nextSibling || null)
 				placeholder.insertAdjacentHTML("beforebegin", data)
 				parent.removeChild(placeholder)
