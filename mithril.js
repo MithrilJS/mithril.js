@@ -602,6 +602,7 @@
 
 			case MOVE:
 				var changeElement = change.element
+				// changeElement is never null
 				if (inst.parent.childNodes[index] !== changeElement) {
 					inst.parent.insertBefore(
 						changeElement,
@@ -790,7 +791,7 @@
 		}
 	}
 
-	// Shallow array compare, assumes strings
+	// shallow array compare, assumes strings
 	function arraySortCompare(a, b) {
 		var len = a.length
 		if (len !== b.length) return false
@@ -1043,9 +1044,10 @@
 				inst.editable.innerHTML = inst.data
 			} else {
 				// was a trusted string
-				if (nodes[0].nodeType === 1 || nodes.length > 1 ||
-					isString(nodes[0].nodeValue) &&
-						/\s*/.test(nodes[0].nodeValue)) {
+				if (nodes[0].nodeType === 1 ||
+					nodes.length > 1 ||
+					(nodes[0].nodeValue.trim && !nodes[0].nodeValue.trim())
+				) {
 					clear(inst.cached.nodes, inst.cached)
 					nodes = [$document.createTextNode(inst.data)]
 				}
@@ -1159,7 +1161,7 @@
 		} catch (e) {
 			// swallow IE's invalid argument errors to mimic HTML's
 			// fallback-to-doing-nothing-on-invalid-attributes behavior
-			if (!/\bInvalid argument\b/.test(e.message)) throw e
+			if (/\bInvalid argument\b/.test(e.message)) throw e
 		}
 	}
 
@@ -1346,7 +1348,7 @@
 
 	function getCellCacheKey(element) {
 		var index = nodeCache.indexOf(element)
-		return index >= 0 ? index : nodeCache.push(element) - 1
+		return index < 0 ? nodeCache.push(element) - 1 : index
 	}
 
 	m.trust = function (value) {
@@ -2177,7 +2179,7 @@
 	}
 
 	function ajax(options) {
-		if (options.dataType === "JSONP") {
+		if (options.dataType && options.dataType.toUpperCase() === "JSONP") {
 			return getJsonp(options)
 		} else {
 			return runXhr(options)
@@ -2220,7 +2222,6 @@
 		}
 
 		if (!options.dataType || options.dataType.toUpperCase() !== "JSONP") {
-			options.dataType = "JSONP"
 			serialize = options.serialize || JSON.stringify
 			deserialize = options.deserialize || JSON.parse
 			extract = options.extract || function (xhr) {
