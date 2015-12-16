@@ -1441,11 +1441,35 @@ void (function (global, factory) { // eslint-disable-line
 	var isDefaultRoute = false
 	var routeParams, currentRoute
 
+	// Depending on the Browser / `m.route.mode` combination, the route
+	// may or may not be URI encoded.
+	// See issue #872 and PR #881.
+
+	var  aElement = $document.createElement("a")
+	aElement.href = "/ö?ö#ö"
+	function getURLPart(target, part) {
+		// In this context, `decodeURI` is the right function to call
+		// (not `decodeURIComponent`), since URI components separators
+		// are not encoded in the raw routes.
+		return /ö/.test(aElement[part]) ? target[part] : decodeURI(target[part])
+	}
+
+	function getRoute(target, mode) {
+		var part = getURLPart(target, mode).slice(modes[mode].length)
+		// IE 11 bug: no leading '/' when getting the 'pathname'
+		if (mode === "pathname" && !/^\//.test(part)) {
+			part = '/' + part
+		}
+		return part
+	}
+
 	function runHistoryListener(listener) {
 		window[listener] = function () {
-			var path = $location[m.route.mode]
-			if (m.route.mode === "pathname") path += $location.search
-			if (currentRoute !== normalizeRoute(path)) redirect(path)
+			var path = getRoute($location, m.route.mode)
+			if (m.route.mode === "pathname") {
+				path += getURLPart($location, "search")
+			}
+			if (currentRoute !== path) redirect(path)
 		}
 
 		computePreRedrawHook = setScroll
@@ -1453,8 +1477,11 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	function getRouteBase() {
-		return (m.route.mode === "pathname" ? "" : $location.pathname) +
-			modes[m.route.mode]
+		return (
+			m.route.mode === "pathname" ? 
+			"" : 
+			getRoute($location, "pathname")
+		) + modes[m.route.mode]
 	}
 
 	function computeAndLaunchRedirect(shouldReplaceHistoryEntry) {
@@ -1468,11 +1495,10 @@ void (function (global, factory) { // eslint-disable-line
 					$document.title,
 					modes[m.route.mode] + currentRoute)
 			}
-
-			redirect(modes[m.route.mode] + currentRoute)
+			redirect(currentRoute)
 		} else {
 			$location[m.route.mode] = currentRoute
-			redirect(modes[m.route.mode] + currentRoute)
+			redirect(currentRoute)
 		}
 	}
 
@@ -1517,8 +1543,8 @@ void (function (global, factory) { // eslint-disable-line
 		} else if (arguments.length === 3 && isString(arg1)) {
 			// m.route(el, defaultRoute, routes)
 			redirect = function (source) {
-				var path = currentRoute = normalizeRoute(source)
-				if (!routeByValue(root, arg2, path)) {
+				currentRoute = source
+				if (!routeByValue(root, arg2, source)) {
 					if (isDefaultRoute) {
 						throw new Error("Ensure the default route matches " +
 							"one of the routes defined in m.route")
@@ -1562,10 +1588,6 @@ void (function (global, factory) { // eslint-disable-line
 	}
 
 	m.route.mode = "search"
-
-	function normalizeRoute(route) {
-		return route.slice(modes[m.route.mode].length)
-	}
 
 	function routeByValue(root, router, path) {
 		var queryStart = path.indexOf("?")
@@ -1617,11 +1639,6 @@ void (function (global, factory) { // eslint-disable-line
 		}
 	}
 
-	// This is part of the logic to determine if special characters
-	// are URI encöded in routes.
-	var  aElement = $document.createElement("a")
-	aElement.href = "/ö?ö#ö"
-
 	function routeUnobtrusive(e) {
 		e = e || event
 
@@ -1633,22 +1650,12 @@ void (function (global, factory) { // eslint-disable-line
 			e.returnValue = false
 		}
 
-		var mode = m.routes.mode
-
-		// Depending on the Browser / `m.route.mode` combination, the route
-		// may or may not be URI encoded.
-		// In this context, `String` is the identity function. `decodeURI` is
-		// the right function to call (not `decodeURIComponent`), since URI
-		// components separators are not encoded in the raw routes.
-		// See issue #872 and PR #881.
-		var decode = /ö/.test(aElement[mode]) ? String : decodeURI
-
 		var currentTarget = e.currentTarget || e.srcElement
 
 		var args
 
-		if (mode === "pathname" && currentTarget.search) {
-			args = parseQueryString(currentTarget.search.slice(1))
+		if (m.routes.mode === "pathname" && currentTarget.search) {
+			args = parseQueryString(getURLPart(currentTarget, "search"))
 		} else {
 			args = {}
 		}
@@ -1656,9 +1663,8 @@ void (function (global, factory) { // eslint-disable-line
 		while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") {
 			currentTarget = currentTarget.parentNode
 		}
-
 		m.route(
-			decode(currentTarget[mode].slice(modes[mode].length)),
+			getRoute(currentTarget, m.route.mode),
 			args
 		)
 	}
