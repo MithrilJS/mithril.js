@@ -539,7 +539,8 @@
 		if (!keysDiffer) {
 			forKeys(inst.data, function (attrs, i) {
 				var cachedCell = inst.cached[i]
-				return keysDiffer = cachedCell &&
+				return keysDiffer =
+					cachedCell &&
 					cachedCell.attrs &&
 					cachedCell.attrs.key !== attrs.key
 			})
@@ -601,8 +602,8 @@
 
 			case MOVE:
 				var changeElement = change.element
-				if (inst.parent.childNodes[index] !== changeElement &&
-						changeElement !== null) {
+				// changeElement is never null
+				if (inst.parent.childNodes[index] !== changeElement) {
 					inst.parent.insertBefore(
 						changeElement,
 						inst.parent.childNodes[index] || null
@@ -764,7 +765,7 @@
 
 		if (index > -1) {
 			return cached[index]
-		} else if (typeof controller === "function") {
+		} else if (isFunction(controller)) {
 			return new controller()
 		} else {
 			return {}
@@ -790,14 +791,19 @@
 		}
 	}
 
-	// shallow array compare, sorts
+	// shallow array compare, assumes strings
 	function arraySortCompare(a, b) {
-		a.sort()
-		b.sort()
 		var len = a.length
 		if (len !== b.length) return false
-		for (var i = 0; i < len; i++) {
-			if (a[i] !== b[i]) return false
+
+		// A string-integer map is used to simplify the algorithm from
+		// two `O(n * log(n))` loops + an `O(n)` loop to just two O(n) loops
+		// with constant-time (or a super cheap `log(n)`) string key lookup.
+		var i = 0
+		var cache = Object.create(null)
+		while (i < len) cache[b[i]] = i++
+		while (i !== 0) {
+			if (cache[a[--i]] === undefined) return false
 		}
 		return true
 	}
@@ -858,8 +864,7 @@
 				return $document.createElement(data.tag)
 			}
 		} else if (data.attrs.is) {
-			return $document.createElementNS(inst.ns, data.tag,
-				data.attrs.is)
+			return $document.createElementNS(inst.ns, data.tag, data.attrs.is)
 		} else {
 			return $document.createElementNS(inst.ns, data.tag)
 		}
@@ -893,7 +898,7 @@
 
 	function objectBuildChildren(inst, node) {
 		var children = inst.builder.data.children
-		if (children != null && children.length !== 0) {
+		if (children != null && children.length) {
 			return objectMakeChild(inst, node, true)
 		} else {
 			return children
@@ -995,22 +1000,8 @@
 	}
 
 	function nodeHasBody(node) {
-		return node !== "AREA" &&
-			node !== "BASE" &&
-			node !== "BR" &&
-			node !== "COL" &&
-			node !== "COMMAND" &&
-			node !== "EMBED" &&
-			node !== "HR" &&
-			node !== "IMG" &&
-			node !== "INPUT" &&
-			node !== "KEYGEN" &&
-			node !== "LINK" &&
-			node !== "META" &&
-			node !== "PARAM" &&
-			node !== "SOURCE" &&
-			node !== "TRACK" &&
-			node !== "WBR"
+		return !/^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/ // eslint-disable-line max-len
+			.test(node)
 	}
 
 	function builderHandleNonexistentNodes(inst) {
@@ -1112,12 +1103,7 @@
 	}
 
 	function shouldSetAttrDirectly(attr) {
-		return attr !== "list" &&
-			attr !== "style" &&
-			attr !== "form" &&
-			attr !== "type" &&
-			attr !== "width" &&
-			attr !== "height"
+		return !/^(list|style|form|type|width|height)$/.test(attr)
 	}
 
 	function trySetAttribute(attr, dataAttr, cachedAttr, node, namespace, tag) {
@@ -1831,7 +1817,7 @@
 
 	function parseQueryString(str) {
 		if (str === "" || str == null) return {}
-		if (str.charAt(0) === "?") str = str.slice(1)
+		if (str[0] === "?") str = str.slice(1)
 
 		var pairs = str.split("&")
 		var params = {}
