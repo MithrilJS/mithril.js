@@ -1145,7 +1145,7 @@
 			//   used as a string, but it's an object in js
 			//
 			// #348
-			// don't set the value if not needed otherwise cursor placement
+			// don't set the value if not needed, otherwise cursor placement
 			// breaks in Chrome
 			if (tag !== "input" || node[attr] !== dataAttr) {
 				node[attr] = dataAttr
@@ -1161,7 +1161,7 @@
 		} catch (e) {
 			// swallow IE's invalid argument errors to mimic HTML's
 			// fallback-to-doing-nothing-on-invalid-attributes behavior
-			if (e.message.indexOf("Invalid argument") < 0) throw e
+			if (/\bInvalid argument\b/.test(e.message)) throw e
 		}
 	}
 
@@ -1173,7 +1173,7 @@
 				trySetSingle(attr, dataAttr, cachedAttr, node, namespace, tag)
 			} else if (attr === "value" && tag === "input" &&
 					// #348: dataAttr may not be a string, so use loose
-					// comparison
+					// comparison (i.e. identity not required).
 					node.value != dataAttr) { // eslint-disable-line eqeqeq
 				node.value = dataAttr
 			}
@@ -1454,7 +1454,7 @@
 	var lastRedrawCallTime = 0
 
 	function actuallyPerformRedraw() {
-		if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId)
+		if (lastRedrawId !== 0) $cancelAnimationFrame(lastRedrawId)
 		lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
 	}
 
@@ -1816,7 +1816,7 @@
 	}
 
 	function parseQueryString(str) {
-		if (str === "" || str == null) return {}
+		if (!str) return {}
 		if (str[0] === "?") str = str.slice(1)
 
 		var pairs = str.split("&")
@@ -2122,7 +2122,7 @@
 
 		script.src = options.url +
 			(options.url.indexOf("?") > 0 ? "&" : "?") +
-			(options.callbackKey ? options.callbackKey : "callback") +
+			(options.callbackKey || "callback") +
 			"=" + callbackKey +
 			"&" + buildQueryString(options.data || {})
 
@@ -2169,7 +2169,7 @@
 			data = options.data
 		}
 
-		if (data && !isString(data) && data.constructor !== window.FormData) {
+		if (data && !isString(data) && !(data instanceof window.FormData)) {
 			throw new Error("Request data should be either be a string or " +
 				"FormData. Check the `serialize` option in `m.request`")
 		}
@@ -2179,7 +2179,7 @@
 	}
 
 	function ajax(options) {
-		if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
+		if (options.dataType && options.dataType.toUpperCase() === "JSONP") {
 			return getJsonp(options)
 		} else {
 			return runXhr(options)
@@ -2221,15 +2221,14 @@
 			return jsonp.responseText
 		}
 
-		if (!options.dataType || options.dataType.toLowerCase() !== "jsonp") {
+		if (!options.dataType || options.dataType.toUpperCase() !== "JSONP") {
 			serialize = options.serialize || JSON.stringify
 			deserialize = options.deserialize || JSON.parse
 			extract = options.extract || function (xhr) {
-				if (xhr.responseText.length === 0 &&
-						deserialize === JSON.parse) {
-					return null
-				} else {
+				if (xhr.responseText.length || deserialize !== JSON.parse) {
 					return xhr.responseText
+				} else {
+					return null
 				}
 			}
 		}
