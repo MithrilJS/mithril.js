@@ -1445,20 +1445,53 @@ void (function (global, factory) { // eslint-disable-line
 	// may or may not be URI encoded.
 	// See issue #872 and PR #881.
 
-	var  aElement = $document.createElement("a")
+	var aElement = $document.createElement("a")
+	var decodeURISeparator, encodeURISeparator
+	;(function () {
+		var encodeMap = {}
+		var decodeMap = {}
+		var encodedList = ";/?:@&=+$,#".split("").map(function (char){
+			var encoded = encodeURIComponent(char).toUpperCase()
+			decodeMap[encoded] = char
+			encodeMap[char] = encoded
+			return encoded
+		}).join("|")
+		var decodeRegex = new RegExp(
+			"(" + encodedList + ")", "ig"
+		)
+		function decodeReplacer(encodedChar) {
+			return decodeMap[encodedChar.toUpperCase()]
+		}
+		decodeURISeparator = function (source) {
+			return ('' + source).replace(decodeRegex, decodeReplacer)
+		}
+		var encodeRegex = new RegExp(
+			"(" +
+			decodeURISeparator(encodedList).replace(/([\/\?\+\$])/g, "\\$1") +
+			")", "ig"
+		)
+		function encodeReplacer(decodedChar) {
+			return encodeMap[decodedChar.toUpperCase()]
+		}
+		encodeURISeparator = function (source) {
+			return ('' + source).replace(encodeRegex, encodeReplacer)
+		}
+	})()
+
 	aElement.href = "/ö?ö#ö"
-	function getURLPart(target, part) {
+
+	function getURLPart(target, mode) {
 		// In this context, `decodeURI` is the right function to call
 		// (not `decodeURIComponent`), since URI components separators
 		// are not encoded in the raw routes.
-		return /ö/.test(aElement[part]) ? target[part] : decodeURI(target[part])
+		return /ö/.test(aElement[mode]) ? target[mode] : decodeURI(target[mode])
 	}
 
 	function getRoute(target, mode) {
 		var part = getURLPart(target, mode).slice(modes[mode].length)
 		// IE 11 bug: no leading '/' when getting the 'pathname'
 		if (mode === "pathname" && !/^\//.test(part)) {
-			part = '/' + part
+			part = "/" + part
 		}
 		return part
 	}
@@ -1478,9 +1511,7 @@ void (function (global, factory) { // eslint-disable-line
 
 	function getRouteBase() {
 		return (
-			m.route.mode === "pathname" ? 
-			"" : 
-			getRoute($location, "pathname")
+			m.route.mode === "pathname" ? "" : getRoute($location, "pathname")
 		) + modes[m.route.mode]
 	}
 
@@ -1594,7 +1625,7 @@ void (function (global, factory) { // eslint-disable-line
 
 		if (queryStart >= 0) {
 			routeParams = parseQueryString(
-				path.substr(queryStart + 1, path.length))
+				decodeURI(path.substr(queryStart + 1, path.length)))
 			path = path.substr(0, queryStart)
 		} else {
 			routeParams = {}
@@ -1684,7 +1715,7 @@ void (function (global, factory) { // eslint-disable-line
 			var key = prefix ? prefix + "[" + prop + "]" : prop
 
 			if (value === null) {
-				str.push(encodeURIComponent(key))
+				str.push(encodeURISeparator(key))
 			} else if (isObject(value)) {
 				str.push(buildQueryString(value, key))
 			} else if (isArray(value)) {
@@ -1694,30 +1725,30 @@ void (function (global, factory) { // eslint-disable-line
 				forEach(value, function (item) {
 					if (!duplicates[key][item]) {
 						duplicates[key][item] = true
-						keys.push(encodeURIComponent(key) + "=" +
-							encodeURIComponent(item))
+						keys.push(encodeURISeparator(key) + "=" +
+							encodeURISeparator(item))
 					}
 				})
 				/* eslint-enable-line no-loop-func  */
 				str.push(keys.join("&"))
 			} else if (value !== undefined) {
-				str.push(encodeURIComponent(key) + "=" +
-					encodeURIComponent(value))
+				str.push(encodeURISeparator(key) + "=" +
+					encodeURISeparator(value))
 			}
 		})
 		return str.join("&")
 	}
 
 	function parseQueryString(str) {
-		if (str === "" || str == null) return {}
+		if (str === "" || str == null || str === "?") return {}
 		if (str.charAt(0) === "?") str = str.slice(1)
 
 		var pairs = str.split("&")
 		var params = {}
 		forEach(pairs, function (string) {
 			var pair = string.split("=")
-			var key = decodeURIComponent(pair[0])
-			var value = pair.length === 2 ? decodeURIComponent(pair[1]) : null
+			var key = decodeURISeparator(pair[0])
+			var value = pair.length === 2 ? decodeURISeparator(pair[1]) : null
 			if (params[key] != null) {
 				if (!isArray(params[key])) params[key] = [params[key]]
 				params[key].push(value)
@@ -1729,8 +1760,12 @@ void (function (global, factory) { // eslint-disable-line
 		return params
 	}
 
-	m.route.buildQueryString = buildQueryString
-	m.route.parseQueryString = parseQueryString
+	m.route.buildQueryString = function (o) {
+		return encodeURI(buildQueryString(o))
+	}
+	m.route.parseQueryString = function (o) {
+		return parseQueryString(decodeURI(o))
+	}
 
 	function reset(root) {
 		var cacheKey = getCellCacheKey(root)
