@@ -1,5 +1,5 @@
 # Most of these are build artifacts.
-**/node_modules
+node_modules
 **/*.min.js
 archive
 deploy

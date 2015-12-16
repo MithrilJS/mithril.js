@@ -17,21 +17,6 @@ describe("m()", function () {
 		expect(m).to.be.a("function")
 	})
 
-	it("throws with an empty tag name", function () {
-		expect(function () {
-			m("")
-		}).to.throw(TypeError)
-	})
-
-	it("throws when the tag is not a string or object", function () {
-		expect(function () { m(0) }).to.throw(TypeError)
-		expect(function () { m(1) }).to.throw(TypeError)
-		expect(function () { m(true) }).to.throw(TypeError)
-		expect(function () { m(null) }).to.throw(TypeError)
-		expect(function () { m(undefined) }).to.throw(TypeError)
-		expect(function () { m([]) }).to.throw(TypeError)
-	})
-
 	it("sets correct tag name", function () {
 		expect(m("div")).to.have.property("tag", "div")
 	})
