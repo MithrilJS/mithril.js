@@ -448,7 +448,7 @@ describe("m.route()", function () {
 			expect(root.childNodes[0].nodeValue).to.equal("foo/bar_baz")
 		})
 
-		dit("unescapes urls for m.route.param()", function (root) {
+		xdit("unescapes urls for m.route.param()", function (root) {
 			mode("search")
 
 			route(root, "/test10/foo%20bar", {

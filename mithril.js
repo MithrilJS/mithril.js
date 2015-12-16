@@ -1446,6 +1446,30 @@ void (function (global, factory) { // eslint-disable-line
 	// See issue #872 and PR #881.
 
 	var aElement = $document.createElement("a")
+	aElement.href = "/ö?ö#ö"
+
+	function getURLPart(target, mode) {
+		// In this context, `decodeURI` is the right function to call
+		// (not `decodeURIComponent`), since URI components separators
+		// are not encoded in the raw routes.
+		return /ö/.test(aElement[mode]) ? target[mode] : decodeURI(target[mode])
+	}
+
+	function getRoute(target, mode) {
+		var part = getURLPart(target, mode).slice(modes[mode].length)
+		// IE 11 bug: no leading '/' when getting the 'pathname'
+		if (mode === "pathname" && !/^\//.test(part)) {
+			part = "/" + part
+		}
+		return part
+	}
+
+	// These functions  do percent encoding and decoding on ';', '/', '?',
+	// ':', '@', '&', '=', '+', '$', ',' and '#', that is the characters
+	// encoded by `encodeURIComponent`, but left alone by `encodeURI`.
+	// This is necessary to prevent double-decoding when using Unicode
+	// strings as canonical internally.
+
 	var decodeURISeparator, encodeURISeparator
 	;(function () {
 		var encodeMap = {}
@@ -1471,30 +1495,12 @@ void (function (global, factory) { // eslint-disable-line
 			")", "ig"
 		)
 		function encodeReplacer(decodedChar) {
-			return encodeMap[decodedChar.toUpperCase()]
+			return encodeMap[decodedChar]
 		}
 		encodeURISeparator = function (source) {
 			return ('' + source).replace(encodeRegex, encodeReplacer)
 		}
 	})()
-
-	aElement.href = "/ö?ö#ö"
-
-	function getURLPart(target, mode) {
-		// In this context, `decodeURI` is the right function to call
-		// (not `decodeURIComponent`), since URI components separators
-		// are not encoded in the raw routes.
-		return /ö/.test(aElement[mode]) ? target[mode] : decodeURI(target[mode])
-	}
-
-	function getRoute(target, mode) {
-		var part = getURLPart(target, mode).slice(modes[mode].length)
-		// IE 11 bug: no leading '/' when getting the 'pathname'
-		if (mode === "pathname" && !/^\//.test(part)) {
-			part = "/" + part
-		}
-		return part
-	}
 
 	function runHistoryListener(listener) {
 		window[listener] = function () {
@@ -1625,7 +1631,7 @@ void (function (global, factory) { // eslint-disable-line
 
 		if (queryStart >= 0) {
 			routeParams = parseQueryString(
-				decodeURI(path.substr(queryStart + 1, path.length)))
+				path.substr(queryStart + 1, path.length))
 			path = path.substr(0, queryStart)
 		} else {
 			routeParams = {}
@@ -1659,7 +1665,7 @@ void (function (global, factory) { // eslint-disable-line
 						var values = [].slice.call(arguments, 1, -2)
 						forEach(keys, function (key, i) {
 							key = key.replace(/:|\./g, "")
-							routeParams[key] = decodeURIComponent(values[i])
+							routeParams[key] = decodeURISeparator(values[i])
 						})
 						m.mount(root, router[route])
 					})
@@ -1685,7 +1691,7 @@ void (function (global, factory) { // eslint-disable-line
 
 		var args
 
-		if (m.routes.mode === "pathname" && currentTarget.search) {
+		if (m.route.mode === "pathname" && currentTarget.search) {
 			args = parseQueryString(getURLPart(currentTarget, "search"))
 		} else {
 			args = {}
