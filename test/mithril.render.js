@@ -1315,31 +1315,30 @@ describe("m.render()", function () {
 		expect(before).to.equal(after)
 	})
 
-	// FIXME: implement document.createRange().createContextualFragment()
-	dom(function () {
-		it("keeps unkeyed identity if mixed with elements/trusted text and identity can be inferred", function () { // eslint-disable-line
-			var root = document.createElement("div")
+	// FIXME: implement document.createRange().createContextualFragment() in the
+	// mock document to fix this test
+	it("keeps unkeyed identity if mixed with elements/trusted text and identity can be inferred", function () { // eslint-disable-line
+		var root = mock.document.createElement("div")
 
-			m.render(root, m("div", [
-				m("a", {key: 1}),
-				m("a", {key: 2}),
-				m.trust("a"),
-				m("a", {key: 3}),
-				m("i")
-			]))
-			var before = root.childNodes[0].childNodes[4]
+		m.render(root, m("div", [
+			m("a", {key: 1}),
+			m("a", {key: 2}),
+			m.trust("a"),
+			m("a", {key: 3}),
+			m("i")
+		]))
+		var before = root.childNodes[0].childNodes[4]
 
-			m.render(root, m("div", [
-				m("a", {key: 3}),
-				m("a", {key: 4}),
-				m.trust("a"),
-				m("i"),
-				m("a", {key: 1})
-			]))
-			var after = root.childNodes[0].childNodes[3]
+		m.render(root, m("div", [
+			m("a", {key: 3}),
+			m("a", {key: 4}),
+			m.trust("a"),
+			m("i"),
+			m("a", {key: 1})
+		]))
+		var after = root.childNodes[0].childNodes[3]
 
-			expect(before).to.equal(after)
-		})
+		expect(before).to.equal(after)
 	})
 
 	it("uses the syntax class if it's given as `undefined` in attr", function () { // eslint-disable-line
@@ -1412,7 +1411,6 @@ describe("m.render()", function () {
 
 	// https://github.com/lhorie/mithril.js/issues/214
 	it("keeps all input events", function () {
-		this.timeout(3000) // eslint-disable-line no-invalid-this
 		var root = mock.document.createElement("div")
 
 		var ctrl = m.mount(root, {
