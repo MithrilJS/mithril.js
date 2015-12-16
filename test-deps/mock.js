@@ -227,6 +227,14 @@ this.mock = (function (global) {
 		function Request() {
 			this.$headers = {}
 
+			this.$resolve = function (data, status) {
+				if (data === undefined) data = this // eslint-disable-line
+				this.responseText = JSON.stringify(data)
+				this.readyState = 4
+				this.status = status || 200
+				return this
+			}
+
 			this.setRequestHeader = function (key, value) {
 				this.$headers[key] = value
 			}
@@ -237,9 +245,6 @@ this.mock = (function (global) {
 			}
 
 			this.send = function () {
-				this.responseText = JSON.stringify(this)
-				this.readyState = 4
-				this.status = 200
 				Request.$instances.push(this)
 			}
 		}

@@ -4,6 +4,7 @@ describe("m.request()", function () {
 	// Much easier to read
 	function resolve() {
 		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.$resolve.apply(xhr, arguments)
 		xhr.onreadystatechange()
 		return xhr
 	}
@@ -380,5 +381,22 @@ describe("m.request()", function () {
 
 		// For good measure
 		mock.requestAnimationFrame.$resolve()
+	})
+
+	it("can use a config correctly", function () {
+		var config = sinon.spy()
+		var result = m.prop()
+		var error = sinon.spy
+		var opts = {
+			method: "GET",
+			url: "/test",
+			config: config
+		}
+		m.request(opts).then(result, error)
+		var xhr = resolve({foo: "bar"})
+
+		expect(config).to.be.calledWithExactly(xhr, opts)
+		expect(result()).to.eql({foo: "bar"})
+		expect(error).to.not.be.called
 	})
 })
