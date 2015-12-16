@@ -5,7 +5,6 @@ describe("m.request()", function () {
 	function resolve() {
 		var xhr = mock.XMLHttpRequest.$instances.pop()
 		xhr.$resolve.apply(xhr, arguments)
-		xhr.onreadystatechange()
 		return xhr
 	}
 
@@ -182,8 +181,7 @@ describe("m.request()", function () {
 			data: {foo: 1}
 		}).then(null, error)
 
-		var xhr = mock.XMLHttpRequest.$instances.pop()
-		xhr.onreadystatechange()
+		var xhr = mock.XMLHttpRequest.$instances.pop().$resolve()
 
 		expect(xhr.$headers).to.have.property(
 			"Content-Type",
@@ -198,8 +196,7 @@ describe("m.request()", function () {
 			url: "test"
 		}).then(null, error)
 
-		var xhr = mock.XMLHttpRequest.$instances.pop()
-		xhr.onreadystatechange()
+		var xhr = mock.XMLHttpRequest.$instances.pop().$resolve()
 
 		expect(xhr.$headers).to.not.have.property("Content-Type")
 	})

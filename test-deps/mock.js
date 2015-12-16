@@ -232,6 +232,7 @@ this.mock = (function (global) {
 				this.responseText = JSON.stringify(data)
 				this.readyState = 4
 				this.status = status || 200
+				this.onreadystatechange()
 				return this
 			}
 
