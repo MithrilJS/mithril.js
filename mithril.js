@@ -1556,10 +1556,33 @@
 	var isDefaultRoute = false
 	var routeParams, currentRoute
 
+	// Depending on the Browser / `m.route.mode` combination, the route
+	// may or may not be URI encoded.
+	// See issue #872 and PR #881.
+
+	var aElement = $document.createElement("a")
+	aElement.href = "/ö?ö#ö"
+
+	function getURLPart(target, mode) {
+		// In this context, `decodeURI` is the right function to call
+		// (not `decodeURIComponent`), since URI components separators
+		// are not encoded in the raw routes.
+		return /ö/.test(aElement[mode]) ? encodeURI(target[mode]) : target[mode]
+	}
+
+	function getRoute(target, mode) {
+		var part = getURLPart(target, mode).slice(modes[mode].length)
+		// IE 11 bug: no leading '/' when getting the 'pathname'
+		if (mode === "pathname" && !/^\//.test(part)) {
+			part = "/" + part
+		}
+		return part
+	}
+
 	function historyListener() {
-		var path = $location[mroute.mode]
-		if (mroute.mode === "pathname") path += $location.search
-		if (currentRoute !== normalizeRoute(path)) redirect(path)
+		var path = getRoute($location, mroute.mode)
+		if (mroute.mode === "pathname") path += getURLPart($location, "search")
+		if (currentRoute !== path) redirect(path)
 	}
 
 	function runHistoryListener(listener) {
@@ -1569,8 +1592,10 @@
 	}
 
 	function getRouteBase() {
-		return (mroute.mode === "pathname" ? "" : $location.pathname) +
-			modes[mroute.mode]
+		return (
+			mroute.mode === "pathname" ?
+			"" : getRoute($location, "pathname")
+		) + modes[mroute.mode]
 	}
 
 	function windowPushState() {
@@ -1591,10 +1616,10 @@
 			computePostRedrawHook = replaceHistory ?
 				windowReplaceState :
 				windowPushState
-			redirect(modes[mroute.mode] + currentRoute)
+			redirect(currentRoute)
 		} else {
 			$location[mroute.mode] = currentRoute
-			redirect(modes[mroute.mode] + currentRoute)
+			redirect(currentRoute)
 		}
 	}
 
@@ -1606,7 +1631,7 @@
 
 		var oldRoute = currentRoute
 
-		currentRoute = route
+		currentRoute = route = encodeURI(route)
 		var args = params || {}
 		var queryIndex = currentRoute.indexOf("?")
 		var queryString, currentPath
@@ -1639,8 +1664,8 @@
 		} else if (arguments.length === 3 && isString(arg1)) {
 			// m.route(el, defaultRoute, routes)
 			redirect = function (source) {
-				var path = currentRoute = normalizeRoute(source)
-				if (!routeByValue(root, arg2, path)) {
+				currentRoute = source
+				if (!routeByValue(root, arg2, source)) {
 					if (isDefaultRoute) {
 						throw new Error("Ensure the default route matches " +
 							"one of the routes defined in m.route")
@@ -1685,10 +1710,6 @@
 
 	mroute.mode = "search"
 
-	function normalizeRoute(route) {
-		return route.slice(modes[mroute.mode].length)
-	}
-
 	function routeByValue(root, router, path) {
 		var queryStart = path.indexOf("?")
 
@@ -1702,8 +1723,9 @@
 
 		// Get all routes and check if there's an exact match for the current
 		// path
-		var keys = Object.keys(router)
+		var keys = Object.keys(router).map(encodeURI)
 		var index = keys.indexOf(path)
+		var i = 0
 
 		if (index >= 0) {
 			mmount(root, router[keys[index]])
@@ -1712,6 +1734,7 @@
 
 		for (var route in router) {
 			if (hasOwn.call(router, route)) {
+				route = keys[i++] // get the corresponding encoded route
 				if (route === path) {
 					mmount(root, router[route])
 					return true
@@ -1759,7 +1782,7 @@
 		var args
 
 		if (mroute.mode === "pathname" && currentTarget.search) {
-			args = parseQueryString(currentTarget.search.slice(1))
+			args = parseQueryString(getURLPart(currentTarget, "search"))
 		} else {
 			args = {}
 		}
@@ -1771,8 +1794,7 @@
 		// clear pendingRequests because we want an immediate route change
 		pendingRequests = 0
 
-		mroute(currentTarget[mroute.mode].slice(modes[mroute.mode].length),
-			args)
+		mroute(getRoute(currentTarget, mroute.mode), args)
 	}
 
 	function setScroll() {
