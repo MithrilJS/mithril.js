@@ -62,7 +62,7 @@ var MyComponent = {
 	controller: function(data) {
 		return {
 			increment: function() {
-				//This is a simplication for the sake of the example.
+				//This is a simplification for the sake of the example.
 				//Typically, values are modified via model methods,
 				//rather than modified directly
 				model.count++
@@ -590,7 +590,7 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a controller is not specified, Mithril will automatically create an empty controller function.
 
 -	**Object attributes**
 

@@ -152,7 +152,7 @@ The `m.startComputation` / `m.endComputation` pair is designed to be "stacked", 
 
 Therefore, using the computation methods is recommended in order to reduce the amount of intermediate redraws that would otherwise occur as multiple asynchronous services are resolved.
 
-When computation methods are used dilligently and religiously, templates are never redrawn with incomplete data. However, it's important to always write conditional tests in templates to account for the possibility of nullables, because redraws may come to occur more aggressively than data is available (perhaps because a newly introduced 3rd party library calls `m.redraw`, or because you might want a more aggressive redraw policy to implement a specific feature down the road).
+When computation methods are used diligently and religiously, templates are never redrawn with incomplete data. However, it's important to always write conditional tests in templates to account for the possibility of nullables, because redraws may come to occur more aggressively than data is available (perhaps because a newly introduced 3rd party library calls `m.redraw`, or because you might want a more aggressive redraw policy to implement a specific feature down the road).
 
 Defending against nullables can typically be achieved via the `initialValue` option in [`m.request`](mithril.request.md) and basic null checks (e.g. `data ? m("div", data) : null`).
 

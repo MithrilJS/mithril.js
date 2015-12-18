@@ -108,7 +108,7 @@ In the example below, we bind an error getter-setter to our previous controller 
 //controller
 var controller = function() {
 	this.error = m.prop("")
-	
+
 	this.users = User.listEven().then(function(users) {
 		if (users.length == 0) m.route("/add");
 	}, this.error)
@@ -121,7 +121,7 @@ If the controller doesn't already have a success callback to run after a request
 //controller
 var controller = function() {
 	this.error = m.prop("")
-	
+
 	this.users = User.listEven().then(null, this.error)
 }
 ```
@@ -145,7 +145,7 @@ var users = m.request({method: "GET", url: "/user"})
 		//add one more user to the response
 		return users.concat({name: "Jane"})
 	})
-	
+
 function log(value) {
     console.log(value)
     return value

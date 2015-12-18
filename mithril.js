@@ -1980,7 +1980,7 @@
 			}
 		}
 
-		function notThennable(value, state, deferred) {
+		function notThenable(value, state, deferred) {
 			try {
 				if (state === RESOLVING && isFunction(onSuccess)) {
 					value = onSuccess(value)
@@ -2017,7 +2017,7 @@
 			if (thenable) {
 				return doThen(value, deferred)
 			} else {
-				return notThennable(value, state, deferred)
+				return notThenable(value, state, deferred)
 			}
 		}
 	}

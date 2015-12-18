@@ -477,7 +477,7 @@
 ### Bug Fixes:
 
 -	diff no longer touch the DOM when processing `style` attributes and event handlers
--	returning a thennable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
+-	returning a thenable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
 -	diff now correctly clears subtree if null or undefined is passed as a node
 
 ---
