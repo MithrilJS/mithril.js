@@ -92,8 +92,8 @@ declare module _mithril {
 		onunload?(evt: Event): any;
 	}
 
-	interface MithrilControllerFunction extends MithrilController {
-		(): any;
+	interface MithrilControllerFunction<T extends MithrilController> {
+		(attributes?: any, ... args : any[]): T;
 	}
 
 	interface MithrilView<T extends MithrilController> {
@@ -101,7 +101,7 @@ declare module _mithril {
 	}
 
 	interface MithrilComponent<T extends MithrilController> {
-		controller: MithrilControllerFunction|{ new(): T };
+		controller: MithrilControllerFunction<T>|{ new(): T };
 		view: MithrilView<T>;
 	}
 
@@ -153,6 +153,7 @@ declare module _mithril {
 		password?: string;
 		data?: any;
 		background?: boolean;
+		initialValue?: any;
 		unwrapSuccess?(data: any): any;
 		unwrapError?(data: any): any;
 		serialize?(dataToSerialize: any): string;
