@@ -2283,13 +2283,22 @@
 		return deferred.promise
 	}
 
+	function deferred() {
+		var prm = {}
+		prm.promise = new Promise(function(R,r){
+			prm.resolve = R
+			prm.reject = r
+		})
+		return prm
+	}
+
 	m.hook = mhook
 	function mhook(prop) {
-		var prm = m.deferred()
+		var prm = deferred()
 		prop(prm.promise)
 		return function(value) {
 			prm.resolve(value)
-			prm = m.deferred()
+			prm = deferred()
 			prop(prm.promise)
 		}
 	}
@@ -2299,9 +2308,9 @@
 		routeChange: gettersetter(),
 		locationChange: gettersetter()
 	}
-	var triggerRedrawHook = mhook(m.hooks.nextRedraw)
-	var triggerRouteChangeHook = mhook(m.hooks.nextRouteChange)
-	var triggerLocationChangeHook = mhook(m.hooks.nextLocationChange)
+	var triggerRedrawHook = mhook(m.hooks.redraw)
+	var triggerRouteChangeHook = mhook(m.hooks.routeChange)
+	var triggerLocationChangeHook = mhook(m.hooks.locationChange)
 
 	return m
 })
