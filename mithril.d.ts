@@ -171,13 +171,13 @@ declare module _mithril {
 		* Creates a getter-setter function that wraps a Mithril promise. Useful
 		* for uniform data access, m.withAttr, etc.
 		*
-		* @param promise A thennable to initialize the property with. It may
+		* @param promise A thenable to initialize the property with. It may
 		* optionally be a Mithril promise.
 		* @return A getter-setter function wrapping the promise.
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(promise: Thennable<T>) : MithrilPromiseProperty<T>;
+		prop<T>(promise: Thenable<T>) : MithrilPromiseProperty<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a simple value. Useful
@@ -554,7 +554,7 @@ declare module _mithril {
 		}
 
 		/**
-		* Takes a list of promises or thennables and returns a Mithril promise
+		* Takes a list of promises or thenables and returns a Mithril promise
 		* that resolves once all in the list are resolved, or rejects if any of
 		* them reject.
 		*
@@ -562,7 +562,7 @@ declare module _mithril {
 		* @return A promise that resolves to all the promises if all resolve, or
 		* rejects with the error contained in the first rejection.
 		*/
-		sync<T>(promises: Thennable<T>[]): MithrilPromise<T[]>;
+		sync<T>(promises: Thenable<T>[]): MithrilPromise<T[]>;
 
 		/**
 		* Use this and endComputation if your views aren't redrawing after
@@ -911,32 +911,32 @@ declare module _mithril {
 	}
 
 	/**
-	* This represents a thennable success callback.
+	* This represents a thenable success callback.
 	*/
 	interface MithrilSuccessCallback<T, U> {
-		(value: T): U | Thennable<U>;
+		(value: T): U | Thenable<U>;
 	}
 
 	/**
-	* This represents a thennable error callback.
+	* This represents a thenable error callback.
 	*/
 	interface MithrilErrorCallback<T> {
-		(value: Error): T | Thennable<T>;
+		(value: Error): T | Thenable<T>;
 	}
 
 	/**
-	* This represents a thennable.
+	* This represents a thenable.
 	*/
-	interface Thennable<T> {
-		then<U>(success: (value: T) => U): Thennable<U>;
-		then<U,V>(success: (value: T) => U, error: (value: Error) => V): Thennable<U>|Thennable<V>;
-		catch?: <U>(error: (value: Error) => U) => Thennable<U>;
+	interface Thenable<T> {
+		then<U>(success: (value: T) => U): Thenable<U>;
+		then<U,V>(success: (value: T) => U, error: (value: Error) => V): Thenable<U>|Thenable<V>;
+		catch?: <U>(error: (value: Error) => U) => Thenable<U>;
 	}
 
 	/**
 	* This represents a Mithril promise object.
 	*/
-	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<MithrilPromise<T>> {
+	interface MithrilPromise<T> extends Thenable<T>, MithrilProperty<MithrilPromise<T>> {
 		/**
 		* Chain this promise with a simple success callback, propogating
 		* rejections.
