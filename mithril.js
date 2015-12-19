@@ -1513,6 +1513,8 @@
 			computePostRedrawHook = null
 		}
 
+		triggerRedrawHook(root)
+
 		lastRedrawId = null
 		lastRedrawCallTime = new Date()
 		redrawStrategy("diff")
@@ -1577,12 +1579,14 @@
 		window.history.pushState(null,
 			$document.title,
 			modes[mroute.mode] + currentRoute)
+		triggerLocationChangeHook(decodeURI(currentRoute))
 	}
 
 	function windowReplaceState() {
 		window.history.replaceState(null,
 			$document.title,
 			modes[mroute.mode] + currentRoute)
+		triggerLocationChangeHook(decodeURI(currentRoute))
 	}
 
 	function computeAndLaunchRedirect(replaceHistory) {
@@ -1594,6 +1598,7 @@
 			redirect(modes[mroute.mode] + currentRoute)
 		} else {
 			$location[mroute.mode] = currentRoute
+			triggerLocationChangeHook(decodeURI(currentRoute))
 			redirect(modes[mroute.mode] + currentRoute)
 		}
 	}
@@ -1640,7 +1645,9 @@
 			// m.route(el, defaultRoute, routes)
 			redirect = function (source) {
 				var path = currentRoute = normalizeRoute(source)
-				if (!routeByValue(root, arg2, path)) {
+				if (routeByValue(root, arg2, path)) {
+					triggerRouteChangeHook(encodeURI(currentRoute))
+				} else {
 					if (isDefaultRoute) {
 						throw new Error("Ensure the default route matches " +
 							"one of the routes defined in m.route")
@@ -2275,6 +2282,35 @@
 		deferred.promise(options.initialValue)
 		return deferred.promise
 	}
+
+	function deferred() {
+		var prm = {}
+		prm.promise = new Promise(function(R,r){
+			prm.resolve = R
+			prm.reject = r
+		})
+		return prm
+	}
+
+	m.hook = mhook
+	function mhook(prop) {
+		var prm = deferred()
+		prop(prm.promise)
+		return function(value) {
+			prm.resolve(value)
+			prm = deferred()
+			prop(prm.promise)
+		}
+	}
+
+	m.hooks = {
+		redraw: gettersetter(),
+		routeChange: gettersetter(),
+		locationChange: gettersetter()
+	}
+	var triggerRedrawHook = mhook(m.hooks.redraw)
+	var triggerRouteChangeHook = mhook(m.hooks.routeChange)
+	var triggerLocationChangeHook = mhook(m.hooks.locationChange)
 
 	return m
 })
