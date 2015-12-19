@@ -4,9 +4,9 @@
 
 ### News:
 
--	added `catch` to promises
+-	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @isiahmeadows)
+-	added `catch` and `finally` to promises
 -	improvements and fixes in the documentation and wiki
--	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @impinball)
 -	`m(component, ...args)` can now be used as a shorthand for `m.component(component, ...args)`
 
 ### Bug Fixes:
@@ -15,6 +15,7 @@
 -	fix edge case with falsy keys
 -	fix controller prototype inheritance in component controllers
 -	fix return value of `parseQueryString` if input is empty string
+-	fix component unloading [#614](https://github.com/lhorie/mithril.js/issues/614) [#866](https://github.com/lhorie/mithril.js/issues/866)
 
 ---
 
