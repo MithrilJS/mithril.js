@@ -1,11 +1,18 @@
 ## Change Log
 
+[v0.2.2-rc.1](http://mithril.js.org/archive/v0.2.2-rc.1)
+
+### Bug Fixes:
+
+-	revert regressions from 0.2.1 refactor
+-	revert `finally` because it's not in the ES6 promise spec
+
 [v0.2.1](http://mithril.js.org/archive/v0.2.1)
 
 ### News:
 
 -	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @isiahmeadows)
--	added `catch` and `finally` to promises
+-	added `catch` to promises
 -	improvements and fixes in the documentation and wiki
 -	`m(component, ...args)` can now be used as a shorthand for `m.component(component, ...args)`
 
@@ -15,7 +22,6 @@
 -	fix edge case with falsy keys
 -	fix controller prototype inheritance in component controllers
 -	fix return value of `parseQueryString` if input is empty string
--	fix component unloading [#614](https://github.com/lhorie/mithril.js/issues/614) [#866](https://github.com/lhorie/mithril.js/issues/866)
 
 ---
 
@@ -478,7 +484,7 @@
 ### Bug Fixes:
 
 -	diff no longer touch the DOM when processing `style` attributes and event handlers
--	returning a thenable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
+-	returning a thennable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
 -	diff now correctly clears subtree if null or undefined is passed as a node
 
 ---

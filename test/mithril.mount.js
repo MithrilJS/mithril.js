@@ -54,8 +54,6 @@ describe("m.mount()", function () {
 	})
 
 	it("reloads components correctly", function () {
-		if (mock.phantom) return
-
 		mock.requestAnimationFrame.$resolve()
 
 		var root1 = mock.document.createElement("div")
@@ -546,8 +544,6 @@ describe("m.mount()", function () {
 
 	// https://github.com/lhorie/mithril.js/issues/551
 	it("only redraws a component when clicked", function () {
-		if (mock.phantom) return
-
 		var root = mock.document.createElement("div")
 		var a = false
 		var found = {}
@@ -630,8 +626,6 @@ describe("m.mount()", function () {
 	})
 
 	it("redraws when clicked and click handler forces redraw", function () {
-		if (mock.phantom) return
-
 		var root = mock.document.createElement("div")
 		var view = sinon.stub().returns(m("div", {
 			onclick: function () { m.redraw(true) }
@@ -648,7 +642,7 @@ describe("m.mount()", function () {
 	})
 
 	function resolveXhr() {
-		mock.XMLHttpRequest.$instances.pop().$resolve()
+		mock.XMLHttpRequest.$instances.pop().$resolve().onreadystatechange()
 		mock.requestAnimationFrame.$resolve()
 	}
 

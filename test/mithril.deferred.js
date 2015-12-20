@@ -285,4 +285,26 @@ describe("m.deferred()", function () {
 		deferred.reject(1)
 		expect(deferred.promise()).to.be.undefined
 	})
+
+	it("resolves to value of returned promise", function () {
+		var prmA = m.deferred()
+		var prmB = m.deferred()
+
+		prmA.resolve("A")
+		prmB.resolve("B")
+
+		prmA.promise.then(function (A) {
+			return prmB.promise
+		}).then(function(B) {
+			expect(B).to.equal("B")
+		})
+	})
+	it("yields immutable promises", function () {
+		var d = m.deferred()
+		d.resolve(5)
+		d.resolve(6)
+		d.promise.then(function(v) {
+			expect(v).to.equal(5)
+		})
+	})
 })

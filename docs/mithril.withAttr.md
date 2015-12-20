@@ -45,7 +45,7 @@ var user = {
 [How to read signatures](how-to-read-signatures.md)
 
 ```clike
-EventHandler withAttr(String property, void callback(any value))
+EventHandler withAttr(String property, void callback(any value) [, any callbackThis])
 
 where:
 	EventHandler :: void handler(Event e)
@@ -62,6 +62,10 @@ where:
 	-	**any value**
 	
 		This is the value of the defined DOM element's property.
+		
+-	**any callbackThis**
+
+	The object which the `this` keyword points to for the callback
 		
 -	**returns EventHandler handler**
 

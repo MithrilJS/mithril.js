@@ -1,0 +1,19 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'c:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'c:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'test' ]
+2 info using npm@1.4.3
+3 info using node@v0.10.26
+4 error Error: ENOENT, open 'C:\Users\Leo\Desktop\shared\work\mithril.js\tests\package.json'
+5 error If you need help, you may report this *entire* log,
+5 error including the npm and node versions, at:
+5 error     <http://github.com/npm/npm/issues>
+6 error System Windows_NT 6.1.7601
+7 error command "c:\\Program Files\\nodejs\\node.exe" "c:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "test"
+8 error cwd C:\Users\Leo\Desktop\shared\work\mithril.js\tests
+9 error node -v v0.10.26
+10 error npm -v 1.4.3
+11 error path C:\Users\Leo\Desktop\shared\work\mithril.js\tests\package.json
+12 error code ENOENT
+13 error errno 34
+14 verbose exit [ 34, true ]
