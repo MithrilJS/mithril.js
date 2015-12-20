@@ -1,7 +1,7 @@
 ;(function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
-	var m = factory(typeof window !== "undefined" ? window : {})
+	var m = factory(global, typeof window !== "undefined" ? window : {})
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
 	} else if (typeof define === "function" && define.amd) {
@@ -10,7 +10,7 @@
 		global.m = m
 	}
 	/* eslint-enable no-undef */
-})(this, function (window, undefined) { // eslint-disable-line
+})(this, function (global, window, undefined) { // eslint-disable-line
 	"use strict"
 
 	m.version = function () {
@@ -53,26 +53,51 @@
 		}
 	}
 
-	// caching commonly used variables
-	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
-
-	// self invoking function needed because of the way mocks work
-	function initialize(window) {
-		$document = window.document
-		$location = window.location
-		$cancelAnimationFrame = window.cancelAnimationFrame ||
-			window.clearTimeout
-		$requestAnimationFrame = window.requestAnimationFrame ||
-			window.setTimeout
-	}
-
-	initialize(window)
-
 	// testing API
-	m.deps = function (mock) {
-		initialize(window = mock || window)
+	m.deps = mdeps
+	function mdeps(mock) {
+		window = mock || window
+		mdeps.document(window.document)
+		mdeps.location(window.location)
+		mdeps.requestAnimationFrame(
+			window.requestAnimationFrame || window.setTimeout)
+		mdeps.cancelAnimationFrame(
+			window.cancelAnimationFrame || window.clearTimeout)
+		mdeps.XMLHttpRequest(window.XMLHttpRequest)
 		return window
 	}
+
+	// caching commonly used variables
+	var Promise
+	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
+	var $XMLHttpRequest
+
+	// These are all IIFEs because they are used internally. They are more fine-
+	// grained so that they can be individually added to, changed and removed
+	// easily.
+	;(mdeps.Promise = function (PromiseType) {
+		Promise = PromiseType
+	})(global.Promise)
+
+	;(mdeps.document = function (document) {
+		$document = document
+	})(window.document)
+
+	;(mdeps.location = function (location) {
+		$location = location
+	})(window.location)
+
+	;(mdeps.requestAnimationFrame = function (requestAnimationFrame) {
+		$requestAnimationFrame = requestAnimationFrame
+	})(window.requestAnimationFrame || global.setTimeout)
+
+	;(mdeps.cancelAnimationFrame = function (cancelAnimationFrame) {
+		$cancelAnimationFrame = cancelAnimationFrame
+	})(window.cancelAnimationFrame || global.clearTimeout)
+
+	;(mdeps.XMLHttpRequest = function (XMLHttpRequest) {
+		$XMLHttpRequest = XMLHttpRequest
+	})(window.XMLHttpRequest)
 
 	function gettersetter(store) {
 		function prop() {
@@ -87,53 +112,66 @@
 		return prop
 	}
 
-	function isPromise(object) {
+	function isThenable(object) {
 		return object != null && (isObject(object) || isFunction(object)) &&
-				isFunction(object.then)
+			isFunction(object.then)
 	}
 
-	function simpleResolve(p, callback) {
-		if (p.then) {
-			return p.then(callback)
-		} else {
-			return callback()
-		}
+	function reduceDeferred(p) {
+		return mdeferred().resolve(p).promise
 	}
 
-	function propify(promise) {
-		var prop = m.prop()
-		promise.then(prop)
+	function reducePromise(p) {
+		return Promise.resolve(p)
+	}
+
+	function propify(reduce, promise, initialValue) {
+		// The `reduce` argument is the only difference between deferred and
+		// promise handling.
+		var prop = gettersetter(initialValue)
+		promise = promise.then(prop)
 
 		prop.then = function (resolve, reject) {
-			return promise.then(function () {
-				return resolve(prop())
-			}, reject)
+			return propify(
+				reduce,
+				promise.then(function () {
+					return resolve(prop.toJSON())
+				}, reject),
+				prop())
 		}
 
 		prop.catch = function (reject) {
-			return promise.then(function () {
-				return prop()
-			}, reject)
+			return propify(
+				reduce,
+				promise.then(prop.toJSON, reject),
+				prop())
 		}
 
 		prop.finally = function (callback) {
-			return promise.then(function (value) {
-				return simpleResolve(callback(), function () {
-					return value
-				})
-			}, function (reason) {
-				return simpleResolve(callback(), function () {
-					throw reason
-				})
-			})
+			return propify(
+				reduce,
+				promise.then(function () {
+					return reduce(callback()).then(prop.toJSON)
+				}, function (reason) {
+					return reduce(callback()).then(function () { throw reason })
+				}),
+				prop())
+		}
+
+		prop.promise = function () {
+			return promise.then(prop.toJSON)
 		}
 
 		return prop
 	}
 
 	m.prop = function (store) {
-		if (isPromise(store)) {
-			return propify(store)
+		if (store instanceof Promise) {
+			return propify(reducePromise, store)
+		} else if (store instanceof mdeferred) {
+			return propify(reduceDeferred, store)
+		} else if (isThenable(store)) {
+			return propify(reduceDeferred, reduceDeferred(store))
 		} else {
 			return gettersetter(store)
 		}
@@ -1860,7 +1898,7 @@
 	var REJECTED = 4
 
 	function coerce(value, next, error) {
-		if (isPromise(value)) {
+		if (isThenable(value)) {
 			return value.then(function (value) {
 				coerce(value, next, error)
 			}, function (e) {
@@ -2004,7 +2042,7 @@
 			// check if it's a thenable
 			var thenable
 			try {
-				thenable = isPromise(value)
+				thenable = isThenable(value)
 			} catch (e) {
 				mdeferred.onerror(e)
 				return fire(REJECTING, e, deferred)
@@ -2129,7 +2167,7 @@
 	}
 
 	function runXhr(options) {
-		var xhr = new window.XMLHttpRequest()
+		var xhr = new $XMLHttpRequest()
 
 		xhr.open(options.method, options.url, true, options.user,
 			options.password)
