@@ -1070,141 +1070,175 @@ var m = (function app(window, undefined) {
 	};
 	function propify(promise, initialValue) {
 		var prop = m.prop(initialValue);
+
+		for (var key in promise) {
+			if (isFunction(prop[key])) {
+				prop[key] = promise[key].bind(promise);
+			} else {
+				prop[key] = promise[key];
+			}
+		}
+
 		promise.then(prop);
 		prop.then = function(resolve, reject) {
 			return propify(promise.then(resolve, reject), initialValue);
 		};
-		prop["catch"] = prop.then.bind(null, null);
+
+		if (!prop["catch"]) {
+			prop["catch"] = prop.then.bind(null, null);
+		}
+
 		return prop;
 	}
-	//Promiz.mithril.js | Zolmeister | MIT
-	//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
-	//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
-	//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
-	function Deferred(successCallback, failureCallback) {
-		var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
-		var self = this, state = 0, promiseValue = 0, next = [];
 
-		self.promise = {};
+	var Deferred;
+	m.setPromiseImpl = function(Promise) {
+		if (Promise == null) {
+			// Use default implementation
+			//Promiz.mithril.js | Zolmeister | MIT
+			//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
+			//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
+			//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
+			Deferred = function(successCallback, failureCallback) {
+				var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
+				var self = this, state = 0, promiseValue = 0, next = [];
 
-		self.resolve = function(value) {
-			if (!state) {
-				promiseValue = value;
-				state = RESOLVING;
+				self.promise = {};
 
-				fire();
-			}
-			return this;
-		};
-
-		self.reject = function(value) {
-			if (!state) {
-				promiseValue = value;
-				state = REJECTING;
-
-				fire();
-			}
-			return this;
-		};
-
-		self.promise.then = function(successCallback, failureCallback) {
-			var deferred = new Deferred(successCallback, failureCallback)
-			if (state === RESOLVED) {
-				deferred.resolve(promiseValue);
-			}
-			else if (state === REJECTED) {
-				deferred.reject(promiseValue);
-			}
-			else {
-				next.push(deferred);
-			}
-			return deferred.promise
-		};
-
-		function finish(type) {
-			state = type || REJECTED;
-			next.map(function(deferred) {
-				state === RESOLVED ? deferred.resolve(promiseValue) : deferred.reject(promiseValue);
-			});
-		}
-
-		function thennable(then, successCallback, failureCallback, notThennableCallback) {
-			if (((promiseValue != null && isObject(promiseValue)) || isFunction(promiseValue)) && isFunction(then)) {
-				try {
-					// count protects against abuse calls from spec checker
-					var count = 0;
-					then.call(promiseValue, function(value) {
-						if (count++) return;
+				self.resolve = function(value) {
+					if (!state) {
 						promiseValue = value;
-						successCallback();
-					}, function (value) {
-						if (count++) return;
-						promiseValue = value;
-						failureCallback();
-					});
-				}
-				catch (e) {
-					m.deferred.onerror(e);
-					promiseValue = e;
-					failureCallback();
-				}
-			} else {
-				notThennableCallback();
-			}
-		}
-
-		function fire() {
-			// check if it's a thenable
-			var then;
-			try {
-				then = promiseValue && promiseValue.then;
-			}
-			catch (e) {
-				m.deferred.onerror(e);
-				promiseValue = e;
-				state = REJECTING;
-				return fire();
-			}
-
-			if (state === REJECTING) {
-				m.deferred.onerror(promiseValue)
-			}
-
-			thennable(then, function () {
-				state = RESOLVING
-				fire()
-			}, function () {
-				state = REJECTING
-				fire()
-			}, function () {
-				try {
-					if (state === RESOLVING && isFunction(successCallback)) {
-						promiseValue = successCallback(promiseValue);
-					}
-					else if (state === REJECTING && isFunction(failureCallback)) {
-						promiseValue = failureCallback(promiseValue);
 						state = RESOLVING;
-					}
-				}
-				catch (e) {
-					m.deferred.onerror(e);
-					promiseValue = e;
-					return finish();
-				}
 
-				if (promiseValue === self) {
-					promiseValue = TypeError();
-					finish();
-				} else {
-					thennable(then, function () {
-						finish(RESOLVED);
-					}, finish, function () {
-						finish(state === RESOLVING && RESOLVED);
+						fire();
+					}
+					return this;
+				};
+
+				self.reject = function(value) {
+					if (!state) {
+						promiseValue = value;
+						state = REJECTING;
+
+						fire();
+					}
+					return this;
+				};
+
+				self.promise.then = function(successCallback, failureCallback) {
+					var deferred = new Deferred(successCallback, failureCallback)
+					if (state === RESOLVED) {
+						deferred.resolve(promiseValue);
+					}
+					else if (state === REJECTED) {
+						deferred.reject(promiseValue);
+					}
+					else {
+						next.push(deferred);
+					}
+					return deferred.promise
+				};
+
+				function finish(type) {
+					state = type || REJECTED;
+					next.map(function(deferred) {
+						state === RESOLVED ? deferred.resolve(promiseValue) : deferred.reject(promiseValue);
 					});
 				}
-			});
+
+				function thennable(then, successCallback, failureCallback, notThennableCallback) {
+					if (((promiseValue != null && isObject(promiseValue)) || isFunction(promiseValue)) && isFunction(then)) {
+						try {
+							// count protects against abuse calls from spec checker
+							var count = 0;
+							then.call(promiseValue, function(value) {
+								if (count++) return;
+								promiseValue = value;
+								successCallback();
+							}, function (value) {
+								if (count++) return;
+								promiseValue = value;
+								failureCallback();
+							});
+						}
+						catch (e) {
+							m.deferred.onerror(e);
+							promiseValue = e;
+							failureCallback();
+						}
+					} else {
+						notThennableCallback();
+					}
+				}
+
+				function fire() {
+					// check if it's a thenable
+					var then;
+					try {
+						then = promiseValue && promiseValue.then;
+					}
+					catch (e) {
+						m.deferred.onerror(e);
+						promiseValue = e;
+						state = REJECTING;
+						return fire();
+					}
+
+					if (state === REJECTING) {
+						m.deferred.onerror(promiseValue)
+					}
+
+					thennable(then, function () {
+						state = RESOLVING
+						fire()
+					}, function () {
+						state = REJECTING
+						fire()
+					}, function () {
+						try {
+							if (state === RESOLVING && isFunction(successCallback)) {
+								promiseValue = successCallback(promiseValue);
+							}
+							else if (state === REJECTING && isFunction(failureCallback)) {
+								promiseValue = failureCallback(promiseValue);
+								state = RESOLVING;
+							}
+						}
+						catch (e) {
+							m.deferred.onerror(e);
+							promiseValue = e;
+							return finish();
+						}
+
+						if (promiseValue === self) {
+							promiseValue = TypeError();
+							finish();
+						} else {
+							thennable(then, function () {
+								finish(RESOLVED);
+							}, finish, function () {
+								finish(state === RESOLVING && RESOLVED);
+							});
+						}
+					});
+				}
+			}
+		} else {
+			Deferred = function(resolve, reject) {
+				var promise = new Promise(function() {
+					resolve = arguments[0];
+					reject = arguments[1];
+				});
+				return {
+					resolve: resolve,
+					reject: reject,
+					promise: promise
+				};;
+			}
 		}
 	}
+	m.setPromiseImpl(); // initialize with the default Promise implementation
+
 	m.deferred.onerror = function(e) {
 		if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
 			pendingRequests = 0;
