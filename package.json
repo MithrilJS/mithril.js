@@ -22,6 +22,7 @@
   "devDependencies": {
     "chai": "^3.4.0",
     "chai-string": "^1.1.4",
+    "es6-promise": "^3.0.2",
     "eslint": "^1.7.3",
     "grunt": "*",
     "grunt-cli": "*",

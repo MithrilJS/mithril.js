@@ -50,7 +50,7 @@ describe("m.prop()", function () {
 		expect(prop()).to.equal("test")
 	})
 
-	it("returns a thenable when wrapping a Mithril promise", function () {
+	it("returns a callable thenable when wrapping a Mithril promise", function () { // eslint-disable-line max-len
 		var defer = m.deferred()
 
 		var prop = m.prop(defer.promise).then(function () {
@@ -61,4 +61,57 @@ describe("m.prop()", function () {
 
 		expect(prop()).to.equal("test2")
 	})
+
+	it("provides a way to wrap promises", function () {
+		var promise = Promise.resolve()
+		var prop = m.prop(promise)
+		// `then` is called, so identity doesn't hold.
+		expect(prop.promise()).to.be.an.instanceof(Promise)
+	})
+
+	it("returns a callable when wrapping a thenable", function () {
+		var prop = m.prop(Promise.resolve(2))
+		return prop.promise().then(function (value) {
+			expect(value).to.equal(2)
+		})
+	})
+
+	it("returns a callable when `then` is called", function () {
+		var promise = Promise.resolve(2)
+		var spy = sinon.spy()
+		var prop = m.prop(promise).then(spy)
+
+		return prop.promise().then(function (value) {
+			expect(spy).to.be.calledWith(2)
+			expect(prop()).to.equal(2)
+			expect(value).to.equal(2)
+		})
+	})
+
+	it("returns a callable when `catch` is called", function () {
+		var promise = Promise.reject(2)
+		var spy = sinon.spy()
+		var prop = m.prop(promise).catch(spy)
+
+		return prop.promise().then(function (value) {
+			expect(spy).to.be.calledWith(2)
+			expect(prop()).to.equal(2)
+			expect(value).to.equal(2)
+		})
+	})
+
+	it("returns a callable when `finally` is called", function () {
+		var promise = Promise.resolve(2)
+		var spy = sinon.spy()
+		var prop = m.prop(promise).finally(spy)
+
+		return prop.promise().then(function (value) {
+			expect(spy).to.be.calledWith(2)
+			expect(prop()).to.equal(2)
+			expect(value).to.equal(2)
+		})
+	})
+
+	// TODO: take this out before merging
+	this.timeout(0) // eslint-disable-line no-invalid-this
 })

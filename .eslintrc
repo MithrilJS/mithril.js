@@ -5,6 +5,10 @@
 		"browser": true
 	},
 
+    "global": {
+        "Promise": false
+    },
+
 	"rules": {
 		"indent": [2, "tab"],
 		"no-trailing-spaces": 2,
