@@ -101,7 +101,7 @@ describe("m.prop()", function () {
 	})
 
 	it("returns a callable when `finally` is called", function () {
-		var promise = Promise.reject(2)
+		var promise = Promise.resolve(2)
 		var spy = sinon.spy()
 		var prop = m.prop(promise).finally(spy)
 
