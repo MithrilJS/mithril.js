@@ -95,64 +95,6 @@ describe("m.request()", function () {
 		expect(error().message).to.equal("error occurred")
 	})
 
-	xit("does not propagate results to `finally`", function () {
-		// Data returned by then() functions do *not* propagate to finally().
-		var data = m.prop()
-		var prop = m.request({
-			method: "GET",
-			url: "test"
-		})
-		.then(function () { return "foo" })
-		.finally(data)
-
-		resolve()
-
-		expect(prop()).to.equal("foo")
-		expect(data()).to.not.exist
-	})
-
-	it("does not propagate `finally` results to the next promise", function () {
-		var data = m.prop()
-
-		var prop = m.request({method: "GET", url: "test"})
-		.then(function () { return "foo" })
-		.finally(function () { return "bar" })
-		.then(data)
-		resolve()
-
-		expect(prop()).to.equal("foo")
-		expect(data()).to.equal("foo")
-	})
-
-	it("propagates `finally` errors", function () {
-		var error = m.prop()
-
-		var prop = m.request({method: "GET", url: "test"})
-		.then(function () { return "foo" })
-		.finally(function () { throw new Error("error occurred") })
-		.catch(error)
-
-		resolve()
-		expect(prop().message).to.equal("error occurred")
-		expect(error().message).to.equal("error occurred")
-	})
-
-	it("runs successive `finally` after `catch`", function () {
-		var error = m.prop()
-
-		var prop = m.request({
-			method: "GET",
-			url: "test",
-			deserialize: function () { throw new Error("error occurred") }
-		})
-		.catch(error)
-		.finally(function () { error("finally") })
-
-		resolve()
-		expect(prop().message).to.equal("error occurred")
-		expect(error()).to.equal("finally")
-	})
-
 	it("synchronously throws TypeErrors", function () {
 		var error = m.prop()
 		var exception

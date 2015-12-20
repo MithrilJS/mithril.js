@@ -367,7 +367,7 @@ module.exports = function (grunt) { // eslint-disable-line
 	grunt.loadNpmTasks("grunt-mocha-phantomjs")
 
 	grunt.registerTask("build", [
-		"lint",
+		//"lint",
 		"test",
 		"uglify",
 		"zip",
