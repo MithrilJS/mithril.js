@@ -1,6 +1,7 @@
 import {initialize} from "./env.js";
 
 import {component} from "./component.js";
+import {deps} from "./deps.js";
 import {mount} from "./mount.js";
 import {parse} from "./parse.js";
 import {prop} from "./prop.js";
@@ -21,6 +22,7 @@ m.version = function() {
 };
 
 m.component = component;
+m.deps = deps;
 m.mount = mount;
 m.prop = prop;
 m.redraw = redraw;

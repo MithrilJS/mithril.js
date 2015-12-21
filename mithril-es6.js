@@ -8,6 +8,12 @@
     var $location;
     var $cancelAnimationFrame;
     var $requestAnimationFrame;
+    function initialize(window) {
+        $document = window.document;
+        $location = window.location;
+        $cancelAnimationFrame = window.cancelAnimationFrame || window.clearTimeout;
+        $requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
+    }
 
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
@@ -104,16 +110,14 @@
         return parameterize(component, args);
     }
 
-    function forEach(list, f) {
-        /*eslint no-empty:0 */
-        for (var i = 0; i < list.length && !f(list[i], i++);) {}
-    }
+    //testing API
+    function deps(mock) {
+        initialize(window = mock || window);
+        return window;
+    };
 
-    function forKeys(list, f) {
-        forEach(list, function(attrs, i) {
-            return (attrs = attrs && attrs.attrs) && attrs.key != null && f(attrs, i);
-        });
-    }
+    //for internal testing only, do not use `m.deps.factory`
+    deps.factory = app;
 
     function gettersetter(store) {
         var val = function() {
@@ -219,6 +223,17 @@
 
     function clear() {
         pendingRequests = 0;
+    }
+
+    function forEach(list, f) {
+        /*eslint no-empty:0 */
+        for (var i = 0; i < list.length && !f(list[i], i++);) {}
+    }
+
+    function forKeys(list, f) {
+        forEach(list, function(attrs, i) {
+            return (attrs = attrs && attrs.attrs) && attrs.key != null && f(attrs, i);
+        });
     }
 
     var roots = [];
@@ -1601,6 +1616,7 @@
     };
 
     m.component = component;
+    m.deps = deps;
     m.mount = mount;
     m.prop = prop;
     m.redraw = redraw;
