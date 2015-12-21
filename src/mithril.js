@@ -23,6 +23,7 @@ m.version = function() {
 
 m.component = component;
 m.deps = deps;
+m.module = mount;
 m.mount = mount;
 m.prop = prop;
 m.redraw = redraw;
