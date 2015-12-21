@@ -1,6 +1,7 @@
-import { isObject, isString, isArray } from "./types.js";
+import {noop} from "./util.js";
+import {isObject, isString, isArray} from "./types.js";
 
-var parser     = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g,
+var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g,
     attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 
 /**
@@ -11,6 +12,7 @@ var parser     = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g,
  *
  */
 export default function(tag, pairs) {
+    /*eslint max-statements:[2, 24] */
     for (var args = [], i = 1; i < arguments.length; i++) {
         args[i - 1] = arguments[i];
     }
@@ -51,4 +53,19 @@ export default function(tag, pairs) {
     if (classes.length) cell.attrs[classAttrName] = classes.join(" ");
 
     return cell;
+}
+
+export function parameterize(component, args) {
+    var controller = function() {
+        return (component.controller || noop).apply(this, args) || this;
+    };
+    if (component.controller) controller.prototype = component.controller.prototype;
+    var view = function(ctrl) {
+        var currentArgs = arguments.length > 1 ? args.concat([].slice.call(arguments, 1)) : args;
+        return component.view.apply(component, currentArgs ? [ctrl].concat(currentArgs) : [ctrl]);
+    };
+    view.$original = component.view;
+    var output = {controller: controller, view: view};
+    if (args[0] && args[0].key != null) output.attrs = {key: args[0].key};
+    return output;
 }
