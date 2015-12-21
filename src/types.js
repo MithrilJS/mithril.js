@@ -16,4 +16,4 @@ var isArray = Array.isArray || function (object) {
     return type.call(object) === "[object Array]";
 }
 
-export { type, isFunction, isObject, isString, isArray };
+export {type, isFunction, isObject, isString, isArray};

@@ -1,8 +1,6 @@
-import { forEach } from "./iterate.js";
-import { isObject, isArray } from "./types.js";
-
-var encode = encodeURIComponent;
-var decode = decodeURIComponent;
+import {forEach} from "./iterate.js";
+import {isObject, isArray} from "./types.js";
+import {encode, decode} from "./util.js";
 
 function build(object, prefix) {
     var duplicates = {};
@@ -13,9 +11,11 @@ function build(object, prefix) {
 
         if (value === null) {
             str.push(encode(key));
-        } else if (isObject(value)) {
+        }
+        else if (isObject(value)) {
             str.push(build(value, key));
-        } else if (isArray(value)) {
+        }
+        else if (isArray(value)) {
             var keys = [];
             duplicates[key] = duplicates[key] || {};
             forEach(value, function (item) {
@@ -25,7 +25,8 @@ function build(object, prefix) {
                 }
             });
             str.push(keys.join("&"));
-        } else if (value !== undefined) {
+        }
+        else if (value !== undefined) {
             str.push(encode(key) + "=" + encode(value));
         }
     }
@@ -39,7 +40,7 @@ function parse(str) {
     var pairs = str.split("&");
     var params = {};
 
-    forEach(pairs, function (string) {
+    forEach(pairs, function(string) {
         var pair = string.split("=");
         var key = decode(pair[0]);
         var value = pair.length === 2 ? decode(pair[1]) : null;
@@ -53,4 +54,4 @@ function parse(str) {
     return params;
 }
 
-export { build, parse };
+export {build, parse};

@@ -1,11 +1,12 @@
-import { type, isObject, isFunction } from "./types.js";
-import { propify } from "./prop.js";
+import {type, isObject, isFunction} from "./types.js";
+import {propify} from "./prop.js";
 
 // Promiz.mithril.js | Zolmeister | MIT
 // a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
 // 1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
 // 2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
 function Deferred(successCallback, failureCallback) {
+    /*eslint-disable*/
     var RESOLVING = 1;
     var REJECTING = 2;
     var RESOLVED = 3;
@@ -149,4 +150,4 @@ deferred.onerror = function (e) {
     }
 };
 
-export { deferred, Deferred };
+export {deferred, Deferred };

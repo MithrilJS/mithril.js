@@ -1,19 +1,19 @@
-import { isObject, isFunction } from "./types.js";
+import {isObject, isFunction} from "./types.js";
 
 function gettersetter(store) {
-    var prop = function() {
+    var val = function() {
         if (arguments.length) store = arguments[0];
         return store;
     };
 
-    prop.toJSON = function() {
+    val.toJSON = function() {
         return store;
     };
 
-    return prop;
+    return val;
 }
 
-function prop (store) {
+function prop(store) {
     //note: using non-strict equality check here because we're checking if store is null OR undefined
     if ((store != null && isObject(store) || isFunction(store)) && isFunction(store.then)) {
         return propify(store);
@@ -32,4 +32,4 @@ function propify(promise, initialValue) {
     return local;
 }
 
-export { prop, propify }
+export {prop, propify}
