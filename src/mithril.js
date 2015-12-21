@@ -8,6 +8,7 @@ import {redraw} from "./redraw.js";
 import {render} from "./render.js";
 import {request} from "./request.js";
 import {route} from "./route.js";
+import {sync} from "./sync.js";
 import {trust} from "./trust.js";
 import {withAttr} from "./with-attr.js";
 
@@ -26,6 +27,7 @@ m.redraw = redraw;
 m.render = render;
 m.request = request;
 m.route = route;
+m.sync = sync;
 m.trust = trust;
 m.withAttr = withAttr;
 
