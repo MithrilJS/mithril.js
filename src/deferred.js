@@ -1,4 +1,4 @@
-/*eslint spaced-comment:0 */
+/*eslint spaced-comment:0, max-len:0 */
 import {type, isObject, isFunction} from "./types.js";
 import {propify} from "./prop.js";
 import {clear} from "./computation.js";
