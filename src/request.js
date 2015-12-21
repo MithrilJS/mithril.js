@@ -81,8 +81,8 @@ function ajax(options) {
         var data = options.method === "GET" || !options.data ? "" : options.data;
         if (data && (!isString(data) && data.constructor !== window.FormData)) {
             throw new Error(
-                "Request data should be either be a string or FormData."
-                + " Check the `serialize` option in `m.request`"
+                "Request data should be either be a string or FormData. " +
+                "Check the `serialize` option in `m.request`"
             );
         }
         xhr.send(data);
