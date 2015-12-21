@@ -22,7 +22,7 @@
         return type.call(object) === "[object String]";
     }
 
-    var isArray$1 = Array.isArray || function (object) {
+    var isArray = Array.isArray || function(object) {
         return type.call(object) === "[object Array]";
     }
 
@@ -53,12 +53,12 @@
             else if (match[1] === ".") classes.push(match[2]);
             else if (match[3][0] === "[") {
                 var pair = attrParser.exec(match[3]);
-                cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true);
+                cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true);
             }
         }
 
         var children = hasAttrs ? args.slice(1) : args;
-        if (children.length === 1 && isArray$1(children[0])) {
+        if (children.length === 1 && isArray(children[0])) {
             cell.children = children[0];
         }
         else {
@@ -95,6 +95,7 @@
     }
 
     function forEach(list, f) {
+        /*eslint no-empty:0 */
         for (var i = 0; i < list.length && !f(list[i], i++);) {}
     }
 
@@ -205,7 +206,7 @@
         }
     }
 
-    function clear$1() {
+    function clear() {
         pendingRequests = 0;
     }
 
@@ -213,7 +214,6 @@
     var components = [];
     var controllers = [];
     var unloaders = [];
-    var topComponent;
     var nodeCache = [];
     var cellCache = {};
     function unload(cached) {
@@ -227,18 +227,19 @@
             });
         }
         if (cached.children) {
-            if (isArray$1(cached.children)) forEach(cached.children, unload);
+            if (isArray(cached.children)) forEach(cached.children, unload);
             else if (cached.children.tag) unload(cached.children);
         }
     }
 
-    function clear(nodes, cached) {
+    function clear$1(nodes, cached) {
         for (var i = nodes.length - 1; i > -1; i--) {
             if (nodes[i] && nodes[i].parentNode) {
                 try { nodes[i].parentNode.removeChild(nodes[i]); }
                 catch (e) {
                     //ignore if this fails due to order of events
                     //(see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
+                    //eslint-disable-line
                 }
                 cached = [].concat(cached);
                 if (cached[i]) unload(cached[i]);
@@ -255,7 +256,7 @@
 
     function reset(root) {
         var cacheKey = getCellCacheKey(root);
-        clear(root.childNodes, cellCache[cacheKey]);
+        clear$1(root.childNodes, cellCache[cacheKey]);
         cellCache[cacheKey] = undefined;
     }
 
@@ -266,6 +267,12 @@
         reset(root);
         nodeCache.splice(getCellCacheKey(root), 1);
     }
+
+    function clearUnloaders() {
+        unloaders = [];
+    }
+
+    var topComponent;
 
     function mount(root, component) {
         /*eslint max-statements:[2, 26] */
@@ -292,7 +299,7 @@
                 unloader.controller.onunload = unloader.handler;
             });
         }
-        else unloaders = [];
+        else clearUnloaders();
 
         if (controllers[index] && isFunction(controllers[index].onunload)) {
             controllers[index].onunload(event);
@@ -454,19 +461,20 @@
                 }
             });
         }
+        /*eslint-enable*/
     }
 
     function deferred() {
         var local = new Deferred();
         local.promise = propify(local.promise);
-        
+
         return local;
     }
 
-    deferred.onerror = function (e) {
+    deferred.onerror = function(e) {
         if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
-            clear$1();
-            
+            clear();
+
             throw e;
         }
     };
@@ -484,10 +492,10 @@
             else if (isObject(value)) {
                 str.push(build(value, key));
             }
-            else if (isArray$1(value)) {
+            else if (isArray(value)) {
                 var keys = [];
                 duplicates[key] = duplicates[key] || {};
-                forEach(value, function (item) {
+                forEach(value, function(item) {
                     if (!duplicates[key][item]) {
                         duplicates[key][item] = true;
                         keys.push(encode(key) + "=" + encode(item));
@@ -514,7 +522,7 @@
             var key = decode(pair[0]);
             var value = pair.length === 2 ? decode(pair[1]) : null;
             if (params[key] != null) {
-                if (!isArray$1(params[key])) params[key] = [params[key]];
+                if (!isArray(params[key])) params[key] = [params[key]];
                 params[key].push(value);
             }
             else params[key] = value;
@@ -571,10 +579,11 @@
                 + "=" + callbackKey
                 + "&" + build(options.data || {});
             $document.body.appendChild(script);
-        } else {
+        }
+        else {
             var xhr = new window.XMLHttpRequest();
             xhr.open(options.method, options.url, true, options.user, options.password);
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
                     else options.onerror({type: "error", target: xhr});
@@ -653,7 +662,7 @@
                 var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
                 var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
                 if (e.type === "load") {
-                    if (isArray$1(response) && xhrOptions.type) {
+                    if (isArray(response) && xhrOptions.type) {
                         forEach(response, function(res, i) {
                             response[i] = new xhrOptions.type(res);
                         });
@@ -747,7 +756,7 @@
             args = route.mode === "pathname" && currentTarget.search ? parse$1(currentTarget.search.slice(1)) : {};
         while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
         //clear pendingRequests because we want an immediate route change
-        clear$1();
+        clear();
         route(currentTarget[route.mode].slice(modes[route.mode].length), args);
     }
 
@@ -847,8 +856,8 @@
 
     var m = parse;
 
-    m.version = function () {
-        return "v0.2.2-rc.1";
+    m.version = function() {
+        return "v0.2.3";
     };
 
     m.mount = mount;
