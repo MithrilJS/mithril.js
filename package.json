@@ -1,7 +1,7 @@
 {
   "name": "mithril",
   "description": "Mithril.js beta build - use this to help us test the releases before they are released",
-  "version": "0.2.1",
+  "version": "0.2.2-rc.1",
   "homepage": "http://mithril.js.org",
   "license": "MIT",
   "author": {
@@ -12,21 +12,19 @@
     "url": "git@github.com:lhorie/mithril.js.git"
   },
   "bugs": {
-    "url": "http://github.com/lhorie/mithril.js/issues"
+    "url" : "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
-    "preversion": "grunt",
     "test": "grunt test"
   },
   "main": "mithril.js",
   "devDependencies": {
     "chai": "^3.4.0",
-    "chai-string": "^1.1.4",
     "eslint": "^1.7.3",
     "grunt": "*",
     "grunt-cli": "*",
     "grunt-contrib-clean": "*",
-    "grunt-contrib-connect": "~0.7.1",
+    "grunt-contrib-connect": "^0.11.2",
     "grunt-contrib-copy": "*",
     "grunt-contrib-uglify": "*",
     "grunt-eslint": "^17.3.1",
@@ -36,10 +34,8 @@
     "grunt-saucelabs": "*",
     "grunt-saucelabs-browsers": "^0.2.0",
     "grunt-zip": "*",
-    "load-grunt-config": "^0.9.2",
     "mocha": "^2.3.3",
-    "request": "~2.35.0",
-    "saucelabs": "~0.1.1",
+    "request": "^2.67.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   },

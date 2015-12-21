@@ -32,9 +32,7 @@ It is assumed that for all contributions you make, you have the appropriate righ
 
 # Style Guide
 
-The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but it shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide.
-
-If you need some sort of hack that doesn't follow this style guide like [Bluebird's `toFastProperties` hack](https://stackoverflow.com/q/24987896), make sure the code is consistent with what's around it, and disable whatever ESLint warnings you need to. (In that case, you would use `no-eval` and `no-unused-expressions`). And please document the hack as best as you can and why you used it. If it's a hack that's already been explained elsewhere, like Bluebird's, a link to that is sufficient.
+The style is checked with ESLint. This style guide is here for one reason only: consistency. This should work for most code here, but it shouldn't be considered absolute &endash; consistency with the surrounding code is higher priority than following this guide. Also, if you need some sort of hack that doesn't follow this style guide like [Bluebird's `toFastProperties` hack](https://stackoverflow.com/q/24987896), make sure the code is consistent with what's around it, and disable whatever ESLint warnings you need to. (In that case, you would use `no-eval` and `no-unused-expressions`).
 
 ### EditorConfig
 
@@ -120,8 +118,8 @@ for (var i = 0; i < CARD_DECK_SIZE; i++) {
 
 // Also good
 function toFastProperties(obj) {
-	// Bluebird's toFastProperties hack. Forces V8 to optimize object as
-	// prototype, significantly speeding up property access.
+	// Bluebird's toFastProperties hack. Forces V8 to optimize object as prototype,
+	// significantly speeding up property access.
 
 	/* eslint-disable no-eval */
 	function C() {}
@@ -253,11 +251,7 @@ function iterate() {
 
 ### Trailing whitespace
 
-Please don't leave trailing spaces, even in blank likes. It makes diffs harder to read.
-
-If your [editor supports EditorConfig, or you've downloaded a plugin for it](http://editorconfig.org/#download), you're already set. Otherwise, Googling "<your editor> strip trailing whitespace blank lines" should help you.
-
-Also, make sure to include a trailing line break. Several editors add this by default, and many of them offer no easy way to prevent it.
+Please don't leave trailing spaces, even in blank likes. It makes diffs harder to read. If your [editor supports EditorConfig, or you've downloaded a plugin for it](http://editorconfig.org/#download), you're already set. Otherwise, searching "<editor> strip trailing whitespace blank lines" should help you.
 
 ### Indentation and vertical whitespace
 
@@ -413,7 +407,7 @@ Prefer plain objects over `new function () {}`, but if you feel the latter is be
 
 ### Comma placement
 
-Commas come last. Don't use trailing commas
+Commas come last. Also, don't use trailing commas.
 
 ```js
 // Good
@@ -432,6 +426,9 @@ var object = {
 	foo: 1
 ,	bar: 2 // Comma first
 }
+
+// Also bad
+var object = {foo: 1,}
 ```
 
 ### Member access
@@ -695,7 +692,7 @@ if (condition)
 
 setTimeout(function () { doSomething(); doSomethingElse() }, 0)
 
-setTimeout(function () {doSomething()}, 0) // Body needs some space
+setTimeout(function () {doSomething()}, 0)
 ```
 
 ### Function declarations

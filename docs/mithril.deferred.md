@@ -165,7 +165,7 @@ m.request({method: "GET", url: "/user/:id", data: {id: 1}})
 	.then(function(user) {
 		if (!user.isAdmin) throw new Error("Sorry, you don't have permissions")
 	})
-	.then(null, error) //handle the application error: bind to a getter-setter for displaying it on the template
+	.then(null, error) //handle the application error: bind to a getter-setter for diplaying it on the template
 ```
 
 Note that the default promise exception handling semantics can be modified. See the next section.

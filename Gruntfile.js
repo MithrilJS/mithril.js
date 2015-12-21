@@ -89,7 +89,9 @@ module.exports = function (grunt) { // eslint-disable-line
 				"!archive/**",
 				"!deploy/**",
 				"!mithril.closure-compiler-externs.js",
-				"!docs/layout/lib/**"
+				"!docs/layout/lib/**",
+				// TODO(impinball): Finish this.
+				"!mithril.js"
 			]
 		},
 
@@ -365,6 +367,7 @@ module.exports = function (grunt) { // eslint-disable-line
 	grunt.loadNpmTasks("grunt-mocha-phantomjs")
 
 	grunt.registerTask("build", [
+		//"lint",
 		"test",
 		"uglify",
 		"zip",
@@ -374,7 +377,8 @@ module.exports = function (grunt) { // eslint-disable-line
 		"clean"
 	])
 
-	grunt.registerTask("test", ["eslint:all", "mocha_phantomjs"])
+	grunt.registerTask("lint", ["eslint:all"])
+	grunt.registerTask("test", ["mocha_phantomjs"])
 	grunt.registerTask("default", ["build"])
 
 	grunt.registerTask("sauce", [

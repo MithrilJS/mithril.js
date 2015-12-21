@@ -1,5 +1,5 @@
 # Most of these are build artifacts.
-**/node_modules
+node_modules
 **/*.min.js
 archive
 deploy
@@ -7,3 +7,6 @@ mithril.closure-compiler-externs.js
 
 # This is merely a dependency for the documentation.
 docs/layout/lib
+
+# TODO: These are temporary, and need to be eventually enabled.
+mithril.js

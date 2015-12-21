@@ -254,11 +254,17 @@ where:
 	
 	-	**String key**
 	
-		The name of a route parameter
+		The name of a route parameter.
 		
 	-	**returns String value**
 	
 		The value that maps to the parameter specified by `key`
+		
+	**Object param()**
+	
+	-	**returns Object params**
+	
+		An object containing all the route parameters
 
 -	<a name="buildQueryString"></a>
 

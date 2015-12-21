@@ -33,29 +33,20 @@
 
 	Object.keys = Object.keys || function (obj) {
 		var keys = []
-		for (var i in obj) {
-			if ({}.hasOwnProperty.call(obj, i)) {
-				keys.push(i)
-			}
+		for (var i in obj) if ({}.hasOwnProperty.call(obj, i)) {
+			keys.push(i)
 		}
 		return keys
 	}
 	/* eslint-enable no-extend-native */
 })()
 
-this.mock = (function (global) {
+window.mock = (function () {
 	"use strict"
 
-	var window = {
-		// Some tests are only broken in PhantomJS 1.x, but successfully run in
-		// the browser. Still waiting on mocha-phantomjs to update to be
-		// compatible with PhantomJS 2.x.
-		phantom: global.window && global.window.navigator &&
-			/PhantomJS/.test(global.window.navigator.userAgent)
-	}
-
+	var window = {}
 	var document = window.document = {
-		// NTBD: add document.createRange().createContextualFragment()
+		// FIXME: add document.createRange().createContextualFragment()
 
 		childNodes: [],
 
@@ -80,7 +71,7 @@ this.mock = (function (global) {
 				},
 
 				insertAdjacentHTML: function (position, html) {
-					// NTBD: accept markup
+					// TODO: accept markup
 					if (position === "beforebegin") {
 						this.parentNode.insertBefore(
 							document.createTextNode(html),
@@ -232,7 +223,6 @@ this.mock = (function (global) {
 				this.responseText = JSON.stringify(data)
 				this.readyState = 4
 				this.status = status || 200
-				this.onreadystatechange()
 				return this
 			}
 
@@ -270,4 +260,4 @@ this.mock = (function (global) {
 	}
 
 	return window
-})(this)
+})()
