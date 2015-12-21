@@ -4,6 +4,7 @@ describe("m.request()", function () {
 	// Much easier to read
 	function resolve() {
 		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.$resolve.apply(xhr, arguments)
 		xhr.onreadystatechange()
 		return xhr
 	}
@@ -66,7 +67,7 @@ describe("m.request()", function () {
 		})().url).to.equal("http://domain.com:80/foo")
 	})
 
-	it("propogates errors through the promise (1)", function () {
+	it("propagates errors through the promise (1)", function () {
 		var error = m.prop()
 
 		var prop = m.request({
@@ -80,7 +81,7 @@ describe("m.request()", function () {
 		expect(error().message).to.equal("error occurred")
 	})
 
-	it("propogates errors through the promise (2)", function () {
+	it("propagates errors through the promise (2)", function () {
 		var error = m.prop()
 
 		var prop = m.request({
@@ -92,64 +93,6 @@ describe("m.request()", function () {
 
 		expect(prop().message).to.equal("error occurred")
 		expect(error().message).to.equal("error occurred")
-	})
-
-	it("does not propogate results to `finally`", function () {
-		// Data returned by then() functions do *not* propagate to finally().
-		var data = m.prop()
-		var prop = m.request({
-			method: "GET",
-			url: "test"
-		})
-		.then(function () { return "foo" })
-		.finally(data)
-
-		resolve()
-
-		expect(prop()).to.equal("foo")
-		expect(data()).to.not.exist
-	})
-
-	it("does not propogate `finally` results to the next promise", function () {
-		var data = m.prop()
-
-		var prop = m.request({method: "GET", url: "test"})
-		.then(function () { return "foo" })
-		.finally(function () { return "bar" })
-		.then(data)
-		resolve()
-
-		expect(prop()).to.equal("foo")
-		expect(data()).to.equal("foo")
-	})
-
-	it("propogates `finally` errors", function () {
-		var error = m.prop()
-
-		var prop = m.request({method: "GET", url: "test"})
-		.then(function () { return "foo" })
-		.finally(function () { throw new Error("error occurred") })
-		.catch(error)
-
-		resolve()
-		expect(prop().message).to.equal("error occurred")
-		expect(error().message).to.equal("error occurred")
-	})
-
-	it("runs successive `finally` after `catch`", function () {
-		var error = m.prop()
-
-		var prop = m.request({
-			method: "GET",
-			url: "test",
-			deserialize: function () { throw new Error("error occurred") }
-		})
-		.catch(error)
-		.finally(function () { error("finally") })
-
-		resolve()
-		expect(prop().message).to.equal("error occurred")
-		expect(error()).to.equal("finally")
 	})
 
 	it("synchronously throws TypeErrors", function () {
@@ -216,7 +159,7 @@ describe("m.request()", function () {
 		expect(initialValue).to.equal("foo")
 	})
 
-	it("correctly propogates initial value when not completed", function () {
+	it("correctly propagates initial value when not completed", function () {
 		var prop = m.request({
 			method: "POST",
 			url: "test",
@@ -258,7 +201,7 @@ describe("m.request()", function () {
 		expect(prop().url).to.equal("test?foo=1&foo=2")
 	})
 
-	it("propogates initial value in call before request is completed", function () { // eslint-disable-line
+	it("propagates initial value in call before request is completed", function () { // eslint-disable-line
 		var value
 		var prop1 = m.request({method: "GET", url: "test", initialValue: 123})
 		expect(prop1()).to.equal(123)
@@ -344,5 +287,58 @@ describe("m.request()", function () {
 			resolve({foo: "bar1"})
 			expect(req()).to.eql({foo: "bar1"})
 		})
+	})
+
+	it("ends the computation when a SyntaxError is thrown from `options.extract`", function () { // eslint-disable-line max-len
+		var root = mock.document.createElement("div")
+		var viewSpy = sinon.spy(function () { return m("div") })
+		var resolved = sinon.spy()
+		var rejected = sinon.spy()
+
+		m.mount(root, {
+			controller: function () {
+				m.request({
+					url: "/test",
+					extract: function () {
+						throw new SyntaxError()
+					}
+				}).then(resolved, rejected)
+			},
+
+			view: viewSpy
+		})
+
+		// For good measure
+		mock.requestAnimationFrame.$resolve()
+
+		expect(function () {
+			resolve()
+		}).to.throw()
+
+		expect(resolved).to.not.have.been.called
+		expect(rejected).to.not.have.been.called
+
+		// The controller should throw, but the view should still render.
+		expect(viewSpy).to.have.been.called
+
+		// For good measure
+		mock.requestAnimationFrame.$resolve()
+	})
+
+	it("can use a config correctly", function () {
+		var config = sinon.spy()
+		var result = m.prop()
+		var error = sinon.spy
+		var opts = {
+			method: "GET",
+			url: "/test",
+			config: config
+		}
+		m.request(opts).then(result, error)
+		var xhr = resolve({foo: "bar"})
+
+		expect(config).to.be.calledWithExactly(xhr, opts)
+		expect(result()).to.eql({foo: "bar"})
+		expect(error).to.not.be.called
 	})
 })

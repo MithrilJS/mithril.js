@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<title>TodoMVC Benchmark</title>
+<script src="../mithril.js"></script>
+<script src="https://www.google.com/jsapi"></script>
+<script src="resources/benchmark-runner.js" defer></script>
+<script src="resources/tests.js" defer></script>
+<style>
+body {
+	font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif;
+	background-color: rgb(253, 253, 253);
+}
+
+iframe {
+	border: 1px solid black;
+}
+
+button {
+	margin: 15px 5px;
+}
+
+ol {
+	list-style: none;
+	margin: 5px 0;
+	padding: 0;
+}
+
+ol ol {
+	margin-left: 2em;
+	list-position: outside;
+}
+
+.running {
+	text-decoration: underline;
+}
+
+.ran {
+	color: grey;
+}
+
+nav {
+	position: absolute;
+	right: 10px;
+}
+
+#analysis {
+	float:left;
+	display: none;
+	border: 1px solid #888;
+}
+
+#header {
+	background: #EEE;
+	margin: -1em -1em 1em;
+	padding: 1em;
+	text-align: center;
+}
+
+#barchart-body {
+	width: 400px;
+	margin: 30px;
+}
+</style>
+<div id="header">
+	Items:
+	<a href="#250">250</a> (default)
+	|
+	<a href="#500">500</a>
+	|
+	<a href="#1000">1000</a>
+	|
+	<a href="#2500">2500</a>
+	|
+	<a href="#5000">5000</a>
+	|
+	<a href="#10000">10000</a>
+</div>
+<div id="analysis">
+	<div id="barchart-values"></div>
+	<div id="barchart-body"></div>
+</div>
+<script src="resources/manager.js"></script>

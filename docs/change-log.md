@@ -1,12 +1,19 @@
 ## Change Log
 
+[v0.2.2-rc.1](http://mithril.js.org/archive/v0.2.2-rc.1)
+
+### Bug Fixes:
+
+-	revert regressions from 0.2.1 refactor
+-	revert `finally` because it's not in the ES6 promise spec
+
 [v0.2.1](http://mithril.js.org/archive/v0.2.1)
 
 ### News:
 
+-	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @isiahmeadows)
 -	added `catch` to promises
 -	improvements and fixes in the documentation and wiki
--	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @impinball)
 -	`m(component, ...args)` can now be used as a shorthand for `m.component(component, ...args)`
 
 ### Bug Fixes:
