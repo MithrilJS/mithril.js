@@ -993,8 +993,7 @@ var m = (function app(window, undefined) {
 	}
 	function routeUnobtrusive(e) {
 		e = e || event;
-
-		if (e.ctrlKey || e.metaKey || e.which === 2) return;
+		if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return;
 
 		if (e.preventDefault) e.preventDefault();
 		else e.returnValue = false;
