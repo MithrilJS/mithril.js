@@ -1617,6 +1617,7 @@
 
     m.component = component;
     m.deps = deps;
+    m.endComputation = end;
     m.module = mount;
     m.mount = mount;
     m.prop = prop;
@@ -1624,6 +1625,7 @@
     m.render = render;
     m.request = request;
     m.route = route;
+    m.startComputation = start;
     m.sync = sync;
     m.trust = trust;
     m.withAttr = withAttr;

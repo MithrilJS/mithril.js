@@ -9,6 +9,7 @@ import {redraw} from "./redraw.js";
 import {render} from "./render.js";
 import {request} from "./request.js";
 import {route} from "./route.js";
+import {start, end} from "./computation.js";
 import {sync} from "./sync.js";
 import {trust} from "./trust.js";
 import {withAttr} from "./with-attr.js";
@@ -23,6 +24,7 @@ m.version = function() {
 
 m.component = component;
 m.deps = deps;
+m.endComputation = end;
 m.module = mount;
 m.mount = mount;
 m.prop = prop;
@@ -30,6 +32,7 @@ m.redraw = redraw;
 m.render = render;
 m.request = request;
 m.route = route;
+m.startComputation = start;
 m.sync = sync;
 m.trust = trust;
 m.withAttr = withAttr;
