@@ -1,17 +1,23 @@
-import { isObject, isFunction } from "./types.js";
+import { type, isObject, isFunction } from "./types.js";
 import { propify } from "./prop.js";
 
-//Promiz.mithril.js | Zolmeister | MIT
-//a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
-//1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
-//2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
+// Promiz.mithril.js | Zolmeister | MIT
+// a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
+// 1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
+// 2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
 function Deferred(successCallback, failureCallback) {
-    var RESOLVING = 1, REJECTING = 2, RESOLVED = 3, REJECTED = 4;
-    var self = this, state = 0, promiseValue = 0, next = [];
+    var RESOLVING = 1;
+    var REJECTING = 2;
+    var RESOLVED = 3;
+    var REJECTED = 4;
+    var self = this;
+    var state = 0;
+    var promiseValue = 0;
+    var next = [];
 
     self.promise = {};
 
-    self.resolve = function(value) {
+    self.resolve = function (value) {
         if (!state) {
             promiseValue = value;
             state = RESOLVING;
@@ -21,7 +27,7 @@ function Deferred(successCallback, failureCallback) {
         return this;
     };
 
-    self.reject = function(value) {
+    self.reject = function (value) {
         if (!state) {
             promiseValue = value;
             state = REJECTING;
@@ -31,24 +37,25 @@ function Deferred(successCallback, failureCallback) {
         return this;
     };
 
-    self.promise.then = function(successCallback, failureCallback) {
-        var deferred = new Deferred(successCallback, failureCallback)
+    self.promise.then = function (successCallback, failureCallback) {
+        var local = new Deferred(successCallback, failureCallback)
+        
         if (state === RESOLVED) {
-            deferred.resolve(promiseValue);
+            local.resolve(promiseValue);
+        } else if (state === REJECTED) {
+            local.reject(promiseValue);
+        } else {
+            next.push(local);
         }
-        else if (state === REJECTED) {
-            deferred.reject(promiseValue);
-        }
-        else {
-            next.push(deferred);
-        }
-        return deferred.promise
+        
+        return local.promise;
     };
 
     function finish(type) {
         state = type || REJECTED;
-        next.map(function(deferred) {
-            state === RESOLVED ? deferred.resolve(promiseValue) : deferred.reject(promiseValue);
+
+        next.map(function (local) {
+            local[state === RESOLVED ? "resolve" : "reject"](promiseValue);
         });
     }
 
@@ -66,9 +73,8 @@ function Deferred(successCallback, failureCallback) {
                     promiseValue = value;
                     failureCallback();
                 });
-            }
-            catch (e) {
-                m.deferred.onerror(e);
+            } catch (e) {
+                deferred.onerror(e);
                 promiseValue = e;
                 failureCallback();
             }
@@ -82,16 +88,15 @@ function Deferred(successCallback, failureCallback) {
         var then;
         try {
             then = promiseValue && promiseValue.then;
-        }
-        catch (e) {
-            m.deferred.onerror(e);
+        } catch (e) {
+            deferred.onerror(e);
             promiseValue = e;
             state = REJECTING;
             return fire();
         }
 
         if (state === REJECTING) {
-            m.deferred.onerror(promiseValue)
+            deferred.onerror(promiseValue)
         }
 
         thennable(then, function () {
@@ -104,14 +109,12 @@ function Deferred(successCallback, failureCallback) {
             try {
                 if (state === RESOLVING && isFunction(successCallback)) {
                     promiseValue = successCallback(promiseValue);
-                }
-                else if (state === REJECTING && isFunction(failureCallback)) {
+                } else if (state === REJECTING && isFunction(failureCallback)) {
                     promiseValue = failureCallback(promiseValue);
                     state = RESOLVING;
                 }
-            }
-            catch (e) {
-                m.deferred.onerror(e);
+            } catch (e) {
+                deferred.onerror(e);
                 promiseValue = e;
                 return finish();
             }
@@ -130,15 +133,18 @@ function Deferred(successCallback, failureCallback) {
     }
 }
 
-function deferred () {
-    var deferred = new Deferred();
-    deferred.promise = propify(deferred.promise);
-    return deferred;
-};
+function deferred() {
+    var local = new Deferred();
+    local.promise = propify(local.promise);
+    
+    return local;
+}
 
-deferred.onerror = function(e) {
+deferred.onerror = function (e) {
     if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
+        // TODO: expose from... somewhere
         pendingRequests = 0;
+        
         throw e;
     }
 };

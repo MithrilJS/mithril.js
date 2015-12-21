@@ -1,4 +1,7 @@
-var $document, $location, $cancelAnimationFrame, $requestAnimationFrame;
+var $document,
+    $location,
+    $cancelAnimationFrame,
+    $requestAnimationFrame;
 
 function initialize(window) {
     $document = window.document;

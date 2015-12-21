@@ -4,7 +4,7 @@ import parse from "./parse.js";
 
 var m = parse;
 
-m.version = function() {
+m.version = function () {
     return "v0.2.2-rc.1";
 };
 
