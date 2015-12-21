@@ -1,5 +1,8 @@
 import {prop} from "./prop.js";
 import {$requestAnimationFrame, $cancelAnimationFrame} from "./_env.js";
+import {forEach} from "./_iterate.js";
+import {roots, components, controllers} from "./_dom.js";
+import {render} from "./render.js";
 
 var redrawing = false,
     forcing = false,
@@ -8,6 +11,30 @@ var redrawing = false,
     FRAME_BUDGET = 16, //60 frames per second = 1 call per 16 ms
     computePreRedrawHook = null,
     computePostRedrawHook = null;
+
+function _redraw() {
+    if (computePreRedrawHook) {
+        computePreRedrawHook();
+        computePreRedrawHook = null;
+    }
+    forEach(roots, function(root, i) {
+        var component = components[i];
+        if (controllers[i]) {
+            var args = [controllers[i]];
+            render(root, component.view ? component.view(controllers[i], args) : "");
+        }
+    });
+
+    //after rendering within a routed context, we need to scroll back to the top,
+    //and fetch the document title for history.pushState
+    if (computePostRedrawHook) {
+        computePostRedrawHook();
+        computePostRedrawHook = null;
+    }
+    lastRedrawId = null;
+    lastRedrawCallTime = new Date();
+    redraw.strategy("diff");
+}
 
 function preredraw(value) {
     computePreRedrawHook = value;
@@ -29,13 +56,13 @@ function redraw(force) {
             //when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame,
             //otherwise keep currently scheduled timeout
             if ($requestAnimationFrame === window.requestAnimationFrame
-                || Date.now() - lastRedrawCallTime > FRAME_BUDGET) {
+                || (new Date()) - lastRedrawCallTime > FRAME_BUDGET) {
                 if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
                 lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET);
             }
         }
         else {
-            redraw();
+            _redraw();
             lastRedrawId = $requestAnimationFrame(function() { lastRedrawId = null; }, FRAME_BUDGET);
         }
     }

@@ -64,6 +64,4 @@ function mount(root, component) {
     }
 }
 
-export {
-    mount
-};
+export {mount};

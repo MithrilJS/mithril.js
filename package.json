@@ -16,7 +16,7 @@
   },
   "scripts": {
     "test": "grunt test",
-    "build": "rollup --format umd --name m --input src/mithril.js --output ./mithril-es6.js"
+    "build": "rollup --format umd --name m --input src/mithril.js --output ./mithril-es6.js --sourcemap"
   },
   "main": "mithril.js",
   "devDependencies": {

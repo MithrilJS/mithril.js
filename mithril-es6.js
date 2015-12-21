@@ -81,229 +81,6 @@
         $requestAnimationFrame = window.requestAnimationFrame || window.setTimeout;
     }
 
-    var redrawing = false;
-    var forcing = false;
-    var lastRedrawId = null;
-    var lastRedrawCallTime = 0;
-    var FRAME_BUDGET = 16;
-    var computePreRedrawHook = null;
-    var computePostRedrawHook = null;
-    function preredraw(value) {
-        computePreRedrawHook = value;
-    }
-
-    function postredraw(value) {
-        computePostRedrawHook = value;
-    }
-
-    function redraw(force) {
-        if (redrawing) return;
-        redrawing = true;
-        if (force) forcing = true;
-        try {
-            //lastRedrawId is a positive number if a second redraw is requested before the next animation frame
-            //lastRedrawID is null if it's the first redraw and not an event handler
-            if (lastRedrawId && !force) {
-                //when rAF: always reschedule redraw
-                //when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame,
-                //otherwise keep currently scheduled timeout
-                if ($requestAnimationFrame === window.requestAnimationFrame
-                    || Date.now() - lastRedrawCallTime > FRAME_BUDGET) {
-                    if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
-                    lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET);
-                }
-            }
-            else {
-                redraw();
-                lastRedrawId = $requestAnimationFrame(function() { lastRedrawId = null; }, FRAME_BUDGET);
-            }
-        }
-        finally {
-            redrawing = forcing = false;
-        }
-    }
-
-    redraw.strategy = prop();
-
-    var pendingRequests = 0;
-
-    function start() {
-        pendingRequests++;
-    }
-
-    function end() {
-        if (pendingRequests > 1) {
-            pendingRequests--;
-        }
-        else {
-            pendingRequests = 0;
-            redraw();
-        }
-    }
-
-    function endFirst() {
-        if (redraw.strategy() === "none") {
-            pendingRequests--;
-            redraw.strategy("diff");
-        }
-        else {
-            end();
-        }
-    }
-
-    function clear() {
-        pendingRequests = 0;
-    }
-
-    // Promiz.mithril.js | Zolmeister | MIT
-    // a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
-    // 1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
-    // 2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
-    function Deferred(successCallback, failureCallback) {
-        /*eslint-disable*/
-        var RESOLVING = 1;
-        var REJECTING = 2;
-        var RESOLVED = 3;
-        var REJECTED = 4;
-        var self = this;
-        var state = 0;
-        var promiseValue = 0;
-        var next = [];
-
-        self.promise = {};
-
-        self.resolve = function (value) {
-            if (!state) {
-                promiseValue = value;
-                state = RESOLVING;
-
-                fire();
-            }
-            return this;
-        };
-
-        self.reject = function (value) {
-            if (!state) {
-                promiseValue = value;
-                state = REJECTING;
-
-                fire();
-            }
-            return this;
-        };
-
-        self.promise.then = function (successCallback, failureCallback) {
-            var local = new Deferred(successCallback, failureCallback)
-            
-            if (state === RESOLVED) {
-                local.resolve(promiseValue);
-            } else if (state === REJECTED) {
-                local.reject(promiseValue);
-            } else {
-                next.push(local);
-            }
-            
-            return local.promise;
-        };
-
-        function finish(type) {
-            state = type || REJECTED;
-
-            next.map(function (local) {
-                local[state === RESOLVED ? "resolve" : "reject"](promiseValue);
-            });
-        }
-
-        function thennable(then, successCallback, failureCallback, notThennableCallback) {
-            if (((promiseValue != null && isObject(promiseValue)) || isFunction(promiseValue)) && isFunction(then)) {
-                try {
-                    // count protects against abuse calls from spec checker
-                    var count = 0;
-                    then.call(promiseValue, function(value) {
-                        if (count++) return;
-                        promiseValue = value;
-                        successCallback();
-                    }, function (value) {
-                        if (count++) return;
-                        promiseValue = value;
-                        failureCallback();
-                    });
-                } catch (e) {
-                    deferred.onerror(e);
-                    promiseValue = e;
-                    failureCallback();
-                }
-            } else {
-                notThennableCallback();
-            }
-        }
-
-        function fire() {
-            // check if it's a thenable
-            var then;
-            try {
-                then = promiseValue && promiseValue.then;
-            } catch (e) {
-                deferred.onerror(e);
-                promiseValue = e;
-                state = REJECTING;
-                return fire();
-            }
-
-            if (state === REJECTING) {
-                deferred.onerror(promiseValue)
-            }
-
-            thennable(then, function () {
-                state = RESOLVING
-                fire()
-            }, function () {
-                state = REJECTING
-                fire()
-            }, function () {
-                try {
-                    if (state === RESOLVING && isFunction(successCallback)) {
-                        promiseValue = successCallback(promiseValue);
-                    } else if (state === REJECTING && isFunction(failureCallback)) {
-                        promiseValue = failureCallback(promiseValue);
-                        state = RESOLVING;
-                    }
-                } catch (e) {
-                    deferred.onerror(e);
-                    promiseValue = e;
-                    return finish();
-                }
-
-                if (promiseValue === self) {
-                    promiseValue = TypeError();
-                    finish();
-                } else {
-                    thennable(then, function () {
-                        finish(RESOLVED);
-                    }, finish, function () {
-                        finish(state === RESOLVING && RESOLVED);
-                    });
-                }
-            });
-        }
-        /*eslint-enable*/
-    }
-
-    function deferred() {
-        var local = new Deferred();
-        local.promise = propify(local.promise);
-
-        return local;
-    }
-
-    deferred.onerror = function(e) {
-        if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
-            clear();
-
-            throw e;
-        }
-    };
-
     function forEach(list, f) {
         /*eslint no-empty:0 */
         for (var i = 0; i < list.length && !f(list[i], i++);) {}
@@ -315,89 +92,9 @@
         });
     }
 
-    function sync(args) {
-        var method = "resolve";
-        var local = deferred();
-        var outstanding = args.length;
-        var results = new Array(outstanding);
-
-        function synchronizer(pos, resolved) {
-            return function(value) {
-                results[pos] = value;
-                if (!resolved) method = "reject";
-                if (--outstanding === 0) {
-                    local.promise(results);
-                    local[method](results);
-                }
-                return value;
-            };
-        }
-
-        if (args.length > 0) {
-            forEach(args, function(arg, i) {
-                arg.then(synchronizer(i, true), synchronizer(i, false));
-            });
-        }
-        else local.resolve([]);
-
-        return local.promise;
-    }
-
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
     function noop() {}
-
-    function build$1(object, prefix) {
-        var duplicates = {};
-        var str = [];
-        for (var prop in object) {
-            var key = prefix ? prefix + "[" + prop + "]" : prop;
-            var value = object[prop];
-
-            if (value === null) {
-                str.push(encode(key));
-            }
-            else if (isObject(value)) {
-                str.push(build$1(value, key));
-            }
-            else if (isArray(value)) {
-                var keys = [];
-                duplicates[key] = duplicates[key] || {};
-                forEach(value, function(item) {
-                    if (!duplicates[key][item]) {
-                        duplicates[key][item] = true;
-                        keys.push(encode(key) + "=" + encode(item));
-                    }
-                });
-                str.push(keys.join("&"));
-            }
-            else if (value !== undefined) {
-                str.push(encode(key) + "=" + encode(value));
-            }
-        }
-        return str.join("&");
-    }
-
-    function parse$1(str) {
-        if (str === "" || str == null) return {};
-        if (str.charAt(0) === "?") str = str.slice(1);
-
-        var pairs = str.split("&");
-        var params = {};
-
-        forEach(pairs, function(string) {
-            var pair = string.split("=");
-            var key = decode(pair[0]);
-            var value = pair.length === 2 ? decode(pair[1]) : null;
-            if (params[key] != null) {
-                if (!isArray(params[key])) params[key] = [params[key]];
-                params[key].push(value);
-            }
-            else params[key] = value;
-        });
-
-        return params;
-    }
 
     var roots = [];
     var components = [];
@@ -531,387 +228,6 @@
                 end();
             }
         };
-    }
-
-    var topComponent;
-
-    function mount(root, component) {
-        /*eslint max-statements:[2, 26] */
-        if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-        var index = roots.indexOf(root);
-        if (index < 0) index = roots.length;
-
-        var isPrevented = false;
-        var event = {
-            preventDefault: function() {
-                isPrevented = true;
-                preredraw(null);
-                postredraw(null);
-            }
-        };
-
-        forEach(unloaders, function(unloader) {
-            unloader.handler.call(unloader.controller, event);
-            unloader.controller.onunload = null;
-        });
-
-        if (isPrevented) {
-            forEach(unloaders, function(unloader) {
-                unloader.controller.onunload = unloader.handler;
-            });
-        }
-        else clearUnloaders();
-
-        if (controllers[index] && isFunction(controllers[index].onunload)) {
-            controllers[index].onunload(event);
-        }
-
-        var isNullComponent = component === null;
-
-        if (!isPrevented) {
-            redraw.strategy("all");
-            start();
-            roots[index] = root;
-            var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
-            var controller = new (component.controller || noop)();
-            //controllers may call m.mount recursively (via m.route redirects, for example)
-            //this conditional ensures only the last recursive m.mount call is applied
-            if (currentComponent === topComponent) {
-                controllers[index] = controller;
-                components[index] = component;
-            }
-            endFirst();
-            if (isNullComponent) {
-                removeRootElement(root, index);
-            }
-            return controllers[index];
-        }
-        if (isNullComponent) {
-            removeRootElement(root, index);
-        }
-    }
-
-    var modes = {pathname: "", hash: "#", search: "?"};
-    var redirect = noop;
-    var routeParams;
-    var currentRoute;
-    var isDefaultRoute = false;
-    function normalizeRoute(route) {
-        return route.slice(modes[route.mode].length);
-    }
-
-    function routeByValue(root, router, path) {
-        routeParams = {};
-
-        var queryStart = path.indexOf("?");
-        if (queryStart !== -1) {
-            routeParams = parse$1(path.substr(queryStart + 1, path.length));
-            path = path.substr(0, queryStart);
-        }
-
-        //Get all routes and check if there's
-        //an exact match for the current path
-        var keys = Object.keys(router);
-        var index = keys.indexOf(path);
-        if (index !== -1){
-            mount(root, router[keys [index]]);
-            return true;
-        }
-
-        for (var route in router) {
-            if (route === path) {
-                mount(root, router[route]);
-                return true;
-            }
-
-            var matcher = new RegExp(
-                "^"
-                + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)")
-                + "\/?$"
-            );
-
-            if (matcher.test(path)) {
-                path.replace(matcher, function() {
-                    var keys = route.match(/:[^\/]+/g) || [];
-                    var values = [].slice.call(arguments, 1, -2);
-                    forEach(keys, function(key, i) {
-                        routeParams[key.replace(/:|\./g, "")] = decode(values[i]);
-                    })
-                    mount(root, router[route]);
-                });
-                return true;
-            }
-        }
-    }
-
-    function routeUnobtrusive(e) {
-        e = e || event;
-        if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return;
-
-        if (e.preventDefault) e.preventDefault();
-        else e.returnValue = false;
-
-        var currentTarget = e.currentTarget || e.srcElement,
-            args = route.mode === "pathname" && currentTarget.search ? parse$1(currentTarget.search.slice(1)) : {};
-        while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
-        //clear pendingRequests because we want an immediate route change
-        clear();
-        route(currentTarget[route.mode].slice(modes[route.mode].length), args);
-    }
-
-    function setScroll() {
-        if (route.mode !== "hash" && $location.hash) $location.hash = $location.hash;
-        else window.scrollTo(0, 0);
-    }
-
-    function route(root, arg1, arg2, vdom) {
-        /*eslint max-statements:[2, 28] */
-        //route()
-        if (arguments.length === 0) return currentRoute;
-        //route(el, defaultRoute, routes)
-        else if (arguments.length === 3 && isString(arg1)) {
-            redirect = function(source) {
-                var path = currentRoute = normalizeRoute(source);
-                if (!routeByValue(root, arg2, path)) {
-                    if (isDefaultRoute) {
-                        throw new Error("Ensure the default route matches one of the routes defined in route");
-                    }
-
-                    isDefaultRoute = true;
-                    route(arg1, true);
-                    isDefaultRoute = false;
-                }
-            };
-            var listener = route.mode === "hash" ? "onhashchange" : "onpopstate";
-            window[listener] = function() {
-                var path = $location[route.mode];
-                if (route.mode === "pathname") path += $location.search;
-                if (currentRoute !== normalizeRoute(path)) redirect(path);
-            };
-
-            preredraw(setScroll);
-            window[listener]();
-        }
-        //config: route
-        else if (root.addEventListener || root.attachEvent) {
-            root.href = (route.mode !== "pathname" ? $location.pathname : "") + modes[route.mode] + vdom.attrs.href;
-            if (root.addEventListener) {
-                root.removeEventListener("click", routeUnobtrusive);
-                root.addEventListener("click", routeUnobtrusive);
-            }
-            else {
-                root.detachEvent("onclick", routeUnobtrusive);
-                root.attachEvent("onclick", routeUnobtrusive);
-            }
-        }
-        //route(route, params, shouldReplaceHistoryEntry)
-        else if (isString(root)) {
-            var oldRoute = currentRoute;
-            currentRoute = root;
-            var args = arg1 || {};
-            var queryIndex = currentRoute.indexOf("?");
-            var params = queryIndex > -1 ? parse$1(currentRoute.slice(queryIndex + 1)) : {};
-            for (var i in args) params[i] = args[i];
-            var querystring = build$1(params);
-            var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute;
-            if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
-
-            var shouldReplaceHistoryEntry = (arguments.length === 3 ? arg2 : arg1) === true || oldRoute === root;
-
-            if (window.history.pushState) {
-                preredraw(setScroll);
-                postredraw(function() {
-                    window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](
-                        null,
-                        $document.title,
-                        modes[route.mode] + currentRoute
-                    );
-                });
-                redirect(modes[route.mode] + currentRoute);
-            }
-            else {
-                $location[route.mode] = currentRoute;
-                redirect(modes[route.mode] + currentRoute);
-            }
-        }
-    }
-
-    route.param = function(key) {
-        if (!routeParams) {
-            throw new Error("You must call route(element, defaultRoute, routes) before calling route.param()");
-        }
-
-        if (!key) {
-            return routeParams;
-        }
-
-        return routeParams[key];
-    };
-
-    route.mode = "search";
-
-    route.buildQueryString = build$1;
-    route.parseQueryString = parse$1;
-
-    function identity(value) { return value; }
-
-    function ajax(options) {
-        /*eslint max-statements:[2, 23] */
-        if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
-            var callbackKey = "mithril_callback_"
-                + new Date().getTime()
-                + "_" + (Math.round(Math.random() * 1e16)).toString(36);
-            var script = $document.createElement("script");
-
-            window[callbackKey] = function(resp) {
-                script.parentNode.removeChild(script);
-                options.onload({
-                    type: "load",
-                    target: {
-                        responseText: resp
-                    }
-                });
-                window[callbackKey] = undefined;
-            };
-
-            script.onerror = function() {
-                script.parentNode.removeChild(script);
-
-                options.onerror({
-                    type: "error",
-                    target: {
-                        status: 500,
-                        responseText: JSON.stringify({
-                            error: "Error making jsonp request"
-                        })
-                    }
-                });
-                window[callbackKey] = undefined;
-
-                return false;
-            }
-
-            script.onload = function() {
-                return false;
-            };
-
-            script.src = options.url
-                + (options.url.indexOf("?") > 0 ? "&" : "?")
-                + (options.callbackKey ? options.callbackKey : "callback")
-                + "=" + callbackKey
-                + "&" + build$1(options.data || {});
-            $document.body.appendChild(script);
-        }
-        else {
-            var xhr = new window.XMLHttpRequest();
-            xhr.open(options.method, options.url, true, options.user, options.password);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
-                    else options.onerror({type: "error", target: xhr});
-                }
-            };
-
-            if (options.serialize === JSON.stringify && options.data && options.method !== "GET") {
-                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-            }
-
-            if (options.deserialize === JSON.parse) {
-                xhr.setRequestHeader("Accept", "application/json, text/*");
-            }
-
-            if (isFunction(options.config)) {
-                var maybeXhr = options.config(xhr, options);
-                if (maybeXhr != null) xhr = maybeXhr;
-            }
-
-            var data = options.method === "GET" || !options.data ? "" : options.data;
-            if (data && (!isString(data) && data.constructor !== window.FormData)) {
-                throw new Error(
-                    "Request data should be either be a string or FormData. " +
-                    "Check the `serialize` option in `m.request`"
-                );
-            }
-            xhr.send(data);
-            return xhr;
-        }
-    }
-
-    function bindData(xhrOptions, data, serialize) {
-        if (xhrOptions.method === "GET" && xhrOptions.dataType !== "jsonp") {
-            var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&";
-            var querystring = build$1(data);
-
-            xhrOptions.url += (querystring ? prefix + querystring : "");
-        }
-        else xhrOptions.data = serialize(data);
-
-        return xhrOptions;
-    }
-
-    function parameterizeUrl(url, data) {
-        var tokens = url.match(/:[a-z]\w+/gi);
-        if (tokens && data) {
-            forEach(tokens, function(token) {
-                var key = token.slice(1);
-                url = url.replace(token, data[key]);
-                delete data[key];
-            });
-        }
-        return url;
-    }
-
-    function request(xhrOptions) {
-        if (xhrOptions.background !== true) start();
-        var deferred = new Deferred();
-        var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
-        var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
-        var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
-        var extract = isJSONP ? function(jsonp) { return jsonp.responseText } : xhrOptions.extract || function(xhr) {
-            if (xhr.responseText.length === 0 && deserialize === JSON.parse) {
-                return null
-            }
-            else {
-                return xhr.responseText
-            }
-        };
-        xhrOptions.method = (xhrOptions.method || "GET").toUpperCase();
-        xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
-        xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
-        xhrOptions.onload = xhrOptions.onerror = function(e) {
-            try {
-                e = e || event;
-                var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
-                var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
-                if (e.type === "load") {
-                    if (isArray(response) && xhrOptions.type) {
-                        forEach(response, function(res, i) {
-                            response[i] = new xhrOptions.type(res);
-                        });
-                    }
-                    else if (xhrOptions.type) {
-                        response = new xhrOptions.type(response);
-                    }
-
-                    deferred.resolve(response)
-                }
-                else {
-                    deferred.reject(response)
-                }
-
-                deferred[e.type === "load" ? "resolve" : "reject"](response);
-            }
-            catch (error) {
-                deferred.reject(error);
-            }
-            finally {
-                if (xhrOptions.background !== true) end()
-            }
-        }
-
-        ajax(xhrOptions);
-        deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
-        return deferred.promise;
     }
 
     function getController(views, view, cachedControllers, controller) {
@@ -1527,6 +843,714 @@
         forEach(configs, function(config) { config(); });
     }
 
+    var redrawing = false;
+    var forcing = false;
+    var lastRedrawId = null;
+    var lastRedrawCallTime = 0;
+    var FRAME_BUDGET = 16;
+    var computePreRedrawHook = null;
+    var computePostRedrawHook = null;
+    function _redraw() {
+        if (computePreRedrawHook) {
+            computePreRedrawHook();
+            computePreRedrawHook = null;
+        }
+        forEach(roots, function(root, i) {
+            var component = components[i];
+            if (controllers[i]) {
+                var args = [controllers[i]];
+                render(root, component.view ? component.view(controllers[i], args) : "");
+            }
+        });
+
+        //after rendering within a routed context, we need to scroll back to the top,
+        //and fetch the document title for history.pushState
+        if (computePostRedrawHook) {
+            computePostRedrawHook();
+            computePostRedrawHook = null;
+        }
+        lastRedrawId = null;
+        lastRedrawCallTime = new Date();
+        redraw.strategy("diff");
+    }
+
+    function preredraw(value) {
+        computePreRedrawHook = value;
+    }
+
+    function postredraw(value) {
+        computePostRedrawHook = value;
+    }
+
+    function redraw(force) {
+        if (redrawing) return;
+        redrawing = true;
+        if (force) forcing = true;
+        try {
+            //lastRedrawId is a positive number if a second redraw is requested before the next animation frame
+            //lastRedrawID is null if it's the first redraw and not an event handler
+            if (lastRedrawId && !force) {
+                //when rAF: always reschedule redraw
+                //when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame,
+                //otherwise keep currently scheduled timeout
+                if ($requestAnimationFrame === window.requestAnimationFrame
+                    || (new Date()) - lastRedrawCallTime > FRAME_BUDGET) {
+                    if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
+                    lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET);
+                }
+            }
+            else {
+                _redraw();
+                lastRedrawId = $requestAnimationFrame(function() { lastRedrawId = null; }, FRAME_BUDGET);
+            }
+        }
+        finally {
+            redrawing = forcing = false;
+        }
+    }
+
+    redraw.strategy = prop();
+
+    var pendingRequests = 0;
+
+    function start() {
+        pendingRequests++;
+    }
+
+    function end() {
+        if (pendingRequests > 1) {
+            pendingRequests--;
+        }
+        else {
+            pendingRequests = 0;
+            redraw();
+        }
+    }
+
+    function endFirst() {
+        if (redraw.strategy() === "none") {
+            pendingRequests--;
+            redraw.strategy("diff");
+        }
+        else {
+            end();
+        }
+    }
+
+    function clear() {
+        pendingRequests = 0;
+    }
+
+    // Promiz.mithril.js | Zolmeister | MIT
+    // a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
+    // 1) `then` callbacks are called synchronously (because setTimeout is too slow, and the setImmediate polyfill is too big
+    // 2) throwing subclasses of Error cause the error to be bubbled up instead of triggering rejection (because the spec does not account for the important use case of default browser error handling, i.e. message w/ line number)
+    function Deferred(successCallback, failureCallback) {
+        /*eslint-disable*/
+        var RESOLVING = 1;
+        var REJECTING = 2;
+        var RESOLVED = 3;
+        var REJECTED = 4;
+        var self = this;
+        var state = 0;
+        var promiseValue = 0;
+        var next = [];
+
+        self.promise = {};
+
+        self.resolve = function (value) {
+            if (!state) {
+                promiseValue = value;
+                state = RESOLVING;
+
+                fire();
+            }
+            return this;
+        };
+
+        self.reject = function (value) {
+            if (!state) {
+                promiseValue = value;
+                state = REJECTING;
+
+                fire();
+            }
+            return this;
+        };
+
+        self.promise.then = function (successCallback, failureCallback) {
+            var local = new Deferred(successCallback, failureCallback)
+            
+            if (state === RESOLVED) {
+                local.resolve(promiseValue);
+            } else if (state === REJECTED) {
+                local.reject(promiseValue);
+            } else {
+                next.push(local);
+            }
+            
+            return local.promise;
+        };
+
+        function finish(type) {
+            state = type || REJECTED;
+
+            next.map(function (local) {
+                local[state === RESOLVED ? "resolve" : "reject"](promiseValue);
+            });
+        }
+
+        function thennable(then, successCallback, failureCallback, notThennableCallback) {
+            if (((promiseValue != null && isObject(promiseValue)) || isFunction(promiseValue)) && isFunction(then)) {
+                try {
+                    // count protects against abuse calls from spec checker
+                    var count = 0;
+                    then.call(promiseValue, function(value) {
+                        if (count++) return;
+                        promiseValue = value;
+                        successCallback();
+                    }, function (value) {
+                        if (count++) return;
+                        promiseValue = value;
+                        failureCallback();
+                    });
+                } catch (e) {
+                    deferred.onerror(e);
+                    promiseValue = e;
+                    failureCallback();
+                }
+            } else {
+                notThennableCallback();
+            }
+        }
+
+        function fire() {
+            // check if it's a thenable
+            var then;
+            try {
+                then = promiseValue && promiseValue.then;
+            } catch (e) {
+                deferred.onerror(e);
+                promiseValue = e;
+                state = REJECTING;
+                return fire();
+            }
+
+            if (state === REJECTING) {
+                deferred.onerror(promiseValue)
+            }
+
+            thennable(then, function () {
+                state = RESOLVING
+                fire()
+            }, function () {
+                state = REJECTING
+                fire()
+            }, function () {
+                try {
+                    if (state === RESOLVING && isFunction(successCallback)) {
+                        promiseValue = successCallback(promiseValue);
+                    } else if (state === REJECTING && isFunction(failureCallback)) {
+                        promiseValue = failureCallback(promiseValue);
+                        state = RESOLVING;
+                    }
+                } catch (e) {
+                    deferred.onerror(e);
+                    promiseValue = e;
+                    return finish();
+                }
+
+                if (promiseValue === self) {
+                    promiseValue = TypeError();
+                    finish();
+                } else {
+                    thennable(then, function () {
+                        finish(RESOLVED);
+                    }, finish, function () {
+                        finish(state === RESOLVING && RESOLVED);
+                    });
+                }
+            });
+        }
+        /*eslint-enable*/
+    }
+
+    function deferred() {
+        var local = new Deferred();
+        local.promise = propify(local.promise);
+
+        return local;
+    }
+
+    deferred.onerror = function(e) {
+        if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
+            clear();
+
+            throw e;
+        }
+    };
+
+    function sync(args) {
+        var method = "resolve";
+        var local = deferred();
+        var outstanding = args.length;
+        var results = new Array(outstanding);
+
+        function synchronizer(pos, resolved) {
+            return function(value) {
+                results[pos] = value;
+                if (!resolved) method = "reject";
+                if (--outstanding === 0) {
+                    local.promise(results);
+                    local[method](results);
+                }
+                return value;
+            };
+        }
+
+        if (args.length > 0) {
+            forEach(args, function(arg, i) {
+                arg.then(synchronizer(i, true), synchronizer(i, false));
+            });
+        }
+        else local.resolve([]);
+
+        return local.promise;
+    }
+
+    function build$1(object, prefix) {
+        var duplicates = {};
+        var str = [];
+        for (var prop in object) {
+            var key = prefix ? prefix + "[" + prop + "]" : prop;
+            var value = object[prop];
+
+            if (value === null) {
+                str.push(encode(key));
+            }
+            else if (isObject(value)) {
+                str.push(build$1(value, key));
+            }
+            else if (isArray(value)) {
+                var keys = [];
+                duplicates[key] = duplicates[key] || {};
+                forEach(value, function(item) {
+                    if (!duplicates[key][item]) {
+                        duplicates[key][item] = true;
+                        keys.push(encode(key) + "=" + encode(item));
+                    }
+                });
+                str.push(keys.join("&"));
+            }
+            else if (value !== undefined) {
+                str.push(encode(key) + "=" + encode(value));
+            }
+        }
+        return str.join("&");
+    }
+
+    function parse$1(str) {
+        if (str === "" || str == null) return {};
+        if (str.charAt(0) === "?") str = str.slice(1);
+
+        var pairs = str.split("&");
+        var params = {};
+
+        forEach(pairs, function(string) {
+            var pair = string.split("=");
+            var key = decode(pair[0]);
+            var value = pair.length === 2 ? decode(pair[1]) : null;
+            if (params[key] != null) {
+                if (!isArray(params[key])) params[key] = [params[key]];
+                params[key].push(value);
+            }
+            else params[key] = value;
+        });
+
+        return params;
+    }
+
+    var topComponent;
+
+    function mount(root, component) {
+        /*eslint max-statements:[2, 26] */
+        if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
+        var index = roots.indexOf(root);
+        if (index < 0) index = roots.length;
+
+        var isPrevented = false;
+        var event = {
+            preventDefault: function() {
+                isPrevented = true;
+                preredraw(null);
+                postredraw(null);
+            }
+        };
+
+        forEach(unloaders, function(unloader) {
+            unloader.handler.call(unloader.controller, event);
+            unloader.controller.onunload = null;
+        });
+
+        if (isPrevented) {
+            forEach(unloaders, function(unloader) {
+                unloader.controller.onunload = unloader.handler;
+            });
+        }
+        else clearUnloaders();
+
+        if (controllers[index] && isFunction(controllers[index].onunload)) {
+            controllers[index].onunload(event);
+        }
+
+        var isNullComponent = component === null;
+
+        if (!isPrevented) {
+            redraw.strategy("all");
+            start();
+            roots[index] = root;
+            var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
+            var controller = new (component.controller || noop)();
+            //controllers may call m.mount recursively (via m.route redirects, for example)
+            //this conditional ensures only the last recursive m.mount call is applied
+            if (currentComponent === topComponent) {
+                controllers[index] = controller;
+                components[index] = component;
+            }
+            endFirst();
+            if (isNullComponent) {
+                removeRootElement(root, index);
+            }
+            return controllers[index];
+        }
+        if (isNullComponent) {
+            removeRootElement(root, index);
+        }
+    }
+
+    var modes = {pathname: "", hash: "#", search: "?"};
+    var redirect = noop;
+    var routeParams;
+    var currentRoute;
+    var isDefaultRoute = false;
+    function normalizeRoute(route) {
+        return route.slice(modes[route.mode].length);
+    }
+
+    function routeByValue(root, router, path) {
+        routeParams = {};
+
+        var queryStart = path.indexOf("?");
+        if (queryStart !== -1) {
+            routeParams = parse$1(path.substr(queryStart + 1, path.length));
+            path = path.substr(0, queryStart);
+        }
+
+        //Get all routes and check if there's
+        //an exact match for the current path
+        var keys = Object.keys(router);
+        var index = keys.indexOf(path);
+        if (index !== -1){
+            mount(root, router[keys [index]]);
+            return true;
+        }
+
+        for (var route in router) {
+            if (route === path) {
+                mount(root, router[route]);
+                return true;
+            }
+
+            var matcher = new RegExp(
+                "^"
+                + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)")
+                + "\/?$"
+            );
+
+            if (matcher.test(path)) {
+                path.replace(matcher, function() {
+                    var keys = route.match(/:[^\/]+/g) || [];
+                    var values = [].slice.call(arguments, 1, -2);
+                    forEach(keys, function(key, i) {
+                        routeParams[key.replace(/:|\./g, "")] = decode(values[i]);
+                    })
+                    mount(root, router[route]);
+                });
+                return true;
+            }
+        }
+    }
+
+    function routeUnobtrusive(e) {
+        e = e || event;
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return;
+
+        if (e.preventDefault) e.preventDefault();
+        else e.returnValue = false;
+
+        var currentTarget = e.currentTarget || e.srcElement,
+            args = route.mode === "pathname" && currentTarget.search ? parse$1(currentTarget.search.slice(1)) : {};
+        while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
+        //clear pendingRequests because we want an immediate route change
+        clear();
+        route(currentTarget[route.mode].slice(modes[route.mode].length), args);
+    }
+
+    function setScroll() {
+        if (route.mode !== "hash" && $location.hash) $location.hash = $location.hash;
+        else window.scrollTo(0, 0);
+    }
+
+    function route(root, arg1, arg2, vdom) {
+        /*eslint max-statements:[2, 28] */
+        //route()
+        if (arguments.length === 0) return currentRoute;
+        //route(el, defaultRoute, routes)
+        else if (arguments.length === 3 && isString(arg1)) {
+            redirect = function(source) {
+                var path = currentRoute = normalizeRoute(source);
+                if (!routeByValue(root, arg2, path)) {
+                    if (isDefaultRoute) {
+                        throw new Error("Ensure the default route matches one of the routes defined in route");
+                    }
+
+                    isDefaultRoute = true;
+                    route(arg1, true);
+                    isDefaultRoute = false;
+                }
+            };
+            var listener = route.mode === "hash" ? "onhashchange" : "onpopstate";
+            window[listener] = function() {
+                var path = $location[route.mode];
+                if (route.mode === "pathname") path += $location.search;
+                if (currentRoute !== normalizeRoute(path)) redirect(path);
+            };
+
+            preredraw(setScroll);
+            window[listener]();
+        }
+        //config: route
+        else if (root.addEventListener || root.attachEvent) {
+            root.href = (route.mode !== "pathname" ? $location.pathname : "") + modes[route.mode] + vdom.attrs.href;
+            if (root.addEventListener) {
+                root.removeEventListener("click", routeUnobtrusive);
+                root.addEventListener("click", routeUnobtrusive);
+            }
+            else {
+                root.detachEvent("onclick", routeUnobtrusive);
+                root.attachEvent("onclick", routeUnobtrusive);
+            }
+        }
+        //route(route, params, shouldReplaceHistoryEntry)
+        else if (isString(root)) {
+            var oldRoute = currentRoute;
+            currentRoute = root;
+            var args = arg1 || {};
+            var queryIndex = currentRoute.indexOf("?");
+            var params = queryIndex > -1 ? parse$1(currentRoute.slice(queryIndex + 1)) : {};
+            for (var i in args) params[i] = args[i];
+            var querystring = build$1(params);
+            var currentPath = queryIndex > -1 ? currentRoute.slice(0, queryIndex) : currentRoute;
+            if (querystring) currentRoute = currentPath + (currentPath.indexOf("?") === -1 ? "?" : "&") + querystring;
+
+            var shouldReplaceHistoryEntry = (arguments.length === 3 ? arg2 : arg1) === true || oldRoute === root;
+
+            if (window.history.pushState) {
+                preredraw(setScroll);
+                postredraw(function() {
+                    window.history[shouldReplaceHistoryEntry ? "replaceState" : "pushState"](
+                        null,
+                        $document.title,
+                        modes[route.mode] + currentRoute
+                    );
+                });
+                redirect(modes[route.mode] + currentRoute);
+            }
+            else {
+                $location[route.mode] = currentRoute;
+                redirect(modes[route.mode] + currentRoute);
+            }
+        }
+    }
+
+    route.param = function(key) {
+        if (!routeParams) {
+            throw new Error("You must call route(element, defaultRoute, routes) before calling route.param()");
+        }
+
+        if (!key) {
+            return routeParams;
+        }
+
+        return routeParams[key];
+    };
+
+    route.mode = "search";
+
+    route.buildQueryString = build$1;
+    route.parseQueryString = parse$1;
+
+    function identity(value) { return value; }
+
+    function ajax(options) {
+        /*eslint max-statements:[2, 23] */
+        if (options.dataType && options.dataType.toLowerCase() === "jsonp") {
+            var callbackKey = "mithril_callback_"
+                + new Date().getTime()
+                + "_" + (Math.round(Math.random() * 1e16)).toString(36);
+            var script = $document.createElement("script");
+
+            window[callbackKey] = function(resp) {
+                script.parentNode.removeChild(script);
+                options.onload({
+                    type: "load",
+                    target: {
+                        responseText: resp
+                    }
+                });
+                window[callbackKey] = undefined;
+            };
+
+            script.onerror = function() {
+                script.parentNode.removeChild(script);
+
+                options.onerror({
+                    type: "error",
+                    target: {
+                        status: 500,
+                        responseText: JSON.stringify({
+                            error: "Error making jsonp request"
+                        })
+                    }
+                });
+                window[callbackKey] = undefined;
+
+                return false;
+            }
+
+            script.onload = function() {
+                return false;
+            };
+
+            script.src = options.url
+                + (options.url.indexOf("?") > 0 ? "&" : "?")
+                + (options.callbackKey ? options.callbackKey : "callback")
+                + "=" + callbackKey
+                + "&" + build$1(options.data || {});
+            $document.body.appendChild(script);
+        }
+        else {
+            var xhr = new window.XMLHttpRequest();
+            xhr.open(options.method, options.url, true, options.user, options.password);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
+                    else options.onerror({type: "error", target: xhr});
+                }
+            };
+
+            if (options.serialize === JSON.stringify && options.data && options.method !== "GET") {
+                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+            }
+
+            if (options.deserialize === JSON.parse) {
+                xhr.setRequestHeader("Accept", "application/json, text/*");
+            }
+
+            if (isFunction(options.config)) {
+                var maybeXhr = options.config(xhr, options);
+                if (maybeXhr != null) xhr = maybeXhr;
+            }
+
+            var data = options.method === "GET" || !options.data ? "" : options.data;
+            if (data && (!isString(data) && data.constructor !== window.FormData)) {
+                throw new Error(
+                    "Request data should be either be a string or FormData. " +
+                    "Check the `serialize` option in `m.request`"
+                );
+            }
+            xhr.send(data);
+            return xhr;
+        }
+    }
+
+    function bindData(xhrOptions, data, serialize) {
+        if (xhrOptions.method === "GET" && xhrOptions.dataType !== "jsonp") {
+            var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&";
+            var querystring = build$1(data);
+
+            xhrOptions.url += (querystring ? prefix + querystring : "");
+        }
+        else xhrOptions.data = serialize(data);
+
+        return xhrOptions;
+    }
+
+    function parameterizeUrl(url, data) {
+        var tokens = url.match(/:[a-z]\w+/gi);
+        if (tokens && data) {
+            forEach(tokens, function(token) {
+                var key = token.slice(1);
+                url = url.replace(token, data[key]);
+                delete data[key];
+            });
+        }
+        return url;
+    }
+
+    function request(xhrOptions) {
+        if (xhrOptions.background !== true) start();
+        var deferred = new Deferred();
+        var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
+        var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
+        var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
+        var extract = isJSONP ? function(jsonp) { return jsonp.responseText } : xhrOptions.extract || function(xhr) {
+            if (xhr.responseText.length === 0 && deserialize === JSON.parse) {
+                return null
+            }
+            else {
+                return xhr.responseText
+            }
+        };
+        xhrOptions.method = (xhrOptions.method || "GET").toUpperCase();
+        xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
+        xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
+        xhrOptions.onload = xhrOptions.onerror = function(e) {
+            try {
+                e = e || event;
+                var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
+                var response = unwrap(deserialize(extract(e.target, xhrOptions)), e.target);
+                if (e.type === "load") {
+                    if (isArray(response) && xhrOptions.type) {
+                        forEach(response, function(res, i) {
+                            response[i] = new xhrOptions.type(res);
+                        });
+                    }
+                    else if (xhrOptions.type) {
+                        response = new xhrOptions.type(response);
+                    }
+
+                    deferred.resolve(response)
+                }
+                else {
+                    deferred.reject(response)
+                }
+
+                deferred[e.type === "load" ? "resolve" : "reject"](response);
+            }
+            catch (error) {
+                deferred.reject(error);
+            }
+            finally {
+                if (xhrOptions.background !== true) end()
+            }
+        }
+
+        ajax(xhrOptions);
+        deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
+        return deferred.promise;
+    }
+
     //testing API
     function deps(mock) {
         initialize(window = mock || window);
@@ -1639,3 +1663,4 @@
     return mithril;
 
 }));
+//# sourceMappingURL=mithril-es6.js.map
