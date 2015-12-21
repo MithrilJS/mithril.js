@@ -2,6 +2,8 @@ import { Deferred } from "./deferred.js";
 import { propify } from "./prop.js";
 import { $document } from "./env.js";
 import { isFunction, isString, isArray } from "./types.js";
+import { forEach } from "./iterate.js";
+import { build as buildQueryString } from "./query-string.js";
 
 function identity(value) { return value; }
 
@@ -10,7 +12,7 @@ function ajax(options) {
         var callbackKey = "mithril_callback_" + new Date().getTime() + "_" + (Math.round(Math.random() * 1e16)).toString(36)
         var script = $document.createElement("script");
 
-        window[callbackKey] = function(resp) {
+        window[callbackKey] = function (resp) {
             script.parentNode.removeChild(script);
             options.onload({
                 type: "load",
@@ -21,7 +23,7 @@ function ajax(options) {
             window[callbackKey] = undefined;
         };
 
-        script.onerror = function() {
+        script.onerror = function () {
             script.parentNode.removeChild(script);
 
             options.onerror({
@@ -38,7 +40,7 @@ function ajax(options) {
             return false;
         }
 
-        script.onload = function() {
+        script.onload = function () {
             return false;
         };
 
@@ -48,22 +50,24 @@ function ajax(options) {
             + "=" + callbackKey
             + "&" + buildQueryString(options.data || {});
         $document.body.appendChild(script);
-    }
-    else {
+    } else {
         var xhr = new window.XMLHttpRequest();
         xhr.open(options.method, options.url, true, options.user, options.password);
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
                 else options.onerror({type: "error", target: xhr});
             }
         };
+
         if (options.serialize === JSON.stringify && options.data && options.method !== "GET") {
             xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         }
+        
         if (options.deserialize === JSON.parse) {
             xhr.setRequestHeader("Accept", "application/json, text/*");
         }
+        
         if (isFunction(options.config)) {
             var maybeXhr = options.config(xhr, options);
             if (maybeXhr != null) xhr = maybeXhr;
@@ -82,9 +86,11 @@ function bindData(xhrOptions, data, serialize) {
     if (xhrOptions.method === "GET" && xhrOptions.dataType !== "jsonp") {
         var prefix = xhrOptions.url.indexOf("?") < 0 ? "?" : "&";
         var querystring = buildQueryString(data);
-        xhrOptions.url = xhrOptions.url + (querystring ? prefix + querystring : "");
+        
+        xhrOptions.url += (querystring ? prefix + querystring : "");
     }
     else xhrOptions.data = serialize(data);
+    
     return xhrOptions;
 }
 
@@ -100,13 +106,13 @@ function parameterizeUrl(url, data) {
     return url;
 }
 
-export function request (xhrOptions) {
+export function request(xhrOptions) {
     if (xhrOptions.background !== true) m.startComputation();
     var deferred = new Deferred();
     var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
     var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
     var deserialize = xhrOptions.deserialize = isJSONP ? identity : xhrOptions.deserialize || JSON.parse;
-    var extract = isJSONP ? function(jsonp) { return jsonp.responseText } : xhrOptions.extract || function(xhr) {
+    var extract = isJSONP ? function (jsonp) { return jsonp.responseText } : xhrOptions.extract || function (xhr) {
         if (xhr.responseText.length === 0 && deserialize === JSON.parse) {
             return null
         } else {
@@ -116,7 +122,7 @@ export function request (xhrOptions) {
     xhrOptions.method = (xhrOptions.method || "GET").toUpperCase();
     xhrOptions.url = parameterizeUrl(xhrOptions.url, xhrOptions.data);
     xhrOptions = bindData(xhrOptions, xhrOptions.data, serialize);
-    xhrOptions.onload = xhrOptions.onerror = function(e) {
+    xhrOptions.onload = xhrOptions.onerror = function (e) {
         try {
             e = e || event;
             var unwrap = (e.type === "load" ? xhrOptions.unwrapSuccess : xhrOptions.unwrapError) || identity;
@@ -135,11 +141,9 @@ export function request (xhrOptions) {
             }
 
             deferred[e.type === "load" ? "resolve" : "reject"](response);
-        }
-        catch (e) {
-            deferred.reject(e);
-        }
-        finally {
+        } catch (error) {
+            deferred.reject(error);
+        } finally {
             if (xhrOptions.background !== true) m.endComputation()
         }
     }
@@ -147,4 +151,4 @@ export function request (xhrOptions) {
     ajax(xhrOptions);
     deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
     return deferred.promise;
-};
+}
