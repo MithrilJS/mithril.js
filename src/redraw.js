@@ -1,5 +1,5 @@
 import {prop} from "./prop.js";
-import {$requestAnimationFrame, $cancelAnimationFrame} from "./env";
+import {$requestAnimationFrame, $cancelAnimationFrame} from "./_env.js";
 
 var redrawing = false,
     forcing = false,

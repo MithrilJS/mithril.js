@@ -1,7 +1,7 @@
-import {noop} from "./util.js";
-import {isFunction, isArray} from "./types.js";
-import {$document} from "./env.js";
-import {forEach} from "./iterate.js";
+import {noop} from "./_util.js";
+import {isFunction, isArray} from "./_types.js";
+import {$document} from "./_env.js";
+import {forEach} from "./_iterate.js";
 import {redraw} from "./redraw";
 import {start, end} from "./computation.js";
 

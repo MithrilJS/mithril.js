@@ -1,11 +1,11 @@
-import {noop} from "./util.js";
-import {forEach} from "./iterate.js";
-import {isFunction, isString, isObject} from "./types.js";
-import {$document} from "./env.js";
+import {noop} from "./_util.js";
+import {forEach} from "./_iterate.js";
+import {isFunction, isString, isObject} from "./_types.js";
+import {$document} from "./_env.js";
 import {redraw, forcing} from "./redraw.js";
 import {pendingRequests} from "./computation.js";
-import {clear, unloaders, insertNode, autoredraw} from "./dom.js";
-import {build} from "./build.js";
+import {clear, unloaders, insertNode, autoredraw} from "./_dom.js";
+import {build} from "./_build.js";
 
 function getController(views, view, cachedControllers, controller) {
     var controllerIndex = redraw.strategy() === "diff" && views ? views.indexOf(view) : -1;

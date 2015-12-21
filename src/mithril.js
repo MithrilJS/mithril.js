@@ -1,4 +1,4 @@
-import {initialize} from "./env.js";
+import {initialize} from "./_env.js";
 
 import {component} from "./component.js";
 import {deps} from "./deps.js";
@@ -14,6 +14,7 @@ import {sync} from "./sync.js";
 import {trust} from "./trust.js";
 import {withAttr} from "./with-attr.js";
 
+export default (function app(window, undefined) {
 initialize(window);
 
 var m = parse;
@@ -37,4 +38,7 @@ m.sync = sync;
 m.trust = trust;
 m.withAttr = withAttr;
 
-export default m;
+//for internal testing only, do not use `m.deps.factory`
+m.deps.factory = app;
+
+}(typeof window !== "undefined" ? window : {}));

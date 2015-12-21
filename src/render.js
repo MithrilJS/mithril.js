@@ -1,7 +1,7 @@
-import {$document} from "./env.js";
-import {forEach} from "./iterate.js";
-import {getCellCacheKey, cellCache, clear, reset, documentNode} from "./dom.js";
-import {build} from "./build.js";
+import {$document} from "./_env.js";
+import {forEach} from "./_iterate.js";
+import {getCellCacheKey, cellCache, clear, reset, documentNode} from "./_dom.js";
+import {build} from "./_build.js";
 
 function render(root, cell, forceRecreation) {
     var configs = [];

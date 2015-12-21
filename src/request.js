@@ -1,9 +1,9 @@
 import {Deferred} from "./deferred.js";
 import {propify} from "./prop.js";
-import {$document} from "./env.js";
-import {isFunction, isString, isArray} from "./types.js";
-import {forEach} from "./iterate.js";
-import {build as buildQueryString} from "./query-string.js";
+import {$document} from "./_env.js";
+import {isFunction, isString, isArray} from "./_types.js";
+import {forEach} from "./_iterate.js";
+import {build as buildQueryString} from "./_query-string.js";
 import {start, end} from "./computation.js";
 
 function identity(value) { return value; }

@@ -1,4 +1,4 @@
-import {isObject, isFunction} from "./types.js";
+import {isObject, isFunction} from "./_types.js";
 
 function gettersetter(store) {
     var val = function() {

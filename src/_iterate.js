@@ -1,4 +1,4 @@
-import {isArray} from "./types.js";
+import {isArray} from "./_types.js";
 
 function forEach(list, f) {
     /*eslint no-empty:0 */

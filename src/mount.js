@@ -1,10 +1,10 @@
-import {noop} from "./util.js";
-import {isFunction} from "./types.js";
-import {forEach} from "./iterate.js";
+import {noop} from "./_util.js";
+import {isFunction} from "./_types.js";
+import {forEach} from "./_iterate.js";
 import {redraw} from "./redraw.js";
 import {start as startComputation, endFirst as endFirstComputation} from "./computation.js";
 import {preredraw, postredraw} from "./redraw.js";
-import {roots, unloaders, controllers, components, removeRootElement, clearUnloaders} from "./dom.js";
+import {roots, unloaders, controllers, components, removeRootElement, clearUnloaders} from "./_dom.js";
 
 var topComponent;
 

@@ -1,6 +1,6 @@
-import {forEach} from "./iterate.js";
-import {isObject, isArray} from "./types.js";
-import {encode, decode} from "./util.js";
+import {forEach} from "./_iterate.js";
+import {isObject, isArray} from "./_types.js";
+import {encode, decode} from "./_util.js";
 
 function build(object, prefix) {
     var duplicates = {};

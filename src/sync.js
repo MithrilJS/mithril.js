@@ -1,5 +1,5 @@
 import {deferred} from "./deferred.js";
-import {forEach} from "./iterate.js";
+import {forEach} from "./_iterate.js";
 
 function sync(args) {
     var method = "resolve";

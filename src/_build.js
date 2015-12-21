@@ -1,8 +1,8 @@
-import {$document} from "./env.js";
-import {forKeys, forEach} from "./iterate.js";
-import {type, isArray, isObject, isFunction} from "./types.js";
-import {clear, insertNode, injectHTML, injectTextNode} from "./dom.js";
-import {buildObject} from "./build-object.js";
+import {$document} from "./_env.js";
+import {forKeys, forEach} from "./_iterate.js";
+import {type, isArray, isObject, isFunction} from "./_types.js";
+import {clear, insertNode, injectHTML, injectTextNode} from "./_dom.js";
+import {buildObject} from "./_build-object.js";
 
 var DELETION = 1,
     INSERTION = 2,

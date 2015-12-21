@@ -1,5 +1,5 @@
-import {noop} from "./util.js";
-import {isObject, isString, isArray} from "./types.js";
+import {noop} from "./_util.js";
+import {isObject, isString, isArray} from "./_types.js";
 
 var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g,
     attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;

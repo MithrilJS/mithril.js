@@ -1,9 +1,9 @@
-import {$document, $location} from "./env.js";
-import {isString} from "./types.js";
-import {forEach} from "./iterate.js";
-import {build, parse} from "./query-string.js";
+import {$document, $location} from "./_env.js";
+import {noop, decode} from "./_util.js";
+import {isString} from "./_types.js";
+import {forEach} from "./_iterate.js";
+import {build, parse} from "./_query-string.js";
 import {clear} from "./computation.js";
-import {noop, decode} from "./util.js";
 import {preredraw, postredraw} from "./redraw.js";
 import {mount} from "./mount.js";
 
