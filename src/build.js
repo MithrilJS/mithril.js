@@ -2,7 +2,7 @@ import {$document} from "./env.js";
 import {forKeys, forEach} from "./iterate.js";
 import {type, isArray, isObject, isFunction} from "./types.js";
 import {clear, insertNode, injectHTML, injectTextNode} from "./dom.js";
-import buildObject from "./build-object.js";
+import {buildObject} from "./build-object.js";
 
 var DELETION = 1,
     INSERTION = 2,
@@ -261,7 +261,7 @@ function handleText(cached, data, index, parentElement, shouldReattach, editable
         (cached.nodes.intact = true, cached);
 }
 
-export default function build(
+function build(
     parentElement,
     parentTag,
     parentCache,
@@ -342,3 +342,5 @@ export default function build(
 
     return cached;
 }
+
+export {build};

@@ -1,17 +1,17 @@
 import {isArray} from "./types.js";
 
-export function forEach(list, f) {
+function forEach(list, f) {
     /*eslint no-empty:0 */
     for (var i = 0; i < list.length && !f(list[i], i++);) {}
 }
 
-export function forKeys(list, f) {
+function forKeys(list, f) {
     forEach(list, function(attrs, i) {
         return (attrs = attrs && attrs.attrs) && attrs.key != null && f(attrs, i);
     });
 }
 
-export function flatten(list) {
+function flatten(list) {
     //recursively flatten array
     for (var i = 0; i < list.length; i++) {
         if (isArray(list[i])) {
@@ -22,3 +22,5 @@ export function flatten(list) {
     }
     return list;
 }
+
+export {forEach, forKeys, flaten};

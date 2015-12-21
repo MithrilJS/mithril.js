@@ -5,7 +5,7 @@ import {$document} from "./env.js";
 import {redraw, forcing} from "./redraw.js";
 import {pendingRequests} from "./computation.js";
 import {clear, unloaders, insertNode, autoredraw} from "./dom.js";
-import build from "./build.js";
+import {build} from "./build.js";
 
 function getController(views, view, cachedControllers, controller) {
     var controllerIndex = redraw.strategy() === "diff" && views ? views.indexOf(view) : -1;
@@ -235,7 +235,7 @@ function scheduleConfigsToBeCalled(configs, data, node, isNew, cached) {
     }
 }
 
-export default function buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) {
+function buildObject(data, cached, editable, parentElement, index, shouldReattach, namespace, configs) {
     /*eslint max-statements:[2, 23] */
     var views = [], controllers = [];
     data = markViews(data, cached, views, controllers);
@@ -268,3 +268,5 @@ export default function buildObject(data, cached, editable, parentElement, index
     scheduleConfigsToBeCalled(configs, data, node, isNew, cached);
     return cached
 }
+
+export {buildObject};
