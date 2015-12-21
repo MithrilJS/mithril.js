@@ -5,8 +5,7 @@ import {route} from "./route.js";
 import {mount} from "./mount.js";
 import {component} from "./component.js";
 import {trust} from "./trust.js";
-
-import parse from "./parse.js";
+import {parse} from "./parse.js";
 
 var m = parse;
 

@@ -11,7 +11,7 @@ var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g,
  * @param {...mNode=[]} Zero or more Mithril child nodes. Can be an array, or splat (optional)
  *
  */
-export default function(tag, pairs) {
+function parse(tag, pairs) {
     /*eslint max-statements:[2, 24] */
     for (var args = [], i = 1; i < arguments.length; i++) {
         args[i - 1] = arguments[i];
@@ -55,7 +55,7 @@ export default function(tag, pairs) {
     return cell;
 }
 
-export function parameterize(component, args) {
+function parameterize(component, args) {
     var controller = function() {
         return (component.controller || noop).apply(this, args) || this;
     };
@@ -69,3 +69,5 @@ export function parameterize(component, args) {
     if (args[0] && args[0].key != null) output.attrs = {key: args[0].key};
     return output;
 }
+
+export {parse, parameterize};
