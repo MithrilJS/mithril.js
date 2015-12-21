@@ -854,6 +854,18 @@
     route.buildQueryString = build;
     route.parseQueryString = parse$1;
 
+    function trust(value) {
+        /*eslint no-new-wrapper:0 */
+        value = new String(value);
+        value.$trusted = true;
+        return value;
+    }
+
+    function component(component) {
+        for (var args = [], i = 1; i < arguments.length; i++) args.push(arguments[i]);
+        return parameterize(component, args);
+    }
+
     var m = parse;
 
     m.version = function() {
@@ -865,6 +877,8 @@
     m.redraw = redraw;
     m.request = request;
     m.route = route;
+    m.trust = trust;
+    m.component = component;
 
     return m;
 
