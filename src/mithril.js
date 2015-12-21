@@ -41,4 +41,5 @@ m.withAttr = withAttr;
 //for internal testing only, do not use `m.deps.factory`
 m.deps.factory = app;
 
+return m;
 }(typeof window !== "undefined" ? window : {}));

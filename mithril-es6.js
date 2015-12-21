@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
-    global.mithril = factory();
+    global.m = factory();
 }(this, function () { 'use strict';
 
     function withAttr(prop, withAttrCallback, callbackThis) {
@@ -1633,6 +1633,7 @@
     //for internal testing only, do not use `m.deps.factory`
     m.deps.factory = app;
 
+    return m;
     }(typeof window !== "undefined" ? window : {}));
 
     return mithril;
