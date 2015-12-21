@@ -1,5 +1,6 @@
 import {type, isObject, isFunction} from "./types.js";
 import {propify} from "./prop.js";
+import {clear} from "./computation.js";
 
 // Promiz.mithril.js | Zolmeister | MIT
 // a modified version of Promiz.js, which does not conform to Promises/A+ for two reasons:
@@ -143,8 +144,7 @@ function deferred() {
 
 deferred.onerror = function (e) {
     if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
-        // TODO: expose from... somewhere
-        pendingRequests = 0;
+        clear();
         
         throw e;
     }

@@ -94,6 +94,10 @@
         return output;
     }
 
+    function forEach(list, f) {
+        for (var i = 0; i < list.length && !f(list[i], i++);) {}
+    }
+
     function gettersetter(store) {
         var val = function() {
             if (arguments.length) store = arguments[0];
@@ -124,6 +128,199 @@
         };
         local["catch"] = local.then.bind(null, null);
         return local;
+    }
+
+    var $document;
+    var $location;
+    var $cancelAnimationFrame;
+    var $requestAnimationFrame;
+
+    var redrawing = false;
+    var forcing = false;
+    var lastRedrawId = null;
+    var lastRedrawCallTime = 0;
+    var FRAME_BUDGET = 16;
+    var computePreRedrawHook = null;
+    var computePostRedrawHook = null;
+    function preredraw(value) {
+        computePreRedrawHook = value;
+    }
+
+    function postredraw(value) {
+        computePostRedrawHook = value;
+    }
+
+    function redraw(force) {
+        if (redrawing) return;
+        redrawing = true;
+        if (force) forcing = true;
+        try {
+            //lastRedrawId is a positive number if a second redraw is requested before the next animation frame
+            //lastRedrawID is null if it's the first redraw and not an event handler
+            if (lastRedrawId && !force) {
+                //when rAF: always reschedule redraw
+                //when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame,
+                //otherwise keep currently scheduled timeout
+                if ($requestAnimationFrame === window.requestAnimationFrame
+                    || Date.now() - lastRedrawCallTime > FRAME_BUDGET) {
+                    if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
+                    lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET);
+                }
+            }
+            else {
+                redraw();
+                lastRedrawId = $requestAnimationFrame(function() { lastRedrawId = null; }, FRAME_BUDGET);
+            }
+        }
+        finally {
+            redrawing = forcing = false;
+        }
+    }
+
+    redraw.strategy = prop();
+
+    var pendingRequests = 0;
+
+    function start() {
+        pendingRequests++;
+    }
+
+    function end() {
+        if (pendingRequests > 1) {
+            pendingRequests--;
+        }
+        else {
+            pendingRequests = 0;
+            redraw();
+        }
+    }
+
+    function endFirst() {
+        if (redraw.strategy() === "none") {
+            pendingRequests--;
+            redraw.strategy("diff");
+        }
+        else {
+            end();
+        }
+    }
+
+    function clear$1() {
+        pendingRequests = 0;
+    }
+
+    var roots = [];
+    var components = [];
+    var controllers = [];
+    var unloaders = [];
+    var topComponent;
+    var nodeCache = [];
+    var cellCache = {};
+    function unload(cached) {
+        if (cached.configContext && isFunction(cached.configContext.onunload)) {
+            cached.configContext.onunload();
+            cached.configContext.onunload = null;
+        }
+        if (cached.controllers) {
+            forEach(cached.controllers, function(controller) {
+                if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
+            });
+        }
+        if (cached.children) {
+            if (isArray$1(cached.children)) forEach(cached.children, unload);
+            else if (cached.children.tag) unload(cached.children);
+        }
+    }
+
+    function clear(nodes, cached) {
+        for (var i = nodes.length - 1; i > -1; i--) {
+            if (nodes[i] && nodes[i].parentNode) {
+                try { nodes[i].parentNode.removeChild(nodes[i]); }
+                catch (e) {
+                    //ignore if this fails due to order of events
+                    //(see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
+                }
+                cached = [].concat(cached);
+                if (cached[i]) unload(cached[i]);
+            }
+        }
+        //release memory if nodes is an array. This check should fail if nodes is a NodeList (see loop above)
+        if (nodes.length) nodes.length = 0;
+    }
+
+    function getCellCacheKey(element) {
+        var index = nodeCache.indexOf(element);
+        return index < 0 ? nodeCache.push(element) - 1 : index;
+    }
+
+    function reset(root) {
+        var cacheKey = getCellCacheKey(root);
+        clear(root.childNodes, cellCache[cacheKey]);
+        cellCache[cacheKey] = undefined;
+    }
+
+    function removeRootElement(root, index) {
+        roots.splice(index, 1);
+        controllers.splice(index, 1);
+        components.splice(index, 1);
+        reset(root);
+        nodeCache.splice(getCellCacheKey(root), 1);
+    }
+
+    function mount(root, component) {
+        /*eslint max-statements:[2, 26] */
+        if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
+        var index = roots.indexOf(root);
+        if (index < 0) index = roots.length;
+
+        var isPrevented = false;
+        var event = {
+            preventDefault: function() {
+                isPrevented = true;
+                preredraw(null);
+                postredraw(null);
+            }
+        };
+
+        forEach(unloaders, function(unloader) {
+            unloader.handler.call(unloader.controller, event);
+            unloader.controller.onunload = null;
+        });
+
+        if (isPrevented) {
+            forEach(unloaders, function(unloader) {
+                unloader.controller.onunload = unloader.handler;
+            });
+        }
+        else unloaders = [];
+
+        if (controllers[index] && isFunction(controllers[index].onunload)) {
+            controllers[index].onunload(event);
+        }
+
+        var isNullComponent = component === null;
+
+        if (!isPrevented) {
+            redraw.strategy("all");
+            start();
+            roots[index] = root;
+            var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
+            var controller = new (component.controller || noop)();
+            //controllers may call m.mount recursively (via m.route redirects, for example)
+            //this conditional ensures only the last recursive m.mount call is applied
+            if (currentComponent === topComponent) {
+                controllers[index] = controller;
+                components[index] = component;
+            }
+            endFirst();
+            if (isNullComponent) {
+                removeRootElement(root, index);
+            }
+            return controllers[index];
+        }
+        if (isNullComponent) {
+            removeRootElement(root, index);
+        }
     }
 
     // Promiz.mithril.js | Zolmeister | MIT
@@ -268,21 +465,11 @@
 
     deferred.onerror = function (e) {
         if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
-            // TODO: expose from... somewhere
-            pendingRequests = 0;
+            clear$1();
             
             throw e;
         }
     };
-
-    var $document;
-    var $location;
-    var $cancelAnimationFrame;
-    var $requestAnimationFrame;
-
-    function forEach(list, f) {
-        for (var i = 0; i < list.length && !f(list[i], i++);) {}
-    }
 
     function build(object, prefix) {
         var duplicates = {};
@@ -334,80 +521,6 @@
         });
 
         return params;
-    }
-
-    var redrawing = false;
-    var forcing = false;
-    var lastRedrawId = null;
-    var lastRedrawCallTime = 0;
-    var FRAME_BUDGET = 16;
-    var computePreRedrawHook = null;
-    var computePostRedrawHook = null;
-    function preredraw(value) {
-        computePreRedrawHook = value;
-    }
-
-    function postredraw(value) {
-        computePostRedrawHook = value;
-    }
-
-    function redraw(force) {
-        if (redrawing) return;
-        redrawing = true;
-        if (force) forcing = true;
-        try {
-            //lastRedrawId is a positive number if a second redraw is requested before the next animation frame
-            //lastRedrawID is null if it's the first redraw and not an event handler
-            if (lastRedrawId && !force) {
-                //when rAF: always reschedule redraw
-                //when setTimeout: only reschedule redraw if time between now and previous redraw is bigger than a frame,
-                //otherwise keep currently scheduled timeout
-                if ($requestAnimationFrame === window.requestAnimationFrame
-                    || Date.now() - lastRedrawCallTime > FRAME_BUDGET) {
-                    if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId);
-                    lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET);
-                }
-            }
-            else {
-                redraw();
-                lastRedrawId = $requestAnimationFrame(function() { lastRedrawId = null; }, FRAME_BUDGET);
-            }
-        }
-        finally {
-            redrawing = forcing = false;
-        }
-    }
-
-    redraw.strategy = prop();
-
-    var pendingRequests$1 = 0;
-
-    function startComputation() {
-        pendingRequests$1++;
-    }
-
-    function end() {
-        if (pendingRequests$1 > 1) {
-            pendingRequests$1--;
-        }
-        else {
-            pendingRequests$1 = 0;
-            redraw();
-        }
-    }
-
-    function endFirstComputation() {
-        if (redraw.strategy() === "none") {
-            pendingRequests$1--;
-            redraw.strategy("diff");
-        }
-        else {
-            end();
-        }
-    }
-
-    function clear() {
-        pendingRequests$1 = 0;
     }
 
     function identity(value) { return value; }
@@ -518,7 +631,7 @@
     }
 
     function request(xhrOptions) {
-        if (xhrOptions.background !== true) startComputation();
+        if (xhrOptions.background !== true) start();
         var deferred = new Deferred();
         var isJSONP = xhrOptions.dataType && xhrOptions.dataType.toLowerCase() === "jsonp"
         var serialize = xhrOptions.serialize = isJSONP ? identity : xhrOptions.serialize || JSON.stringify;
@@ -568,120 +681,6 @@
         ajax(xhrOptions);
         deferred.promise = propify(deferred.promise, xhrOptions.initialValue);
         return deferred.promise;
-    }
-
-    var roots = [];
-    var components = [];
-    var controllers = [];
-    var unloaders = [];
-    var topComponent;
-    var nodeCache = [];
-    var cellCache = {};
-    function unload(cached) {
-        if (cached.configContext && isFunction(cached.configContext.onunload)) {
-            cached.configContext.onunload();
-            cached.configContext.onunload = null;
-        }
-        if (cached.controllers) {
-            forEach(cached.controllers, function(controller) {
-                if (isFunction(controller.onunload)) controller.onunload({preventDefault: noop});
-            });
-        }
-        if (cached.children) {
-            if (isArray$1(cached.children)) forEach(cached.children, unload);
-            else if (cached.children.tag) unload(cached.children);
-        }
-    }
-
-    function clear$1(nodes, cached) {
-        for (var i = nodes.length - 1; i > -1; i--) {
-            if (nodes[i] && nodes[i].parentNode) {
-                try { nodes[i].parentNode.removeChild(nodes[i]); }
-                catch (e) {
-                    //ignore if this fails due to order of events
-                    //(see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
-                }
-                cached = [].concat(cached);
-                if (cached[i]) unload(cached[i]);
-            }
-        }
-        //release memory if nodes is an array. This check should fail if nodes is a NodeList (see loop above)
-        if (nodes.length) nodes.length = 0;
-    }
-
-    function getCellCacheKey(element) {
-        var index = nodeCache.indexOf(element);
-        return index < 0 ? nodeCache.push(element) - 1 : index;
-    }
-
-    function reset(root) {
-        var cacheKey = getCellCacheKey(root);
-        clear$1(root.childNodes, cellCache[cacheKey]);
-        cellCache[cacheKey] = undefined;
-    }
-
-    function removeRootElement(root, index) {
-        roots.splice(index, 1);
-        controllers.splice(index, 1);
-        components.splice(index, 1);
-        reset(root);
-        nodeCache.splice(getCellCacheKey(root), 1);
-    }
-
-    function mount(root, component) {
-        /*eslint max-statements:[2, 26] */
-        if (!root) throw new Error("Please ensure the DOM element exists before rendering a template into it.");
-        var index = roots.indexOf(root);
-        if (index < 0) index = roots.length;
-
-        var isPrevented = false;
-        var event = {
-            preventDefault: function() {
-                isPrevented = true;
-                preredraw(null);
-                postredraw(null);
-            }
-        };
-
-        forEach(unloaders, function(unloader) {
-            unloader.handler.call(unloader.controller, event);
-            unloader.controller.onunload = null;
-        });
-
-        if (isPrevented) {
-            forEach(unloaders, function(unloader) {
-                unloader.controller.onunload = unloader.handler;
-            });
-        }
-        else unloaders = [];
-
-        if (controllers[index] && isFunction(controllers[index].onunload)) {
-            controllers[index].onunload(event);
-        }
-
-        var isNullComponent = component === null;
-
-        if (!isPrevented) {
-            redraw.strategy("all");
-            startComputation();
-            roots[index] = root;
-            var currentComponent = component ? (topComponent = component) : (topComponent = component = {controller: noop});
-            var controller = new (component.controller || noop)();
-            //controllers may call m.mount recursively (via m.route redirects, for example)
-            //this conditional ensures only the last recursive m.mount call is applied
-            if (currentComponent === topComponent) {
-                controllers[index] = controller;
-                components[index] = component;
-            }
-            endFirstComputation();
-            if (isNullComponent) {
-                removeRootElement(root, index);
-            }
-            return controllers[index];
-        }
-        if (isNullComponent) {
-            removeRootElement(root, index);
-        }
     }
 
     var modes = {pathname: "", hash: "#", search: "?"};
@@ -748,7 +747,7 @@
             args = route.mode === "pathname" && currentTarget.search ? parse$1(currentTarget.search.slice(1)) : {};
         while (currentTarget && currentTarget.nodeName.toUpperCase() !== "A") currentTarget = currentTarget.parentNode;
         //clear pendingRequests because we want an immediate route change
-        clear();
+        clear$1();
         route(currentTarget[route.mode].slice(modes[route.mode].length), args);
     }
 
@@ -852,9 +851,10 @@
         return "v0.2.2-rc.1";
     };
 
+    m.mount = mount;
     m.prop = prop;
-    m.request = request;
     m.redraw = redraw;
+    m.request = request;
     m.route = route;
 
     return m;
