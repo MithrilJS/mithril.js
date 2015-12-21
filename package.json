@@ -15,7 +15,8 @@
     "url" : "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "rollup --format umd --name mithril --input src/mithril.js --output ./mithril-es6.js"
   },
   "main": "mithril.js",
   "devDependencies": {
