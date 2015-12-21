@@ -54,10 +54,11 @@ function ajax(options) {
             + "=" + callbackKey
             + "&" + buildQueryString(options.data || {});
         $document.body.appendChild(script);
-    } else {
+    }
+    else {
         var xhr = new window.XMLHttpRequest();
         xhr.open(options.method, options.url, true, options.user, options.password);
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) options.onload({type: "load", target: xhr});
                 else options.onerror({type: "error", target: xhr});

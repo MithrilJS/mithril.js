@@ -12,7 +12,7 @@ function isString(object) {
     return type.call(object) === "[object String]";
 }
 
-var isArray = Array.isArray || function (object) {
+var isArray = Array.isArray || function(object) {
     return type.call(object) === "[object Array]";
 }
 

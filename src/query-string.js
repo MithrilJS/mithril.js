@@ -18,7 +18,7 @@ function build(object, prefix) {
         else if (isArray(value)) {
             var keys = [];
             duplicates[key] = duplicates[key] || {};
-            forEach(value, function (item) {
+            forEach(value, function(item) {
                 if (!duplicates[key][item]) {
                     duplicates[key][item] = true;
                     keys.push(encode(key) + "=" + encode(item));

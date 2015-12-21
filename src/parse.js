@@ -29,7 +29,7 @@ export default function(tag, pairs) {
         else if (match[1] === ".") classes.push(match[2]);
         else if (match[3][0] === "[") {
             var pair = attrParser.exec(match[3]);
-            cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" :true);
+            cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true);
         }
     }
 

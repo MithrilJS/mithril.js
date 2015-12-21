@@ -1,3 +1,4 @@
+/*eslint spaced-comment:0 */
 import {type, isObject, isFunction} from "./types.js";
 import {propify} from "./prop.js";
 import {clear} from "./computation.js";
@@ -133,21 +134,22 @@ function Deferred(successCallback, failureCallback) {
             }
         });
     }
+    /*eslint-enable*/
 }
 
 function deferred() {
     var local = new Deferred();
     local.promise = propify(local.promise);
-    
+
     return local;
 }
 
-deferred.onerror = function (e) {
+deferred.onerror = function(e) {
     if (type.call(e) === "[object Error]" && !e.constructor.toString().match(/ Error/)) {
         clear();
-        
+
         throw e;
     }
 };
 
-export {deferred, Deferred };
+export {deferred, Deferred};
