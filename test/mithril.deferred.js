@@ -307,4 +307,58 @@ describe("m.deferred()", function () {
 			expect(v).to.equal(5)
 		})
 	})
+
+	it("allows setting Bluebird as the Promise implementation", function (done) {
+		m.setPromiseImpl(Promise);
+		var d = m.deferred();
+		d.resolve('allows setting Bluebird as the Promise implementation');
+		m.setPromiseImpl(); // set back to the default impl
+
+		d.promise.then(function () {
+			expect(d.promise.isRejected()).to.equal(false);
+			done();
+		})
+	})
+
+	it("finally works with Bluebird", function (done) {
+		m.setPromiseImpl(Promise);
+		var d = m.deferred();
+		d.resolve('finally works with Bluebird');
+
+		d.promise.finally(function () {
+			// needs to happen in the finally block (next tick) since all Bluebird promise are resolved/rejected asynchronously
+			expect(d.promise.isPending()).to.equal(false);
+			expect(d.promise.isRejected()).to.equal(false);
+			done();
+		})
+		m.setPromiseImpl(); // set back to the default impl
+	})
+
+	it("catch string works with Bluebird", function (done) {
+		m.setPromiseImpl(Promise);
+		var d = m.deferred();
+
+		d.reject('catch String with Bluebird');
+
+		d.promise.catch(function () {
+			expect(d.promise.isPending()).to.equal(false);
+			expect(d.promise.isRejected()).to.equal(true);
+			done();
+		})
+		m.setPromiseImpl(); // set back to the default impl
+	})
+
+	it("catch Error works with Bluebird", function (done) {
+		m.setPromiseImpl(Promise);
+		var d = m.deferred();
+
+		d.reject(new Error('catch Error with Bluebird'));
+
+		d.promise.catch(function () {
+			expect(d.promise.isPending()).to.equal(false);
+			expect(d.promise.isRejected()).to.equal(true);
+			done();
+		})
+		m.setPromiseImpl(); // set back to the default impl
+	})
 })

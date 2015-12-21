@@ -12,13 +12,14 @@
     "url": "git@github.com:lhorie/mithril.js.git"
   },
   "bugs": {
-    "url" : "http://github.com/lhorie/mithril.js/issues"
+    "url": "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
     "test": "grunt test"
   },
   "main": "mithril.js",
   "devDependencies": {
+    "bluebird": "^3.1.1",
     "chai": "^3.4.0",
     "eslint": "^1.7.3",
     "grunt": "*",
