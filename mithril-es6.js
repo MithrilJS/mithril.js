@@ -1640,6 +1640,7 @@
     };
 
     m.component = component;
+    m.deferred = deferred;
     m.deps = deps;
     m.endComputation = end;
     m.module = mount;

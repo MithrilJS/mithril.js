@@ -1,6 +1,7 @@
 import {initialize} from "./_env.js";
 
 import {component} from "./component.js";
+import {deferred} from "./deferred.js";
 import {deps} from "./deps.js";
 import {mount} from "./mount.js";
 import {parse} from "./parse.js";
@@ -24,6 +25,7 @@ m.version = function() {
 };
 
 m.component = component;
+m.deferred = deferred;
 m.deps = deps;
 m.endComputation = end;
 m.module = mount;
