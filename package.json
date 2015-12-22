@@ -12,10 +12,11 @@
     "url": "git@github.com:lhorie/mithril.js.git"
   },
   "bugs": {
-    "url" : "http://github.com/lhorie/mithril.js/issues"
+    "url": "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "rollup --format umd --name m --input src/mithril.js --output ./mithril-es6.js --sourcemap"
   },
   "main": "mithril.js",
   "devDependencies": {
@@ -36,6 +37,7 @@
     "grunt-zip": "*",
     "mocha": "^2.3.3",
     "request": "^2.67.0",
+    "rollup": "^0.21.2",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   },
