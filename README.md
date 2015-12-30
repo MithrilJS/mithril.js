@@ -18,7 +18,7 @@ Mithril is a client-side MVC framework - a tool to organize code in a way that i
 
 ### Light-weight
 
-- Only 7kb gzipped, no dependencies
+- Only 7.8 kB gzipped, no dependencies
 - Small API, small learning curve
 
 ### Robust
