@@ -6,7 +6,7 @@ This page aims to provide a comparison between Mithril and some of the most wide
 
 ### Code Size
 
-One of the most obvious differences between Mithril and most frameworks is in file size: Mithril is around 7kb gzipped and has no dependencies on other libraries.
+One of the most obvious differences between Mithril and most frameworks is in file size: Mithril is around 7.8 kB gzipped and has no dependencies on other libraries.
 
 Note that while a small gzipped size can look appealing, that number is often used to "hide the weight" of the uncompressed code: remember that the decompressed Javascript still needs to be parsed and evaluated on every page load, and this cost (which can be in the dozens of milliseconds range for some frameworks in some browsers) cannot be cached.
 
