@@ -622,6 +622,13 @@ var m = (function app(window, undefined) {
 			else if (cached.children.tag) unload(cached.children);
 		}
 	}
+	function appendTextFragment(parentElement, data) {
+	  try {
+	    parentElement.appendChild($document.createRange().createContextualFragment(data));
+	  } catch (e) {
+	    parentElement.insertAdjacentHTML("beforeend", data);
+	  }
+	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
@@ -635,10 +642,7 @@ var m = (function app(window, undefined) {
 			else nextSibling.insertAdjacentHTML("beforebegin", data);
 		}
 		else {
-			if (window.Range && window.Range.prototype.createContextualFragment) {
-				parentElement.appendChild($document.createRange().createContextualFragment(data));
-			}
-			else parentElement.insertAdjacentHTML("beforeend", data);
+			appendTextFragment(parentElement, data);
 		}
 		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {
