@@ -579,7 +579,11 @@ var m = (function app(window, undefined) {
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && attrName !== "list" && attrName !== "style" && attrName !== "form" && attrName !== "type" && attrName !== "width" && attrName !== "height") {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
-						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr;
+						try {
+							if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr;
+						} catch (e) {
+							node.setAttribute(attrName, dataAttr);
+						}
 					}
 					else node.setAttribute(attrName, dataAttr);
 				}
