@@ -20,6 +20,7 @@ describe("m.trust()", function () {
 	// FIXME: implement document.createRange().createContextualFragment() in the
 	// mock window for these tests
 	dom(function () {
+
 		it("isn't escaped in m.render()", function () {
 			var root = document.createElement("div")
 			m.render(root, m("div", "a", m.trust("&amp;"), "b"))
@@ -54,5 +55,16 @@ describe("m.trust()", function () {
 
 			expect(root.childNodes[2].tagName).to.equal("TD")
 		})
+
+		it("works with trusted content in div", function () {
+			var root = document.createElement("div")
+			m.render(root, m('div', [
+			  m('p', '&copy;'),
+			  m('p', m.trust('&copy;')),
+			  m.trust('&copy;'),
+			]))
+			expect(root.innerHTML).to.equal("<div><p>&amp;copy;</p><p>©</p>©</div>")
+		})
+		
 	})
 })
