@@ -42,8 +42,6 @@ describe("m.trust()", function () {
 			expect(root.childNodes[3].tagName).to.equal("I")
 		})
 
-		// FIXME: this is a bug (trusted string's contents rendered as just
-		// textual contents)
 		it("works with mixed trusted content in td", function () {
 			var root = document.createElement("table")
 			root.appendChild(root = document.createElement("tr"))
