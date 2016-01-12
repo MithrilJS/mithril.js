@@ -534,6 +534,12 @@ declare module _mithril {
 		* @see MithrilElementConfig
 		*/
 		config?: MithrilElementConfig;
+
+		/**
+		* Any other virtual element properties including attributes and
+		* event handlers
+		*/
+		[property: string]: any;
 	}
 
 	/**
