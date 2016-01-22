@@ -10,3 +10,4 @@ docs/layout/lib
 
 # TODO: These are temporary, and need to be eventually enabled.
 mithril.js
+tests
