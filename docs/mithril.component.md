@@ -165,8 +165,8 @@ var MyComponent = {
 
 m.render(document.body, [
 	//the two lines below are equivalent
-	m(component, {data: "world"}),
-	m.component(component, {data: "world"})
+	m(MyComponent, {data: "world"}),
+	m.component(MyComponent, {data: "world"})
 ])
 ```
 
