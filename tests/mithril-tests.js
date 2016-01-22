@@ -5551,14 +5551,6 @@
 		return success
 	})
 
-	// console.log presence
-	test(function () {
-		return m.deps.factory.toString().indexOf("console") < 0
-	})
-	test(function () {
-		return m.deps.factory.toString().indexOf("document.write") < 0
-	})
-
 	test.print(function (value) {
 		console.log(value) // eslint-disable-line no-console
 	})
