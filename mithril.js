@@ -554,7 +554,7 @@ var m = (function app(window, undefined) {
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr)) {
 				cachedAttrs[attrName] = dataAttr;
 				try {
-					//`config` isn't a real attributes, so ignore it
+					//`config` isn't a real attribute, so ignore it
 					if (attrName === "config" || attrName === "key") continue;
 					//hook event handlers to the auto-redrawing system
 					else if (isFunction(dataAttr) && attrName.slice(0, 2) === "on") {
