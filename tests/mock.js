@@ -1,40 +1,49 @@
-if (!Array.prototype.indexOf) {
-	Array.prototype.indexOf = function (item) {
-		for (var i = 0; i < this.length; i++) {
-			if (this[i] === item) return i
-		}
-		return -1
-	}
-}
-if (!Array.prototype.map) {
-	Array.prototype.map = function (callback) {
-		var results = []
-		for (var i = 0; i < this.length; i++) {
-			results[i] = callback(this[i], i, this)
-		}
-		return results
-	}
-}
-if (!Array.prototype.filter) {
-	Array.prototype.filter = function (callback) {
-		var results = []
-		for (var i = 0; i < this.length; i++) {
-			if (callback(this[i], i, this)) results.push(this[i])
-		}
-		return results
-	}
-}
-if (!Object.keys) {
-	Object.keys = function () {
-		var keys = []
-		for (var i in this) keys.push(i)
-		return keys
-	}
-}
+(function (global) { // eslint-disable-line max-statements
+	"use strict"
 
-var mock = {}
-mock.window = (function () {
-	var window = {}
+	/* eslint-disable no-extend-native */
+	if (!Array.prototype.indexOf) {
+		Array.prototype.indexOf = function (item) {
+			for (var i = 0; i < this.length; i++) {
+				if (this[i] === item) return i
+			}
+			return -1
+		}
+	}
+
+	if (!Array.prototype.map) {
+		Array.prototype.map = function (callback) {
+			var results = []
+			for (var i = 0; i < this.length; i++) {
+				results[i] = callback(this[i], i, this)
+			}
+			return results
+		}
+	}
+
+	if (!Array.prototype.filter) {
+		Array.prototype.filter = function (callback) {
+			var results = []
+			for (var i = 0; i < this.length; i++) {
+				if (callback(this[i], i, this)) results.push(this[i])
+			}
+			return results
+		}
+	}
+
+	if (!Object.keys) {
+		Object.keys = function () {
+			var keys = []
+			for (var i in this) if ({}.hasOwnProperty.call(this, i)) {
+				keys.push(i)
+			}
+			return keys
+		}
+	}
+	/* eslint-enable no-extend-native */
+
+	var window = global.mock = {window: window}
+	window.window = window
 	window.document = {}
 	window.document.childNodes = []
 	window.document.createElement = function (tag) {
@@ -46,6 +55,7 @@ mock.window = (function () {
 			appendChild: window.document.appendChild,
 			removeChild: window.document.removeChild,
 			replaceChild: window.document.replaceChild,
+
 			insertBefore: function (node, reference) {
 				node.parentNode = this
 				var referenceIndex = this.childNodes.indexOf(reference)
@@ -54,15 +64,18 @@ mock.window = (function () {
 				if (referenceIndex < 0) this.childNodes.push(node)
 				else this.childNodes.splice(referenceIndex, 0, node)
 			},
+
 			insertAdjacentHTML: function (position, html) {
-				//todo: accept markup
+				// todo: accept markup
 				if (position === "beforebegin") {
-					this.parentNode.insertBefore(window.document.createTextNode(html), this)
-				}
-				else if (position === "beforeend") {
+					this.parentNode.insertBefore(
+						window.document.createTextNode(html),
+						this)
+				} else if (position === "beforeend") {
 					this.appendChild(window.document.createTextNode(html))
 				}
 			},
+
 			setAttribute: function (name, value) {
 				this[name] = value.toString()
 			},
@@ -70,7 +83,7 @@ mock.window = (function () {
 				this.namespaceURI = namespace
 				this[name] = value.toString()
 			},
-			getAttribute: function (name, value) {
+			getAttribute: function (name) {
 				return this[name]
 			},
 			addEventListener: function () {},
@@ -104,16 +117,18 @@ mock.window = (function () {
 		this.childNodes.splice(index, 1)
 		child.parentNode = null
 	}
-	//getElementsByTagName is only used by JSONP tests, it's not required by Mithril
+	// getElementsByTagName is only used by JSONP tests, it's not required by
+	// Mithril
 	window.document.getElementsByTagName = function (name){
 		name = name.toLowerCase()
 		var out = []
 
-		var traverse = function (node){
+		function traverse(node) {
 			if (node.childNodes && node.childNodes.length > 0){
 				node.childNodes.map(function (curr){
-					if (curr.nodeName.toLowerCase() === name)
+					if (curr.nodeName.toLowerCase() === name) {
 						out.push(curr)
+					}
 					traverse(curr)
 				})
 			}
@@ -136,8 +151,9 @@ mock.window = (function () {
 			callback()
 		}
 	}
+
 	window.XMLHttpRequest = (function () {
-		var request = function () {
+		function XMLHttpRequest() {
 			this.$headers = {}
 			this.setRequestHeader = function (key, value) {
 				this.$headers[key] = value
@@ -150,21 +166,28 @@ mock.window = (function () {
 				this.responseText = JSON.stringify(this)
 				this.readyState = 4
 				this.status = 200
-				request.$instances.push(this)
+				XMLHttpRequest.$instances.push(this)
 			}
 		}
-		request.$instances = []
-		return request
-	}())
-	window.location = {search: "", pathname: "", hash: ""},
+		XMLHttpRequest.$instances = []
+		return XMLHttpRequest
+	})()
+
+	window.location = {search: "", pathname: "", hash: ""}
+
 	window.history = {}
 	window.history.$$length = 0
+
 	window.history.pushState = function (data, title, url) {
 		window.history.$$length++
-		window.location.pathname = window.location.search = window.location.hash = url
-	},
-	window.history.replaceState = function (data, title, url) {
-		window.location.pathname = window.location.search = window.location.hash = url
+		window.location.pathname =
+		window.location.search =
+		window.location.hash = url
 	}
-	return window
-}())
+
+	window.history.replaceState = function (data, title, url) {
+		window.location.pathname =
+		window.location.search =
+		window.location.hash = url
+	}
+})(this)
