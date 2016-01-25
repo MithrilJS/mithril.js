@@ -13,6 +13,15 @@ var m = (function app(window, undefined) {
 	var isArray = Array.isArray || function (object) {
 		return type.call(object) === "[object Array]";
 	};
+	function clone(obj) {
+		var target = {};
+		for (var i in obj) {
+			if (obj.hasOwnProperty(i)) {
+				target[i] = obj[i];
+			}
+		}
+		return target;
+	}
 	var type = {}.toString;
 	var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/;
 	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/;
@@ -952,7 +961,7 @@ var m = (function app(window, undefined) {
 	m.route.param = function(key) {
 		if (!routeParams) throw new Error("You must call m.route(element, defaultRoute, routes) before calling m.route.param()");
 		if( !key ){
-			return routeParams;
+			return clone(routeParams);
 		}
 		return routeParams[key];
 	};
