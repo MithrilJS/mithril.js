@@ -590,7 +590,7 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a controller is not specified, Mithril will automatically create an empty controller function.
 
 -	**Object attributes**
 
