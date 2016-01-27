@@ -442,11 +442,10 @@ var m = (function app(window, undefined) {
 
 	function checkView(data, view, cached, cachedControllers, controllers, views) {
 		var controller = getController(cached.views, view, cachedControllers, data.controller);
-		//Faster to coerce to number and check for NaN
-		var key = +(data && data.attrs && data.attrs.key);
+		var key = data && data.attrs && data.attrs.key;
 		data = pendingRequests === 0 || forcing || cachedControllers && cachedControllers.indexOf(controller) > -1 ? data.view(controller) : {tag: "placeholder"};
 		if (data.subtree === "retain") return data;
-		if (key === key) (data.attrs = data.attrs || {}).key = key;
+		(data.attrs = data.attrs || {}).key = key;
 		updateLists(views, controllers, view, controller);
 		return data;
 	}

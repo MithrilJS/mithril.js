@@ -270,6 +270,41 @@ function testMithril(mock) {
 		return firstBefore === firstAfter
 	})
 	test(function() {
+		//string keys in components should work
+		mock.requestAnimationFrame.$resolve()
+
+		var root = mock.document.createElement("div")
+		var list = [1, 2, 3]
+		var component = {
+			controller: function() {},
+			view: function() {
+				return list.map(function(i) {
+					return m.component(sub, {key: "key" + i})
+				})
+			}
+		}
+		var sub = {
+			controller: function() {},
+			view: function() {
+				return m("div")
+			}
+		}
+		m.mount(root, component)
+
+		var firstBefore = root.childNodes[0]
+
+		mock.requestAnimationFrame.$resolve()
+
+		list.reverse()
+		m.redraw(true)
+
+		mock.requestAnimationFrame.$resolve()
+
+		var firstAfter = root.childNodes[2]
+
+		return firstBefore === firstAfter
+	})
+	test(function() {
 		//keys in subcomponents should work
 		mock.requestAnimationFrame.$resolve()
 
