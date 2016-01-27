@@ -553,7 +553,7 @@ var m = (function app(window, undefined) {
 			if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr)) {
 				cachedAttrs[attrName] = dataAttr;
 				try {
-					//`config` isn't a real attributes, so ignore it
+					//`config` isn't a real attribute, so ignore it
 					if (attrName === "config" || attrName === "key") continue;
 					//hook event handlers to the auto-redrawing system
 					else if (isFunction(dataAttr) && attrName.slice(0, 2) === "on") {
@@ -578,7 +578,11 @@ var m = (function app(window, undefined) {
 					//- when using CSS selectors (e.g. `m("[style='']")`), style is used as a string, but it's an object in js
 					else if (attrName in node && attrName !== "list" && attrName !== "style" && attrName !== "form" && attrName !== "type" && attrName !== "width" && attrName !== "height") {
 						//#348 don't set the value if not needed otherwise cursor placement breaks in Chrome
-						if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr;
+						try {
+							if (tag !== "input" || node[attrName] !== dataAttr) node[attrName] = dataAttr;
+						} catch (e) {
+							node.setAttribute(attrName, dataAttr);
+						}
 					}
 					else node.setAttribute(attrName, dataAttr);
 				}
@@ -621,6 +625,13 @@ var m = (function app(window, undefined) {
 			else if (cached.children.tag) unload(cached.children);
 		}
 	}
+	function appendTextFragment(parentElement, data) {
+	  try {
+	    parentElement.appendChild($document.createRange().createContextualFragment(data));
+	  } catch (e) {
+	    parentElement.insertAdjacentHTML("beforeend", data);
+	  }
+	}
 	function injectHTML(parentElement, index, data) {
 		var nextSibling = parentElement.childNodes[index];
 		if (nextSibling) {
@@ -634,10 +645,7 @@ var m = (function app(window, undefined) {
 			else nextSibling.insertAdjacentHTML("beforebegin", data);
 		}
 		else {
-			if (window.Range && window.Range.prototype.createContextualFragment) {
-				parentElement.appendChild($document.createRange().createContextualFragment(data));
-			}
-			else parentElement.insertAdjacentHTML("beforeend", data);
+			appendTextFragment(parentElement, data);
 		}
 		var nodes = [];
 		while (parentElement.childNodes[index] !== nextSibling) {

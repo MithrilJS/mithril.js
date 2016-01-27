@@ -250,7 +250,7 @@ declare module _mithril {
 			<T extends MithrilController>(
 				rootElement: Element,
 				defaultRoute: string,
-				routes: MithrilRoutes<T>
+				routes: MithrilRoutes
 			): void;
 
 			/**
@@ -534,6 +534,12 @@ declare module _mithril {
 		* @see MithrilElementConfig
 		*/
 		config?: MithrilElementConfig;
+
+		/**
+		* Any other virtual element properties including attributes and
+		* event handlers
+		*/
+		[property: string]: any;
 	}
 
 	/**
@@ -668,12 +674,12 @@ declare module _mithril {
 	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
-	interface MithrilRoutes<T extends MithrilController> {
+	interface MithrilRoutes {
 		/**
 		* The key represents the route. The value represents the corresponding
 		* component.
 		*/
-		[key: string]: MithrilComponent<T>;
+		[key: string]: MithrilComponent<MithrilController>;
 	}
 
 	/**

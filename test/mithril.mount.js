@@ -333,12 +333,11 @@ describe("m.mount()", function () {
 			})
 		}))
 
-		list.pop()
+		list = []
 		refresh(true)
 
-		// TODO: These fail.
-		// expect(spies[1]).to.have.been.called
-		// expect(spies[2]).to.have.been.called
+		expect(spies[1]).to.have.been.called
+		expect(spies[2]).to.have.been.called
 		expect(spies[3]).to.have.been.called
 	})
 
@@ -374,17 +373,15 @@ describe("m.mount()", function () {
 			})
 		}))
 
-		list.pop()
+		list = []
 		refresh(true)
 
-		// TODO: These fail.
-		// expect(spies1[1]).to.have.been.called
-		// expect(spies1[2]).to.have.been.called
+		expect(spies1[1]).to.have.been.called
+		expect(spies1[2]).to.have.been.called
 		expect(spies1[3]).to.have.been.called
 
-		// TODO: These fail.
-		// expect(spies2[1]).to.have.been.called
-		// expect(spies2[2]).to.have.been.called
+		expect(spies2[1]).to.have.been.called
+		expect(spies2[2]).to.have.been.called
 		expect(spies2[3]).to.have.been.called
 	})
 

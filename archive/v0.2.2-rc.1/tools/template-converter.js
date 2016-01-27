@@ -73,6 +73,7 @@ window.templateConverter = (function () {
 
 			each(Object.keys(el.attrs).sort(), function (attrName) {
 				if (attrName === "style") return
+				if(el.attrs[attrName]===undefined) return;
 				virtual += "[" + attrName + "='"
 				virtual += el.attrs[attrName].replace(/'/g, "\\'") + "']"
 			})
