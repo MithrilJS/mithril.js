@@ -229,7 +229,7 @@ var m = (function app(window, undefined) {
 			if (cached.configContext && isFunction(cached.configContext.onunload)) cached.configContext.onunload();
 			if (cached.controllers) {
 				forEach(cached.controllers, function (controller) {
-					if (controller.unload) controller.onunload({preventDefault: noop});
+					if (controller.onunload) controller.onunload({preventDefault: noop});
 				});
 			}
 		}
