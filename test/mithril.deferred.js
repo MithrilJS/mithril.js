@@ -295,7 +295,7 @@ describe("m.deferred()", function () {
 
 		prmA.promise.then(function (A) {
 			return prmB.promise
-		}).then(function(B) {
+		}).then(function (B) {
 			expect(B).to.equal("B")
 		})
 	})
@@ -303,7 +303,7 @@ describe("m.deferred()", function () {
 		var d = m.deferred()
 		d.resolve(5)
 		d.resolve(6)
-		d.promise.then(function(v) {
+		d.promise.then(function (v) {
 			expect(v).to.equal(5)
 		})
 	})
