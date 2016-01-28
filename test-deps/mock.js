@@ -45,6 +45,9 @@ window.mock = (function () {
 	"use strict"
 
 	var window = {}
+
+	window.window = window
+
 	var document = window.document = {
 		// FIXME: add document.createRange().createContextualFragment()
 
@@ -136,7 +139,7 @@ window.mock = (function () {
 			name = name.toLowerCase()
 			var out = []
 
-			function traverse(node){
+			function traverse(node) {
 				if (node.childNodes && node.childNodes.length > 0) {
 					node.childNodes.forEach(function (curr) {
 						if (curr.nodeName.toLowerCase() === name) {
@@ -156,7 +159,7 @@ window.mock = (function () {
 
 	window.scrollTo = function () {}
 
-	;(function (window) {
+	;(function () {
 		// This is an actual conforming implementation of the
 		// requestAnimationFrame spec, with the nonstandard extension of
 		// rAF.$resolve for running the callbacks. It works in Node and the
@@ -212,7 +215,7 @@ window.mock = (function () {
 		}
 
 		window.requestAnimationFrame = requestAnimationFrame
-	})(window)
+	})()
 
 	window.XMLHttpRequest = (function () {
 		function Request() {

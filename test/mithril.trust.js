@@ -56,13 +56,13 @@ describe("m.trust()", function () {
 
 		it("works with trusted content in div", function () {
 			var root = document.createElement("div")
-			m.render(root, m('div', [
-			  m('p', '&copy;'),
-			  m('p', m.trust('&copy;')),
-			  m.trust('&copy;'),
+			m.render(root, m("div", [
+			  	m("p", "&copy;"),
+			  	m("p", m.trust("&copy;")),
+			  	m.trust("&copy;"),
 			]))
 			expect(root.innerHTML).to.equal("<div><p>&amp;copy;</p><p>©</p>©</div>")
 		})
-		
+
 	})
 })
