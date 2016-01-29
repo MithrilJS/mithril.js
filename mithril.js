@@ -643,10 +643,9 @@
 					data.attrs.is)
 			}
 		} else if (namespace == null) {
-			return $document.createElement(data.tag, data.attrs.is)
+			return $document.createElement(data.tag)
 		} else {
-			return $document.createElementNS(namespace, data.tag,
-				data.attrs.is)
+			return $document.createElementNS(namespace, data.tag)
 		}
 	}
 
