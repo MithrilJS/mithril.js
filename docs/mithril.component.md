@@ -362,7 +362,7 @@ var MyComponent = {
 	},
 	view: function(ctrl) {
 		return m("ul", [
-			ctrl.things().map(function(name) {
+			ctrl.things().map(function(thing) {
 				return m("li", thing.name)
 			})
 		]);
