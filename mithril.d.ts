@@ -27,7 +27,7 @@ declare module _mithril {
 				MithrilVirtualElement<T> |
 				MithrilComponent<T>>
 		): MithrilVirtualElement<T>;
-		
+
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
 		*
@@ -126,6 +126,19 @@ declare module _mithril {
 			callback: (value: any) => void,
 			callbackThis: any
 		): (e: Event) => any;
+
+		/**
+		* Returns a event handler that can be bound to an element, firing with
+		* the specified property.
+		*
+		* @param attributeName Name of the element's attribute to bind to.
+		* @param property The property to bind.
+		* @return A function suitable for listening to an event.
+		*/
+		withAttr<T>(
+			attributeName: string,
+			property: MithrilBasicProperty<T>
+		) : (e: Event) => any;
 
 		/**
 		* @deprecated Use m.mount instead
@@ -561,7 +574,7 @@ declare module _mithril {
 	* @see MithrilControllerConstructor
 	*/
 	interface MithrilControllerFunction<T extends MithrilController> {
-		(): T;
+		(opts?: any): T;
 	}
 
 	/**
@@ -603,7 +616,7 @@ declare module _mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl: T): MithrilVirtualElement<T>;
+		view(ctrl?: T, opts?: any): MithrilVirtualElement<T>;
 	}
 
 	/**
