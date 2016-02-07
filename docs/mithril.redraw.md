@@ -10,7 +10,7 @@
 
 ---
 
-Redraws the view for the currently active component. Use [`m.mount()`](mithril.mount.md) or [`m.route()`](mithril.route.md) to activate a component.
+Redraws the view. Use [`m.mount()`](mithril.mount.md) or [`m.route()`](mithril.route.md) to activate a component.
 
 Calling `m.redraw` triggers a redraw regardless of whether AJAX requests (and other asynchronous services) are completed. Therefore, you should ensure that templates have null checks in place to account for the possibility of variables being uninitialized when the forced redraw occurs.
 
