@@ -2048,16 +2048,14 @@
 	}
 
 	function parameterizeUrl(url, data) {
-		var tokens = url.match(/:[a-z]\w+/gi)
-
-		if (tokens && data) {
-			forEach(tokens, function (token) {
+		if (data) {
+			url = url.replace(/:[a-z]\w+/gi, function(token){
 				var key = token.slice(1)
-				url = url.replace(token, data[key])
+				var value = data[key]
 				delete data[key]
+				return value
 			})
 		}
-
 		return url
 	}
 
