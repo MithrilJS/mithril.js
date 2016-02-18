@@ -456,7 +456,7 @@
 			nodes = injectHTML(parentElement, index, data)
 		} else {
 			nodes = [$document.createTextNode(data)]
-			if (!parentElement.nodeName.match(voidElements)) {
+			if (!voidElements.test(parentElement.nodeName)) {
 				insertNode(parentElement, nodes[0], index)
 			}
 		}
@@ -1902,7 +1902,7 @@
 
 	m.deferred.onerror = function (e) {
 		if (type.call(e) === "[object Error]" &&
-				!e.constructor.toString().match(/ Error/)) {
+				!/ Error/.test(e.constructor.toString())) {
 			pendingRequests = 0
 			throw e
 		}
