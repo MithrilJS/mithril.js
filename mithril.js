@@ -983,13 +983,13 @@
 		}
 	}
 
-	function shouldUseSetAttribute(attrName) {
-		return attrName !== "list" &&
-			attrName !== "style" &&
-			attrName !== "form" &&
-			attrName !== "type" &&
-			attrName !== "width" &&
-			attrName !== "height"
+	var shouldUseSetAttribute = {
+		list: 1,
+		style: 1,
+		form: 1,
+		type: 1,
+		width: 1,
+		height: 1
 	}
 
 	function setSingleAttr(
@@ -1020,7 +1020,7 @@
 					attrName === "className" ? "class" : attrName,
 					dataAttr)
 			}
-		} else if (attrName in node && shouldUseSetAttribute(attrName)) {
+		} else if (attrName in node && !shouldUseSetAttribute[attrName]) {
 			// handle cases that are properties (but ignore cases where we
 			// should use setAttribute instead)
 			//
