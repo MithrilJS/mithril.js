@@ -38,9 +38,24 @@
 
 	function noop() {}
 
-	/* eslint-disable max-len */
-	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/
-	/* eslint-enable max-len */
+	var voidElements = {
+		AREA: 1,
+		BASE: 1,
+		BR: 1,
+		COL: 1,
+		COMMAND: 1,
+		EMBED: 1,
+		HR: 1,
+		IMG: 1,
+		INPUT: 1,
+		KEYGEN: 1,
+		LINK: 1,
+		META: 1,
+		PARAM: 1,
+		SOURCE: 1,
+		TRACK: 1,
+		WBR: 1
+	}
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
@@ -454,7 +469,7 @@
 			nodes = injectHTML(parentElement, index, data)
 		} else {
 			nodes = [$document.createTextNode(data)]
-			if (!voidElements.test(parentElement.nodeName)) {
+			if (!(parentElement.nodeName in voidElements)) {
 				insertNode(parentElement, nodes[0], index)
 			}
 		}
