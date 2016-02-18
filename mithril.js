@@ -126,9 +126,7 @@
 	 *                      or splat (optional)
 	 */
 	function m(tag, pairs) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args[i - 1] = arguments[i]
-		}
+		var args = [].slice.call(arguments, 1)
 
 		if (isObject(tag)) return parameterize(tag, args)
 
@@ -1298,9 +1296,7 @@
 	}
 
 	m.component = function (component) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args.push(arguments[i])
-		}
+		var args = [].slice.call(arguments, 1)
 
 		return parameterize(component, args)
 	}
