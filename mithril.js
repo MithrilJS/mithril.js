@@ -38,9 +38,24 @@
 
 	function noop() {}
 
-	/* eslint-disable max-len */
-	var voidElements = /^(AREA|BASE|BR|COL|COMMAND|EMBED|HR|IMG|INPUT|KEYGEN|LINK|META|PARAM|SOURCE|TRACK|WBR)$/
-	/* eslint-enable max-len */
+	var voidElements = {
+		AREA: 1,
+		BASE: 1,
+		BR: 1,
+		COL: 1,
+		COMMAND: 1,
+		EMBED: 1,
+		HR: 1,
+		IMG: 1,
+		INPUT: 1,
+		KEYGEN: 1,
+		LINK: 1,
+		META: 1,
+		PARAM: 1,
+		SOURCE: 1,
+		TRACK: 1,
+		WBR: 1
+	}
 
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
@@ -126,9 +141,7 @@
 	 *                      or splat (optional)
 	 */
 	function m(tag, pairs) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args[i - 1] = arguments[i]
-		}
+		var args = [].slice.call(arguments, 1)
 
 		if (isObject(tag)) return parameterize(tag, args)
 
@@ -456,7 +469,7 @@
 			nodes = injectHTML(parentElement, index, data)
 		} else {
 			nodes = [$document.createTextNode(data)]
-			if (!parentElement.nodeName.match(voidElements)) {
+			if (!(parentElement.nodeName in voidElements)) {
 				insertNode(parentElement, nodes[0], index)
 			}
 		}
@@ -970,13 +983,13 @@
 		}
 	}
 
-	function shouldUseSetAttribute(attrName) {
-		return attrName !== "list" &&
-			attrName !== "style" &&
-			attrName !== "form" &&
-			attrName !== "type" &&
-			attrName !== "width" &&
-			attrName !== "height"
+	var shouldUseSetAttribute = {
+		list: 1,
+		style: 1,
+		form: 1,
+		type: 1,
+		width: 1,
+		height: 1
 	}
 
 	function setSingleAttr(
@@ -1007,7 +1020,7 @@
 					attrName === "className" ? "class" : attrName,
 					dataAttr)
 			}
-		} else if (attrName in node && shouldUseSetAttribute(attrName)) {
+		} else if (attrName in node && !shouldUseSetAttribute[attrName]) {
 			// handle cases that are properties (but ignore cases where we
 			// should use setAttribute instead)
 			//
@@ -1298,9 +1311,7 @@
 	}
 
 	m.component = function (component) {
-		for (var args = [], i = 1; i < arguments.length; i++) {
-			args.push(arguments[i])
-		}
+		var args = [].slice.call(arguments, 1)
 
 		return parameterize(component, args)
 	}
@@ -1902,7 +1913,7 @@
 
 	m.deferred.onerror = function (e) {
 		if (type.call(e) === "[object Error]" &&
-				!e.constructor.toString().match(/ Error/)) {
+				!/ Error/.test(e.constructor.toString())) {
 			pendingRequests = 0
 			throw e
 		}
@@ -2048,16 +2059,14 @@
 	}
 
 	function parameterizeUrl(url, data) {
-		var tokens = url.match(/:[a-z]\w+/gi)
-
-		if (tokens && data) {
-			forEach(tokens, function (token) {
+		if (data) {
+			url = url.replace(/:[a-z]\w+/gi, function(token){
 				var key = token.slice(1)
-				url = url.replace(token, data[key])
+				var value = data[key]
 				delete data[key]
+				return value
 			})
 		}
-
 		return url
 	}
 
