@@ -64,5 +64,18 @@ describe("m.trust()", function () {
 			expect(root.innerHTML).to.equal("<div><p>&amp;copy;</p><p>©</p>©</div>")
 		})
 
+		// not sure that this goes here; not really an m.trust issue
+		it("caches children of editable on update", function () {
+			var root = document.createElement("table")
+			var t1 = m.trust("<h1>fo</h1>o")
+			var t2 = "foo"
+
+			m.render(root, m("span", {contenteditable: false}, t1))
+			m.render(root, m("span", {contenteditable: true}, t2))
+			m.render(root, m("span", {contenteditable: false}, t1))
+
+			expect(root.childNodes[0].innerHTML).to.equal(t1.valueOf())
+		})
+
 	})
 })
