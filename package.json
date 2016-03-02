@@ -1,7 +1,7 @@
 {
   "name": "mithril",
   "description": "Mithril.js beta build - use this to help us test the releases before they are released",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3",
   "homepage": "http://mithril.js.org",
   "license": "MIT",
   "author": {

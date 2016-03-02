@@ -1,5 +1,13 @@
 ## Change Log
 
+[v0.2.3](http://mithril.js.org/archive/v0.2.3)
+
+### Bug Fixes:
+
+-	fix regression that prevented string keys
+-	fix handling of read-only attributes [#925](https://github.com/lhorie/mithril.js/issues/925)
+-	fix double unloading issue [#931](https://github.com/lhorie/mithril.js/issues/931)
+
 [v0.2.2-rc.1](http://mithril.js.org/archive/v0.2.2-rc.1)
 
 ### Bug Fixes:
@@ -8,6 +16,8 @@
 -	revert `finally` because it's not in the ES6 promise spec
 
 [v0.2.1](http://mithril.js.org/archive/v0.2.1)
+
+**IMPORTANT NOTE: Due to some unfortunate factors, 0.2.1 is not a stable release. Please use either 0.2.0 or latest instead**
 
 ### News:
 
