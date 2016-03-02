@@ -293,17 +293,18 @@ describe("m.deferred()", function () {
 		prmA.resolve("A")
 		prmB.resolve("B")
 
-		prmA.promise.then(function (A) {
+		prmA.promise.then(function () {
 			return prmB.promise
-		}).then(function(B) {
+		}).then(function (B) {
 			expect(B).to.equal("B")
 		})
 	})
+
 	it("yields immutable promises", function () {
 		var d = m.deferred()
 		d.resolve(5)
 		d.resolve(6)
-		d.promise.then(function(v) {
+		d.promise.then(function (v) {
 			expect(v).to.equal(5)
 		})
 	})
