@@ -14,7 +14,7 @@
 	"use strict"
 
 	m.version = function () {
-		return "v0.2.2-rc.1"
+		return "v0.2.3"
 	}
 
 	var hasOwn = {}.hasOwnProperty
