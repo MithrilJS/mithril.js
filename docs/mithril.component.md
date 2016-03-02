@@ -165,8 +165,8 @@ var MyComponent = {
 
 m.render(document.body, [
 	//the two lines below are equivalent
-	m(component, {data: "world"}),
-	m.component(component, {data: "world"})
+	m(MyComponent, {data: "world"}),
+	m.component(MyComponent, {data: "world"})
 ])
 ```
 
@@ -362,7 +362,7 @@ var MyComponent = {
 	},
 	view: function(ctrl) {
 		return m("ul", [
-			ctrl.things().map(function(name) {
+			ctrl.things().map(function(thing) {
 				return m("li", thing.name)
 			})
 		]);
@@ -590,7 +590,7 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a controller is not specified, Mithril will automatically create an empty controller function.
 
 -	**Object attributes**
 
