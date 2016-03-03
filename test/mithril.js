@@ -63,6 +63,10 @@ describe("m()", function () {
 			.that.eqls(["test"])
 	})
 
+	it("sets empty string for boolean attributes", function () {
+		expect(m("a[href]")).to.have.deep.property("attrs.href", "")
+	})
+
 	it("sets correct attrs with object", function () {
 		expect(m("div", {title: "bar"}, "test"))
 			.to.have.deep.property("attrs.title", "bar")
