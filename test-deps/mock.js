@@ -33,8 +33,10 @@
 
 	Object.keys = Object.keys || function (obj) {
 		var keys = []
-		for (var i in obj) if ({}.hasOwnProperty.call(obj, i)) {
-			keys.push(i)
+		for (var i in obj) {
+			if ({}.hasOwnProperty.call(obj, i)) {
+				keys.push(i)
+			}
 		}
 		return keys
 	}
