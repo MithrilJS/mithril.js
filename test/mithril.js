@@ -37,6 +37,10 @@ describe("m()", function () {
 		expect(m("[title=bar]")).to.have.deep.property("attrs.title", "bar")
 	})
 
+	it("sets attr without a value as an empty string", function () {
+		expect(m("[empty]")).to.have.deep.property("attrs.empty", "")
+	})
+
 	it("sets correct single quoted attr", function () {
 		expect(m("[title=\'bar\']")).to.have.deep.property("attrs.title", "bar")
 	})
