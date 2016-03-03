@@ -96,7 +96,7 @@
 				classes.push(match[2])
 			} else if (match[3][0] === "[") {
 				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
-				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true)
+				cell.attrs[pair[1]] = pair[3] || pair[2] || ""
 			}
 		}
 
