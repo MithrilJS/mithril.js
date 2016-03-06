@@ -57,6 +57,46 @@
 		WBR: 1
 	}
 
+	function slice(x){
+		return Array.prototype.slice.call(x)
+	}
+	
+	function getAttributes(node) {
+		if(!node.attributes) return {};
+		return slice(node.attributes).reduce(function(a, v){
+			if(v.name === 'class'){
+				a.className = a.class
+			} else {
+				a[v.name] = v.value
+			}
+			return a;
+		}, {})
+	}
+	
+	function rebuild(node){
+		if(node instanceof NodeList){
+			return Array.prototype.slice.call(node).map(rebuild)
+		} else if(node instanceof Text){
+			return {
+				children: [String(node.textContent)],
+				nodes: [node],
+				attrs: {},
+				intact: true
+			}
+		} else {
+			nodeCache.push(node)
+			var r = {
+				tag: node.tagName ? node.tagName.toLowerCase() : node.nodeName.toLowerCase(),
+				attrs: getAttributes(node),
+				children: rebuild(node.childNodes),
+				nodes: [node],
+				intact: true
+			}
+			r.children.nodes = Array.prototype.slice.call(node.childNodes)
+			return r
+		}
+	}
+
 	// caching commonly used variables
 	var $document, $location, $requestAnimationFrame, $cancelAnimationFrame
 
@@ -306,11 +346,13 @@
 		// than the old one. if errors ever happen here, the issue is most
 		// likely a bug in the construction of the `cached` data structure
 		// somewhere earlier in the program
-		forEach(cached.nodes, function (node, i) {
-			if (node.parentNode != null && nodes.indexOf(node) < 0) {
-				clear([node], [cached[i]])
-			}
-		})
+		if(cached.nodes) {
+			forEach(cached.nodes, function (node, i) {
+				if (node.parentNode != null && nodes.indexOf(node) < 0) {
+					clear([node], [cached[i]])
+				}
+			})
+		}
 
 		if (data.length < cached.length) cached.length = data.length
 		cached.nodes = nodes
@@ -533,7 +575,7 @@
 		editable,
 		parentTag
 	) {
-		if (!cached.nodes.length) {
+		if (!cached.nodes || !cached.nodes.length) {
 			return handleNonexistentNodes(data, parentElement, index)
 		} else if (cached.valueOf() !== data.valueOf() || shouldReattach) {
 			return reattachNodes(data, cached, parentElement, editable, index,
@@ -1222,7 +1264,19 @@
 			cell = {tag: "html", attrs: {}, children: cell}
 		}
 
-		if (cellCache[id] === undefined) clear(node.childNodes)
+		if (cellCache[id] === undefined) {
+			// if we have a single node in an array, just rebuild with a single node
+			// if we pass an array of nodes, rebuild all
+			// otherwise clear out the container
+			if(node.childNodes.length === 1) {
+				cellCache[id] = rebuild(node.childNodes[0])
+			} else if(node.childNodes.length){
+				cellCache[id] = rebuild(node.childNodes)
+			} else {
+				clear(node.childNodes)
+			}
+		}
+
 		if (forceRecreation === true) reset(root)
 
 		cellCache[id] = build(
@@ -1318,7 +1372,7 @@
 
 	function checkPrevented(component, root, index, isPrevented) {
 		if (!isPrevented) {
-			m.redraw.strategy("all")
+			m.redraw.strategy("diff")
 			m.startComputation()
 			roots[index] = root
 			var currentComponent
