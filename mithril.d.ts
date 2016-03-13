@@ -3,8 +3,8 @@
 /**
 * This is the module containing all the types/declarations/etc. for Mithril
 */
-declare namespace _mithril {
-	interface MithrilStatic {
+declare namespace Mithril {
+	interface Static {
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
 		*
@@ -20,13 +20,13 @@ declare namespace _mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
+		<T extends Controller>(
 			selector: string,
-			attributes: MithrilAttributes,
+			attributes: Attributes,
 			...children: Array<string |
-				MithrilVirtualElement |
-				MithrilComponent<T>>
-		): MithrilVirtualElement;
+				VirtualElement |
+				Component<T>>
+		): VirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -39,10 +39,10 @@ declare namespace _mithril {
 		* @see m.mount
 		* @see m
 		*/
-		<T extends MithrilController>(
-			component: MithrilComponent<T>,
+		<T extends Controller>(
+			component: Component<T>,
 			...args: any[]
-		): MithrilComponent<T>;
+		): Component<T>;
 
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -56,12 +56,12 @@ declare namespace _mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
+		<T extends Controller>(
 			selector: string,
 			...children: Array<string |
-				MithrilVirtualElement |
-				MithrilComponent<T>>
-		): MithrilVirtualElement;
+				VirtualElement |
+				Component<T>>
+		): VirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -75,10 +75,10 @@ declare namespace _mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends MithrilController>(
-			component: MithrilComponent<T>,
+		<T extends Controller>(
+			component: Component<T>,
 			...args: any[]
-		): MithrilComponent<T>;
+		): Component<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a Mithril promise. Useful
@@ -90,7 +90,7 @@ declare namespace _mithril {
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(promise: Thennable<T>) : MithrilPromiseProperty<T>;
+		prop<T>(promise: Thennable<T>) : PromiseProperty<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a simple value. Useful
@@ -101,7 +101,7 @@ declare namespace _mithril {
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(value: T): MithrilBasicProperty<T>;
+		prop<T>(value: T): BasicProperty<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a simple value. Useful
@@ -111,7 +111,7 @@ declare namespace _mithril {
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(): MithrilBasicProperty<T>;
+		prop<T>(): BasicProperty<T>;
 
 		/**
 		* Returns a event handler that can be bound to an element, firing with
@@ -137,15 +137,15 @@ declare namespace _mithril {
 		*/
 		withAttr<T>(
 			attributeName: string,
-			property: MithrilBasicProperty<T>
+			property: BasicProperty<T>
 		) : (e: Event) => any;
 
 		/**
 		* @deprecated Use m.mount instead
 		*/
-		module<T extends MithrilController>(
+		module<T extends Controller>(
 			rootElement: Node,
-			component: MithrilComponent<T>
+			component: Component<T>
 		): T;
 
 		/**
@@ -155,9 +155,9 @@ declare namespace _mithril {
 		* @param component The component to mount.
 		* @return An instance of the top-level component's controller
 		*/
-		mount<T extends MithrilController>(
+		mount<T extends Controller>(
 			rootElement: Node,
-			component: MithrilComponent<T>
+			component: Component<T>
 		): T;
 
 		/**
@@ -171,10 +171,10 @@ declare namespace _mithril {
 		* @see m.mount
 		* @see m
 		*/
-		component<T extends MithrilController>(
-			component: MithrilComponent<T>,
+		component<T extends Controller>(
+			component: Component<T>,
 			...args: any[]
-		): MithrilComponent<T>;
+		): Component<T>;
 
 		/**
 		* Trust this string of HTML.
@@ -183,7 +183,7 @@ declare namespace _mithril {
 		* @return A String object instance with an added internal flag to mark
 		* it as trusted.
 		*/
-		trust(html: string): MithrilTrustedString;
+		trust(html: string): TrustedString;
 
 		/**
 		* Render a virtual DOM tree.
@@ -193,9 +193,9 @@ declare namespace _mithril {
 		* @param forceRecreation If true, overwrite the entire tree without
 		* diffing against it.
 		*/
-		render<T extends MithrilController>(
+		render<T extends Controller>(
 			rootElement: Element,
-			children: MithrilVirtualElement|MithrilVirtualElement[],
+			children: VirtualElement|VirtualElement[],
 			forceRecreation?: boolean
 		): void;
 
@@ -244,7 +244,7 @@ declare namespace _mithril {
 
 				/**
 				* @private
-				* Implementation detail - it's a MithrilBasicProperty instance
+				* Implementation detail - it's a BasicProperty instance
 				*/
 				toJSON(): string;
 			}
@@ -260,10 +260,10 @@ declare namespace _mithril {
 			* @param defaultRoute The route to start with.
 			* @param routes A key-value mapping of pathname to controller.
 			*/
-			<T extends MithrilController>(
+			<T extends Controller>(
 				rootElement: Element,
 				defaultRoute: string,
-				routes: MithrilRoutes
+				routes: Routes
 			): void;
 
 			/**
@@ -276,11 +276,11 @@ declare namespace _mithril {
 			* m("a[href='/dashboard/alicesmith']", {config: m.route});
 			* ```
 			*/
-			<T extends MithrilController>(
+			<T extends Controller>(
 				element: Element,
 				isInitialized: boolean,
-				context?: MithrilContext,
-				vdom?: MithrilVirtualElement
+				context?: Context,
+				vdom?: VirtualElement
 			): void;
 
 			/**
@@ -355,9 +355,9 @@ declare namespace _mithril {
 		* @return A promise to the returned data for "GET" requests, or a void
 		* promise for any other request type.
 		*
-		* @see MithrilXHROptions for the available options.
+		* @see XHROptions for the available options.
 		*/
-		request<T>(options: MithrilXHROptions<T>): MithrilPromise<T>;
+		request<T>(options: XHROptions<T>): Promise<T>;
 
 		deferred: {
 			/**
@@ -371,7 +371,7 @@ declare namespace _mithril {
 			* @see m.deferred.onerror for the error callback called for Error
 			* subclasses
 			*/
-			<T>(): MithrilDeferred<T>;
+			<T>(): Deferred<T>;
 
 			/**
 			* A callback for all uncaught native Error subclasses in deferreds.
@@ -391,7 +391,7 @@ declare namespace _mithril {
 		* @return A promise that resolves to all the promises if all resolve, or
 		* rejects with the error contained in the first rejection.
 		*/
-		sync<T>(promises: Thennable<T>[]): MithrilPromise<T[]>;
+		sync<T>(promises: Thennable<T>[]): Promise<T[]>;
 
 		/**
 		* Use this and endComputation if your views aren't redrawing after
@@ -433,7 +433,7 @@ declare namespace _mithril {
 		deps(mockWindow: Window): Window;
 	}
 
-	interface MithrilTrustedString extends String {
+	interface TrustedString extends String {
 		/** @private Implementation detail. Don't depend on it. */
 		$trusted: boolean;
 	}
@@ -444,7 +444,7 @@ declare namespace _mithril {
 	*
 	* @see m
 	*/
-	interface MithrilVirtualElement {
+	interface VirtualElement {
 		/**
 		* A key to optionally associate with this element.
 		*/
@@ -458,18 +458,18 @@ declare namespace _mithril {
 		/**
 		* The attributes of this element.
 		*/
-		attrs?: MithrilAttributes;
+		attrs?: Attributes;
 
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|MithrilVirtualElement|MithrilComponent<MithrilController>>;
+		children?: Array<string|VirtualElement|Component<Controller>>;
 	}
 
 	/**
 	* An event passed by Mithril to unload event handlers.
 	*/
-	interface MithrilEvent {
+	interface Event {
 		/**
 		* Prevent the default behavior of scrolling the page and updating the
 		* URL on next route change.
@@ -480,9 +480,9 @@ declare namespace _mithril {
 	/**
 	* A context object for configuration functions.
 	*
-	* @see MithrilElementConfig
+	* @see ElementConfig
 	*/
-	interface MithrilContext {
+	interface Context {
 		/**
 		* A function to call when the node is unloaded. Useful for cleanup.
 		*/
@@ -502,10 +502,10 @@ declare namespace _mithril {
 	* removal from the tree, storing instances of third-party classes that
 	* need to be associated with the DOM, etc.
 	*
-	* @see MithrilAttributes
-	* @see MithrilContext
+	* @see Attributes
+	* @see Context
 	*/
-	interface MithrilElementConfig {
+	interface ElementConfig {
 		/**
 		* A callback function for a virtual element's config attribute.
 		*
@@ -515,11 +515,11 @@ declare namespace _mithril {
 		* @param context The associated context for this element.
 		* @param vdom The associated virtual element.
 		*/
-		<T extends MithrilController>(
+		<T extends Controller>(
 			element: Element,
 			isInitialized: boolean,
-			context: MithrilContext,
-			vdom: MithrilVirtualElement
+			context: Context,
+			vdom: VirtualElement
 		): void;
 	}
 
@@ -529,7 +529,7 @@ declare namespace _mithril {
 	*
 	* @see m
 	*/
-	interface MithrilAttributes {
+	interface Attributes {
 		/**
 		* The class name(s) for this virtual element, as a space-separated list.
 		*/
@@ -544,9 +544,9 @@ declare namespace _mithril {
 		* A custom, low-level configuration in case this element needs special
 		* cleanup after removal from the tree.
 		*
-		* @see MithrilElementConfig
+		* @see ElementConfig
 		*/
-		config?: MithrilElementConfig;
+		config?: ElementConfig;
 
 		/**
 		* Any other virtual element properties including attributes and
@@ -558,42 +558,42 @@ declare namespace _mithril {
 	/**
 	* The basis of a Mithril controller instance.
 	*/
-	interface MithrilController {
+	interface Controller {
 		/**
 		* An optional handler to call when the associated virtual element is
 		* destroyed.
 		*
 		* @param evt An associated event.
 		*/
-		onunload?(evt: MithrilEvent): any;
+		onunload?(evt: Event): any;
 	}
 
 	/**
 	* This represents a controller function.
 	*
-	* @see MithrilControllerConstructor
+	* @see ControllerConstructor
 	*/
-	interface MithrilControllerFunction<T extends MithrilController> {
+	interface ControllerFunction<T extends Controller> {
 		(opts?: any): T;
 	}
 
 	/**
 	* This represents a controller constructor.
 	*
-	* @see MithrilControllerFunction
+	* @see ControllerFunction
 	*/
-	interface MithrilControllerConstructor<T extends MithrilController> {
+	interface ControllerConstructor<T extends Controller> {
 		new(): T;
 	}
 
 	/**
 	* This represents a view factory.
 	*/
-	interface MithrilView<T extends MithrilController> {
+	interface View<T extends Controller> {
 		/**
 		* Creates a view out of virtual elements.
 		*/
-		(ctrl: T): MithrilVirtualElement;
+		(ctrl: T): VirtualElement;
 	}
 
 	/**
@@ -602,21 +602,21 @@ declare namespace _mithril {
 	* @see m
 	* @see m.component
 	*/
-	interface MithrilComponent<T extends MithrilController> {
+	interface Component<T extends Controller> {
 		/**
 		* The component's controller.
 		*
 		* @see m.component
 		*/
-		controller: MithrilControllerFunction<T> |
-			MithrilControllerConstructor<T>;
+		controller: ControllerFunction<T> |
+			ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.
 		*
 		* @see m.component
 		*/
-		view(ctrl?: T, opts?: any): MithrilVirtualElement;
+		view(ctrl?: T, opts?: any): VirtualElement;
 	}
 
 	/**
@@ -624,7 +624,7 @@ declare namespace _mithril {
 	*
 	* @see m.prop
 	*/
-	interface MithrilProperty<T> {
+	interface Property<T> {
 		/**
 		* Gets the contained value.
 		*
@@ -646,7 +646,7 @@ declare namespace _mithril {
 	*
 	* @see m.prop which returns objects that implement this interface.
 	*/
-	interface MithrilBasicProperty<T> extends MithrilProperty<T> {
+	interface BasicProperty<T> extends Property<T> {
 		/**
 		* Makes this serializable to JSON.
 		*/
@@ -658,14 +658,14 @@ declare namespace _mithril {
 	*
 	* @see m.prop which returns objects that implement this interface.
 	*/
-	interface MithrilPromiseProperty<T> extends MithrilPromise<T | MithrilPromise<T>>,
-			MithrilProperty<MithrilPromise<T>> {
+	interface PromiseProperty<T> extends Promise<T | Promise<T>>,
+			Property<Promise<T>> {
 		/**
 		* Gets the contained promise.
 		*
 		* @return The contained value.
 		*/
-		(): MithrilPromise<T>;
+		(): Promise<T>;
 
 		/**
 		* Sets the contained promise.
@@ -673,7 +673,7 @@ declare namespace _mithril {
 		* @param value The new value to set.
 		* @return The newly set value.
 		*/
-		(value: MithrilPromise<T>): MithrilPromise<T>;
+		(value: Promise<T>): Promise<T>;
 
 		/**
 		* Sets the contained wrapped value.
@@ -681,24 +681,24 @@ declare namespace _mithril {
 		* @param value The new value to set.
 		* @return The newly set value.
 		*/
-		(value: T): MithrilPromise<T>;
+		(value: T): Promise<T>;
 	}
 
 	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
-	interface MithrilRoutes {
+	interface Routes {
 		/**
 		* The key represents the route. The value represents the corresponding
 		* component.
 		*/
-		[key: string]: MithrilComponent<MithrilController>;
+		[key: string]: Component<Controller>;
 	}
 
 	/**
-	* This represents a Mithril deferred object.
+	* This represents a  deferred object.
 	*/
-	interface MithrilDeferred<T> {
+	interface Deferred<T> {
 		/**
 		* Resolve this deferred's promise with a value.
 		*
@@ -716,22 +716,22 @@ declare namespace _mithril {
 		/**
 		* The backing promise.
 		*
-		* @see MithrilPromise
+		* @see Promise
 		*/
-		promise: MithrilPromise<T>;
+		promise: Promise<T>;
 	}
 
 	/**
 	* This represents a thennable success callback.
 	*/
-	interface MithrilSuccessCallback<T, U> {
+	interface SuccessCallback<T, U> {
 		(value: T): U | Thennable<U>;
 	}
 
 	/**
 	* This represents a thennable error callback.
 	*/
-	interface MithrilErrorCallback<T> {
+	interface ErrorCallback<T> {
 		(value: Error): T | Thennable<T>;
 	}
 
@@ -747,7 +747,7 @@ declare namespace _mithril {
 	/**
 	* This represents a Mithril promise object.
 	*/
-	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<T | MithrilPromise<T>> {
+	interface Promise<T> extends Thennable<T>, Property<T | Promise<T>> {
 		/**
 		* Chain this promise with a simple success callback, propogating
 		* rejections.
@@ -755,7 +755,7 @@ declare namespace _mithril {
 		* @param success The callback to call when the promise is resolved.
 		* @return The chained promise.
 		*/
-		then<U>(success: MithrilSuccessCallback<T,U>): MithrilPromise<U>;
+		then<U>(success: SuccessCallback<T,U>): Promise<U>;
 
 		/**
 		* Chain this promise with a success callback and error callback, without
@@ -766,9 +766,9 @@ declare namespace _mithril {
 		* @return The chained promise.
 		*/
 		then<U, V>(
-			success: MithrilSuccessCallback<T, U>,
-			error: MithrilErrorCallback<V>
-		): MithrilPromise<U> | MithrilPromise<V>;
+			success: SuccessCallback<T, U>,
+			error: ErrorCallback<V>
+		): Promise<U> | Promise<V>;
 
 		/**
 		* Chain this promise with a single error callback, without propogating
@@ -777,8 +777,8 @@ declare namespace _mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		catch<U>(error: MithrilErrorCallback<U>): MithrilPromise<T> |
-			MithrilPromise<U>;
+		catch<U>(error: ErrorCallback<U>): Promise<T> |
+			Promise<U>;
 	}
 
 	/**
@@ -786,7 +786,7 @@ declare namespace _mithril {
 	*
 	* @see m.request
 	*/
-	interface MithrilXHROptions<T> {
+	interface XHROptions<T> {
 		/**
 		* This represents the HTTP method used, one of the following:
 		*
@@ -878,7 +878,7 @@ declare namespace _mithril {
 		* @param options The options passed to this request.
 		* @return string The serialized format.
 		*/
-		extract?(xhr: XMLHttpRequest, options: MithrilXHROptions<T>): string;
+		extract?(xhr: XMLHttpRequest, options: XHROptions<T>): string;
 
 		/**
 		* The parsed data, or its children if it's an array, will be passed to
@@ -899,7 +899,7 @@ declare namespace _mithril {
 		* @param options The options passed to this request.
 		* @return The new XMLHttpRequest, or nothing if the same one is kept.
 		*/
-		config?(xhr: XMLHttpRequest, options: MithrilXHROptions<T>): any;
+		config?(xhr: XMLHttpRequest, options: XHROptions<T>): any;
 
 		/**
 		* For JSONP requests, this must be the string "jsonp". Otherwise, it's
@@ -918,8 +918,8 @@ declare namespace _mithril {
 	}
 }
 
-declare var Mithril: _mithril.MithrilStatic;
-declare var m: _mithril.MithrilStatic;
+declare var _mithril: Mithril.Static;
+declare var m: Mithril.Static;
 
 declare module "mithril" {
     export = m;
