@@ -3,7 +3,7 @@
 /**
 * This is the module containing all the types/declarations/etc. for Mithril
 */
-declare module _mithril {
+declare namespace _mithril {
 	interface MithrilStatic {
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -24,9 +24,9 @@ declare module _mithril {
 			selector: string,
 			attributes: MithrilAttributes,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
+				MithrilVirtualElement |
 				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
+		): MithrilVirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -59,9 +59,9 @@ declare module _mithril {
 		<T extends MithrilController>(
 			selector: string,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
+				MithrilVirtualElement |
 				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
+		): MithrilVirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -195,7 +195,7 @@ declare module _mithril {
 		*/
 		render<T extends MithrilController>(
 			rootElement: Element,
-			children: MithrilVirtualElement<T>|MithrilVirtualElement<T>[],
+			children: MithrilVirtualElement|MithrilVirtualElement[],
 			forceRecreation?: boolean
 		): void;
 
@@ -280,7 +280,7 @@ declare module _mithril {
 				element: Element,
 				isInitialized: boolean,
 				context?: MithrilContext,
-				vdom?: MithrilVirtualElement<T>
+				vdom?: MithrilVirtualElement
 			): void;
 
 			/**
@@ -444,7 +444,7 @@ declare module _mithril {
 	*
 	* @see m
 	*/
-	interface MithrilVirtualElement<T extends MithrilController> {
+	interface MithrilVirtualElement {
 		/**
 		* A key to optionally associate with this element.
 		*/
@@ -463,7 +463,7 @@ declare module _mithril {
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|MithrilVirtualElement<T>|MithrilComponent<T>>;
+		children?: Array<string|MithrilVirtualElement|MithrilComponent<MithrilController>>;
 	}
 
 	/**
@@ -519,7 +519,7 @@ declare module _mithril {
 			element: Element,
 			isInitialized: boolean,
 			context: MithrilContext,
-			vdom: MithrilVirtualElement<T>
+			vdom: MithrilVirtualElement
 		): void;
 	}
 
@@ -593,7 +593,7 @@ declare module _mithril {
 		/**
 		* Creates a view out of virtual elements.
 		*/
-		(ctrl: T): MithrilVirtualElement<T>;
+		(ctrl: T): MithrilVirtualElement;
 	}
 
 	/**
@@ -616,7 +616,7 @@ declare module _mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl?: T, opts?: any): MithrilVirtualElement<T>;
+		view(ctrl?: T, opts?: any): MithrilVirtualElement;
 	}
 
 	/**
