@@ -141,7 +141,11 @@
 	 *                      or splat (optional)
 	 */
 	function m(tag, pairs) {
-		var args = [].slice.call(arguments, 1)
+		var args = []
+
+		for (var i = 1, length = arguments.length; i < length; i++) {
+			args[i - 1] = arguments[i]
+		}
 
 		if (isObject(tag)) return parameterize(tag, args)
 

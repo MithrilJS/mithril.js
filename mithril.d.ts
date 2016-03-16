@@ -658,7 +658,7 @@ declare module _mithril {
 	*
 	* @see m.prop which returns objects that implement this interface.
 	*/
-	interface MithrilPromiseProperty<T> extends MithrilPromise<T>,
+	interface MithrilPromiseProperty<T> extends MithrilPromise<T | MithrilPromise<T>>,
 			MithrilProperty<MithrilPromise<T>> {
 		/**
 		* Gets the contained promise.
@@ -747,7 +747,7 @@ declare module _mithril {
 	/**
 	* This represents a Mithril promise object.
 	*/
-	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<MithrilPromise<T>> {
+	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<T | MithrilPromise<T>> {
 		/**
 		* Chain this promise with a simple success callback, propogating
 		* rejections.
