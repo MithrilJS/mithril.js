@@ -918,7 +918,6 @@ declare namespace Mithril {
 	}
 }
 
-declare var _mithril: Mithril.Static;
 declare var m: Mithril.Static;
 
 declare module "mithril" {
