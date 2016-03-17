@@ -897,14 +897,22 @@ var m = (function app(window, undefined) {
 		//m.route()
 		if (arguments.length === 0) return currentRoute;
 		//m.route(el, defaultRoute, routes)
-		else if (arguments.length === 3 && isString(arg1)) {
+    //m.route(el, defaultComponent, routes)
+		else if (arguments.length === 3 && (isString(arg1) || isObject(arg1))) {
 			redirect = function(source) {
 				var path = currentRoute = normalizeRoute(source);
 				if (!routeByValue(root, arg2, path)) {
-					if (isDefaultRoute) throw new Error("Ensure the default route matches one of the routes defined in m.route");
-					isDefaultRoute = true;
-					m.route(arg1, true);
-					isDefaultRoute = false;
+          // defaultRoute
+          if(isString(arg1)) {
+            if (isDefaultRoute) throw new Error("Ensure the default route matches one of the routes defined in m.route");
+            isDefaultRoute = true;
+            m.route(arg1, true);
+            isDefaultRoute = false;
+          }
+          // defaultComponent
+          else {
+            m.mount(root, arg1)
+          }
 				}
 			};
 			var listener = m.route.mode === "hash" ? "onhashchange" : "onpopstate";
