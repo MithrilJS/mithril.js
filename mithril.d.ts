@@ -534,6 +534,14 @@ declare namespace Mithril {
 	}
 
 	/**
+	 * This covers https://github.com/lhorie/mithril.js/issues/914
+	 */
+	interface ControllerConstructor<T> {
+		(...args: any[]): T;
+		new (...args: any[]): T;
+	}
+
+	/**
 	* This represents a Mithril component.
 	*
 	* @see m
@@ -546,7 +554,7 @@ declare namespace Mithril {
 		* @see m
 		* @see m.component
 		*/
-		controller?: ((...args: any[]) => T) | (new (...args: any[]) => T);
+		controller?: ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.
