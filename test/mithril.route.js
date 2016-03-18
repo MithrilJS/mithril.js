@@ -81,15 +81,15 @@ describe("m.route()", function () {
 		expect(root.childNodes[0].nodeValue).to.equal("foo")
 	})
 
-  dit("mounts the default component if no route matches", function (root) {
-    mode("search")
+	dit("mounts the default component if no route matches", function (root) {
+		mode("search")
 
-    route(root, pure(function () { return "defaultComponent"}), {
-      "/test1": pure(function () { return "foo" })
-    })
+		route(root, pure(function () { return "defaultComponent"}), {
+			"/test1": pure(function () { return "foo" })
+		})
 
-    expect(root.childNodes[0].nodeValue).to.equal("defaultComponent")
-  })
+		expect(root.childNodes[0].nodeValue).to.equal("defaultComponent")
+	})
 
 	dit("gets the right right location when routed to it", function (root) {
 		mode("search")
