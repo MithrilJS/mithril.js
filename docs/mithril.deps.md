@@ -7,7 +7,7 @@
 
 ---
 
-This function overwrites the reference to the `window` object that is used internally by Mithril. It is useful for injecting a mock `window` dependency for the purposes of testing and for running Mithril in non-browser environments. The mock object used by Mithril for its own test suite [can be found in the development repo](https://github.com/lhorie/mithril.js/blob/next/tests/mock.js).
+This function overwrites the reference to the `window` object that is used internally by Mithril. It is useful for injecting a mock `window` dependency for the purposes of testing and for running Mithril in non-browser environments. The mock object used by Mithril for its own test suite [can be found in the development repo](https://github.com/lhorie/mithril.js/blob/next/test-deps/mock.js).
 
 By default, Mithril uses `window` itself as the dependency. Note that Mithril only uses the mock object for browser APIs such as the DOM API and `requestAnimationFrame`, but relies on the environment for ECMAScript features like `Object.keys`.
 
