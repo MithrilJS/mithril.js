@@ -4,7 +4,7 @@
 
 If you already have your HTML written and want to convert it into a Mithril template, you can use the tool below for one-off manual conversion.
 
-[Template Converter](tools/template-converter.html)
+[Template Converter](http://arthurclemens.github.io/mithril-template-converter/index.html)
 
 ---
 

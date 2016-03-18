@@ -1,0 +1,281 @@
+<!doctype html>
+<html>
+	<head>
+		<title>m.deferred - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.2.1)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html" title="A utility to create virtual elements">m</a></li>
+								<li><a href="mithril.component.html" title="Parameterizes a component">m.component</a></li>
+								<li><a href="mithril.mount.html" title="Renders a component">m.mount</a></li>
+								<li><a href="mithril.prop.html" title="A getter-setter utility">m.prop</a></li>
+								<li><a href="mithril.withAttr.html" title="A event handler factory utility">m.withAttr</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html" title="A routing utility">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes" title="Defines what routes exist">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting" title="Redirects to a route">m.route(path, params, replaceHistory)</a></li>
+										<li><a href="mithril.route.html#reading-current-route" title="Read the current route">m.route()</a></li>
+										<li><a href="mithril.route.html#mode-abstraction" title="Routing mode abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode" title="Whether routing uses location hash, querystring or pathname">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param" title="Read an argument from a parameterized route">m.route.param</a></li>
+										<li><a href="mithril.route.html#buildQueryString" title="Serialize data into querystring format">m.route.buildQueryString</a></li>
+										<li><a href="mithril.route.html#parseQueryString" title="Read an argument from a parameterized route">m.route.parseQueryString</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html" title="A high-level AJAX utility">m.request</a></li>
+								<li><a href="mithril.deferred.html" title="A Promise factory">m.deferred</a></li>
+								<li><a href="mithril.sync.html" title="A Promise aggregator">m.sync</a></li>
+							</ul>
+							<h3 id="html">HTML</h3>
+							<ul>
+								<li><a href="mithril.trust.html" title="A method to unescape HTML">m.trust</a></li>
+							</ul>
+							<h3 id="rendering">Rendering</h3>
+							<ul>
+								<li><a href="mithril.render.html" title="The lowest level rendering method">m.render</a></li>
+								<li><a href="mithril.redraw.html" title="A high-level explicit rendering method">m.redraw</a>
+									<ul>
+										<li><a href="mithril.redraw.html#strategy" title="A flag that drives the rendering strategy for the next redraw">m.redraw.strategy(strategy)</a></li>
+									</ul>
+								</li>
+								<li><a href="mithril.computation.html" title="Utilities to integrate asynchronous contexts to the rendering system">m.startComputation / m.endComputation</a></li>
+							</ul>
+							<h3 id="data">Testing</h3>
+							<ul>
+								<li><a href="mithril.deps.html" title="The dependency injector">m.deps</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="m-deferred">m.deferred</h2>
+<hr>
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#retrieving-a-value-via-the-getter-setter-api">Retrieving a value via the getter-setter API</a></li>
+<li><a href="#integrating-to-the-mithril-redrawing-system">Integrating to the Mithril redrawing system</a></li>
+<li><a href="#differences-from-promises-a-">Differences from Promises/A+</a></li>
+<li><a href="#the-exception-monitor">The exception monitor</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
+<hr>
+<p>This is a low-level method in Mithril. It&#39;s a modified version of the Thenable API.</p>
+<p>A deferred is an asynchrony monad. It exposes a <code>promise</code> property which can <em>bind</em> callbacks to build a computation tree.</p>
+<p>The deferred object can then <em>apply</em> a value by calling either <code>resolve</code> or <code>reject</code>, which then dispatches the value to be processed to the computation tree.</p>
+<p>Each computation function takes a value as a parameter and is expected to return another value, which in turns is forwarded along to the next computation function (or functions) in the tree.</p>
+<p>The deferred object returned by <code>m.deferred</code> has two methods: <code>resolve</code> and <code>reject</code>, and one property called <code>promise</code>. The methods can be called to dispatch a value to the promise tree. The <code>promise</code> property is the root of the promise tree. It has a method <code>then</code> which takes a <code>successCallback</code> and a <code>errorCallback</code> callbacks. Calling the <code>then</code> method attaches the computations represented by <code>successCallback</code> and <code>errorCallback</code> to the promise, which will be called when either <code>resolve</code> or <code>reject</code> is called. The <code>then</code> method returns a child promise, which, itself, can have more child promises, recursively.</p>
+<p>The <code>promise</code> object is actually a function - specifically, it&#39;s an <a href="mithril.prop.html"><code>m.prop</code></a> getter-setter, which gets populated with the value returned by  <code>successCallback</code> if the promise is resolved successfully.</p>
+<p>Note that Mithril promises are not automatically integrated to its automatic redrawing system. If you wish to use third party asynchronous libraries (for example, <code>jQuery.ajax</code>), you should also consider using <a href="mithril.computation.html"><code>m.startComputation</code> / <code>m.endComputation</code></a> if you want views to redraw after requests complete.</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">//standalone usage
+var greetAsync = function() {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+    }, 1000);
+    return deferred.promise;
+};
+
+greetAsync()
+    .then(function(value) {return value + &quot; world&quot;})
+    .then(function(value) {console.log(value)}); //logs &quot;hello world&quot; after 1 second
+</code></pre>
+<hr>
+<h4 id="retrieving-a-value-via-the-getter-setter-api">Retrieving a value via the getter-setter API</h4>
+<p>The promise object is actually a getter-setter function that gets populated when the promise is fulfilled.</p>
+<pre><code class="lang-javascript">//asynchronous service
+var greetAsync = function() {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+    }, 1000);
+    return deferred.promise;
+};
+
+//asynchronous consumer
+var greeting = greetAsync()
+var processed = greeting.then(function(value) {return value + &quot; world&quot;})
+
+console.log(greeting()) // undefined - because `deferred.resolve` has not been called yet
+
+setTimeout(function() {
+    //now `deferred.resolve` has been called
+    console.log(greeting()) // &quot;hello&quot;
+    console.log(processed()) // &quot;hello world&quot;
+}, 2000)
+</code></pre>
+<hr>
+<h4 id="integrating-to-the-mithril-redrawing-system">Integrating to the Mithril redrawing system</h4>
+<p>By default, promises are not integrated to the Mithril auto-redrawing system. When dealing with asynchronous functions, you must call [<code>m.startComputation</code> / <code>m.endComputation</code>] if you want the asynchronous payload to affect the view.</p>
+<pre><code class="lang-javascript">//asynchronous service
+var greetAsync = function() {
+    //tell Mithril to wait for this service to complete before redrawing
+    m.startComputation();
+
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+
+        //the service is done, tell Mithril that it may redraw
+        m.endComputation();
+    }, 1000);
+    return deferred.promise;
+};
+</code></pre>
+<p>Some cases may not require a redraw upon completion of the asynchronous callbacks. In such cases, simply omit the m.startComputation/m.endComputation calls.</p>
+<p>Some asynchronous operations might need to affect redrawing both before and after their completion. In those cases, you can call <a href="mithril.redraw.html"><code>m.redraw</code></a> instead of using m.startComputation/m.endComputation.</p>
+<pre><code class="lang-javascript">//asynchronous service
+var greetAsync = function() {
+    //don&#39;t wait for this service; redraw right away
+
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+
+        //redraw again
+        m.redraw()
+    }, 1000);
+    return deferred.promise;
+};
+</code></pre>
+<hr>
+<h3 id="differences-from-promises-a-">Differences from Promises/A+</h3>
+<p>For the most part, Mithril promises behave as you&#39;d expect a <a href="http://promises-aplus.github.io/promises-spec/">Promise/A+</a> promise to behave, but have one difference: Mithril promises attempt to execute synchronously if possible.</p>
+<h4 id="synchronous-execution">Synchronous execution</h4>
+<p>Mithril promises attempt to execute synchronously if possible. To illustrate the difference between Mithril and A+ promises, consider the code below:</p>
+<pre><code class="lang-javascript">var deferred = m.deferred()
+
+deferred.promise.then(function() {
+    console.log(1)
+})
+
+deferred.resolve(&quot;value&quot;)
+
+console.log(2)
+</code></pre>
+<p>In the example above, A+ promises are required to log <code>2</code> before logging <code>1</code>, whereas Mithril logs <code>1</code> before <code>2</code>. Typically <code>resolve</code>/<code>reject</code> are called asynchronously after the <code>then</code> method is called, so normally this difference does not matter.</p>
+<p>There are a couple of reasons why Mithril runs callbacks synchronously. Conforming to the spec requires either a <code>setImmediate</code> polyfill (which is a significantly large library), or <code>setTimeout</code> (which is required to take at least 4 milliseconds per call, according to its specs). Neither of these trade-offs are acceptable, given Mithril&#39;s focus on nimbleness and performance.</p>
+<h4 id="unchecked-error-handling">Unchecked Error Handling</h4>
+<p>By default, Mithril does not swallow errors if these errors are subclasses of the Error class. Manually throwing an instance of the Error class itself (or any other objects or primitives) does trigger the rejection callback path as per the Promises/A+ spec.</p>
+<p>This deviation from the spec is there to make it easier for developers to find common logical errors such as typos that lead to null reference exceptions. By default, the spec requires that all thrown errors trigger rejection, which result in silent failures if the developer forgets to explicitly handle the failure case.</p>
+<p>For example, there is simply never a case where a developer would want to programmatically handle the error of accessing the property of a nullable entity without first checking for its existence. The only reasonable course of action to prevent the potential null reference exceptions in this case is to add the existence check in the source code. It is expected that such an error would bubble up to the console and display a developer-friendly error message and line number there.</p>
+<pre><code class="lang-javascript">m.request({method: &quot;GET&quot;, url: &quot;/things&quot;})
+    .then(function(items) {
+        item.foreach(doSomething) //programmer error: typo will throw runtime error to the console
+    })
+</code></pre>
+<p>The other side of the coin is still supported: if a developer needs to signal an exceptional condition within a promise callback, they can manually throw a <code>new Error</code> (for example, if a validation rule failed, and there should be an error message displayed to the user).</p>
+<pre><code class="lang-javascript">var error = m.prop()
+m.request({method: &quot;GET&quot;, url: &quot;/user/:id&quot;, data: {id: 1}})
+    .then(function(user) {
+        if (!user.isAdmin) throw new Error(&quot;Sorry, you don&#39;t have permissions&quot;)
+    })
+    .then(null, error) //handle the application error: bind to a getter-setter for diplaying it on the template
+</code></pre>
+<p>Note that the default promise exception handling semantics can be modified. See the next section.</p>
+<hr>
+<h3 id="the-exception-monitor">The exception monitor</h3>
+<p>Any time an exception is thrown inside a promise callback, Mithril calls <code>m.deferred.onerror(e)</code>.</p>
+<p>By default, this event handler rethrows the exception to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications. It does this because people expect unexpected errors like null reference exceptions to be thrown to the console for debugging purposes, and these errors are always subclasses of Error.</p>
+<p>On the other hand, javascript developers rarely ever throw errors that are subclasses of Error, and for the purposes of application error handling, the underlying prototypal chain of the error class is typically not relevant.</p>
+<p>The <code>onerror</code> function can be safely replaced if the default error monitoring semantics are not desired.</p>
+<pre><code>//swallow all errors
+m.deferred.onerror = function() {}
+
+//only log errors
+m.deferred.onerror = function(e) {console.error(e)}
+</code></pre><hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">Deferred deferred() {void onerror(Error e)}
+
+where:
+    Deferred :: Object { Promise promise, void resolve(any value), void reject(any value) }
+    Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)), Promise catch(any errorCallback(any value)) }
+    GetterSetter :: any getterSetter([any value])
+</code></pre>
+<ul>
+<li><p><strong>GetterSetter { Promise then([any successCallback(any value) [, any errorCallback(any value)]]) } promise</strong></p>
+<p>A promise has a method called <code>then</code> which takes two computation callbacks as parameters.</p>
+<p>The <code>then</code> method returns another promise whose computations (if any) receive their inputs from the parent promise&#39;s computation.</p>
+<p>A promise is also a getter-setter (see <a href="mithril.prop.html"><code>m.prop</code></a>). After a call to either <code>resolve</code> or <code>reject</code>, it holds the result of the parent&#39;s computation (or the <code>resolve</code>/<code>reject</code> value, if the promise has no parent promises)</p>
+<p>Promises also have a method called <code>catch</code>, which is equivalent to calling <code>then(null, errorCallback)</code></p>
+<ul>
+<li><p><strong>Promise then([any successCallback(any value) [, any errorCallback(any value)]])</strong></p>
+<p>This method accepts two callbacks which process a value passed to the <code>resolve</code> and <code>reject</code> methods, respectively, and pass the processed value to the returned promise</p>
+<ul>
+<li><p><strong>any successCallback(any value)</strong> (optional)</p>
+<p>The <code>successCallback</code> is called if <code>resolve</code> is called in the root <code>deferred</code>.</p>
+<p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
+<p>If this function returns undefined, then it passes the <code>value</code> argument to the next step in the thenable queue, if any</p>
+</li>
+<li><p><strong>any errorCallback(any value)</strong> (optional)</p>
+<p>The <code>errorCallback</code> is called if <code>reject</code> is called in the root <code>deferred</code>.</p>
+<p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
+<p>If this function returns undefined, then it passes the <code>value</code> argument to the next step in the thenable queue, if any</p>
+</li>
+<li><p><strong>returns Promise promise</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>void resolve(any value)</strong></p>
+<p>This method passes a value to the <code>successCallback</code> of the deferred object&#39;s child promise</p>
+</li>
+<li><p><strong>void reject(any value)</strong></p>
+<p>This method passes a value to the <code>errorCallback</code> of the deferred object&#39;s child promise</p>
+</li>
+<li><p><a name="onerror"></a></p>
+<h4 id="m-deferred-onerror">m.deferred.onerror</h4>
+<p><strong>void onerror(Error e)</strong></p>
+<p>This method gets called every time an exception is thrown inside a promise callback. By default, it rethrows to the console if an error is a subclass of Error (but not an instance of Error itself). Otherwise it follows the Promises/A+ specifications.</p>
+</li>
+</ul>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>

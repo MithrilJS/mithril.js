@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Mithril test suite</title>
+<div id="mocha"></div>
+
+<!-- Dependencies -->
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/sinon/pkg/sinon.js" charset="utf-8"></script>
+<script src="../node_modules/sinon-chai/lib/sinon-chai.js" charset="utf-8"></script>
+<link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+<script src="../node_modules/mocha/mocha.js"></script>
+
+<script src="../test-deps/dom.js"></script>
+<script src="../test-deps/mock.js"></script>
+<script src="../mithril.js"></script>
+<script>
+mocha.setup("bdd")
+var expect = chai.expect
+// Temporary workaround for https://github.com/mochajs/mocha/issues/1348
+chai.config.truncateThreshold = 0
+</script>
+
+<!-- Tests go here -->
+<script src="./mithril.js"></script>
+<script src="./mithril.mount.js"></script>
+<script src="./mithril.render.js"></script>
+<script src="./mithril.withAttr.js"></script>
+<script src="./mithril.trust.js"></script>
+<script src="./mithril.redraw.js"></script>
+<script src="./mithril.route.js"></script>
+<script src="./mithril.route.parseQueryString.js"></script>
+<script src="./mithril.route.buildQueryString.js"></script>
+<script src="./mithril.prop.js"></script>
+<script src="./mithril.request.js"></script>
+<script src="./mithril.deferred.js"></script>
+<script src="./mithril.sync.js"></script>
+<script src="./mithril.startComputation.js"></script>
+
+<!-- Set options and run this thing -->
+<script>
+m.deps(mock)
+mocha.checkLeaks()
+mocha.globals(["m", "mochaResults"])
+
+// For Saucelabs reporting
+var runner = mocha.run()
+
+var failedTests = []
+
+runner.on("end", function() {
+	window.mochaResults = runner.stats
+	window.mochaResults.reports = failedTests
+})
+
+runner.on("fail", function (test, err) {
+	function flattenTitles(test) {
+		var titles = []
+		while (test.parent.title) {
+			titles.push(test.parent.title)
+			test = test.parent
+		}
+		return titles.reverse()
+	}
+
+	failedTests.push({
+		name: test.title,
+		result: false,
+		message: err.message,
+		stack: err.stack,
+		titles: flattenTitles(test),
+	})
+})
+</script>

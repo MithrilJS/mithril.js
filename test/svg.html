@@ -1,0 +1,214 @@
+<!doctype html>
+<title>SVG test</title>
+<style>
+.path {
+	stroke-dasharray: 1000;
+	stroke-dashoffset: 1000;
+	animation: dash 5s linear alternate infinite;
+	-webkit-animation: dash 5s linear alternate infinite;
+}
+
+@keyframes dash {
+	from {
+		stroke-dashoffset: 1000;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+@-webkit-keyframes dash {
+	from {
+		stroke-dashoffset: 1000;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+</style>
+
+<p>
+	This page is for testing SVG support in Mithril. This page should contain:
+</p>
+<ul>
+	<li>an HTML link labeled "HTML link"</li>
+	<li>an SVG link labeled "SVG link"</li>
+	<li>a tilted blue square</li>
+	<li>a cat picture</li>
+	<li>an animated line drawing</li>
+	<li>a clock with the current time</li>
+</ul>
+
+<p>
+	The links should open in a new tab. All items should display title tooltips
+	when hovered over.
+</p>
+
+<div id="test"></div>
+<script src="../mithril.js"></script>
+<script>
+m.render(document.getElementById("test"), [
+	m("a[href='http://google.com'][target=_blank][title='HTML link']",
+		"HTML link"),
+	m("br"),
+	m("svg[width=180][height=200]", [
+		m("rect[title=Square]", {
+			x: 50,
+			y: 50,
+			height: 100,
+			width: 100,
+			transform: "translate(30) rotate(45 50 50)",
+			style: {stroke: "#000", fill: "#0086b2"}
+		}),
+		m("a[href='http://google.com'][title='SVG link'][target=_new]", {
+			style: {textDecoration: "underline"}
+		}, [
+			m("text[x=0][y=20]", "SVG Link")
+		])
+	]),
+	m("svg[height=201px][width=201px]", [
+		m("image[href='http://placekitten.com/201/201']", {
+			height: "200px",
+			width: "200px",
+			title: "Cat picture"
+		})
+	]),
+	m("svg[title='Line drawings']", {
+		"enable-background": "new 0 0 340 333",
+		height: "333px",
+		viewBox: "0 0 340 333",
+		width: "340px",
+		x: "0px",
+		y: "0px"
+	}, [
+		m("path.path", {
+			d: [
+				"M 66.039,133.545",
+				"c 0,0 -21 -57,18 -67",
+				"s 49 -4,65,8",
+				"s 30,41,53,27",
+				"s 66,4,58,32",
+				"s -5,44,18,57",
+				"s 22,46,0,45",
+				"s -54 -40 -68 -16",
+				"s -40,88 -83,48",
+				"s 11 -61 -11 -80",
+				"s -79 -7 -70 -41",
+				"C 46.039,146.545,53.039,128.545,66.039,133.545",
+				"z",
+			].join(" "),
+			fill: "#FFFFFF",
+			stroke: "#000000",
+			"stroke-miterlimit": 10,
+			"stroke-width": 4,
+		}),
+	]),
+	m("svg[height=270px][width=270px][viewBox='0 0 270 270']", [
+		m("g[transform='translate(150,150)'][title=Clock]", [
+			m("g", [
+				m("circle", {
+					r: 108,
+					fill: "none",
+					"stroke-width": 4,
+					stroke: "gray",
+				}),
+				m("circle", {
+					r: 97,
+					fill: "none",
+					"stroke-width": 11,
+					stroke: "black",
+					"stroke-dasharray": "4,46.789082",
+					transform: "rotate(-1.5)",
+				}),
+				m("circle", {
+					r: 100,
+					fill: "none",
+					"stroke-width": 5,
+					stroke: "black",
+					"stroke-dasharray": "2,8.471976",
+					transform: "rotate(-.873)",
+				}),
+			]),
+			m("g[transform='rotate(180)']", [
+				m("g#hour", [
+					m("line", {
+						"stroke-width": 5,
+						y2: 75,
+						"stroke-linecap": "round",
+						stroke: "blue",
+						opacity: 0.5,
+					}),
+					m("animateTransform[attributeName=transform]", {
+						type: "rotate",
+						repeatCount: "indefinite",
+						dur: "12h",
+						by: 360
+					}),
+					m("circle[r=7]"),
+				]),
+				m("g#minute", [
+					m("line", {
+						"stroke-width": 4,
+						y2: 93,
+						"stroke-linecap": "round",
+						stroke: "green",
+						opacity: 0.9
+					}),
+					m("animateTransform[attributeName=transform]", {
+						type: "rotate",
+						repeatCount: "indefinite",
+						dur: "60min",
+						by: 360,
+					}),
+					m("circle[r=6][fill=red]"),
+				]),
+				m("g#second", [
+					m("line", {
+						"stroke-width": 2,
+						y1: -20,
+						y2: 102,
+						"stroke-linecap": "round",
+						stroke: "red"
+					}),
+					m("animateTransform[attributeName=transform]", {
+						type: "rotate",
+						repeatCount: "indefinite",
+						dur: "60s",
+						by: 360
+					}),
+					m("circle[r=4][fill=blue]"),
+				]),
+			]),
+		]),
+		m("script", "(" + function () {
+			"use strict"
+
+			function rotate(id, num) {
+				document.getElementById(id)
+					.setAttribute("transform", "rotate(" + num + ")")
+			}
+
+			var date = new Date()
+			var hours = date.getHours()
+			if (hours > 12) hours -= 12
+			var minutes = date.getMinutes()
+			var seconds = date.getSeconds()
+			rotate("hour", 30 * (hours + minutes / 60 + seconds / 3600))
+			rotate("minute", 6 * (minutes + seconds / 60))
+			rotate("second", 6 * seconds)
+		}.toString() + ")()"),
+	]),
+	m("svg[height=200px][width=200px]", [
+		m("foreignObject", {
+			x: 0,
+			y: 0,
+			width: "100px",
+			height: "100px",
+			transform: "translate(0,0)",
+		}, m("div", {xmlns: "http://www.w3.org/1999/xhtml"}, [
+			m.trust("this is a piece of html rendered as " +
+				"<a href=\"http://www.w3.org/TR/SVG11/extend.html\">" +
+				"SVG foreignObject</a>")
+		]))
+	])
+])
+</script>

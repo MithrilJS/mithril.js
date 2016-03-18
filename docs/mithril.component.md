@@ -43,7 +43,7 @@ var MyComponent = {
 m.mount(document.body, MyComponent) // renders <h1>Hello</h1> into <body>
 ```
 
-The optional `controller` function creates an object that may be used in the following recommended ways: 
+The optional `controller` function creates an object that may be used in the following recommended ways:
 
 - It can contain methods meant to be called by a `view`.
 - It can call model methods directly or from methods inside the resulting object.
@@ -165,8 +165,8 @@ var MyComponent = {
 
 m.render(document.body, [
 	//the two lines below are equivalent
-	m(component, {data: "world"}),
-	m.component(component, {data: "world"})
+	m(MyComponent, {data: "world"}),
+	m.component(MyComponent, {data: "world"})
 ])
 ```
 
@@ -211,7 +211,7 @@ var App = {
 	view: function() {
 		return m(".app", [
 			m("h1", "My App"),
-			
+
 			//nested component
 			m.component(MyComponent, {message: "Hello"})
 		])
@@ -246,7 +246,7 @@ var App = {
 		return m(".app", [
 			//pressing the button reverses the list
 			m("button[type=button]", {onclick: function() {ctrl.data.reverse()}}, "My App"),
-			
+
 			ctrl.data.map(function(item) {
 				//the key ensures the components aren't recreated from scratch, if they merely exchanged places
 				return m.component(MyComponent, {message: "Hello " + item, key: item})
@@ -327,12 +327,12 @@ var ctrl = new TemperatureConverter.controller();
 assert(ctrl.kelvinToCelsius(273.15) == 0)
 
 //test the template
-var tpl = TemperatureConverter.view(null, {value: 273.15})
+var tpl = TemperatureConverter.view(ctrl, {value: 273.15})
 assert(tpl.children[1] == 0)
 
 //test with real DOM
 var testRoot = document.createElement("div")
-m.render(testRoot, TemperatureConverter.view(null, {value: 273.15}))
+m.render(testRoot, TemperatureConverter.view(ctrl, {value: 273.15}))
 assert(testRoot.innerHTML.indexOf("celsius:0") > -1)
 ```
 
@@ -362,7 +362,7 @@ var MyComponent = {
 	},
 	view: function(ctrl) {
 		return m("ul", [
-			ctrl.things().map(function(name) {
+			ctrl.things().map(function(thing) {
 				return m("li", thing.name)
 			})
 		]);
@@ -419,14 +419,14 @@ Often, you will want to do some work before the component is unloaded (i.e. clea
 var MyComponent = {
 	controller: function() {
 		return {
-			onunload = function() {
+			onunload: function() {
 				console.log("unloading my component");
 			}
 		}
 	},
 	view: function() {
 		return m("div", "test")
-	};
+	}
 };
 
 m.mount(document.body, MyComponent);
@@ -451,7 +451,7 @@ var component = {
 		var unsaved = m.prop(false)
 		return {
 			unsaved: unsaved,
-			
+
 			onunload: function(e) {
 				if (unsaved()) {
 					e.preventDefault()
@@ -538,7 +538,7 @@ There are a few other technical caveats when nesting components:
 2.	Nested components cannot change `m.redraw.strategy` from the controller constructor (but they can from event handlers). It's recommended that you use the [`ctx.retain`](mithril.md#persisting-dom-elements-across-route-changes) flag instead of changing the redraw strategy in controller constructors.
 
 3.	The root DOM element in a component's view must not be changed during the lifecycle of the component, otherwise undefined behavior will occur. In other words, don't do this:
-	
+
 	```javascript
 	var MyComponent = {
 		view: function() {
@@ -590,7 +590,7 @@ where:
 
 -	**Component component**
 
-	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a contoller is not specified, Mithril will automatically create an empty controller function.
+	A component is supposed to be an Object with two keys: `controller` and `view`. Each of these should point to a Javascript function. If a controller is not specified, Mithril will automatically create an empty controller function.
 
 -	**Object attributes**
 
@@ -603,4 +603,3 @@ where:
 -	**returns Component parameterizedComponent**
 
 	A component with arguments bound
-

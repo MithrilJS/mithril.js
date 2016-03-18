@@ -3,7 +3,7 @@
 /**
 * This is the module containing all the types/declarations/etc. for Mithril
 */
-declare module _mithril {
+declare namespace _mithril {
 	interface MithrilStatic {
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -24,10 +24,10 @@ declare module _mithril {
 			selector: string,
 			attributes: MithrilAttributes,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
+				MithrilVirtualElement |
 				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
-		
+		): MithrilVirtualElement;
+
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
 		*
@@ -59,9 +59,9 @@ declare module _mithril {
 		<T extends MithrilController>(
 			selector: string,
 			...children: Array<string |
-				MithrilVirtualElement<T> |
+				MithrilVirtualElement |
 				MithrilComponent<T>>
-		): MithrilVirtualElement<T>;
+		): MithrilVirtualElement;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -123,8 +123,22 @@ declare module _mithril {
 		*/
 		withAttr(
 			property: string,
-			callback: (value: any) => void
+			callback: (value: any) => void,
+			callbackThis: any
 		): (e: Event) => any;
+
+		/**
+		* Returns a event handler that can be bound to an element, firing with
+		* the specified property.
+		*
+		* @param attributeName Name of the element's attribute to bind to.
+		* @param property The property to bind.
+		* @return A function suitable for listening to an event.
+		*/
+		withAttr<T>(
+			attributeName: string,
+			property: MithrilBasicProperty<T>
+		) : (e: Event) => any;
 
 		/**
 		* @deprecated Use m.mount instead
@@ -181,7 +195,7 @@ declare module _mithril {
 		*/
 		render<T extends MithrilController>(
 			rootElement: Element,
-			children: MithrilVirtualElement<T>|MithrilVirtualElement<T>[],
+			children: MithrilVirtualElement|MithrilVirtualElement[],
 			forceRecreation?: boolean
 		): void;
 
@@ -249,7 +263,7 @@ declare module _mithril {
 			<T extends MithrilController>(
 				rootElement: Element,
 				defaultRoute: string,
-				routes: MithrilRoutes<T>
+				routes: MithrilRoutes
 			): void;
 
 			/**
@@ -266,7 +280,7 @@ declare module _mithril {
 				element: Element,
 				isInitialized: boolean,
 				context?: MithrilContext,
-				vdom?: MithrilVirtualElement<T>
+				vdom?: MithrilVirtualElement
 			): void;
 
 			/**
@@ -430,7 +444,7 @@ declare module _mithril {
 	*
 	* @see m
 	*/
-	interface MithrilVirtualElement<T extends MithrilController> {
+	interface MithrilVirtualElement {
 		/**
 		* A key to optionally associate with this element.
 		*/
@@ -449,7 +463,7 @@ declare module _mithril {
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|MithrilVirtualElement<T>|MithrilComponent<T>>;
+		children?: Array<string|MithrilVirtualElement|MithrilComponent<MithrilController>>;
 	}
 
 	/**
@@ -505,7 +519,7 @@ declare module _mithril {
 			element: Element,
 			isInitialized: boolean,
 			context: MithrilContext,
-			vdom: MithrilVirtualElement<T>
+			vdom: MithrilVirtualElement
 		): void;
 	}
 
@@ -533,6 +547,12 @@ declare module _mithril {
 		* @see MithrilElementConfig
 		*/
 		config?: MithrilElementConfig;
+
+		/**
+		* Any other virtual element properties including attributes and
+		* event handlers
+		*/
+		[property: string]: any;
 	}
 
 	/**
@@ -554,7 +574,7 @@ declare module _mithril {
 	* @see MithrilControllerConstructor
 	*/
 	interface MithrilControllerFunction<T extends MithrilController> {
-		(): T;
+		(opts?: any): T;
 	}
 
 	/**
@@ -573,7 +593,7 @@ declare module _mithril {
 		/**
 		* Creates a view out of virtual elements.
 		*/
-		(ctrl: T): MithrilVirtualElement<T>;
+		(ctrl: T): MithrilVirtualElement;
 	}
 
 	/**
@@ -596,7 +616,7 @@ declare module _mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl: T): MithrilVirtualElement<T>;
+		view(ctrl?: T, opts?: any): MithrilVirtualElement;
 	}
 
 	/**
@@ -638,7 +658,7 @@ declare module _mithril {
 	*
 	* @see m.prop which returns objects that implement this interface.
 	*/
-	interface MithrilPromiseProperty<T> extends MithrilPromise<T>,
+	interface MithrilPromiseProperty<T> extends MithrilPromise<T | MithrilPromise<T>>,
 			MithrilProperty<MithrilPromise<T>> {
 		/**
 		* Gets the contained promise.
@@ -667,12 +687,12 @@ declare module _mithril {
 	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
-	interface MithrilRoutes<T extends MithrilController> {
+	interface MithrilRoutes {
 		/**
 		* The key represents the route. The value represents the corresponding
 		* component.
 		*/
-		[key: string]: MithrilComponent<T>;
+		[key: string]: MithrilComponent<MithrilController>;
 	}
 
 	/**
@@ -727,7 +747,7 @@ declare module _mithril {
 	/**
 	* This represents a Mithril promise object.
 	*/
-	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<MithrilPromise<T>> {
+	interface MithrilPromise<T> extends Thennable<T>, MithrilProperty<T | MithrilPromise<T>> {
 		/**
 		* Chain this promise with a simple success callback, propogating
 		* rejections.
