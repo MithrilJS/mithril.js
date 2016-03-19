@@ -103,9 +103,7 @@
 		return classes
 	}
 
-	function getVirtualChildren(args, hasAttrs) {
-		var children = hasAttrs ? args.slice(1) : args
-
+	function getVirtualChildren(children) {
 		if (children.length === 1 && isArray(children[0])) {
 			return children[0]
 		} else {
@@ -156,10 +154,11 @@
 			!("tag" in pairs || "view" in pairs || "subtree" in pairs)
 
 		var attrs = hasAttrs ? pairs : {}
+		var children = hasAttrs ? args.slice(1) : args;
 		var cell = {
 			tag: "div",
 			attrs: {},
-			children: getVirtualChildren(args, hasAttrs)
+			children: getVirtualChildren(children)
 		}
 
 		assignAttrs(cell.attrs, attrs, parseTagAttrs(cell, tag))
