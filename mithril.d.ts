@@ -20,12 +20,10 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
+		(
 			selector: string,
 			attributes: Attributes,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
+			...children: Array<string | VirtualElement | Component<Controller>>
 		): VirtualElement;
 
 		/**
@@ -56,11 +54,9 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
+		(
 			selector: string,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
+			...children: Array<string | VirtualElement | Component<Controller>>
 		): VirtualElement;
 
 		/**
@@ -193,7 +189,7 @@ declare namespace Mithril {
 		* @param forceRecreation If true, overwrite the entire tree without
 		* diffing against it.
 		*/
-		render<T extends Controller>(
+		render(
 			rootElement: Element,
 			children: VirtualElement|VirtualElement[],
 			forceRecreation?: boolean
@@ -260,7 +256,7 @@ declare namespace Mithril {
 			* @param defaultRoute The route to start with.
 			* @param routes A key-value mapping of pathname to controller.
 			*/
-			<T extends Controller>(
+			(
 				rootElement: Element,
 				defaultRoute: string,
 				routes: Routes
@@ -276,7 +272,7 @@ declare namespace Mithril {
 			* m("a[href='/dashboard/alicesmith']", {config: m.route});
 			* ```
 			*/
-			<T extends Controller>(
+			(
 				element: Element,
 				isInitialized: boolean,
 				context?: Context,
@@ -515,7 +511,7 @@ declare namespace Mithril {
 		* @param context The associated context for this element.
 		* @param vdom The associated virtual element.
 		*/
-		<T extends Controller>(
+		(
 			element: Element,
 			isInitialized: boolean,
 			context: Context,
@@ -583,7 +579,7 @@ declare namespace Mithril {
 	* @see ControllerFunction
 	*/
 	interface ControllerConstructor<T extends Controller> {
-		new(): T;
+		new (): T;
 	}
 
 	/**
@@ -608,8 +604,7 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		controller: ControllerFunction<T> |
-			ControllerConstructor<T>;
+		controller: ControllerFunction<T> | ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.
@@ -741,7 +736,7 @@ declare namespace Mithril {
 	interface Thennable<T> {
 		then<U>(success: (value: T) => U): Thennable<U>;
 		then<U,V>(success: (value: T) => U, error: (value: Error) => V): Thennable<U>|Thennable<V>;
-		catch?: <U>(error: (value: Error) => U) => Thennable<U>;
+		catch?<U>(error: (value: Error) => U): Thennable<U>;
 	}
 
 	/**
@@ -777,8 +772,7 @@ declare namespace Mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		catch<U>(error: ErrorCallback<U>): Promise<T> |
-			Promise<U>;
+		catch<U>(error: ErrorCallback<U>): Promise<T> | Promise<U>;
 	}
 
 	/**
@@ -918,7 +912,7 @@ declare namespace Mithril {
 	}
 }
 
-declare var m: Mithril.Static;
+declare const m: Mithril.Static;
 
 declare module "mithril" {
     export = m;
