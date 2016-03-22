@@ -206,44 +206,20 @@ declare namespace Mithril {
 			*/
 			(force?: boolean): void;
 
-			strategy: {
-				/**
-				* Gets the current redraw strategy, which returns one of the
-				* following:
-				*
-				* "all" - recreates the DOM tree from scratch
-				* "diff" - recreates the DOM tree from scratch
-				* "none" - leaves the DOM tree intact
-				*
-				* This is useful for event handlers, which may want to cancel
-				* the next redraw if the event doesn't update the UI.
-				*
-				* @return The current strategy
-				*/
-				(): string;
-
-				/**
-				* Sets the current redraw strategy. The parameter must be one of
-				* the following values:
-				*
-				* "all" - recreates the DOM tree from scratch
-				* "diff" - recreates the DOM tree from scratch
-				* "none" - leaves the DOM tree intact
-				*
-				* This is useful for event handlers, which may want to cancel
-				* the next redraw if the event doesn't update the UI.
-				*
-				* @param value The value to set
-				* @return The new strategy
-				*/
-				(value: string): string;
-
-				/**
-				* @private
-				* Implementation detail - it's a BasicProperty instance
-				*/
-				toJSON(): string;
-			}
+			/**
+			* Gets/sets the current redraw strategy, which returns one of the
+			* following:
+			*
+			* "all" - recreates the DOM tree from scratch
+			* "diff" - recreates the DOM tree from scratch
+			* "none" - leaves the DOM tree intact
+			*
+			* This is useful for event handlers, which may want to cancel
+			* the next redraw if the event doesn't update the UI.
+			*
+			* @return The current strategy
+			*/
+			strategy: BasicProperty<"all" | "diff" | "none">;
 		}
 
 		route: {
@@ -324,7 +300,7 @@ declare namespace Mithril {
 			* page refreshes on IE8 and lower. Note that this requires that the
 			* application to be run from the root of the URL.
 			*/
-			mode: string;
+			mode: "search" | "hash" | "pathname";
 
 			/**
 			* Serialize an object into a query string.
@@ -782,16 +758,9 @@ declare namespace Mithril {
 	*/
 	interface XHROptions<T> {
 		/**
-		* This represents the HTTP method used, one of the following:
-		*
-		* - "GET" (default)
-		* - "POST"
-		* - "PUT"
-		* - "DELETE"
-		* - "HEAD"
-		* - "OPTIONS"
+		* This represents the HTTP method used, defaulting to "GET".
 		*/
-		method?: string;
+		method?: "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS";
 
 		/**
 		* The URL to send the request to.
@@ -899,7 +868,7 @@ declare namespace Mithril {
 		* For JSONP requests, this must be the string "jsonp". Otherwise, it's
 		* ignored.
 		*/
-		dataType?: string;
+		dataType?: "jsonp";
 
 		/**
 		* For JSONP requests, this is the query string key for the JSONP
