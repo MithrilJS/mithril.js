@@ -2186,4 +2186,4 @@
 	}
 
 	return m
-});
+}); // eslint-disable-line
