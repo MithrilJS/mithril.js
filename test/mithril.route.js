@@ -88,7 +88,7 @@ describe("m.route()", function () {
 			"/test1": pure(function () { return "foo" })
 		})
 
- 		m.route("/404/")
+ 		m.route("/no-match")
 
 		expect(root.childNodes[0].nodeValue).to.equal("defaultComponent")
 	})
