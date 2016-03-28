@@ -13,6 +13,3 @@ docs/layout/lib
 
 # This is probably going to disappear eventually, anyways.
 tests
-
-# TODO: These are temporary, and need to be eventually enabled.
-mithril.js
