@@ -96,7 +96,7 @@
 				classes.push(match[2])
 			} else if (match[3][0] === "[") {
 				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
-				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true)
+				cell.attrs[pair[1]] = pair[3] || ""
 			}
 		}
 
@@ -239,8 +239,10 @@
 		})
 
 		var actions = []
-		for (var prop in existing) if (hasOwn.call(existing, prop)) {
-			actions.push(existing[prop])
+		for (var prop in existing) {
+			if (hasOwn.call(existing, prop)) {
+				actions.push(existing[prop])
+			}
 		}
 
 		var changes = actions.sort(sortChanges)
@@ -371,8 +373,10 @@
 
 			if (cached.controllers) {
 				forEach(cached.controllers, function (controller) {
-					if (controller.onunload) controller.onunload({preventDefault: noop});
-				});
+					if (controller.onunload) {
+						controller.onunload({preventDefault: noop})
+					}
+				})
 			}
 		}
 	}
@@ -753,7 +757,9 @@
 	var unloaders = []
 
 	function updateLists(views, controllers, view, controller) {
-		if (controller.onunload != null && unloaders.map(function(u) {return u.handler}).indexOf(controller.onunload) < 0) {
+		if (controller.onunload != null &&
+				unloaders.map(function (u) { return u.handler })
+					.indexOf(controller.onunload) < 0) {
 			unloaders.push({
 				controller: controller,
 				handler: controller.onunload
@@ -765,11 +771,32 @@
 	}
 
 	var forcing = false
-	function checkView(data, view, cached, cachedControllers, controllers, views) {
-		var controller = getController(cached.views, view, cachedControllers, data.controller)
+	function checkView(
+		data,
+		view,
+		cached,
+		cachedControllers,
+		controllers,
+		views
+	) {
+		var controller = getController(
+			cached.views,
+			view,
+			cachedControllers,
+			data.controller)
+
 		var key = data && data.attrs && data.attrs.key
-		data = pendingRequests === 0 || forcing || cachedControllers && cachedControllers.indexOf(controller) > -1 ? data.view(controller) : {tag: "placeholder"}
-		if (data.subtree === "retain") return data;
+
+		if (pendingRequests === 0 ||
+				forcing ||
+				cachedControllers &&
+					cachedControllers.indexOf(controller) > -1) {
+			data = data.view(controller)
+		} else {
+			data = {tag: "placeholder"}
+		}
+
+		if (data.subtree === "retain") return data
 		data.attrs = data.attrs || {}
 		data.attrs.key = key
 		updateLists(views, controllers, view, controller)
@@ -976,14 +1003,18 @@
 	}
 
 	function copyStyleAttrs(node, dataAttr, cachedAttr) {
-		for (var rule in dataAttr) if (hasOwn.call(dataAttr, rule)) {
-			if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) {
-				node.style[rule] = dataAttr[rule]
+		for (var rule in dataAttr) {
+			if (hasOwn.call(dataAttr, rule)) {
+				if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) {
+					node.style[rule] = dataAttr[rule]
+				}
 			}
 		}
 
-		for (rule in cachedAttr) if (hasOwn.call(cachedAttr, rule)) {
-			if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+		for (rule in cachedAttr) {
+			if (hasOwn.call(cachedAttr, rule)) {
+				if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+			}
 		}
 	}
 
@@ -1079,16 +1110,18 @@
 	}
 
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
-		for (var attrName in dataAttrs) if (hasOwn.call(dataAttrs, attrName)) {
-			if (trySetAttr(
-					node,
-					attrName,
-					dataAttrs[attrName],
-					cachedAttrs[attrName],
-					cachedAttrs,
-					tag,
-					namespace)) {
-				continue
+		for (var attrName in dataAttrs) {
+			if (hasOwn.call(dataAttrs, attrName)) {
+				if (trySetAttr(
+						node,
+						attrName,
+						dataAttrs[attrName],
+						cachedAttrs[attrName],
+						cachedAttrs,
+						tag,
+						namespace)) {
+					continue
+				}
 			}
 		}
 		return cachedAttrs
@@ -1407,7 +1440,7 @@
 		try {
 			// lastRedrawId is a positive number if a second redraw is requested
 			// before the next animation frame
-			// lastRedrawID is null if it's the first redraw and not an event
+			// lastRedrawId is null if it's the first redraw and not an event
 			// handler
 			if (lastRedrawId && !force) {
 				// when setTimeout: only reschedule redraw if time between now
@@ -1556,8 +1589,10 @@
 				params = {}
 			}
 
-			for (var i in args) if (hasOwn.call(args, i)) {
-				params[i] = args[i]
+			for (var i in args) {
+				if (hasOwn.call(args, i)) {
+					params[i] = args[i]
+				}
 			}
 
 			var querystring = buildQueryString(params)
@@ -1633,29 +1668,31 @@
 			return true
 		}
 
-		for (var route in router) if (hasOwn.call(router, route)) {
-			if (route === path) {
-				m.mount(root, router[route])
-				return true
-			}
-
-			var matcher = new RegExp("^" + route
-				.replace(/:[^\/]+?\.{3}/g, "(.*?)")
-				.replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-
-			if (matcher.test(path)) {
-				/* eslint-disable no-loop-func */
-				path.replace(matcher, function () {
-					var keys = route.match(/:[^\/]+/g) || []
-					var values = [].slice.call(arguments, 1, -2)
-					forEach(keys, function (key, i) {
-						routeParams[key.replace(/:|\./g, "")] =
-							decodeURIComponent(values[i])
-					})
+		for (var route in router) {
+			if (hasOwn.call(router, route)) {
+				if (route === path) {
 					m.mount(root, router[route])
-				})
-				/* eslint-enable no-loop-func */
-				return true
+					return true
+				}
+
+				var matcher = new RegExp("^" + route
+					.replace(/:[^\/]+?\.{3}/g, "(.*?)")
+					.replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+
+				if (matcher.test(path)) {
+					/* eslint-disable no-loop-func */
+					path.replace(matcher, function () {
+						var keys = route.match(/:[^\/]+/g) || []
+						var values = [].slice.call(arguments, 1, -2)
+						forEach(keys, function (key, i) {
+							routeParams[key.replace(/:|\./g, "")] =
+								decodeURIComponent(values[i])
+						})
+						m.mount(root, router[route])
+					})
+					/* eslint-enable no-loop-func */
+					return true
+				}
 			}
 		}
 	}
@@ -1701,32 +1738,35 @@
 		var duplicates = {}
 		var str = []
 
-		for (var prop in object) if (hasOwn.call(object, prop)) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop
-			var value = object[prop]
+		for (var prop in object) {
+			if (hasOwn.call(object, prop)) {
+				var key = prefix ? prefix + "[" + prop + "]" : prop
+				var value = object[prop]
 
-			if (value === null) {
-				str.push(encodeURIComponent(key))
-			} else if (isObject(value)) {
-				str.push(buildQueryString(value, key))
-			} else if (isArray(value)) {
-				var keys = []
-				duplicates[key] = duplicates[key] || {}
-				/* eslint-disable no-loop-func */
-				forEach(value, function (item) {
-					/* eslint-enable no-loop-func */
-					if (!duplicates[key][item]) {
-						duplicates[key][item] = true
-						keys.push(encodeURIComponent(key) + "=" +
-							encodeURIComponent(item))
-					}
-				})
-				str.push(keys.join("&"))
-			} else if (value !== undefined) {
-				str.push(encodeURIComponent(key) + "=" +
-					encodeURIComponent(value))
+				if (value === null) {
+					str.push(encodeURIComponent(key))
+				} else if (isObject(value)) {
+					str.push(buildQueryString(value, key))
+				} else if (isArray(value)) {
+					var keys = []
+					duplicates[key] = duplicates[key] || {}
+					/* eslint-disable no-loop-func */
+					forEach(value, function (item) {
+						/* eslint-enable no-loop-func */
+						if (!duplicates[key][item]) {
+							duplicates[key][item] = true
+							keys.push(encodeURIComponent(key) + "=" +
+								encodeURIComponent(item))
+						}
+					})
+					str.push(keys.join("&"))
+				} else if (value !== undefined) {
+					str.push(encodeURIComponent(key) + "=" +
+						encodeURIComponent(value))
+				}
 			}
 		}
+
 		return str.join("&")
 	}
 
@@ -1934,7 +1974,7 @@
 	m.sync = function (args) {
 		var deferred = m.deferred()
 		var outstanding = args.length
-		var results = new Array(outstanding)
+		var results = []
 		var method = "resolve"
 
 		function synchronizer(pos, resolved) {
@@ -2072,7 +2112,7 @@
 
 	function parameterizeUrl(url, data) {
 		if (data) {
-			url = url.replace(/:[a-z]\w+/gi, function(token){
+			url = url.replace(/:[a-z]\w+/gi, function (token){
 				var key = token.slice(1)
 				var value = data[key]
 				delete data[key]
