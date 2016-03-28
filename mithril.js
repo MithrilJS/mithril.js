@@ -1348,7 +1348,11 @@
 	}
 
 	m.component = function (component) {
-		var args = [].slice.call(arguments, 1)
+		var args = new Array(arguments.length - 1)
+
+		for (var i = 1; i < arguments.length; i++) {
+			args[i - 1] = arguments[i]
+		}
 
 		return parameterize(component, args)
 	}
