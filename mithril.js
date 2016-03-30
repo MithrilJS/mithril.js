@@ -326,6 +326,10 @@
 		var guid = 0
 		forKeys(data, function () {
 			forEach(data, function (attrs) {
+				if (isObject(attrs)) {
+					attrs.attrs = attrs.attrs || {}
+				}
+
 				if ((attrs = attrs && attrs.attrs) && attrs.key == null) {
 					attrs.key = "__mithril__" + guid++
 				}
