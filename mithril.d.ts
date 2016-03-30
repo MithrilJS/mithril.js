@@ -20,12 +20,10 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
+		(
 			selector: string,
 			attributes: Attributes,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
+			...children: Array<string|VirtualElement|ComponentElement<any, any>>
 		): VirtualElement;
 
 		/**
@@ -39,10 +37,10 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m
 		*/
-		<T extends Controller>(
-			component: Component<T>,
+		<T extends Component<U>, U extends Controller>(
+			component: T,
 			...args: any[]
-		): Component<T>;
+		): ComponentElement<T, U>;
 
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -56,11 +54,9 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
+		(
 			selector: string,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
+			...children: Array<string|VirtualElement|ComponentElement<any, any>>
 		): VirtualElement;
 
 		/**
@@ -75,10 +71,10 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
-			component: Component<T>,
+		<T extends Component<U>, U extends Controller>(
+			component: T,
 			...args: any[]
-		): Component<T>;
+		): ComponentElement<T, U>;
 
 		/**
 		* Creates a getter-setter function that wraps a Mithril promise. Useful
@@ -143,10 +139,10 @@ declare namespace Mithril {
 		/**
 		* @deprecated Use m.mount instead
 		*/
-		module<T extends Controller>(
+		module<T extends Component<U>, U extends Controller>(
 			rootElement: Node,
-			component: Component<T>
-		): T;
+			component: T | ComponentElement<T, U>
+		): U;
 
 		/**
 		* Mounts a component to a base DOM node.
@@ -155,10 +151,10 @@ declare namespace Mithril {
 		* @param component The component to mount.
 		* @return An instance of the top-level component's controller
 		*/
-		mount<T extends Controller>(
+		mount<T extends Component<U>, U extends Controller>(
 			rootElement: Node,
-			component: Component<T>
-		): T;
+			component: T | ComponentElement<T, U>
+		): U;
 
 		/**
 		* Initializes a component for use with m.render, m.mount, etc.
@@ -171,10 +167,10 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m
 		*/
-		component<T extends Controller>(
-			component: Component<T>,
+		component<T extends Component<U>, U extends Controller>(
+			component: T,
 			...args: any[]
-		): Component<T>;
+		): ComponentElement<T, U>;
 
 		/**
 		* Trust this string of HTML.
@@ -446,11 +442,6 @@ declare namespace Mithril {
 	*/
 	interface VirtualElement {
 		/**
-		* A key to optionally associate with this element.
-		*/
-		key?: number;
-
-		/**
 		* The tag name of this element.
 		*/
 		tag?: string;
@@ -463,7 +454,34 @@ declare namespace Mithril {
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|VirtualElement|Component<Controller>>;
+		children?: Array<string|VirtualElement|ComponentElement<any, any>>;
+	}
+
+	/**
+	* The interface for a virtual component element. It's best to consider this
+	* immutable for most use cases.
+	*/
+	interface ComponentElement<T extends Component<U>, U extends Controller> {
+		/**
+		* The component used to construct this element.
+		*/
+		tag: Component<T>;
+
+		/**
+		* The arguments passed to the view and controller for this element.
+		*/
+		args: any[];
+
+		/**
+		 * An object containing the key. This is mostly an implementation
+		 * detail, but it functionally bleeds into userland.
+		 */
+		attrs?: {
+			/**
+			* A key to optionally associate with this element.
+			*/
+			key?: number;
+		};
 	}
 
 	/**
@@ -549,6 +567,11 @@ declare namespace Mithril {
 		config?: ElementConfig;
 
 		/**
+		* A key to optionally associate with this element.
+		*/
+		key?: number;
+
+		/**
 		* Any other virtual element properties including attributes and
 		* event handlers
 		*/
@@ -569,21 +592,12 @@ declare namespace Mithril {
 	}
 
 	/**
-	* This represents a controller function.
-	*
-	* @see ControllerConstructor
-	*/
-	interface ControllerFunction<T extends Controller> {
-		(opts?: any): T;
-	}
-
-	/**
 	* This represents a controller constructor.
 	*
 	* @see ControllerFunction
 	*/
 	interface ControllerConstructor<T extends Controller> {
-		new(): T;
+		new (...args: any[]): T;
 	}
 
 	/**
@@ -608,8 +622,7 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		controller: ControllerFunction<T> |
-			ControllerConstructor<T>;
+		controller: ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.

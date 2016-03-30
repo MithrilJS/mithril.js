@@ -200,10 +200,8 @@ describe("m()", function () {
 	})
 
 	it("proxies an object first arg to m.component()", function () {
-		var spy = sinon.spy()
-
 		var component = {
-			controller: spy,
+			controller: function () {},
 			view: function () {
 				return m("div", "testing")
 			}
@@ -211,10 +209,31 @@ describe("m()", function () {
 
 		var args = {age: 12}
 
-		m(component, args).controller()
-		expect(spy.firstCall).to.have.been.calledWith(args)
+		var result = m(component, args)
+		expect(result.tag).to.equal(component)
+		expect(result.args[0]).to.equal(args)
+	})
+})
 
-		m.component(component, args).controller()
-		expect(spy.secondCall).to.have.been.calledWith(args)
+describe("m.component()", function () {
+	"use strict"
+
+	it("exists", function () {
+		expect(m.component).to.be.a("function")
+	})
+
+	it("returns the right type", function () {
+		var component = {
+			controller: function () {},
+			view: function () {
+				return m("div", "testing")
+			}
+		}
+
+		var args = {age: 12}
+
+		var result = m.component(component, args)
+		expect(result.tag).to.equal(component)
+		expect(result.args[0]).to.equal(args)
 	})
 })

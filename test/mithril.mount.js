@@ -149,7 +149,7 @@ describe("m.mount()", function () {
 			view: viewSpy
 		}
 
-		mount(root, pure(function () { return sub }))
+		mount(root, pure(function () { return m.component(sub) }))
 
 		refresh(true)
 
@@ -170,14 +170,14 @@ describe("m.mount()", function () {
 		}
 
 		var ctrl2 = sinon.spy()
-		var view2 = sinon.stub().returns(subsub)
+		var view2 = sinon.stub().returns(m.component(subsub))
 
 		var sub = {
 			controller: ctrl2,
 			view: view2
 		}
 
-		mount(root, pure(function () { return sub }))
+		mount(root, pure(function () { return m.component(sub) }))
 
 		refresh(true)
 
@@ -219,7 +219,7 @@ describe("m.mount()", function () {
 
 		var subsub = pure(function () { return m("div") })
 
-		var sub = pure(function () { return subsub })
+		var sub = pure(function () { return m.component(subsub) })
 
 		m.mount(root, pure(function () {
 			return list.map(function (i) {
@@ -269,7 +269,7 @@ describe("m.mount()", function () {
 
 		var subsub = pure(function () { return m("div", {key: 1}) })
 
-		var sub = pure(function () { return subsub })
+		var sub = pure(function () { return m.component(subsub) })
 
 		m.mount(root, pure(function () {
 			return list.map(function (i) {
@@ -297,7 +297,7 @@ describe("m.mount()", function () {
 
 		m.mount(root, pure(function () {
 			return list.map(function (i) {
-				return m("div", {key: i}, sub)
+				return m("div", {key: i}, m.component(sub))
 			})
 		}))
 
@@ -398,7 +398,7 @@ describe("m.mount()", function () {
 			view: spy
 		}
 
-		mount(root, pure(function () { return sub }))
+		mount(root, pure(function () { return m.component(sub) }))
 
 		expect(spy).to.have.been.called
 	})
@@ -416,9 +416,9 @@ describe("m.mount()", function () {
 			view: spy
 		}
 
-		var sub = pure(function () { return subsub })
+		var sub = pure(function () { return m.component(subsub) })
 
-		mount(root, pure(function () { return sub }))
+		mount(root, pure(function () { return m.component(sub) }))
 
 		expect(spy).to.have.been.called
 	})
@@ -524,7 +524,7 @@ describe("m.mount()", function () {
 		mount(root, pure(function () {
 			return show ? [
 				m("h1", "1"),
-				sub
+				m.component(sub)
 			] : [
 				m("h1", "2")
 			]
@@ -568,7 +568,7 @@ describe("m.mount()", function () {
 			}
 		}
 
-		m.mount(root, pure(function () { return Comp }))
+		m.mount(root, pure(function () { return m.component(Comp) }))
 
 		var target = root.childNodes[0].childNodes[0]
 
@@ -610,7 +610,7 @@ describe("m.mount()", function () {
 			}
 		}
 
-		m.mount(root, pure(function () { return Comp }))
+		m.mount(root, pure(function () { return m.component(Comp) }))
 
 		var target = root.childNodes[0].childNodes[0]
 
@@ -660,7 +660,7 @@ describe("m.mount()", function () {
 			view: view
 		}
 
-		mount(root, pure(function () { return Comp }))
+		mount(root, pure(function () { return m.component(Comp) }))
 
 		resolveXhr()
 
@@ -694,8 +694,8 @@ describe("m.mount()", function () {
 
 		mount(root, pure(function () {
 			return m("div", [
-				Comp1,
-				Comp2
+				m.component(Comp1),
+				m.component(Comp2)
 			])
 		}))
 
@@ -724,7 +724,9 @@ describe("m.mount()", function () {
 			return m("div")
 		})
 
-		mount(root, pure(function () { return cond ? Comp1 : Comp2 }))
+		mount(root, pure(function () {
+			return m.component(cond ? Comp1 : Comp2)
+		}))
 
 		cond = false
 		refresh(true)
@@ -748,7 +750,9 @@ describe("m.mount()", function () {
 
 		var Comp2 = pure(function () { return m("div") })
 
-		mount(root, pure(function () { return cond ? Comp1 : Comp2 }))
+		mount(root, pure(function () {
+			return m.component(cond ? Comp1 : Comp2)
+		}))
 
 		cond = false
 		refresh(true)
@@ -765,7 +769,9 @@ describe("m.mount()", function () {
 		var Comp1 = pure(function () { return m("div") })
 		var Comp2 = pure(function () { return m("div", {config: config}) })
 
-		mount(root, pure(function () { return cond ? Comp1 : Comp2 }))
+		mount(root, pure(function () {
+			return m.component(cond ? Comp1 : Comp2)
+		}))
 
 		cond = false
 		refresh(true)
