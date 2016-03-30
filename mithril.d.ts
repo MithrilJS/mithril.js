@@ -4,6 +4,10 @@
 * This is the module containing all the types/declarations/etc. for Mithril
 */
 declare namespace Mithril {
+	interface ChildArray extends Array<Children> {}
+	type Children = Child | ChildArray;
+	type Child = string | VirtualElement | Component<Controller>;
+
 	interface Static {
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -22,8 +26,28 @@ declare namespace Mithril {
 		*/
 		(
 			selector: string,
+			...children: Children[]
+		): VirtualElement;
+
+		/**
+		* Creates a virtual element for use with m.render, m.mount, etc.
+		*
+		* @param selector A simple CSS selector. May include SVG tags. Nested
+		* selectors are not supported.
+		* @param attributes Attributes to add. Any DOM attribute may be used
+		* as an attribute, although innerHTML and the like may be overwritten
+		* silently.
+		* @param children Child elements, components, and text to add.
+		* @return A virtual element.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		(
+			selector: string,
 			attributes: Attributes,
-			...children: Array<string | VirtualElement | Component<Controller>>
+			...children: Children[]
 		): VirtualElement;
 
 		/**
@@ -36,40 +60,6 @@ declare namespace Mithril {
 		* @see m.render
 		* @see m.mount
 		* @see m
-		*/
-		<T extends Controller>(
-			component: Component<T>,
-			...args: any[]
-		): Component<T>;
-
-		/**
-		* Creates a virtual element for use with m.render, m.mount, etc.
-		*
-		* @param selector A simple CSS selector. Nested selectors are not
-		* supported.
-		* @param children Child elements, components, and text to add.
-		* @return A virtual element.
-		*
-		* @see m.render
-		* @see m.mount
-		* @see m.component
-		*/
-		(
-			selector: string,
-			...children: Array<string | VirtualElement | Component<Controller>>
-		): VirtualElement;
-
-		/**
-		* Initializes a component for use with m.render, m.mount, etc.
-		* Shorthand for m.component.
-		*
-		* @param selector A component.
-		* @param args Arguments to optionally pass to the component.
-		* @return A component.
-		*
-		* @see m.render
-		* @see m.mount
-		* @see m.component
 		*/
 		<T extends Controller>(
 			component: Component<T>,
@@ -119,22 +109,9 @@ declare namespace Mithril {
 		*/
 		withAttr(
 			property: string,
-			callback: (value: any) => void,
-			callbackThis: any
-		): (e: Event) => any;
-
-		/**
-		* Returns a event handler that can be bound to an element, firing with
-		* the specified property.
-		*
-		* @param attributeName Name of the element's attribute to bind to.
-		* @param property The property to bind.
-		* @return A function suitable for listening to an event.
-		*/
-		withAttr<T>(
-			attributeName: string,
-			property: BasicProperty<T>
-		) : (e: Event) => any;
+			callback: (value: any) => any,
+			callbackThis?: any
+		): (e: Event) => void;
 
 		/**
 		* @deprecated Use m.mount instead
@@ -308,7 +285,7 @@ declare namespace Mithril {
 			* @param data The data to serialize.
 			* @return The serialized string.
 			*/
-			buildQueryString(data: Object): String
+			buildQueryString(data: Object): string;
 
 			/**
 			* Parse a query string into an object.
@@ -316,7 +293,7 @@ declare namespace Mithril {
 			* @param data The data to parse.
 			* @return The parsed object data.
 			*/
-			parseQueryString(data: String): Object
+			parseQueryString(data: string): Object;
 		}
 
 		/**
@@ -428,24 +405,19 @@ declare namespace Mithril {
 	*/
 	interface VirtualElement {
 		/**
-		* A key to optionally associate with this element.
-		*/
-		key?: number;
-
-		/**
 		* The tag name of this element.
 		*/
-		tag?: string;
+		tag: string;
 
 		/**
 		* The attributes of this element.
 		*/
-		attrs?: Attributes;
+		attrs: Attributes;
 
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|VirtualElement|Component<Controller>>;
+		children: Children[];
 	}
 
 	/**
@@ -531,8 +503,13 @@ declare namespace Mithril {
 		config?: ElementConfig;
 
 		/**
-		* Any other virtual element properties including attributes and
-		* event handlers
+		* A key to optionally associate with this element.
+		*/
+		key?: string | number;
+
+		/**
+		* Any other virtual element properties, including attributes and event
+		* handlers.
 		*/
 		[property: string]: any;
 	}
@@ -556,7 +533,7 @@ declare namespace Mithril {
 	* @see ControllerConstructor
 	*/
 	interface ControllerFunction<T extends Controller> {
-		(opts?: any): T;
+		(...args: any[]): T;
 	}
 
 	/**
@@ -565,17 +542,7 @@ declare namespace Mithril {
 	* @see ControllerFunction
 	*/
 	interface ControllerConstructor<T extends Controller> {
-		new (): T;
-	}
-
-	/**
-	* This represents a view factory.
-	*/
-	interface View<T extends Controller> {
-		/**
-		* Creates a view out of virtual elements.
-		*/
-		(ctrl: T): VirtualElement;
+		new (...args: any[]): T;
 	}
 
 	/**
@@ -597,7 +564,7 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl?: T, opts?: any): VirtualElement;
+		view(ctrl?: T, ...args: any[]): VirtualElement;
 	}
 
 	/**
