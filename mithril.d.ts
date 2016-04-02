@@ -845,8 +845,7 @@ declare namespace Mithril {
 		config?(xhr: XMLHttpRequest, options: this): any;
 
 		/**
-		 * The data to send with the request. This is automatically serialized
-		 * to a querystring.
+		 * The data to send with the request.
 		 */
 		data?: Object;
 	}
