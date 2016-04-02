@@ -1706,14 +1706,14 @@
 		var currentTarget = e.currentTarget || e.srcElement
 		var args
 
+		while (currentTarget && !currentTarget.href) {
+			currentTarget = currentTarget.parentNode
+		}
+
 		if (m.route.mode === "pathname" && currentTarget.search) {
 			args = parseQueryString(currentTarget.search.slice(1))
 		} else {
 			args = {}
-		}
-
-		while (currentTarget && !/a/i.test(currentTarget.nodeName)) {
-			currentTarget = currentTarget.parentNode
 		}
 
 		// clear pendingRequests because we want an immediate route change
