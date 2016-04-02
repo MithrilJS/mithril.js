@@ -76,7 +76,7 @@ declare namespace Mithril {
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(promise: Thennable<T>) : PromiseProperty<T>;
+		prop<T>(promise: Thennable<T>) : Promise<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a simple value. Useful
@@ -602,37 +602,6 @@ declare namespace Mithril {
 	}
 
 	/**
-	* This represents a promise getter-setter function.
-	*
-	* @see m.prop which returns objects that implement this interface.
-	*/
-	interface PromiseProperty<T> extends Promise<T | Promise<T>>,
-			Property<Promise<T>> {
-		/**
-		* Gets the contained promise.
-		*
-		* @return The contained value.
-		*/
-		(): Promise<T>;
-
-		/**
-		* Sets the contained promise.
-		*
-		* @param value The new value to set.
-		* @return The newly set value.
-		*/
-		(value: Promise<T>): Promise<T>;
-
-		/**
-		* Sets the contained wrapped value.
-		*
-		* @param value The new value to set.
-		* @return The newly set value.
-		*/
-		(value: T): Promise<T>;
-	}
-
-	/**
 	* This represents a key-value mapping linking routes to components.
 	*/
 	interface Routes {
@@ -687,9 +656,10 @@ declare namespace Mithril {
 	* This represents a thennable.
 	*/
 	interface Thennable<T> {
-		then<U>(success: (value: T) => U): Thennable<U>;
-		then<U,V>(success: (value: T) => U, error: (value: Error) => V): Thennable<U>|Thennable<V>;
-		catch?<U>(error: (value: Error) => U): Thennable<U>;
+		then<U>(success: SuccessCallback<T, U>): Thennable<U>;
+		then<U, V>(success: SuccessCallback<T, U>, error: ErrorCallback<V>): Thennable<U | V>;
+		catch?(error: ErrorCallback<T>): Thennable<T>;
+		catch?<U>(error: ErrorCallback<U>): Thennable<T | U>;
 	}
 
 	/**
@@ -703,7 +673,7 @@ declare namespace Mithril {
 		* @param success The callback to call when the promise is resolved.
 		* @return The chained promise.
 		*/
-		then<U>(success: SuccessCallback<T,U>): Promise<U>;
+		then<U>(success: SuccessCallback<T, U>): Promise<U>;
 
 		/**
 		* Chain this promise with a success callback and error callback, without
@@ -713,10 +683,7 @@ declare namespace Mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		then<U, V>(
-			success: SuccessCallback<T, U>,
-			error: ErrorCallback<V>
-		): Promise<U> | Promise<V>;
+		then<U, V>(success: SuccessCallback<T, U>, error: ErrorCallback<V>): Promise<U | V>;
 
 		/**
 		* Chain this promise with a single error callback, without propogating
@@ -725,7 +692,7 @@ declare namespace Mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		catch<U>(error: ErrorCallback<U>): Promise<T> | Promise<U>;
+		catch<U>(error: ErrorCallback<U>): Promise<T | U>;
 	}
 
 	/**
