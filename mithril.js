@@ -4,7 +4,7 @@
 	var m = factory(global)
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
-        module.exports.m = m
+		module.exports.m = m
 	} else if (typeof define === "function" && define.amd) {
 		define(function () { return m })
 	} else {
