@@ -3,7 +3,7 @@
 /**
 * This is the module containing all the types/declarations/etc. for Mithril
 */
-declare namespace Mithril {
+export declare namespace Mithril {
 	interface ChildArray extends Array<Children> {}
 	type Children = Child | ChildArray;
 	type Child = string | VirtualElement | Component<Controller>;
@@ -851,4 +851,6 @@ declare namespace Mithril {
 	}
 }
 
-export const m: Mithril.Static;
+export declare const m: Mithril.Static;
+
+export default m;

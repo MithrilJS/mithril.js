@@ -4,9 +4,14 @@
 	var m = factory(global)
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
+		module.exports.default = m
 		module.exports.m = m
 	} else if (typeof define === "function" && define.amd) {
-		define(function () { return m })
+		define(function () {
+			m.default = m
+			m.m = m
+			return m
+		})
 	} else {
 		global.m = m
 	}
