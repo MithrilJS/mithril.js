@@ -174,6 +174,37 @@
 		}
 	}
 
+	function construct(C, args) {
+		switch (args.length) {
+		case 0: return new C()
+		case 1: return new C(args[0])
+		case 2: return new C(args[0], args[1])
+		case 3: return new C(args[0], args[1], args[2])
+		case 4: return new C(args[0], args[1], args[2], args[3])
+		default: return new (C.bind.apply(C, [undefined].concat(args)))()
+		}
+	}
+
+	function initController(data) {
+		if (isFunction(data.tag.controller)) {
+			return construct(data.tag.controller, data.args)
+		} else {
+			return {}
+		}
+	}
+
+	function callView(data, ctrl) {
+		var args = data.args
+		switch (args.length) {
+		case 0: return data.tag.view(ctrl)
+		case 1: return data.tag.view(ctrl, args[0])
+		case 2: return data.tag.view(ctrl, args[0], args[1])
+		case 3: return data.tag.view(ctrl, args[0], args[1], args[2])
+		case 4: return data.tag.view(ctrl, args[0], args[1], args[2], args[3])
+		default: return data.tag.view.apply(data.tag, [ctrl].concat(args))
+		}
+	}
+
 	function forKeys(list, f) {
 		forEach(list, function (attrs, i) {
 			return (attrs = attrs && attrs.attrs) &&
@@ -181,6 +212,7 @@
 				f(attrs, i)
 		})
 	}
+
 	// This function was causing deopts in Chrome.
 	function dataToString(data) {
 		// data.toString() might throw or return null if data is the return
@@ -399,19 +431,21 @@
 		}
 	}
 
+	var oldUnloads = {}
+
 	function unloadCachedControllers(cached, views, controllers) {
 		if (controllers.length) {
 			cached.views = views
 			cached.controllers = controllers
-			forEach(controllers, function (controller) {
-				if (controller.onunload && controller.onunload.$old) {
-					controller.onunload = controller.onunload.$old
+			forEach(controllers, function (controller, i) {
+				if (controller.onunload && oldUnloads[i]) {
+					controller.onunload = oldUnloads[i]
+					delete oldUnloads[i]
 				}
 
 				if (pendingRequests && controller.onunload) {
-					var onunload = controller.onunload
+					oldUnloads[i] = controller.onunload
 					controller.onunload = noop
-					controller.onunload.$old = onunload
 				}
 			})
 		}
@@ -423,9 +457,9 @@
 		if (isFunction(data.attrs.config)) {
 			var context = cached.configContext = cached.configContext || {}
 
-			// bind
+			// bind to the tag, since that's closer to what was the previous API
 			configs.push(function () {
-				return data.attrs.config.call(data, node, !isNew, context,
+				return data.attrs.config.call(data.tag, node, !isNew, context,
 					cached)
 			})
 		}
@@ -650,7 +684,7 @@
 		cached = new data.constructor()
 		// if constructor creates a virtual dom element, use a blank object as
 		// the base cached node instead of copying the virtual el (#277)
-		if (cached.tag) cached = {}
+		if (isString(cached.tag)) cached = {}
 		cached.nodes = []
 		return cached
 	}
@@ -736,54 +770,56 @@
 		return cached
 	}
 
-	function getController(views, view, cachedControllers, controller) {
-		var controllerIndex
+	function getController(cached, controllers, data) {
+		var index
 
-		if (m.redraw.strategy() === "diff" && views) {
-			controllerIndex = views.indexOf(view)
+		if (m.redraw.strategy() === "diff" && cached.views) {
+			index = cached.views.indexOf(data.tag.view)
 		} else {
-			controllerIndex = -1
+			index = -1
 		}
 
-		if (controllerIndex > -1) {
-			return cachedControllers[controllerIndex]
-		} else if (isFunction(controller)) {
-			return new controller()
+		if (index > -1) {
+			return controllers[index]
 		} else {
-			return {}
+			return initController(data)
 		}
 	}
 
 	var unloaders = []
 
-	function updateLists(views, controllers, view, controller) {
-		if (controller.onunload != null &&
-				unloaders.map(function (u) { return u.handler })
-					.indexOf(controller.onunload) < 0) {
+	function hasHandler(handler) {
+		for (var i = 0; i < unloaders.length; i++) {
+			if (unloaders[i].handler === handler) {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	function updateLists(views, controllers, data, controller) {
+		if (controller.onunload != null && !hasHandler(controller.onunload)) {
 			unloaders.push({
 				controller: controller,
 				handler: controller.onunload
 			})
 		}
 
-		views.push(view)
+		views.push(data.tag.view)
 		controllers.push(controller)
 	}
 
 	var forcing = false
 	function checkView(
 		data,
-		view,
 		cached,
 		cachedControllers,
 		controllers,
 		views
 	) {
-		var controller = getController(
-			cached.views,
-			view,
-			cachedControllers,
-			data.controller)
+		var original = data
+		var controller = getController(cached, cachedControllers, original)
 
 		var key = data && data.attrs && data.attrs.key
 
@@ -791,25 +827,23 @@
 				forcing ||
 				cachedControllers &&
 					cachedControllers.indexOf(controller) > -1) {
-			data = data.view(controller)
+			data = callView(data, controller)
 		} else {
-			data = {tag: "placeholder"}
+			data = {tag: "placeholder", attrs: {}}
 		}
 
 		if (data.subtree === "retain") return data
-		data.attrs = data.attrs || {}
 		data.attrs.key = key
-		updateLists(views, controllers, view, controller)
+		updateLists(views, controllers, original, controller)
 		return data
 	}
 
 	function markViews(data, cached, views, controllers) {
 		var cachedControllers = cached && cached.controllers
 
-		while (data.view != null) {
+		while (isObject(data.tag)) {
 			data = checkView(
 				data,
-				data.view.$original || data.view,
 				cached,
 				cachedControllers,
 				controllers,
@@ -845,7 +879,7 @@
 		cached.attrs = cached.attrs || {}
 
 		var dataAttrKeys = Object.keys(data.attrs)
-		var hasKeys = dataAttrKeys.length > ("key" in data.attrs ? 1 : 0)
+		var hasKeys = dataAttrKeys.length > (data.attrs.key != null ? 1 : 0)
 
 		maybeRecreateObject(data, cached, dataAttrKeys)
 
@@ -1322,29 +1356,12 @@
 	var FRAME_BUDGET = 16 // 60 frames per second = 1 call per 16 ms
 
 	function parameterize(component, args) {
-		function controller() {
-			/* eslint-disable no-invalid-this */
-			return (component.controller || noop).apply(this, args) || this
-			/* eslint-enable no-invalid-this */
+		var key = args[0] && args[0].key != null ? args[0].key : null
+		return {
+			tag: component,
+			args: args,
+			attrs: {key: key}
 		}
-
-		if (component.controller) {
-			controller.prototype = component.controller.prototype
-		}
-
-		function view(ctrl) {
-			var currentArgs = [ctrl].concat(args)
-			for (var i = 1; i < arguments.length; i++) {
-				currentArgs.push(arguments[i])
-			}
-
-			return component.view.apply(component, currentArgs)
-		}
-
-		view.$original = component.view
-		var output = {controller: controller, view: view}
-		if (args[0] && args[0].key != null) output.attrs = {key: args[0].key}
-		return output
 	}
 
 	m.component = function (component) {
@@ -1362,15 +1379,17 @@
 			m.redraw.strategy("all")
 			m.startComputation()
 			roots[index] = root
-			var currentComponent
+			var currentComponent = topComponent = component = component || {}
 
-			if (component) {
-				currentComponent = topComponent = component
+			var controller
+
+			if (isObject(component.tag)) {
+				controller = initController(component)
+			} else if (isFunction(component.controller)) {
+				controller = construct(component.controller, [])
 			} else {
-				currentComponent = topComponent = component = {controller: noop}
+				controller = {}
 			}
-
-			var controller = new (component.controller || noop)()
 
 			// controllers may call m.mount recursively (via m.route redirects,
 			// for example)
@@ -1475,10 +1494,20 @@
 		}
 		forEach(roots, function (root, i) {
 			var component = components[i]
-			if (controllers[i]) {
-				var args = [controllers[i]]
-				m.render(root,
-					component.view ? component.view(controllers[i], args) : "")
+			var controller = controllers[i]
+			if (controller) {
+				// This is a total hack...it's too assuming.
+				var view
+
+				if (isObject(component.tag)) {
+					view = callView(component, controller)
+				} else if (isFunction(component.view)) {
+					view = component.view(controller)
+				} else {
+					view = ""
+				}
+
+				m.render(root, view)
 			}
 		})
 		// after rendering within a routed context, we need to scroll back to

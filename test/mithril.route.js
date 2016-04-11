@@ -117,7 +117,7 @@ describe("m.route()", function () {
 		}
 
 		route(root, "/a", {
-			"/a": pure(function () { return sub }),
+			"/a": pure(function () { return m.component(sub) }),
 
 			"/b": {
 				controller: spy,
@@ -145,10 +145,10 @@ describe("m.route()", function () {
 			}
 		}
 
-		var sub = pure(function () { return subsub })
+		var sub = pure(function () { return m.component(subsub) })
 
 		route(root, "/a", {
-			"/a": pure(function () { return sub }),
+			"/a": pure(function () { return m.component(sub) }),
 
 			"/b": {
 				controller: spy,
@@ -177,7 +177,7 @@ describe("m.route()", function () {
 		}
 
 		route(root, "/a", {
-			"/a": pure(function () { return sub }),
+			"/a": pure(function () { return m.component(sub) }),
 
 			"/b": {
 				controller: spy,
@@ -205,10 +205,10 @@ describe("m.route()", function () {
 			}
 		}
 
-		var sub = pure(function () { return subsub })
+		var sub = pure(function () { return m.component(subsub) })
 
 		route(root, "/a", {
-			"/a": pure(function () { return sub }),
+			"/a": pure(function () { return m.component(sub) }),
 
 			"/b": {
 				controller: spy,
@@ -264,7 +264,7 @@ describe("m.route()", function () {
 		var Component = pure(function () { return m(".comp") })
 
 		route(root, "/foo", {
-			"/foo": pure(function () { return [Component] })
+			"/foo": pure(function () { return [m.component(Component)] })
 		})
 
 		expect(root.childNodes[0].nodeName).to.equal("DIV")
@@ -1208,8 +1208,8 @@ describe("m.route()", function () {
 		}
 
 		route(root, "/a", {
-			"/a": pure(function () { return m("div", a) }),
-			"/b": pure(function () { return m("div", b) })
+			"/a": pure(function () { return m("div", m.component(a)) }),
+			"/b": pure(function () { return m("div", m.component(b)) })
 		})
 
 		route("/b")

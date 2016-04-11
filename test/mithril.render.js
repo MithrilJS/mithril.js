@@ -1411,6 +1411,9 @@ describe("m.render()", function () {
 
 	// https://github.com/lhorie/mithril.js/issues/214
 	it("keeps all input events", function () {
+		// It takes a little longer in slower engines/machines
+		this.timeout(3000) // eslint-disable-line no-invalid-this
+
 		var root = mock.document.createElement("div")
 
 		var ctrl = m.mount(root, {
