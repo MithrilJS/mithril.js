@@ -4,6 +4,10 @@
 * This is the module containing all the types/declarations/etc. for Mithril
 */
 declare namespace Mithril {
+	interface ChildArray extends Array<Children> {}
+	type Children = Child | ChildArray;
+	type Child = string | VirtualElement | Component<Controller>;
+
 	interface Static {
 		/**
 		* Creates a virtual element for use with m.render, m.mount, etc.
@@ -20,12 +24,30 @@ declare namespace Mithril {
 		* @see m.mount
 		* @see m.component
 		*/
-		<T extends Controller>(
+		(
+			selector: string,
+			...children: Children[]
+		): VirtualElement;
+
+		/**
+		* Creates a virtual element for use with m.render, m.mount, etc.
+		*
+		* @param selector A simple CSS selector. May include SVG tags. Nested
+		* selectors are not supported.
+		* @param attributes Attributes to add. Any DOM attribute may be used
+		* as an attribute, although innerHTML and the like may be overwritten
+		* silently.
+		* @param children Child elements, components, and text to add.
+		* @return A virtual element.
+		*
+		* @see m.render
+		* @see m.mount
+		* @see m.component
+		*/
+		(
 			selector: string,
 			attributes: Attributes,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
+			...children: Children[]
 		): VirtualElement;
 
 		/**
@@ -45,42 +67,6 @@ declare namespace Mithril {
 		): Component<T>;
 
 		/**
-		* Creates a virtual element for use with m.render, m.mount, etc.
-		*
-		* @param selector A simple CSS selector. Nested selectors are not
-		* supported.
-		* @param children Child elements, components, and text to add.
-		* @return A virtual element.
-		*
-		* @see m.render
-		* @see m.mount
-		* @see m.component
-		*/
-		<T extends Controller>(
-			selector: string,
-			...children: Array<string |
-				VirtualElement |
-				Component<T>>
-		): VirtualElement;
-
-		/**
-		* Initializes a component for use with m.render, m.mount, etc.
-		* Shorthand for m.component.
-		*
-		* @param selector A component.
-		* @param args Arguments to optionally pass to the component.
-		* @return A component.
-		*
-		* @see m.render
-		* @see m.mount
-		* @see m.component
-		*/
-		<T extends Controller>(
-			component: Component<T>,
-			...args: any[]
-		): Component<T>;
-
-		/**
 		* Creates a getter-setter function that wraps a Mithril promise. Useful
 		* for uniform data access, m.withAttr, etc.
 		*
@@ -90,7 +76,7 @@ declare namespace Mithril {
 		*
 		* @see m.withAttr
 		*/
-		prop<T>(promise: Thennable<T>) : PromiseProperty<T>;
+		prop<T>(promise: Thennable<T>) : Promise<T>;
 
 		/**
 		* Creates a getter-setter function that wraps a simple value. Useful
@@ -123,22 +109,9 @@ declare namespace Mithril {
 		*/
 		withAttr(
 			property: string,
-			callback: (value: any) => void,
-			callbackThis: any
-		): (e: Event) => any;
-
-		/**
-		* Returns a event handler that can be bound to an element, firing with
-		* the specified property.
-		*
-		* @param attributeName Name of the element's attribute to bind to.
-		* @param property The property to bind.
-		* @return A function suitable for listening to an event.
-		*/
-		withAttr<T>(
-			attributeName: string,
-			property: BasicProperty<T>
-		) : (e: Event) => any;
+			callback: (value: any) => any,
+			callbackThis?: any
+		): (e: Event) => void;
 
 		/**
 		* @deprecated Use m.mount instead
@@ -193,7 +166,7 @@ declare namespace Mithril {
 		* @param forceRecreation If true, overwrite the entire tree without
 		* diffing against it.
 		*/
-		render<T extends Controller>(
+		render(
 			rootElement: Element,
 			children: VirtualElement|VirtualElement[],
 			forceRecreation?: boolean
@@ -210,44 +183,20 @@ declare namespace Mithril {
 			*/
 			(force?: boolean): void;
 
-			strategy: {
-				/**
-				* Gets the current redraw strategy, which returns one of the
-				* following:
-				*
-				* "all" - recreates the DOM tree from scratch
-				* "diff" - recreates the DOM tree from scratch
-				* "none" - leaves the DOM tree intact
-				*
-				* This is useful for event handlers, which may want to cancel
-				* the next redraw if the event doesn't update the UI.
-				*
-				* @return The current strategy
-				*/
-				(): string;
-
-				/**
-				* Sets the current redraw strategy. The parameter must be one of
-				* the following values:
-				*
-				* "all" - recreates the DOM tree from scratch
-				* "diff" - recreates the DOM tree from scratch
-				* "none" - leaves the DOM tree intact
-				*
-				* This is useful for event handlers, which may want to cancel
-				* the next redraw if the event doesn't update the UI.
-				*
-				* @param value The value to set
-				* @return The new strategy
-				*/
-				(value: string): string;
-
-				/**
-				* @private
-				* Implementation detail - it's a BasicProperty instance
-				*/
-				toJSON(): string;
-			}
+			/**
+			* Gets/sets the current redraw strategy, which returns one of the
+			* following:
+			*
+			* "all" - recreates the DOM tree from scratch
+			* "diff" - recreates the DOM tree from scratch
+			* "none" - leaves the DOM tree intact
+			*
+			* This is useful for event handlers, which may want to cancel
+			* the next redraw if the event doesn't update the UI.
+			*
+			* @return The current strategy
+			*/
+			strategy: BasicProperty<"all" | "diff" | "none">;
 		}
 
 		route: {
@@ -260,7 +209,7 @@ declare namespace Mithril {
 			* @param defaultRoute The route to start with.
 			* @param routes A key-value mapping of pathname to controller.
 			*/
-			<T extends Controller>(
+			(
 				rootElement: Element,
 				defaultRoute: string,
 				routes: Routes
@@ -276,7 +225,7 @@ declare namespace Mithril {
 			* m("a[href='/dashboard/alicesmith']", {config: m.route});
 			* ```
 			*/
-			<T extends Controller>(
+			(
 				element: Element,
 				isInitialized: boolean,
 				context?: Context,
@@ -328,7 +277,7 @@ declare namespace Mithril {
 			* page refreshes on IE8 and lower. Note that this requires that the
 			* application to be run from the root of the URL.
 			*/
-			mode: string;
+			mode: "search" | "hash" | "pathname";
 
 			/**
 			* Serialize an object into a query string.
@@ -336,7 +285,7 @@ declare namespace Mithril {
 			* @param data The data to serialize.
 			* @return The serialized string.
 			*/
-			buildQueryString(data: Object): String
+			buildQueryString(data: Object): string;
 
 			/**
 			* Parse a query string into an object.
@@ -344,20 +293,30 @@ declare namespace Mithril {
 			* @param data The data to parse.
 			* @return The parsed object data.
 			*/
-			parseQueryString(data: String): Object
+			parseQueryString(data: string): Object;
 		}
 
 		/**
-		* Send a request to a server to server. Note that the `url` option is
+		* Send an XHR request to a server. Note that the `url` option is
 		* required.
 		*
-		* @param options The options to use
-		* @return A promise to the returned data for "GET" requests, or a void
-		* promise for any other request type.
+		* @param options The options to use for the request.
+		* @return A promise to the returned data, or void if not applicable.
 		*
 		* @see XHROptions for the available options.
 		*/
-		request<T>(options: XHROptions<T>): Promise<T>;
+		request(options: XHROptions): Promise<any>
+
+		/**
+		* Send a JSONP request to a server. Note that the `url` option is
+		* required.
+		*
+		* @param options The options to use
+		* @return A promise to the returned data.
+		*
+		* @see JSONPOptions for the available options.
+		*/
+		request(options: JSONPOptions): Promise<any>;
 
 		deferred: {
 			/**
@@ -446,24 +405,19 @@ declare namespace Mithril {
 	*/
 	interface VirtualElement {
 		/**
-		* A key to optionally associate with this element.
-		*/
-		key?: number;
-
-		/**
 		* The tag name of this element.
 		*/
-		tag?: string;
+		tag: string;
 
 		/**
 		* The attributes of this element.
 		*/
-		attrs?: Attributes;
+		attrs: Attributes;
 
 		/**
 		* The children of this element.
 		*/
-		children?: Array<string|VirtualElement|Component<Controller>>;
+		children: Children[];
 	}
 
 	/**
@@ -515,7 +469,7 @@ declare namespace Mithril {
 		* @param context The associated context for this element.
 		* @param vdom The associated virtual element.
 		*/
-		<T extends Controller>(
+		(
 			element: Element,
 			isInitialized: boolean,
 			context: Context,
@@ -549,8 +503,13 @@ declare namespace Mithril {
 		config?: ElementConfig;
 
 		/**
-		* Any other virtual element properties including attributes and
-		* event handlers
+		* A key to optionally associate with this element.
+		*/
+		key?: string | number;
+
+		/**
+		* Any other virtual element properties, including attributes and event
+		* handlers.
 		*/
 		[property: string]: any;
 	}
@@ -574,7 +533,7 @@ declare namespace Mithril {
 	* @see ControllerConstructor
 	*/
 	interface ControllerFunction<T extends Controller> {
-		(opts?: any): T;
+		(...args: any[]): T;
 	}
 
 	/**
@@ -583,17 +542,7 @@ declare namespace Mithril {
 	* @see ControllerFunction
 	*/
 	interface ControllerConstructor<T extends Controller> {
-		new(): T;
-	}
-
-	/**
-	* This represents a view factory.
-	*/
-	interface View<T extends Controller> {
-		/**
-		* Creates a view out of virtual elements.
-		*/
-		(ctrl: T): VirtualElement;
+		new (...args: any[]): T;
 	}
 
 	/**
@@ -608,15 +557,14 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		controller: ControllerFunction<T> |
-			ControllerConstructor<T>;
+		controller: ControllerFunction<T> | ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.
 		*
 		* @see m.component
 		*/
-		view(ctrl?: T, opts?: any): VirtualElement;
+		view(ctrl?: T, ...args: any[]): VirtualElement;
 	}
 
 	/**
@@ -651,37 +599,6 @@ declare namespace Mithril {
 		* Makes this serializable to JSON.
 		*/
 		toJSON(): T;
-	}
-
-	/**
-	* This represents a promise getter-setter function.
-	*
-	* @see m.prop which returns objects that implement this interface.
-	*/
-	interface PromiseProperty<T> extends Promise<T | Promise<T>>,
-			Property<Promise<T>> {
-		/**
-		* Gets the contained promise.
-		*
-		* @return The contained value.
-		*/
-		(): Promise<T>;
-
-		/**
-		* Sets the contained promise.
-		*
-		* @param value The new value to set.
-		* @return The newly set value.
-		*/
-		(value: Promise<T>): Promise<T>;
-
-		/**
-		* Sets the contained wrapped value.
-		*
-		* @param value The new value to set.
-		* @return The newly set value.
-		*/
-		(value: T): Promise<T>;
 	}
 
 	/**
@@ -739,9 +656,10 @@ declare namespace Mithril {
 	* This represents a thennable.
 	*/
 	interface Thennable<T> {
-		then<U>(success: (value: T) => U): Thennable<U>;
-		then<U,V>(success: (value: T) => U, error: (value: Error) => V): Thennable<U>|Thennable<V>;
-		catch?: <U>(error: (value: Error) => U) => Thennable<U>;
+		then<U>(success: SuccessCallback<T, U>): Thennable<U>;
+		then<U, V>(success: SuccessCallback<T, U>, error: ErrorCallback<V>): Thennable<U | V>;
+		catch?(error: ErrorCallback<T>): Thennable<T>;
+		catch?<U>(error: ErrorCallback<U>): Thennable<T | U>;
 	}
 
 	/**
@@ -755,7 +673,7 @@ declare namespace Mithril {
 		* @param success The callback to call when the promise is resolved.
 		* @return The chained promise.
 		*/
-		then<U>(success: SuccessCallback<T,U>): Promise<U>;
+		then<U>(success: SuccessCallback<T, U>): Promise<U>;
 
 		/**
 		* Chain this promise with a success callback and error callback, without
@@ -765,10 +683,7 @@ declare namespace Mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		then<U, V>(
-			success: SuccessCallback<T, U>,
-			error: ErrorCallback<V>
-		): Promise<U> | Promise<V>;
+		then<U, V>(success: SuccessCallback<T, U>, error: ErrorCallback<V>): Promise<U | V>;
 
 		/**
 		* Chain this promise with a single error callback, without propogating
@@ -777,43 +692,15 @@ declare namespace Mithril {
 		* @param error The callback to call when the promise is rejected.
 		* @return The chained promise.
 		*/
-		catch<U>(error: ErrorCallback<U>): Promise<T> |
-			Promise<U>;
+		catch<U>(error: ErrorCallback<U>): Promise<T | U>;
 	}
 
 	/**
-	* This represents the available options for configuring m.request.
-	*
-	* @see m.request
-	*/
-	interface XHROptions<T> {
-		/**
-		* This represents the HTTP method used, one of the following:
-		*
-		* - "GET" (default)
-		* - "POST"
-		* - "PUT"
-		* - "DELETE"
-		* - "HEAD"
-		* - "OPTIONS"
-		*/
-		method?: string;
-
-		/**
-		* The URL to send the request to.
-		*/
-		url: string;
-
-		/**
-		* The username for HTTP authentication.
-		*/
-		user?: string;
-
-		/**
-		* The password for HTTP authentication.
-		*/
-		password?: string;
-
+	 * These are the common options shared across normal and JSONP requests.
+	 *
+	 * @see m.request
+	 */
+	interface RequestOptions {
 		/**
 		* The data to be sent. It's automatically serialized in the right format
 		* depending on the method (with exception of HTML5 FormData), and put in
@@ -831,7 +718,7 @@ declare namespace Mithril {
 		* Set an initial value while the request is working, to populate the
 		* promise getter-setter.
 		*/
-		initialValue?: T;
+		initialValue?: any;
 
 		/**
 		* An optional preprocessor function to unwrap a successful response, in
@@ -840,7 +727,7 @@ declare namespace Mithril {
 		* @param data The data to unwrap.
 		* @return The unwrapped result.
 		*/
-		unwrapSuccess?(data: any): T;
+		unwrapSuccess?(data: any): any;
 
 		/**
 		* An optional preprocessor function to unwrap an unsuccessful response,
@@ -849,7 +736,7 @@ declare namespace Mithril {
 		* @param data The data to unwrap.
 		* @return The unwrapped result.
 		*/
-		unwrapError?(data: any): T;
+		unwrapError?(data: any): any;
 
 		/**
 		* An optional function to serialize the data. This defaults to
@@ -878,7 +765,7 @@ declare namespace Mithril {
 		* @param options The options passed to this request.
 		* @return string The serialized format.
 		*/
-		extract?(xhr: XMLHttpRequest, options: XHROptions<T>): string;
+		extract?(xhr: XMLHttpRequest, options: this): string;
 
 		/**
 		* The parsed data, or its children if it's an array, will be passed to
@@ -887,7 +774,63 @@ declare namespace Mithril {
 		* @param data The data to parse.
 		* @return The new instance for the list.
 		*/
-		type?: new (data: Object) => any;
+		type?: new (data: any) => any;
+
+		/**
+		* The URL to send the request to.
+		*/
+		url: string;
+	}
+
+	/**
+	* This represents the available options for configuring m.request for JSONP
+	* requests.
+	*
+	* @see m.request
+	*/
+	interface JSONPOptions extends RequestOptions {
+		/**
+		* For JSONP requests, this must be the string "jsonp". Otherwise, it's
+		* ignored.
+		*/
+		dataType: "jsonp";
+
+		/**
+		* The querystring key for the JSONP request callback. This is useful for
+		* APIs that don't use common conventions, such as
+		* `www.example.com/?jsonpCallback=doSomething`. It defaults to
+		* `callback`.
+		*/
+		callbackKey?: string;
+
+		/**
+		 * The data to send with the request. This is automatically serialized
+		 * to a querystring.
+		 */
+		data?: Object;
+	}
+
+	/**
+	* This represents the available options for configuring m.request for
+	* standard AJAX requests.
+	*
+	* @see m.request
+	*/
+	interface XHROptions extends RequestOptions {
+		/**
+		* This represents the HTTP method used, defaulting to "GET".
+		*/
+		method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS";
+
+		/**
+		* The username for HTTP authentication.
+		*/
+		user?: string;
+
+		/**
+		* The password for HTTP authentication.
+		*/
+		password?: string;
 
 		/**
 		* An optional function to run between `open` and `send`, useful for
@@ -899,26 +842,16 @@ declare namespace Mithril {
 		* @param options The options passed to this request.
 		* @return The new XMLHttpRequest, or nothing if the same one is kept.
 		*/
-		config?(xhr: XMLHttpRequest, options: XHROptions<T>): any;
+		config?(xhr: XMLHttpRequest, options: this): any;
 
 		/**
-		* For JSONP requests, this must be the string "jsonp". Otherwise, it's
-		* ignored.
-		*/
-		dataType?: string;
-
-		/**
-		* For JSONP requests, this is the query string key for the JSONP
-		* request. This is useful for APIs that don't use common conventions,
-		* such as `www.example.com/?jsonpCallback=doSomething`. It defaults to
-		* `callback` for JSONP requests, and is ignored for any other kind of
-		* request.
-		*/
-		callbackKey?: string;
+		 * The data to send with the request.
+		 */
+		data?: Object;
 	}
 }
 
-declare var m: Mithril.Static;
+declare const m: Mithril.Static;
 
 declare module "mithril" {
     export = m;
