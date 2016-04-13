@@ -1503,7 +1503,7 @@
 
 	m.withAttr = function (prop, withAttrCallback, callbackThis) {
 		return function (e) {
-			e = e || event
+			e = e || window.event
 			/* eslint-disable no-invalid-this */
 			var currentTarget = e.currentTarget || this
 			var _this = callbackThis || this
