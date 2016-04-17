@@ -861,6 +861,9 @@
 			// set attributes first, then create children
 			var attrs = constructAttrs(data, node, namespace, hasKeys)
 
+			// add the node to its parent before attaching children to it
+			insertNode(parentElement, node, index)
+
 			var children = constructChildren(data, node, cached, editable,
 				namespace, configs)
 
@@ -884,7 +887,7 @@
 				controllers)
 		}
 
-		if (isNew || shouldReattach === true && node != null) {
+		if (!isNew && shouldReattach === true && node != null) {
 			insertNode(parentElement, node, index)
 		}
 
