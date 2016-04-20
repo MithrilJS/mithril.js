@@ -41,7 +41,7 @@ describe("m.trust()", function () {
 			expect(root.childNodes[3].tagName).to.equal("I")
 		})
 
-		// TODO: m.trust's contents are having their tags stripped.
+		// TODO: this currently fails.
 		xit("works with mixed trusted content in td", function () {
 			var root = document.createElement("table")
 			root.appendChild(root = document.createElement("tr"))
