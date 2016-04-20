@@ -1,5 +1,14 @@
 ## Change Log
 
+[v0.2.4](http://mithril.js.org/archive/v0.2.4)
+
+### Bug Fixes:
+
+-	fix regression that caused errors to be swallowed in promises returned by m.request [#968](https://github.com/lhorie/mithril.js/issues/968)
+-	fix ReferenceError when calling an event handler via mithril-query without an event argument
+
+---
+
 [v0.2.3](http://mithril.js.org/archive/v0.2.3)
 
 ### Bug Fixes:
