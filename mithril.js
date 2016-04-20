@@ -2175,6 +2175,7 @@
 				}
 			} catch (e) {
 				deferred.reject(e)
+				m.deferred.onerror(e)
 			} finally {
 				if (options.background !== true) m.endComputation()
 			}
