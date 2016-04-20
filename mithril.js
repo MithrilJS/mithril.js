@@ -10,7 +10,7 @@
 		global.m = m
 	}
 	/* eslint-enable no-undef */
-})(typeof window !== "undefined" ? window : {}, function (global, undefined) { // eslint-disable-line
+})(typeof window !== "undefined" ? window : this, function (global, undefined) { // eslint-disable-line
 	"use strict"
 
 	m.version = function () {
