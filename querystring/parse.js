@@ -1,0 +1,42 @@
+"use strict"
+
+module.exports = function parseQueryString(string) {
+	if (string === "" || string == null) return {}
+	if (string.charAt(0) === "?") string = string.slice(1)
+		
+	var entries = string.split("&"), data = {}, counters = {}
+	for (var i = 0; i < entries.length; i++) {
+		var entry = entries[i].split("=")
+		var key = decodeURIComponent(entry[0])
+		var value = decodeURIComponent(entry[1])
+		
+		//TODO refactor out
+		var number = Number(value)
+		if (value !== "" && !isNaN(number) || value === "NaN") value = number
+		else if (value === "true") value = true
+		else if (value === "false") value = false
+		else {
+			var date = new Date(value)
+			if (!isNaN(date.getTime())) value = date
+		}
+		
+		var levels = key.split(/\]\[?|\[/)
+		var cursor = data
+		if (key.indexOf("[") > -1) levels.pop()
+		for (var j = 0; j < levels.length; j++) {
+			var level = levels[j], nextLevel = levels[j + 1]
+			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel))
+			var isValue = j === levels.length - 1
+			if (level === "") {
+				var key = levels.slice(0, j).join()
+				if (counters[key] == null) counters[key] = 0
+				level = counters[key]++
+			}
+			if (cursor[level] == null) {
+				cursor[level] = isValue ? value : isNumber ? [] : {}
+			}
+			cursor = cursor[level]
+		}
+	}
+	return data
+}
