@@ -12,7 +12,7 @@ Some examples of usage can be found in the [examples](examples) folder. [ThreadI
 
 ## Performance
 
-Mithril's virtual DOM engine is now less than 400 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation](examples/dbmon/mithril/index.html) (for comparison, here's dbmon for [React v15.0.1](examples/dbmon/react/index.html)).
+Mithril's virtual DOM engine is now less than 400 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation](examples/dbmonster/mithril/index.html) (for comparison, here's dbmon for [React v15.0.1](examples/dbmonster/react/index.html)).
 
 ## Lifecycle methods and Animation Support
 
