@@ -377,28 +377,26 @@ The rest of the code can be implemented using idioms we already covered. The com
 
 ```javascript
 todo.view = function() {
-	return m("html", [
-		m("body", [
-			m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
-			m("button", {onclick: todo.vm.add}, "Add"),
-			m("table", [
-				todo.vm.list.map(function(task, index) {
-					return m("tr", [
-						m("td", [
-							m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
-						]),
-						m("td", {style: {textDecoration: task.done() ? "line-through" : "none"}}, task.description()),
-					])
-				})
-			])
+	return [
+		m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
+		m("button", {onclick: todo.vm.add}, "Add"),
+		m("table", [
+			todo.vm.list.map(function(task, index) {
+				return m("tr", [
+					m("td", [
+						m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
+					]),
+					m("td", {style: {textDecoration: task.done() ? "line-through" : "none"}}, task.description()),
+				])
+			})
 		])
-	]);
+	];
 };
 ```
 
 Here are the highlights of the template above:
 
--	The template is rendered as a child of the implicit `<html>` element of the document.
+-	The template is rendered as a child of the document's `<body>`.
 -	The text input saves its value to the `todo.vm.description` getter-setter we defined earlier.
 -	The button calls the `todo.vm.add` method when clicked.
 -	The table lists all the existing to-dos, if any.
@@ -411,11 +409,11 @@ Here are the highlights of the template above:
 So far, we've been using `m.render` to manually redraw after we made a change to the data. However, as I mentioned before, you can enable an [auto-redrawing system](auto-redrawing.md), by initializing the `todo` component via `m.mount`.
 
 ```javascript
-//render the todo component inside the document DOM node
-m.mount(document, {controller: todo.controller, view: todo.view});
+//render the todo component inside the body DOM node
+m.mount(document.body, {controller: todo.controller, view: todo.view});
 ```
 
-Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing. 
+Mithril's auto-redrawing system keeps track of controller stability, and only redraws the view once it detects that the controller has finished running all of its code, including asynchronous AJAX payloads. Likewise, it intelligently waits for asynchronous services inside event handlers to complete before redrawing.
 
 You can learn more about how redrawing heuristics work [here](auto-redrawing.md).
 
@@ -475,26 +473,24 @@ todo.controller = function() {
 
 //here's the view
 todo.view = function() {
-	return m("html", [
-		m("body", [
-			m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
-			m("button", {onclick: todo.vm.add}, "Add"),
-			m("table", [
-				todo.vm.list.map(function(task, index) {
-					return m("tr", [
-						m("td", [
-							m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
-						]),
-						m("td", {style: {textDecoration: task.done() ? "line-through" : "none"}}, task.description()),
-					])
-				})
-			])
+	return [
+		m("input", {onchange: m.withAttr("value", todo.vm.description), value: todo.vm.description()}),
+		m("button", {onclick: todo.vm.add}, "Add"),
+		m("table", [
+			todo.vm.list.map(function(task, index) {
+				return m("tr", [
+					m("td", [
+						m("input[type=checkbox]", {onclick: m.withAttr("checked", task.done), checked: task.done()})
+					]),
+					m("td", {style: {textDecoration: task.done() ? "line-through" : "none"}}, task.description()),
+				])
+			})
 		])
-	]);
+	]
 };
 
 //initialize the application
-m.mount(document, {controller: todo.controller, view: todo.view});
+m.mount(document.body, {controller: todo.controller, view: todo.view});
 </script>
 ```
 
