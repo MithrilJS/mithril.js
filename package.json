@@ -4,7 +4,7 @@
 	"description": "A framework for building brilliant applications",
 	"main": "index.js",
 	"scripts": {
-	"test": "node ospec/bin/ospec"
+		"test": "node ospec/bin/ospec"
 	},
 	"author": "Leo Horie",
 	"license": "MIT"
