@@ -43,30 +43,3 @@ function view() {
 		])
 	])
 }
-/*
-function view() {
-	return m("div", [
-		m("table.table.table-striped.latest-data", [
-			m("tbody", 
-				data.map(function(db) {
-					return m("tr", {key: db.dbname}, [
-						m("td.dbname", db.dbname),
-						m("td.query-count",  [
-							m("span", { className: db.lastSample.countClassNameName }, db.lastSample.nbQueries)
-						]),
-						db.lastSample.topFiveQueries.map(function(query) {
-							return m("td", { className: query.elapsedClassNameName }, [
-								m("span", query.formatElapsed),
-								m("div.popover.left", [
-									m("div.popover-content", query.query),
-									m("div.arrow")
-								])
-							])
-						})
-					])
-				})
-			)
-		])
-	])
-}
-*/
