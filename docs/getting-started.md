@@ -22,12 +22,14 @@ Once you have a [copy of Mithril](installation.md), getting started is surprisin
 <!doctype html>
 <title>Todo app</title>
 <script src="mithril.min.js"></script>
+<body>
 <script>
 //app goes here
 </script>
+</body>
 ```
 
-Yes, this is valid HTML 5! According to the specs, the `<html>`, `<head>` and `<body>` tags can be omitted, but their respective DOM elements will still be there implicitly when a browser renders that markup.
+Yes, this is valid HTML 5! According to the specs, the `<html>` and `<head>` tags can be omitted, but their respective DOM elements will still be there implicitly when a browser renders that markup.
 
 ---
 
@@ -426,6 +428,7 @@ Here's the application code in its entirety:
 ```markup
 <!doctype html>
 <script src="mithril.min.js"></script>
+<body>
 <script>
 //this application only has one component: todo
 var todo = {};
@@ -492,6 +495,7 @@ todo.view = function() {
 //initialize the application
 m.mount(document.body, {controller: todo.controller, view: todo.view});
 </script>
+</body>
 ```
 
 This example is also available as a [jsFiddle](http://jsfiddle.net/fbgypzbr/16/).
