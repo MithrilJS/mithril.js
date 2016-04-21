@@ -20,20 +20,20 @@ function update() {
 
 function view() {
 	return m("div", [
-		m("table", { class: "table table-striped latest-data" }, [
+		m("table", { className: "table table-striped latest-data" }, [
 			m("tbody", 
 				data.map(function(db) {
 					return m("tr", {key: db.dbname}, [
-						m("td", { class: "dbname" }, db.dbname),
-						m("td", { class: "query-count" },  [
-							m("span", { class: db.lastSample.countclassName }, db.lastSample.nbQueries)
+						m("td", { className: "dbname" }, db.dbname),
+						m("td", { className: "query-count" },  [
+							m("span", { className: db.lastSample.countclassNameName }, db.lastSample.nbQueries)
 						]),
 						db.lastSample.topFiveQueries.map(function(query) {
-							return m("td", { class: query.elapsedclassName }, [
+							return m("td", { className: query.elapsedclassNameName }, [
 								m("span", query.formatElapsed),
-								m("div", { class: "popover left" }, [
-									m("div", { class: "popover-content" }, query.query),
-									m("div", { class: "arrow" })
+								m("div", { className: "popover left" }, [
+									m("div", { className: "popover-content" }, query.query),
+									m("div", { className: "arrow" })
 								])
 							])
 						})
@@ -52,10 +52,10 @@ function view() {
 					return m("tr", {key: db.dbname}, [
 						m("td.dbname", db.dbname),
 						m("td.query-count",  [
-							m("span", { class: db.lastSample.countclassName }, db.lastSample.nbQueries)
+							m("span", { className: db.lastSample.countclassNameName }, db.lastSample.nbQueries)
 						]),
 						db.lastSample.topFiveQueries.map(function(query) {
-							return m("td", { class: query.elapsedclassName }, [
+							return m("td", { className: query.elapsedclassNameName }, [
 								m("span", query.formatElapsed),
 								m("div.popover.left", [
 									m("div.popover-content", query.query),
