@@ -10,12 +10,6 @@ The example below shows a simple component that integrates with the [select2 lib
 // Component containing a Select that uses Select2 for functionality.
 var S2Component = {
 
-  controller: function() {
-    // this controller does nothing.
-    // but I like to include it for
-    // consistency in components.
-  },
-
   // Rendered view for S2
   view: function(ctrl, attrs) {
     var current = attrs.selectedUser;
@@ -83,8 +77,7 @@ var MainComponent = {
   controller: function() {
     var ctrl = this;
 
-    // Putting data in here is arbitrary,
-    // you'd probably get this elsewhere in a normal case.
+    // Some arbitrary data
     ctrl.selectedUser = 2;
     ctrl.data = [
           {id: 1, name: 'Alexander Hamilton'},
