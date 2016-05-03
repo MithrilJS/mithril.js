@@ -78,6 +78,9 @@ module.exports = function($window, onevent) {
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null)
+			if (tag === "select" && "value" in attrs) {
+				setAttrs(vnode, { value: attrs.value })
+			}
 		}
 		return element
 	}
