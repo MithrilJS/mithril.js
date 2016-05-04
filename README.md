@@ -18,11 +18,11 @@ Mithril's virtual DOM engine is now less than 400 lines of well organized code a
 
 Mithril's `config` method is now replaced by several lifecycle methods to improve separation of concerns and allow better control over animations.
 
-- **`oninit`** Run once before vnode creation
-- **`oncreate`** Run after the DOM element is created
-- **`onupdate`** Run after vnode is diffed
-- **`onremove`** Run before DOM removal
-- **`onbeforeremove`** Run before DOM removal
+- **`oninit(vnode)`** Runs once before vnode diff and creation
+- **`oncreate(vnode)`** Runs once after the DOM element is created. It's guaranteed to run after all DOM changes in the render cycle
+- **`onupdate(vnode)`** Runs after vnode is diffed by a re-render. It's guaranteed to run after all DOM changes in the render cycle
+- **`onremove(vnode)`** Runs before DOM removal.
+- **`onbeforeremove(vnode, done)`** Runs before DOM removal and waits for `done` to be called before actually removing the DOM element. Affects when `onremove` is called
 
 ## Robustness
 
