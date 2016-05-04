@@ -18,6 +18,12 @@ Mithril's virtual DOM engine is now less than 400 lines of well organized code a
 
 Mithril's `config` method is now replaced by several lifecycle methods to improve separation of concerns and allow better control over animations.
 
+- **`oninit`** Run once before vnode creation
+- **`oncreate`** Run after the DOM element is created
+- **`onupdate`** Run after vnode is diffed
+- **`onremove`** Run before DOM removal
+- **`onbeforeremove`** Run before DOM removal
+
 ## Robustness
 
 There are over 1800 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
