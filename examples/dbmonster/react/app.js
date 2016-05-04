@@ -51,20 +51,14 @@ var Database = React.createClass({
 
 var DBMon = React.createClass({
 	getInitialState: function getInitialState() {
-		return {
-			databases: []
-		}
+		return {databases: []}
 	},
 
 	loadSamples: function loadSamples() {
 		var data = ENV.generateData(true).toArray()
 		
 		perfMonitor.startProfile("render")
-		
-		this.setState({
-			databases: data
-		})
-		
+		this.setState({databases: data})
 		perfMonitor.endProfile("render")
 		
 		setTimeout(this.loadSamples, ENV.timeout)
@@ -91,4 +85,4 @@ var DBMon = React.createClass({
 	}
 })
 
-ReactDOM.render(h(DBMon, null), document.getElementById('app'))
+ReactDOM.render(h(DBMon, null), document.getElementById("app"))

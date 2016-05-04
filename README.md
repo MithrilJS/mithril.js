@@ -8,7 +8,7 @@ This rewrite aims to fix longstanding API design issues, significantly improve p
 
 Code still is in flux. Most notably, components and thunks (`{subtree: "retain"}`) are currently not implemented yet and there are several use cases that still need to be polished. DO NOT USE IN PRODUCTION YET!
 
-Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](examples/threaditjs/index.html) has the largest API surface coverage and comments indicating pending issues in framework usability. Note that the APIs those examples use may not become the final public API points in v1.0.
+Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/threaditjs/index.html) has the largest API surface coverage and comments indicating pending issues in framework usability. Note that the APIs those examples use may not become the final public API points in v1.0.
 
 ## Performance
 
