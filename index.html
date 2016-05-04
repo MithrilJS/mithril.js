@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+	<head>
+		<style>* {font-size:40px;}</style>
+	</head>
+	<body>
+		<script src="./module/module.js"></script>
+		<script src="./render/node.js"></script>
+		<script src="./render/hyperscript.js"></script>
+		<script src="./render/render.js"></script>
+		<script>
+var m = require("./render/hyperscript")
+var render = require("./render/render")(window, run).render
+
+var count = 10
+function inc() {count++}
+
+var Counter1 = {
+	oninit: function(vnode) {console.log("init", vnode)},
+	oncreate: function(vnode) {console.log("create", vnode)},
+	onupdate: function(vnode) {console.log("update", vnode)},
+	onremove: function(vnode) {console.log("remove", vnode)},
+	onbeforeremove: function(vnode, done) {console.log("before remove", vnode);done()},
+	view: function({attrs, state}) {
+		return m("a", {
+			onclick: () => {
+				count++
+				state.visible = !state.visible
+			}
+		}, attrs.count + (state.visible ? "visible" : ""))
+	}
+}
+/*
+class Counter2 {
+	oninit(vnode) {
+		request().then(function(foo) {
+			vnode.state.foo = foo
+		})
+	}
+	onupdate(vnode) {
+		vnode.dom.style.borderRight = vnode.attrs.count + "px solid red"
+	}
+	view(vnode) {
+		return m("a", {onclick: inc}, vnode.attrs.count)
+	}
+}
+function Counter3() {
+	return m("a", {
+		onupdate: function(vnode) {
+			vnode.dom.style.borderRight = vnode.attrs.count + "px solid red"
+		},
+		onclick: inc
+	}, vnode.attrs.count)
+}
+*/
+
+
+function view() {
+	return m("div", [
+		m("a", {onclick: inc}, count),
+		m("br"),
+		count % 7 !== 0 ? {tag: Counter1, attrs: {count: count}, text: "test", state: {}} : null,
+	])
+}
+
+function run() {
+	render(document.body, view())
+}
+run()
+		</script>
+	</body>
+</html>

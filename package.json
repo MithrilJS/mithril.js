@@ -4,6 +4,7 @@
 	"description": "A framework for building brilliant applications",
 	"main": "index.js",
 	"scripts": {
+		"build": "node bundler/bundler",
 		"test": "node ospec/bin/ospec"
 	},
 	"author": "Leo Horie",

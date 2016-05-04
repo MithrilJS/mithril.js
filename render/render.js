@@ -1,6 +1,6 @@
 "use strict"
 
-var normalizeChildren = require("../render/normalizeChildren")
+var Node = require("../render/node")
 
 module.exports = function($window, onevent) {
 	var $doc = $window.document
@@ -16,15 +16,19 @@ module.exports = function($window, onevent) {
 	}
 	function createNode(vnode, hooks) {
 		var tag = vnode.tag
-		if (vnode.attrs && vnode.attrs.oncreate) {
-			hooks.push(vnode.attrs.oncreate.bind(vnode, vnode))
+		if (vnode.attrs) {
+			if (vnode.attrs.oninit) vnode.attrs.oninit.call(vnode, vnode)
+			if (vnode.attrs.oncreate) hooks.push(vnode.attrs.oncreate.bind(vnode, vnode))
 		}
-		switch (tag) {
-			case "#": return createText(vnode)
-			case "<": return createHTML(vnode)
-			case "[": return createFragment(vnode, hooks)
-			default: return createElement(vnode, hooks)
+		if (typeof tag === "string") {
+			switch (tag) {
+				case "#": return createText(vnode)
+				case "<": return createHTML(vnode)
+				case "[": return createFragment(vnode, hooks)
+				default: return createElement(vnode, hooks)
+			}
 		}
+		else return createComponent(vnode, hooks)
 	}
 	function createText(vnode) {
 		return vnode.dom = $doc.createTextNode(vnode.children)
@@ -72,13 +76,21 @@ module.exports = function($window, onevent) {
 		
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
-			else vnode.children = [{tag: "#", children: vnode.text}]
+			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
 		
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null)
 		}
+		return element
+	}
+	function createComponent(vnode, hooks) {
+		vnode.instance = Node.normalize(vnode.tag.view(vnode))
+		initLifecycle(vnode.tag, vnode, hooks)
+		var element = createNode(vnode.instance, hooks)
+		vnode.dom = vnode.instance.dom
+		vnode.domSize = vnode.instance.domSize
 		return element
 	}
 
@@ -98,7 +110,7 @@ module.exports = function($window, onevent) {
 				else if (o != null && v != null && o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling)
-					if (recycling) insertNode(parent, toFragment(v), nextSibling)
+					if (recycling) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
 					var o = old[oldEnd]
@@ -116,7 +128,7 @@ module.exports = function($window, onevent) {
 				if (o === v) oldEnd--, end--
 				else if (o != null && v != null && o.key === v.key) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling)
-					if (recycling) insertNode(parent, toFragment(v), nextSibling)
+					if (recycling) insertNode(parent, toFragment(o), nextSibling)
 					nextSibling = o.dom
 					oldEnd--, end--
 				}
@@ -148,16 +160,17 @@ module.exports = function($window, onevent) {
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
-			if (recycling) {
-				if (vnode.attrs && vnode.attrs.oncreate) hooks.push(vnode.attrs.oncreate.bind(vnode, vnode))
+			vnode.state = old.state
+			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks, recycling)
+			if (typeof oldTag === "string") {
+				switch (oldTag) {
+					case "#": updateText(old, vnode); break
+					case "<": updateHTML(parent, old, vnode, nextSibling); break
+					case "[": updateFragment(parent, old, vnode, hooks, nextSibling); break
+					default: updateElement(old, vnode, hooks)
+				}
 			}
-			else if (vnode.attrs && vnode.attrs.onupdate) hooks.push(vnode.attrs.onupdate.bind(vnode, vnode))
-			switch (oldTag) {
-				case "#": updateText(old, vnode); break
-				case "<": updateHTML(parent, old, vnode, nextSibling); break
-				case "[": updateFragment(parent, old, vnode, hooks, nextSibling); break
-				default: updateElement(old, vnode, hooks)
-			}
+			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling)
 		}
 		else {
 			removeNode(parent, old, null, false)
@@ -189,7 +202,7 @@ module.exports = function($window, onevent) {
 					domSize += child.domSize || 1
 				}
 			}
-			if (domSize != 1) vnode.domSize = domSize
+			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
 	function updateElement(old, vnode, hooks) {
@@ -199,10 +212,17 @@ module.exports = function($window, onevent) {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
-			if (old.text != null) old.children = [{tag: "#", children: old.text, dom: old.dom.firstChild}]
-			if (vnode.text != null) vnode.children = [{tag: "#", children: vnode.text}]
+			if (old.text != null) old.children = [Node("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+			if (vnode.text != null) vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
 			updateNodes(element, old.children, vnode.children, hooks, null)
 		}
+	}
+	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
+		vnode.instance = Node.normalize(vnode.tag.view(vnode))
+		updateLifecycle(vnode.tag, vnode, hooks, recycling)
+		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
+		vnode.dom = vnode.instance.dom
+		vnode.domSize = vnode.instance.domSize
 	}
 	function isRecyclable(old, vnodes) {
 		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
@@ -262,9 +282,20 @@ module.exports = function($window, onevent) {
 		}
 	}
 	function removeNode(parent, vnode, context, deferred) {
-		if (vnode.attrs && vnode.attrs.onbeforeremove && deferred === false) {
-			vnode.attrs.onbeforeremove.call(vnode, vnode, function() {removeNode(parent, vnode, context, true)})
-			return
+		if (deferred === false) {
+			var expected = 0, called = 0
+			var callback = function() {
+				if (++called === expected) removeNode(parent, vnode, context, true)
+			}
+			if (vnode.attrs && vnode.attrs.onbeforeremove) {
+				expected++
+				vnode.attrs.onbeforeremove.call(vnode, vnode, callback)
+			}
+			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
+				expected++
+				vnode.tag.onbeforeremove.call(vnode, vnode, callback)
+			}
+			if (expected > 0) return
 		}
 		
 		onremove(vnode)
@@ -285,9 +316,10 @@ module.exports = function($window, onevent) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode, vnode)
+		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode, vnode)
 			
 		var children = vnode.children
-		if (children) {
+		if (children instanceof Array) {
 			for (var i = 0; i < children.length; i++) {
 				var child = children[i]
 				if (child != null) onremove(child)
@@ -341,7 +373,7 @@ module.exports = function($window, onevent) {
 		}
 	}
 	function isLifecycleMethod(attr) {
-		return attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove"
+		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove"
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
@@ -364,15 +396,23 @@ module.exports = function($window, onevent) {
 		}
 	}
 
+	//lifecycle
+	function initLifecycle(source, vnode, hooks) {
+		if (source.oninit != null) source.oninit.call(vnode, vnode)
+		if (source.oncreate != null) hooks.push(source.oncreate.bind(vnode, vnode))
+	}
+	function updateLifecycle(source, vnode, hooks, recycling) {
+		if (recycling) initLifecycle(source, vnode, hooks)
+		else if (source.onupdate != null) hooks.push(source.onupdate.bind(vnode, vnode))
+	}
+
 	function render(dom, vnodes) {
-		//if (dom.lastRedraw + 16 > performance.now() && vnodes.length > 0) return
-		//dom.lastRedraw = performance.now()
 		var hooks = []
 		var active = $doc.activeElement
-		if (!dom.vnodes) dom.vnodes = []
+		if (dom.vnodes == null) dom.vnodes = []
 		
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, normalizeChildren(vnodes), hooks, null)
+		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null)
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		dom.vnodes = vnodes
 		if ($doc.activeElement !== active) active.focus()

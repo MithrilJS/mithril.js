@@ -1,3 +1,5 @@
+# Contributing
+
 # FAQ
 
 ## How do I go about contributing ideas or new features?
@@ -16,11 +18,15 @@ Ideally, provide code to reproduce the issue (via jsfiddle, a gist, etc). Even b
 
 Assuming you have forked this repo, you can open the `index.html` file in a module's `tests` folder and look at console output to see only tests for that module, or you can run `ospec/bin/ospec` from the command line to run all tests under a Node.js environment. Additionally, you can modify a test to use `o.only(description, test)` instead of `o(description, test)` if you wish to run only a specific test.
 
+There is no need to `npm install` anything in order to run the test suite, however NodeJS is required to run the test suite from the command line.
+
 
 
 ## How do I build Mithril?
 
-Run `node bundler/bundler.js` from the command line to generate the bundled file.
+If all you're trying to do is run examples in the codebase, you don't need to build Mithril, you can just open the various html files and things should just work.
+
+To generate the bundled file, run `node bundler/bundler.js` from the command line. There is no need to `npm install` anything, but NodeJS is required to run the build script.
 
 
 
@@ -56,7 +62,7 @@ In addition, ES6 features are usually less performant than equivalent ES5 code, 
 
 ## Why doesn't the Mithril codebase use trailing semi-colons? Would a PR to add them be welcome?
 
-I don't use them. Adding them means the semi-colon usage in the codebase will eventually become inconsistent. If you're not comfortable with ASI rules, bear in mind that this codebase is heavily optimized and large modifications will require an advanced level of javascript mastery.
+I don't use them. Adding them means the semi-colon usage in the codebase will eventually become inconsistent.
 
 
 

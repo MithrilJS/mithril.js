@@ -70,16 +70,22 @@ module.exports = new function init() {
 					var body = fn.toString()
 					var arg = (body.match(/\(([\w_$]+)/) || body.match(/([\w_$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
-					fn(function done() {
-						if (timeout !== undefined) {
-							timeout = clearTimeout(timeout)
-							if (delay !== Infinity) record(null)
-							if (!isDone) next()
-							else throw new Error("`" + arg + "()` should only be called once")
-							isDone = true
-						}
-						else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
-					}, function(t) {delay = t})
+					try {
+						fn(function done() {
+							if (timeout !== undefined) {
+								timeout = clearTimeout(timeout)
+								if (delay !== Infinity) record(null)
+								if (!isDone) next()
+								else throw new Error("`" + arg + "()` should only be called once")
+								isDone = true
+							}
+							else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
+						}, function(t) {delay = t})
+					}
+					catch (e) {
+						record(e.message, e)
+						next()
+					}
 					if (timeout === 0) {
 						timeout = setTimeout(function() {
 							timeout = undefined
@@ -157,11 +163,13 @@ module.exports = new function init() {
 			}
 		}
 	}
-	function record(message) {
+	function record(message, error) {
 		var result = {pass: message === null}
 		if (result.pass === false) {
-			var error = new Error
-			if (error.stack === undefined) new function() {try {throw error} catch (e) {error = e}}
+			if (error == null) {
+				error = new Error
+				if (error.stack === undefined) new function() {try {throw error} catch (e) {error = e}}
+			}
 			result.context = subjects.join(" > ")
 			result.message = message
 			result.error = error.stack
@@ -170,6 +178,7 @@ module.exports = new function init() {
 	}
 	function serialize(value) {
 		if (value === null || typeof value === "object") return String(value)
+		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
 	function highlight(message) {
@@ -178,7 +187,7 @@ module.exports = new function init() {
 
 	function report() {
 		for (var i = 0, r; r = results[i]; i++) {
-			if (!r.pass) console.info(r.context + ": " + highlight(r.message) + "\n\n" + r.error.match(/^(?:(?!^Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m) + "\n\n", hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+			if (!r.pass) console.error(r.context + ": " + highlight(r.message) + "\n\n" + r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m) + "\n\n", hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 		}
 		console.log(results.length + " tests completed in " + Math.round(new Date - start) + "ms")
 	}

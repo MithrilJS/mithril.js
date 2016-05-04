@@ -1,3 +1,7 @@
+"use strict"
+
+var Node = require("../render/node")
+
 module.exports = function(html) {
-	return {tag: "<", key: undefined, attrs: undefined, children: html, text: undefined}
+	return Node("<", undefined, undefined, html, undefined, undefined)
 }

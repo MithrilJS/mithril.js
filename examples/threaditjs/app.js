@@ -10,34 +10,17 @@ var router = require("../../router/router")(window, "#")
 var api = {
 	home : function() {
 		T.timeEnd("Setup")
-		return request({
-			method: "GET",
-			url: T.apiUrl + "/threads/",
-		})
+		return request({method: "GET", url: T.apiUrl + "/threads/"})
 	}, 
 	thread : function(id) {
 		T.timeEnd("Setup")
-		return request({
-			method: "GET",
-			url: T.apiUrl + "/comments/" + id,
-		}).then(T.transformResponse)
+		return request({method: "GET", url: T.apiUrl + "/comments/" + id}).then(T.transformResponse)
 	},
 	newThread : function(text) {
-		return request({
-			method: "POST", 
-			url: T.apiUrl + "/threads/create",
-			data: {text: text},
-		});
+		return request({method: "POST", url: T.apiUrl + "/threads/create",data: {text: text}})
 	},
 	newComment : function(text, id) {
-		return request({
-			url: T.apiUrl + "/comments/create", 
-			method: "POST",
-			data: {
-				text: text,
-				parent: id,
-			}
-		});
+		return request({method: "POST", url: T.apiUrl + "/comments/create", data: {text: text, parent: id}});
 	}
 };
 
@@ -82,9 +65,9 @@ function createThread() {
 	return false
 }
 
-function showReplying(node) {
-	node.replying = true
-	node.newComment = ""
+function showReplying(vnode) {
+	vnode.state.replying = true
+	vnode.state.newComment = ""
 	return false
 }
 
@@ -99,39 +82,53 @@ function submitComment(node) {
 }
 
 //shared
-function header() {
-	return [
-		m("p.head_links", [
-			m("a[href='https://github.com/koglerjs/threaditjs/tree/master/examples/mithril']", "Source"),
-			" | ", 
-			m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
-		]),
-		m("h2", [
-			m("a[href='#/']", "ThreaditJS: Mithril"),
-		]),
-	]
+var Header = {
+	view: function() {
+		return [
+			m("p.head_links", [
+				m("a[href='https://github.com/koglerjs/threaditjs/tree/master/examples/mithril']", "Source"),
+				" | ", 
+				m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
+			]),
+			m("h2", [
+				m("a[href='#/']", "ThreaditJS: Mithril"),
+			]),
+		]
+	}
 }
 
 //home
-function home() {
-	return {tag: "[", key: "home", attrs: {oncreate: loadThreads}, children: [
-		header(),
-		m(".main", [
-			loaded === false ? m("h2", "Loading") :
-			error ? m("h2", "Error! Try refreshing.") :
-			notFound ? m("h2", "Not found! Don't try refreshing!") :
-			[
-				threads.map(threadListItem),
-				newThread(),
-			]
-		])
-	]}
+var Home = {
+	oninit: loadThreads,
+	view: function() {
+		return [
+			m(Header),
+			m(".main", [
+				loaded === false ? m("h2", "Loading") :
+				error ? m("h2", "Error! Try refreshing.") :
+				notFound ? m("h2", "Not found! Don't try refreshing!") : [
+					threads.map(function(thread) {
+						return [
+							m("p", [
+								m("a", {href: "#/thread/" + thread.id}, trust(T.trimTitle(thread.text))),
+							]),
+							m("p.comment_count", thread.comment_count + " comment(s)"),
+							m("hr"),
+						]
+					}),
+					m(NewThread),
+				]
+			])
+		]
+	}
 }
-function newThread() {
-	return m("form", {onsubmit: createThread}, [
-		m("textarea#threadText"),
-		m("input", {type:"submit", value: "Post!"}),
-	])
+var NewThread = {
+	view: function() {
+		return m("form", {onsubmit: createThread}, [
+			m("textarea#threadText"),
+			m("input", {type:"submit", value: "Post!"}),
+		])
+	}
 }
 
 function threadListItem(thread) {
@@ -145,39 +142,49 @@ function threadListItem(thread) {
 }
 
 //thread
-function thread(args) {
-	if (current) T.time("Thread render")
-	return {tag: "[", key: args.id, attrs: {oncreate: function() {loadThread(args.id)}, onremove: unloadThread}, children: [
-		header(), 
-		current ? m(".main", {oncreate: function() {T.timeEnd("Thread render")}}, [
-			threadNode({node: current.root})
-		]) : null
-	]}
+var Thread = {
+	oninit: function(vnode) {
+		loadThread(vnode.attrs.id)
+	},
+	onremove: unloadThread,
+	view: function() {
+		if (current) T.time("Thread render")
+		return [
+			m(Header), 
+			current ? m(".main", {oncreate: function() {T.timeEnd("Thread render")}}, [
+				m(ThreadNode, {node: current.root})
+			]) : null
+		]
+	}
 }
-function threadNode(args) {
-	return m(".comment", [		
-		m("p", trust(args.node.text)),
-		m(".reply", reply(args)),
-		m(".children", [
-			args.node.children.map(function(child) {
-				return threadNode({node: child})
-			})
+var ThreadNode = {
+	view: function(vnode) {
+		return m(".comment", [		
+			m("p", trust(vnode.attrs.node.text)),
+			m(".reply", m(Reply, vnode.attrs)),
+			m(".children", [
+				vnode.attrs.node.children.map(function(child) {
+					return m(ThreadNode, {node: child})
+				})
+			])
 		])
-	])
+	}
 }
-function reply(args) {
-	return args.node.replying
-		? m("form", {onsubmit: function() {return submitComment(args.node)}}, [
-			m("textarea", {
-				value: args.node.newComment, //FIXME decouple UI state from data
-				oninput: function(e) {
-					args.node.newComment = e.target.value
-				},
-			}),
-			m("input", {type:"submit", value: "Reply!"}),
-			m(".preview", trust(T.previewComment(args.node.newComment))),
-		])
-		: m("a", {onclick: function() {return showReplying(args.node)}}, "Reply!")
+var Reply = {
+	view: function(vnode) {
+		return vnode.state.replying
+			? m("form", {onsubmit: function() {return submitComment(vnode.attrs.node)}}, [
+				m("textarea", {
+					value: vnode.state.newComment,
+					oninput: function(e) {
+						vnode.state.newComment = e.target.value
+					},
+				}),
+				m("input", {type:"submit", value: "Reply!"}),
+				m(".preview", trust(T.previewComment(vnode.state.newComment))),
+			])
+			: m("a", {onclick: function() {return showReplying(vnode)}}, "Reply!")
+	}
 }
 
 //router
@@ -186,10 +193,10 @@ function run() {
 }
 
 var replayRoute = router.defineRoutes({
-	"/thread/:id" : thread,
-	"/" : home
+	"/thread/:id" : Thread,
+	"/" : Home
 }, function(view, args) {
-	render(document.body, [view(args)])
+	render(document.body, [m(view, args)])
 }, function() {
 	router.setPath("/")
 })

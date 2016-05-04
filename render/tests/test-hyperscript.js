@@ -376,4 +376,20 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0].ns).equals("http://www.w3.org/1998/Math/MathML")
 		})
 	})
+	o.spec("components", function() {
+		o("works", function() {
+			var component = {
+				view: function() {
+					return m("div")
+				}
+			}
+			var vnode = m(component, {id: "a"}, "b")
+			
+			o(vnode.tag).equals(component)
+			o(vnode.attrs.id).equals("a")
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0].tag).equals("#")
+			o(vnode.children[0].children).equals("b")
+		})
+	})
 })
