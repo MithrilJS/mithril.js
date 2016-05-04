@@ -39,7 +39,7 @@ function countRemaining() {
 }
 function clear() {
 	for (var i = 0; i < todos.length; i++) {
-		if (todos[i].completed) destroy(todos[i])
+		if (todos[i].completed) destroy(todos[i--])
 	}
 }
 
