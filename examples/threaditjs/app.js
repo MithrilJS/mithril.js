@@ -71,11 +71,11 @@ function showReplying(vnode) {
 	return false
 }
 
-function submitComment(node) {
-	api.newComment(node.newComment, node.id).then(function(response) {
-		node.newComment = ""
-		node.replying = false
-		node.children.push(response.data)
+function submitComment(vnode) {
+	api.newComment(vnode.state.newComment, vnode.attrs.node.id).then(function(response) {
+		vnode.state.newComment = ""
+		vnode.state.replying = false
+		vnode.attrs.node.children.push(response.data)
 	})
 	.then(run)
 	return false
@@ -163,7 +163,7 @@ var ThreadNode = {
 var Reply = {
 	view: function(vnode) {
 		return vnode.state.replying
-			? m("form", {onsubmit: function() {return submitComment(vnode.attrs.node)}}, [
+			? m("form", {onsubmit: function() {return submitComment(vnode)}}, [
 				m("textarea", {
 					value: vnode.state.newComment,
 					oninput: function(e) {
