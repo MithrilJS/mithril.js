@@ -131,16 +131,6 @@ var NewThread = {
 	}
 }
 
-function threadListItem(thread) {
-	return [
-		m("p", [
-			m("a", {href: "#/thread/" + thread.id}, trust(T.trimTitle(thread.text))),
-		]),
-		m("p.comment_count", thread.comment_count + " comment(s)"),
-		m("hr"),
-	]
-}
-
 //thread
 var Thread = {
 	oninit: function(vnode) {
