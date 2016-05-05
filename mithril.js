@@ -1617,8 +1617,16 @@
 				var method = replaceHistory ? "replaceState" : "pushState"
 				computePreRedrawHook = setScroll
 				computePostRedrawHook = function () {
-					global.history[method](null, $document.title,
-						modes[m.route.mode] + currentRoute)
+					try {
+						global.history[method](null, $document.title,
+							modes[m.route.mode] + currentRoute)
+					} catch (err) {
+						// In the event of a pushState or replaceState failure,
+						// fallback to a standard redirect. This is specifically
+						// to address a Safari security error when attempting to
+						// call pushState more than 100 times.
+						$location[m.route.mode] = currentRoute
+					}
 				}
 				redirect(modes[m.route.mode] + currentRoute)
 			} else {
