@@ -2113,7 +2113,7 @@
 		if (data) {
 			url = url.replace(/:[a-z]\w+/gi, function (token){
 				var key = token.slice(1)
-				var value = data[key]
+				var value = data[key] || token
 				delete data[key]
 				return value
 			})

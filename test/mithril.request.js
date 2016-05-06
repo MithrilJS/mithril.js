@@ -195,6 +195,12 @@ describe("m.request()", function () {
 		expect(prop().url).to.equal("/test")
 	})
 
+	it("ignores interpolations without data", function () { // eslint-disable-line
+		var prop = m.request({method: "GET", url: "/test:notfound", data: {foo: 1}})
+		resolve()
+		expect(prop().url).to.equal("/test:notfound?foo=1")
+	})
+
 	it("appends children in query strings to `url` from `data` for `GET`", function () { // eslint-disable-line
 		var prop = m.request({method: "GET", url: "test", data: {foo: [1, 2]}})
 		resolve()
