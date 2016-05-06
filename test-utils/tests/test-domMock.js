@@ -484,31 +484,72 @@ o.spec("domMock", function() {
 		})
 	})
 	o.spec("events", function() {
-		var spy, div, e
-		o.beforeEach(function() {
-			spy = o.spy()
-			div = $document.createElement("div")
-			e = $document.createEvent("MouseEvents")
-			e.initEvent("click", true, true)
+		o.spec("click", function() {
+			var spy, div, e
+			o.beforeEach(function() {
+				spy = o.spy()
+				div = $document.createElement("div")
+				e = $document.createEvent("MouseEvents")
+				e.initEvent("click", true, true)
+				
+				$document.body.appendChild(div)
+			})
+			o.afterEach(function() {
+				$document.body.removeChild(div)
+			})
 			
-			$document.body.appendChild(div)
+			o("addEventListener works", function() {
+				div.addEventListener("click", spy, false)
+				div.dispatchEvent(e)
+				
+				o(spy.callCount).equals(1)
+				o(spy.this).equals(div)
+				o(spy.args[0].type).equals("click")
+				o(spy.args[0].target).equals(div)
+			})
+			o("removeEventListener works", function(done) {
+				div.addEventListener("click", spy, false)
+				div.removeEventListener("click", spy, false)
+				div.dispatchEvent(e)
+				
+				o(spy.callCount).equals(0)
+				done()
+			})
+			o("click fires onclick", function() {
+				div.onclick = spy
+				div.dispatchEvent(e)
+				
+				o(spy.callCount).equals(1)
+				o(spy.this).equals(div)
+				o(spy.args[0].type).equals("click")
+				o(spy.args[0].target).equals(div)
+			})
+			o("click without onclick doesn't throw", function(done) {
+				div.dispatchEvent(e)
+				done()
+			})
 		})
-		o.afterEach(function() {
-			$document.body.removeChild(div)
-		})
-		
-		o("click fires onclick", function() {
-			div.onclick = spy
-			div.dispatchEvent(e)
+		o.spec("transitionend", function() {
+			var spy, div, e
+			o.beforeEach(function() {
+				spy = o.spy()
+				div = $document.createElement("div")
+				e = $document.createEvent("AnimationEvent")
+				e.initEvent("transitionend", true, true)
+				
+				$document.body.appendChild(div)
+			})
+			o.afterEach(function() {
+				$document.body.removeChild(div)
+			})
 			
-			o(spy.callCount).equals(1)
-			o(spy.this).equals(div)
-			o(spy.args[0].type).equals("click")
-			o(spy.args[0].target).equals(div)
-		})
-		o("click without onclick doesn't throw", function(done) {
-			div.dispatchEvent(e)
-			done()
+			o("ontransitionend does not fire", function(done) {
+				div.ontransitionend = spy
+				div.dispatchEvent(e)
+				
+				o(spy.callCount).equals(0)
+				done()
+			})
 		})
 	})
 	o.spec("attributes", function() {

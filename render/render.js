@@ -161,6 +161,7 @@ module.exports = function($window, onevent) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
+			vnode.events = old.events
 			if (shouldUpdate(vnode, old)) return
 			if (vnode.attrs != null) {
 				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
@@ -345,11 +346,17 @@ module.exports = function($window, onevent) {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
 		}
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") {
-			element[key] = function(e) {
+			var eventName = key.slice(2)
+			if (vnode.events === undefined) vnode.events = {}
+			if (vnode.events[key] != null) {
+				element.removeEventListener(eventName, vnode.events[key], false)
+			}
+			vnode.events[key] = function(e) {
 				var result = value.call(element, e)
 				if (typeof onevent === "function") onevent.call(element, e)
 				return result
 			}
+			element.addEventListener(eventName, vnode.events[key], false)
 		}
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && vnode.ns === undefined) element[key] = value

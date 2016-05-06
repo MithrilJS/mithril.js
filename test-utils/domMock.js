@@ -1,6 +1,9 @@
 "use strict"
 
 module.exports = function() {
+	function isModernEvent(type) {
+		return type === "transitionstart" || type === "transitionend" || type === "animationstart" || type === "animationend"
+	}
 	function appendChild(child) {
 		var ancestor = this
 		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
@@ -77,6 +80,7 @@ module.exports = function() {
 		document: {
 			createElement: function(tag, is) {
 				var style = {}
+				var events = {}
 				var element = {
 					nodeType: 1,
 					nodeName: tag.toUpperCase(),
@@ -148,9 +152,24 @@ module.exports = function() {
 						}
 					},
 					focus: function() {activeElement = this},
+					addEventListener: function(type, callback, useCapture) {
+						if (events[type] == null) events[type] = [callback]
+						else events[type].push(callback)
+					},
+					removeEventListener: function(type, callback, useCapture) {
+						if (events[type] != null) {
+							var index = events[type].indexOf(callback)
+							if (index > -1) events[type].splice(index, 1)
+						}
+					},
 					dispatchEvent: function(e) {
 						e.target = this
-						if (typeof this["on" + e.type] === "function") this["on" + e.type](e)
+						if (events[e.type] != null) {
+							for (var i = 0; i < events[e.type].length; i++) {
+								events[e.type][i].call(this, e)
+							}
+						}
+						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
 					},
 				}
 				if (element.nodeName === "A") {
