@@ -86,8 +86,8 @@ module.exports = function($window, onevent) {
 		return element
 	}
 	function createComponent(vnode, hooks) {
-		vnode.instance = Node.normalize(vnode.tag.view(vnode))
 		initLifecycle(vnode.tag, vnode, hooks)
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
 		var element = createNode(vnode.instance, hooks)
 		vnode.dom = vnode.instance.dom
 		vnode.domSize = vnode.instance.domSize
@@ -161,7 +161,10 @@ module.exports = function($window, onevent) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
-			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks, recycling)
+			if (shouldUpdate(vnode, old)) return
+			if (vnode.attrs != null) {
+				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
+			}
 			if (typeof oldTag === "string") {
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
@@ -218,7 +221,7 @@ module.exports = function($window, onevent) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
-		vnode.instance = Node.normalize(vnode.tag.view(vnode))
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
 		vnode.dom = vnode.instance.dom
@@ -373,7 +376,7 @@ module.exports = function($window, onevent) {
 		}
 	}
 	function isLifecycleMethod(attr) {
-		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove"
+		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "shouldUpdate"
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
@@ -404,6 +407,18 @@ module.exports = function($window, onevent) {
 	function updateLifecycle(source, vnode, hooks, recycling) {
 		if (recycling) initLifecycle(source, vnode, hooks)
 		else if (source.onupdate != null) hooks.push(source.onupdate.bind(vnode, vnode))
+	}
+	function shouldUpdate(vnode, old) {
+		var forceVnodeUpdate, forceComponentUpdate
+		if (vnode.attrs != null && typeof vnode.attrs.shouldUpdate === "function") forceVnodeUpdate = vnode.attrs.shouldUpdate(vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode.tag.shouldUpdate === "function") forceComponentUpdate = vnode.tag.shouldUpdate(vnode, old)
+		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
+			vnode.dom = old.dom
+			vnode.domSize = old.domSize
+			vnode.instance = old.instance
+			return true
+		}
+		return false
 	}
 
 	function render(dom, vnodes) {

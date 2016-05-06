@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var domMock = require("../../test-utils/domMock")
 var trust = require("../../render/trust")
 
 o.spec("trust", function() {

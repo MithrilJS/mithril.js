@@ -257,6 +257,21 @@ o.spec("component", function() {
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
 			o(root.firstChild.firstChild.nodeValue).equals("b")
 		})
+		o("calls oninit before view", function() {
+			var viewCalled = false
+			
+			render(root, {
+				tag: {
+					view: function() {
+						viewCalled = true
+						return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+					},
+					oninit: function(vnode) {
+						o(viewCalled).equals(false)
+					},
+				}
+			})
+		})
 		o("calls oncreate", function() {
 			var called = 0
 			var component = {

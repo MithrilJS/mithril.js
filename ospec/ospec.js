@@ -189,7 +189,7 @@ module.exports = new function init() {
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) console.error(r.context + ": " + highlight(r.message) + "\n\n" + r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m) + "\n\n", hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 		}
-		console.log(results.length + " tests completed in " + Math.round(new Date - start) + "ms")
+		console.log(results.length + " assertions completed in " + Math.round(new Date - start) + "ms")
 	}
 
 	return o

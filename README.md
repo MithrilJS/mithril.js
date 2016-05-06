@@ -6,13 +6,13 @@ This rewrite aims to fix longstanding API design issues, significantly improve p
 
 ## Status
 
-Code still is in flux. Most notably, components and thunks (`{subtree: "retain"}`) are currently not implemented yet and there are several use cases that still need to be polished. DO NOT USE IN PRODUCTION YET!
+Code still is in flux. Most notably, thunks (`{subtree: "retain"}`) are currently not implemented yet and there are several use cases that still need to be polished. DO NOT USE IN PRODUCTION YET!
 
 Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/threaditjs/index.html) has the largest API surface coverage and comments indicating pending issues in framework usability. Note that the APIs those examples use may not become the final public API points in v1.0.
 
 ## Performance
 
-Mithril's virtual DOM engine is now less than 400 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation (non-optimized)](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are optimized dbmon implementations for [React v15.0.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html) and [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html)).
+Mithril's virtual DOM engine is now around 400 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation (non-optimized)](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are optimized dbmon implementations for [React v15.0.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html) and [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html)).
 
 ## Lifecycle methods and Animation Support
 

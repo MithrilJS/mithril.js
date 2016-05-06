@@ -14,7 +14,7 @@ var AppComponent = ng.core.Component({selector: "my-app"})
 					"<td class='query-count'>" +
 						"<span [class]='db.lastSample.countClassName'>{{db.lastSample.nbQueries}}</span>" +
 					"</td>" +
-					"<td *ngFor='let q of db.lastSample.topFiveQueries' [class]='q.elapsedClassName'>" +
+					"<td *ngFor='let q of db.lastSample.topFiveQueries' [class]='\"Query \" + q.elapsedClassName'>" +
 						"{{q.formatElapsed}}" +
 						"<div class='popover left'>" +
 							"<div class='popover-content'>{{q.query}}</div>" +
