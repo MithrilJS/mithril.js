@@ -21,8 +21,8 @@ Mithril's `config` method is now replaced by several lifecycle methods to improv
 - **`oninit(vnode)`** Runs once before vnode diff and creation
 - **`oncreate(vnode)`** Runs once after the DOM element is created. It's guaranteed to run after all DOM changes in the render cycle
 - **`onupdate(vnode)`** Runs after vnode is diffed by a re-render. It's guaranteed to run after all DOM changes in the render cycle
-- **`onremove(vnode)`** Runs before DOM removal.
 - **`onbeforeremove(vnode, done)`** Runs before DOM removal and waits for `done` to be called before actually removing the DOM element. Affects when `onremove` is called
+- **`onremove(vnode)`** Runs after DOM removal.
 
 ## Robustness
 
