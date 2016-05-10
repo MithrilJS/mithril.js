@@ -163,6 +163,10 @@ module.exports = function() {
 						}
 					},
 					dispatchEvent: function(e) {
+						if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].nodeValue === "checkbox" && e.type === "click") {
+							this.checked = !this.checked
+						}
+						
 						e.target = this
 						if (events[e.type] != null) {
 							for (var i = 0; i < events[e.type].length; i++) {
@@ -172,6 +176,7 @@ module.exports = function() {
 						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
 					},
 				}
+				
 				if (element.nodeName === "A") {
 					var href
 					Object.defineProperty(element, "href", {
@@ -180,11 +185,104 @@ module.exports = function() {
 						enumerable: true,
 					})
 				}
+				
 				if (element.nodeName === "INPUT") {
 					var checked
 					Object.defineProperty(element, "checked", {
 						get: function() {return checked === undefined ? this.attributes["checked"] !== undefined : checked},
 						set: function(value) {checked = Boolean(value)},
+						enumerable: true,
+					})
+					
+					element.value = ""
+				}
+				
+				if (element.nodeName === "TEXTAREA") {
+					var value
+					Object.defineProperty(element, "value", {
+						get: function() {
+							return value != null ? value :
+								this.firstChild ? this.firstChild.nodeValue : ""
+						},
+						set: function(v) {value = v},
+						enumerable: true,
+					})
+				}
+				
+				function getOptions(element) {
+					var options = []
+					for (var i = 0; i < element.childNodes.length; i++) {
+						if (element.childNodes[i].nodeName === "OPTION") options.push(element.childNodes[i])
+						else if (element.childNodes[i].nodeName === "OPTGROUP") options = options.concat(getOptions(element.childNodes[i]))
+					}
+					return options
+				}
+				function getOptionValue(element) {
+					return element.attributes["value"] != null ?
+						element.attributes["value"].nodeValue :
+						element.firstChild != null ? element.firstChild.nodeValue : ""
+				}
+				if (element.nodeName === "SELECT") {
+					var selectedValue, selectedIndex = 0
+					Object.defineProperty(element, "selectedIndex", {
+						get: function() {return getOptions(this).length > 0 ? selectedIndex : -1},
+						set: function(value) {
+							var options = getOptions(this)
+							if (value >= 0 && value < options.length) {
+								selectedValue = getOptionValue(options[selectedIndex])
+								selectedIndex = value
+							}
+							else {
+								selectedValue = ""
+								selectedIndex = -1
+							}
+						},
+						enumerable: true,
+					})
+					Object.defineProperty(element, "value", {
+						get: function() {
+							if (this.selectedIndex > -1) return getOptionValue(getOptions(this)[this.selectedIndex])
+							return ""
+						},
+						set: function(value) {
+							var options = getOptions(this)
+							var stringValue = String(value)
+							for (var i = 0; i < options.length; i++) {
+								if (getOptionValue(options[i]) === stringValue) {
+									selectedValue = stringValue
+									selectedIndex = i
+									return
+								}
+							}
+							selectedValue = stringValue
+							selectedIndex = -1
+						},
+						enumerable: true,
+					})
+				}
+				if (element.nodeName === "OPTION") {
+					Object.defineProperty(element, "value", {
+						get: function() {return getOptionValue(this)},
+						set: function(value) {
+							this.setAttribute("value", value)
+						},
+						enumerable: true,
+					})
+					Object.defineProperty(element, "selected", {
+						get: function() {
+							var options = getOptions(this.parentNode)
+							var index = options.indexOf(this)
+							if (index > -1) return index === this.parentNode.selectedIndex
+							return false
+						},
+						set: function(value) {
+							if (value) {
+								var options = getOptions(this.parentNode)
+								var index = options.indexOf(this)
+								if (index > -1) this.parentNode.selectedIndex = index
+							}
+							else this.parentNode.selectedIndex = 0
+						},
 						enumerable: true,
 					})
 				}

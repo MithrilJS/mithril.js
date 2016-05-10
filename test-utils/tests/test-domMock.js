@@ -553,7 +553,7 @@ o.spec("domMock", function() {
 		})
 	})
 	o.spec("attributes", function() {
-		o.spec("link href", function() {
+		o.spec("a[href]", function() {
 			o("is empty string if no attribute", function() {
 				var a = $document.createElement("a")
 				
@@ -575,7 +575,7 @@ o.spec("domMock", function() {
 				o(a.attributes["href"].nodeValue).equals("")
 			})
 		})
-		o.spec("input checked", function() {
+		o.spec("input[checked]", function() {
 			o("only exists in input elements", function() {
 				var input = $document.createElement("input")
 				var a = $document.createElement("a")
@@ -615,6 +615,195 @@ o.spec("domMock", function() {
 				input.removeAttribute("checked")
 				
 				o(input.checked).equals(true)
+			})
+			o("toggles on click", function() {
+				var input = $document.createElement("input")
+				input.setAttribute("type", "checkbox")
+				input.checked = false
+				
+				var e = $document.createEvent("MouseEvents")
+				e.initEvent("click", true, true)
+				input.dispatchEvent(e)
+				
+				o(input.checked).equals(true)
+			})
+		})
+		o.spec("input[value]", function() {
+			o("only exists in input elements", function() {
+				var input = $document.createElement("input")
+				var a = $document.createElement("a")
+				
+				o("value" in input).equals(true)
+				o("value" in a).equals(false)
+			})
+		})
+		o.spec("textarea[value]", function() {
+			o("reads from child if no value", function() {
+				var input = $document.createElement("textarea")
+				input.appendChild($document.createTextNode("aaa"))
+				
+				o(input.value).equals("aaa")
+			})
+			o("ignores child if value set", function() {
+				var input = $document.createElement("textarea")
+				input.value = "aaa"
+				input.setAttribute("value", "bbb")
+				
+				o(input.value).equals("aaa")
+			})
+		})
+		o.spec("select[value] and select[selectedIndex]", function() {
+			o("only exist in select elements", function() {
+				var select = $document.createElement("select")
+				var a = $document.createElement("a")
+				
+				o("value" in select).equals(true)
+				o("value" in a).equals(false)
+				
+				o("selectedIndex" in select).equals(true)
+				o("selectedIndex" in a).equals(false)
+			})
+			o("value defaults to value at first index", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				o(select.value).equals("a")
+				o(select.selectedIndex).equals(0)
+			})
+			o("value falls back to child nodeValue if no attribute", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.appendChild($document.createTextNode("a"))
+				select.appendChild(option1)
+				
+				o(select.value).equals("a")
+				o(select.selectedIndex).equals(0)
+			})
+			o("value defaults to invalid if no options", function() {
+				var select = $document.createElement("select")
+				
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
+			})
+			o("setting valid value works", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.value = "b"
+				
+				o(select.value).equals("b")
+				o(select.selectedIndex).equals(1)
+			})
+			o("setting valid selectedIndex works", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.selectedIndex = 1
+				
+				o(select.value).equals("b")
+				o(select.selectedIndex).equals(1)
+			})
+			o("setting option[selected] works", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.childNodes[1].selected = true
+				
+				o(select.value).equals("b")
+				o(select.selectedIndex).equals(1)
+			})
+			o("setting invalid value yields a selectedIndex of -1 and value of empty string", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.value = "c"
+				
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
+			})
+			o("setting invalid selectedIndex yields a selectedIndex of -1 and value of empty string", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.selectedIndex = -2
+				
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
+			})
+			o("setting invalid value yields a selectedIndex of -1 and value of empty string even when there's an option whose value is empty string", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "")
+				select.appendChild(option2)
+				
+				select.value = "c"
+				
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
+			})
+			o("setting invalid selectedIndex yields a selectedIndex of -1 and value of empty string even when there's an option whose value is empty string", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "")
+				select.appendChild(option2)
+				
+				select.selectedIndex = -2
+				
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
 			})
 		})
 	})

@@ -82,9 +82,7 @@ module.exports = function($window, onevent) {
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null)
-			if (tag === "select" && "value" in attrs) {
-				setAttrs(vnode, { value: attrs.value })
-			}
+			setLateAttrs(vnode)
 		}
 		return element
 	}
@@ -214,6 +212,10 @@ module.exports = function($window, onevent) {
 	}
 	function updateElement(old, vnode, hooks) {
 		var element = vnode.dom = old.dom
+		if (vnode.tag === "textarea") {
+			if (vnode.attrs == null) vnode.attrs = {}
+			if (vnode.text != null) vnode.attrs.value = vnode.text //FIXME handle multiple children
+		}
 		updateAttrs(vnode, old.attrs, vnode.attrs)
 		if (old.text != null && vnode.text != null && vnode.text !== "") {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
@@ -343,24 +345,12 @@ module.exports = function($window, onevent) {
 	function setAttr(vnode, key, old, value) {
 		//TODO test input undo history
 		var element = vnode.dom
-		if (key === "key" || old === value || typeof value === "undefined" || isLifecycleMethod(key)) return
+		if (key === "key" || (!isFormAttribute(vnode, key) && old === value) || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
 		}
-		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") {
-			var eventName = key.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key] != null) {
-				element.removeEventListener(eventName, vnode.events[key], false)
-			}
-			vnode.events[key] = function(e) {
-				var result = value.call(element, e)
-				if (typeof onevent === "function") onevent.call(element, e)
-				return result
-			}
-			element.addEventListener(eventName, vnode.events[key], false)
-		}
+		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && vnode.ns === undefined) element[key] = value
 		else {
@@ -371,10 +361,17 @@ module.exports = function($window, onevent) {
 			else element.setAttribute(key, value)
 		}
 	}
+	function setLateAttrs(vnode) {
+		var attrs = vnode.attrs
+		if (vnode.tag === "select" && attrs != null) {
+			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value)
+			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex)
+		}
+	}
 	function updateAttrs(vnode, old, attrs) {
 		if (attrs != null) {
 			for (var key in attrs) {
-				setAttr(vnode, key, old[key], attrs[key])
+				setAttr(vnode, key, old && old[key], attrs[key])
 			}
 		}
 		if (old != null) {
@@ -384,6 +381,9 @@ module.exports = function($window, onevent) {
 				}
 			}
 		}
+	}
+	function isFormAttribute(vnode, attr) {
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "shouldUpdate"
@@ -406,6 +406,24 @@ module.exports = function($window, onevent) {
 					if (!(key in style)) element.style[key] = ""
 				}
 			}
+		}
+	}
+	
+	//event
+	function updateEvent(vnode, key, value) {
+		var element = vnode.dom
+		var callback = function(e) {
+			var result = value.call(element, e)
+			if (typeof onevent === "function") onevent.call(element, e)
+			return result
+		}
+		if (key in element) element[key] = callback
+		else {
+			var eventName = key.slice(2)
+			if (vnode.events === undefined) vnode.events = {}
+			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
+			vnode.events[key] = callback
+			element.addEventListener(eventName, vnode.events[key], false)
 		}
 	}
 

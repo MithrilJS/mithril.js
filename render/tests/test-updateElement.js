@@ -34,6 +34,17 @@ o.spec("updateElement", function() {
 		o(updated.dom).equals(root.firstChild)
 		o(updated.dom.attributes["title"].nodeValue).equals("d")
 	})
+	o("adds attr from empty attrs", function() {
+		var vnode = {tag: "a"}
+		var updated = {tag: "a", attrs: {title: "d"}}
+		
+		render(root, [vnode])
+		render(root, [updated])
+		
+		o(updated.dom).equals(vnode.dom)
+		o(updated.dom).equals(root.firstChild)
+		o(updated.dom.attributes["title"].nodeValue).equals("d")
+	})
 	o("removes attr", function() {
 		var vnode = {tag: "a", attrs: {id: "b", title: "d"}}
 		var updated = {tag: "a", attrs: {id: "c"}}
