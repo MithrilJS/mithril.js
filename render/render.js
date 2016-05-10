@@ -358,7 +358,9 @@ module.exports = function($window, onevent) {
 				if (value) element.setAttribute(key, "")
 				else element.removeAttribute(key)
 			}
-			else element.setAttribute(key, value)
+			else element.setAttribute(
+				key === "className" ? "class" : key,
+				value)
 		}
 	}
 	function setLateAttrs(vnode) {

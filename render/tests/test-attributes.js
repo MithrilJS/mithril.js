@@ -76,4 +76,13 @@ o.spec("attributes", function() {
 			o(a.dom.attributes["href"]).equals(undefined)
 		})
 	})
+	o.spec("svg class", function() {
+		o("when className is specified then it should be added as a class", function() {
+			var a = {tag: "svg", attrs: {className: "test"}}
+
+			render(root, [a]);
+
+			o(a.dom.attributes.class.nodeValue).equals("test")
+		})
+	})
 })
