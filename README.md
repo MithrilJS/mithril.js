@@ -12,7 +12,7 @@ Some examples of usage can be found in the [examples](examples) folder. [ThreadI
 
 ## Performance
 
-Mithril's virtual DOM engine is less than 500 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation (non-optimized)](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are optimized dbmon implementations for [React v15.0.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html) and [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html)).
+Mithril's virtual DOM engine is less than 500 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation (non-optimized)](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are optimized dbmon implementations for [React v15.0.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html), [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html) and [Mithril 0.2.x](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril-0.2.x/index.html)).
 
 ## Lifecycle methods and Animation Support
 
