@@ -82,7 +82,7 @@ o.spec("attributes", function() {
 
 			render(root, [a]);
 
-			o(a.dom.attributes.class.nodeValue).equals("test")
+			o(a.dom.attributes["class"].nodeValue).equals("test")
 		})
 	})
 })

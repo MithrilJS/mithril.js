@@ -7,7 +7,6 @@ o.spec("domMock", function() {
 	var $document
 	o.beforeEach(function() {
 		$document = domMock().document
-		//$document = document //TODO clean up
 	})
 	
 	o.spec("createElement", function() {
