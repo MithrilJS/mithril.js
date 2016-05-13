@@ -12,6 +12,22 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("?a=b&c=d")
 		o(data).deepEquals({a: "b", c: "d"})
 	})
+	o("handles escaped values", function() {
+		var data = parseQueryString("?%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23=%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23")
+		o(data).deepEquals({";:@&=+$,/?%#": ";:@&=+$,/?%#"})
+	})
+	o("handles escaped square brackets", function() {
+		var data = parseQueryString("?a%5B%5D=b")
+		o(data).deepEquals({"a": ["b"]})
+	})
+	o("handles escaped unicode", function() {
+		var data = parseQueryString("?%C3%B6=%C3%B6")
+		o(data).deepEquals({"ö": "ö"})
+	})
+	o("handles unicode", function() {
+		var data = parseQueryString("?ö=ö")
+		o(data).deepEquals({"ö": "ö"})
+	})
 	o("parses without question mark", function() {
 		var data = parseQueryString("a=b&c=d")
 		o(data).deepEquals({a: "b", c: "d"})
@@ -69,6 +85,10 @@ o.spec("parseQueryString", function() {
 	})
 	o("does not cast empty string to number", function() {
 		var data = parseQueryString("a=")
+		o(data).deepEquals({a: ""})
+	})
+	o("does not cast void to number", function() {
+		var data = parseQueryString("a")
 		o(data).deepEquals({a: ""})
 	})
 })

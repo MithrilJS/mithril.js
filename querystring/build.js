@@ -20,6 +20,6 @@ module.exports = function buildQueryString(object) {
 				destructure(key + "[" + i + "]", value[i])
 			}
 		}
-		else args.push(encodeURIComponent(key) + "=" + (value != null ? encodeURIComponent(value) : ""))
+		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }

@@ -5,47 +5,56 @@ var parseQueryString = require("../querystring/parse")
 
 module.exports = function($window, prefix) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
-
-	function parsePath(path) {
-		var params = {}
+	
+	function normalize(fragment) {
+		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
+		return data
+	}
+	
+	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
 		var pathEnd = queryIndex > -1 ? queryIndex : hashIndex > -1 ? hashIndex : path.length
 		if (queryIndex > -1) {
 			var queryEnd = hashIndex > -1 ? hashIndex : path.length
 			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key in queryParams) params[key] = queryParams[key]
+			for (var key in queryParams) queryData[key] = queryParams[key]
 		}
 		if (hashIndex > -1) {
 			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key in hashParams) params[key] = hashParams[key]
+			for (var key in hashParams) hashData[key] = hashParams[key]
 		}
-		return {name: path.slice(0, pathEnd), params: params}
+		return path.slice(0, pathEnd)
 	}
 
 	function getPath() {
 		var type = prefix.charAt(0)
 		switch (type) {
-			case "#": return $window.location.hash.slice(prefix.length)
-			case "?": return $window.location.search.slice(prefix.length) + $window.location.hash
-			default: return $window.location.pathname + $window.location.search + $window.location.hash
+			case "#": return normalize("hash").slice(prefix.length)
+			case "?": return normalize("search").slice(prefix.length) + normalize("hash")
+			default: return normalize("pathname") + normalize("search") + normalize("hash")
 		}
 	}
 
 	function setPath(path, data, options) {
+		var queryData = {}, hashData = {}
+		path = parsePath(path, queryData, hashData)
+		if (data != null) {
+			for (var key in data) queryData[key] = data[key]
+			path = path.replace(/:([^\/]+)/g, function(match, token) {
+				delete queryData[token]
+				return data[token]
+			})
+		}
+		
+		var query = buildQueryString(queryData)
+		if (query) path += "?" + query
+		
+		var hash = buildQueryString(hashData)
+		if (hash) path += "#" + hash
+		
 		if (supportsPushState) {
-			var queryData = {}
-			if (data != null) {
-				for (var key in data) queryData[key] = data[key]
-				path = path.replace(/:([^\/]+)/g, function(match, token) {
-					delete queryData[token]
-					return data[token]
-				})
-			}
-			
-			var query = buildQueryString(queryData)
-			if (query) path = path + "?" + query
-			
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
 			$window.onpopstate()
@@ -58,27 +67,28 @@ module.exports = function($window, prefix) {
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 		
-		function resolveRoute(e) {
+		function resolveRoute() {
 			var path = getPath()
-			var data = parsePath(path)
+			var params = {}
+			var pathname = parsePath(path, params, params)
 			
 			for (var route in routes) {
 				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 				
-				if (matcher.test(data.name)) {
-					data.name.replace(matcher, function() {
+				if (matcher.test(pathname)) {
+					pathname.replace(matcher, function() {
 						var keys = route.match(/:[^\/]+/g) || []
 						var values = [].slice.call(arguments, 1, -2)
 						for (var i = 0; i < keys.length; i++) {
-							data.params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route], data.params, path, route)
+						resolve(routes[route], params, path, route)
 					})
 					return
 				}
 			}
 			
-			reject(path, data.params)
+			reject(path, params)
 		}
 		return resolveRoute
 	}
