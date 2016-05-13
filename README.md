@@ -26,7 +26,7 @@ Mithril's `config` method is now replaced by several lifecycle methods to improv
 
 ## Robustness
 
-There are over 2100 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
+There are over 2200 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
 
 ## Modularity
 

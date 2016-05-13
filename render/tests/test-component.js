@@ -272,6 +272,24 @@ o.spec("component", function() {
 				}
 			})
 		})
+		o("does not calls oninit on redraw", function() {
+			var init = o.spy()
+			var component = {
+				view: function() {
+					return {tag: "div", attrs: {id: "a"}, text: "b"}
+				},
+				oninit: init,
+			}
+			
+			function view() {
+				return {tag: component}
+			}
+			
+			render(root, view())
+			render(root, view())
+			
+			o(init.callCount).equals(1)
+		})
 		o("calls oncreate", function() {
 			var called = 0
 			var component = {
@@ -294,6 +312,24 @@ o.spec("component", function() {
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
 			o(root.firstChild.firstChild.nodeValue).equals("b")
+		})
+		o("does not calls oncreate on redraw", function() {
+			var create = o.spy()
+			var component = {
+				view: function() {
+					return {tag: "div", attrs: {id: "a"}, text: "b"}
+				},
+				oncreate: create,
+			}
+			
+			function view() {
+				return {tag: component}
+			}
+			
+			render(root, view())
+			render(root, view())
+			
+			o(create.callCount).equals(1)
 		})
 		o("calls oncreate when returning fragment", function() {
 			var called = 0
