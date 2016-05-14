@@ -37,46 +37,46 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing element", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}}
+		var vnode = {tag: "div", attrs: {onremove: remove}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
 		
 		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode)
+		o(remove.this).equals(vnode.state)
 		o(remove.args[0]).equals(vnode)
 	})
 	o("calls onremove when removing text", function() {
 		var remove = o.spy()
-		var vnode = {tag: "#", attrs: {onremove: remove}, children: "a"}
+		var vnode = {tag: "#", attrs: {onremove: remove}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
 		
 		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode)
+		o(remove.this).equals(vnode.state)
 		o(remove.args[0]).equals(vnode)
 	})
 	o("calls onremove when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = {tag: "[", attrs: {onremove: remove}, children: []}
+		var vnode = {tag: "[", attrs: {onremove: remove}, children: [], state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
 		
 		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode)
+		o(remove.this).equals(vnode.state)
 		o(remove.args[0]).equals(vnode)
 	})
 	o("calls onremove when removing html", function() {
 		var remove = o.spy()
-		var vnode = {tag: "<", attrs: {onremove: remove}, children: "a"}
+		var vnode = {tag: "<", attrs: {onremove: remove}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
 		
 		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode)
+		o(remove.this).equals(vnode.state)
 		o(remove.args[0]).equals(vnode)
 	})
 	o("does not set onremove as an event handler", function() {

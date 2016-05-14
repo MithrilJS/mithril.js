@@ -11,7 +11,8 @@ o.spec("Router.defineRoutes", function() {
 	
 			o.beforeEach(function() {
 				$window = pushStateMock()
-				router = new Router($window, prefix)
+				router = new Router($window)
+				router.setPrefix(prefix)
 				onRouteChange = o.spy()
 				onFail = o.spy()
 			})

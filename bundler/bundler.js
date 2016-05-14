@@ -35,4 +35,4 @@ function resolve(dir, data) {
 	return data
 }
 
-fs.writeFileSync("mithril.min.js", resolve(".", fs.readFileSync("index.js", "utf8")), "utf8")
+fs.writeFileSync("mithril.js", resolve(".", fs.readFileSync("index.js", "utf8")), "utf8")

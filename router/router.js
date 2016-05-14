@@ -3,8 +3,11 @@
 var buildQueryString = require("../querystring/build")
 var parseQueryString = require("../querystring/parse")
 
-module.exports = function($window, prefix) {
+module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	
+	var prefix = "#!"
+	function setPrefix(value) {prefix = value}
 	
 	function normalize(fragment) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
@@ -93,5 +96,13 @@ module.exports = function($window, prefix) {
 		return resolveRoute
 	}
 	
-	return {getPath: getPath, setPath: setPath, defineRoutes: defineRoutes}
+	function link(vnode) {
+		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
+		vnode.dom.onclick = function(e) {
+			e.preventDefault()
+			setPath(vnode.attrs.href)
+		}
+	}
+	
+	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }

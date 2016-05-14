@@ -10,7 +10,9 @@ o.spec("event", function() {
 		$window = domMock()
 		root = $window.document.body
 		onevent = o.spy()
-		render = vdom($window, onevent).render
+		var renderer = vdom($window)
+		renderer.setEventCallback(onevent)
+		render = renderer.render
 	})
 
 	o("handles onclick", function() {

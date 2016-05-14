@@ -15,15 +15,15 @@ o.spec("onupdate", function() {
 	o("does not call onupdate when creating element", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onupdate: create}}
-		var updated = {tag: "div", attrs: {onupdate: update}}
+		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
+		var updated = {tag: "div", attrs: {onupdate: update}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("does not call onupdate when removing element", function() {
@@ -74,85 +74,85 @@ o.spec("onupdate", function() {
 	o("calls onupdate when noop", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onupdate: create}}
-		var updated = {tag: "div", attrs: {onupdate: update}}
+		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
+		var updated = {tag: "div", attrs: {onupdate: update}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate when updating attr", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onupdate: create}}
-		var updated = {tag: "div", attrs: {onupdate: update, id: "a"}}
+		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
+		var updated = {tag: "div", attrs: {onupdate: update, id: "a"}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate when updating children", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onupdate: create}, children: [{tag: "a"}]}
-		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "b"}]}
+		var vnode = {tag: "div", attrs: {onupdate: create}, children: [{tag: "a"}], state: {}}
+		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "b"}], state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate when updating text", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "#", attrs: {onupdate: create}, children: "a"}
-		var updated = {tag: "#", attrs: {onupdate: update}, children: "a"}
+		var vnode = {tag: "#", attrs: {onupdate: create}, children: "a", state: {}}
+		var updated = {tag: "#", attrs: {onupdate: update}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate when updating fragment", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "[", attrs: {onupdate: create}, children: []}
-		var updated = {tag: "[", attrs: {onupdate: update}, children: []}
+		var vnode = {tag: "[", attrs: {onupdate: create}, children: [], state: {}}
+		var updated = {tag: "[", attrs: {onupdate: update}, children: [], state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate when updating html", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "<", attrs: {onupdate: create}, children: "a"}
-		var updated = {tag: "<", attrs: {onupdate: update}, children: "a"}
+		var vnode = {tag: "<", attrs: {onupdate: create}, children: "a", state: {}}
+		var updated = {tag: "<", attrs: {onupdate: update}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls onupdate after full DOM update", function() {

@@ -14,135 +14,135 @@ o.spec("oninit", function() {
 
 	o("calls oninit when creating element", function() {
 		var callback = o.spy()
-		var vnode = {tag: "div", attrs: {oninit: callback}}
+		var vnode = {tag: "div", attrs: {oninit: callback}, state: {}}
 		
 		render(root, [vnode])
 		
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode)
+		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
 	})
 	o("calls oninit when creating text", function() {
 		var callback = o.spy()
-		var vnode = {tag: "#", attrs: {oninit: callback}, children: "a"}
+		var vnode = {tag: "#", attrs: {oninit: callback}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode)
+		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
 	})
 	o("calls oninit when creating fragment", function() {
 		var callback = o.spy()
-		var vnode = {tag: "[", attrs: {oninit: callback}, children: []}
+		var vnode = {tag: "[", attrs: {oninit: callback}, children: [], state: {}}
 		
 		render(root, [vnode])
 		
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode)
+		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
 	})
 	o("calls oninit when creating html", function() {
 		var callback = o.spy()
-		var vnode = {tag: "<", attrs: {oninit: callback}, children: "a"}
+		var vnode = {tag: "<", attrs: {oninit: callback}, children: "a", state: {}}
 		
 		render(root, [vnode])
 		
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode)
+		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
 	})
 	o("calls oninit when replacing keyed", function() {
 		var createDiv = o.spy()
 		var createA = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {oninit: createDiv}}
-		var updated = {tag: "a", key: 1, attrs: {oninit: createA}}
+		var vnode = {tag: "div", key: 1, attrs: {oninit: createDiv}, state: {}}
+		var updated = {tag: "a", key: 1, attrs: {oninit: createA}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(createDiv.callCount).equals(1)
-		o(createDiv.this).equals(vnode)
+		o(createDiv.this).equals(vnode.state)
 		o(createDiv.args[0]).equals(vnode)
 		o(createA.callCount).equals(1)
-		o(createA.this).equals(updated)
+		o(createA.this).equals(updated.state)
 		o(createA.args[0]).equals(updated)
 	})
 	o("does not call oninit when noop", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {oninit: create}}
-		var updated = {tag: "div", attrs: {oninit: update}}
+		var vnode = {tag: "div", attrs: {oninit: create}, state: {}}
+		var updated = {tag: "div", attrs: {oninit: update}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(0)
 	})
 	o("does not call oninit when updating attr", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {oninit: create}}
-		var updated = {tag: "div", attrs: {oninit: update, id: "a"}}
+		var vnode = {tag: "div", attrs: {oninit: create}, state: {}}
+		var updated = {tag: "div", attrs: {oninit: update, id: "a"}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(0)
 	})
 	o("does not call oninit when updating children", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {oninit: create}, children: [{tag: "a"}]}
-		var updated = {tag: "div", attrs: {oninit: update}, children: [{tag: "b"}]}
+		var vnode = {tag: "div", attrs: {oninit: create}, children: [{tag: "a"}], state: {}}
+		var updated = {tag: "div", attrs: {oninit: update}, children: [{tag: "b"}], state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(0)
 	})
 	o("does not call oninit when updating keyed", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {oninit: create}}
+		var vnode = {tag: "div", key: 1, attrs: {oninit: create}, state: {}}
 		var otherVnode = {tag: "a", key: 2}
-		var updated = {tag: "div", key: 1, attrs: {oninit: update}}
+		var updated = {tag: "div", key: 1, attrs: {oninit: update}, state: {}}
 		var otherUpdated = {tag: "a", key: 2}
 		
 		render(root, [vnode, otherVnode])
 		render(root, [otherUpdated, updated])
 		
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(0)
 	})
 	o("does not call oninit when removing", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {oninit: create}}
+		var vnode = {tag: "div", attrs: {oninit: create}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
 		
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 	})
 	o("calls oninit when recycling", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {oninit: create}}
-		var updated = {tag: "div", key: 1, attrs: {oninit: update}}
+		var vnode = {tag: "div", key: 1, attrs: {oninit: create}, state: {}}
+		var updated = {tag: "div", key: 1, attrs: {oninit: update}, state: {}}
 		
 		render(root, [vnode])
 		render(root, [])
@@ -150,28 +150,28 @@ o.spec("oninit", function() {
 		
 		o(vnode.dom).equals(updated.dom)
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode)
+		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(updated.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls oninit at the same step as onupdate", function() {
 		var create = o.spy()
 		var update = o.spy()
 		var callback = o.spy()
-		var vnode = {tag: "div", attrs: {onupdate: create}, children: []}
-		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "a", attrs: {oninit: callback}}]}
+		var vnode = {tag: "div", attrs: {onupdate: create}, children: [], state: {}}
+		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "a", attrs: {oninit: callback}, state: {}}], state: {}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
-		o(update.this).equals(updated)
+		o(update.this).equals(vnode.state)
 		o(update.args[0]).equals(updated)
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(updated.children[0])
+		o(callback.this).equals(updated.children[0].state)
 		o(callback.args[0]).equals(updated.children[0])
 	})
 	o("calls oninit before full DOM creation", function() {

@@ -1,8 +1,102 @@
 "use strict"
 
-var Node = require("../render/node")
+function Node(tag, key, attrs, children, text, dom) {
+	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined}
+}
+Node.normalize = function(node) {
+	if (node instanceof Array) return Node("[", undefined, undefined, Node.normalizeChildren(node), undefined, undefined)
+	else if (node != null && typeof node !== "object") return Node("#", undefined, undefined, node, undefined, undefined)
+	return node
+}
+Node.normalizeChildren = function normalizeChildren(children) {
+	for (var i = 0; i < children.length; i++) {
+		children[i] = Node.normalize(children[i])
+	}
+	return children
+}
 
-module.exports = function($window) {
+var Node = Node
+
+var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:\s*=\s*("|'|)(.*?)\2)?\]/
+var selectorCache = {}
+function hyperscript(selector) {
+	if (typeof selector === "string") {
+		if (selectorCache[selector] === undefined) {
+			var match, tag, id, classes = [], attributes = {}
+			while (match = selectorParser.exec(selector)) {
+				var type = match[1], value = match[2]
+				if (type === "" && value !== "") tag = value
+				else if (type === "#") attributes.id = value
+				else if (type === ".") classes.push(value)
+				else if (match[3][0] === "[") {
+					var pair = attrParser.exec(match[3])
+					attributes[pair[1]] = pair[3] || true
+				}
+			}
+			if (classes.length > 0) attributes.className = classes.join(" ")
+			selectorCache[selector] = function(attrs, children) {
+				var hasAttrs = false, childList, text
+				var className = attrs.className || attrs.class
+				for (var key in attributes) attrs[key] = attributes[key]
+				if (className !== undefined) {
+					if (attrs.class !== undefined) {
+						attrs.class = undefined
+						attrs.className = className
+					}
+					if (attributes.className !== undefined) attrs.className = attributes.className + " " + className
+				}
+				for (var key in attrs) {
+					if (key !== "key") {
+						hasAttrs = true
+						break
+					}
+				}
+				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
+				else childList = children
+				
+				var vnode = Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
+				switch (vnode.tag) {
+					case "svg": changeNS("http://www.w3.org/2000/svg", vnode); break
+					case "math": changeNS("http://www.w3.org/1998/Math/MathML", vnode); break
+				}
+				return vnode
+			}
+		}
+	}
+	var attrs, children, childrenIndex
+	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !(arguments[1] instanceof Array)) {
+		attrs = arguments[1]
+		childrenIndex = 2
+	}
+	else childrenIndex = 1
+	if (arguments.length === childrenIndex + 1) {
+		children = arguments[childrenIndex] instanceof Array ? arguments[childrenIndex] : [arguments[childrenIndex]]
+	}
+	else {
+		children = []
+		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
+	}
+	
+	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
+	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
+}
+
+function changeNS(ns, vnode) {
+	vnode.ns = ns
+	if (vnode.children != null) {
+		for (var i = 0; i < vnode.children.length; i++) changeNS(ns, vnode.children[i])
+	}
+}
+
+var m = hyperscript
+
+
+var trust = function(html) {
+	return Node("<", undefined, undefined, html, undefined, undefined)
+}
+
+
+var createRenderer = function($window) {
 	var $doc = $window.document
 
 	var onevent
@@ -19,7 +113,10 @@ module.exports = function($window) {
 	}
 	function createNode(vnode, hooks) {
 		var tag = vnode.tag
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
+		if (vnode.attrs) {
+			if (vnode.attrs.oninit) vnode.attrs.oninit.call(vnode, vnode)
+			if (vnode.attrs.oncreate) hooks.push(vnode.attrs.oncreate.bind(vnode, vnode))
+		}
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
@@ -463,3 +560,326 @@ module.exports = function($window) {
 
 	return {render: render, setEventCallback: setEventCallback}
 }
+
+
+var createMounter = function($window, redraw) {
+	return function(root, component) {
+		var render = createRenderer($window, draw).render
+		
+		function draw() {
+			render(root, component)
+		}
+		
+		redraw.run = redraw
+	}
+}
+
+var buildQueryString = function buildQueryString(object) {
+	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
+	
+	var args = []
+	for (var key in object) {
+		destructure(key, object[key])
+	}
+	return args.join("&")
+	
+	function destructure(key, value) {
+		if (value instanceof Array) {
+			for (var i = 0; i < value.length; i++) {
+				destructure(key + "[" + i + "]", value[i])
+			}
+		}
+		else if (Object.prototype.toString.call(value) === "[object Object]") {
+			for (var i in value) {
+				destructure(key + "[" + i + "]", value[i])
+			}
+		}
+		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
+	}
+}
+var parseQueryString = function parseQueryString(string) {
+	if (string === "" || string == null) return {}
+	if (string.charAt(0) === "?") string = string.slice(1)
+		
+	var entries = string.split("&"), data = {}, counters = {}
+	for (var i = 0; i < entries.length; i++) {
+		var entry = entries[i].split("=")
+		var key = decodeURIComponent(entry[0])
+		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		
+		//TODO refactor out
+		var number = Number(value)
+		if (value !== "" && !isNaN(number) || value === "NaN") value = number
+		else if (value === "true") value = true
+		else if (value === "false") value = false
+		else {
+			var date = new Date(value)
+			if (!isNaN(date.getTime())) value = date
+		}
+		
+		var levels = key.split(/\]\[?|\[/)
+		var cursor = data
+		if (key.indexOf("[") > -1) levels.pop()
+		for (var j = 0; j < levels.length; j++) {
+			var level = levels[j], nextLevel = levels[j + 1]
+			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel))
+			var isValue = j === levels.length - 1
+			if (level === "") {
+				var key = levels.slice(0, j).join()
+				if (counters[key] == null) counters[key] = 0
+				level = counters[key]++
+			}
+			if (cursor[level] == null) {
+				cursor[level] = isValue ? value : isNumber ? [] : {}
+			}
+			cursor = cursor[level]
+		}
+	}
+	return data
+}
+
+var createRouter = function($window) {
+	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	
+	var prefix = "#!"
+	function setPrefix(value) {prefix = value}
+	
+	function normalize(fragment) {
+		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
+		return data
+	}
+	
+	function parsePath(path, queryData, hashData) {
+		var queryIndex = path.indexOf("?")
+		var hashIndex = path.indexOf("#")
+		var pathEnd = queryIndex > -1 ? queryIndex : hashIndex > -1 ? hashIndex : path.length
+		if (queryIndex > -1) {
+			var queryEnd = hashIndex > -1 ? hashIndex : path.length
+			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
+			for (var key in queryParams) queryData[key] = queryParams[key]
+		}
+		if (hashIndex > -1) {
+			var hashParams = parseQueryString(path.slice(hashIndex + 1))
+			for (var key in hashParams) hashData[key] = hashParams[key]
+		}
+		return path.slice(0, pathEnd)
+	}
+
+	function getPath() {
+		var type = prefix.charAt(0)
+		switch (type) {
+			case "#": return normalize("hash").slice(prefix.length)
+			case "?": return normalize("search").slice(prefix.length) + normalize("hash")
+			default: return normalize("pathname") + normalize("search") + normalize("hash")
+		}
+	}
+
+	function setPath(path, data, options) {
+		var queryData = {}, hashData = {}
+		path = parsePath(path, queryData, hashData)
+		if (data != null) {
+			for (var key in data) queryData[key] = data[key]
+			path = path.replace(/:([^\/]+)/g, function(match, token) {
+				delete queryData[token]
+				return data[token]
+			})
+		}
+		
+		var query = buildQueryString(queryData)
+		if (query) path += "?" + query
+		
+		var hash = buildQueryString(hashData)
+		if (hash) path += "#" + hash
+		
+		if (supportsPushState) {
+			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
+			else $window.history.pushState(null, null, prefix + path)
+			$window.onpopstate()
+		}
+		else $window.location.href = prefix + path
+	}
+	
+	function defineRoutes(routes, resolve, reject) {
+		if (supportsPushState) $window.onpopstate = resolveRoute
+		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
+		resolveRoute()
+		
+		function resolveRoute() {
+			var path = getPath()
+			var params = {}
+			var pathname = parsePath(path, params, params)
+			
+			for (var route in routes) {
+				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+				
+				if (matcher.test(pathname)) {
+					pathname.replace(matcher, function() {
+						var keys = route.match(/:[^\/]+/g) || []
+						var values = [].slice.call(arguments, 1, -2)
+						for (var i = 0; i < keys.length; i++) {
+							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+						}
+						resolve(routes[route], params, path, route)
+					})
+					return
+				}
+			}
+			
+			reject(path, params)
+		}
+		return resolveRoute
+	}
+	
+	function link(vnode) {
+		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
+		vnode.dom.onclick = function(e) {
+			e.preventDefault()
+			setPath(vnode.attrs.href)
+		}
+	}
+	
+	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
+}
+
+var createRouterInstance = function($window, redraw) {
+	var renderer = createRenderer($window)
+	var router = createRouter($window)
+	var route = function(root, defaultRoute, routes) {
+		var replay = router.defineRoutes(routes, function(component, args) {
+			renderer.render(root, {tag: component, attrs: args})
+		}, function() {
+			router.setPath(defaultRoute)
+		})
+		renderer.setEventCallback(replay)
+		redraw.run = replay
+	}
+	route.link = router.link
+	route.prefix = router.setPrefix
+	
+	return route
+}
+
+
+
+var createRequester = function($window, Promise) {
+	var callbackCount = 0
+
+	function ajax(args) {
+		return new Promise(function(resolve, reject) {
+			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			
+			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
+			if (typeof args.deserialize !== "function") args.deserialize = deserialize
+			if (typeof args.extract !== "function") args.extract = extract
+			
+			args.url = interpolate(args.url, args.data)
+			if (useBody) args.data = args.serialize(args.data)
+			else args.url = assemble(args.url, args.data)
+			
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open(args.method, args.url, args.async || true, args.user, args.password)
+			
+			if (args.serialize === JSON.stringify && useBody) {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
+			}
+			if (args.deserialize === deserialize) {
+				xhr.setRequestHeader("Accept", "application/json, text/*")
+			}
+			
+			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
+			
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					try {
+						var response = args.deserialize(args.extract(xhr, args))
+						if (xhr.status >= 200 && xhr.status < 300) {
+							if (typeof args.type === "function") {
+								if (response instanceof Array) {
+									for (var i = 0; i < response.length; i++) {
+										response[i] = new args.type(response[i])
+									}
+								}
+								else response = new args.type(response[i])
+							}
+							
+							resolve(response)
+						}
+						else reject(new Error(xhr.responseText))
+					}
+					catch (e) {
+						reject(e)
+					}
+				}
+			}
+			
+			if (useBody) xhr.send(args.data)
+			else xhr.send()
+		})
+	}
+
+	function jsonp(args) {
+		return new Promise(function(resolve, reject) {
+			var callbackKey = "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var script = $window.document.createElement("script")
+			$window[callbackKey] = function(data) {
+				script.parentNode.removeChild(script)
+				resolve(data)
+				$window[callbackKey] = undefined
+			}
+			script.onerror = function(e) {
+				script.parentNode.removeChild(script)
+				reject(new Error("JSONP request failed"))
+				$window[callbackKey] = undefined
+			}
+			if (args.data == null) args.data = {}
+			args.url = interpolate(args.url, args.data)
+			args.data[args.callbackKey || "callback"] = callbackKey
+			script.src = assemble(args.url, args.data)
+			$window.document.documentElement.appendChild(script)
+		})
+	}
+
+	function interpolate(url, data) {
+		if (data == null) return url
+		
+		var tokens = url.match(/:[^\/]+/gi) || []
+		for (var i = 0; i < tokens.length; i++) {
+			var key = tokens[i].slice(1)
+			if (data[key] != null) {
+				url = url.replace(tokens[i], data[key])
+				delete data[key]
+			}
+		}
+		return url
+	}
+
+	function assemble(url, data) {
+		var querystring = buildQueryString(data)
+		if (querystring !== "") {
+			var prefix = url.indexOf("?") < 0 ? "?" : "&"
+			url += prefix + querystring
+		}
+		return url
+	}
+
+	function deserialize(data) {
+		try {return data !== "" ? JSON.parse(data) : null}
+		catch (e) {throw new Error(data)}
+	}
+
+	function extract(xhr) {return xhr.responseText}
+	
+	return {ajax: ajax, jsonp: jsonp}
+}
+var redraw = {run: function() {}}
+
+m.redraw = function() {
+	redraw.run()
+}
+m.trust = trust
+m.mount = createMounter(window, redraw)
+m.route = createRouterInstance(window, redraw)
+m.request = createRequester(window, Promise).ajax
+
+module.exports = m
