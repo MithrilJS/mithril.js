@@ -78,6 +78,7 @@ function hyperscript(selector) {
 	}
 	
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
+	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 
@@ -113,10 +114,7 @@ var createRenderer = function($window) {
 	}
 	function createNode(vnode, hooks) {
 		var tag = vnode.tag
-		if (vnode.attrs) {
-			if (vnode.attrs.oninit) vnode.attrs.oninit.call(vnode, vnode)
-			if (vnode.attrs.oncreate) hooks.push(vnode.attrs.oncreate.bind(vnode, vnode))
-		}
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
@@ -184,8 +182,10 @@ var createRenderer = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks) {
+		vnode.state = copy(vnode.tag)
+		
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		var element = createNode(vnode.instance, hooks)
 		vnode.dom = vnode.instance.dom
 		vnode.domSize = vnode.instance.domSize
@@ -324,7 +324,7 @@ var createRenderer = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
 		vnode.dom = vnode.instance.dom
@@ -545,6 +545,20 @@ var createRenderer = function($window) {
 		}
 		return false
 	}
+	
+	function copy(data) {
+		if (data instanceof Array) {
+			var output = []
+			for (var i = 0; i < data.length; i++) output[i] = copy(data[i])
+			return output
+		}
+		else if (typeof data === "object") {
+			var output = {}
+			for (var i in data) output[i] = copy(data[i])
+			return output
+		}
+		return data
+	}
 
 	function render(dom, vnodes) {
 		var hooks = []
@@ -564,13 +578,15 @@ var createRenderer = function($window) {
 
 var createMounter = function($window, redraw) {
 	return function(root, component) {
-		var render = createRenderer($window, draw).render
+		var renderer = createRenderer($window)
+		renderer.setEventCallback(draw)
 		
 		function draw() {
-			render(root, component)
+			renderer.render(root, {tag: component})
 		}
 		
-		redraw.run = redraw
+		redraw.run = draw
+		draw()
 	}
 }
 

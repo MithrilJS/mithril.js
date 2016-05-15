@@ -87,8 +87,10 @@ module.exports = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks) {
+		vnode.state = copy(vnode.tag)
+		
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		var element = createNode(vnode.instance, hooks)
 		vnode.dom = vnode.instance.dom
 		vnode.domSize = vnode.instance.domSize
@@ -227,7 +229,7 @@ module.exports = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode, vnode))
+		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
 		vnode.dom = vnode.instance.dom
@@ -447,6 +449,20 @@ module.exports = function($window) {
 			return true
 		}
 		return false
+	}
+	
+	function copy(data) {
+		if (data instanceof Array) {
+			var output = []
+			for (var i = 0; i < data.length; i++) output[i] = copy(data[i])
+			return output
+		}
+		else if (typeof data === "object") {
+			var output = {}
+			for (var i in data) output[i] = copy(data[i])
+			return output
+		}
+		return data
 	}
 
 	function render(dom, vnodes) {

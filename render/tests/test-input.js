@@ -14,6 +14,7 @@ o.spec("form inputs", function() {
 	})
 	o.afterEach(function() {
 		while (root.firstChild) root.removeChild(root.firstChild)
+		root.vnodes = null
 	})
 
 	o.spec("input", function() {

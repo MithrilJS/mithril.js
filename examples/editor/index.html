@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Markdown Editor</title>
+		<style>
+html,body {height:100%;margin:0;}
+h1,h2,h3,h4,h5,h6,p {margin:0 0 10px;}
+#editor {display:flex;height:100%;}
+.editor-input,.editor-preview {box-sizing:border-box;height:100%;margin:0;padding:10px;width:50%;}
+.editor-input {border:0;border-right:1px solid #ccc;outline:none;resize:none;}
+		</style>
+	</head>
+	<body>
+		<div id="editor"></div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+		<script src="../../module/module.js"></script>
+		<script src="../../render/node.js"></script>
+		<script src="../../render/hyperscript.js"></script>
+		<script src="../../render/render.js"></script>
+		<script src="../../render/trust.js"></script>
+		<script>
+var m = require("../../render/hyperscript")
+var renderer = require("../../render/render")(window)
+renderer.setEventCallback(run)
+var trust = require("../../render/trust")
+
+var Editor = {
+	data: "# Markdown Editor\n\nType on the left panel and see the result on the right panel",
+	view: function(vnode) {
+		return [
+			m("textarea.editor-input", {oninput: function(e) {vnode.state.data = e.target.value}}, vnode.state.data),
+			m(".editor-preview", trust(marked(vnode.state.data))),
+		]
+	}
+}
+
+function run() {
+	renderer.render(document.getElementById("editor"), m(Editor))
+}
+run()
+		</script>
+	</body>
+</html>

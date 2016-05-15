@@ -63,6 +63,7 @@ function hyperscript(selector) {
 	}
 	
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
+	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 

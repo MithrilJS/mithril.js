@@ -3,8 +3,8 @@ T.time("Setup");
 var request = require("../../request/request")(window, Promise).ajax
 var m = require("../../render/hyperscript")
 var trust = require("../../render/trust")
-var render = require("../../render/render")(window, run).render
-var router = require("../../router/router")(window, "#")
+var renderer = require("../../render/render")(window)
+var router = require("../../router/router")(window)
 
 //API calls
 var api = {
@@ -178,16 +178,18 @@ var Reply = {
 }
 
 //router
+renderer.setEventCallback(run)
 function run() {
 	replayRoute()
 }
 
 var root = document.getElementById("app")
+router.setPrefix("#")
 var replayRoute = router.defineRoutes({
 	"/thread/:id" : Thread,
 	"/" : Home
 }, function(view, args) {
-	render(root, [m(view, args)])
+	renderer.render(root, [m(view, args)])
 }, function() {
 	router.setPath("/")
 })

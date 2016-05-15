@@ -1,6 +1,6 @@
 var m = require("../../render/hyperscript")
-var render = require("../../render/render")(window, run).render
-var router = require("../../router/router")(window, "#")
+var renderer = require("../../render/render")(window)
+var router = require("../../router/router")(window)
 
 //model
 var todos = loadData()
@@ -124,14 +124,16 @@ function view() {
 
 var root = document.getElementById("todoapp")
 var raf
+renderer.setEventCallback(run)
 function run() {
 	cancelAnimationFrame(raf)
 	raf = requestAnimationFrame(function() {
 		saveData()
-		render(root, view())
+		renderer.render(root, view())
 	})
 }
 
+router.setPrefix("#")
 router.defineRoutes({
 	"/": "all",
 	"/active": "active",

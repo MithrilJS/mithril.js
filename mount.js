@@ -2,12 +2,14 @@ var createRenderer = require("./render/render")
 
 module.exports = function($window, redraw) {
 	return function(root, component) {
-		var render = createRenderer($window, draw).render
+		var renderer = createRenderer($window)
+		renderer.setEventCallback(draw)
 		
 		function draw() {
-			render(root, component)
+			renderer.render(root, {tag: component})
 		}
 		
-		redraw.run = redraw
+		redraw.run = draw
+		draw()
 	}
 }
