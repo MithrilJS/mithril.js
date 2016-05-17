@@ -393,7 +393,7 @@ var ContactsWidget = {
 	}
 }
 
-//ContactList no longer calls `Contact.save`
+//ContactForm no longer calls `Contact.save`
 var ContactForm = {
 	controller: function(args) {
 	        var ctrl = this
