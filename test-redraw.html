@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+	<head></head>
+	<style>
+		html, body {
+			width: 100%;
+			height: 100%;
+			
+			margin: 0;
+		}
+		
+		.mount {
+			display: flex;
+			flex-direction: column;
+			
+			height: 100%;
+		}
+		
+		.outer {
+			flex: 1;
+			overflow-y: auto;
+		}
+		
+		.inner {
+			height: 99999px;
+			background: #CCC;
+		}
+	</style>
+	<body>
+		<div class="mount"></div>
+		<script src="./module/module.js"></script>
+		<script src="./mithril.js"></script>
+		<script type="text/javascript">
+var m = require("./mithril")
+
+var last = 0
+
+m.mount(document.querySelector(".mount"), {
+	view : function() {
+		var now = performance.now()
+		console.log("draw", now - last)
+		last = now
+		
+		return m(".outer", {
+				onscroll : function() {
+					// Unused except to trigger redraws
+				}
+			},
+			m(".inner",
+				m("p", "Scroll me")
+			)
+		)
+	}
+})
+		</script>
+	</body>
+</html>
