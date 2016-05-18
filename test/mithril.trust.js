@@ -65,5 +65,21 @@ describe("m.trust()", function () {
 			expect(root.innerHTML)
 				.to.equal("<div><p>&amp;copy;</p><p>©</p>©</div>")
 		})
+
+		// https://github.com/lhorie/mithril.js/issues/1045
+		it("correctly injects script tags and executes them", function () {
+			var HTMLString =
+			"<script>document.getElementById('root').innerText='After'</script>"
+			var root = document.createElement("div")
+			var child = document.createElement("div")
+			root.id = "root"
+			root.innerText = "Before"
+			root.appendChild(child)
+			document.body.appendChild(root)
+
+			m.render(child, m.trust(HTMLString))
+
+			expect(root.innerText).to.equal("After")
+		})
 	})
 })
