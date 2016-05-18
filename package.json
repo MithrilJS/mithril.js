@@ -15,6 +15,7 @@
     "url" : "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
+    "test": "grunt test"
     "test": "grunt lint test"
   },
   "main": "mithril.js",
