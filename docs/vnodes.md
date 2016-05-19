@@ -34,7 +34,7 @@ Virtual DOM goes one step further than HTML by allowing you to write *dynamic* D
 
 Virtual DOM nodes, or *vnodes*, are javascript objects that represent DOM elements (or parts of the DOM). Mithril's virtual DOM engine consumes a tree of vnodes to produce a DOM tree.
 
-Vnodes can be created via the [`m`](hyperscript.md) hyperscript utility:
+Vnodes can be created via the [`m()`](hyperscript.md) hyperscript utility:
 
 ```javascript
 m("div", {id: "test"}, "hello")
@@ -91,7 +91,7 @@ Component    | `{tag: ExampleComponent}`      | If `tag` is a Javascript object 
 
 Everything in a virtual DOM tree is a vnode, including text. The `m()` utility automatically normalizes its `children` argument and turns strings into text vnodes and nested arrays into fragment vnodes.
 
-Only element tag names and components can be the first argument of the `m` function. In other words, `[`, `#` and `<` are not valid `selector` arguments for `m()`. Trusted HTML vnodes can be created via [`m.trust()`](trust.md)
+Only element tag names and components can be the first argument of the `m()` function. In other words, `[`, `#` and `<` are not valid `selector` arguments for `m()`. Trusted HTML vnodes can be created via [`m.trust()`](trust.md)
 
 ---
 

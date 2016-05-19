@@ -9,7 +9,7 @@
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any Javascript object that has a view method is a Mithril component. Components can be consumed via the [`m`](hyperscript.md) utility:
+Any Javascript object that has a view method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
 ```javascript
 var Example = {

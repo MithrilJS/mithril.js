@@ -34,7 +34,7 @@ Argument     | Type                                       | Required | Descripti
 
 ### How it works
 
-Mithril provides a hyperscript function `m`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attributes` object (optional) and a `children` array (optional).
+Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attributes` object (optional) and a `children` array (optional).
 
 ```javascript
 var m = require("mithril")
@@ -45,7 +45,7 @@ m("div", {id: "box"}, "hello")
 // <div id="box">hello</div>
 ```
 
-The `m` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a javascript object that represents the DOM element to be created.
+The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a javascript object that represents the DOM element to be created.
 
 ```javascript
 //a vnode
@@ -64,7 +64,7 @@ Calling `m.render()` multiple times does **not** recreate the DOM tree from scra
 
 ### Flexibility
 
-The `m` function is both *polymorphic* and *variadic*. In other words, it's very flexible in what it expects as input parameters:
+The `m()` function is both *polymorphic* and *variadic*. In other words, it's very flexible in what it expects as input parameters:
 
 ```javascript
 //simple tag
@@ -91,7 +91,7 @@ m("ul",               // <ul>
 
 ### CSS selectors
 
-The first argument of `m` can be any CSS selector that can describe an HTML element. It accepts any valid CSS combinations of `#` (id), `.` (class) and `[]` (attribute) syntax.
+The first argument of `m()` can be any CSS selector that can describe an HTML element. It accepts any valid CSS combinations of `#` (id), `.` (class) and `[]` (attribute) syntax.
 
 ```javascript
 m("div#hello")
@@ -126,7 +126,7 @@ m("a.link[href=/]", {
 <a href="/" class="link selected">Home</a>
 ```
 
-If there are class names in both first and second arguments of `m`, they are merged together as you would expect.
+If there are class names in both first and second arguments of `m()`, they are merged together as you would expect.
 
 ---
 
@@ -206,7 +206,7 @@ MathML is also fully supported.
 
 [Components](components.md) allow you to encapsulate logic into a unit and use it as if it was an element. They are the base for making large, scalable applications.
 
-A component is any Javascript object that contains a `view` method. To consume a component, pass the component as the first argument to `m` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
+A component is any Javascript object that contains a `view` method. To consume a component, pass the component as the first argument to `m()` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
 
 ```javascript
 // define a component
