@@ -1,3 +1,5 @@
+"use strict"
+
 var createRenderer = require("../render/render")
 var limiter = require("./limiter");
 
