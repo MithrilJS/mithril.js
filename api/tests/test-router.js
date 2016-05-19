@@ -11,7 +11,13 @@ var createRouter = require("../router")
 o.spec("m.route", function() {
 	var $window, root, router
 	
-	["#", "?", "", "#!", "?!"].forEach(function(prefix) {
+	[
+		"#",
+		"?",
+		"#!",
+		"?!",
+		""
+	].forEach(function(prefix) {
 		var spec = prefix ? "prefix " + prefix : "pushstate";
 		
 		o.spec(spec, function() {
@@ -41,7 +47,7 @@ o.spec("m.route", function() {
 				var redraw = {}
 				var router = createRouter($window, redraw)
 				
-				router.prefix = prefix
+				router.prefix(prefix)
 				
 				router(root, "/", {
 					"/" : {
@@ -57,7 +63,7 @@ o.spec("m.route", function() {
 			o("renders into `root`", function() {
 				var router = createRouter($window, {})
 				
-				router.prefix = prefix
+				router.prefix(prefix)
 				
 				router(root, "/", {
 					"/" : {
@@ -76,7 +82,7 @@ o.spec("m.route", function() {
 				var redraw = {}
 				var router = createRouter($window, redraw)
 				
-				router.prefix = prefix
+				router.prefix(prefix)
 				
 				router(root, "/", {
 					"/" : {
@@ -110,7 +116,7 @@ o.spec("m.route", function() {
 				
 				e.initEvent("click", true, true)
 				
-				router.prefix = prefix
+				router.prefix(prefix)
 				
 				router(root, "/", {
 					"/" : {
@@ -147,7 +153,7 @@ o.spec("m.route", function() {
 				
 				e.initEvent("click", true, true)
 				
-				router.prefix = prefix
+				router.prefix(prefix)
 				
 				router(root, "/", {
 					"/" : {
@@ -165,9 +171,11 @@ o.spec("m.route", function() {
                     }
 				})
 				
+				o($window.location.href).equals("http://localhost/" + (prefix ? prefix + "/" : ""))
+				
 				root.firstChild.dispatchEvent(e)
 				
-				o($window.location.href).equals("http://localhost/" + prefix + "/test")
+				o($window.location.href).equals("http://localhost/" + (prefix ? prefix + "/test" : "test"))
 			})
 		})
 	})
