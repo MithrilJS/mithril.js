@@ -1,0 +1,80 @@
+# Keys
+
+- [What are keys](#what-are-keys)
+- [How to use](#how-to-use)
+
+---
+
+### What are keys
+
+Keys are a mechanism that allows re-ordering DOM elements within a NodeList, and mapping specific data items in a list to the respective DOM elements that are derived from them, as the data items move within the list.
+
+In other words, a `key` is a way of saying "this DOM element is for the data object with this id".
+
+Typically, `key` should be the unique identifier field of the objects in the data array.
+
+```javascript
+var users = [
+	{id: 1, name: "John"},
+	{id: 2, name: "Mary"},
+]
+
+function userInputs(users) {
+	return users.map(function(u) {
+		return m("input", {key: u.id}, u.name)
+	})
+}
+
+m.render(document.body, userInputs(users))
+```
+
+Having a key means that if the `users` array is shuffled and the view is re-rendered, the inputs will be shuffled in the exact same order, so as to maintain correct focus and DOM state.
+
+---
+
+### How to use
+
+A common pattern is to have data comprised of an array of objects and to generate a list of vnodes that map to each object in the array. For example, consider the following code:
+
+```javascript
+var people = [
+	{id: 1, name: "John"},
+	{id: 2, name: "Mary"},
+]
+
+function userList(users) {
+	return users.map(function(u) {
+		return m("button", u.name) // <button>John</button>
+		                           // <button>Mary</button>
+	})
+}
+
+m.render(document.body, userList(people))
+```
+
+Let's suppose the `people` variable was changed to this:
+
+```javascript
+people = [{id: 2, name: "Mary"}]
+```
+
+The problem is that from the point of view of the `userList` function, there's no way to tell if it was the first object that was removed, or if it was the second object that was removed *in addition to the first object's properties being modified*. If the first button was focused and the rendering engine removes it, then focus goes back to `<body>` as expected, but if the rendering engine removes the second button and modifies the text content of the first, then the focus will be on the wrong button after the update.
+
+Worse still, if there were stateful jQuery plugins attached to these buttons, they could potentially have incorrect internal state after the update.
+
+Even though in this particular example, we humans intuitively guess that the first item in the list was the one being removed, it's actually impossible for a computer to automatically solve this problem for all possible inputs.
+
+Therefore, in the cases when a list of vnodes is derived from a *mutable* array of data, you should add a `key` property to each virtual node that maps to a uniquely identifiable field in the source data. This will allow Mithril to intelligently re-order the DOM to maintain each DOM element correctly mapped to its respective item in the data source.
+
+```javascript
+function correctUserList(users) {
+	return users.map(function(u) {
+		return m("button", {key: u.id}, u.name)
+	})
+}
+```
+
+Keys must be strings if present or they will be cast to strings if they are not. Therefore, `"1"` (string) and `1` (number) are considered the same key.
+
+In addition, keys must be placed on the virtual node that is an immediate child of the array. This means that if you wrap the `button` in an `div` in the example above, the key must be moved to the `div`. Likewise, if you refactor the code and put the button inside a component, the key must be moved out of the component and placed back where the component took place of the button.
+
