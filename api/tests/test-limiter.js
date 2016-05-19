@@ -9,7 +9,7 @@ var limiter = require("../limiter")
 o.spec("fps limiter", function() {
 	var $window, root
 
-	[
+	void [
 		"setTimeout",
 		"requestAnimationFrame",
 	].forEach(function(type) {

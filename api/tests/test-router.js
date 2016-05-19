@@ -13,12 +13,12 @@ var makeRouter = require("../router")
 o.spec("m.route", function() {
 	var $window, root, router
 	
-	[
+	void [
 		"setTimeout",
 		"requestAnimationFrame"
 	].forEach(function(timing) {
 		o.spec(timing, function() {
-			[
+			void [
 				"#",
 				"?",
 				"#!",
