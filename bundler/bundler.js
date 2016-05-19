@@ -8,12 +8,12 @@ var modules = {}
 function resolve(dir, data) {
 	var replacements = []
 	data = data.replace(/((?:var|let|const|)\s*)([\w_$]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
-		var filename = new Function("return " + dep).call()
-		var pathname = path.dirname(filename)
+        var filename = new Function("return " + dep).call()
+		var pathname = path.dirname(path.resolve(dir, filename))
 		var normalized = path.normalize(dir + "/" + filename)
 		if (modules[normalized] === undefined) {
 			modules[normalized] = variable
-			return resolve(pathname,
+            return resolve(pathname,
 				fs.readFileSync(dir + "/" + filename + ".js", "utf8")
 					.replace(/"use strict"\s*/gm, "")
 					.replace(/module\.exports\s*=\s*/gm, def + variable + eq)
