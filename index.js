@@ -2,8 +2,8 @@
 
 var m = require("./render/hyperscript")
 var trust = require("./render/trust")
-var createMounter = require("./mount")
-var createRouterInstance = require("./router")
+var createMounter = require("./api/mount")
+var createRouterInstance = require("./api/router")
 var createRequester = require("./request/request")
 var redraw = {run: function() {}}
 

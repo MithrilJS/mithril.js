@@ -1,5 +1,7 @@
-var createRenderer = require("./render/render")
-var createRouter = require("./router/router")
+"use strict"
+
+var createRenderer = require("../render/render")
+var createRouter = require("../router/router")
 var limiter = require("./limiter")
 
 module.exports = function($window, redraw) {

@@ -1,4 +1,6 @@
-var createRenderer = require("./render/render")
+"use strict"
+
+var createRenderer = require("../render/render")
 var limiter = require("./limiter");
 
 module.exports = function($window, redraw) {

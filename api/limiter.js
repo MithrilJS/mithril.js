@@ -1,26 +1,28 @@
+"use strict"
+
 var FRAME_BUDGET = 16 // 60 frames per second = 1 call per 16 ms
 
 module.exports = function($window, render) {
 	var rAF = $window.requestAnimationFrame || $window.setTimeout
-	var cAF = $window.cancelAnimationFrame || $window.clearTimeout
 	
 	var last = 0
-	var pending
+	var pending = null
 	
-	return function() {
+	return function(force) {
 		var now = new Date()
 		
-		// First render, OR if the time since the last render is greater
-		// than the frame budget
-		// just immediately render
-		if(!last || now - last > FRAME_BUDGET) {
+		// Immediately render if:
+		// Forced
+		// Haven't rendered yet
+		// Time since the last render is greater than the frame budget
+		if(force || !last || now - last > FRAME_BUDGET) {
 			last = now;
 			
 			return render()
 		}
 		
 		// Redraw already pending, abort
-		if(pending) {
+		if(pending !== null) {
 			return
 		}
 		
