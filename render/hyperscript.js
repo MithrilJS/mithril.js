@@ -7,7 +7,7 @@ var selectorCache = {}
 function hyperscript(selector) {
 	if (typeof selector === "string") {
 		if (selectorCache[selector] === undefined) {
-			var match, tag, id, classes = [], attributes = {}
+			var match, tag, classes = [], attributes = {}
 			while (match = selectorParser.exec(selector)) {
 				var type = match[1], value = match[2]
 				if (type === "" && value !== "") tag = value
