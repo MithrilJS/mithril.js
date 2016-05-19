@@ -1,3 +1,5 @@
+"use strict"
+
 var FRAME_BUDGET = 16 // 60 frames per second = 1 call per 16 ms
 
 module.exports = function($window, render) {

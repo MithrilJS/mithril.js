@@ -1,3 +1,5 @@
+"use strict"
+
 var createRenderer = require("../render/render")
 var createRouter = require("../router/router")
 var limiter = require("./limiter")
