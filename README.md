@@ -30,6 +30,6 @@ There are over 2200 assertions in the test suite, and tests cover even difficult
 
 ## Modularity
 
-Despite the huge performance improvements, the new codebase is smaller than v0.2.x, currently clocking at 4.5kb min+gzip
+Despite the huge performance improvements, the new codebase is smaller than v0.2.x, currently clocking at 5.6kb min+gzip
 
 In addition, Mithril is now completely modular: you can import only the modules that you need and easily integrate 3rd party modules if you wish to use a different library for routing, ajax, and even rendering
