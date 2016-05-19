@@ -6,7 +6,9 @@ var domMock = require("../../test-utils/domMock")
 var async = require("./async")
 
 var m = require("../../render/hyperscript")
-var createRouter = require("../router")
+// Convention would be `createRouter`, but that causes variable shadowing bugs
+// in browsers when running tests, so `makeRouter` it is
+var makeRouter = require("../router")
 
 o.spec("m.route", function() {
 	var $window, root, router
@@ -41,16 +43,16 @@ o.spec("m.route", function() {
 					})
 					
 					o("is a function", function() {
-						o(typeof createRouter).equals("function")
+						o(typeof makeRouter).equals("function")
 					})
 					
 					o("returns a function after invocation", function() {
-						o(typeof createRouter($window)).equals("function")
+						o(typeof makeRouter($window)).equals("function")
 					})
 					
 					o("updates passed in redraw object", function() {
 						var redraw = {}
-						var router = createRouter($window, redraw)
+						var router = makeRouter($window, redraw)
 						
 						router.prefix(prefix)
 						
@@ -66,7 +68,7 @@ o.spec("m.route", function() {
 					})
 					
 					o("renders into `root`", function() {
-						var router = createRouter($window, {})
+						var router = makeRouter($window, {})
 						
 						router.prefix(prefix)
 						
@@ -85,7 +87,7 @@ o.spec("m.route", function() {
 						var onupdate = o.spy()
 						var oninit = o.spy()
 						var redraw = {}
-						var router = createRouter($window, redraw)
+						var router = makeRouter($window, redraw)
 						
 						router.prefix(prefix)
 						
@@ -116,7 +118,7 @@ o.spec("m.route", function() {
 						var onupdate = o.spy()
 						var oninit   = o.spy()
 						var onclick  = o.spy()
-						var router = createRouter($window, {})
+						var router = makeRouter($window, {})
 						var e = $window.document.createEvent("MouseEvents")
 						
 						e.initEvent("click", true, true)
@@ -153,7 +155,7 @@ o.spec("m.route", function() {
 					})
 					
 					o("changes location on route.link", function() {
-						var router = createRouter($window, {})
+						var router = makeRouter($window, {})
 						var e = $window.document.createEvent("MouseEvents")
 						
 						e.initEvent("click", true, true)
