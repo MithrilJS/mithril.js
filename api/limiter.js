@@ -4,7 +4,6 @@ var FRAME_BUDGET = 16 // 60 frames per second = 1 call per 16 ms
 
 module.exports = function($window, render) {
 	var rAF = $window.requestAnimationFrame || $window.setTimeout
-	var cAF = $window.cancelAnimationFrame || $window.clearTimeout
 	
 	var last = 0
 	var pending = null
