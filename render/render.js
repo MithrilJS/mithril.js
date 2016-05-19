@@ -347,14 +347,17 @@ module.exports = function($window) {
 	function setAttr(vnode, key, old, value) {
 		//TODO test input undo history
 		var element = vnode.dom
-		if (key === "key" || (!isFormAttribute(vnode, key) && old === value) || typeof value === "undefined" || isLifecycleMethod(key)) return
+		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
 		}
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
-		else if (key in element && !isAttribute(key) && vnode.ns === undefined) element[key] = value
+		else if (key in element && !isAttribute(key) && vnode.ns === undefined) {
+			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			element[key] = value
+		}
 		else {
 			if (typeof value === "boolean") {
 				if (value) element.setAttribute(key, "")
