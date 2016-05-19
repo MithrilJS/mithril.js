@@ -173,6 +173,9 @@ module.exports = function() {
 								events[e.type][i].call(this, e)
 							}
 						}
+						e.preventDefault = function() {
+							// TODO: should this do something?
+						}
 						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
 					},
 				}
