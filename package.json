@@ -5,8 +5,12 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "node bundler/bundler",
-		"test": "node ospec/bin/ospec"
+		"test": "node ospec/bin/ospec",
+		"cover": "istanbul cover --print both ospec/bin/ospec"
 	},
 	"author": "Leo Horie",
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"istanbul": "^0.4.3"
+	}
 }
