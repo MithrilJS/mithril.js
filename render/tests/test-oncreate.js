@@ -138,7 +138,7 @@ o.spec("oncreate", function() {
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 	})
-	o("calls oncreate when recycling", function() {
+	o("does not recycle when there's an oncreate", function() {
 		var create = o.spy()
 		var update = o.spy()
 		var vnode = {tag: "div", key: 1, attrs: {oncreate: create}, state: {}}
@@ -148,12 +148,12 @@ o.spec("oncreate", function() {
 		render(root, [])
 		render(root, [updated])
 		
-		o(vnode.dom).equals(updated.dom)
+		o(vnode.dom).notEquals(updated.dom)
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
+		o(update.this).equals(updated.state)
 		o(update.args[0]).equals(updated)
 	})
 	o("calls oncreate at the same step as onupdate", function() {

@@ -319,7 +319,7 @@ module.exports = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null) { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode)) { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -392,6 +392,9 @@ module.exports = function($window) {
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
+	}
+	function hasIntegrationMethods(vnode) {
+		return vnode.attrs != null && (vnode.attrs.oncreate || vnode.attrs.onupdate || vnode.attrs.onbeforeremove || vnode.attrs.onremove)
 	}
 	
 	//style

@@ -46,19 +46,16 @@ o.spec("onupdate", function() {
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
-	o("does not call onupdate when recycling", function() {
-		var create = o.spy()
+	o("does not recycle when there's an onupdate", function() {
 		var update = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {onupdate: create}}
+		var vnode = {tag: "div", key: 1, attrs: {onupdate: update}}
 		var updated = {tag: "div", key: 1, attrs: {onupdate: update}}
 		
 		render(root, [vnode])
 		render(root, [])
 		render(root, [updated])
 		
-		o(vnode.dom).equals(updated.dom)
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(0)
+		o(vnode.dom).notEquals(updated.dom)
 	})
 	o("does not call old onupdate when removing the onupdate property in new vnode", function() {
 		var create = o.spy()

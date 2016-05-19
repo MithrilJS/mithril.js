@@ -100,4 +100,15 @@ o.spec("onremove", function() {
 		
 		o(remove.callCount).equals(1)
 	})
+	o("does not recycle when there's an onremove", function() {
+		var remove = o.spy()
+		var vnode = {tag: "div", key: 1, attrs: {onremove: remove}}
+		var updated = {tag: "div", key: 1, attrs: {onremove: remove}}
+		
+		render(root, [vnode])
+		render(root, [])
+		render(root, [updated])
+		
+		o(vnode.dom).notEquals(updated.dom)
+	})
 })

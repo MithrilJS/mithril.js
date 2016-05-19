@@ -27,7 +27,7 @@
 		<script src="../../render/render.js"></script>
 		<script>
 var m = require("../../render/hyperscript")
-var render = require("../../render/render")(window, run).render
+var renderer = require("../../render/render")(window)
 var root = document.getElementById("root")
 
 var empty = []
@@ -47,16 +47,13 @@ function view() {
 
 function exit(vnode, done) {
 	vnode.dom.classList.add("exit")
-	setTimeout(function() {
-		vnode.dom.classList.remove("exit")
-		done()
-	}, 1000)
+	setTimeout(done, 1000)
 }
 
 function run() {
 	cells = cells === full ? empty : full
 
-	render(root, [view()])
+	renderer.render(root, [view()])
 	
 	setTimeout(run, 2000)
 }

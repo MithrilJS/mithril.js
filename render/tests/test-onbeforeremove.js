@@ -156,4 +156,15 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom.onbeforeremove).equals(undefined)
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
+	o("does not recycle when there's an onbeforeremove", function() {
+		var remove = function(vnode, done) {done()}
+		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
+		var updated = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
+		
+		render(root, [vnode])
+		render(root, [])
+		render(root, [updated])
+		
+		o(vnode.dom).notEquals(updated.dom)
+	})
 })
