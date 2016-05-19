@@ -14,6 +14,8 @@ module.exports = function($window, redraw) {
 		
 		renderer.setEventCallback(replay)
 		redraw.run = replay
+		
+		replay()
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
