@@ -16,7 +16,6 @@
   },
   "scripts": {
     "test": "grunt test"
-    "test": "grunt lint test"
   },
   "main": "mithril.js",
   "devDependencies": {
