@@ -4,7 +4,7 @@ var createRenderer = require("../render/render")
 var createRouter = require("../router/router")
 var throttle = require("../api/throttle")
 
-module.exports = function($window, redraw) {
+module.exports = function($window, renderers) {
 	var renderer = createRenderer($window)
 	var router = createRouter($window)
 	var route = function(root, defaultRoute, routes) {
@@ -16,7 +16,7 @@ module.exports = function($window, redraw) {
 		var run = throttle(replay)
 		
 		renderer.setEventCallback(run)
-		redraw.run = run
+		renderers.push(run)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix

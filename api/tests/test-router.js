@@ -9,7 +9,7 @@ var router = require("../../api/router")
 
 o.spec("m.route", function() {
 	var FRAME_BUDGET = 1000 / 60
-	var $window, root, route, redraw
+	var $window, root, route, renderers
 	
 	o.beforeEach(function() {
 		$window = {}
@@ -22,11 +22,11 @@ o.spec("m.route", function() {
 		
 		root = $window.document.body
 		
-		redraw = {}
-		route = router($window, redraw)
+		renderers = []
+		route = router($window, renderers)
 	})
 	
-	o("updates redraw object", function() {
+	o("pushes a render function", function() {
 		route(root, "/", {
 			"/" : {
 				view: function() {
@@ -35,7 +35,8 @@ o.spec("m.route", function() {
 			}
 		})
 		
-		o(typeof redraw.run).equals("function")
+		o(renderers.length).equals(1)
+		o(typeof renderers[0]).equals("function")
 	})
 	
 	o("renders into `root`", function() {
@@ -50,7 +51,7 @@ o.spec("m.route", function() {
 		o(root.firstChild.nodeName).equals("DIV")
 	})
 	
-	o("redraws on redraw.run()", function(done) {
+	o("redraws when render function is executed", function(done) {
 		var onupdate = o.spy()
 		var oninit = o.spy()
 		
@@ -67,7 +68,7 @@ o.spec("m.route", function() {
 		
 		o(oninit.callCount).equals(1)
 		
-		redraw.run()
+		renderers[0]()
 		
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {

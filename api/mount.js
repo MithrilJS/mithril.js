@@ -3,7 +3,7 @@
 var createRenderer = require("../render/render")
 var throttle = require("../api/throttle")
 
-module.exports = function($window, redraw) {
+module.exports = function($window, renderers) {
 	var renderer = createRenderer($window)
 	return function(root, component) {
 		var run = throttle(function() {
@@ -12,7 +12,7 @@ module.exports = function($window, redraw) {
 		
 		renderer.setEventCallback(run)
 	
-		redraw.run = run
+		renderers.push(run)
 		run()
 	}
 }
