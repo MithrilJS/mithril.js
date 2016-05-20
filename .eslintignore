@@ -1,0 +1,9 @@
+coverage
+.vscode
+examples
+docs
+node_modules
+tests
+test-utils
+ospec
+mithril.js
