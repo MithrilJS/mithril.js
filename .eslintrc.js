@@ -4,6 +4,9 @@ module.exports = {
         "commonjs": true,
         "node": true
     },
+    "globals": {
+        "Promise": true
+    },
     "extends": "eslint:recommended",
     "rules": {
         "accessor-pairs": "error",
@@ -67,7 +70,7 @@ module.exports = {
         "keyword-spacing": "off",
         "linebreak-style": [
             "error",
-            "windows"
+            "unix"
         ],
         "lines-around-comment": "error",
         "max-depth": "off",
@@ -134,6 +137,7 @@ module.exports = {
         "no-process-env": "error",
         "no-process-exit": "error",
         "no-proto": "error",
+        "no-redeclare": "off",
         "no-restricted-globals": "error",
         "no-restricted-imports": "error",
         "no-restricted-modules": "error",
@@ -161,6 +165,12 @@ module.exports = {
         "no-unneeded-ternary": "error",
         "no-unsafe-finally": "error",
         "no-unused-expressions": "off",
+        "no-unused-vars": [
+            "error",
+            {
+                "varsIgnorePattern": "module"
+            }
+        ],
         "no-use-before-define": "off",
         "no-useless-call": "error",
         "no-useless-computed-key": "error",
