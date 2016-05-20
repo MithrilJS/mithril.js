@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "node bundler/bundler",
 		"test": "node ospec/bin/ospec",
-		"cover": "istanbul cover --print both -x \"**/ospec/**\" -x \"**/test-utils/**\" ospec/bin/ospec"
+		"cover": "istanbul cover --print both ospec/bin/ospec"
 	},
 	"author": "Leo Horie",
 	"license": "MIT",
