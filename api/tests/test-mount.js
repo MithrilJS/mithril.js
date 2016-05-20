@@ -77,6 +77,38 @@ o.spec("m.mount", function() {
 		}, FRAME_BUDGET)
 	})
 	
+	o("event handlers can skip redraw", function(done) {
+		var onupdate = o.spy()
+		var oninit   = o.spy()
+		var mount = createMounter($window, {})
+		var e = $window.document.createEvent("MouseEvents")
+		
+		e.initEvent("click", true, true)
+		
+		mount(root, {
+			view: function() {
+				return m("div", {
+					oninit: oninit,
+					onupdate: onupdate,
+					onclick: function(e) {
+						e.redraw = false
+					}
+				})
+			}
+		})
+		
+		root.firstChild.dispatchEvent(e)
+		
+		o(oninit.callCount).equals(1)
+		
+		// Wrapped to ensure no redraw fired
+		setTimeout(function() {
+			o(onupdate.callCount).equals(0)
+			
+			done()
+		}, 20)
+	})
+	
 	 o("redraws on redraw.run()", function(done) {
 		var onupdate = o.spy()
 		var oninit = o.spy()

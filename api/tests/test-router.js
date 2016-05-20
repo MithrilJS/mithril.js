@@ -114,6 +114,40 @@ o.spec("m.route", function() {
 		}, FRAME_BUDGET)
 	})
 	
+	o("event handlers can skip redraw", function(done) {
+		var onupdate = o.spy()
+		var oninit   = o.spy()
+		var onclick  = o.spy()
+		var e = $window.document.createEvent("MouseEvents")
+		
+		e.initEvent("click", true, true)
+		
+		route(root, "/", {
+			"/" : {
+				view: function() {
+					return m("div", {
+						oninit: oninit,
+						onupdate: onupdate,
+						onclick: function(e) {
+							e.redraw = false
+						},
+					})
+				}
+			}
+		})
+		
+		root.firstChild.dispatchEvent(e)
+		
+		o(oninit.callCount).equals(1)
+		
+		// Wrapped to ensure no redraw fired
+		setTimeout(function() {
+			o(onupdate.callCount).equals(0)
+			
+			done()
+		}, 20)
+	})
+	
 	o("changes location on route.link", function() {
 		var e = $window.document.createEvent("MouseEvents")
 		
