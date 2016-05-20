@@ -67,7 +67,7 @@ module.exports = function($window, Promise) {
 				resolve(data)
 				$window[callbackKey] = undefined
 			}
-			script.onerror = function(e) {
+			script.onerror = function() {
 				script.parentNode.removeChild(script)
 				reject(new Error("JSONP request failed"))
 				$window[callbackKey] = undefined

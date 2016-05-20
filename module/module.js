@@ -8,7 +8,6 @@ require.$$current = function() {
 	var pathnameEnd = searchIndex > -1 ? searchIndex : hashIndex > -1 ? hashIndex : href.length
 	try {throw new Error} catch (e) {var error = e}
 	var src = error.stack.match(/^(?:(?!^Error|\/module\/module\.js).)*$/m).toString().match(/((?:file|https|http):\/\/.+)(?::\d+){2}/)[1] || href.slice(0, pathnameEnd)
-	var base = href.slice(0, href.lastIndexOf("/", pathnameEnd) + 1)
 	return src.replace(/\.js$/, "")
 }
 
