@@ -60,7 +60,7 @@ o.spec("event", function() {
 	o("handles ontransitionend", function() {
 		var spy = o.spy()
 		var div = {tag: "div", attrs: {ontransitionend: spy}}
-		var e = $window.document.createEvent("AnimationEvent")
+		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 		
 		render(root, [div])

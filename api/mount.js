@@ -1,18 +1,18 @@
 "use strict"
 
 var createRenderer = require("../render/render")
-var limiter = require("./limiter");
+var throttle = require("../api/throttle")
 
 module.exports = function($window, redraw) {
+	var renderer = createRenderer($window)
 	return function(root, component) {
-		var renderer = createRenderer($window)
-		var draw = limiter($window, function draw() {
+		var run = throttle(function() {
 			renderer.render(root, {tag: component})
 		})
 		
-		renderer.setEventCallback(draw)
+		renderer.setEventCallback(run)
 	
-		redraw.run = draw
-		draw()
+		redraw.run = run
+		run()
 	}
 }

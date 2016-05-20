@@ -533,7 +533,7 @@ o.spec("domMock", function() {
 			o.beforeEach(function() {
 				spy = o.spy()
 				div = $document.createElement("div")
-				e = $document.createEvent("AnimationEvent")
+				e = $document.createEvent("HTMLEvents")
 				e.initEvent("transitionend", true, true)
 				
 				$document.body.appendChild(div)

@@ -345,7 +345,6 @@ module.exports = function($window) {
 		}
 	}
 	function setAttr(vnode, key, old, value) {
-		//TODO test input undo history
 		var element = vnode.dom
 		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
@@ -355,6 +354,7 @@ module.exports = function($window) {
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && vnode.ns === undefined) {
+			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			element[key] = value
 		}

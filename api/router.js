@@ -2,20 +2,21 @@
 
 var createRenderer = require("../render/render")
 var createRouter = require("../router/router")
-var limiter = require("./limiter")
+var throttle = require("../api/throttle")
 
 module.exports = function($window, redraw) {
 	var renderer = createRenderer($window)
 	var router = createRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var replay = limiter($window, router.defineRoutes(routes, function(component, args) {
+		var replay = router.defineRoutes(routes, function(component, args) {
 			renderer.render(root, {tag: component, attrs: args})
 		}, function() {
 			router.setPath(defaultRoute)
-		}))
+		})
+		var run = throttle(replay)
 		
-		renderer.setEventCallback(replay)
-		redraw.run = replay
+		renderer.setEventCallback(run)
+		redraw.run = run
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
