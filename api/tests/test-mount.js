@@ -4,7 +4,7 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
-var createMounter = require("../mount")
+var apiMounter = require("../../api/mount")
 
 o.spec("m.mount", function() {
 	var FRAME_BUDGET = 1000 / 60

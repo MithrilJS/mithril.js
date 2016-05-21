@@ -1,6 +1,6 @@
 "use strict"
 
-module.exports = function parseQueryString(string) {
+module.exports = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 		
