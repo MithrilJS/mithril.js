@@ -16,7 +16,6 @@ Webpack is conservative and treats CommonJS modules as non-statically-analyzable
 ### Caveats
 
 - Only supports modules that have the `require` and `module.exports` statement declared at the top-level scope before all other code, i.e. it does not support CommonJS modules that rely on dynamic importing/exporting. This means modules should only export a pure function or export a factory function if there are multiple statements and/or internal module state. The factory function pattern allows easier dependency injection in stateful modules, thus making modules testable.
-- Doesn't support scope pollution of module's top level scope. Specifically, it does not support same-name top-level variables in different modules.
 - Changes the semantics of value/binding exporting between unbundled and bundled code, and therefore relying on those semantics is discouraged. Instead, it is recommended that module consumers inject dependencies via the factory function pattern
 - Top level strictness is infectious (i.e. if entry file is in `"use strict"` mode, all modules inherit strict mode, and conversely, if the entry file is not in strict mode, all modules are pulled out of strict mode)
 - Currently only supports assignments to `module.exports` (i.e. `module.exports.foo = bar` will not work)
