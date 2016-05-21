@@ -84,7 +84,7 @@ function changeNS(ns, vnode) {
 	}
 }
 var m = hyperscript
-var renderer = function($window) {
+var rendererService = function($window) {
 	var $doc = $window.document
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
@@ -559,7 +559,7 @@ var renderer = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }(window)
-var redraw = function() {
+var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
 		var index = callbacks.indexOf(callback)
@@ -860,46 +860,48 @@ var throttle = function(callback) {
 		}
 	}
 }
-var autoredraw = function(root, renderer2, pubsub, callback) {
+var autoredraw = function(root, renderer, pubsub, callback) {
 	var run = throttle(callback)
-	renderer2.setEventCallback(function(e) {
-		if (e.redraw1 !== false) run()
-	})
+	if (renderer != null) {
+		renderer.setEventCallback(function(e) {
+			if (e.redraw !== false) run()
+		})
+	}
 	
 	if (pubsub != null) {
-		if (root.redraw1) pubsub.unsubscribe(root.redraw1)
+		if (root.redraw) pubsub.unsubscribe(root.redraw)
 		pubsub.subscribe(run)
 	}
 	
-	return root.redraw1 = run
+	return root.redraw = run
 }
-m.route = function($window, renderer1, pubsub) {
+m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {
-			renderer1.render(root, {tag: component, attrs: args})
+			renderer.render(root, {tag: component, attrs: args})
 		}, function() {
 			router.setPath(defaultRoute)
 		})
-		autoredraw(root, renderer1, pubsub, replay)
+		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	
 	return route
-}(window, renderer, redraw)
-m.mount = function(renderer3, pubsub) {
+}(window, rendererService, redrawService)
+m.mount = function(renderer, pubsub) {
 	return function(root, component) {
-		var run = autoredraw(root, renderer3, pubsub, function() {
-			renderer3.render(root, {tag: component})
+		var run = autoredraw(root, renderer, pubsub, function() {
+			renderer.render(root, {tag: component})
 		})
 		
 		run()
 	}
-}(renderer, redraw)
+}(rendererService, redrawService)
 m.trust = function(html) {
 	return Node("<", undefined, undefined, html, undefined, undefined)
 }
-m.render = renderer.render
-m.redraw = redraw.publish
+m.render = rendererService.render
+m.redraw = redrawService.publish
 module.exports = m
