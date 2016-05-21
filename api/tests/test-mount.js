@@ -8,28 +8,30 @@ var createMounter = require("../mount")
 
 o.spec("m.mount", function() {
 	var FRAME_BUDGET = 1000 / 60
-	var $window, root
+	var $window, root, mount, renderers
 	
 	o.beforeEach(function() {
 		$window = domMock()
+		
 		root = $window.document.body
+		
+		renderers = []
+		mount = createMounter($window, renderers)
 	})
 	
-	o("updates redraw object", function() {
-		var redraw = {}
-		var mount = createMounter($window, redraw)
-		
+	o("pushes a render function", function() {
 		mount(root, {
 			view : function() {
 				return m("div")
 			}
 		})
 		
-		o(typeof redraw.run).equals("function")
+		o(renderers.length).equals(1)
+		o(typeof renderers[0]).equals("function")
 	})
 	
 	o("renders into `root`", function() {
-		var mount = createMounter($window, {})
+		var mount = createMounter($window, [])
 		
 		mount(root, {
 			view : function() {
@@ -44,7 +46,6 @@ o.spec("m.mount", function() {
 		var onupdate = o.spy()
 		var oninit   = o.spy()
 		var onclick  = o.spy()
-		var mount = createMounter($window, {})
 		var e = $window.document.createEvent("MouseEvents")
 		
 		e.initEvent("click", true, true)
@@ -80,7 +81,6 @@ o.spec("m.mount", function() {
 	o("event handlers can skip redraw", function(done) {
 		var onupdate = o.spy()
 		var oninit   = o.spy()
-		var mount = createMounter($window, {})
 		var e = $window.document.createEvent("MouseEvents")
 		
 		e.initEvent("click", true, true)
@@ -109,11 +109,9 @@ o.spec("m.mount", function() {
 		}, 20)
 	})
 	
-	 o("redraws on redraw.run()", function(done) {
+	 o("redraws when the render function is run", function(done) {
 		var onupdate = o.spy()
 		var oninit = o.spy()
-		var redraw = {}
-		var mount = createMounter($window, redraw)
 		
 		mount(root, {
 			view : function() {
@@ -127,7 +125,7 @@ o.spec("m.mount", function() {
 		o(oninit.callCount).equals(1)
 		o(onupdate.callCount).equals(0)
 		
-		redraw.run()
+		renderers[0]()
 		
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {
