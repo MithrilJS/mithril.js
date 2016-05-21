@@ -5,6 +5,7 @@ var pushStateMock = require("../../test-utils/pushStateMock")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
+var coreRenderer = require("../../render/render")
 var apiPubSub = require("../../api/pubsub")
 var apiRouter = require("../../api/router")
 
@@ -24,7 +25,7 @@ o.spec("route", function() {
 		root = $window.document.body
 		
 		redraw = apiPubSub()
-		route = apiRouter($window, redraw)
+		route = apiRouter($window, coreRenderer($window), redraw)
 	})
 	
 	o("renders into `root`", function() {

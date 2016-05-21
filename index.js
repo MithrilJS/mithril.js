@@ -1,14 +1,14 @@
 "use strict"
 
 var m = require("./render/hyperscript")
-var coreRenderer = require("./render/render")
+var renderer = require("./render/render")(window)
 var redraw = require("./api/pubsub")()
 
 m.request = require("./request/request")(window, Promise).ajax
-m.render = coreRenderer(window).render
+m.route = require("./api/router")(window, renderer, redraw)
+m.mount = require("./api/mount")(renderer, redraw)
 m.trust = require("./render/trust")
-m.mount = require("./api/mount")(window, redraw)
-m.route = require("./api/router")(window, redraw)
+m.render = renderer.render
 m.redraw = redraw.publish
 
 module.exports = m

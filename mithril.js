@@ -84,7 +84,7 @@ function changeNS(ns, vnode) {
 	}
 }
 var m = hyperscript
-var coreRenderer = function($window) {
+var renderer = function($window) {
 	var $doc = $window.document
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
@@ -558,7 +558,7 @@ var coreRenderer = function($window) {
 		if ($doc.activeElement !== active) active.focus()
 	}
 	return {render: render, setEventCallback: setEventCallback}
-}
+}(window)
 var redraw = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
@@ -699,53 +699,6 @@ m.request = function($window, Promise) {
 	
 	return {ajax: ajax, jsonp: jsonp}
 }(window, Promise).ajax
-m.render = coreRenderer(window).render
-m.trust = function(html) {
-	return Node("<", undefined, undefined, html, undefined, undefined)
-}
-var throttle = function(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
-	return function(synchronous) {
-		var now = new Date().getTime()
-		if (synchronous === true || last === 0 || now - last >= time) {
-			last = now
-			callback()
-		}
-		else if (pending === null) {
-			pending = timeout(function() {
-				pending = 0
-				callback()
-				last = new Date().getTime()
-			}, time - (now - last))
-		}
-	}
-}
-var autoredraw = function(root, renderer, pubsub, callback) {
-	var run = throttle(callback)
-	renderer.setEventCallback(function(e) {
-		if (e.redraw1 !== false) run()
-	})
-	
-	if (pubsub != null) {
-		if (root.redraw1) pubsub.unsubscribe(root.redraw1)
-		pubsub.subscribe(run)
-	}
-	
-	return root.redraw1 = run
-}
-m.mount = function($window, pubsub) {
-	var renderer = coreRenderer($window)
-	return function(root, component) {
-		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(root, {tag: component})
-		})
-		
-		run()
-	}
-}(window, redraw)
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -887,21 +840,66 @@ var coreRouter = function($window) {
 	
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-m.route = function($window, pubsub) {
-	var renderer = coreRenderer($window)
+var throttle = function(callback) {
+	//60fps translates to 16.6ms, round it down since setTimeout requires int
+	var time = 16
+	var last = 0, pending = null
+	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	return function(synchronous) {
+		var now = new Date().getTime()
+		if (synchronous === true || last === 0 || now - last >= time) {
+			last = now
+			callback()
+		}
+		else if (pending === null) {
+			pending = timeout(function() {
+				pending = 0
+				callback()
+				last = new Date().getTime()
+			}, time - (now - last))
+		}
+	}
+}
+var autoredraw = function(root, renderer2, pubsub, callback) {
+	var run = throttle(callback)
+	renderer2.setEventCallback(function(e) {
+		if (e.redraw1 !== false) run()
+	})
+	
+	if (pubsub != null) {
+		if (root.redraw1) pubsub.unsubscribe(root.redraw1)
+		pubsub.subscribe(run)
+	}
+	
+	return root.redraw1 = run
+}
+m.route = function($window, renderer1, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {
-			renderer.render(root, {tag: component, attrs: args})
+			renderer1.render(root, {tag: component, attrs: args})
 		}, function() {
 			router.setPath(defaultRoute)
 		})
-		autoredraw(root, renderer, pubsub, replay)
+		autoredraw(root, renderer1, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	
 	return route
-}(window, redraw)
+}(window, renderer, redraw)
+m.mount = function(renderer3, pubsub) {
+	return function(root, component) {
+		var run = autoredraw(root, renderer3, pubsub, function() {
+			renderer3.render(root, {tag: component})
+		})
+		
+		run()
+	}
+}(renderer, redraw)
+m.trust = function(html) {
+	return Node("<", undefined, undefined, html, undefined, undefined)
+}
+m.render = renderer.render
 m.redraw = redraw.publish
 module.exports = m

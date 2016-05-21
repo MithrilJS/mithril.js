@@ -4,8 +4,7 @@ var coreRenderer = require("../render/render")
 var coreRouter = require("../router/router")
 var autoredraw = require("../api/autoredraw")
 
-module.exports = function($window, pubsub) {
-	var renderer = coreRenderer($window)
+module.exports = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {

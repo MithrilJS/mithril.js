@@ -4,6 +4,7 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
+var coreRenderer = require("../../render/render")
 var apiPubSub = require("../../api/pubsub")
 var apiMounter = require("../../api/mount")
 
@@ -17,7 +18,7 @@ o.spec("mount", function() {
 		root = $window.document.body
 		
 		redraw = apiPubSub()
-		mount = apiMounter($window, redraw)
+		mount = apiMounter(coreRenderer($window), redraw)
 	})
 	
 	o("renders into `root`", function() {
