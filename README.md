@@ -4,6 +4,14 @@ Note: This branch is a sneak peek for the upcoming version 1.0. It's a rewrite f
 
 This rewrite aims to fix longstanding API design issues, significantly improve performance, and clean up the codebase.
 
+## Early Preview
+
+You can install this via NPN using this command:
+
+```
+npm install lhorie/mithril.js#rewrite
+```
+
 ## Status
 
 Code still is in flux. Most notably, there's no promise polyfill yet and there are several use cases that still need to be polished. DO NOT USE IN PRODUCTION YET!

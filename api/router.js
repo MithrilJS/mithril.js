@@ -1,12 +1,12 @@
 "use strict"
 
-var createRenderer = require("../render/render")
-var createRouter = require("../router/router")
+var coreRenderer = require("../render/render")
+var coreRouter = require("../router/router")
 var throttle = require("../api/throttle")
 
 module.exports = function($window, redraw) {
-	var renderer = createRenderer($window)
-	var router = createRouter($window)
+	var renderer = coreRenderer($window)
+	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {
 			renderer.render(root, {tag: component, attrs: args})

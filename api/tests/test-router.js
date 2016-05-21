@@ -5,7 +5,7 @@ var pushStateMock = require("../../test-utils/pushStateMock")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
-var router = require("../../api/router")
+var apiRouter = require("../../api/router")
 
 o.spec("m.route", function() {
 	var FRAME_BUDGET = 1000 / 60
@@ -23,7 +23,7 @@ o.spec("m.route", function() {
 		root = $window.document.body
 		
 		redraw = {}
-		route = router($window, redraw)
+		route = apiRouter($window, redraw)
 	})
 	
 	o("updates redraw object", function() {

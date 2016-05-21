@@ -1,6 +1,6 @@
 "use strict"
 
-module.exports = function buildQueryString(object) {
+module.exports = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	
 	var args = []
