@@ -5,7 +5,7 @@ var callAsync = require("../../test-utils/callAsync")
 var throttle = require("../../api/throttle")
 
 o.spec("throttle", function() {
-	var FRAME_BUDGET = 1000 / 60
+	var FRAME_BUDGET = Math.floor(1000 / 60)
 	var spy, throttled
 	o.beforeEach(function() {
 		spy = o.spy()

@@ -7,7 +7,7 @@ var m = require("../../render/hyperscript")
 var apiMounter = require("../../api/mount")
 
 o.spec("m.mount", function() {
-	var FRAME_BUDGET = 1000 / 60
+	var FRAME_BUDGET = Math.floor(1000 / 60)
 	var $window, root, mount, renderers
 	
 	o.beforeEach(function() {

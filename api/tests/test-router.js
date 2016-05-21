@@ -8,7 +8,7 @@ var m = require("../../render/hyperscript")
 var apiRouter = require("../../api/router")
 
 o.spec("m.route", function() {
-	var FRAME_BUDGET = 1000 / 60
+	var FRAME_BUDGET = Math.floor(1000 / 60)
 	var $window, root, route, renderers
 	
 	o.beforeEach(function() {
