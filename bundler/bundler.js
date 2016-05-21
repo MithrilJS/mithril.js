@@ -36,7 +36,8 @@ function resolve(dir, data) {
 	}
 	return data
 		.replace(/(?:var|let|const)[\t ]([\w_$\.]+)(\s*=\s*)\1([\r\n;]+)/g, "$3") // remove assignments to itself
-		.replace(/(\r\n){2,}/g, "$1$1") // remove multiple consecutive line breaks
+		.replace(/([\r\n]){2,}/g, "$1") // remove multiple consecutive line breaks
+		.replace(/\}[\r\n]+\(/g, "}(") // remove space from iife
 }
 
 function fixCollisions(code) {

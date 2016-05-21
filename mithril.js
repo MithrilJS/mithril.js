@@ -1,5 +1,4 @@
 "use strict"
-
 function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined}
 }
@@ -14,7 +13,6 @@ Node.normalizeChildren = function normalizeChildren(children) {
 	}
 	return children
 }
-
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:\s*=\s*("|'|)(.*?)\2)?\]/
 var selectorCache = {}
 function hyperscript(selector) {
@@ -79,23 +77,15 @@ function hyperscript(selector) {
 	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
-
 function changeNS(ns, vnode) {
 	vnode.ns = ns
 	if (vnode.children != null) {
 		for (var i = 0; i < vnode.children.length; i++) changeNS(ns, vnode.children[i])
 	}
 }
-
 var m = hyperscript
-
-var trust = function(html) {
-	return Node("<", undefined, undefined, html, undefined, undefined)
-}
-
 var coreRenderer = function($window) {
 	var $doc = $window.document
-
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 	
@@ -187,7 +177,6 @@ var coreRenderer = function($window) {
 		vnode.domSize = vnode.instance.domSize
 		return element
 	}
-
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling) {
 		if (old == null && vnodes == null) return
@@ -367,12 +356,10 @@ var coreRenderer = function($window) {
 		}
 		return nextSibling
 	}
-
 	function insertNode(parent, dom, nextSibling) {
 		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
-
 	//remove
 	function removeNodes(parent, vnodes, start, end, context) {
 		for (var i = start; i < end; i++) {
@@ -428,7 +415,6 @@ var coreRenderer = function($window) {
 			}
 		}
 	}
-
 	//attrs
 	function setAttrs(vnode, attrs) {
 		for (var key in attrs) {
@@ -525,7 +511,6 @@ var coreRenderer = function($window) {
 			element.addEventListener(eventName, vnode.events[key], false)
 		}
 	}
-
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
 		if (source.oninit != null) source.oninit.call(vnode.state, vnode)
@@ -561,7 +546,6 @@ var coreRenderer = function($window) {
 		}
 		return data
 	}
-
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
@@ -573,57 +557,21 @@ var coreRenderer = function($window) {
 		dom.vnodes = vnodes
 		if ($doc.activeElement !== active) active.focus()
 	}
-
 	return {render: render, setEventCallback: setEventCallback}
 }
-
-var apiRedraw = function(renderers) {
-    return function() {
-        if (renderers.length === 0) return
-        if (renderers.length === 1) return renderers[0]()
-        
-        for (var i = 0; i < renderers.length; i++) {
-            renderers[i]()
+var redraw = function() {
+	var callbacks = []
+	function unsubscribe(callback) {
+		var index = callbacks.indexOf(callback)
+		if (index > -1) callbacks.splice(index, 1)
+	}
+    function publish() {
+        for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i].apply(this, arguments)
         }
     }
-}
-
-var throttle = function(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
-	return function(synchronous) {
-		var now = new Date().getTime()
-		if (typeof synchronous === "object" && "redraw" in synchronous && !synchronous.redraw) return
-		if (synchronous === true || last === 0 || now - last >= time) {
-			last = now
-			callback()
-		}
-		else if (pending === null) {
-			pending = timeout(function() {
-				pending = 0
-				callback()
-				last = new Date().getTime()
-			}, time - (now - last))
-		}
-	}
-}
-
-var apiMounter = function($window, renderers) {
-	var renderer = coreRenderer($window)
-	return function(root, component) {
-		var run = throttle(function() {
-			renderer.render(root, {tag: component})
-		})
-		
-		renderer.setEventCallback(run)
-	
-		renderers.push(run)
-		run()
-	}
-}
-
+	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
+}()
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	
@@ -647,6 +595,157 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
+m.request = function($window, Promise) {
+	var callbackCount = 0
+	function ajax(args) {
+		return new Promise(function(resolve, reject) {
+			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			
+			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
+			if (typeof args.deserialize !== "function") args.deserialize = deserialize
+			if (typeof args.extract !== "function") args.extract = extract
+			
+			args.url = interpolate(args.url, args.data)
+			if (useBody) args.data = args.serialize(args.data)
+			else args.url = assemble(args.url, args.data)
+			
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open(args.method, args.url, args.async || true, args.user, args.password)
+			
+			if (args.serialize === JSON.stringify && useBody) {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
+			}
+			if (args.deserialize === deserialize) {
+				xhr.setRequestHeader("Accept", "application/json, text/*")
+			}
+			
+			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
+			
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					try {
+						var response = args.deserialize(args.extract(xhr, args))
+						if (xhr.status >= 200 && xhr.status < 300) {
+							if (typeof args.type === "function") {
+								if (response instanceof Array) {
+									for (var i = 0; i < response.length; i++) {
+										response[i] = new args.type(response[i])
+									}
+								}
+								else response = new args.type(response[i])
+							}
+							
+							resolve(response)
+						}
+						else reject(new Error(xhr.responseText))
+					}
+					catch (e) {
+						reject(e)
+					}
+				}
+			}
+			
+			if (useBody) xhr.send(args.data)
+			else xhr.send()
+		})
+	}
+	function jsonp(args) {
+		return new Promise(function(resolve, reject) {
+			var callbackKey = "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var script = $window.document.createElement("script")
+			$window[callbackKey] = function(data) {
+				script.parentNode.removeChild(script)
+				resolve(data)
+				$window[callbackKey] = undefined
+			}
+			script.onerror = function() {
+				script.parentNode.removeChild(script)
+				reject(new Error("JSONP request failed"))
+				$window[callbackKey] = undefined
+			}
+			if (args.data == null) args.data = {}
+			args.url = interpolate(args.url, args.data)
+			args.data[args.callbackKey || "callback"] = callbackKey
+			script.src = assemble(args.url, args.data)
+			$window.document.documentElement.appendChild(script)
+		})
+	}
+	function interpolate(url, data) {
+		if (data == null) return url
+		
+		var tokens = url.match(/:[^\/]+/gi) || []
+		for (var i = 0; i < tokens.length; i++) {
+			var key = tokens[i].slice(1)
+			if (data[key] != null) {
+				url = url.replace(tokens[i], data[key])
+				delete data[key]
+			}
+		}
+		return url
+	}
+	function assemble(url, data) {
+		var querystring = buildQueryString(data)
+		if (querystring !== "") {
+			var prefix = url.indexOf("?") < 0 ? "?" : "&"
+			url += prefix + querystring
+		}
+		return url
+	}
+	function deserialize(data) {
+		try {return data !== "" ? JSON.parse(data) : null}
+		catch (e) {throw new Error(data)}
+	}
+	function extract(xhr) {return xhr.responseText}
+	
+	return {ajax: ajax, jsonp: jsonp}
+}(window, Promise).ajax
+m.render = coreRenderer(window).render
+m.trust = function(html) {
+	return Node("<", undefined, undefined, html, undefined, undefined)
+}
+var throttle = function(callback) {
+	//60fps translates to 16.6ms, round it down since setTimeout requires int
+	var time = 16
+	var last = 0, pending = null
+	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	return function(synchronous) {
+		var now = new Date().getTime()
+		if (synchronous === true || last === 0 || now - last >= time) {
+			last = now
+			callback()
+		}
+		else if (pending === null) {
+			pending = timeout(function() {
+				pending = 0
+				callback()
+				last = new Date().getTime()
+			}, time - (now - last))
+		}
+	}
+}
+var autoredraw = function(root, renderer, pubsub, callback) {
+	var run = throttle(callback)
+	renderer.setEventCallback(function(e) {
+		if (e.redraw1 !== false) run()
+	})
+	
+	if (pubsub != null) {
+		if (root.redraw1) pubsub.unsubscribe(root.redraw1)
+		pubsub.subscribe(run)
+	}
+	
+	return root.redraw1 = run
+}
+m.mount = function($window, pubsub) {
+	var renderer = coreRenderer($window)
+	return function(root, component) {
+		var run = autoredraw(root, renderer, pubsub, function() {
+			renderer.render(root, {tag: component})
+		})
+		
+		run()
+	}
+}(window, redraw)
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -687,7 +786,6 @@ var parseQueryString = function(string) {
 	}
 	return data
 }
-
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
 	
@@ -715,7 +813,6 @@ var coreRouter = function($window) {
 		}
 		return path.slice(0, pathEnd)
 	}
-
 	function getPath() {
 		var type = prefix.charAt(0)
 		switch (type) {
@@ -724,7 +821,6 @@ var coreRouter = function($window) {
 			default: return normalize("pathname") + normalize("search") + normalize("hash")
 		}
 	}
-
 	function setPath(path, data, options) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
@@ -791,8 +887,7 @@ var coreRouter = function($window) {
 	
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-
-var apiRouter = function($window, renderers) {
+m.route = function($window, pubsub) {
 	var renderer = coreRenderer($window)
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
@@ -801,135 +896,12 @@ var apiRouter = function($window, renderers) {
 		}, function() {
 			router.setPath(defaultRoute)
 		})
-		var run = throttle(replay)
-		
-		renderer.setEventCallback(run)
-		renderers.push(run)
+		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	
 	return route
-}
-
-var coreRequester = function($window, Promise) {
-	var callbackCount = 0
-
-	function ajax(args) {
-		return new Promise(function(resolve, reject) {
-			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-			
-			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
-			if (typeof args.deserialize !== "function") args.deserialize = deserialize
-			if (typeof args.extract !== "function") args.extract = extract
-			
-			args.url = interpolate(args.url, args.data)
-			if (useBody) args.data = args.serialize(args.data)
-			else args.url = assemble(args.url, args.data)
-			
-			var xhr = new $window.XMLHttpRequest()
-			xhr.open(args.method, args.url, args.async || true, args.user, args.password)
-			
-			if (args.serialize === JSON.stringify && useBody) {
-				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
-			}
-			if (args.deserialize === deserialize) {
-				xhr.setRequestHeader("Accept", "application/json, text/*")
-			}
-			
-			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-			
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4) {
-					try {
-						var response = args.deserialize(args.extract(xhr, args))
-						if (xhr.status >= 200 && xhr.status < 300) {
-							if (typeof args.type === "function") {
-								if (response instanceof Array) {
-									for (var i = 0; i < response.length; i++) {
-										response[i] = new args.type(response[i])
-									}
-								}
-								else response = new args.type(response[i])
-							}
-							
-							resolve(response)
-						}
-						else reject(new Error(xhr.responseText))
-					}
-					catch (e) {
-						reject(e)
-					}
-				}
-			}
-			
-			if (useBody) xhr.send(args.data)
-			else xhr.send()
-		})
-	}
-
-	function jsonp(args) {
-		return new Promise(function(resolve, reject) {
-			var callbackKey = "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-			var script = $window.document.createElement("script")
-			$window[callbackKey] = function(data) {
-				script.parentNode.removeChild(script)
-				resolve(data)
-				$window[callbackKey] = undefined
-			}
-			script.onerror = function() {
-				script.parentNode.removeChild(script)
-				reject(new Error("JSONP request failed"))
-				$window[callbackKey] = undefined
-			}
-			if (args.data == null) args.data = {}
-			args.url = interpolate(args.url, args.data)
-			args.data[args.callbackKey || "callback"] = callbackKey
-			script.src = assemble(args.url, args.data)
-			$window.document.documentElement.appendChild(script)
-		})
-	}
-
-	function interpolate(url, data) {
-		if (data == null) return url
-		
-		var tokens = url.match(/:[^\/]+/gi) || []
-		for (var i = 0; i < tokens.length; i++) {
-			var key = tokens[i].slice(1)
-			if (data[key] != null) {
-				url = url.replace(tokens[i], data[key])
-				delete data[key]
-			}
-		}
-		return url
-	}
-
-	function assemble(url, data) {
-		var querystring = buildQueryString(data)
-		if (querystring !== "") {
-			var prefix = url.indexOf("?") < 0 ? "?" : "&"
-			url += prefix + querystring
-		}
-		return url
-	}
-
-	function deserialize(data) {
-		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
-	}
-
-	function extract(xhr) {return xhr.responseText}
-	
-	return {ajax: ajax, jsonp: jsonp}
-}
-
-var renderers = []
-
-m.redraw = apiRedraw(renderers)
-m.trust = trust
-m.render = coreRenderer(window).render
-m.mount = apiMounter(window, renderers)
-m.route = apiRouter(window, renderers)
-m.request = coreRequester(window, Promise).ajax
-
+}(window, redraw)
+m.redraw = redraw.publish
 module.exports = m
