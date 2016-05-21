@@ -16,7 +16,7 @@ o.spec("m.mount", function() {
 		root = $window.document.body
 		
 		renderers = []
-		mount = createMounter($window, renderers)
+		mount = apiMounter($window, renderers)
 	})
 	
 	o("pushes a render function", function() {
@@ -31,7 +31,7 @@ o.spec("m.mount", function() {
 	})
 	
 	o("renders into `root`", function() {
-		var mount = createMounter($window, [])
+		var mount = apiMounter($window, [])
 		
 		mount(root, {
 			view : function() {

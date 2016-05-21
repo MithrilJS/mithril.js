@@ -23,7 +23,7 @@ o.spec("m.route", function() {
 		root = $window.document.body
 		
 		renderers = []
-		route = apiRouter($window, redraw)
+		route = apiRouter($window, renderers)
 	})
 	
 	o("pushes a render function", function() {
