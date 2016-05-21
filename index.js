@@ -2,18 +2,18 @@
 
 var m = require("./render/hyperscript")
 var trust = require("./render/trust")
-var coreRenderer = require("./render/render")
-var apiRedraw = require("./api/redraw")
-var apiMounter = require("./api/mount")
-var apiRouter = require("./api/router")
 var coreRequester = require("./request/request")
-var renderers = []
+var coreRenderer = require("./render/render")
+var apiPubSub = require("./api/pubsub")
+var apiMount = require("./api/mount")
+var apiRouter = require("./api/router")
+var redraw = apiPubSub()
 
-m.redraw = apiRedraw(renderers)
 m.trust = trust
-m.render = coreRenderer(window).render
-m.mount = apiMounter(window, renderers)
-m.route = apiRouter(window, renderers)
 m.request = coreRequester(window, Promise).ajax
+m.render = coreRenderer(window).render
+m.mount = apiMount(window, redraw)
+m.route = apiRouter(window, redraw)
+m.redraw = redraw.publish
 
 module.exports = m

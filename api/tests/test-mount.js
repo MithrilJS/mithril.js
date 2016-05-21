@@ -4,35 +4,23 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
+var apiPubSub = require("../../api/pubsub")
 var apiMounter = require("../../api/mount")
 
-o.spec("m.mount", function() {
+o.spec("mount", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, mount, renderers
+	var $window, root, redraw, mount
 	
 	o.beforeEach(function() {
 		$window = domMock()
 		
 		root = $window.document.body
 		
-		renderers = []
-		mount = apiMounter($window, renderers)
-	})
-	
-	o("pushes a render function", function() {
-		mount(root, {
-			view : function() {
-				return m("div")
-			}
-		})
-		
-		o(renderers.length).equals(1)
-		o(typeof renderers[0]).equals("function")
+		redraw = apiPubSub()
+		mount = apiMounter($window, redraw)
 	})
 	
 	o("renders into `root`", function() {
-		var mount = apiMounter($window, [])
-		
 		mount(root, {
 			view : function() {
 				return m("div")
@@ -106,7 +94,7 @@ o.spec("m.mount", function() {
 			o(onupdate.callCount).equals(0)
 			
 			done()
-		}, 20)
+		}, FRAME_BUDGET)
 	})
 	
 	 o("redraws when the render function is run", function(done) {
@@ -125,7 +113,7 @@ o.spec("m.mount", function() {
 		o(oninit.callCount).equals(1)
 		o(onupdate.callCount).equals(0)
 		
-		renderers[0]()
+		redraw.publish()
 		
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {

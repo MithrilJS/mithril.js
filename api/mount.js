@@ -1,18 +1,15 @@
 "use strict"
 
 var coreRenderer = require("../render/render")
-var throttle = require("../api/throttle")
+var autoredraw = require("../api/autoredraw")
 
-module.exports = function($window, renderers) {
+module.exports = function($window, pubsub) {
 	var renderer = coreRenderer($window)
 	return function(root, component) {
-		var run = throttle(function() {
+		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, {tag: component})
 		})
 		
-		renderer.setEventCallback(run)
-	
-		renderers.push(run)
 		run()
 	}
 }

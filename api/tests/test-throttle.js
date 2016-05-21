@@ -81,12 +81,4 @@ o.spec("throttle", function() {
 		
 		o(spy.callCount).equals(2)
 	})
-	
-	o("it supports aborting when redraw is falsey", function() {
-		throttled({ redraw : false })
-		throttled({ redraw : 0 })
-		throttled({ redraw : "" })
-		
-		o(spy.callCount).equals(0)
-	})
 })

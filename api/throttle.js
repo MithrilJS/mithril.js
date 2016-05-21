@@ -7,7 +7,6 @@ module.exports = function(callback) {
 	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
 	return function(synchronous) {
 		var now = new Date().getTime()
-		if (typeof synchronous === "object" && "redraw" in synchronous && !synchronous.redraw) return
 		if (synchronous === true || last === 0 || now - last >= time) {
 			last = now
 			callback()

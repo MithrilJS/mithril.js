@@ -5,11 +5,12 @@ var pushStateMock = require("../../test-utils/pushStateMock")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
+var apiPubSub = require("../../api/pubsub")
 var apiRouter = require("../../api/router")
 
-o.spec("m.route", function() {
+o.spec("route", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, route, renderers
+	var $window, root, redraw, route
 	
 	o.beforeEach(function() {
 		$window = {}
@@ -22,21 +23,8 @@ o.spec("m.route", function() {
 		
 		root = $window.document.body
 		
-		renderers = []
-		route = apiRouter($window, renderers)
-	})
-	
-	o("pushes a render function", function() {
-		route(root, "/", {
-			"/" : {
-				view: function() {
-					return m("div")
-				}
-			}
-		})
-		
-		o(renderers.length).equals(1)
-		o(typeof renderers[0]).equals("function")
+		redraw = apiPubSub()
+		route = apiRouter($window, redraw)
 	})
 	
 	o("renders into `root`", function() {
@@ -68,7 +56,7 @@ o.spec("m.route", function() {
 		
 		o(oninit.callCount).equals(1)
 		
-		renderers[0]()
+		redraw.publish()
 		
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {
@@ -146,7 +134,7 @@ o.spec("m.route", function() {
 			o(onupdate.callCount).equals(0)
 			
 			done()
-		}, 20)
+		}, FRAME_BUDGET)
 	})
 	
 	o("changes location on route.link", function() {

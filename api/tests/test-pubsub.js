@@ -1,32 +1,30 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var createRedraw = require("../../api/redraw")
+var apiPubSub = require("../../api/pubsub")
 
-o.spec("m.redraw", function() {
-    var redraw, renderers
-	
+o.spec("pubsub", function() {
+    var pubsub
 	o.beforeEach(function() {
-		renderers = []
-		redraw = createRedraw(renderers)
+		pubsub = apiPubSub()
 	})
     
     o("it shouldn't error if there are no renderers", function() {
-        redraw()
+        pubsub.publish()
     })
     
     o("it should run a single renderer entry", function() {
         var spy = o.spy()
         
-        renderers.push(spy)
+        pubsub.subscribe(spy)
         
-        redraw()
+        pubsub.publish()
         
         o(spy.callCount).equals(1)
         
-        redraw()
-        redraw()
-        redraw()
+        pubsub.publish()
+        pubsub.publish()
+        pubsub.publish()
         
         o(spy.callCount).equals(4)
     })
@@ -36,20 +34,20 @@ o.spec("m.redraw", function() {
         var spy2 = o.spy()
         var spy3 = o.spy()
         
-        renderers.push(spy1, spy2, spy3)
+        pubsub.subscribe(spy1)
+        pubsub.subscribe(spy2)
+        pubsub.subscribe(spy3)
         
-        redraw()
+        pubsub.publish()
         
         o(spy1.callCount).equals(1)
         o(spy2.callCount).equals(1)
         o(spy3.callCount).equals(1)
         
-        redraw()
-        redraw()
-        redraw()
+        pubsub.publish()
         
-        o(spy1.callCount).equals(4)
-        o(spy2.callCount).equals(4)
-        o(spy3.callCount).equals(4)
+        o(spy1.callCount).equals(2)
+        o(spy2.callCount).equals(2)
+        o(spy3.callCount).equals(2)
     })
 })

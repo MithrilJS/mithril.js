@@ -2,9 +2,9 @@
 
 var coreRenderer = require("../render/render")
 var coreRouter = require("../router/router")
-var throttle = require("../api/throttle")
+var autoredraw = require("../api/autoredraw")
 
-module.exports = function($window, renderers) {
+module.exports = function($window, pubsub) {
 	var renderer = coreRenderer($window)
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
@@ -13,10 +13,7 @@ module.exports = function($window, renderers) {
 		}, function() {
 			router.setPath(defaultRoute)
 		})
-		var run = throttle(replay)
-		
-		renderer.setEventCallback(run)
-		renderers.push(run)
+		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
