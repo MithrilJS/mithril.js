@@ -84,7 +84,7 @@ function changeNS(ns, vnode) {
 	}
 }
 var m = hyperscript
-var rendererService = function($window) {
+var renderService = function($window) {
 	var $doc = $window.document
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
@@ -889,7 +889,7 @@ m.route = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	
 	return route
-}(window, rendererService, redrawService)
+}(window, renderService, redrawService)
 m.mount = function(renderer, pubsub) {
 	return function(root, component) {
 		var run = autoredraw(root, renderer, pubsub, function() {
@@ -898,10 +898,19 @@ m.mount = function(renderer, pubsub) {
 		
 		run()
 	}
-}(rendererService, redrawService)
+}(renderService, redrawService)
 m.trust = function(html) {
 	return Node("<", undefined, undefined, html, undefined, undefined)
 }
-m.render = rendererService.render
+m.prop = function(store) {
+	return function() {
+		if (arguments.length > 0) store = arguments[0]
+		return store
+	}
+}
+m.withAttr = function(attrName, callback, context) {
+	return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+}
+m.render = renderService.render
 m.redraw = redrawService.publish
 module.exports = m
