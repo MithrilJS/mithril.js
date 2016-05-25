@@ -38,6 +38,18 @@ o.spec("Router.setPath", function() {
 				
 				o(router.getPath()).equals("/ö?ö=ö#ö=ö")
 			})
+			
+			o("sets route on fallback mode", function() {
+				$window.location.href = "file://" + prefix + "/test"
+				
+				router = new Router($window)
+				router.setPrefix(prefix)
+				
+				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+				router.setPath("/other/x/y/z?c=d#e=f")
+				
+				o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+			})
 			o("sets route via pushState/onpopstate", function() {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)

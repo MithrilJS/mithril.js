@@ -4,6 +4,7 @@ var Node = require("../render/node")
 
 module.exports = function($window) {
 	var $doc = $window.document
+	var $emptyFragment = $doc.createDocumentFragment()
 
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
@@ -91,10 +92,13 @@ module.exports = function($window) {
 		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
-		var element = createNode(vnode.instance, hooks)
-		vnode.dom = vnode.instance.dom
-		vnode.domSize = vnode.instance.domSize
-		return element
+		if (vnode.instance != null) {
+			var element = createNode(vnode.instance, hooks)
+			vnode.dom = vnode.instance.dom
+			vnode.domSize = vnode.instance.domSize
+			return element
+		}
+		else return $emptyFragment
 	}
 
 	//update
@@ -231,9 +235,11 @@ module.exports = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
-		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
-		vnode.dom = vnode.instance.dom
-		vnode.domSize = vnode.instance.domSize
+		if (vnode.instance != null) {
+			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
+			vnode.dom = vnode.instance.dom
+			vnode.domSize = vnode.instance.domSize
+		}
 	}
 	function isRecyclable(old, vnodes) {
 		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {

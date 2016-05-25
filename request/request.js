@@ -40,7 +40,7 @@ module.exports = function($window, Promise) {
 										response[i] = new args.type(response[i])
 									}
 								}
-								else response = new args.type(response[i])
+								else response = new args.type(response)
 							}
 							
 							resolve(response)

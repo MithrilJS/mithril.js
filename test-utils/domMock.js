@@ -275,8 +275,7 @@ module.exports = function() {
 						get: function() {
 							var options = getOptions(this.parentNode)
 							var index = options.indexOf(this)
-							if (index > -1) return index === this.parentNode.selectedIndex
-							return false
+							return index === this.parentNode.selectedIndex
 						},
 						set: function(value) {
 							if (value) {

@@ -156,6 +156,65 @@ o.spec("pushStateMock", function() {
 			o($window.location.hash).equals("#b")
 		})
 	})
+	o.spec("set pathname", function() {
+		o("changes url on location.pathname change", function() {
+			var old = $window.location.href
+			$window.location.pathname = "/a"
+			
+			o(old).equals("http://localhost/")
+			o($window.location.href).equals("http://localhost/a")
+			o($window.location.pathname).equals("/a")
+		})
+	})
+	o.spec("set protocol", function() {
+		o("setting protocol throws", function(done) {
+			var old = $window.location.href
+			try {
+				$window.location.protocol = "https://"
+			}
+			catch (e) {
+				done()
+			}
+		})
+	})
+	o.spec("set port", function() {
+		o("setting origin changes href", function() {
+			var old = $window.location.href
+			$window.location.port = "81"
+			
+			o(old).equals("http://localhost/")
+			o($window.location.port).equals("81")
+			o($window.location.href).equals("http://localhost:81/")
+		})
+	})
+	o.spec("set hostname", function() {
+		o("setting hostname changes href", function() {
+			var old = $window.location.href
+			$window.location.hostname = "127.0.0.1"
+			
+			o(old).equals("http://localhost/")
+			o($window.location.hostname).equals("127.0.0.1")
+			o($window.location.href).equals("http://127.0.0.1/")
+		})
+	})
+	o.spec("set origin", function() {
+		o("setting origin is ignored", function() {
+			var old = $window.location.href
+			$window.location.origin = "http://127.0.0.1"
+			
+			o(old).equals("http://localhost/")
+			o($window.location.origin).equals("http://localhost")
+		})
+	})
+	o.spec("set host", function() {
+		o("setting host is ignored", function() {
+			var old = $window.location.href
+			$window.location.host = "http://127.0.0.1"
+			
+			o(old).equals("http://localhost/")
+			o($window.location.host).equals("localhost")
+		})
+	})
 	o.spec("pushState", function() {
 		o("changes url on pushstate", function() {
 			var old = $window.location.href

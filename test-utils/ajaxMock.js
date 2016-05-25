@@ -8,7 +8,7 @@ module.exports = function() {
 	var routes = {}
 	var callback = "callback"
 	var serverErrorHandler = function() {
-		return {status: 500, responseText: "server error"}
+		return {status: 500, responseText: "server error, most likely the URL was not defined"}
 	}
 	
 	var $window = {

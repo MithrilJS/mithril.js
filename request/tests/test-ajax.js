@@ -115,6 +115,132 @@ o.spec("ajax", function() {
 				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
+		o("type parameter works for Array responses", function(done) {
+			var Entity = function(args) {
+				return {_id: args.id}
+			}
+			
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
+				}
+			})
+			ajax({method: "GET", url: "/item", type: Entity}).then(function(data) {
+				o(data).deepEquals([{_id: 1}, {_id: 2}, {_id: 3}])
+			}).then(done)
+		})
+		o("type parameter works for Object responses", function(done) {
+			var Entity = function(args) {
+				return {_id: args.id}
+			}
+			
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({id: 1})}
+				}
+			})
+			ajax({method: "GET", url: "/item", type: Entity}).then(function(data) {
+				o(data).deepEquals({_id: 1})
+			}).then(done)
+		})
+		o("serialize parameter works in GET", function(done) {
+			var serialize = function(data) {
+				return "id=" + data.id
+			}
+			
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({body: request.query})}
+				}
+			})
+			ajax({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+				o(data.body).equals("?id=1")
+			}).then(done)
+		})
+		o("serialize parameter works in POST", function(done) {
+			var serialize = function(data) {
+				return "id=" + data.id
+			}
+			
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({body: request.body})}
+				}
+			})
+			ajax({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+				o(data.body).equals("id=1")
+			}).then(done)
+		})
+		o("deserialize parameter works in GET", function(done) {
+			var deserialize = function(data) {
+				return data
+			}
+			
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({test: 123})}
+				}
+			})
+			ajax({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
+				o(data).equals("{\"test\":123}")
+			}).then(done)
+		})
+		o("deserialize parameter works in POST", function(done) {
+			var deserialize = function(data) {
+				return data
+			}
+			
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({test: 123})}
+				}
+			})
+			ajax({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
+				o(data).equals("{\"test\":123}")
+			}).then(done)
+		})
+		o("extract parameter works in GET", function(done) {
+			var extract = function(data) {
+				return JSON.stringify({test: 123})
+			}
+			
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			ajax({method: "GET", url: "/item", extract: extract}).then(function(data) {
+				o(data).deepEquals({test: 123})
+			}).then(done)
+		})
+		o("extract parameter works in POST", function(done) {
+			var extract = function(data) {
+				return JSON.stringify({test: 123})
+			}
+			
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			ajax({method: "POST", url: "/item", extract: extract}).then(function(data) {
+				o(data).deepEquals({test: 123})
+			}).then(done)
+		})
+		o("config parameter works", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			ajax({method: "POST", url: "/item", config: config}).then(done)
+			
+			function config(xhr) {
+				o(typeof xhr.setRequestHeader).equals("function")
+				o(typeof xhr.open).equals("function")
+				o(typeof xhr.send).equals("function")
+			}
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {

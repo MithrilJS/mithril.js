@@ -150,6 +150,26 @@ o.spec("component", function() {
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("false")
 		})
+		o("can return null", function() {
+			var component = {
+				view: function(vnode) {
+					return null
+				}
+			}
+			render(root, [{tag: component}])
+			
+			o(root.childNodes.length).equals(0)
+		})
+		o("can return undefined", function() {
+			var component = {
+				view: function(vnode) {
+					return undefined
+				}
+			}
+			render(root, [{tag: component}])
+			
+			o(root.childNodes.length).equals(0)
+		})
 		o("can update when returning fragments", function() {
 			var component = {
 				view: function(vnode) {
@@ -177,6 +197,17 @@ o.spec("component", function() {
 			
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("a")
+		})
+		o("can update when returning null", function() {
+			var component = {
+				view: function(vnode) {
+					return null
+				}
+			}
+			render(root, [{tag: component}])
+			render(root, [{tag: component}])
+			
+			o(root.childNodes.length).equals(0)
 		})
 		o("can remove when returning fragments", function() {
 			var component = {
@@ -505,6 +536,24 @@ o.spec("component", function() {
 			
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
+		})
+	})
+	o.spec("state", function() {
+		o("deep copies state", function() {
+			var called = 0
+			var component = {
+				data: [{a: 1}],
+				oninit: init,
+				view: function() {
+					return ""
+				}
+			}
+			
+			render(root, [{tag: component}])
+			
+			function init(vnode) {
+				o(vnode.state.data).deepEquals([{a: 1}])
+			}
 		})
 	})
 })

@@ -345,6 +345,13 @@ o.spec("domMock", function() {
 			
 			o(div.attributes["id"].nodeValue).equals("[object Object]")
 		})
+		o("setting via attributes map stringifies", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("id", "a")
+			div.attributes["id"].nodeValue = 123
+			
+			o(div.attributes["id"].nodeValue).equals("123")
+		})
 	})
 	
 	o.spec("setAttributeNS", function() {
@@ -681,10 +688,16 @@ o.spec("domMock", function() {
 				
 				var option1 = $document.createElement("option")
 				option1.appendChild($document.createTextNode("a"))
+				var option2 = $document.createElement("option")
+				option2.appendChild($document.createTextNode("b"))
 				select.appendChild(option1)
+				select.appendChild(option2)
 				
 				o(select.value).equals("a")
 				o(select.selectedIndex).equals(0)
+				o(select.childNodes[0].selected).equals(true)
+				o(select.childNodes[0].value).equals("a")
+				o(select.childNodes[1].value).equals("b")
 			})
 			o("value defaults to invalid if no options", function() {
 				var select = $document.createElement("select")
@@ -702,6 +715,29 @@ o.spec("domMock", function() {
 				var option2 = $document.createElement("option")
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
+				
+				select.value = "b"
+				
+				o(select.value).equals("b")
+				o(select.selectedIndex).equals(1)
+			})
+			o("setting valid value works with optgroup", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				
+				var option3 = $document.createElement("option")
+				option3.setAttribute("value", "c")
+				
+				var optgroup = $document.createElement("optgroup")
+				optgroup.appendChild(option1)
+				optgroup.appendChild(option2)
+				select.appendChild(optgroup)
+				select.appendChild(option3)
 				
 				select.value = "b"
 				
@@ -739,6 +775,23 @@ o.spec("domMock", function() {
 				
 				o(select.value).equals("b")
 				o(select.selectedIndex).equals(1)
+			})
+			o("unsetting option[selected] works", function() {
+				var select = $document.createElement("select")
+				
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "a")
+				select.appendChild(option1)
+				
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "b")
+				select.appendChild(option2)
+				
+				select.childNodes[1].selected = true
+				select.childNodes[1].selected = false
+				
+				o(select.value).equals("a")
+				o(select.selectedIndex).equals(0)
 			})
 			o("setting invalid value yields a selectedIndex of -1 and value of empty string", function() {
 				var select = $document.createElement("select")

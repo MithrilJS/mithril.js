@@ -114,10 +114,10 @@ module.exports = function() {
 			},
 			
 			set origin(value) {
-				console.warn("Origin is writable but ignored")
+				//origin is writable but ignored
 			},
 			set host(value) {
-				console.warn("Host is writable but ignored in Chrome")
+				//host is writable but ignored in Chrome
 			},
 			set href(value) {
 				var url = getURL()
@@ -160,7 +160,6 @@ module.exports = function() {
 				}
 			},
 		},
-		scrollTo: function(x, y) {},
 		onpopstate: null,
 		onhashchange: null,
 		onunload: null,
