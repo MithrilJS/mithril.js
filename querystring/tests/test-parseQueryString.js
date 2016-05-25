@@ -8,6 +8,10 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("?aaa=bbb")
 		o(data).deepEquals({aaa: "bbb"})
 	})
+	o("parses empty string", function() {
+		var data = parseQueryString("")
+		o(data).deepEquals({})
+	})
 	o("parses flat object", function() {
 		var data = parseQueryString("?a=b&c=d")
 		o(data).deepEquals({a: "b", c: "d"})

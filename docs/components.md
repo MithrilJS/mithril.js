@@ -139,7 +139,7 @@ m(ComponentUsingThis, {text: "Hello"})
 // <div>Hello</div>
 ```
 
-Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, if ES6 is not available, use `vnode.state`.
+Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
 
 ---
 
