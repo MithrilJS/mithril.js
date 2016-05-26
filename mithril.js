@@ -14,7 +14,7 @@
 	"use strict"
 
 	m.version = function () {
-		return "v0.2.4"
+		return "v0.2.5"
 	}
 
 	var hasOwn = {}.hasOwnProperty
@@ -1338,7 +1338,7 @@
 	}
 
 	m.prop = function (store) {
-		if ((store != null && isObject(store) || isFunction(store)) || (typeof Promise !== "undefined" && store instanceof Promise) &&
+		if ((store != null && (isObject(store) || isFunction(store)) || ((typeof Promise !== "undefined") && (store instanceof Promise))) &&
 				isFunction(store.then)) {
 			return propify(store)
 		}
