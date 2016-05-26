@@ -1338,7 +1338,7 @@
 	}
 
 	m.prop = function (store) {
-		if ((store != null && isObject(store) || isFunction(store)) || store instanceof window.Promise &&
+		if ((store != null && isObject(store) || isFunction(store)) || (typeof Promise !== "undefined" && store instanceof Promise) &&
 				isFunction(store.then)) {
 			return propify(store)
 		}
