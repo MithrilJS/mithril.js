@@ -1,14 +1,14 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var ajaxMock = require("../../test-utils/ajaxMock")
+var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
 	var mock, jsonp
 	o.beforeEach(function() {
-		mock = ajaxMock()
+		mock = xhrMock()
 		jsonp = new Request(mock, Promise).jsonp
 	})
 	

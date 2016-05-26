@@ -5,7 +5,7 @@ var buildQueryString = require("../querystring/build")
 module.exports = function($window, Promise) {
 	var callbackCount = 0
 
-	function ajax(args) {
+	function xhr(args) {
 		return new Promise(function(resolve, reject) {
 			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 			
@@ -60,21 +60,21 @@ module.exports = function($window, Promise) {
 
 	function jsonp(args) {
 		return new Promise(function(resolve, reject) {
-			var callbackKey = "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
-			$window[callbackKey] = function(data) {
+			$window[callbackName] = function(data) {
 				script.parentNode.removeChild(script)
 				resolve(data)
-				$window[callbackKey] = undefined
+				delete $window[callbackName]
 			}
 			script.onerror = function() {
 				script.parentNode.removeChild(script)
 				reject(new Error("JSONP request failed"))
-				$window[callbackKey] = undefined
+				delete $window[callbackName]
 			}
 			if (args.data == null) args.data = {}
 			args.url = interpolate(args.url, args.data)
-			args.data[args.callbackKey || "callback"] = callbackKey
+			args.data[args.callbackKey || "callback"] = callbackName
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
 		})
@@ -110,5 +110,5 @@ module.exports = function($window, Promise) {
 
 	function extract(xhr) {return xhr.responseText}
 	
-	return {ajax: ajax, jsonp: jsonp}
+	return {xhr: xhr, jsonp: jsonp}
 }

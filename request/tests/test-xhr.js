@@ -1,14 +1,14 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var ajaxMock = require("../../test-utils/ajaxMock")
+var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 
-o.spec("ajax", function() {
-	var mock, ajax
+o.spec("xhr", function() {
+	var mock, xhr
 	o.beforeEach(function() {
-		mock = ajaxMock()
-		ajax = new Request(mock, Promise).ajax
+		mock = xhrMock()
+		xhr = new Request(mock, Promise).xhr
 	})
 	
 	o.spec("success", function() {
@@ -19,7 +19,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			ajax({method: "GET", url: "/item"}).then(function(data) {
+			xhr({method: "GET", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(function() {
 				done()
@@ -31,7 +31,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			ajax({method: "GET", url: "/item"}).then(function(data) {
+			xhr({method: "GET", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(done)
 		})
@@ -41,7 +41,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			ajax({method: "GET", url: "/item", data: {x: "y"}}).then(function(data) {
+			xhr({method: "GET", url: "/item", data: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=y"})
 			}).then(done)
 		})
@@ -51,7 +51,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			ajax({method: "POST", url: "/item", data: {x: "y"}}).then(function(data) {
+			xhr({method: "POST", url: "/item", data: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: "y"}})
 			}).then(done)
 		})
@@ -61,7 +61,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			ajax({method: "GET", url: "/item", data: {x: ":y"}}).then(function(data) {
+			xhr({method: "GET", url: "/item", data: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=%3Ay"})
 			}).then(done)
 		})
@@ -71,7 +71,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			ajax({method: "POST", url: "/item", data: {x: ":y"}}).then(function(data) {
+			xhr({method: "POST", url: "/item", data: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: ":y"}})
 			}).then(done)
 		})
@@ -81,7 +81,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query})}
 				}
 			})
-			ajax({method: "GET", url: "/item/:x", data: {x: "y"}}).then(function(data) {
+			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}})
 			}).then(done)
 		})
@@ -91,7 +91,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
 				}
 			})
-			ajax({method: "POST", url: "/item/:x", data: {x: "y"}}).then(function(data) {
+			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}})
 			}).then(done)
 		})
@@ -101,7 +101,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			ajax({method: "GET", url: "/item/:x"}).then(function(data) {
+			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
@@ -111,7 +111,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			ajax({method: "GET", url: "/item/:x"}).then(function(data) {
+			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
@@ -125,7 +125,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
 				}
 			})
-			ajax({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			xhr({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals([{_id: 1}, {_id: 2}, {_id: 3}])
 			}).then(done)
 		})
@@ -139,7 +139,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
 				}
 			})
-			ajax({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			xhr({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals({_id: 1})
 			}).then(done)
 		})
@@ -153,7 +153,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
 				}
 			})
-			ajax({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+			xhr({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
 				o(data.body).equals("?id=1")
 			}).then(done)
 		})
@@ -167,7 +167,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
 				}
 			})
-			ajax({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+			xhr({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
 				o(data.body).equals("id=1")
 			}).then(done)
 		})
@@ -181,7 +181,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			ajax({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
+			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
@@ -195,7 +195,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			ajax({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
+			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
@@ -209,7 +209,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			ajax({method: "GET", url: "/item", extract: extract}).then(function(data) {
+			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -223,7 +223,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			ajax({method: "POST", url: "/item", extract: extract}).then(function(data) {
+			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -233,7 +233,7 @@ o.spec("ajax", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			ajax({method: "POST", url: "/item", config: config}).then(done)
+			xhr({method: "POST", url: "/item", config: config}).then(done)
 			
 			function config(xhr) {
 				o(typeof xhr.setRequestHeader).equals("function")
@@ -249,7 +249,7 @@ o.spec("ajax", function() {
 					return {status: 500, responseText: JSON.stringify({error: "error"})}
 				}
 			})
-			ajax({method: "GET", url: "/item"}).catch(function(e) {
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e.message).equals(JSON.stringify({error: "error"}))
 			}).then(done)
 		})
@@ -259,7 +259,7 @@ o.spec("ajax", function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
-			ajax({method: "GET", url: "/item"}).catch(function(e) {
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e.message).equals("error")
 			}).then(done)
 		})

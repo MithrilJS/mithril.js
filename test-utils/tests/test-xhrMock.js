@@ -1,13 +1,13 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var ajaxMock = require("../../test-utils/ajaxMock")
+var xhrMock = require("../../test-utils/xhrMock")
 var parseQueryString = require("../../querystring/parse")
 
-o.spec("ajaxMock", function() {
+o.spec("xhrMock", function() {
 	var $window, ajax
 	o.beforeEach(function() {
-		$window = ajaxMock()
+		$window = xhrMock()
 	})
 	
 	o.spec("xhr", function() {
