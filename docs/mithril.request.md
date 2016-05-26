@@ -448,6 +448,7 @@ where:
 		String dataType,
 		String url,
 		String callbackKey,
+		String callbackName,
 		Object<any> data
 	}
 ```
@@ -660,6 +661,12 @@ where:
 		The name of the querystring key that defines the name of the callback function to be called by the response. Defaults to "callback"
 		
 		This option is useful for web services that use uncommon conventions for defining jsonp callbacks (e.g. foo.com/?jsonpCallback=doSomething)
+		
+	-	**String callbackName**
+	
+		The name of callback function to be called by the response. Defaults to a unique auto-generated name
+		
+		This option is useful for web services serving static files and to prevent cache busting.
 		
 	-	**Object<any> data** (optional)
 	

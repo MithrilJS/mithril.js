@@ -1,5 +1,20 @@
 ## Change Log
 
+[v0.2.5](http://mithril.js.org/archive/v0.2.5)
+
+### News:
+
+-	performance improvements in IE (thanks to @gyandeeps)
+-	m.request now has a `callbackName` option to specify the name of the javascript function that gets called on JSONP response [#1072](https://github.com/lhorie/mithril.js/issues/1072)
+
+### Bug Fixes:
+
+-	fix active form element syncing [#691](https://github.com/lhorie/mithril.js/issues/691)
+-	ignore url interpolations without value in m.request [#1039](https://github.com/lhorie/mithril.js/issues/1039)
+-	fixed native promise absorption in `m.prop` [#1076](https://github.com/lhorie/mithril.js/issues/1076)
+
+---
+
 [v0.2.4](http://mithril.js.org/archive/v0.2.4)
 
 ### Bug Fixes:
