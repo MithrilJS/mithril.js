@@ -106,7 +106,7 @@ You should not modify model data synchronously from this method. Since `oncreate
 
 ### onupdate
 
-The `oncreate(vnode)` hook is called after a DOM element is updated, while attached to the document. `onupdate` is guaranteed to run at the end of the render cycle, so it is safe to read layout values such as `vnode.dom.offsetHeight` and `vnode.dom.getBoundingClientRect()` from this method.
+The `onupdate(vnode)` hook is called after a DOM element is updated, while attached to the document. `onupdate` is guaranteed to run at the end of the render cycle, so it is safe to read layout values such as `vnode.dom.offsetHeight` and `vnode.dom.getBoundingClientRect()` from this method.
 
 This hook is only called if the element existed in the previous render cycle. It is not called when an element is created or when it is recycled.
 

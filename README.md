@@ -6,17 +6,21 @@ This rewrite aims to fix longstanding API design issues, significantly improve p
 
 ## Early Preview
 
-You can install this via NPN using this command:
+You can install this via NPM using this command:
 
 ```
 npm install lhorie/mithril.js#rewrite
 ```
+
+Examples run out of the box. Just open the HTML files.
 
 ## Status
 
 Code still is in flux. Most notably, there's no promise polyfill yet and there are several use cases that still need to be polished. DO NOT USE IN PRODUCTION YET!
 
 Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/threaditjs/index.html) has the largest API surface coverage and comments indicating pending issues in framework usability. Note that the APIs those examples use may not become the final public API points in v1.0.
+
+Partial documentation can be found in the `/docs` directory
 
 ## Performance
 
@@ -34,7 +38,7 @@ Mithril's `config` method is now replaced by several lifecycle methods to improv
 
 ## Robustness
 
-There are over 2200 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
+There are over 2300 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
 
 ## Modularity
 

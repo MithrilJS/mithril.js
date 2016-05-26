@@ -125,7 +125,7 @@ State can also be accessed via the `this` keyword, which is available to all lif
 
 ```javascript
 var ComponentUsingThis = {
-	oninit: function() {
+	oninit: function(vnode) {
 		this.data = vnode.attrs.text
 	},
 	view: function(vnode) {
