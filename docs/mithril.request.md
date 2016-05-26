@@ -272,6 +272,7 @@ data.append("file", file)
 m.request({
 	method: "POST",
 	url: "/upload",
+	data: data,
 	serialize: function(data) {return data}
 })
 ```
