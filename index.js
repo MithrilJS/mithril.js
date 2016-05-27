@@ -6,7 +6,7 @@ var redrawService = require("./api/pubsub")()
 var requestService = require("./request/request")(window, Promise)
 
 m.request = requestService.xhr
-m.request = requestService.jsonp
+m.jsonp = requestService.jsonp
 m.route = require("./api/router")(window, renderService, redrawService)
 m.mount = require("./api/mount")(renderService, redrawService)
 m.trust = require("./render/trust")
