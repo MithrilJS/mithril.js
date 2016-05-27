@@ -535,7 +535,7 @@ where:
 		demo.view = function(ctrl) {
 			return m("div", [
 				//in the first redraw, there's no user, so ensure we don't throw an error
-				ctrl.user ? ctrl.user.name : "no user"
+				ctrl.user() ? ctrl.user().name : "no user"
 			])
 		}
 		```
