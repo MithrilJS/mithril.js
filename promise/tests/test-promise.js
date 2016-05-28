@@ -133,6 +133,22 @@ o.spec("promise", function() {
 			
 			promise.then(null, done)
 		})
+		o("non-function onFulfilled is ignored", function(done) {
+			var promise = Promise.resolve(1)
+			
+			promise.then(null, null).then(function(value) {
+				o(value).equals(1)
+				done()
+			})
+		})
+		o("non-function onFulfilled is ignored", function(done) {
+			var promise = Promise.resolve(1)
+			
+			promise.then(null).then(function(value) {
+				o(value).equals(1)
+				done()
+			})
+		})
 	})
 	o.spec("reject", function() {
 		o("rejects once", function(done) {
@@ -244,6 +260,14 @@ o.spec("promise", function() {
 				throw 2
 			}).then(null, function(value) {
 				o(value).equals(2)
+				done()
+			})
+		})
+		o("non-function onRejected is ignored", function(done) {
+			var promise = Promise.reject(1)
+			
+			promise.then(function() {}, null).then(null, function(value) {
+				o(value).equals(1)
 				done()
 			})
 		})
@@ -440,6 +464,37 @@ o.spec("promise", function() {
 				done()
 			})
 		})
+		o("promise stays pending if absorbed promise is pending", function(done) {
+			var promise = new Promise(function(resolve) {resolve()})
+			var fulfilled = false, rejected = false
+			
+			promise.then(function() {
+				return new Promise(function() {})
+			}).then(function() {
+				fulfilled = true
+			}, function() {
+				rejected = false
+			})
+			
+			setTimeout(function() {
+				o(fulfilled).equals(false)
+				o(rejected).equals(false)
+				done()
+			}, 10)
+		})
+		o("absorbs early resolved promise", function(done, t) {
+			var resolved = Promise.resolve(1)
+			var promise = new Promise(function(resolve) {
+				setTimeout(function() {
+					resolve(resolved)
+				}, 10)
+			})
+			
+			promise.then(function(value) {
+				o(value).equals(1)
+				done()
+			})
+		})
 	})
 	o.spec("race", function() {
 		o("resolves to first resolved", function(done) {
@@ -492,6 +547,45 @@ o.spec("promise", function() {
 			})
 			Promise.all([a, b]).then(null, function(value) {
 				o(value).equals(1)
+				done()
+			})
+		})
+	})
+	o.spec("A+ compliance", function() {
+		o("accesses then only once", function(done) {
+			var readCount = 0
+			var promise = Promise.resolve(1).then(function() {
+				return Object.create(null, {
+                    then: {
+                        get: function () {
+                            ++readCount
+                            return function(onFulfilled) {
+                                onFulfilled()
+                            }
+                        }
+                    }
+                })
+			})
+			
+			promise.then(function(value) {
+				o(readCount).equals(1)
+				done()
+			})
+		})
+		o("works if thennable resolves twice", function(done) {
+			var promise = Promise.resolve({
+				then: function(res) {
+					res({
+						then: function(resolve) {
+							setTimeout(function() {resolve(2)})
+						}
+					})
+					res(1)
+				}
+			})
+			
+			promise.then(function(value) {
+				o(value).equals(2)
 				done()
 			})
 		})

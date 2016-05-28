@@ -1,39 +1,55 @@
 "use strict"
-
+{
 function Promise(executor) {
 	if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
 	if (typeof executor !== "function") throw new Error("executor must be a function")
 	
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
 	function handler(list, shouldAbsorb) {
+		var done = false
 		return function execute(value) {
-			if (shouldAbsorb && (typeof value === "object" || typeof value === "function") && typeof value.then === "function") {
-				if (value === self) rejectCurrent(new Error("Promise cannot be resolved with itself"))
-				value.then(execute, rejectCurrent)
+			if (done) return
+			done = true
+
+			var then
+			try {
+				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
+					if (value === self) rejectCurrent(new TypeError("Promise can't be resolved w/ itself"))
+					then.call(value, handler(list, shouldAbsorb), rejectCurrent)
+				}
+				else {
+					setTimeout(function() {
+						for (var i = 0; i < list.length; i++) list[i](value)
+						instance.retry = function() {
+							done = false
+							execute(value)
+						}
+					}, 0)
+				}
 			}
-			else {
-				setTimeout(function() {
-					for (var i = 0; i < list.length; i++) list[i](value)
-					resolvers.length = 0, rejectors.length = 0
-				}, 0)
+			catch (e) {
+				rejectCurrent(e)
 			}
 		}
 	}
+	var instance = this._instance = {resolvers: resolvers, rejectors: rejectors}
 	
-	this._instance = {resolvers: resolvers, rejectors: rejectors}
 	try {executor(resolveCurrent, rejectCurrent)} catch (e) {rejectCurrent(e)}
 }
 Promise.prototype.then = function(onFulfilled, onRejection) {
-	function handle(callback, list) {
-		if (typeof callback === "function") {
-			list.push(function(value) {
-				try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
-			})
-		}
+	var self = this
+	function handle(callback, list, next, state) {
+		list.push(function(value) {
+			if (typeof callback !== "function") next(value)
+			try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
+		})
+		var retry = self._instance.retry
+		if (retry) retry()
 	}
 	var resolveNext, rejectNext
-	handle(onFulfilled, this._instance.resolvers), handle(onRejection, this._instance.rejectors)
-	return new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	handle(onFulfilled, this._instance.resolvers, resolveNext, true), handle(onRejection, this._instance.rejectors, rejectNext, false)
+	return promise
 }
 Promise.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
@@ -55,8 +71,9 @@ Promise.all = function(list) {
 					values[i] = value
 					if (count === total) resolve(values)
 				}
-				if ((typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
-					list[i].then(consume, reject)
+				var then
+				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof (then = list[i].then) === "function") {
+					then.call(list[i], consume, reject)
 				}
 				else consume(list[i])
 			}(i)
@@ -72,3 +89,4 @@ Promise.race = function(list) {
 }
 
 module.exports = Promise
+}
