@@ -5,7 +5,7 @@ var pushStateMock = require("../../test-utils/pushStateMock")
 var Router = require("../../router/router")
 
 o.spec("Router.defineRoutes", function() {
-	void ["#", "?", "", "#!", "?!"].forEach(function(prefix) {
+	void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 		o.spec("using prefix `" + prefix + "`", function() {
 			var $window, router, onRouteChange, onFail
 	
