@@ -5,7 +5,7 @@ var pushStateMock = require("../../test-utils/pushStateMock")
 var Router = require("../../router/router")
 
 o.spec("Router.setPath", function() {
-	void ["#", "?", "", "#!", "?!"].forEach(function(prefix) {
+	void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 		o.spec("using prefix `" + prefix + "`", function() {
 			var $window, router, onRouteChange, onFail
 	
@@ -78,8 +78,10 @@ o.spec("Router.setPath", function() {
 				router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
 				router.setPath("/other", null, {replace: false})
 				$window.history.back()
-				
-				o($window.location.href).equals("http://localhost/" + (prefix ? prefix + "/" : "") + "test")
+
+				var slash = prefix[0] === "/" ? "" : "/"
+
+				o($window.location.href).equals("http://localhost" + slash + (prefix ? prefix + "/" : "") + "test")
 			})
 		})
 	})

@@ -36,7 +36,7 @@ module.exports = function($window) {
 		switch (type) {
 			case "#": return normalize("hash").slice(prefix.length)
 			case "?": return normalize("search").slice(prefix.length) + normalize("hash")
-			default: return normalize("pathname") + normalize("search") + normalize("hash")
+			default: return normalize("pathname").slice(prefix.length) + normalize("search") + normalize("hash")
 		}
 	}
 
