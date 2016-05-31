@@ -82,11 +82,25 @@
 	 * Which describes a DOM node
 	 */
 
+	var quoteTable = {
+		"'": '"',
+		"\\'": "'",
+		'\\\\': '\\\\',
+		'\\"': '\\"',
+		'"': '\\"'
+	}
+
+	function convertQuote(q) {return quoteTable[q]}
+
+	function parseString(str) {
+		if (str.charAt(0) === "'") str = str.replace(/^'|'$|\\[\\"']|"/g, convertQuote)
+		return JSON.parse(str)
+	}
+
 	function parseTagAttrs(cell, tag) {
 		var classes = []
-		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g
+		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.*?(?:=(?:"(?:\\[\s\S]|[^"\n])*"|'(?:\\[\s\S]|[^'\n])*'|.*?))?\])/g
 		var match
-
 		while ((match = parser.exec(tag))) {
 			if (match[1] === "" && match[2]) {
 				cell.tag = match[2]
@@ -95,8 +109,8 @@
 			} else if (match[1] === ".") {
 				classes.push(match[2])
 			} else if (match[3][0] === "[") {
-				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
-				cell.attrs[pair[1]] = pair[3] || ""
+				var pair = /\[(.+?)(?:=(?:("(?:\\[\s\S]|[^"\n])*"|'(?:\\[\s\S]|[^'\n])*')|("|'|)(.*?)\3))?\]/.exec(match[3])
+				cell.attrs[pair[1]] = pair[2] ? parseString(pair[2]) : pair[4] || ""
 			}
 		}
 

@@ -37,16 +37,48 @@ describe("m()", function () {
 		expect(m("[title=bar]")).to.have.deep.property("attrs.title", "bar")
 	})
 
+	it("sets correct unquoted attr with unicode characters", function () {
+		expect(m("[title=bö💥]")).to.have.deep.property("attrs.title", "bö💥")
+	})
+
 	it("sets attr without a value as an empty string", function () {
 		expect(m("[empty]")).to.have.deep.property("attrs.empty", "")
 	})
 
 	it("sets correct single quoted attr", function () {
-		expect(m("[title=\'bar\']")).to.have.deep.property("attrs.title", "bar")
+		expect(m("[title='bar']")).to.have.deep.property("attrs.title", "bar")
+	})
+
+	it("sets correct single quoted attr with old-style embedded single quote", function () {
+		expect(m("[title='b'ar']")).to.have.deep.property("attrs.title", "b'ar")
+	})
+
+	it("sets correct single quoted attr with an embedded single quote", function () {
+		expect(m("[title='b\\'ar']")).to.have.deep.property("attrs.title", "b'ar")
+	})
+
+	it("sets correct single quoted attr with an embedded escape sequences and quotes", function () {
+		expect(m("[title='b\\\\\\'\\\"\\\\\"ar']")).to.have.deep.property("attrs.title", "b\\'\"\\\"ar")
+	})
+
+	it("sets correct single quoted attr with an embedded closing bracket", function () {
+		expect(m("[title='b]ar']")).to.have.deep.property("attrs.title", "b]ar")
 	})
 
 	it("sets correct double quoted attr", function () {
 		expect(m("[title=\"bar\"]")).to.have.deep.property("attrs.title", "bar")
+	})
+
+	it("sets correct double quoted attr with old-style embedded double quotes", function () {
+		expect(m("[title=\"b\"a\"r\"]")).to.have.deep.property("attrs.title", "b\"a\"r")
+	})
+
+	it("sets correct double quoted attr with an embedded double quote and closing bracket", function () {
+		expect(m("[title=\"b\\\"]ar\"]")).to.have.deep.property("attrs.title", "b\"]ar")
+	})
+
+	it("sets correct double quoted attr with an embedded closing bracket", function () {
+		expect(m("[title=\"b]ar\"]")).to.have.deep.property("attrs.title", "b]ar")
 	})
 
 	it("sets correct children with 1 string arg", function () {
