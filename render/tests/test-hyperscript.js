@@ -52,9 +52,10 @@ o.spec("hyperscript", function() {
 			o(vnode.attrs.a).equals("b")
 		})
 		o("handles attr w/ quoted square bracket", function() {
-			var vnode = m("[a='[b]'].c")
+			var vnode = m("[x][a='[b]'].c")
 			
 			o(vnode.tag).equals("div")
+			o(vnode.attrs.x).equals(true)
 			o(vnode.attrs.a).equals("[b]")
 			o(vnode.attrs.className).equals("c")
 		})
