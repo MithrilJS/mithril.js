@@ -48,6 +48,9 @@ describe("m()", function () {
 	it("sets correct double quoted attr", function () {
 		expect(m("[title=\"bar\"]")).to.have.deep.property("attrs.title", "bar")
 	})
+	it("sets pattern attr", function () {
+		expect(m("[pattern=\"[a-zA-Z0-9]{56}\"]")).to.have.deep.property("attrs.pattern", "[a-zA-Z0-9]{56}")
+	})
 
 	it("sets correct children with 1 string arg", function () {
 		expect(m("div", "test"))

@@ -84,7 +84,7 @@
 
 	function parseTagAttrs(cell, tag) {
 		var classes = []
-		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g
+		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 		var match
 
 		while ((match = parser.exec(tag))) {
@@ -95,8 +95,9 @@
 			} else if (match[1] === ".") {
 				classes.push(match[2])
 			} else if (match[3][0] === "[") {
-				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
-				cell.attrs[pair[1]] = pair[3] || ""
+				var attrValue = match[6]
+				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1")
+				cell.attrs[match[4]] = attrValue || ""
 			}
 		}
 
