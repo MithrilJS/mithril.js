@@ -530,6 +530,12 @@ o.spec("promise", function() {
 				done()
 			})
 		})
+		o("resolves empty array", function(done) {
+			Promise.all([]).then(function(value) {
+				o(value).deepEquals([])
+				done()
+			})
+		})
 		o("resolves non-promise to itself", function(done) {
 			var a = new Promise(function(resolve, reject) {
 				callAsync(function() {resolve(1)})

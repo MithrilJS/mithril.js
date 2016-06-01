@@ -72,7 +72,8 @@ if (typeof Promise === "undefined") {
 	Promise.all = function(list) {
 		return new Promise(function(resolve, reject) {
 			var total = list.length, count = 0, values = []
-			for (var i = 0; i < list.length; i++) {
+			if (list.length === 0) resolve([])
+			else for (var i = 0; i < list.length; i++) {
 				new function(i) {
 					function consume(value) {
 						count++
