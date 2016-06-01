@@ -5,25 +5,23 @@ function Promise(executor) {
 	if (typeof executor !== "function") throw new Error("executor must be a function")
 	
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
+	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
+	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 	function handler(list, shouldAbsorb) {
-		var done = false
 		return function execute(value) {
-			if (done) return
-			done = true
-
 			var then
 			try {
 				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-					if (value === self) rejectCurrent(new TypeError("Promise can't be resolved w/ itself"))
-					then.call(value, handler(list, shouldAbsorb), rejectCurrent)
+					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
+					executeOnce(then.bind(value))
 				}
 				else {
-					setTimeout(function() {
+					callAsync(function() {
+						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
 						for (var i = 0; i < list.length; i++) list[i](value)
-						instance.retry = function() {
-							done = false
-							execute(value)
-						}
+						resolvers.length = 0, rejectors.length = 0
+						instance.state = shouldAbsorb
+						instance.retry = function() {execute(value)}
 					}, 0)
 				}
 			}
@@ -32,23 +30,32 @@ function Promise(executor) {
 			}
 		}
 	}
-	var instance = this._instance = {resolvers: resolvers, rejectors: rejectors}
+	function executeOnce(then) {
+		var runs = 0
+		function run(fn) {
+			return function(value) {
+				if (runs++ > 0) return
+				fn(value)
+			}
+		}
+		var onerror = run(rejectCurrent)
+		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
+	}
 	
-	try {executor(resolveCurrent, rejectCurrent)} catch (e) {rejectCurrent(e)}
+	executeOnce(executor)
 }
 Promise.prototype.then = function(onFulfilled, onRejection) {
-	var self = this
+	var self = this, instance = self._instance
 	function handle(callback, list, next, state) {
 		list.push(function(value) {
 			if (typeof callback !== "function") next(value)
-			try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
+			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
 		})
-		var retry = self._instance.retry
-		if (retry) retry()
+		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
 	}
 	var resolveNext, rejectNext
 	var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
-	handle(onFulfilled, this._instance.resolvers, resolveNext, true), handle(onRejection, this._instance.rejectors, rejectNext, false)
+	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
 	return promise
 }
 Promise.prototype.catch = function(onRejection) {
@@ -71,9 +78,8 @@ Promise.all = function(list) {
 					values[i] = value
 					if (count === total) resolve(values)
 				}
-				var then
-				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof (then = list[i].then) === "function") {
-					then.call(list[i], consume, reject)
+				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
+					list[i].then(consume, reject)
 				}
 				else consume(list[i])
 			}(i)

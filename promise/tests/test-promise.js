@@ -282,7 +282,8 @@ o.spec("promise", function() {
 		})
 		o("absorbs resolved promise in executor resolve", function(done) {
 			var promise = new Promise(function(resolve, reject) {
-				resolve(Promise.resolve(1))
+				var p = Promise.resolve(1)
+				resolve(p)
 			})
 			
 			promise.then(function(value) {
@@ -482,7 +483,7 @@ o.spec("promise", function() {
 				done()
 			}, 10)
 		})
-		o("absorbs early resolved promise", function(done, t) {
+		o("absorbs early resolved promise", function(done) {
 			var resolved = Promise.resolve(1)
 			var promise = new Promise(function(resolve) {
 				setTimeout(function() {
@@ -585,6 +586,21 @@ o.spec("promise", function() {
 			})
 			
 			promise.then(function(value) {
+				o(value).equals(2)
+				done()
+			})
+		})
+		o("works if thennable resolves async rejection then throws", function(done) {
+			var promise = new Promise(function(res) {
+				res({
+					then: function(resolve, reject) {
+						setTimeout(function() {reject(2)})
+					}
+				})
+				throw 3
+			})
+			
+			promise.then(null, function(value) {
 				o(value).equals(2)
 				done()
 			})
