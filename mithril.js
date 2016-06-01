@@ -86,6 +86,7 @@ function changeNS(ns, vnode) {
 var m = hyperscript
 var renderService = function($window) {
 	var $doc = $window.document
+	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 	
@@ -172,10 +173,13 @@ var renderService = function($window) {
 		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
-		var element = createNode(vnode.instance, hooks)
-		vnode.dom = vnode.instance.dom
-		vnode.domSize = vnode.instance.domSize
-		return element
+		if (vnode.instance != null) {
+			var element = createNode(vnode.instance, hooks)
+			vnode.dom = vnode.instance.dom
+			vnode.domSize = vnode.instance.domSize
+			return element
+		}
+		else return $emptyFragment
 	}
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling) {
@@ -311,9 +315,11 @@ var renderService = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
-		updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
-		vnode.dom = vnode.instance.dom
-		vnode.domSize = vnode.instance.domSize
+		if (vnode.instance != null) {
+			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
+			vnode.dom = vnode.instance.dom
+			vnode.domSize = vnode.instance.domSize
+		}
 	}
 	function isRecyclable(old, vnodes) {
 		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
@@ -595,9 +601,9 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-m.request = function($window, Promise) {
+var requestService = function($window, Promise) {
 	var callbackCount = 0
-	function ajax(args) {
+	function xhr(args) {
 		return new Promise(function(resolve, reject) {
 			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 			
@@ -632,7 +638,7 @@ m.request = function($window, Promise) {
 										response[i] = new args.type(response[i])
 									}
 								}
-								else response = new args.type(response[i])
+								else response = new args.type(response)
 							}
 							
 							resolve(response)
@@ -651,21 +657,21 @@ m.request = function($window, Promise) {
 	}
 	function jsonp(args) {
 		return new Promise(function(resolve, reject) {
-			var callbackKey = "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
-			$window[callbackKey] = function(data) {
+			$window[callbackName] = function(data) {
 				script.parentNode.removeChild(script)
 				resolve(data)
-				$window[callbackKey] = undefined
+				delete $window[callbackName]
 			}
 			script.onerror = function() {
 				script.parentNode.removeChild(script)
 				reject(new Error("JSONP request failed"))
-				$window[callbackKey] = undefined
+				delete $window[callbackName]
 			}
 			if (args.data == null) args.data = {}
 			args.url = interpolate(args.url, args.data)
-			args.data[args.callbackKey || "callback"] = callbackKey
+			args.data[args.callbackKey || "callback"] = callbackName
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
 		})
@@ -697,8 +703,10 @@ m.request = function($window, Promise) {
 	}
 	function extract(xhr) {return xhr.responseText}
 	
-	return {ajax: ajax, jsonp: jsonp}
-}(window, Promise).ajax
+	return {xhr: xhr, jsonp: jsonp}
+}(window, Promise)
+m.request = requestService.xhr
+m.jsonp = requestService.jsonp
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -771,7 +779,7 @@ var coreRouter = function($window) {
 		switch (type) {
 			case "#": return normalize("hash").slice(prefix.length)
 			case "?": return normalize("search").slice(prefix.length) + normalize("hash")
-			default: return normalize("pathname") + normalize("search") + normalize("hash")
+			default: return normalize("pathname").slice(prefix.length) + normalize("search") + normalize("hash")
 		}
 	}
 	function setPath(path, data, options) {
@@ -909,7 +917,9 @@ m.prop = function(store) {
 	}
 }
 m.withAttr = function(attrName, callback, context) {
-	return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+	return function(e) {
+		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+	}
 }
 m.render = renderService.render
 m.redraw = redrawService.publish
