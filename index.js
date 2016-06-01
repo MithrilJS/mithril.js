@@ -1,5 +1,6 @@
 "use strict"
 
+var Promise = require("./promise/promise")
 var m = require("./render/hyperscript")
 var renderService = require("./render/render")(window)
 var redrawService = require("./api/pubsub")()
