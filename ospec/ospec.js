@@ -187,7 +187,10 @@ module.exports = new function init() {
 
 	function report() {
 		for (var i = 0, r; r = results[i]; i++) {
-			if (!r.pass) console.error(r.context + ": " + highlight(r.message) + "\n\n" + r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m) + "\n\n", hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+			if (!r.pass) {
+				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
+				console.error(r.context + ": " + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+			}
 		}
 		console.log(results.length + " assertions completed in " + Math.round(new Date - start) + "ms")
 	}
