@@ -2,7 +2,7 @@
 
 var Node = require("../render/node")
 
-var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g, attrParser = /\[(.+?)(?:\s*=\s*("|'|)(.*?)\2)?\]/
+var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
 	if (typeof selector === "string") {
@@ -14,8 +14,9 @@ function hyperscript(selector) {
 				else if (type === "#") attributes.id = value
 				else if (type === ".") classes.push(value)
 				else if (match[3][0] === "[") {
-					var pair = attrParser.exec(match[3])
-					attributes[pair[1]] = pair[3] || true
+					var attrValue = match[6]
+					if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
+					attributes[match[4]] = attrValue || true
 				}
 			}
 			if (classes.length > 0) attributes.className = classes.join(" ")

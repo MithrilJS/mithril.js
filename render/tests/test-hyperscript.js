@@ -51,6 +51,41 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("b")
 		})
+		o("handles attr w/ quoted square bracket", function() {
+			var vnode = m("[a='[b]'].c")
+			
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("[b]")
+			o(vnode.attrs.className).equals("c")
+		})
+		o("handles attr w/ unmatched square bracket", function() {
+			var vnode = m("[a=']'].c")
+			
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("]")
+			o(vnode.attrs.className).equals("c")
+		})
+		o("handles attr w/ quoted square bracket and quote", function() {
+			var vnode = m("[a='[b\"\\']'].c") // `[a='[b"\']']`
+			
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("[b\"']") // `[b"']`
+			o(vnode.attrs.className).equals("c")
+		})
+		o("handles attr w/ quoted square containing escaped square bracket", function() {
+			var vnode = m("[a='[\\]]'].c") // `[a='[\]]']`
+			
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("[\\]]") // `[\]]`
+			o(vnode.attrs.className).equals("c")
+		})
+		o("handles attr w/ backslashes", function() {
+			var vnode = m("[a='\\\\'].c") // `[a='\\']`
+			
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("\\")
+			o(vnode.attrs.className).equals("c")
+		})
 		o("handles attr w/ quotes and spaces in selector", function() {
 			var vnode = m("[a = 'b']")
 			
