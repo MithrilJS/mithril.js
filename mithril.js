@@ -1007,6 +1007,10 @@
 	}
 
 	function copyStyleAttrs(node, dataAttr, cachedAttr) {
+		if (cachedAttr === dataAttr) {
+			node.style = ""
+			cachedAttr = {}
+		}
 		for (var rule in dataAttr) {
 			if (hasOwn.call(dataAttr, rule)) {
 				if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) {
@@ -1091,7 +1095,7 @@
 		tag,
 		namespace
 	) {
-		if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || ($document.activeElement === node)) {
+		if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || typeof dataAttr === "object" || ($document.activeElement === node)) {
 			cachedAttrs[attrName] = dataAttr
 			try {
 				return setSingleAttr(
