@@ -1,3 +1,3 @@
 "use strict"
 
-module.exports = typeof process === "object" ? process.nextTick : window.setImmediate || window.setTimeout
+module.exports = typeof setImmediate === "function" ? setImmediate : setTimeout

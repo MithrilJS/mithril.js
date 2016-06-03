@@ -92,6 +92,24 @@ o.spec("updateElement", function() {
 		
 		o(updated.dom.style.backgroundColor).equals("green")
 	})
+	o("handles noop style change when style is string", function() {
+		var vnode = {tag: "a", attrs: {style: "background-color:green;"}}
+		var updated = {tag: "a", attrs: {style: "background-color:green;"}}
+		
+		render(root, [vnode])
+		render(root, [updated])
+		
+		o(updated.dom.style.backgroundColor).equals("green")
+	})
+	o("handles noop style change when style is object", function() {
+		var vnode = {tag: "a", attrs: {style: {backgroundColor: "red"}}}
+		var updated = {tag: "a", attrs: {style: {backgroundColor: "red"}}}
+		
+		render(root, [vnode])
+		render(root, [updated])
+		
+		o(updated.dom.style.backgroundColor).equals("red")
+	})
 	o("updates style from string to object", function() {
 		var vnode = {tag: "a", attrs: {style: "background-color:red;"}}
 		var updated = {tag: "a", attrs: {style: {backgroundColor: "green"}}}
@@ -149,6 +167,19 @@ o.spec("updateElement", function() {
 		
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).equals("")
+	})
+	o("updates style when it's same object but mutated", function() {
+		var style = {backgroundColor: "red", color: "gold"}
+		var vnode = {tag: "a", attrs: {style: style}}
+		
+		render(root, [vnode])
+		
+		delete style.backgroundColor
+		var updated = {tag: "a", attrs: {style: style}}
+		render(root, [updated])
+		
+		o(updated.dom.style.backgroundColor).equals("")
+		o(updated.dom.style.color).equals("gold")
 	})
 	o("replaces el", function() {
 		var vnode = {tag: "a"}

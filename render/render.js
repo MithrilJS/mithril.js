@@ -325,7 +325,7 @@ module.exports = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode)) { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && !(typeof vnode.tag !== "string" && hasIntegrationMethods(vnode.tag))) { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -352,7 +352,7 @@ module.exports = function($window) {
 	}
 	function setAttr(vnode, key, old, value) {
 		var element = vnode.dom
-		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) || typeof value === "undefined" || isLifecycleMethod(key)) return
+		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
@@ -402,12 +402,13 @@ module.exports = function($window) {
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
 	}
-	function hasIntegrationMethods(vnode) {
-		return vnode.attrs != null && (vnode.attrs.oncreate || vnode.attrs.onupdate || vnode.attrs.onbeforeremove || vnode.attrs.onremove)
+	function hasIntegrationMethods(source) {
+		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
 	
 	//style
 	function updateStyle(element, old, style) {
+		if (old === style) element.style = "", old = null
 		if (style == null) element.style = ""
 		else if (typeof style === "string") element.style = style
 		else {

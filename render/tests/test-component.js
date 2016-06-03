@@ -537,6 +537,23 @@ o.spec("component", function() {
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
 		})
+		o("does not recycle when there's an onupdate", function() {
+			var component = {
+				onupdate: function() {},
+				view: function() {
+					return {tag: "div"}
+				}
+			}
+			var update = o.spy()
+			var vnode = {tag: component, key: 1}
+			var updated = {tag: component, key: 1}
+			
+			render(root, [vnode])
+			render(root, [])
+			render(root, [updated])
+			
+			o(vnode.dom).notEquals(updated.dom)
+		})
 	})
 	o.spec("state", function() {
 		o("deep copies state", function() {
