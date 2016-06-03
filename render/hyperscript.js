@@ -40,12 +40,7 @@ function hyperscript(selector) {
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
 				
-				var vnode = Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
-				switch (vnode.tag) {
-					case "svg": changeNS("http://www.w3.org/2000/svg", vnode); break
-					case "math": changeNS("http://www.w3.org/1998/Math/MathML", vnode); break
-				}
-				return vnode
+				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
 	}
@@ -66,13 +61,6 @@ function hyperscript(selector) {
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
 	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
-}
-
-function changeNS(ns, vnode) {
-	vnode.ns = ns
-	if (vnode.children != null) {
-		for (var i = 0; i < vnode.children.length; i++) changeNS(ns, vnode.children[i])
-	}
 }
 
 module.exports = hyperscript

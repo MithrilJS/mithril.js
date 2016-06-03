@@ -67,6 +67,27 @@ o.spec("component", function() {
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
 		})
+		o("svg works when creating across component boundary", function() {
+			var component = {
+				view: function(vnode) {
+					return {tag: "g"}
+				}
+			}
+			render(root, [{tag: "svg", children: [{tag: component}]}])
+			
+			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+		})
+		o("svg works when updating across component boundary", function() {
+			var component = {
+				view: function(vnode) {
+					return {tag: "g"}
+				}
+			}
+			render(root, [{tag: "svg", children: [{tag: component}]}])
+			render(root, [{tag: "svg", children: [{tag: component}]}])
+			
+			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+		})
 	})
 	o.spec("return value", function() {
 		o("can return fragments", function() {

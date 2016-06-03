@@ -10,26 +10,26 @@ module.exports = function($window) {
 	function setEventCallback(callback) {return onevent = callback}
 	
 	//create
-	function createNodes(parent, vnodes, start, end, hooks, nextSibling) {
+	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent, createNode(vnode, hooks), nextSibling)
+				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
 			}
 		}
 	}
-	function createNode(vnode, hooks) {
+	function createNode(vnode, hooks, ns) {
 		var tag = vnode.tag
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
 				case "<": return createHTML(vnode)
-				case "[": return createFragment(vnode, hooks)
-				default: return createElement(vnode, hooks)
+				case "[": return createFragment(vnode, hooks, ns)
+				default: return createElement(vnode, hooks, ns)
 			}
 		}
-		else return createComponent(vnode, hooks)
+		else return createComponent(vnode, hooks, ns)
 	}
 	function createText(vnode) {
 		return vnode.dom = $doc.createTextNode(vnode.children)
@@ -49,19 +49,22 @@ module.exports = function($window) {
 		}
 		return fragment
 	}
-	function createFragment(vnode, hooks) {
+	function createFragment(vnode, hooks, ns) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
-			createNodes(fragment, children, 0, children.length, hooks, null)
+			createNodes(fragment, children, 0, children.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		return fragment
 	}
-	function createElement(vnode, hooks) {
+	function createElement(vnode, hooks, ns) {
 		var tag = vnode.tag
-		var ns = vnode.ns
+		switch (vnode.tag) {
+			case "svg": ns = "http://www.w3.org/2000/svg"; break
+			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
+		}
 		
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
@@ -82,18 +85,18 @@ module.exports = function($window) {
 		
 		if (vnode.children != null) {
 			var children = vnode.children
-			createNodes(element, children, 0, children.length, hooks, null)
+			createNodes(element, children, 0, children.length, hooks, null, ns)
 			setLateAttrs(vnode)
 		}
 		return element
 	}
-	function createComponent(vnode, hooks) {
+	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
 		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
-			var element = createNode(vnode.instance, hooks)
+			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 			return element

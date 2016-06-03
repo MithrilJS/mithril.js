@@ -96,7 +96,7 @@ if (typeof Promise === "undefined") {
 	}
 }
 function Node(tag, key, attrs, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined}
+	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
 Node.normalize = function(node) {
 	if (node instanceof Array) return Node("[", undefined, undefined, Node.normalizeChildren(node), undefined, undefined)
@@ -147,12 +147,7 @@ function hyperscript(selector) {
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
 				
-				var vnode = Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
-				switch (vnode.tag) {
-					case "svg": changeNS("http://www.w3.org/2000/svg", vnode); break
-					case "math": changeNS("http://www.w3.org/1998/Math/MathML", vnode); break
-				}
-				return vnode
+				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
 	}
@@ -174,12 +169,6 @@ function hyperscript(selector) {
 	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
-function changeNS(ns, vnode) {
-	vnode.ns = ns
-	if (vnode.children != null) {
-		for (var i = 0; i < vnode.children.length; i++) changeNS(ns, vnode.children[i])
-	}
-}
 var m = hyperscript
 var renderService = function($window) {
 	var $doc = $window.document
@@ -188,26 +177,26 @@ var renderService = function($window) {
 	function setEventCallback(callback) {return onevent = callback}
 	
 	//create
-	function createNodes(parent, vnodes, start, end, hooks, nextSibling) {
+	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent, createNode(vnode, hooks), nextSibling)
+				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
 			}
 		}
 	}
-	function createNode(vnode, hooks) {
+	function createNode(vnode, hooks, ns) {
 		var tag = vnode.tag
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
 				case "<": return createHTML(vnode)
-				case "[": return createFragment(vnode, hooks)
-				default: return createElement(vnode, hooks)
+				case "[": return createFragment(vnode, hooks, ns)
+				default: return createElement(vnode, hooks, ns)
 			}
 		}
-		else return createComponent(vnode, hooks)
+		else return createComponent(vnode, hooks, ns)
 	}
 	function createText(vnode) {
 		return vnode.dom = $doc.createTextNode(vnode.children)
@@ -227,19 +216,22 @@ var renderService = function($window) {
 		}
 		return fragment
 	}
-	function createFragment(vnode, hooks) {
+	function createFragment(vnode, hooks, ns) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
-			createNodes(fragment, children, 0, children.length, hooks, null)
+			createNodes(fragment, children, 0, children.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		return fragment
 	}
-	function createElement(vnode, hooks) {
+	function createElement(vnode, hooks, ns) {
 		var tag = vnode.tag
-		var ns = vnode.ns
+		switch (vnode.tag) {
+			case "svg": ns = "http://www.w3.org/2000/svg"; break
+			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
+		}
 		
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
@@ -260,18 +252,18 @@ var renderService = function($window) {
 		
 		if (vnode.children != null) {
 			var children = vnode.children
-			createNodes(element, children, 0, children.length, hooks, null)
+			createNodes(element, children, 0, children.length, hooks, null, ns)
 			setLateAttrs(vnode)
 		}
 		return element
 	}
-	function createComponent(vnode, hooks) {
+	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
 		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
-			var element = createNode(vnode.instance, hooks)
+			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 			return element
@@ -500,7 +492,7 @@ var renderService = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode)) { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && !(typeof vnode.tag !== "string" && hasIntegrationMethods(vnode.tag))) { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -526,7 +518,7 @@ var renderService = function($window) {
 	}
 	function setAttr(vnode, key, old, value) {
 		var element = vnode.dom
-		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) || typeof value === "undefined" || isLifecycleMethod(key)) return
+		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
@@ -576,12 +568,13 @@ var renderService = function($window) {
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
 	}
-	function hasIntegrationMethods(vnode) {
-		return vnode.attrs != null && (vnode.attrs.oncreate || vnode.attrs.onupdate || vnode.attrs.onbeforeremove || vnode.attrs.onremove)
+	function hasIntegrationMethods(source) {
+		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
 	
 	//style
 	function updateStyle(element, old, style) {
+		if (old === style) element.style = "", old = null
 		if (style == null) element.style = ""
 		else if (typeof style === "string") element.style = style
 		else {
@@ -992,6 +985,8 @@ m.route = function($window, renderer, pubsub) {
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
+	route.setPath = router.setPath
+	route.getPath = router.getPath
 	
 	return route
 }(window, renderService, redrawService)

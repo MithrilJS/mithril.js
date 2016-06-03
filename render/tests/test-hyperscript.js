@@ -394,24 +394,6 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0].children[0].children[1].tag).equals("s")
 		})
 	})
-	o.spec("namespaced", function() {
-		o("handles svg ns", function() {
-			var vnode = m("svg", m("g"))
-			
-			o(vnode.tag).equals("svg")
-			o(vnode.ns).equals("http://www.w3.org/2000/svg")
-			o(vnode.children[0].tag).equals("g")
-			o(vnode.children[0].ns).equals("http://www.w3.org/2000/svg")
-		})
-		o("handles mathml ns", function() {
-			var vnode = m("math", m("mrow"))
-			
-			o(vnode.tag).equals("math")
-			o(vnode.ns).equals("http://www.w3.org/1998/Math/MathML")
-			o(vnode.children[0].tag).equals("mrow")
-			o(vnode.children[0].ns).equals("http://www.w3.org/1998/Math/MathML")
-		})
-	})
 	o.spec("components", function() {
 		o("works", function() {
 			var component = {
