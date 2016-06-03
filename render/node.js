@@ -1,5 +1,5 @@
 function Node(tag, key, attrs, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined}
+	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, ns: undefined, instance: undefined}
 }
 Node.normalize = function(node) {
 	if (node instanceof Array) return Node("[", undefined, undefined, Node.normalizeChildren(node), undefined, undefined)
