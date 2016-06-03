@@ -388,10 +388,10 @@ var people = [
 ]
 
 //ajax and display a list of projects for John
-m.render(document.body, ProjectList({key: people[0].id, value: people[0]})
+m.render(document.body, m(ProjectList, {key: people[0].id, value: people[0]}))
 
 //ajax and display a list of projects for Mary
-m.render(document.body, ProjectList({key: people[1].id, value: people[1]})
+m.render(document.body, m(ProjectList, {key: people[1].id, value: people[1]}))
 ```
 
 In the example above, since the key is different, the ProjectList component is recreated from scratch. As a result, the controller runs again, the DOM is re-generated, and any applicable 3rd party plugins in configs are re-initialized.
