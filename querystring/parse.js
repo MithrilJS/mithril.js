@@ -25,7 +25,7 @@ module.exports = function(string) {
 		if (key.indexOf("[") > -1) levels.pop()
 		for (var j = 0; j < levels.length; j++) {
 			var level = levels[j], nextLevel = levels[j + 1]
-			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel))
+			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j === levels.length - 1
 			if (level === "") {
 				var key = levels.slice(0, j).join()

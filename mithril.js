@@ -1,101 +1,101 @@
 "use strict"
-if (typeof Promise === "undefined") {
-	var Promise = function(executor) {
-		if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
-		if (typeof executor !== "function") throw new TypeError("executor must be a function")
-		
-		var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
-		var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
-		var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
-		function handler(list, shouldAbsorb) {
-			return function execute(value) {
-				var then
-				try {
-					if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-						if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
-						executeOnce(then.bind(value))
-					}
-					else {
-						callAsync(function() {
-							if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
-							for (var i = 0; i < list.length; i++) list[i](value)
-							resolvers.length = 0, rejectors.length = 0
-							instance.state = shouldAbsorb
-							instance.retry = function() {execute(value)}
-						}, 0)
-					}
+;(function () {
+	/** @constructor */
+var Promise = function(executor) {
+	if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
+	if (typeof executor !== "function") throw new TypeError("executor must be a function")
+	
+	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
+	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
+	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+	function handler(list, shouldAbsorb) {
+		return function execute(value) {
+			var then
+			try {
+				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
+					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
+					executeOnce(then.bind(value))
 				}
-				catch (e) {
-					rejectCurrent(e)
+				else {
+					callAsync(function() {
+						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
+						for (var i = 0; i < list.length; i++) list[i](value)
+						resolvers.length = 0, rejectors.length = 0
+						instance.state = shouldAbsorb
+						instance.retry = function() {execute(value)}
+					})
 				}
 			}
-		}
-		function executeOnce(then) {
-			var runs = 0
-			function run(fn) {
-				return function(value) {
-					if (runs++ > 0) return
-					fn(value)
-				}
+			catch (e) {
+				rejectCurrent(e)
 			}
-			var onerror = run(rejectCurrent)
-			try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
 		}
-		
-		executeOnce(executor)
 	}
-	Promise.prototype.then = function(onFulfilled, onRejection) {
-		var self = this, instance = self._instance
-		function handle(callback, list, next, state) {
-			list.push(function(value) {
-				if (typeof callback !== "function") next(value)
-				else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
-			})
-			if (typeof instance.retry === "function" && state === instance.state) instance.retry()
+	function executeOnce(then) {
+		var runs = 0
+		function run(fn) {
+			return function(value) {
+				if (runs++ > 0) return
+				fn(value)
+			}
 		}
-		var resolveNext, rejectNext
-		var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
-		handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
-		return promise
+		var onerror = run(rejectCurrent)
+		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
 	}
-	Promise.prototype.catch = function(onRejection) {
-		return this.then(null, onRejection)
-	}
-	Promise.resolve = function(value) {
-		if (value instanceof Promise) return value
-		return new Promise(function(resolve, reject) {resolve(value)})
-	}
-	Promise.reject = function(value) {
-		return new Promise(function(resolve, reject) {reject(value)})
-	}
-	Promise.all = function(list) {
-		return new Promise(function(resolve, reject) {
-			var total = list.length, count = 0, values = []
-			if (list.length === 0) resolve([])
-			else for (var i = 0; i < list.length; i++) {
-				new function(i) {
-					function consume(value) {
-						count++
-						values[i] = value
-						if (count === total) resolve(values)
-					}
-					if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
-						list[i].then(consume, reject)
-					}
-					else consume(list[i])
-				}(i)
-			}
-		})
-	}
-	Promise.race = function(list) {
-		return new Promise(function(resolve, reject) {
-			for (var i = 0; i < list.length; i++) {
-				list[i].then(resolve, reject)
-			}
-		})
-	}
+	
+	executeOnce(executor)
 }
-function Node(tag, key, attrs, children, text, dom) {
+Promise.prototype.then = function(onFulfilled, onRejection) {
+	var self = this, instance = self._instance
+	function handle(callback, list, next, state) {
+		list.push(function(value) {
+			if (typeof callback !== "function") next(value)
+			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
+		})
+		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
+	}
+	var resolveNext, rejectNext
+	var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
+	return promise
+}
+Promise.prototype.catch = function(onRejection) {
+	return this.then(null, onRejection)
+}
+Promise.resolve = function(value) {
+	if (value instanceof Promise) return value
+	return new Promise(function(resolve, reject) {resolve(value)})
+}
+Promise.reject = function(value) {
+	return new Promise(function(resolve, reject) {reject(value)})
+}
+Promise.all = function(list) {
+	return new Promise(function(resolve, reject) {
+		var total = list.length, count = 0, values = []
+		if (list.length === 0) resolve([])
+		else for (var i = 0; i < list.length; i++) {
+			(function(i) {
+				function consume(value) {
+					count++
+					values[i] = value
+					if (count === total) resolve(values)
+				}
+				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
+					list[i].then(consume, reject)
+				}
+				else consume(list[i])
+			})(i)
+		}
+	})
+}
+Promise.race = function(list) {
+	return new Promise(function(resolve, reject) {
+		for (var i = 0; i < list.length; i++) {
+			list[i].then(resolve, reject)
+		}
+	})
+}
+	function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
 Node.normalize = function(node) {
@@ -170,6 +170,7 @@ function hyperscript(selector) {
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
+	
 var renderService = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
@@ -242,7 +243,7 @@ var renderService = function($window) {
 		vnode.dom = element
 		
 		if (attrs != null) {
-			setAttrs(vnode, attrs)
+			setAttrs(vnode, attrs, ns)
 		}
 		
 		if (vnode.text != null) {
@@ -273,7 +274,7 @@ var renderService = function($window) {
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling) {
 		if (old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling)
+		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
 		else {
 			var recycling = isRecyclable(old, vnodes)
@@ -320,7 +321,7 @@ var renderService = function($window) {
 							nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(v, hooks)
+							var dom = createNode(v, hooks, undefined)
 							insertNode(parent, dom, nextSibling)
 							nextSibling = dom
 						}
@@ -329,7 +330,7 @@ var renderService = function($window) {
 				}
 				if (end < start) break
 			}
-			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling)
+			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
 			removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
@@ -354,7 +355,7 @@ var renderService = function($window) {
 		}
 		else {
 			removeNode(parent, old, null, false)
-			insertNode(parent, createNode(vnode, hooks), nextSibling)
+			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -511,12 +512,12 @@ var renderService = function($window) {
 		}
 	}
 	//attrs
-	function setAttrs(vnode, attrs) {
+	function setAttrs(vnode, attrs, ns) {
 		for (var key in attrs) {
-			setAttr(vnode, key, null, attrs[key])
+			setAttr(vnode, key, null, attrs[key], ns)
 		}
 	}
-	function setAttr(vnode, key, old, value) {
+	function setAttr(vnode, key, old, value, ns) {
 		var element = vnode.dom
 		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
@@ -525,7 +526,7 @@ var renderService = function($window) {
 		}
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
-		else if (key in element && !isAttribute(key) && vnode.ns === undefined) {
+		else if (key in element && !isAttribute(key) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			element[key] = value
@@ -541,14 +542,14 @@ var renderService = function($window) {
 	function setLateAttrs(vnode) {
 		var attrs = vnode.attrs
 		if (vnode.tag === "select" && attrs != null) {
-			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value)
-			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex)
+			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value, undefined)
+			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 		}
 	}
 	function updateAttrs(vnode, old, attrs) {
 		if (attrs != null) {
 			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key])
+				setAttr(vnode, key, old && old[key], attrs[key], undefined)
 			}
 		}
 		if (old != null) {
@@ -609,12 +610,12 @@ var renderService = function($window) {
 	}
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
-		if (source.oninit != null) source.oninit.call(vnode.state, vnode)
-		if (source.oncreate != null) hooks.push(source.oncreate.bind(vnode.state, vnode))
+		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
+		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
 	}
 	function updateLifecycle(source, vnode, hooks, recycling) {
 		if (recycling) initLifecycle(source, vnode, hooks)
-		else if (source.onupdate != null) hooks.push(source.onupdate.bind(vnode.state, vnode))
+		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
@@ -655,7 +656,7 @@ var renderService = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }(window)
-var redrawService = function() {
+	var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
 		var index = callbacks.indexOf(callback)
@@ -668,7 +669,7 @@ var redrawService = function() {
     }
 	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
 }()
-var buildQueryString = function(object) {
+	var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	
 	var args = []
@@ -695,7 +696,7 @@ var requestService = function($window, Promise1) {
 	var callbackCount = 0
 	function xhr(args) {
 		return new Promise1(function(resolve, reject) {
-			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 			
 			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
@@ -706,7 +707,7 @@ var requestService = function($window, Promise1) {
 			else args.url = assemble(args.url, args.data)
 			
 			var xhr = new $window.XMLHttpRequest()
-			xhr.open(args.method, args.url, args.async || true, args.user, args.password)
+			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 			
 			if (args.serialize === JSON.stringify && useBody) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
@@ -795,8 +796,8 @@ var requestService = function($window, Promise1) {
 	
 	return {xhr: xhr, jsonp: jsonp}
 }(window, Promise)
-m.request = requestService.xhr
-m.jsonp = requestService.jsonp
+	m.request = requestService.xhr
+	m.jsonp = requestService.jsonp
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -822,7 +823,7 @@ var parseQueryString = function(string) {
 		if (key.indexOf("[") > -1) levels.pop()
 		for (var j = 0; j < levels.length; j++) {
 			var level = levels[j], nextLevel = levels[j + 1]
-			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel))
+			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j === levels.length - 1
 			if (level === "") {
 				var key = levels.slice(0, j).join()
@@ -932,7 +933,7 @@ var coreRouter = function($window) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
-			setPath(vnode.attrs.href)
+			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}
 	
@@ -973,7 +974,7 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 	
 	return root.redraw = run
 }
-m.route = function($window, renderer, pubsub) {
+	m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {
@@ -990,7 +991,7 @@ m.route = function($window, renderer, pubsub) {
 	
 	return route
 }(window, renderService, redrawService)
-m.mount = function(renderer, pubsub) {
+	m.mount = function(renderer, pubsub) {
 	return function(root, component) {
 		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, {tag: component})
@@ -999,20 +1000,21 @@ m.mount = function(renderer, pubsub) {
 		run()
 	}
 }(renderService, redrawService)
-m.trust = function(html) {
+	m.trust = function(html) {
 	return Node("<", undefined, undefined, html, undefined, undefined)
 }
-m.prop = function(store) {
+	m.prop = function(store) {
 	return function() {
 		if (arguments.length > 0) store = arguments[0]
 		return store
 	}
 }
-m.withAttr = function(attrName, callback, context) {
+	m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.render = renderService.render
-m.redraw = redrawService.publish
-module.exports = m
+	m.render = renderService.render
+	m.redraw = redrawService.publish
+	module.exports = m
+})()

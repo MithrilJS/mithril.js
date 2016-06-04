@@ -75,7 +75,7 @@ module.exports = function($window) {
 		vnode.dom = element
 		
 		if (attrs != null) {
-			setAttrs(vnode, attrs)
+			setAttrs(vnode, attrs, ns)
 		}
 		
 		if (vnode.text != null) {
@@ -107,7 +107,7 @@ module.exports = function($window) {
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling) {
 		if (old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling)
+		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
 		else {
 			var recycling = isRecyclable(old, vnodes)
@@ -154,7 +154,7 @@ module.exports = function($window) {
 							nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(v, hooks)
+							var dom = createNode(v, hooks, undefined)
 							insertNode(parent, dom, nextSibling)
 							nextSibling = dom
 						}
@@ -163,7 +163,7 @@ module.exports = function($window) {
 				}
 				if (end < start) break
 			}
-			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling)
+			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
 			removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
@@ -188,7 +188,7 @@ module.exports = function($window) {
 		}
 		else {
 			removeNode(parent, old, null, false)
-			insertNode(parent, createNode(vnode, hooks), nextSibling)
+			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -348,12 +348,12 @@ module.exports = function($window) {
 	}
 
 	//attrs
-	function setAttrs(vnode, attrs) {
+	function setAttrs(vnode, attrs, ns) {
 		for (var key in attrs) {
-			setAttr(vnode, key, null, attrs[key])
+			setAttr(vnode, key, null, attrs[key], ns)
 		}
 	}
-	function setAttr(vnode, key, old, value) {
+	function setAttr(vnode, key, old, value, ns) {
 		var element = vnode.dom
 		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
@@ -362,7 +362,7 @@ module.exports = function($window) {
 		}
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
-		else if (key in element && !isAttribute(key) && vnode.ns === undefined) {
+		else if (key in element && !isAttribute(key) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			element[key] = value
@@ -378,14 +378,14 @@ module.exports = function($window) {
 	function setLateAttrs(vnode) {
 		var attrs = vnode.attrs
 		if (vnode.tag === "select" && attrs != null) {
-			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value)
-			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex)
+			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value, undefined)
+			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 		}
 	}
 	function updateAttrs(vnode, old, attrs) {
 		if (attrs != null) {
 			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key])
+				setAttr(vnode, key, old && old[key], attrs[key], undefined)
 			}
 		}
 		if (old != null) {
@@ -447,12 +447,12 @@ module.exports = function($window) {
 
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
-		if (source.oninit != null) source.oninit.call(vnode.state, vnode)
-		if (source.oncreate != null) hooks.push(source.oncreate.bind(vnode.state, vnode))
+		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
+		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
 	}
 	function updateLifecycle(source, vnode, hooks, recycling) {
 		if (recycling) initLifecycle(source, vnode, hooks)
-		else if (source.onupdate != null) hooks.push(source.onupdate.bind(vnode.state, vnode))
+		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate

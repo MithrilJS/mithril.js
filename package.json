@@ -7,6 +7,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "node bundler/bundler",
+		"minify": "uglifyjs mithril.js -m -c -o mithril.min.js",
+		"size": "uglifyjs mithril.js -m -c | gzipped",
 		"lint": "eslint .",
 		"test": "node ospec/bin/ospec",
 		"cover": "istanbul cover --print both ospec/bin/ospec"

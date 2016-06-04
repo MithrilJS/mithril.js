@@ -7,7 +7,7 @@ module.exports = function($window, Promise) {
 
 	function xhr(args) {
 		return new Promise(function(resolve, reject) {
-			var useBody = args.useBody != null ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 			
 			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
@@ -18,7 +18,7 @@ module.exports = function($window, Promise) {
 			else args.url = assemble(args.url, args.data)
 			
 			var xhr = new $window.XMLHttpRequest()
-			xhr.open(args.method, args.url, args.async || true, args.user, args.password)
+			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 			
 			if (args.serialize === JSON.stringify && useBody) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
