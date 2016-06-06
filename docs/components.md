@@ -28,7 +28,7 @@ m(Example)
 
 ### Lifecycle methods
 
-Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove` and `shouldUpdate`.
+Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove` and `onbeforeupdate`.
 
 ```javascript
 var ComponentWithHooks = {
@@ -48,7 +48,7 @@ var ComponentWithHooks = {
 	onremove: function(vnode) {
 		console.log("removing DOM element")
 	},
-	shouldUpdate: function(vnode, old) {
+	onbeforeupdate: function(vnode, old) {
 		return true
 	},
 	view: function(vnode) {

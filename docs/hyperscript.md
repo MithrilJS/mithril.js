@@ -229,7 +229,7 @@ To learn more about components, [see the components page](components.md).
 
 ### Lifecycle methods
 
-Vnodes and components can have lifecycle methods (also known as *hooks*), which are called at various points during the lifetime of a DOM element. The lifecycle methods supported by Mithril are: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove`, and `shouldUpdate`. 
+Vnodes and components can have lifecycle methods (also known as *hooks*), which are called at various points during the lifetime of a DOM element. The lifecycle methods supported by Mithril are: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove`, and `onbeforeupdate`. 
 
 Lifecycle methods are defined in the same way as DOM event handlers, but receive the vnode as an argument, instead of an Event object:
 
@@ -248,7 +248,7 @@ Hook                          | Description
 `onupdate(vnode)`             | Runs every time a redraw occurs while the DOM element is attached to the document
 `onbeforeremove(vnode, done)` | Runs before a DOM element is removed from the document, and only triggers the actual removal of the DOM element when the `done` callback is called. This method is only triggered on the element that is detached from its parent DOM element, but not on its child elements.
 `onremove(vnode)`             | Runs before a DOM element is removed from the document. If a `onbeforeremove` hook is defined, `onremove` is called after `done` is called. This method is triggered on the element that is detached from its parent element, and all of its children
-`shouldUpdate(vnode, old)`    | Runs before `onupdate` and if it returns `false`, it prevents a diff for the element and all of its children
+`onbeforeupdate(vnode, old)`    | Runs before `onupdate` and if it returns `false`, it prevents a diff for the element and all of its children
 
 To learn more about lifecycle methods, [see the lifecycle methods page](lifecycle-methods.md).
 

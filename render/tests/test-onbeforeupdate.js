@@ -4,7 +4,7 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
-o.spec("shouldUpdate", function() {
+o.spec("onbeforeupdate", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
@@ -13,9 +13,9 @@ o.spec("shouldUpdate", function() {
 	})
 	
 	o("prevents update in element", function() {
-		var shouldUpdate = function() {return false}
-		var vnode = {tag: "div", attrs: {id: "a", shouldUpdate: shouldUpdate}}
-		var updated = {tag: "div", attrs: {id: "b", shouldUpdate: shouldUpdate}}
+		var onbeforeupdate = function() {return false}
+		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -24,9 +24,9 @@ o.spec("shouldUpdate", function() {
 	})
 	
 	o("prevents update in text", function() {
-		var shouldUpdate = function() {return false}
-		var vnode = {tag: "#", attrs: {shouldUpdate: shouldUpdate}, children: "a"}
-		var updated = {tag: "#", attrs: {shouldUpdate: shouldUpdate}, children: "b"}
+		var onbeforeupdate = function() {return false}
+		var vnode = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
+		var updated = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -35,9 +35,9 @@ o.spec("shouldUpdate", function() {
 	})
 	
 	o("prevents update in html", function() {
-		var shouldUpdate = function() {return false}
-		var vnode = {tag: "<", attrs: {shouldUpdate: shouldUpdate}, children: "a"}
-		var updated = {tag: "<", attrs: {shouldUpdate: shouldUpdate}, children: "b"}
+		var onbeforeupdate = function() {return false}
+		var vnode = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
+		var updated = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -46,9 +46,9 @@ o.spec("shouldUpdate", function() {
 	})
 	
 	o("prevents update in fragment", function() {
-		var shouldUpdate = function() {return false}
-		var vnode = {tag: "[", attrs: {shouldUpdate: shouldUpdate}, children: [{tag: "#", children: "a"}]}
-		var updated = {tag: "[", attrs: {shouldUpdate: shouldUpdate}, children: [{tag: "#", children: "b"}]}
+		var onbeforeupdate = function() {return false}
+		var vnode = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "a"}]}
+		var updated = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "b"}]}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -58,7 +58,7 @@ o.spec("shouldUpdate", function() {
 	
 	o("prevents update in component", function() {
 		var component = {
-			shouldUpdate: function() {return false},
+			onbeforeupdate: function() {return false},
 			view: function(vnode) {
 				return {tag: "div", children: vnode.children}
 			},
@@ -74,13 +74,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("prevents update if returning false in component and false in vnode", function() {
 		var component = {
-			shouldUpdate: function() {return false},
+			onbeforeupdate: function() {return false},
 			view: function(vnode) {
 				return {tag: "div", attrs: {id: vnode.attrs.id}}
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", shouldUpdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", shouldUpdate: function() {return false}}}
+		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
+		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -90,13 +90,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("does not prevent update if returning true in component and true in vnode", function() {
 		var component = {
-			shouldUpdate: function() {return true},
+			onbeforeupdate: function() {return true},
 			view: function(vnode) {
 				return {tag: "div", attrs: {id: vnode.attrs.id}}
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", shouldUpdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", shouldUpdate: function() {return true}}}
+		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
+		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -106,13 +106,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("does not prevent update if returning false in component but true in vnode", function() {
 		var component = {
-			shouldUpdate: function() {return false},
+			onbeforeupdate: function() {return false},
 			view: function(vnode) {
 				return {tag: "div", attrs: {id: vnode.attrs.id}}
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", shouldUpdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", shouldUpdate: function() {return true}}}
+		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
+		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -122,13 +122,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("does not prevent update if returning true in component but false in vnode", function() {
 		var component = {
-			shouldUpdate: function() {return true},
+			onbeforeupdate: function() {return true},
 			view: function(vnode) {
 				return {tag: "div", attrs: {id: vnode.attrs.id}}
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", shouldUpdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", shouldUpdate: function() {return false}}}
+		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
+		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -137,9 +137,9 @@ o.spec("shouldUpdate", function() {
 	})
 	
 	o("does not prevent update if returning true", function() {
-		var shouldUpdate = function() {return true}
-		var vnode = {tag: "div", attrs: {id: "a", shouldUpdate: shouldUpdate}}
-		var updated = {tag: "div", attrs: {id: "b", shouldUpdate: shouldUpdate}}
+		var onbeforeupdate = function() {return true}
+		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 		
 		render(root, [vnode])
 		render(root, [updated])
@@ -149,7 +149,7 @@ o.spec("shouldUpdate", function() {
 	
 	o("does not prevent update if returning true from component", function() {
 		var component = {
-			shouldUpdate: function() {return true},
+			onbeforeupdate: function() {return true},
 			view: function(vnode) {
 				return {tag: "div", attrs: vnode.attrs}
 			},
@@ -165,13 +165,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("accepts arguments for comparison", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", shouldUpdate: shouldUpdate}}
-		var updated = {tag: "div", attrs: {id: "b", shouldUpdate: shouldUpdate}}
+		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			
 			o(old.attrs.id).equals("a")
@@ -186,7 +186,7 @@ o.spec("shouldUpdate", function() {
 	
 	o("accepts arguments for comparison in component", function() {
 		var component = {
-			shouldUpdate: shouldUpdate,
+			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
 				return {tag: "div", attrs: vnode.attrs}
 			},
@@ -198,7 +198,7 @@ o.spec("shouldUpdate", function() {
 		render(root, [vnode])
 		render(root, [updated])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			
 			o(old.attrs.id).equals("a")
@@ -213,12 +213,12 @@ o.spec("shouldUpdate", function() {
 	
 	o("is not called on creation", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", shouldUpdate: shouldUpdate}}
-		var updated = {tag: "div", attrs: {id: "b", shouldUpdate: shouldUpdate}}
+		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 		
 		render(root, [vnode])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			return true
 		}
@@ -228,7 +228,7 @@ o.spec("shouldUpdate", function() {
 	
 	o("is not called on component creation", function() {
 		var component = {
-			shouldUpdate: shouldUpdate,
+			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
 				return {tag: "div", attrs: vnode.attrs}
 			},
@@ -240,7 +240,7 @@ o.spec("shouldUpdate", function() {
 		
 		render(root, [vnode])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			return true
 		}
@@ -250,13 +250,13 @@ o.spec("shouldUpdate", function() {
 	
 	o("is called only once on update", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", shouldUpdate: shouldUpdate}}
-		var updated = {tag: "div", attrs: {id: "b", shouldUpdate: shouldUpdate}}
+		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 		
 		render(root, [vnode])
 		render(root, [updated])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			return true
 		}
@@ -266,7 +266,7 @@ o.spec("shouldUpdate", function() {
 	
 	o("is called only once on component update", function() {
 		var component = {
-			shouldUpdate: shouldUpdate,
+			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
 				return {tag: "div", attrs: vnode.attrs}
 			},
@@ -279,7 +279,7 @@ o.spec("shouldUpdate", function() {
 		render(root, [vnode])
 		render(root, [updated])
 		
-		function shouldUpdate(vnode, old) {
+		function onbeforeupdate(vnode, old) {
 			count++
 			return true
 		}

@@ -7,7 +7,7 @@
 - [onupdate](#onupdate)
 - [onbeforeremove](#onbeforeremove)
 - [onremove](#onremove)
-- [shouldUpdate](#shouldUpdate)
+- [onbeforeupdate](#onbeforeupdate)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
@@ -176,13 +176,13 @@ var Timer = {
 
 ---
 
-### shouldUpdate
+### onbeforeupdate
 
-The `shouldUpdate(vnode, old)` hook is called before a vnode is diffed in a update. If this function is defined and returns false, Mithril prevents a diff from happening to the vnode, and consequently to the vnode's children.
+The `onbeforeupdate(vnode, old)` hook is called before a vnode is diffed in a update. If this function is defined and returns false, Mithril prevents a diff from happening to the vnode, and consequently to the vnode's children.
 
 This hook by itself does not prevent a virtual DOM subtree from being generated unless the subtree is encapsulated within a component.
 
-Like in other hooks, the `this` keyword in the `shouldUpdate` callback points to `vnode.state`.
+Like in other hooks, the `this` keyword in the `onbeforeupdate` callback points to `vnode.state`.
 
 This hook is useful to reduce lag in updates in cases where there is a overly large DOM tree.
 
@@ -194,14 +194,14 @@ Although Mithril is flexible, some code patterns are discouraged:
 
 #### Avoid premature optimizations
 
-The `shouldUpdate` hook should only be used as a last resort. Avoid using it unless you have a noticeable performance issue.
+The `onbeforeupdate` hook should only be used as a last resort. Avoid using it unless you have a noticeable performance issue.
 
-Typically performance problems that can be fixed via `shouldUpdate` boil down to one large array of items. In this context, typically "large" means any array that contains a large number of nodes, be it in a wide spread (the infamous 5000 row table), or in a deep, dense tree.
+Typically performance problems that can be fixed via `onbeforeupdate` boil down to one large array of items. In this context, typically "large" means any array that contains a large number of nodes, be it in a wide spread (the infamous 5000 row table), or in a deep, dense tree.
 
 If you do have a performance issue, first consider whether the UI presents a good user experience and change it if it doesn't. For example, it's highly unlikely that a user would ever sift through 5000 rows of raw table data, and highly likely that it would be easier for a user to use a search feature that returns only the top few most relevant items.
 
-If a design-based solution is not feasible, and you must optimize a UI with a large number of DOM element, apply `shouldUpdate` on the parent node of the largest array and re-evaluate performance. In the vast majority of cases, a single check should be sufficient. In the rare case that it is not, rinse and repeat, but you should be increasingly wary of each new `shouldUpdate` declaration. Multiple `shouldUpdate`s are a code smell that indicates prioritization problems in the design workflow.
+If a design-based solution is not feasible, and you must optimize a UI with a large number of DOM element, apply `onbeforeupdate` on the parent node of the largest array and re-evaluate performance. In the vast majority of cases, a single check should be sufficient. In the rare case that it is not, rinse and repeat, but you should be increasingly wary of each new `onbeforeupdate` declaration. Multiple `onbeforeupdate`s are a code smell that indicates prioritization problems in the design workflow.
 
-Avoid applying the optimization to other areas of your application "just-in-case". Remember that, generally speaking, more code incurs a higher maintenance cost than less code, and `shouldUpdate` related bugs can be especially difficult to troubleshoot if you rely on object identity for its conditional checks.
+Avoid applying the optimization to other areas of your application "just-in-case". Remember that, generally speaking, more code incurs a higher maintenance cost than less code, and `onbeforeupdate` related bugs can be especially difficult to troubleshoot if you rely on object identity for its conditional checks.
 
-Again, **the `shouldUpdate` hook should only be used as a last resort.**
+Again, **the `onbeforeupdate` hook should only be used as a last resort.**

@@ -339,7 +339,7 @@ var renderService = function($window) {
 		if (oldTag === tag) {
 			vnode.state = old.state
 			vnode.events = old.events
-			if (shouldUpdate(vnode, old)) return
+			if (onbeforeupdate(vnode, old)) return
 			if (vnode.attrs != null) {
 				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
 			}
@@ -564,7 +564,7 @@ var renderService = function($window) {
 		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
-		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "shouldUpdate"
+		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
@@ -617,10 +617,10 @@ var renderService = function($window) {
 		if (recycling) initLifecycle(source, vnode, hooks)
 		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
-	function shouldUpdate(vnode, old) {
+	function onbeforeupdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.shouldUpdate === "function") forceVnodeUpdate = vnode.attrs.shouldUpdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode.tag.shouldUpdate === "function") forceComponentUpdate = vnode.tag.shouldUpdate.call(vnode.state, vnode, old)
+		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
