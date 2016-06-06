@@ -38,7 +38,7 @@ var Select2 = {
 				if (!isInitialized) {
 					el.select2()
 						.on("change", function(e) {
-							var id = el.select2("val");
+							var id = el.val();
 							m.startComputation();
                             //Set the value to the selected option
 							ctrl.data.map(function(d){
@@ -48,7 +48,7 @@ var Select2 = {
 							});
 
 							if (typeof ctrl.onchange == "function"){
-								ctrl.onchange(el.select2("val"));
+								ctrl.onchange(el.val());
 							}
 							m.endComputation();
 						});
