@@ -185,22 +185,17 @@ module.exports = new function init() {
 		return hasProcess ? "\x1b[31m" + message + "\x1b[0m" : "%c" + message + "%c "
 	}
 	
-	function printInfo() {
-		var total = results.length
-		var completed = total - subjects.length
-		console.log(completed + " out of " + total + " assertions completed in " + Math.round(new Date - start) + "ms")
-	}
-
 	function report() {
+		var status = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
 				console.error(r.context + ": " + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
-				printInfo()
-				process.exit(1)
+				status = 1
 			}
 		}
-		printInfo()
+		console.log(results.length + " assertions completed in " + Math.round(new Date - start) + "ms")
+		if (hasProcess && status === 1) process.exit(1)
 	}
 
 	return o
