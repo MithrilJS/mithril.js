@@ -38,7 +38,7 @@ describe("m()", function () {
 	})
 
 	it("sets attr without a value as an empty string", function () {
-		expect(m("[empty]")).to.have.deep.property("attrs.empty", "")
+		expect(m("[empty]")).to.have.deep.property("attrs.empty", true)
 	})
 
 	it("sets correct single quoted attr", function () {
@@ -47,9 +47,6 @@ describe("m()", function () {
 
 	it("sets correct double quoted attr", function () {
 		expect(m("[title=\"bar\"]")).to.have.deep.property("attrs.title", "bar")
-	})
-	it("sets pattern attr", function () {
-		expect(m("[pattern=\"[a-zA-Z0-9]{56}\"]")).to.have.deep.property("attrs.pattern", "[a-zA-Z0-9]{56}")
 	})
 
 	it("sets correct children with 1 string arg", function () {

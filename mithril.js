@@ -97,7 +97,7 @@
 			} else if (match[3][0] === "[") {
 				var attrValue = match[6]
 				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1")
-				cell.attrs[match[4]] = attrValue || ""
+				cell.attrs[match[4]] = attrValue || true
 			}
 		}
 
