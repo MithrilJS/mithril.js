@@ -16,5 +16,6 @@
 	m.render = renderService.render
 	m.redraw = redrawService.publish
 
-	module.exports = m
+	if (typeof module === "object") module.exports = m
+	else window.m = m
 })()

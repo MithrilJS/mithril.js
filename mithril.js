@@ -339,7 +339,7 @@ var renderService = function($window) {
 		if (oldTag === tag) {
 			vnode.state = old.state
 			vnode.events = old.events
-			if (onbeforeupdate(vnode, old)) return
+			if (shouldUpdate(vnode, old)) return
 			if (vnode.attrs != null) {
 				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
 			}
@@ -617,7 +617,7 @@ var renderService = function($window) {
 		if (recycling) initLifecycle(source, vnode, hooks)
 		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
-	function onbeforeupdate(vnode, old) {
+	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
 		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
@@ -1016,5 +1016,6 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 }
 	m.render = renderService.render
 	m.redraw = redrawService.publish
-	module.exports = m
+	if (typeof module === "object") module.exports = m
+	else window.m = m
 })()
