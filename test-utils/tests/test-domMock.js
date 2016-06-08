@@ -859,4 +859,22 @@ o.spec("domMock", function() {
 			})
 		})
 	})
+	o.spec("className", function() {
+		o("works", function() {
+			var el = $document.createElement("div")
+			el.className = "a"
+			
+			o(el.className).equals("a")
+			o(el.attributes["class"].nodeValue).equals("a")
+		})
+		o("setter throws in svg", function(done) {
+			var el = $document.createElementNS("http://www.w3.org/2000/svg", "svg")
+			try {
+				el.className = "a"
+			}
+			catch (e) {
+				done()
+			}
+		})
+	})
 })

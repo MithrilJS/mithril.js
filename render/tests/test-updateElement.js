@@ -191,4 +191,13 @@ o.spec("updateElement", function() {
 		o(updated.dom).equals(root.firstChild)
 		o(updated.dom.nodeName).equals("B")
 	})
+	o("updates svg class", function() {
+		var vnode = {tag: "svg", attrs: {className: "a"}}
+		var updated = {tag: "svg", attrs: {className: "b"}}
+		
+		render(root, [vnode])
+		render(root, [updated])
+		
+		o(updated.dom.attributes["class"].nodeValue).equals("b")
+	})
 })

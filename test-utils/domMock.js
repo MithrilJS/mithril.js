@@ -151,6 +151,13 @@ module.exports = function() {
 							}
 						}
 					},
+					get className() {
+						return this.attributes["class"] ? this.attributes["class"].nodeValue : ""
+					},
+					set className(value) {
+						if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot set property className of SVGElement")
+						else this.setAttribute("class", value)
+					},
 					focus: function() {activeElement = this},
 					addEventListener: function(type, callback, useCapture) {
 						if (events[type] == null) events[type] = [callback]

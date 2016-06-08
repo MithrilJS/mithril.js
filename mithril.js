@@ -272,7 +272,7 @@ var renderService = function($window) {
 		else return $emptyFragment
 	}
 	//update
-	function updateNodes(parent, old, vnodes, hooks, nextSibling) {
+	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
@@ -286,14 +286,14 @@ var renderService = function($window) {
 				if (o === v) oldStart++, start++
 				else if (o != null && v != null && o.key === v.key) {
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
 					if (recycling) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
 					var o = old[oldEnd]
 					if (o === v) oldEnd--, start++
 					else if (o != null && v != null && o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling)
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
 					}
@@ -304,7 +304,7 @@ var renderService = function($window) {
 				var o = old[oldEnd], v = vnodes[end]
 				if (o === v) oldEnd--, end--
 				else if (o != null && v != null && o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 					if (recycling) insertNode(parent, toFragment(o), nextSibling)
 					nextSibling = o.dom
 					oldEnd--, end--
@@ -315,7 +315,7 @@ var renderService = function($window) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
 							var movable = old[oldIndex]
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling)
+							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true
 							nextSibling = movable.dom
@@ -334,7 +334,7 @@ var renderService = function($window) {
 			removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
-	function updateNode(parent, old, vnode, hooks, nextSibling, recycling) {
+	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
@@ -347,11 +347,11 @@ var renderService = function($window) {
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, hooks, nextSibling); break
-					default: updateElement(old, vnode, hooks)
+					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, hooks, ns)
 				}
 			}
-			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling)
+			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
 			removeNode(parent, old, null, false)
@@ -371,8 +371,8 @@ var renderService = function($window) {
 		}
 		else vnode.dom = old.dom
 	}
-	function updateFragment(parent, old, vnode, hooks, nextSibling) {
-		updateNodes(parent, old.children, vnode.children, hooks, nextSibling)
+	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -386,27 +386,31 @@ var renderService = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, hooks) {
+	function updateElement(old, vnode, hooks, ns) {
 		var element = vnode.dom = old.dom
+		switch (vnode.tag) {
+			case "svg": ns = "http://www.w3.org/2000/svg"; break
+			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
+		}
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) vnode.attrs.value = vnode.text //FIXME handle multiple children
 		}
-		updateAttrs(vnode, old.attrs, vnode.attrs)
+		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 		if (old.text != null && vnode.text != null && vnode.text !== "") {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
 			if (old.text != null) old.children = [Node("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null)
+			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
-	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling) {
+	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling)
+			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
@@ -546,10 +550,10 @@ var renderService = function($window) {
 			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 		}
 	}
-	function updateAttrs(vnode, old, attrs) {
+	function updateAttrs(vnode, old, attrs, ns) {
 		if (attrs != null) {
 			for (var key in attrs) {
-				setAttr(vnode, key, old && old[key], attrs[key], undefined)
+				setAttr(vnode, key, old && old[key], attrs[key], ns)
 			}
 		}
 		if (old != null) {
@@ -649,7 +653,7 @@ var renderService = function($window) {
 		if (dom.vnodes == null) dom.vnodes = []
 		
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null)
+		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		dom.vnodes = vnodes
 		if ($doc.activeElement !== active) active.focus()
