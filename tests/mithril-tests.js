@@ -11,7 +11,7 @@
 	test(function () { return m(".foo").attrs.className === "foo" })
 	test(function () { return m("[title=bar]").tag === "div" })
 	test(function () { return m("[title=bar]").attrs.title === "bar" })
-	test(function () { return m("[empty]").attrs.empty === "" })
+	test(function () { return m("[empty]").attrs.empty === true })
 	test(function () { return m("[title=\'bar\']").attrs.title === "bar" })
 	test(function () { return m("[title=\"bar\"]").attrs.title === "bar" })
 	test(function () { return m("div", "test").children[0] === "test" })
@@ -1747,6 +1747,24 @@
 	test(function () {
 		var root = mock.document.createElement("div")
 		m.render(root, m("div", [undefined]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [null]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [true]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [false]))
 		return root.childNodes[0].childNodes[0].nodeValue === ""
 	})
 
