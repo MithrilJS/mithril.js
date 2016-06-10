@@ -11,7 +11,7 @@
 	test(function () { return m(".foo").attrs.className === "foo" })
 	test(function () { return m("[title=bar]").tag === "div" })
 	test(function () { return m("[title=bar]").attrs.title === "bar" })
-	test(function () { return m("[empty]").attrs.empty === "" })
+	test(function () { return m("[empty]").attrs.empty === true })
 	test(function () { return m("[title=\'bar\']").attrs.title === "bar" })
 	test(function () { return m("[title=\"bar\"]").attrs.title === "bar" })
 	test(function () { return m("div", "test").children[0] === "test" })
