@@ -188,7 +188,7 @@
 		// value of Console.log in some versions of Firefox (behavior depends on
 		// version)
 		try {
-			if (data != null && data.toString() != null) return data
+			if (typeof data !== "boolean" && data != null && data.toString() != null) return data
 		} catch (e) {
 			// silently ignore errors
 		}

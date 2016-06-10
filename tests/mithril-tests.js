@@ -1752,6 +1752,24 @@
 
 	test(function () {
 		var root = mock.document.createElement("div")
+		m.render(root, m("div", [null]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [true]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [false]))
+		return root.childNodes[0].childNodes[0].nodeValue === ""
+	})
+
+	test(function () {
+		var root = mock.document.createElement("div")
 		m.render(root, m("svg", [m("g")]))
 		var g = root.childNodes[0].childNodes[0]
 		return g.nodeName === "G" &&

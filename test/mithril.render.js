@@ -57,6 +57,24 @@ describe("m.render()", function () {
 		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
 	})
 
+	it("renders `null` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [null]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
+	it("renders `true` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [true]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
+	it("renders `false` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [false]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
 	it("uses the W3C URI as default namespace for SVG children", function () {
 		var root = mock.document.createElement("div")
 		m.render(root, m("svg", [m("g")]))
