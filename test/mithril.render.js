@@ -1567,5 +1567,17 @@ describe("m.render()", function () {
 			expect(root.childNodes[0].innerHTML)
 				.to.equal('<option value="">aaa</option>')
 		})
+
+		it("caches children of editable on update", function () {
+			var root = document.createElement("span")
+			var t1 = m.trust("<h1>fo</h1>o")
+			var t2 = "foo"
+
+			m.render(root, m("span", {contenteditable: false}, t1))
+			m.render(root, m("span", {contenteditable: true}, t2))
+			m.render(root, m("span", {contenteditable: false}, t1))
+
+			expect(root.childNodes[0].innerHTML).to.equal(t1.valueOf())
+		})
 	})
 })
