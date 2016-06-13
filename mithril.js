@@ -727,13 +727,6 @@
 			cached.children.nodes = []
 		}
 
-		// edge case: setting value on <select> doesn't work before children
-		// exist, so set it again after children have been created
-		if (data.tag === "select" && "value" in data.attrs) {
-			setAttributes(node, data.tag, {value: data.attrs.value}, {},
-				namespace)
-		}
-
 		return cached
 	}
 
@@ -886,6 +879,13 @@
 				views,
 				configs,
 				controllers)
+		}
+
+		// edge case: setting value on <select> doesn't work before children
+		// exist, so set it again after children have been created/updated
+		if (data.tag === "select" && "value" in data.attrs) {
+			setAttributes(node, data.tag, {value: data.attrs.value}, {},
+				namespace)
 		}
 
 		if (!isNew && shouldReattach === true && node != null) {

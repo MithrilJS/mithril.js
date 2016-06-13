@@ -1567,5 +1567,15 @@ describe("m.render()", function () {
 			expect(root.childNodes[0].innerHTML)
 				.to.equal('<option value="">aaa</option>')
 		})
+
+		it("sets correct <select> value", function () {
+			var root = document.createElement("div")
+			m.render(root, m("select", {value: "b"}, [
+				m("option", {value: "a"}, "aaa"),
+				m("option", {value: "b"}, "bbb")
+			]))
+			// This works only if select value is set after its options exist.
+			expect(root.childNodes[0].value).to.equal("b")
+		})
 	})
 })
