@@ -1,4 +1,5 @@
-// Mithril type definitions for Typescript
+// Mithril type definitions for Typescript. Note that changes to this *must* be
+// mirrored in the module export file in index.d.ts
 
 /**
 * This is the module containing all the types/declarations/etc. for Mithril

@@ -43,6 +43,7 @@
     "mithril.min.js",
     "mithril.min.js.map",
     "mithril.js",
-    "README.*"
+    "mithril.d.js",
+    "index.d.js"
   ]
 }
