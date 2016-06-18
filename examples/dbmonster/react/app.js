@@ -56,11 +56,11 @@ var DBMon = React.createClass({
 
 	loadSamples: function loadSamples() {
 		var data = ENV.generateData(true).toArray()
-		
+
 		perfMonitor.startProfile("render")
 		this.setState({databases: data})
 		perfMonitor.endProfile("render")
-		
+
 		setTimeout(this.loadSamples, ENV.timeout)
 	},
 
