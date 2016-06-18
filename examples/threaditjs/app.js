@@ -11,7 +11,7 @@ var api = {
 	home : function() {
 		T.timeEnd("Setup")
 		return request({method: "GET", url: T.apiUrl + "/threads/"})
-	}, 
+	},
 	thread : function(id) {
 		T.timeEnd("Setup")
 		return request({method: "GET", url: T.apiUrl + "/comments/" + id}).then(T.transformResponse)
@@ -87,7 +87,7 @@ var Header = {
 		return [
 			m("p.head_links", [
 				m("a[href='https://github.com/koglerjs/threaditjs/tree/master/examples/mithril']", "Source"),
-				" | ", 
+				" | ",
 				m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
 			]),
 			m("h2", [
@@ -140,7 +140,7 @@ var Thread = {
 	view: function() {
 		if (current) T.time("Thread render")
 		return [
-			m(Header), 
+			m(Header),
 			current ? m(".main", {oncreate: function() {T.timeEnd("Thread render")}}, [
 				m(ThreadNode, {node: current.root})
 			]) : null
@@ -149,7 +149,7 @@ var Thread = {
 }
 var ThreadNode = {
 	view: function(vnode) {
-		return m(".comment", [		
+		return m(".comment", [
 			m("p", trust(vnode.attrs.node.text)),
 			m(".reply", m(Reply, vnode.attrs)),
 			m(".children", [

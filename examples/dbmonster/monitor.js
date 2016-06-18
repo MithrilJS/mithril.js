@@ -56,5 +56,5 @@ var Monitoring = Monitoring || (function() {
     memoryStats: stats,
     renderRate: renderRate
   };
-  
+
 })();

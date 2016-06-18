@@ -14,18 +14,18 @@ update()
 
 function update() {
 	data = ENV.generateData().toArray()
-		
+
 	perfMonitor.startProfile("render")
 	render(root, view())
 	perfMonitor.endProfile("render")
-	
+
 	setTimeout(update, ENV.timeout)
 }
 
 function view() {
 	return m("div", [
 		m("table", {className: "table table-striped latest-data"}, [
-			m("tbody", 
+			m("tbody",
 				data.map(function(db) {
 					return m("tr", {key: db.dbname}, [
 						m("td", {className: "dbname"}, db.dbname),
