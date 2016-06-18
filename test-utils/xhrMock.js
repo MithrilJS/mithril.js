@@ -10,7 +10,7 @@ module.exports = function() {
 	var serverErrorHandler = function() {
 		return {status: 500, responseText: "server error, most likely the URL was not defined"}
 	}
-	
+
 	var $window = {
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}

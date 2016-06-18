@@ -18,6 +18,6 @@ module.exports = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	route.setPath = router.setPath
 	route.getPath = router.getPath
-	
+
 	return route
 }

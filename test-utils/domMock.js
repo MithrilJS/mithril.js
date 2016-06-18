@@ -8,9 +8,9 @@ module.exports = function() {
 		var ancestor = this
 		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
 		if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
-		
+
 		if (child.nodeType == null) throw new Error("Argument is not a DOM element")
-		
+
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) this.childNodes.splice(index, 1)
 		if (child.nodeType === 11) {
@@ -35,9 +35,9 @@ module.exports = function() {
 		var ancestor = this
 		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
 		if (ancestor === child) throw new Error("Node cannot be inserted at the specified point in the hierarchy")
-		
+
 		if (child.nodeType == null) throw new Error("Argument is not a DOM element")
-		
+
 		var refIndex = this.childNodes.indexOf(reference)
 		var index = this.childNodes.indexOf(child)
 		if (reference !== null && refIndex < 0) throw new TypeError("Invalid argument")
@@ -109,7 +109,7 @@ module.exports = function() {
 					},
 					set innerHTML(value) {
 						while (this.firstChild) this.removeChild(this.firstChild)
-						
+
 						var stack = [this], depth = 0, voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 						value.replace(/<([a-z0-9\-]+?)((?:\s+?[^=]+?=(?:"[^"]*?"|'[^']*?'|[^\s>]*))*?)(\s*\/)?>|<\/([a-z0-9\-]+?)>|([^<]+)/g, function(match, startTag, attrs, selfClosed, endTag, text) {
 							if (startTag) {
@@ -173,7 +173,7 @@ module.exports = function() {
 						if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].nodeValue === "checkbox" && e.type === "click") {
 							this.checked = !this.checked
 						}
-						
+
 						e.target = this
 						if (events[e.type] != null) {
 							for (var i = 0; i < events[e.type].length; i++) {
@@ -186,7 +186,7 @@ module.exports = function() {
 						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
 					},
 				}
-				
+
 				if (element.nodeName === "A") {
 					var href
 					Object.defineProperty(element, "href", {
@@ -195,7 +195,7 @@ module.exports = function() {
 						enumerable: true,
 					})
 				}
-				
+
 				if (element.nodeName === "INPUT") {
 					var checked
 					Object.defineProperty(element, "checked", {
@@ -203,10 +203,10 @@ module.exports = function() {
 						set: function(value) {checked = Boolean(value)},
 						enumerable: true,
 					})
-					
+
 					element.value = ""
 				}
-				
+
 				if (element.nodeName === "TEXTAREA") {
 					var value
 					Object.defineProperty(element, "value", {
@@ -218,7 +218,7 @@ module.exports = function() {
 						enumerable: true,
 					})
 				}
-				
+
 				function getOptions(element) {
 					var options = []
 					for (var i = 0; i < element.childNodes.length; i++) {
@@ -340,6 +340,6 @@ module.exports = function() {
 	$window.document.body = $window.document.createElement("body")
 	$window.document.documentElement.appendChild($window.document.body)
 	activeElement = $window.document.body
-	
+
 	return $window
 }

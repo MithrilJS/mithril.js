@@ -39,7 +39,7 @@ function hyperscript(selector) {
 				}
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
-				
+
 				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
@@ -57,9 +57,9 @@ function hyperscript(selector) {
 		children = []
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
-	
+
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
-	
+
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 

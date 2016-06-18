@@ -3,13 +3,13 @@
 module.exports = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
-		
+
 	var entries = string.split("&"), data = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		
+
 		//TODO refactor out
 		var number = Number(value)
 		if (value !== "" && !isNaN(number) || value === "NaN") value = number
@@ -19,7 +19,7 @@ module.exports = function(string) {
 			var date = new Date(value)
 			if (!isNaN(date.getTime())) value = date
 		}
-		
+
 		var levels = key.split(/\]\[?|\[/)
 		var cursor = data
 		if (key.indexOf("[") > -1) levels.pop()

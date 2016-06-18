@@ -229,7 +229,7 @@ To learn more about components, [see the components page](components.md).
 
 ### Lifecycle methods
 
-Vnodes and components can have lifecycle methods (also known as *hooks*), which are called at various points during the lifetime of a DOM element. The lifecycle methods supported by Mithril are: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove`, and `onbeforeupdate`. 
+Vnodes and components can have lifecycle methods (also known as *hooks*), which are called at various points during the lifetime of a DOM element. The lifecycle methods supported by Mithril are: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove`, and `onbeforeupdate`.
 
 Lifecycle methods are defined in the same way as DOM event handlers, but receive the vnode as an argument, instead of an Event object:
 
@@ -309,7 +309,7 @@ m("ul", users.map(function(u) { // <ul>
 }))                             // </ul>
 
 // ES6:
-// m("ul", users.map(u => 
+// m("ul", users.map(u =>
 //   m("li", u.name)
 // ))
 ```
@@ -392,7 +392,7 @@ var BadListComponent = {
 		for (var i = 0; i < vnode.attrs.items.length; i++) {
 			list.push(m("li", vnode.attrs.items[i]))
 		}
-		
+
 		return m("ul", list)
 	}
 }

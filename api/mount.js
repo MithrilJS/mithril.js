@@ -8,7 +8,7 @@ module.exports = function(renderer, pubsub) {
 		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, {tag: component})
 		})
-		
+
 		run()
 	}
 }

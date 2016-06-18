@@ -9,7 +9,7 @@ o.spec("prop", function() {
 		var initialValue = store()
 		store(2)
 		var newValue = store()
-		
+
 		o(initialValue).equals(1)
 		o(newValue).equals(2)
 	})

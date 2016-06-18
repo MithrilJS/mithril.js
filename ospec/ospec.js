@@ -32,21 +32,21 @@ module.exports = new function init() {
 	o.run = function() {
 		start = new Date
 		test(spec, [], [], report)
-		
+
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
 			post = [].concat(spec["__afterEach"] || [], post)
 			series([].concat(spec["__before"] || [], Object.keys(spec).map(function(key) {
 				return function(done, timeout) {
 					timeout(Infinity)
-					
+
 					if (key.slice(0, 2) === "__") return done()
 					if (only !== null && spec[key] !== only && typeof only === typeof spec[key]) return done()
 					subjects.push(key)
 					var type = typeof spec[key]
 					if (type === "object") test(spec[key], pre, post, pop)
 					if (type === "function") series([].concat(pre, spec[key], post, pop))
-					
+
 					function pop() {
 						subjects.pop()
 						done()
@@ -58,11 +58,11 @@ module.exports = new function init() {
 		function series(fns) {
 			var cursor = 0
 			next()
-			
+
 			function next() {
 				stack++
 				if (cursor === fns.length) return
-				
+
 				var fn = fns[cursor++]
 				if (fn.length > 0) {
 					var timeout = 0, delay = 40, s = new Date
@@ -108,12 +108,12 @@ module.exports = new function init() {
 			ctx[name] = predicate
 		}
 	}
-	
+
 	define("equals", "should equal", function(a, b) {return a === b})
 	define("notEquals", "should not equal", function(a, b) {return a !== b})
 	define("deepEquals", "should deep equal", deepEqual)
 	define("notDeepEquals", "should not deep equal", function(a, b) {return !deepEqual(a, b)})
-	
+
 	function isArguments(a) {
 		if ("callee" in a) {
 			for (var i in a) if (i === "callee") return false
@@ -184,7 +184,7 @@ module.exports = new function init() {
 	function highlight(message) {
 		return hasProcess ? "\x1b[31m" + message + "\x1b[0m" : "%c" + message + "%c "
 	}
-	
+
 	function report() {
 		var status = 0
 		for (var i = 0, r; r = results[i]; i++) {

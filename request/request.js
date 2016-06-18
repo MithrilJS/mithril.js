@@ -8,27 +8,27 @@ module.exports = function($window, Promise) {
 	function xhr(args) {
 		return new Promise(function(resolve, reject) {
 			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-			
+
 			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
-			
+
 			args.url = interpolate(args.url, args.data)
 			if (useBody) args.data = args.serialize(args.data)
 			else args.url = assemble(args.url, args.data)
-			
+
 			var xhr = new $window.XMLHttpRequest()
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			
+
 			if (args.serialize === JSON.stringify && useBody) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (args.deserialize === deserialize) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
-			
+
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-			
+
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
 					try {
@@ -42,7 +42,7 @@ module.exports = function($window, Promise) {
 								}
 								else response = new args.type(response)
 							}
-							
+
 							resolve(response)
 						}
 						else reject(new Error(xhr.responseText))
@@ -52,7 +52,7 @@ module.exports = function($window, Promise) {
 					}
 				}
 			}
-			
+
 			if (useBody) xhr.send(args.data)
 			else xhr.send()
 		})
@@ -82,7 +82,7 @@ module.exports = function($window, Promise) {
 
 	function interpolate(url, data) {
 		if (data == null) return url
-		
+
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)
@@ -109,6 +109,6 @@ module.exports = function($window, Promise) {
 	}
 
 	function extract(xhr) {return xhr.responseText}
-	
+
 	return {xhr: xhr, jsonp: jsonp}
 }

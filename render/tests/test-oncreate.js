@@ -15,9 +15,9 @@ o.spec("oncreate", function() {
 	o("calls oncreate when creating element", function() {
 		var callback = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: callback}, state: {}}
-		
+
 		render(root, [vnode])
-		
+
 		o(callback.callCount).equals(1)
 		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
@@ -25,9 +25,9 @@ o.spec("oncreate", function() {
 	o("calls oncreate when creating text", function() {
 		var callback = o.spy()
 		var vnode = {tag: "#", attrs: {oncreate: callback}, children: "a", state: {}}
-		
+
 		render(root, [vnode])
-		
+
 		o(callback.callCount).equals(1)
 		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
@@ -35,9 +35,9 @@ o.spec("oncreate", function() {
 	o("calls oncreate when creating fragment", function() {
 		var callback = o.spy()
 		var vnode = {tag: "[", attrs: {oncreate: callback}, children: [], state: {}}
-		
+
 		render(root, [vnode])
-		
+
 		o(callback.callCount).equals(1)
 		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
@@ -45,9 +45,9 @@ o.spec("oncreate", function() {
 	o("calls oncreate when creating html", function() {
 		var callback = o.spy()
 		var vnode = {tag: "<", attrs: {oncreate: callback}, children: "a", state: {}}
-		
+
 		render(root, [vnode])
-		
+
 		o(callback.callCount).equals(1)
 		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
@@ -57,10 +57,10 @@ o.spec("oncreate", function() {
 		var createA = o.spy()
 		var vnode = {tag: "div", key: 1, attrs: {oncreate: createDiv}, state: {}}
 		var updated = {tag: "a", key: 1, attrs: {oncreate: createA}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(createDiv.callCount).equals(1)
 		o(createDiv.this).equals(vnode.state)
 		o(createDiv.args[0]).equals(vnode)
@@ -73,10 +73,10 @@ o.spec("oncreate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, state: {}}
 		var updated = {tag: "div", attrs: {oncreate: update}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -87,10 +87,10 @@ o.spec("oncreate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, state: {}}
 		var updated = {tag: "div", attrs: {oncreate: update, id: "a"}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -101,10 +101,10 @@ o.spec("oncreate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, children: [{tag: "a"}], state: {}}
 		var updated = {tag: "div", attrs: {oncreate: update}, children: [{tag: "b"}], state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -117,10 +117,10 @@ o.spec("oncreate", function() {
 		var otherVnode = {tag: "a", key: 2}
 		var updated = {tag: "div", key: 1, attrs: {oncreate: update}, state: {}}
 		var otherUpdated = {tag: "a", key: 2}
-		
+
 		render(root, [vnode, otherVnode])
 		render(root, [otherUpdated, updated])
-		
+
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -130,10 +130,10 @@ o.spec("oncreate", function() {
 		var create = o.spy()
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [])
-		
+
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -143,11 +143,11 @@ o.spec("oncreate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", key: 1, attrs: {oncreate: create}, state: {}}
 		var updated = {tag: "div", key: 1, attrs: {oncreate: update}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [])
 		render(root, [updated])
-		
+
 		o(vnode.dom).notEquals(updated.dom)
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
@@ -162,10 +162,10 @@ o.spec("oncreate", function() {
 		var callback = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}, children: [], state: {}}
 		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "a", attrs: {oncreate: callback}, state: {}}], state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -181,12 +181,12 @@ o.spec("oncreate", function() {
 				{tag: "b"}
 			]}
 		]}
-		
+
 		render(root, [vnode])
-		
+
 		function create(vnode) {
 			created = true
-			
+
 			o(vnode.dom.parentNode).notEquals(null)
 			o(vnode.dom.childNodes.length).equals(1)
 		}
@@ -195,9 +195,9 @@ o.spec("oncreate", function() {
 	o("does not set oncreate as an event handler", function() {
 		var create = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, children: []}
-		
+
 		render(root, [vnode])
-		
+
 		o(vnode.dom.oncreate).equals(undefined)
 		o(vnode.dom.attributes["oncreate"]).equals(undefined)
 	})
@@ -206,11 +206,11 @@ o.spec("oncreate", function() {
 		var vnodes = [{tag: "div", key: 1, attrs: {oncreate: create}}]
 		var temp = []
 		var updated = [{tag: "div", key: 1, attrs: {oncreate: create}}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(create.callCount).equals(2)
 	})
 })
