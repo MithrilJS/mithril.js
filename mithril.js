@@ -1473,6 +1473,7 @@
 		components.splice(index, 1)
 		reset(root)
 		nodeCache.splice(getCellCacheKey(root), 1)
+		unloaders = []
 	}
 
 	var redrawing = false
