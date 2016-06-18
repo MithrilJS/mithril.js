@@ -102,8 +102,7 @@ describe("m.route()", function () {
 		expect(route2).to.equal("/test13")
 	})
 
-	// FIXME: this causes others to fail
-	xdit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 		var spy = sinon.spy()
 
@@ -130,68 +129,7 @@ describe("m.route()", function () {
 		expect(spy).to.not.have.been.called
 	})
 
-	// FIXME: this causes others to fail
-	xdit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
-		mode("search")
-
-		var spy = sinon.spy()
-
-		var subsub = {
-			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
-			},
-			view: function () {
-				return m("div")
-			}
-		}
-
-		var sub = pure(function () { return subsub })
-
-		route(root, "/a", {
-			"/a": pure(function () { return sub }),
-
-			"/b": {
-				controller: spy,
-				view: noop
-			}
-		})
-
-		route("/b")
-
-		expect(spy).to.not.have.been.called
-	})
-
-	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
-		mode("search")
-
-		var spy = sinon.spy()
-
-		var sub = {
-			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
-			},
-			view: function () {
-				return m("div")
-			}
-		}
-
-		route(root, "/a", {
-			"/a": pure(function () { return sub }),
-
-			"/b": {
-				controller: spy,
-				view: noop
-			}
-		})
-
-		route("/b")
-
-		expect(spy).to.not.have.been.called
-	})
-
-	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
 		var spy = sinon.spy()
