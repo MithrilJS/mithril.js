@@ -15,10 +15,10 @@ o.spec("updateNodes", function() {
 	o("handles el noop", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var updated = [{tag: "a", key: 1}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -28,10 +28,10 @@ o.spec("updateNodes", function() {
 	o("handles el noop without key", function() {
 		var vnodes = [{tag: "a"}, {tag: "b"}]
 		var updated = [{tag: "a"}, {tag: "b"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -41,10 +41,10 @@ o.spec("updateNodes", function() {
 	o("handles text noop", function() {
 		var vnodes = [{tag: "#", children: "a"}]
 		var updated = [{tag: "#", children: "a"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeValue).equals("a")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -52,10 +52,10 @@ o.spec("updateNodes", function() {
 	o("handles text noop w/ type casting", function() {
 		var vnodes = [{tag: "#", children: 1}]
 		var updated = [{tag: "#", children: "1"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeValue).equals("1")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -63,10 +63,10 @@ o.spec("updateNodes", function() {
 	o("handles falsy text noop w/ type casting", function() {
 		var vnodes = [{tag: "#", children: 0}]
 		var updated = [{tag: "#", children: "0"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeValue).equals("0")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -74,10 +74,10 @@ o.spec("updateNodes", function() {
 	o("handles html noop", function() {
 		var vnodes = [{tag: "<", children: "a"}]
 		var updated = [{tag: "<", children: "a"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeValue).equals("a")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -85,10 +85,10 @@ o.spec("updateNodes", function() {
 	o("handles fragment noop", function() {
 		var vnodes = [{tag: "[", children: [{tag: "a"}]}]
 		var updated = [{tag: "[", children: [{tag: "a"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -96,10 +96,10 @@ o.spec("updateNodes", function() {
 	o("handles fragment noop w/ text child", function() {
 		var vnodes = [{tag: "[", children: [{tag: "#", children: "a"}]}]
 		var updated = [{tag: "[", children: [{tag: "#", children: "a"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeValue).equals("a")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -107,10 +107,10 @@ o.spec("updateNodes", function() {
 	o("reverses els w/ even count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var updated = [{tag: "s", key: 4}, {tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -124,10 +124,10 @@ o.spec("updateNodes", function() {
 	o("reverses els w/ odd count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
 		var updated = [{tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -139,10 +139,10 @@ o.spec("updateNodes", function() {
 	o("creates el at start", function() {
 		var vnodes = [{tag: "a", key: 1}]
 		var updated = [{tag: "b", key: 2}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("B")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -152,10 +152,10 @@ o.spec("updateNodes", function() {
 	o("creates el at end", function() {
 		var vnodes = [{tag: "a", key: 1}]
 		var updated = [{tag: "a", key: 1}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -165,10 +165,10 @@ o.spec("updateNodes", function() {
 	o("creates el in middle", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var updated = [{tag: "a", key: 1}, {tag: "i", key: 3}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
 		o(updated[1].dom.nodeName).equals("I")
@@ -179,10 +179,10 @@ o.spec("updateNodes", function() {
 	o("creates el while reversing", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var updated = [{tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("B")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -194,10 +194,10 @@ o.spec("updateNodes", function() {
 	o("deletes el at start", function() {
 		var vnodes = [{tag: "b", key: 2}, {tag: "a", key: 1}]
 		var updated = [{tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -205,10 +205,10 @@ o.spec("updateNodes", function() {
 	o("deletes el at end", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var updated = [{tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -216,10 +216,10 @@ o.spec("updateNodes", function() {
 	o("deletes el at middle", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "i", key: 3}, {tag: "b", key: 2}]
 		var updated = [{tag: "a", key: 1}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -229,10 +229,10 @@ o.spec("updateNodes", function() {
 	o("deletes el while reversing", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "i", key: 3}, {tag: "b", key: 2}]
 		var updated = [{tag: "b", key: 2}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("B")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -242,10 +242,10 @@ o.spec("updateNodes", function() {
 	o("creates, deletes, reverses els at same time", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "i", key: 3}, {tag: "b", key: 2}]
 		var updated = [{tag: "b", key: 2}, {tag: "a", key: 1}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("B")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -257,10 +257,10 @@ o.spec("updateNodes", function() {
 	o("adds to empty array followed by el", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "b", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}]}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].children[0].dom.nodeName).equals("A")
 		o(updated[0].children[0].dom).equals(root.childNodes[0])
@@ -270,10 +270,10 @@ o.spec("updateNodes", function() {
 	o("reverses followed by el", function() {
 		var vnodes = [{tag: "[", key: 1, children: [{tag: "a", key: 2}, {tag: "b", key: 3}]}, {tag: "i", key: 4}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "b", key: 3}, {tag: "a", key: 2}]}, {tag: "i", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].children[0].dom.nodeName).equals("B")
 		o(updated[0].children[0].dom).equals(root.childNodes[0])
@@ -285,10 +285,10 @@ o.spec("updateNodes", function() {
 	o("updates empty array to html with same key", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}]
 		var updated = [{tag: "<", key: 1, children: "<a></a><b></b>"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -299,10 +299,10 @@ o.spec("updateNodes", function() {
 	o("updates empty html to array with same key", function() {
 		var vnodes = [{tag: "<", key: 1, children: ""}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -313,10 +313,10 @@ o.spec("updateNodes", function() {
 	o("updates empty array to html without key", function() {
 		var vnodes = [{tag: "[", children: []}]
 		var updated = [{tag: "<", children: "<a></a><b></b>"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -327,10 +327,10 @@ o.spec("updateNodes", function() {
 	o("updates empty html to array without key", function() {
 		var vnodes = [{tag: "<", children: ""}]
 		var updated = [{tag: "[", children: [{tag: "a"}, {tag: "b"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -341,10 +341,10 @@ o.spec("updateNodes", function() {
 	o("updates array to html with same key", function() {
 		var vnodes = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}]
 		var updated = [{tag: "<", key: 1, children: "<i></i><s></s>"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -355,10 +355,10 @@ o.spec("updateNodes", function() {
 	o("updates html to array with same key", function() {
 		var vnodes = [{tag: "<", key: 1, children: "<a></a><b></b>"}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "i"}, {tag: "s"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -369,10 +369,10 @@ o.spec("updateNodes", function() {
 	o("updates array to html without key", function() {
 		var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: "b"}]}]
 		var updated = [{tag: "<", children: "<i></i><s></s>"}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -383,10 +383,10 @@ o.spec("updateNodes", function() {
 	o("updates html to array without key", function() {
 		var vnodes = [{tag: "<", children: "<a></a><b></b>"}]
 		var updated = [{tag: "[", children: [{tag: "i"}, {tag: "s"}]}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -397,10 +397,10 @@ o.spec("updateNodes", function() {
 	o("updates empty array to html with same key followed by el", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "i", key: 2}]
 		var updated = [{tag: "<", key: 1, children: "<a></a><b></b>"}, {tag: "i", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -413,10 +413,10 @@ o.spec("updateNodes", function() {
 	o("updates empty html to array with same key followed by el", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "i", key: 2}]
 		var updated = [{tag: "<", key: 1, children: "<a></a><b></b>"}, {tag: "i", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -429,10 +429,10 @@ o.spec("updateNodes", function() {
 	o("populates array followed by null then el", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}, null, {tag: "i", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, null, {tag: "i", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -445,10 +445,10 @@ o.spec("updateNodes", function() {
 	o("populates childless array followed by el", function() {
 		var vnodes = [{tag: "[", key: 1}, {tag: "i", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, {tag: "i", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -461,10 +461,10 @@ o.spec("updateNodes", function() {
 	o("populates childless array followed by null then el", function() {
 		var vnodes = [{tag: "[", key: 1}, null, {tag: "i", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, null, {tag: "i", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -477,10 +477,10 @@ o.spec("updateNodes", function() {
 	o("moves from end to start", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var updated = [{tag: "s", key: 4}, {tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -494,10 +494,10 @@ o.spec("updateNodes", function() {
 	o("moves from start to end", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var updated = [{tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(updated[0].dom.nodeName).equals("B")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -512,11 +512,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -531,11 +531,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var temp = []
 		var updated = [{tag: "s", key: 4}, {tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -550,11 +550,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -563,11 +563,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -580,11 +580,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "i", key: 3}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -595,11 +595,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "i", key: 3}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(1)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -608,11 +608,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "i", key: 3}, {tag: "s", key: 4}, {tag: "div", key: 5}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -625,11 +625,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -640,11 +640,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "s", key: 4}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -655,11 +655,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -670,11 +670,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
 		var temp = []
 		var updated = [{tag: "s", key: 4}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -685,11 +685,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "a", key: 1}, {tag: "i", key: 3}, {tag: "s", key: 4}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -702,11 +702,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
 		var updated = [{tag: "s", key: 4}, {tag: "i", key: 3}, {tag: "a", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("S")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -720,12 +720,12 @@ o.spec("updateNodes", function() {
 		var temp1 = []
 		var temp2 = [{tag: "a", key: 1, children: [{tag: "i", key: 3}, {tag: "s", key: 4}]}, {tag: "b", key: 2}]
 		var updated = [{tag: "a", key: 1, children: [{tag: "s", key: 4}, {tag: "i", key: 3}]}, {tag: "b", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, temp1)
 		render(root, temp2)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(updated[0].dom.nodeName).equals("A")
 		o(updated[0].dom).equals(root.childNodes[0])
@@ -739,11 +739,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "a", key: 1, children: [{tag: "a", key: 3, children: [{tag: "a", key: 5}]}, {tag: "a", key: 4, children: [{tag: "a", key: 5}]}]}, {tag: "a", key: 2}]
 		var temp = []
 		var updated = [{tag: "a", key: 1, children: [{tag: "a", key: 3, children: [{tag: "a", key: 5}]}, {tag: "a", key: 4, children: [{tag: "a", key: 5}]}]}, {tag: "a", key: 2}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(root.childNodes[0].childNodes.length).equals(2)
 		o(root.childNodes[0].childNodes[0].childNodes.length).equals(1)
@@ -754,11 +754,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "div", key: 1}]
 		var temp = []
 		var updated = [{tag: "div", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(vnodes[0].dom).equals(updated[0].dom)
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
@@ -766,11 +766,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "div", key: 1}]
 		var temp = [{tag: "div"}]
 		var updated = [{tag: "div", key: 1}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(vnodes[0].dom).equals(updated[0].dom)
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
@@ -778,11 +778,11 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "div", children: [{tag: "a", key: 1}]}]
 		var temp = [{tag: "div"}]
 		var updated = [{tag: "div", children: [{tag: "a", key: 1}]}]
-		
+
 		render(root, vnodes)
 		render(root, temp)
 		render(root, updated)
-		
+
 		o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
 		o(updated[0].dom.firstChild.nodeName).equals("A")
 	})

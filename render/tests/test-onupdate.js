@@ -17,10 +17,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
 		var updated = {tag: "div", attrs: {onupdate: update}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -29,10 +29,10 @@ o.spec("onupdate", function() {
 	o("does not call onupdate when removing element", function() {
 		var create = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}}
-		
+
 		render(root, [vnode])
 		render(root, [])
-		
+
 		o(create.callCount).equals(0)
 	})
 	o("does not call onupdate when replacing keyed element", function() {
@@ -42,7 +42,7 @@ o.spec("onupdate", function() {
 		var updated = {tag: "a", key: 1, attrs: {onupdate: update}}
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
@@ -50,11 +50,11 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", key: 1, attrs: {onupdate: update}}
 		var updated = {tag: "div", key: 1, attrs: {onupdate: update}}
-		
+
 		render(root, [vnode])
 		render(root, [])
 		render(root, [updated])
-		
+
 		o(vnode.dom).notEquals(updated.dom)
 	})
 	o("does not call old onupdate when removing the onupdate property in new vnode", function() {
@@ -62,10 +62,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "a", attrs: {onupdate: create}}
 		var updated = {tag: "a"}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 	})
 	o("calls onupdate when noop", function() {
@@ -73,10 +73,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
 		var updated = {tag: "div", attrs: {onupdate: update}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -87,10 +87,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}, state: {}}
 		var updated = {tag: "div", attrs: {onupdate: update, id: "a"}, state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -101,10 +101,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: create}, children: [{tag: "a"}], state: {}}
 		var updated = {tag: "div", attrs: {onupdate: update}, children: [{tag: "b"}], state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -115,10 +115,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "#", attrs: {onupdate: create}, children: "a", state: {}}
 		var updated = {tag: "#", attrs: {onupdate: update}, children: "a", state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -129,10 +129,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "[", attrs: {onupdate: create}, children: [], state: {}}
 		var updated = {tag: "[", attrs: {onupdate: update}, children: [], state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -143,10 +143,10 @@ o.spec("onupdate", function() {
 		var update = o.spy()
 		var vnode = {tag: "<", attrs: {onupdate: create}, children: "a", state: {}}
 		var updated = {tag: "<", attrs: {onupdate: update}, children: "a", state: {}}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(1)
 		o(update.this).equals(vnode.state)
@@ -164,13 +164,13 @@ o.spec("onupdate", function() {
 				{tag: "b", attrs: {id: "33"}}
 			]}
 		]}
-		
+
 		render(root, [vnode])
 		render(root, [updated])
-		
+
 		function update(vnode) {
 			called = true
-			
+
 			o(vnode.dom.parentNode.attributes["id"].nodeValue).equals("11")
 			o(vnode.dom.attributes["id"].nodeValue).equals("22")
 			o(vnode.dom.childNodes[0].attributes["id"].nodeValue).equals("33")
@@ -180,9 +180,9 @@ o.spec("onupdate", function() {
 	o("does not set onupdate as an event handler", function() {
 		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onupdate: update}, children: []}
-		
+
 		render(root, [vnode])
-		
+
 		o(vnode.dom.onupdate).equals(undefined)
 		o(vnode.dom.attributes["onupdate"]).equals(undefined)
 	})

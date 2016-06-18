@@ -20,9 +20,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component}
-			
+
 			render(root, [node])
-			
+
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
 			o(root.firstChild.firstChild.nodeValue).equals("b")
@@ -34,9 +34,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component, attrs: {id: "a"}, text: "b"}
-			
+
 			render(root, [node])
-			
+
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
 			o(root.firstChild.firstChild.nodeValue).equals("b")
@@ -49,7 +49,7 @@ o.spec("component", function() {
 			}
 			render(root, [{tag: component, attrs: {id: "a"}, text: "b"}])
 			render(root, [{tag: component, attrs: {id: "c"}, text: "d"}])
-			
+
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("c")
 			o(root.firstChild.firstChild.nodeValue).equals("d")
@@ -63,7 +63,7 @@ o.spec("component", function() {
 			var div = {tag: "div", key: 2}
 			render(root, [{tag: component, key: 1}, div])
 			render(root, [{tag: "div", key: 2}])
-			
+
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
 		})
@@ -74,7 +74,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: "svg", children: [{tag: component}]}])
-			
+
 			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 		})
 		o("svg works when updating across component boundary", function() {
@@ -85,7 +85,7 @@ o.spec("component", function() {
 			}
 			render(root, [{tag: "svg", children: [{tag: component}]}])
 			render(root, [{tag: "svg", children: [{tag: component}]}])
-			
+
 			o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 		})
 	})
@@ -100,7 +100,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.childNodes.length).equals(2)
 			o(root.childNodes[0].nodeName).equals("LABEL")
 			o(root.childNodes[1].nodeName).equals("INPUT")
@@ -112,7 +112,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("a")
 		})
@@ -123,7 +123,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("")
 		})
@@ -134,7 +134,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("1")
 		})
@@ -145,7 +145,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("0")
 		})
@@ -156,7 +156,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("true")
 		})
@@ -167,7 +167,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("false")
 		})
@@ -178,7 +178,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.childNodes.length).equals(0)
 		})
 		o("can return undefined", function() {
@@ -188,7 +188,7 @@ o.spec("component", function() {
 				}
 			}
 			render(root, [{tag: component}])
-			
+
 			o(root.childNodes.length).equals(0)
 		})
 		o("can update when returning fragments", function() {
@@ -202,7 +202,7 @@ o.spec("component", function() {
 			}
 			render(root, [{tag: component}])
 			render(root, [{tag: component}])
-			
+
 			o(root.childNodes.length).equals(2)
 			o(root.childNodes[0].nodeName).equals("LABEL")
 			o(root.childNodes[1].nodeName).equals("INPUT")
@@ -215,7 +215,7 @@ o.spec("component", function() {
 			}
 			render(root, [{tag: component}])
 			render(root, [{tag: component}])
-			
+
 			o(root.firstChild.nodeType).equals(3)
 			o(root.firstChild.nodeValue).equals("a")
 		})
@@ -227,7 +227,7 @@ o.spec("component", function() {
 			}
 			render(root, [{tag: component}])
 			render(root, [{tag: component}])
-			
+
 			o(root.childNodes.length).equals(0)
 		})
 		o("can remove when returning fragments", function() {
@@ -241,9 +241,9 @@ o.spec("component", function() {
 			}
 			var div = {tag: "div", key: 2}
 			render(root, [{tag: component, key: 1}, div])
-			
+
 			render(root, [{tag: "div", key: 2}])
-			
+
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
 		})
@@ -255,9 +255,9 @@ o.spec("component", function() {
 			}
 			var div = {tag: "div", key: 2}
 			render(root, [{tag: component, key: 1}, div])
-			
+
 			render(root, [{tag: "div", key: 2}])
-			
+
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(div.dom)
 		})
@@ -268,7 +268,7 @@ o.spec("component", function() {
 			var component = {
 				oninit: function(vnode) {
 					called++
-					
+
 					o(vnode.tag).equals(component)
 					o(vnode.dom).equals(undefined)
 					o(root.childNodes.length).equals(0)
@@ -278,9 +278,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component}
-			
+
 			render(root, [node])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -291,7 +291,7 @@ o.spec("component", function() {
 			var component = {
 				oninit: function(vnode) {
 					called++
-					
+
 					o(vnode.tag).equals(component)
 					o(vnode.dom).equals(undefined)
 					o(root.childNodes.length).equals(0)
@@ -301,9 +301,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component}
-			
+
 			render(root, [node])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -311,7 +311,7 @@ o.spec("component", function() {
 		})
 		o("calls oninit before view", function() {
 			var viewCalled = false
-			
+
 			render(root, {
 				tag: {
 					view: function() {
@@ -332,14 +332,14 @@ o.spec("component", function() {
 				},
 				oninit: init,
 			}
-			
+
 			function view() {
 				return {tag: component}
 			}
-			
+
 			render(root, view())
 			render(root, view())
-			
+
 			o(init.callCount).equals(1)
 		})
 		o("calls oncreate", function() {
@@ -347,7 +347,7 @@ o.spec("component", function() {
 			var component = {
 				oncreate: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -357,9 +357,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component}
-			
+
 			render(root, [node])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -373,14 +373,14 @@ o.spec("component", function() {
 				},
 				oncreate: create,
 			}
-			
+
 			function view() {
 				return {tag: component}
 			}
-			
+
 			render(root, view())
 			render(root, view())
-			
+
 			o(create.callCount).equals(1)
 		})
 		o("calls oncreate when returning fragment", function() {
@@ -388,7 +388,7 @@ o.spec("component", function() {
 			var component = {
 				oncreate: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -398,9 +398,9 @@ o.spec("component", function() {
 				}
 			}
 			var node = {tag: component}
-			
+
 			render(root, [node])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -411,7 +411,7 @@ o.spec("component", function() {
 			var component = {
 				onupdate: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -420,13 +420,13 @@ o.spec("component", function() {
 					return {tag: "div", attrs: {id: "a"}, text: "b"}
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -437,7 +437,7 @@ o.spec("component", function() {
 			var component = {
 				onupdate: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -446,13 +446,13 @@ o.spec("component", function() {
 					return [{tag: "div", attrs: {id: "a"}, text: "b"}]
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 			o(root.firstChild.attributes["id"].nodeValue).equals("a")
@@ -463,7 +463,7 @@ o.spec("component", function() {
 			var component = {
 				onremove: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -472,13 +472,13 @@ o.spec("component", function() {
 					return {tag: "div", attrs: {id: "a"}, text: "b"}
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [])
-			
+
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
 		})
@@ -487,7 +487,7 @@ o.spec("component", function() {
 			var component = {
 				onremove: function(vnode) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
@@ -496,13 +496,13 @@ o.spec("component", function() {
 					return [{tag: "div", attrs: {id: "a"}, text: "b"}]
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [])
-			
+
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
 		})
@@ -511,24 +511,24 @@ o.spec("component", function() {
 			var component = {
 				onbeforeremove: function(vnode, done) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
-					
+
 					done()
 				},
 				view: function() {
 					return {tag: "div", attrs: {id: "a"}, text: "b"}
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [])
-			
+
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
 		})
@@ -537,24 +537,24 @@ o.spec("component", function() {
 			var component = {
 				onbeforeremove: function(vnode, done) {
 					called++
-					
+
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
-					
+
 					done()
 				},
 				view: function() {
 					return [{tag: "div", attrs: {id: "a"}, text: "b"}]
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			o(called).equals(0)
 
 			render(root, [])
-			
+
 			o(called).equals(1)
 			o(root.childNodes.length).equals(0)
 		})
@@ -568,11 +568,11 @@ o.spec("component", function() {
 			var update = o.spy()
 			var vnode = {tag: component, key: 1}
 			var updated = {tag: component, key: 1}
-			
+
 			render(root, [vnode])
 			render(root, [])
 			render(root, [updated])
-			
+
 			o(vnode.dom).notEquals(updated.dom)
 		})
 	})
@@ -586,9 +586,9 @@ o.spec("component", function() {
 					return ""
 				}
 			}
-			
+
 			render(root, [{tag: component}])
-			
+
 			function init(vnode) {
 				o(vnode.state.data).deepEquals([{a: 1}])
 			}

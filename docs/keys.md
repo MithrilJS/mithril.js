@@ -150,4 +150,3 @@ var things = [
 	{id: 1, name: "Cup"},
 ]
 ```
-

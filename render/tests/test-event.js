@@ -20,10 +20,10 @@ o.spec("event", function() {
 		var div = {tag: "div", attrs: {onclick: spy}}
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
-		
+
 		render(root, [div])
 		div.dom.dispatchEvent(e)
-		
+
 		o(spy.callCount).equals(1)
 		o(spy.this).equals(div.dom)
 		o(spy.args[0].type).equals("click")
@@ -40,11 +40,11 @@ o.spec("event", function() {
 		var updated = {tag: "div", attrs: {id: "b", onclick: spy}}
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
-		
+
 		render(root, [div])
 		render(root, [updated])
 		div.dom.dispatchEvent(e)
-		
+
 		o(spy.callCount).equals(1)
 		o(spy.this).equals(div.dom)
 		o(spy.args[0].type).equals("click")
@@ -62,10 +62,10 @@ o.spec("event", function() {
 		var div = {tag: "div", attrs: {ontransitionend: spy}}
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
-		
+
 		render(root, [div])
 		div.dom.dispatchEvent(e)
-		
+
 		o(spy.callCount).equals(1)
 		o(spy.this).equals(div.dom)
 		o(spy.args[0].type).equals("transitionend")

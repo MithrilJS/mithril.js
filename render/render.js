@@ -8,7 +8,7 @@ module.exports = function($window) {
 
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
-	
+
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -38,7 +38,7 @@ module.exports = function($window) {
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
 		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
 		var temp = $doc.createElement(parent)
-		
+
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -65,24 +65,24 @@ module.exports = function($window) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
 			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
 		}
-		
+
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
-		
+
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
 		vnode.dom = element
-		
+
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
 		}
-		
+
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
 			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
-		
+
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null, ns)
@@ -92,7 +92,7 @@ module.exports = function($window) {
 	}
 	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
-		
+
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
@@ -112,7 +112,7 @@ module.exports = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
+
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -321,7 +321,7 @@ module.exports = function($window) {
 			}
 			if (expected > 0) return
 		}
-		
+
 		onremove(vnode)
 		if (vnode.dom) {
 			var count = vnode.domSize || 1
@@ -341,7 +341,7 @@ module.exports = function($window) {
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
 		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-			
+
 		var children = vnode.children
 		if (children instanceof Array) {
 			for (var i = 0; i < children.length; i++) {
@@ -412,7 +412,7 @@ module.exports = function($window) {
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
-	
+
 	//style
 	function updateStyle(element, old, style) {
 		if (old === style) element.style = "", old = null
@@ -430,7 +430,7 @@ module.exports = function($window) {
 			}
 		}
 	}
-	
+
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
@@ -470,7 +470,7 @@ module.exports = function($window) {
 		}
 		return false
 	}
-	
+
 	function copy(data) {
 		if (data instanceof Array) {
 			var output = []
@@ -489,7 +489,7 @@ module.exports = function($window) {
 		var hooks = []
 		var active = $doc.activeElement
 		if (dom.vnodes == null) dom.vnodes = []
-		
+
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
 		for (var i = 0; i < hooks.length; i++) hooks[i]()

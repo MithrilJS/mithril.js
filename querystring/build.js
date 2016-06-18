@@ -2,13 +2,13 @@
 
 module.exports = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
-	
+
 	var args = []
 	for (var key in object) {
 		destructure(key, object[key])
 	}
 	return args.join("&")
-	
+
 	function destructure(key, value) {
 		if (value instanceof Array) {
 			for (var i = 0; i < value.length; i++) {

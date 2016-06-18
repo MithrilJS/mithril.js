@@ -5,16 +5,16 @@ var parseQueryString = require("../querystring/parse")
 
 module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
-	
+
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
-	
+
 	function normalize(fragment) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
-	
+
 	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
@@ -50,13 +50,13 @@ module.exports = function($window) {
 				return data[token]
 			})
 		}
-		
+
 		var query = buildQueryString(queryData)
 		if (query) path += "?" + query
-		
+
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
-		
+
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
@@ -64,20 +64,20 @@ module.exports = function($window) {
 		}
 		else $window.location.href = prefix + path
 	}
-	
+
 	function defineRoutes(routes, resolve, reject) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
-		
+
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
+
 			for (var route in routes) {
 				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-				
+
 				if (matcher.test(pathname)) {
 					pathname.replace(matcher, function() {
 						var keys = route.match(/:[^\/]+/g) || []
@@ -90,12 +90,12 @@ module.exports = function($window) {
 					return
 				}
 			}
-			
+
 			reject(path, params)
 		}
 		return resolveRoute
 	}
-	
+
 	function link(vnode) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
@@ -103,6 +103,6 @@ module.exports = function($window) {
 			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}
-	
+
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
