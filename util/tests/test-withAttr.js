@@ -10,7 +10,7 @@ o.spec("withAttr", function() {
 			handler: withAttr("value", spy)
 		}
 		context.handler({currentTarget: {value: 1}})
-		
+
 		o(spy.args).deepEquals([1])
 		o(spy.this).equals(context)
 	})
@@ -23,7 +23,7 @@ o.spec("withAttr", function() {
 			handler: withAttr("readonly", spy)
 		}
 		context.handler({currentTarget: target})
-		
+
 		o(spy.args).deepEquals(["readonly"])
 		o(spy.this).equals(context)
 	})
@@ -32,7 +32,7 @@ o.spec("withAttr", function() {
 		var context = {}
 		var handler = withAttr("value", spy, context)
 		handler({currentTarget: {value: 1}})
-		
+
 		o(spy.this).equals(context)
 	})
 })

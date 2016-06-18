@@ -3,7 +3,7 @@
 var Promise = function(executor) {
 	if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
 	if (typeof executor !== "function") throw new TypeError("executor must be a function")
-	
+
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
 	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
@@ -41,7 +41,7 @@ var Promise = function(executor) {
 		var onerror = run(rejectCurrent)
 		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
 	}
-	
+
 	executeOnce(executor)
 }
 Promise.prototype.then = function(onFulfilled, onRejection) {

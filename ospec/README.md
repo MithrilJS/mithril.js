@@ -45,7 +45,7 @@ Assertions may have descriptions:
 ```javascript
 o("addition", function() {
 	o(1 + 1).equals(2)("addition should work")
-	
+
 	/* in ES6, the following syntax is also possible
 	o(1 + 1).equals(2) `addition should work`
 	*/
@@ -110,7 +110,7 @@ o.spec("call()", function() {
 	o("works", function() {
 		var spy = o.spy()
 		call(spy, 1)
-		
+
 		o(spy.callCount).equals(1)
 		o(spy.args[0]).equals(1)
 	})
@@ -132,7 +132,7 @@ By default, asynchronous tests time out after 20ms. This can be changed on a per
 ```javascript
 o("setTimeout calls callback", function(done, timeout) {
 	timeout(50) //wait 50ms before bailing out of the test
-	
+
 	setTimeout(done, 30)
 })
 ```
@@ -151,15 +151,15 @@ o.spec("math", function() {
 	o.beforeEach(function() {
 		acc = 0
 	})
-	
+
 	o("addition", function() {
 		acc += 1
-		
+
 		o(acc).equals(1)
 	})
 	o("subtraction", function() {
 		acc -= 1
-		
+
 		o(acc).equals(-1)
 	})
 })
@@ -180,16 +180,16 @@ o.spec("math", function() {
 			done()
 		})
 	})
-	
+
 	//tests only run after async hooks complete
 	o("addition", function() {
 		acc += 1
-		
+
 		o(acc).equals(1)
 	})
 	o("subtraction", function() {
 		acc -= 1
-		
+
 		o(acc).equals(-1)
 	})
 })
@@ -204,7 +204,7 @@ o.spec("math", function() {
 	o("addition", function() {
 		o(1 + 1).equals(2)
 	})
-	
+
 	//only this test will be run, regardless of how many groups there are
 	o.only("subtraction", function() {
 		o(1 - 1).notEquals(2)

@@ -101,10 +101,10 @@ Here's the example snippet for the [Facebook Like button](https://developers.fac
 }(document, 'script', 'facebook-jssdk'));</script>
 
 <!-- Your like button code -->
-<div class="fb-like" 
-	data-href="http://www.your-domain.com/your-page.html" 
-	data-layout="standard" 
-	data-action="like" 
+<div class="fb-like"
+	data-href="http://www.your-domain.com/your-page.html"
+	data-layout="standard"
+	data-action="like"
 	data-show-faces="true">
 </div>
 ```

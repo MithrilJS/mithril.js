@@ -20,7 +20,7 @@ o.spec("createNodes", function() {
 			{tag: "[", children: [{tag: "#", children: "d"}]},
 		]
 		render(root, vnodes)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeValue).equals("b")
@@ -36,7 +36,7 @@ o.spec("createNodes", function() {
 			{tag: "[", children: [{tag: "#", children: "d"}]},
 		]
 		render(root, vnodes)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeValue).equals("b")
@@ -52,7 +52,7 @@ o.spec("createNodes", function() {
 			{tag: "[", children: [{tag: "#", children: "d"}]},
 		]
 		render(root, vnodes)
-		
+
 		o(root.childNodes.length).equals(4)
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeValue).equals("b")

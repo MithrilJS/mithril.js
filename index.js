@@ -1,4 +1,7 @@
 "use strict"
+
+/* eslint-disable global-require */
+
 ;(function () {
 	var Promise = require("./promise/promise")
 	var m = require("./render/hyperscript")
@@ -18,4 +21,4 @@
 
 	if (typeof module === "object") module.exports = m
 	else window.m = m
-})()
+}())
