@@ -7,11 +7,11 @@ update()
 
 function update() {
 	data = ENV.generateData().toArray()
-		
+
 	Monitoring.renderRate.ping()
-	
+
 	m.redraw();
-	
+
 	setTimeout(update, ENV.timeout)
 }
 

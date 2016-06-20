@@ -5,7 +5,7 @@ var parseURL = require("../../test-utils/parseURL")
 
 o.spec("parseURL", function() {
 	var root = {protocol: "http:", hostname: "localhost", port: "", pathname: "/"}
-	
+
 	o.spec("full URL", function() {
 		o("parses full URL", function() {
 			var data = parseURL("http://www.google.com:80/test?a=b#c")

@@ -38,11 +38,11 @@ m.mount(document.getElementById("app"), {
 
 function update() {
 	data = ENV.generateData().toArray()
-	
+
 	perfMonitor.startProfile("render")
 	m.redraw()
 	perfMonitor.endProfile("render")
-	
+
 	setTimeout(update, ENV.timeout)
 }
 

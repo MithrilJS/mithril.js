@@ -24,31 +24,31 @@ o.spec("promise", function() {
 	o.spec("return value", function() {
 		o("static resolve returns promise", function() {
 			var promise = Promise.resolve()
-			
+
 			o(promise instanceof Promise).equals(true)
 		})
 		o("static resolve returns promise", function() {
 			var promise = Promise.reject()
 			promise.catch(function() {})
-			
+
 			o(promise instanceof Promise).equals(true)
 		})
 		o("static resolve with promise input returns same promise", function() {
 			var resolved = Promise.resolve(1)
 			var promise = Promise.resolve(resolved)
-			
+
 			o(promise).equals(resolved)
 		})
 		o("then returns promise", function(done) {
 			var promise = Promise.resolve(1)
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 			}).then(done)
 		})
 		o("catch returns promise", function(done) {
 			var promise = Promise.reject(1)
-			
+
 			promise.catch(function(value) {
 				o(value).equals(1)
 			}).then(done)
@@ -62,10 +62,10 @@ o.spec("promise", function() {
 				resolve(2)
 				callAsync(function() {resolve(3)})
 			})
-			
+
 			promise.then(function(value) {
 				callCount++
-				
+
 				o(value).equals(1)
 				o(callCount).equals(1)
 				done()
@@ -77,7 +77,7 @@ o.spec("promise", function() {
 				reject(2)
 				callAsync(function() {reject(3)})
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -85,9 +85,9 @@ o.spec("promise", function() {
 		})
 		o("resolves asynchronously", function(done) {
 			var state = 0
-			
+
 			var promise = Promise.resolve()
-			
+
 			state = 1
 			promise.then(function(value) {
 				o(state).equals(2)
@@ -97,7 +97,7 @@ o.spec("promise", function() {
 		})
 		o("resolves via static method", function(done) {
 			var promise = Promise.resolve(1)
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -107,7 +107,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				callAsync(function() {resolve(1)})
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -117,7 +117,7 @@ o.spec("promise", function() {
 			var promise = Promise.resolve(1)
 			var a = promise.then(function(value) {return value + 1})
 			var b = promise.then(function(value) {return value + 2})
-			
+
 			a.then(function(aValue) {
 				b.then(function(bValue) {
 					o(aValue).equals(2)
@@ -130,12 +130,12 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve) {
 				callAsync(function() {resolve(promise)})
 			})
-			
+
 			promise.then(null, done)
 		})
 		o("non-function onFulfilled is ignored", function(done) {
 			var promise = Promise.resolve(1)
-			
+
 			promise.then(null, null).then(function(value) {
 				o(value).equals(1)
 				done()
@@ -143,7 +143,7 @@ o.spec("promise", function() {
 		})
 		o("non-function onFulfilled is ignored", function(done) {
 			var promise = Promise.resolve(1)
-			
+
 			promise.then(null).then(function(value) {
 				o(value).equals(1)
 				done()
@@ -158,10 +158,10 @@ o.spec("promise", function() {
 				reject(2)
 				callAsync(function() {reject(3)})
 			})
-			
+
 			promise.then(null, function(value) {
 				callCount++
-				
+
 				o(value).equals(1)
 				o(callCount).equals(1)
 				done()
@@ -173,7 +173,7 @@ o.spec("promise", function() {
 				resolve(2)
 				callAsync(function() {resolve(3)})
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -181,9 +181,9 @@ o.spec("promise", function() {
 		})
 		o("rejects asynchronously", function(done) {
 			var state = 0
-			
+
 			var promise = Promise.reject()
-			
+
 			state = 1
 			promise.then(null, function(value) {
 				o(state).equals(2)
@@ -194,7 +194,7 @@ o.spec("promise", function() {
 		o("does not catch itself", function(done) {
 			var callCount = 0
 			var promise = Promise.resolve().then(function() {throw 1}, function() {callCount++})
-			
+
 			promise.then(null, function() {
 				o(callCount).equals(0)
 				done()
@@ -202,7 +202,7 @@ o.spec("promise", function() {
 		})
 		o("rejects via static method", function(done) {
 			var promise = Promise.reject(1)
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				return value
@@ -215,7 +215,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				reject(1)
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -225,7 +225,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				callAsync(function() {reject(1)})
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -235,7 +235,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				throw 1
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -243,7 +243,7 @@ o.spec("promise", function() {
 		})
 		o("rejects on fulfillment error", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				throw 1
 			}).then(null, function(value) {
@@ -253,7 +253,7 @@ o.spec("promise", function() {
 		})
 		o("rejects on rejection error", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				throw 1
 			}).then(null, function() {
@@ -265,7 +265,7 @@ o.spec("promise", function() {
 		})
 		o("non-function onRejected is ignored", function(done) {
 			var promise = Promise.reject(1)
-			
+
 			promise.then(function() {}, null).then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -275,7 +275,7 @@ o.spec("promise", function() {
 	o.spec("promise absorption", function() {
 		o("absorbs resolved promise via static resolver", function(done) {
 			var promise = Promise.resolve(Promise.resolve(1))
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 			}).then(done)
@@ -285,7 +285,7 @@ o.spec("promise", function() {
 				var p = Promise.resolve(1)
 				resolve(p)
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -293,7 +293,7 @@ o.spec("promise", function() {
 		})
 		o("absorbs resolved promise on fulfillment", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				return Promise.resolve(1)
 			}).then(function(value) {
@@ -303,7 +303,7 @@ o.spec("promise", function() {
 		})
 		o("absorbs rejected promise via static resolver", function(done) {
 			var promise = Promise.resolve(Promise.reject(1))
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -313,7 +313,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				resolve(Promise.reject(1))
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -321,7 +321,7 @@ o.spec("promise", function() {
 		})
 		o("absorbs rejected promise on fulfillment", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				return Promise.reject(1)
 			}).then(null, function(value) {
@@ -334,7 +334,7 @@ o.spec("promise", function() {
 				setTimeout(function() {resolve(1)}, 10)
 			})
 			var promise = Promise.resolve(pending)
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -347,7 +347,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				resolve(pending)
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -358,7 +358,7 @@ o.spec("promise", function() {
 				setTimeout(function() {resolve(1)}, 10)
 			})
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				return pending
 			}).then(function(value) {
@@ -371,7 +371,7 @@ o.spec("promise", function() {
 				setTimeout(function() {reject(1)}, 10)
 			})
 			var promise = Promise.resolve(pending)
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -384,7 +384,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				resolve(pending)
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(1)
 				done()
@@ -395,7 +395,7 @@ o.spec("promise", function() {
 				setTimeout(function() {reject(1)}, 10)
 			})
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				return pending
 			}).then(null, function(value) {
@@ -405,7 +405,7 @@ o.spec("promise", function() {
 		})
 		o("does not absorb resolved promise via static rejector", function(done) {
 			var promise = Promise.reject(Promise.resolve(1))
-			
+
 			promise.then(null, function(value) {
 				o(value instanceof Promise).equals(true)
 				done()
@@ -415,7 +415,7 @@ o.spec("promise", function() {
 			var rejected = Promise.reject(1)
 			rejected.catch(function() {})
 			var promise = Promise.reject(rejected)
-			
+
 			promise.then(null, function(value) {
 				o(value instanceof Promise).equals(true)
 				done()
@@ -425,7 +425,7 @@ o.spec("promise", function() {
 			var promise = new Promise(function(resolve, reject) {
 				reject(Promise.resolve(1))
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value instanceof Promise).equals(true)
 				done()
@@ -437,7 +437,7 @@ o.spec("promise", function() {
 				rejected.catch(function() {})
 				reject(rejected)
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value instanceof Promise).equals(true)
 				done()
@@ -445,7 +445,7 @@ o.spec("promise", function() {
 		})
 		o("does not absorb resolved promise on fulfillment error", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				throw Promise.resolve(1)
 			}).then(null, function(value) {
@@ -455,7 +455,7 @@ o.spec("promise", function() {
 		})
 		o("does not absorb rejected promise on fulfillment error", function(done) {
 			var promise = Promise.resolve()
-			
+
 			promise.then(function() {
 				var rejected = Promise.reject(1)
 				rejected.catch(function() {})
@@ -468,7 +468,7 @@ o.spec("promise", function() {
 		o("promise stays pending if absorbed promise is pending", function(done) {
 			var promise = new Promise(function(resolve) {resolve()})
 			var fulfilled = false, rejected = false
-			
+
 			promise.then(function() {
 				return new Promise(function() {})
 			}).then(function() {
@@ -476,7 +476,7 @@ o.spec("promise", function() {
 			}, function() {
 				rejected = false
 			})
-			
+
 			setTimeout(function() {
 				o(fulfilled).equals(false)
 				o(rejected).equals(false)
@@ -490,7 +490,7 @@ o.spec("promise", function() {
 					resolve(resolved)
 				}, 10)
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(1)
 				done()
@@ -573,7 +573,7 @@ o.spec("promise", function() {
                     }
                 })
 			})
-			
+
 			promise.then(function(value) {
 				o(readCount).equals(1)
 				done()
@@ -590,7 +590,7 @@ o.spec("promise", function() {
 					res(1)
 				}
 			})
-			
+
 			promise.then(function(value) {
 				o(value).equals(2)
 				done()
@@ -605,7 +605,7 @@ o.spec("promise", function() {
 				})
 				throw 3
 			})
-			
+
 			promise.then(null, function(value) {
 				o(value).equals(2)
 				done()

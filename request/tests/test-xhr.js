@@ -10,7 +10,7 @@ o.spec("xhr", function() {
 		mock = xhrMock()
 		xhr = new Request(mock).xhr
 	})
-	
+
 	o.spec("success", function() {
 		o("works via GET", function(done) {
 			var s = new Date
@@ -119,7 +119,7 @@ o.spec("xhr", function() {
 			var Entity = function(args) {
 				return {_id: args.id}
 			}
-			
+
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
@@ -133,7 +133,7 @@ o.spec("xhr", function() {
 			var Entity = function(args) {
 				return {_id: args.id}
 			}
-			
+
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
@@ -147,7 +147,7 @@ o.spec("xhr", function() {
 			var serialize = function(data) {
 				return "id=" + data.id
 			}
-			
+
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
@@ -161,7 +161,7 @@ o.spec("xhr", function() {
 			var serialize = function(data) {
 				return "id=" + data.id
 			}
-			
+
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
@@ -175,7 +175,7 @@ o.spec("xhr", function() {
 			var deserialize = function(data) {
 				return data
 			}
-			
+
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
@@ -189,7 +189,7 @@ o.spec("xhr", function() {
 			var deserialize = function(data) {
 				return data
 			}
-			
+
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
@@ -203,7 +203,7 @@ o.spec("xhr", function() {
 			var extract = function(data) {
 				return JSON.stringify({test: 123})
 			}
-			
+
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: ""}
@@ -217,7 +217,7 @@ o.spec("xhr", function() {
 			var extract = function(data) {
 				return JSON.stringify({test: 123})
 			}
-			
+
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					return {status: 200, responseText: ""}

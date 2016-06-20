@@ -9,11 +9,11 @@ module.exports = function(root, renderer, pubsub, callback) {
 			if (e.redraw !== false) run()
 		})
 	}
-	
+
 	if (pubsub != null) {
 		if (root.redraw) pubsub.unsubscribe(root.redraw)
 		pubsub.subscribe(run)
 	}
-	
+
 	return root.redraw = run
 }

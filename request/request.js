@@ -93,7 +93,7 @@ module.exports = function($window) {
 
 	function interpolate(url, data) {
 		if (data == null) return url
-		
+
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)

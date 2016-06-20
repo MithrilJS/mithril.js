@@ -9,9 +9,9 @@ module.exports = function() {
 	var pathname = "/"
 	var search = ""
 	var hash = ""
-	
+
 	var past = [], future = []
-	
+
 	function getURL() {
 		if (protocol === "file:") return protocol + "//" + pathname + search + hash
 		return protocol + "//" + hostname + prefix(":", port) + pathname + search + hash
@@ -75,7 +75,7 @@ module.exports = function() {
 			get href() {
 				return getURL()
 			},
-			
+
 			set protocol(value) {
 				throw new Error("Protocol is read-only")
 			},
@@ -112,7 +112,7 @@ module.exports = function() {
 				hash = prefix("#", value)
 				if (oldHash != hash) hashchange()
 			},
-			
+
 			set origin(value) {
 				//origin is writable but ignored
 			},

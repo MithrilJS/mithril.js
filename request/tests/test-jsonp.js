@@ -11,7 +11,7 @@ o.spec("jsonp", function() {
 		mock = xhrMock()
 		jsonp = new Request(mock).jsonp
 	})
-	
+
 	o("works", function(done) {
 		mock.$defineRoutes({
 			"GET /item": function(request) {

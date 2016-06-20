@@ -32,4 +32,3 @@ This method is internally called by [`m.mount()`](mount.md), [`m.route()`](route
 The `m.render` module is similar in scope to view libraries like Knockout, React and Vue. It is less than 500 lines of code (3kb min+gzip) and implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril and can be used as a standalone library.
 
 Despite being incredibly small, the render module is fully functional and self-suficient. It supports everything you might expect: SVG, custom elements, and all valid attributes and events - without any weird case-sensitive edge cases or exceptions. Of course, it also fully supports [components](components.md) and [lifecycle methods](lifecycle-methods.md).
-

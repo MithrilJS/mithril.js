@@ -10,7 +10,7 @@ function resolve(dir, data) {
 	var replacements = []
 	data = data.replace(/((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
 		usedVariables[variable] = usedVariables[variable] ? usedVariables[variable]++ : 1
-		
+
 		var filename = new Function("return " + dep).call()
 		var normalized = path.resolve(dir, filename)
 		var pathname = path.dirname(normalized)
