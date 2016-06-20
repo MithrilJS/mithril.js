@@ -193,8 +193,8 @@
 		// version)
 		try {
 			if (typeof data !== "boolean" &&
-          data != null &&
-          data.toString() != null) return data
+					data != null &&
+					data.toString() != null) return data
 		} catch (e) {
 			// silently ignore errors
 		}
@@ -1101,9 +1101,9 @@
 		namespace
 	) {
 		if (!(attrName in cachedAttrs) ||
-        (cachedAttr !== dataAttr) ||
-        typeof dataAttr === "object" ||
-        ($document.activeElement === node)) {
+				(cachedAttr !== dataAttr) ||
+				typeof dataAttr === "object" ||
+				($document.activeElement === node)) {
 			cachedAttrs[attrName] = dataAttr
 			try {
 				return setSingleAttr(
@@ -1119,7 +1119,7 @@
 				if (e.message.indexOf("Invalid argument") < 0) throw e
 			}
 		} else if (attrName === "value" && tag === "input" &&
-				node.value !== dataAttr) {
+								node.value !== dataAttr) {
 			// #348 dataAttr may not be a string, so use loose comparison
 			node.value = dataAttr
 		}
@@ -1352,7 +1352,8 @@
 
 	m.prop = function (store) {
 		if ((store != null && (isObject(store) || isFunction(store)) ||
-         ((typeof Promise !== "undefined") && (store instanceof Promise))) &&
+					((typeof Promise !== "undefined") &&
+						(store instanceof Promise))) &&
 				isFunction(store.then)) {
 			return propify(store)
 		}

@@ -55,7 +55,6 @@
 		"camelcase": 2,
 		"comma-spacing": 2,
 		"comma-style": 2,
-		"comma-dangle": [2, "never"],
 		"consistent-this":  [2, "self"],
 		"eol-last": 2,
 		"func-style": [2, "declaration"],
