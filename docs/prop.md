@@ -43,7 +43,7 @@ Creates a computed stream that reactively updates if any of its upstreams are up
 `stream = prop.combine(combiner, streams)`
 
 Argument    | Type                        | Required | Description
------------ | ------------------------=-- | -------- | ---
+----------- | --------------------------- | -------- | ---
 `combiner`  | `(Stream..., Array) -> any` | Yes      | See [combiner](#combiner) argument
 `streams`   | `Array<Stream>`             | Yes      | A list of streams to be combined
 **returns** | `Stream`                    |          | Returns a stream
