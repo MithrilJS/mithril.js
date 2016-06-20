@@ -183,7 +183,7 @@ In the example above, when the user types in the input, the `user` stream is upd
 
 ---
 
-### Streams vs promiss
+### Streams vs promises
 
 Mithril streams have many similarities to [ES6 promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise):
 
