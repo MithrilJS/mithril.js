@@ -3,6 +3,7 @@
 - [What are keys](#what-are-keys)
 - [How to use](#how-to-use)
 - [Debugging key related issues](#debugging-key-related-issues)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
@@ -88,7 +89,7 @@ Keys must be placed on the virtual node that is an immediate child of the array.
 ```javascript
 // AVOID
 users.map(function(u) {
-	return m("div", [ //key should be in `div`
+	return m("div", [ // key should be in `div`
 		m("button", {key: u.id}, u.name)
 	])
 })
@@ -107,7 +108,7 @@ var Button = {
 }
 users.map(function(u) {
 	return m("div", [
-		m(Button, {id: u.id}, u.name) //key should be here, not in component
+		m(Button, {id: u.id}, u.name) // key should be here, not in component
 	])
 })
 ```
@@ -119,7 +120,7 @@ Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap array
 ```javascript
 // AVOID
 users.map(function(u) {
-	return [ //fragment is a vnode, and therefore keyable
+	return [ // fragment is a vnode, and therefore keyable
 		m("button", {key: u.id}, u.name)
 	]
 })
@@ -150,4 +151,11 @@ var things = [
 	{id: 1, name: "Cup"},
 ]
 ```
+
+---
+
+### Avoid anti-patterns
+
+#### Avoid using key as a counter
+
 

@@ -1,6 +1,6 @@
 # trust(html)
 
-- [Signature](#signature)
+- [API](#api)
 - [How it works](#how-it-works)
 - [Security considerations](#security-considerations)
 - [Scripts that do not run](#scripts-that-do-not-run)
@@ -8,9 +8,11 @@
 
 ---
 
-### Signature
+### API
 
-`render(element, vnodes)`
+Generates a trusted HTML [vnode](vnodes.md)
+
+`vnode = m.trust(html)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
@@ -49,6 +51,8 @@ You **must sanitize the input** of `m.trust` to ensure there's no user-generated
 There are many ways in which an HTML string may contain executable code. The most common ways to inject security attacks are to add an `onload` or `onerror` attributes in `<img>` or `<iframe>` tags, and to use unbalanced quotes such as `" onerror="alert(1)` to inject executable contexts in unsanitized string interpolations.
 
 ```javascript
+var data = {}
+
 // Sample vulnerable HTML string
 var description = "<img alt='" + data.title + "'> <span>" + data.description + "</span>"
 
@@ -121,7 +125,7 @@ var FacebookLikeButton = {
 		  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1";
 		  fjs.parentNode.insertBefore(js, fjs);
 		}(document, 'script', 'facebook-jssdk'));
-	}
+	},
 	view: function() {
 		return [
 			m("#fb-root"),

@@ -38,10 +38,10 @@ Mithril's `config` method is now replaced by several lifecycle methods to improv
 
 ## Robustness
 
-There are over 2500 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
+There are over 2600 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
 
 ## Modularity
 
-Despite the huge performance improvements, the new codebase is smaller than v0.2.x, currently clocking at 6.5kb min+gzip
+Despite the huge performance improvements, the new codebase is smaller than v0.2.x, currently clocking at 6.7kb min+gzip
 
 In addition, Mithril is now completely modular: you can import only the modules that you need and easily integrate 3rd party modules if you wish to use a different library for routing, ajax, and even rendering
