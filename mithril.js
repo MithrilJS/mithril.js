@@ -1,3 +1,5 @@
+/* global Promise */
+
 ;(function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
@@ -84,7 +86,9 @@
 
 	function parseTagAttrs(cell, tag) {
 		var classes = []
+		/* eslint-disable max-len */
 		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
+		/* eslint-enable max-len */
 		var match
 
 		while ((match = parser.exec(tag))) {
@@ -188,7 +192,9 @@
 		// value of Console.log in some versions of Firefox (behavior depends on
 		// version)
 		try {
-			if (typeof data !== "boolean" && data != null && data.toString() != null) return data
+			if (typeof data !== "boolean" &&
+          data != null &&
+          data.toString() != null) return data
 		} catch (e) {
 			// silently ignore errors
 		}
@@ -1082,8 +1088,7 @@
 			} catch (e) {
 				node.setAttribute(attrName, dataAttr)
 			}
-		}
-		else node.setAttribute(attrName, dataAttr)
+		} else node.setAttribute(attrName, dataAttr)
 	}
 
 	function trySetAttr(
@@ -1095,7 +1100,10 @@
 		tag,
 		namespace
 	) {
-		if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr) || typeof dataAttr === "object" || ($document.activeElement === node)) {
+		if (!(attrName in cachedAttrs) ||
+        (cachedAttr !== dataAttr) ||
+        typeof dataAttr === "object" ||
+        ($document.activeElement === node)) {
 			cachedAttrs[attrName] = dataAttr
 			try {
 				return setSingleAttr(
@@ -1343,7 +1351,8 @@
 	}
 
 	m.prop = function (store) {
-		if ((store != null && (isObject(store) || isFunction(store)) || ((typeof Promise !== "undefined") && (store instanceof Promise))) &&
+		if ((store != null && (isObject(store) || isFunction(store)) ||
+         ((typeof Promise !== "undefined") && (store instanceof Promise))) &&
 				isFunction(store.then)) {
 			return propify(store)
 		}
@@ -1829,8 +1838,7 @@
 			if (params[key] != null) {
 				if (!isArray(params[key])) params[key] = [params[key]]
 				params[key].push(value)
-			}
-			else params[key] = value
+			} else params[key] = value
 		})
 
 		return params
@@ -1858,7 +1866,7 @@
 			return propify(promise.then(resolve, reject), initialValue)
 		}
 
-		prop.catch = prop.then.bind(null, null)
+		prop["catch"] = prop.then.bind(null, null)
 		return prop
 	}
 	// Promiz.mithril.js | Zolmeister | MIT
