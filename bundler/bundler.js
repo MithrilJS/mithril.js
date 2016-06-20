@@ -52,8 +52,13 @@ function fixCollisions(code) {
 	return code
 }
 
+function setVersion(code) {
+	var metadata = JSON.parse(fs.readFileSync("./package.json"))
+	return code.replace("bleeding-edge", metadata.version)
+}
+
 function bundle(input, output) {
-	var code = resolve(".", fs.readFileSync(input, "utf8"))
+	var code = setVersion(resolve(".", fs.readFileSync(input, "utf8")))
 	if (new Function(code)) fs.writeFileSync(output, code, "utf8")
 }
 
