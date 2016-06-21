@@ -1,7 +1,7 @@
 T.time("Setup");
 
 var Stream = require("../../util/stream")
-var requestService = require("../../request/request")(window, Stream)
+var requestService = require("../../request/request")(window)
 var request = requestService.xhr
 var m = require("../../render/hyperscript")
 var trust = require("../../render/trust")
