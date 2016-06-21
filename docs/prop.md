@@ -490,7 +490,7 @@ var errored4 = m.prop.combine(function() {
 }, [m.prop("hello")])
 console.log(errored4.error()) // logs "Server is offline"
 
-//by returning an errored stream in a chain
+// by returning an errored stream in a chain
 var errored5 = m.prop("hello").map(function() {
 	return m.prop.reject("Server is offline")
 })

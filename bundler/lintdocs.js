@@ -27,7 +27,7 @@ function ensureCodeIsSyntaticallyValid(file, data) {
 	codeBlocks.forEach(function(block) {
 		block = block.slice(13, -3)
 		try {new Function(block)}
-		catch (e) {console.log(file + " -: javascript block has wrong syntax\n\n" + e.message + "\n\n" + block + "\n\n---\n\n")}
+		catch (e) {console.log(file + " - javascript block has wrong syntax\n\n" + e.message + "\n\n" + block + "\n\n---\n\n")}
 	})
 }
 
@@ -46,7 +46,7 @@ function ensureCodeIsRunnable(file, data) {
 	try {
 		new Function("console,fetch", code).call(this, silentConsole, fetch)
 	}
-	catch (e) {console.log(file + " -: javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
+	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
 	
 }
 
@@ -54,7 +54,7 @@ function ensureCommentStyle(file, data) {
 	var codeBlocks = data.match(/```javascript(.|\n|\r)*?```/gim) || []
 	codeBlocks.forEach(function(block) {
 		block = block.slice(13, -3)
-		if (block.match(/(^|\s)\/\/[\S]/)) console.log(file + " -: comment missing space\n\n" + block + "\n\n---\n\n")
+		if (block.match(/(^|\s)\/\/[\S]/)) console.log(file + " - comment missing space\n\n" + block + "\n\n---\n\n")
 	})
 }
 
@@ -85,9 +85,9 @@ function traverseDirectory(pathname, callback) {
 }
 
 //init mocks
-var domMock = require("../../test-utils/domMock")()
-var xhrMock = require("../../test-utils/xhrMock")()
-var pushStateMock = require("../../test-utils/pushStateMock")()
+var domMock = require("../test-utils/domMock")()
+var xhrMock = require("../test-utils/xhrMock")()
+var pushStateMock = require("../test-utils/pushStateMock")()
 
 global.window = {}
 for (var key in domMock) if (!window[key]) window[key] = domMock[key]
@@ -95,7 +95,7 @@ for (var key in xhrMock) if (!window[key]) window[key] = xhrMock[key]
 for (var key in pushStateMock) if (!window[key]) window[key] = pushStateMock[key]
 
 global.document = window.document
-global.m = require("../../index")
+global.m = require("../index")
 
 //run
 traverseDirectory("./docs", function(pathname, stat, children) {
