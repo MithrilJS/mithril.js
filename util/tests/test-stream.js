@@ -193,6 +193,16 @@ o.spec("stream", function() {
 			
 			o(doubled()).equals(undefined)
 		})
+		o("upstream does not affect ended stream", function() {
+			var stream = Stream.stream(2)
+			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
+			
+			doubled.end(true)
+			
+			stream(4)
+			
+			o(doubled()).equals(4)
+		})
 	})
 	o.spec("error", function() {
 		o("error() works", function() {
