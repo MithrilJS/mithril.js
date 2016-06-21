@@ -89,8 +89,8 @@ This method exists to conform to [Fantasy Land's Applicative specification](http
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
-`callback`   | `any -> any`         | Yes      | The error value
-**returns**  | `Stream`             |          | Returns a stream in an error state
+`callback`   | `any -> any`         | Yes      | A callback whose return value becomes the value of the stream
+**returns**  | `Stream`             |          | Returns a stream
 
 [How to read signatures](signatures.md)
 
