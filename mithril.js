@@ -130,6 +130,10 @@ function registerDependency(stream, parents) {
 	}
 }
 function unregisterStream(stream) {
+	for (var i = 0; i < stream._state.parents.length; i++) {
+		var parent = stream._state.parents[i]
+		delete parent._state.deps[stream._state.id]
+	}
 	for (var id in stream._state.deps) {
 		var dependent = stream._state.deps[id]
 		var index = dependent._state.parents.indexOf(stream)
@@ -202,7 +206,6 @@ function hyperscript(selector) {
 				}
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
-				
 				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
@@ -220,9 +223,7 @@ function hyperscript(selector) {
 		children = []
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
-	
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
-	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
@@ -231,7 +232,6 @@ var renderService = function($window) {
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
-	
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -261,7 +261,6 @@ var renderService = function($window) {
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
 		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
 		var temp = $doc.createElement(parent)
-		
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -288,24 +287,19 @@ var renderService = function($window) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
 			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
 		}
-		
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
-		
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
 		vnode.dom = element
-		
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
 		}
-		
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
 			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
-		
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null, ns)
@@ -315,7 +309,6 @@ var renderService = function($window) {
 	}
 	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
-		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
@@ -334,7 +327,6 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -541,7 +533,6 @@ var renderService = function($window) {
 			}
 			if (expected > 0) return
 		}
-		
 		onremove(vnode)
 		if (vnode.dom) {
 			var count = vnode.domSize || 1
@@ -561,7 +552,6 @@ var renderService = function($window) {
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
 		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-			
 		var children = vnode.children
 		if (children instanceof Array) {
 			for (var i = 0; i < children.length; i++) {
@@ -631,7 +621,6 @@ var renderService = function($window) {
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
-	
 	//style
 	function updateStyle(element, old, style) {
 		if (old === style) element.style = "", old = null
@@ -649,7 +638,6 @@ var renderService = function($window) {
 			}
 		}
 	}
-	
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
@@ -688,7 +676,6 @@ var renderService = function($window) {
 		}
 		return false
 	}
-	
 	function copy(data) {
 		if (data instanceof Array) {
 			var output = []
@@ -706,7 +693,6 @@ var renderService = function($window) {
 		var hooks = []
 		var active = $doc.activeElement
 		if (dom.vnodes == null) dom.vnodes = []
-		
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
@@ -730,13 +716,11 @@ var redrawService = function() {
 }()
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
-	
 	var args = []
 	for (var key in object) {
 		destructure(key, object[key])
 	}
 	return args.join("&")
-	
 	function destructure(key, value) {
 		if (value instanceof Array) {
 			for (var i = 0; i < value.length; i++) {
@@ -838,7 +822,6 @@ var requestService = function($window) {
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
-		
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)
@@ -872,13 +855,11 @@ m.jsonp = requestService.jsonp
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
-		
 	var entries = string.split("&"), data = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		
 		//TODO refactor out
 		var number = Number(value)
 		if (value !== "" && !isNaN(number) || value === "NaN") value = number
@@ -888,7 +869,6 @@ var parseQueryString = function(string) {
 			var date = new Date(value)
 			if (!isNaN(date.getTime())) value = date
 		}
-		
 		var levels = key.split(/\]\[?|\[/)
 		var cursor = data
 		if (key.indexOf("[") > -1) levels.pop()
@@ -911,16 +891,13 @@ var parseQueryString = function(string) {
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
-	
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
-	
 	function normalize(fragment) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
-	
 	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
@@ -954,13 +931,10 @@ var coreRouter = function($window) {
 				return data[token]
 			})
 		}
-		
 		var query = buildQueryString(queryData)
 		if (query) path += "?" + query
-		
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
-		
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
@@ -968,20 +942,16 @@ var coreRouter = function($window) {
 		}
 		else $window.location.href = prefix + path
 	}
-	
 	function defineRoutes(routes, resolve, reject) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
-		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
 			for (var route in routes) {
 				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-				
 				if (matcher.test(pathname)) {
 					pathname.replace(matcher, function() {
 						var keys = route.match(/:[^\/]+/g) || []
@@ -994,12 +964,10 @@ var coreRouter = function($window) {
 					return
 				}
 			}
-			
 			reject(path, params)
 		}
 		return resolveRoute
 	}
-	
 	function link(vnode) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
@@ -1007,7 +975,6 @@ var coreRouter = function($window) {
 			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}
-	
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
 var throttle = function(callback) {
@@ -1037,12 +1004,10 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 			if (e.redraw !== false) run()
 		})
 	}
-	
 	if (pubsub != null) {
 		if (root.redraw) pubsub.unsubscribe(root.redraw)
 		pubsub.subscribe(run)
 	}
-	
 	return root.redraw = run
 }
 m.route = function($window, renderer, pubsub) {
@@ -1059,7 +1024,6 @@ m.route = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	route.setPath = router.setPath
 	route.getPath = router.getPath
-	
 	return route
 }(window, renderService, redrawService)
 m.mount = function(renderer, pubsub) {
@@ -1067,7 +1031,6 @@ m.mount = function(renderer, pubsub) {
 		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, {tag: component})
 		})
-		
 		run()
 	}
 }(renderService, redrawService)
