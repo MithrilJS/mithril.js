@@ -359,6 +359,13 @@ module.exports = function($window) {
 			}
 		}
 	}
+	//TODO test custom elements
+	function hasLifecycleHooks(vnode) {
+		if (hasIntegrationMethods(vnode.attrs)) return true
+		if (typeof vnode.tag === "string") return false
+		if (typeof vnode.tag === "function") return hasIntegrationMethods(vnode.state)
+		return hasIntegrationMethods(vnode.tag)
+	}
 	function removeNode(parent, vnode, context, deferred) {
 		if (deferred === false) {
 			var ref = {expected: 0, called: 0}
@@ -380,7 +387,7 @@ module.exports = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && !(typeof vnode.tag !== "string" && hasIntegrationMethods(vnode.tag.prototype || vnode.tag))) { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasLifecycleHooks(vnode)) {
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
