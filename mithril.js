@@ -1,101 +1,161 @@
 "use strict"
 ;(function () {
-	/** @constructor */
-var Promise = function(executor) {
-	if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
-	if (typeof executor !== "function") throw new TypeError("executor must be a function")
+var guid = 0, noop = function() {}, HALT = {}
+function createStream() {
+	function stream() {
+		if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+		return stream._state.value
+	}
+	initStream(stream, arguments)
 	
-	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
-	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
-	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
-	function handler(list, shouldAbsorb) {
-		return function execute(value) {
-			var then
+	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+	
+	return stream
+}
+function initStream(stream, args) {
+	stream.constructor = createStream
+	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
+	stream.map = map, stream.ap = ap, stream.of = createStream
+	stream.valueOf = valueOf
+	stream.catch = doCatch
+	
+	Object.defineProperties(stream, {
+		error: {get: function() {
+			if (!stream._state.errorStream) {
+				var errorStream = function() {
+					if (arguments.length > 0) updateStream(stream, undefined, arguments[0])
+					return stream._state.error
+				}
+				initStream(errorStream, [])
+				initDependency(errorStream, [stream], noop, noop)
+				stream._state.errorStream = errorStream
+			}
+			return stream._state.errorStream
+		}},
+		end: {get: function() {
+			if (!stream._state.endStream) {
+				var endStream = createStream()
+				endStream.map(function(value) {
+					if (value === true) unregisterStream(stream), unregisterStream(endStream)
+					return value
+				})
+				stream._state.endStream = endStream
+			}
+			return stream._state.endStream
+		}}
+	})
+}
+function updateStream(stream, value, error) {
+	if (!absorbStream(stream, value, false) && !absorbStream(stream, error, true)) {
+		updateState(stream, value, error)
+		for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+		finalize(stream)
+	}
+}
+function updateState(stream, value, error) {
+	if (error !== undefined && typeof stream._state.recover === "function") {
+		try {updateValues(stream, stream._state.recover(), undefined)}
+		catch (e) {updateValues(stream, undefined, e)}
+	}
+	else updateValues(stream, value, error)
+	stream._state.changed = true
+	if (stream._state.state !== 2) stream._state.state = 1
+}
+function updateValues(stream, value, error) {
+	stream._state.value = value
+	stream._state.error = error
+}
+function updateDependency(stream, mustSync) {
+	var state = stream._state, parents = state.parents
+	if (parents.length > 0 && parents.filter(active).length === parents.length && (mustSync || parents.filter(changed).length > 0)) {
+		var failed = parents.filter(errored)
+		if (failed.length > 0) updateState(stream, undefined, failed[0]._state.error)
+		else {
 			try {
-				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
-					executeOnce(then.bind(value))
-				}
-				else {
-					callAsync(function() {
-						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
-						for (var i = 0; i < list.length; i++) list[i](value)
-						resolvers.length = 0, rejectors.length = 0
-						instance.state = shouldAbsorb
-						instance.retry = function() {execute(value)}
-					})
-				}
+				var value = state.derive()
+				if (!absorbStream(stream, value)) updateState(stream, value, undefined)
 			}
 			catch (e) {
-				rejectCurrent(e)
+				updateState(stream, undefined, e)
 			}
 		}
 	}
-	function executeOnce(then) {
-		var runs = 0
-		function run(fn) {
-			return function(value) {
-				if (runs++ > 0) return
-				fn(value)
-			}
+}
+function absorbStream(stream, value, isError) {
+	if (value != null && value.constructor === createStream) {
+		if (value._state.state === 2) {
+			stream.end(true)
+			stream(value())
 		}
-		var onerror = run(rejectCurrent)
-		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
+		else if (value._state.error) stream.error(value.error())
+		else if (value._state.state === 0) return true
+		else if (!isError) stream(value())
+		else stream.error(value())
+		return true
 	}
+	return false
+}
+function finalize(stream) {
+	stream._state.changed = false
+	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
+}
+function doCatch(fn) {
+	var stream = this
+	var derive = function() {return stream._state.value}
+	var recover = function() {return fn(stream._state.error)}
+	return initDependency(createStream(), [stream], derive, recover)
+}
+function combine(fn, streams) {
+	return initDependency(createStream(), streams, function() {
+		var failed = streams.filter(errored)
+		if (failed.length > 0) throw failed[0]._state.error
+		return fn.apply(this, streams.concat([streams.filter(changed)]))
+	}, undefined)
+}
+function initDependency(dep, streams, derive, recover) {
+	var state = dep._state
+	state.derive = derive
+	state.recover = recover
+	state.parents = streams.filter(notEnded)
 	
-	executeOnce(executor)
+	registerDependency(dep, state.parents)
+	updateDependency(dep, true)
+	
+	return dep
 }
-Promise.prototype.then = function(onFulfilled, onRejection) {
-	var self = this, instance = self._instance
-	function handle(callback, list, next, state) {
-		list.push(function(value) {
-			if (typeof callback !== "function") next(value)
-			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
-		})
-		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
+function registerDependency(stream, parents) {
+	for (var i = 0; i < parents.length; i++) {
+		parents[i]._state.deps[stream._state.id] = stream
+		registerDependency(stream, parents[i]._state.parents)
 	}
-	var resolveNext, rejectNext
-	var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
-	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
-	return promise
 }
-Promise.prototype.catch = function(onRejection) {
-	return this.then(null, onRejection)
+function unregisterStream(stream) {
+	for (var i = 0; i < stream._state.parents.length; i++) {
+		var parent = stream._state.parents[i]
+		delete parent._state.deps[stream._state.id]
+	}
+	for (var id in stream._state.deps) {
+		var dependent = stream._state.deps[id]
+		var index = dependent._state.parents.indexOf(stream)
+		if (index > -1) dependent._state.parents.splice(index, 1)
+	}
+	stream._state.state = 2 //ended
+	stream._state.deps = {}
 }
-Promise.resolve = function(value) {
-	if (value instanceof Promise) return value
-	return new Promise(function(resolve, reject) {resolve(value)})
+function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
+function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
+function valueOf() {return this._state.value}
+function active(stream) {return stream._state.state === 1}
+function changed(stream) {return stream._state.changed}
+function notEnded(stream) {return stream._state.state !== 2}
+function errored(stream) {return stream._state.error}
+function reject(e) {
+	var stream = createStream()
+	stream.error(e)
+	return stream
 }
-Promise.reject = function(value) {
-	return new Promise(function(resolve, reject) {reject(value)})
-}
-Promise.all = function(list) {
-	return new Promise(function(resolve, reject) {
-		var total = list.length, count = 0, values = []
-		if (list.length === 0) resolve([])
-		else for (var i = 0; i < list.length; i++) {
-			(function(i) {
-				function consume(value) {
-					count++
-					values[i] = value
-					if (count === total) resolve(values)
-				}
-				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
-					list[i].then(consume, reject)
-				}
-				else consume(list[i])
-			})(i)
-		}
-	})
-}
-Promise.race = function(list) {
-	return new Promise(function(resolve, reject) {
-		for (var i = 0; i < list.length; i++) {
-			list[i].then(resolve, reject)
-		}
-	})
-}
-	function Node(tag, key, attrs, children, text, dom) {
+var Stream = {stream: createStream, combine: combine, reject: reject}
+function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
 Node.normalize = function(node) {
@@ -146,7 +206,6 @@ function hyperscript(selector) {
 				}
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
-				
 				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
@@ -164,19 +223,15 @@ function hyperscript(selector) {
 		children = []
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
-	
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
-	
 	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
-	
 var renderService = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
-	
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -206,7 +261,6 @@ var renderService = function($window) {
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
 		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
 		var temp = $doc.createElement(parent)
-		
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -233,24 +287,19 @@ var renderService = function($window) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
 			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
 		}
-		
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
-		
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
 		vnode.dom = element
-		
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
 		}
-		
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
 			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
-		
 		if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null, ns)
@@ -260,7 +309,6 @@ var renderService = function($window) {
 	}
 	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
-		
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
@@ -279,7 +327,6 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -486,7 +533,6 @@ var renderService = function($window) {
 			}
 			if (expected > 0) return
 		}
-		
 		onremove(vnode)
 		if (vnode.dom) {
 			var count = vnode.domSize || 1
@@ -506,7 +552,6 @@ var renderService = function($window) {
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
 		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-			
 		var children = vnode.children
 		if (children instanceof Array) {
 			for (var i = 0; i < children.length; i++) {
@@ -576,7 +621,6 @@ var renderService = function($window) {
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
-	
 	//style
 	function updateStyle(element, old, style) {
 		if (old === style) element.style = "", old = null
@@ -594,7 +638,6 @@ var renderService = function($window) {
 			}
 		}
 	}
-	
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
@@ -633,7 +676,6 @@ var renderService = function($window) {
 		}
 		return false
 	}
-	
 	function copy(data) {
 		if (data instanceof Array) {
 			var output = []
@@ -651,7 +693,6 @@ var renderService = function($window) {
 		var hooks = []
 		var active = $doc.activeElement
 		if (dom.vnodes == null) dom.vnodes = []
-		
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
@@ -660,7 +701,7 @@ var renderService = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }(window)
-	var redrawService = function() {
+var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
 		var index = callbacks.indexOf(callback)
@@ -673,15 +714,13 @@ var renderService = function($window) {
     }
 	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
 }()
-	var buildQueryString = function(object) {
+var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
-	
 	var args = []
 	for (var key in object) {
 		destructure(key, object[key])
 	}
 	return args.join("&")
-	
 	function destructure(key, value) {
 		if (value instanceof Array) {
 			for (var i = 0; i < value.length; i++) {
@@ -696,84 +735,93 @@ var renderService = function($window) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var requestService = function($window, Promise1) {
+var requestService = function($window) {
 	var callbackCount = 0
+	var oncompletion
+	function setCompletionCallback(callback) {oncompletion = callback}
+	
 	function xhr(args) {
-		return new Promise1(function(resolve, reject) {
-			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-			
-			if (typeof args.serialize !== "function") args.serialize = JSON.stringify
-			if (typeof args.deserialize !== "function") args.deserialize = deserialize
-			if (typeof args.extract !== "function") args.extract = extract
-			
-			args.url = interpolate(args.url, args.data)
-			if (useBody) args.data = args.serialize(args.data)
-			else args.url = assemble(args.url, args.data)
-			
-			var xhr = new $window.XMLHttpRequest()
-			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			
-			if (args.serialize === JSON.stringify && useBody) {
-				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
-			}
-			if (args.deserialize === deserialize) {
-				xhr.setRequestHeader("Accept", "application/json, text/*")
-			}
-			
-			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-			
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4) {
-					try {
-						var response = args.deserialize(args.extract(xhr, args))
-						if (xhr.status >= 200 && xhr.status < 300) {
-							if (typeof args.type === "function") {
-								if (response instanceof Array) {
-									for (var i = 0; i < response.length; i++) {
-										response[i] = new args.type(response[i])
-									}
+		var stream = Stream.stream()
+		
+		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+		
+		if (typeof args.serialize !== "function") args.serialize = JSON.stringify
+		if (typeof args.deserialize !== "function") args.deserialize = deserialize
+		if (typeof args.extract !== "function") args.extract = extract
+		
+		args.url = interpolate(args.url, args.data)
+		if (useBody) args.data = args.serialize(args.data)
+		else args.url = assemble(args.url, args.data)
+		
+		var xhr = new $window.XMLHttpRequest()
+		xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+		
+		if (args.serialize === JSON.stringify && useBody) {
+			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
+		}
+		if (args.deserialize === deserialize) {
+			xhr.setRequestHeader("Accept", "application/json, text/*")
+		}
+		
+		if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
+		
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				try {
+					var response = args.deserialize(args.extract(xhr, args))
+					if (xhr.status >= 200 && xhr.status < 300) {
+						if (typeof args.type === "function") {
+							if (response instanceof Array) {
+								for (var i = 0; i < response.length; i++) {
+									response[i] = new args.type(response[i])
 								}
-								else response = new args.type(response)
 							}
-							
-							resolve(response)
+							else response = new args.type(response)
 						}
-						else reject(new Error(xhr.responseText))
+						
+						stream(response)
 					}
-					catch (e) {
-						reject(e)
-					}
+					else stream.error(new Error(xhr.responseText))
 				}
+				catch (e) {
+					stream.error(e)
+				}
+				if (typeof oncompletion === "function") oncompletion()
 			}
-			
-			if (useBody) xhr.send(args.data)
-			else xhr.send()
-		})
+		}
+		
+		if (useBody) xhr.send(args.data)
+		else xhr.send()
+		
+		return stream
 	}
 	function jsonp(args) {
-		return new Promise1(function(resolve, reject) {
-			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-			var script = $window.document.createElement("script")
-			$window[callbackName] = function(data) {
-				script.parentNode.removeChild(script)
-				resolve(data)
-				delete $window[callbackName]
-			}
-			script.onerror = function() {
-				script.parentNode.removeChild(script)
-				reject(new Error("JSONP request failed"))
-				delete $window[callbackName]
-			}
-			if (args.data == null) args.data = {}
-			args.url = interpolate(args.url, args.data)
-			args.data[args.callbackKey || "callback"] = callbackName
-			script.src = assemble(args.url, args.data)
-			$window.document.documentElement.appendChild(script)
-		})
+		var stream = Stream.stream()
+		
+		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+		var script = $window.document.createElement("script")
+		$window[callbackName] = function(data) {
+			script.parentNode.removeChild(script)
+			stream(data)
+			if (typeof oncompletion === "function") oncompletion()
+			delete $window[callbackName]
+		}
+		script.onerror = function() {
+			script.parentNode.removeChild(script)
+			stream.error(new Error("JSONP request failed"))
+			if (typeof oncompletion === "function") oncompletion()
+			delete $window[callbackName]
+		}
+		if (args.data == null) args.data = {}
+		args.url = interpolate(args.url, args.data)
+		args.data[args.callbackKey || "callback"] = callbackName
+		script.src = assemble(args.url, args.data)
+		$window.document.documentElement.appendChild(script)
+		
+		return stream
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
-		
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)
@@ -798,20 +846,20 @@ var requestService = function($window, Promise1) {
 	}
 	function extract(xhr) {return xhr.responseText}
 	
-	return {xhr: xhr, jsonp: jsonp}
-}(window, Promise)
-	m.request = requestService.xhr
-	m.jsonp = requestService.jsonp
+	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
+}(window)
+requestService.setCompletionCallback(redrawService.publish)
+m.version = "1.0.0"
+m.request = requestService.xhr
+m.jsonp = requestService.jsonp
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
-		
 	var entries = string.split("&"), data = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		
 		//TODO refactor out
 		var number = Number(value)
 		if (value !== "" && !isNaN(number) || value === "NaN") value = number
@@ -821,7 +869,6 @@ var parseQueryString = function(string) {
 			var date = new Date(value)
 			if (!isNaN(date.getTime())) value = date
 		}
-		
 		var levels = key.split(/\]\[?|\[/)
 		var cursor = data
 		if (key.indexOf("[") > -1) levels.pop()
@@ -844,16 +891,13 @@ var parseQueryString = function(string) {
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
-	
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
-	
 	function normalize(fragment) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
-	
 	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
@@ -887,13 +931,10 @@ var coreRouter = function($window) {
 				return data[token]
 			})
 		}
-		
 		var query = buildQueryString(queryData)
 		if (query) path += "?" + query
-		
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
-		
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
@@ -901,20 +942,16 @@ var coreRouter = function($window) {
 		}
 		else $window.location.href = prefix + path
 	}
-	
 	function defineRoutes(routes, resolve, reject) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
-		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
 			for (var route in routes) {
 				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-				
 				if (matcher.test(pathname)) {
 					pathname.replace(matcher, function() {
 						var keys = route.match(/:[^\/]+/g) || []
@@ -927,12 +964,10 @@ var coreRouter = function($window) {
 					return
 				}
 			}
-			
 			reject(path, params)
 		}
 		return resolveRoute
 	}
-	
 	function link(vnode) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
@@ -940,7 +975,6 @@ var coreRouter = function($window) {
 			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}
-	
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
 var throttle = function(callback) {
@@ -970,15 +1004,13 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 			if (e.redraw !== false) run()
 		})
 	}
-	
 	if (pubsub != null) {
 		if (root.redraw) pubsub.unsubscribe(root.redraw)
 		pubsub.subscribe(run)
 	}
-	
 	return root.redraw = run
 }
-	m.route = function($window, renderer, pubsub) {
+m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
 		var replay = router.defineRoutes(routes, function(component, args) {
@@ -992,34 +1024,30 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 	route.prefix = router.setPrefix
 	route.setPath = router.setPath
 	route.getPath = router.getPath
-	
 	return route
 }(window, renderService, redrawService)
-	m.mount = function(renderer, pubsub) {
+m.mount = function(renderer, pubsub) {
 	return function(root, component) {
 		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, {tag: component})
 		})
-		
 		run()
 	}
 }(renderService, redrawService)
-	m.trust = function(html) {
+m.trust = function(html) {
 	return Node("<", undefined, undefined, html, undefined, undefined)
 }
-	m.prop = function(store) {
-	return function() {
-		if (arguments.length > 0) store = arguments[0]
-		return store
-	}
-}
-	m.withAttr = function(attrName, callback, context) {
+m.prop = Stream.stream
+m.prop.combine = Stream.combine
+m.prop.reject = Stream.reject
+m.prop.HALT = Stream.HALT
+m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-	m.render = renderService.render
-	m.redraw = redrawService.publish
-	if (typeof module === "object") module.exports = m
-	else window.m = m
+m.render = renderService.render
+m.redraw = redrawService.publish
+if (typeof module === "object") module.exports = m
+else window.m = m
 })()

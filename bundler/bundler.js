@@ -12,14 +12,21 @@ function resolve(dir, data) {
 		usedVariables[variable] = usedVariables[variable] ? usedVariables[variable]++ : 1
 
 		var filename = new Function("return " + dep).call()
+		
+		//resolve npm dependencies
+		if (filename[0] !== ".") {
+			var meta = JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json"))
+			var dependencyEntry = "./node_modules/" + filename + "/" + (meta.main || filename + ".js")
+			try {fs.statSync(dependencyEntry).isFile()} catch (e) {dependencyEntry = "./node_modules/" + filename + "/index.js"}
+			return resolve(path.dirname(dependencyEntry), exportCode(dependencyEntry, def + variable + eq))
+		}
+		
+		//resolve local dependencies
 		var normalized = path.resolve(dir, filename)
 		var pathname = path.dirname(normalized)
 		if (modules[normalized] === undefined) {
 			modules[normalized] = variable
-			var exported = fixCollisions(fs.readFileSync(dir + "/" + filename + ".js", "utf8"))
-				.replace(/"use strict"\s*/gm, "") // remove extraneous "use strict"
-				.replace(/module\.exports\s*=\s*/gm, def + variable + eq)
-				//.replace(/module\.exports(\.[\w_$]|\["[^\"]"\])/, def + variable + eq + "{}\n" + variable + "$1")
+			var exported = exportCode(dir + "/" + filename + ".js", def + variable + eq)
 			return resolve(pathname, exported)
 		}
 		else {
@@ -40,6 +47,12 @@ function resolve(dir, data) {
 		.replace(/\}[\r\n]+\(/g, "}(") // remove space from iife
 }
 
+function exportCode(file, assigment) {
+	return fixCollisions(fs.readFileSync(file, "utf8"))
+		.replace(/("|')use strict\1;?\s*/gm, "") // remove extraneous "use strict"
+		.replace(/module\.exports\s*=\s*/gm, assigment)
+}
+
 function fixCollisions(code) {
 	for (var variable in usedVariables) {
 		var collision = new RegExp("\\b" + variable + "\\b(?![\"'`])", "g")
@@ -52,8 +65,13 @@ function fixCollisions(code) {
 	return code
 }
 
+function setVersion(code) {
+	var metadata = JSON.parse(fs.readFileSync("./package.json"))
+	return code.replace("bleeding-edge", metadata.version)
+}
+
 function bundle(input, output) {
-	var code = resolve(".", fs.readFileSync(input, "utf8"))
+	var code = setVersion(resolve(".", fs.readFileSync(input, "utf8")))
 	if (new Function(code)) fs.writeFileSync(output, code, "utf8")
 }
 

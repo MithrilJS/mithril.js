@@ -1,1 +1,1 @@
-node cli
+node ospec

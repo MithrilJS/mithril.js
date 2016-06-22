@@ -1,6 +1,6 @@
 # m(selector, attributes, children)
 
-- [Signature](#signature)
+- [API](#api)
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
@@ -13,11 +13,11 @@
 - [Keys](#keys)
 - [SVG and MathML](#svg-and-mathml)
 - [Making templates dynamic](#making-templates-dynamic)
-- [Avoid-anti-patterns](#avoid-anti-patterns)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
-### Signature
+### API
 
 `vnode = m(selector, attributes, children)`
 
@@ -37,8 +37,6 @@ Argument     | Type                                       | Required | Descripti
 Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attributes` object (optional) and a `children` array (optional).
 
 ```javascript
-var m = require("mithril")
-
 m("div", {id: "box"}, "hello")
 
 // equivalent HTML:
@@ -48,13 +46,13 @@ m("div", {id: "box"}, "hello")
 The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a javascript object that represents the DOM element to be created.
 
 ```javascript
-//a vnode
-{tag: "div", attrs: {id: "box"}, children: [ /*...*/ ]}
+// a vnode
+var vnode = {tag: "div", attrs: {id: "box"}, children: [ /*...*/ ]}
 ```
 
 To transform a vnode into an actual DOM element, use the [`m.render()`](render.md) function:
 
-```
+```javascript
 m.render(document.body, m("br")) // puts a <br> in <body>
 ```
 
@@ -67,14 +65,14 @@ Calling `m.render()` multiple times does **not** recreate the DOM tree from scra
 The `m()` function is both *polymorphic* and *variadic*. In other words, it's very flexible in what it expects as input parameters:
 
 ```javascript
-//simple tag
+// simple tag
 m("div") // <div></div>
 
-//attributes and children are optional
+// attributes and children are optional
 m("a", {id: "b"}) // <a id="b"></a>
 m("span", "hello") // <span>hello</span>
 
-//tag with child nodes
+// tag with child nodes
 m("ul", [             // <ul>
 	m("li", "hello"), //   <li>hello</li>
 	m("li", "world"), //   <li>world</li>
@@ -122,8 +120,8 @@ m("a.link[href=/]", {
 	class: currentURL === "/" ? "selected" : ""
 }, "Home")
 
-//equivalent HTML:
-<a href="/" class="link selected">Home</a>
+// equivalent HTML:
+// <a href="/" class="link selected">Home</a>
 ```
 
 If there are class names in both first and second arguments of `m()`, they are merged together as you would expect.
@@ -137,8 +135,8 @@ Mithril uses both the Javascript API and the DOM API (`setAttribute`) to resolve
 For example, in the Javascript API, the `readonly` attribute is called `element.readOnly` (notice the uppercase). In Mithril, all of the following are supported:
 
 ```javascript
-m("input", {readonly: true}) //lowercase
-m("input", {readOnly: true}) //uppercase
+m("input", {readonly: true}) // lowercase
+m("input", {readOnly: true}) // uppercase
 m("input[readonly]")
 m("input[readOnly]")
 ```
@@ -165,7 +163,7 @@ Mithril does not attempt to add units to number values.
 
 Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on<event>` property, such as `touchstart`
 
-```
+```javascript
 function doSomething(e) {
 	console.log(e)
 }
@@ -192,7 +190,7 @@ m("select", {selectedIndex: 0}, [
 
 Mithril fully supports SVG. Xlink is also supported, but unlike in pre-v1.0 versions of Mithril, must have the namespace explicitly defined:
 
-```
+```javascript
 m("svg", [
 	m("image[xlink:href='image.gif']")
 ])
@@ -384,7 +382,7 @@ var BetterLabeledComponent = {
 
 Javascript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
 
-```
+```javascript
 // AVOID
 var BadListComponent = {
 	view: function(vnode) {

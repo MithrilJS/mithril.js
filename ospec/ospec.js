@@ -84,6 +84,7 @@ module.exports = new function init() {
 					}
 					catch (e) {
 						record(e.message, e)
+						subjects.pop()
 						next()
 					}
 					if (timeout === 0) {
@@ -177,7 +178,7 @@ module.exports = new function init() {
 		results.push(result)
 	}
 	function serialize(value) {
-		if (value === null || typeof value === "object") return String(value)
+		if (value === null || typeof value === "object" || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}

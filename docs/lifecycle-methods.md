@@ -27,12 +27,12 @@ var ComponentWithHook = {
 	}
 }
 
-//Sample hook in vnode
+// Sample hook in vnode
 function initializeVnode() {
 	console.log("initialize vnode")
 }
 
-m(ComponentWithHook, {oninit: initializeVnode}})
+m(ComponentWithHook, {oninit: initializeVnode})
 ```
 
 All lifecyle methods receive the vnode as their first arguments, and have their `this` keyword bound to `vnode.state`.
