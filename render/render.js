@@ -2,58 +2,56 @@
 
 var Node = require("../render/node")
 
-var lifecycle = {
-	oninit: function(source, vnode, hooks) {
-		if (typeof source === "function") source = vnode.state
-		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
-		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
-	},
+function lifecycleInit(source, vnode, hooks) {
+	if (typeof source === "function") source = vnode.state
+	if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
+	if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
+}
 
-	onremove: function(vnode) {
-		if (typeof vnode.tag === "function" && vnode.state.onremove) vnode.state.onremove(vnode)
-		else if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-	},
+function lifecycleRemove(vnode) {
+	if (typeof vnode.tag === "function" && vnode.state.onremove) vnode.state.onremove(vnode)
+	else if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
+}
 
-	onupdate: function(source, vnode, hooks, recycling) {
-		if (typeof source === "function") source = vnode.state
-		if (recycling) lifecycle.oninit(source, vnode, hooks)
-		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
-	},
+function lifecycleUpdate(source, vnode, hooks, recycling) {
+	if (typeof source === "function") source = vnode.state
+	if (recycling) lifecycleInit(source, vnode, hooks)
+	else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
+}
 
-	onbeforeremove: function(source, vnode, ref, callback) {
-		if (typeof source === "function") {
-			if (vnode.state.onbeforeremove) {
-				ref.expected++
-				vnode.state.onbeforeremove(vnode, callback)
-			}
-		}
-		else if (typeof source !== "string" && source.onbeforeremove) {
+function lifecycleBeforeRemove(source, vnode, ref, callback) {
+	if (typeof source === "function") {
+		if (vnode.state.onbeforeremove) {
 			ref.expected++
-			source.onbeforeremove.call(vnode, vnode, callback)
+			vnode.state.onbeforeremove(vnode, callback)
 		}
-	},
+	}
+	else if (typeof source !== "string" && source.onbeforeremove) {
+		ref.expected++
+		source.onbeforeremove.call(vnode, vnode, callback)
+	}
+}
 
-	shouldUpdate: function(vnode, old) {
-		if (typeof vnode.tag === "function") {
-			if (typeof vnode.state.onbeforeupdate === "function") {
-				return vnode.state.onbeforeupdate(vnode, old)
-			}
+function lifecycleShouldUpdate(vnode, old) {
+	if (typeof vnode.tag === "function") {
+		if (typeof vnode.state.onbeforeupdate === "function") {
+			return vnode.state.onbeforeupdate(vnode, old)
 		}
-		else if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") {
-			return vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
-		}
+	}
+	else if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") {
+		return vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
+	}
 
-		return undefined
-	},
+	return undefined
+}
 
-	view: function(vnode) {
-		if (typeof vnode.tag === "function") {
-			return vnode.state.view(vnode)
-		}
-		else {
-			return vnode.tag.view.call(vnode.state, vnode)
-		}
-	},
+function lifecycleView(vnode) {
+	if (typeof vnode.tag === "function") {
+		return vnode.state.view(vnode)
+	}
+	else {
+		return vnode.tag.view.call(vnode.state, vnode)
+	}
 }
 
 module.exports = function($window) {
@@ -74,7 +72,7 @@ module.exports = function($window) {
 	}
 	function createNode(vnode, hooks, ns) {
 		var tag = vnode.tag
-		if (vnode.attrs != null) lifecycle.oninit(vnode.attrs, vnode, hooks)
+		if (vnode.attrs != null) lifecycleInit(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
@@ -145,15 +143,12 @@ module.exports = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		if (typeof vnode.tag !== "function") {
-			vnode.state = {}
-			vnode.state = copy(vnode.tag)
-		} else {
-			vnode.state = new vnode.tag(vnode)
-		}
+		vnode.state = typeof vnode.tag !== "function" ?
+			copy(vnode.tag) :
+			new vnode.tag(vnode)
 
-		lifecycle.oninit(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(lifecycle.view(vnode))
+		lifecycleInit(vnode.tag, vnode, hooks)
+		vnode.instance = Node.normalize(lifecycleView(vnode))
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
@@ -233,7 +228,7 @@ module.exports = function($window) {
 			vnode.events = old.events
 			if (shouldUpdate(vnode, old)) return
 			if (vnode.attrs != null) {
-				lifecycle.onupdate(vnode.attrs, vnode, hooks, recycling)
+				lifecycleUpdate(vnode.attrs, vnode, hooks, recycling)
 			}
 			if (typeof oldTag === "string") {
 				switch (oldTag) {
@@ -299,8 +294,8 @@ module.exports = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Node.normalize(lifecycle.view(vnode))
-		lifecycle.onupdate(vnode.tag, vnode, hooks, recycling)
+		vnode.instance = Node.normalize(lifecycleView(vnode))
+		lifecycleUpdate(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
@@ -370,8 +365,8 @@ module.exports = function($window) {
 			var callback = function() {
 				if (++ref.called === ref.expected) removeNode(parent, vnode, context, true)
 			}
-			if (vnode.attrs) lifecycle.onbeforeremove(vnode.attrs, vnode, ref, callback)
-			lifecycle.onbeforeremove(vnode.tag, vnode, ref, callback)
+			if (vnode.attrs) lifecycleBeforeRemove(vnode.attrs, vnode, ref, callback)
+			lifecycleBeforeRemove(vnode.tag, vnode, ref, callback)
 			if (ref.expected > 0) return
 		}
 
@@ -393,7 +388,7 @@ module.exports = function($window) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		lifecycle.onremove(vnode)
+		lifecycleRemove(vnode)
 
 		var children = vnode.children
 		if (children instanceof Array) {
@@ -506,7 +501,7 @@ module.exports = function($window) {
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		var forceComponentUpdate = lifecycle.shouldUpdate(vnode, old)
+		var forceComponentUpdate = lifecycleShouldUpdate(vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
