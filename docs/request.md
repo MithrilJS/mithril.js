@@ -122,7 +122,7 @@ Normally, XMLHttpRequest makes HTTP requests to a server *asynchronously*. This 
 
 Some older libraries do so via callback functions, and newer ones (including the `fetch` API) return [promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise). `m.request` returns *reactive streams*.
 
-Callback functions are the most basic mechanism for asynchronous flow control. They are not *composable* because they require the callback function to be passed at call time, and they don't provide any mechanism for handling errors.
+Callback functions are the most basic mechanism for asynchronous flow control. They are not *composable* because they require the callback function to be passed at call time, and error handling mechanisms must similarly be declared upfront.
 
 However, it's desirable to allow the callback function to be defined (and broken into subroutines) in different places than the call site, in order to achieve better separation of concerns. In addition, it's also desirable to wrap an abstraction around errors so that they can be thrown freely and handled safely from a single place, rather than requiring `try/catch` blocks in every callback function, or duplicating error handling code. The problems that arise from callbacks' lack of composability are [infamous enough](http://callbackhell.com/) to earn nicknames such as "callback hell" and "pyramids of doom".
 
