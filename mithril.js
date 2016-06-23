@@ -1659,7 +1659,7 @@
 
 			var replaceHistory =
 				(arguments.length === 3 ? arg2 : arg1) === true ||
-				oldRoute === root
+				oldRoute === currentRoute
 
 			if (global.history.pushState) {
 				var method = replaceHistory ? "replaceState" : "pushState"
