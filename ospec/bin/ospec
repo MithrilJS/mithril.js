@@ -33,7 +33,7 @@ function traverseDirectory(pathname, callback) {
 traverseDirectory(".", function(pathname, stat, children) {
 	if (pathname.indexOf("node_modules") > -1) return
 	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
-		require("../../" + pathname)
+		require(path.normalize(process.cwd()) + "/" + pathname)
 	}
 })
 .then(o.run)

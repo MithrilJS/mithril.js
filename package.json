@@ -6,8 +6,7 @@
 	"license": "MIT",
 	"main": "index.js",
 	"scripts": {
-		"build": "node bundler/bundler",
-		"minify": "node bundler/minify",
+		"build": "node bundler/cli index.js -o mithril.js",
 		"lintdocs": "node bundler/lintdocs",
 		"lint": "eslint .",
 		"test": "node ospec/bin/ospec",
