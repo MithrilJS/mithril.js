@@ -6,7 +6,6 @@ var minify = require("./minify")
 var aliases = {o: "output"}
 var params = {}
 var args = process.argv.slice(2), command = null
-console.log(args)
 for (var i = 0; i < args.length; i++) {
 	if (args[i][0] === '"') args[i] = args[i].slice(1, -1)
 	if (args[i][0] === "-") command = args[i].replace(/\-+/g, "")

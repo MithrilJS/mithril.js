@@ -742,6 +742,7 @@ var requestService = function($window) {
 	
 	function xhr(args) {
 		var stream = Stream.stream()
+		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
