@@ -241,6 +241,16 @@ o.spec("xhr", function() {
 				o(typeof xhr.send).equals("function")
 			}
 		})
+		o("initialValue parameter works", function() {
+			mock.$defineRoutes({
+				"GET /items": function() {
+					return {status: 200, responseText: JSON.stringify([{a: 1}])}
+				}
+			})
+			var items = xhr({method: "GET", url: "/items", initialValue: []})
+			
+			o(items()).deepEquals([])
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
