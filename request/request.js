@@ -51,7 +51,11 @@ module.exports = function($window) {
 						
 						stream(response)
 					}
-					else stream.error(new Error(xhr.responseText))
+					else {
+						var error = new Error(xhr.responseText)
+						for (var key in response) error[key] = response[key]
+						stream.error(error)
+					}
 				}
 				catch (e) {
 					stream.error(e)

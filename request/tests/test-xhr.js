@@ -260,7 +260,20 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
+				o(e instanceof Error).equals(true)
 				o(e.message).equals(JSON.stringify({error: "error"}))
+			}).map(done)
+		})
+		o("extends Error with JSON response", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 500, responseText: JSON.stringify({message: "error", stack: "error on line 1"})}
+				}
+			})
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("error")
+				o(e.stack).equals("error on line 1")
 			}).map(done)
 		})
 		o("rejects on non-JSON server error", function(done) {
