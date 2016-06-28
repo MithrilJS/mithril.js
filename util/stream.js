@@ -7,9 +7,9 @@ function createStream() {
 		return stream._state.value
 	}
 	initStream(stream, arguments)
-	
+
 	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
-	
+
 	return stream
 }
 function initStream(stream, args) {
@@ -18,7 +18,8 @@ function initStream(stream, args) {
 	stream.map = map, stream.ap = ap, stream.of = createStream
 	stream.valueOf = valueOf
 	stream.catch = doCatch
-	
+	stream.filter = filter
+
 	Object.defineProperties(stream, {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
@@ -119,10 +120,10 @@ function initDependency(dep, streams, derive, recover) {
 	state.derive = derive
 	state.recover = recover
 	state.parents = streams.filter(notEnded)
-	
+
 	registerDependency(dep, state.parents)
 	updateDependency(dep, true)
-	
+
 	return dep
 }
 function registerDependency(stream, parents) {
@@ -148,6 +149,12 @@ function unregisterStream(stream) {
 function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
 function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
 function valueOf() {return this._state.value}
+
+function filter(fn) {
+	var stream = createStream()
+	this.map(function(value){ if(fn(value)) stream(value) })
+	return stream
+}
 
 function active(stream) {return stream._state.state === 1}
 function changed(stream) {return stream._state.changed}
