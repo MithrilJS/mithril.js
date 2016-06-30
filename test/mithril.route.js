@@ -127,6 +127,7 @@ describe("m.route()", function () {
 		route("/b")
 
 		expect(spy).to.not.have.been.called
+		expect(m.route()).to.equal("/a")
 	})
 
 	dit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
@@ -157,6 +158,7 @@ describe("m.route()", function () {
 		route("/b")
 
 		expect(spy).to.not.have.been.called
+		expect(m.route()).to.equal("/a")
 	})
 
 	dit("initializes a component's constructor on route change", function (root) { // eslint-disable-line

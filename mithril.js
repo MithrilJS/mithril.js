@@ -1435,8 +1435,13 @@
 				removeRootElement(root, index)
 			}
 			return controllers[index]
-		} else if (component == null) {
-			removeRootElement(root, index)
+		} else {
+			if (component == null) {
+				removeRootElement(root, index)
+			}
+			if (previousRoute) {
+				currentRoute = previousRoute
+			}
 		}
 	}
 
@@ -1570,7 +1575,7 @@
 	var modes = {pathname: "", hash: "#", search: "?"}
 	var redirect = noop
 	var isDefaultRoute = false
-	var routeParams, currentRoute
+	var routeParams, currentRoute, previousRoute
 
 	m.route = function (root, arg1, arg2, vdom) { // eslint-disable-line
 		// m.route()
@@ -1623,7 +1628,7 @@
 		}
 		// m.route(route, params, shouldReplaceHistoryEntry)
 		if (isString(root)) {
-			var oldRoute = currentRoute
+			previousRoute = currentRoute
 			currentRoute = root
 
 			var args = arg1 || {}
@@ -1659,7 +1664,7 @@
 
 			var replaceHistory =
 				(arguments.length === 3 ? arg2 : arg1) === true ||
-				oldRoute === root
+				previousRoute === root
 
 			if (global.history.pushState) {
 				var method = replaceHistory ? "replaceState" : "pushState"
@@ -1681,6 +1686,8 @@
 				$location[m.route.mode] = currentRoute
 				redirect(modes[m.route.mode] + currentRoute)
 			}
+
+			previousRoute = null
 		}
 	}
 
