@@ -757,12 +757,13 @@
 	var unloaders = []
 
 	function updateLists(views, controllers, view, controller) {
-		if (controller.onunload != null &&
-				unloaders.map(function (u) { return u.handler })
-					.indexOf(controller.onunload) < 0) {
+		var onunload = controller.onunload
+
+		if (onunload != null &&
+				!unloaders.some(function (u) { return u.handler === onunload })) {
 			unloaders.push({
 				controller: controller,
-				handler: controller.onunload
+				handler: onunload
 			})
 		}
 
