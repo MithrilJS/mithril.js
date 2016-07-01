@@ -5,6 +5,7 @@ var parseQueryString = require("../querystring/parse")
 
 module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
@@ -60,7 +61,7 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate()
+			callAsync($window.onpopstate)
 		}
 		else $window.location.href = prefix + path
 	}
