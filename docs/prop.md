@@ -237,7 +237,7 @@ It's of course also possible to compute properties based on multiple streams:
 var firstName = m.prop("John")
 var lastName = m.prop("Doe")
 var fullName = m.prop.combine(function(first, last) {
-	return first() + last()
+	return first() + " " + last()
 }, [firstName, lastName])
 
 firstName("Mary")
