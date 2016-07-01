@@ -16,8 +16,8 @@ module.exports = function($window, renderer, pubsub) {
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
-	route.setPath = router.setPath
-	route.getPath = router.getPath
+	route.set = router.setPath
+	route.get = router.getPath
 
 	return route
 }
