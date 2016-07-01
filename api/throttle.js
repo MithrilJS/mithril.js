@@ -13,7 +13,7 @@ module.exports = function(callback) {
 		}
 		else if (pending === null) {
 			pending = timeout(function() {
-				pending = 0
+				pending = null
 				callback()
 				last = new Date().getTime()
 			}, time - (now - last))

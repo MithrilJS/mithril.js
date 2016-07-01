@@ -74,11 +74,35 @@ o.spec("throttle", function() {
 		}, FRAME_BUDGET)
 	})
 
-	o("it supports forcing a synchronous redraw", function() {
+	o("it supports forcing a synchronous redraw", function(done) {
 		throttled()
 		throttled()
 		throttled(true)
 
 		o(spy.callCount).equals(2)
+		
+		setTimeout(function() {
+			o(spy.callCount).equals(3)
+
+			done()
+		}, FRAME_BUDGET)
+	})
+	
+	o("it doesn't swallow redraws", function(done, timeout) {
+		timeout(60)
+		
+		throttled()
+
+		setTimeout(function() {
+			throttled()
+			setTimeout(function() {
+				throttled()
+				setTimeout(function() {
+					o(spy.callCount).equals(3)
+
+					done()
+				}, FRAME_BUDGET)
+			}, 0)
+		}, 0)
 	})
 })
