@@ -87,22 +87,4 @@ o.spec("throttle", function() {
 			done()
 		}, FRAME_BUDGET)
 	})
-	
-	o("it doesn't swallow redraws", function(done, timeout) {
-		timeout(60)
-		
-		throttled()
-
-		setTimeout(function() {
-			throttled()
-			setTimeout(function() {
-				throttled()
-				setTimeout(function() {
-					o(spy.callCount).equals(3)
-
-					done()
-				}, FRAME_BUDGET)
-			}, 0)
-		}, 0)
-	})
 })
