@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
+var callAsync = require("../../test-utils/callAsync")
 var pushStateMock = require("../../test-utils/pushStateMock")
 var Router = require("../../router/router")
 
@@ -17,6 +18,28 @@ o.spec("Router.setPath", function() {
 				onFail = o.spy()
 			})
 
+			o("setPath calls onRouteChange asynchronously", function(done) {
+				$window.location.href = prefix + "/a"
+				router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
+				router.setPath("/b")
+
+				o(onRouteChange.callCount).equals(1)
+				callAsync(function() {
+					o(onRouteChange.callCount).equals(2)
+					done()
+				})
+			})
+			o("setPath calls onFail asynchronously", function(done) {
+				$window.location.href = prefix + "/a"
+				router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
+				router.setPath("/c")
+
+				o(onFail.callCount).equals(0)
+				callAsync(function() {
+					o(onFail.callCount).equals(1)
+					done()
+				})
+			})
 			o("sets route via API", function() {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)

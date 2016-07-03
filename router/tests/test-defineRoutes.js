@@ -17,6 +17,13 @@ o.spec("Router.defineRoutes", function() {
 				onFail = o.spy()
 			})
 
+			o("calls onRouteChange on init", function() {
+				$window.location.href = prefix + "/a"
+				router.defineRoutes({"/a": {data: 1}}, onRouteChange, onFail)
+				
+				o(onRouteChange.callCount).equals(1)
+			})
+			
 			o("resolves to route", function() {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)

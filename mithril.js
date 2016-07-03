@@ -16,8 +16,8 @@ function initStream(stream, args) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 	stream.map = map, stream.ap = ap, stream.of = createStream
-	stream.valueOf = valueOf
-	stream.catch = doCatch
+	stream.valueOf = valueOf, stream.toJSON = toJSON
+	stream.run = run, stream.catch = doCatch
 	
 	Object.defineProperties(stream, {
 		error: {get: function() {
@@ -46,15 +46,18 @@ function initStream(stream, args) {
 	})
 }
 function updateStream(stream, value, error) {
-	if (!absorbStream(stream, value, false) && !absorbStream(stream, error, true)) {
-		updateState(stream, value, error)
-		for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
-		finalize(stream)
-	}
+	updateState(stream, value, error)
+	for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+	finalize(stream)
 }
 function updateState(stream, value, error) {
+	error = unwrapError(value, error)
 	if (error !== undefined && typeof stream._state.recover === "function") {
-		try {updateValues(stream, stream._state.recover(), undefined)}
+		try {
+			var recovered = stream._state.recover()
+			if (recovered === HALT) return
+			updateValues(stream, recovered, undefined)
+		}
 		catch (e) {updateValues(stream, undefined, e)}
 	}
 	else updateValues(stream, value, error)
@@ -73,7 +76,8 @@ function updateDependency(stream, mustSync) {
 		else {
 			try {
 				var value = state.derive()
-				if (!absorbStream(stream, value)) updateState(stream, value, undefined)
+				if (value === HALT) return
+				updateState(stream, value, undefined)
 			}
 			catch (e) {
 				updateState(stream, undefined, e)
@@ -81,29 +85,28 @@ function updateDependency(stream, mustSync) {
 		}
 	}
 }
-function absorbStream(stream, value, isError) {
+function unwrapError(value, error) {
 	if (value != null && value.constructor === createStream) {
-		if (value._state.state === 2) {
-			stream.end(true)
-			stream(value())
-		}
-		else if (value._state.error) stream.error(value.error())
-		else if (value._state.state === 0) return true
-		else if (!isError) stream(value())
-		else stream.error(value())
-		return true
+		if (value._state.error !== undefined) error = value._state.error
+		else error = unwrapError(value._state.value, value._state.error)
 	}
-	return false
+	return error
 }
 function finalize(stream) {
 	stream._state.changed = false
 	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
 }
+function run(fn) {
+	var self = createStream(), stream = this
+	return initDependency(self, [stream], function() {
+		return absorb(self, fn(stream()))
+	}, undefined)
+}
 function doCatch(fn) {
-	var stream = this
+	var self = createStream(), stream = this
 	var derive = function() {return stream._state.value}
-	var recover = function() {return fn(stream._state.error)}
-	return initDependency(createStream(), [stream], derive, recover)
+	var recover = function() {return absorb(self, fn(stream._state.error))}
+	return initDependency(self, [stream], derive, recover)
 }
 function combine(fn, streams) {
 	return initDependency(createStream(), streams, function() {
@@ -111,6 +114,16 @@ function combine(fn, streams) {
 		if (failed.length > 0) throw failed[0]._state.error
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	}, undefined)
+}
+function absorb(stream, value) {
+	if (value != null && value.constructor === createStream) {
+		value.error.map(stream.error)
+		value.map(stream)
+		if (value._state.state === 0) return HALT
+		if (value._state.error) throw value._state.error
+		value = value._state.value
+	}
+	return value
 }
 function initDependency(dep, streams, derive, recover) {
 	var state = dep._state
@@ -145,6 +158,7 @@ function unregisterStream(stream) {
 function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
 function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
 function valueOf() {return this._state.value}
+function toJSON() {return JSON.stringify(this._state.value)}
 function active(stream) {return stream._state.state === 1}
 function changed(stream) {return stream._state.changed}
 function notEnded(stream) {return stream._state.state !== 2}
@@ -154,7 +168,7 @@ function reject(e) {
 	stream.error(e)
 	return stream
 }
-var Stream = {stream: createStream, combine: combine, reject: reject}
+var Stream = {stream: createStream, combine: combine, reject: reject, HALT: HALT}
 function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -742,6 +756,7 @@ var requestService = function($window) {
 	
 	function xhr(args) {
 		var stream = Stream.stream()
+		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
@@ -781,7 +796,11 @@ var requestService = function($window) {
 						
 						stream(response)
 					}
-					else stream.error(new Error(xhr.responseText))
+					else {
+						var error = new Error(xhr.responseText)
+						for (var key in response) error[key] = response[key]
+						stream.error(error)
+					}
 				}
 				catch (e) {
 					stream.error(e)
@@ -891,6 +910,7 @@ var parseQueryString = function(string) {
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
 	function normalize(fragment) {
@@ -938,7 +958,7 @@ var coreRouter = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate()
+			callAsync($window.onpopstate)
 		}
 		else $window.location.href = prefix + path
 	}
@@ -990,7 +1010,7 @@ var throttle = function(callback) {
 		}
 		else if (pending === null) {
 			pending = timeout(function() {
-				pending = 0
+				pending = null
 				callback()
 				last = new Date().getTime()
 			}, time - (now - last))
@@ -1048,6 +1068,8 @@ m.withAttr = function(attrName, callback, context) {
 }
 m.render = renderService.render
 m.redraw = redrawService.publish
-if (typeof module === "object") module.exports = m
+if (typeof module === "object") {
+	module.exports = m
+}
 else window.m = m
 })()

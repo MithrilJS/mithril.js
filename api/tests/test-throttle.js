@@ -74,11 +74,17 @@ o.spec("throttle", function() {
 		}, FRAME_BUDGET)
 	})
 
-	o("it supports forcing a synchronous redraw", function() {
+	o("it supports forcing a synchronous redraw", function(done) {
 		throttled()
 		throttled()
 		throttled(true)
 
 		o(spy.callCount).equals(2)
+		
+		setTimeout(function() {
+			o(spy.callCount).equals(3)
+
+			done()
+		}, FRAME_BUDGET)
 	})
 })

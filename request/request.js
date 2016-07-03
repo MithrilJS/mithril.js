@@ -11,6 +11,7 @@ module.exports = function($window) {
 	
 	function xhr(args) {
 		var stream = Stream.stream()
+		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
@@ -50,7 +51,11 @@ module.exports = function($window) {
 						
 						stream(response)
 					}
-					else stream.error(new Error(xhr.responseText))
+					else {
+						var error = new Error(xhr.responseText)
+						for (var key in response) error[key] = response[key]
+						stream.error(error)
+					}
 				}
 				catch (e) {
 					stream.error(e)

@@ -2,6 +2,7 @@
 
 - [API](#api)
 - [How it works](#how-it-works)
+- [Typical usage](#typical-usage)
 - [Dynamic URLs](#dynamic-urls)
 - [Why JSON instead of HTML](#why-json-instead-of-html)
 - [Why XMLHttpRequest instead of fetch](#why-xmlhttprequest-instead-of-fetch)
@@ -13,21 +14,22 @@
 
 `stream = m.request(options)`
 
-Argument              | Type                              | Required | Description
---------------------- | --------------------------------- | -------- | ---
-`options.method`      | `String`                          | Yes      | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`.
-`options.url`         | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
-`options.data`        | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
-`options.async`       | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
-`options.user`        | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
-`options.password`    | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
-`options.config`      | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.type`        | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.serialize`   | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`.
-`options.deserialize` | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
-`options.extract`     | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`
-`options.useBody`     | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
-**returns**           | `Stream`                          |          | A stream that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+Argument               | Type                              | Required | Description
+---------------------- | --------------------------------- | -------- | ---
+`options.method`       | `String`                          | Yes      | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`.
+`options.url`          | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
+`options.data`         | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
+`options.async`        | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
+`options.user`         | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
+`options.password`     | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
+`options.config`       | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`.
+`options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
+`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`
+`options.initialValue` | `any`                             | No       | A value to populate the returned stream before the request completes
+`options.useBody`      | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
+**returns**            | `Stream`                          |          | A stream that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
 [How to read signatures](signatures.md)
 
@@ -41,12 +43,87 @@ The `m.request` utility is a thin wrapper around [`XMLHttpRequest`](https://deve
 m.request({
 	method: "GET",
 	url: "/api/v1/users",
-}).map(function(users) {
+}).run(function(users) {
 	console.log(users)
 })
 ```
 
 Calls to `m.request` return a [stream](prop.md).
+
+---
+
+### Typical usage
+
+Here's an illustrative example of a self-contained component that uses `m.request` to retrieve some data from a server.
+
+```javascript
+var SimpleExample = {
+	oninit: function(vnode) {
+		vnode.state.items = m.request({
+			method: "GET",
+			url: "/api/items",
+			initialValue: []
+		})
+	},
+	view: function(vnode) {
+		return vnode.state.items().map(function(item) {
+			return m("div", item.name)
+		})
+	}
+}
+
+m.route(document.body, "/", {
+	"/": SimpleExample
+})
+```
+
+Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
+
+When `m.route` is called at the bottom, `MyComponent` is initialized. `oninit` is called, which calls `m.request` and assigns its return value (a stream) to `vnode.state.items`. This stream contains the `initialValue` (i.e. an empty array), and this value can be retrieved by calling the stream as a function (i.e. `value = vnode.state.items()`). After the oninit method returns, the component is then rendered. Since `vnode.state.items()` returns an empty array, the component's `view` method also returns an empty array, so no DOM elements are created. When the request to the server completes, `m.request` parses the response data into a Javascript array of objects and sets the value of the stream to that array. Then, the component is rendered again. This time, `vnode.state.items()` returns a non-empty array, so the component's `view` method returns an array of vnodes, which in turn are rendered into `div` DOM elements.
+
+#### Loading icons and error messages
+
+Here's an expanded version of the example above that implements a loading indicator and an error message:
+
+```javascript
+var RobustExample = {
+	oninit: function(vnode) {
+		var req = m.request({
+			method: "GET",
+			url: "/api/items",
+		})
+		vnode.state.items = req.catch(function() {
+			return []
+		})
+		vnode.state.error = req.error.run(this.errorView)
+	},
+	view: function(vnode) {
+		return [
+			vnode.state.items() ? vnode.state.items().map(function(item) {
+				return m("div", item.name)
+			}) : m(".loading-icon"),
+			vnode.state.error(),
+		]
+	},
+	errorView: function(e) {
+		return m(".error", "An error occurred")
+	}
+}
+
+m.route(document.body, "/", {
+	"/": MyComponent
+})
+```
+
+When this component is initialized, `m.request` is called and its return value is assigned to `req`. Unlike the previous example, here there's no `initialValue`, so the `req` stream is in a pending state, and therefore has a value of `undefined`. `req.error` is the error stream for the request. Since `req` is pending, the `req.error` stream also remain in a pending state, and likewise, `vnode.state.error` stays pending and does not call `this.errorView`.
+
+Then the component renders. Both `vnode.state.items()` and `vnode.state.error()` return `undefined`, so the component returns `[m(".loading-icon"), undefined]`, which in turn creates a loading icon element in the DOM.
+
+When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `vnode.state.error()` is still `undefined`, but now `view` returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
+
+If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
+
+---
 
 ### Dynamic URLs
 
@@ -57,7 +134,7 @@ m.request({
 	method: "GET",
 	url: "/api/v1/users/:id",
 	data: {id: 123},
-}).map(function(user) {
+}).run(function(user) {
 	console.log(user.id) // logs 123
 })
 ```
@@ -204,9 +281,9 @@ function getProjectOwnerID(project) {
 
 function doStuffWithProjectOwner(projectID) {
 	return findProject(projectID)
-		.map(getProjectOwnerID)
-		.map(findUser)
-		.map(doStuff)
+		.run(getProjectOwnerID)
+		.run(findUser)
+		.run(doStuff)
 		.catch(function(e) {
 			console.log(e)
 		})
@@ -215,7 +292,7 @@ function doStuffWithProjectOwner(projectID) {
 doStuffWithProjectOwner(123)
 ```
 
-Aside from the API signature difference between `fetch` and `m.request`, the only change required to achieve the same functionality was to replace all instances of `then` with `map`.
+Aside from the API signature difference between `fetch` and `m.request`, the only change required to achieve the same functionality was to replace all instances of `.then` with `.run`.
 
 However, stream have some additional interesting properties. Let's suppose project objects have a `team` property that contains a list of user objects, and we wanted to display a list of designers and a list of developers in a project:
 
@@ -229,11 +306,11 @@ function getTeamUsersByType(team, type) {
 	})
 }
 var project = findProject(123)
-var team = project.map(getProjectTeam)
-var designers = team.map(function(team) {
+var team = project.run(getProjectTeam)
+var designers = team.run(function(team) {
 	return getTeamUsersByType(team, "designer")
 })
-var developers = team.map(function(team) {
+var developers = team.run(function(team) {
 	return getTeamUsersByType(team, "developer")
 })
 ```
@@ -243,7 +320,7 @@ Now let's suppose that the team changed for the project and we need to fetch the
 Fortunately, `project` is a stream, and `team`, `designers` and `developers` are streams derived from `project`. So to update the state of all these streams, we only need to do this:
 
 ```javascript
-findProject(123).map(project)
+findProject(123).run(project)
 ```
 
 Doing so updates all the streams, and therefore there's no need to place the filtering code in the view, where the filtering code would recompute the same thing on every render.

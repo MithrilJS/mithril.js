@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
+var callAsync = require("../../test-utils/callAsync")
 var pushStateMock = require("../../test-utils/pushStateMock")
 var domMock = require("../../test-utils/domMock")
 
@@ -28,7 +29,7 @@ o.spec("route", function() {
 		route = apiRouter($window, coreRenderer($window), redraw)
 	})
 
-	o("renders into `root`", function() {
+	o("renders into `root`", function(done) {
 		route(root, "/", {
 			"/" : {
 				view: function() {
@@ -37,7 +38,11 @@ o.spec("route", function() {
 			}
 		})
 
-		o(root.firstChild.nodeName).equals("DIV")
+		callAsync(function() {
+			o(root.firstChild.nodeName).equals("DIV")
+			
+			done()
+		})
 	})
 
 	o("redraws when render function is executed", function(done) {
@@ -55,19 +60,21 @@ o.spec("route", function() {
 			}
 		})
 
-		o(oninit.callCount).equals(1)
+		callAsync(function() {
+			o(oninit.callCount).equals(1)
 
-		redraw.publish()
+			redraw.publish()
 
-		// Wrapped to give time for the rate-limited redraw to fire
-		setTimeout(function() {
-			o(onupdate.callCount).equals(1)
+			// Wrapped to give time for the rate-limited redraw to fire
+			setTimeout(function() {
+				o(onupdate.callCount).equals(1)
 
-			done()
-		}, FRAME_BUDGET)
+				done()
+			}, FRAME_BUDGET)
+		})
 	})
 
-	o("redraws on events", function(done, timeout) {
+	o("redraws on events", function(done) {
 		var onupdate = o.spy()
 		var oninit   = o.spy()
 		var onclick  = o.spy()
@@ -87,21 +94,23 @@ o.spec("route", function() {
 			}
 		})
 
-		root.firstChild.dispatchEvent(e)
+		callAsync(function() {
+			root.firstChild.dispatchEvent(e)
 
-		o(oninit.callCount).equals(1)
+			o(oninit.callCount).equals(1)
 
-		o(onclick.callCount).equals(1)
-		o(onclick.this).equals(root.firstChild)
-		o(onclick.args[0].type).equals("click")
-		o(onclick.args[0].target).equals(root.firstChild)
+			o(onclick.callCount).equals(1)
+			o(onclick.this).equals(root.firstChild)
+			o(onclick.args[0].type).equals("click")
+			o(onclick.args[0].target).equals(root.firstChild)
 
-		// Wrapped to give time for the rate-limited redraw to fire
-		setTimeout(function() {
-			o(onupdate.callCount).equals(1)
+			// Wrapped to give time for the rate-limited redraw to fire
+			setTimeout(function() {
+				o(onupdate.callCount).equals(1)
 
-			done()
-		}, FRAME_BUDGET)
+				done()
+			}, FRAME_BUDGET)
+		})
 	})
 
 	o("event handlers can skip redraw", function(done) {
@@ -126,19 +135,21 @@ o.spec("route", function() {
 			}
 		})
 
-		root.firstChild.dispatchEvent(e)
+		callAsync(function() {
+			root.firstChild.dispatchEvent(e)
 
-		o(oninit.callCount).equals(1)
+			o(oninit.callCount).equals(1)
 
-		// Wrapped to ensure no redraw fired
-		setTimeout(function() {
-			o(onupdate.callCount).equals(0)
+			// Wrapped to ensure no redraw fired
+			setTimeout(function() {
+				o(onupdate.callCount).equals(0)
 
-			done()
-		}, FRAME_BUDGET)
+				done()
+			}, FRAME_BUDGET)
+		})
 	})
 
-	o("changes location on route.link", function() {
+	o("changes location on route.link", function(done) {
 		var e = $window.document.createEvent("MouseEvents")
 
 		e.initEvent("click", true, true)
@@ -161,10 +172,14 @@ o.spec("route", function() {
 			}
 		})
 
-		o($window.location.href).equals("http://localhost/?/")
+		callAsync(function() {
+			o($window.location.href).equals("http://localhost/?/")
 
-		root.firstChild.dispatchEvent(e)
+			root.firstChild.dispatchEvent(e)
 
-		o($window.location.href).equals("http://localhost/?/test")
+			o($window.location.href).equals("http://localhost/?/test")
+			
+			done()
+		})
 	})
 })

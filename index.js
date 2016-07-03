@@ -24,7 +24,9 @@ m.withAttr = require("./util/withAttr")
 m.render = renderService.render
 m.redraw = redrawService.publish
 
-if (typeof module === "object") module.exports = m
+if (typeof module === "object") {
+	module.exports = m
+}
 else window.m = m
 
 })()
