@@ -1664,7 +1664,7 @@
 
 			var replaceHistory =
 				(arguments.length === 3 ? arg2 : arg1) === true ||
-				previousRoute === root
+				previousRoute === currentRoute
 
 			if (global.history.pushState) {
 				var method = replaceHistory ? "replaceState" : "pushState"

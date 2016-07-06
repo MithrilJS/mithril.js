@@ -838,6 +838,36 @@ describe("m.route()", function () {
 		expect(mock.history.$$length).to.equal(0)
 	})
 
+	dit("modify history when redirecting to same route with different parameters", function(root) {
+		mode("search")
+		mock.history.$$length = 0
+
+		route(root, "/a", {
+			"/a": pure(function () { return "a" }),
+			"/b": pure(function () { return "b" })
+		})
+
+		route("/b")
+		route("/b", { foo: "bar" })
+
+		expect(mock.history.$$length).to.equal(2)
+	})
+
+	dit("doesn't modify history when redirecting to same route with same parameters", function(root) {
+		mode("search")
+		mock.history.$$length = 0
+
+		route(root, "/a", {
+			"/a": pure(function () { return "a" }),
+			"/b": pure(function () { return "b" })
+		})
+
+		route("/b", { foo: "bar" })
+		route("/b", { foo: "bar" })
+
+		expect(mock.history.$$length).to.equal(1)
+	})
+
 	context("m.route.strategy() === \"all\", identical views", function () {
 		context("parent nodes", function () {
 			dit("renders routes independently", function (root) {
