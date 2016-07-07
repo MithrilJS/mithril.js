@@ -27,6 +27,16 @@ Argument    | Type                 | Required | Description
 
 By default, Mithril escapes all values in order to prevent a class of security problems called [XSS injections](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
+```javascript
+var userContent = "<script>alert('evil')</script>"
+var view = m("div", userContent)
+
+m.render(document.body, view)
+
+// equivalent HTML
+// <div>&lt;script&gt;alert('evil')&lt;/script&gt;</div>
+```
+
 However, sometimes it is desirable to render rich text and formatting markup. To fill that need, `m.trust` creates trusted HTML [vnodes](vnodes.md) which are rendered as HTML.
 
 ```javascript
@@ -46,7 +56,7 @@ Trusted HTML vnodes are objects, not strings; therefore they cannot be concatena
 
 ### Security considerations
 
-You **must sanitize the input** of `m.trust` to ensure there's no user-generated Javascript in the HTML string. If you don't sanitize an HTML string and mark it as a trusted string, any asynchronous javascript call points within the HTML string will be triggered and run with the authorization level of the user viewing the page.
+You **must sanitize the input** of `m.trust` to ensure there's no user-generated malicious code in the HTML string. If you don't sanitize an HTML string and mark it as a trusted string, any asynchronous javascript call points within the HTML string will be triggered and run with the authorization level of the user viewing the page.
 
 There are many ways in which an HTML string may contain executable code. The most common ways to inject security attacks are to add an `onload` or `onerror` attributes in `<img>` or `<iframe>` tags, and to use unbalanced quotes such as `" onerror="alert(1)` to inject executable contexts in unsanitized string interpolations.
 
@@ -67,9 +77,12 @@ data.title = "' onerror='alert(1)"
 
 // An attack using a different attribute
 data.title = "' onmouseover='alert(1)"
+
+// An attack that does not use javascript
+data.description = "<a href='http://evil.com/login-page-that-steals-passwords.html'>Click here to read more</a>"
 ```
 
-There are several non-obvious ways of declaring executable code, so it is highly recommended that you use a [whitelist](https://en.wikipedia.org/wiki/Whitelist) of permitted HTML tags, attributes and attribute values, as opposed to a [blacklist](https://en.wikipedia.org/wiki/Blacklisting) to sanitize the user input. It's also highly recommended that you use a proper HTML parser, instead of regular expressions for sanitization, because regular expressions are extremely difficult to test for all edge cases.
+There are countless non-obvious ways of creating malicious code, so it is highly recommended that you use a [whitelist](https://en.wikipedia.org/wiki/Whitelist) of permitted HTML tags, attributes and attribute values, as opposed to a [blacklist](https://en.wikipedia.org/wiki/Blacklisting) to sanitize the user input. It's also highly recommended that you use a proper HTML parser, instead of regular expressions for sanitization, because regular expressions are extremely difficult to test for all edge cases.
 
 ---
 
@@ -79,7 +92,7 @@ Even though there are many obscure ways to make an HTML string run Javascript, `
 
 For historical reasons, browsers ignore `<script>` tags that are inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible innerHTML property), the rendering engines cannot backtrack to the parsing-stage if the script calls something like document.write("</body>").
 
-This browser behavior may seem surprising to a developer coming from jQuery, because jQuery implements code specifically to find script tags and run them in this scenario. Mithril follows the browser behavior. If jQuery behavior is desired, you should consider moving the code out of the HTML string and into an `oncreate` [lifecycle method](lifecycle-methods.md), and either use jQuery or re-implement its script parsing routine.
+This browser behavior may seem surprising to a developer coming from jQuery, because jQuery implements code specifically to find script tags and run them in this scenario. Mithril follows the browser behavior. If jQuery behavior is desired, you should consider either moving the code out of the HTML string and into an `oncreate` [lifecycle method](lifecycle-methods.md), or use jQuery (or re-implement its script parsing code).
 
 ---
 

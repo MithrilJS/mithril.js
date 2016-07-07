@@ -23,7 +23,7 @@ Argument    | Type                 | Required | Description
 
 The `m.render(element, vnodes)` method takes a virtual DOM tree (typically generated via the [`m()` hyperscript function](hyperscript.md), generates a DOM tree and mounts it on `element`. If `element` already has a DOM tree mounted via a previous `m.render()` call, `vnodes` is diffed against the previous `vnodes` tree and the existing DOM tree is modified where needed to reflect the changes.
 
-This method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md) amd `[m.request()](request.md)`.
+This method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md), [`m.redraw()`](redraw.md) and `[m.request()](request.md)`. It is not called by [`m.prop()`](prop.md)
 
 ---
 
