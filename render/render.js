@@ -248,6 +248,10 @@ module.exports = function($window) {
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
+		else if (old.instance != null) {
+			removeNode(parent, old.instance, null, false)
+			vnode.dom = vnode.domSize = undefined
+		}
 	}
 	function isRecyclable(old, vnodes) {
 		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
