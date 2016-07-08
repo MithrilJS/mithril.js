@@ -8,33 +8,39 @@ module.exports = function($window) {
 
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
-	
+
 	function xhr(args) {
 		var stream = Stream.stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
-		
+
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-		
+
 		if (typeof args.serialize !== "function") args.serialize = JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
-		
+
 		args.url = interpolate(args.url, args.data)
 		if (useBody) args.data = args.serialize(args.data)
 		else args.url = assemble(args.url, args.data)
-		
+
 		var xhr = new $window.XMLHttpRequest()
+
+		stream.end.map(function(value){
+			if (value === true && xhr.readyState !== 4) {
+				xhr.abort()
+			}
+		})
 		xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-		
+
 		if (args.serialize === JSON.stringify && useBody) {
 			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 		}
 		if (args.deserialize === deserialize) {
 			xhr.setRequestHeader("Accept", "application/json, text/*")
 		}
-		
+
 		if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-		
+
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				try {
@@ -48,7 +54,7 @@ module.exports = function($window) {
 							}
 							else response = new args.type(response)
 						}
-						
+
 						stream(response)
 					}
 					else {
@@ -63,16 +69,16 @@ module.exports = function($window) {
 				if (typeof oncompletion === "function") oncompletion()
 			}
 		}
-		
+
 		if (useBody) xhr.send(args.data)
 		else xhr.send()
-		
+
 		return stream
 	}
 
 	function jsonp(args) {
 		var stream = Stream.stream()
-		
+
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 		var script = $window.document.createElement("script")
 		$window[callbackName] = function(data) {
@@ -92,7 +98,7 @@ module.exports = function($window) {
 		args.data[args.callbackKey || "callback"] = callbackName
 		script.src = assemble(args.url, args.data)
 		$window.document.documentElement.appendChild(script)
-		
+
 		return stream
 	}
 
@@ -125,6 +131,6 @@ module.exports = function($window) {
 	}
 
 	function extract(xhr) {return xhr.responseText}
-	
+
 	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
