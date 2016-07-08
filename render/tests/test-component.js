@@ -54,6 +54,32 @@ o.spec("component", function() {
 			o(root.firstChild.attributes["id"].nodeValue).equals("c")
 			o(root.firstChild.firstChild.nodeValue).equals("d")
 		})
+		o("updates from null", function() {
+			var visible = false
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : null
+				}
+			}
+			render(root, [{tag: component}])
+			visible = true
+			render(root, [{tag: component}])
+
+			o(root.firstChild.nodeName).equals("DIV")
+		})
+		o("updates from primitive", function() {
+			var visible = false
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : false
+				}
+			}
+			render(root, [{tag: component}])
+			visible = true
+			render(root, [{tag: component}])
+
+			o(root.firstChild.nodeName).equals("DIV")
+		})
 		o("removes", function() {
 			var component = {
 				view: function(vnode) {
