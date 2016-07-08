@@ -77,31 +77,11 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
 
-The state of a component can be accessed three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
-
-#### At initialization
-
-Any property attached to the component object is deep-cloned for every instance of the component. This allows simple state initialization.
-
-In the example below, `data` is a property of the `Input` component's state object.
-
-```javascript
-var ComponentWithInitialState = {
-	data: "Initial content",
-	view: function(vnode) {
-		return m("div", vnode.state.data)
-	}
-}
-
-m(ComponentWithInitialState)
-
-// Equivalent HTML
-// <div>Initial content</div>
-```
+The state of a component can be accessed two ways: via `vnode.state` and via the `this` keyword in component methods.
 
 #### Via vnode.state
 
-State can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
+State can be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
 
 ```javascript
 var ComponentWithDynamicState = {

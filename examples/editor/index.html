@@ -25,7 +25,9 @@ renderer.setEventCallback(run)
 var trust = require("../../render/trust")
 
 var Editor = {
-	data: "# Markdown Editor\n\nType on the left panel and see the result on the right panel",
+	oninit: function() {
+		this.data = "# Markdown Editor\n\nType on the left panel and see the result on the right panel"
+	},
 	view: function(vnode) {
 		return [
 			m("textarea.editor-input", {oninput: function(e) {vnode.state.data = e.target.value}}, vnode.state.data),
