@@ -576,4 +576,22 @@ o.spec("component", function() {
 			o(vnode.dom).notEquals(updated.dom)
 		})
 	})
+	o.spec("state", function() {
+		o("deep copies state", function() {
+			var called = 0
+			var component = {
+				data: [{a: 1}],
+				oninit: init,
+				view: function() {
+					return ""
+				}
+			}
+
+			render(root, [{tag: component}])
+
+			function init(vnode) {
+				o(vnode.state.data).deepEquals([{a: 1}])
+			}
+		})
+	})
 })
