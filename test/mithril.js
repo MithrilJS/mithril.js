@@ -223,6 +223,6 @@ describe("m()", function () {
 
 		var args = {age: 12}
 
-		expect(m.bind(m, component, args).to.throw();
+		expect(m.bind(m, component, args)).to.throw()
 	})
 })
