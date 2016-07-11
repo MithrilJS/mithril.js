@@ -225,24 +225,4 @@ describe("m()", function () {
 
 		expect(m.bind(m, component, args).to.throw();
 	})
-
-	it("even proxies a function to m.component if it has .view() method", function () {
-		var spy = sinon.spy()
-
-		var component = function () {};
-
-		var component.controller = spy;
-		var component.view = function () {
-			return m("div", "testing")
-		}
-
-		var args = {age: 12}
-
-		m(component, args).controller()
-		expect(spy.firstCall).to.have.been.calledWith(args)
-
-		m.component(component, args).controller()
-		expect(spy.secondCall).to.have.been.calledWith(args)
-	});
-
 })
