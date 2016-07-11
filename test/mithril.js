@@ -217,4 +217,12 @@ describe("m()", function () {
 		m.component(component, args).controller()
 		expect(spy.secondCall).to.have.been.calledWith(args)
 	})
+
+	it("does not proxy to m.component() if the object does not have .view() method", function () {
+		var component = {}
+
+		var args = {age: 12}
+
+		expect(m.bind(m, component, args)).to.throw()
+	})
 })
