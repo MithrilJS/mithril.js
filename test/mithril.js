@@ -217,4 +217,32 @@ describe("m()", function () {
 		m.component(component, args).controller()
 		expect(spy.secondCall).to.have.been.calledWith(args)
 	})
+
+	it("does not proxy to m.component() if the object does not have .view() method", function () {
+		var component = {}
+
+		var args = {age: 12}
+
+		expect(m.bind(m, component, args).to.throw();
+	})
+
+	it("even proxies a function to m.component if it has .view() method", function () {
+		var spy = sinon.spy()
+
+		var component = function () {};
+
+		var component.controller = spy;
+		var component.view = function () {
+			return m("div", "testing")
+		}
+
+		var args = {age: 12}
+
+		m(component, args).controller()
+		expect(spy.firstCall).to.have.been.calledWith(args)
+
+		m.component(component, args).controller()
+		expect(spy.secondCall).to.have.been.calledWith(args)
+	});
+
 })

@@ -152,7 +152,7 @@
 			args[i - 1] = arguments[i]
 		}
 
-		if (isObject(tag)) return parameterize(tag, args)
+		if (tag && isFunction(tag.view)) return parameterize(tag, args)
 
 		if (!isString(tag)) {
 			throw new Error("selector in m(selector, attrs, children) should " +
