@@ -61,7 +61,7 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			callAsync($window.onpopstate)
+			$window.onpopstate()
 		}
 		else $window.location.href = prefix + path
 	}
@@ -70,29 +70,31 @@ module.exports = function($window) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
-
+		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
 
-			for (var route in routes) {
-				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+			callAsync(function() {
+				for (var route in routes) {
+					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
-				if (matcher.test(pathname)) {
-					pathname.replace(matcher, function() {
-						var keys = route.match(/:[^\/]+/g) || []
-						var values = [].slice.call(arguments, 1, -2)
-						for (var i = 0; i < keys.length; i++) {
-							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-						}
-						resolve(routes[route], params, path, route)
-					})
-					return
+					if (matcher.test(pathname)) {
+						pathname.replace(matcher, function() {
+							var keys = route.match(/:[^\/]+/g) || []
+							var values = [].slice.call(arguments, 1, -2)
+							for (var i = 0; i < keys.length; i++) {
+								params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+							}
+							resolve(routes[route], params, path, route)
+						})
+						return
+					}
 				}
-			}
 
-			reject(path, params)
+				reject(path, params)
+			})
 		}
 		return resolveRoute
 	}
@@ -101,6 +103,7 @@ module.exports = function($window) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
+			e.redraw = false
 			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}

@@ -771,6 +771,7 @@ o.spec("updateNodes", function() {
 		render(root, temp)
 		render(root, updated)
 
+		o(root.childNodes.length).equals(1)
 		o(vnodes[0].dom).equals(updated[0].dom)
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
