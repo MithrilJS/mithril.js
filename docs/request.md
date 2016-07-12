@@ -123,6 +123,8 @@ When the request to the server completes, `req` is populated with the response d
 
 If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
 
+To clear the error message, simply set the value of the `vnode.state.error` stream to `undefined`.
+
 ---
 
 ### Dynamic URLs

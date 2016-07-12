@@ -273,7 +273,7 @@ var RobustExample = {
 		]
 	},
 	errorView: function(e) {
-		return m(".error", "An error occurred")
+		return e ? m(".error", "An error occurred") : null
 	}
 }
 
@@ -286,7 +286,7 @@ When this component is initialized, `m.request` is called and its return value i
 
 Then the component renders. Both `vnode.state.items()` and `vnode.state.error()` return `undefined`, so the component returns `[m(".loading-icon"), undefined]`, which in turn creates a loading icon element in the DOM.
 
-When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `vnode.state.error()` is still `undefined`, but now `view` returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
+When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `req.error` is set to an active state (but it still has a value of `undefined`), and `vnode.state.error()` is then set to `null`. The `view` function returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
 
 If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
 
