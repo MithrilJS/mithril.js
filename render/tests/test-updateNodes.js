@@ -787,4 +787,30 @@ o.spec("updateNodes", function() {
 		o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
 		o(updated[0].dom.firstChild.nodeName).equals("A")
 	})
+	o("mixed unkeyed tags are not broken by recycle", function() {
+		var vnodes = [{tag: "a"}, {tag: "b"}]
+		var temp = [{tag: "b"}]
+		var updated = [{tag: "a"}, {tag: "b"}]
+
+		render(root, vnodes)
+		render(root, temp)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(2)
+		o(root.childNodes[0].nodeName).equals("A")
+		o(root.childNodes[1].nodeName).equals("B")
+	})
+	o("mixed unkeyed vnode types are not broken by recycle", function() {
+		var vnodes = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
+		var temp = [{tag: "b"}]
+		var updated = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
+
+		render(root, vnodes)
+		render(root, temp)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(2)
+		o(root.childNodes[0].nodeName).equals("A")
+		o(root.childNodes[1].nodeName).equals("B")
+	})
 })

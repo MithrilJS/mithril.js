@@ -341,6 +341,7 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
+		
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -348,7 +349,7 @@ var renderService = function($window) {
 				else if (o != null && v != null && o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
 					var o = old[oldEnd]
@@ -366,7 +367,7 @@ var renderService = function($window) {
 				if (o === v) oldEnd--, end--
 				else if (o != null && v != null && o.key === v.key) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					nextSibling = o.dom
 					oldEnd--, end--
 				}
@@ -1065,6 +1066,7 @@ m.route = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	route.set = router.setPath
 	route.get = router.getPath
+	
 	return route
 }(window, renderService, redrawService)
 m.mount = function(renderer, pubsub) {
