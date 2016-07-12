@@ -174,7 +174,7 @@ module.exports = function($window) {
 				else if (o != null && v != null && o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
 					var o = old[oldEnd]
@@ -192,7 +192,7 @@ module.exports = function($window) {
 				if (o === v) oldEnd--, end--
 				else if (o != null && v != null && o.key === v.key) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					nextSibling = o.dom
 					oldEnd--, end--
 				}
@@ -297,9 +297,14 @@ module.exports = function($window) {
 		vnode.instance = Node.normalize(lifecycleView(vnode))
 		lifecycleUpdate(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
+			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
+		}
+		else if (old.instance != null) {
+			removeNode(parent, old.instance, null, false)
+			vnode.dom = vnode.domSize = undefined
 		}
 	}
 	function isRecyclable(old, vnodes) {

@@ -92,7 +92,6 @@ module.exports = function($window) {
 		args.data[args.callbackKey || "callback"] = callbackName
 		script.src = assemble(args.url, args.data)
 		$window.document.documentElement.appendChild(script)
-		
 		return stream
 	}
 

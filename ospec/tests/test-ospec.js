@@ -22,13 +22,13 @@ o.spec("ospec", function() {
 	o.spec("sync", function() {
 		var a = 0, b = 0
 
-		o.before(function test() {a = 1})
-		o.after(function test() {a = 0})
+		o.before(function() {a = 1})
+		o.after(function() {a = 0})
 
-		o.beforeEach(function test() {b = 1})
-		o.afterEach(function test() {b = 0})
+		o.beforeEach(function() {b = 1})
+		o.afterEach(function() {b = 0})
 
-		o("assertions", function test() {
+		o("assertions", function() {
 			var spy = o.spy()
 			spy(a)
 
@@ -53,33 +53,33 @@ o.spec("ospec", function() {
 	o.spec("async", function() {
 		var a = 0, b = 0
 
-		o.before(function test(done) {
+		o.before(function(done) {
 			callAsync(function() {
 				a = 1
 				done()
 			})
 		})
-		o.after(function test(done) {
+		o.after(function(done) {
 			callAsync(function() {
 				a = 0
 				done()
 			})
 		})
 
-		o.beforeEach(function test(done) {
+		o.beforeEach(function(done) {
 			callAsync(function() {
 				b = 1
 				done()
 			})
 		})
-		o.afterEach(function test(done) {
+		o.afterEach(function(done) {
 			callAsync(function() {
 				b = 0
 				done()
 			})
 		})
 
-		o("async hooks", function test(done) {
+		o("async hooks", function(done) {
 			callAsync(function() {
 				var spy = o.spy()
 				spy(a)

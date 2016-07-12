@@ -25,6 +25,7 @@
 - [Stream states](#stream-states)
 - [Handling errors](#handling-errors)
 - [Serializing streams](#serializing-streams)
+- [Streams do not trigger rendering](#streams-do-not-trigger-rendering)
 
 ---
 
@@ -272,12 +273,12 @@ var RobustExample = {
 		]
 	},
 	errorView: function(e) {
-		return m(".error", "An error occurred")
+		return e ? m(".error", "An error occurred") : null
 	}
 }
 
 m.route(document.body, "/", {
-	"/": MyComponent
+	"/": RobustExample
 })
 ```
 
@@ -285,9 +286,11 @@ When this component is initialized, `m.request` is called and its return value i
 
 Then the component renders. Both `vnode.state.items()` and `vnode.state.error()` return `undefined`, so the component returns `[m(".loading-icon"), undefined]`, which in turn creates a loading icon element in the DOM.
 
-When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `vnode.state.error()` is still `undefined`, but now `view` returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
+When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `req.error` is set to an active state (but it still has a value of `undefined`), and `vnode.state.error()` is then set to `null`. The `view` function returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
 
 If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
+
+To clear the error message, simply set the value of the `vnode.state.error` stream to `undefined`.
 
 ---
 
@@ -395,7 +398,7 @@ var halted = m.prop(1).run(function(value) {
 })
 
 halted.run(function() {
-	//never runs
+	// never runs
 })
 ```
 
@@ -426,7 +429,7 @@ var halted = m.prop.combine(function(stream) {
 }, [m.prop(1)])
 
 halted.run(function() {
-	//never runs
+	// never runs
 })
 ```
 
@@ -655,11 +658,13 @@ console.log(recoveredStream()) // logs "hi"
 console.log(recoveredStream.error()) // logs undefined
 ```
 
+---
+
 ### Serializing streams
 
 Streams implement a `.toJSON()` method. When a stream is passed as the argument to `JSON.stringify()`, the value of the stream is serialized.
 
-```
+```javascript
 var stream = m.prop(123)
 var serialized = JSON.stringify(stream)
 console.log(serialized) // logs 123
@@ -667,7 +672,15 @@ console.log(serialized) // logs 123
 
 Streams also implement a `valueOf` method that returns the value of the stream.
 
-```
+```javascript
 var stream = m.prop(123)
 console.log("test " + stream) // logs "test 123"
 ```
+
+---
+
+### Streams do not trigger rendering
+
+Unlike libraries like Knockout, Mithril streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril component views, route changes, or after [`m.request`](request.md) calls resolve.
+
+If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc), you should manually call [`m.redraw()`](redraw.md)

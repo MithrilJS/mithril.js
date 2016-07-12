@@ -341,6 +341,7 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
+		
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -348,7 +349,7 @@ var renderService = function($window) {
 				else if (o != null && v != null && o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
 					var o = old[oldEnd]
@@ -366,7 +367,7 @@ var renderService = function($window) {
 				if (o === v) oldEnd--, end--
 				else if (o != null && v != null && o.key === v.key) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-					if (recycling) insertNode(parent, toFragment(o), nextSibling)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					nextSibling = o.dom
 					oldEnd--, end--
 				}
@@ -471,9 +472,14 @@ var renderService = function($window) {
 		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
+			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
+		}
+		else if (old.instance != null) {
+			removeNode(parent, old.instance, null, false)
+			vnode.dom = vnode.domSize = undefined
 		}
 	}
 	function isRecyclable(old, vnodes) {
@@ -557,7 +563,7 @@ var renderService = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && !(typeof vnode.tag !== "string" && hasIntegrationMethods(vnode.tag))) { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -836,7 +842,6 @@ var requestService = function($window) {
 		args.data[args.callbackKey || "callback"] = callbackName
 		script.src = assemble(args.url, args.data)
 		$window.document.documentElement.appendChild(script)
-		
 		return stream
 	}
 	function interpolate(url, data) {
@@ -958,7 +963,7 @@ var coreRouter = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			callAsync($window.onpopstate)
+			$window.onpopstate()
 		}
 		else $window.location.href = prefix + path
 	}
@@ -966,25 +971,28 @@ var coreRouter = function($window) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
+		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			for (var route in routes) {
-				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-				if (matcher.test(pathname)) {
-					pathname.replace(matcher, function() {
-						var keys = route.match(/:[^\/]+/g) || []
-						var values = [].slice.call(arguments, 1, -2)
-						for (var i = 0; i < keys.length; i++) {
-							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-						}
-						resolve(routes[route], params, path, route)
-					})
-					return
+			callAsync(function() {
+				for (var route in routes) {
+					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+					if (matcher.test(pathname)) {
+						pathname.replace(matcher, function() {
+							var keys = route.match(/:[^\/]+/g) || []
+							var values = [].slice.call(arguments, 1, -2)
+							for (var i = 0; i < keys.length; i++) {
+								params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+							}
+							resolve(routes[route], params, path, route)
+						})
+						return
+					}
 				}
-			}
-			reject(path, params)
+				reject(path, params)
+			})
 		}
 		return resolveRoute
 	}
@@ -992,6 +1000,7 @@ var coreRouter = function($window) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
+			e.redraw = false
 			setPath(vnode.attrs.href, undefined, undefined)
 		}
 	}
@@ -1033,8 +1042,21 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var replay = router.defineRoutes(routes, function(component, args) {
-			renderer.render(root, {tag: component, attrs: args})
+		var current = {route: null, component: null}
+		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
+			if (typeof payload.view !== "function") {
+				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
+				var render = function(component) {
+					current.route = route, current.component = component
+					renderer.render(root, payload.render(Node(component, null, args, undefined, undefined, undefined)))
+				}
+				if (typeof payload.resolve !== "function") payload.resolve = function() {render(current.component)}
+				if (route !== current.route) payload.resolve(render, args, path, route)
+				else render(current.component)
+			}
+			else {
+				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
+			}
 		}, function() {
 			router.setPath(defaultRoute)
 		})
@@ -1042,8 +1064,9 @@ m.route = function($window, renderer, pubsub) {
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
-	route.setPath = router.setPath
-	route.getPath = router.getPath
+	route.set = router.setPath
+	route.get = router.getPath
+	
 	return route
 }(window, renderService, redrawService)
 m.mount = function(renderer, pubsub) {

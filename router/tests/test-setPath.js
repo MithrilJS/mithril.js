@@ -21,90 +21,136 @@ o.spec("Router.setPath", function() {
 			o("setPath calls onRouteChange asynchronously", function(done) {
 				$window.location.href = prefix + "/a"
 				router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/b")
 
-				o(onRouteChange.callCount).equals(1)
 				callAsync(function() {
-					o(onRouteChange.callCount).equals(2)
-					done()
+					router.setPath("/b")
+
+					o(onRouteChange.callCount).equals(1)
+					callAsync(function() {
+						o(onRouteChange.callCount).equals(2)
+						done()
+					})
 				})
 			})
 			o("setPath calls onFail asynchronously", function(done) {
 				$window.location.href = prefix + "/a"
 				router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/c")
 
-				o(onFail.callCount).equals(0)
 				callAsync(function() {
-					o(onFail.callCount).equals(1)
+					router.setPath("/c")
+
+					o(onFail.callCount).equals(0)
+					callAsync(function() {
+						o(onFail.callCount).equals(1)
+						done()
+					})
+				})
+			})
+			o("sets route via API", function(done) {
+				$window.location.href = prefix + "/test"
+				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+
+				callAsync(function() {
+					router.setPath("/other/x/y/z?c=d#e=f")
+
+					o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+					
 					done()
 				})
 			})
-			o("sets route via API", function() {
-				$window.location.href = prefix + "/test"
-				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/other/x/y/z?c=d#e=f")
-
-				o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
-			})
-			o("sets route w/ escaped unicode", function() {
+			o("sets route w/ escaped unicode", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6")
 
-				o(router.getPath()).equals("/ö?ö=ö#ö=ö")
+				callAsync(function() {
+					router.setPath("/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6")
+
+					o(router.getPath()).equals("/ö?ö=ö#ö=ö")
+					
+					done()
+				})
 			})
-			o("sets route w/ unicode", function() {
+			o("sets route w/ unicode", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/ö?ö=ö#ö=ö")
 
-				o(router.getPath()).equals("/ö?ö=ö#ö=ö")
+				callAsync(function() {
+					router.setPath("/ö?ö=ö#ö=ö")
+
+					o(router.getPath()).equals("/ö?ö=ö#ö=ö")
+					
+					done()
+				})
 			})
 
-			o("sets route on fallback mode", function() {
+			o("sets route on fallback mode", function(done) {
 				$window.location.href = "file://" + prefix + "/test"
 
 				router = new Router($window)
 				router.setPrefix(prefix)
 
 				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/other/x/y/z?c=d#e=f")
 
-				o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+				callAsync(function() {
+					router.setPath("/other/x/y/z?c=d#e=f")
+
+					o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+					
+					done()
+				})
 			})
-			o("sets route via pushState/onpopstate", function() {
+			o("sets route via pushState/onpopstate", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				$window.history.pushState(null, null, prefix + "/other/x/y/z?c=d#e=f")
-				$window.onpopstate()
 
-				o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+				callAsync(function() {
+					$window.history.pushState(null, null, prefix + "/other/x/y/z?c=d#e=f")
+					$window.onpopstate()
+
+					o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
+					
+					done()
+				})
 			})
-			o("sets parameterized route", function() {
+			o("sets parameterized route", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
 
-				o(router.getPath()).equals("/other/x/y/z?c=d&e=f")
+				callAsync(function() {
+					router.setPath("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
+
+					o(router.getPath()).equals("/other/x/y/z?c=d&e=f")
+					
+					done()
+				})
 			})
-			o("replace:true works", function() {
+			o("replace:true works", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/other", null, {replace: true})
-				$window.history.back()
 
-				o($window.location.href).equals("http://localhost/")
+				callAsync(function() {
+					router.setPath("/other", null, {replace: true})
+					$window.history.back()
+
+					o($window.location.href).equals("http://localhost/")
+					
+					done()
+				})
 			})
-			o("replace:false works", function() {
+			o("replace:false works", function(done) {
 				$window.location.href = prefix + "/test"
 				router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
-				router.setPath("/other", null, {replace: false})
-				$window.history.back()
 
-				var slash = prefix[0] === "/" ? "" : "/"
+				callAsync(function() {
+					router.setPath("/other", null, {replace: false})
+					$window.history.back()
 
-				o($window.location.href).equals("http://localhost" + slash + (prefix ? prefix + "/" : "") + "test")
+					var slash = prefix[0] === "/" ? "" : "/"
+
+					o($window.location.href).equals("http://localhost" + slash + (prefix ? prefix + "/" : "") + "test")
+					
+					done()
+				})
 			})
 		})
 	})

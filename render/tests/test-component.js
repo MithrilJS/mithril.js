@@ -54,6 +54,69 @@ o.spec("component object", function() {
 			o(root.firstChild.attributes["id"].nodeValue).equals("c")
 			o(root.firstChild.firstChild.nodeValue).equals("d")
 		})
+		o("updates root from null", function() {
+			var visible = false
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : null
+				}
+			}
+			render(root, [{tag: component}])
+			visible = true
+			render(root, [{tag: component}])
+
+			o(root.firstChild.nodeName).equals("DIV")
+		})
+		o("updates root from primitive", function() {
+			var visible = false
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : false
+				}
+			}
+			render(root, [{tag: component}])
+			visible = true
+			render(root, [{tag: component}])
+
+			o(root.firstChild.nodeName).equals("DIV")
+		})
+		o("updates root to null", function() {
+			var visible = true
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : null
+				}
+			}
+			render(root, [{tag: component}])
+			visible = false
+			render(root, [{tag: component}])
+
+			o(root.childNodes.length).equals(0)
+		})
+		o("updates root to primitive", function() {
+			var visible = true
+			var component = {
+				view: function(vnode) {
+					return visible ? {tag: "div"} : false
+				}
+			}
+			render(root, [{tag: component}])
+			visible = false
+			render(root, [{tag: component}])
+
+			o(root.firstChild.nodeValue).equals("false")
+		})
+		o("updates root from null to null", function() {
+			var component = {
+				view: function(vnode) {
+					return null
+				}
+			}
+			render(root, [{tag: component}])
+			render(root, [{tag: component}])
+
+			o(root.childNodes.length).equals(0)
+		})
 		o("removes", function() {
 			var component = {
 				view: function(vnode) {

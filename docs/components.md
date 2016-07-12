@@ -179,7 +179,7 @@ var FlexibleComponent = {
 
 #### Avoid magic indexes
 
-Often it's desireable to define multiple sets of children, for example, if a component has a configurable title and body.
+Often it's desirable to define multiple sets of children, for example, if a component has a configurable title and body.
 
 Avoid destructuring the `children` property for this purpose.
 
@@ -235,4 +235,33 @@ m(Header, {
 	],
 	tagline: m("h2", "Lorem ipsum"),
 })
+```
+
+#### Avoid component factories
+
+Component diffing relies on strict equality checking, so you should avoid recreating components. Instead, consume components idiomatically.
+
+```javascript
+// AVOID
+var ComponentFactory = function(greeting) {
+	// creates a new component on every call
+	return {
+		view: function() {
+			return m("div", greeting)
+		}
+	}
+}
+m.render(document.body, m(ComponentFactory("hello")))
+// caling a second time recreates div from scratch rather than doing nothing
+m.render(document.body, m(ComponentFactory("hello")))
+
+// PREFER
+var Component = {
+	view: function(vnode) {
+		return m("div", vnode.attrs.greeting)
+	}
+}
+m.render(document.body, m(Component, {greeting: "hello"}))
+// caling a second time does not modify DOM
+m.render(document.body, m(Component, {greeting: "hello"}))
 ```
