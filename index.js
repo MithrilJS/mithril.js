@@ -17,6 +17,7 @@ m.route = require("./api/router")(window, renderService, redrawService)
 m.mount = require("./api/mount")(renderService, redrawService)
 m.trust = require("./render/trust")
 m.prop = Stream.stream
+m.prop.sync = Stream.sync
 m.prop.combine = Stream.combine
 m.prop.reject = Stream.reject
 m.prop.HALT = Stream.HALT
