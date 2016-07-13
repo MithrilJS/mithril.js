@@ -166,6 +166,31 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 		})
 	})
+	o.spec("sync", function() {
+		o("transforms an array of streams to an array of values", function() {
+			var all = Stream.sync([
+				Stream.stream(10),
+				Stream.stream("20"),
+				Stream.stream({ value: 30 }),
+			])
+			
+			o(all()).deepEquals([10, "20", { value: 30 }])
+		})
+		o("remains pending until all streams are active", function() {
+			var straggler = Stream.stream()
+
+			var all = Stream.sync([
+				Stream.stream(10),
+				Stream.stream("20"),
+				straggler,
+			])
+			
+			o(all()).equals(undefined)
+
+			straggler(30)
+			o(all()).deepEquals([10, "20", 30])
+		})
+	})
 	o.spec("end", function() {
 		o("end stream works", function() {
 			var stream = Stream.stream()
