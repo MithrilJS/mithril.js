@@ -11,24 +11,24 @@ o.spec("stream", function() {
 			var initialValue = stream()
 			stream(2)
 			var newValue = stream()
-			
+
 			o(initialValue).equals(1)
 			o(newValue).equals(2)
 		})
 		o("has undefined value by default", function() {
 			var stream = Stream.stream()
-			
+
 			o(stream()).equals(undefined)
 		})
 		o("can update to undefined", function() {
 			var stream = Stream.stream(1)
 			stream(undefined)
-			
+
 			o(stream()).equals(undefined)
 		})
 		o("can be stream of streams", function() {
 			var stream = Stream.stream(Stream.stream(1))
-			
+
 			o(stream()()).equals(1)
 		})
 	})
@@ -36,41 +36,41 @@ o.spec("stream", function() {
 		o("transforms value", function() {
 			var stream = Stream.stream()
 			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
-			
+
 			stream(2)
-			
+
 			o(doubled()).equals(4)
 		})
 		o("transforms default value", function() {
 			var stream = Stream.stream(2)
 			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
-			
+
 			o(doubled()).equals(4)
 		})
 		o("transforms multiple values", function() {
 			var s1 = Stream.stream()
 			var s2 = Stream.stream()
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
-			
+
 			s1(2)
 			s2(3)
-			
+
 			o(added()).equals(5)
 		})
 		o("transforms multiple default values", function() {
 			var s1 = Stream.stream(2)
 			var s2 = Stream.stream(3)
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
-			
+
 			o(added()).equals(5)
 		})
 		o("transforms mixed default and late-bound values", function() {
 			var s1 = Stream.stream(2)
 			var s2 = Stream.stream()
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
-			
+
 			s2(3)
-			
+
 			o(added()).equals(5)
 		})
 		o("combines atomically", function() {
@@ -82,9 +82,9 @@ o.spec("stream", function() {
 				count++
 				return b() + c()
 			}, [b, c])
-			
+
 			a(3)
-			
+
 			o(d()).equals(15)
 			o(count).equals(1)
 		})
@@ -97,7 +97,7 @@ o.spec("stream", function() {
 				count++
 				return b() + c()
 			}, [b, c])
-			
+
 			o(d()).equals(15)
 			o(count).equals(1)
 		})
@@ -108,10 +108,10 @@ o.spec("stream", function() {
 			var c = Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
-			
+
 			a(3)
 			b(5)
-			
+
 			o(streams.length).equals(1)
 			o(streams[0]).equals(b)
 		})
@@ -122,9 +122,9 @@ o.spec("stream", function() {
 			var c = Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
-			
+
 			a(7)
-			
+
 			o(streams.length).equals(1)
 			o(streams[0]).equals(a)
 		})
@@ -133,7 +133,7 @@ o.spec("stream", function() {
 			var b = Stream.combine(function(a) {
 				return undefined
 			}, [a])
-			
+
 			o(b()).equals(undefined)
 		})
 		o("combine can return stream", function() {
@@ -141,7 +141,7 @@ o.spec("stream", function() {
 			var b = Stream.combine(function(a) {
 				return Stream.stream(2)
 			}, [a])
-			
+
 			o(b()()).equals(2)
 		})
 		o("combine can return pending stream", function() {
@@ -149,7 +149,7 @@ o.spec("stream", function() {
 			var b = Stream.combine(function(a) {
 				return Stream.stream()
 			}, [a])
-			
+
 			o(b()()).equals(undefined)
 		})
 		o("combine can halt", function() {
@@ -162,7 +162,7 @@ o.spec("stream", function() {
 				count++
 				return 1
 			})
-			
+
 			o(b()).equals(undefined)
 		})
 	})
@@ -170,40 +170,40 @@ o.spec("stream", function() {
 		o("end stream works", function() {
 			var stream = Stream.stream()
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
-			
+
 			stream.end(true)
-			
+
 			stream(3)
-			
+
 			o(doubled()).equals(undefined)
 		})
 		o("end stream works with default value", function() {
 			var stream = Stream.stream(2)
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
-			
+
 			stream.end(true)
-			
+
 			stream(3)
-			
+
 			o(doubled()).equals(4)
 		})
 		o("cannot add downstream to ended stream", function() {
 			var stream = Stream.stream(2)
 			stream.end(true)
-			
+
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
 			stream(3)
-			
+
 			o(doubled()).equals(undefined)
 		})
 		o("upstream does not affect ended stream", function() {
 			var stream = Stream.stream(2)
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
-			
+
 			doubled.end(true)
-			
+
 			stream(4)
-			
+
 			o(doubled()).equals(4)
 		})
 	})
@@ -211,16 +211,16 @@ o.spec("stream", function() {
 		o("error() works", function() {
 			var stream = Stream.stream()
 			var errored = Stream.combine(function(stream) {throw new Error("error")}, [stream])
-			
+
 			stream(3)
-			
+
 			o(errored()).equals(undefined)
 			o(errored.error().message).equals("error")
 		})
 		o("error() works with default value", function() {
 			var stream = Stream.stream(3)
 			var errored = Stream.combine(function(stream) {throw new Error("error")}, [stream])
-			
+
 			o(errored()).equals(undefined)
 			o(errored.error().message).equals("error")
 		})
@@ -230,9 +230,9 @@ o.spec("stream", function() {
 				if (typeof stream() !== "number") throw new Error("error")
 				else return stream() * 2
 			}, [stream])
-			
+
 			stream(3)
-			
+
 			o(doubled()).equals(6)
 			o(doubled.error()).equals(undefined)
 		})
@@ -243,9 +243,9 @@ o.spec("stream", function() {
 				count++
 				return 2
 			})
-			
+
 			stream.error(new Error("error"))
-			
+
 			o(handled()).equals(2)
 			o(handled.error()).equals(undefined)
 			o(count).equals(1)
@@ -262,7 +262,7 @@ o.spec("stream", function() {
 					count++
 					return value * 3
 				})
-			
+
 			o(stream()).equals(undefined)
 			o(stream.error().message).equals("error")
 			o(count).equals(0)
@@ -279,7 +279,7 @@ o.spec("stream", function() {
 				return value * 3
 			})
 			stream.error(new Error("error"))
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
 			o(count).equals(0)
@@ -289,11 +289,11 @@ o.spec("stream", function() {
 			var mappedFromError = stream.error.map(function(value) {
 				return "from" + value.message
 			})
-			
+
 			o(mappedFromError()).equals(undefined)
-			
+
 			stream.error(new Error("error"))
-			
+
 			o(mappedFromError()).equals("fromerror")
 		})
 		o("error from error.map propagates", function() {
@@ -304,11 +304,11 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return "a" + value
 			})
-			
+
 			o(mappedFromError()).equals(undefined)
-			
+
 			stream.error(new Error("error"))
-			
+
 			o(mappedFromError()).equals("afromerror")
 		})
 		o("error thrown from error.map propagates downstream", function() {
@@ -317,15 +317,15 @@ o.spec("stream", function() {
 			var mappedFromError = stream.error.map(function(value) {
 				throw new Error("b")
 			})
-			
+
 			var downstream = mappedFromError.map(function() {
 				count++
 			})
-			
+
 			o(mappedFromError()).equals(undefined)
-			
+
 			stream.error(new Error("a"))
-			
+
 			o(mappedFromError()).equals(undefined)
 			o(mappedFromError.error().message).equals("b")
 			o(downstream()).equals(undefined)
@@ -341,7 +341,7 @@ o.spec("stream", function() {
 				count++
 				return 1
 			})
-			
+
 			o(stream()).equals(undefined)
 			o(count).equals(0)
 		})
@@ -350,7 +350,7 @@ o.spec("stream", function() {
 			var error = stream.error.map(function(value) {
 				return Stream.stream(1)
 			})
-			
+
 			o(error()()).equals(1)
 		})
 		o("combined stream of two errored streams adopts error from first", function() {
@@ -358,7 +358,7 @@ o.spec("stream", function() {
 			var b = Stream.combine(function(a) {throw new Error("error from b")}, [a])
 			var c = Stream.combine(function(a) {throw new Error("error from c")}, [a])
 			var d = Stream.combine(function(a, b) {return 2}, [a, b])
-			
+
 			o(d()).equals(undefined)
 			o(d.error().message).equals("error from b")
 		})
@@ -366,7 +366,7 @@ o.spec("stream", function() {
 	o.spec("reject", function() {
 		o("reject works", function() {
 			var stream = Stream.reject(new Error("error"))
-			
+
 			o(stream()).equals(undefined)
 			o(stream.error().message).equals("error")
 		})
@@ -381,7 +381,7 @@ o.spec("stream", function() {
 					count++
 					return value * 3
 				})
-			
+
 			o(stream()).equals(undefined)
 			o(stream.error().message).equals("error")
 		})
@@ -390,9 +390,9 @@ o.spec("stream", function() {
 			var doubled = stream.map(function(value) {
 				return value * 2
 			})
-			
+
 			stream(1)
-			
+
 			o(doubled()).equals(2)
 			o(stream.error()).equals(undefined)
 		})
@@ -404,7 +404,7 @@ o.spec("stream", function() {
 				count++
 				return a() + b()
 			}, [a, b])
-			
+
 			o(combined()).equals(undefined)
 			o(combined.error().message).equals("a")
 			o(count).equals(0)
@@ -414,29 +414,29 @@ o.spec("stream", function() {
 		o("works", function() {
 			var stream = Stream.stream()
 			var doubled = stream.run(function(value) {return value * 2})
-			
+
 			stream(3)
-			
+
 			o(doubled()).equals(6)
 		})
 		o("works with default value", function() {
 			var stream = Stream.stream(3)
 			var doubled = stream.run(function(value) {return value * 2})
-			
+
 			o(doubled()).equals(6)
 		})
 		o("works with undefined value", function() {
 			var stream = Stream.stream()
 			var mapped = stream.run(function(value) {return String(value)})
-			
+
 			stream(undefined)
-			
+
 			o(mapped()).equals("undefined")
 		})
 		o("works with default undefined value", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.run(function(value) {return String(value)})
-			
+
 			o(mapped()).equals("undefined")
 		})
 		o("works with stream that throws", function() {
@@ -447,7 +447,7 @@ o.spec("stream", function() {
 				count++
 				return value
 			})
-			
+
 			o(errored()).equals(undefined)
 			o(errored.error().message).equals("error")
 			o(mapped()).equals(undefined)
@@ -462,20 +462,20 @@ o.spec("stream", function() {
 				count++
 				return value
 			})
-			
+
 			o(mapped()).equals(undefined)
 			o(count).equals(0)
 		})
 		o("works with active stream", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.run(function(value) {return Stream.stream(1)})
-			
+
 			o(mapped()).equals(1)
 		})
 		o("works with errored stream", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.run(function(value) {return Stream.reject(new Error("error"))})
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
 		})
@@ -486,36 +486,36 @@ o.spec("stream", function() {
 				ended.end(true)
 				return ended
 			})
-			
+
 			stream(3)
-			
+
 			o(mapped()).equals(2)
 		})
 		o("works when active stream updates", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
-			
+
 			absorbed(2)
-			
+
 			o(mapped()).equals(2)
-			
+
 			absorbed(3)
-			
+
 			o(mapped()).equals(3)
 		})
 		o("works when updating stream to errored state", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
-			
+
 			absorbed.error(new Error("error"))
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
-			
+
 			absorbed.error(new Error("another error"))
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("another error")
 		})
@@ -523,18 +523,18 @@ o.spec("stream", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream()
 			var mapped = stream.run(function(value) {return absorbed})
-			
+
 			absorbed(2)
-			
+
 			o(mapped()).equals(2)
 		})
 		o("works when updating pending stream to errored state", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream()
 			var mapped = stream.run(function(value) {return absorbed})
-			
+
 			absorbed.error(new Error("error"))
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
 		})
@@ -542,14 +542,14 @@ o.spec("stream", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
-			
+
 			absorbed.error(new Error("error"))
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
-			
+
 			absorbed(2)
-			
+
 			o(mapped()).equals(2)
 			o(mapped.error()).equals(undefined)
 		})
@@ -564,7 +564,7 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			o(count).equals(1)
 			o(stream()).equals("noerrormapped")
 			o(stream.error()).equals(undefined)
@@ -578,7 +578,7 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			o(count).equals(1)
 			o(stream()).equals("noerrormapped")
 			o(stream.error()).equals(undefined)
@@ -593,9 +593,9 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			stream("a")
-			
+
 			o(count).equals(0)
 			o(handled()).equals("aamapped")
 			o(handled.error()).equals(undefined)
@@ -609,7 +609,7 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			o(count).equals(0)
 			o(stream()).equals("aamapped")
 			o(stream.error()).equals(undefined)
@@ -619,7 +619,7 @@ o.spec("stream", function() {
 				throw new Error("b")
 			})
 			var mapped = stream.map(function(value) {return value + "ok"})
-			
+
 			o(stream()).equals(undefined)
 			o(stream.error().message).equals("b")
 			o(mapped()).equals(undefined)
@@ -627,7 +627,7 @@ o.spec("stream", function() {
 		})
 		o("catch can return undefined", function() {
 			var stream = Stream.reject(new Error("b")).catch(function(e) {}).map(function(value) {return String(value)})
-			
+
 			o(stream()).equals("undefined")
 			o(stream.error()).equals(undefined)
 		})
@@ -641,7 +641,7 @@ o.spec("stream", function() {
 				count++
 				return String(value)
 			})
-			
+
 			o(mapped()).equals(undefined)
 			o(count).equals(0)
 		})
@@ -651,7 +651,7 @@ o.spec("stream", function() {
 				return stream
 			})
 			.map(function(value) {return String(value)})
-			
+
 			o(mapped()).equals("1")
 		})
 		o("catch absorbs errored stream", function() {
@@ -660,7 +660,7 @@ o.spec("stream", function() {
 				return stream
 			})
 			.map(function(value) {return String(value)})
-			
+
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("a")
 		})
@@ -669,7 +669,7 @@ o.spec("stream", function() {
 			var b = a.map(function(value) {return value + "b"}).catch(function(e) {})
 			var c = a.map(function(value) {return value + "c"})
 			var d = Stream.combine(function(b, c) {return b() + c()}, [b, c])
-			
+
 			o(d()).equals(undefined)
 			o(d.error().message).equals("a")
 		})
@@ -685,7 +685,7 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			o(stream()).equals("noerrormapped")
 		})
 		o("catches nested wrapped rejected stream", function() {
@@ -702,7 +702,7 @@ o.spec("stream", function() {
 			.map(function(value) {
 				return value + "mapped"
 			})
-			
+
 			o(stream()).equals("noerrormapped")
 		})
 	})
@@ -716,6 +716,19 @@ o.spec("stream", function() {
 			o(Stream.stream({a: 1}).valueOf()).deepEquals({a: 1})
 			o(Stream.stream([1, 2, 3]).valueOf()).deepEquals([1, 2, 3])
 			o(Stream.stream().valueOf()).equals(undefined)
+		})
+		o("allows implicit value access in mathematical operations", function() {
+			o(Stream.stream(1) + Stream.stream(1)).equals(2)
+		})
+	})
+	o.spec("toString", function() {
+		o("aliases valueOf", function() {
+			var stream = Stream.stream(1)
+
+			o(stream.toString).equals(stream.valueOf)
+		})
+		o("allows implicit value access in string operations", function() {
+			o(Stream.stream("a") + Stream.stream("b")).equals("ab")
 		})
 	})
 	o.spec("toJSON", function() {
@@ -734,35 +747,35 @@ o.spec("stream", function() {
 		o("works", function() {
 			var stream = Stream.stream()
 			var doubled = stream.map(function(value) {return value * 2})
-			
+
 			stream(3)
-			
+
 			o(doubled()).equals(6)
 		})
 		o("works with default value", function() {
 			var stream = Stream.stream(3)
 			var doubled = stream.map(function(value) {return value * 2})
-			
+
 			o(doubled()).equals(6)
 		})
 		o("works with undefined value", function() {
 			var stream = Stream.stream()
 			var mapped = stream.map(function(value) {return String(value)})
-			
+
 			stream(undefined)
-			
+
 			o(mapped()).equals("undefined")
 		})
 		o("works with default undefined value", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.map(function(value) {return String(value)})
-			
+
 			o(mapped()).equals("undefined")
 		})
 		o("works with pending stream", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.map(function(value) {return Stream.stream()})
-			
+
 			o(mapped()()).equals(undefined)
 		})
 	})
@@ -771,26 +784,26 @@ o.spec("stream", function() {
 			var apply = Stream.stream(function(value) {return value * 2})
 			var stream = Stream.stream(3)
 			var applied = apply.ap(stream)
-			
+
 			o(applied()).equals(6)
-			
+
 			apply(function(value) {return value / 3})
-			
+
 			o(applied()).equals(1)
-			
+
 			stream(9)
-			
+
 			o(applied()).equals(3)
 		})
 		o("works with undefined value", function() {
 			var apply = Stream.stream(function(value) {return String(value)})
 			var stream = Stream.stream(undefined)
 			var applied = apply.ap(stream)
-			
+
 			o(applied()).equals("undefined")
-			
+
 			apply(function(value) {return String(value) + "a"})
-			
+
 			o(applied()).equals("undefineda")
 		})
 	})
@@ -799,18 +812,18 @@ o.spec("stream", function() {
 			o("identity", function() {
 				var stream = Stream.stream(3)
 				var mapped = stream.map(function(value) {return value})
-				
+
 				o(stream()).equals(mapped())
 			})
 			o("composition", function() {
 				function f(x) {return x * 2}
 				function g(x) {return x * x}
-				
+
 				var stream = Stream.stream(3)
-				
+
 				var mapped = stream.map(function(value) {return f(g(value))})
 				var composed = stream.map(g).map(f)
-				
+
 				o(mapped()).equals(18)
 				o(mapped()).equals(composed())
 			})
@@ -820,7 +833,7 @@ o.spec("stream", function() {
 				var a = Stream.stream(function(value) {return value * 2})
 				var u = Stream.stream(function(value) {return value * 3})
 				var v = Stream.stream(5)
-				
+
 				var mapped = a.map(function(f) {
 					return function(g) {
 						return function(x) {
@@ -828,9 +841,9 @@ o.spec("stream", function() {
 						}
 					}
 				}).ap(u).ap(v)
-				
+
 				var composed = a.ap(u.ap(v))
-				
+
 				o(mapped()).equals(30)
 				o(mapped()).equals(composed())
 			})
@@ -839,7 +852,7 @@ o.spec("stream", function() {
 			o("identity", function() {
 				var a = Stream.stream().of(function(value) {return value})
 				var v = Stream.stream(5)
-				
+
 				o(a.ap(v)()).equals(5)
 				o(a.ap(v)()).equals(v())
 			})
@@ -847,7 +860,7 @@ o.spec("stream", function() {
 				var a = Stream.stream(0)
 				var f = function(value) {return value * 2}
 				var x = 3
-				
+
 				o(a.of(f).ap(a.of(x))()).equals(6)
 				o(a.of(f).ap(a.of(x))()).equals(a.of(f(x))())
 			})
@@ -855,7 +868,7 @@ o.spec("stream", function() {
 				var u = Stream.stream(function(value) {return value * 2})
 				var a = Stream.stream()
 				var y = 3
-				
+
 				o(u.ap(a.of(y))()).equals(6)
 				o(u.ap(a.of(y))()).equals(a.of(function(f) {return f(y)}).ap(u)())
 			})
