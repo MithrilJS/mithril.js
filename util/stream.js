@@ -7,18 +7,18 @@ function createStream() {
 		return stream._state.value
 	}
 	initStream(stream, arguments)
-	
+
 	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
-	
+
 	return stream
 }
 function initStream(stream, args) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 	stream.map = map, stream.ap = ap, stream.of = createStream
-	stream.valueOf = valueOf, stream.toJSON = toJSON
+	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 	stream.run = run, stream.catch = doCatch
-	
+
 	Object.defineProperties(stream, {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
@@ -132,10 +132,10 @@ function initDependency(dep, streams, derive, recover) {
 	state.derive = derive
 	state.recover = recover
 	state.parents = streams.filter(notEnded)
-	
+
 	registerDependency(dep, state.parents)
 	updateDependency(dep, true)
-	
+
 	return dep
 }
 function registerDependency(stream, parents) {
