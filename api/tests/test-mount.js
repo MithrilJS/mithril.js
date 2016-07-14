@@ -98,7 +98,7 @@ o.spec("mount", function() {
 		}, FRAME_BUDGET)
 	})
 
-	 o("redraws when the render function is run", function(done) {
+	o("redraws when the render function is run", function(done) {
 		var onupdate = o.spy()
 		var oninit = o.spy()
 
@@ -122,5 +122,29 @@ o.spec("mount", function() {
 
 			done()
 		}, FRAME_BUDGET)
+	})
+
+	o("updates when new mounts are instantiated", function(done) {
+		var onupdate = o.spy()
+
+		mount(root, {
+			view : function() {
+				return m("div", {
+					onupdate : onupdate,
+					oncreate : function( node ){
+						mount(node.dom, {
+							view : function(){
+								return m("div", {
+									oncreate : function(){
+										o(onupdate.callCount).equals(1)
+										done()
+									}
+								} )
+							}
+						})
+					}
+				})
+			}
+		})
 	})
 })
