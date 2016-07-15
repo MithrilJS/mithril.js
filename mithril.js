@@ -168,7 +168,12 @@ function reject(e) {
 	stream.error(e)
 	return stream
 }
-var Stream = {stream: createStream, combine: combine, reject: reject, HALT: HALT}
+function merge(streams) {
+	return combine(function () {
+		return streams.map(function (s) {return s()})
+	}, streams)
+}
+var Stream = {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
 function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -1065,8 +1070,8 @@ m.route = function($window, renderer, pubsub) {
 			else {
 				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
 			}
-		}, function() {
-			router.setPath(defaultRoute)
+		}, function(path, params) {
+			router.setPath(defaultRoute, params, {replace: true})
 		})
 		autoredraw(root, renderer, pubsub, replay)
 	}
@@ -1091,6 +1096,7 @@ m.trust = function(html) {
 m.prop = Stream.stream
 m.prop.combine = Stream.combine
 m.prop.reject = Stream.reject
+m.prop.merge = Stream.merge
 m.prop.HALT = Stream.HALT
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
