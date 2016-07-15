@@ -98,10 +98,13 @@ module.exports = function($window) {
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.instance.domSize
+			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
 			return element
 		}
-		else return $emptyFragment
+		else {
+			vnode.domSize = 0
+			return $emptyFragment
+		}
 	}
 
 	//update
@@ -112,12 +115,12 @@ module.exports = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-		
+			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
 				if (o === v) oldStart++, start++
-				else if (o != null && v != null && o.key === v.key) {
+				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
@@ -125,7 +128,7 @@ module.exports = function($window) {
 				else {
 					var o = old[oldEnd]
 					if (o === v) oldEnd--, start++
-					else if (o != null && v != null && o.key === v.key) {
+					else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
@@ -136,10 +139,10 @@ module.exports = function($window) {
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldEnd], v = vnodes[end]
 				if (o === v) oldEnd--, end--
-				else if (o != null && v != null && o.key === v.key) {
+				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-					nextSibling = o.dom
+					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
 				}
 				else {
@@ -151,7 +154,7 @@ module.exports = function($window) {
 							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true
-							nextSibling = movable.dom
+							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
 							var dom = createNode(v, hooks, undefined)
@@ -211,7 +214,7 @@ module.exports = function($window) {
 		if (children != null) {
 			for (var i = 0; i < children.length; i++) {
 				var child = children[i]
-				if (child != null) {
+				if (child != null && child.dom != null) {
 					if (vnode.dom == null) vnode.dom = child.dom
 					domSize += child.domSize || 1
 				}
@@ -250,7 +253,12 @@ module.exports = function($window) {
 		}
 		else if (old.instance != null) {
 			removeNode(parent, old.instance, null, false)
-			vnode.dom = vnode.domSize = undefined
+			vnode.dom = undefined
+			vnode.domSize = 0
+		}
+		else {
+			vnode.dom = old.dom
+			vnode.domSize = old.domSize
 		}
 	}
 	function isRecyclable(old, vnodes) {
@@ -277,7 +285,7 @@ module.exports = function($window) {
 	}
 	function toFragment(vnode) {
 		var count = vnode.domSize
-		if (count != null) {
+		if (count != null || vnode.dom == null) {
 			var fragment = $doc.createDocumentFragment()
 			if (count > 0) {
 				var dom = vnode.dom
@@ -290,7 +298,7 @@ module.exports = function($window) {
 	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
-			if (vnodes[i] != null) return vnodes[i].dom
+			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
 	}
@@ -479,12 +487,12 @@ module.exports = function($window) {
 	function copy(data) {
 		if (data instanceof Array) {
 			var output = []
-			for (var i = 0; i < data.length; i++) output[i] = copy(data[i])
+			for (var i = 0; i < data.length; i++) output[i] = data[i]
 			return output
 		}
 		else if (typeof data === "object") {
 			var output = {}
-			for (var i in data) output[i] = copy(data[i])
+			for (var i in data) output[i] = data[i]
 			return output
 		}
 		return data
