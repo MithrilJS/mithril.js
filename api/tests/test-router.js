@@ -49,6 +49,45 @@ o.spec("route", function() {
 				})
 			})
 
+			o("default route doesn't break back button", function(done) {
+				$window.location.href = "http://google.com"
+				route(root, "/a", {
+					"/a" : {
+						view: function() {
+							return m("div")
+						}
+					}
+				})
+
+				setTimeout(function() {
+					o(root.firstChild.nodeName).equals("DIV")
+					
+					$window.history.back()
+					
+					o($window.location.pathname).equals("/")
+					
+					done()
+				}, FRAME_BUDGET)
+			})
+
+			o("default route does not inherit params", function(done) {
+				$window.location.href = "/invalid?foo=bar"
+				route(root, "/a", {
+					"/a" : {
+						oninit: init,
+						view: function() {
+							return m("div")
+						}
+					}
+				})
+
+				function init(vnode) {
+					o(vnode.attrs).deepEquals({})
+					
+					done()
+				}
+			})
+
 			o("redraws when render function is executed", function(done) {
 				var onupdate = o.spy()
 				var oninit = o.spy()
