@@ -174,4 +174,12 @@ function reject(e) {
 	return stream
 }
 
-module.exports = {stream: createStream, combine: combine, reject: reject, HALT: HALT}
+function sync (streams) {
+	return combine(function () {
+		return Array.prototype.slice
+			.call(arguments, 0, arguments.length-1)
+			.map(function (s) { return s() })
+	}, streams)
+}
+
+module.exports = {stream: createStream, sync: sync, combine: combine, reject: reject, HALT: HALT}
