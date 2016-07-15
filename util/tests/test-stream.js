@@ -166,20 +166,20 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 		})
 	})
-	o.spec("sync", function() {
+	o.spec("merge", function() {
 		o("transforms an array of streams to an array of values", function() {
-			var all = Stream.sync([
+			var all = Stream.merge([
 				Stream.stream(10),
 				Stream.stream("20"),
-				Stream.stream({ value: 30 }),
+				Stream.stream({value: 30}),
 			])
 			
-			o(all()).deepEquals([10, "20", { value: 30 }])
+			o(all()).deepEquals([10, "20", {value: 30}])
 		})
 		o("remains pending until all streams are active", function() {
 			var straggler = Stream.stream()
 
-			var all = Stream.sync([
+			var all = Stream.merge([
 				Stream.stream(10),
 				Stream.stream("20"),
 				straggler,
