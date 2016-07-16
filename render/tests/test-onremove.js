@@ -3,6 +3,7 @@
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("onremove", function() {
 	var $window, root, render
