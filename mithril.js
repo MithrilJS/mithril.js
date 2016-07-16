@@ -585,11 +585,14 @@ var renderService = function($window) {
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
 		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-		var children = vnode.children
-		if (children instanceof Array) {
-			for (var i = 0; i < children.length; i++) {
-				var child = children[i]
-				if (child != null) onremove(child)
+		if (vnode.instance != null) onremove(vnode.instance)
+		else {
+			var children = vnode.children
+			if (children instanceof Array) {
+				for (var i = 0; i < children.length; i++) {
+					var child = children[i]
+					if (child != null) onremove(child)
+				}
 			}
 		}
 	}
@@ -1071,7 +1074,7 @@ m.route = function($window, renderer, pubsub) {
 				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
 			}
 		}, function(path, params) {
-			router.setPath(defaultRoute, params, {replace: true})
+			router.setPath(defaultRoute, null, {replace: true})
 		})
 		autoredraw(root, renderer, pubsub, replay)
 	}

@@ -22,7 +22,7 @@ module.exports = function($window, renderer, pubsub) {
 			else {
 				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
 			}
-		}, function(path, params) {
+		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
 		autoredraw(root, renderer, pubsub, replay)
