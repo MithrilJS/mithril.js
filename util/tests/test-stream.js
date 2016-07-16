@@ -312,7 +312,7 @@ o.spec("stream", function() {
 		o("error.map works", function() {
 			var stream = Stream.stream(1)
 			var mappedFromError = stream.error.map(function(value) {
-				return "from" + value.message
+				if (value) return "from" + value.message
 			})
 
 			o(mappedFromError()).equals(undefined)
@@ -382,7 +382,7 @@ o.spec("stream", function() {
 			var a = Stream.stream(1)
 			var b = Stream.combine(function(a) {throw new Error("error from b")}, [a])
 			var c = Stream.combine(function(a) {throw new Error("error from c")}, [a])
-			var d = Stream.combine(function(a, b) {return 2}, [a, b])
+			var d = Stream.combine(function(b, c) {return 2}, [b, c])
 
 			o(d()).equals(undefined)
 			o(d.error().message).equals("error from b")

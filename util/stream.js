@@ -58,7 +58,10 @@ function updateState(stream, value, error) {
 			if (recovered === HALT) return
 			updateValues(stream, recovered, undefined)
 		}
-		catch (e) {updateValues(stream, undefined, e)}
+		catch (e) {
+			updateValues(stream, undefined, e)
+			reportUncaughtError(stream, e)
+		}
 	}
 	else updateValues(stream, value, error)
 	stream._state.changed = true
@@ -81,6 +84,7 @@ function updateDependency(stream, mustSync) {
 			}
 			catch (e) {
 				updateState(stream, undefined, e)
+				reportUncaughtError(stream, e)
 			}
 		}
 	}
@@ -95,6 +99,13 @@ function unwrapError(value, error) {
 function finalize(stream) {
 	stream._state.changed = false
 	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
+}
+function reportUncaughtError(stream, e) {
+	if (Object.keys(stream._state.deps).length === 0) {
+		setTimeout(function() {
+			if (Object.keys(stream._state.deps).length === 0) console.error(e)
+		}, 0)
+	}
 }
 
 function run(fn) {
