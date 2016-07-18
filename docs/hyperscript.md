@@ -171,6 +171,21 @@ function doSomething(e) {
 m("div", {onclick: doSomething})
 ```
 
+
+
+By default, the full application is redrawn after running the even handler you supplied. You can prevent the redraw from occurring by setting the `redraw` property of the event (`e` in these samples) to `false`.
+
+```javascript
+function doSomethingDontRedraw(e) {
+	e.redraw = false
+	console.log(e)
+}
+```
+
+Mithril also supports per mount point redraws through a `redraw` function attached to the `root` DOM node passed to `m.mount(root, component)` and `m.route(root, defaultRoute, routes)`.
+
+To redraw a single mount point after an event, you can pass that function as `e.redraw = root.redraw`.
+
 ---
 
 ### Properties
