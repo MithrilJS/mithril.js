@@ -12,7 +12,7 @@
 		global.m = m
 	}
 	/* eslint-enable no-undef */
-})(typeof window !== "undefined" ? window : this, function (global, undefined) { // eslint-disable-line
+})(typeof window !== "undefined" ? window : this, function factory(global, undefined) { // eslint-disable-line
 	"use strict"
 
 	m.version = function () {
@@ -75,6 +75,8 @@
 		initialize(global = mock || window)
 		return global
 	}
+
+	m.deps.factory = m.factory = factory
 
 	m.deps(global)
 
