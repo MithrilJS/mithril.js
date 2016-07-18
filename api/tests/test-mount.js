@@ -10,7 +10,7 @@ var apiMounter = require("../../api/mount")
 
 o.spec("mount", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, redraw, mount
+	var $window, root, redraw, mount, render
 
 	o.beforeEach(function() {
 		$window = domMock()
@@ -19,6 +19,7 @@ o.spec("mount", function() {
 
 		redraw = apiPubSub()
 		mount = apiMounter(coreRenderer($window), redraw)
+		render = coreRenderer($window).render
 	})
 
 	o("renders into `root`", function() {
@@ -127,21 +128,25 @@ o.spec("mount", function() {
 	o("updates when new mounts are instantiated", function(done) {
 		var onupdate = o.spy()
 
-		mount(root, {
+		render(root, [
+			m("div[id=a]"),
+			m("div[id=b]")
+		])
+
+		mount(root.childNodes[0], {
 			view : function() {
 				return m("div", {
-					onupdate : onupdate,
-					oncreate : function( node ){
-						mount(node.dom, {
-							view : function(){
-								return m("div", {
-									oncreate : function(){
-										o(onupdate.callCount).equals(1)
-										done()
-									}
-								} )
-							}
-						})
+					onupdate : onupdate
+				})
+			}
+		})
+
+		mount(root.childNodes[1], {
+			view : function() {
+				return m("div", {
+					oncreate : function(){
+						o(onupdate.callCount).equals(1)
+						done()
 					}
 				})
 			}
