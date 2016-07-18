@@ -1,5 +1,6 @@
 "use strict"
 
+var m = require( "../hyperscript" )
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
@@ -93,7 +94,7 @@ o.spec("onremove", function() {
 		}
 		render(root, {tag: comp})
 		render(root, null)
-		
+
 		o(spy.callCount).equals(1)
 	})
 	o("calls onremove on nested component child", function() {
@@ -109,7 +110,7 @@ o.spec("onremove", function() {
 		}
 		render(root, {tag: comp})
 		render(root, null)
-		
+
 		o(spy.callCount).equals(1)
 	})
 	o("does not set onremove as an event handler", function() {
