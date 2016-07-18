@@ -19,6 +19,7 @@ m.trust = require("./render/trust")
 m.prop = Stream.stream
 m.prop.combine = Stream.combine
 m.prop.reject = Stream.reject
+m.prop.merge = Stream.merge
 m.prop.HALT = Stream.HALT
 m.withAttr = require("./util/withAttr")
 m.render = renderService.render

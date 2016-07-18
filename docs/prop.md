@@ -4,6 +4,7 @@
 - [Static members](#static-members)
 	- [prop.combine](#prop-combine)
 	- [prop.reject](#prop-reject)
+	- [prop.merge](#prop-merge)
 	- [prop.HALT](#prop-halt)
 - [Instance members](#static-members)
 	- [stream.run](#stream-run)
@@ -82,6 +83,19 @@ Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
 `value`      | `any`                | Yes      | The error value
 **returns**  | `Stream`             |          | Returns a stream in an error state
+
+[How to read signatures](signatures.md)
+
+##### prop.merge
+
+Creates a stream whose value is the array of values from an array of streams
+
+`stream = m.prop.merge(streams)`
+
+Argument     | Type                 | Required | Description
+------------ | -------------------- | -------- | ---
+`streams`    | `Array<Stream>`      | Yes      | A list of streams
+**returns**  | `Stream`             |          | Returns a stream whose value is an array of input stream values 
 
 [How to read signatures](signatures.md)
 

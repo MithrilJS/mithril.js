@@ -6,7 +6,7 @@ module.exports = function(root, renderer, pubsub, callback) {
 	var run = throttle(callback)
 	if (renderer != null) {
 		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) run()
+			if (e.redraw !== false) pubsub.publish()
 		})
 	}
 

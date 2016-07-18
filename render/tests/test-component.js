@@ -640,10 +640,11 @@ o.spec("component", function() {
 		})
 	})
 	o.spec("state", function() {
-		o("deep copies state", function() {
+		o("copies state", function() {
 			var called = 0
+			var data = {a: 1}
 			var component = {
-				data: [{a: 1}],
+				data: data,
 				oninit: init,
 				view: function() {
 					return ""
@@ -653,7 +654,27 @@ o.spec("component", function() {
 			render(root, [{tag: component}])
 
 			function init(vnode) {
-				o(vnode.state.data).deepEquals([{a: 1}])
+				o(vnode.state.data).deepEquals(data)
+				o(vnode.state.data).equals(data)
+			}
+		})
+		o("state copy is shallow", function() {
+			var called = 0
+			var body = {a: 1}
+			var data = [body]
+			var component = {
+				data: data,
+				oninit: init,
+				view: function() {
+					return ""
+				}
+			}
+
+			render(root, [{tag: component}])
+
+			function init(vnode) {
+				o(vnode.state.data).equals(data)
+				o(vnode.state.data[0]).equals(body)
 			}
 		})
 	})

@@ -23,7 +23,7 @@ module.exports = function($window, renderer, pubsub) {
 				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
 			}
 		}, function() {
-			router.setPath(defaultRoute)
+			router.setPath(defaultRoute, null, {replace: true})
 		})
 		autoredraw(root, renderer, pubsub, replay)
 	}
@@ -31,6 +31,6 @@ module.exports = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	route.set = router.setPath
 	route.get = router.getPath
-
+	
 	return route
 }

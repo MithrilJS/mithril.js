@@ -7,18 +7,15 @@ function createStream() {
 		return stream._state.value
 	}
 	initStream(stream, arguments)
-	
 	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
-	
 	return stream
 }
 function initStream(stream, args) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 	stream.map = map, stream.ap = ap, stream.of = createStream
-	stream.valueOf = valueOf, stream.toJSON = toJSON
+	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 	stream.run = run, stream.catch = doCatch
-	
 	Object.defineProperties(stream, {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
@@ -58,7 +55,10 @@ function updateState(stream, value, error) {
 			if (recovered === HALT) return
 			updateValues(stream, recovered, undefined)
 		}
-		catch (e) {updateValues(stream, undefined, e)}
+		catch (e) {
+			updateValues(stream, undefined, e)
+			reportUncaughtError(stream, e)
+		}
 	}
 	else updateValues(stream, value, error)
 	stream._state.changed = true
@@ -81,6 +81,7 @@ function updateDependency(stream, mustSync) {
 			}
 			catch (e) {
 				updateState(stream, undefined, e)
+				reportUncaughtError(stream, e)
 			}
 		}
 	}
@@ -95,6 +96,13 @@ function unwrapError(value, error) {
 function finalize(stream) {
 	stream._state.changed = false
 	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
+}
+function reportUncaughtError(stream, e) {
+	if (Object.keys(stream._state.deps).length === 0) {
+		setTimeout(function() {
+			if (Object.keys(stream._state.deps).length === 0) console.error(e)
+		}, 0)
+	}
 }
 function run(fn) {
 	var self = createStream(), stream = this
@@ -130,10 +138,8 @@ function initDependency(dep, streams, derive, recover) {
 	state.derive = derive
 	state.recover = recover
 	state.parents = streams.filter(notEnded)
-	
 	registerDependency(dep, state.parents)
 	updateDependency(dep, true)
-	
 	return dep
 }
 function registerDependency(stream, parents) {
@@ -168,7 +174,12 @@ function reject(e) {
 	stream.error(e)
 	return stream
 }
-var Stream = {stream: createStream, combine: combine, reject: reject, HALT: HALT}
+function merge(streams) {
+	return combine(function () {
+		return streams.map(function (s) {return s()})
+	}, streams)
+}
+var Stream = {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
 function Node(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -328,10 +339,13 @@ var renderService = function($window) {
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.instance.domSize
+			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
 			return element
 		}
-		else return $emptyFragment
+		else {
+			vnode.domSize = 0
+			return $emptyFragment
+		}
 	}
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
@@ -341,12 +355,12 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-		
+			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
 				if (o === v) oldStart++, start++
-				else if (o != null && v != null && o.key === v.key) {
+				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
@@ -354,7 +368,7 @@ var renderService = function($window) {
 				else {
 					var o = old[oldEnd]
 					if (o === v) oldEnd--, start++
-					else if (o != null && v != null && o.key === v.key) {
+					else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
@@ -365,10 +379,10 @@ var renderService = function($window) {
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldEnd], v = vnodes[end]
 				if (o === v) oldEnd--, end--
-				else if (o != null && v != null && o.key === v.key) {
+				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-					nextSibling = o.dom
+					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
 				}
 				else {
@@ -380,7 +394,7 @@ var renderService = function($window) {
 							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true
-							nextSibling = movable.dom
+							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
 							var dom = createNode(v, hooks, undefined)
@@ -440,7 +454,7 @@ var renderService = function($window) {
 		if (children != null) {
 			for (var i = 0; i < children.length; i++) {
 				var child = children[i]
-				if (child != null) {
+				if (child != null && child.dom != null) {
 					if (vnode.dom == null) vnode.dom = child.dom
 					domSize += child.domSize || 1
 				}
@@ -479,7 +493,12 @@ var renderService = function($window) {
 		}
 		else if (old.instance != null) {
 			removeNode(parent, old.instance, null, false)
-			vnode.dom = vnode.domSize = undefined
+			vnode.dom = undefined
+			vnode.domSize = 0
+		}
+		else {
+			vnode.dom = old.dom
+			vnode.domSize = old.domSize
 		}
 	}
 	function isRecyclable(old, vnodes) {
@@ -506,7 +525,7 @@ var renderService = function($window) {
 	}
 	function toFragment(vnode) {
 		var count = vnode.domSize
-		if (count != null) {
+		if (count != null || vnode.dom == null) {
 			var fragment = $doc.createDocumentFragment()
 			if (count > 0) {
 				var dom = vnode.dom
@@ -519,7 +538,7 @@ var renderService = function($window) {
 	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
-			if (vnodes[i] != null) return vnodes[i].dom
+			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
 	}
@@ -572,11 +591,14 @@ var renderService = function($window) {
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
 		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
-		var children = vnode.children
-		if (children instanceof Array) {
-			for (var i = 0; i < children.length; i++) {
-				var child = children[i]
-				if (child != null) onremove(child)
+		if (vnode.instance != null) onremove(vnode.instance)
+		else {
+			var children = vnode.children
+			if (children instanceof Array) {
+				for (var i = 0; i < children.length; i++) {
+					var child = children[i]
+					if (child != null) onremove(child)
+				}
 			}
 		}
 	}
@@ -699,12 +721,12 @@ var renderService = function($window) {
 	function copy(data) {
 		if (data instanceof Array) {
 			var output = []
-			for (var i = 0; i < data.length; i++) output[i] = copy(data[i])
+			for (var i = 0; i < data.length; i++) output[i] = data[i]
 			return output
 		}
 		else if (typeof data === "object") {
 			var output = {}
-			for (var i in data) output[i] = copy(data[i])
+			for (var i in data) output[i] = data[i]
 			return output
 		}
 		return data
@@ -1030,7 +1052,7 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 	var run = throttle(callback)
 	if (renderer != null) {
 		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) run()
+			if (e.redraw !== false) pubsub.publish()
 		})
 	}
 	if (pubsub != null) {
@@ -1058,7 +1080,7 @@ m.route = function($window, renderer, pubsub) {
 				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
 			}
 		}, function() {
-			router.setPath(defaultRoute)
+			router.setPath(defaultRoute, null, {replace: true})
 		})
 		autoredraw(root, renderer, pubsub, replay)
 	}
@@ -1083,6 +1105,7 @@ m.trust = function(html) {
 m.prop = Stream.stream
 m.prop.combine = Stream.combine
 m.prop.reject = Stream.reject
+m.prop.merge = Stream.merge
 m.prop.HALT = Stream.HALT
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {

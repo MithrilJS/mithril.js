@@ -7,18 +7,18 @@ function createStream() {
 		return stream._state.value
 	}
 	initStream(stream, arguments)
-	
+
 	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
-	
+
 	return stream
 }
 function initStream(stream, args) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 	stream.map = map, stream.ap = ap, stream.of = createStream
-	stream.valueOf = valueOf, stream.toJSON = toJSON
+	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 	stream.run = run, stream.catch = doCatch
-	
+
 	Object.defineProperties(stream, {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
@@ -58,7 +58,10 @@ function updateState(stream, value, error) {
 			if (recovered === HALT) return
 			updateValues(stream, recovered, undefined)
 		}
-		catch (e) {updateValues(stream, undefined, e)}
+		catch (e) {
+			updateValues(stream, undefined, e)
+			reportUncaughtError(stream, e)
+		}
 	}
 	else updateValues(stream, value, error)
 	stream._state.changed = true
@@ -81,6 +84,7 @@ function updateDependency(stream, mustSync) {
 			}
 			catch (e) {
 				updateState(stream, undefined, e)
+				reportUncaughtError(stream, e)
 			}
 		}
 	}
@@ -95,6 +99,13 @@ function unwrapError(value, error) {
 function finalize(stream) {
 	stream._state.changed = false
 	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
+}
+function reportUncaughtError(stream, e) {
+	if (Object.keys(stream._state.deps).length === 0) {
+		setTimeout(function() {
+			if (Object.keys(stream._state.deps).length === 0) console.error(e)
+		}, 0)
+	}
 }
 
 function run(fn) {
@@ -132,10 +143,10 @@ function initDependency(dep, streams, derive, recover) {
 	state.derive = derive
 	state.recover = recover
 	state.parents = streams.filter(notEnded)
-	
+
 	registerDependency(dep, state.parents)
 	updateDependency(dep, true)
-	
+
 	return dep
 }
 function registerDependency(stream, parents) {
@@ -174,4 +185,10 @@ function reject(e) {
 	return stream
 }
 
-module.exports = {stream: createStream, combine: combine, reject: reject, HALT: HALT}
+function merge(streams) {
+	return combine(function () {
+		return streams.map(function (s) {return s()})
+	}, streams)
+}
+
+module.exports = {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
