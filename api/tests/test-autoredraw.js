@@ -92,4 +92,29 @@ o.spec("autoredraw", function() {
 		o(spy.callCount).equals(0)
 	})
 
+	o("does redraw if e.redraw is true", function() {
+		autoredraw(root, renderer, pubsub, spy)
+
+		renderer.render(root, {tag: "div", attrs: {onclick: function(e) {e.redraw = true}}})
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		root.firstChild.dispatchEvent(e)
+
+		o(spy.callCount).equals(1)
+	})
+
+	o("calls custom redraw function when provided", function() {
+		var customRedrawer = o.spy()
+		autoredraw(root, renderer, pubsub, spy)
+
+		renderer.render(root, {tag: "div", attrs: {onclick: function(e) {e.redraw = customRedrawer}}})
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		root.firstChild.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+		o(customRedrawer.callCount).equals(1)
+	})
 })
