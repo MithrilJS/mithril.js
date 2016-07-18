@@ -536,6 +536,7 @@
 		}
 		cached = new data.constructor(data)
 		cached.nodes = nodes
+		cached.$trusted = data.$trusted
 		return cached
 	}
 
@@ -562,10 +563,7 @@
 		if (item.$trusted) {
 			// fix offset of next element if item was a trusted string w/ more
 			// than one html element
-			// the first clause in the regexp matches elements
-			// the second clause (after the pipe) matches text nodes
-			var match = item.match(/<[^\/]|\>\s*[^<]/g)
-			if (match != null) return match.length
+			return item.nodes.length
 		} else if (isArray(item)) {
 			return item.length
 		}
