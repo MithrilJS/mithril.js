@@ -116,58 +116,69 @@ module.exports = function($window) {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
 			
-			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
-			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldStart], v = vnodes[start]
-				if (o === v) oldStart++, start++
-				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
-					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
+				for (var i = 0; i < old.length; i++) {
+					if (old[i] == null && vnodes[i] == null) continue
+					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+					else if (vnodes[i] == null) removeNodes(parent, old, i, i + 1, vnodes)
+					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
+					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
 				}
-				else {
-					var o = old[oldEnd]
-					if (o === v) oldEnd--, start++
-					else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
+			}
+			else {
+				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
+				while (oldEnd >= oldStart && end >= start) {
+					var o = old[oldStart], v = vnodes[start]
+					if (o === v) oldStart++, start++
+					else if (o != null && v != null && o.key === v.key) {
+						oldStart++, start++
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
+						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					}
+					else {
+						var o = old[oldEnd]
+						if (o === v) oldEnd--, start++
+						else if (o != null && v != null && o.key === v.key) {
+							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+							insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+							oldEnd--, start++
+						}
+						else break
+					}
+				}
+				while (oldEnd >= oldStart && end >= start) {
+					var o = old[oldEnd], v = vnodes[end]
+					if (o === v) oldEnd--, end--
+					else if (o != null && v != null && o.key === v.key) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-						insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
-						oldEnd--, start++
+						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+						if (o.dom != null) nextSibling = o.dom
+						oldEnd--, end--
 					}
-					else break
-				}
-			}
-			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldEnd], v = vnodes[end]
-				if (o === v) oldEnd--, end--
-				else if (o != null && v != null && o.key === v.key && o.tag === v.tag) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-					if (o.dom != null) nextSibling = o.dom
-					oldEnd--, end--
-				}
-				else {
-					if (!map) map = getKeyMap(old, oldEnd)
-					if (v != null) {
-						var oldIndex = map[v.key]
-						if (oldIndex != null) {
-							var movable = old[oldIndex]
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							insertNode(parent, toFragment(movable), nextSibling)
-							old[oldIndex].skip = true
-							if (movable.dom != null) nextSibling = movable.dom
+					else {
+						if (!map) map = getKeyMap(old, oldEnd)
+						if (v != null) {
+							var oldIndex = map[v.key]
+							if (oldIndex != null) {
+								var movable = old[oldIndex]
+								updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+								insertNode(parent, toFragment(movable), nextSibling)
+								old[oldIndex].skip = true
+								if (movable.dom != null) nextSibling = movable.dom
+							}
+							else {
+								var dom = createNode(v, hooks, undefined)
+								insertNode(parent, dom, nextSibling)
+								nextSibling = dom
+							}
 						}
-						else {
-							var dom = createNode(v, hooks, undefined)
-							insertNode(parent, dom, nextSibling)
-							nextSibling = dom
-						}
+						end--
 					}
-					end--
+					if (end < start) break
 				}
-				if (end < start) break
+				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
+				removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 			}
-			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
-			removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {

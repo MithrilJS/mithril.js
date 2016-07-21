@@ -174,6 +174,20 @@ o.spec("oncreate", function() {
 		o(callback.this).equals(updated.children[0].state)
 		o(callback.args[0]).equals(updated.children[0])
 	})
+	o("calls oncreate on unkeyed that falls into reverse list diff code path", function() {
+		var create = o.spy()
+		render(root, [{tag: "p"}, {tag: "div"}])
+		render(root, [{tag: "div", attrs: {oncreate: create}}, {tag: "div"}])
+
+		o(create.callCount).equals(1)
+	})
+	o("calls oncreate on unkeyed that falls into forward list diff code path", function() {
+		var create = o.spy()
+		render(root, [{tag: "div"}, {tag: "p"}])
+		render(root, [{tag: "div"}, {tag: "div", attrs: {oncreate: create}}])
+
+		o(create.callCount).equals(1)
+	})
 	o("calls oncreate after full DOM creation", function() {
 		var created = false
 		var vnode = {tag: "div", children: [

@@ -762,10 +762,10 @@ o.spec("updateNodes", function() {
 		o(vnodes[0].dom).equals(updated[0].dom)
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
-	o("recycles when toggling", function() {
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = [{tag: "div"}]
-		var updated = [{tag: "div", key: 1}]
+	o("recycles when not keyed", function() {
+		var vnodes = [{tag: "div"}]
+		var temp = []
+		var updated = [{tag: "div"}]
 
 		render(root, vnodes)
 		render(root, temp)
