@@ -2,7 +2,7 @@
 
 - [API](#api)
 - [How it works](#how it works)
-- [Relationship to other API methods](#relationship-to-other-api-methods)
+- [Differences from other API methods](#differences-from-other-api-methods)
 - [Standalone usage](#standalone-usage)
 
 ---
@@ -33,7 +33,7 @@ In contrast, traversing a javascript data structure has a much more predictable 
 
 ---
 
-### Relationship to other API methods
+### Differences from other API methods
 
 `m.render()` method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md), [`m.redraw()`](redraw.md) and `[m.request()](request.md)`. It is not called by [`m.prop()`](prop.md)
 
