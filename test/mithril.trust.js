@@ -81,5 +81,37 @@ describe("m.trust()", function () {
 
 			expect(root.innerText).to.equal("After")
 		})
+
+		// https://github.com/lhorie/mithril.js/issues/956
+		it("works with many and nested tags in trusted content", function () {
+			var page = {
+				names: m.prop(["John", "Paul", "George", "Ringo"]),
+				nodeString: function (name) {
+					return "<div><p>Hi </p></div><div><p>" + name + "</p></div>"
+				},
+				view: function () {
+					return m("div",
+						this.names().map(function (name) {
+							return m.trust(this.nodeString(name))
+						}, this)
+					)
+				}
+			}
+			m.render(document.body, page)
+			var root = document.body.children[0]
+			expect(root.children.length).to.equal(2 * page.names().length)
+			for (var i = 0; i < page.names().length; i++) {
+				var section = root.children[2 * i + 1]
+				expect(section.children[0].innerText).to.equal(page.names()[i])
+			}
+
+			page.names(["Jack", "Jill"])
+			m.render(document.body, page)
+			expect(root.children.length).to.equal(2 * page.names().length)
+			for (i = 0; i < page.names().length; i++) {
+				section = root.children[2 * i + 1]
+				expect(section.children[0].innerText).to.equal(page.names()[i])
+			}
+		})
 	})
 })
