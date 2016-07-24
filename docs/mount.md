@@ -10,11 +10,11 @@
 
 `m.mount(element, component)`
 
-Argument    | Type                 | Required | Description
------------ | -------------------- | -------- | ---
-`element`   | `Element`            | Yes      | A DOM element that will be the parent node to the subtree
-`component` | `Component`          | Yes      | The [component](components.md) to be rendered
-**returns** |                      |          | Returns nothing
+Argument    | Type                   | Required | Description
+----------- | ---------------------- | -------- | ---
+`element`   | `Element`              | Yes      | A DOM element that will be the parent node to the subtree
+`component` | `Component|Vnode|null` | Yes      | The [component](components.md) or [vnode](vnodes.md) to be rendered. `null` unmounts the tree and cleans up internal state.
+**returns** |                        |          | Returns nothing
 
 [How to read signatures](signatures.md)
 
@@ -22,7 +22,18 @@ Argument    | Type                 | Required | Description
 
 ### How it works
 
-Similar to [`m.render()`](render.md), the `m.mount()` method takes a component and mounts a corresponding DOM tree into `element`. If `element` already has a DOM tree mounted via a previous `m.mount()` call, the component is diffed against the previous vnode tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.
+Similar to [`m.render()`](render.md), the `m.mount()` method takes a component or a vnode and mounts a corresponding DOM tree into `element`. If `element` already has a DOM tree mounted via a previous `m.mount()` call, the component is diffed against the previous vnode tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.
+
+
+#### Unmounting
+
+`m.mount(root, null)`
+
+Passing `null` as second argument unmounts the tree and cleans up Mithril internal state. This can be useful to prevent memory leaks when removing the `root` node manually from the DOM.
+
+---
+
+### Performance considerations
 
 It may seem wasteful to generate a vnode tree on every redraw, but as it turns out, creating and comparing Javascript data structures is surprisingly cheap compared to reading and modifying the DOM.
 
@@ -34,7 +45,7 @@ In contrast, traversing a javascript data structure has a much more predictable 
 
 ### Differences from m.render
 
-A component rendered via `m.mount` automatically auto-redraws in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not. Note that calls to `m.prop()` do not trigger auto-redraws.
+A component rendered via `m.mount` automatically auto-redraws in response to view events or `m.redraw()` calls. Vnodes rendered via `m.render()` do not. Note that calls to `m.prop()` do not trigger auto-redraws.
 
 `m.mount()` is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril's auto-redrawing facilities.
 
