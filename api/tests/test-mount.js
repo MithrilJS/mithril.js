@@ -68,6 +68,71 @@ o.spec("mount", function() {
 		}, FRAME_BUDGET)
 	})
 
+	o("redraws several mount points on events", function(done) {
+		var onupdate0 = o.spy()
+		var oninit0   = o.spy()
+		var onclick0  = o.spy()
+		var onupdate1 = o.spy()
+		var oninit1   = o.spy()
+		var onclick1  = o.spy()
+
+		var e = $window.document.createEvent("MouseEvents")
+
+		e.initEvent("click", true, true)
+
+		render(root, [
+			m("#child0"),
+			m("#child1")
+		])
+
+		mount(root.childNodes[0], {
+			view : function() {
+				return m("div", {
+					oninit   : oninit0,
+					onupdate : onupdate0,
+					onclick  : onclick0,
+				})
+			}
+		})
+
+		o(oninit0.callCount).equals(1)
+		o(onupdate0.callCount).equals(0)
+
+		mount(root.childNodes[1], {
+			view : function() {
+				return m("div", {
+					oninit   : oninit1,
+					onupdate : onupdate1,
+					onclick  : onclick1,
+				})
+			}
+		})
+
+		o(oninit1.callCount).equals(1)
+		o(onupdate1.callCount).equals(0)
+
+		root.childNodes[0].firstChild.dispatchEvent(e)
+		o(onclick0.callCount).equals(1)
+		o(onclick0.this).equals(root.childNodes[0].firstChild)
+
+		setTimeout(function() {
+			o(onupdate0.callCount).equals(1)
+			o(onupdate1.callCount).equals(1)
+
+			root.childNodes[1].firstChild.dispatchEvent(e)
+			o(onclick1.callCount).equals(1)
+			o(onclick1.this).equals(root.childNodes[1].firstChild)
+
+			setTimeout(function() {
+				o(onupdate0.callCount).equals(2)
+				o(onupdate1.callCount).equals(2)
+
+				done()
+			}, FRAME_BUDGET)
+		}, FRAME_BUDGET)
+
+	})
+
 	o("event handlers can skip redraw", function(done) {
 		var onupdate = o.spy()
 		var oninit   = o.spy()
