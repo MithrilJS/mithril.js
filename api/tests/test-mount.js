@@ -124,32 +124,4 @@ o.spec("mount", function() {
 			done()
 		}, FRAME_BUDGET)
 	})
-
-	o("updates when new mounts are instantiated", function(done) {
-		var onupdate = o.spy()
-
-		render(root, [
-			m("div[id=a]"),
-			m("div[id=b]")
-		])
-
-		mount(root.childNodes[0], {
-			view : function() {
-				return m("div", {
-					onupdate : onupdate
-				})
-			}
-		})
-
-		mount(root.childNodes[1], {
-			view : function() {
-				return m("div", {
-					oncreate : function(){
-						o(onupdate.callCount).equals(1)
-						done()
-					}
-				})
-			}
-		})
-	})
 })
