@@ -176,7 +176,7 @@ module.exports = function($window) {
 					}
 					if (end < start) break
 				}
-				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
+				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
