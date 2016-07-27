@@ -176,7 +176,7 @@ module.exports = function($window) {
 					}
 					if (end < start) break
 				}
-				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
+				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
@@ -518,8 +518,8 @@ module.exports = function($window) {
 
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
-		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		dom.vnodes = vnodes
+		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
 	}
 
