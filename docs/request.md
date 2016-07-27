@@ -3,7 +3,13 @@
 - [API](#api)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
+- [Loading icons and error messages](#loading-icons-and-error-messages)
 - [Dynamic URLs](#dynamic-urls)
+- [Aborting requests](#aborting-requests)
+- [File uploads](#file-uploads)
+- [Monitoring progress](#monitoring-progress)
+- [Casting response to a type](#casting-response-to-a-type)
+- [Non-JSON responses](#non-json-responses)
 - [Why JSON instead of HTML](#why-json-instead-of-html)
 - [Why XMLHttpRequest instead of fetch](#why-xmlhttprequest-instead-of-fetch)
 - [Why return streams](#why-return-streams)
@@ -24,7 +30,7 @@ Argument               | Type                              | Required | Descript
 `options.password`     | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
 `options.config`       | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`.
+`options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
 `options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`
 `options.initialValue` | `any`                             | No       | A value to populate the returned stream before the request completes
@@ -43,12 +49,15 @@ The `m.request` utility is a thin wrapper around [`XMLHttpRequest`](https://deve
 m.request({
 	method: "GET",
 	url: "/api/v1/users",
-}).run(function(users) {
+})
+.run(function(users) {
 	console.log(users)
 })
 ```
 
 Calls to `m.request` return a [stream](prop.md).
+
+By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
 
 ---
 
@@ -81,7 +90,9 @@ Let's assume making a request to the server URL `/api/items` returns an array of
 
 When `m.route` is called at the bottom, `SimpleExample` is initialized. `oninit` is called, which calls `m.request` and assigns its return value (a stream) to `vnode.state.items`. This stream contains the `initialValue` (i.e. an empty array), and this value can be retrieved by calling the stream as a function (i.e. `value = vnode.state.items()`). After the oninit method returns, the component is then rendered. Since `vnode.state.items()` returns an empty array, the component's `view` method also returns an empty array, so no DOM elements are created. When the request to the server completes, `m.request` parses the response data into a Javascript array of objects and sets the value of the stream to that array. Then, the component is rendered again. This time, `vnode.state.items()` returns a non-empty array, so the component's `view` method returns an array of vnodes, which in turn are rendered into `div` DOM elements.
 
-#### Loading icons and error messages
+---
+
+### Loading icons and error messages
 
 Here's an expanded version of the example above that implements a loading indicator and an error message:
 
@@ -154,6 +165,189 @@ m.request({
 ```
 
 In the code above, the request becomes `GET /api/v1/users/foo:bar`
+
+---
+
+### Aborting requests
+
+Sometimes, it is desirable to abort a request. For example, in an autocompleter/typeahead widget, you want to ensure that only the last request completes, because typically autocompleters fire several requests as the user types  and HTTP requests may complete out of order due to the unpredictable nature of networks. If another request finishes after the last fired request, the widget would display less relevant (or potentially wrong) data than if the last fired request finished last.
+
+`m.request()` exposes its underlying `XMLHttpRequest` object via the `options.config` parameter, which allows you to save a reference to that object and call its `abort` method when required:
+
+```javascript
+var searchXHR = null
+function search() {
+	abortPreviousSearch()
+	
+	m.request({
+		method: "GET",
+		url: "/api/v1/users",
+		data: {search: query},
+		config: function(xhr) {searchXHR = xhr}
+	})
+}
+function abortPreviousSearch() {
+	if (searchXHR !== null) searchXHR.abort()
+	searchXHR = null
+}
+```
+
+---
+
+### File uploads
+
+To upload files, first you need to get a reference to a [`File`](https://developer.mozilla.org/en/docs/Web/API/File) object. The easiest way to do that is from a `<input type="file">`.
+
+```javascript
+m.render(document.body, [
+	m("input[type=file]", {onchange: upload})
+])
+
+function upload(e) {
+	var file = e.target.files[0]
+}
+```
+
+The snippet above renders a file input. If a user picks a file, the `onchange` event is triggered, which calls the `upload` function. `e.target.files` is a list of `File` objects.
+
+Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData) object to create a [multipart request](https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html), which is a specially formatted HTTP request that is able to send file data in the request body.
+
+```javascript
+function upload(e) {
+	var file = e.target.files[0]
+	
+	var data = new FormData()
+	data.append("myfile", file)
+}
+```
+
+Next, you need to call `m.request` and set `options.method` to an HTTP method that uses body (e.g. `POST`, `PUT`, `PATCH`) and use the `FormData` object as `options.data`.
+
+```javascript
+function upload(e) {
+	var file = e.target.files[0]
+	
+	var data = new FormData()
+	data.append("myfile", file)
+	
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		data: data,
+	})
+}
+```
+
+Assuming the server is configured to accept multipart requests, the file information will be associated with the `myfile` key.
+
+---
+
+### Monitoring progress
+
+Sometimes, if a request is inherently slow (e.g. a large file upload), it's desirable to display a progress indicator to the user to signal that the application is still working.
+
+`m.request()` exposes its underlying `XMLHttpRequest` object via the `options.config` parameter, which allows you to attach event listeners to the XMLHttpRequest object:
+
+```javascript
+var progress = 0
+
+m.mount(document.body, {
+	view: function() {
+		return [
+			m("input[type=file]", {onchange: upload}),
+			progress + "% completed"
+		]
+	}
+})
+
+function upload(e) {
+	var file = e.target.files[0]
+	
+	var data = new FormData()
+	data.append("myfile", file)
+	
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		data: data,
+		config: function(xhr) {
+			xhr.addEventListener("progress", function(e) {
+				progress = e.loaded / e.total
+				
+				m.redraw() // tell Mithril that data changed and a re-render is needed
+			})
+		}
+	})
+}
+```
+
+In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the `config` callback, a `progress` event handler is registered. This event handler is fired whenever there's a progress update in the XMLHttpRequest. Because the XMLHttpRequest's progress event is not directly handled by Mithril's virtual DOM engine, `m.redraw()` must be called to signal to Mithril that data has changed and a redraw is required.
+
+---
+
+### Casting response to a type
+
+Depending on the overall application architecture, it may be desirable to transform the response data of a request to a specific class or type (for example, to uniformly parse date fields or to have helper methods).
+
+You can pass a constructor as the `options.type` parameter and Mithril will instantiate it for each object in the HTTP response.
+
+```javascript
+function User(data) {
+	this.name = data.firstName + " " + data.lastName
+}
+
+m.request({
+	method: "GET",
+	url: "/api/v1/users",
+	type: User
+})
+.run(function(users) {
+	console.log(users[0].name) // logs a name
+})
+```
+
+In the example above, assuming `/api/v1/users` returns an array of objects, the `User` constructor will be instantiated (i.e. called as `new User(data)`) for each object in the array. If the response returned a single object, that object would be used as the `data` argument.
+
+---
+
+### Non-JSON responses
+
+Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
+
+```javascript
+m.request({
+	method: "GET",
+	url: "/files/icon.svg",
+	deserialize: function(value) {return value}
+})
+.run(function(svg) {
+	m.render(document.body, m.trust(svg))
+})
+```
+
+In the example above, the request retrieves an SVG file, does nothing to parse it (because `deserialize` merely returns the value as-is), and then renders the SVG string as trusted HTML.
+
+Of course, a `deserialize` function may be more elaborate:
+
+```javascript
+m.request({
+	method: "GET",
+	url: "/files/data.csv",
+	deserialize: parseCSV
+})
+.run(function(data) {
+	console.log(data)
+})
+
+function parseCSV(data) {
+	// naive implementation for the sake of keeping example simple
+	return data.split("\n").map(function(row) {
+		return row.split(",")
+	})
+}
+```
+
+Ignoring the fact that the parseCSV function above doesn't handle a lot of cases that a proper CSV parser would, the code above logs an array of arrays
 
 ---
 
