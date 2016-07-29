@@ -252,7 +252,7 @@ var WorkingComponent = {
 
 #### Avoid premature optimizations
 
-The `onbeforeupdate` hook should only be used as a last resort. Avoid using it unless you have a noticeable performance issue.
+You should only use `onbeforeupdate` to skip diffing as a last resort. Avoid using it unless you have a noticeable performance issue.
 
 Typically performance problems that can be fixed via `onbeforeupdate` boil down to one large array of items. In this context, typically "large" means any array that contains a large number of nodes, be it in a wide spread (the infamous 5000 row table), or in a deep, dense tree.
 
