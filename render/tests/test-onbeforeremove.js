@@ -167,4 +167,16 @@ o.spec("onbeforeremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
+	o("triggers onbeforeremove hooks in descendants of the removed node", function() {
+		var count = 0
+		var increment = function() {count++}
+		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: increment}, children: [
+			{tag: "div", key: 1, attrs: {onbeforeremove: increment}}
+		]}
+
+		render(root, [vnode])
+		render(root, [])
+
+		o(count).equals(2)
+	})
 })
