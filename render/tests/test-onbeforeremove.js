@@ -188,4 +188,20 @@ o.spec("onbeforeremove", function() {
 
 		o(count).equals(2)
 	})
+	o("awaits resolution of all descendants onbeforremoves before removing the root node", function() {
+		var count = 0
+		var deferIncrement = function(delay) {
+			return function(done) {
+				setTimeout(function() {
+					count++
+					done()
+				}, delay)
+			}
+		}
+		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: deferIncrement(0), onremove:function(){
+			o(count).equals(2)
+		}}, children: [
+			{tag: "div", key: 1, attrs: {onbeforeremove: deferIncrement(1)}}
+		]}
+	})
 })

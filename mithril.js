@@ -354,7 +354,6 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] == null && vnodes[i] == null) continue
@@ -572,13 +571,22 @@ var renderService = function($window) {
 			var callback = function() {
 				if (++called === expected) removeNode(parent, vnode, context, true)
 			}
-			if (vnode.attrs && vnode.attrs.onbeforeremove) {
-				expected++
-				vnode.attrs.onbeforeremove.call(vnode, vnode, callback)
-			}
-			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-				expected++
-				vnode.tag.onbeforeremove.call(vnode, vnode, callback)
+			var removables = [vnode]
+			while (removables[0]) {
+				var removable = removables.shift()
+				if (removable.attrs && removable.attrs.onbeforeremove) {
+					expected++
+					removable.attrs.onbeforeremove.call(removable.state, removable, callback)
+				}
+				if (removable.tag && typeof removable.tag !== "string" && removable.tag.onbeforeremove) {
+					expected++
+					removable.tag.onbeforeremove.call(removable.state, removable, callback)
+				}
+				if (removable.children && removable.children.length) {
+					for (var i = 0; i < removable.children.length; i++) {
+						removables.push(removable.children[i])
+					}
+				}
 			}
 			if (expected > 0) return
 		}
@@ -785,7 +793,7 @@ var requestService = function($window) {
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
-		if (typeof args.serialize !== "function") args.serialize = args.data instanceof FormData ? function(value) {return value} : JSON.stringify
+		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
 		
