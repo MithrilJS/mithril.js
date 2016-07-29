@@ -173,8 +173,35 @@ o.spec("onbeforeremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
-
 	o("sets the onbeforeremove context to vnode.state", function(){
 		var handler = o.spy()
+	})
+	o("triggers onbeforeremove hooks in descendants of the removed node", function() {
+		var count = 0
+		var increment = function() {count++}
+		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: increment}, children: [
+			{tag: "div", key: 1, attrs: {onbeforeremove: increment}}
+		]}
+
+		render(root, [vnode])
+		render(root, [])
+
+		o(count).equals(2)
+	})
+	o("awaits resolution of all descendants onbeforremoves before removing the root node", function() {
+		var count = 0
+		var deferIncrement = function(delay) {
+			return function(done) {
+				setTimeout(function() {
+					count++
+					done()
+				}, delay)
+			}
+		}
+		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: deferIncrement(0), onremove:function(){
+			o(count).equals(2)
+		}}, children: [
+			{tag: "div", key: 1, attrs: {onbeforeremove: deferIncrement(1)}}
+		]}
 	})
 })
