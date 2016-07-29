@@ -3,7 +3,7 @@
 var fs = require("fs")
 var path = require("path")
 
-module.exports = function(input, output) {
+module.exports = function(input, output, options) {
 	function run(e, file) {
 		var modules = {}
 		var usedVariables = {}
@@ -17,7 +17,7 @@ module.exports = function(input, output) {
 				
 				//resolve npm dependencies
 				if (filename[0] !== ".") {
-					var meta = JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json"))
+					var meta = fs.statSync("./node_modules/" + filename + "/package.json").isFile() ? JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json")) : {}
 					var dependencyEntry = "./node_modules/" + filename + "/" + (meta.main || filename + ".js")
 					try {fs.statSync(dependencyEntry).isFile()} catch (e) {dependencyEntry = "./node_modules/" + filename + "/index.js"}
 					return resolve(path.dirname(dependencyEntry), exportCode(dependencyEntry, def + variable + eq))
@@ -57,7 +57,7 @@ module.exports = function(input, output) {
 
 		function fixCollisions(code) {
 			for (var variable in usedVariables) {
-				var collision = new RegExp("\\b" + variable + "\\b(?![\"'`])", "g")
+				var collision = new RegExp("(?!.)\\b" + variable + "\\b(?![\"'`])", "g")
 				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
 				if (collision.test(code) && !exported.test(code)) {
 					var fixed = variable + usedVariables[variable]++
@@ -68,14 +68,14 @@ module.exports = function(input, output) {
 		}
 
 		function setVersion(code) {
-			var metadata = JSON.parse(fs.readFileSync("./package.json"))
+			var metadata = JSON.parse(fs.readFileSync(__dirname + "/../package.json"))
 			return code.replace("bleeding-edge", metadata.version)
 		}
 
 		function bundle(input, output) {
 			console.log("bundling...")
 			var code = setVersion(resolve(path.dirname(input), fs.readFileSync(input, "utf8")))
-			if (new Function(code)) fs.writeFileSync(output, code, "utf8")
+			/*if (new Function(code)) */fs.writeFileSync(output, code, "utf8")
 			console.log("done")
 		}
 		
@@ -83,5 +83,5 @@ module.exports = function(input, output) {
 	}
 	run()
 
-	//fs.watch(process.cwd(), {recursive: true}, run)
+	if (options && options.watch) fs.watch(process.cwd(), {recursive: true}, run)
 }

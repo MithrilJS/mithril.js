@@ -2,7 +2,7 @@ var http = require("http")
 var querystring = require("querystring")
 var fs = require("fs")
 
-module.exports = function(input, output) {
+module.exports = function(input, output, options) {
 	function format(n) {
 		return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
 	}
@@ -61,5 +61,5 @@ module.exports = function(input, output) {
 	}
 	run()
 
-	//fs.watchFile(input, run)
+	if (options && options.watch) fs.watchFile(input, run)
 }

@@ -3,18 +3,24 @@
 var bundle = require("./bundle")
 var minify = require("./minify")
 
-var aliases = {o: "output"}
+var aliases = {o: "output", m: "minify", w: "watch"}
 var params = {}
 var args = process.argv.slice(2), command = null
 for (var i = 0; i < args.length; i++) {
-	if (args[i][0] === '"') args[i] = args[i].slice(1, -1)
-	if (args[i][0] === "-") command = args[i].replace(/\-+/g, "")
-	else if (command != null) {
-		params[aliases[command] || command] = args[i]
-		command = null
+	if (args[i][0] === '"') args[i] = JSON.parse(args[i])
+	if (args[i][0] === "-") {
+		if (command != null) add(true)
+		command = args[i].replace(/\-+/g, "")
 	}
+	else if (command != null) add(args[i])
 	else params.input = args[i]
 }
+if (command != null) add(true)
 
-bundle(params.input, params.output)
-minify(params.output, params.output.replace(/\.js$/, ".min.js"))
+function add(value) {
+	params[aliases[command] || command] = value
+	command = null
+}
+
+bundle(params.input, params.output, {watch: params.watch})
+if (params.minify) minify(params.output, params.output, {watch: params.watch})
