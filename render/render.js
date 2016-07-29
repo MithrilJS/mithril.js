@@ -341,11 +341,11 @@ module.exports = function($window) {
 
 				if (removable.attrs && removable.attrs.onbeforeremove) {
 					expected++
-					removable.attrs.onbeforeremove.call(removable, removable, callback)
+					removable.attrs.onbeforeremove.call(removable.state, removable, callback)
 				}
 				if (removable.tag && typeof removable.tag !== "string" && removable.tag.onbeforeremove) {
 					expected++
-					removable.tag.onbeforeremove.call(removable, removable, callback)
+					removable.tag.onbeforeremove.call(removable.state, removable, callback)
 				}
 				if (removable.children && removable.children.length) {
 					for (var i = 0; i < removable.children.length; i++) {
