@@ -1,5 +1,4 @@
 "use strict"
-;(function () {
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
 	function stream() {
@@ -416,7 +415,7 @@ var renderService = function($window) {
 					}
 					if (end < start) break
 				}
-				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, undefined)
+				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
@@ -748,25 +747,12 @@ var renderService = function($window) {
 		if (dom.vnodes == null) dom.vnodes = []
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
-		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		dom.vnodes = vnodes
+		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }(window)
-var redrawService = function() {
-	var callbacks = []
-	function unsubscribe(callback) {
-		var index = callbacks.indexOf(callback)
-		if (index > -1) callbacks.splice(index, 1)
-	}
-    function publish() {
-        for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i].apply(this, arguments)
-        }
-    }
-	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
-}()
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -799,7 +785,7 @@ var requestService = function($window) {
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
-		if (typeof args.serialize !== "function") args.serialize = JSON.stringify
+		if (typeof args.serialize !== "function") args.serialize = args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
 		
@@ -905,10 +891,20 @@ var requestService = function($window) {
 	
 	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }(window)
+var redrawService = function() {
+	var callbacks = []
+	function unsubscribe(callback) {
+		var index = callbacks.indexOf(callback)
+		if (index > -1) callbacks.splice(index, 1)
+	}
+    function publish() {
+        for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i].apply(this, arguments)
+        }
+    }
+	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
+}()
 requestService.setCompletionCallback(redrawService.publish)
-m.version = "1.0.0"
-m.request = requestService.xhr
-m.jsonp = requestService.jsonp
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -1113,20 +1109,19 @@ m.mount = function(renderer, pubsub) {
 m.trust = function(html) {
 	return Node("<", undefined, undefined, html, undefined, undefined)
 }
-m.prop = Stream.stream
-m.prop.combine = Stream.combine
-m.prop.reject = Stream.reject
-m.prop.merge = Stream.merge
-m.prop.HALT = Stream.HALT
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
+m.prop = Stream.stream
+m.prop.combine = Stream.combine
+m.prop.reject = Stream.reject
+m.prop.merge = Stream.merge
+m.prop.HALT = Stream.HALT
 m.render = renderService.render
 m.redraw = redrawService.publish
-if (typeof module === "object") {
-	module.exports = m
-}
-else window.m = m
-})()
+m.request = requestService.xhr
+m.jsonp = requestService.jsonp
+m.version = "1.0.0"
+module.exports = m

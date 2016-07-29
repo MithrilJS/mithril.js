@@ -240,6 +240,33 @@ function upload(e) {
 
 Assuming the server is configured to accept multipart requests, the file information will be associated with the `myfile` key.
 
+#### Multiple file uploads
+
+It's possible to upload multiple files in one request. Doing so will make the batch upload atomic, i.e. no files will be processed if there's an error during the upload, so it's not possible to have only part of the files saved. If you want to save as many files as possible in the event of a network failure, you should consider uploading each file in a separate request instead.
+
+To upload multiple files, simply append them all to the `FormData` object. When using a file input, you can get a list of files by adding the `multiple` attribute to the input:
+
+```javascript
+m.render(document.body, [
+	m("input[type=file][multiple]", {onchange: upload})
+])
+
+function upload(e) {
+	var files = e.target.files
+	
+	var data = new FormData()
+	for (var i = 0; i < files.length; i++) {
+		data.append("file" + i, file)
+	}
+	
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		data: data,
+	})
+}
+```
+
 ---
 
 ### Monitoring progress

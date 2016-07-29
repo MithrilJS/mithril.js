@@ -3,7 +3,7 @@
 var fs = require("fs")
 var path = require("path")
 
-module.exports = function(input, output) {
+module.exports = function(input, output, options) {
 	function run(e, file) {
 		var modules = {}
 		var usedVariables = {}
@@ -17,25 +17,28 @@ module.exports = function(input, output) {
 				
 				//resolve npm dependencies
 				if (filename[0] !== ".") {
-					var meta = JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json"))
+					var meta
+					try {meta = JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json"))} catch (e) {meta = {}}
 					var dependencyEntry = "./node_modules/" + filename + "/" + (meta.main || filename + ".js")
 					try {fs.statSync(dependencyEntry).isFile()} catch (e) {dependencyEntry = "./node_modules/" + filename + "/index.js"}
-					return resolve(path.dirname(dependencyEntry), exportCode(dependencyEntry, def + variable + eq))
+					return process(dependencyEntry)
 				}
 				
 				//resolve local dependencies
-				var normalized = path.resolve(dir, filename)
-				var pathname = path.dirname(normalized)
-				if (modules[normalized] === undefined) {
-					modules[normalized] = variable
-					var exported = exportCode(dir + "/" + filename + ".js", def + variable + eq)
-					return resolve(pathname, exported)
-				}
-				else {
-					if (modules[normalized] !== variable) {
-						replacements.push({variable: variable, replacement: modules[normalized]})
+				return process(dir + "/" + filename + ".js")
+				
+				function process(dependency) {
+					var normalized = path.resolve(dir, filename)
+					if (modules[normalized] === undefined) {
+						modules[normalized] = variable
+						return resolve(path.dirname(dependency), exportCode(dependency, def + variable + eq))
 					}
-					return ""
+					else {
+						if (modules[normalized] !== variable) {
+							replacements.push({variable: variable, replacement: modules[normalized]})
+						}
+						return ""
+					}
 				}
 			})
 			if (replacements.length > 0) {
@@ -57,7 +60,7 @@ module.exports = function(input, output) {
 
 		function fixCollisions(code) {
 			for (var variable in usedVariables) {
-				var collision = new RegExp("\\b" + variable + "\\b(?![\"'`])", "g")
+				var collision = new RegExp("(?!.)\\b" + variable + "\\b(?![\"'`])", "g")
 				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
 				if (collision.test(code) && !exported.test(code)) {
 					var fixed = variable + usedVariables[variable]++
@@ -68,7 +71,7 @@ module.exports = function(input, output) {
 		}
 
 		function setVersion(code) {
-			var metadata = JSON.parse(fs.readFileSync("./package.json"))
+			var metadata = JSON.parse(fs.readFileSync(__dirname + "/../package.json"))
 			return code.replace("bleeding-edge", metadata.version)
 		}
 
@@ -83,5 +86,5 @@ module.exports = function(input, output) {
 	}
 	run()
 
-	//fs.watch(process.cwd(), {recursive: true}, run)
+	if (options && options.watch) fs.watch(process.cwd(), {recursive: true}, run)
 }
