@@ -151,7 +151,6 @@ o.spec("onbeforeremove", function() {
 			})
 		}
 	})
-
 	o("does not set onbeforeremove as an event handler", function() {
 		var remove = o.spy()
 		var vnode = {tag: "div", attrs: {onbeforeremove: remove}, children: []}
@@ -161,7 +160,6 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom.onbeforeremove).equals(undefined)
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
-
 	o("does not recycle when there's an onbeforeremove", function() {
 		var remove = function(vnode, done) {done()}
 		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
@@ -172,9 +170,5 @@ o.spec("onbeforeremove", function() {
 		render(root, [updated])
 
 		o(vnode.dom).notEquals(updated.dom)
-	})
-
-	o("sets the onbeforeremove context to vnode.state", function(){
-		var handler = o.spy()
 	})
 })
