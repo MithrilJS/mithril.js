@@ -337,11 +337,11 @@ module.exports = function($window) {
 			}
 			if (vnode.attrs && vnode.attrs.onbeforeremove) {
 				expected++
-				vnode.attrs.onbeforeremove.call(vnode, vnode, callback)
+				vnode.attrs.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
 				expected++
-				vnode.tag.onbeforeremove.call(vnode, vnode, callback)
+				vnode.tag.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (expected > 0) return
 		}
