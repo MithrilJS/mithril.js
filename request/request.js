@@ -15,7 +15,7 @@ module.exports = function($window) {
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
-		if (typeof args.serialize !== "function") args.serialize = JSON.stringify
+		if (typeof args.serialize !== "function") args.serialize = args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
 		
