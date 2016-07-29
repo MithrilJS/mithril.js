@@ -6,83 +6,46 @@ perfMonitor.startFPSMonitor()
 perfMonitor.startMemMonitor()
 perfMonitor.initProfiler("render")
 
-var Query = React.createClass({
-	shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-		if (nextProps.elapsedClassName !== this.props.elapsedClassName) return true
-		if (nextProps.formatElapsed !== this.props.formatElapsed) return true
-		if (nextProps.query !== this.props.query) return true
-		return false
-	},
-	render: function render() {
-		return h("td", {className: "Query " + this.props.elapsedClassName},
-			this.props.formatElapsed,
-			h("div", {className: "popover left"},
-				h("div", {className: "popover-content"}, this.props.query),
-				h("div", {className: "arrow"})
-			)
-		)
-	}
-})
-
-var Database = React.createClass({
-	shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-		if (nextProps.lastMutationId === this.props.lastMutationId) return false
-		return true
-	},
-	render: function render() {
-		var lastSample = this.props.lastSample
-		return h("tr", {key: this.props.dbname},
-			h("td", {className: "dbname"}, this.props.dbname),
-			h("td", {className: "query-count"},
-				h("span", {className: this.props.lastSample.countClassName}, this.props.lastSample.nbQueries)
-			),
-			this.props.lastSample.topFiveQueries.map(function (query, index) {
-				return h(Query, {
-					key: index,
-					query: query.query,
-					elapsed: query.elapsed,
-					formatElapsed: query.formatElapsed,
-					elapsedClassName: query.elapsedClassName
-				})
-			})
-		)
-	}
-})
+var data = []
 
 var DBMon = React.createClass({
-	getInitialState: function getInitialState() {
-		return {databases: []}
-	},
-
-	loadSamples: function loadSamples() {
-		var data = ENV.generateData(true).toArray()
-
-		perfMonitor.startProfile("render")
-		this.setState({databases: data})
-		perfMonitor.endProfile("render")
-
-		setTimeout(this.loadSamples, ENV.timeout)
-	},
-
-	componentDidMount: function componentDidMount() {
-		this.loadSamples()
-	},
-
-	render: function render() {
+	render: function() {
 		return h("div", null,
 			h("table", {className: "table table-striped latest-data"},
-				h("tbody", null, this.state.databases.map(function (database) {
-					return h(Database, {
-						key: database.dbname,
-						lastMutationId: database.lastMutationId,
-						dbname: database.dbname,
-						samples: database.samples,
-						lastSample: database.lastSample
+				h("tbody", null,
+					data.map(function(db) {
+						return h("tr", {key: db.dbname},
+							h("td", {className: "dbname"}, db.dbname),
+							h("td", {className: "query-count"},
+								h("span", {className: db.lastSample.countClassName}, db.lastSample.nbQueries)
+							),
+							db.lastSample.topFiveQueries.map(function(query, i) {
+								return h("td", {key: i, className: query.elapsedClassName},
+									query.formatElapsed,
+									h("div", {className: "popover left"},
+										h("div", {className: "popover-content"}, query.query),
+										h("div", {className: "arrow"})
+									)
+								)
+							})
+						)
 					})
-				}))
+				)
 			)
 		)
 	}
 })
 
-ReactDOM.render(h(DBMon, null), document.getElementById("app"))
+var root = document.getElementById("app")
+function update() {
+	data = ENV.generateData().toArray()
+
+	perfMonitor.startProfile("render")
+	ReactDOM.render(h(DBMon, null), root)
+
+	perfMonitor.endProfile("render")
+
+	setTimeout(update, ENV.timeout)
+}
+
+update()

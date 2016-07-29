@@ -33,7 +33,7 @@ var AppComponent = ng.core.Component({selector: "my-app"})
 	},
 	update: function() {
 		var self = this
-		self.databases = ENV.generateData(true).toArray()
+		self.databases = ENV.generateData().toArray()
 		setTimeout(function() {self.update()}, ENV.timeout)
 
 		if (renderStage === 0) {
