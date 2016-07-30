@@ -7,9 +7,14 @@ module.exports = function(input, output, options) {
 	function run(e, file) {
 		var modules = {}
 		var usedVariables = {}
+		var globals = {}
 
 		function resolve(dir, data) {
 			var replacements = []
+			
+			var globalMatch = data.match(/window\.([\w_$]+)\s*=\s*/)
+			if (globalMatch) globals[globalMatch[1]] = true
+			
 			data = data.replace(/((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
 				usedVariables[variable] = usedVariables[variable] ? usedVariables[variable]++ : 1
 
@@ -60,9 +65,9 @@ module.exports = function(input, output, options) {
 
 		function fixCollisions(code) {
 			for (var variable in usedVariables) {
-				var collision = new RegExp("(?!.)\\b" + variable + "\\b(?![\"'`])", "g")
+				var collision = new RegExp("\\b" + variable + "\\b(?![\"'`])", "g")
 				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
-				if (collision.test(code) && !exported.test(code)) {
+				if (collision.test(code) && !exported.test(code) && !globals[variable.match(/[^\.]+/)]) {
 					var fixed = variable + usedVariables[variable]++
 					code = code.replace(collision, fixed)
 				}
@@ -78,7 +83,7 @@ module.exports = function(input, output, options) {
 		function bundle(input, output) {
 			console.log("bundling...")
 			var code = setVersion(resolve(path.dirname(input), fs.readFileSync(input, "utf8")))
-			if (new Function(code)) fs.writeFileSync(output, code, "utf8")
+			if (new Function(code)) fs.writeFileSync(output, "new function() {" + code + "}", "utf8")
 			console.log("done")
 		}
 		
