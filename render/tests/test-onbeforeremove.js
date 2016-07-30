@@ -35,13 +35,17 @@ o.spec("onbeforeremove", function() {
 		o(update.callCount).equals(0)
 	})
 	o("calls onbeforeremove when removing element", function(done) {
-		var vnode = {tag: "div", attrs: {onbeforeremove: remove}}
+		var vnode = {tag: "div", attrs: {
+			oninit: function(){vnode.state = {}},
+			onbeforeremove: remove
+		}}
 
 		render(root, [vnode])
 		render(root, [])
 
 		function remove(node, complete) {
 			o(node).equals(vnode)
+			o(this).equals(vnode.state)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
