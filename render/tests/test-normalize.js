@@ -1,17 +1,17 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var Node = require("../../render/node")
+var Vnode = require("../../render/vnode")
 
 o.spec("normalize", function() {
 	o("normalizes array into fragment", function() {
-		var node = Node.normalize([])
+		var node = Vnode.normalize([])
 
 		o(node.tag).equals("[")
 		o(node.children.length).equals(0)
 	})
 	o("normalizes nested array into fragment", function() {
-		var node = Node.normalize([[]])
+		var node = Vnode.normalize([[]])
 
 		o(node.tag).equals("[")
 		o(node.children.length).equals(1)
@@ -19,37 +19,37 @@ o.spec("normalize", function() {
 		o(node.children[0].children.length).equals(0)
 	})
 	o("normalizes string into text node", function() {
-		var node = Node.normalize("a")
+		var node = Vnode.normalize("a")
 
 		o(node.tag).equals("#")
 		o(node.children).equals("a")
 	})
 	o("normalizes falsy string into text node", function() {
-		var node = Node.normalize("")
+		var node = Vnode.normalize("")
 
 		o(node.tag).equals("#")
 		o(node.children).equals("")
 	})
 	o("normalizes number into text node", function() {
-		var node = Node.normalize(1)
+		var node = Vnode.normalize(1)
 
 		o(node.tag).equals("#")
 		o(node.children).equals(1)
 	})
 	o("normalizes falsy number into text node", function() {
-		var node = Node.normalize(0)
+		var node = Vnode.normalize(0)
 
 		o(node.tag).equals("#")
 		o(node.children).equals(0)
 	})
 	o("normalizes boolean into text node", function() {
-		var node = Node.normalize(true)
+		var node = Vnode.normalize(true)
 
 		o(node.tag).equals("#")
 		o(node.children).equals(true)
 	})
 	o("normalizes falsy boolean into text node", function() {
-		var node = Node.normalize(false)
+		var node = Vnode.normalize(false)
 
 		o(node.tag).equals("#")
 		o(node.children).equals(false)

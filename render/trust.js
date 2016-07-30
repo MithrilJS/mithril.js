@@ -1,7 +1,7 @@
 "use strict"
 
-var Node = require("../render/node")
+var Vnode = require("../render/vnode")
 
 module.exports = function(html) {
-	return Node("<", undefined, undefined, html, undefined, undefined)
+	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }

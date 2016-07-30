@@ -1,6 +1,6 @@
 "use strict"
 
-var Node = require("../render/node")
+var Vnode = require("../render/vnode")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
@@ -40,7 +40,7 @@ function hyperscript(selector) {
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
 
-				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
+				return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
 	}
@@ -58,9 +58,9 @@ function hyperscript(selector) {
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
 
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
+	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
 
-	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
+	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
 
 module.exports = hyperscript

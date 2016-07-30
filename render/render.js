@@ -1,6 +1,6 @@
 "use strict"
 
-var Node = require("../render/node")
+var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
 	var $doc = $window.document
@@ -80,7 +80,7 @@ module.exports = function($window) {
 
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
-			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
 
 		if (vnode.children != null) {
@@ -94,7 +94,7 @@ module.exports = function($window) {
 		vnode.state = copy(vnode.tag)
 
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
@@ -248,13 +248,13 @@ module.exports = function($window) {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
-			if (old.text != null) old.children = [Node("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
@@ -517,7 +517,7 @@ module.exports = function($window) {
 		if (dom.vnodes == null) dom.vnodes = []
 
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()

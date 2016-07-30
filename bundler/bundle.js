@@ -86,5 +86,9 @@ module.exports = function(input, output, options) {
 	}
 	run()
 
-	if (options && options.watch) fs.watch(process.cwd(), {recursive: true}, run)
+	if (options && options.watch) {
+		fs.watch(process.cwd(), {recursive: true}, function(type, file) {
+			if (path.resolve(output) !== path.resolve(file)) run()
+		})
+	}
 }
