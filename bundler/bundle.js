@@ -15,7 +15,7 @@ module.exports = function(input, output, options) {
 			var globalMatch = data.match(/window\.([\w_$]+)\s*=\s*/)
 			if (globalMatch) globals[globalMatch[1]] = true
 			
-			data = data.replace(/((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
+			data = data.replace(/^\s*\/\/[^\n]*/g, "").replace(/((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
 				usedVariables[variable] = usedVariables[variable] ? usedVariables[variable]++ : 1
 
 				var filename = new Function("return " + dep).call()
@@ -36,7 +36,7 @@ module.exports = function(input, output, options) {
 					var normalized = path.resolve(dir, filename)
 					if (modules[normalized] === undefined) {
 						modules[normalized] = variable
-						return resolve(path.dirname(dependency), exportCode(dependency, def + variable + eq))
+						return resolve(path.dirname(dependency), exportCode(dependency, def, variable, eq))
 					}
 					else {
 						if (modules[normalized] !== variable) {
@@ -57,19 +57,27 @@ module.exports = function(input, output, options) {
 				.replace(/\}[\r\n]+\(/g, "}(") // remove space from iife
 		}
 
-		function exportCode(file, assignment) {
+		function exportCode(file, def, variable, eq) {
+			var declared = {}
 			return fixCollisions(fs.readFileSync(file, "utf8"))
 				.replace(/("|')use strict\1;?\s*/gm, "") // remove extraneous "use strict"
-				.replace(/module\.exports\s*=\s*/gm, assignment)
+				.replace(/module\.exports\s*=\s*/gm, def + variable + eq)
+				.replace(/module\.exports(\.|\[)/gm, function(match, token, length, code) {
+					if (new RegExp("\\b" + variable + "\\b").test(variable) && !declared[variable]) {
+						declared[variable] = true
+						return def + variable + eq + "{}\n" + variable + token
+					}
+					return variable + token
+				})
 		}
 
 		function fixCollisions(code) {
 			for (var variable in usedVariables) {
-				var collision = new RegExp("\\b" + variable + "\\b(?![\"'`])", "g")
+				var collision = new RegExp("([^\\.])" + variable + "\\b(?![\"'`])", "g")
 				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
 				if (collision.test(code) && !exported.test(code) && !globals[variable.match(/[^\.]+/)]) {
 					var fixed = variable + usedVariables[variable]++
-					code = code.replace(collision, fixed)
+					code = code.replace(collision, "$1" + fixed)
 				}
 			}
 			return code
@@ -83,7 +91,7 @@ module.exports = function(input, output, options) {
 		function bundle(input, output) {
 			console.log("bundling...")
 			var code = setVersion(resolve(path.dirname(input), fs.readFileSync(input, "utf8")))
-			if (new Function(code)) fs.writeFileSync(output, "new function() {" + code + "}", "utf8")
+			if (new Function(code)) fs.writeFileSync(output, "new function() {\n" + code + "\n}", "utf8")
 			console.log("done")
 		}
 		
