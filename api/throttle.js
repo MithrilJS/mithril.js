@@ -1,16 +1,12 @@
 "use strict"
 
-var ts = Date.now || function() {
-	return new Date().getTime()
-}
-
 module.exports = function(callback) {
 	//60fps translates to 16.6ms, round it down since setTimeout requires int
 	var time = 16
 	var last = 0, pending = null
 	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
 	return function(synchronous) {
-		var now = ts()
+		var now = Date.now()
 		if (synchronous === true || last === 0 || now - last >= time) {
 			last = now
 			callback()
@@ -19,7 +15,7 @@ module.exports = function(callback) {
 			pending = timeout(function() {
 				pending = null
 				callback()
-				last = ts()
+				last = Date.now()
 			}, time - (now - last))
 		}
 	}
