@@ -73,7 +73,8 @@ module.exports = function(input, output, options) {
 
 		function fixCollisions(code) {
 			for (var variable in usedVariables) {
-				var collision = new RegExp("([^\\.])" + variable + "\\b(?![\"'`])", "g")
+				var collision = new RegExp("([^\\.])\\b" + variable + "\\b(?![\"'`])", "g")
+				// var collision = new RegExp("([^\\.])" + variable + "\\b(?![\"'`])", "g")
 				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
 				if (collision.test(code) && !exported.test(code) && !globals[variable.match(/[^\.]+/)]) {
 					var fixed = variable + usedVariables[variable]++

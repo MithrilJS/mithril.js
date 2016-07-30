@@ -1,3 +1,4 @@
+new function() {
 "use strict"
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
@@ -179,17 +180,17 @@ function merge(streams) {
 	}, streams)
 }
 var Stream = {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
-function Node(tag, key, attrs, children, text, dom) {
+function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
-Node.normalize = function(node) {
-	if (node instanceof Array) return Node("[", undefined, undefined, Node.normalizeChildren(node), undefined, undefined)
-	else if (node != null && typeof node !== "object") return Node("#", undefined, undefined, node, undefined, undefined)
+Vnode.normalize = function(node) {
+	if (node instanceof Array) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
+	else if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node, undefined, undefined)
 	return node
 }
-Node.normalizeChildren = function normalizeChildren(children) {
+Vnode.normalizeChildren = function normalizeChildren(children) {
 	for (var i = 0; i < children.length; i++) {
-		children[i] = Node.normalize(children[i])
+		children[i] = Vnode.normalize(children[i])
 	}
 	return children
 }
@@ -230,7 +231,7 @@ function hyperscript(selector) {
 				}
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
-				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
+				return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
 	}
@@ -247,8 +248,8 @@ function hyperscript(selector) {
 		children = []
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
-	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
+	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
+	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
 var renderService = function($window) {
@@ -322,7 +323,7 @@ var renderService = function($window) {
 		}
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
-			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
 		if (vnode.children != null) {
 			var children = vnode.children
@@ -334,7 +335,7 @@ var renderService = function($window) {
 	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
@@ -487,13 +488,13 @@ var renderService = function($window) {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
-			if (old.text != null) old.children = [Node("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
@@ -574,11 +575,11 @@ var renderService = function($window) {
 			}
 			if (vnode.attrs && vnode.attrs.onbeforeremove) {
 				expected++
-				vnode.attrs.onbeforeremove.call(vnode, vnode, callback)
+				vnode.attrs.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
 				expected++
-				vnode.tag.onbeforeremove.call(vnode, vnode, callback)
+				vnode.tag.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (expected > 0) return
 		}
@@ -746,7 +747,7 @@ var renderService = function($window) {
 		var active = $doc.activeElement
 		if (dom.vnodes == null) dom.vnodes = []
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
@@ -785,7 +786,7 @@ var requestService = function($window) {
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
-		if (typeof args.serialize !== "function") args.serialize = args.data instanceof FormData ? function(value) {return value} : JSON.stringify
+		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
 		
@@ -1077,14 +1078,14 @@ m.route = function($window, renderer, pubsub) {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
 				var render = function(component) {
 					current.route = route, current.component = component
-					renderer.render(root, payload.render(Node(component, null, args, undefined, undefined, undefined)))
+					renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
 				if (typeof payload.resolve !== "function") payload.resolve = function() {render(current.component)}
 				if (route !== current.route) payload.resolve(render, args, path, route)
 				else render(current.component)
 			}
 			else {
-				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
+				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
 			}
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
@@ -1107,7 +1108,7 @@ m.mount = function(renderer, pubsub) {
 	}
 }(renderService, redrawService)
 m.trust = function(html) {
-	return Node("<", undefined, undefined, html, undefined, undefined)
+	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
@@ -1125,3 +1126,5 @@ m.request = requestService.xhr
 m.jsonp = requestService.jsonp
 m.version = "1.0.0"
 module.exports = m
+
+}
