@@ -20,6 +20,7 @@ o.spec("updateHTML", function() {
 		render(root, [updated])
 
 		o(updated.dom).equals(root.firstChild)
+		o(updated.domSize).equals(1)
 		o(updated.dom.nodeValue).equals("b")
 	})
 	o("adds html", function() {

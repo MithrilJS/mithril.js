@@ -456,7 +456,7 @@ var renderService = function($window) {
 			toFragment(old)
 			insertNode(parent, createHTML(vnode), nextSibling)
 		}
-		else vnode.dom = old.dom
+		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
@@ -1042,7 +1042,7 @@ var throttle = function(callback) {
 	var last = 0, pending = null
 	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
 	return function(synchronous) {
-		var now = new Date().getTime()
+		var now = Date.now()
 		if (synchronous === true || last === 0 || now - last >= time) {
 			last = now
 			callback()
@@ -1051,7 +1051,7 @@ var throttle = function(callback) {
 			pending = timeout(function() {
 				pending = null
 				callback()
-				last = new Date().getTime()
+				last = Date.now()
 			}, time - (now - last))
 		}
 	}

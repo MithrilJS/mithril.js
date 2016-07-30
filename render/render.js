@@ -216,7 +216,7 @@ module.exports = function($window) {
 			toFragment(old)
 			insertNode(parent, createHTML(vnode), nextSibling)
 		}
-		else vnode.dom = old.dom
+		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
@@ -356,7 +356,7 @@ module.exports = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string" && vnode.tag !== "<") { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
