@@ -1,47 +1,48 @@
+new function() {
 "use strict"
 var guid = 0, noop = function() {}, HALT = {}
-function createStream() {
+function createStream1() {
 	function stream() {
-		if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+		if (arguments.length > 0) updateStream1(stream, arguments[0], undefined)
 		return stream._state.value
 	}
-	initStream(stream, arguments)
-	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+	initStream1(stream, arguments)
+	if (arguments.length > 0) updateStream1(stream, arguments[0], undefined)
 	return stream
 }
-function initStream(stream, args) {
-	stream.constructor = createStream
-	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-	stream.map = map, stream.ap = ap, stream.of = createStream
+function initStream1(stream, args) {
+	stream.constructor = createStream1
+	stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream1: undefined, endStream1: undefined}
+	stream.map = map, stream.ap = ap, stream.of = createStream1
 	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 	stream.run = run, stream.catch = doCatch
 	Object.defineProperties(stream, {
 		error: {get: function() {
-			if (!stream._state.errorStream) {
-				var errorStream = function() {
-					if (arguments.length > 0) updateStream(stream, undefined, arguments[0])
+			if (!stream._state.errorStream1) {
+				var errorStream1 = function() {
+					if (arguments.length > 0) updateStream1(stream, undefined, arguments[0])
 					return stream._state.error
 				}
-				initStream(errorStream, [])
-				initDependency(errorStream, [stream], noop, noop)
-				stream._state.errorStream = errorStream
+				initStream1(errorStream1, [])
+				initDependency(errorStream1, [stream], noop, noop)
+				stream._state.errorStream1 = errorStream1
 			}
-			return stream._state.errorStream
+			return stream._state.errorStream1
 		}},
 		end: {get: function() {
-			if (!stream._state.endStream) {
-				var endStream = createStream()
-				endStream.map(function(value) {
-					if (value === true) unregisterStream(stream), unregisterStream(endStream)
+			if (!stream._state.endStream1) {
+				var endStream1 = createStream1()
+				endStream1.map(function(value) {
+					if (value === true) unregisterStream1(stream), unregisterStream1(endStream1)
 					return value
 				})
-				stream._state.endStream = endStream
+				stream._state.endStream1 = endStream1
 			}
-			return stream._state.endStream
+			return stream._state.endStream1
 		}}
 	})
 }
-function updateStream(stream, value, error) {
+function updateStream1(stream, value, error) {
 	updateState(stream, value, error)
 	for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
 	finalize(stream)
@@ -86,7 +87,7 @@ function updateDependency(stream, mustSync) {
 	}
 }
 function unwrapError(value, error) {
-	if (value != null && value.constructor === createStream) {
+	if (value != null && value.constructor === createStream1) {
 		if (value._state.error !== undefined) error = value._state.error
 		else error = unwrapError(value._state.value, value._state.error)
 	}
@@ -104,26 +105,26 @@ function reportUncaughtError(stream, e) {
 	}
 }
 function run(fn) {
-	var self = createStream(), stream = this
+	var self = createStream1(), stream = this
 	return initDependency(self, [stream], function() {
 		return absorb(self, fn(stream()))
 	}, undefined)
 }
 function doCatch(fn) {
-	var self = createStream(), stream = this
+	var self = createStream1(), stream = this
 	var derive = function() {return stream._state.value}
 	var recover = function() {return absorb(self, fn(stream._state.error))}
 	return initDependency(self, [stream], derive, recover)
 }
 function combine(fn, streams) {
-	return initDependency(createStream(), streams, function() {
+	return initDependency(createStream1(), streams, function() {
 		var failed = streams.filter(errored)
 		if (failed.length > 0) throw failed[0]._state.error
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	}, undefined)
 }
 function absorb(stream, value) {
-	if (value != null && value.constructor === createStream) {
+	if (value != null && value.constructor === createStream1) {
 		value.error.map(stream.error)
 		value.map(stream)
 		if (value._state.state === 0) return HALT
@@ -147,7 +148,7 @@ function registerDependency(stream, parents) {
 		registerDependency(stream, parents[i]._state.parents)
 	}
 }
-function unregisterStream(stream) {
+function unregisterStream1(stream) {
 	for (var i = 0; i < stream._state.parents.length; i++) {
 		var parent = stream._state.parents[i]
 		delete parent._state.deps[stream._state.id]
@@ -169,7 +170,7 @@ function changed(stream) {return stream._state.changed}
 function notEnded(stream) {return stream._state.state !== 2}
 function errored(stream) {return stream._state.error}
 function reject(e) {
-	var stream = createStream()
+	var stream = createStream1()
 	stream.error(e)
 	return stream
 }
@@ -178,18 +179,18 @@ function merge(streams) {
 		return streams.map(function (s) {return s()})
 	}, streams)
 }
-var Stream = {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
-function Node(tag, key, attrs, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
+var Stream = {stream: createStream1, merge: merge, combine: combine, reject: reject, HALT: HALT}
+function Vnode(tag, key, attrs, children, text, dom1) {
+	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom1: dom1, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
-Node.normalize = function(node) {
-	if (node instanceof Array) return Node("[", undefined, undefined, Node.normalizeChildren(node), undefined, undefined)
-	else if (node != null && typeof node !== "object") return Node("#", undefined, undefined, node, undefined, undefined)
+Vnode.normalize = function(node) {
+	if (node instanceof Array) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
+	else if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node, undefined, undefined)
 	return node
 }
-Node.normalizeChildren = function normalizeChildren(children) {
+Vnode.normalizeChildren = function normalizeChildren(children) {
 	for (var i = 0; i < children.length; i++) {
-		children[i] = Node.normalize(children[i])
+		children[i] = Vnode.normalize(children[i])
 	}
 	return children
 }
@@ -230,7 +231,7 @@ function hyperscript(selector) {
 				}
 				if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 				else childList = children
-				return Node(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
+				return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 			}
 		}
 	}
@@ -247,8 +248,8 @@ function hyperscript(selector) {
 		children = []
 		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
 	}
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Node.normalizeChildren(children))
-	return Node(selector, attrs && attrs.key, attrs || {}, Node.normalizeChildren(children), undefined, undefined)
+	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
+	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
 var renderService = function($window) {
@@ -279,14 +280,14 @@ var renderService = function($window) {
 		else return createComponent(vnode, hooks, ns)
 	}
 	function createText(vnode) {
-		return vnode.dom = $doc.createTextNode(vnode.children)
+		return vnode.dom2 = $doc.createTextNode(vnode.children)
 	}
 	function createHTML(vnode) {
-		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
+		var match = vnode.children.match(/^\s*?<(\w+)/im2) || []
 		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
 		var temp = $doc.createElement(parent)
 		temp.innerHTML = vnode.children
-		vnode.dom = temp.firstChild
+		vnode.dom2 = temp.firstChild
 		vnode.domSize = temp.childNodes.length
 		var fragment = $doc.createDocumentFragment()
 		var child
@@ -301,7 +302,7 @@ var renderService = function($window) {
 			var children = vnode.children
 			createNodes(fragment, children, 0, children.length, hooks, null, ns)
 		}
-		vnode.dom = fragment.firstChild
+		vnode.dom2 = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		return fragment
 	}
@@ -316,13 +317,13 @@ var renderService = function($window) {
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
-		vnode.dom = element
+		vnode.dom2 = element
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
 		}
 		if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
-			else vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
 		if (vnode.children != null) {
 			var children = vnode.children
@@ -334,11 +335,11 @@ var renderService = function($window) {
 	function createComponent(vnode, hooks, ns) {
 		vnode.state = copy(vnode.tag)
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
 			var element = createNode(vnode.instance, hooks, ns)
-			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			vnode.dom2 = vnode.instance.dom2
+			vnode.domSize = vnode.dom2 != null ? vnode.instance.domSize : 0
 			return element
 		}
 		else {
@@ -391,7 +392,7 @@ var renderService = function($window) {
 					else if (o != null && v != null && o.key === v.key) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-						if (o.dom != null) nextSibling = o.dom
+						if (o.dom2 != null) nextSibling = o.dom2
 						oldEnd--, end--
 					}
 					else {
@@ -403,12 +404,12 @@ var renderService = function($window) {
 								updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 								insertNode(parent, toFragment(movable), nextSibling)
 								old[oldIndex].skip = true
-								if (movable.dom != null) nextSibling = movable.dom
+								if (movable.dom2 != null) nextSibling = movable.dom2
 							}
 							else {
-								var dom = createNode(v, hooks, undefined)
-								insertNode(parent, dom, nextSibling)
-								nextSibling = dom
+								var dom2 = createNode(v, hooks, undefined)
+								insertNode(parent, dom2, nextSibling)
+								nextSibling = dom2
 							}
 						}
 						end--
@@ -446,26 +447,26 @@ var renderService = function($window) {
 	}
 	function updateText(old, vnode) {
 		if (old.children.toString() !== vnode.children.toString()) {
-			old.dom.nodeValue = vnode.children
+			old.dom2.nodeValue = vnode.children
 		}
-		vnode.dom = old.dom
+		vnode.dom2 = old.dom2
 	}
 	function updateHTML(parent, old, vnode, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
 			insertNode(parent, createHTML(vnode), nextSibling)
 		}
-		else vnode.dom = old.dom
+		else vnode.dom2 = old.dom2
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
-		vnode.dom = null
+		vnode.dom2 = null
 		if (children != null) {
 			for (var i = 0; i < children.length; i++) {
 				var child = children[i]
-				if (child != null && child.dom != null) {
-					if (vnode.dom == null) vnode.dom = child.dom
+				if (child != null && child.dom2 != null) {
+					if (vnode.dom2 == null) vnode.dom2 = child.dom2
 					domSize += child.domSize || 1
 				}
 			}
@@ -473,7 +474,7 @@ var renderService = function($window) {
 		}
 	}
 	function updateElement(old, vnode, hooks, ns) {
-		var element = vnode.dom = old.dom
+		var element = vnode.dom2 = old.dom2
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
 			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
@@ -484,30 +485,30 @@ var renderService = function($window) {
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 		if (old.text != null && vnode.text != null && vnode.text !== "") {
-			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
+			if (old.text.toString() !== vnode.text.toString()) old.dom2.firstChild.nodeValue = vnode.text
 		}
 		else {
-			if (old.text != null) old.children = [Node("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Node("#", undefined, undefined, vnode.text, undefined, undefined)]
+			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom2.firstChild)]
+			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Node.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
-			vnode.dom = vnode.instance.dom
+			vnode.dom2 = vnode.instance.dom2
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
 			removeNode(parent, old.instance, null, false)
-			vnode.dom = undefined
+			vnode.dom2 = undefined
 			vnode.domSize = 0
 		}
 		else {
-			vnode.dom = old.dom
+			vnode.dom2 = old.dom2
 			vnode.domSize = old.domSize
 		}
 	}
@@ -535,26 +536,26 @@ var renderService = function($window) {
 	}
 	function toFragment(vnode) {
 		var count = vnode.domSize
-		if (count != null || vnode.dom == null) {
+		if (count != null || vnode.dom2 == null) {
 			var fragment = $doc.createDocumentFragment()
 			if (count > 0) {
-				var dom = vnode.dom
-				while (--count) fragment.appendChild(dom.nextSibling)
-				fragment.insertBefore(dom, fragment.firstChild)
+				var dom2 = vnode.dom2
+				while (--count) fragment.appendChild(dom2.nextSibling)
+				fragment.insertBefore(dom2, fragment.firstChild)
 			}
 			return fragment
 		}
-		else return vnode.dom
+		else return vnode.dom2
 	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
-			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
+			if (vnodes[i] != null && vnodes[i].dom2 != null) return vnodes[i].dom2
 		}
 		return nextSibling
 	}
-	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
-		else parent.appendChild(dom)
+	function insertNode(parent, dom2, nextSibling) {
+		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom2, nextSibling)
+		else parent.appendChild(dom2)
 	}
 	//remove
 	function removeNodes(parent, vnodes, start, end, context) {
@@ -574,25 +575,25 @@ var renderService = function($window) {
 			}
 			if (vnode.attrs && vnode.attrs.onbeforeremove) {
 				expected++
-				vnode.attrs.onbeforeremove.call(vnode, vnode, callback)
+				vnode.attrs.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
 				expected++
-				vnode.tag.onbeforeremove.call(vnode, vnode, callback)
+				vnode.tag.onbeforeremove.call(vnode.state, vnode, callback)
 			}
 			if (expected > 0) return
 		}
 		onremove(vnode)
-		if (vnode.dom) {
+		if (vnode.dom2) {
 			var count = vnode.domSize || 1
 			if (count > 1) {
-				var dom = vnode.dom
+				var dom2 = vnode.dom2
 				while (--count) {
-					parent.removeChild(dom.nextSibling)
+					parent.removeChild(dom2.nextSibling)
 				}
 			}
-			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
+			if (vnode.dom2.parentNode != null) parent.removeChild(vnode.dom2)
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom2 elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -619,7 +620,7 @@ var renderService = function($window) {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
-		var element = vnode.dom
+		var element = vnode.dom2
 		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
@@ -629,7 +630,7 @@ var renderService = function($window) {
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "input" && key === "value" && vnode.dom2.value === value && vnode.dom2 === $doc.activeElement) return
 			element[key] = value
 		}
 		else {
@@ -656,13 +657,13 @@ var renderService = function($window) {
 		if (old != null) {
 			for (var key in old) {
 				if (attrs == null || !(key in attrs)) {
-					if (key !== "key") vnode.dom.removeAttribute(key)
+					if (key !== "key") vnode.dom2.removeAttribute(key)
 				}
 			}
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom2 === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
@@ -692,7 +693,7 @@ var renderService = function($window) {
 	}
 	//event
 	function updateEvent(vnode, key, value) {
-		var element = vnode.dom
+		var element = vnode.dom2
 		var callback = function(e) {
 			var result = value.call(element, e)
 			if (typeof onevent === "function") onevent.call(element, e)
@@ -721,7 +722,7 @@ var renderService = function($window) {
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
 		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
-			vnode.dom = old.dom
+			vnode.dom2 = old.dom2
 			vnode.domSize = old.domSize
 			vnode.instance = old.instance
 			return true
@@ -741,13 +742,13 @@ var renderService = function($window) {
 		}
 		return data
 	}
-	function render(dom, vnodes) {
+	function render(dom2, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		if (dom.vnodes == null) dom.vnodes = []
+		if (dom2.vnodes == null) dom2.vnodes = []
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Node.normalizeChildren(vnodes), hooks, null, undefined)
-		dom.vnodes = vnodes
+		updateNodes(dom2, dom2.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
+		dom2.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
 	}
@@ -780,12 +781,12 @@ var requestService = function($window) {
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
 	function xhr(args) {
-		var stream = Stream.stream()
-		if (args.initialValue !== undefined) stream(args.initialValue)
+		var stream3 = Stream.stream3()
+		if (args.initialValue !== undefined) stream3(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
-		if (typeof args.serialize !== "function") args.serialize = args.data instanceof FormData ? function(value) {return value} : JSON.stringify
+		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
 		
@@ -819,16 +820,16 @@ var requestService = function($window) {
 							else response = new args.type(response)
 						}
 						
-						stream(response)
+						stream3(response)
 					}
 					else {
 						var error = new Error(xhr.responseText)
 						for (var key in response) error[key] = response[key]
-						stream.error(error)
+						stream3.error(error)
 					}
 				}
 				catch (e) {
-					stream.error(e)
+					stream3.error(e)
 				}
 				if (typeof oncompletion === "function") oncompletion()
 			}
@@ -837,22 +838,22 @@ var requestService = function($window) {
 		if (useBody) xhr.send(args.data)
 		else xhr.send()
 		
-		return stream
+		return stream3
 	}
 	function jsonp(args) {
-		var stream = Stream.stream()
+		var stream3 = Stream.stream3()
 		
-		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random3() * 1e16) + "_" + callbackCount++
 		var script = $window.document.createElement("script")
 		$window[callbackName] = function(data) {
 			script.parentNode.removeChild(script)
-			stream(data)
+			stream3(data)
 			if (typeof oncompletion === "function") oncompletion()
 			delete $window[callbackName]
 		}
 		script.onerror = function() {
 			script.parentNode.removeChild(script)
-			stream.error(new Error("JSONP request failed"))
+			stream3.error(new Error("JSONP request failed"))
 			if (typeof oncompletion === "function") oncompletion()
 			delete $window[callbackName]
 		}
@@ -861,7 +862,7 @@ var requestService = function($window) {
 		args.data[args.callbackKey || "callback"] = callbackName
 		script.src = assemble(args.url, args.data)
 		$window.document.documentElement.appendChild(script)
-		return stream
+		return stream3
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
@@ -948,7 +949,7 @@ var coreRouter = function($window) {
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
 	function normalize(fragment) {
-		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim4, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
@@ -1026,8 +1027,8 @@ var coreRouter = function($window) {
 		return resolveRoute
 	}
 	function link(vnode) {
-		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
-		vnode.dom.onclick = function(e) {
+		vnode.dom4.setAttribute("href", prefix + vnode.attrs.href)
+		vnode.dom4.onclick = function(e) {
 			e.preventDefault()
 			e.redraw = false
 			setPath(vnode.attrs.href, undefined, undefined)
@@ -1077,14 +1078,14 @@ m.route = function($window, renderer, pubsub) {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
 				var render = function(component) {
 					current.route = route, current.component = component
-					renderer.render(root, payload.render(Node(component, null, args, undefined, undefined, undefined)))
+					renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
 				if (typeof payload.resolve !== "function") payload.resolve = function() {render(current.component)}
 				if (route !== current.route) payload.resolve(render, args, path, route)
 				else render(current.component)
 			}
 			else {
-				renderer.render(root, Node(payload, null, args, undefined, undefined, undefined))
+				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
 			}
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
@@ -1107,7 +1108,7 @@ m.mount = function(renderer, pubsub) {
 	}
 }(renderService, redrawService)
 m.trust = function(html) {
-	return Node("<", undefined, undefined, html, undefined, undefined)
+	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
@@ -1125,3 +1126,5 @@ m.request = requestService.xhr
 m.jsonp = requestService.jsonp
 m.version = "1.0.0"
 module.exports = m
+
+}
