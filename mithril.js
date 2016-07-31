@@ -593,7 +593,7 @@ var renderService = function($window) {
 				}
 			}
 			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
+			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string" && vnode.tag !== "<") { //TODO test custom elements
 				if (!context.pool) context.pool = [vnode]
 				else context.pool.push(vnode)
 			}
@@ -1125,6 +1125,6 @@ m.redraw = redrawService.publish
 m.request = requestService.xhr
 m.jsonp = requestService.jsonp
 m.version = "1.0.0"
-module.exports = m
+window.m = m
 
 }

@@ -1,7 +1,5 @@
 "use strict"
 
-var m = require("../../../mithril")
-
 perfMonitor.startFPSMonitor()
 perfMonitor.startMemMonitor()
 perfMonitor.initProfiler("render")
