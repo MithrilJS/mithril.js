@@ -13,7 +13,8 @@
 		"lintdocs": "node bundler/lintdocs",
 		"lint": "eslint .",
 		"test": "node ospec/bin/ospec",
-		"cover": "istanbul cover --print both ospec/bin/ospec"
+		"cover": "istanbul cover --print both ospec/bin/ospec",
+		"prepublish": "npm run test && npm run lint && npm run cover && npm run build"
 	},
 	"devDependencies": {
 		"eslint": "^2.10.2",
