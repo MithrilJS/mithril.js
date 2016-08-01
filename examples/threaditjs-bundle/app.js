@@ -1,6 +1,5 @@
 T.time("Setup");
 
-var m = require("../../mithril")
 var request = m.request
 
 //API calls
