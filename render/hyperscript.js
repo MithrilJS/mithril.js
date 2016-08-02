@@ -5,7 +5,7 @@ var Vnode = require("../render/vnode")
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
-	if (selector && typeof selector !== "string" && !selector.view) {
+	if (!selector || typeof selector !== "string" && !selector.view) {
 		throw Error("The selector should either be a string or an object with a view.");
 	}
 
