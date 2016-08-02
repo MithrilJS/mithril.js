@@ -91,7 +91,9 @@ module.exports = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		vnode.state = copy(vnode.tag)
+		// For object literals since `Vnode()` always sets the `state` field.
+		if (!vnode.state) vnode.state = {}
+		assign(vnode.state, vnode.tag)
 
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
@@ -500,18 +502,8 @@ module.exports = function($window) {
 		return false
 	}
 
-	function copy(data) {
-		if (data instanceof Array) {
-			var output = []
-			for (var i = 0; i < data.length; i++) output[i] = data[i]
-			return output
-		}
-		else if (typeof data === "object") {
-			var output = {}
-			for (var i in data) output[i] = data[i]
-			return output
-		}
-		return data
+	function assign(target, source) {
+		Object.keys(source).forEach(function(k){target[k] = source[k]})
 	}
 
 	function render(dom, vnodes) {
