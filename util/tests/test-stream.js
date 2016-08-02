@@ -549,9 +549,17 @@ o.spec("stream", function() {
 			var absorbed = Stream.stream()
 			var mapped = stream.run(function(value) {return absorbed})
 
-			absorbed(2)
+			var depCallCount = 0
+			mapped.map(function (value) {
+				o(value).equals(200)
+				depCallCount += 1
+			})
+			o(depCallCount).equals(0)
 
-			o(mapped()).equals(2)
+			absorbed(200)
+			o(depCallCount).equals(1)
+
+			o(mapped()).equals(200)
 		})
 		o("works when updating pending stream to errored state", function() {
 			var stream = Stream.stream(undefined)
