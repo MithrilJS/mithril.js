@@ -1,5 +1,4 @@
 new function() {
-"use strict"
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
 	function stream() {
@@ -944,7 +943,7 @@ var parseQueryString = function(string) {
 	return data
 }
 var coreRouter = function($window) {
-	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 	var prefix = "#!"
 	function setPrefix(value) {prefix = value}
@@ -1006,6 +1005,7 @@ var coreRouter = function($window) {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
+			
 			callAsync(function() {
 				for (var route in routes) {
 					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
@@ -1072,16 +1072,16 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var current = {route: null, component: null}
+		var current = {path: null, component: null}
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
 			if (typeof payload.view !== "function") {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
 				var render = function(component) {
-					current.route = route, current.component = component
+					current.path = path, current.component = component
 					renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
 				if (typeof payload.resolve !== "function") payload.resolve = function() {render(current.component)}
-				if (route !== current.route) payload.resolve(render, args, path, route)
+				if (path !== current.path) payload.resolve(render, args, path, route)
 				else render(current.component)
 			}
 			else {
@@ -1125,6 +1125,7 @@ m.redraw = redrawService.publish
 m.request = requestService.xhr
 m.jsonp = requestService.jsonp
 m.version = "1.0.0"
-module.exports = m
+if (typeof module !== "undefined") module["exports"] = m
+else window.m = m
 
 }
