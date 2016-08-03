@@ -419,7 +419,7 @@
 
 				if (pendingRequests && controller.onunload) {
 					var onunload = controller.onunload
-					controller.onunload = noop
+					controller.onunload = function (){}
 					controller.onunload.$old = onunload
 				}
 			})
