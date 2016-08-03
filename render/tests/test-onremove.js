@@ -2,8 +2,8 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var m = require("../../test-utils/hyperscript").m
 var vdom = require("../../render/render")
-var m = require("../../render/hyperscript")
 
 o.spec("onremove", function() {
 	var $window, root, render
@@ -16,8 +16,8 @@ o.spec("onremove", function() {
 	o("does not call onremove when creating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -27,8 +27,8 @@ o.spec("onremove", function() {
 	o("does not call onremove when updating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -38,7 +38,7 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing element", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, state: {}}
+		var vnode = m("div", {onremove: remove})
 
 		render(root, [vnode])
 		render(root, [])
@@ -49,7 +49,7 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing text", function() {
 		var remove = o.spy()
-		var vnode = {tag: "#", attrs: {onremove: remove}, children: "a", state: {}}
+		var vnode = m("#", {onremove: remove}, "a")
 
 		render(root, [vnode])
 		render(root, [])
@@ -60,7 +60,7 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = {tag: "[", attrs: {onremove: remove}, children: [], state: {}}
+		var vnode = m("[", {onremove: remove})
 
 		render(root, [vnode])
 		render(root, [])
@@ -71,7 +71,7 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing html", function() {
 		var remove = o.spy()
-		var vnode = {tag: "<", attrs: {onremove: remove}, children: "a", state: {}}
+		var vnode = m("<", {onremove: remove}, "a")
 
 		render(root, [vnode])
 		render(root, [])
@@ -92,9 +92,9 @@ o.spec("onremove", function() {
 			onremove: spy,
 			view: function() {return m("div")}
 		}
-		render(root, {tag: comp})
+		render(root, m(comp))
 		render(root, null)
-		
+
 		o(spy.callCount).equals(1)
 	})
 	o("calls onremove on nested component child", function() {
@@ -103,19 +103,19 @@ o.spec("onremove", function() {
 			view: function() {return m(outer)}
 		}
 		var outer = {
-			view: function() {return m(inner, m("a", {onremove: spy}))}
+			view: function() {return m(inner, [m("a", {onremove: spy})])}
 		}
 		var inner = {
 			view: function(vnode) {return m("div", vnode.children)}
 		}
-		render(root, {tag: comp})
+		render(root, m(comp))
 		render(root, null)
-		
+
 		o(spy.callCount).equals(1)
 	})
 	o("does not set onremove as an event handler", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, children: []}
+		var vnode = m("div", {onremove: remove})
 
 		render(root, [vnode])
 
@@ -124,9 +124,9 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove on recycle", function() {
 		var remove = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = [{tag: "div", key: 2, attrs: {onremove: remove}}]
-		var updated = [{tag: "div", key: 1}]
+		var vnodes = [m("div", {key: 1})]
+		var temp = [m("div", {key: 2, onremove: remove})]
+		var updated = [m("div", {key: 1})]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -136,8 +136,8 @@ o.spec("onremove", function() {
 	})
 	o("does not recycle when there's an onremove", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {onremove: remove}}
-		var updated = {tag: "div", key: 1, attrs: {onremove: remove}}
+		var vnode = m("div", {key: 1, onremove: remove})
+		var updated = m("div", {key: 1, onremove: remove})
 
 		render(root, [vnode])
 		render(root, [])

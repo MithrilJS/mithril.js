@@ -2,6 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var m = require("../../test-utils/hyperscript").m
 var vdom = require("../../render/render")
 
 o.spec("event", function() {
@@ -17,7 +18,7 @@ o.spec("event", function() {
 
 	o("handles onclick", function() {
 		var spy = o.spy()
-		var div = {tag: "div", attrs: {onclick: spy}}
+		var div = m("div", {onclick: spy})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
@@ -36,8 +37,8 @@ o.spec("event", function() {
 
 	o("fires onclick only once after redraw", function() {
 		var spy = o.spy()
-		var div = {tag: "div", attrs: {id: "a", onclick: spy}}
-		var updated = {tag: "div", attrs: {id: "b", onclick: spy}}
+		var div = m("div", {id: "a", onclick: spy})
+		var updated = m("div", {id: "b", onclick: spy})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
@@ -59,7 +60,7 @@ o.spec("event", function() {
 
 	o("handles ontransitionend", function() {
 		var spy = o.spy()
-		var div = {tag: "div", attrs: {ontransitionend: spy}}
+		var div = m("div", {ontransitionend: spy})
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 

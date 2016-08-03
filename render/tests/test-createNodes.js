@@ -2,6 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var m = require("../../test-utils/hyperscript").m
 var vdom = require("../../render/render")
 
 o.spec("createNodes", function() {
@@ -14,10 +15,10 @@ o.spec("createNodes", function() {
 
 	o("creates nodes", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			m("a"),
+			m("#", "b"),
+			m("<", "c"),
+			m("[", [m("#", "d")]),
 		]
 		render(root, vnodes)
 
@@ -29,11 +30,11 @@ o.spec("createNodes", function() {
 	})
 	o("ignores null", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
+			m("a"),
+			m("#", "b"),
 			null,
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			m("<", "c"),
+			m("[", [m("#", "d")]),
 		]
 		render(root, vnodes)
 
@@ -45,11 +46,11 @@ o.spec("createNodes", function() {
 	})
 	o("ignores undefined", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
+			m("a"),
+			m("#", "b"),
 			undefined,
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			m("<", "c"),
+			m("[", [m("#", "d")]),
 		]
 		render(root, vnodes)
 
