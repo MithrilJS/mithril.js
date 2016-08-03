@@ -23,7 +23,7 @@
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
-`selector`   | `String|Object`                            | Yes      | A CSS selector or a component
+`selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](https://github.com/lhorie/mithril.js/blob/rewrite/docs/components.md)
 `attributes` | `Object`                                   | No       | HTML attributes or element properties
 `children`   | `Array<Vnode>|String|Number|Boolean`       | No       | Child [vnodes](vnodes.md#structure). Can be written as [splat arguments](signatures.md#splats)
 **returns**  | `Vnode`                                    |          | A [vnode](vnodes.md#structure)
