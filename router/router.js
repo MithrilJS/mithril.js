@@ -4,7 +4,7 @@ var buildQueryString = require("../querystring/build")
 var parseQueryString = require("../querystring/parse")
 
 module.exports = function($window) {
-	var supportsPushState = typeof $window.history.pushState === "function" && $window.location.protocol !== "file:"
+	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
 	var prefix = "#!"
@@ -75,7 +75,7 @@ module.exports = function($window) {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-
+			
 			callAsync(function() {
 				for (var route in routes) {
 					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")

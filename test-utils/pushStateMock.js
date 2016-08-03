@@ -2,9 +2,11 @@
 
 var parseURL = require("../test-utils/parseURL")
 
-module.exports = function() {
-	var protocol = "http:"
-	var hostname = "localhost"
+module.exports = function(options) {
+	if (options == null) options = {}
+	
+	var protocol = options.protocol || "http:"
+	var hostname = options.hostname || "localhost"
 	var port = ""
 	var pathname = "/"
 	var search = ""
