@@ -20,6 +20,6 @@ o.spec("callAsync", function() {
 		})
 		timeout = setTimeout(function() {
 			throw new Error("callAsync was called too slow")
-		}, 0)
+		}, 5)
 	})
 })
