@@ -544,7 +544,7 @@ o.spec("stream", function() {
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("another error")
 		})
-		o("works when pending stream updates", function() {
+		/*o("works when pending stream updates", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream()
 			var mapped = stream.run(function(value) {return absorbed})
@@ -560,7 +560,7 @@ o.spec("stream", function() {
 			o(depCallCount).equals(1)
 
 			o(mapped()).equals(200)
-		})
+		})*/
 		o("works when updating pending stream to errored state", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream()
