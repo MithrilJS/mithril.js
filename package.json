@@ -16,6 +16,7 @@
 		"cover": "istanbul cover --print both ospec/bin/ospec"
 	},
 	"devDependencies": {
+		"@alrra/travis-scripts": "^3.0.1",
 		"eslint": "^2.10.2",
 		"istanbul": "^0.4.3"
 	},
