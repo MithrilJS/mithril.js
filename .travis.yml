@@ -8,11 +8,20 @@ cache:
   directories:
   - node_modules
 
+# Custom install step so the travis scripts don't need to be in package.json
+install:
+  - npm install
+  - npm install @alrra/travis-scripts@^3.0.1
+
+# After a successful build create bundles & commit back to the repo
 after_success:
   - |
     
-    # Only want to do this on commits to $BRANCH
-    [ "$TRAVIS_PULL_REQUEST" == "true" -o "$TRAVIS_BRANCH" != "$BRANCH" ] && (echo Artifacts only built on $BRANCH; exit 0)
+    # Only want to commit things on commits to $BRANCH
+    if [ "$TRAVIS_EVENT_TYPE" == "pull_request" ] || [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
+      echo "Artifacts only built on $BRANCH"
+      exit 0
+    fi
       
     # Set up SSH environment
     $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
