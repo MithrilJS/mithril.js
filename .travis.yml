@@ -1,5 +1,34 @@
+sudo: false
+
 language: node_js
 node_js:
-  - stable
+- node
 
-sudo: false
+cache:
+  directories:
+  - node_modules
+
+after_success:
+  - |
+    
+    # Only want to do this on commits to $BRANCH
+    [ "$TRAVIS_PULL_REQUEST" == "true" -o "$TRAVIS_BRANCH" != "$BRANCH" ] && (echo Artifacts only built on $BRANCH; exit 0)
+      
+    # Set up SSH environment
+    $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
+                          --iv "$encrypted_8b86e0359d64_iv" \
+                          --path-encrypted-key "./.deploy.enc"
+    
+    # Build & commit changes
+    $(npm bin)/commit-changes --commands "npm run build" \
+                              --commit-message "Update bundles [skip ci]" \
+                              --branch "$BRANCH"
+
+env:
+  global:
+    # Restrict the branch this will activate on
+    - BRANCH=rewrite
+    
+    # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
+    - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
+    - secure: Rf/ldEO9d4vItJhe6EmqWpFAyCARzoCb422nHnjr1hYJknnwIXpgyZ1C/7On/9o7rWPPf+8WcHC/rgjK2rthKCldzdG5I60LfWSNzap9lk3Aa4TpSCoDBuEp7JVvDr5tc3rKnBXVT71hOay7RSx1StWzXiJs9mjaeVMJzYzRT78=
