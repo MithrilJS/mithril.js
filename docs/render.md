@@ -35,7 +35,7 @@ In contrast, traversing a javascript data structure has a much more predictable 
 
 ### Differences from other API methods
 
-`m.render()` method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md), [`m.redraw()`](redraw.md) and `[m.request()](request.md)`. It is not called by [`m.prop()`](prop.md)
+`m.render()` method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md), [`m.redraw()`](redraw.md) and [`m.request()`](request.md). It is not called by [`m.prop()`](prop.md)
 
 Unlike with `m.mount()` and `m.route()`, a vnode tree rendered via `m.render()` does not auto-redraw in response to view events, `m.redraw()` calls or `m.request()` calls. It is a low level mechanism suitable for library authors who wish to manually control rendering instead of relying on Mithril's built-in auto-redrawing system.
 
