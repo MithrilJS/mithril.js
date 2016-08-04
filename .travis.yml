@@ -15,8 +15,8 @@ after_success:
     [ "$TRAVIS_PULL_REQUEST" == "true" -o "$TRAVIS_BRANCH" != "$BRANCH" ] && (echo Artifacts only built on $BRANCH; exit 0)
       
     # Set up SSH environment
-    $(npm bin)/set-up-ssh --key "$encrypted_c891851fc18e_key" \
-                          --iv "$encrypted_c891851fc18e_iv" \
+    $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
+                          --iv "$encrypted_8b86e0359d64_iv" \
                           --path-encrypted-key "./.deploy.enc"
     
     # Build & commit changes
@@ -26,7 +26,9 @@ after_success:
 
 env:
   global:
-    # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
-    - secure: Tn2040lfA5crcBdklJHWtnALD9wKGFg6xlZNF836fjX5C2FgjnT8oEu1My5Dq2GELxI1Nnvjam5mF3NehyRJI+MtAWX1daPsK/GurdbDFMktz1lzMgKzn8e2VuJ4Ta8y/B0YtOb3TVzp8asqswIrqssAZOsi463a+0lgILBjhQMt/0ktV63aoq/PaOQMcYqUrmROmK8L08wxMrmTBNJSEcxv6a1fY7HuGqaCAdvgmksA1BY8mK7xfY4u8eLJnvNjcJDeh8lq6ATtOQQpf2uz+RUTeRAfR3vwMAQscVlSPh7ll7hwgRjQYO7TkO/8NJtlk7+ADfVqg5QxVzqjdlwunCotxG/Tyfh9XZWUR6m4YF8N6WmDyDaSHOySmdGZd3FE8U5kUlMGs2kIBRnjMSgi4lrxee+obEi2B31igriHSs9/IVHY030LIKwP7G4T4Uli2FCIp7XZ9VIi/RWVV7RfIqg9rZBiN2UeH9KcV4gz5RVmigak3hsH/72Z5gNPW1EwEoUrgCSeZEBXhXiv+ig2WIK/NzzjaeoNJeu/5H84GdG+h3z+lapAo9cf72sdlZN9eDLEoBGy/8Jg8P467MlgJlrXVYXmjRce65rBxD3owyjuZyV1KyZabsLoGRG8UhSnoQnW7dW3/7TaJI6T4Dy0RThnjw00SSUv9r0bZ8m9k50=
-    - secure: fahDeoYtRZNp8DLoBdLFJIX51EN/UnJff/hIt/k8Z+ruOn2a8+Zw7Q96cYbslUZ4s8FMdZqZnIsLS4P0OBQbkltl59Yd6omVN4Zl9pLjinPr68b2oZFyA4q7UfrIywm3AlQSKNLcjrHMdJ1iacZWNW42wm/b5EDPOV95du8iTBH/Ky7OdbMQ9XYe79Tj663kOZajSYK2tf25G8CBCaqkMTLt9Hn2gHuXneJMQeyXYQTV6PLHyGIKhptFczXPiY7hbDj0OxKlDEx5VqHPASLXetIj7KLfpqeiwd4vAuqNdF527uaGaPRoKXR/WNBKofEX+18Ra97ws0b2p9m/vM6fbVeZ8tUcBeWHy9rB48yEktgSipHAI8cd7c69Irbq5hk8PMjjFD4QivZqAqz/3tmGNVK6CS49BnZwPDDKa8lmx8tCsIMhEBrE3SeF1IEpfJ8DuaMqIfWtv/IDPRFSm8MPR5Ga3VaCqgcdVyTnImOo3hiZog2spShD1/8bNVv1Lhv82Al4ozJ6ScAnSA3aIeXdi9OYAu4Dov2ZbBfAJhp/0A1UYwYOIqhRK6LLivYnywwIbVIOL1/gubqZcRyMETfoaO1dWFf9z2T71oTrz5oVVetDaVD5AdpH/Y+MkK6vcXpaIhiYhdLASeQdPmrbiLsT+F0b50LXmsxCkGEszEm+HhE=
+    # Restrict the branch this will activate on
     - BRANCH=rewrite
+    
+    # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
+    - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
+    - secure: Rf/ldEO9d4vItJhe6EmqWpFAyCARzoCb422nHnjr1hYJknnwIXpgyZ1C/7On/9o7rWPPf+8WcHC/rgjK2rthKCldzdG5I60LfWSNzap9lk3Aa4TpSCoDBuEp7JVvDr5tc3rKnBXVT71hOay7RSx1StWzXiJs9mjaeVMJzYzRT78=
