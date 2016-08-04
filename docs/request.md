@@ -32,7 +32,7 @@ Argument               | Type                              | Required | Descript
 `options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
-`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`
+`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, `options.deserialize` is ignored.
 `options.initialValue` | `any`                             | No       | A value to populate the returned stream before the request completes
 `options.useBody`      | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 **returns**            | `Stream`                          |          | A stream that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
@@ -375,6 +375,26 @@ function parseCSV(data) {
 ```
 
 Ignoring the fact that the parseCSV function above doesn't handle a lot of cases that a proper CSV parser would, the code above logs an array of arrays
+
+---
+
+
+### Retrieving response details
+
+By default Mithril attempts to parse a response as JSON and returns `xhr.responseText`. It may be useful to inspect a server response in more detail, this can be accomplished by passing a custom `options.extract` function:
+
+```javascript
+m.request({
+	method: "GET",
+	url: "/api/v1/users",
+	extract: function(xhr) {return {status: xhr.status, body: xhr.responseText}}
+})
+.run(function(response) {
+	console.log(response.status, response.body)
+})
+```
+
+The parameter to `options.extract` is the XMLHttpRequest object once its operation is completed, but before it has been passed to the resulting [stream](prop.md), so the stream may still end up in an errored state if processing throws an exception.
 
 ---
 
