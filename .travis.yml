@@ -8,6 +8,12 @@ cache:
   directories:
   - node_modules
 
+# Custom install step so the travis scripts don't need to be in package.json
+install:
+  - npm install
+  - npm install @alrra/travis-scripts@^3.0.1
+
+# After a successful build create bundles & commit back to the repo
 after_success:
   - |
     
