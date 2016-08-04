@@ -68,7 +68,9 @@ o.spec("mount", function() {
 		}, FRAME_BUDGET)
 	})
 
-	o("redraws several mount points on events", function(done) {
+	o("redraws several mount points on events", function(done, timeout) {
+		timeout(60)
+		
 		var onupdate0 = o.spy()
 		var oninit0   = o.spy()
 		var onclick0  = o.spy()

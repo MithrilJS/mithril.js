@@ -810,16 +810,7 @@ var requestService = function($window) {
 				try {
 					var response = args.deserialize(args.extract(xhr, args))
 					if (xhr.status >= 200 && xhr.status < 300) {
-						if (typeof args.type === "function") {
-							if (response instanceof Array) {
-								for (var i = 0; i < response.length; i++) {
-									response[i] = new args.type(response[i])
-								}
-							}
-							else response = new args.type(response)
-						}
-						
-						stream(response)
+						stream(cast(args.type, response))
 					}
 					else {
 						var error = new Error(xhr.responseText)
@@ -841,12 +832,13 @@ var requestService = function($window) {
 	}
 	function jsonp(args) {
 		var stream = Stream.stream()
+		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 		var script = $window.document.createElement("script")
 		$window[callbackName] = function(data) {
 			script.parentNode.removeChild(script)
-			stream(data)
+			stream(cast(args.type, data))
 			if (typeof oncompletion === "function") oncompletion()
 			delete $window[callbackName]
 		}
@@ -888,6 +880,18 @@ var requestService = function($window) {
 		catch (e) {throw new Error(data)}
 	}
 	function extract(xhr) {return xhr.responseText}
+	
+	function cast(type, data) {
+		if (typeof type === "function") {
+			if (data instanceof Array) {
+				for (var i = 0; i < data.length; i++) {
+					data[i] = new type(data[i])
+				}
+			}
+			else return new type(data)
+		}
+		return data
+	}
 	
 	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }(window)

@@ -100,6 +100,14 @@ This browser behavior may seem surprising to a developer coming from jQuery, bec
 
 As a general rule of thumb, you should avoid using `m.trust` unless you are explicitly rendering rich text and there's no other way to get the results that you want.
 
+```javascript
+// AVOID
+m("div", m.trust("hello world"))
+
+// PREFER
+m("div", "hello world")
+```
+
 #### Avoid blind copying and pasting
 
 One common way to misuse `m.trust` is when working with third party services whose tutorials include HTML code to be copied and pasted. In most cases, HTML should be written using vnodes (typically via the [`m()`](hyperscript.md) utility)
@@ -148,7 +156,7 @@ var FacebookLikeButton = {
 }
 ```
 
-The Mithril component above simply pulls out the script tag's exact content into the `oncreate` hook and declares the remaining HTML tags using Mithril's `m()` syntax.
+The Mithril component above simply copies the script tag's code into the `oncreate` hook and declares the remaining HTML tags using Mithril's `m()` syntax.
 
 #### Avoid HTML entities
 
