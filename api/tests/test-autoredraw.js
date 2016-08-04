@@ -2,6 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var m = require("../../test-utils/hyperscript").m
 
 var coreRenderer = require("../../render/render")
 var apiPubSub = require("../../api/pubsub")
@@ -39,7 +40,7 @@ o.spec("autoredraw", function() {
 	o("registers onevent", function() {
 		autoredraw(root, renderer, pubsub, spy)
 
-		renderer.render(root, {tag: "div", attrs: {onclick: function() {}}})
+		renderer.render(root, m("div", {onclick: function() {}}))
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -83,7 +84,7 @@ o.spec("autoredraw", function() {
 	o("does not redraw if e.redraw is false", function() {
 		autoredraw(root, renderer, pubsub, spy)
 
-		renderer.render(root, {tag: "div", attrs: {onclick: function(e) {e.redraw = false}}})
+		renderer.render(root, m("div", {onclick: function(e) {e.redraw = false}}))
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)

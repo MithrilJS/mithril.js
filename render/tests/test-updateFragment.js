@@ -2,6 +2,10 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var hyperscript = require("../../test-utils/hyperscript")
+var m = hyperscript.m
+var t = hyperscript.t
+
 var vdom = require("../../render/render")
 
 o.spec("updateFragment", function() {
@@ -13,8 +17,8 @@ o.spec("updateFragment", function() {
 	})
 
 	o("updates fragment", function() {
-		var vnode = {tag: "[", children: [{tag: "a"}]}
-		var updated = {tag: "[", children: [{tag: "b"}]}
+		var vnode = m("[", [m("a")])
+		var updated = m("[", [m("b")])
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -23,8 +27,8 @@ o.spec("updateFragment", function() {
 		o(updated.dom.nodeName).equals("B")
 	})
 	o("adds els", function() {
-		var vnode = {tag: "[", children: []}
-		var updated = {tag: "[", children: [{tag: "a"}, {tag: "b"}]}
+		var vnode = m("[")
+		var updated = m("[", [m("a"), m("b")])
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -36,8 +40,8 @@ o.spec("updateFragment", function() {
 		o(root.childNodes[1].nodeName).equals("B")
 	})
 	o("removes els", function() {
-		var vnode = {tag: "[", children: [{tag: "a"}, {tag: "b"}]}
-		var updated = {tag: "[", children: []}
+		var vnode = m("[", [m("a"), m("b")])
+		var updated = m("[")
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -47,8 +51,8 @@ o.spec("updateFragment", function() {
 		o(root.childNodes.length).equals(0)
 	})
 	o("updates from childless fragment", function() {
-		var vnode = {tag: "["}
-		var updated = {tag: "[", children: [{tag: "a"}]}
+		var vnode = t("[") // t() creates no children
+		var updated = m("[", [m("a")])
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -57,8 +61,8 @@ o.spec("updateFragment", function() {
 		o(updated.dom.nodeName).equals("A")
 	})
 	o("updates to childless fragment", function() {
-		var vnode = {tag: "[", children: [{tag: "a"}]}
-		var updated = {tag: "["}
+		var vnode = m("[", [m("a")])
+		var updated = t("[") // t() creates no children
 
 		render(root, [vnode])
 		render(root, [updated])

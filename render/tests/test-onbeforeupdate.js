@@ -2,6 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var m = require("../../test-utils/hyperscript").m
 var vdom = require("../../render/render")
 
 o.spec("onbeforeupdate", function() {
@@ -14,8 +15,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in element", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -25,8 +26,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in text", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
-		var updated = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
+		var vnode = m("#", {onbeforeupdate: onbeforeupdate}, "a")
+		var updated = m("#", {onbeforeupdate: onbeforeupdate}, "b")
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -36,8 +37,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in html", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
-		var updated = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
+		var vnode = m("<", {onbeforeupdate: onbeforeupdate}, "a")
+		var updated = m("<", {onbeforeupdate: onbeforeupdate}, "b")
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -47,8 +48,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in fragment", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "a"}]}
-		var updated = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "b"}]}
+		var vnode = m("[", {onbeforeupdate: onbeforeupdate}, [m("#", "a")])
+		var updated = m("[", {onbeforeupdate: onbeforeupdate}, [m("#", "b")])
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -60,11 +61,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return false},
 			view: function(vnode) {
-				return {tag: "div", children: vnode.children}
+				return m("div", vnode.children)
 			},
 		}
-		var vnode = {tag: component, children: [{tag: "#", children: "a"}]}
-		var updated = {tag: component, children: [{tag: "#", children: "b"}]}
+		var vnode = m(component, [m("#", "a")])
+		var updated = m(component, [m("#", "b")])
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -76,11 +77,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return false},
 			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
+				return m("div", {id: vnode.attrs.id})
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+		var vnode = m(component, {id: "a", onbeforeupdate: function() {return false}})
+		var updated = m(component, {id: "b", onbeforeupdate: function() {return false}})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -92,11 +93,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return true},
 			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
+				return m("div", {id: vnode.attrs.id})
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+		var vnode = m(component, {id: "a", onbeforeupdate: function() {return true}})
+		var updated = m(component, {id: "b", onbeforeupdate: function() {return true}})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -108,11 +109,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return false},
 			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
+				return m("div", {id: vnode.attrs.id})
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+		var vnode = m(component, {id: "a", onbeforeupdate: function() {return true}})
+		var updated = m(component, {id: "b", onbeforeupdate: function() {return true}})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -124,11 +125,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return true},
 			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
+				return m("div", {id: vnode.attrs.id})
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+		var vnode = m(component, {id: "a", onbeforeupdate: function() {return false}})
+		var updated = m(component, {id: "b", onbeforeupdate: function() {return false}})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -138,8 +139,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("does not prevent update if returning true", function() {
 		var onbeforeupdate = function() {return true}
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -151,11 +152,11 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: function() {return true},
 			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
+				return m("div", vnode.attrs)
 			},
 		}
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+		var vnode = m(component, {id: "a"})
+		var updated = m(component, {id: "b"})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -165,8 +166,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("accepts arguments for comparison", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -188,12 +189,12 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
+				return m("div", vnode.attrs)
 			},
 		}
 		var count = 0
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+		var vnode = m(component, {id: "a"})
+		var updated = m(component, {id: "b"})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -213,8 +214,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("is not called on creation", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
 		render(root, [vnode])
 
@@ -230,13 +231,13 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
+				return m("div", vnode.attrs)
 			},
 		}
 
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a"}}
-		var updated = {tag: "div", attrs: {id: "b"}}
+		var vnode = m("div", {id: "a"})
+		var updated = m("div", {id: "b"})
 
 		render(root, [vnode])
 
@@ -250,8 +251,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("is called only once on update", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
 		render(root, [vnode])
 		render(root, [updated])
@@ -268,13 +269,13 @@ o.spec("onbeforeupdate", function() {
 		var component = {
 			onbeforeupdate: onbeforeupdate,
 			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
+				return m("div", vnode.attrs)
 			},
 		}
 
 		var count = 0
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+		var vnode = m(component, {id: "a"})
+		var updated = m(component, {id: "b"})
 
 		render(root, [vnode])
 		render(root, [updated])

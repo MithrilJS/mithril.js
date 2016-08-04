@@ -354,10 +354,9 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
-					if (old[i] == null && vnodes[i] == null) continue
+					if (old[i] == null && vnodes[i] == null) continue // eslint-disable-line no-continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(parent, old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
@@ -1102,7 +1101,7 @@ m.route = function($window, renderer, pubsub) {
 m.mount = function(renderer, pubsub) {
 	return function(root, component) {
 		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(root, {tag: component})
+			renderer.render(root, Vnode(component, undefined, {}, [], undefined, undefined))
 		})
 		run()
 	}
