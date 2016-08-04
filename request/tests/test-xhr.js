@@ -210,7 +210,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", extract: extract}).map(function(data) {
-				o(data).deepEquals({test: 123})
+				o(data).equals("{\"test\":123}")
 			}).map(done)
 		})
 		o("extract parameter works in POST", function(done) {
@@ -224,7 +224,24 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", extract: extract}).map(function(data) {
-				o(data).deepEquals({test: 123})
+				o(data).equals("{\"test\":123}")
+			}).map(done)
+		})
+		o("ignores deserialize if extract is defined", function(done) {
+			var extract = function(data) {
+				return data.status
+			}
+			var deserialize = o.spy()
+
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			xhr({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).map(function(data) {
+				o(data).equals(200)
+			}).map(function() {
+				o(deserialize.callCount).equals(0)
 			}).map(done)
 		})
 		o("config parameter works", function(done) {

@@ -38,7 +38,7 @@ module.exports = function($window) {
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				try {
-					var response = args.deserialize(args.extract(xhr, args))
+					var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
 					if (xhr.status >= 200 && xhr.status < 300) {
 						stream(cast(args.type, response))
 					}
