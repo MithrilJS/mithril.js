@@ -13,12 +13,12 @@ o.spec("render", function() {
 	})
 
 	o("overwrites existing content", function() {
-		var vnodes = [{tag: "a", text: null}]
+		var vnodes = []
 
 		root.appendChild($window.document.createElement("div"));
 
 		render(root, vnodes)
 
-		o(root.childNodes.length).equals(1)
+		o(root.childNodes.length).equals(0)
 	})
 })
