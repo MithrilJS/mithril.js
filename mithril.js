@@ -744,7 +744,12 @@ var renderService = function($window) {
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		if (dom.vnodes == null) dom.vnodes = []
+		
+		// First time rendering into a node clears it out
+		if (dom.vnodes == null) {
+			dom.vnodes = []
+			dom.textContent = "";
+		}
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
