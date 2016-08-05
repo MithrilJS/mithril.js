@@ -675,11 +675,11 @@ var renderService = function($window) {
 	}
 	//style
 	function updateStyle(element, old, style) {
-		if (old === style) element.style = "", old = null
-		if (style == null) element.style = ""
-		else if (typeof style === "string") element.style = style
+		if (old === style) element.cssText = "", old = null
+		if (style == null) element.cssText = ""
+		else if (typeof style === "string") element.cssText = style
 		else {
-			if (typeof old === "string") element.style = ""
+			if (typeof old === "string") element.cssText = ""
 			for (var key in style) {
 				element.style[key] = style[key]
 			}
