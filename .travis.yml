@@ -30,7 +30,7 @@ after_success:
     
     # Build & commit changes
     $(npm bin)/commit-changes --commands "npm run build" \
-                              --commit-message "Update bundles [skip ci]" \
+                              --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
                               --branch "$BRANCH"
 
 env:
