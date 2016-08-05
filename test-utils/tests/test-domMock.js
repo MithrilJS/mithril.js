@@ -474,19 +474,29 @@ o.spec("domMock", function() {
 
 			o(typeof div.style).equals("object")
 		})
-		o("setting style string works", function() {
+		o("setting cssText string works", function() {
 			var div = $document.createElement("div")
-			div.style = "background-color: red; border-bottom: 1px solid red;"
+			div.cssText = "background-color: red; border-bottom: 1px solid red;"
 
 			o(div.style.backgroundColor).equals("red")
 			o(div.style.borderBottom).equals("1px solid red")
 		})
-		o("removing via setting style string works", function() {
+		o("removing via setting cssText string works", function() {
 			var div = $document.createElement("div")
-			div.style = "background: red;"
-			div.style = ""
+			div.cssText = "background: red;"
+			div.cssText = ""
 
 			o(div.style.background).equals("")
+		})
+		o("setting style throws", function () {
+			var err = false
+			try {
+				div.style = ''
+			} catch (e) {
+				err = e
+			}
+
+			o(err instanceof Error).equals(true)
 		})
 	})
 	o.spec("events", function() {
