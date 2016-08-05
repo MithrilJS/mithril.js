@@ -1,7 +1,6 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var coreRenderer = require("../render/render")
 var autoredraw = require("../api/autoredraw")
 var dummy = {view: function() {}}
 
