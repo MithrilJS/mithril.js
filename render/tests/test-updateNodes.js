@@ -845,4 +845,22 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeName).equals("S")
 	})
+	o("cached, non-keyed nodes skip diff", function () {
+		var onupdate = o.spy();
+		var cached = {tag:"a", attrs:{onupdate: onupdate}}
+
+		render(root, cached)
+		render(root, cached)
+
+		o(onupdate.callCount).equals(0)
+	})
+	o("cached, keyed nodes skip diff", function () {
+		var onupdate = o.spy();
+		var cached = {tag:"a", key:"a", attrs:{onupdate: onupdate}}
+
+		render(root, cached)
+		render(root, cached)
+
+		o(onupdate.callCount).equals(0)
+	})
 })
