@@ -100,7 +100,7 @@
 				cell.attrs.id = match[2]
 			} else if (match[1] === ".") {
 				classes.push(match[2])
-			} else if (match[3][0] === "[") {
+			} else if (match[3].charAt(0) === "[") { // #1195
 				var attrValue = match[6]
 				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1")
 				cell.attrs[match[4]] = attrValue || true
@@ -1081,14 +1081,19 @@
 			//
 			// #348 don't set the value if not needed - otherwise, cursor
 			// placement breaks in Chrome
-			try {
-				if (tag !== "input" || node[attrName] !== dataAttr) {
-					node[attrName] = dataAttr
+			// #1195 do not update attribute value if not changed
+			if (node[attrName] !== dataAttr) {
+				try {
+					if (tag !== "input" || node[attrName] !== dataAttr) {
+						node[attrName] = dataAttr
+					}
+				} catch (e) {
+					node.setAttribute(attrName, dataAttr)
 				}
-			} catch (e) {
-				node.setAttribute(attrName, dataAttr)
 			}
-		} else node.setAttribute(attrName, dataAttr)
+		} else if (node[attrName] !== dataAttr) {
+			node.setAttribute(attrName, dataAttr)
+		}
 	}
 
 	function trySetAttr(
