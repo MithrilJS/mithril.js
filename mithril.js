@@ -1081,18 +1081,21 @@
 			//
 			// #348 don't set the value if not needed - otherwise, cursor
 			// placement breaks in Chrome
-			// #1195 do not update attribute value if not changed
-			if (node[attrName] !== dataAttr) {
-				try {
-					if (tag !== "input" || node[attrName] !== dataAttr) {
-						node[attrName] = dataAttr
-					}
-				} catch (e) {
-					node.setAttribute(attrName, dataAttr)
+			try {
+				if (tag !== "input" || node[attrName] !== dataAttr) {
+					node[attrName] = dataAttr
 				}
+			} catch (e) {
+				node.setAttribute(attrName, dataAttr)
 			}
-		} else if (node[attrName] !== dataAttr) {
-			node.setAttribute(attrName, dataAttr)
+		} else {
+			try {
+				node.setAttribute(attrName, dataAttr)
+			} catch (e) {
+				// IE8 doesn't allow change input attributes and throws
+				// an exception. Unfortunately it cannot be handled, because
+				// error code is not informative.
+			}
 		}
 	}
 
