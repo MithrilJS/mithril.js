@@ -109,7 +109,7 @@ module.exports = function($window) {
 
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
-		if (old == null && vnodes == null) return
+		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
 		else {
@@ -118,7 +118,7 @@ module.exports = function($window) {
 			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
-					if (old[i] == null && vnodes[i] == null) continue
+					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(parent, old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
@@ -441,11 +441,11 @@ module.exports = function($window) {
 
 	//style
 	function updateStyle(element, old, style) {
-		if (old === style) element.style = "", old = null
-		if (style == null) element.style = ""
-		else if (typeof style === "string") element.style = style
+		if (old === style) element.cssText = "", old = null
+		if (style == null) element.cssText = ""
+		else if (typeof style === "string") element.cssText = style
 		else {
-			if (typeof old === "string") element.style = ""
+			if (typeof old === "string") element.cssText = ""
 			for (var key in style) {
 				element.style[key] = style[key]
 			}
@@ -514,7 +514,12 @@ module.exports = function($window) {
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		if (dom.vnodes == null) dom.vnodes = []
+		
+		// First time rendering into a node clears it out
+		if (dom.vnodes == null) {
+			dom.vnodes = []
+			dom.textContent = "";
+		}
 
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)

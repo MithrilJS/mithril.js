@@ -348,7 +348,7 @@ var renderService = function($window) {
 	}
 	//update
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
-		if (old == null && vnodes == null) return
+		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
 		else {
@@ -357,7 +357,7 @@ var renderService = function($window) {
 			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
-					if (old[i] == null && vnodes[i] == null) continue
+					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(parent, old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
@@ -675,11 +675,11 @@ var renderService = function($window) {
 	}
 	//style
 	function updateStyle(element, old, style) {
-		if (old === style) element.style = "", old = null
-		if (style == null) element.style = ""
-		else if (typeof style === "string") element.style = style
+		if (old === style) element.cssText = "", old = null
+		if (style == null) element.cssText = ""
+		else if (typeof style === "string") element.cssText = style
 		else {
-			if (typeof old === "string") element.style = ""
+			if (typeof old === "string") element.cssText = ""
 			for (var key in style) {
 				element.style[key] = style[key]
 			}
@@ -744,7 +744,12 @@ var renderService = function($window) {
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		if (dom.vnodes == null) dom.vnodes = []
+		
+		// First time rendering into a node clears it out
+		if (dom.vnodes == null) {
+			dom.vnodes = []
+			dom.textContent = "";
+		}
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
@@ -808,7 +813,7 @@ var requestService = function($window) {
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				try {
-					var response = args.deserialize(args.extract(xhr, args))
+					var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
 					if (xhr.status >= 200 && xhr.status < 300) {
 						stream(cast(args.type, response))
 					}
@@ -1103,12 +1108,21 @@ m.route = function($window, renderer, pubsub) {
 	
 	return route
 }(window, renderService, redrawService)
+var dummy = {view: function() {}}
 m.mount = function(renderer, pubsub) {
 	return function(root, component) {
+		pubsub.unsubscribe(root.redraw)
 		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(root, {tag: component})
+			renderer.render(
+				root,
+				Vnode(component === null ? dummy : component, undefined, undefined, undefined, undefined, undefined)
+			)
 		})
 		run()
+		if (component === null) {
+			pubsub.unsubscribe(root.redraw)
+			delete root.redraw
+		}
 	}
 }(renderService, redrawService)
 m.trust = function(html) {

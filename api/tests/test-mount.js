@@ -32,6 +32,20 @@ o.spec("mount", function() {
 		o(root.firstChild.nodeName).equals("DIV")
 	})
 
+	o("mounting null deletes `redraw` from `root`", function() {
+		mount(root, {
+			view : function() {
+				return m("div")
+			}
+		})
+
+		o(typeof root.redraw).equals('function')
+
+		mount(root, null)
+
+		o(typeof root.redraw).equals('undefined')
+	})
+
 	o("redraws on events", function(done) {
 		var onupdate = o.spy()
 		var oninit   = o.spy()

@@ -136,7 +136,11 @@ module.exports = function() {
 					get style() {
 						return style
 					},
-					set style(value) {
+					set style(_){
+						// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style#Setting_style
+						throw new Error("setting element.style is not portable")
+					},
+					set cssText(value) {
 						if (typeof value === "string") {
 							for (var key in style) style[key] = ""
 							var rules = value.split(";")
