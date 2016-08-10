@@ -15,7 +15,7 @@ Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `element`   | `Element`            | Yes      | A DOM element that will be the parent node to the subtree
 `vnodes`    | `Array<Vnode>|Vnode` | Yes      | The [vnodes](vnodes.md) to be rendered
-**returns** |                      |          | Returns nothing
+**returns** |                      |          | Returns `undefined`
 
 [How to read signatures](signatures.md)
 
