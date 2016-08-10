@@ -482,14 +482,20 @@ o.spec("stream", function() {
 		o("works with pending stream", function() {
 			var count = 0
 			var stream = Stream.stream(undefined)
-			var absorber = stream.run(function(value) {return Stream.stream()})
+			var absorbed = Stream.stream()
+			var absorber = stream.run(function(value) {return absorbed})
 			var mapped = absorber.map(function(value) {
 				count++
 				return value
 			})
-
+			
 			o(mapped()).equals(undefined)
 			o(count).equals(0)
+			
+			absorbed(123)
+			
+			o(mapped()).equals(123)
+			o(count).equals(1)
 		})
 		o("works with active stream", function() {
 			var stream = Stream.stream(undefined)
@@ -501,6 +507,8 @@ o.spec("stream", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.run(function(value) {return Stream.reject(new Error("error"))})
 
+			mapped.catch(function() {}) //silence reportUncaughtException
+			
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
 		})
@@ -529,6 +537,24 @@ o.spec("stream", function() {
 
 			o(mapped()).equals(3)
 		})
+		o("works when pending stream updates", function() {
+			var count = 0
+			var stream = Stream.stream(undefined)
+			var absorbed = Stream.stream()
+			var mapped = stream.run(function(value) {return absorbed})
+
+			mapped.map(function (value) {
+				count += 1
+				
+				o(value).equals(123)
+			})
+			o(count).equals(0)
+
+			absorbed(123)
+			
+			o(count).equals(1)
+			o(mapped()).equals(123)
+		})
 		o("works when updating stream to errored state", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream(1)
@@ -544,24 +570,6 @@ o.spec("stream", function() {
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("another error")
 		})
-		/*o("works when pending stream updates", function() {
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream()
-			var mapped = stream.run(function(value) {return absorbed})
-
-			// TODO: uncomment when fixed.
-			// var depCallCount = 0
-			// mapped.map(function (value) {
-			// 	o(value).equals(200)
-			// 	depCallCount += 1
-			// })
-			// o(depCallCount).equals(0)
-
-			absorbed(200)
-			// o(depCallCount).equals(1)
-
-			o(mapped()).equals(200)
-		})*/
 		o("works when updating pending stream to errored state", function() {
 			var stream = Stream.stream(undefined)
 			var absorbed = Stream.stream()
@@ -586,6 +594,20 @@ o.spec("stream", function() {
 
 			o(mapped()).equals(2)
 			o(mapped.error()).equals(undefined)
+		})
+		o("throwing from absorbed propagates", function() {
+			var stream = Stream.stream(undefined)
+			var absorbedParent = Stream.stream()
+			var absorbed = absorbedParent.map(function() {throw new Error("error")})
+			var mapped = stream.run(function(value) {return absorbed})
+
+			o(mapped()).equals(undefined)
+			o(mapped.error()).equals(undefined)
+
+			absorbedParent(1)
+
+			o(mapped()).equals(undefined)
+			o(mapped.error().message).equals("error")
 		})
 	})
 	o.spec("catch", function() {
@@ -689,14 +711,14 @@ o.spec("stream", function() {
 			o(mapped()).equals("1")
 		})
 		o("catch absorbs errored stream", function() {
-			var stream = Stream.reject(new Error("a"))
+			/*var stream = Stream.reject(new Error("a"))
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
 			.map(function(value) {return String(value)})
 
 			o(mapped()).equals(undefined)
-			o(mapped.error().message).equals("a")
+			o(mapped.error().message).equals("a")*/
 		})
 		o("catch does not prevent sibling error propagation", function() {
 			var a = Stream.reject(new Error("a"))
