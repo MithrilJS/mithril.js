@@ -1,4 +1,4 @@
-//"use strict"
+"use strict"
 
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
