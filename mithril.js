@@ -354,7 +354,6 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
@@ -695,7 +694,7 @@ var renderService = function($window) {
 		var element = vnode.dom
 		var callback = function(e) {
 			var result = value.call(element, e)
-			if (typeof onevent === "function") onevent.call(element, e)
+			if (typeof onevent === "function") onevent.call(element, result)
 			return result
 		}
 		if (key in element) element[key] = callback
@@ -744,7 +743,6 @@ var renderService = function($window) {
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) {
 			dom.vnodes = []
@@ -1009,12 +1007,10 @@ var coreRouter = function($window) {
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
-		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
 			callAsync(function() {
 				for (var route in routes) {
 					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
@@ -1039,8 +1035,8 @@ var coreRouter = function($window) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
-			e.redraw = false
 			setPath(vnode.attrs.href, undefined, undefined)
+			return false
 		}
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
@@ -1068,8 +1064,8 @@ var throttle = function(callback) {
 var autoredraw = function(root, renderer, pubsub, callback) {
 	var run = throttle(callback)
 	if (renderer != null) {
-		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) pubsub.publish()
+		renderer.setEventCallback(function(result) {
+			if (result !== false) pubsub.publish()
 		})
 	}
 	if (pubsub != null) {

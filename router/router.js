@@ -103,8 +103,8 @@ module.exports = function($window) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
-			e.redraw = false
 			setPath(vnode.attrs.href, undefined, undefined)
+			return false
 		}
 	}
 
