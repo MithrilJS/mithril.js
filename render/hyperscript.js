@@ -2,9 +2,26 @@
 
 var Vnode = require("../render/vnode")
 
+var hyperscript_doc = "https://github.com/lhorie/mithril.js/blob/rewrite/docs/hyperscript.md#api"
+
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
+	if (!selector || typeof selector !== "string" && !selector.view) {
+		var error_msg = "";
+		if (!selector) {
+			var got = selector === ""? "An empty string": selector
+			error_msg = got + " is an invalid selector." +
+				" The selector must be a string or a component."
+		}
+		if(typeof selector === "object") {
+			error_msg = "Did you forget the selector?" +
+				" If it was supposed to be a component make sure it has a view."
+		}
+		throw Error(error_msg +
+			    " Visit " + hyperscript_doc + " for detail.")
+	}
+
 	if (typeof selector === "string") {
 		if (selectorCache[selector] === undefined) {
 			var match, tag, classes = [], attributes = {}
