@@ -20,10 +20,11 @@ module.exports = new function init() {
 	}
 	o.only = function(subject, predicate) {o(subject, only = predicate)}
 	o.spy = function() {
-		var spy = function() {
+		var spy = function(x) {
 			spy.this = this
 			spy.args = [].slice.call(arguments)
 			spy.callCount++
+			return x
 		}
 		spy.args = []
 		spy.callCount = 0

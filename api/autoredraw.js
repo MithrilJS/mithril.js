@@ -5,8 +5,8 @@ var throttle = require("../api/throttle")
 module.exports = function(root, renderer, pubsub, callback) {
 	var run = throttle(callback)
 	if (renderer != null) {
-		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) pubsub.publish()
+		renderer.setEventCallback(function(result) {
+			if (result !== false) pubsub.publish()
 		})
 	}
 

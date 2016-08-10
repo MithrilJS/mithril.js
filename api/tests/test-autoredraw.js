@@ -80,10 +80,10 @@ o.spec("autoredraw", function() {
 		}, FRAME_BUDGET)
 	})
 
-	o("does not redraw if e.redraw is false", function() {
+	o("does not redraw if handler returns false", function() {
 		autoredraw(root, renderer, pubsub, spy)
 
-		renderer.render(root, {tag: "div", attrs: {onclick: function(e) {e.redraw = false}}})
+		renderer.render(root, {tag: "div", attrs: {onclick: function(e) {return false}}})
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)

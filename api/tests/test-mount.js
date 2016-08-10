@@ -162,7 +162,7 @@ o.spec("mount", function() {
 					oninit: oninit,
 					onupdate: onupdate,
 					onclick: function(e) {
-						e.redraw = false
+						return false
 					}
 				})
 			}

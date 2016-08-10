@@ -462,7 +462,7 @@ module.exports = function($window) {
 		var element = vnode.dom
 		var callback = function(e) {
 			var result = value.call(element, e)
-			if (typeof onevent === "function") onevent.call(element, e)
+			if (typeof onevent === "function") onevent.call(element, result)
 			return result
 		}
 		if (key in element) element[key] = callback

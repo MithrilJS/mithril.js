@@ -175,7 +175,7 @@ o.spec("route", function() {
 									oninit: oninit,
 									onupdate: onupdate,
 									onclick: function(e) {
-										e.redraw = false
+										return false
 									},
 								})
 							}
