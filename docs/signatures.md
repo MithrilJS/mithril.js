@@ -19,7 +19,7 @@ The **Type** column indicates the expected type for the argument.
 
 A pipe (`|`) indicates that an argument is valid if it has any of the listed types. For example, `String|Object` indicates that `selector` can be a string OR an object.
 
-Angled brackets (`< >`) after an `Array` indicate the expected type for array items. For exampe, `Array<String>` indicates that an argument must be an array and that all items in that array must be strings.
+Angled brackets (`< >`) after an `Array` indicate the expected type for array items. For exampe, `Array<String>` indicates that the argument must be an array and that all items in that array must be strings. Angled brackets after an `Object` indicate a map. For example, `Object<String,Component>` indicates that the argument must be an object, whose keys are strings and values are [components](components.md)
 
 Sometimes non-native types may appear to indicate that a specific object signature is required. For example, `Vnode` is an object that has a [virtual DOM node](vnodes.md) structure.
 
