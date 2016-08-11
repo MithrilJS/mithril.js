@@ -2,11 +2,11 @@ new function() {
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
 	function stream() {
-		if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 		return stream._state.value
 	}
 	initStream(stream, arguments)
-	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+	if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 	return stream
 }
 function initStream(stream, args) {
@@ -19,7 +19,7 @@ function initStream(stream, args) {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
 				var errorStream = function() {
-					if (arguments.length > 0) updateStream(stream, undefined, arguments[0])
+					if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
 					return stream._state.error
 				}
 				initStream(errorStream, [])
@@ -381,7 +381,7 @@ var renderService = function($window) {
 						if (o === v) oldEnd--, start++
 						else if (o != null && v != null && o.key === v.key) {
 							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+							if (start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 							oldEnd--, start++
 						}
 						else break
@@ -748,10 +748,7 @@ var renderService = function($window) {
 		var active = $doc.activeElement
 		
 		// First time rendering into a node clears it out
-		if (dom.vnodes == null) {
-			dom.vnodes = []
-			dom.textContent = "";
-		}
+		if (dom.vnodes == null) dom.textContent = ""
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
