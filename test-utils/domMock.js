@@ -79,14 +79,14 @@ module.exports = function() {
 	/**
 	 * This will split a semicolon-separated CSS declaration list into an array of
 	 * individual declarations, ignoring semicolons in strings.
-     *
+	 *
 	 * Comments are also stripped.
 	 *
 	 * @param {string} declList
 	 * @return {string[]}
 	 */
 	function splitDeclList(declList) {
-	  var indices = [], res = [], inParen = 0, match
+	  var indices = [], res = [], match
 
 	  // remove comments, preserving comments in strings.
 	  declList = declList.replace(
