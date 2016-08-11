@@ -3,12 +3,12 @@
 var guid = 0, noop = function() {}, HALT = {}
 function createStream() {
 	function stream() {
-		if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 		return stream._state.value
 	}
 	initStream(stream, arguments)
 
-	if (arguments.length > 0) updateStream(stream, arguments[0], undefined)
+	if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 
 	return stream
 }
@@ -23,7 +23,7 @@ function initStream(stream, args) {
 		error: {get: function() {
 			if (!stream._state.errorStream) {
 				var errorStream = function() {
-					if (arguments.length > 0) updateStream(stream, undefined, arguments[0])
+					if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
 					return stream._state.error
 				}
 				initStream(errorStream, [])

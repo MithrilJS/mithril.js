@@ -458,6 +458,20 @@ o.spec("stream", function() {
 
 			o(mapped()).equals("undefined")
 		})
+		o("does not run when initialized w/ HALT", function() {
+			var stream = Stream.stream(Stream.HALT)
+			var mapped = stream.run(function(value) {return 123})
+
+			o(mapped()).equals(undefined)
+		})
+		o("does not run when set to HALT", function() {
+			var stream = Stream.stream()
+			var mapped = stream.run(function(value) {return 123})
+
+			stream(Stream.HALT)
+			
+			o(mapped()).equals(undefined)
+		})
 		o("works with default undefined value", function() {
 			var stream = Stream.stream(undefined)
 			var mapped = stream.run(function(value) {return String(value)})
