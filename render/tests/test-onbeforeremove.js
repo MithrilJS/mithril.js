@@ -171,4 +171,21 @@ o.spec("onbeforeremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
+	o("does not leave elements out of order during removal", function() {
+		var finish
+		var remove = function(vnode, done) {finish = done}
+		var vnodes = [{tag: "div", key: 1, attrs: {onbeforeremove: remove}, text: "1"}, {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}]
+		var updated = {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}
+
+		render(root, vnodes)
+		render(root, updated)
+		
+		o(root.childNodes.length).equals(2)
+		o(root.firstChild.firstChild.nodeValue).equals("1")
+		
+		finish()
+		
+		o(root.childNodes.length).equals(1)
+		o(root.firstChild.firstChild.nodeValue).equals("2")
+	})
 })
