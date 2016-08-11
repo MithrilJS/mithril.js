@@ -319,8 +319,8 @@ var renderService = function($window) {
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
 		var element = ns ?
-			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
-			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
+			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
+			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
 		vnode.dom = element
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
@@ -680,11 +680,11 @@ var renderService = function($window) {
 	}
 	//style
 	function updateStyle(element, old, style) {
-		if (old === style) element.cssText = "", old = null
-		if (style == null) element.cssText = ""
-		else if (typeof style === "string") element.cssText = style
+		if (old === style) element.style.cssText = "", old = null
+		if (style == null) element.style.cssText = ""
+		else if (typeof style === "string") element.style.cssText = style
 		else {
-			if (typeof old === "string") element.cssText = ""
+			if (typeof old === "string") element.style.cssText = ""
 			for (var key in style) {
 				element.style[key] = style[key]
 			}

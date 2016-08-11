@@ -75,11 +75,69 @@ module.exports = function() {
 	function removeAttribute(name) {
 		delete this.attributes[name]
 	}
+	var declListTokenizer = /;|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'/g
+	/**
+	 * This will split a semicolon-separated CSS declaration list into an array of
+	 * individual declarations, ignoring semicolons in strings.
+	 *
+	 * Comments are also stripped.
+	 *
+	 * @param {string} declList
+	 * @return {string[]}
+	 */
+	function splitDeclList(declList) {
+	  var indices = [], res = [], match
+
+	  // remove comments, preserving comments in strings.
+	  declList = declList.replace(
+	  	/("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*')|\/\*[\s\S]*?\*\//g,
+	  	function(m, str){
+	  	  return str || ''
+	  	}
+	  )
+	  /*eslint-disable no-cond-assign*/
+	  while (match = declListTokenizer.exec(declList)) {
+	  	if (match[0] === ";") indices.push(match.index)
+	  }
+	  /*eslint-enable no-cond-assign*/
+	  for (var i = indices.length; i--;){
+	    res.unshift(declList.slice(indices[i] + 1))
+	    declList = declList.slice(0, indices[i])
+	  }
+	  res.unshift(declList)
+	  return res
+	}
+
 	var activeElement
 	var $window = {
 		document: {
 			createElement: function(tag, is) {
+				var cssText = ""
 				var style = {}
+				Object.defineProperty(style, "cssText", {
+					get: function() {return cssText},
+					set: function (value) {
+						var buf = []
+						if (typeof value === "string") {
+							for (var key in style) style[key] = ""
+							var rules = splitDeclList(value)
+							for (var i = 0; i < rules.length; i++) {
+								var rule = rules[i]
+								var colonIndex = rule.indexOf(":")
+								if (colonIndex > -1) {
+									var rawKey = rule.slice(0, colonIndex).trim()
+									var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
+									var value = rule.slice(colonIndex + 1).trim()
+									if (key !== "cssText") {
+										style[key] = value
+										buf.push(rawKey + ": " + value + ";")
+									}
+								}
+							}
+							cssText = buf.join(" ")
+						}
+					}
+				})
 				var events = {}
 				var element = {
 					nodeType: 1,
@@ -139,21 +197,6 @@ module.exports = function() {
 					set style(_){
 						// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style#Setting_style
 						throw new Error("setting element.style is not portable")
-					},
-					set cssText(value) {
-						if (typeof value === "string") {
-							for (var key in style) style[key] = ""
-							var rules = value.split(";")
-							for (var i = 0; i < rules.length; i++) {
-								var rule = rules[i]
-								var colonIndex = rule.indexOf(":")
-								if (colonIndex > -1) {
-									var key = rule.slice(0, colonIndex).trim().replace(/-\D/g, function(match) {return match[1].toUpperCase()})
-									var value = rule.slice(colonIndex + 1).trim()
-									style[key] = value
-								}
-							}
-						}
 					},
 					get className() {
 						return this.attributes["class"] ? this.attributes["class"].nodeValue : ""
