@@ -140,7 +140,7 @@ module.exports = function($window) {
 						if (o === v) oldEnd--, start++
 						else if (o != null && v != null && o.key === v.key) {
 							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+							if (start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 							oldEnd--, start++
 						}
 						else break
@@ -516,10 +516,7 @@ module.exports = function($window) {
 		var active = $doc.activeElement
 		
 		// First time rendering into a node clears it out
-		if (dom.vnodes == null) {
-			dom.vnodes = []
-			dom.textContent = "";
-		}
+		if (dom.vnodes == null) dom.textContent = ""
 
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
