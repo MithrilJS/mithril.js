@@ -474,19 +474,55 @@ o.spec("domMock", function() {
 
 			o(typeof div.style).equals("object")
 		})
-		o("setting cssText string works", function() {
+		o("setting style.cssText string works", function() {
 			var div = $document.createElement("div")
-			div.cssText = "background-color: red; border-bottom: 1px solid red;"
+			div.style.cssText = "background-color: red; border-bottom: 1px solid red;"
 
 			o(div.style.backgroundColor).equals("red")
 			o(div.style.borderBottom).equals("1px solid red")
 		})
-		o("removing via setting cssText string works", function() {
+		o("removing via setting style.cssText string works", function() {
 			var div = $document.createElement("div")
-			div.cssText = "background: red;"
-			div.cssText = ""
+			div.style.cssText = "background: red;"
+			div.style.cssText = ""
 
 			o(div.style.background).equals("")
+		})
+		o("the final semicolon is optional when setting style.cssText", function() {
+			var div = $document.createElement("div")
+			div.style.cssText = "background: red"
+
+			o(div.style.background).equals("red")
+			o(div.style.cssText).equals("background: red;")
+		})
+		o("'cssText' as a property name is ignored when setting style.cssText", function(){
+			var div = $document.createElement("div")
+			div.style.cssText = "cssText: red;"
+
+			o(div.style.cssText).equals("")
+		})
+		o("setting style.cssText that has a semi-colon in a strings", function(){
+			var div = $document.createElement("div")
+			div.style.cssText = "background: url(';'); font-family: \";\""
+
+			o(div.style.background).equals("url(';')")			
+			o(div.style.fontFamily).equals("\";\"")			
+			o(div.style.cssText).equals("background: url(';'); font-family: \";\";")
+		})
+		o("comments in style.cssText are stripped", function(){
+			var div = $document.createElement("div")
+			div.style.cssText = "/**/background/*:*/: /*>;)*/red/**/;/**/"
+
+			o(div.style.background).equals("red")
+			o(div.style.cssText).equals("background: red;")
+
+		})
+		o("comments in strings in style.cssText are preserved", function(){
+			var div = $document.createElement("div")
+			div.style.cssText = "background: url('/*foo*/')"
+
+			o(div.style.background).equals("url('/*foo*/')")
+
 		})
 		o("setting style throws", function () {
 			var err = false
