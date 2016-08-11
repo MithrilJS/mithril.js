@@ -319,8 +319,8 @@ var renderService = function($window) {
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
 		var element = ns ?
-			is ? $doc.createElementNS(ns, tag, is) : $doc.createElementNS(ns, tag) :
-			is ? $doc.createElement(tag, is) : $doc.createElement(tag)
+			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
+			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
 		vnode.dom = element
 		if (attrs != null) {
 			setAttrs(vnode, attrs, ns)
