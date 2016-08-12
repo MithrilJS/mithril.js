@@ -101,7 +101,7 @@ module.exports = function(input, output, options) {
 
 	if (options && options.watch) {
 		fs.watch(process.cwd(), {recursive: true}, function(type, file) {
-			if (path.resolve(output) !== path.resolve(file)) run()
+			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run()
 		})
 	}
 }
