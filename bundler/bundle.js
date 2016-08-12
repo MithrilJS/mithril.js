@@ -60,7 +60,7 @@ module.exports = function(input, output, options) {
 		function exportCode(file, def, variable, eq) {
 			var declared = {}
 			return fixCollisions(fs.readFileSync(file, "utf8"))
-				.replace(/("|')use strict\1;?\s*/gm, "") // remove extraneous "use strict"
+				.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
 				.replace(/module\.exports\s*=\s*/gm, def + variable + eq)
 				.replace(/module\.exports(\.|\[)/gm, function(match, token, length, code) {
 					if (new RegExp("\\b" + variable + "\\b").test(variable) && !declared[variable]) {
