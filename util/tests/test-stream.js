@@ -2,9 +2,15 @@
 
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
-var Stream = require("../../util/stream")
+var StreamFactory = require("../../util/stream")
 
 o.spec("stream", function() {
+	var Stream, spy
+	o.beforeEach(function() {
+		spy = o.spy()
+		Stream = StreamFactory(spy)
+	})
+	
 	o.spec("stream", function() {
 		o("works as getter/setter", function() {
 			var stream = Stream.stream(1)
@@ -518,11 +524,12 @@ o.spec("stream", function() {
 			o(mapped()).equals(1)
 		})
 		o("works with errored stream", function() {
+			var rejected
 			var stream = Stream.stream(undefined)
-			var mapped = stream.run(function(value) {return Stream.reject(new Error("error"))})
+			var mapped = stream.run(function(value) {
+				return Stream.reject(new Error("error"))
+			})
 
-			mapped.catch(function() {}) //silence reportUncaughtException
-			
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("error")
 		})
@@ -803,14 +810,45 @@ o.spec("stream", function() {
 	})
 	o.spec("toJSON", function() {
 		o("works", function() {
-			o(Stream.stream(1).toJSON()).equals("1")
-			o(Stream.stream("a").toJSON()).equals("\"a\"")
-			o(Stream.stream(true).toJSON()).equals("true")
-			o(Stream.stream(null).toJSON()).equals("null")
+			o(Stream.stream(1).toJSON()).equals(1)
+			o(Stream.stream("a").toJSON()).equals("a")
+			o(Stream.stream(true).toJSON()).equals(true)
+			o(Stream.stream(null).toJSON()).equals(null)
 			o(Stream.stream(undefined).toJSON()).equals(undefined)
-			o(Stream.stream({a: 1}).toJSON()).deepEquals("{\"a\":1}")
-			o(Stream.stream([1, 2, 3]).toJSON()).deepEquals("[1,2,3]")
+			o(Stream.stream({a: 1}).toJSON()).deepEquals({a: 1})
+			o(Stream.stream([1, 2, 3]).toJSON()).deepEquals([1, 2, 3])
 			o(Stream.stream().toJSON()).equals(undefined)
+			o(Stream.stream(new Date(0)).toJSON()).equals(new Date(0).toJSON())
+		})
+		o("works w/ JSON.stringify", function() {
+			o(JSON.stringify(Stream.stream(1))).equals(JSON.stringify(1))
+			o(JSON.stringify(Stream.stream("a"))).equals(JSON.stringify("a"))
+			o(JSON.stringify(Stream.stream(true))).equals(JSON.stringify(true))
+			o(JSON.stringify(Stream.stream(null))).equals(JSON.stringify(null))
+			o(JSON.stringify(Stream.stream(undefined))).equals(JSON.stringify(undefined))
+			o(JSON.stringify(Stream.stream({a: 1}))).deepEquals(JSON.stringify({a: 1}))
+			o(JSON.stringify(Stream.stream([1, 2, 3]))).deepEquals(JSON.stringify([1, 2, 3]))
+			o(JSON.stringify(Stream.stream())).equals(JSON.stringify(undefined))
+			o(JSON.stringify(Stream.stream(new Date(0)))).equals(JSON.stringify(new Date(0)))
+		})
+	})
+	o.spec("uncaught exception reporting", function() {
+		o("reports thrown errors", function(done) {
+			Stream.stream(1).map(function() {throw new Error("error")})
+			
+			setTimeout(function() {
+				o(spy.callCount).equals(1)
+				o(spy.args[0].message).equals("error")
+				done()
+			}, 0)
+		})
+		o("does not report explicit rejections", function(done) {
+			Stream.reject(1)
+			
+			setTimeout(function() {
+				o(spy.callCount).equals(0)
+				done()
+			}, 0)
 		})
 	})
 	o.spec("map", function() {

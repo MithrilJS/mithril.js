@@ -1,6 +1,6 @@
 "use strict"
 
-var Stream = require("./util/stream")
+var Stream = require("./util/stream")(console.error.bind(console))
 var m = require("./render/hyperscript")
 var renderService = require("./render/render")(window)
 var requestService = require("./request/request")(window)

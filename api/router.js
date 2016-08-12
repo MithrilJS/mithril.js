@@ -11,13 +11,13 @@ module.exports = function($window, renderer, pubsub) {
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
 			if (typeof payload.view !== "function") {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
-				var render = function(component) {
+				var use = function(component) {
 					current.path = path, current.component = component
 					renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
-				if (typeof payload.resolve !== "function") payload.resolve = function() {render(current.component)}
-				if (path !== current.path) payload.resolve(render, args, path, route)
-				else render(current.component)
+				if (typeof payload.resolve !== "function") payload.resolve = function() {use(current.component)}
+				if (path !== current.path) payload.resolve(use, args, path, route)
+				else use(current.component)
 			}
 			else {
 				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
