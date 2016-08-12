@@ -1352,6 +1352,7 @@
 		}
 
 		prop.toJSON = function () {
+			if (store && isFunction(store.toJSON)) return store.toJSON()
 			return store
 		}
 
