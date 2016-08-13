@@ -1,9 +1,10 @@
 "use strict"
 
-var Stream = require("./util/stream")(console.error.bind(console))
+var log = console.error.bind(console)
+var Stream = require("./util/stream")(log)
 var m = require("./render/hyperscript")
 var renderService = require("./render/render")(window)
-var requestService = require("./request/request")(window)
+var requestService = require("./request/request")(window, log)
 var redrawService = require("./api/pubsub")()
 
 requestService.setCompletionCallback(redrawService.publish)

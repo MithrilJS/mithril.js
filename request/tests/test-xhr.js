@@ -5,10 +5,11 @@ var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 
 o.spec("xhr", function() {
-	var mock, xhr
+	var mock, xhr, spy
 	o.beforeEach(function() {
 		mock = xhrMock()
-		xhr = new Request(mock).xhr
+		spy = o.spy()
+		xhr = new Request(mock, spy).xhr
 	})
 
 	o.spec("success", function() {

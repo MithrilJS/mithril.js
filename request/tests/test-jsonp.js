@@ -6,10 +6,11 @@ var Request = require("../../request/request")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
-	var mock, jsonp
+	var mock, jsonp, spy
 	o.beforeEach(function() {
 		mock = xhrMock()
-		jsonp = new Request(mock).jsonp
+		spy = o.spy()
+		jsonp = new Request(mock, spy).jsonp
 	})
 
 	o("works", function(done) {

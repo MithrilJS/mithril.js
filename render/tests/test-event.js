@@ -33,6 +33,21 @@ o.spec("event", function() {
 		o(onevent.args[0].type).equals("click")
 		o(onevent.args[0].target).equals(div.dom)
 	})
+	
+	o("removes event", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {onclick: spy}}
+		var updated = {tag: "a", attrs: {}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		vnode.dom.dispatchEvent(e)
+		
+		o(spy.callCount).equals(0)
+	})
 
 	o("fires onclick only once after redraw", function() {
 		var spy = o.spy()

@@ -1,9 +1,10 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
-var Stream = require("../util/stream")
+var StreamFactory = require("../util/stream")
 
-module.exports = function($window) {
+module.exports = function($window, log) {
+	var Stream = StreamFactory(log)
 	var callbackCount = 0
 
 	var oncompletion

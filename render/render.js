@@ -421,7 +421,8 @@ module.exports = function($window) {
 		if (old != null) {
 			for (var key in old) {
 				if (attrs == null || !(key in attrs)) {
-					if (key !== "key") vnode.dom.removeAttribute(key)
+					if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
+					else if (key !== "key") vnode.dom.removeAttribute(key)
 				}
 			}
 		}
@@ -470,8 +471,10 @@ module.exports = function($window) {
 			var eventName = key.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
 			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			vnode.events[key] = callback
-			element.addEventListener(eventName, vnode.events[key], false)
+			if (typeof value === "function") {
+				vnode.events[key] = callback
+				element.addEventListener(eventName, vnode.events[key], false)
+			}
 		}
 	}
 

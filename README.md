@@ -30,7 +30,7 @@ Mithril's virtual DOM engine is around 500 lines of well organized code and it i
 
 ## Robustness
 
-There are over 3000 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
+There are over 4000 assertions in the test suite, and tests cover even difficult-to-test things like `location.href`, `element.innerHTML` and `XMLHttpRequest` usage.
 
 ## Modularity
 

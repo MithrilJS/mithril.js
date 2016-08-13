@@ -1,4 +1,5 @@
 new function() {
+
 var Stream = function(log) {
 	var guid = 0, noop = function() {}, HALT = {}
 	function createStream() {

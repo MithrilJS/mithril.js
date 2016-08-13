@@ -55,6 +55,7 @@ module.exports = function(input, output, options) {
 				.replace(/(?:var|let|const)[\t ]([\w_$\.]+)(\s*=\s*)\1([\r\n;]+)/g, "$3") // remove assignments to itself
 				.replace(/([\r\n]){2,}/g, "$1") // remove multiple consecutive line breaks
 				.replace(/\}[\r\n]+\(/g, "}(") // remove space from iife
+				.replace(/(window\.){2}/g, "") // collapse window references
 		}
 
 		function exportCode(file, def, variable, eq) {
