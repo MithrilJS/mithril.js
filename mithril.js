@@ -1,5 +1,6 @@
 new function() {
 
+var log = console.error.bind(console)
 var Stream = function(log) {
 	var guid = 0, noop = function() {}, HALT = {}
 	function createStream() {
@@ -183,7 +184,7 @@ var Stream = function(log) {
 		}, streams)
 	}
 	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
-}(console.error.bind(console))
+}(log)
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -664,7 +665,8 @@ var renderService = function($window) {
 		if (old != null) {
 			for (var key in old) {
 				if (attrs == null || !(key in attrs)) {
-					if (key !== "key") vnode.dom.removeAttribute(key)
+					if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
+					else if (key !== "key") vnode.dom.removeAttribute(key)
 				}
 			}
 		}
@@ -711,8 +713,10 @@ var renderService = function($window) {
 			var eventName = key.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
 			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			vnode.events[key] = callback
-			element.addEventListener(eventName, vnode.events[key], false)
+			if (typeof value === "function") {
+				vnode.events[key] = callback
+				element.addEventListener(eventName, vnode.events[key], false)
+			}
 		}
 	}
 	//lifecycle
@@ -784,13 +788,14 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var requestService = function($window) {
+var requestService = function($window, log) {
+	var Stream1 = Stream(log)
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
 	function xhr(args) {
-		var stream = Stream.stream()
+		var stream = Stream1.stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -841,7 +846,7 @@ var requestService = function($window) {
 		return stream
 	}
 	function jsonp(args) {
-		var stream = Stream.stream()
+		var stream = Stream1.stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
@@ -904,7 +909,7 @@ var requestService = function($window) {
 	}
 	
 	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
-}(window)
+}(window, log)
 var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
