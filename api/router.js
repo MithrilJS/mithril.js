@@ -7,7 +7,7 @@ var autoredraw = require("../api/autoredraw")
 module.exports = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: null}
+		var current = {path: null, component: "div"}
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
 			if (typeof payload.view !== "function") {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}

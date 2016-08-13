@@ -232,6 +232,8 @@ o.spec("route", function() {
 				})
 				
 				o("accepts object as payload", function(done) {
+					var resolveCount = 0
+					var renderCount = 0
 					var Component = {
 						view: function() {
 							return m("div")
@@ -239,21 +241,38 @@ o.spec("route", function() {
 					}
 					
 					$window.location.href = prefix + "/"
-					route(root, "/", {
-						"/" : {
-							resolve: function(resolve) {resolve(Component)},
-							render: function(vnode) {return vnode},
+					route(root, "/abc", {
+						"/:id" : {
+							resolve: function(use, args, path, route) {
+								resolveCount++
+								
+								o(args).deepEquals({id: "abc"})
+								o(path).equals("/abc")
+								o(route).equals("/:id")
+								
+								use(Component)
+							},
+							render: function(vnode) {
+								renderCount++
+								
+								o(vnode.attrs).deepEquals({id: "abc"})
+								
+								return vnode
+							},
 						},
 					})
 					
-					callAsync(function() {
+					setTimeout(function() {
+						o(resolveCount).equals(1)
+						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
 						
 						done()
-					})
+					}, FRAME_BUDGET)
 				})
 				
 				o("accepts object without `render` method as payload", function(done) {
+					var resolveCount = 0
 					var Component = {
 						view: function() {
 							return m("div")
@@ -261,20 +280,31 @@ o.spec("route", function() {
 					}
 					
 					$window.location.href = prefix + "/"
-					route(root, "/", {
-						"/" : {
-							resolve: function(resolve) {resolve(Component)},
+					route(root, "/abc", {
+						"/:id" : {
+							resolve: function(use, args, path, route) {
+								resolveCount++
+								
+								o(args).deepEquals({id: "abc"})
+								o(path).equals("/abc")
+								o(route).equals("/:id")
+								
+								use(Component)
+							},
 						},
 					})
 					
-					callAsync(function() {
+					setTimeout(function() {
+						o(resolveCount).equals(1)
+						
 						o(root.firstChild.nodeName).equals("DIV")
 						
 						done()
-					})
+					}, FRAME_BUDGET)
 				})
 				
 				o("accepts object without `resolve` method as payload", function(done) {
+					var renderCount = 0
 					var Component = {
 						view: function() {
 							return m("div")
@@ -282,17 +312,23 @@ o.spec("route", function() {
 					}
 					
 					$window.location.href = prefix + "/"
-					route(root, "/", {
-						"/" : {
-							render: function() {return m(Component)},
+					route(root, "/abc", {
+						"/:id" : {
+							render: function(vnode) {
+								renderCount++
+								
+								o(vnode.attrs).deepEquals({id: "abc"})
+								
+								return m(Component)
+							},
 						},
 					})
 					
-					callAsync(function() {
+					setTimeout(function() {
 						o(root.firstChild.nodeName).equals("DIV")
 						
 						done()
-					})
+					}, FRAME_BUDGET)
 				})
 
 				o("calls resolve and render correct number of times", function(done) {
@@ -307,9 +343,9 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							resolve: function(resolve) {
+							resolve: function(use) {
 								resolveCount++
-								resolve(Component)
+								use(Component)
 							},
 							render: function(vnode) {
 								renderCount++
