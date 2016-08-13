@@ -4,6 +4,15 @@
 	"use strict"
 	/* eslint-disable no-undef */
 	var m = factory(global)
+	/*	Set dependencies when no window for isomorphic compatibility */
+	if(typeof window === "undefined") {
+		m.deps({
+			document: typeof document !== "undefined"? document: {},
+			location: typeof location !== "undefined"? location: {},
+			clearTimeout: clearTimeout,
+			setTimeout: setTimeout
+		});
+	}
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
 	} else if (typeof define === "function" && define.amd) {
