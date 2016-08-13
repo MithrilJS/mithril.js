@@ -202,7 +202,7 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
-	if (selector == null || typeof selector !== "string" && !selector.view) {
+	if (selector == null || typeof selector !== "string" && selector.view == null) {
 		throw Error("The selector must be either a string or a component.");
 	}
 	if (typeof selector === "string") {
@@ -1091,7 +1091,7 @@ var autoredraw = function(root, renderer, pubsub, callback) {
 m.route = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: null}
+		var current = {path: null, component: "div"}
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
 			if (typeof payload.view !== "function") {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
