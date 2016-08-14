@@ -1,7 +1,8 @@
 "use strict"
 
 var log = console.error.bind(console)
-var Stream = require("./util/stream")(log)
+var StreamFactory = require("./util/stream")
+var Stream = StreamFactory(log)
 var m = require("./render/hyperscript")
 var renderService = require("./render/render")(window)
 var requestService = require("./request/request")(window, log)
