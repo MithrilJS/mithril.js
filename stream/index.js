@@ -4,10 +4,10 @@ var log = console.error.bind(console)
 var StreamFactory = require("../util/stream")
 var Stream = StreamFactory(log)
 
-var s = Stream.stream
-s.combine = Stream.combine
-s.reject = Stream.reject
-s.merge = Stream.merge
-s.HALT = Stream.HALT
+var defaultStream = Stream.stream
+defaultStream.combine = Stream.combine
+defaultStream.reject = Stream.reject
+defaultStream.merge = Stream.merge
+defaultStream.HALT = Stream.HALT
 
-module.exports = s
+module.exports = defaultStream
