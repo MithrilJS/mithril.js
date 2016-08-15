@@ -1,7 +1,7 @@
 new function() {
 
 var log = console.error.bind(console)
-var Stream = function(log) {
+var StreamFactory = function(log) {
 	var guid = 0, noop = function() {}, HALT = {}
 	function createStream() {
 		function stream() {
@@ -184,7 +184,8 @@ var Stream = function(log) {
 		}, streams)
 	}
 	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
-}(log)
+}
+var Stream = StreamFactory(log)
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -789,13 +790,13 @@ var buildQueryString = function(object) {
 	}
 }
 var requestService = function($window, log) {
-	var Stream1 = Stream(log)
+	var Stream = StreamFactory(log)
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
 	function xhr(args) {
-		var stream = Stream1.stream()
+		var stream = Stream.stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -846,7 +847,7 @@ var requestService = function($window, log) {
 		return stream
 	}
 	function jsonp(args) {
-		var stream = Stream1.stream()
+		var stream = Stream.stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
