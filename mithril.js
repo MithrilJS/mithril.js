@@ -181,17 +181,17 @@ var StreamFactory = function(log) {
 	}
 	function merge(streams) {
 		return combine(function () {
-			return streams.map(function(s1) {return s1()})
+			return streams.map(function(s) {return s()})
 		}, streams)
 	}
 	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
 }
 var Stream = StreamFactory(log)
-var s = Stream.stream
-s.combine = Stream.combine
-s.reject = Stream.reject
-s.merge = Stream.merge
-s.HALT = Stream.HALT
+var defaultStream = Stream.stream
+defaultStream.combine = Stream.combine
+defaultStream.reject = Stream.reject
+defaultStream.merge = Stream.merge
+defaultStream.HALT = Stream.HALT
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -206,7 +206,7 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 	}
 	return children
 }
-var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s2*=\s2*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
+var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && selector.view == null) {
@@ -296,7 +296,7 @@ var renderService = function($window) {
 		return vnode.dom = $doc.createTextNode(vnode.children)
 	}
 	function createHTML(vnode) {
-		var match = vnode.children.match(/^\s3*?<(\w+)/im) || []
+		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
 		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
 		var temp = $doc.createElement(parent)
 		temp.innerHTML = vnode.children
@@ -1140,7 +1140,7 @@ m.withAttr = function(attrName, callback, context) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.prop = s
+m.prop = defaultStream
 m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.xhr
