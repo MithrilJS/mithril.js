@@ -1,8 +1,7 @@
 "use strict"
 
 var log = console.error.bind(console)
-var StreamFactory = require("./util/stream")
-var Stream = StreamFactory(log)
+var stream = require("./stream");
 var m = require("./render/hyperscript")
 var renderService = require("./render/render")(window)
 var requestService = require("./request/request")(window, log)
@@ -14,11 +13,7 @@ m.route = require("./api/router")(window, renderService, redrawService)
 m.mount = require("./api/mount")(renderService, redrawService)
 m.trust = require("./render/trust")
 m.withAttr = require("./util/withAttr")
-m.prop = Stream.stream
-m.prop.combine = Stream.combine
-m.prop.reject = Stream.reject
-m.prop.merge = Stream.merge
-m.prop.HALT = Stream.HALT
+m.prop = stream
 m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.xhr
