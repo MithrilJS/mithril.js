@@ -72,7 +72,7 @@ Property   | Type                             | Description
 `text`     | `(String|Number|Boolean)?`       | This is used instead of `children` if a vnode contains a text node as its only child. This is done for performance reasons. Component vnodes never use the `text` property even if they have a text node as its only child.
 `dom`      | `Element?`                       | Points to the element that corresponds to the vnode. This property is `undefined` in the `oninit` lifecycle method. In fragment and trusted HTML vnodes, `dom` points to the first element in the range.
 `domSize`  | `Number?`                        | This is only set in fragment and trusted HTML vnodes, and it's `undefined` in all other vnode types. It defines the number of DOM elements that the vnode represents (starting from the element referenced by the `dom` property).
-`state`    | `Object`                         | An object that is persisted between redraws. In component vnodes, `state` is a deep clone of the component object.
+`state`    | `Object`                         | An object that is persisted between redraws. In component vnodes, `state` is a shallow clone of the component object.
 `events`   | `Object?`                        | An object that is persisted between redraws and that stores event handlers so that they can be removed using the DOM API. The `events` property is `undefined` if there are no event handlers defined. This property is only used internally by Mithril, do not use it.
 
 ---
