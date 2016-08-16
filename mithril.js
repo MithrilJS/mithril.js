@@ -1,6 +1,7 @@
 new function() {
 
 var log = console.error.bind(console)
+var log = console.error.bind(console)
 var StreamFactory = function(log) {
 	var guid = 0, noop = function() {}, HALT = {}
 	function createStream() {
@@ -186,6 +187,11 @@ var StreamFactory = function(log) {
 	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
 }
 var Stream = StreamFactory(log)
+var defaultStream = Stream.stream
+defaultStream.combine = Stream.combine
+defaultStream.reject = Stream.reject
+defaultStream.merge = Stream.merge
+defaultStream.HALT = Stream.HALT
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
 }
@@ -1134,11 +1140,7 @@ m.withAttr = function(attrName, callback, context) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.prop = Stream.stream
-m.prop.combine = Stream.combine
-m.prop.reject = Stream.reject
-m.prop.merge = Stream.merge
-m.prop.HALT = Stream.HALT
+m.prop = defaultStream
 m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.xhr
