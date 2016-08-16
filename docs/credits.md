@@ -16,6 +16,7 @@ Special thanks to:
 - Boris Kaul, for his awesome work on the benchmarking tools used to develop Mithril
 - Leon Sorokin, for writing a DOM instrumentation tool that helped improve performance in Mithril 1.0
 - Jordan Walke, whose work on React was prior art to the implementation of keys in Mithril
+- Pierre-Yves Gérardy, who consistently makes high quality contributions
 
 Other people who also deserve recognition:
 
