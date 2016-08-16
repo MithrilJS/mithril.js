@@ -145,4 +145,15 @@ o.spec("onremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
+	o("The remove phase is finalized only once when `done()` is called synchronously from both attrs- and tag.onbeforeremove", function () {
+		var onremove = o.spy()
+		var component = {
+			view: function(){return m('br')},
+			onbeforeremove: function(vnode, done){done()},
+			onremove: onremove
+		}
+		render(root, [{tag: component, attrs: component}])
+		render(root, [])
+		o(onremove.callCount).equals(2)
+	})
 })
