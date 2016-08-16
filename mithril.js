@@ -193,7 +193,7 @@ defaultStream.reject = Stream.reject
 defaultStream.merge = Stream.merge
 defaultStream.HALT = Stream.HALT
 function Vnode(tag, key, attrs, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined}
+	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
 }
 Vnode.normalize = function(node) {
 	if (node instanceof Array) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -577,7 +577,7 @@ var renderService = function($window) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				if (vnode.skip) vnode.skip = undefined
+				if (vnode.skip) vnode.skip = false
 				else removeNode(parent, vnode, context, false)
 			}
 		}

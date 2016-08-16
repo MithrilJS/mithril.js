@@ -326,7 +326,7 @@ module.exports = function($window) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				if (vnode.skip) vnode.skip = undefined
+				if (vnode.skip) vnode.skip = false
 				else removeNode(parent, vnode, context, false)
 			}
 		}
