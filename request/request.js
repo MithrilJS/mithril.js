@@ -10,8 +10,8 @@ module.exports = function($window, log) {
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
-	function xhr(args) {
-		var stream = Stream.stream()
+	function request(args) {
+		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -63,7 +63,7 @@ module.exports = function($window, log) {
 	}
 
 	function jsonp(args) {
-		var stream = Stream.stream()
+		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
@@ -130,5 +130,5 @@ module.exports = function($window, log) {
 		return data
 	}
 	
-	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
+	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }

@@ -18,7 +18,6 @@ module.exports = function(renderer, pubsub) {
 		run()
 
 		if (component === null) {
-			pubsub.unsubscribe(root.redraw)
 			delete root.redraw
 		}
 	}

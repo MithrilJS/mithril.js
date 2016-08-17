@@ -193,6 +193,10 @@ module.exports = function(log) {
 			return streams.map(function(s) {return s()})
 		}, streams)
 	}
+	createStream.merge = merge
+	createStream.combine = combine
+	createStream.reject = reject
+	createStream.HALT = HALT
 
-	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
+	return createStream
 }

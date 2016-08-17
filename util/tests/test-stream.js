@@ -13,7 +13,7 @@ o.spec("stream", function() {
 	
 	o.spec("stream", function() {
 		o("works as getter/setter", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var initialValue = stream()
 			stream(2)
 			var newValue = stream()
@@ -22,25 +22,25 @@ o.spec("stream", function() {
 			o(newValue).equals(2)
 		})
 		o("has undefined value by default", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 
 			o(stream()).equals(undefined)
 		})
 		o("can update to undefined", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			stream(undefined)
 
 			o(stream()).equals(undefined)
 		})
 		o("can be stream of streams", function() {
-			var stream = Stream.stream(Stream.stream(1))
+			var stream = Stream(Stream(1))
 
 			o(stream()()).equals(1)
 		})
 	})
 	o.spec("combine", function() {
 		o("transforms value", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
 
 			stream(2)
@@ -48,14 +48,14 @@ o.spec("stream", function() {
 			o(doubled()).equals(4)
 		})
 		o("transforms default value", function() {
-			var stream = Stream.stream(2)
+			var stream = Stream(2)
 			var doubled = Stream.combine(function(s) {return s() * 2}, [stream])
 
 			o(doubled()).equals(4)
 		})
 		o("transforms multiple values", function() {
-			var s1 = Stream.stream()
-			var s2 = Stream.stream()
+			var s1 = Stream()
+			var s2 = Stream()
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
 
 			s1(2)
@@ -64,15 +64,15 @@ o.spec("stream", function() {
 			o(added()).equals(5)
 		})
 		o("transforms multiple default values", function() {
-			var s1 = Stream.stream(2)
-			var s2 = Stream.stream(3)
+			var s1 = Stream(2)
+			var s2 = Stream(3)
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
 
 			o(added()).equals(5)
 		})
 		o("transforms mixed default and late-bound values", function() {
-			var s1 = Stream.stream(2)
-			var s2 = Stream.stream()
+			var s1 = Stream(2)
+			var s2 = Stream()
 			var added = Stream.combine(function(s1, s2) {return s1() + s2()}, [s1, s2])
 
 			s2(3)
@@ -81,7 +81,7 @@ o.spec("stream", function() {
 		})
 		o("combines atomically", function() {
 			var count = 0
-			var a = Stream.stream()
+			var a = Stream()
 			var b = Stream.combine(function(a) {return a() * 2}, [a])
 			var c = Stream.combine(function(a) {return a() * a()}, [a])
 			var d = Stream.combine(function(b, c) {
@@ -96,7 +96,7 @@ o.spec("stream", function() {
 		})
 		o("combines default value atomically", function() {
 			var count = 0
-			var a = Stream.stream(3)
+			var a = Stream(3)
 			var b = Stream.combine(function(a) {return a() * 2}, [a])
 			var c = Stream.combine(function(a) {return a() * a()}, [a])
 			var d = Stream.combine(function(b, c) {
@@ -109,8 +109,8 @@ o.spec("stream", function() {
 		})
 		o("combine lists only changed upstreams in last arg", function() {
 			var streams = []
-			var a = Stream.stream()
-			var b = Stream.stream()
+			var a = Stream()
+			var b = Stream()
 			var c = Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
@@ -123,8 +123,8 @@ o.spec("stream", function() {
 		})
 		o("combine lists only changed upstreams in last arg with default value", function() {
 			var streams = []
-			var a = Stream.stream(3)
-			var b = Stream.stream(5)
+			var a = Stream(3)
+			var b = Stream(5)
 			var c = Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
@@ -135,7 +135,7 @@ o.spec("stream", function() {
 			o(streams[0]).equals(a)
 		})
 		o("combine can return undefined", function() {
-			var a = Stream.stream(1)
+			var a = Stream(1)
 			var b = Stream.combine(function(a) {
 				return undefined
 			}, [a])
@@ -143,24 +143,24 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 		})
 		o("combine can return stream", function() {
-			var a = Stream.stream(1)
+			var a = Stream(1)
 			var b = Stream.combine(function(a) {
-				return Stream.stream(2)
+				return Stream(2)
 			}, [a])
 
 			o(b()()).equals(2)
 		})
 		o("combine can return pending stream", function() {
-			var a = Stream.stream(1)
+			var a = Stream(1)
 			var b = Stream.combine(function(a) {
-				return Stream.stream()
+				return Stream()
 			}, [a])
 
 			o(b()()).equals(undefined)
 		})
 		o("combine can halt", function() {
 			var count = 0
-			var a = Stream.stream(1)
+			var a = Stream(1)
 			var b = Stream.combine(function(a) {
 				return Stream.HALT
 			}, [a])
@@ -175,19 +175,19 @@ o.spec("stream", function() {
 	o.spec("merge", function() {
 		o("transforms an array of streams to an array of values", function() {
 			var all = Stream.merge([
-				Stream.stream(10),
-				Stream.stream("20"),
-				Stream.stream({value: 30}),
+				Stream(10),
+				Stream("20"),
+				Stream({value: 30}),
 			])
 
 			o(all()).deepEquals([10, "20", {value: 30}])
 		})
 		o("remains pending until all streams are active", function() {
-			var straggler = Stream.stream()
+			var straggler = Stream()
 
 			var all = Stream.merge([
-				Stream.stream(10),
-				Stream.stream("20"),
+				Stream(10),
+				Stream("20"),
 				straggler,
 			])
 
@@ -199,7 +199,7 @@ o.spec("stream", function() {
 	})
 	o.spec("end", function() {
 		o("end stream works", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
 
 			stream.end(true)
@@ -209,7 +209,7 @@ o.spec("stream", function() {
 			o(doubled()).equals(undefined)
 		})
 		o("end stream works with default value", function() {
-			var stream = Stream.stream(2)
+			var stream = Stream(2)
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
 
 			stream.end(true)
@@ -219,7 +219,7 @@ o.spec("stream", function() {
 			o(doubled()).equals(4)
 		})
 		o("cannot add downstream to ended stream", function() {
-			var stream = Stream.stream(2)
+			var stream = Stream(2)
 			stream.end(true)
 
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
@@ -228,7 +228,7 @@ o.spec("stream", function() {
 			o(doubled()).equals(undefined)
 		})
 		o("upstream does not affect ended stream", function() {
-			var stream = Stream.stream(2)
+			var stream = Stream(2)
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
 
 			doubled.end(true)
@@ -240,7 +240,7 @@ o.spec("stream", function() {
 	})
 	o.spec("error", function() {
 		o("error() works", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var errored = Stream.combine(function(stream) {throw new Error("error")}, [stream])
 
 			stream(3)
@@ -249,14 +249,14 @@ o.spec("stream", function() {
 			o(errored.error().message).equals("error")
 		})
 		o("error() works with default value", function() {
-			var stream = Stream.stream(3)
+			var stream = Stream(3)
 			var errored = Stream.combine(function(stream) {throw new Error("error")}, [stream])
 
 			o(errored()).equals(undefined)
 			o(errored.error().message).equals("error")
 		})
 		o("error() removes error on valid value", function() {
-			var stream = Stream.stream("a")
+			var stream = Stream("a")
 			var doubled = Stream.combine(function(stream) {
 				if (typeof stream() !== "number") throw new Error("error")
 				else return stream() * 2
@@ -269,7 +269,7 @@ o.spec("stream", function() {
 		})
 		o("error() triggers catch", function() {
 			var count = 0
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var handled = stream.catch(function() {
 				count++
 				return 2
@@ -283,7 +283,7 @@ o.spec("stream", function() {
 		})
 		o("thrown error propagates downstream", function() {
 			var count = 0
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 				.map(function() {throw new Error("error")})
 				.map(function(value) {
 					count++
@@ -300,7 +300,7 @@ o.spec("stream", function() {
 		})
 		o("set error propagates downstream", function() {
 			var count = 0
-			var stream = Stream.stream()
+			var stream = Stream()
 			var mapped = stream.map(function(value) {
 				count++
 				return value * 2
@@ -316,7 +316,7 @@ o.spec("stream", function() {
 			o(count).equals(0)
 		})
 		o("error.map works", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var mappedFromError = stream.error.map(function(value) {
 				if (value) return "from" + value.message
 			})
@@ -328,7 +328,7 @@ o.spec("stream", function() {
 			o(mappedFromError()).equals("fromerror")
 		})
 		o("error from error.map propagates", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var mappedFromError = stream.error.map(function(value) {
 				return "from" + value.message
 			})
@@ -344,7 +344,7 @@ o.spec("stream", function() {
 		})
 		o("error thrown from error.map propagates downstream", function() {
 			var count = 0
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var mappedFromError = stream.error.map(function(value) {
 				throw new Error("b")
 			})
@@ -379,13 +379,13 @@ o.spec("stream", function() {
 		o("error.map can return streams", function() {
 			var stream = Stream.reject(new Error("error"))
 			var error = stream.error.map(function(value) {
-				return Stream.stream(1)
+				return Stream(1)
 			})
 
 			o(error()()).equals(1)
 		})
 		o("combined stream of two errored streams adopts error from first", function() {
-			var a = Stream.stream(1)
+			var a = Stream(1)
 			var b = Stream.combine(function(a) {throw new Error("error from b")}, [a])
 			var c = Stream.combine(function(a) {throw new Error("error from c")}, [a])
 			var d = Stream.combine(function(b, c) {return 2}, [b, c])
@@ -443,7 +443,7 @@ o.spec("stream", function() {
 	})
 	o.spec("run", function() {
 		o("works", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var doubled = stream.run(function(value) {return value * 2})
 
 			stream(3)
@@ -451,13 +451,13 @@ o.spec("stream", function() {
 			o(doubled()).equals(6)
 		})
 		o("works with default value", function() {
-			var stream = Stream.stream(3)
+			var stream = Stream(3)
 			var doubled = stream.run(function(value) {return value * 2})
 
 			o(doubled()).equals(6)
 		})
 		o("works with undefined value", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var mapped = stream.run(function(value) {return String(value)})
 
 			stream(undefined)
@@ -465,13 +465,13 @@ o.spec("stream", function() {
 			o(mapped()).equals("undefined")
 		})
 		o("does not run when initialized w/ HALT", function() {
-			var stream = Stream.stream(Stream.HALT)
+			var stream = Stream(Stream.HALT)
 			var mapped = stream.run(function(value) {return 123})
 
 			o(mapped()).equals(undefined)
 		})
 		o("does not run when set to HALT", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var mapped = stream.run(function(value) {return 123})
 
 			stream(Stream.HALT)
@@ -479,14 +479,14 @@ o.spec("stream", function() {
 			o(mapped()).equals(undefined)
 		})
 		o("works with default undefined value", function() {
-			var stream = Stream.stream(undefined)
+			var stream = Stream(undefined)
 			var mapped = stream.run(function(value) {return String(value)})
 
 			o(mapped()).equals("undefined")
 		})
 		o("works with stream that throws", function() {
 			var count = 0
-			var stream = Stream.stream(undefined)
+			var stream = Stream(undefined)
 			var errored = stream.run(function(value) {throw new Error("error")})
 			var mapped = errored.map(function(value) {
 				count++
@@ -501,8 +501,8 @@ o.spec("stream", function() {
 		})
 		o("works with pending stream", function() {
 			var count = 0
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream()
+			var stream = Stream(undefined)
+			var absorbed = Stream()
 			var absorber = stream.run(function(value) {return absorbed})
 			var mapped = absorber.map(function(value) {
 				count++
@@ -518,14 +518,14 @@ o.spec("stream", function() {
 			o(count).equals(1)
 		})
 		o("works with active stream", function() {
-			var stream = Stream.stream(undefined)
-			var mapped = stream.run(function(value) {return Stream.stream(1)})
+			var stream = Stream(undefined)
+			var mapped = stream.run(function(value) {return Stream(1)})
 
 			o(mapped()).equals(1)
 		})
 		o("works with errored stream", function() {
 			var rejected
-			var stream = Stream.stream(undefined)
+			var stream = Stream(undefined)
 			var mapped = stream.run(function(value) {
 				return Stream.reject(new Error("error"))
 			})
@@ -534,9 +534,9 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("error")
 		})
 		o("works with ended stream", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var mapped = stream.run(function(value) {
-				var ended = Stream.stream(2)
+				var ended = Stream(2)
 				ended.end(true)
 				return ended
 			})
@@ -546,8 +546,8 @@ o.spec("stream", function() {
 			o(mapped()).equals(2)
 		})
 		o("works when active stream updates", function() {
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream(1)
+			var stream = Stream(undefined)
+			var absorbed = Stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
 
 			absorbed(2)
@@ -560,8 +560,8 @@ o.spec("stream", function() {
 		})
 		o("works when pending stream updates", function() {
 			var count = 0
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream()
+			var stream = Stream(undefined)
+			var absorbed = Stream()
 			var mapped = stream.run(function(value) {return absorbed})
 
 			mapped.map(function (value) {
@@ -577,8 +577,8 @@ o.spec("stream", function() {
 			o(mapped()).equals(123)
 		})
 		o("works when updating stream to errored state", function() {
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream(1)
+			var stream = Stream(undefined)
+			var absorbed = Stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
 
 			absorbed.error(new Error("error"))
@@ -592,8 +592,8 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("another error")
 		})
 		o("works when updating pending stream to errored state", function() {
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream()
+			var stream = Stream(undefined)
+			var absorbed = Stream()
 			var mapped = stream.run(function(value) {return absorbed})
 
 			absorbed.error(new Error("error"))
@@ -602,8 +602,8 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("error")
 		})
 		o("works when updating stream to active state", function() {
-			var stream = Stream.stream(undefined)
-			var absorbed = Stream.stream(1)
+			var stream = Stream(undefined)
+			var absorbed = Stream(1)
 			var mapped = stream.run(function(value) {return absorbed})
 
 			absorbed.error(new Error("error"))
@@ -617,8 +617,8 @@ o.spec("stream", function() {
 			o(mapped.error()).equals(undefined)
 		})
 		o("throwing from absorbed propagates", function() {
-			var stream = Stream.stream(undefined)
-			var absorbedParent = Stream.stream()
+			var stream = Stream(undefined)
+			var absorbedParent = Stream()
 			var absorbed = absorbedParent.map(function() {throw new Error("error")})
 			var mapped = stream.run(function(value) {return absorbed})
 
@@ -648,7 +648,7 @@ o.spec("stream", function() {
 		})
 		o("catch works from combine", function() {
 			var count = 0
-			var stream = Stream.combine(function() {throw new Error("error")}, [Stream.stream(1)]).catch(function(e) {
+			var stream = Stream.combine(function() {throw new Error("error")}, [Stream(1)]).catch(function(e) {
 				count++
 				return "no" + e.message
 			})
@@ -662,7 +662,7 @@ o.spec("stream", function() {
 		})
 		o("catch is not called if no error", function() {
 			var count = 0
-			var stream = Stream.stream()
+			var stream = Stream()
 			var handled = stream.map(function(value) {return value + value}).catch(function(e) {
 				count++
 				return "no" + e.message
@@ -679,7 +679,7 @@ o.spec("stream", function() {
 		})
 		o("catch is not called if no error with default value", function() {
 			var count = 0
-			var stream = Stream.stream("a").map(function(value) {return value + value}).catch(function(e) {
+			var stream = Stream("a").map(function(value) {return value + value}).catch(function(e) {
 				count++
 				return "no" + e.message
 			})
@@ -710,7 +710,7 @@ o.spec("stream", function() {
 		})
 		o("catch absorbs pending stream", function() {
 			var count = 0
-			var stream = Stream.stream()
+			var stream = Stream()
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
@@ -723,7 +723,7 @@ o.spec("stream", function() {
 			o(count).equals(0)
 		})
 		o("catch absorbs active stream", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
@@ -752,7 +752,7 @@ o.spec("stream", function() {
 		})
 		o("catches wrapped rejected stream", function() {
 			var caught
-			var stream = Stream.stream(1).map(function() {
+			var stream = Stream(1).map(function() {
 				return Stream.reject(new Error("error"))
 			})
 			.catch(function(value) {
@@ -767,8 +767,8 @@ o.spec("stream", function() {
 		})
 		o("catches nested wrapped rejected stream", function() {
 			var caught
-			var stream = Stream.stream(1).map(function() {
-				return Stream.stream(2).map(function() {
+			var stream = Stream(1).map(function() {
+				return Stream(2).map(function() {
 					return Stream.reject(new Error("error"))
 				})
 			})
@@ -785,56 +785,56 @@ o.spec("stream", function() {
 	})
 	o.spec("valueOf", function() {
 		o("works", function() {
-			o(Stream.stream(1).valueOf()).equals(1)
-			o(Stream.stream("a").valueOf()).equals("a")
-			o(Stream.stream(true).valueOf()).equals(true)
-			o(Stream.stream(null).valueOf()).equals(null)
-			o(Stream.stream(undefined).valueOf()).equals(undefined)
-			o(Stream.stream({a: 1}).valueOf()).deepEquals({a: 1})
-			o(Stream.stream([1, 2, 3]).valueOf()).deepEquals([1, 2, 3])
-			o(Stream.stream().valueOf()).equals(undefined)
+			o(Stream(1).valueOf()).equals(1)
+			o(Stream("a").valueOf()).equals("a")
+			o(Stream(true).valueOf()).equals(true)
+			o(Stream(null).valueOf()).equals(null)
+			o(Stream(undefined).valueOf()).equals(undefined)
+			o(Stream({a: 1}).valueOf()).deepEquals({a: 1})
+			o(Stream([1, 2, 3]).valueOf()).deepEquals([1, 2, 3])
+			o(Stream().valueOf()).equals(undefined)
 		})
 		o("allows implicit value access in mathematical operations", function() {
-			o(Stream.stream(1) + Stream.stream(1)).equals(2)
+			o(Stream(1) + Stream(1)).equals(2)
 		})
 	})
 	o.spec("toString", function() {
 		o("aliases valueOf", function() {
-			var stream = Stream.stream(1)
+			var stream = Stream(1)
 
 			o(stream.toString).equals(stream.valueOf)
 		})
 		o("allows implicit value access in string operations", function() {
-			o(Stream.stream("a") + Stream.stream("b")).equals("ab")
+			o(Stream("a") + Stream("b")).equals("ab")
 		})
 	})
 	o.spec("toJSON", function() {
 		o("works", function() {
-			o(Stream.stream(1).toJSON()).equals(1)
-			o(Stream.stream("a").toJSON()).equals("a")
-			o(Stream.stream(true).toJSON()).equals(true)
-			o(Stream.stream(null).toJSON()).equals(null)
-			o(Stream.stream(undefined).toJSON()).equals(undefined)
-			o(Stream.stream({a: 1}).toJSON()).deepEquals({a: 1})
-			o(Stream.stream([1, 2, 3]).toJSON()).deepEquals([1, 2, 3])
-			o(Stream.stream().toJSON()).equals(undefined)
-			o(Stream.stream(new Date(0)).toJSON()).equals(new Date(0).toJSON())
+			o(Stream(1).toJSON()).equals(1)
+			o(Stream("a").toJSON()).equals("a")
+			o(Stream(true).toJSON()).equals(true)
+			o(Stream(null).toJSON()).equals(null)
+			o(Stream(undefined).toJSON()).equals(undefined)
+			o(Stream({a: 1}).toJSON()).deepEquals({a: 1})
+			o(Stream([1, 2, 3]).toJSON()).deepEquals([1, 2, 3])
+			o(Stream().toJSON()).equals(undefined)
+			o(Stream(new Date(0)).toJSON()).equals(new Date(0).toJSON())
 		})
 		o("works w/ JSON.stringify", function() {
-			o(JSON.stringify(Stream.stream(1))).equals(JSON.stringify(1))
-			o(JSON.stringify(Stream.stream("a"))).equals(JSON.stringify("a"))
-			o(JSON.stringify(Stream.stream(true))).equals(JSON.stringify(true))
-			o(JSON.stringify(Stream.stream(null))).equals(JSON.stringify(null))
-			o(JSON.stringify(Stream.stream(undefined))).equals(JSON.stringify(undefined))
-			o(JSON.stringify(Stream.stream({a: 1}))).deepEquals(JSON.stringify({a: 1}))
-			o(JSON.stringify(Stream.stream([1, 2, 3]))).deepEquals(JSON.stringify([1, 2, 3]))
-			o(JSON.stringify(Stream.stream())).equals(JSON.stringify(undefined))
-			o(JSON.stringify(Stream.stream(new Date(0)))).equals(JSON.stringify(new Date(0)))
+			o(JSON.stringify(Stream(1))).equals(JSON.stringify(1))
+			o(JSON.stringify(Stream("a"))).equals(JSON.stringify("a"))
+			o(JSON.stringify(Stream(true))).equals(JSON.stringify(true))
+			o(JSON.stringify(Stream(null))).equals(JSON.stringify(null))
+			o(JSON.stringify(Stream(undefined))).equals(JSON.stringify(undefined))
+			o(JSON.stringify(Stream({a: 1}))).deepEquals(JSON.stringify({a: 1}))
+			o(JSON.stringify(Stream([1, 2, 3]))).deepEquals(JSON.stringify([1, 2, 3]))
+			o(JSON.stringify(Stream())).equals(JSON.stringify(undefined))
+			o(JSON.stringify(Stream(new Date(0)))).equals(JSON.stringify(new Date(0)))
 		})
 	})
 	o.spec("uncaught exception reporting", function() {
 		o("reports thrown errors", function(done) {
-			Stream.stream(1).map(function() {throw new Error("error")})
+			Stream(1).map(function() {throw new Error("error")})
 			
 			setTimeout(function() {
 				o(spy.callCount).equals(1)
@@ -853,7 +853,7 @@ o.spec("stream", function() {
 	})
 	o.spec("map", function() {
 		o("works", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var doubled = stream.map(function(value) {return value * 2})
 
 			stream(3)
@@ -861,13 +861,13 @@ o.spec("stream", function() {
 			o(doubled()).equals(6)
 		})
 		o("works with default value", function() {
-			var stream = Stream.stream(3)
+			var stream = Stream(3)
 			var doubled = stream.map(function(value) {return value * 2})
 
 			o(doubled()).equals(6)
 		})
 		o("works with undefined value", function() {
-			var stream = Stream.stream()
+			var stream = Stream()
 			var mapped = stream.map(function(value) {return String(value)})
 
 			stream(undefined)
@@ -875,22 +875,22 @@ o.spec("stream", function() {
 			o(mapped()).equals("undefined")
 		})
 		o("works with default undefined value", function() {
-			var stream = Stream.stream(undefined)
+			var stream = Stream(undefined)
 			var mapped = stream.map(function(value) {return String(value)})
 
 			o(mapped()).equals("undefined")
 		})
 		o("works with pending stream", function() {
-			var stream = Stream.stream(undefined)
-			var mapped = stream.map(function(value) {return Stream.stream()})
+			var stream = Stream(undefined)
+			var mapped = stream.map(function(value) {return Stream()})
 
 			o(mapped()()).equals(undefined)
 		})
 	})
 	o.spec("ap", function() {
 		o("works", function() {
-			var apply = Stream.stream(function(value) {return value * 2})
-			var stream = Stream.stream(3)
+			var apply = Stream(function(value) {return value * 2})
+			var stream = Stream(3)
 			var applied = apply.ap(stream)
 
 			o(applied()).equals(6)
@@ -904,8 +904,8 @@ o.spec("stream", function() {
 			o(applied()).equals(3)
 		})
 		o("works with undefined value", function() {
-			var apply = Stream.stream(function(value) {return String(value)})
-			var stream = Stream.stream(undefined)
+			var apply = Stream(function(value) {return String(value)})
+			var stream = Stream(undefined)
 			var applied = apply.ap(stream)
 
 			o(applied()).equals("undefined")
@@ -918,7 +918,7 @@ o.spec("stream", function() {
 	o.spec("fantasy-land", function() {
 		o.spec("functor", function() {
 			o("identity", function() {
-				var stream = Stream.stream(3)
+				var stream = Stream(3)
 				var mapped = stream.map(function(value) {return value})
 
 				o(stream()).equals(mapped())
@@ -927,7 +927,7 @@ o.spec("stream", function() {
 				function f(x) {return x * 2}
 				function g(x) {return x * x}
 
-				var stream = Stream.stream(3)
+				var stream = Stream(3)
 
 				var mapped = stream.map(function(value) {return f(g(value))})
 				var composed = stream.map(g).map(f)
@@ -938,9 +938,9 @@ o.spec("stream", function() {
 		})
 		o.spec("apply", function() {
 			o("composition", function() {
-				var a = Stream.stream(function(value) {return value * 2})
-				var u = Stream.stream(function(value) {return value * 3})
-				var v = Stream.stream(5)
+				var a = Stream(function(value) {return value * 2})
+				var u = Stream(function(value) {return value * 3})
+				var v = Stream(5)
 
 				var mapped = a.map(function(f) {
 					return function(g) {
@@ -958,14 +958,14 @@ o.spec("stream", function() {
 		})
 		o.spec("applicative", function() {
 			o("identity", function() {
-				var a = Stream.stream().of(function(value) {return value})
-				var v = Stream.stream(5)
+				var a = Stream().of(function(value) {return value})
+				var v = Stream(5)
 
 				o(a.ap(v)()).equals(5)
 				o(a.ap(v)()).equals(v())
 			})
 			o("homomorphism", function() {
-				var a = Stream.stream(0)
+				var a = Stream(0)
 				var f = function(value) {return value * 2}
 				var x = 3
 
@@ -973,8 +973,8 @@ o.spec("stream", function() {
 				o(a.of(f).ap(a.of(x))()).equals(a.of(f(x))())
 			})
 			o("interchange", function() {
-				var u = Stream.stream(function(value) {return value * 2})
-				var a = Stream.stream()
+				var u = Stream(function(value) {return value * 2})
+				var a = Stream()
 				var y = 3
 
 				o(u.ap(a.of(y))()).equals(6)

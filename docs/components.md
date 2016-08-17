@@ -239,7 +239,9 @@ m(Header, {
 
 #### Avoid component factories
 
-Component diffing relies on strict equality checking, so you should avoid recreating components. Instead, consume components idiomatically.
+If you create a component from within a `view` method (either directly inline or by calling a function that does so), each redraw will have a different clone of the component. When diffing component vnodes, if the component referenced by the new vnode is not strictly equal to the one referenced by the old component, the two are assumed to be different components even if they ultimately run equivalent code. This means components created dynamically via a factory will always be re-created from scratch.
+
+For that reason you should avoid recreating components. Instead, consume components idiomatically.
 
 ```javascript
 // AVOID

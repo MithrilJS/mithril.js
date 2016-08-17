@@ -6,15 +6,18 @@
 	- [route.get](#route-get)
 	- [route.prefix](#route-prefix)
 	- [route.link](#route-link)
+- [RouteResolver](#routeresolver)
+	- [routeResolver.onmatch](#routeresolver-onmatch)
+	- [routeResolver.view](#routeresolver-view)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
 - [Routing parameters](#routing-parameters)
 - [Changing router prefix](#changing-router-prefix)
-- [Advanced component resolution](#advanced-component-resolution)
 - [Wrapping a layout component](#wrapping-a-layout-component)
+- [Advanced component resolution](#advanced-component-resolution)
 - [Authentication](#authentication)
-- [Lazy loading](#lazy-loading)
+- [Code splitting](#code-splitting)
 
 ---
 
@@ -31,38 +34,6 @@ Argument               | Type                                     | Required | D
 
 [How to read signatures](signatures.md)
 
-#### RouteResolver
-
-A RouterResolver is an object that contains a `resolve` and a `render` methods. Both methods are optional, but at least one must be defined.
-
-`routeResolver = {resolve, render}`
-
-##### routeResolver.resolve
-
-The `resolve` method is called when the router needs to find a component to render. It is called once when a router path changes, but not on subsequent redraws. It can be used to run logic before a component initializes (for example authentication logic)
-
-This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading.
-
-`routeResolver.resolve(use, args, path, route)`
-
-Argument    | Type                  | Required | Description
------------ | --------------------- | -------- | ---
-`use`       | `Function(Component)` | Yes      | Call this function with a component as the first argument to use it as the route's component
-`args`      | `Object`              | No       | The [routing parameters](#routing-parameters)
-`path`      | `String`              | No       | The current router path, including interpolated routing parameter values, but without the prefix
-`route`     | `String`              | No       | The matched route
-**returns** |                       |          | Returns `undefined`
-
-##### routeResolver.render
-
-The `render` method is called on every redraw for a matching route. It is meant for functional composition of components, to avoid the need for repetitive component definitions
-
-`vnode = routeResolve.render(vnode)`
-
-Argument    | Type                  | Required | Description
------------ | --------------------- | -------- | ---
-`vnode`     | `Vnode`               | Yes      | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
-**returns** | `Vnode`               |          | Returns a vnode
 
 #### Static members
 
@@ -108,6 +79,43 @@ Argument          | Type        | Required | Description
 ----------------- | ----------- | -------- | ---
 `vnode`           | `Vnode`     | Yes      | This method is meant to be used in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` hook](lifecycle-methods.md)
 **returns**       | Function(e) |          | Returns an event handler that calls `m.route.set` with the link's `href` as the `path`
+
+#### RouteResolver
+
+A RouterResolver is an object that contains an `onmatch` method, and optionally a `view` method.
+
+`routeResolver = {onmatch, view}`
+
+##### routeResolver.onmatch
+
+The `onmatch` hook is called when the router needs to find a component to render. It is called once when a router path changes, but not on subsequent redraws. It can be used to run logic before a component initializes (for example authentication logic)
+
+This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading.
+
+`routeResolver.onmatch(vnode, resolve)`
+
+Argument            | Type                  | Description
+------------------- | --------------------- | ---
+`vnode`             | `Vnode`               | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
+`vnode.attrs`       | `Object`              | The [routing parameters](#routing-parameters)
+`vnode.attrs.path`  | `String`              | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
+`vnode.attrs.route` | `String`              | The matched route
+`resolve`           | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
+**returns**         |                       | Returns `undefined`
+
+##### routeResolver.view
+
+The `view` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
+
+`vnode = routeResolve.view(vnode)`
+
+Argument            | Type            | Required | Description
+------------------- | --------------- | ---
+`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
+`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
+`vnode.attrs.path`  | `String`        | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
+`vnode.attrs.route` | `String`        | The matched route
+**returns**         | `Vnode`         | Returns a vnode
 
 ---
 
@@ -255,30 +263,9 @@ m.route.prefix("/my-app")
 
 ---
 
-### Advanced component resolution
-
-Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `resolve()` and a `render()` method. Both methods are optional, but at least one of them should be specified.
-
-```javascript
-m.route(document.body, "/", {
-	"/": {
-		resolve: function(use) {
-			use(Home)
-		},
-		render: function(vnode) {
-			return vnode
-		},
-	}
-})
-```
-
-The RouteResolver can be used to implement a variety of advanced component initialization use cases.
-
----
-
 ### Wrapping a layout component
 
-The RouterResolver's `render` method can be used to wrap a layout around a component, or to pass parameters to a top level component
+You can use anonymous components to wrap a layout around a component, or to pass parameters to a top level component
 
 ```javascript
 var Layout = {
@@ -289,7 +276,7 @@ var Layout = {
 
 m.route(document.body, "/", {
 	"/": {
-		render: function() {
+		view: function() {
 			return m(Layout, Home)
 		},
 	}
@@ -298,9 +285,30 @@ m.route(document.body, "/", {
 
 ---
 
+### Advanced component resolution
+
+Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `view()` method.
+
+```javascript
+m.route(document.body, "/", {
+	"/": {
+		onmatch: function(vnode, resolve) {
+			use(Home)
+		},
+		view: function(vnode) {
+			return vnode
+		},
+	}
+})
+```
+
+RouteResolvers are useful for implementing a variety of advanced routing use cases.
+
+---
+
 ### Authentication
 
-The RouterResolver's `resolve` method can be used to run logic before component initialization (including asynchronous logic). The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
@@ -320,8 +328,8 @@ var Login = {
 
 m.route(document.body, "/secret", {
 	"/secret": {
-		resolve: function(use) {
-			if (isLoggedIn) use(Home)
+		onmatch: function(vnode, resolve) {
+			if (isLoggedIn) resolve(Home)
 			else m.route.set("/login")
 		},
 	},
@@ -329,15 +337,15 @@ m.route(document.body, "/secret", {
 })
 ```
 
-When the application loads, `resolve` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `resolve` method would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
+When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
 
 For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user.
 
 ---
 
-### Lazy loading
+### Code splitting
 
-One important feature of the `resolve` method in RouteResolvers is that the `use` callback can be triggered asynchronously. This allows components to be downloaded on demand.
+In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by calling the `resolve` callback of the `onmatch` hook asynchronously:
 
 At its simplest form, one could do the following:
 
@@ -368,8 +376,8 @@ function load(file, done) {
 
 m.route(document.body, "/", {
 	"/": {
-		resolve: function(use) {
-			load("Home.js", use)
+		onmatch: function(vnode, resolve) {
+			load("Home.js", resolve)
 		},
 	},
 })

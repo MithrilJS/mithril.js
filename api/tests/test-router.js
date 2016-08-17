@@ -83,7 +83,7 @@ o.spec("route", function() {
 					})
 
 					function init(vnode) {
-						o(vnode.attrs).deepEquals({})
+						o(vnode.attrs.foo).equals(undefined)
 						
 						done()
 					}
@@ -231,8 +231,8 @@ o.spec("route", function() {
 					})
 				})
 				
-				o("accepts object as payload", function(done) {
-					var resolveCount = 0
+				o("accepts RouteResolver", function(done) {
+					var matchCount = 0
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -243,19 +243,19 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							resolve: function(use, args, path, route) {
-								resolveCount++
+							onmatch: function(vnode, resolve) {
+								matchCount++
 								
-								o(args).deepEquals({id: "abc"})
-								o(path).equals("/abc")
-								o(route).equals("/:id")
+								o(vnode.attrs.id).equals("abc")
+								o(vnode.attrs.path).equals("/abc")
+								o(vnode.attrs.route).equals("/:id")
 								
-								use(Component)
+								resolve(Component)
 							},
-							render: function(vnode) {
+							view: function(vnode) {
 								renderCount++
 								
-								o(vnode.attrs).deepEquals({id: "abc"})
+								o(vnode.attrs.id).equals("abc")
 								
 								return vnode
 							},
@@ -263,7 +263,7 @@ o.spec("route", function() {
 					})
 					
 					setTimeout(function() {
-						o(resolveCount).equals(1)
+						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
 						
@@ -271,8 +271,8 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 				
-				o("accepts object without `render` method as payload", function(done) {
-					var resolveCount = 0
+				o("accepts RouteResolver without `view` method as payload", function(done) {
+					var matchCount = 0
 					var Component = {
 						view: function() {
 							return m("div")
@@ -282,20 +282,20 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							resolve: function(use, args, path, route) {
-								resolveCount++
+							onmatch: function(vnode, resolve) {
+								matchCount++
 								
-								o(args).deepEquals({id: "abc"})
-								o(path).equals("/abc")
-								o(route).equals("/:id")
+								o(vnode.attrs.id).equals("abc")
+								o(vnode.attrs.path).equals("/abc")
+								o(vnode.attrs.route).equals("/:id")
 								
-								use(Component)
+								resolve(Component)
 							},
 						},
 					})
 					
 					setTimeout(function() {
-						o(resolveCount).equals(1)
+						o(matchCount).equals(1)
 						
 						o(root.firstChild.nodeName).equals("DIV")
 						
@@ -303,7 +303,7 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 				
-				o("accepts object without `resolve` method as payload", function(done) {
+				o("object without `onmatch` method acts as component", function(done) {
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -314,10 +314,10 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							render: function(vnode) {
+							view: function(vnode) {
 								renderCount++
 								
-								o(vnode.attrs).deepEquals({id: "abc"})
+								o(vnode.attrs.id).equals("abc")
 								
 								return m(Component)
 							},
@@ -331,8 +331,8 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
-				o("calls resolve and render correct number of times", function(done) {
-					var resolveCount = 0
+				o("calls onmatch and view correct number of times", function(done) {
+					var matchCount = 0
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -343,11 +343,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							resolve: function(use) {
-								resolveCount++
-								use(Component)
+							onmatch: function(vnode, resolve) {
+								matchCount++
+								resolve(Component)
 							},
-							render: function(vnode) {
+							view: function(vnode) {
 								renderCount++
 								return vnode
 							},
@@ -355,13 +355,13 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
-						o(resolveCount).equals(1)
+						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						
 						redraw.publish()
 
 						setTimeout(function() {
-							o(resolveCount).equals(1)
+							o(matchCount).equals(1)
 							o(renderCount).equals(2)
 							
 							done()

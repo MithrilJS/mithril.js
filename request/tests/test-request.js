@@ -9,7 +9,7 @@ o.spec("xhr", function() {
 	o.beforeEach(function() {
 		mock = xhrMock()
 		spy = o.spy()
-		xhr = new Request(mock, spy).xhr
+		xhr = new Request(mock, spy).request
 	})
 
 	o.spec("success", function() {

@@ -1,22 +1,20 @@
 "use strict"
 
-var log = console.error.bind(console)
-var defaultStream = require("./stream/index")
 var m = require("./render/hyperscript")
-var renderService = require("./render/render")(window)
-var requestService = require("./request/request")(window, log)
-var redrawService = require("./api/pubsub")()
+var renderService = require("./render")
+var requestService = require("./request")
+var redrawService = require("./redraw")
 
 requestService.setCompletionCallback(redrawService.publish)
 
-m.route = require("./api/router")(window, renderService, redrawService)
-m.mount = require("./api/mount")(renderService, redrawService)
+m.route = require("./route")
+m.mount = require("./mount")
 m.trust = require("./render/trust")
 m.withAttr = require("./util/withAttr")
-m.prop = defaultStream
+m.prop = require("./stream")
 m.render = renderService.render
 m.redraw = redrawService.publish
-m.request = requestService.xhr
+m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.version = "bleeding-edge"
 
