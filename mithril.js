@@ -1081,8 +1081,14 @@
 			//
 			// #348 don't set the value if not needed - otherwise, cursor
 			// placement breaks in Chrome
+			// #1252 likewise when `contenteditable` is set on an element.
 			try {
-				if (tag !== "input" || node[attrName] !== dataAttr) {
+				if (
+					tag !== "input" && !node.isContentEditable
+					/* eslint-disable eqeqeq */
+					|| node[attrName] != dataAttr
+					/* eslint-enable eqeqeq */
+				) {
 					node[attrName] = dataAttr
 				}
 			} catch (e) {
@@ -1119,8 +1125,11 @@
 				if (e.message.indexOf("Invalid argument") < 0) throw e
 			}
 		} else if (attrName === "value" && tag === "input" &&
-								node.value !== dataAttr) {
-			// #348 dataAttr may not be a string, so use loose comparison
+								/* eslint-disable eqeqeq */
+								node.value != dataAttr) {
+								// #348 dataAttr may not be a string,
+								// so use loose comparison
+								/* eslint-enable eqeqeq */
 			node.value = dataAttr
 		}
 	}
