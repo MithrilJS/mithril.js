@@ -1,197 +1,5 @@
 new function() {
 
-var log = console.error.bind(console)
-var log = console.error.bind(console)
-var StreamFactory = function(log) {
-	var guid = 0, noop = function() {}, HALT = {}
-	function createStream() {
-		function stream() {
-			if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
-			return stream._state.value
-		}
-		initStream(stream, arguments)
-		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
-		return stream
-	}
-	function initStream(stream, args) {
-		stream.constructor = createStream
-		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-		stream.map = map, stream.ap = ap, stream.of = createStream
-		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
-		stream.run = run, stream.catch = doCatch
-		Object.defineProperties(stream, {
-			error: {get: function() {
-				if (!stream._state.errorStream) {
-					var errorStream = function() {
-						if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
-						return stream._state.error
-					}
-					initStream(errorStream, [])
-					initDependency(errorStream, [stream], noop, noop)
-					stream._state.errorStream = errorStream
-				}
-				return stream._state.errorStream
-			}},
-			end: {get: function() {
-				if (!stream._state.endStream) {
-					var endStream = createStream()
-					endStream.map(function(value) {
-						if (value === true) unregisterStream(stream), unregisterStream(endStream)
-						return value
-					})
-					stream._state.endStream = endStream
-				}
-				return stream._state.endStream
-			}}
-		})
-	}
-	function updateStream(stream, value, error) {
-		updateState(stream, value, error)
-		for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
-		finalize(stream)
-	}
-	function updateState(stream, value, error) {
-		error = unwrapError(value, error)
-		if (error !== undefined && typeof stream._state.recover === "function") {
-			if (!resolve(stream, updateValues, true)) return
-		}
-		else updateValues(stream, value, error)
-		stream._state.changed = true
-		if (stream._state.state !== 2) stream._state.state = 1
-	}
-	function updateValues(stream, value, error) {
-		stream._state.value = value
-		stream._state.error = error
-	}
-	function updateDependency(stream, mustSync) {
-		var state = stream._state, parents = state.parents
-		if (parents.length > 0 && parents.filter(active).length === parents.length && (mustSync || parents.filter(changed).length > 0)) {
-			var failed = parents.filter(errored)
-			if (failed.length > 0) updateState(stream, undefined, failed[0]._state.error)
-			else resolve(stream, updateState, false)
-		}
-	}
-	function resolve(stream, update, shouldRecover) {
-		try {
-			var value = shouldRecover ? stream._state.recover() : stream._state.derive()
-			if (value === HALT) return false
-			update(stream, value, undefined)
-		}
-		catch (e) {
-			update(stream, undefined, e.__error != null ? e.__error : e)
-			if (e.__error == null) reportUncaughtError(stream, e)
-		}
-		return true
-	}
-	function unwrapError(value, error) {
-		if (value != null && value.constructor === createStream) {
-			if (value._state.error !== undefined) error = value._state.error
-			else error = unwrapError(value._state.value, value._state.error)
-		}
-		return error
-	}
-	function finalize(stream) {
-		stream._state.changed = false
-		for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
-	}
-	function reportUncaughtError(stream, e) {
-		if (Object.keys(stream._state.deps).length === 0) {
-			setTimeout(function() {
-				if (Object.keys(stream._state.deps).length === 0) log(e)
-			}, 0)
-		}
-	}
-	function run(fn) {
-		var self = createStream(), stream = this
-		return initDependency(self, [stream], function() {
-			return absorb(self, fn(stream()))
-		}, undefined)
-	}
-	function doCatch(fn) {
-		var self = createStream(), stream = this
-		var derive = function() {return stream._state.value}
-		var recover = function() {return absorb(self, fn(stream._state.error))}
-		return initDependency(self, [stream], derive, recover)
-	}
-	function combine(fn, streams) {
-		return initDependency(createStream(), streams, function() {
-			var failed = streams.filter(errored)
-			if (failed.length > 0) throw {__error: failed[0]._state.error}
-			return fn.apply(this, streams.concat([streams.filter(changed)]))
-		}, undefined)
-	}
-	function absorb(stream, value) {
-		if (value != null && value.constructor === createStream) {
-			var absorbable = value
-			var update = function() {
-				updateState(stream, absorbable._state.value, absorbable._state.error)
-				for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
-			}
-			absorbable.map(update).catch(function(e) {
-				update()
-				throw {__error: e}
-			})
-			
-			if (absorbable._state.state === 0) return HALT
-			if (absorbable._state.error) throw {__error: absorbable._state.error}
-			value = absorbable._state.value
-		}
-		return value
-	}
-	function initDependency(dep, streams, derive, recover) {
-		var state = dep._state
-		state.derive = derive
-		state.recover = recover
-		state.parents = streams.filter(notEnded)
-		registerDependency(dep, state.parents)
-		updateDependency(dep, true)
-		return dep
-	}
-	function registerDependency(stream, parents) {
-		for (var i = 0; i < parents.length; i++) {
-			parents[i]._state.deps[stream._state.id] = stream
-			registerDependency(stream, parents[i]._state.parents)
-		}
-	}
-	function unregisterStream(stream) {
-		for (var i = 0; i < stream._state.parents.length; i++) {
-			var parent = stream._state.parents[i]
-			delete parent._state.deps[stream._state.id]
-		}
-		for (var id in stream._state.deps) {
-			var dependent = stream._state.deps[id]
-			var index = dependent._state.parents.indexOf(stream)
-			if (index > -1) dependent._state.parents.splice(index, 1)
-		}
-		stream._state.state = 2 //ended
-		stream._state.deps = {}
-	}
-	function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
-	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
-	function valueOf() {return this._state.value}
-	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
-	function active(stream) {return stream._state.state === 1}
-	function changed(stream) {return stream._state.changed}
-	function notEnded(stream) {return stream._state.state !== 2}
-	function errored(stream) {return stream._state.error}
-	function reject(e) {
-		var stream = createStream()
-		stream.error(e)
-		return stream
-	}
-	function merge(streams) {
-		return combine(function () {
-			return streams.map(function(s) {return s()})
-		}, streams)
-	}
-	return {stream: createStream, merge: merge, combine: combine, reject: reject, HALT: HALT}
-}
-var Stream = StreamFactory(log)
-var defaultStream = Stream.stream
-defaultStream.combine = Stream.combine
-defaultStream.reject = Stream.reject
-defaultStream.merge = Stream.merge
-defaultStream.HALT = Stream.HALT
 function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
 }
@@ -785,14 +593,202 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
+var StreamFactory = function(log) {
+	var guid = 0, noop = function() {}, HALT = {}
+	function createStream() {
+		function stream() {
+			if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
+			return stream._state.value
+		}
+		initStream(stream, arguments)
+		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
+		return stream
+	}
+	function initStream(stream, args) {
+		stream.constructor = createStream
+		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
+		stream.map = map, stream.ap = ap, stream.of = createStream
+		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
+		stream.run = run, stream.catch = doCatch
+		Object.defineProperties(stream, {
+			error: {get: function() {
+				if (!stream._state.errorStream) {
+					var errorStream = function() {
+						if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
+						return stream._state.error
+					}
+					initStream(errorStream, [])
+					initDependency(errorStream, [stream], noop, noop)
+					stream._state.errorStream = errorStream
+				}
+				return stream._state.errorStream
+			}},
+			end: {get: function() {
+				if (!stream._state.endStream) {
+					var endStream = createStream()
+					endStream.map(function(value) {
+						if (value === true) unregisterStream(stream), unregisterStream(endStream)
+						return value
+					})
+					stream._state.endStream = endStream
+				}
+				return stream._state.endStream
+			}}
+		})
+	}
+	function updateStream(stream, value, error) {
+		updateState(stream, value, error)
+		for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+		finalize(stream)
+	}
+	function updateState(stream, value, error) {
+		error = unwrapError(value, error)
+		if (error !== undefined && typeof stream._state.recover === "function") {
+			if (!resolve(stream, updateValues, true)) return
+		}
+		else updateValues(stream, value, error)
+		stream._state.changed = true
+		if (stream._state.state !== 2) stream._state.state = 1
+	}
+	function updateValues(stream, value, error) {
+		stream._state.value = value
+		stream._state.error = error
+	}
+	function updateDependency(stream, mustSync) {
+		var state = stream._state, parents = state.parents
+		if (parents.length > 0 && parents.filter(active).length === parents.length && (mustSync || parents.filter(changed).length > 0)) {
+			var failed = parents.filter(errored)
+			if (failed.length > 0) updateState(stream, undefined, failed[0]._state.error)
+			else resolve(stream, updateState, false)
+		}
+	}
+	function resolve(stream, update, shouldRecover) {
+		try {
+			var value = shouldRecover ? stream._state.recover() : stream._state.derive()
+			if (value === HALT) return false
+			update(stream, value, undefined)
+		}
+		catch (e) {
+			update(stream, undefined, e.__error != null ? e.__error : e)
+			if (e.__error == null) reportUncaughtError(stream, e)
+		}
+		return true
+	}
+	function unwrapError(value, error) {
+		if (value != null && value.constructor === createStream) {
+			if (value._state.error !== undefined) error = value._state.error
+			else error = unwrapError(value._state.value, value._state.error)
+		}
+		return error
+	}
+	function finalize(stream) {
+		stream._state.changed = false
+		for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
+	}
+	function reportUncaughtError(stream, e) {
+		if (Object.keys(stream._state.deps).length === 0) {
+			setTimeout(function() {
+				if (Object.keys(stream._state.deps).length === 0) log(e)
+			}, 0)
+		}
+	}
+	function run(fn) {
+		var self = createStream(), stream = this
+		return initDependency(self, [stream], function() {
+			return absorb(self, fn(stream()))
+		}, undefined)
+	}
+	function doCatch(fn) {
+		var self = createStream(), stream = this
+		var derive = function() {return stream._state.value}
+		var recover = function() {return absorb(self, fn(stream._state.error))}
+		return initDependency(self, [stream], derive, recover)
+	}
+	function combine(fn, streams) {
+		return initDependency(createStream(), streams, function() {
+			var failed = streams.filter(errored)
+			if (failed.length > 0) throw {__error: failed[0]._state.error}
+			return fn.apply(this, streams.concat([streams.filter(changed)]))
+		}, undefined)
+	}
+	function absorb(stream, value) {
+		if (value != null && value.constructor === createStream) {
+			var absorbable = value
+			var update = function() {
+				updateState(stream, absorbable._state.value, absorbable._state.error)
+				for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+			}
+			absorbable.map(update).catch(function(e) {
+				update()
+				throw {__error: e}
+			})
+			
+			if (absorbable._state.state === 0) return HALT
+			if (absorbable._state.error) throw {__error: absorbable._state.error}
+			value = absorbable._state.value
+		}
+		return value
+	}
+	function initDependency(dep, streams, derive, recover) {
+		var state = dep._state
+		state.derive = derive
+		state.recover = recover
+		state.parents = streams.filter(notEnded)
+		registerDependency(dep, state.parents)
+		updateDependency(dep, true)
+		return dep
+	}
+	function registerDependency(stream, parents) {
+		for (var i = 0; i < parents.length; i++) {
+			parents[i]._state.deps[stream._state.id] = stream
+			registerDependency(stream, parents[i]._state.parents)
+		}
+	}
+	function unregisterStream(stream) {
+		for (var i = 0; i < stream._state.parents.length; i++) {
+			var parent = stream._state.parents[i]
+			delete parent._state.deps[stream._state.id]
+		}
+		for (var id in stream._state.deps) {
+			var dependent = stream._state.deps[id]
+			var index = dependent._state.parents.indexOf(stream)
+			if (index > -1) dependent._state.parents.splice(index, 1)
+		}
+		stream._state.state = 2 //ended
+		stream._state.deps = {}
+	}
+	function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
+	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
+	function valueOf() {return this._state.value}
+	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
+	function active(stream) {return stream._state.state === 1}
+	function changed(stream) {return stream._state.changed}
+	function notEnded(stream) {return stream._state.state !== 2}
+	function errored(stream) {return stream._state.error}
+	function reject(e) {
+		var stream = createStream()
+		stream.error(e)
+		return stream
+	}
+	function merge(streams) {
+		return combine(function () {
+			return streams.map(function(s) {return s()})
+		}, streams)
+	}
+	createStream.merge = merge
+	createStream.combine = combine
+	createStream.reject = reject
+	createStream.HALT = HALT
+	return createStream
+}
 var requestService = function($window, log) {
 	var Stream = StreamFactory(log)
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
-	function xhr(args) {
-		var stream = Stream.stream()
+	function request(args) {
+		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -843,7 +839,7 @@ var requestService = function($window, log) {
 		return stream
 	}
 	function jsonp(args) {
-		var stream = Stream.stream()
+		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
@@ -905,8 +901,8 @@ var requestService = function($window, log) {
 		return data
 	}
 	
-	return {xhr: xhr, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
-}(window, log)
+	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
+}(window, console.error.bind(console))
 var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
@@ -1090,15 +1086,16 @@ m.route = function($window, renderer, pubsub) {
 	var route = function(root, defaultRoute, routes) {
 		var current = {path: null, component: "div"}
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
-			if (typeof payload.view !== "function") {
-				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
-				var use = function(component) {
+			args.path = path, args.route = route
+			if (typeof payload.onmatch === "function") {
+				if (typeof payload.view !== "function") payload.view = function(vnode) {return vnode}
+				var resolve = function(component) {
 					current.path = path, current.component = component
-					renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
+					renderer.render(root, payload.view(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
-				if (typeof payload.resolve !== "function") payload.resolve = function() {use(current.component)}
-				if (path !== current.path) payload.resolve(use, args, path, route)
-				else use(current.component)
+				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}
+				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
+				else resolve(current.component)
 			}
 			else {
 				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
@@ -1127,7 +1124,6 @@ m.mount = function(renderer, pubsub) {
 		})
 		run()
 		if (component === null) {
-			pubsub.unsubscribe(root.redraw)
 			delete root.redraw
 		}
 	}
@@ -1140,10 +1136,10 @@ m.withAttr = function(attrName, callback, context) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.prop = defaultStream
+m.prop = StreamFactory(console.log.bind(console))
 m.render = renderService.render
 m.redraw = redrawService.publish
-m.request = requestService.xhr
+m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.version = "1.0.0"
 if (typeof module !== "undefined") module["exports"] = m
