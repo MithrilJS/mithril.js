@@ -1093,7 +1093,6 @@ m.route = function($window, renderer, pubsub) {
 					current.path = path, current.component = component
 					renderer.render(root, payload.view(Vnode(component, null, args, undefined, undefined, undefined)))
 				}
-				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}
 				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
 				else resolve(current.component)
 			}
