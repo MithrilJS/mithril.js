@@ -165,6 +165,13 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals(false)
 		})
+		o("handles only key in attrs", function() {
+			var vnode = m("div", {key:"a"})
+
+			o(vnode.tag).equals("div")
+			o(vnode.attrs).equals(undefined)
+			o(vnode.key).equals("a")
+		})
 		o("handles many attrs", function() {
 			var vnode = m("div", {a: "b", c: "d"})
 
