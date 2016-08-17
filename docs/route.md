@@ -110,12 +110,12 @@ The `view` method is called on every redraw for a matching route. It is similar 
 `vnode = routeResolve.view(vnode)`
 
 Argument            | Type            | Required | Description
-------------------- | --------------- | ---
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
-`vnode.attrs.path`  | `String`        | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`        | The matched route
-**returns**         | `Vnode`         | Returns a vnode
+------------------- | --------------- | -------- | ----------- 
+`vnode`             | `Object`        |          | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
+`vnode.attrs`       | `Object`        |          | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
+`vnode.attrs.path`  | `String`        |          | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
+`vnode.attrs.route` | `String`        |          | The matched route
+**returns**         | `Vnode`         |          | Returns a vnode
 
 ---
 
@@ -293,7 +293,7 @@ Instead of mapping a component to a route, you can specify a RouteResolver objec
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function(vnode, resolve) {
-			use(Home)
+			resolve(Home)
 		},
 		view: function(vnode) {
 			return vnode
