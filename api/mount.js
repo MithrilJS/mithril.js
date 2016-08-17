@@ -5,9 +5,9 @@ var autoredraw = require("../api/autoredraw")
 
 module.exports = function(renderer, pubsub) {
 	return function(root, component) {
-		pubsub.unsubscribe(root.redraw)
 		if (component === null) {
 			renderer.render(root, [])
+			pubsub.unsubscribe(root.redraw)
 			delete root.redraw
 			return
 		}
