@@ -1,6 +1,6 @@
 "use strict"
 
-var m = require("./render/hyperscript")
+var m = require("./hyperscript")
 var renderService = require("./render")
 var requestService = require("./request")
 var redrawService = require("./redraw")
@@ -9,7 +9,6 @@ requestService.setCompletionCallback(redrawService.publish)
 
 m.route = require("./route")
 m.mount = require("./mount")
-m.trust = require("./render/trust")
 m.withAttr = require("./util/withAttr")
 m.prop = require("./stream")
 m.render = renderService.render
