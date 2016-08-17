@@ -3,6 +3,12 @@ var m = require("../../render/hyperscript")
 
 o.spec("hyperscript", function() {
 	o.spec("selector", function() {
+		o("throws on null selector", function(done) {
+			try {m(null)} catch(e) {done()}
+		})
+		o("throws on non-string selector w/o a view property", function(done) {
+			try {m({})} catch(e) {done()}
+		})
 		o("handles tag in selector", function() {
 			var vnode = m("a")
 
@@ -165,6 +171,11 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("b")
 			o(vnode.attrs.c).equals("d")
+		})
+		o("handles className attrs property", function() {
+			var vnode = m("div", {className: "a"})
+
+			o(vnode.attrs.className).equals("a")
 		})
 		o("handles merging classes w/ class property", function() {
 			var vnode = m(".a", {class: "b"})
