@@ -1113,9 +1113,9 @@ m.route = function($window, renderer, pubsub) {
 }(window, renderService, redrawService)
 m.mount = function(renderer, pubsub) {
 	return function(root, component) {
-		pubsub.unsubscribe(root.redraw)
 		if (component === null) {
 			renderer.render(root, [])
+			pubsub.unsubscribe(root.redraw)
 			delete root.redraw
 			return
 		}
