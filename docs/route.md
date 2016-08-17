@@ -109,13 +109,13 @@ The `view` method is called on every redraw for a matching route. It is similar 
 
 `vnode = routeResolve.view(vnode)`
 
-Argument            | Type            | Required | Description
-------------------- | --------------- | -------- | ----------- 
-`vnode`             | `Object`        |          | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`        |          | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
-`vnode.attrs.path`  | `String`        |          | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`        |          | The matched route
-**returns**         | `Vnode`         |          | Returns a vnode
+Argument            | Type            | Description
+------------------- | --------------- | ----------- 
+`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
+`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
+`vnode.attrs.path`  | `String`        | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
+`vnode.attrs.route` | `String`        | The matched route
+**returns**         | `Vnode`         | Returns a vnode
 
 ---
 
@@ -212,7 +212,7 @@ When navigating to routes, there's no need to explicitly specify the router pref
 
 Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:
 
-```
+```javascript
 var Edit = {
 	view: function(vnode) {
 		return [
@@ -390,8 +390,8 @@ Fortunately, there are a number of tools that facilitate the task of bundling mo
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		resolve: function(use) {
-			//using Webpack async code splitting
+		onmatch: function(use) {
+			// using Webpack async code splitting
 			require(['./Home.js'], use)
 		},
 	},

@@ -44,7 +44,10 @@ function ensureCodeIsRunnable(file, data) {
 	}
 
 	try {
-		new Function("console,fetch", code).call(this, silentConsole, fetch)
+		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, {exports: {}}, function(dep) {
+			if (dep.indexOf("./mycomponent") === 0) return {view: function() {}}
+			if (dep === "mithril") return m
+		})
 	}
 	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
 	

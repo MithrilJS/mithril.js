@@ -59,10 +59,10 @@ m.jsonp({
 And sometimes, you just want to take advantage of HTTP caching for GET requests for rarely-modified data:
 
 ```javascript
-//this request is always called with the same querystring, and therefore it is cached
+// this request is always called with the same querystring, and therefore it is cached
 m.jsonp({
-	url: "https://api.github.com/users/lhorie"
-	callbackName: "__callback"
+	url: "https://api.github.com/users/lhorie",
+	callbackName: "__callback",
 })
 .run(function(response) {
 	console.log(response.data.login) // logs "lhorie"
