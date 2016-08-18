@@ -264,7 +264,7 @@ var renderService = function($window) {
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
-			removeNode(parent, old, null, false)
+			removeNode(parent, old, null)
 			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
@@ -326,7 +326,7 @@ var renderService = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(parent, old.instance, null, false)
+			removeNode(parent, old.instance, null)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -386,39 +386,47 @@ var renderService = function($window) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				if (vnode.skip) vnode.skip = false
-				else removeNode(parent, vnode, context, false)
+				else removeNode(parent, vnode, context)
 			}
 		}
 	}
-	function removeNode(parent, vnode, context, deferred) {
-		if (deferred === false) {
-			var expected = 0, called = 0
-			var callback = function() {
-				if (++called === expected) removeNode(parent, vnode, context, true)
+	function once(f) {
+		var called = false
+		return function() {
+			if (!called) {
+				called = true
+				f()
 			}
-			if (vnode.attrs && vnode.attrs.onbeforeremove) {
-				expected++
-				vnode.attrs.onbeforeremove.call(vnode.state, vnode, callback)
-			}
-			if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-				expected++
-				vnode.tag.onbeforeremove.call(vnode.state, vnode, callback)
-			}
-			if (expected > 0) return
 		}
-		onremove(vnode)
-		if (vnode.dom) {
-			var count = vnode.domSize || 1
-			if (count > 1) {
-				var dom = vnode.dom
-				while (--count) {
-					parent.removeChild(dom.nextSibling)
+	}
+	function removeNode(parent, vnode, context) {
+		var expected = 1, called = 0
+		if (vnode.attrs && vnode.attrs.onbeforeremove) {
+			expected++
+			vnode.attrs.onbeforeremove.call(vnode.state, vnode, once(continuation))
+		}
+		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
+			expected++
+			vnode.tag.onbeforeremove.call(vnode.state, vnode, once(continuation))
+		}
+		continuation()
+		function continuation() {
+			if (++called === expected) {
+				onremove(vnode)
+				if (vnode.dom) {
+					var count = vnode.domSize || 1
+					if (count > 1) {
+						var dom = vnode.dom
+						while (--count) {
+							parent.removeChild(dom.nextSibling)
+						}
+					}
+					if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
+					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
+						if (!context.pool) context.pool = [vnode]
+						else context.pool.push(vnode)
+					}
 				}
-			}
-			if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
-			if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
-				if (!context.pool) context.pool = [vnode]
-				else context.pool.push(vnode)
 			}
 		}
 	}
