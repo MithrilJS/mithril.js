@@ -117,7 +117,7 @@ module.exports = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
+
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
@@ -510,13 +510,14 @@ module.exports = function($window) {
 	}
 
 	function assign(target, source) {
-		Object.keys(source).forEach(function(k){target[k] = source[k]})
+		if(source)
+			Object.keys(source).forEach(function(k){target[k] = source[k]})
 	}
 
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		
+
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 
