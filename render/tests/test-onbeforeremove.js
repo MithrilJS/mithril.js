@@ -188,4 +188,34 @@ o.spec("onbeforeremove", function() {
 		o(root.childNodes.length).equals(1)
 		o(root.firstChild.firstChild.nodeValue).equals("2")
 	})
+	o("finalizes the remove phase only once when `done()` is called synchronously from both attrs- and tag.onbeforeremove", function() {
+		var onremove = o.spy()
+		var component = {
+			view: function(){return {tag:'br'}},
+			onbeforeremove: function(vnode, done){done()},
+			onremove: onremove
+		}
+		render(root, [{tag: component, attrs: component}])
+		render(root, [])
+		o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
+	})
+	o("doesn't finalize prematurely if `done` is called twice in the `tag` hook", function(done) {
+		var async = false
+		var component = {
+			view: function(){return {tag:'br'}},
+			onbeforeremove: function(vnode, doneRemoving){
+				doneRemoving()
+				doneRemoving()
+			},
+			onremove: function(){
+				o(async).equals(true)("onremove should be called asynchronously")
+				done()
+			}
+		}
+		render(root, [{tag:component, attrs: {onbeforeremove: function(vnode, doneRemoving){
+			callAsync(doneRemoving)
+		}}}])
+		render(root, [])
+		async = true
+	})
 })
