@@ -36,7 +36,7 @@ o.spec("onbeforeremove", function() {
 	})
 	o("calls onbeforeremove when removing element", function(done) {
 		var vnode = {tag: "div", attrs: {
-			oninit: function(){vnode.state = {}},
+			oninit: function() {vnode.state = {}},
 			onbeforeremove: remove
 		}}
 
@@ -190,31 +190,37 @@ o.spec("onbeforeremove", function() {
 	})
 	o("finalizes the remove phase only once when `done()` is called synchronously from both attrs- and tag.onbeforeremove", function() {
 		var onremove = o.spy()
+		var onbeforeremove = function(vnode, done){done()}
 		var component = {
-			view: function(){return {tag:'br'}},
-			onbeforeremove: function(vnode, done){done()},
-			onremove: onremove
+			onbeforeremove: onbeforeremove,
+			onremove: onremove,
+			view: function() {},
 		}
-		render(root, [{tag: component, attrs: component}])
+		render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
 		render(root, [])
 		o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
 	})
 	o("doesn't finalize prematurely if `done` is called twice in the `tag` hook", function(done) {
 		var async = false
 		var component = {
-			view: function(){return {tag:'br'}},
+			view: function() {},
 			onbeforeremove: function(vnode, doneRemoving){
 				doneRemoving()
 				doneRemoving()
 			},
-			onremove: function(){
-				o(async).equals(true)("onremove should be called asynchronously")
+			onremove: function() {
+				o(async).equals(true)
 				done()
-			}
+			},
 		}
-		render(root, [{tag:component, attrs: {onbeforeremove: function(vnode, doneRemoving){
-			callAsync(doneRemoving)
-		}}}])
+		render(root, [{
+			tag:component,
+			attrs: {
+				onbeforeremove: function(vnode, doneRemoving){
+					callAsync(doneRemoving)
+				}
+			}
+		}])
 		render(root, [])
 		async = true
 	})
