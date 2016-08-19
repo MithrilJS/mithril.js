@@ -6,9 +6,8 @@
 	- [route.get](#route-get)
 	- [route.prefix](#route-prefix)
 	- [route.link](#route-link)
-- [RouteResolver](#routeresolver)
-	- [routeResolver.onmatch](#routeresolver-onmatch)
-	- [routeResolver.view](#routeresolver-view)
+- [Route components](#route-components)
+	- [Component.onmatch](#componentonmatch)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
@@ -25,12 +24,12 @@
 
 `m.route(root, defaultRoute, routes)`
 
-Argument               | Type                                     | Required | Description
----------------------- | ---------------------------------------- | -------- | ---
-`root`                 | `Element`                                | Yes      | A DOM element that will be the parent node to the subtree
-`defaultRoute`         | `String`                                 | Yes      | The route to redirect to if the current URL does not match a route
-`routes`               | `Object<String,Component|RouteResolver>` | Yes      | An object whose keys are route strings and values are either components or a [RouteResolver](advanced-component-resolution.md)
-**returns**            |                                          |          | Returns `undefined`
+Argument               | Type                       | Required | Description
+---------------------- | -------------------------- | -------- | ---
+`root`                 | `Element`                  | Yes      | A DOM element that will be the parent node to the subtree
+`defaultRoute`         | `String`                   | Yes      | The route to redirect to if the current URL does not match a route
+`routes`               | `Object<String,Component>` | Yes      | An object whose keys are route strings and values are [route components](advanced-component-resolution.md)
+**returns**            |                            |          | Returns `undefined`
 
 [How to read signatures](signatures.md)
 
@@ -80,42 +79,26 @@ Argument          | Type        | Required | Description
 `vnode`           | `Vnode`     | Yes      | This method is meant to be used in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` hook](lifecycle-methods.md)
 **returns**       | Function(e) |          | Returns an event handler that calls `m.route.set` with the link's `href` as the `path`
 
-#### RouteResolver
+#### Route components
 
-A RouterResolver is an object that contains an `onmatch` method, and optionally a `view` method.
+Since routes represent user actions and logic may need to be performed before the view can be resolved, route components can additionally, or exclusively, contain an `onmatch` method.
 
-`routeResolver = {onmatch, view}`
+##### component.onmatch
 
-##### routeResolver.onmatch
+The `onmatch` hook is called when the corresponding route is matched, before the lifecycle is engaged. It is called once when a router path changes, but not on subsequent redraws. It can be used to run logic before a component initializes (eg example authentication logic), and optionally redirect.
 
-The `onmatch` hook is called when the router needs to find a component to render. It is called once when a router path changes, but not on subsequent redraws. It can be used to run logic before a component initializes (for example authentication logic)
+This method also allows you to asynchronously assign properties to `attrs` to inform view logic, making it suitable for code splitting and asynchronous module loading.
 
-This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading.
+`component.onmatch(vnode, resolve)`
 
-`routeResolver.onmatch(vnode, resolve)`
-
-Argument            | Type                  | Description
-------------------- | --------------------- | ---
-`vnode`             | `Vnode`               | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`              | The [routing parameters](#routing-parameters)
-`vnode.attrs.path`  | `String`              | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`              | The matched route
-`resolve`           | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
-**returns**         |                       | Returns `undefined`
-
-##### routeResolver.view
-
-The `view` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
-
-`vnode = routeResolve.view(vnode)`
-
-Argument            | Type            | Description
-------------------- | --------------- | ----------- 
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
-`vnode.attrs.path`  | `String`        | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`        | The matched route
-**returns**         | `Vnode`         | Returns a vnode
+Argument            | Type         | Description
+------------------- | ------------ | ---
+`vnode`             | `Vnode`      | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the component does not have an `view` method, the vnode's `tag` field defaults to a `div`
+`vnode.attrs`       | `Object`     | The [routing parameters](#routing-parameters)
+`vnode.attrs.path`  | `String`     | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
+`vnode.attrs.route` | `String`     | The matched route
+`resolve`           | `Function()` | Call this function to proceed with component initialisation
+**returns**         |              | Returns `undefined`
 
 ---
 
@@ -287,28 +270,31 @@ m.route(document.body, "/", {
 
 ### Advanced component resolution
 
-Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `view()` method.
+A routed component can contain an `onmatch` method to suspend immediate resolution and perform arbitrary routing logic. The `view` is called when the `onmatch` function's `resolve` argument is called.
 
 ```javascript
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function(vnode, resolve) {
-			resolve(Home)
+			setTimeout(function(){
+				vnode.attrs.loaded = true
+				resolve()
+			}, 1000)
 		},
-		view: function(vnode) {
-			return vnode
+		view: function() {
+			return m( 'h1', 'Hi!' )
 		},
 	}
 })
 ```
 
-RouteResolvers are useful for implementing a variety of advanced routing use cases.
+This is useful for implementing a variety of advanced routing use cases.
 
 ---
 
 ### Authentication
 
-The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
@@ -329,15 +315,16 @@ var Login = {
 m.route(document.body, "/secret", {
 	"/secret": {
 		onmatch: function(vnode, resolve) {
-			if (isLoggedIn) resolve(Home)
+			if (isLoggedIn) m.route.set("/home")
 			else m.route.set("/login")
 		},
 	},
-	"/login": Login
+	"/login": Login,
+	"/home": Home
 })
 ```
 
-When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
+When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application redirects to the `Home` component.
 
 For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user.
 
@@ -377,9 +364,17 @@ function load(file, done) {
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function(vnode, resolve) {
-			load("Home.js", resolve)
+			load("Home.js", function(component){
+				vnode.attrs.component = component
+
+				resolve()
+			})
 		},
-	},
+
+		view: function(vnode){
+			return m(vnode.attrs.component)
+		}
+	}
 })
 ```
 
@@ -390,10 +385,12 @@ Fortunately, there are a number of tools that facilitate the task of bundling mo
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(use) {
+		onmatch: function(vnode, resolve) {
 			// using Webpack async code splitting
-			require(['./Home.js'], use)
+			require(['./Home.js'], function(component){
+				vnode.attrs.component = component
+			})
 		},
-	},
+	}
 })
 ```
