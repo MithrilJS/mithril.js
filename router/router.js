@@ -66,18 +66,21 @@ module.exports = function($window) {
 		else $window.location.href = prefix + path
 	}
 
-	function defineRoutes(routes, resolve, reject) {
+	function defineRoutes(routes, resolve, reject, onbeforeresolve) {
+		var path, params, route, payload
+
 		if (supportsPushState) $window.onpopstate = resolveRoute
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 		
 		function resolveRoute() {
-			var path = getPath()
-			var params = {}
+			path = getPath()
+			params = {}
 			var pathname = parsePath(path, params, params)
 			
 			callAsync(function() {
-				for (var route in routes) {
+				if (onbeforeresolve) onbeforeresolve()
+				for (route in routes) {
 					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
 					if (matcher.test(pathname)) {
@@ -87,7 +90,8 @@ module.exports = function($window) {
 							for (var i = 0; i < keys.length; i++) {
 								params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 							}
-							resolve(routes[route], params, path, route)
+							payload = routes[route]
+							finalizeResolution()
 						})
 						return
 					}
@@ -96,7 +100,12 @@ module.exports = function($window) {
 				reject(path, params)
 			})
 		}
-		return resolveRoute
+
+		function finalizeResolution() {
+			resolve(payload, params, path, route)
+		}
+
+		return finalizeResolution
 	}
 
 	function link(vnode) {
