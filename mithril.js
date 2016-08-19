@@ -72,6 +72,12 @@ function hyperscript(selector) {
 	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
 	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
+hyperscript.trust = function(html) {
+	return Vnode("<", undefined, undefined, html, undefined, undefined)
+}
+hyperscript.fragment = function(attrs, children) {
+	return Vnode("[", attrs.key, attrs, Vnode.normalizeChildren(children), undefined, undefined)
+}
 var m = hyperscript
 var renderService = function($window) {
 	var $doc = $window.document
@@ -1136,9 +1142,6 @@ m.mount = function(renderer, pubsub) {
 		run()
 	}
 }(renderService, redrawService)
-m.trust = function(html) {
-	return Vnode("<", undefined, undefined, html, undefined, undefined)
-}
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
