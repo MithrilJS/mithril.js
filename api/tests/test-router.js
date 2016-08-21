@@ -245,11 +245,11 @@ o.spec("route", function() {
 						"/:id" : {
 							onmatch: function(resolve, attrs, path, route) {
 								matchCount++
-								
+
 								o(attrs.id).equals("abc")
 								o(path).equals("/abc")
 								o(route).equals("/:id")
-								
+
 								resolve(Component)
 							},
 							render: function(vnode) {
@@ -270,7 +270,7 @@ o.spec("route", function() {
 						done()
 					}, FRAME_BUDGET)
 				})
-				
+
 				o("accepts RouteResolver without `render` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {
@@ -284,11 +284,11 @@ o.spec("route", function() {
 						"/:id" : {
 							onmatch: function(resolve, attrs, path, route) {
 								matchCount++
-								
+
 								o(attrs.id).equals("abc")
 								o(path).equals("/abc")
 								o(route).equals("/:id")
-								
+
 								resolve(Component)
 							},
 						},
@@ -334,11 +334,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("object without `onmatch` method acts as component", function(done) {
-=======
-				
 				o("RouteResolver without `onmatch` hook calls `render` appropriately", function(done) {
->>>>>>> Adapt router tests
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -402,6 +398,44 @@ o.spec("route", function() {
 							done()
 						}, FRAME_BUDGET)
 					})
+				})
+				o("route.set(route.get()) triggers `onmatch()`", function(done){
+					var matchCount = 0
+					var renderCount = 0
+					var Component = {
+						view: function() {
+							return m("div")
+						}
+					}
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							onmatch: function(resolve, attrs, path, route) {
+								matchCount++
+								resolve(Component)
+							},
+							render: function(vnode) {
+								renderCount++
+								return vnode
+							},
+						},
+					})
+
+					callAsync(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+
+						route.set(route.get())
+
+						setTimeout(function() {
+							o(matchCount).equals(2)
+							o(renderCount).equals(2)
+
+							done()
+						}, FRAME_BUDGET)
+					})
+
 				})
 			})
 		})
