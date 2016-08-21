@@ -243,16 +243,16 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve, attrs, path, route) {
 								matchCount++
-
-								o(vnode.attrs.id).equals("abc")
-								o(vnode.attrs.path).equals("/abc")
-								o(vnode.attrs.route).equals("/:id")
-
+								
+								o(attrs.id).equals("abc")
+								o(path).equals("/abc")
+								o(route).equals("/:id")
+								
 								resolve(Component)
 							},
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 
 								o(vnode.attrs.id).equals("abc")
@@ -270,8 +270,8 @@ o.spec("route", function() {
 						done()
 					}, FRAME_BUDGET)
 				})
-
-				o("accepts RouteResolver without `view` method as payload", function(done) {
+				
+				o("accepts RouteResolver without `render` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {
 						view: function() {
@@ -282,13 +282,13 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve, attrs, path, route) {
 								matchCount++
-
-								o(vnode.attrs.id).equals("abc")
-								o(vnode.attrs.path).equals("/abc")
-								o(vnode.attrs.route).equals("/:id")
-
+								
+								o(attrs.id).equals("abc")
+								o(path).equals("/abc")
+								o(route).equals("/:id")
+								
 								resolve(Component)
 							},
 						},
@@ -316,7 +316,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve) {
 								resolve(Component)
 								resolve(Component)
 							}
@@ -335,6 +335,10 @@ o.spec("route", function() {
 				})
 
 				o("object without `onmatch` method acts as component", function(done) {
+=======
+				
+				o("RouteResolver without `onmatch` hook calls `render` appropriately", function(done) {
+>>>>>>> Adapt router tests
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -345,7 +349,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 
 								o(vnode.attrs.id).equals("abc")
@@ -362,7 +366,7 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
-				o("calls onmatch and view correct number of times", function(done) {
+				o("calls `onmatch` and `render` correct number of times", function(done) {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
@@ -374,11 +378,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve, attrs, path, route) {
 								matchCount++
 								resolve(Component)
 							},
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 								return vnode
 							},
