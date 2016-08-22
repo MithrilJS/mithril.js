@@ -45,7 +45,7 @@ o.spec("route", function() {
 
 					callAsync(function() {
 						o(root.firstChild.nodeName).equals("DIV")
-						
+
 						done()
 					})
 				})
@@ -62,11 +62,11 @@ o.spec("route", function() {
 
 					setTimeout(function() {
 						o(root.firstChild.nodeName).equals("DIV")
-						
+
 						$window.history.back()
-						
+
 						o($window.location.pathname).equals("/")
-						
+
 						done()
 					}, FRAME_BUDGET)
 				})
@@ -84,7 +84,7 @@ o.spec("route", function() {
 
 					function init(vnode) {
 						o(vnode.attrs.foo).equals(undefined)
-						
+
 						done()
 					}
 				})
@@ -226,11 +226,11 @@ o.spec("route", function() {
 						root.firstChild.dispatchEvent(e)
 
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
-						
+
 						done()
 					})
 				})
-				
+
 				o("accepts RouteResolver", function(done) {
 					var matchCount = 0
 					var renderCount = 0
@@ -239,38 +239,64 @@ o.spec("route", function() {
 							return m("div")
 						}
 					}
-					
+
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
 							onmatch: function(vnode, resolve) {
 								matchCount++
-								
+
 								o(vnode.attrs.id).equals("abc")
 								o(vnode.attrs.path).equals("/abc")
 								o(vnode.attrs.route).equals("/:id")
-								
+
 								resolve(Component)
 							},
 							view: function(vnode) {
 								renderCount++
-								
+
 								o(vnode.attrs.id).equals("abc")
-								
+
 								return vnode
 							},
 						},
 					})
-					
+
 					setTimeout(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-						
+
 						done()
 					}, FRAME_BUDGET)
 				})
-				
+
+				o("onmatch can redirect to another route", function(done) {
+					var redirected = false
+
+					$window.location.href = prefix + "/"
+					route(root, "/a", {
+						"/a" : {
+							onmatch: function() {
+								route.set("/b")
+							}
+						},
+						"/b" : {
+							view: function(vnode){
+								redirected = true
+
+								return vnode
+							}
+						}
+					})
+
+					callAsync(function() {
+						o(redirected).equals(true)
+
+						done()
+					})
+				})
+
 				o("accepts RouteResolver without `view` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {
@@ -278,31 +304,31 @@ o.spec("route", function() {
 							return m("div")
 						}
 					}
-					
+
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
 							onmatch: function(vnode, resolve) {
 								matchCount++
-								
+
 								o(vnode.attrs.id).equals("abc")
 								o(vnode.attrs.path).equals("/abc")
 								o(vnode.attrs.route).equals("/:id")
-								
+
 								resolve(Component)
 							},
 						},
 					})
-					
+
 					setTimeout(function() {
 						o(matchCount).equals(1)
-						
+
 						o(root.firstChild.nodeName).equals("DIV")
-						
+
 						done()
 					}, FRAME_BUDGET)
 				})
-				
+
 				o("object without `onmatch` method acts as component", function(done) {
 					var renderCount = 0
 					var Component = {
@@ -310,23 +336,23 @@ o.spec("route", function() {
 							return m("div")
 						}
 					}
-					
+
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
 							view: function(vnode) {
 								renderCount++
-								
+
 								o(vnode.attrs.id).equals("abc")
-								
+
 								return m(Component)
 							},
 						},
 					})
-					
+
 					setTimeout(function() {
 						o(root.firstChild.nodeName).equals("DIV")
-						
+
 						done()
 					}, FRAME_BUDGET)
 				})
@@ -339,7 +365,7 @@ o.spec("route", function() {
 							return m("div")
 						}
 					}
-					
+
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
@@ -357,13 +383,13 @@ o.spec("route", function() {
 					callAsync(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
-						
+
 						redraw.publish()
 
 						setTimeout(function() {
 							o(matchCount).equals(1)
 							o(renderCount).equals(2)
-							
+
 							done()
 						}, FRAME_BUDGET)
 					})
