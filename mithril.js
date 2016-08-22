@@ -166,6 +166,8 @@ var renderService = function($window) {
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
+			if(vnode.instance === vnode)
+				throw Error("A component view mustn't return the vnode that was supplied to it.")
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
@@ -184,7 +186,6 @@ var renderService = function($window) {
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-			
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
@@ -575,7 +576,6 @@ var renderService = function($window) {
 	function render(dom, vnodes) {
 		var hooks = []
 		var active = $doc.activeElement
-		
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
