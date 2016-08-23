@@ -924,7 +924,6 @@ var redrawService = function() {
     }
 	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
 }()
-requestService.setCompletionCallback(redrawService.publish)
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -962,6 +961,7 @@ var parseQueryString = function(string) {
 	}
 	return data
 }
+requestService.setCompletionCallback(redrawService.publish)
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
@@ -1149,6 +1149,8 @@ m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.request
 m.jsonp = requestService.jsonp
+m.parseQueryString = parseQueryString
+m.buildQueryString = buildQueryString
 m.version = "1.0.0"
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
