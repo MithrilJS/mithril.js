@@ -254,6 +254,22 @@ o.spec("component", function() {
 
 			o(root.childNodes.length).equals(0)
 		})
+		o("throws a custom error if it returns itself", function() {
+			// A view that returns its vnode would otherwise trigger an infinite loop
+			var component = {
+				view: function(vnode) {
+					return vnode
+				}
+			}
+			try {
+				render(root, [{tag: component}])
+			}
+			catch(error){
+				o(error instanceof Error).equals(true)
+				// Call stack excession is a RangeError
+				o(error instanceof RangeError).equals(false)
+			}
+		})
 		o("can update when returning fragments", function() {
 			var component = {
 				view: function(vnode) {
