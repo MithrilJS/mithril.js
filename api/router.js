@@ -12,9 +12,13 @@ module.exports = function($window, renderer, pubsub) {
 			args.path = path, args.route = route
 			if (typeof payload.onmatch === "function") {
 				if (typeof payload.view !== "function") payload.view = function(vnode) {return vnode}
+				var resolved = false
 				var resolve = function(component) {
-					current.path = path, current.component = component
-					renderer.render(root, payload.view(Vnode(component, null, args, undefined, undefined, undefined)))
+					if (!resolved){
+						current.path = path, current.component = component
+						renderer.render(root, payload.view(Vnode(component, null, args, undefined, undefined, undefined)))
+						resolved = true
+					}
 				}
 				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
 				else resolve(current.component)
@@ -31,6 +35,6 @@ module.exports = function($window, renderer, pubsub) {
 	route.prefix = router.setPrefix
 	route.set = router.setPath
 	route.get = router.getPath
-	
+
 	return route
 }
