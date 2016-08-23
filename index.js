@@ -7,8 +7,6 @@ var redrawService = require("./redraw")
 var parseQueryString = require("./querystring/parse")
 var buildQueryString = require("./querystring/build")
 
-requestService.setCompletionCallback(redrawService.publish)
-
 m.route = require("./route")
 m.mount = require("./mount")
 m.withAttr = require("./util/withAttr")
