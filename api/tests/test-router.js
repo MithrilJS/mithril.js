@@ -2,8 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
-var pushStateMock = require("../../test-utils/pushStateMock")
-var domMock = require("../../test-utils/domMock")
+var browserMock = require("../../test-utils/browserMock")
 
 var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
@@ -18,13 +17,7 @@ o.spec("route", function() {
 				var $window, root, redraw, route
 
 				o.beforeEach(function() {
-					$window = {}
-
-					var dom = domMock()
-					for (var key in dom) $window[key] = dom[key]
-
-					var loc = pushStateMock(env)
-					for (var key in loc) $window[key] = loc[key]
+					$window = browserMock(env)
 
 					root = $window.document.body
 

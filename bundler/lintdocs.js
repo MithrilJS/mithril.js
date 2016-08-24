@@ -88,15 +88,7 @@ function traverseDirectory(pathname, callback) {
 }
 
 //init mocks
-var domMock = require("../test-utils/domMock")()
-var xhrMock = require("../test-utils/xhrMock")()
-var pushStateMock = require("../test-utils/pushStateMock")()
-
-global.window = {}
-for (var key in domMock) if (!window[key]) window[key] = domMock[key]
-for (var key in xhrMock) if (!window[key]) window[key] = xhrMock[key]
-for (var key in pushStateMock) if (!window[key]) window[key] = pushStateMock[key]
-
+global.window = require("../test-utils/browserMock")()
 global.document = window.document
 global.m = require("../index")
 
