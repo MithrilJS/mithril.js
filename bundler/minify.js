@@ -13,7 +13,7 @@ module.exports = function(input, output, options) {
 		var data = {
 			output_format: "json",
 			output_info: ["compiled_code", "warnings", "errors", "statistics"],
-			compilation_level: "SIMPLE_OPTIMIZATIONS",//ADVANDED_OPTIMIZATIONS
+			compilation_level: "SIMPLE_OPTIMIZATIONS",//"ADVANCED_OPTIMIZATIONS",
 			warning_level: "default",
 			output_file_name: "default.js",
 			js_code: code,
