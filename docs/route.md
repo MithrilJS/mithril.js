@@ -386,7 +386,7 @@ m.route(document.body, "/", {
 
 However, realistically, in order for that to work on a production scale, it would be necessary to bundle all of the dependencies for the `Home.js` module into the file that is ultimately served by the server.
 
-Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using webpack's code splitting system:
+Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [webpack's code splitting system](https://webpack.github.io/docs/code-splitting.html):
 
 ```javascript
 m.route(document.body, "/", {
