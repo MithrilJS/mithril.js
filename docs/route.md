@@ -391,9 +391,9 @@ Fortunately, there are a number of tools that facilitate the task of bundling mo
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(use) {
+		onmatch: function(vnode, resolve) {
 			// using Webpack async code splitting
-			require(['./Home.js'], use)
+			require(['./Home.js'], resolve)
 		},
 	},
 })
