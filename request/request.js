@@ -3,8 +3,7 @@
 var buildQueryString = require("../querystring/build")
 var StreamFactory = require("../util/stream")
 
-module.exports = function($window, log) {
-	var Stream = StreamFactory(log)
+module.exports = function($window, Stream) {
 	var callbackCount = 0
 
 	var oncompletion

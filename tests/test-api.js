@@ -188,6 +188,9 @@ o.spec("api", function() {
 		o("works", function() {
 			o(typeof m.request).equals("function") // TODO improve
 		})
+		o("return value is stream", function() {
+			o(m.request({method: "GET", url: "[invalid]"}).constructor).equals(m.prop().constructor)
+		})
 	})
 	o.spec("m.jsonp", function() {
 		o("works", function() {

@@ -1,1 +1,2 @@
-module.exports = require("./request/request")(window, console.error.bind(console))
+var Stream = require("./stream")
+module.exports = require("./request/request")(window, Stream)

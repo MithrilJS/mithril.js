@@ -3,6 +3,7 @@
 var o = require("../../ospec/ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
+var StreamFactory = require("../../util/stream")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
@@ -10,7 +11,7 @@ o.spec("jsonp", function() {
 	o.beforeEach(function() {
 		mock = xhrMock()
 		spy = o.spy()
-		jsonp = new Request(mock, spy).jsonp
+		jsonp = new Request(mock, StreamFactory(spy)).jsonp
 	})
 
 	o("works", function(done) {

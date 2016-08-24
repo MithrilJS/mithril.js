@@ -585,27 +585,6 @@ var renderService = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }(window)
-var buildQueryString = function(object) {
-	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
-	var args = []
-	for (var key in object) {
-		destructure(key, object[key])
-	}
-	return args.join("&")
-	function destructure(key, value) {
-		if (value instanceof Array) {
-			for (var i = 0; i < value.length; i++) {
-				destructure(key + "[" + i + "]", value[i])
-			}
-		}
-		else if (Object.prototype.toString.call(value) === "[object Object]") {
-			for (var i in value) {
-				destructure(key + "[" + i + "]", value[i])
-			}
-		}
-		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
-	}
-}
 var StreamFactory = function(log) {
 	var guid = 0, noop = function() {}, HALT = {}
 	function createStream() {
@@ -794,14 +773,35 @@ var StreamFactory = function(log) {
 	createStream.HALT = HALT
 	return createStream
 }
-var requestService = function($window, log) {
-	var Stream = StreamFactory(log)
+var Stream = StreamFactory(console.log.bind(console))
+var buildQueryString = function(object) {
+	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
+	var args = []
+	for (var key in object) {
+		destructure(key, object[key])
+	}
+	return args.join("&")
+	function destructure(key, value) {
+		if (value instanceof Array) {
+			for (var i = 0; i < value.length; i++) {
+				destructure(key + "[" + i + "]", value[i])
+			}
+		}
+		else if (Object.prototype.toString.call(value) === "[object Object]") {
+			for (var i in value) {
+				destructure(key + "[" + i + "]", value[i])
+			}
+		}
+		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
+	}
+}
+var requestService = function($window, Stream1) {
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
 	
 	function request(args) {
-		var stream = Stream()
+		var stream = Stream1()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -852,7 +852,7 @@ var requestService = function($window, log) {
 		return stream
 	}
 	function jsonp(args) {
-		var stream = Stream()
+		var stream = Stream1()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
@@ -915,7 +915,7 @@ var requestService = function($window, log) {
 	}
 	
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
-}(window, console.error.bind(console))
+}(window, Stream)
 var redrawService = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
@@ -1150,7 +1150,7 @@ m.withAttr = function(attrName, callback, context) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.prop = StreamFactory(console.log.bind(console))
+m.prop = Stream
 m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.request

@@ -3,13 +3,14 @@
 var o = require("../../ospec/ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
+var StreamFactory = require("../../util/stream")
 
 o.spec("xhr", function() {
 	var mock, xhr, spy
 	o.beforeEach(function() {
 		mock = xhrMock()
 		spy = o.spy()
-		xhr = new Request(mock, spy).request
+		xhr = new Request(mock, StreamFactory(spy)).request
 	})
 
 	o.spec("success", function() {
