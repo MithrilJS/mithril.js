@@ -264,10 +264,10 @@ o.spec("component", function() {
 			try {
 				render(root, [{tag: component}])
 			}
-			catch(error){
-				o(error instanceof Error).equals(true)
-				// Call stack excession is a RangeError
-				o(error instanceof RangeError).equals(false)
+			catch (e) {
+				o(e instanceof Error).equals(true)
+				// Call stack exception is a RangeError
+				o(e instanceof RangeError).equals(false)
 			}
 		})
 		o("can update when returning fragments", function() {

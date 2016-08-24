@@ -98,8 +98,7 @@ module.exports = function($window) {
 		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		if (vnode.instance != null) {
-			if(vnode.instance === vnode)
-				throw Error("A component view mustn't return the vnode that was supplied to it.")
+			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(vnode.instance, hooks, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0

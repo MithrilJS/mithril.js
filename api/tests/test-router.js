@@ -252,7 +252,7 @@ o.spec("route", function() {
 								
 								resolve(Component)
 							},
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 								
 								o(vnode.attrs.id).equals("abc")
@@ -271,7 +271,7 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 				
-				o("accepts RouteResolver without `view` method as payload", function(done) {
+				o("accepts RouteResolver without `render` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {
 						view: function() {
@@ -303,7 +303,7 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 				
-				o("object without `onmatch` method acts as component", function(done) {
+				o("accepts RouteResolver without `onmatch` method as payload", function(done) {
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -314,7 +314,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 								
 								o(vnode.attrs.id).equals("abc")
@@ -328,6 +328,44 @@ o.spec("route", function() {
 						o(root.firstChild.nodeName).equals("DIV")
 						
 						done()
+					}, FRAME_BUDGET)
+				})
+				
+				o("RouteResolver `render` does not have component semantics", function(done, timeout) {
+					timeout(60)
+					
+					var renderCount = 0
+					var A = {
+						view: function() {
+							return m("div")
+						}
+					}
+					
+					$window.location.href = prefix + "/"
+					route(root, "/a", {
+						"/a" : {
+							render: function(vnode) {
+								return m("div")
+							},
+						},
+						"/b" : {
+							render: function(vnode) {
+								return m("div")
+							},
+						},
+					})
+					
+					setTimeout(function() {
+						var dom = root.firstChild
+						o(root.firstChild.nodeName).equals("DIV")
+						
+						route.set("/b")
+						
+						setTimeout(function() {
+							o(root.firstChild).equals(dom)
+							
+							done()
+						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 				})
 
@@ -347,7 +385,7 @@ o.spec("route", function() {
 								matchCount++
 								resolve(Component)
 							},
-							view: function(vnode) {
+							render: function(vnode) {
 								renderCount++
 								return vnode
 							},
@@ -367,6 +405,83 @@ o.spec("route", function() {
 							done()
 						}, FRAME_BUDGET)
 					})
+				})
+				
+				o("onmatch can redirect to another route", function(done) {
+                    var redirected = false
+
+                    $window.location.href = prefix + "/"
+                    route(root, "/a", {
+                        "/a" : {
+                            onmatch: function() {
+                                route.set("/b")
+                            }
+                        },
+                        "/b" : {
+                            view: function(vnode){
+                                redirected = true
+                            }
+                        }
+                    })
+
+                    setTimeout(function() {
+                        o(redirected).equals(true)
+
+                        done()
+                    }, FRAME_BUDGET)
+                })
+				
+				o("onmatch can redirect to another route that has RouteResolver", function(done) {
+                    var redirected = false
+
+                    $window.location.href = prefix + "/"
+                    route(root, "/a", {
+                        "/a" : {
+                            onmatch: function() {
+                                route.set("/b")
+                            }
+                        },
+                        "/b" : {
+                            render: function(vnode){
+                                redirected = true
+                            }
+                        }
+                    })
+
+                    setTimeout(function() {
+                        o(redirected).equals(true)
+
+                        done()
+                    }, FRAME_BUDGET)
+                })
+				
+				o("onmatch resolution callback resolves at most once", function(done) {
+					var resolveCount = 0
+					var resolvedComponent
+					var A = {view: function() {}}
+					var B = {view: function() {}}
+					var C = {view: function() {}}
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							onmatch: function(vnode, resolve) {
+								resolve(A)
+								resolve(B)
+								callAsync(function() {resolve(C)})
+							},
+							render: function(vnode) {
+								resolveCount++
+								resolvedComponent = vnode.tag
+							}
+						},
+					})
+					setTimeout(function() {
+						o(resolveCount).equals(1)
+						o(resolvedComponent).equals(A)
+
+						done()
+					}, FRAME_BUDGET)
 				})
 			})
 		})

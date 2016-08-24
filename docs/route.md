@@ -8,14 +8,14 @@
 	- [route.link](#route-link)
 - [RouteResolver](#routeresolver)
 	- [routeResolver.onmatch](#routeresolver-onmatch)
-	- [routeResolver.view](#routeresolver-view)
+	- [routeResolver.render](#routeresolver-render)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
 - [Routing parameters](#routing-parameters)
 - [Changing router prefix](#changing-router-prefix)
-- [Wrapping a layout component](#wrapping-a-layout-component)
 - [Advanced component resolution](#advanced-component-resolution)
+- [Wrapping a layout component](#wrapping-a-layout-component)
 - [Authentication](#authentication)
 - [Code splitting](#code-splitting)
 
@@ -82,9 +82,9 @@ Argument          | Type        | Required | Description
 
 #### RouteResolver
 
-A RouterResolver is an object that contains an `onmatch` method, and optionally a `view` method.
+A RouterResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present.
 
-`routeResolver = {onmatch, view}`
+`routeResolver = {onmatch, render}`
 
 ##### routeResolver.onmatch
 
@@ -103,11 +103,11 @@ Argument            | Type                  | Description
 `resolve`           | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
 **returns**         |                       | Returns `undefined`
 
-##### routeResolver.view
+##### routeResolver.render
 
-The `view` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
+The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
 
-`vnode = routeResolve.view(vnode)`
+`vnode = routeResolve.render(vnode)`
 
 Argument            | Type            | Description
 ------------------- | --------------- | ----------- 
@@ -205,7 +205,6 @@ You can also navigate programmatically, via `m.route.set(route)`. For example, `
 
 When navigating to routes, there's no need to explicitly specify the router prefix. In other words, don't add the hashbang `#!` in front of the route path when linking via `m.route.link` or redirecting.
 
-
 ---
 
 ### Routing parameters
@@ -229,6 +228,8 @@ m.route(document.body, "/edit/1", {
 In the example above, we defined a route `/edit/:id`. This creates a dynamic route that matches any URL that starts with `/edit/` and is followed by some data (e.g. `/edit/1`, `edit/234`, etc). The `id` value is then mapped as an attribute of the component's [vnode](vnodes.md) (`vnode.attrs.id`)
 
 It's possible to have multiple arguments in a route, for example `/edit/:projectID/:userID` would yield the properties `projectID` and `userID` on the component's vnode attributes object.
+
+In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched routed.
 
 #### Variadic routes
 
@@ -263,28 +264,6 @@ m.route.prefix("/my-app")
 
 ---
 
-### Wrapping a layout component
-
-You can use anonymous components to wrap a layout around a component, or to pass parameters to a top level component
-
-```javascript
-var Layout = {
-	view: function(vnode) {
-		return m(".layout", vnode.children)
-	}
-}
-
-m.route(document.body, "/", {
-	"/": {
-		view: function() {
-			return m(Layout, Home)
-		},
-	}
-})
-```
-
----
-
 ### Advanced component resolution
 
 Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `view()` method.
@@ -295,7 +274,7 @@ m.route(document.body, "/", {
 		onmatch: function(vnode, resolve) {
 			resolve(Home)
 		},
-		view: function(vnode) {
+		render: function(vnode) {
 			return vnode
 		},
 	}
@@ -303,6 +282,28 @@ m.route(document.body, "/", {
 ```
 
 RouteResolvers are useful for implementing a variety of advanced routing use cases.
+
+---
+
+### Wrapping a layout component
+
+You can use a RouteResolver to wrap a layout around a component, or to pass parameters to a top level component
+
+```javascript
+var Layout = {
+	view: function(vnode) {
+		return m(".layout", vnode.children)
+	}
+}
+
+m.route(document.body, "/", {
+	"/": {
+		render: function() {
+			return m(Layout, m(Home))
+		},
+	}
+})
+```
 
 ---
 

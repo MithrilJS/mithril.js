@@ -196,6 +196,24 @@ o.spec("stream", function() {
 			straggler(30)
 			o(all()).deepEquals([10, "20", 30])
 		})
+		o("calls run callback after all parents are active", function() {
+			var value = 0
+			var id = function(value) {return value}
+			var a = Stream()
+			var b = Stream()
+
+			var all = Stream.merge([a.run(id).catch(id), b.run(id).catch(id)]).run(function(data) {
+				value = data[0] + data[1]
+			})
+
+			a(1)
+			b(2)
+			o(value).equals(3)
+
+			a(3)
+			b(4)
+			o(value).equals(7)
+		})
 	})
 	o.spec("end", function() {
 		o("end stream works", function() {
