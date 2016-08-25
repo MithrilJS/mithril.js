@@ -266,7 +266,7 @@ m.route.prefix("/my-app")
 
 ### Advanced component resolution
 
-Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `view()` method.
+Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `render()` method.
 
 ```javascript
 m.route(document.body, "/", {
