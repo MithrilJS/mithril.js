@@ -14,7 +14,7 @@
 
 ### Usage
 
-[Components](components.md) and [virtual DOM nodes](vnodes.md) and can have lifecycle methods, also known as *hooks*, which are called at various points during the lifetime of a DOM element.
+[Components](components.md) and [virtual DOM nodes](vnodes.md) can have lifecycle methods, also known as *hooks*, which are called at various points during the lifetime of a DOM element.
 
 ```javascript
 // Sample hook in component
