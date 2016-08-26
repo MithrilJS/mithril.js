@@ -7,16 +7,15 @@ var autoredraw = require("../api/autoredraw")
 module.exports = function($window, renderer, pubsub) {
 	var router = coreRouter($window)
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: "div"}
+		var current = {path: null, component: "div", resolver: null}, currentResolutionIdentifier = null
 		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
-			var resolved = false
+			var resolutionIdentifier = currentResolutionIdentifier = {}
 			function resolve(component) {
-				if (resolved) return
-				resolved = true
+				if (resolutionIdentifier !== currentResolutionIdentifier) return
+				resolutionIdentifier = null
 				current.path = path, current.component = component
 				renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
 			}
-			args.path = path, args.route = route
 			if (typeof payload.view !== "function") {
 				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
 				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}

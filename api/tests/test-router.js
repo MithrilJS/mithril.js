@@ -240,8 +240,7 @@ o.spec("route", function() {
 								matchCount++
 								
 								o(vnode.attrs.id).equals("abc")
-								o(vnode.attrs.path).equals("/abc")
-								o(vnode.attrs.route).equals("/:id")
+								o(route.get()).equals("/abc")
 								
 								resolve(Component)
 							},
@@ -279,8 +278,7 @@ o.spec("route", function() {
 								matchCount++
 								
 								o(vnode.attrs.id).equals("abc")
-								o(vnode.attrs.path).equals("/abc")
-								o(vnode.attrs.route).equals("/:id")
+								o(route.get()).equals("/abc")
 								
 								resolve(Component)
 							},
@@ -457,7 +455,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": {
 							onmatch: function(vnode, resolve) {
 								resolve(A)
 								resolve(B)
@@ -474,6 +472,33 @@ o.spec("route", function() {
 						o(resolvedComponent).equals(A)
 
 						done()
+					}, FRAME_BUDGET)
+				})
+				
+				o("calling route.set invalidates pending onmatch resolution", function(done, timeout) {
+					timeout(100)
+					
+					var resolved
+					$window.location.href = prefix + "/"
+					route(root, "/a", {
+						"/a": {
+							onmatch: function(vnode, resolve) {
+								setTimeout(resolve, 20)
+							},
+							render: function(vnode) {resolved = "a"}
+						},
+						"/b": {
+							view: function() {resolved = "b"}
+						}
+					})
+					setTimeout(function() {
+						route.set("/b")
+						
+						setTimeout(function() {
+							o(resolved).equals("b")
+
+							done()
+						}, 30)
 					}, FRAME_BUDGET)
 				})
 			})
