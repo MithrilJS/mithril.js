@@ -49,6 +49,23 @@ o.spec("ospec", function() {
 			o(spy.args.length).equals(1)
 			o(spy.args[0]).equals(1)
 		})
+		o("spy wrapping", function() {
+			var spy = o.spy(function view(vnode){
+				this.drawn = true
+
+				return {tag: "div", children: vnode.children}
+			})
+			var children = [""]
+			var state = {}
+
+			var output = spy.call(state, {children: children})
+
+			o(spy.callCount).equals(1)
+			o(spy.args.length).equals(1)
+			o(spy.args[0]).deepEquals({children: children})
+			o(state).deepEquals({drawn: true})
+			o(output).deepEquals({tag: "div", children: children})
+		})
 	})
 	o.spec("async", function() {
 		var a = 0, b = 0
