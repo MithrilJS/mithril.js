@@ -25,8 +25,7 @@ module.exports = new function init() {
 			spy.args = [].slice.call(arguments)
 			spy.callCount++
 
-			if(fn)
-				return fn.apply(this, arguments)
+			if (fn) return fn.apply(this, arguments)
 		}
 		spy.args = []
 		spy.callCount = 0

@@ -4,7 +4,7 @@
 
 Noiseless testing framework
 
-Version: 1.0  
+Version: 1.1 
 License: MIT
 
 ## About
@@ -115,6 +115,29 @@ o.spec("call()", function() {
 		o(spy.args[0]).equals(1)
 	})
 })
+```
+
+A spy can also wrap other functions, like a decorator:
+
+```javascript
+//code to be tested
+var count = 0
+function inc() {
+	count++
+}
+
+//test suite
+var o = require("ospec")
+
+o.spec("call()", function() {
+	o("works", function() {
+		var spy = o.spy(inc)
+		spy()
+
+		o(count).equals(1)
+	})
+})
+
 ```
 
 ### Asynchronous tests
@@ -336,7 +359,7 @@ Declares that only a single test should be run, instead of all of them
 
 ---
 
-### Function o.spy()
+### Function o.spy([Function fn])
 
 Returns a function that records the number of times it gets called, and its arguments
 
