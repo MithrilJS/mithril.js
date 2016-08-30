@@ -19,11 +19,14 @@ module.exports = new function init() {
 		ctx = parent
 	}
 	o.only = function(subject, predicate) {o(subject, only = predicate)}
-	o.spy = function() {
+	o.spy = function(fn) {
 		var spy = function() {
 			spy.this = this
 			spy.args = [].slice.call(arguments)
 			spy.callCount++
+
+			if(fn)
+				return fn.apply(this, arguments)
 		}
 		spy.args = []
 		spy.callCount = 0
