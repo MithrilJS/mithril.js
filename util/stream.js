@@ -98,7 +98,7 @@ module.exports = function(log) {
 	function reportUncaughtError(stream, e) {
 		if (Object.keys(stream._state.deps).length === 0) {
 			setTimeout(function() {
-				if (Object.keys(stream._state.deps).length === 0) log(e)
+				if (Object.keys(stream._state.deps).length === 0) log(e.stack)
 			}, 0)
 		}
 	}

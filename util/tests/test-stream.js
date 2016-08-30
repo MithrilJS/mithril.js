@@ -852,11 +852,11 @@ o.spec("stream", function() {
 	})
 	o.spec("uncaught exception reporting", function() {
 		o("reports thrown errors", function(done) {
-			Stream(1).map(function() {throw new Error("error")})
+			Stream(1).map(function() {throw new Error("my message")})
 			
 			setTimeout(function() {
 				o(spy.callCount).equals(1)
-				o(spy.args[0].message).equals("error")
+				o( !! spy.args[0].split('\n')[0].match(/my message/) ).equals(true)
 				done()
 			}, 0)
 		})
