@@ -60,6 +60,8 @@ o.spec("ospec", function() {
 
 			var output = spy.call(state, {children: children})
 
+			o(spy.length).equals(1)
+			o(spy.name).equals('view')
 			o(spy.callCount).equals(1)
 			o(spy.args.length).equals(1)
 			o(spy.args[0]).deepEquals({children: children})
