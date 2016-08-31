@@ -1374,6 +1374,14 @@
 			return store
 		}
 
+		prop.toString = function(){
+			return store.toString();
+		}
+
+		prop.valueOf = function(){
+			return store.valueOf();
+		}
+
 		return prop
 	}
 
