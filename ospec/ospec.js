@@ -27,6 +27,11 @@ module.exports = new function init() {
 
 			if (fn) return fn.apply(this, arguments)
 		}
+		if (fn)
+			Object.defineProperties(spy, {
+				length: {value: fn.length},
+				name: {value: fn.name}
+			})
 		spy.args = []
 		spy.callCount = 0
 		return spy
