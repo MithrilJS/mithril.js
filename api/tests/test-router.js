@@ -475,6 +475,114 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
+				o("the previous view redraws while onmatch resolution is pending (#1268)", function(done, timeout) {
+					timeout(FRAME_BUDGET * 5)
+					var view = o.spy()
+					var onmatch = o.spy()
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/": {view: view},
+						"/2": {onmatch: onmatch}
+					})
+
+					setTimeout(function() {
+						o(view.callCount).equals(1)
+						o(onmatch.callCount).equals(0)
+
+						route.set("/2")
+
+						setTimeout(function(){
+							o(view.callCount).equals(1)
+							o(onmatch.callCount).equals(1)
+
+							redraw.publish()
+
+							setTimeout(function() {
+								o(view.callCount).equals(2)
+								o(onmatch.callCount).equals(1)
+
+								done()
+							}, FRAME_BUDGET)
+						}, FRAME_BUDGET)
+					}, FRAME_BUDGET)
+				})
+
+				o("routed mount points can redraw synchronoulsy (#1275)", function(done) {
+					var view = o.spy()
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {"/":{view:view}})
+
+					setTimeout(function() {
+						o(view.callCount).equals(1)
+
+						redraw.publish(true)
+
+						o(view.callCount).equals(2)
+
+						done()
+					}, FRAME_BUDGET)
+				})
+
+				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done, timeout){
+					timeout(FRAME_BUDGET * 3)
+
+					var onmatch = o.spy(function(vnode, resolve){resolve()})
+
+					$window.location.href = prefix + "/"
+					route(root, '/', {
+						"/":{
+							onmatch: onmatch,
+							render: function(){return m("div")}
+						}
+					})
+
+					setTimeout(function() {
+						o(onmatch.callCount).equals(1)
+
+						route.set(route.get())
+
+						setTimeout(function() {
+							o(onmatch.callCount).equals(2)
+
+							done()
+						}, FRAME_BUDGET)
+					}, FRAME_BUDGET)
+				})
+
+				o("routing with RouteResolver works more than once (#1286)", function(done, timeout){
+					timeout(FRAME_BUDGET * 4)
+
+					$window.location.href = prefix + "/a"
+					route(root, '/a', {
+						'/a': {
+							render: function() {
+								return m("a", "a")
+							}
+						},
+						'/b': {
+							render: function() {
+								return m("b", "b")
+							}
+						}
+					})
+
+					setTimeout(function(){
+						route.set('/b')
+
+						setTimeout(function(){
+							route.set('/a')
+
+							setTimeout(function(){
+								o(root.firstChild.nodeName).equals("A")
+
+								done()
+							}, FRAME_BUDGET)
+						}, FRAME_BUDGET)
+					}, FRAME_BUDGET)
+				})
+
 				o("calling route.set invalidates pending onmatch resolution", function(done, timeout) {
 					timeout(100)
 
