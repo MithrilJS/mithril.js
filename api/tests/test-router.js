@@ -238,11 +238,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve, args, requestedPath) {
 								matchCount++
 
-								o(vnode.attrs.id).equals("abc")
-								o(route.get()).equals("/abc")
+								o(args.id).equals("abc")
+								o(requestedPath).equals("/abc")
 
 								resolve(Component)
 							},
@@ -276,11 +276,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve, args, requestedPath) {
 								matchCount++
 
-								o(vnode.attrs.id).equals("abc")
-								o(route.get()).equals("/abc")
+								o(args.id).equals("abc")
+								o(requestedPath).equals("/abc")
 
 								resolve(Component)
 							},
@@ -374,7 +374,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve) {
 								matchCount++
 								resolve(Component)
 							},
@@ -458,7 +458,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/": {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve) {
 								resolve(A)
 								resolve(B)
 								callAsync(function() {resolve(C)})
@@ -530,7 +530,7 @@ o.spec("route", function() {
 				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done, timeout){
 					timeout(FRAME_BUDGET * 3)
 
-					var onmatch = o.spy(function(vnode, resolve){resolve()})
+					var onmatch = o.spy(function(resolve){resolve()})
 
 					$window.location.href = prefix + "/"
 					route(root, '/', {
@@ -612,7 +612,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/a", {
 						"/a": {
-							onmatch: function(vnode, resolve) {
+							onmatch: function(resolve) {
 								setTimeout(resolve, 20)
 							},
 							render: function(vnode) {resolved = "a"}

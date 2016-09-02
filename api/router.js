@@ -5,7 +5,7 @@ var coreRouter = require("../router/router")
 
 module.exports = function($window, mount) {
 	var router = coreRouter($window)
-	var globalId, currentComponent, currentRender, currentArgs
+	var globalId, currentComponent, currentRender, currentArgs, currentPath
 
 	var RouteComponent = {view: function() {
 		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
@@ -32,6 +32,7 @@ module.exports = function($window, mount) {
 				currentComponent = component != null ? component: isResolver ? "div" : payload
 				currentRender = render
 				currentArgs = args
+				currentPath = path
 
 				root.redraw(true)
 			}
@@ -42,8 +43,8 @@ module.exports = function($window, mount) {
 				if (typeof payload.render === "function") render = payload.render.bind(payload)
 				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
 			}
-
-			onmatch.call(payload, {attrs: args}, resolve)
+		
+			onmatch.call(payload, resolve, args, path)
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
@@ -51,7 +52,7 @@ module.exports = function($window, mount) {
 	route.link = router.link
 	route.prefix = router.setPrefix
 	route.set = router.setPath
-	route.get = router.getPath
+	route.get = function() {return currentPath}
 
 	return route
 }
