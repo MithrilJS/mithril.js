@@ -285,18 +285,14 @@ o.spec("Router.defineRoutes", function() {
 					})
 				})
 
-				o("replays", function(done) {
+				o("replays", function() {
 					$window.location.href = prefix + "/test"
 					var replay = router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
 					replay()
 
-					callAsync(function() {
-						o(onRouteChange.callCount).equals(2)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
-						o(onFail.callCount).equals(0)
-						
-						done()
-					})
+					o(onRouteChange.callCount).equals(2)
+					o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
+					o(onFail.callCount).equals(0)
 				})
 			})
 		})

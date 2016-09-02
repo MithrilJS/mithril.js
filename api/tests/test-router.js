@@ -28,7 +28,7 @@ o.spec("route", function() {
 					route.prefix(prefix)
 				})
 
-				o("renders into `root`", function(done) {
+				o("renders into `root`", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
@@ -38,11 +38,21 @@ o.spec("route", function() {
 						}
 					})
 
-					callAsync(function() {
-						o(root.firstChild.nodeName).equals("DIV")
+					o(root.firstChild.nodeName).equals("DIV")
+				})
 
-						done()
-					})
+				o("routed mount points can redraw synchronoulsy (#1275)", function() {
+					var view = o.spy()
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {"/":{view:view}})
+
+					o(view.callCount).equals(1)
+
+					redraw.publish(true)
+
+					o(view.callCount).equals(2)
+
 				})
 
 				o("default route doesn't break back button", function(done) {
@@ -84,7 +94,7 @@ o.spec("route", function() {
 					}
 				})
 
-				o("redraws when render function is executed", function(done) {
+				o("redraws when render function is executed", function() {
 					var onupdate = o.spy()
 					var oninit = o.spy()
 
@@ -100,18 +110,11 @@ o.spec("route", function() {
 						}
 					})
 
-					callAsync(function() {
-						o(oninit.callCount).equals(1)
+					o(oninit.callCount).equals(1)
 
-						redraw.publish()
+					redraw.publish(true)
 
-						// Wrapped to give time for the rate-limited redraw to fire
-						setTimeout(function() {
-							o(onupdate.callCount).equals(1)
-
-							done()
-						}, FRAME_BUDGET)
-					})
+					o(onupdate.callCount).equals(1)
 				})
 
 				o("redraws on events", function(done) {
@@ -135,23 +138,21 @@ o.spec("route", function() {
 						}
 					})
 
-					callAsync(function() {
-						root.firstChild.dispatchEvent(e)
+					root.firstChild.dispatchEvent(e)
 
-						o(oninit.callCount).equals(1)
+					o(oninit.callCount).equals(1)
 
-						o(onclick.callCount).equals(1)
-						o(onclick.this).equals(root.firstChild)
-						o(onclick.args[0].type).equals("click")
-						o(onclick.args[0].target).equals(root.firstChild)
+					o(onclick.callCount).equals(1)
+					o(onclick.this).equals(root.firstChild)
+					o(onclick.args[0].type).equals("click")
+					o(onclick.args[0].target).equals(root.firstChild)
 
-						// Wrapped to give time for the rate-limited redraw to fire
-						setTimeout(function() {
-							o(onupdate.callCount).equals(1)
+					// Wrapped to give time for the rate-limited redraw to fire
+					setTimeout(function() {
+						o(onupdate.callCount).equals(1)
 
-							done()
-						}, FRAME_BUDGET)
-					})
+						done()
+					}, FRAME_BUDGET * 2)
 				})
 
 				o("event handlers can skip redraw", function(done) {
@@ -177,21 +178,19 @@ o.spec("route", function() {
 						}
 					})
 
-					callAsync(function() {
-						root.firstChild.dispatchEvent(e)
+					root.firstChild.dispatchEvent(e)
 
-						o(oninit.callCount).equals(1)
+					o(oninit.callCount).equals(1)
 
-						// Wrapped to ensure no redraw fired
-						setTimeout(function() {
-							o(onupdate.callCount).equals(0)
+					// Wrapped to ensure no redraw fired
+					setTimeout(function() {
+						o(onupdate.callCount).equals(0)
 
-							done()
-						}, FRAME_BUDGET)
-					})
+						done()
+					}, FRAME_BUDGET)
 				})
 
-				o("changes location on route.link", function(done) {
+				o("changes location on route.link", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -213,20 +212,16 @@ o.spec("route", function() {
 						}
 					})
 
-					callAsync(function() {
-						var slash = prefix[0] === "/" ? "" : "/"
+					var slash = prefix[0] === "/" ? "" : "/"
 
-						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
 
-						root.firstChild.dispatchEvent(e)
+					root.firstChild.dispatchEvent(e)
 
-						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
-
-						done()
-					})
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
-				o("accepts RouteResolver", function(done) {
+				o("accepts RouteResolver", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
@@ -235,7 +230,7 @@ o.spec("route", function() {
 						}
 					}
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
 							onmatch: function(resolve, args, requestedPath) {
@@ -256,16 +251,12 @@ o.spec("route", function() {
 						},
 					})
 
-					setTimeout(function() {
-						o(matchCount).equals(1)
-						o(renderCount).equals(1)
-						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
+					o(matchCount).equals(1)
+					o(renderCount).equals(1)
+					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("accepts RouteResolver without `render` method as payload", function(done) {
+				o("accepts RouteResolver without `render` method as payload", function() {
 					var matchCount = 0
 					var Component = {
 						view: function() {
@@ -273,7 +264,7 @@ o.spec("route", function() {
 						}
 					}
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
 							onmatch: function(resolve, args, requestedPath) {
@@ -287,16 +278,12 @@ o.spec("route", function() {
 						},
 					})
 
-					setTimeout(function() {
-						o(matchCount).equals(1)
+					o(matchCount).equals(1)
 
-						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
+					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("accepts RouteResolver without `onmatch` method as payload", function(done) {
+				o("accepts RouteResolver without `onmatch` method as payload", function() {
 					var renderCount = 0
 					var Component = {
 						view: function() {
@@ -304,7 +291,7 @@ o.spec("route", function() {
 						}
 					}
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
 							render: function(vnode) {
@@ -317,16 +304,10 @@ o.spec("route", function() {
 						},
 					})
 
-					setTimeout(function() {
-						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
+					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("RouteResolver `render` does not have component semantics", function(done, timeout) {
-					timeout(60)
-
+				o("RouteResolver `render` does not have component semantics", function(done) {
 					var renderCount = 0
 					var A = {
 						view: function() {
@@ -334,7 +315,7 @@ o.spec("route", function() {
 						}
 					}
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							render: function(vnode) {
@@ -348,21 +329,19 @@ o.spec("route", function() {
 						},
 					})
 
+					var dom = root.firstChild
+					o(root.firstChild.nodeName).equals("DIV")
+
+					route.set("/b")
+
 					setTimeout(function() {
-						var dom = root.firstChild
-						o(root.firstChild.nodeName).equals("DIV")
+						o(root.firstChild).equals(dom)
 
-						route.set("/b")
-
-						setTimeout(function() {
-							o(root.firstChild).equals(dom)
-
-							done()
-						}, FRAME_BUDGET)
+						done()
 					}, FRAME_BUDGET)
 				})
 
-				o("calls onmatch and view correct number of times", function(done) {
+				o("calls onmatch and view correct number of times", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
@@ -385,25 +364,19 @@ o.spec("route", function() {
 						},
 					})
 
-					callAsync(function() {
-						o(matchCount).equals(1)
-						o(renderCount).equals(1)
+					o(matchCount).equals(1)
+					o(renderCount).equals(1)
 
-						redraw.publish()
+					redraw.publish(true)
 
-						setTimeout(function() {
-							o(matchCount).equals(1)
-							o(renderCount).equals(2)
-
-							done()
-						}, FRAME_BUDGET)
-					})
+					o(matchCount).equals(1)
+					o(renderCount).equals(2)
 				})
 
 				o("onmatch can redirect to another route", function(done) {
 					var redirected = false
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
@@ -427,7 +400,7 @@ o.spec("route", function() {
 				o("onmatch can redirect to another route that has RouteResolver", function(done) {
 					var redirected = false
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
@@ -477,59 +450,35 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
-				o("the previous view redraws while onmatch resolution is pending (#1268)", function(done, timeout) {
-					timeout(FRAME_BUDGET * 5)
+				o("the previous view redraws while onmatch resolution is pending (#1268)", function(done) {
 					var view = o.spy()
 					var onmatch = o.spy()
 
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/a"
 					route(root, "/", {
-						"/": {view: view},
-						"/2": {onmatch: onmatch}
+						"/a": {view: view},
+						"/b": {onmatch: onmatch}
 					})
 
-					setTimeout(function() {
+					o(view.callCount).equals(1)
+					o(onmatch.callCount).equals(0)
+
+					route.set("/b")
+
+					setTimeout(function(){
 						o(view.callCount).equals(1)
-						o(onmatch.callCount).equals(0)
-
-						route.set("/2")
-
-						setTimeout(function(){
-							o(view.callCount).equals(1)
-							o(onmatch.callCount).equals(1)
-
-							redraw.publish()
-
-							setTimeout(function() {
-								o(view.callCount).equals(2)
-								o(onmatch.callCount).equals(1)
-
-								done()
-							}, FRAME_BUDGET)
-						}, FRAME_BUDGET)
-					}, FRAME_BUDGET)
-				})
-
-				o("routed mount points can redraw synchronoulsy (#1275)", function(done) {
-					var view = o.spy()
-
-					$window.location.href = prefix + "/"
-					route(root, "/", {"/":{view:view}})
-
-					setTimeout(function() {
-						o(view.callCount).equals(1)
+						o(onmatch.callCount).equals(1)
 
 						redraw.publish(true)
 
 						o(view.callCount).equals(2)
+						o(onmatch.callCount).equals(1)
 
 						done()
 					}, FRAME_BUDGET)
 				})
 
-				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done, timeout){
-					timeout(FRAME_BUDGET * 3)
-
+				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
 					var onmatch = o.spy(function(resolve){resolve()})
 
 					$window.location.href = prefix + "/"
@@ -540,16 +489,14 @@ o.spec("route", function() {
 						}
 					})
 
+					o(onmatch.callCount).equals(1)
+
+					route.set(route.get())
+
 					setTimeout(function() {
-						o(onmatch.callCount).equals(1)
+						o(onmatch.callCount).equals(2)
 
-						route.set(route.get())
-
-						setTimeout(function() {
-							o(onmatch.callCount).equals(2)
-
-							done()
-						}, FRAME_BUDGET)
+						done()
 					}, FRAME_BUDGET)
 				})
 
@@ -562,19 +509,18 @@ o.spec("route", function() {
 					})
 
 
-					setTimeout(function() {
-						o(route.get()).equals("/")
-						
-						route.set("/2")
-						
-						o(route.get()).equals("/")
+					o(route.get()).equals("/")
+					
+					route.set("/2")
 
-						done()
+					setTimeout(function(){
+						o(route.get()).equals("/")
+						done()					
 					}, FRAME_BUDGET)
 				})
 
 				o("routing with RouteResolver works more than once (#1286)", function(done, timeout){
-					timeout(FRAME_BUDGET * 4)
+					timeout(FRAME_BUDGET * 3)
 
 					$window.location.href = prefix + "/a"
 					route(root, '/a', {
@@ -590,26 +536,24 @@ o.spec("route", function() {
 						}
 					})
 
+					route.set('/b')
+
 					setTimeout(function(){
-						route.set('/b')
+						route.set('/a')
 
 						setTimeout(function(){
-							route.set('/a')
+							o(root.firstChild.nodeName).equals("A")
 
-							setTimeout(function(){
-								o(root.firstChild.nodeName).equals("A")
-
-								done()
-							}, FRAME_BUDGET)
+							done()
 						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 				})
 
 				o("calling route.set invalidates pending onmatch resolution", function(done, timeout) {
-					timeout(100)
+					timeout(50)
 
 					var resolved
-					$window.location.href = prefix + "/"
+					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
 							onmatch: function(resolve) {
@@ -621,15 +565,14 @@ o.spec("route", function() {
 							view: function() {resolved = "b"}
 						}
 					})
+
+					route.set("/b")
+
 					setTimeout(function() {
-						route.set("/b")
+						o(resolved).equals("b")
 
-						setTimeout(function() {
-							o(resolved).equals("b")
-
-							done()
-						}, 30)
-					}, FRAME_BUDGET)
+						done()
+					}, 30)
 				})
 			})
 		})
