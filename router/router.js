@@ -18,9 +18,9 @@ module.exports = function($window) {
 
 	var asyncId
 	function debounceAsync(f) {
-		return function(){
+		return function() {
 			if (asyncId != null) return
-			asyncId = callAsync(function(){
+			asyncId = callAsync(function() {
 				asyncId = null
 				f()
 			})

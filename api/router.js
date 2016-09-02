@@ -10,7 +10,7 @@ module.exports = function($window, mount) {
 	var RouteComponent = {view: function() {
 		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
 	}}
-	function defaultRender(vnode){
+	function defaultRender(vnode) {
 		return vnode
 	}
 	var route = function(root, defaultRoute, routes) {
@@ -20,7 +20,7 @@ module.exports = function($window, mount) {
 
 		mount(root, RouteComponent)
 
-		router.defineRoutes(routes, function(payload, args, path, route) {
+		router.defineRoutes(routes, function(payload, args, path) {
 			var resolutionIdentifier = globalId = {}
 			var isResolver = typeof payload.view !== "function"
 			var render = defaultRender
@@ -29,14 +29,14 @@ module.exports = function($window, mount) {
 				if (resolutionIdentifier !== globalId) return
 				globalId = null
 
-				currentComponent = component != null ? component: isResolver ? "div" : payload
+				currentComponent = component != null ? component : isResolver ? "div" : payload
 				currentRender = render
 				currentArgs = args
 				currentPath = path
 
 				root.redraw(true)
 			}
-			function onmatch() {
+			var onmatch = function() {
 				resolve()
 			}
 			if (isResolver) {
