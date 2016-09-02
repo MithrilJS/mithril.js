@@ -16,6 +16,18 @@ module.exports = function($window) {
 		return data
 	}
 
+	var asyncId
+	function debounceAsync(f) {
+		return function(){
+			if (asyncId != null) return
+			asyncId = callAsync(function(){
+				asyncId = null
+				f()
+			})
+
+		}
+	}
+
 	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
@@ -67,7 +79,7 @@ module.exports = function($window) {
 	}
 
 	function defineRoutes(routes, resolve, reject) {
-		if (supportsPushState) $window.onpopstate = resolveRoute
+		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 		
@@ -76,25 +88,23 @@ module.exports = function($window) {
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
-			callAsync(function() {
-				for (var route in routes) {
-					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+			for (var route in routes) {
+				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 
-					if (matcher.test(pathname)) {
-						pathname.replace(matcher, function() {
-							var keys = route.match(/:[^\/]+/g) || []
-							var values = [].slice.call(arguments, 1, -2)
-							for (var i = 0; i < keys.length; i++) {
-								params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-							}
-							resolve(routes[route], params, path, route)
-						})
-						return
-					}
+				if (matcher.test(pathname)) {
+					pathname.replace(matcher, function() {
+						var keys = route.match(/:[^\/]+/g) || []
+						var values = [].slice.call(arguments, 1, -2)
+						for (var i = 0; i < keys.length; i++) {
+							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+						}
+						resolve(routes[route], params, path, route)
+					})
+					return
 				}
+			}
 
-				reject(path, params)
-			})
+			reject(path, params)
 		}
 		return resolveRoute
 	}
