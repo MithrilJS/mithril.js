@@ -553,6 +553,26 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
+				o("m.route.get() returns the last fully resolved route (#1276)", function(done){
+					$window.location.href = prefix + "/"
+
+					route(root, "/", {
+						"/": {view: function(){}},
+						"/2": {onmatch: function(){}}
+					})
+
+
+					setTimeout(function() {
+						o(route.get()).equals("/")
+						
+						route.set("/2")
+						
+						o(route.get()).equals("/")
+
+						done()
+					}, FRAME_BUDGET)
+				})
+
 				o("routing with RouteResolver works more than once (#1286)", function(done, timeout){
 					timeout(FRAME_BUDGET * 4)
 
