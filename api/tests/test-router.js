@@ -8,13 +8,14 @@ var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
 var apiPubSub = require("../../api/pubsub")
 var apiRouter = require("../../api/router")
+var apiMounter = require("../../api/mount")
 
 o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var FRAME_BUDGET = Math.floor(1000 / 60)
-				var $window, root, redraw, route
+				var $window, root, redraw, mount, route
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
@@ -22,7 +23,8 @@ o.spec("route", function() {
 					root = $window.document.body
 
 					redraw = apiPubSub()
-					route = apiRouter($window, coreRenderer($window), redraw)
+					mount = apiMounter(coreRenderer($window), redraw)
+					route = apiRouter($window, mount)
 					route.prefix(prefix)
 				})
 
