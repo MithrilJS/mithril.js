@@ -711,7 +711,7 @@ o.spec("component", function() {
 			proto.oncreate = o.spy()
 			proto.onbeforeupdate = o.spy()
 			proto.onupdate = o.spy()
-			proto.onbeforeremove = o.spy(function(vnode, done) {done()})
+			proto.onbeforeremove = o.spy()
 			proto.onremove = o.spy()
 			proto.view = o.spy(function() {
 				return ""
@@ -759,7 +759,7 @@ o.spec("component", function() {
 			o(proto.oncreate.args.length).equals(1)
 			o(proto.onbeforeupdate.args.length).equals(2)
 			o(proto.onupdate.args.length).equals(1)
-			o(proto.onbeforeremove.args.length).equals(2)
+			o(proto.onbeforeremove.args.length).equals(1)
 			o(proto.onremove.args.length).equals(1)
 		})
 		o("Factory functions can be used as components", function() {
@@ -775,7 +775,7 @@ o.spec("component", function() {
 					oncreate: o.spy(),
 					onbeforeupdate: o.spy(),
 					onupdate: o.spy(),
-					onbeforeremove: o.spy(function(vnode, done) {done()}),
+					onbeforeremove: o.spy(),
 					onremove: o.spy(),
 					view: o.spy(function() {
 						return ""
@@ -828,7 +828,7 @@ o.spec("component", function() {
 			o(state.oncreate.args.length).equals(1)
 			o(state.onbeforeupdate.args.length).equals(2)
 			o(state.onupdate.args.length).equals(1)
-			o(state.onbeforeremove.args.length).equals(2)
+			o(state.onbeforeremove.args.length).equals(1)
 			o(state.onremove.args.length).equals(1)
 		})
 	})
