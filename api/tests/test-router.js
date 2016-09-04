@@ -358,7 +358,7 @@ o.spec("route", function() {
 							view1Count++
 							return m('h1')
 						},
-						"/v2": function (args, reject) {
+						"/v2": function (route, reject) {
 							view2Count++
 							return reject
 						}
@@ -395,11 +395,11 @@ o.spec("route", function() {
 					}
 				})
 
-				o("render function can redirect to a third route", function(done, timeout) {
-					timeout(FRAME_BUDGET * 3)
+				o("route.tryAgain()", function(done, timeout) {
+					timeout(FRAME_BUDGET * 5)
 					var view1Count = 0
 					var view2Count = 0
-					var view3Count = 0
+					var asyncResource = null
 
 					$window.location.href = prefix + "/"
 					routeLib(root, "/v1", {
@@ -407,14 +407,84 @@ o.spec("route", function() {
 							view1Count++
 							return m('h1')
 						},
-						"/v2": function (args, reject) {
+						"/v2": function (route, reject) {
 							view2Count++
-							routeLib.set('/v3')
-							return reject
+							if (asyncResource === null) {
+
+								setTimeout(function(){
+									asyncResource = 'h2'
+									route.tryAgain()
+								}, FRAME_BUDGET)
+
+								return reject
+							}
+
+							return m(asyncResource)
 						},
-						"/v3": function (args, reject) {
+					})
+
+					setTimeout(function() {
+						o(view1Count).equals(1)
+						o(view2Count).equals(0)
+
+						o(root.firstChild.nodeName).equals("H1")
+						o(routeLib.get()).equals("/v1")
+
+						routeLib.set("/v2")
+
+						setTimeout(function(){
+							o(view1Count).equals(2)
+							o(view2Count).equals(1)
+
+							setTimeout(function(){
+								o(view1Count).equals(2)
+								o(view2Count).equals(2)
+
+								o(root.firstChild.nodeName).equals("H2")
+								o(routeLib.get()).equals("/v2")
+
+								done()
+							}, FRAME_BUDGET)
+						}, FRAME_BUDGET)
+					}, FRAME_BUDGET)
+
+				})
+
+				o("handles route race conditions (#1267)", function(done, timeout) {
+					timeout(FRAME_BUDGET * 8)
+					var view1Count = 0
+					var view2Count = 0
+					var view3Count = 0
+
+					var rejected = true
+					var asyncResource = null
+
+					$window.location.href = prefix + "/"
+					routeLib(root, "/v1", {
+						"/v1": function () {
+							view1Count++
+							return m('h1')
+						},
+						"/v2": function (route, reject) {
+							view2Count++
+
+							if ( asyncResource === null ) {
+
+								setTimeout(function mockLoad () {
+									asyncResource = 'h2'
+									route.tryAgain()
+								}, FRAME_BUDGET*3)
+
+								rejected = true
+								return reject
+							}
+							else {
+								return m(asyncResource)
+							}
+						},
+						"/v3": function (route, reject) {
 							view3Count++
-							return m('h2')
+							return m('h3')
 						}
 					})
 
@@ -429,14 +499,43 @@ o.spec("route", function() {
 						routeLib.set("/v2")
 
 						setTimeout(function(){
-							o(view1Count).equals(1) // Initial route
-							o(view2Count).equals(1) // Reject route
-							o(view3Count).equals(1) // Detour route
+							o(view1Count).equals(2)
+							o(view2Count).equals(1)
+							o(view3Count).equals(0)
 
-							o(root.firstChild.nodeName).equals("H2")
-							o(routeLib.get()).equals("/v3")
+							o(rejected).equals(true)
+							o(asyncResource).equals(null)
+							o(routeLib.get()).equals("/v1")
 
-							done()
+							// Route to different resource while asyncResource is still loading
+							routeLib.set("/v3")
+
+							setTimeout(function(){
+								o(view1Count).equals(2)
+								o(view2Count).equals(1)
+								o(view3Count).equals(1)
+
+								o(root.firstChild.nodeName).equals("H3")
+								o(routeLib.get()).equals("/v3")
+
+								o(asyncResource).equals(null)
+								// After asyncResource loads, the m.route.set should fail
+
+								setTimeout(function(){
+									o(asyncResource).equals('h2')
+
+									o(view1Count).equals(2)
+									o(view2Count).equals(1)
+									o(view3Count).equals(1)
+
+									setTimeout(function() {
+										o(root.firstChild.nodeName).equals("H3")
+										o(routeLib.get()).equals("/v3")
+
+										done()
+									}, FRAME_BUDGET)
+								}, FRAME_BUDGET*2)
+							}, FRAME_BUDGET)
 						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 

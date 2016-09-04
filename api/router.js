@@ -4,6 +4,7 @@ var Vnode = require("../render/vnode")
 var coreRouter = require("../router/router")
 
 module.exports = function($window, mount) {
+	var idCounter = 100
 	var router = coreRouter($window)
 	var reject = {} // used as a unique value
 
@@ -34,13 +35,20 @@ module.exports = function($window, mount) {
 		router.defineRoutes(routes, function onmatch(payload, args, path, route) {
 			var render = typeof payload === "function" ? payload : renderComponent(payload)
 
-			var newRoute = {
-				prev: {path: currentRoute.path, args: currentRoute.args},
-				path: path,
-				args: args
-			}
+			var newRoute = path === currentRoute.path
+				? currentRoute
+				: {
+						id: idCounter++,
+						prev: {id: currentRoute.id, path: currentRoute.path, args: currentRoute.args},
+						path: path,
+						args: args
+					}
 
 			var result = render(newRoute, reject)
+
+			if ( result === reject ) {
+				newRoute.tryAgain = tryAgainFn(newRoute, currentRoute)
+			}
 
 			if (result !== reject) {
 				currentRoute = newRoute
@@ -69,10 +77,21 @@ module.exports = function($window, mount) {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
 	}
+
+	function tryAgainFn (rejectedRoute, originalRoute) {
+		// Provide a pre-filled router.setPath function that only works
+		// if the route has not been changed by something else.
+		return function () {
+			if ( currentRoute.id === originalRoute.id ) {
+				router.setPath(rejectedRoute.path, rejectedRoute.args)
+			}
+		}
+	}
+
 	route.link = router.link
 	route.prefix = router.setPrefix
-	route.set = router.setPath
 	route.get = router.getPath
+	route.set = router.setPath
 
 	return route
 }
