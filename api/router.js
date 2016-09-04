@@ -47,7 +47,7 @@ module.exports = function($window, mount) {
 			var result = render(newRoute, reject)
 
 			if ( result === reject ) {
-				newRoute.tryAgain = tryAgainFn(newRoute, currentRoute)
+				newRoute.retry = retryFn(newRoute, currentRoute)
 			}
 
 			if (result !== reject) {
@@ -78,7 +78,7 @@ module.exports = function($window, mount) {
 		})
 	}
 
-	function tryAgainFn (rejectedRoute, originalRoute) {
+	function retryFn (rejectedRoute, originalRoute) {
 		// Provide a pre-filled router.setPath function that only works
 		// if the route has not been changed by something else.
 		return function () {

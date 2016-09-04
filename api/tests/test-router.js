@@ -395,7 +395,7 @@ o.spec("route", function() {
 					}
 				})
 
-				o("route.tryAgain()", function(done, timeout) {
+				o("route.retry()", function(done, timeout) {
 					timeout(FRAME_BUDGET * 5)
 					var view1Count = 0
 					var view2Count = 0
@@ -413,7 +413,7 @@ o.spec("route", function() {
 
 								setTimeout(function(){
 									asyncResource = 'h2'
-									route.tryAgain()
+									route.retry()
 								}, FRAME_BUDGET)
 
 								return reject
@@ -472,7 +472,7 @@ o.spec("route", function() {
 
 								setTimeout(function mockLoad () {
 									asyncResource = 'h2'
-									route.tryAgain()
+									route.retry()
 								}, FRAME_BUDGET*3)
 
 								rejected = true
