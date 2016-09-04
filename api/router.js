@@ -2,38 +2,77 @@
 
 var Vnode = require("../render/vnode")
 var coreRouter = require("../router/router")
-var autoredraw = require("../api/autoredraw")
 
-module.exports = function($window, renderer, pubsub) {
+module.exports = function($window, mount) {
 	var router = coreRouter($window)
+	var reject = {} // used as a unique value
+
+	var currentRoute = {args: {}, path: null, prev: null}
+	var currentRender, routeInitialRenderCache
+
+	var RouteComponent = {view: function() {
+		if (routeInitialRenderCache) {
+			var temp = routeInitialRenderCache
+			routeInitialRenderCache = null
+			return temp
+		}
+		else {
+			return currentRender(currentRoute, reject)
+		}
+	}}
+	function renderComponent(component) {
+		return function (route) {
+			return Vnode(component, null, route.args, undefined, undefined, undefined)
+		}
+	}
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: "div", resolver: null}, currentResolutionIdentifier = null
-		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
-			var resolutionIdentifier = currentResolutionIdentifier = {}
-			function resolve(component) {
-				if (resolutionIdentifier !== currentResolutionIdentifier) return
-				resolutionIdentifier = null
-				current.path = path, current.component = component
-				renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
+
+		currentRender = renderComponent("div")
+
+		mount(root, RouteComponent)
+
+		router.defineRoutes(routes, function onmatch(payload, args, path, route) {
+			var render = typeof payload === "function" ? payload : renderComponent(payload)
+
+			var newRoute = {
+				prev: {path: currentRoute.path, args: currentRoute.args},
+				path: path,
+				args: args
 			}
-			if (typeof payload.view !== "function") {
-				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
-				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}
-				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
-				else resolve(current.component)
+
+			var result = render(newRoute, reject)
+
+			if (result !== reject) {
+				currentRoute = newRoute
+				currentRender = render
+
+				routeInitialRenderCache = result
+				root.redraw(true)
+			}
+			else if (currentRoute.path === null) {
+				// Rejected on first route without a redirect.
+				// Handle this strange case by remembering route without caching.
+				currentRoute = newRoute
+				currentRender = render
 			}
 			else {
-				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
+				if (
+					currentRoute.path && 			// If this isn't our first route...
+					path === router.getPath() // and the route function did not call m.route.set()...
+				) {
+					// revert to previous route.
+					router.setPath(currentRoute.path, currentRoute.args, {replace: true})
+				}
 			}
+
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
-		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	route.set = router.setPath
 	route.get = router.getPath
-	
+
 	return route
 }
