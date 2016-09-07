@@ -967,6 +967,56 @@ var parseQueryString = function(string) {
 	return data
 }
 requestService.setCompletionCallback(redrawService.publish)
+var throttle = function(callback) {
+	//60fps translates to 16.6ms, round it down since setTimeout requires int
+	var time = 16
+	var last = 0, pending = null
+	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	return function(synchronous) {
+		var now = Date.now()
+		if (synchronous === true || last === 0 || now - last >= time) {
+			last = now
+			callback()
+		}
+		else if (pending === null) {
+			pending = timeout(function() {
+				pending = null
+				callback()
+				last = Date.now()
+			}, time - (now - last))
+		}
+	}
+}
+var autoredraw = function(root, renderer, pubsub, callback) {
+	var run = throttle(callback)
+	if (renderer != null) {
+		renderer.setEventCallback(function(e) {
+			if (e.redraw !== false) pubsub.publish()
+		})
+	}
+	if (pubsub != null) {
+		if (root.redraw) pubsub.unsubscribe(root.redraw)
+		pubsub.subscribe(run)
+	}
+	return root.redraw = run
+}
+m.mount = function(renderer, pubsub) {
+	return function(root, component) {
+		if (component === null) {
+			renderer.render(root, [])
+			pubsub.unsubscribe(root.redraw)
+			delete root.redraw
+			return
+		}
+		var run = autoredraw(root, renderer, pubsub, function() {
+			renderer.render(
+				root,
+				Vnode(component, undefined, undefined, undefined, undefined, undefined)
+			)
+		})
+		run()
+	}
+}(renderService, redrawService)
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
@@ -976,6 +1026,16 @@ var coreRouter = function($window) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
+	}
+	var asyncId
+	function debounceAsync(f) {
+		return function() {
+			if (asyncId != null) return
+			asyncId = callAsync(function() {
+				asyncId = null
+				f()
+			})
+		}
 	}
 	function parsePath(path, queryData, hashData) {
 		var queryIndex = path.indexOf("?")
@@ -1022,7 +1082,7 @@ var coreRouter = function($window) {
 		else $window.location.href = prefix + path
 	}
 	function defineRoutes(routes, resolve, reject) {
-		if (supportsPushState) $window.onpopstate = resolveRoute
+		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 		
@@ -1031,23 +1091,21 @@ var coreRouter = function($window) {
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
-			callAsync(function() {
-				for (var route in routes) {
-					var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-					if (matcher.test(pathname)) {
-						pathname.replace(matcher, function() {
-							var keys = route.match(/:[^\/]+/g) || []
-							var values = [].slice.call(arguments, 1, -2)
-							for (var i = 0; i < keys.length; i++) {
-								params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-							}
-							resolve(routes[route], params, path, route)
-						})
-						return
-					}
+			for (var route in routes) {
+				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+				if (matcher.test(pathname)) {
+					pathname.replace(matcher, function() {
+						var keys = route.match(/:[^\/]+/g) || []
+						var values = [].slice.call(arguments, 1, -2)
+						for (var i = 0; i < keys.length; i++) {
+							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+						}
+						resolve(routes[route], params, path, route)
+					})
+					return
 				}
-				reject(path, params)
-			})
+			}
+			reject(path, params)
 		}
 		return resolveRoute
 	}
@@ -1061,89 +1119,52 @@ var coreRouter = function($window) {
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-var throttle = function(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
-	return function(synchronous) {
-		var now = Date.now()
-		if (synchronous === true || last === 0 || now - last >= time) {
-			last = now
-			callback()
-		}
-		else if (pending === null) {
-			pending = timeout(function() {
-				pending = null
-				callback()
-				last = Date.now()
-			}, time - (now - last))
-		}
-	}
-}
-var autoredraw = function(root, renderer, pubsub, callback) {
-	var run = throttle(callback)
-	if (renderer != null) {
-		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) pubsub.publish()
-		})
-	}
-	if (pubsub != null) {
-		if (root.redraw) pubsub.unsubscribe(root.redraw)
-		pubsub.subscribe(run)
-	}
-	return root.redraw = run
-}
-m.route = function($window, renderer, pubsub) {
+m.route = function($window, mount1) {
 	var router = coreRouter($window)
+	var globalId, currentComponent, currentRender, currentArgs, currentPath
+	var RouteComponent = {view: function() {
+		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
+	}}
+	function defaultRender(vnode) {
+		return vnode
+	}
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: "div", resolver: null}, currentResolutionIdentifier = null
-		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
-			var resolutionIdentifier = currentResolutionIdentifier = {}
-			function resolve(component) {
-				if (resolutionIdentifier !== currentResolutionIdentifier) return
-				resolutionIdentifier = null
-				current.path = path, current.component = component
-				renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
+		currentComponent = "div"
+		currentRender = defaultRender
+		currentArgs = null
+		mount1(root, RouteComponent)
+		router.defineRoutes(routes, function(payload, args, path) {
+			var resolutionIdentifier = globalId = {}
+			var isResolver = typeof payload.view !== "function"
+			var render = defaultRender
+			function resolve (component) {
+				if (resolutionIdentifier !== globalId) return
+				globalId = null
+				currentComponent = component != null ? component : isResolver ? "div" : payload
+				currentRender = render
+				currentArgs = args
+				currentPath = path
+				root.redraw(true)
 			}
-			if (typeof payload.view !== "function") {
-				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
-				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}
-				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
-				else resolve(current.component)
+			var onmatch = function() {
+				resolve()
 			}
-			else {
-				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
+			if (isResolver) {
+				if (typeof payload.render === "function") render = payload.render.bind(payload)
+				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
 			}
+		
+			onmatch.call(payload, resolve, args, path)
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
-		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	route.set = router.setPath
-	route.get = router.getPath
-	
+	route.get = function() {return currentPath}
 	return route
-}(window, renderService, redrawService)
-m.mount = function(renderer, pubsub) {
-	return function(root, component) {
-		if (component === null) {
-			renderer.render(root, [])
-			pubsub.unsubscribe(root.redraw)
-			delete root.redraw
-			return
-		}
-		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(
-				root,
-				Vnode(component, undefined, undefined, undefined, undefined, undefined)
-			)
-		})
-		run()
-	}
-}(renderService, redrawService)
+}(window, m.mount)
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		return callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
