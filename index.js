@@ -10,8 +10,8 @@ var Stream = require("./stream")
 
 requestService.setCompletionCallback(redrawService.publish)
 
-m.route = require("./route")
 m.mount = require("./mount")
+m.route = require("./route")
 m.withAttr = require("./util/withAttr")
 m.prop = Stream
 m.render = renderService.render

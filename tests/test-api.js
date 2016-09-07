@@ -164,9 +164,11 @@ o.spec("api", function() {
 			
 			setTimeout(function() {
 				m.route.set("/b")
-				o(m.route.get()).equals("/b")
+				setTimeout(function() {
+					o(m.route.get()).equals("/b")
 				
-				done()
+					done()
+				}, FRAME_BUDGET)
 			}, FRAME_BUDGET)
 		})
 	})

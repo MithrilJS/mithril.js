@@ -52,13 +52,13 @@ Argument          | Type      | Required | Description
 
 ##### route.get
 
-Returns the current routing path, without the prefix.
+Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
 
 `path = m.route.get()`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-**returns**       | String    |          | Returns the current path
+**returns**       | String    |          | Returns the last fully resolved path
 
 ##### route.prefix
 
@@ -94,14 +94,12 @@ This method also allows you to asynchronously define what component will be rend
 
 `routeResolver.onmatch(vnode, resolve)`
 
-Argument            | Type                  | Description
-------------------- | --------------------- | ---
-`vnode`             | `Vnode`               | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`              | The [routing parameters](#routing-parameters)
-`vnode.attrs.path`  | `String`              | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`              | The matched route
-`resolve`           | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
-**returns**         |                       | Returns `undefined`
+Argument        | Type                  | Description
+--------------- | --------------------- | ---
+`resolve`       | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
+`args`          | `Object`              | The [routing parameters](#routing-parameters)
+`requestedPath` | `String`              | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+**returns**     |                       | Returns `undefined`
 
 ##### routeResolver.render
 
@@ -113,8 +111,6 @@ Argument            | Type            | Description
 ------------------- | --------------- | ----------- 
 `vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
 `vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
-`vnode.attrs.path`  | `String`        | The current router path, including interpolated routing parameter values, but without the prefix. Same value as `m.route.get()`
-`vnode.attrs.route` | `String`        | The matched route
 **returns**         | `Vnode`         | Returns a vnode
 
 ---
@@ -266,12 +262,12 @@ m.route.prefix("/my-app")
 
 ### Advanced component resolution
 
-Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `render()` method.
+Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and/or a `render()` method.
 
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(vnode, resolve) {
+		onmatch: function(resolve, args, requestedPath) {
 			resolve(Home)
 		},
 		render: function(vnode) {
@@ -329,7 +325,7 @@ var Login = {
 
 m.route(document.body, "/secret", {
 	"/secret": {
-		onmatch: function(vnode, resolve) {
+		onmatch: function(resolve) {
 			if (isLoggedIn) resolve(Home)
 			else m.route.set("/login")
 		},
@@ -377,7 +373,7 @@ function load(file, done) {
 
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(vnode, resolve) {
+		onmatch: function(resolve) {
 			load("Home.js", resolve)
 		},
 	},
@@ -391,7 +387,7 @@ Fortunately, there are a number of tools that facilitate the task of bundling mo
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(vnode, resolve) {
+		onmatch: function(resolve) {
 			// using Webpack async code splitting
 			require(['./Home.js'], resolve)
 		},
