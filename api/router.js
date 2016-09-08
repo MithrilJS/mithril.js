@@ -5,7 +5,7 @@ var coreRouter = require("../router/router")
 
 module.exports = function($window, mount) {
 	var router = coreRouter($window)
-	var globalId, currentComponent, currentRender, currentArgs, currentPath
+	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 
 	var RouteComponent = {view: function() {
 		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
@@ -21,13 +21,12 @@ module.exports = function($window, mount) {
 		mount(root, RouteComponent)
 
 		router.defineRoutes(routes, function(payload, args, path) {
-			var resolutionIdentifier = globalId = {}
 			var isResolver = typeof payload.view !== "function"
 			var render = defaultRender
 
-			function resolve (component) {
-				if (resolutionIdentifier !== globalId) return
-				globalId = null
+			var resolve = currentResolve = function (component) {
+				if (resolve !== currentResolve) return
+				currentResolve = null
 
 				currentComponent = component != null ? component : isResolver ? "div" : payload
 				currentRender = render
