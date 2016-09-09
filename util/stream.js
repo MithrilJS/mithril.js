@@ -116,6 +116,7 @@ module.exports = function(log) {
 		return initDependency(self, [stream], derive, recover)
 	}
 	function combine(fn, streams) {
+		if (streams.length > streams.filter(valid).length) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
 		return initDependency(createStream(), streams, function() {
 			var failed = streams.filter(errored)
 			if (failed.length > 0) throw {__error: failed[0]._state.error}
@@ -177,6 +178,7 @@ module.exports = function(log) {
 	function valueOf() {return this._state.value}
 	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
 
+	function valid(stream) {return stream._state }
 	function active(stream) {return stream._state.state === 1}
 	function changed(stream) {return stream._state.changed}
 	function notEnded(stream) {return stream._state.state !== 2}
