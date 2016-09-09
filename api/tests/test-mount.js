@@ -22,6 +22,16 @@ o.spec("mount", function() {
 		render = coreRenderer($window).render
 	})
 
+	o("throws on invalid `root` DOM node", function() {
+		var threw = false
+		try {
+			mount(null, {view: function() {}})
+		} catch (e) {
+			threw = true
+		}
+		o(threw).equals(true)
+	})
+
 	o("renders into `root`", function() {
 		mount(root, {
 			view : function() {

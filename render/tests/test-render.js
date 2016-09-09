@@ -21,4 +21,13 @@ o.spec("render", function() {
 
 		o(root.childNodes.length).equals(0)
 	})
+	o("throws on invalid root node", function(){
+		var threw = false
+		try {
+			render(null, [])
+		} catch (e) {
+			threw = true
+		}
+		o(threw).equals(true)
+	})
 })
