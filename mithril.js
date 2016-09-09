@@ -573,6 +573,7 @@ var renderService = function($window) {
 		Object.keys(source).forEach(function(k){target[k] = source[k]})
 	}
 	function render(dom, vnodes) {
+		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = $doc.activeElement
 		// First time rendering into a node clears it out
