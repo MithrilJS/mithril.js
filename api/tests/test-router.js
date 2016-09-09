@@ -28,6 +28,16 @@ o.spec("route", function() {
 					route.prefix(prefix)
 				})
 
+				o("throws on invalid `root` DOM node", function() {
+					var threw = false
+					try {
+						route(null, '/', {'/':{view: function() {}}})
+					} catch (e) {
+						threw = true
+					}
+					o(threw).equals(true)
+				})
+
 				o("renders into `root`", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
