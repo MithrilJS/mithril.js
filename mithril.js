@@ -1474,8 +1474,8 @@
 
 	m.mount = m.module = function (root, component) {
 		if (!root) {
-			throw new Error("Please ensure the DOM element exists before " +
-				"rendering a template into it.")
+			throw new Error("Ensure the DOM element being passed to " +
+				"m.route/m.mount/m.render is not undefined.")
 		}
 
 		var index = roots.indexOf(root)
