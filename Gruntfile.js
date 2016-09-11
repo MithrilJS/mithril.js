@@ -95,7 +95,7 @@ module.exports = function (grunt) { // eslint-disable-line
 
 		mocha_phantomjs: { // eslint-disable-line camelcase
 			test: {
-				src: ["test/index.html"],
+				src: ["test/index.html", "tests/index.html"],
 				options: {
 					reporter: "dot"
 				}
