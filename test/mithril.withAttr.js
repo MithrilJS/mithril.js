@@ -12,6 +12,6 @@ describe("m.withAttr()", function () {
 		var spy = sinon.spy()
 		var object = {}
 		m.withAttr("test", spy, object)({currentTarget: {test: "foo"}})
-		expect(spy).to.be.calledOn(object).and.calledWith("foo")
+		expect(spy).to.be.calledOn(object).and.calledWith("Ofoo")
 	})
 })
