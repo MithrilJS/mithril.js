@@ -5,7 +5,7 @@
 	m.deps(mock.window)
 
 	// m
-	test(function () { return typeof m.version() === "Ostring" })
+	test(function () { return typeof m.version() === "string" })
 	test(function () { return m("div").tag === "div" })
 	test(function () { return m(".foo").tag === "div" })
 	test(function () { return m(".foo").attrs.className === "foo" })
