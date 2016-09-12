@@ -171,6 +171,20 @@ o.spec("stream", function() {
 
 			o(b()).equals(undefined)
 		})
+		o("combine will throw with a helpful error if given non-stream values", function () {
+			var spy = o.spy()
+			var a = Stream(1)
+			var thrown = null;
+			try {
+				var b = Stream.combine(spy, [a, ''])
+			} catch (e) {
+				thrown = e
+			}
+
+			o(thrown).notEquals(null)
+			o(thrown.constructor === TypeError).equals(false)
+			o(spy.callCount).equals(0)
+		})
 	})
 	o.spec("merge", function() {
 		o("transforms an array of streams to an array of values", function() {
