@@ -266,7 +266,7 @@ m.route.prefix("/my-app")
 
 ### Advanced component resolution
 
-Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` method and a optionally a `render()` method.
+Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` and/or a `render()` method. Both methods are optional but at least one of them must be present.
 
 ```javascript
 m.route(document.body, "/", {
@@ -275,7 +275,7 @@ m.route(document.body, "/", {
 			resolve(Home)
 		},
 		render: function(vnode) {
-			return vnode
+			return vnode // equivalent to m(Home)
 		},
 	}
 })
@@ -287,7 +287,7 @@ RouteResolvers are useful for implementing a variety of advanced routing use cas
 
 ### Wrapping a layout component
 
-You can use a RouteResolver to wrap a layout around a component, or to pass parameters to a top level component
+It's often desirable to wrap all or most of the routed components in a reusable shell (often called a "layout"). In order to do that, you first need to create a component that contains the common markup that will wrap around the various different components:
 
 ```javascript
 var Layout = {
@@ -295,7 +295,27 @@ var Layout = {
 		return m(".layout", vnode.children)
 	}
 }
+```
 
+In the example above, the layout merely consists of a `<div class="layout">` that contains the children passed to the component, but in a real life scenario it could be as complex as neeeded.
+
+One way to wrap the layout is to define an anonymous component in the routes map:
+
+```javascript
+m.route(document.body, "/", {
+	"/": {
+		view: function() {
+			return m(Layout, m(Home))
+		},
+	}
+})
+```
+
+However, note that because the top level component is an anonymous component, jumping from route to route will tear down the anonymous component and recreate the DOM from scratch. If the Layout component had [lifecycle methods](lifecycle-methods.md) defined, the `oninit` and `oncreate` hooks would fire on every route change. Depending on the application, this may or may not be desirable.
+
+If you would prefer to have the Layout component be diffed and maintained intact rather than recreated from scratch, you should instead use a RouteResolver as the root object:
+
+```javascript
 m.route(document.body, "/", {
 	"/": {
 		render: function() {
@@ -304,6 +324,8 @@ m.route(document.body, "/", {
 	}
 })
 ```
+
+Note that in this case, if the Layout component the `oninit` and `oncreate` lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).
 
 ---
 
