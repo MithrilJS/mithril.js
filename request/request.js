@@ -39,7 +39,7 @@ module.exports = function($window, Stream) {
 			if (xhr.readyState === 4) {
 				try {
 					var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-					if (xhr.status >= 200 && xhr.status < 300) {
+					if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
 						stream(cast(args.type, response))
 					}
 					else {
