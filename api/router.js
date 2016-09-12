@@ -2,38 +2,56 @@
 
 var Vnode = require("../render/vnode")
 var coreRouter = require("../router/router")
-var autoredraw = require("../api/autoredraw")
 
-module.exports = function($window, renderer, pubsub) {
+module.exports = function($window, mount) {
 	var router = coreRouter($window)
+	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
+
+	var RouteComponent = {view: function() {
+		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
+	}}
+	function defaultRender(vnode) {
+		return vnode
+	}
 	var route = function(root, defaultRoute, routes) {
-		var current = {path: null, component: "div", resolver: null}, currentResolutionIdentifier = null
-		var replay = router.defineRoutes(routes, function(payload, args, path, route) {
-			var resolutionIdentifier = currentResolutionIdentifier = {}
-			function resolve(component) {
-				if (resolutionIdentifier !== currentResolutionIdentifier) return
-				resolutionIdentifier = null
-				current.path = path, current.component = component
-				renderer.render(root, payload.render(Vnode(component, null, args, undefined, undefined, undefined)))
+		currentComponent = "div"
+		currentRender = defaultRender
+		currentArgs = null
+
+		mount(root, RouteComponent)
+
+		router.defineRoutes(routes, function(payload, args, path) {
+			var isResolver = typeof payload.view !== "function"
+			var render = defaultRender
+
+			var resolve = currentResolve = function (component) {
+				if (resolve !== currentResolve) return
+				currentResolve = null
+
+				currentComponent = component != null ? component : isResolver ? "div" : payload
+				currentRender = render
+				currentArgs = args
+				currentPath = path
+
+				root.redraw(true)
 			}
-			if (typeof payload.view !== "function") {
-				if (typeof payload.render !== "function") payload.render = function(vnode) {return vnode}
-				if (typeof payload.onmatch !== "function") payload.onmatch = function() {resolve(current.component)}
-				if (path !== current.path) payload.onmatch(Vnode(payload, null, args, undefined, undefined, undefined), resolve)
-				else resolve(current.component)
+			var onmatch = function() {
+				resolve()
 			}
-			else {
-				renderer.render(root, Vnode(payload, null, args, undefined, undefined, undefined))
+			if (isResolver) {
+				if (typeof payload.render === "function") render = payload.render.bind(payload)
+				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
 			}
+		
+			onmatch.call(payload, resolve, args, path)
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
-		autoredraw(root, renderer, pubsub, replay)
 	}
 	route.link = router.link
 	route.prefix = router.setPrefix
 	route.set = router.setPath
-	route.get = router.getPath
-	
+	route.get = function() {return currentPath}
+
 	return route
 }
