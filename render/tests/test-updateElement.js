@@ -56,6 +56,17 @@ o.spec("updateElement", function() {
 		o(updated.dom).equals(root.firstChild)
 		o("title" in updated.dom.attributes).equals(false)
 	})
+	o("removes class", function() {
+		var vnode = {tag: "a", attrs: {id: "b", className: "d"}}
+		var updated = {tag: "a", attrs: {id: "c"}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		o(updated.dom).equals(vnode.dom)
+		o(updated.dom).equals(root.firstChild)
+		o("class" in updated.dom.attributes).equals(false)
+	})
 	o("creates style object", function() {
 		var vnode = {tag: "a", attrs: {}}
 		var updated = {tag: "a", attrs: {style: {backgroundColor: "green"}}}

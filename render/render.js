@@ -431,6 +431,7 @@ module.exports = function($window) {
 		if (old != null) {
 			for (var key in old) {
 				if (attrs == null || !(key in attrs)) {
+					if (key === "className") key = "class"
 					if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 					else if (key !== "key") vnode.dom.removeAttribute(key)
 				}
