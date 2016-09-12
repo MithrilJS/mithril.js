@@ -494,6 +494,7 @@ var renderService = function($window) {
 		if (old != null) {
 			for (var key in old) {
 				if (attrs == null || !(key in attrs)) {
+					if (key === "className") key = "class"
 					if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 					else if (key !== "key") vnode.dom.removeAttribute(key)
 				}
@@ -1122,7 +1123,7 @@ var coreRouter = function($window) {
 }
 m.route = function($window, mount1) {
 	var router = coreRouter($window)
-	var globalId, currentComponent, currentRender, currentArgs, currentPath
+	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 	var RouteComponent = {view: function() {
 		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
 	}}
@@ -1135,12 +1136,11 @@ m.route = function($window, mount1) {
 		currentArgs = null
 		mount1(root, RouteComponent)
 		router.defineRoutes(routes, function(payload, args, path) {
-			var resolutionIdentifier = globalId = {}
 			var isResolver = typeof payload.view !== "function"
 			var render = defaultRender
-			function resolve (component) {
-				if (resolutionIdentifier !== globalId) return
-				globalId = null
+			var resolve = currentResolve = function (component) {
+				if (resolve !== currentResolve) return
+				currentResolve = null
 				currentComponent = component != null ? component : isResolver ? "div" : payload
 				currentRender = render
 				currentArgs = args
