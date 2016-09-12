@@ -533,6 +533,7 @@
 			} else if (editable) {
 				// contenteditable nodes use `innerHTML` instead of `nodeValue`.
 				editable.innerHTML = data
+				nodes = [].slice.call(editable.childNodes)
 			} else {
 				// was a trusted string
 				if (nodes[0].nodeType === 1 || nodes.length > 1 ||
