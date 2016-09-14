@@ -12,7 +12,7 @@ var S2Component = {
 
   // Rendered view for S2
   view: function(ctrl, attrs) {
-    var current = attrs.selectedUser;
+    var current = attrs.selectedUser
 
     return m('select', {
         class: 'select-field',
@@ -32,17 +32,13 @@ var S2Component = {
   _configure: function(element, initialized) {
 
     /*
-      Note: This is a use of the config attribute given to
-      attributes on mithril objects. Integrating with 3rd
-      party DOM manipulation (jQuery) needs {config: function(){}} because
-      that's the attribute that exposes the real DOM element (as opposed to
-      the virtual DOM element) in the corresponding function so you can access
-      and manipulate it.
+      Note: This function is being called from the 'config' attribute
+      in our mithril view.
 
-      the function at the config property in attrs is passed the real DOM element
-      (element), and whether or not it exists in the page (initialized)
-
-      Anyways, let's look at using Select2 now.
+      Integration with third-party party DOM manipulation (jQuery) needs 
+      {config: function(){}} because that's the attribute that exposes the real
+      DOM element (as opposed to the virtual DOM element) in the corresponding 
+      function so you can access and manipulate it.
     */
 
     // If this hasn't been initialized, we can do our setup  
@@ -53,11 +49,7 @@ var S2Component = {
       });
 
       // Other logic pertaining to this select also goes here.
-
-      // If you add event listeners that change data and you need your
-      // component to know about it, consider adding m.redraw() to the end
-      // of this function call.
-
+      // e.g. Event handlers, etc.
     }
   }
 }
@@ -68,7 +60,8 @@ var MainComponent = {
     var ctrl = this;
 
     // Some arbitrary data
-    ctrl.selectedUser = 2; // Aaron Burr is the initially selected user.
+   // Aaron Burr is the initially selected user.
+    ctrl.selectedUser = 2;
     ctrl.data = [
           {id: 1, name: 'Alexander Hamilton'},
           {id: 2, name: 'Aaron Burr'},
@@ -101,9 +94,9 @@ m.mount(document.body, MainComponent)
 
 `_configure` is a helper function that is called via the `config` attribute in the `select` we render in our `SC2Component.view`
 
-This `_configure` function has a guarded `if` statement: `if(!initialized)`, meaning if this component is being instantiated for the first time, we're going to want to do all of the initial setup on the first render. There's a good chance that this component will be redrawn throughout the life of the page, so if that's the case, subsequent redraws will __not__ run the initialization code again, making sure everything in the `_configure` function is only initialized once.
+This `_configure` function has a guarded `if` statement: `if(!initialized)`. In the event this component is being instantiated for the first time, we're going to do all of the initial setup on the first render. Subsequent redraws will __not__ run the initialization code again, making sure everything in the `_configure` function is only initialized once.
 
-The initialization code is simply calling `lmnt.select2()` on the exposed DOM element in order to initialize it. There are other things you can do in this initialization code like adding event handlers to these elements. You must remember that if you modify the DOM or any data that your component relies on inside of this function, you'll need to make sure the component knows to update by adding `m.redraw` (or, in very few cases, `m.startComputation` and `m.endComputation`).
+The initialization code is simply calling `$(element).select2()` on the exposed DOM element in order to initialize it. You can also addevent handlers to these elements. If you modify the DOM or any data that your component relies on inside of this function, you'll need to make sure the component knows to redraw itself by adding `m.redraw` as needed.
 
 `m.startComputation` and `m.endComputation` are used for asynchronous operations. If you were to call a web service using jQuery, then you would be responsible for adding a `m.startComputation` call before the jQuery ajax call, and for adding a `m.endComputation` call at the end of the completion callback, in addition to the calls within any event handlers. Refer to the [`auto-redrawing`](auto-redrawing.md) guide for an example.
 
