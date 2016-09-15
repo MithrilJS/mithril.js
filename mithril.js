@@ -946,7 +946,7 @@ var parseQueryString = function(string) {
 		if (value !== "" && !isNaN(number) || value === "NaN") value = number
 		else if (value === "true") value = true
 		else if (value === "false") value = false
-		else {
+		else if (value.charAt(0) !== "/") {
 			var date = new Date(value)
 			if (!isNaN(date.getTime())) value = date
 		}
