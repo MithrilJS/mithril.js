@@ -86,8 +86,6 @@
 		"space-infix-ops": [2, {"int32Hint": true}],
 		"space-unary-ops": 2,
 		"spaced-comment": [2, "always"],
-		"max-depth": [2, 4],
-		"max-len": [2, 80, 4],
-		"max-statements": [2, 20]
+		"max-depth": [2, 4]
 	}
 }
