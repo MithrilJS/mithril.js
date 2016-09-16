@@ -1474,6 +1474,7 @@
 			m.startComputation()
 			roots[index] = root
 			var currentComponent
+			var isNullComponent = component == null
 
 			if (component) {
 				currentComponent = topComponent = component
@@ -1492,7 +1493,7 @@
 				components[index] = component
 			}
 			endFirstComputation()
-			if (component === null) {
+			if (isNullComponent) {
 				roots.splice(index, 1)
 				controllers.splice(index, 1)
 				components.splice(index, 1)
