@@ -1435,37 +1435,6 @@
 		return parameterize(component, args)
 	}
 
-	function checkPrevented(component, root, index, isPrevented) {
-		if (!isPrevented) {
-			m.redraw.strategy("all")
-			m.startComputation()
-			roots[index] = root
-			var currentComponent
-
-			if (component) {
-				currentComponent = topComponent = component
-			} else {
-				currentComponent = topComponent = component = {controller: noop}
-			}
-
-			var controller = new (component.controller || noop)()
-
-			// controllers may call m.mount recursively (via m.route redirects,
-			// for example)
-			// this conditional ensures only the last recursive m.mount call is
-			// applied
-			if (currentComponent === topComponent) {
-				controllers[index] = controller
-				components[index] = component
-			}
-			endFirstComputation()
-			if (component === null) {
-				removeRootElement(root, index)
-			}
-			return controllers[index]
-		}
-	}
-
 	m.mount = m.module = function (root, component) {
 		if (!root) {
 			throw new Error("Ensure the DOM element being passed to " +
@@ -1500,16 +1469,39 @@
 			controllers[index].onunload(event)
 		}
 
-		return checkPrevented(component, root, index, isPrevented)
-	}
+		if (!isPrevented) {
+			m.redraw.strategy("all")
+			m.startComputation()
+			roots[index] = root
+			var currentComponent
 
-	function removeRootElement(root, index) {
-		roots.splice(index, 1)
-		controllers.splice(index, 1)
-		components.splice(index, 1)
-		reset(root)
-		nodeCache.splice(getCellCacheKey(root), 1)
-		unloaders = []
+			if (component) {
+				currentComponent = topComponent = component
+			} else {
+				currentComponent = topComponent = component = {controller: noop}
+			}
+
+			var controller = new (component.controller || noop)()
+
+			// controllers may call m.mount recursively (via m.route redirects,
+			// for example)
+			// this conditional ensures only the last recursive m.mount call is
+			// applied
+			if (currentComponent === topComponent) {
+				controllers[index] = controller
+				components[index] = component
+			}
+			endFirstComputation()
+			if (component === null) {
+				roots.splice(index, 1)
+				controllers.splice(index, 1)
+				components.splice(index, 1)
+				reset(root)
+				nodeCache.splice(getCellCacheKey(root), 1)
+				unloaders = []
+			}
+			return controllers[index]
+		}
 	}
 
 	var redrawing = false
