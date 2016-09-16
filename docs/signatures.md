@@ -43,5 +43,5 @@ Functions are denoted with an arrow (`->`). The left side of the arrow indicates
 
 For example, `parseFloat` has the signature `String -> Number`, i.e. it takes a string as input and returns a number as output.
 
-Functions with multiple arguments are denoted with parenthesis: `String, Array -> Number`
+Functions with multiple arguments are denoted with parenthesis: `(String, Array) -> Number`
 
