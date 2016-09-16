@@ -130,6 +130,34 @@ describe("m.route()", function () {
 		expect(m.route()).to.equal("/a")
 	})
 
+	dit("skips route change if component ctrl.onunload calls preventDefault when the route has parameters", function (root) { // eslint-disable-line
+		mode("search")
+		var spy = sinon.spy()
+
+		var sub = {
+			controller: function () {
+				this.onunload = function (e) { e.preventDefault() }
+			},
+			view: function () {
+				return m("div")
+			}
+		}
+
+		route(root, "/a/1", {
+			"/a/:id": pure(function () { return sub }),
+
+			"/b/:id": {
+				controller: spy,
+				view: noop
+			}
+		})
+
+		route("/b/1")
+
+		expect(spy).to.not.have.been.called
+		expect(m.route()).to.equal("/a/1")
+	})
+
 	dit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
