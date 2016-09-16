@@ -56,12 +56,21 @@ describe("m.route()", function () {
 		}
 	}
 
+	// this `preventDefault` helper calls `e.preventDefault()` only during the
+	// test phase, which allows `afterEach()` to properly unmount
+	var shouldPreventDefault
+	function preventDefault(e) {
+		if (shouldPreventDefault) e.preventDefault()
+	}
+
 	beforeEach(function () {
+		shouldPreventDefault = true
 		mock.requestAnimationFrame.$resolve()
 		this.root = mock.document.createElement("div")
 	})
 
 	afterEach(function () {
+		shouldPreventDefault = false
 		m.mount(this.root, null)
 	})
 	/* eslint-enable no-invalid-this */
@@ -108,7 +117,7 @@ describe("m.route()", function () {
 
 		var sub = {
 			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
+				this.onunload = preventDefault
 			},
 			view: function () {
 				return m("div")
@@ -136,7 +145,7 @@ describe("m.route()", function () {
 
 		var sub = {
 			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
+				this.onunload = preventDefault
 			},
 			view: function () {
 				return m("div")
@@ -165,7 +174,7 @@ describe("m.route()", function () {
 
 		var subsub = {
 			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
+				this.onunload = preventDefault
 			},
 			view: function () {
 				return m("div")

@@ -1463,10 +1463,6 @@
 				removeRootElement(root, index)
 			}
 			return controllers[index]
-		} else {
-			if (component == null) {
-				removeRootElement(root, index)
-			}
 		}
 	}
 
