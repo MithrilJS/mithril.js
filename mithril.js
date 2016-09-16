@@ -1467,9 +1467,6 @@
 			if (component == null) {
 				removeRootElement(root, index)
 			}
-			if (previousRoute) {
-				currentRoute = previousRoute
-			}
 		}
 	}
 
@@ -1748,23 +1745,15 @@
 			path = path.substr(0, queryStart)
 		}
 
-		// Get all routes and check if there's
-		// an exact match for the current path
-		var keys = Object.keys(router)
-		var index = keys.indexOf(path)
-
-		if (index !== -1){
-			m.mount(root, router[keys [index]])
-			return true
-		}
-
 		for (var route in router) {
 			if (hasOwn.call(router, route)) {
 				if (route === path) {
-					m.mount(root, router[route])
+					if (m.mount(root, router[route]) == null) {
+						// onunload e.prevendDefault() was called
+						currentRoute = previousRoute
+					}
 					return true
 				}
-
 				var matcher = new RegExp("^" + route
 					.replace(/:[^\/]+?\.{3}/g, "(.*?)")
 					.replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
@@ -1778,7 +1767,11 @@
 							routeParams[key.replace(/:|\./g, "")] =
 								decodeURIComponent(values[i])
 						})
-						m.mount(root, router[route])
+						if (m.mount(root, router[route]) == null) {
+							// onunload e.prevendDefault() was called
+							currentRoute = previousRoute
+						}
+
 					})
 					/* eslint-enable no-loop-func */
 					return true
