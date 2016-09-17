@@ -8,7 +8,7 @@ module.exports = function($window, mount) {
 	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 
 	var RouteComponent = {view: function() {
-		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
+		return [currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))]
 	}}
 	function defaultRender(vnode) {
 		return vnode
