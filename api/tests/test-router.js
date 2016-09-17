@@ -293,6 +293,32 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
+				o("changing `vnode.key` in `render` resets the component", function(done, timeout){
+					timeout(FRAME_BUDGET * 3)
+
+					var oninit = o.spy()
+					var Component = {
+						oninit: oninit,
+						view: function(){
+							return m("div")
+						}
+					}
+					$window.location.href = prefix + "/abc"
+					route(root, "/abc", {
+						"/:id": {render: function(vnode) {
+							return m(Component, {key: vnode.attrs.id})
+						}}
+					})
+					setTimeout(function(){
+						o(oninit.callCount).equals(1)
+						route.set('/def')
+						setTimeout(function(){
+							o(oninit.callCount).equals(2)
+							done()
+						}, FRAME_BUDGET)
+					}, FRAME_BUDGET)
+				})
+
 				o("accepts RouteResolver without `onmatch` method as payload", function() {
 					var renderCount = 0
 					var Component = {
