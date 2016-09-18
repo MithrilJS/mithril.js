@@ -97,9 +97,7 @@
 
 	function parseTagAttrs(cell, tag) {
 		var classes = []
-		/* eslint-disable max-len */
 		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
-		/* eslint-enable max-len */
 		var match
 
 		while ((match = parser.exec(tag))) {
@@ -829,7 +827,7 @@
 		return data
 	}
 
-	function buildObject( // eslint-disable-line max-statements
+	function buildObject(
 		data,
 		cached,
 		editable,
@@ -1176,10 +1174,8 @@
 				try {
 					nodes[i].parentNode.removeChild(nodes[i])
 				} catch (e) {
-					/* eslint-disable max-len */
 					// ignore if this fails due to order of events (see
 					// http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node)
-					/* eslint-enable max-len */
 				}
 				cached = [].concat(cached)
 				if (cached[i]) unload(cached[i])

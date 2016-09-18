@@ -51,8 +51,8 @@ describe("m.prop()", function () {
 		function Thing(name) {
 			this.name = name
 		}
-		Thing.prototype.toJSON = function() {
-			return {kind: 'Thing', name: this.name}
+		Thing.prototype.toJSON = function () {
+			return {kind: "Thing", name: this.name}
 		}
 		var banana = m.prop(new Thing("bannana"))
 		expect(JSON.stringify(banana)).to.equal('{"kind":"Thing","name":"bannana"}')

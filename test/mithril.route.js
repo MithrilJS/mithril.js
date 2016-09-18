@@ -875,7 +875,7 @@ describe("m.route()", function () {
 		expect(mock.history.$$length).to.equal(0)
 	})
 
-	dit("modify history when redirecting to same route with different parameters", function(root) {
+	dit("modify history when redirecting to same route with different parameters", function (root) {
 		mode("search")
 		mock.history.$$length = 0
 
@@ -885,12 +885,12 @@ describe("m.route()", function () {
 		})
 
 		route("/b")
-		route("/b", { foo: "bar" })
+		route("/b", {foo: "bar"})
 
 		expect(mock.history.$$length).to.equal(2)
 	})
 
-	dit("doesn't modify history when redirecting to same route with same parameters", function(root) {
+	dit("doesn't modify history when redirecting to same route with same parameters", function (root) {
 		mode("search")
 		mock.history.$$length = 0
 
@@ -899,8 +899,8 @@ describe("m.route()", function () {
 			"/b": pure(function () { return "b" })
 		})
 
-		route("/b", { foo: "bar" })
-		route("/b", { foo: "bar" })
+		route("/b", {foo: "bar"})
+		route("/b", {foo: "bar"})
 
 		expect(mock.history.$$length).to.equal(1)
 	})
