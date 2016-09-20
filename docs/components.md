@@ -228,7 +228,7 @@ m(BetterHeader, {
 })
 
 // clearer consumption use case
-m(Header, {
+m(BetterHeader, {
 	title: [
 		m("h1", "My title"),
 		m("small", "A small note"),
