@@ -370,7 +370,7 @@ var BetterSelect = {
 // PREFER refactor variability out
 var BetterLabeledComponent = {
 	view: function(vnode) {
-		m("div", [
+		return m("div", [
 			m("label", vnode.attrs.title),
 			vnode.children,
 		])
