@@ -186,20 +186,6 @@ m("select", {selectedIndex: 0}, [
 
 ---
 
-### SVG and MathML
-
-Mithril fully supports SVG. Xlink is also supported, but unlike in pre-v1.0 versions of Mithril, must have the namespace explicitly defined:
-
-```javascript
-m("svg", [
-	m("image[xlink:href='image.gif']")
-])
-```
-
-MathML is also fully supported.
-
----
-
 ### Components
 
 [Components](components.md) allow you to encapsulate logic into a unit and use it as if it was an element. They are the base for making large, scalable applications.
@@ -279,6 +265,20 @@ To learn more about keys, [see the keys page](keys.md)
 
 ---
 
+### SVG and MathML
+
+Mithril fully supports SVG. Xlink is also supported, but unlike in pre-v1.0 versions of Mithril, must have the namespace explicitly defined:
+
+```javascript
+m("svg", [
+	m("image[xlink:href='image.gif']")
+])
+```
+
+MathML is also fully supported.
+
+---
+
 ### Making templates dynamic
 
 Since nested vnodes are just plain Javascript expressions, you can simply use Javascript facilities to manipulate them
@@ -326,7 +326,7 @@ You cannot use Javascript statements such as `if` or `for` within Javascript exp
 
 ---
 
-### Anti-patterns
+### Avoid Anti-patterns
 
 Although Mithril is flexible, some code patterns are discouraged:
 
