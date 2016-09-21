@@ -65,7 +65,4 @@ function hyperscript(selector) {
 	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
 
-hyperscript.trust = require("./trust")
-hyperscript.fragment = require("./fragment")
-
 module.exports = hyperscript
