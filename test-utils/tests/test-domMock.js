@@ -904,6 +904,63 @@ o.spec("domMock", function() {
 				o(select.selectedIndex).equals(-1)
 			})
 		})
+		o.spec("canvas width and height", function() {
+			o("setting property works", function() {
+				var canvas = $document.createElement("canvas")
+				
+				canvas.width = 100
+				o(canvas.attributes["width"].nodeValue).equals("100")
+				o(canvas.width).equals(100)
+				
+				canvas.height = 100
+				o(canvas.attributes["height"].nodeValue).equals("100")
+				o(canvas.height).equals(100)
+			})
+			o("setting string casts to number", function() {
+				var canvas = $document.createElement("canvas")
+				
+				canvas.width = "100"
+				o(canvas.attributes["width"].nodeValue).equals("100")
+				o(canvas.width).equals(100)
+				
+				canvas.height = "100"
+				o(canvas.attributes["height"].nodeValue).equals("100")
+				o(canvas.height).equals(100)
+			})
+			o("setting float casts to int", function() {
+				var canvas = $document.createElement("canvas")
+				
+				canvas.width = 1.2
+				o(canvas.attributes["width"].nodeValue).equals("1")
+				o(canvas.width).equals(1)
+				
+				canvas.height = 1.2
+				o(canvas.attributes["height"].nodeValue).equals("1")
+				o(canvas.height).equals(1)
+			})
+			o("setting percentage fails", function() {
+				var canvas = $document.createElement("canvas")
+				
+				canvas.width = "100%"
+				o(canvas.attributes["width"].nodeValue).equals("0")
+				o(canvas.width).equals(0)
+				
+				canvas.height = "100%"
+				o(canvas.attributes["height"].nodeValue).equals("0")
+				o(canvas.height).equals(0)
+			})
+			o("setting attribute works", function() {
+				var canvas = $document.createElement("canvas")
+				
+				canvas.setAttribute("width", "100%")
+				o(canvas.attributes["width"].nodeValue).equals("100%")
+				o(canvas.width).equals(100)
+				
+				canvas.setAttribute("height", "100%")
+				o(canvas.attributes["height"].nodeValue).equals("100%")
+				o(canvas.height).equals(100)
+			})
+		})
 	})
 	o.spec("className", function() {
 		o("works", function() {

@@ -76,6 +76,16 @@ o.spec("attributes", function() {
 			o(a.dom.attributes["href"]).equals(undefined)
 		})
 	})
+	o.spec("canvas width and height", function() {
+		o("uses attribute API", function() {
+			var canvas = {tag: "canvas", attrs: {width: "100%"}}
+			
+			render(root, canvas)
+			
+			o(canvas.dom.attributes["width"].nodeValue).equals("100%")
+			o(canvas.dom.width).equals(100)
+		})
+	})
 	o.spec("svg class", function() {
 		o("when className is specified then it should be added as a class", function() {
 			var a = {tag: "svg", attrs: {className: "test"}}

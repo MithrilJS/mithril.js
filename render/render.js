@@ -445,7 +445,7 @@ module.exports = function($window) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
 	function isAttribute(attr) {
-		return attr === "href" || attr === "list" || attr === "form"// || attr === "type" || attr === "width" || attr === "height"
+		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
 	}
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)

@@ -265,6 +265,17 @@ module.exports = function() {
 						enumerable: true,
 					})
 				}
+				
+				if (element.nodeName === "CANVAS") {
+					Object.defineProperty(element, "width", {
+						get: function() {return this.attributes["width"] ? Math.floor(parseInt(this.attributes["width"].nodeValue) || 0) : 300},
+						set: function(value) {this.setAttribute("width", Math.floor(Number(value) || 0).toString())},
+					})
+					Object.defineProperty(element, "height", {
+						get: function() {return this.attributes["height"] ? Math.floor(parseInt(this.attributes["height"].nodeValue) || 0) : 300},
+						set: function(value) {this.setAttribute("height", Math.floor(Number(value) || 0).toString())},
+					})
+				}
 
 				function getOptions(element) {
 					var options = []

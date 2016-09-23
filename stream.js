@@ -1,2 +1,1 @@
-var StreamFactory = require("./util/stream")
-module.exports = StreamFactory(console.log.bind(console))
+module.exports = require("./util/stream")(console.log.bind(console))

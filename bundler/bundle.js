@@ -2,107 +2,125 @@
 
 var fs = require("fs")
 var path = require("path")
+var proc = require("child_process")
 
-module.exports = function(input, output, options) {
-	function run(e, file) {
+function read(filepath) {
+	try {return fs.readFileSync(filepath, "utf8")} catch (e) {throw new Error("File does not exist: " + filepath)}
+}
+function isFile(filepath) {
+	try {return fs.statSync(filepath).isFile()} catch (e) {return false}
+}
+function parse(file) {
+	var json = read(file)
+	try {return JSON.parse(json)} catch (e) {throw new Error("invalid JSON: " + json)}
+}
+
+function run(input, output) {
+	try {
 		var modules = {}
-		var usedVariables = {}
-		var globals = {}
-
-		function resolve(dir, data) {
-			var replacements = []
+		var bindings = {}
+		var declaration = /^\s*(?:var|let|const|function)[\t ]+([\w_$]+)/gm
+		var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
+		var uuid = 0
+		function process(filepath, data) {
+			data.replace(declaration, function(match, binding) {bindings[binding] = 0})
 			
-			var globalMatch = data.match(/window\.([\w_$]+)\s*=\s*/)
-			if (globalMatch) globals[globalMatch[1]] = true
-			
-			data = data.replace(/^\s*\/\/[^\n]*/g, "").replace(/((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)require\(([^\)]+)\)/g, function(match, def, variable, eq, dep) {
-				usedVariables[variable] = usedVariables[variable] ? usedVariables[variable]++ : 1
-
-				var filename = new Function("return " + dep).call()
+			return data.replace(include, function(match, def, variable, eq, dep, rest) {
+				var filename = new Function("return " + dep).call(), pre = ""
 				
-				//resolve npm dependencies
-				if (filename[0] !== ".") {
-					var meta
-					try {meta = JSON.parse(fs.readFileSync("./node_modules/" + filename + "/package.json"))} catch (e) {meta = {}}
-					var dependencyEntry = "./node_modules/" + filename + "/" + (meta.main || filename + ".js")
-					try {fs.statSync(dependencyEntry).isFile()} catch (e) {dependencyEntry = "./node_modules/" + filename + "/index.js"}
-					return process(dependencyEntry)
-				}
-				
-				//resolve local dependencies
-				return process(dir + "/" + filename + ".js")
-				
-				function process(dependency) {
-					var normalized = path.resolve(dir, filename)
-					if (modules[normalized] === undefined) {
-						modules[normalized] = variable
-						return resolve(path.dirname(dependency), exportCode(dependency, def, variable, eq))
-					}
-					else {
-						if (modules[normalized] !== variable) {
-							replacements.push({variable: variable, replacement: modules[normalized]})
-						}
-						return ""
-					}
-				}
+				def = def || "", variable = variable || "", eq = eq || "", rest = rest || ""
+				if (def[0] === ",") def = "\nvar ", pre = "\n"
+				var dependency = resolve(filepath, filename)
+				var code = process(dependency, pre + (modules[dependency] == null ? exportCode(filename, dependency, def, variable, eq, rest, uuid) : def + variable + eq + modules[dependency]))
+				modules[dependency] = rest ? "_" + uuid : variable
+				uuid++
+				return code + rest
 			})
-			if (replacements.length > 0) {
-				for (var i = 0; i < replacements.length; i++) {
-					data = data.replace(new RegExp("\\b" + replacements[i].variable + "\\b", "g"), replacements[i].replacement)
-				}
-			}
-			return data
-				.replace(/(?:var|let|const)[\t ]([\w_$\.]+)(\s*=\s*)\1([\r\n;]+)/g, "$3") // remove assignments to itself
-				.replace(/([\r\n]){2,}/g, "$1") // remove multiple consecutive line breaks
-				.replace(/\}[\r\n]+\(/g, "}(") // remove space from iife
-				.replace(/(window\.){2}/g, "") // collapse window references
-		}
-
-		function exportCode(file, def, variable, eq) {
-			var declared = {}
-			return fixCollisions(fs.readFileSync(file, "utf8"))
-				.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
-				.replace(/module\.exports\s*=\s*/gm, def + variable + eq)
-				.replace(/module\.exports(\.|\[)/gm, function(match, token, length, code) {
-					if (new RegExp("\\b" + variable + "\\b").test(variable) && !declared[variable]) {
-						declared[variable] = true
-						return def + variable + eq + "{}\n" + variable + token
-					}
-					return variable + token
-				})
-		}
-
-		function fixCollisions(code) {
-			for (var variable in usedVariables) {
-				var collision = new RegExp("([^\\.])\\b" + variable + "\\b(?![\"'`])", "g")
-				var exported = new RegExp("module\\.exports\\s*=\\s*" + variable)
-				if (collision.test(code) && !exported.test(code) && !globals[variable.match(/[^\.]+/)]) {
-					var fixed = variable + usedVariables[variable]++
-					code = code.replace(collision, "$1" + fixed)
-				}
-			}
-			return code
-		}
-
-		function setVersion(code) {
-			var metadata = JSON.parse(fs.readFileSync(__dirname + "/../package.json"))
-			return code.replace("bleeding-edge", metadata.version)
-		}
-
-		function bundle(input, output) {
-			console.log("bundling...")
-			var code = setVersion(resolve(path.dirname(input), fs.readFileSync(input, "utf8")))
-			if (new Function(code)) fs.writeFileSync(output, "new function() {\n" + code + "\n}", "utf8")
-			console.log("done")
 		}
 		
-		if (file !== output && file !== output.replace(/\.js$/, ".min.js")) bundle(input, output)
+		function resolve(filepath, filename) {
+			if (filename[0] !== ".") {
+				// resolve as npm dependency
+				var packagePath = "./node_modules/" + filename + "/package.json"
+				var meta = isFile(packagePath) ? parse(packagePath) : {}
+				var main = "./node_modules/" + filename + "/" + (meta.main || filename + ".js")
+				return path.resolve(isFile(main) ? main : "./node_modules/" + filename + "/index.js")
+			}
+			else {
+				// resolve as local dependency
+				return path.resolve(path.dirname(filepath), filename + ".js")
+			}
+		}
+		
+		function exportCode(filename, filepath, def, variable, eq, rest, uuid) {
+			var code = read(filepath)
+			// if there's a syntax error, report w/ proper stack trace
+			try {new Function(code)} catch (e) {
+				proc.exec("node " + filename, function(error) {
+					if (error !== null) console.log("\x1b[31m" + error.message)
+				})
+			}
+			
+			// disambiguate collisions
+			var ignored = {}
+			code.replace(include, function(match, def, variable, eq, dep, rest) {
+				var filename = new Function("return " + dep).call()
+				var binding = modules[resolve(filepath, filename)]
+				if (binding != null) ignored[binding] = true
+			})
+			if (code.match(new RegExp("module\\.exports\\s*=\\s*" + variable + "\s*$", "m"))) ignored[variable] = true
+			for (var binding in bindings) {
+				if (!ignored[binding]) {
+					var before = code
+					code = code.replace(new RegExp("(\\b)" + binding + "\\b", "g"), binding + bindings[binding])
+					if (before !== code) bindings[binding]++
+				}
+			}
+			
+			// fix strings that got mangled by collision disambiguation
+			var string = /(["'])((?:\\\1|.)*?)(\1)/g
+			var candidates = Object.keys(bindings).map(function(binding) {return binding + (bindings[binding] - 1)}).join("|")
+			code = code.replace(string, function(match, open, data, close) {
+				var variables = new RegExp(Object.keys(bindings).map(function(binding) {return binding + (bindings[binding] - 1)}).join("|"), "g")
+				var fixed = data.replace(variables, function(match) {
+					return match.replace(/\d+$/, "")
+				})
+				return open + fixed + close
+			})
+			
+			//fix props
+			var props = new RegExp("(\\.\\s*)(" + candidates + ")|([\\{,]\\s*)(" + candidates + ")(\\s*:)", "gm")
+			code = code.replace(props, function(match, dot, a, pre, b, post) {
+				if (dot) return dot + a.replace(/\d+$/, "")
+				else return pre + b.replace(/\d+$/, "") + post
+			})
+			
+			return code
+				.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
+				.replace(/module\.exports\s*=\s*/gm, rest ? "var _" + uuid + eq : def + (rest ? "_" : "") + variable + eq) // export
+				+ (rest ? "\n" + def + variable + eq + "_" + uuid : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
+		}
+		
+		var versionTag = "bleeding-edge"
+		var packageFile = __dirname + "/../package.json"
+		var code = process(path.resolve(input), read(input))
+			.replace(/^\s*((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)(\2)(?=[\s]+(\w)|;|$)/gm, "") // remove assignments to self
+			.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
+			.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
+			.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
+		
+		fs.writeFileSync(output, "new function() {\n" + code + "\n}", "utf8")
 	}
-	run()
+	catch (e) {
+		console.error(e.message)
+	}
+}
 
+module.exports = function(input, output, options) {
+	run(input, output)
 	if (options && options.watch) {
-		fs.watch(process.cwd(), {recursive: true}, function(type, file) {
-			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run()
+		fs.watch(process.cwd(), {recursive: true}, function(file, type) {
+			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run(input, output)
 		})
 	}
 }
