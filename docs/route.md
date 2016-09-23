@@ -92,7 +92,7 @@ The `onmatch` hook is called when the router needs to find a component to render
 
 This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading.
 
-`routeResolver.onmatch(vnode, resolve)`
+`routeResolver.onmatch(resolve, args, requestedPath)`
 
 Argument        | Type                  | Description
 --------------- | --------------------- | ---
