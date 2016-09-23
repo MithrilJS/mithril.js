@@ -254,7 +254,7 @@ var ComponentFactory = function(greeting) {
 	}
 }
 m.render(document.body, m(ComponentFactory("hello")))
-// caling a second time recreates div from scratch rather than doing nothing
+// calling a second time recreates div from scratch rather than doing nothing
 m.render(document.body, m(ComponentFactory("hello")))
 
 // PREFER
@@ -264,6 +264,6 @@ var Component = {
 	}
 }
 m.render(document.body, m(Component, {greeting: "hello"}))
-// caling a second time does not modify DOM
+// calling a second time does not modify DOM
 m.render(document.body, m(Component, {greeting: "hello"}))
 ```
