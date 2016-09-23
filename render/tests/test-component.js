@@ -5,11 +5,14 @@ var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
 o.spec("component", function() {
-	var $window, root, render
+	var $window, root, renderer, render, Component
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		
+		renderer = vdom($window)
+		render = renderer.render
+		Component = renderer.Component
 	})
 
 	o.spec("basics", function() {
@@ -693,73 +696,68 @@ o.spec("component", function() {
 				o(vnode.state.data[0]).equals(body)
 			}
 		})
-		o("the view and hooks are looked up on the state object", function() {
-			var state = {
-				oncreate: o.spy(),
-				onbeforeupdate: o.spy(),
-				onupdate: o.spy(),
-				onbeforeremove: o.spy(function(vnode, done) {done()}),
-				onremove: o.spy(),
-				view: o.spy()
-			}
-			var context
-			var component = {
-				oninit: o.spy(function(vnode) {
-					context = this
-					vnode.state = state
-				}),
-				view: o.spy(function() {
-					return ""
-				})
-			}
-			render(root, [{tag: component}])
+		o("Classes can be sued as components", function() {
+			var proto = new Component()
+			
+			var state, context
 
-			o(component.oninit.callCount).equals(1)
-			o(component.view.callCount).equals(0)
-			o(state.view.callCount).equals(1)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(0)
-			o(state.onupdate.callCount).equals(0)
-			o(state.onbeforeremove.callCount).equals(0)
-			o(state.onremove.callCount).equals(0)
+			proto.oninit = o.spy(function(vnode) {
+				context = this
+			})
+			proto.oncreate = o.spy()
+			proto.onbeforeupdate = o.spy()
+			proto.onupdate = o.spy()
+			proto.onbeforeremove = o.spy(function(vnode, done) {done()})
+			proto.onremove = o.spy()
+			proto.view = o.spy(function() {
+				return ""
+			})
+			
+			function MyComponent(){}
+			MyComponent.prototype = proto
 
-			render(root, [{tag: component}])
+			render(root, [{tag: MyComponent}])
 
-			o(component.oninit.callCount).equals(1)
-			o(component.view.callCount).equals(0)
-			o(state.view.callCount).equals(2)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(1)
-			o(state.onupdate.callCount).equals(1)
-			o(state.onbeforeremove.callCount).equals(0)
-			o(state.onremove.callCount).equals(0)
+			o(proto.view.callCount).equals(1)
+			o(proto.oncreate.callCount).equals(1)
+			o(proto.onbeforeupdate.callCount).equals(0)
+			o(proto.onupdate.callCount).equals(0)
+			o(proto.onbeforeremove.callCount).equals(0)
+			o(proto.onremove.callCount).equals(0)
+
+			render(root, [{tag: MyComponent}])
+
+			o(proto.view.callCount).equals(2)
+			o(proto.oncreate.callCount).equals(1)
+			o(proto.onbeforeupdate.callCount).equals(1)
+			o(proto.onupdate.callCount).equals(1)
+			o(proto.onbeforeremove.callCount).equals(0)
+			o(proto.onremove.callCount).equals(0)
 
 			render(root, [])
 
-			o(component.oninit.callCount).equals(1)
-			o(component.view.callCount).equals(0)
-			o(state.view.callCount).equals(2)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(1)
-			o(state.onupdate.callCount).equals(1)
-			o(state.onbeforeremove.callCount).equals(1)
-			o(state.onremove.callCount).equals(1)
+			o(proto.view.callCount).equals(2)
+			o(proto.oncreate.callCount).equals(1)
+			o(proto.onbeforeupdate.callCount).equals(1)
+			o(proto.onupdate.callCount).equals(1)
+			o(proto.onbeforeremove.callCount).equals(1)
+			o(proto.onremove.callCount).equals(1)
 
-			o(component.oninit.this).equals(context)
-			o(state.view.this).equals(state)
-			o(state.oncreate.this).equals(state)
-			o(state.onbeforeupdate.this).equals(state)
-			o(state.onupdate.this).equals(state)
-			o(state.onbeforeremove.this).equals(state)
-			o(state.onremove.this).equals(state)
+			o(proto.oninit.this).equals(context)
+			o(proto.view.this).equals(context)
+			o(proto.oncreate.this).equals(context)
+			o(proto.onbeforeupdate.this).equals(context)
+			o(proto.onupdate.this).equals(context)
+			o(proto.onbeforeremove.this).equals(context)
+			o(proto.onremove.this).equals(context)
 
-			o(component.oninit.args.length).equals(1)
-			o(state.view.args.length).equals(1)
-			o(state.oncreate.args.length).equals(1)
-			o(state.onbeforeupdate.args.length).equals(2)
-			o(state.onupdate.args.length).equals(1)
-			o(state.onbeforeremove.args.length).equals(2)
-			o(state.onremove.args.length).equals(1)
+			o(proto.oninit.args.length).equals(1)
+			o(proto.view.args.length).equals(1)
+			o(proto.oncreate.args.length).equals(1)
+			o(proto.onbeforeupdate.args.length).equals(2)
+			o(proto.onupdate.args.length).equals(1)
+			o(proto.onbeforeremove.args.length).equals(2)
+			o(proto.onremove.args.length).equals(1)
 		})
 	})
 })
