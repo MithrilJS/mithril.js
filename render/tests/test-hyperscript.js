@@ -427,8 +427,7 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("b")
 		})
-	})
-	o("works with functions", function() {
+		o("works with functions", function() {
 			var component = o.spy()
 			
 			var vnode = m(component, {id: "a"}, "b")
