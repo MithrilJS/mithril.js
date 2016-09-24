@@ -764,7 +764,7 @@ o.spec("component", function() {
 		})
 		o("Factory functions can be used as components", function() {
 			var state, context
-			function component() {}
+			function component() {
 				return state = {
 					oninit: o.spy(function(vnode) {
 						o(this).equals(vnode.state)
