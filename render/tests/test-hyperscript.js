@@ -433,7 +433,7 @@ o.spec("hyperscript", function() {
 			
 			var vnode = m(component, {id: "a"}, "b")
 
-			o(component.callcount)equals(0)
+			o(component.callcount).equals(0)
 			
 			o(vnode.tag).equals(component)
 			o(vnode.attrs.id).equals("a")
