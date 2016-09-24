@@ -413,7 +413,7 @@ o.spec("hyperscript", function() {
 		})
 	})
 	o.spec("components", function() {
-		o("works", function() {
+		o("works with POJOs", function() {
 			var component = {
 				view: function() {
 					return m("div")
@@ -421,6 +421,19 @@ o.spec("hyperscript", function() {
 			}
 			var vnode = m(component, {id: "a"}, "b")
 
+			o(vnode.tag).equals(component)
+			o(vnode.attrs.id).equals("a")
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0].tag).equals("#")
+			o(vnode.children[0].children).equals("b")
+		})
+		o("works with functions", function() {
+			var component = o.spy()
+			
+			var vnode = m(component, {id: "a"}, "b")
+
+			o(component.callcount).equals(0)
+			
 			o(vnode.tag).equals(component)
 			o(vnode.attrs.id).equals("a")
 			o(vnode.children.length).equals(1)

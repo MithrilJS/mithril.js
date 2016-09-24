@@ -6,6 +6,8 @@ module.exports = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 
+	function Component() {}
+
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 
@@ -91,12 +93,16 @@ module.exports = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		// For object literals since `Vnode()` always sets the `state` field.
-		if (!vnode.state) vnode.state = {}
-		assign(vnode.state, vnode.tag)
+		if (typeof vnode.tag === "function") {
+			vnode.state = vnode.tag.prototype instanceof Component ? new vnode.tag(vnode) : vnode.tag(vnode)
+		} else {
+			// For object literals since `Vnode()` always sets the `state` field.
+			if (!vnode.state) vnode.state = {}
+			assign(vnode.state, vnode.tag)
+		}
 
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(vnode.instance, hooks, ns)
@@ -257,7 +263,7 @@ module.exports = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
@@ -347,9 +353,9 @@ module.exports = function($window) {
 			expected++
 			vnode.attrs.onbeforeremove.call(vnode.state, vnode, once(continuation))
 		}
-		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
+		if (typeof vnode.tag !== "string" && vnode.state.onbeforeremove) {
 			expected++
-			vnode.tag.onbeforeremove.call(vnode.state, vnode, once(continuation))
+			vnode.state.onbeforeremove(vnode, once(continuation))
 		}
 		continuation()
 		function continuation() {
@@ -374,7 +380,7 @@ module.exports = function($window) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && vnode.state.onremove) vnode.state.onremove(vnode)
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
@@ -501,7 +507,7 @@ module.exports = function($window) {
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") forceComponentUpdate = vnode.state.onbeforeupdate(vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
@@ -530,5 +536,5 @@ module.exports = function($window) {
 		if ($doc.activeElement !== active) active.focus()
 	}
 
-	return {render: render, setEventCallback: setEventCallback}
+	return {Component: Component, render: render, setEventCallback: setEventCallback}
 }
