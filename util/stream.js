@@ -7,13 +7,13 @@ module.exports = function(log) {
 			if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 			return stream._state.value
 		}
-		initStream(stream, arguments)
+		initStream(stream)
 
 		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 
 		return stream
 	}
-	function initStream(stream, args) {
+	function initStream(stream) {
 		stream.constructor = createStream
 		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 		stream.map = map, stream.ap = ap, stream.of = createStream
@@ -27,7 +27,7 @@ module.exports = function(log) {
 						if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
 						return stream._state.error
 					}
-					initStream(errorStream, [])
+					initStream(errorStream)
 					initDependency(errorStream, [stream], noop, noop)
 					stream._state.errorStream = errorStream
 				}

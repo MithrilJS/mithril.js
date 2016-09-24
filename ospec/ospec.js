@@ -164,7 +164,7 @@ module.exports = new function init() {
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
 			if (compare(this.value, value)) record(null)
-			else record(serialize(this.value) + " " + verb + " " + serialize(value))
+			else record(serialize(this.value) + "\n" + verb + "\n" + serialize(value))
 			return function(message) {
 				var result = results[results.length - 1]
 				result.message = message + "\n\n" + result.message
@@ -198,7 +198,7 @@ module.exports = new function init() {
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
-				console.error(r.context + ": " + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 				status = 1
 			}
 		}

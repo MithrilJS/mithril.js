@@ -22,7 +22,7 @@ function run(input, output) {
 		var declaration = /^\s*(?:var|let|const|function)[\t ]+([\w_$]+)/gm
 		var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
 		var uuid = 0
-		function process(filepath, data) {
+		var process = function(filepath, data) {
 			data.replace(declaration, function(match, binding) {bindings[binding] = 0})
 			
 			return data.replace(include, function(match, def, variable, eq, dep, rest) {
@@ -38,7 +38,7 @@ function run(input, output) {
 			})
 		}
 		
-		function resolve(filepath, filename) {
+		var resolve = function(filepath, filename) {
 			if (filename[0] !== ".") {
 				// resolve as npm dependency
 				var packagePath = "./node_modules/" + filename + "/package.json"
@@ -52,7 +52,7 @@ function run(input, output) {
 			}
 		}
 		
-		function exportCode(filename, filepath, def, variable, eq, rest, uuid) {
+		var exportCode = function(filename, filepath, def, variable, eq, rest, uuid) {
 			var code = read(filepath)
 			// if there's a syntax error, report w/ proper stack trace
 			try {new Function(code)} catch (e) {
@@ -63,7 +63,7 @@ function run(input, output) {
 			
 			// disambiguate collisions
 			var ignored = {}
-			code.replace(include, function(match, def, variable, eq, dep, rest) {
+			code.replace(include, function(match, def, variable, eq, dep) {
 				var filename = new Function("return " + dep).call()
 				var binding = modules[resolve(filepath, filename)]
 				if (binding != null) ignored[binding] = true
@@ -119,7 +119,7 @@ function run(input, output) {
 module.exports = function(input, output, options) {
 	run(input, output)
 	if (options && options.watch) {
-		fs.watch(process.cwd(), {recursive: true}, function(file, type) {
+		fs.watch(process.cwd(), {recursive: true}, function(file) {
 			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run(input, output)
 		})
 	}

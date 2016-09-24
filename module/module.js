@@ -11,7 +11,7 @@ require.$$current = function() {
 	return src.replace(/\.js$/, "")
 }
 
-var module = {
+window.module = {
 	get exports() {return require.$$modules[require.$$current()]},
 	set exports(value) {require.$$modules[require.$$current()] = value},
 }

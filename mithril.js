@@ -86,11 +86,11 @@ var _7 = function(log) {
 			if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 			return stream._state.value
 		}
-		initStream(stream, arguments)
+		initStream(stream)
 		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
 		return stream
 	}
-	function initStream(stream, args) {
+	function initStream(stream) {
 		stream.constructor = createStream
 		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
 		stream.map = map, stream.ap = ap, stream.of = createStream
@@ -103,7 +103,7 @@ var _7 = function(log) {
 						if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
 						return stream._state.error
 					}
-					initStream(errorStream, [])
+					initStream(errorStream)
 					initDependency(errorStream, [stream], noop, noop)
 					stream._state.errorStream = errorStream
 				}
@@ -291,7 +291,6 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key0) + (value1 != null && value1 !== "" ? "=" + encodeURIComponent(value1) : ""))
 	}
 }
-var StreamFactory = _7
 var _9 = function($window, Stream0) {
 	var callbackCount = 0
 	var oncompletion
@@ -414,7 +413,7 @@ var _9 = function($window, Stream0) {
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
 var requestService = _9(window, Stream)
-var _13 = function() {
+var _12 = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
 		var index0 = callbacks.indexOf(callback)
@@ -427,9 +426,9 @@ var _13 = function() {
     }
 	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
 }
-var redrawService = _13()
+var redrawService = _12()
 requestService.setCompletionCallback(redrawService.publish)
-var _15 = function($window) {
+var _14 = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
@@ -937,7 +936,7 @@ var _15 = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
-var renderService = _15(window)
+var renderService = _14(window)
 var throttle = function(callback1) {
 	//60fps translates to 16.6ms, round it down since setTimeout requires int
 	var time = 16
@@ -971,7 +970,7 @@ var autoredraw = function(root, renderer, pubsub, callback0) {
 	}
 	return root.redraw = run1
 }
-var _19 = function(renderer, pubsub) {
+var _18 = function(renderer, pubsub) {
 	return function(root, component) {
 		if (component === null) {
 			renderer.render(root, [])
@@ -988,7 +987,7 @@ var _19 = function(renderer, pubsub) {
 		run0()
 	}
 }
-m.mount = _19(renderService, redrawService)
+m.mount = _18(renderService, redrawService)
 var mount = m.mount
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1129,7 +1128,7 @@ var coreRouter = function($window) {
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-var _25 = function($window, mount0) {
+var _24 = function($window, mount0) {
 	var router = coreRouter($window)
 	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 	var RouteComponent = {view: function() {
@@ -1174,7 +1173,7 @@ var _25 = function($window, mount0) {
 	route.get = function() {return currentPath}
 	return route
 }
-m.route = _25(window, mount)
+m.route = _24(window, mount)
 m.withAttr = function(attrName, callback2, context) {
 	return function(e) {
 		return callback2.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))

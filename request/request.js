@@ -1,7 +1,6 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
-var StreamFactory = require("../util/stream")
 
 module.exports = function($window, Stream) {
 	var callbackCount = 0

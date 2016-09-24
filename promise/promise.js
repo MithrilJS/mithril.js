@@ -63,7 +63,7 @@ Promise.prototype.catch = function(onRejection) {
 }
 Promise.resolve = function(value) {
 	if (value instanceof Promise) return value
-	return new Promise(function(resolve, reject) {resolve(value)})
+	return new Promise(function(resolve) {resolve(value)})
 }
 Promise.reject = function(value) {
 	return new Promise(function(resolve, reject) {reject(value)})

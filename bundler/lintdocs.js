@@ -17,7 +17,7 @@ function ensureCodeIsHighlightable(file, data) {
 		block = block.slice(3, -3)
 		if (block.indexOf("javascript") !== 0) {
 			try {if (new Function(block)) console.log(file + " - javascript block missing language tag after triple backtick\n\n" + block + "\n\n---\n\n")}
-			catch (e) {}
+			catch (e) {/*not a js block, ignore*/}
 		}
 	})
 }
@@ -46,7 +46,7 @@ function ensureCodeIsRunnable(file, data) {
 	try {
 		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, {exports: {}}, function(dep) {
 			if (dep.indexOf("./mycomponent") === 0) return {view: function() {}}
-			if (dep === "mithril") return m
+			if (dep === "mithril") return global.m
 		})
 	}
 	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
@@ -93,7 +93,7 @@ global.document = window.document
 global.m = require("../index")
 
 //run
-traverseDirectory("./docs", function(pathname, stat, children) {
+traverseDirectory("./docs", function(pathname) {
 	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
