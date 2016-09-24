@@ -6,6 +6,8 @@ module.exports = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 
+	function Component() {}
+
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 
@@ -20,7 +22,7 @@ module.exports = function($window) {
 	}
 	function createNode(vnode, hooks, ns) {
 		var tag = vnode.tag
-		if (vnode.attrs != null) initLifecycle(vnode, "attrs", hooks)
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
 				case "#": return createText(vnode)
@@ -91,11 +93,15 @@ module.exports = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		// For object literals since `Vnode()` always sets the `state` field.
-		if (!vnode.state) vnode.state = {}
-		assign(vnode.state, vnode.tag)
+		if (typeof vnode.tag === "function") {
+			vnode.state = vnode.tag.prototype instanceof Component ? new vnode.tag(vnode) : vnode.tag(vnode)
+		} else {
+			// For object literals since `Vnode()` always sets the `state` field.
+			if (!vnode.state) vnode.state = {}
+			assign(vnode.state, vnode.tag)
+		}
 
-		initLifecycle(vnode, "state", hooks)
+		initLifecycle(vnode.tag, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
@@ -191,7 +197,7 @@ module.exports = function($window) {
 			vnode.events = old.events
 			if (shouldUpdate(vnode, old)) return
 			if (vnode.attrs != null) {
-				updateLifecycle(vnode, "attrs", hooks, recycling)
+				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
 			}
 			if (typeof oldTag === "string") {
 				switch (oldTag) {
@@ -258,7 +264,7 @@ module.exports = function($window) {
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
-		updateLifecycle(vnode, "state", hooks, recycling)
+		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
@@ -489,13 +495,13 @@ module.exports = function($window) {
 	}
 
 	//lifecycle
-	function initLifecycle(vnode, source, hooks) {
-		if (typeof vnode[source].oninit === "function") vnode[source].oninit.call(vnode.state, vnode)
-		if (typeof vnode[source].oncreate === "function") hooks.push(vnode[source].oncreate.bind(vnode.state, vnode))
+	function initLifecycle(source, vnode, hooks) {
+		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
+		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
 	}
-	function updateLifecycle(vnode, source, hooks, recycling) {
-		if (recycling) initLifecycle(vnode, source, hooks)
-		else if (typeof vnode[source].onupdate === "function") hooks.push(vnode[source].onupdate.bind(vnode.state, vnode))
+	function updateLifecycle(source, vnode, hooks, recycling) {
+		if (recycling) initLifecycle(source, vnode, hooks)
+		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
@@ -528,5 +534,5 @@ module.exports = function($window) {
 		if ($doc.activeElement !== active) active.focus()
 	}
 
-	return {render: render, setEventCallback: setEventCallback}
+	return {Component: Component, render: render, setEventCallback: setEventCallback}
 }
