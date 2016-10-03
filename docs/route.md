@@ -94,12 +94,12 @@ This method also allows you to asynchronously define what component will be rend
 
 `routeResolver.onmatch(resolve, args, requestedPath)`
 
-Argument        | Type                  | Description
---------------- | --------------------- | ---
-`resolve`       | `Function(Component)` | Call this function with a component as the first argument to use it as the route's component
-`args`          | `Object`              | The [routing parameters](#routing-parameters)
-`requestedPath` | `String`              | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-**returns**     |                       | Returns `undefined`
+Argument        | Type                     | Description
+--------------- | ------------------------ | ---
+`resolve`       | `Component -> undefined` | Call this function with a component as the first argument to use it as the route's component
+`args`          | `Object`                 | The [routing parameters](#routing-parameters)
+`requestedPath` | `String`                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+**returns**     |                          | Returns `undefined`
 
 ##### routeResolver.render
 

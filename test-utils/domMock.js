@@ -86,26 +86,26 @@ module.exports = function() {
 	 * @return {string[]}
 	 */
 	function splitDeclList(declList) {
-	  var indices = [], res = [], match
+		var indices = [], res = [], match
 
-	  // remove comments, preserving comments in strings.
-	  declList = declList.replace(
-	  	/("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*')|\/\*[\s\S]*?\*\//g,
-	  	function(m, str){
-	  	  return str || ''
-	  	}
-	  )
-	  /*eslint-disable no-cond-assign*/
-	  while (match = declListTokenizer.exec(declList)) {
-	  	if (match[0] === ";") indices.push(match.index)
-	  }
-	  /*eslint-enable no-cond-assign*/
-	  for (var i = indices.length; i--;){
-	    res.unshift(declList.slice(indices[i] + 1))
-	    declList = declList.slice(0, indices[i])
-	  }
-	  res.unshift(declList)
-	  return res
+		// remove comments, preserving comments in strings.
+		declList = declList.replace(
+			/("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*')|\/\*[\s\S]*?\*\//g,
+			function(m, str){
+				return str || ''
+			}
+		)
+		/*eslint-disable no-cond-assign*/
+		while (match = declListTokenizer.exec(declList)) {
+			if (match[0] === ";") indices.push(match.index)
+		}
+		/*eslint-enable no-cond-assign*/
+		for (var i = indices.length; i--;){
+			res.unshift(declList.slice(indices[i] + 1))
+			declList = declList.slice(0, indices[i])
+		}
+		res.unshift(declList)
+		return res
 	}
 
 	var activeElement
