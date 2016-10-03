@@ -29,7 +29,7 @@ Argument               | Type                                     | Required | D
 ---------------------- | ---------------------------------------- | -------- | ---
 `root`                 | `Element`                                | Yes      | A DOM element that will be the parent node to the subtree
 `defaultRoute`         | `String`                                 | Yes      | The route to redirect to if the current URL does not match a route
-`routes`               | `Object<String,Component|RouteResolver>` | Yes      | An object whose keys are route strings and values are either components or a [RouteResolver](advanced-component-resolution.md)
+`routes`               | `Object<String,Component|RouteResolver>` | Yes      | An object whose keys are route strings and values are either components or a [RouteResolver](#routeresolver)
 **returns**            |                                          |          | Returns `undefined`
 
 [How to read signatures](signatures.md)
