@@ -621,7 +621,7 @@ console.log(errored1.error()) // logs "Server is offline"
 
 // via `.error`
 var errored2 = m.prop("hello")
-errored.error("Server is offline")
+errored2.error("Server is offline")
 console.log(errored2.error()) // logs "Server is offline"
 
 // by throwing an error in a chain
