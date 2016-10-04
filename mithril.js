@@ -1134,7 +1134,7 @@ var _24 = function($window, mount0) {
 	var router = coreRouter($window)
 	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 	var RouteComponent = {view: function() {
-		return currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))
+		return [currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))]
 	}}
 	function defaultRender(vnode1) {
 		return vnode1
