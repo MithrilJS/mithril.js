@@ -554,9 +554,9 @@ o.spec("route", function() {
 						done()					
 					}, FRAME_BUDGET)
 				})
-
-				o("routing with RouteResolver works more than once (#1286)", function(done, timeout){
-					timeout(FRAME_BUDGET * 3)
+				
+				o("routing with RouteResolver works more than once", function(done, timeout) {
+					timeout(100)
 
 					$window.location.href = prefix + "/a"
 					route(root, '/a', {
@@ -584,9 +584,9 @@ o.spec("route", function() {
 						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 				})
-
+				
 				o("calling route.set invalidates pending onmatch resolution", function(done, timeout) {
-					timeout(50)
+					timeout(100)
 
 					var resolved
 					$window.location.href = prefix + "/a"
