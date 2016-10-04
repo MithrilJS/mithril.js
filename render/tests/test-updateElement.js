@@ -211,4 +211,30 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.attributes["class"].nodeValue).equals("b")
 	})
+	o("updates keyed elements", function() {
+
+		return console.log('Pending test (TODO: Delete this line)')
+
+		var child1 = {tag: "h1", state: {}}
+		var child2 = {tag: "h2", state: {}}
+
+		var vnode = {tag: "header", state: {}, children: [
+			{tag: "div", key: 1, state: {}, children: [child1]},
+		]}
+		var updated = {tag: "header", state: {}, children:[
+			{tag: "div", key: 2, state:{}, children: [child2]},
+		]}
+
+		render(root, [vnode])
+		o(vnode.children[0].children[0].tag).equals('h1')
+		o(vnode.dom.childNodes[0].childNodes[0].nodeName).equals("H1")
+
+		render(root, [updated])
+		o(updated.children[0].children[0].tag).equals('h2')
+		o(updated.dom.childNodes[0].childNodes[0].nodeName).equals("H2")
+
+		render(root, [vnode])
+		o(vnode.children[0].children[0].tag).equals('h1')
+		o(vnode.dom.childNodes[0].childNodes[0].nodeName).equals("H1")
+	})
 })
