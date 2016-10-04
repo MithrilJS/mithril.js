@@ -148,7 +148,6 @@ o.spec("oninit", function() {
 		render(root, [])
 		render(root, [updated])
 
-		o(vnode.dom).equals(updated.dom)
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
@@ -200,17 +199,5 @@ o.spec("oninit", function() {
 
 		o(vnode.dom.oninit).equals(undefined)
 		o(vnode.dom.attributes["oninit"]).equals(undefined)
-	})
-	o("calls oninit on recycle", function() {
-		var create = o.spy()
-		var vnodes = [{tag: "div", key: 1, attrs: {oninit: create}}]
-		var temp = []
-		var updated = [{tag: "div", key: 1, attrs: {oninit: create}}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(create.callCount).equals(2)
 	})
 })

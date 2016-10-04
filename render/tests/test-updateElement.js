@@ -211,4 +211,38 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.attributes["class"].nodeValue).equals("b")
 	})
+	o("restores correctly when recycling", function() {
+		var vnode = {tag: "div", key: 1}
+		var updated = {tag: "div", key: 2}
+
+		render(root, [vnode])
+		var a = vnode.dom
+
+		render(root, [updated])
+
+		render(root, [vnode])
+		var c = vnode.dom
+		
+		o(root.childNodes.length).equals(1)
+		o(a).equals(c)
+	})
+	o("restores correctly when recycling via map", function() {
+		var a = {tag: "div", key: 1}
+		var b = {tag: "div", key: 2}
+		var c = {tag: "div", key: 3}
+		var d = {tag: "div", key: 4}
+		var e = {tag: "div", key: 5}
+		var f = {tag: "div", key: 6}
+
+		render(root, [a, b, c])
+		var x = root.childNodes[1]
+
+		render(root, [d])
+
+		render(root, [e, b, f])
+		var y = root.childNodes[1]
+		
+		o(root.childNodes.length).equals(3)
+		o(x).equals(y)
+	})
 })

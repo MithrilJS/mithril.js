@@ -547,7 +547,7 @@ var _14 = function($window) {
 				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map0
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldStart], v = vnodes[start]
-					if (o === v) oldStart++, start++
+					if (o === v && !recycling) oldStart++, start++
 					else if (o != null && v != null && o.key === v.key) {
 						oldStart++, start++
 						updateNode(parent0, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
@@ -555,10 +555,10 @@ var _14 = function($window) {
 					}
 					else {
 						var o = old[oldEnd]
-						if (o === v) oldEnd--, start++
+						if (o === v && !recycling) oldEnd--, start++
 						else if (o != null && v != null && o.key === v.key) {
 							updateNode(parent0, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							if (start < end) insertNode(parent0, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+							if (recycling || start < end) insertNode(parent0, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 							oldEnd--, start++
 						}
 						else break
@@ -566,7 +566,7 @@ var _14 = function($window) {
 				}
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldEnd], v = vnodes[end]
-					if (o === v) oldEnd--, end--
+					if (o === v && !recycling) oldEnd--, end--
 					else if (o != null && v != null && o.key === v.key) {
 						updateNode(parent0, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						if (recycling && o.tag === v.tag) insertNode(parent0, toFragment(o), nextSibling)
