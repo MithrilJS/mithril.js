@@ -114,7 +114,9 @@ module.exports = function($window) {
 		vnode.dom.onclick = function(e) {
 			e.preventDefault()
 			e.redraw = false
-			setPath(vnode.attrs.href, undefined, undefined)
+			var href = this.getAttribute("href")
+			if (href.indexOf(prefix) === 0) href = href.slice(prefix.length)
+			setPath(href, undefined, undefined)
 		}
 	}
 

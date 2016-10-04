@@ -1123,7 +1123,9 @@ var coreRouter = function($window) {
 		vnode2.dom.onclick = function(e) {
 			e.preventDefault()
 			e.redraw = false
-			setPath(vnode2.attrs.href, undefined, undefined)
+			var href = this.getAttribute("href")
+			if (href.indexOf(prefix1) === 0) href = href.slice(prefix1.length)
+			setPath(href, undefined, undefined)
 		}
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}

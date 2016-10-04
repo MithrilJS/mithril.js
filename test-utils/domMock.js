@@ -60,6 +60,10 @@ module.exports = function() {
 			}
 		}
 	}
+	function getAttribute(name) {
+		if (this.attributes[name] == null) return null
+		return this.attributes[name].nodeValue
+	}
 	function setAttribute(name, value) {
 		var nodeValue = String(value)
 		this.attributes[name] = {
@@ -146,6 +150,7 @@ module.exports = function() {
 					appendChild: appendChild,
 					removeChild: removeChild,
 					insertBefore: insertBefore,
+					getAttribute: getAttribute,
 					setAttribute: setAttribute,
 					setAttributeNS: setAttributeNS,
 					removeAttribute: removeAttribute,

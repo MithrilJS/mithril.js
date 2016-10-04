@@ -313,6 +313,15 @@ o.spec("domMock", function() {
 		})
 	})
 
+	o.spec("getAttribute", function() {
+		o("works", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("id", "aaa")
+
+			o(div.getAttribute("id")).equals("aaa")
+		})
+	})
+	
 	o.spec("setAttribute", function() {
 		o("works", function() {
 			var div = $document.createElement("div")
