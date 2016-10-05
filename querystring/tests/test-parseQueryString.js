@@ -68,12 +68,6 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a[]=x&a[]=y&b[]=w&b[]=z")
 		o(data).deepEquals({a: ["x", "y"], b: ["w", "z"]})
 	})
-	/*TODO remove since build generates a[0]=b syntax
-	o("generates array for duplicate items", function() {
-		var data = parseQueryString("a=b&a=c&a=d")
-		o(data).deepEquals({a: ["b", "c", "d"]})
-	})
-	*/
 	o("casts booleans", function() {
 		var data = parseQueryString("a=true&b=false")
 		o(data).deepEquals({a: true, b: false})
@@ -86,10 +80,10 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a=NaN")
 		o(isNaN(data.a)).equals(true)
 	})
-	o("casts Date", function() {
-		var data = parseQueryString("a=" + new Date(0))
-		o(data.a instanceof Date).equals(true)
-		o(data.a.getTime()).equals(0)
+	o("does not casts Date", function() {
+		var data = parseQueryString("a=1970-01-01")
+		o(typeof data.a).equals("string")
+		o(data.a).equals("1970-01-01")
 	})
 	o("does not cast empty string to number", function() {
 		var data = parseQueryString("a=")

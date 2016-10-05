@@ -15,10 +15,6 @@ module.exports = function(string) {
 		if (value !== "" && !isNaN(number) || value === "NaN") value = number
 		else if (value === "true") value = true
 		else if (value === "false") value = false
-		else if (value.charAt(0) !== "/") {
-			var date = new Date(value)
-			if (!isNaN(date.getTime())) value = date
-		}
 
 		var levels = key.split(/\]\[?|\[/)
 		var cursor = data
