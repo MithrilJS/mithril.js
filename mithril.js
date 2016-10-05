@@ -1002,10 +1002,6 @@ var parseQueryString = function(string) {
 		if (value4 !== "" && !isNaN(number) || value4 === "NaN") value4 = number
 		else if (value4 === "true") value4 = true
 		else if (value4 === "false") value4 = false
-		else if (value4.charAt(0) !== "/") {
-			var date = new Date(value4)
-			if (!isNaN(date.getTime())) value4 = date
-		}
 		var levels = key3.split(/\]\[?|\[/)
 		var cursor = data0
 		if (key3.indexOf("[") > -1) levels.pop()
