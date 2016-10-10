@@ -294,7 +294,7 @@ o.spec("route", function() {
 				})
 
 				o("changing `vnode.key` in `render` resets the component", function(done, timeout){
-					timeout(FRAME_BUDGET * 3)
+					timeout(FRAME_BUDGET * 6)
 
 					var oninit = o.spy()
 					var Component = {
@@ -546,17 +546,17 @@ o.spec("route", function() {
 
 
 					o(route.get()).equals("/")
-					
+
 					route.set("/2")
 
 					setTimeout(function(){
 						o(route.get()).equals("/")
-						done()					
+						done()
 					}, FRAME_BUDGET)
 				})
-				
+
 				o("routing with RouteResolver works more than once", function(done, timeout) {
-					timeout(100)
+					timeout(200)
 
 					$window.location.href = prefix + "/a"
 					route(root, '/a', {
@@ -584,9 +584,9 @@ o.spec("route", function() {
 						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 				})
-				
+
 				o("calling route.set invalidates pending onmatch resolution", function(done, timeout) {
-					timeout(100)
+					timeout(200)
 
 					var resolved
 					$window.location.href = prefix + "/a"
