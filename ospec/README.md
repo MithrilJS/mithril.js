@@ -4,7 +4,7 @@
 
 Noiseless testing framework
 
-Version: 1.1 
+Version: 1.1
 License: MIT
 
 ## About
@@ -257,6 +257,42 @@ _o("a test", function() {
 	_o(1).equals(1)
 })
 _o.run()
+```
+
+### Running the test suite from the command-line
+
+ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
+
+`o.run()` is automatically called by the cli - no need to call it in your test code.
+
+#### Create an npm script in your package:
+```
+	"scripts": {
+		...
+		"test": "ospec",
+		...
+	}
+```
+
+```
+	$ npm test
+```
+
+#### (Optionally) Install Globally
+
+```
+	$ npm i -g ospec
+	$ ospec
+```
+
+#### (Optionally) Evaluate ES6+ code:
+
+One way to accomplish this would be to include the 'babel-cli' module (`npm i babel-cli`)
+
+(This would pre-suppose that you're already using babel in your project and thus have it configured to your liking).
+
+```
+	$ babel-node ospec
 ```
 
 ---
