@@ -9,6 +9,8 @@
   "keywords": [ "testing" ],
   "author": "Leo Horie <lhorie@hotmail.com>",
   "license": "MIT",
-  "bin": "./bin/ospec",
+  "bin": {
+    "ospec": "./bin/ospec"
+  },
   "repository": "lhorie/mithril.js#rewrite"
 }
