@@ -72,13 +72,13 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a=true&b=false")
 		o(data).deepEquals({a: true, b: false})
 	})
-	o("casts numbers", function() {
+	o("does not cast numbers", function() {
 		var data = parseQueryString("a=1&b=-2.3&c=0x10&d=1e2&e=Infinity")
-		o(data).deepEquals({a: 1, b: -2.3, c: 16, d: 100, e: Infinity})
+		o(data).deepEquals({a: "1", b: "-2.3", c: "16", d: "1e2", e: "Infinity"})
 	})
-	o("casts NaN", function() {
+	o("does not cast NaN", function() {
 		var data = parseQueryString("a=NaN")
-		o(isNaN(data.a)).equals(true)
+		o(data.a).equals("NaN")
 	})
 	o("does not casts Date", function() {
 		var data = parseQueryString("a=1970-01-01")

@@ -156,7 +156,8 @@ o.spec("api", function() {
 				done()
 			}, FRAME_BUDGET)
 		})
-		o("m.route.set", function(done) {
+		o("m.route.set", function(done, timeout) {
+			timeout(100)
 			var root = window.document.createElement("div")
 			m.route(root, "/a", {
 				"/:id": {view: function() {return m("div")}}

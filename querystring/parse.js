@@ -10,10 +10,7 @@ module.exports = function(string) {
 		var key = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
 
-		//TODO refactor out
-		var number = Number(value)
-		if (value !== "" && !isNaN(number) || value === "NaN") value = number
-		else if (value === "true") value = true
+		if (value === "true") value = true
 		else if (value === "false") value = false
 
 		var levels = key.split(/\]\[?|\[/)
