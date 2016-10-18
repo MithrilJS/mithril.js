@@ -13,10 +13,7 @@ module.exports = function(renderer, pubsub) {
 		}
 
 		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(
-				root,
-				Vnode(component, undefined, undefined, undefined, undefined, undefined)
-			)
+			renderer.render(root, Vnode(component, undefined, undefined, undefined, undefined, undefined))
 		})
 
 		run()
