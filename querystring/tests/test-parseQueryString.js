@@ -74,7 +74,7 @@ o.spec("parseQueryString", function() {
 	})
 	o("does not cast numbers", function() {
 		var data = parseQueryString("a=1&b=-2.3&c=0x10&d=1e2&e=Infinity")
-		o(data).deepEquals({a: "1", b: "-2.3", c: "16", d: "1e2", e: "Infinity"})
+		o(data).deepEquals({a: "1", b: "-2.3", c: "0x10", d: "1e2", e: "Infinity"})
 	})
 	o("does not cast NaN", function() {
 		var data = parseQueryString("a=NaN")
