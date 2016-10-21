@@ -1852,7 +1852,7 @@
 			return propify(promise.then(resolve, reject), initialValue)
 		}
 
-		prop.catch = prop.then.bind(null, null)
+		prop["catch"] = prop.then.bind(null, null)
 		return prop
 	}
 	// Promiz.mithril.js | Zolmeister | MIT
