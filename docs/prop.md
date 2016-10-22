@@ -49,7 +49,7 @@ Argument    | Type                 | Required | Description
 
 Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams)
 
-`stream = prop.combine(combiner, streams)`
+`stream = m.prop.combine(combiner, streams)`
 
 Argument    | Type                        | Required | Description
 ----------- | --------------------------- | -------- | ---
