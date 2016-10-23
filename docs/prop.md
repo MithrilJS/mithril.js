@@ -555,7 +555,7 @@ var errored2 = m.prop.combine(function(stream) {
 	if (typeof stream() !== "string") {
 		throw new Error("Not a string")
 	}
-	return value
+	return stream()
 }, [stream])
 // errored2 is in an errored state
 ```
