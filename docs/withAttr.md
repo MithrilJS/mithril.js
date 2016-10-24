@@ -1,4 +1,4 @@
-# withAttr(value, callback)
+# withAttr(attrName, callback)
 
 - [API](#api)
 - [How to use](#how-to-use)
@@ -13,11 +13,11 @@ Creates an event handler. The event handler takes the value of a DOM element's p
 
 This helper function is typically used in conjunction with [`m.prop()`](prop.md) to implement data binding. It is provided to help decouple the browser's event model from application code.
 
-`m.withAttr(value, callback, thisArg?)`
+`m.withAttr(attrName, callback, thisArg?)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
-`value`     | `String`             | Yes      | The name of the attribute or property whose value will be used
+`attrName`  | `String`             | Yes      | The name of the attribute or property whose value will be used
 `callback`  | `any -> Boolean?`    | Yes      | The callback
 `thisArg`   | `any`                | No       | An object to bind to the `this` keyword in the callback function
 **returns** | `Event -> Boolean?`  |          | An event handler function
