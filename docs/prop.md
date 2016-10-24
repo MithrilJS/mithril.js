@@ -49,7 +49,7 @@ Argument    | Type                 | Required | Description
 
 Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams)
 
-`stream = prop.combine(combiner, streams)`
+`stream = m.prop.combine(combiner, streams)`
 
 Argument    | Type                        | Required | Description
 ----------- | --------------------------- | -------- | ---
@@ -555,7 +555,7 @@ var errored2 = m.prop.combine(function(stream) {
 	if (typeof stream() !== "string") {
 		throw new Error("Not a string")
 	}
-	return value
+	return stream()
 }, [stream])
 // errored2 is in an errored state
 ```

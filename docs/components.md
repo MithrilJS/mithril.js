@@ -83,7 +83,7 @@ The state of a component can be accessed three ways: as a blueprint at initializ
 
 Any property attached to the component object is deep-cloned for every instance of the component. This allows simple state initialization.
 
-In the example below, `data` is a property of the `Input` component's state object.
+In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
 
 ```javascript
 var ComponentWithInitialState = {

@@ -112,6 +112,7 @@ module.exports = function($window) {
 	function link(vnode) {
 		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
 			e.preventDefault()
 			e.redraw = false
 			var href = this.getAttribute("href")

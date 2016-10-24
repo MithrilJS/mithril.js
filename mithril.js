@@ -1117,6 +1117,7 @@ var coreRouter = function($window) {
 	function link(vnode2) {
 		vnode2.dom.setAttribute("href", prefix1 + vnode2.attrs.href)
 		vnode2.dom.onclick = function(e) {
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
 			e.preventDefault()
 			e.redraw = false
 			var href = this.getAttribute("href")
