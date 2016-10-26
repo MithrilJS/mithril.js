@@ -44,6 +44,8 @@ Argument    | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 #### Static members
 
 ##### prop.combine
