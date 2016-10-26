@@ -25,6 +25,6 @@
 	},
 	"bin": {
 		"ospec": "./ospec/bin/ospec",
-		"bundler": "./bundler/bin/bundle"
+		"bundle": "./bundler/bin/bundle"
 	}
 }
