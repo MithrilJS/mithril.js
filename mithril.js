@@ -979,10 +979,7 @@ var _18 = function(renderer, pubsub) {
 			return
 		}
 		var run0 = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(
-				root,
-				Vnode(component, undefined, undefined, undefined, undefined, undefined)
-			)
+			renderer.render(root, Vnode(component, undefined, undefined, undefined, undefined, undefined))
 		})
 		run0()
 	}
@@ -997,10 +994,7 @@ var parseQueryString = function(string) {
 		var entry = entries[i].split("=")
 		var key3 = decodeURIComponent(entry[0])
 		var value4 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		//TODO refactor out
-		var number = Number(value4)
-		if (value4 !== "" && !isNaN(number) || value4 === "NaN") value4 = number
-		else if (value4 === "true") value4 = true
+		if (value4 === "true") value4 = true
 		else if (value4 === "false") value4 = false
 		var levels = key3.split(/\]\[?|\[/)
 		var cursor = data0

@@ -22,5 +22,9 @@
 	},
 	"publishConfig": {
 		"tag": "beta"
+	},
+	"bin": {
+		"ospec": "./ospec/bin/ospec",
+		"bundler": "./bundler/bin/bundle"
 	}
 }
