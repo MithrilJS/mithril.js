@@ -152,10 +152,3 @@ var things = [
 ]
 ```
 
----
-
-### Avoid anti-patterns
-
-#### Avoid using key as a counter
-
-
