@@ -60,6 +60,8 @@ Argument    | Type                        | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 ###### combiner
 
 Specifies how the value of a computed stream is generated. See [combining streams](#combining-streams)
@@ -74,6 +76,8 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 ##### prop.reject
 
 Creates a stream in a error state. See [stream states](#stream-states)
@@ -86,6 +90,8 @@ Argument     | Type                 | Required | Description
 **returns**  | `Stream`             |          | Returns a stream in an error state
 
 [How to read signatures](signatures.md)
+
+---
 
 ##### prop.merge
 
@@ -100,9 +106,13 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 ##### prop.HALT
 
 A special value that can be returned to stream callbacks to halt execution of downstreams
+
+---
 
 ##### prop["fantasy-land/of"]
 
@@ -114,6 +124,8 @@ Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `value`     | `any`                | No       | If this argument is present, the value of the prop is set to it
 **returns** | `Stream`             |          | Returns a stream
+
+---
 
 #### Instance members
 
@@ -132,17 +144,23 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 ##### stream.end
 
 A co-dependent stream that unregisters dependent streams when set to true. See [ended state](#ended-state).
 
 `endStream = m.prop().end`
 
+---
+
 ##### stream.error
 
 A co-dependent stream that is set if the stream is in an errored state. See [handling errors](#handling-errors).
 
 `errorStream = m.prop().error`
+
+---
 
 ##### stream.catch
 
@@ -157,6 +175,8 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
+---
+
 ##### stream["fantasy-land/of"]
 
 This method is functionally identical to `m.prop`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
@@ -167,6 +187,8 @@ Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `value`     | `any`                | No       | If this argument is present, the value of the prop is set to it
 **returns** | `Stream`             |          | Returns a stream
+
+---
 
 ##### stream["fantasy-land/map"]
 
@@ -184,6 +206,8 @@ Argument     | Type                 | Required | Description
 **returns**  | `Stream`             |          | Returns a stream
 
 [How to read signatures](signatures.md)
+
+---
 
 ##### stream["fantasy-land/ap"]
 
