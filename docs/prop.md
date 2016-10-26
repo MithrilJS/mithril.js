@@ -28,6 +28,7 @@
 - [Handling errors](#handling-errors)
 - [Serializing streams](#serializing-streams)
 - [Streams do not trigger rendering](#streams-do-not-trigger-rendering)
+- [What is Fantasy Land](#what-is-fantasy-land)
 
 ---
 
