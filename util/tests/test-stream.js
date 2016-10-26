@@ -164,7 +164,7 @@ o.spec("stream", function() {
 			var b = Stream.combine(function(a) {
 				return Stream.HALT
 			}, [a])
-			.map(function() {
+			["fantasy-land/map"](function() {
 				count++
 				return 1
 			})
@@ -316,12 +316,12 @@ o.spec("stream", function() {
 		o("thrown error propagates downstream", function() {
 			var count = 0
 			var stream = Stream(1)
-				.map(function() {throw new Error("error")})
-				.map(function(value) {
+				["fantasy-land/map"](function() {throw new Error("error")})
+				["fantasy-land/map"](function(value) {
 					count++
 					return value * 2
 				})
-				.map(function(value) {
+				["fantasy-land/map"](function(value) {
 					count++
 					return value * 3
 				})
@@ -333,11 +333,11 @@ o.spec("stream", function() {
 		o("set error propagates downstream", function() {
 			var count = 0
 			var stream = Stream()
-			var mapped = stream.map(function(value) {
+			var mapped = stream["fantasy-land/map"](function(value) {
 				count++
 				return value * 2
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				count++
 				return value * 3
 			})
@@ -347,9 +347,9 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("error")
 			o(count).equals(0)
 		})
-		o("error.map works", function() {
+		o("error["fantasy-land/map"] works", function() {
 			var stream = Stream(1)
-			var mappedFromError = stream.error.map(function(value) {
+			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
 				if (value) return "from" + value.message
 			})
 
@@ -359,12 +359,12 @@ o.spec("stream", function() {
 
 			o(mappedFromError()).equals("fromerror")
 		})
-		o("error from error.map propagates", function() {
+		o("error from error["fantasy-land/map"] propagates", function() {
 			var stream = Stream(1)
-			var mappedFromError = stream.error.map(function(value) {
+			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
 				return "from" + value.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return "a" + value
 			})
 
@@ -374,14 +374,14 @@ o.spec("stream", function() {
 
 			o(mappedFromError()).equals("afromerror")
 		})
-		o("error thrown from error.map propagates downstream", function() {
+		o("error thrown from error["fantasy-land/map"] propagates downstream", function() {
 			var count = 0
 			var stream = Stream(1)
-			var mappedFromError = stream.error.map(function(value) {
+			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
 				throw new Error("b")
 			})
 
-			var downstream = mappedFromError.map(function() {
+			var downstream = mappedFromError["fantasy-land/map"](function() {
 				count++
 			})
 
@@ -397,10 +397,10 @@ o.spec("stream", function() {
 		})
 		o("error can halt", function() {
 			var count = 0
-			var stream = Stream.reject(1).error.map(function() {
+			var stream = Stream.reject(1).error["fantasy-land/map"](function() {
 				return Stream.HALT
 			})
-			.map(function() {
+			["fantasy-land/map"](function() {
 				count++
 				return 1
 			})
@@ -408,9 +408,9 @@ o.spec("stream", function() {
 			o(stream()).equals(undefined)
 			o(count).equals(0)
 		})
-		o("error.map can return streams", function() {
+		o("error["fantasy-land/map"] can return streams", function() {
 			var stream = Stream.reject(new Error("error"))
-			var error = stream.error.map(function(value) {
+			var error = stream.error["fantasy-land/map"](function(value) {
 				return Stream(1)
 			})
 
@@ -436,11 +436,11 @@ o.spec("stream", function() {
 		o("rejected propagates downstream", function() {
 			var count = 0
 			var stream = Stream.reject(new Error("error"))
-				.map(function(value) {
+				["fantasy-land/map"](function(value) {
 					count++
 					return value * 2
 				})
-				.map(function(value) {
+				["fantasy-land/map"](function(value) {
 					count++
 					return value * 3
 				})
@@ -450,7 +450,7 @@ o.spec("stream", function() {
 		})
 		o("rejected removes error on value", function() {
 			var stream = Stream.reject(new Error("error"))
-			var doubled = stream.map(function(value) {
+			var doubled = stream["fantasy-land/map"](function(value) {
 				return value * 2
 			})
 
@@ -520,7 +520,7 @@ o.spec("stream", function() {
 			var count = 0
 			var stream = Stream(undefined)
 			var errored = stream.run(function(value) {throw new Error("error")})
-			var mapped = errored.map(function(value) {
+			var mapped = errored["fantasy-land/map"](function(value) {
 				count++
 				return value
 			})
@@ -536,7 +536,7 @@ o.spec("stream", function() {
 			var stream = Stream(undefined)
 			var absorbed = Stream()
 			var absorber = stream.run(function(value) {return absorbed})
-			var mapped = absorber.map(function(value) {
+			var mapped = absorber["fantasy-land/map"](function(value) {
 				count++
 				return value
 			})
@@ -596,7 +596,7 @@ o.spec("stream", function() {
 			var absorbed = Stream()
 			var mapped = stream.run(function(value) {return absorbed})
 
-			mapped.map(function (value) {
+			mapped["fantasy-land/map"](function (value) {
 				count += 1
 				
 				o(value).equals(123)
@@ -651,7 +651,7 @@ o.spec("stream", function() {
 		o("throwing from absorbed propagates", function() {
 			var stream = Stream(undefined)
 			var absorbedParent = Stream()
-			var absorbed = absorbedParent.map(function() {throw new Error("error")})
+			var absorbed = absorbedParent["fantasy-land/map"](function() {throw new Error("error")})
 			var mapped = stream.run(function(value) {return absorbed})
 
 			o(mapped()).equals(undefined)
@@ -670,7 +670,7 @@ o.spec("stream", function() {
 				count++
 				return "no" + e.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -684,7 +684,7 @@ o.spec("stream", function() {
 				count++
 				return "no" + e.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -695,11 +695,11 @@ o.spec("stream", function() {
 		o("catch is not called if no error", function() {
 			var count = 0
 			var stream = Stream()
-			var handled = stream.map(function(value) {return value + value}).catch(function(e) {
+			var handled = stream["fantasy-land/map"](function(value) {return value + value}).catch(function(e) {
 				count++
 				return "no" + e.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -711,11 +711,11 @@ o.spec("stream", function() {
 		})
 		o("catch is not called if no error with default value", function() {
 			var count = 0
-			var stream = Stream("a").map(function(value) {return value + value}).catch(function(e) {
+			var stream = Stream("a")["fantasy-land/map"](function(value) {return value + value}).catch(function(e) {
 				count++
 				return "no" + e.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -727,7 +727,7 @@ o.spec("stream", function() {
 			var stream = Stream.reject(new Error("a")).catch(function(e) {
 				throw new Error("b")
 			})
-			var mapped = stream.map(function(value) {return value + "ok"})
+			var mapped = stream["fantasy-land/map"](function(value) {return value + "ok"})
 
 			o(stream()).equals(undefined)
 			o(stream.error().message).equals("b")
@@ -735,7 +735,7 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("b")
 		})
 		o("catch can return undefined", function() {
-			var stream = Stream.reject(new Error("b")).catch(function(e) {}).map(function(value) {return String(value)})
+			var stream = Stream.reject(new Error("b")).catch(function(e) {})["fantasy-land/map"](function(value) {return String(value)})
 
 			o(stream()).equals("undefined")
 			o(stream.error()).equals(undefined)
@@ -746,7 +746,7 @@ o.spec("stream", function() {
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				count++
 				return String(value)
 			})
@@ -759,7 +759,7 @@ o.spec("stream", function() {
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
-			.map(function(value) {return String(value)})
+			["fantasy-land/map"](function(value) {return String(value)})
 
 			o(mapped()).equals("1")
 		})
@@ -768,15 +768,15 @@ o.spec("stream", function() {
 			var mapped = Stream.reject(new Error("b")).catch(function(e) {
 				return stream
 			})
-			.map(function(value) {return String(value)})
+			["fantasy-land/map"](function(value) {return String(value)})
 
 			o(mapped()).equals(undefined)
 			o(mapped.error().message).equals("a")*/
 		})
 		o("catch does not prevent sibling error propagation", function() {
 			var a = Stream.reject(new Error("a"))
-			var b = a.map(function(value) {return value + "b"}).catch(function(e) {})
-			var c = a.map(function(value) {return value + "c"})
+			var b = a["fantasy-land/map"](function(value) {return value + "b"}).catch(function(e) {})
+			var c = a["fantasy-land/map"](function(value) {return value + "c"})
 			var d = Stream.combine(function(b, c) {return b() + c()}, [b, c])
 
 			o(d()).equals(undefined)
@@ -784,14 +784,14 @@ o.spec("stream", function() {
 		})
 		o("catches wrapped rejected stream", function() {
 			var caught
-			var stream = Stream(1).map(function() {
+			var stream = Stream(1)["fantasy-land/map"](function() {
 				return Stream.reject(new Error("error"))
 			})
 			.catch(function(value) {
 				caught = value
 				return "no" + value.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -799,8 +799,8 @@ o.spec("stream", function() {
 		})
 		o("catches nested wrapped rejected stream", function() {
 			var caught
-			var stream = Stream(1).map(function() {
-				return Stream(2).map(function() {
+			var stream = Stream(1)["fantasy-land/map"](function() {
+				return Stream(2)["fantasy-land/map"](function() {
 					return Stream.reject(new Error("error"))
 				})
 			})
@@ -808,7 +808,7 @@ o.spec("stream", function() {
 				caught = value
 				return "no" + value.message
 			})
-			.map(function(value) {
+			["fantasy-land/map"](function(value) {
 				return value + "mapped"
 			})
 
@@ -866,7 +866,7 @@ o.spec("stream", function() {
 	})
 	o.spec("uncaught exception reporting", function() {
 		o("reports thrown errors", function(done) {
-			Stream(1).map(function() {throw new Error("error")})
+			Stream(1)["fantasy-land/map"](function() {throw new Error("error")})
 			
 			setTimeout(function() {
 				o(spy.callCount).equals(1)
@@ -886,7 +886,7 @@ o.spec("stream", function() {
 	o.spec("map", function() {
 		o("works", function() {
 			var stream = Stream()
-			var doubled = stream.map(function(value) {return value * 2})
+			var doubled = stream["fantasy-land/map"](function(value) {return value * 2})
 
 			stream(3)
 
@@ -894,13 +894,13 @@ o.spec("stream", function() {
 		})
 		o("works with default value", function() {
 			var stream = Stream(3)
-			var doubled = stream.map(function(value) {return value * 2})
+			var doubled = stream["fantasy-land/map"](function(value) {return value * 2})
 
 			o(doubled()).equals(6)
 		})
 		o("works with undefined value", function() {
 			var stream = Stream()
-			var mapped = stream.map(function(value) {return String(value)})
+			var mapped = stream["fantasy-land/map"](function(value) {return String(value)})
 
 			stream(undefined)
 
@@ -908,13 +908,13 @@ o.spec("stream", function() {
 		})
 		o("works with default undefined value", function() {
 			var stream = Stream(undefined)
-			var mapped = stream.map(function(value) {return String(value)})
+			var mapped = stream["fantasy-land/map"](function(value) {return String(value)})
 
 			o(mapped()).equals("undefined")
 		})
 		o("works with pending stream", function() {
 			var stream = Stream(undefined)
-			var mapped = stream.map(function(value) {return Stream()})
+			var mapped = stream["fantasy-land/map"](function(value) {return Stream()})
 
 			o(mapped()()).equals(undefined)
 		})
@@ -923,7 +923,7 @@ o.spec("stream", function() {
 		o("works", function() {
 			var apply = Stream(function(value) {return value * 2})
 			var stream = Stream(3)
-			var applied = apply.ap(stream)
+			var applied = apply["fantasy-land/ap"](stream)
 
 			o(applied()).equals(6)
 
@@ -938,7 +938,7 @@ o.spec("stream", function() {
 		o("works with undefined value", function() {
 			var apply = Stream(function(value) {return String(value)})
 			var stream = Stream(undefined)
-			var applied = apply.ap(stream)
+			var applied = apply["fantasy-land/ap"](stream)
 
 			o(applied()).equals("undefined")
 
@@ -951,7 +951,7 @@ o.spec("stream", function() {
 		o.spec("functor", function() {
 			o("identity", function() {
 				var stream = Stream(3)
-				var mapped = stream.map(function(value) {return value})
+				var mapped = stream["fantasy-land/map"](function(value) {return value})
 
 				o(stream()).equals(mapped())
 			})
@@ -961,8 +961,8 @@ o.spec("stream", function() {
 
 				var stream = Stream(3)
 
-				var mapped = stream.map(function(value) {return f(g(value))})
-				var composed = stream.map(g).map(f)
+				var mapped = stream["fantasy-land/map"](function(value) {return f(g(value))})
+				var composed = stream["fantasy-land/map"](g)["fantasy-land/map"](f)
 
 				o(mapped()).equals(18)
 				o(mapped()).equals(composed())
@@ -974,15 +974,15 @@ o.spec("stream", function() {
 				var u = Stream(function(value) {return value * 3})
 				var v = Stream(5)
 
-				var mapped = a.map(function(f) {
+				var mapped = a["fantasy-land/map"](function(f) {
 					return function(g) {
 						return function(x) {
 							return f(g(x))
 						}
 					}
-				}).ap(u).ap(v)
+				})["fantasy-land/ap"](u)["fantasy-land/ap"](v)
 
-				var composed = a.ap(u.ap(v))
+				var composed = a["fantasy-land/ap"](u["fantasy-land/ap"](v))
 
 				o(mapped()).equals(30)
 				o(mapped()).equals(composed())
@@ -990,27 +990,27 @@ o.spec("stream", function() {
 		})
 		o.spec("applicative", function() {
 			o("identity", function() {
-				var a = Stream().of(function(value) {return value})
+				var a = Stream()["fantasy-land/of"](function(value) {return value})
 				var v = Stream(5)
 
-				o(a.ap(v)()).equals(5)
-				o(a.ap(v)()).equals(v())
+				o(a["fantasy-land/ap"](v)()).equals(5)
+				o(a["fantasy-land/ap"](v)()).equals(v())
 			})
 			o("homomorphism", function() {
 				var a = Stream(0)
 				var f = function(value) {return value * 2}
 				var x = 3
 
-				o(a.of(f).ap(a.of(x))()).equals(6)
-				o(a.of(f).ap(a.of(x))()).equals(a.of(f(x))())
+				o(a["fantasy-land/of"](f)["fantasy-land/ap"](a["fantasy-land/of"](x))()).equals(6)
+				o(a["fantasy-land/of"](f)["fantasy-land/ap"](a["fantasy-land/of"](x))()).equals(a["fantasy-land/of"](f(x))())
 			})
 			o("interchange", function() {
 				var u = Stream(function(value) {return value * 2})
 				var a = Stream()
 				var y = 3
 
-				o(u.ap(a.of(y))()).equals(6)
-				o(u.ap(a.of(y))()).equals(a.of(function(f) {return f(y)}).ap(u)())
+				o(u["fantasy-land/ap"](a["fantasy-land/of"](y))()).equals(6)
+				o(u["fantasy-land/ap"](a["fantasy-land/of"](y))()).equals(a["fantasy-land/of"](function(f) {return f(y)})["fantasy-land/ap"](u)())
 			})
 		})
 	})

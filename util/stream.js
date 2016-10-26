@@ -16,7 +16,7 @@ module.exports = function(log) {
 	function initStream(stream) {
 		stream.constructor = createStream
 		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-		stream.map = map, stream.ap = ap, stream.of = createStream
+		stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
 		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 		stream.run = run, stream.catch = doCatch
 
@@ -195,6 +195,7 @@ module.exports = function(log) {
 			return streams.map(function(s) {return s()})
 		}, streams)
 	}
+	createStream["fantasy-land/of"] = createStream
 	createStream.merge = merge
 	createStream.combine = combine
 	createStream.reject = reject

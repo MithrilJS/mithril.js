@@ -2,18 +2,19 @@
 
 - [API](#api)
 - [Static members](#static-members)
-	- [prop.combine](#prop-combine)
-	- [prop.reject](#prop-reject)
-	- [prop.merge](#prop-merge)
-	- [prop.HALT](#prop-halt)
+	- [prop.combine](#propcombine)
+	- [prop.reject](#propreject)
+	- [prop.merge](#propmerge)
+	- [prop.HALT](#prophalt)
+	- [prop["fantasy-land/of"]](#propfantasylandof)
 - [Instance members](#static-members)
-	- [stream.run](#stream-run)
-	- [stream.end](#stream-end)
-	- [stream.error](#stream-error)
-	- [stream.catch](#stream-catch)
-	- [stream.of](#stream-of)
-	- [stream.map](#stream-map)
-	- [stream.ap](#stream-ap)
+	- [stream.run](#streamrun)
+	- [stream.end](#streamend)
+	- [stream.error](#streamerror)
+	- [stream.catch](#streamcatch)
+	- [stream["fantasy-land/of"]](#streamfantasylandof)
+	- [stream["fantasy-land/map"]](#streamfantasylandmap)
+	- [stream["fantasy-land/ap"]](#streamfantasylandap)
 - [Basic usage](#basic-usage)
 	- [Streams as variables](#streams-as-variables)
 	- [Bidirectional bindings](#bidirectional-bindings)
@@ -103,6 +104,17 @@ Argument     | Type                 | Required | Description
 
 A special value that can be returned to stream callbacks to halt execution of downstreams
 
+##### prop["fantasy-land/of"]
+
+This method is functionally identical to `m.prop`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
+
+`stream = m.prop["fantasy-land/of"](value)`
+
+Argument    | Type                 | Required | Description
+----------- | -------------------- | -------- | ---
+`value`     | `any`                | No       | If this argument is present, the value of the prop is set to it
+**returns** | `Stream`             |          | Returns a stream
+
 #### Instance members
 
 ##### stream.run
@@ -145,26 +157,26 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
-##### stream.of
+##### stream["fantasy-land/of"]
 
-This method is functionally identical to `m.prop`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land)
+This method is functionally identical to `m.prop`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
-`stream = m.prop().of(value)`
+`stream = m.prop()["fantasy-land/of"](value)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `value`     | `any`                | No       | If this argument is present, the value of the prop is set to it
 **returns** | `Stream`             |          | Returns a stream
 
-##### stream.map
+##### stream["fantasy-land/map"]
 
 Creates a dependent stream whose value is set to the result of the callback function. See [chaining streams](#chaining-streams)
 
 This method is almost functionally identical to [`stream.run()`](#stream-run), except that if the return value is a stream, the stream is not absorbed.
 
-This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land)
+This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
-`dependentStream = m.prop().map(callback)`
+`dependentStream = m.prop()["fantasy-land/of"](callback)`
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
@@ -173,11 +185,13 @@ Argument     | Type                 | Required | Description
 
 [How to read signatures](signatures.md)
 
-##### stream.ap
+##### stream["fantasy-land/ap"]
 
-The name of this method stands for `apply`. If a stream has a function as its value, calling `ap` will call the function with the value of the input stream as its argument, and it will return another stream whose value is the result of the function call. This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land)
+[FIXME: `ap` does not conform to Fantasy Land 2.0 spec - do not use]
 
-`errorStream = m.prop().ap(value)`
+The name of this method stands for `apply`. If a stream has a function as its value, calling `ap` will call the function with the value of the input stream as its argument, and it will return another stream whose value is the result of the function call. This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
+
+`errorStream = m.prop()["fantasy-land/ap"](value)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
@@ -280,7 +294,7 @@ var RobustExample = {
 	},
 	view: function(vnode) {
 		return [
-			vnode.state.items() ? vnode.state.items().map(function(item) {
+			vnode.state.items() ? vnode.state.items().run(function(item) {
 				return m("div", item.name)
 			}) : m(".loading-icon"),
 			vnode.state.error(),
@@ -474,7 +488,7 @@ var mapped = m.prop.reject(new Error("error")).catch(function(e) {
 console.log(mapped()) // logs 2
 ```
 
-Stream absorption does not occur in fantasy-land methods (i.e. `.map()`, `.ap()`, `.of()`)
+Stream absorption does not occur in fantasy-land methods (i.e. `["fantasy-land/map"]()`, `["fantasy-land/ap"]()`, `["fantasy-land/of"]()`)
 
 ---
 
@@ -698,3 +712,35 @@ console.log("test " + stream) // logs "test 123"
 Unlike libraries like Knockout, Mithril streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril component views, route changes, or after [`m.request`](request.md) calls resolve.
 
 If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc), you should manually call [`m.redraw()`](redraw.md)
+
+---
+
+### What is Fantasy Land
+
+[Fantasy Land](https://github.com/fantasyland/fantasy-land) specifies interoperability of common algebraic structures. In plain english, that means that libraries that conform to Fantasy Land specs can be used to write generic functional style code that works regardless of how these libraries implement the constructs.
+
+For example, say we want to create a generic function called `plusOne`. The naive implementation would look like this:
+
+```javascript
+function plusOne(a) {
+	return a + 1
+}
+```
+
+The problem with this implementation is that it can only be used with a number. However it's possible that whatever logic produces a value for `a` could also produce an error state (wrapped in a Maybe or an Either from a library like [Sanctuary](https://github.com/sanctuary-js/sanctuary) or [Ramda-Fantasy](https://github.com/ramda/ramda-fantasy)), or it could be a Mithril stream, or a [flyd](https://github.com/paldepind/flyd) stream, etc. Ideally, we wouldn't want to write a similar version of the same function for every possible type that `a` could have and we wouldn't want to be writing wrapping/unwrapping/error handling code repeatedly.
+
+This is where Fantasy Land can help. Let's rewrite that function in terms of a Fantasy Land algebra:
+
+```javascript
+var fl = require("fantasy-land")
+
+function plusOne(a) {
+	return a[fl.map](function(value) {return value + 1})
+}
+```
+
+Now this method works with any Fantasy Land compliant [Functor](https://github.com/fantasyland/fantasy-land#functor), such as [`R.Maybe`](https://github.com/ramda/ramda-fantasy/blob/master/docs/Maybe.md), [`S.Either`](https://github.com/sanctuary-js/sanctuary#either-type), `m.prop`, etc.
+
+This example may seem convoluted, but it's a trade-off in complexity: the naive `plusOne` implementation makes sense if you have a simple system and only ever increment numbers, but the Fantasy Land implementation becomes more powerful if you have a large system with many wrapper abstractions and reused algorithms.
+
+When deciding whether you should adopt Fantasy Land, you should consider your team's familiarity with functional programming, and be realistic regarding the level of discipline that your team can commit to maintaining code quality (vs the pressure of writing new features and meeting deadlines). Functional style programming heavily depends on compiling, curating and mastering a large set of small, precisely defined functions, and therefore it's not suitable for teams who do not have solid documentation practices, and/or lack experience in functional oriented languages.
