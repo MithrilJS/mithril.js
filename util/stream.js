@@ -36,7 +36,7 @@ module.exports = function(log) {
 			end: {get: function() {
 				if (!stream._state.endStream) {
 					var endStream = createStream()
-					endStream.map(function(value) {
+					endStream["fantasy-land/map"](function(value) {
 						if (value === true) unregisterStream(stream), unregisterStream(endStream)
 						return value
 					})
@@ -130,7 +130,7 @@ module.exports = function(log) {
 				updateState(stream, absorbable._state.value, absorbable._state.error)
 				for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
 			}
-			absorbable.map(update).catch(function(e) {
+			absorbable["fantasy-land/map"](update).catch(function(e) {
 				update()
 				throw {__error: e}
 			})
@@ -174,7 +174,7 @@ module.exports = function(log) {
 	}
 
 	function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
-	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
+	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
 	function valueOf() {return this._state.value}
 	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
 

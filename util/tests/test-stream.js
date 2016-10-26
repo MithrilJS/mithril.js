@@ -347,7 +347,7 @@ o.spec("stream", function() {
 			o(mapped.error().message).equals("error")
 			o(count).equals(0)
 		})
-		o("error["fantasy-land/map"] works", function() {
+		o("error[fl.map] works", function() {
 			var stream = Stream(1)
 			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
 				if (value) return "from" + value.message
@@ -359,7 +359,7 @@ o.spec("stream", function() {
 
 			o(mappedFromError()).equals("fromerror")
 		})
-		o("error from error["fantasy-land/map"] propagates", function() {
+		o("error from error[fl.map] propagates", function() {
 			var stream = Stream(1)
 			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
 				return "from" + value.message
@@ -374,7 +374,7 @@ o.spec("stream", function() {
 
 			o(mappedFromError()).equals("afromerror")
 		})
-		o("error thrown from error["fantasy-land/map"] propagates downstream", function() {
+		o("error thrown from error[fl.map] propagates downstream", function() {
 			var count = 0
 			var stream = Stream(1)
 			var mappedFromError = stream.error["fantasy-land/map"](function(value) {
@@ -408,7 +408,7 @@ o.spec("stream", function() {
 			o(stream()).equals(undefined)
 			o(count).equals(0)
 		})
-		o("error["fantasy-land/map"] can return streams", function() {
+		o("error[fl.map] can return streams", function() {
 			var stream = Stream.reject(new Error("error"))
 			var error = stream.error["fantasy-land/map"](function(value) {
 				return Stream(1)
@@ -923,7 +923,7 @@ o.spec("stream", function() {
 		o("works", function() {
 			var apply = Stream(function(value) {return value * 2})
 			var stream = Stream(3)
-			var applied = apply["fantasy-land/ap"](stream)
+			var applied = stream["fantasy-land/ap"](apply)
 
 			o(applied()).equals(6)
 
@@ -938,7 +938,7 @@ o.spec("stream", function() {
 		o("works with undefined value", function() {
 			var apply = Stream(function(value) {return String(value)})
 			var stream = Stream(undefined)
-			var applied = apply["fantasy-land/ap"](stream)
+			var applied = stream["fantasy-land/ap"](apply)
 
 			o(applied()).equals("undefined")
 
@@ -974,15 +974,15 @@ o.spec("stream", function() {
 				var u = Stream(function(value) {return value * 3})
 				var v = Stream(5)
 
-				var mapped = a["fantasy-land/map"](function(f) {
+				var mapped = v["fantasy-land/ap"](u["fantasy-land/ap"](a["fantasy-land/map"](function(f) {
 					return function(g) {
 						return function(x) {
 							return f(g(x))
 						}
 					}
-				})["fantasy-land/ap"](u)["fantasy-land/ap"](v)
+				})))
 
-				var composed = a["fantasy-land/ap"](u["fantasy-land/ap"](v))
+				var composed = v["fantasy-land/ap"](u)["fantasy-land/ap"](a)
 
 				o(mapped()).equals(30)
 				o(mapped()).equals(composed())
@@ -993,24 +993,24 @@ o.spec("stream", function() {
 				var a = Stream()["fantasy-land/of"](function(value) {return value})
 				var v = Stream(5)
 
-				o(a["fantasy-land/ap"](v)()).equals(5)
-				o(a["fantasy-land/ap"](v)()).equals(v())
+				o(v["fantasy-land/ap"](a)()).equals(5)
+				o(v["fantasy-land/ap"](a)()).equals(v())
 			})
 			o("homomorphism", function() {
 				var a = Stream(0)
 				var f = function(value) {return value * 2}
 				var x = 3
 
-				o(a["fantasy-land/of"](f)["fantasy-land/ap"](a["fantasy-land/of"](x))()).equals(6)
-				o(a["fantasy-land/of"](f)["fantasy-land/ap"](a["fantasy-land/of"](x))()).equals(a["fantasy-land/of"](f(x))())
+				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(6)
+				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(a["fantasy-land/of"](f(x))())
 			})
 			o("interchange", function() {
 				var u = Stream(function(value) {return value * 2})
 				var a = Stream()
 				var y = 3
 
-				o(u["fantasy-land/ap"](a["fantasy-land/of"](y))()).equals(6)
-				o(u["fantasy-land/ap"](a["fantasy-land/of"](y))()).equals(a["fantasy-land/of"](function(f) {return f(y)})["fantasy-land/ap"](u)())
+				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(6)
+				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(u["fantasy-land/ap"](a["fantasy-land/of"](function(f) {return f(y)}))())
 			})
 		})
 	})

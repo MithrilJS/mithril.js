@@ -214,15 +214,13 @@ Argument     | Type                 | Required | Description
 
 ##### stream["fantasy-land/ap"]
 
-[FIXME: `ap` does not conform to Fantasy Land 2.0 spec - do not use]
+The name of this method stands for `apply`. If a stream `a` has a function as its value, another stream `b` can use it as the argument to `b.ap(a)`. Calling `ap` will call the function with the value of stream `b` as its argument, and it will return another stream whose value is the result of the function call. This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
-The name of this method stands for `apply`. If a stream has a function as its value, calling `ap` will call the function with the value of the input stream as its argument, and it will return another stream whose value is the result of the function call. This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
-
-`errorStream = m.prop()["fantasy-land/ap"](value)`
+`stream = m.prop()["fantasy-land/ap"](apply)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
-`value`     | `Stream`             | Yes      | If this argument is present, the value of the prop is set to it
+`apply`     | `Stream`             | Yes      | A stream whose value is a function
 **returns** | `Stream`             |          | Returns a stream
 
 ---
