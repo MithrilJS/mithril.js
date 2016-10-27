@@ -93,7 +93,7 @@ var _7 = function(log) {
 	function initStream(stream) {
 		stream.constructor = createStream
 		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-		stream.map = map, stream.ap = ap, stream.of = createStream
+		stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
 		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 		stream.run = run, stream.catch = doCatch
 		Object.defineProperties(stream, {
@@ -112,7 +112,7 @@ var _7 = function(log) {
 			end: {get: function() {
 				if (!stream._state.endStream) {
 					var endStream = createStream()
-					endStream.map(function(value) {
+					endStream["fantasy-land/map"](function(value) {
 						if (value === true) unregisterStream(stream), unregisterStream(endStream)
 						return value
 					})
@@ -205,7 +205,7 @@ var _7 = function(log) {
 				updateState(stream, absorbable._state.value, absorbable._state.error)
 				for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
 			}
-			absorbable.map(update).catch(function(e) {
+			absorbable["fantasy-land/map"](update).catch(function(e) {
 				update()
 				throw {__error: e}
 			})
@@ -245,7 +245,7 @@ var _7 = function(log) {
 		stream._state.deps = {}
 	}
 	function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
-	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [this, stream])}
+	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
 	function valueOf() {return this._state.value}
 	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
 	function valid(stream) {return stream._state }
@@ -263,6 +263,7 @@ var _7 = function(log) {
 			return streams.map(function(s) {return s()})
 		}, streams)
 	}
+	createStream["fantasy-land/of"] = createStream
 	createStream.merge = merge
 	createStream.combine = combine
 	createStream.reject = reject
