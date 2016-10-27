@@ -109,7 +109,8 @@ function run(input, output) {
 			.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
 			.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 		
-		fs.writeFileSync(output, "new function() {\n" + code + "\n}", "utf8")
+		code = "new function() {\n" + code + "\n}"
+		if (code !== read(output)) fs.writeFileSync(output, code, "utf8")
 	}
 	catch (e) {
 		console.error(e.message)
