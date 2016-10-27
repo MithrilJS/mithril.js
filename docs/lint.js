@@ -94,7 +94,7 @@ global.m = require("../index")
 
 //run
 traverseDirectory("./docs", function(pathname) {
-	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0) {
+	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0 && pathname.indexOf("route") < 0) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
 			else lint(pathname, data)
