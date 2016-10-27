@@ -21,9 +21,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).map(function(data) {
+			xhr({method: "GET", url: "/item"}).run(function(data) {
 				o(data).deepEquals({a: 1})
-			}).map(function() {
+			}).run(function() {
 				done()
 			})
 		})
@@ -33,9 +33,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).map(function(data) {
+			xhr({method: "GET", url: "/item"}).run(function(data) {
 				o(data).deepEquals({a: 1})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized data via GET", function(done) {
 			mock.$defineRoutes({
@@ -43,9 +43,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", data: {x: "y"}}).map(function(data) {
+			xhr({method: "GET", url: "/item", data: {x: "y"}}).run(function(data) {
 				o(data).deepEquals({a: "?x=y"})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized data via POST", function(done) {
 			mock.$defineRoutes({
@@ -53,9 +53,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", data: {x: "y"}}).map(function(data) {
+			xhr({method: "POST", url: "/item", data: {x: "y"}}).run(function(data) {
 				o(data).deepEquals({a: {x: "y"}})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized data containing colon via GET", function(done) {
 			mock.$defineRoutes({
@@ -63,9 +63,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", data: {x: ":y"}}).map(function(data) {
+			xhr({method: "GET", url: "/item", data: {x: ":y"}}).run(function(data) {
 				o(data).deepEquals({a: "?x=%3Ay"})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized data containing colon via POST", function(done) {
 			mock.$defineRoutes({
@@ -73,9 +73,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", data: {x: ":y"}}).map(function(data) {
+			xhr({method: "POST", url: "/item", data: {x: ":y"}}).run(function(data) {
 				o(data).deepEquals({a: {x: ":y"}})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized url via GET", function(done) {
 			mock.$defineRoutes({
@@ -83,9 +83,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).map(function(data) {
+			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).run(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}})
-			}).map(done)
+			}).run(done)
 		})
 		o("works w/ parameterized url via POST", function(done) {
 			mock.$defineRoutes({
@@ -93,9 +93,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).map(function(data) {
+			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).run(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}})
-			}).map(done)
+			}).run(done)
 		})
 		o("ignores unresolved parameter via GET", function(done) {
 			mock.$defineRoutes({
@@ -103,9 +103,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x"}).map(function(data) {
+			xhr({method: "GET", url: "/item/:x"}).run(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
-			}).map(done)
+			}).run(done)
 		})
 		o("ignores unresolved parameter via POST", function(done) {
 			mock.$defineRoutes({
@@ -113,9 +113,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x"}).map(function(data) {
+			xhr({method: "GET", url: "/item/:x"}).run(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
-			}).map(done)
+			}).run(done)
 		})
 		o("type parameter works for Array responses", function(done) {
 			var Entity = function(args) {
@@ -127,9 +127,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
 				}
 			})
-			xhr({method: "GET", url: "/item", type: Entity}).map(function(data) {
+			xhr({method: "GET", url: "/item", type: Entity}).run(function(data) {
 				o(data).deepEquals([{_id: 1}, {_id: 2}, {_id: 3}])
-			}).map(done)
+			}).run(done)
 		})
 		o("type parameter works for Object responses", function(done) {
 			var Entity = function(args) {
@@ -141,9 +141,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item", type: Entity}).map(function(data) {
+			xhr({method: "GET", url: "/item", type: Entity}).run(function(data) {
 				o(data).deepEquals({_id: 1})
-			}).map(done)
+			}).run(done)
 		})
 		o("serialize parameter works in GET", function(done) {
 			var serialize = function(data) {
@@ -155,9 +155,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).map(function(data) {
+			xhr({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).run(function(data) {
 				o(data.body).equals("?id=1")
-			}).map(done)
+			}).run(done)
 		})
 		o("serialize parameter works in POST", function(done) {
 			var serialize = function(data) {
@@ -169,9 +169,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).map(function(data) {
+			xhr({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).run(function(data) {
 				o(data.body).equals("id=1")
-			}).map(done)
+			}).run(done)
 		})
 		o("deserialize parameter works in GET", function(done) {
 			var deserialize = function(data) {
@@ -183,9 +183,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			xhr({method: "GET", url: "/item", deserialize: deserialize}).map(function(data) {
+			xhr({method: "GET", url: "/item", deserialize: deserialize}).run(function(data) {
 				o(data).equals("{\"test\":123}")
-			}).map(done)
+			}).run(done)
 		})
 		o("deserialize parameter works in POST", function(done) {
 			var deserialize = function(data) {
@@ -197,9 +197,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			xhr({method: "POST", url: "/item", deserialize: deserialize}).map(function(data) {
+			xhr({method: "POST", url: "/item", deserialize: deserialize}).run(function(data) {
 				o(data).equals("{\"test\":123}")
-			}).map(done)
+			}).run(done)
 		})
 		o("extract parameter works in GET", function(done) {
 			var extract = function(data) {
@@ -211,9 +211,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "GET", url: "/item", extract: extract}).map(function(data) {
+			xhr({method: "GET", url: "/item", extract: extract}).run(function(data) {
 				o(data).equals("{\"test\":123}")
-			}).map(done)
+			}).run(done)
 		})
 		o("extract parameter works in POST", function(done) {
 			var extract = function(data) {
@@ -225,9 +225,9 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", extract: extract}).map(function(data) {
+			xhr({method: "POST", url: "/item", extract: extract}).run(function(data) {
 				o(data).equals("{\"test\":123}")
-			}).map(done)
+			}).run(done)
 		})
 		o("ignores deserialize if extract is defined", function(done) {
 			var extract = function(data) {
@@ -240,11 +240,11 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).map(function(data) {
+			xhr({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).run(function(data) {
 				o(data).equals(200)
-			}).map(function() {
+			}).run(function() {
 				o(deserialize.callCount).equals(0)
-			}).map(done)
+			}).run(done)
 		})
 		o("config parameter works", function(done) {
 			mock.$defineRoutes({
@@ -252,7 +252,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", config: config}).map(done)
+			xhr({method: "POST", url: "/item", config: config}).run(done)
 			
 			function config(xhr) {
 				o(typeof xhr.setRequestHeader).equals("function")
@@ -281,7 +281,7 @@ o.spec("xhr", function() {
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 				o(e.message).equals(JSON.stringify({error: "error"}))
-			}).map(done)
+			}).run(done)
 		})
 		o("extends Error with JSON response", function(done) {
 			mock.$defineRoutes({
@@ -293,7 +293,7 @@ o.spec("xhr", function() {
 				o(e instanceof Error).equals(true)
 				o(e.message).equals("error")
 				o(e.stack).equals("error on line 1")
-			}).map(done)
+			}).run(done)
 		})
 		o("rejects on non-JSON server error", function(done) {
 			mock.$defineRoutes({
@@ -303,7 +303,7 @@ o.spec("xhr", function() {
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e.message).equals("error")
-			}).map(done)
+			}).run(done)
 		})
 	})
 })

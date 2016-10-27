@@ -21,9 +21,9 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify({a: 1}) + ")"}
 			}
 		})
-		jsonp({url: "/item"}).map(function(data) {
+		jsonp({url: "/item"}).run(function(data) {
 			o(data).deepEquals({a: 1})
-		}).map(done)
+		}).run(done)
 	})
 	o("works w/ other querystring params", function(done) {
 		mock.$defineRoutes({
@@ -32,10 +32,10 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify(queryData) + ")"}
 			}
 		})
-		jsonp({url: "/item", data: {a: "b", c: "d"}}).map(function(data) {
+		jsonp({url: "/item", data: {a: "b", c: "d"}}).run(function(data) {
 			delete data["callback"]
 			o(data).deepEquals({a: "b", c: "d"})
-		}).map(done)
+		}).run(done)
 	})
 	o("works w/ custom callbackKey", function(done) {
 		mock.$defineRoutes({
@@ -44,9 +44,9 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["cb"] + "(" + JSON.stringify({a: 2}) + ")"}
 			}
 		})
-		jsonp({url: "/item", callbackKey: "cb"}).map(function(data) {
+		jsonp({url: "/item", callbackKey: "cb"}).run(function(data) {
 			o(data).deepEquals({a: 2})
-		}).map(done)
+		}).run(done)
 	})
 	o("handles error", function(done) {
 		jsonp({url: "/item", callbackKey: "cb"}).catch(function(e) {

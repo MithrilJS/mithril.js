@@ -88,7 +88,7 @@ o.spec("api", function() {
 		o("works", function() {
 			var query = m.parseQueryString("?a=1&b=2")
 			
-			o(query).deepEquals({a: 1, b: 2})
+			o(query).deepEquals({a: "1", b: "2"})
 		})
 	})
 	o.spec("m.buildQueryString", function() {
