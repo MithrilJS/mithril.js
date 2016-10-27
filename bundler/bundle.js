@@ -110,7 +110,8 @@ function run(input, output) {
 			.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 		
 		code = "new function() {\n" + code + "\n}"
-		if (code !== read(output)) fs.writeFileSync(output, code, "utf8")
+		
+		if (!isFile(output) || code !== read(output)) fs.writeFileSync(output, code, "utf8")
 	}
 	catch (e) {
 		console.error(e.message)
