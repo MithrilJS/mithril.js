@@ -307,27 +307,21 @@ Here's an example using [`m.request`](request.md) that uses streams to implement
 
 ```javascript
 var RobustExample = {
-	oninit: function(vnode) {
-		var req = m.request({
+	oninit: function() {
+		this.data = m.request({
 			method: "GET",
 			url: "/api/items",
 		})
-		vnode.state.items = req.catch(function() {
-			return []
-		})
-		vnode.state.error = req.error.run(this.errorView)
 	},
-	view: function(vnode) {
+	view: function() {
 		return [
-			vnode.state.items() ? vnode.state.items().run(function(item) {
-				return m("div", item.name)
-			}) : m(".loading-icon"),
-			vnode.state.error(),
+			this.data.error() ? [
+				m(".error", this.data.error().message)
+			] : this.data() ? [
+				this.data().map(item => m("div", item.name))
+			] : m(".loading-icon")
 		]
 	},
-	errorView: function(e) {
-		return e ? m(".error", "An error occurred") : null
-	}
 }
 
 m.route(document.body, "/", {
@@ -335,15 +329,15 @@ m.route(document.body, "/", {
 })
 ```
 
-When this component is initialized, `m.request` is called and its return value is assigned to `req`. Before the request completes, the `req` stream remains in a pending state, and therefore has a value of `undefined`. `req.error` is the error stream for the request. Since `req` is pending, the `req.error` stream also remain in a pending state, and likewise, `vnode.state.error` stays pending and does not call `this.errorView`.
+When this component is initialized, `m.request` is called and its return value is assigned to `this.data`. Before the request completes, that stream remains in a pending state, and therefore has a value of `undefined`. `this.data.error` is the error stream for the request. Since the stream is pending, its error stream also remain in a pending state, with a value of `undefined`.
 
-Then the component renders. Both `vnode.state.items()` and `vnode.state.error()` return `undefined`, so the component returns `[m(".loading-icon"), undefined]`, which in turn creates a loading icon element in the DOM.
+Before the request completes, the component renders once. Both `this.data` and `this.data.error` return `undefined` at this point, so the ternary operators fall through to `m(".loading-icon")`, which in turn creates a loading icon element in the DOM.
 
-When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `req.error` is set to an active state (but it still has a value of `undefined`), and `vnode.state.error()` is then set to `null`. The `view` function returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
+When the request to the server completes, `this.data` is populated with the response data, `this.data.error` is set to an active state (but still with a value of `undefined`), and the component is re-rendered. The `view` function returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
 
-If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
+If the request to the server fails, `this.data` is set to undefined and `this.data.error` is populated with the error. Therefore, `view` returns `[m(".error", this.data.error().message)]`, which replaces the loading icon with the error message in the DOM.
 
-To clear the error message, simply set the value of the `vnode.state.error` stream to `undefined`.
+To clear the error message, you can set the value of the `this.data` to an empty array, or set `this.data.error` to `undefined`.
 
 ---
 
