@@ -1,14 +1,7 @@
 T.time("Setup");
 
-var Stream = require("../../util/stream")
-var requestService = require("../../request/request")(window)
-var request = requestService.xhr
-var m = require("../../render/hyperscript")
-var trust = require("../../render/trust")
-var renderer = require("../../render/render")(window)
-var router = require("../../router/router")(window)
-
-requestService.setCompletionCallback(run)
+var m = require("../../mithril")
+var request = m.request
 
 //API calls
 var api = {
@@ -18,7 +11,7 @@ var api = {
 	},
 	thread : function(id) {
 		T.timeEnd("Setup")
-		return request({method: "GET", url: T.apiUrl + "/comments/" + id}).map(T.transformResponse)
+		return request({method: "GET", url: T.apiUrl + "/comments/" + id}).run(T.transformResponse)
 	},
 	newThread : function(text) {
 		return request({method: "POST", url: T.apiUrl + "/threads/create",data: {text: text}})
@@ -31,11 +24,11 @@ var api = {
 var threads = [], current = null, loaded = false, error = false, notFound = false
 function loadThreads() {
 	loaded = false
-	api.home().map(function(response) {
+	api.home().run(function(response) {
 		document.title = "ThreaditJS: Mithril | Home"
 		threads = response.data
 		loaded = true
-	}).catch(function() {
+	}, function() {
 		loaded = error = true
 	})
 }
@@ -43,11 +36,11 @@ function loadThreads() {
 function loadThread(id) {
 	loaded = false
 	notFound = false
-	api.thread(id).map(function(response) {
+	api.thread(id).run(function(response) {
 		document.title = "ThreaditJS: Mithril | " + T.trimTitle(response.root.text);
 		loaded = true
 		current = response
-	}).catch(function(response) {
+	}, function(response) {
 		loaded = true
 		if (response.status === 404) notFound = true
 		else error = true
@@ -59,7 +52,7 @@ function unloadThread() {
 
 function createThread() {
 	var threadText = document.getElementById("threadText")
-	api.newThread(threadText.value).map(function(response) {
+	api.newThread(threadText.value).run(function(response) {
 		threadText.value = "";
 		threads.push(response.data);
 	})
@@ -73,7 +66,7 @@ function showReplying(vnode) {
 }
 
 function submitComment(vnode) {
-	api.newComment(vnode.state.newComment, vnode.attrs.node.id).map(function(response) {
+	api.newComment(vnode.state.newComment, vnode.attrs.node.id).run(function(response) {
 		vnode.state.newComment = ""
 		vnode.state.replying = false
 		vnode.attrs.node.children.push(response.data)
@@ -91,7 +84,7 @@ var Header = {
 				m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
 			]),
 			m("h2", [
-				m("a[href='#/']", "ThreaditJS: Mithril"),
+				m("a[href='/']", {oncreate: m.route.link}, "ThreaditJS: Mithril"),
 			]),
 		]
 	}
@@ -110,7 +103,7 @@ var Home = {
 					threads.map(function(thread) {
 						return [
 							m("p", [
-								m("a", {href: "#/thread/" + thread.id}, trust(T.trimTitle(thread.text))),
+								m("a", {href: "/thread/" + thread.id, oncreate: m.route.link}, m.trust(T.trimTitle(thread.text))),
 							]),
 							m("p.comment_count", thread.comment_count + " comment(s)"),
 							m("hr"),
@@ -150,7 +143,7 @@ var Thread = {
 var ThreadNode = {
 	view: function(vnode) {
 		return m(".comment", [
-			m("p", trust(vnode.attrs.node.text)),
+			m("p", m.trust(vnode.attrs.node.text)),
 			m(".reply", m(Reply, vnode.attrs)),
 			m(".children", [
 				vnode.attrs.node.children.map(function(child) {
@@ -171,25 +164,14 @@ var Reply = {
 					},
 				}),
 				m("input", {type:"submit", value: "Reply!"}),
-				m(".preview", trust(T.previewComment(vnode.state.newComment))),
+				m(".preview", m.trust(T.previewComment(vnode.state.newComment))),
 			])
 			: m("a", {onclick: function() {return showReplying(vnode)}}, "Reply!")
 	}
 }
 
 //router
-renderer.setEventCallback(run)
-function run() {
-	replayRoute()
-}
-
-var root = document.getElementById("app")
-router.setPrefix("#")
-var replayRoute = router.defineRoutes({
+m.route(document.getElementById("app"), "/", {
 	"/thread/:id" : Thread,
-	"/" : Home
-}, function(view, args) {
-	renderer.render(root, [m(view, args)])
-}, function() {
-	router.setPath("/")
+	"/" : Home,
 })

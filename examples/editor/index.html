@@ -13,31 +13,20 @@ h1,h2,h3,h4,h5,h6,p {margin:0 0 10px;}
 	<body>
 		<div id="editor"></div>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
-		<script src="../../module/module.js"></script>
-		<script src="../../render/vnode.js"></script>
-		<script src="../../render/hyperscript.js"></script>
-		<script src="../../render/render.js"></script>
-		<script src="../../render/trust.js"></script>
+		<script src="../../mithril.js"></script>
 		<script>
-var m = require("../../render/hyperscript")
-var renderer = require("../../render/render")(window)
-renderer.setEventCallback(run)
-var trust = require("../../render/trust")
+var data = {text: "# Markdown Editor\n\nType on the left panel and see the result on the right panel"}
 
 var Editor = {
-	data: "# Markdown Editor\n\nType on the left panel and see the result on the right panel",
 	view: function(vnode) {
 		return [
-			m("textarea.editor-input", {oninput: function(e) {vnode.state.data = e.target.value}}, vnode.state.data),
-			m(".editor-preview", trust(marked(vnode.state.data))),
+			m("textarea.editor-input", {oninput: function(e) {data.text = e.target.value}}, data.text),
+			m(".editor-preview", m.trust(marked(data.text))),
 		]
 	}
 }
 
-function run() {
-	renderer.render(document.getElementById("editor"), m(Editor))
-}
-run()
+m.mount(document.getElementById("editor"), Editor)
 		</script>
 	</body>
 </html>
