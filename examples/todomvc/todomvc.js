@@ -1,146 +1,134 @@
-var m = require("../../render/hyperscript")
-var renderer = require("../../render/render")(window)
-var router = require("../../router/router")(window)
-
 //model
-var todos = loadData()
-var editing = null
-var showing = "all"
+var state = {
+	dispatch: function(action, args) {
+		state[action].apply(state, args || [])
+		requestAnimationFrame(function() {
+			localStorage["todos-mithril"] = JSON.stringify(state.todos)
+		})
+	},
+	
+	todos: JSON.parse(localStorage["todos-mithril"] || "[]"),
+	editing: null,
+	filter: "",
+	remaining: 0,
+	todosByStatus: [],
+	
+	createTodo: function(title) {
+		state.todos.push({title: title.trim(), completed: false})
+	},
+	setStatuses: function(completed) {
+		for (var i = 0; i < state.todos.length; i++) state.todos[i].completed = completed
+	},
+	setStatus: function(todo, completed) {
+		todo.completed = completed
+	},
+	destroy: function(todo) {
+		var index = state.todos.indexOf(todo)
+		if (index > -1) state.todos.splice(index, 1)
+	},
+	clear: function() {
+		for (var i = 0; i < state.todos.length; i++) {
+			if (state.todos[i].completed) state.destroy(state.todos[i--])
+		}
+	},
 
-function loadData() {
-	return JSON.parse(localStorage["todos-mithril"] || "[]")
-}
-function saveData() {
-	localStorage["todos-mithril"] = JSON.stringify(todos)
-}
+	edit: function(todo) {
+		state.editing = todo
+	},
+	update: function(title) {
+		if (state.editing != null) {
+			state.editing.title = title.trim()
+			if (state.editing.title === "") destroy(state.editing)
+			state.editing = null
+		}
+	},
+	reset: function() {
+		state.editing = null
+	},
 
-function createTodo(title) {
-	todos.push({title: title.trim(), completed: false})
-}
-function setStatuses(completed) {
-	for (var i = 0; i < todos.length; i++) todos[i].completed = completed
-}
-function setStatus(todo, completed) {
-	todo.completed = completed
-}
-function todosByStatus(todo) {
-	switch (showing) {
-		case "all": return true
-		case "active": return !todo.completed
-		case "completed": return todo.completed
+	computed: function(vnode) {
+		state.showing = vnode.attrs.status || ""
+		state.remaining = state.todos.filter(function(todo) {return !todo.completed}).length
+		state.todosByStatus = state.todos.filter(function(todo) {
+			switch (state.showing) {
+				case "": return true
+				case "active": return !todo.completed
+				case "completed": return todo.completed
+			}
+		})
 	}
-}
-function destroy(todo) {
-	var index = todos.indexOf(todo)
-	if (index > -1) todos.splice(index, 1)
-}
-function countRemaining() {
-	return todos.filter(function(todo) {return !todo.completed}).length
-}
-function clear() {
-	for (var i = 0; i < todos.length; i++) {
-		if (todos[i].completed) destroy(todos[i--])
-	}
-}
-
-function edit(todo) {
-	editing = todo
-}
-function update(title) {
-	editing.title = title.trim()
-	if (editing.title === "") destroy(editing)
-	editing = null
-}
-function reset() {
-	editing = null
-}
-
-function setFilter(filter) {
-	showing = filter
 }
 
 //view
-function add(e) {
-	if (e.keyCode === 13) {
-		createTodo(this.value)
-		this.value = ""
+var Todos = {
+	add: function(e) {
+		if (e.keyCode === 13) {
+			state.dispatch("createTodo", [e.target.value])
+			e.target.value = ""
+		}
+	},
+	toggleAll: function() {
+		state.dispatch("setStatuses", [document.getElementById("toggle-all").checked])
+	},
+	toggle: function(todo) {
+		state.dispatch("setStatus", [todo, !todo.completed])
+	},
+	focus: function(vnode, todo) {
+		if (todo === state.editing && vnode.dom !== document.activeElement) {
+			vnode.dom.value = todo.title
+			vnode.dom.focus()
+			vnode.dom.selectionStart = vnode.dom.selectionEnd = todo.title.length
+		}
+	},
+	save: function(e) {
+		if (e.keyCode === 13 || e.type === "blur") state.dispatch("update", [e.target.value])
+		else if (e.keyCode === 27) state.dispatch("reset")
+	},
+	dispatch: function(action, args) {
+		state.dispatch(action, args)
+	},
+	oninit: state.computed,
+	onbeforeupdate: state.computed,
+	view: function(vnode) {
+		var ui = vnode.state
+		return [
+			m("header.header", [
+				m("h1", "todos"),
+				m("input#new-todo[placeholder='What needs to be done?'][autofocus]", {onkeypress: ui.add}),
+			]),
+			m("section#main", {style: {display: state.todos.length > 0 ? "" : "none"}}, [
+				m("input#toggle-all[type='checkbox']", {checked: state.remaining === 0, onclick: ui.toggleAll}),
+				m("label[for='toggle-all']", {onclick: ui.toggleAll}, "Mark all as complete"),
+				m("ul#todo-list", [
+					state.todos.map(function(todo) {
+						return m("li", {class: (todo.completed ? "completed" : "") + " " + (todo === state.editing ? "editing" : "")}, [
+							m(".view", [
+								m("input.toggle[type='checkbox']", {checked: todo.completed, onclick: function() {ui.toggle(todo)}}),
+								m("label", {ondblclick: function() {ui.dispatch("edit", [todo])}}, todo.title),
+								m("button.destroy", {onclick: function() {ui.dispatch("destroy", [todo])}}),
+							]),
+							m("input.edit", {onupdate: function(vnode) {ui.focus(vnode, todo)}, onkeypress: ui.save, onblur: ui.save})
+						])
+					}),
+				]),
+			]),
+			state.todos.length ? m("footer#footer", [
+				m("span#todo-count", [
+					m("strong", state.remaining),
+					state.remaining === 1 ? " item left" : " items left",
+				]),
+				m("ul#filters", [
+					m("li", m("a[href='/']", {oncreate: m.route.link, class: state.filter === "" ? "selected" : ""}, "All")),
+					m("li", m("a[href='/active']", {oncreate: m.route.link, class: state.filter === "active" ? "selected" : ""}, "Active")),
+					m("li", m("a[href='/completed']", {oncreate: m.route.link, class: state.filter === "completed" ? "selected" : ""}, "Completed")),
+				]),
+				m("button#clear-completed", {onclick: function() {ui.dispatch("clear")}}, "Clear completed"),
+			]) : null,
+		]
 	}
 }
-function toggleAll() {
-	setStatuses(document.getElementById("toggle-all").checked)
-}
-function toggle(todo) {
-	setStatus(todo, !todo.completed)
-}
-function focus(vnode, todo) {
-	if (todo === editing && vnode.dom !== document.activeElement) {
-		vnode.dom.value = todo.title
-		vnode.dom.focus()
-		vnode.dom.selectionStart = vnode.dom.selectionEnd = todo.title.length
-	}
-}
-function save(e) {
-	if (e.keyCode === 13 || e.type === "blur") update(this.value)
-	else if (e.keyCode === 27) reset()
-}
 
-function view() {
-	var remaining = countRemaining()
-	return [
-		m("header.header", [
-			m("h1", "todos"),
-			m("input#new-todo[placeholder='What needs to be done?'][autofocus]", {onkeypress: add}),
-		]),
-		m("section#main", {style: {display: todos.length > 0 ? "" : "none"}}, [
-			m("input#toggle-all[type='checkbox']", {checked: remaining === 0, onclick: toggleAll}),
-			m("label[for='toggle-all']", {onclick: toggleAll}, "Mark all as complete"),
-			m("ul#todo-list", [
-				todos.filter(todosByStatus).map(function(todo) {
-					return m("li", {class: (todo.completed ? "completed" : "") + " " + (todo === editing ? "editing" : "")}, [
-						m(".view", [
-							m("input.toggle[type='checkbox']", {checked: todo.completed, onclick: function() {toggle(todo)}}),
-							m("label", {ondblclick: function() {edit(todo)}}, todo.title),
-							m("button.destroy", {onclick: function() {destroy(todo)}}),
-						]),
-						m("input.edit", {onupdate: function(vnode) {focus(vnode, todo)}, onkeypress: save, onblur: save})
-					])
-				}),
-			]),
-		]),
-		todos.length ? m("footer#footer", [
-			m("span#todo-count", [
-				m("strong", remaining),
-				remaining === 1 ? " item left" : " items left",
-			]),
-			m("ul#filters", [
-				m("li", m("a[href='#/']", {class: showing === "all" ? "selected" : ""}, "All")),
-				m("li", m("a[href='#/active']", {class: showing === "active" ? "selected" : ""}, "Active")),
-				m("li", m("a[href='#/completed']", {class: showing === "completed" ? "selected" : ""}, "Completed")),
-			]),
-			m("button#clear-completed", {onclick: clear}, "Clear completed"),
-		]) : null,
-	]
-}
-
-var root = document.getElementById("todoapp")
-var raf
-renderer.setEventCallback(run)
-function run() {
-	cancelAnimationFrame(raf)
-	raf = requestAnimationFrame(function() {
-		saveData()
-		renderer.render(root, view())
-	})
-}
-
-router.setPrefix("#")
-router.defineRoutes({
-	"/": "all",
-	"/active": "active",
-	"/completed": "completed",
-}, function(filter) {
-	setFilter(filter)
-	run()
-}, function() {
-	router.setPath("/")
+m.route(document.getElementById("todoapp"), "/", {
+	"/": Todos,
+	"/:status": Todos,
 })
