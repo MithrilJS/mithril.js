@@ -244,7 +244,10 @@ module.exports = function($window) {
 		}
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
-			if (vnode.text != null) vnode.attrs.value = vnode.text //FIXME handle multiple children
+			if (vnode.text != null) {
+				vnode.attrs.value = vnode.text //FIXME handle multiple children
+				vnode.text = undefined
+			}
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 		if (old.text != null && vnode.text != null && vnode.text !== "") {
