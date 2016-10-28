@@ -11,6 +11,8 @@ module.exports = function(renderer, pubsub) {
 			delete root.redraw
 			return
 		}
+		
+		if (component.view == null) throw new Error("m.mount(element, component) expects a component, not a vnode")
 
 		var run = autoredraw(root, renderer, pubsub, function() {
 			renderer.render(root, Vnode(component, undefined, undefined, undefined, undefined, undefined))
