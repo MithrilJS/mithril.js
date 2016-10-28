@@ -84,9 +84,6 @@ var Todos = {
 		if (e.keyCode === 13 || e.type === "blur") state.dispatch("update", [e.target.value])
 		else if (e.keyCode === 27) state.dispatch("reset")
 	},
-	dispatch: function(action, args) {
-		state.dispatch(action, args)
-	},
 	oninit: state.computed,
 	onbeforeupdate: state.computed,
 	view: function(vnode) {
@@ -104,8 +101,8 @@ var Todos = {
 						return m("li", {class: (todo.completed ? "completed" : "") + " " + (todo === state.editing ? "editing" : "")}, [
 							m(".view", [
 								m("input.toggle[type='checkbox']", {checked: todo.completed, onclick: function() {ui.toggle(todo)}}),
-								m("label", {ondblclick: function() {ui.dispatch("edit", [todo])}}, todo.title),
-								m("button.destroy", {onclick: function() {ui.dispatch("destroy", [todo])}}),
+								m("label", {ondblclick: function() {state.dispatch("edit", [todo])}}, todo.title),
+								m("button.destroy", {onclick: function() {state.dispatch("destroy", [todo])}}),
 							]),
 							m("input.edit", {onupdate: function(vnode) {ui.focus(vnode, todo)}, onkeypress: ui.save, onblur: ui.save})
 						])
@@ -122,7 +119,7 @@ var Todos = {
 					m("li", m("a[href='/active']", {oncreate: m.route.link, class: state.filter === "active" ? "selected" : ""}, "Active")),
 					m("li", m("a[href='/completed']", {oncreate: m.route.link, class: state.filter === "completed" ? "selected" : ""}, "Completed")),
 				]),
-				m("button#clear-completed", {onclick: function() {ui.dispatch("clear")}}, "Clear completed"),
+				m("button#clear-completed", {onclick: function() {state.dispatch("clear")}}, "Clear completed"),
 			]) : null,
 		]
 	}
