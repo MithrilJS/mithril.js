@@ -26,7 +26,7 @@ Partial documentation can be found in the [`/docs`](docs) directory
 
 ## Performance
 
-Mithril's virtual DOM engine is around 500 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are dbmon implementations for [React v15.3.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html), and [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html). All implementations are naive (i.e. apples-to-apples, no optimizations)
+Mithril's virtual DOM engine is around 500 lines of well organized code and it implements a modern search space reduction diff algorithm and a DOM recycling mechanism, which translate to top-of-class performance. See the [dbmon implementation](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html) (for comparison, here are dbmon implementations for [React v15.3.2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html), [Angular v2.0.0-beta.17](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html) and [Vue 2](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/vue/index.html). All implementations are naive (i.e. apples-to-apples, no optimizations)
 
 ## Robustness
 
