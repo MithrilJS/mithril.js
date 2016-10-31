@@ -21,7 +21,7 @@
 		"istanbul": "^0.4.3"
 	},
 	"publishConfig": {
-		"tag": "beta"
+		"tag": "rewrite"
 	},
 	"bin": {
 		"ospec": "./ospec/bin/ospec",
