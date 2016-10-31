@@ -11,7 +11,7 @@ This rewrite aims to fix longstanding API design issues, significantly improve p
 You can install this via NPM using this command:
 
 ```
-npm install lhorie/mithril.js#rewrite
+npm install mithril@1.0.0-rc.2
 ```
 
 Examples run out of the box. Just open the HTML files.

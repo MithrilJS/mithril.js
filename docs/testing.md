@@ -12,7 +12,7 @@ The easist way to setup the test runner is to create an NPM script for it. Open 
 		"test": "ospec"
 	},
 	"dependencies": {
-		"mithril": "github:lhorie/mithril.js#rewrite"
+		"mithril": "github:mithril@1.0.0-rc.2"
 	}
 }
 ```
