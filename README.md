@@ -20,7 +20,7 @@ Examples run out of the box. Just open the HTML files.
 
 The code is fairly stable and I'm using it in production, but there may be bugs still lurking.
 
-Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/threaditjs-bundle/index.html) has the largest API surface coverage.
+Some examples of usage can be found in the [examples](examples) folder. [ThreadItJS](http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/threaditjs/index.html) has the largest API surface coverage.
 
 Partial documentation can be found in the [`/docs`](docs) directory
 

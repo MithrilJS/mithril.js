@@ -73,6 +73,7 @@ function hyperscript(selector) {
 	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
 }
 hyperscript.trust = function(html) {
+	if (html == null) html = ""
 	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
 hyperscript.fragment = function(attrs1, children) {
