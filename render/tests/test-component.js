@@ -693,5 +693,73 @@ o.spec("component", function() {
 				o(vnode.state.data[0]).equals(body)
 			}
 		})
+		o("the view and hooks are looked up on the state object", function() {
+			var state = {
+				oncreate: o.spy(),
+				onbeforeupdate: o.spy(),
+				onupdate: o.spy(),
+				onbeforeremove: o.spy(function(vnode, done) {done()}),
+				onremove: o.spy(),
+				view: o.spy()
+			}
+			var context
+			var component = {
+				oninit: o.spy(function(vnode) {
+					context = this
+					vnode.state = state
+				}),
+				view: o.spy(function() {
+					return ""
+				})
+			}
+			render(root, [{tag: component}])
+
+			o(component.oninit.callCount).equals(1)
+			o(component.view.callCount).equals(0)
+			o(state.view.callCount).equals(1)
+			o(state.oncreate.callCount).equals(1)
+			o(state.onbeforeupdate.callCount).equals(0)
+			o(state.onupdate.callCount).equals(0)
+			o(state.onbeforeremove.callCount).equals(0)
+			o(state.onremove.callCount).equals(0)
+
+			render(root, [{tag: component}])
+
+			o(component.oninit.callCount).equals(1)
+			o(component.view.callCount).equals(0)
+			o(state.view.callCount).equals(2)
+			o(state.oncreate.callCount).equals(1)
+			o(state.onbeforeupdate.callCount).equals(1)
+			o(state.onupdate.callCount).equals(1)
+			o(state.onbeforeremove.callCount).equals(0)
+			o(state.onremove.callCount).equals(0)
+
+			render(root, [])
+
+			o(component.oninit.callCount).equals(1)
+			o(component.view.callCount).equals(0)
+			o(state.view.callCount).equals(2)
+			o(state.oncreate.callCount).equals(1)
+			o(state.onbeforeupdate.callCount).equals(1)
+			o(state.onupdate.callCount).equals(1)
+			o(state.onbeforeremove.callCount).equals(1)
+			o(state.onremove.callCount).equals(1)
+
+			o(component.oninit.this).equals(context)
+			o(state.view.this).equals(state)
+			o(state.oncreate.this).equals(state)
+			o(state.onbeforeupdate.this).equals(state)
+			o(state.onupdate.this).equals(state)
+			o(state.onbeforeremove.this).equals(state)
+			o(state.onremove.this).equals(state)
+
+			o(component.oninit.args.length).equals(1)
+			o(state.view.args.length).equals(1)
+			o(state.oncreate.args.length).equals(1)
+			o(state.onbeforeupdate.args.length).equals(2)
+			o(state.onupdate.args.length).equals(1)
+			o(state.onbeforeremove.args.length).equals(2)
+			o(state.onremove.args.length).equals(1)
+		})
 	})
 })
