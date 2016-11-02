@@ -78,12 +78,14 @@ module.exports = function($window) {
 			setAttrs(vnode, attrs, ns)
 		}
 
-		if (vnode.text != null) {
+		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
+			setContentEditable(vnode)
+		}
+		else if (vnode.text != null) {
 			if (vnode.text !== "") element.textContent = vnode.text
 			else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 		}
-
-		if (vnode.children != null) {
+		else if (vnode.children != null) {
 			var children = vnode.children
 			createNodes(element, children, 0, children.length, hooks, null, ns)
 			setLateAttrs(vnode)
@@ -250,7 +252,10 @@ module.exports = function($window) {
 			}
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
-		if (old.text != null && vnode.text != null && vnode.text !== "") {
+		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
+			setContentEditable(vnode)
+		}
+		else if (old.text != null && vnode.text != null && vnode.text !== "") {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
@@ -323,6 +328,15 @@ module.exports = function($window) {
 	function insertNode(parent, dom, nextSibling) {
 		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
+	}
+
+	function setContentEditable(vnode) {
+		var children = vnode.children
+		if (children != null && children.length === 1 && children[0].tag === "<") {
+			var content = children[0].children
+			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
+		}
+		else if (children != null || vnode.text != null) throw new Error("Child node of a contenteditable must be trusted")
 	}
 
 	//remove
