@@ -21,7 +21,8 @@ o.spec("render", function() {
 
 		o(root.childNodes.length).equals(0)
 	})
-	o("throws on invalid root node", function(){
+	
+	o("throws on invalid root node", function() {
 		var threw = false
 		try {
 			render(null, [])
@@ -29,5 +30,29 @@ o.spec("render", function() {
 			threw = true
 		}
 		o(threw).equals(true)
+	})
+	
+	o("does not enter infinite loop when oninit triggers render and view throws", function(done) {
+		var A = {
+			oninit: init,
+			view: function() {throw new Error("error")}
+		}
+		function run() {
+			render(root, {tag: A})
+		}
+		function init() {
+			setTimeout(function() {
+				var threwInner = false
+				try {run()} catch (e) {threwInner = true}
+				
+				o(threwInner).equals(false)
+				done()
+			}, 0)
+		}
+		
+		var threwOuter = false
+		try {run()} catch (e) {threwOuter = true}
+		
+		o(threwOuter).equals(true)
 	})
 })

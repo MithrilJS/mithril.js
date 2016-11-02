@@ -95,8 +95,12 @@ module.exports = function($window) {
 		if (!vnode.state) vnode.state = {}
 		assign(vnode.state, vnode.tag)
 
+		var view = vnode.tag.view
+		if (view.reentrantLock != null) return $emptyFragment
+		view.reentrantLock = true
 		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
+		vnode.instance = Vnode.normalize(view.call(vnode.state, vnode))
+		view.reentrantLock = null
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(vnode.instance, hooks, ns)
