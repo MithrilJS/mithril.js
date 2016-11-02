@@ -81,14 +81,16 @@ module.exports = function($window) {
 		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
 			setContentEditable(vnode)
 		}
-		else if (vnode.text != null) {
-			if (vnode.text !== "") element.textContent = vnode.text
-			else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-		}
-		else if (vnode.children != null) {
-			var children = vnode.children
-			createNodes(element, children, 0, children.length, hooks, null, ns)
-			setLateAttrs(vnode)
+		else {
+			if (vnode.text != null) {
+				if (vnode.text !== "") element.textContent = vnode.text
+				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+			}
+			if (vnode.children != null) {
+				var children = vnode.children
+				createNodes(element, children, 0, children.length, hooks, null, ns)
+				setLateAttrs(vnode)
+			}
 		}
 		return element
 	}
