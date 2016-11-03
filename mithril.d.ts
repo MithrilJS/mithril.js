@@ -7,7 +7,7 @@
 declare namespace Mithril {
 	interface ChildArray extends Array<Children> {}
 	type Children = Child | ChildArray;
-	type Child = string | VirtualElement | Component<Controller>;
+	type Child = string | TrustedString | VirtualElement | Component<Controller>;
 
 	interface Static {
 		/**
@@ -558,7 +558,7 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		controller: ControllerFunction<T> | ControllerConstructor<T>;
+		controller?: ControllerFunction<T> | ControllerConstructor<T>;
 
 		/**
 		* Creates a view out of virtual elements.
