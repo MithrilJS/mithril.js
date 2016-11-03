@@ -7,7 +7,7 @@
 
 export interface ChildArray extends Array<Children> {}
 export type Children = Child | ChildArray;
-export type Child = string | VirtualElement | Component<Controller>;
+export type Child = string | TrustedString | VirtualElement | Component<Controller>;
 
 export interface Static {
 	/**
@@ -884,7 +884,7 @@ export interface Component<T extends Controller> {
 	*
 	* @see m.component
 	*/
-	controller: ControllerFunction<T> | ControllerConstructor<T>;
+	controller?: ControllerFunction<T> | ControllerConstructor<T>;
 
 	/**
 	* Creates a view out of virtual elements.
