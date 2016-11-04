@@ -1,7 +1,7 @@
 //! adapted for mithril from flyd https://github.com/paldepind/flyd
-'use strict'
+"use strict"
 
-var combine = require('../stream').combine
+var combine = require("../stream").combine
 
 module.exports = function (tuples, seed) {
   var streams = tuples.map(function (tuple) {
