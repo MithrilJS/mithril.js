@@ -912,7 +912,7 @@ var _14 = function($window) {
 			if (typeof onevent === "function") onevent.call(element, e)
 			return result
 		}
-		if (key1 in element) element[key1] = callback
+		if (key1 in element) element[key1] = typeof value2 === "function" ? callback : null
 		else {
 			var eventName = key1.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
