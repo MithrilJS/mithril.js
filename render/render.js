@@ -122,7 +122,7 @@ module.exports = function($window) {
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
-		else if (vnodes == null) removeNodes(parent, old, 0, old.length, vnodes)
+		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
@@ -131,7 +131,7 @@ module.exports = function($window) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
-					else if (vnodes[i] == null) removeNodes(parent, old, i, i + 1, vnodes)
+					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
 					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
 				}
@@ -188,7 +188,7 @@ module.exports = function($window) {
 					if (end < start) break
 				}
 				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-				removeNodes(parent, old, oldStart, oldEnd + 1, vnodes)
+				removeNodes(old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
 	}
@@ -212,7 +212,7 @@ module.exports = function($window) {
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
-			removeNode(parent, old, null)
+			removeNode(old, null)
 			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
@@ -280,7 +280,7 @@ module.exports = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(parent, old.instance, null)
+			removeNode(old.instance, null)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -346,12 +346,12 @@ module.exports = function($window) {
 	}
 
 	//remove
-	function removeNodes(parent, vnodes, start, end, context) {
+	function removeNodes(vnodes, start, end, context) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				if (vnode.skip) vnode.skip = false
-				else removeNode(parent, vnode, context)
+				else removeNode(vnode, context)
 			}
 		}
 	}
@@ -364,7 +364,7 @@ module.exports = function($window) {
 			}
 		}
 	}
-	function removeNode(parent, vnode, context) {
+	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		if (vnode.attrs && vnode.attrs.onbeforeremove) {
 			expected++
@@ -383,10 +383,10 @@ module.exports = function($window) {
 					if (count > 1) {
 						var dom = vnode.dom
 						while (--count) {
-							parent.removeChild(dom.nextSibling)
+							removeNodeFromDOM(dom.nextSibling)
 						}
 					}
-					if (vnode.dom.parentNode != null) parent.removeChild(vnode.dom)
+					removeNodeFromDOM(vnode.dom)
 					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
 						if (!context.pool) context.pool = [vnode]
 						else context.pool.push(vnode)
@@ -394,6 +394,10 @@ module.exports = function($window) {
 				}
 			}
 		}
+	}
+	function removeNodeFromDOM(node) {
+		var parent = node.parentNode
+		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
