@@ -237,6 +237,7 @@ module.exports = function() {
 						}
 						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
 					},
+					onclick: null,
 				}
 
 				if (element.nodeName === "A") {

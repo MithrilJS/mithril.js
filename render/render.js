@@ -500,7 +500,7 @@ module.exports = function($window) {
 			if (typeof onevent === "function") onevent.call(element, e)
 			return result
 		}
-		if (key in element) element[key] = callback
+		if (key in element) element[key] = typeof value === "function" ? callback : null
 		else {
 			var eventName = key.slice(2)
 			if (vnode.events === undefined) vnode.events = {}

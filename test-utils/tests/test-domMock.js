@@ -559,6 +559,9 @@ o.spec("domMock", function() {
 				$document.body.removeChild(div)
 			})
 
+			o("has onclick", function() {
+				o("onclick" in div).equals(true)
+			})
 			o("addEventListener works", function() {
 				div.addEventListener("click", spy, false)
 				div.dispatchEvent(e)
