@@ -11,6 +11,7 @@ module.exports = function($window, Stream) {
 	function request(args) {
 		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
+		args.method = args.method.toUpperCase()
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
