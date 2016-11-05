@@ -301,6 +301,7 @@ var _9 = function($window, Stream0) {
 	function request(args) {
 		var stream0 = Stream0()
 		if (args.initialValue !== undefined) stream0(args.initialValue)
+		args.method = args.method.toUpperCase()
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
