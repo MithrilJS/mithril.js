@@ -344,7 +344,7 @@ var _9 = function($window, Stream0) {
 			}
 		}
 		
-		if (useBody) xhr.send(args.data)
+		if (useBody && (args.data != null)) xhr.send(args.data)
 		else xhr.send()
 		
 		return stream0
@@ -541,7 +541,7 @@ var _14 = function($window) {
 	function updateNodes(parent0, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent0, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
-		else if (vnodes == null) removeNodes(parent0, old, 0, old.length, vnodes)
+		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
 			var recycling = isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
@@ -549,7 +549,7 @@ var _14 = function($window) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
 					else if (old[i] == null) insertNode(parent0, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
-					else if (vnodes[i] == null) removeNodes(parent0, old, i, i + 1, vnodes)
+					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 					else updateNode(parent0, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
 					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent0, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
 				}
@@ -606,7 +606,7 @@ var _14 = function($window) {
 					if (end < start) break
 				}
 				createNodes(parent0, vnodes, start, end + 1, hooks, nextSibling, ns)
-				removeNodes(parent0, old, oldStart, oldEnd + 1, vnodes)
+				removeNodes(old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
 	}
@@ -630,7 +630,7 @@ var _14 = function($window) {
 			else updateComponent(parent0, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
-			removeNode(parent0, old, null)
+			removeNode(old, null)
 			insertNode(parent0, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
@@ -698,7 +698,7 @@ var _14 = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(parent0, old.instance, null)
+			removeNode(old.instance, null)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -761,12 +761,12 @@ var _14 = function($window) {
 		else if (children != null || vnode.text != null) throw new Error("Child node of a contenteditable must be trusted")
 	}
 	//remove
-	function removeNodes(parent0, vnodes, start, end, context) {
+	function removeNodes(vnodes, start, end, context) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				if (vnode.skip) vnode.skip = false
-				else removeNode(parent0, vnode, context)
+				else removeNode(vnode, context)
 			}
 		}
 	}
@@ -779,7 +779,7 @@ var _14 = function($window) {
 			}
 		}
 	}
-	function removeNode(parent0, vnode, context) {
+	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		if (vnode.attrs && vnode.attrs.onbeforeremove) {
 			expected++
@@ -798,10 +798,10 @@ var _14 = function($window) {
 					if (count > 1) {
 						var dom = vnode.dom
 						while (--count) {
-							parent0.removeChild(dom.nextSibling)
+							removeNodeFromDOM(dom.nextSibling)
 						}
 					}
-					if (vnode.dom.parentNode != null) parent0.removeChild(vnode.dom)
+					removeNodeFromDOM(vnode.dom)
 					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
 						if (!context.pool) context.pool = [vnode]
 						else context.pool.push(vnode)
@@ -809,6 +809,10 @@ var _14 = function($window) {
 				}
 			}
 		}
+	}
+	function removeNodeFromDOM(node) {
+		var parent0 = node.parentNode
+		if (parent0 != null) parent0.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)

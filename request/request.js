@@ -54,7 +54,7 @@ module.exports = function($window, Stream) {
 			}
 		}
 		
-		if (useBody) xhr.send(args.data)
+		if (useBody && (args.data != null)) xhr.send(args.data)
 		else xhr.send()
 		
 		return stream
