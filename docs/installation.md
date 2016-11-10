@@ -7,7 +7,7 @@ NPM (Node package manager) is the default package manager that is bundled w/ Nod
 To use Mithril via NPM:
 
 - go to your project folder, and run `npm init` from the command line. This will ask some questions (you can just press enter in all of them to set default values), and a file called `package.json` will be created.
-- run `npm install mithril@1.0.0-rc.2 --save`. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
+- run `npm install mithril@rewrite --save`. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
 
 You are now ready to start using Mithril. The recommended way to structure code is to modularize it via CommonJS modules:
 
@@ -33,7 +33,7 @@ The easiest way to create a bundle is to setup an NPM script for Mithril's bundl
 		"build": "bundle index.js --output app.js --watch"
 	},
 	"dependencies": {
-		"mithril": "github:mithril@1.0.0-rc.2"
+		"mithril": "^1.0.0-rc.3"
 	}
 }
 ```
