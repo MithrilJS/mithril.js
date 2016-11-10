@@ -301,6 +301,7 @@ var _9 = function($window, Stream0) {
 	function request(args) {
 		var stream0 = Stream0()
 		if (args.initialValue !== undefined) stream0(args.initialValue)
+		args.method = args.method.toUpperCase()
 		
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 		
@@ -1210,7 +1211,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.0-rc.2"
+m.version = "1.0.0-rc.3"
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }
