@@ -27,13 +27,49 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
-		o("works via POST", function(done) {
+		o("implicit GET method", function(done){
+			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).run(function(data) {
+			xhr({url: "/item"}).run(function(data) {
+				o(data).deepEquals({a: 1})
+			}).run(function() {
+				done()
+			})
+		})
+		o("first argument can be a string aliasing url property", function(done){
+			var s = new Date
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			xhr("/item").run(function(data) {
+				o(data).deepEquals({a: 1})
+			}).run(function() {
+				done()
+			})
+		})
+		o("works via POST", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			xhr({method: "POST", url: "/item"}).run(function(data) {
+				o(data).deepEquals({a: 1})
+			}).run(done)
+		})
+		o("first argument can act as URI with second argument providing options", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			xhr("/item", {method: "POST"}).run(function(data) {
 				o(data).deepEquals({a: 1})
 			}).run(done)
 		})
@@ -253,7 +289,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", config: config}).run(done)
-			
+
 			function config(xhr) {
 				o(typeof xhr.setRequestHeader).equals("function")
 				o(typeof xhr.open).equals("function")
@@ -267,7 +303,7 @@ o.spec("xhr", function() {
 				}
 			})
 			var items = xhr({method: "GET", url: "/items", initialValue: []})
-			
+
 			o(items()).deepEquals([])
 		})
 	})
