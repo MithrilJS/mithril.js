@@ -1,40 +1,52 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
+var Promise = require("../promise/promise")
 
 module.exports = function($window, Stream) {
 	var callbackCount = 0
 
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
-	
-	function request(args) {
+
+	function request(args, extra) {
+		if(typeof args === "string"){
+			var url = args
+
+			if(typeof extra === "object")	args = extra
+			else args = {}
+
+			if(typeof args.url === "undefined") args.url = url
+		}
+
+		if(typeof args.method === "undefined") args.method = "GET"
+
 		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
 		args.method = args.method.toUpperCase()
-		
+
 		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-		
+
 		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 		if (typeof args.deserialize !== "function") args.deserialize = deserialize
 		if (typeof args.extract !== "function") args.extract = extract
-		
+
 		args.url = interpolate(args.url, args.data)
 		if (useBody) args.data = args.serialize(args.data)
 		else args.url = assemble(args.url, args.data)
-		
+
 		var xhr = new $window.XMLHttpRequest()
 		xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-		
+
 		if (args.serialize === JSON.stringify && useBody) {
 			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 		}
 		if (args.deserialize === deserialize) {
 			xhr.setRequestHeader("Accept", "application/json, text/*")
 		}
-		
+
 		if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-		
+
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				try {
@@ -54,17 +66,17 @@ module.exports = function($window, Stream) {
 				if (typeof oncompletion === "function") oncompletion()
 			}
 		}
-		
+
 		if (useBody && (args.data != null)) xhr.send(args.data)
 		else xhr.send()
-		
+
 		return stream
 	}
 
 	function jsonp(args) {
 		var stream = Stream()
 		if (args.initialValue !== undefined) stream(args.initialValue)
-		
+
 		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 		var script = $window.document.createElement("script")
 		$window[callbackName] = function(data) {
@@ -116,7 +128,7 @@ module.exports = function($window, Stream) {
 	}
 
 	function extract(xhr) {return xhr.responseText}
-	
+
 	function cast(type, data) {
 		if (typeof type === "function") {
 			if (data instanceof Array) {
@@ -128,6 +140,6 @@ module.exports = function($window, Stream) {
 		}
 		return data
 	}
-	
+
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
