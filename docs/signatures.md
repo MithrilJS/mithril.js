@@ -27,6 +27,14 @@ The **Required** column indicates whether an argument is required or optional. I
 
 ---
 
+### Optional arguments
+
+Function arguments surrounded by square brackets `[ ]` are optional. In the example below, `url` is an optional argument:
+
+`m.request([url,] options)`
+
+---
+
 ### Splats
 
 A splat argument means that if the argument is an array, you can omit the square brackets and have a variable number of arguments in the method instead.
