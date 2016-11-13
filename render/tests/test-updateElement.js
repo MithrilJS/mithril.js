@@ -211,6 +211,19 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.attributes["class"].nodeValue).equals("b")
 	})
+	o("updates svg child", function() {
+		var vnode = {tag: "svg", children: [{
+			tag: 'circle'
+		}]}
+		var updated = {tag: "svg", children: [{
+			tag: 'line'
+		}]}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+	})
 	o("restores correctly when recycling", function() {
 		var vnode = {tag: "div", key: 1}
 		var updated = {tag: "div", key: 2}
