@@ -213,7 +213,7 @@ module.exports = function($window) {
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
+			insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
