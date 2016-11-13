@@ -626,7 +626,7 @@ var _14 = function($window) {
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent0, createNode(vnode, hooks, undefined), nextSibling)
+			insertNode(parent0, createNode(vnode, hooks, ns), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
