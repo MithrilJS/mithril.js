@@ -219,11 +219,10 @@ var _8 = function($window, Promise) {
 		return finalize(new Promise(function(resolve, reject) {
 			if (typeof args === "string") {
 				var url = args
-				if (typeof extra === "object") args = extra
-				else args = {}
-				if (typeof args.url === "undefined") args.url = url
+				args = extra || {}
+				if (args.url == null) args.url = url
 			}
-			if (typeof args.method === "undefined") args.method = "GET"
+			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
 			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
@@ -540,7 +539,7 @@ var _14 = function($window) {
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
+			insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {

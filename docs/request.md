@@ -22,7 +22,7 @@
 Argument               | Type                              | Required | Description
 ---------------------- | --------------------------------- | -------- | ---
 `url`                  | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
-`options.method`       | `String`                          | Yes      | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`.
+`options.method`       | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
 `options.url`          | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
 `options.data`         | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
 `options.async`        | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
