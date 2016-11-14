@@ -115,7 +115,7 @@ var Data = {
 				url: "/api/todos",
 			})
 			.then(function(items) {
-				Data.todos.items = items
+				Data.todos.list = items
 			})
 			.catch(function(e) {
 				Data.todos.error = e.message
