@@ -1,30 +1,29 @@
 T.time("Setup");
 
 var m = require("../../mithril")
-var request = m.request
 
 //API calls
 var api = {
-	home : function() {
+	home: function() {
 		T.timeEnd("Setup")
-		return request({method: "GET", url: T.apiUrl + "/threads/"})
+		return m.request({method: "GET", url: T.apiUrl + "/threads/"})
 	},
-	thread : function(id) {
+	thread: function(id) {
 		T.timeEnd("Setup")
-		return request({method: "GET", url: T.apiUrl + "/comments/" + id}).run(T.transformResponse)
+		return m.request({method: "GET", url: T.apiUrl + "/comments/" + id}).then(T.transformResponse)
 	},
-	newThread : function(text) {
-		return request({method: "POST", url: T.apiUrl + "/threads/create",data: {text: text}})
+	newThread: function(text) {
+		return m.request({method: "POST", url: T.apiUrl + "/threads/create",data: {text: text}})
 	},
-	newComment : function(text, id) {
-		return request({method: "POST", url: T.apiUrl + "/comments/create", data: {text: text, parent: id}});
+	newComment: function(text, id) {
+		return m.request({method: "POST", url: T.apiUrl + "/comments/create", data: {text: text, parent: id}});
 	}
 };
 
 var threads = [], current = null, loaded = false, error = false, notFound = false
 function loadThreads() {
 	loaded = false
-	api.home().run(function(response) {
+	api.home().then(function(response) {
 		document.title = "ThreaditJS: Mithril | Home"
 		threads = response.data
 		loaded = true
@@ -36,7 +35,7 @@ function loadThreads() {
 function loadThread(id) {
 	loaded = false
 	notFound = false
-	api.thread(id).run(function(response) {
+	api.thread(id).then(function(response) {
 		document.title = "ThreaditJS: Mithril | " + T.trimTitle(response.root.text);
 		loaded = true
 		current = response
@@ -52,7 +51,7 @@ function unloadThread() {
 
 function createThread() {
 	var threadText = document.getElementById("threadText")
-	api.newThread(threadText.value).run(function(response) {
+	api.newThread(threadText.value).then(function(response) {
 		threadText.value = "";
 		threads.push(response.data);
 	})
@@ -66,7 +65,7 @@ function showReplying(vnode) {
 }
 
 function submitComment(vnode) {
-	api.newComment(vnode.state.newComment, vnode.attrs.node.id).run(function(response) {
+	api.newComment(vnode.state.newComment, vnode.attrs.node.id).then(function(response) {
 		vnode.state.newComment = ""
 		vnode.state.replying = false
 		vnode.attrs.node.children.push(response.data)

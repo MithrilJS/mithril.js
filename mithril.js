@@ -80,198 +80,100 @@ hyperscript.fragment = function(attrs1, children) {
 	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children), undefined, undefined)
 }
 var m = hyperscript
-var _7 = function(log) {
-	var guid = 0, noop = function() {}, HALT = {}
-	function createStream() {
-		function stream() {
-			if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
-			return stream._state.value
-		}
-		initStream(stream)
-		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0], undefined)
-		return stream
-	}
-	function initStream(stream) {
-		stream.constructor = createStream
-		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-		stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
-		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
-		stream.run = run, stream.catch = doCatch
-		Object.defineProperties(stream, {
-			error: {get: function() {
-				if (!stream._state.errorStream) {
-					var errorStream = function() {
-						if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, undefined, arguments[0])
-						return stream._state.error
-					}
-					initStream(errorStream)
-					initDependency(errorStream, [stream], noop, noop)
-					stream._state.errorStream = errorStream
+/** @constructor */
+var PromisePolyfill0 = function(executor) {
+	if (!(this instanceof PromisePolyfill0)) throw new Error("Promise must be called with `new`")
+	if (typeof executor !== "function") throw new TypeError("executor must be a function")
+	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
+	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
+	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+	function handler(list, shouldAbsorb) {
+		return function execute(value) {
+			var then
+			try {
+				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
+					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
+					executeOnce(then.bind(value))
 				}
-				return stream._state.errorStream
-			}},
-			end: {get: function() {
-				if (!stream._state.endStream) {
-					var endStream = createStream()
-					endStream["fantasy-land/map"](function(value) {
-						if (value === true) unregisterStream(stream), unregisterStream(endStream)
-						return value
+				else {
+					callAsync(function() {
+						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
+						for (var i = 0; i < list.length; i++) list[i](value)
+						resolvers.length = 0, rejectors.length = 0
+						instance.state = shouldAbsorb
+						instance.retry = function() {execute(value)}
 					})
-					stream._state.endStream = endStream
 				}
-				return stream._state.endStream
-			}}
-		})
-	}
-	function updateStream(stream, value, error) {
-		updateState(stream, value, error)
-		for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
-		finalize(stream)
-	}
-	function updateState(stream, value, error) {
-		error = unwrapError(value, error)
-		if (error !== undefined && typeof stream._state.recover === "function") {
-			if (!resolve(stream, updateValues, true)) return
-		}
-		else updateValues(stream, value, error)
-		stream._state.changed = true
-		if (stream._state.state !== 2) stream._state.state = 1
-	}
-	function updateValues(stream, value, error) {
-		stream._state.value = value
-		stream._state.error = error
-	}
-	function updateDependency(stream, mustSync) {
-		var state = stream._state, parents = state.parents
-		if (parents.length > 0 && parents.filter(active).length === parents.length && (mustSync || parents.filter(changed).length > 0)) {
-			var failed = parents.filter(errored)
-			if (failed.length > 0) updateState(stream, undefined, failed[0]._state.error)
-			else resolve(stream, updateState, false)
-		}
-	}
-	function resolve(stream, update, shouldRecover) {
-		try {
-			var value = shouldRecover ? stream._state.recover() : stream._state.derive()
-			if (value === HALT) return false
-			update(stream, value, undefined)
-		}
-		catch (e) {
-			update(stream, undefined, e.__error != null ? e.__error : e)
-			if (e.__error == null) reportUncaughtError(stream, e)
-		}
-		return true
-	}
-	function unwrapError(value, error) {
-		if (value != null && value.constructor === createStream) {
-			if (value._state.error !== undefined) error = value._state.error
-			else error = unwrapError(value._state.value, value._state.error)
-		}
-		return error
-	}
-	function finalize(stream) {
-		stream._state.changed = false
-		for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
-	}
-	function reportUncaughtError(stream, e) {
-		if (Object.keys(stream._state.deps).length === 0) {
-			setTimeout(function() {
-				if (Object.keys(stream._state.deps).length === 0) log(e)
-			}, 0)
-		}
-	}
-	function run(fn) {
-		var self = createStream(), stream = this
-		return initDependency(self, [stream], function() {
-			return absorb(self, fn(stream()))
-		}, undefined)
-	}
-	function doCatch(fn) {
-		var self = createStream(), stream = this
-		var derive = function() {return stream._state.value}
-		var recover = function() {return absorb(self, fn(stream._state.error))}
-		return initDependency(self, [stream], derive, recover)
-	}
-	function combine(fn, streams) {
-		if (streams.length > streams.filter(valid).length) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
-		return initDependency(createStream(), streams, function() {
-			var failed = streams.filter(errored)
-			if (failed.length > 0) throw {__error: failed[0]._state.error}
-			return fn.apply(this, streams.concat([streams.filter(changed)]))
-		}, undefined)
-	}
-	function absorb(stream, value) {
-		if (value != null && value.constructor === createStream) {
-			var absorbable = value
-			var update = function() {
-				updateState(stream, absorbable._state.value, absorbable._state.error)
-				for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
 			}
-			absorbable["fantasy-land/map"](update).catch(function(e) {
-				update()
-				throw {__error: e}
-			})
-			
-			if (absorbable._state.state === 0) return HALT
-			if (absorbable._state.error) throw {__error: absorbable._state.error}
-			value = absorbable._state.value
-		}
-		return value
-	}
-	function initDependency(dep, streams, derive, recover) {
-		var state = dep._state
-		state.derive = derive
-		state.recover = recover
-		state.parents = streams.filter(notEnded)
-		registerDependency(dep, state.parents)
-		updateDependency(dep, true)
-		return dep
-	}
-	function registerDependency(stream, parents) {
-		for (var i = 0; i < parents.length; i++) {
-			parents[i]._state.deps[stream._state.id] = stream
-			registerDependency(stream, parents[i]._state.parents)
+			catch (e) {
+				rejectCurrent(e)
+			}
 		}
 	}
-	function unregisterStream(stream) {
-		for (var i = 0; i < stream._state.parents.length; i++) {
-			var parent = stream._state.parents[i]
-			delete parent._state.deps[stream._state.id]
+	function executeOnce(then) {
+		var runs = 0
+		function run(fn) {
+			return function(value) {
+				if (runs++ > 0) return
+				fn(value)
+			}
 		}
-		for (var id in stream._state.deps) {
-			var dependent = stream._state.deps[id]
-			var index = dependent._state.parents.indexOf(stream)
-			if (index > -1) dependent._state.parents.splice(index, 1)
-		}
-		stream._state.state = 2 //ended
-		stream._state.deps = {}
+		var onerror = run(rejectCurrent)
+		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
 	}
-	function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
-	function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
-	function valueOf() {return this._state.value}
-	function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
-	function valid(stream) {return stream._state }
-	function active(stream) {return stream._state.state === 1}
-	function changed(stream) {return stream._state.changed}
-	function notEnded(stream) {return stream._state.state !== 2}
-	function errored(stream) {return stream._state.error}
-	function reject(e) {
-		var stream = createStream()
-		stream.error(e)
-		return stream
-	}
-	function merge(streams) {
-		return combine(function () {
-			return streams.map(function(s) {return s()})
-		}, streams)
-	}
-	createStream["fantasy-land/of"] = createStream
-	createStream.merge = merge
-	createStream.combine = combine
-	createStream.reject = reject
-	createStream.HALT = HALT
-	return createStream
+	executeOnce(executor)
 }
-var Stream = _7(console.log.bind(console))
+PromisePolyfill0.prototype.then = function(onFulfilled, onRejection) {
+	var self = this, instance = self._instance
+	function handle(callback, list, next, state) {
+		list.push(function(value) {
+			if (typeof callback !== "function") next(value)
+			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
+		})
+		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
+	}
+	var resolveNext, rejectNext
+	var promise = new PromisePolyfill0(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
+	return promise
+}
+PromisePolyfill0.prototype.catch = function(onRejection) {
+	return this.then(null, onRejection)
+}
+PromisePolyfill0.resolve = function(value) {
+	if (value instanceof PromisePolyfill0) return value
+	return new PromisePolyfill0(function(resolve) {resolve(value)})
+}
+PromisePolyfill0.reject = function(value) {
+	return new PromisePolyfill0(function(resolve, reject) {reject(value)})
+}
+PromisePolyfill0.all = function(list) {
+	return new PromisePolyfill0(function(resolve, reject) {
+		var total = list.length, count = 0, values = []
+		if (list.length === 0) resolve([])
+		else for (var i = 0; i < list.length; i++) {
+			(function(i) {
+				function consume(value) {
+					count++
+					values[i] = value
+					if (count === total) resolve(values)
+				}
+				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
+					list[i].then(consume, reject)
+				}
+				else consume(list[i])
+			})(i)
+		}
+	})
+}
+PromisePolyfill0.race = function(list) {
+	return new PromisePolyfill0(function(resolve, reject) {
+		for (var i = 0; i < list.length; i++) {
+			list[i].then(resolve, reject)
+		}
+	})
+}
+var PromisePolyfill = typeof Promise !== "undefined" ? Promise : PromisePolyfill0
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -279,97 +181,108 @@ var buildQueryString = function(object) {
 		destructure(key0, object[key0])
 	}
 	return args.join("&")
-	function destructure(key0, value1) {
-		if (value1 instanceof Array) {
-			for (var i = 0; i < value1.length; i++) {
-				destructure(key0 + "[" + i + "]", value1[i])
+	function destructure(key0, value) {
+		if (value instanceof Array) {
+			for (var i = 0; i < value.length; i++) {
+				destructure(key0 + "[" + i + "]", value[i])
 			}
 		}
-		else if (Object.prototype.toString.call(value1) === "[object Object]") {
-			for (var i in value1) {
-				destructure(key0 + "[" + i + "]", value1[i])
+		else if (Object.prototype.toString.call(value) === "[object Object]") {
+			for (var i in value) {
+				destructure(key0 + "[" + i + "]", value[i])
 			}
 		}
-		else args.push(encodeURIComponent(key0) + (value1 != null && value1 !== "" ? "=" + encodeURIComponent(value1) : ""))
+		else args.push(encodeURIComponent(key0) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var _9 = function($window, Stream0) {
+var _8 = function($window, Promise) {
 	var callbackCount = 0
+	var count = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
+	function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
+	function finalize(promise0) {
+		var then0 = promise0.then
+		promise0.then = function() {
+			count++
+			var next = then0.apply(promise0, arguments)
+			next.then(complete, function(e) {
+				complete()
+				throw e
+			})
+			return finalize(next)
+		}
+		return promise0
+	}
+	
 	function request(args, extra) {
-		if(typeof args === "string"){
-			var url = args
-			if(typeof extra === "object")	args = extra
-			else args = {}
-			if(typeof args.url === "undefined") args.url = url
-		}
-		if(typeof args.method === "undefined") args.method = "GET"
-		var stream0 = Stream0()
-		if (args.initialValue !== undefined) stream0(args.initialValue)
-		args.method = args.method.toUpperCase()
-		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value0) {return value0} : JSON.stringify
-		if (typeof args.deserialize !== "function") args.deserialize = deserialize
-		if (typeof args.extract !== "function") args.extract = extract
-		args.url = interpolate(args.url, args.data)
-		if (useBody) args.data = args.serialize(args.data)
-		else args.url = assemble(args.url, args.data)
-		var xhr = new $window.XMLHttpRequest()
-		xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-		if (args.serialize === JSON.stringify && useBody) {
-			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
-		}
-		if (args.deserialize === deserialize) {
-			xhr.setRequestHeader("Accept", "application/json, text/*")
-		}
-		if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4) {
-				try {
-					var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-					if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-						stream0(cast(args.type, response))
-					}
-					else {
-						var error = new Error(xhr.responseText)
-						for (var key in response) error[key] = response[key]
-						stream0.error(error)
-					}
-				}
-				catch (e) {
-					stream0.error(e)
-				}
-				if (typeof oncompletion === "function") oncompletion()
+		return finalize(new Promise(function(resolve, reject) {
+			if (typeof args === "string") {
+				var url = args
+				if (typeof extra === "object") args = extra
+				else args = {}
+				if (typeof args.url === "undefined") args.url = url
 			}
-		}
-		if (useBody && (args.data != null)) xhr.send(args.data)
-		else xhr.send()
-		return stream0
+			if (typeof args.method === "undefined") args.method = "GET"
+			args.method = args.method.toUpperCase()
+			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
+			if (typeof args.deserialize !== "function") args.deserialize = deserialize
+			if (typeof args.extract !== "function") args.extract = extract
+			args.url = interpolate(args.url, args.data)
+			if (useBody) args.data = args.serialize(args.data)
+			else args.url = assemble(args.url, args.data)
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+			if (args.serialize === JSON.stringify && useBody) {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
+			}
+			if (args.deserialize === deserialize) {
+				xhr.setRequestHeader("Accept", "application/json, text/*")
+			}
+			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					try {
+						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+							resolve(cast(args.type, response))
+						}
+						else {
+							var error = new Error(xhr.responseText)
+							for (var key in response) error[key] = response[key]
+							reject(error)
+						}
+					}
+					catch (e) {
+						reject(e)
+					}
+				}
+			}
+			if (useBody && (args.data != null)) xhr.send(args.data)
+			else xhr.send()
+		}))
 	}
 	function jsonp(args) {
-		var stream0 = Stream0()
-		if (args.initialValue !== undefined) stream0(args.initialValue)
-		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-		var script = $window.document.createElement("script")
-		$window[callbackName] = function(data) {
-			script.parentNode.removeChild(script)
-			stream0(cast(args.type, data))
-			if (typeof oncompletion === "function") oncompletion()
-			delete $window[callbackName]
-		}
-		script.onerror = function() {
-			script.parentNode.removeChild(script)
-			stream0.error(new Error("JSONP request failed"))
-			if (typeof oncompletion === "function") oncompletion()
-			delete $window[callbackName]
-		}
-		if (args.data == null) args.data = {}
-		args.url = interpolate(args.url, args.data)
-		args.data[args.callbackKey || "callback"] = callbackName
-		script.src = assemble(args.url, args.data)
-		$window.document.documentElement.appendChild(script)
-		return stream0
+		return finalize(new Promise(function(resolve, reject) {
+			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var script = $window.document.createElement("script")
+			$window[callbackName] = function(data) {
+				script.parentNode.removeChild(script)
+				resolve(cast(args.type, data))
+				delete $window[callbackName]
+			}
+			script.onerror = function() {
+				script.parentNode.removeChild(script)
+				reject(new Error("JSONP request failed"))
+				delete $window[callbackName]
+			}
+			if (args.data == null) args.data = {}
+			args.url = interpolate(args.url, args.data)
+			args.data[args.callbackKey || "callback"] = callbackName
+			script.src = assemble(args.url, args.data)
+			$window.document.documentElement.appendChild(script)
+		}))
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
@@ -409,12 +322,12 @@ var _9 = function($window, Stream0) {
 	}
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
-var requestService = _9(window, Stream)
-var _12 = function() {
+var requestService = _8(window, PromisePolyfill)
+var _11 = function() {
 	var callbacks = []
 	function unsubscribe(callback) {
-		var index0 = callbacks.indexOf(callback)
-		if (index0 > -1) callbacks.splice(index0, 1)
+		var index = callbacks.indexOf(callback)
+		if (index > -1) callbacks.splice(index, 1)
 	}
     function publish() {
         for (var i = 0; i < callbacks.length; i++) {
@@ -423,19 +336,20 @@ var _12 = function() {
     }
 	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
 }
-var redrawService = _12()
+var redrawService = _11()
 requestService.setCompletionCallback(redrawService.publish)
+m.Promise = PromisePolyfill
 var _14 = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 	//create
-	function createNodes(parent0, vnodes, start, end, hooks, nextSibling, ns) {
+	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent0, createNode(vnode, hooks, ns), nextSibling)
+				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
 			}
 		}
 	}
@@ -457,8 +371,8 @@ var _14 = function($window) {
 	}
 	function createHTML(vnode) {
 		var match1 = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent0 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
-		var temp = $doc.createElement(parent0)
+		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
+		var temp = $doc.createElement(parent)
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -511,7 +425,7 @@ var _14 = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		// For object literals since `Vnode()` always sets the `state0` field.
+		// For object literals since `Vnode()` always sets the `state` field.
 		if (!vnode.state) vnode.state = {}
 		assign(vnode.state, vnode.tag)
 		var view = vnode.tag.view
@@ -532,10 +446,10 @@ var _14 = function($window) {
 			return $emptyFragment
 		}
 	}
-	//update0
-	function updateNodes(parent0, old, vnodes, hooks, nextSibling, ns) {
+	//update
+	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null) createNodes(parent0, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
+		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
 			var recycling = isRecyclable(old, vnodes)
@@ -543,28 +457,28 @@ var _14 = function($window) {
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
-					else if (old[i] == null) insertNode(parent0, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-					else updateNode(parent0, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
-					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent0, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
+					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
+					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
 				}
 			}
 			else {
-				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map0
+				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldStart], v = vnodes[start]
 					if (o === v && !recycling) oldStart++, start++
 					else if (o != null && v != null && o.key === v.key) {
 						oldStart++, start++
-						updateNode(parent0, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-						if (recycling && o.tag === v.tag) insertNode(parent0, toFragment(o), nextSibling)
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
+						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					}
 					else {
 						var o = old[oldEnd]
 						if (o === v && !recycling) oldEnd--, start++
 						else if (o != null && v != null && o.key === v.key) {
-							updateNode(parent0, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							if (recycling || start < end) insertNode(parent0, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+							if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 							oldEnd--, start++
 						}
 						else break
@@ -574,25 +488,25 @@ var _14 = function($window) {
 					var o = old[oldEnd], v = vnodes[end]
 					if (o === v && !recycling) oldEnd--, end--
 					else if (o != null && v != null && o.key === v.key) {
-						updateNode(parent0, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-						if (recycling && o.tag === v.tag) insertNode(parent0, toFragment(o), nextSibling)
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 						if (o.dom != null) nextSibling = o.dom
 						oldEnd--, end--
 					}
 					else {
-						if (!map0) map0 = getKeyMap(old, oldEnd)
+						if (!map) map = getKeyMap(old, oldEnd)
 						if (v != null) {
-							var oldIndex = map0[v.key]
+							var oldIndex = map[v.key]
 							if (oldIndex != null) {
 								var movable = old[oldIndex]
-								updateNode(parent0, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-								insertNode(parent0, toFragment(movable), nextSibling)
+								updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+								insertNode(parent, toFragment(movable), nextSibling)
 								old[oldIndex].skip = true
 								if (movable.dom != null) nextSibling = movable.dom
 							}
 							else {
 								var dom = createNode(v, hooks, undefined)
-								insertNode(parent0, dom, nextSibling)
+								insertNode(parent, dom, nextSibling)
 								nextSibling = dom
 							}
 						}
@@ -600,12 +514,12 @@ var _14 = function($window) {
 					}
 					if (end < start) break
 				}
-				createNodes(parent0, vnodes, start, end + 1, hooks, nextSibling, ns)
+				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				removeNodes(old, oldStart, oldEnd + 1, vnodes)
 			}
 		}
 	}
-	function updateNode(parent0, old, vnode, hooks, nextSibling, recycling, ns) {
+	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
@@ -617,16 +531,16 @@ var _14 = function($window) {
 			if (typeof oldTag === "string") {
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
-					case "<": updateHTML(parent0, old, vnode, nextSibling); break
-					case "[": updateFragment(parent0, old, vnode, hooks, nextSibling, ns); break
+					case "<": updateHTML(parent, old, vnode, nextSibling); break
+					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
 					default: updateElement(old, vnode, hooks, ns)
 				}
 			}
-			else updateComponent(parent0, old, vnode, hooks, nextSibling, recycling, ns)
+			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent0, createNode(vnode, hooks, undefined), nextSibling)
+			insertNode(parent, createNode(vnode, hooks, undefined), nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -635,15 +549,15 @@ var _14 = function($window) {
 		}
 		vnode.dom = old.dom
 	}
-	function updateHTML(parent0, old, vnode, nextSibling) {
+	function updateHTML(parent, old, vnode, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			insertNode(parent0, createHTML(vnode), nextSibling)
+			insertNode(parent, createHTML(vnode), nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent0, old, vnode, hooks, nextSibling, ns) {
-		updateNodes(parent0, old.children, vnode.children, hooks, nextSibling, ns)
+	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -666,7 +580,7 @@ var _14 = function($window) {
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
-				vnode.attrs.value = vnode.text //FIXME handle multiple children
+				vnode.attrs.value = vnode.text //FIXME handle0 multiple children
 				vnode.text = undefined
 			}
 		}
@@ -683,12 +597,12 @@ var _14 = function($window) {
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
-	function updateComponent(parent0, old, vnode, hooks, nextSibling, recycling, ns) {
+	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			if (old.instance == null) insertNode(parent0, createNode(vnode.instance, hooks, ns), nextSibling)
-			else updateNode(parent0, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
+			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
@@ -714,23 +628,23 @@ var _14 = function($window) {
 		return false
 	}
 	function getKeyMap(vnodes, end) {
-		var map0 = {}, i = 0
+		var map = {}, i = 0
 		for (var i = 0; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				var key1 = vnode.key
-				if (key1 != null) map0[key1] = i
+				if (key1 != null) map[key1] = i
 			}
 		}
-		return map0
+		return map
 	}
 	function toFragment(vnode) {
-		var count = vnode.domSize
-		if (count != null || vnode.dom == null) {
+		var count0 = vnode.domSize
+		if (count0 != null || vnode.dom == null) {
 			var fragment = $doc.createDocumentFragment()
-			if (count > 0) {
+			if (count0 > 0) {
 				var dom = vnode.dom
-				while (--count) fragment.appendChild(dom.nextSibling)
+				while (--count0) fragment.appendChild(dom.nextSibling)
 				fragment.insertBefore(dom, fragment.firstChild)
 			}
 			return fragment
@@ -743,9 +657,9 @@ var _14 = function($window) {
 		}
 		return nextSibling
 	}
-	function insertNode(parent0, dom, nextSibling) {
-		if (nextSibling && nextSibling.parentNode) parent0.insertBefore(dom, nextSibling)
-		else parent0.appendChild(dom)
+	function insertNode(parent, dom, nextSibling) {
+		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
+		else parent.appendChild(dom)
 	}
 	function setContentEditable(vnode) {
 		var children = vnode.children
@@ -789,10 +703,10 @@ var _14 = function($window) {
 			if (++called === expected) {
 				onremove(vnode)
 				if (vnode.dom) {
-					var count = vnode.domSize || 1
-					if (count > 1) {
+					var count0 = vnode.domSize || 1
+					if (count0 > 1) {
 						var dom = vnode.dom
-						while (--count) {
+						while (--count0) {
 							removeNodeFromDOM(dom.nextSibling)
 						}
 					}
@@ -806,8 +720,8 @@ var _14 = function($window) {
 		}
 	}
 	function removeNodeFromDOM(node) {
-		var parent0 = node.parentNode
-		if (parent0 != null) parent0.removeChild(node)
+		var parent = node.parentNode
+		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
@@ -829,26 +743,26 @@ var _14 = function($window) {
 			setAttr(vnode, key1, null, attrs2[key1], ns)
 		}
 	}
-	function setAttr(vnode, key1, old, value2, ns) {
+	function setAttr(vnode, key1, old, value, ns) {
 		var element = vnode.dom
-		if (key1 === "key" || (old === value2 && !isFormAttribute(vnode, key1)) && typeof value2 !== "object" || typeof value2 === "undefined" || isLifecycleMethod(key1)) return
+		if (key1 === "key" || (old === value && !isFormAttribute(vnode, key1)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key1)) return
 		var nsLastIndex = key1.indexOf(":")
 		if (nsLastIndex > -1 && key1.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key1.slice(nsLastIndex + 1), value2)
+			element.setAttributeNS("http://www.w3.org/1999/xlink", key1.slice(nsLastIndex + 1), value)
 		}
-		else if (key1[0] === "o" && key1[1] === "n" && typeof value2 === "function") updateEvent(vnode, key1, value2)
-		else if (key1 === "style") updateStyle(element, old, value2)
+		else if (key1[0] === "o" && key1[1] === "n" && typeof value === "function") updateEvent(vnode, key1, value)
+		else if (key1 === "style") updateStyle(element, old, value)
 		else if (key1 in element && !isAttribute(key1) && ns === undefined) {
-			//setting input[value2] to same value2 by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key1 === "value" && vnode.dom.value === value2 && vnode.dom === $doc.activeElement) return
-			element[key1] = value2
+			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
+			if (vnode.tag === "input" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			element[key1] = value
 		}
 		else {
-			if (typeof value2 === "boolean") {
-				if (value2) element.setAttribute(key1, "")
+			if (typeof value === "boolean") {
+				if (value) element.setAttribute(key1, "")
 				else element.removeAttribute(key1)
 			}
-			else element.setAttribute(key1 === "className" ? "class" : key1, value2)
+			else element.setAttribute(key1 === "className" ? "class" : key1, value)
 		}
 	}
 	function setLateAttrs(vnode) {
@@ -904,19 +818,19 @@ var _14 = function($window) {
 		}
 	}
 	//event
-	function updateEvent(vnode, key1, value2) {
+	function updateEvent(vnode, key1, value) {
 		var element = vnode.dom
 		var callback = function(e) {
-			var result = value2.call(element, e)
+			var result = value.call(element, e)
 			if (typeof onevent === "function") onevent.call(element, e)
 			return result
 		}
-		if (key1 in element) element[key1] = typeof value2 === "function" ? callback : null
+		if (key1 in element) element[key1] = typeof value === "function" ? callback : null
 		else {
 			var eventName = key1.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
 			if (vnode.events[key1] != null) element.removeEventListener(eventName, vnode.events[key1], false)
-			if (typeof value2 === "function") {
+			if (typeof value === "function") {
 				vnode.events[key1] = callback
 				element.addEventListener(eventName, vnode.events[key1], false)
 			}
@@ -949,14 +863,14 @@ var _14 = function($window) {
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
-		var active0 = $doc.activeElement
+		var active = $doc.activeElement
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 		if (!(vnodes instanceof Array)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
-		if ($doc.activeElement !== active0) active0.focus()
+		if ($doc.activeElement !== active) active.focus()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
@@ -1019,9 +933,9 @@ var parseQueryString = function(string) {
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key3 = decodeURIComponent(entry[0])
-		var value4 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		if (value4 === "true") value4 = true
-		else if (value4 === "false") value4 = false
+		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		if (value === "true") value = true
+		else if (value === "false") value = false
 		var levels = key3.split(/\]\[?|\[/)
 		var cursor = data0
 		if (key3.indexOf("[") > -1) levels.pop()
@@ -1035,7 +949,7 @@ var parseQueryString = function(string) {
 				level = counters[key3]++
 			}
 			if (cursor[level] == null) {
-				cursor[level] = isValue ? value4 : isNumber ? [] : {}
+				cursor[level] = isValue ? value : isNumber ? [] : {}
 			}
 			cursor = cursor[level]
 		}
@@ -1044,9 +958,9 @@ var parseQueryString = function(string) {
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
-	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
 	var prefix1 = "#!"
-	function setPrefix(value3) {prefix1 = value3}
+	function setPrefix(value) {prefix1 = value}
 	function normalize(fragment0) {
 		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
@@ -1056,7 +970,7 @@ var coreRouter = function($window) {
 	function debounceAsync(f) {
 		return function() {
 			if (asyncId != null) return
-			asyncId = callAsync(function() {
+			asyncId = callAsync0(function() {
 				asyncId = null
 				f()
 			})
@@ -1106,7 +1020,7 @@ var coreRouter = function($window) {
 		}
 		else $window.location.href = prefix1 + path
 	}
-	function defineRoutes(routes, resolve1, reject0) {
+	function defineRoutes(routes, resolve0, reject) {
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix1.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
@@ -1125,12 +1039,12 @@ var coreRouter = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve1(routes[route0], params, path, route0)
+						resolve0(routes[route0], params, path, route0)
 					})
 					return
 				}
 			}
-			reject0(path, params)
+			reject(path, params)
 		}
 		return resolveRoute
 	}
@@ -1164,8 +1078,8 @@ var _24 = function($window, mount0) {
 		router.defineRoutes(routes, function(payload, args0, path) {
 			var isResolver = typeof payload.view !== "function"
 			var render1 = defaultRender
-			var resolve0 = currentResolve = function (component) {
-				if (resolve0 !== currentResolve) return
+			var resolve = currentResolve = function (component) {
+				if (resolve !== currentResolve) return
 				currentResolve = null
 				currentComponent = component != null ? component : isResolver ? "div" : payload
 				currentRender = render1
@@ -1174,14 +1088,14 @@ var _24 = function($window, mount0) {
 				root.redraw(true)
 			}
 			var onmatch = function() {
-				resolve0()
+				resolve()
 			}
 			if (isResolver) {
 				if (typeof payload.render === "function") render1 = payload.render.bind(payload)
 				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
 			}
 		
-			onmatch.call(payload, resolve0, args0, path)
+			onmatch.call(payload, resolve, args0, path)
 		}, function() {
 			router.setPath(defaultRoute, null, {replace: true})
 		})
@@ -1198,7 +1112,6 @@ m.withAttr = function(attrName, callback2, context) {
 		return callback2.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.prop = Stream
 m.render = renderService.render
 m.redraw = redrawService.publish
 m.request = requestService.request

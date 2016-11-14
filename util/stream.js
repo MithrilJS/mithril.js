@@ -16,7 +16,7 @@ module.exports = function(log) {
 	function initStream(stream) {
 		stream.constructor = createStream
 		stream._state = {id: guid++, value: undefined, error: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], errorStream: undefined, endStream: undefined}
-		stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
+		stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
 		stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 		stream.run = run, stream.catch = doCatch
 
@@ -36,7 +36,7 @@ module.exports = function(log) {
 			end: {get: function() {
 				if (!stream._state.endStream) {
 					var endStream = createStream()
-					endStream["fantasy-land/map"](function(value) {
+					endStream.map(function(value) {
 						if (value === true) unregisterStream(stream), unregisterStream(endStream)
 						return value
 					})

@@ -12,13 +12,12 @@
 - [Non-JSON responses](#non-json-responses)
 - [Why JSON instead of HTML](#why-json-instead-of-html)
 - [Why XMLHttpRequest instead of fetch](#why-xmlhttprequest-instead-of-fetch)
-- [Why return streams](#why-return-streams)
 
 ---
 
 ### API
 
-`stream = m.request([url,] options)`
+`promise = m.request([url,] options)`
 
 Argument               | Type                              | Required | Description
 ---------------------- | --------------------------------- | -------- | ---
@@ -34,9 +33,8 @@ Argument               | Type                              | Required | Descript
 `options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
 `options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored.
-`options.initialValue` | `any`                             | No       | A value to populate the returned stream before the request completes
 `options.useBody`      | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
-**returns**            | `Stream`                          |          | A stream that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+**returns**            | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
 [How to read signatures](signatures.md)
 
@@ -51,12 +49,12 @@ m.request({
 	method: "GET",
 	url: "/api/v1/users",
 })
-.run(function(users) {
+.then(function(users) {
 	console.log(users)
 })
 ```
 
-Calls to `m.request` return a [stream](prop.md).
+Calls to `m.request` return a [promise](promise.md).
 
 By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
 
@@ -64,32 +62,41 @@ By default, `m.request` assumes the response is in JSON format and parses it int
 
 ### Typical usage
 
-Here's an illustrative example of a self-contained component that uses `m.request` to retrieve some data from a server.
+Here's an illustrative example of a component that uses `m.request` to retrieve some data from a server.
 
 ```javascript
-var SimpleExample = {
-	oninit: function(vnode) {
-		vnode.state.items = m.request({
-			method: "GET",
-			url: "/api/items",
-			initialValue: []
-		})
-	},
+var Data = {
+	todos: {
+		list: [],
+		fetch: function() {
+			m.request({
+				method: "GET",
+				url: "/api/todos",
+			})
+			.then(function(items) {
+				Data.todos.items = items
+			})
+		}
+	}
+}
+
+var Todos = {
+	oninit: Data.todos.fetch,
 	view: function(vnode) {
-		return vnode.state.items().map(function(item) {
-			return m("div", item.name)
+		return Data.todos.list.map(function(item) {
+			return m("div", item.title)
 		})
 	}
 }
 
 m.route(document.body, "/", {
-	"/": SimpleExample
+	"/": Todos
 })
 ```
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, `SimpleExample` is initialized. `oninit` is called, which calls `m.request` and assigns its return value (a stream) to `vnode.state.items`. This stream contains the `initialValue` (i.e. an empty array), and this value can be retrieved by calling the stream as a function (i.e. `value = vnode.state.items()`). After the oninit method returns, the component is then rendered. Since `vnode.state.items()` returns an empty array, the component's `view` method also returns an empty array, so no DOM elements are created. When the request to the server completes, `m.request` parses the response data into a Javascript array of objects and sets the value of the stream to that array. Then, the component is rendered again. This time, `vnode.state.items()` returns a non-empty array, so the component's `view` method returns an array of vnodes, which in turn are rendered into `div` DOM elements.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.items` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
 
 ---
 
@@ -98,44 +105,44 @@ When `m.route` is called at the bottom, `SimpleExample` is initialized. `oninit`
 Here's an expanded version of the example above that implements a loading indicator and an error message:
 
 ```javascript
-var RobustExample = {
-	oninit: function(vnode) {
-		var req = m.request({
-			method: "GET",
-			url: "/api/items",
-		})
-		vnode.state.items = req.catch(function() {
-			return []
-		})
-		vnode.state.error = req.error.run(this.errorView)
-	},
+var Data = {
+	todos: {
+		list: null,
+		error: "",
+		fetch: function() {
+			m.request({
+				method: "GET",
+				url: "/api/todos",
+			})
+			.then(function(items) {
+				Data.todos.items = items
+			})
+			.catch(function(e) {
+				Data.todos.error = e.message
+			})
+		}
+	}
+}
+
+var Todos = {
+	oninit: Data.todos.fetch,
 	view: function(vnode) {
-		return [
-			vnode.state.items() ? vnode.state.items().map(function(item) {
-				return m("div", item.name)
-			}) : m(".loading-icon"),
-			vnode.state.error(),
-		]
-	},
-	errorView: function(e) {
-		return e ? m(".error", "An error occurred") : null
+		return Data.todos.error ? [
+			m(".error", Data.todos.error)
+		] : Data.todos.list ? [
+			Data.todos.list.map(function(item) {
+				return m("div", item.title)
+			})
+		] : m(".loading-icon")
 	}
 }
 
 m.route(document.body, "/", {
-	"/": RobustExample
+	"/": Todos
 })
 ```
 
-When this component is initialized, `m.request` is called and its return value is assigned to `req`. Unlike the previous example, here there's no `initialValue`, so the `req` stream is in a pending state, and therefore has a value of `undefined`. `req.error` is the error stream for the request. Since `req` is pending, the `req.error` stream also remain in a pending state, and likewise, `vnode.state.error` stays pending and does not call `this.errorView`.
-
-Then the component renders. Both `vnode.state.items()` and `vnode.state.error()` return `undefined`, so the component returns `[m(".loading-icon"), undefined]`, which in turn creates a loading icon element in the DOM.
-
-When the request to the server completes, `req` is populated with the response data, which is propagated to the `vnode.state.items` dependent stream. (Note that the function in `catch` is not called if there's no error). After the request completes, the component is re-rendered. `req.error` is set to an active state (but it still has a value of `undefined`), and `vnode.state.error()` is then set to `null`. The `view` function returns a list of vnodes containing item names, and therefore the loading icon is replaced by a list of `div` elements are created in the DOM.
-
-If the request to the server fails, `catch` is called and `vnode.state.items()` is set to an empty array. Also, `req.error` is populated with the error, and `vnode.state.error` is populated with the vnode tree returned by `errorView`. Therefore, `view` returns `[[], m(".error", "An error occurred")]`, which replaces the loading icon with the error message in the DOM.
-
-To clear the error message, simply set the value of the `vnode.state.error` stream to `undefined`.
+There are a few difference between this example and the one before. Here, `Data.todos.list` is `null` at the beginning. Also, there's an extra field `error` for holding an error message, and the view of the `Todos` component was modified to displays an error message if one exists, or display a loading icon if `Data.todos.list` is not an array.
 
 ---
 
@@ -148,7 +155,7 @@ m.request({
 	method: "GET",
 	url: "/api/v1/users/:id",
 	data: {id: 123},
-}).run(function(user) {
+}).then(function(user) {
 	console.log(user.id) // logs 123
 })
 ```
@@ -329,7 +336,7 @@ m.request({
 	url: "/api/v1/users",
 	type: User
 })
-.run(function(users) {
+.then(function(users) {
 	console.log(users[0].name) // logs a name
 })
 ```
@@ -348,7 +355,7 @@ m.request({
 	url: "/files/icon.svg",
 	deserialize: function(value) {return value}
 })
-.run(function(svg) {
+.then(function(svg) {
 	m.render(document.body, m.trust(svg))
 })
 ```
@@ -363,7 +370,7 @@ m.request({
 	url: "/files/data.csv",
 	deserialize: parseCSV
 })
-.run(function(data) {
+.then(function(data) {
 	console.log(data)
 })
 
@@ -390,12 +397,12 @@ m.request({
 	url: "/api/v1/users",
 	extract: function(xhr) {return {status: xhr.status, body: xhr.responseText}}
 })
-.run(function(response) {
+.then(function(response) {
 	console.log(response.status, response.body)
 })
 ```
 
-The parameter to `options.extract` is the XMLHttpRequest object once its operation is completed, but before it has been passed to the resulting [stream](prop.md), so the stream may still end up in an errored state if processing throws an exception.
+The parameter to `options.extract` is the XMLHttpRequest object once its operation is completed, but before it has been passed to the returned promise chain, so the promise may still end up in an rejected state if processing throws an exception.
 
 ---
 
@@ -434,139 +441,3 @@ The `fetch()` API does have a few technical advantages over `XMLHttpRequest` in 
 - it integrates to the [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), which provides an extra layer of control over how and when network requests happen. This API also allows access to push notifications and background synchronization features.
 
 In typical scenarios, streaming won't provide noticeable performance benefits because it's generally not advisable to download megabytes of data to begin with. Also, the memory gains from repeatedly reusing small buffers may be offset or nullified if they result in excessive browser repaints. For those reasons, choosing `fetch()` streaming instead of `m.request` is only recommended for extremely resource intensive applications.
-
----
-
-### Why return streams
-
-Normally, XMLHttpRequest makes HTTP requests to a server *asynchronously*. This means that it cannot return the response data via a `return` statement, since the `return` statement runs *synchronously* long before the response data is actually available. Therefore, any library that makes requests must expose the response data using some other mechanism.
-
-Some older libraries do so via callback functions, and newer ones (including the `fetch` API) return [promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise). `m.request` returns *reactive streams*.
-
-Callback functions are the most basic mechanism for asynchronous flow control. They are not *composable* because they require the callback function to be passed at call time, and error handling mechanisms must similarly be declared upfront.
-
-However, it's desirable to allow the callback function to be defined (and broken into subroutines) in different places than the call site, in order to achieve better separation of concerns. In addition, it's also desirable to wrap an abstraction around errors so that they can be thrown freely and handled safely from a single place, rather than requiring `try/catch` blocks in every callback function, or duplicating error handling code. The problems that arise from callbacks' lack of composability are [infamous enough](http://callbackhell.com/) to earn nicknames such as "callback hell" and "pyramids of doom".
-
-The Promise API is designed to address the shortcomings of callbacks. They are *composable*, which allows code to be refactored much more elegantly than using callbacks.
-
-In the example below, the code is written in a naive style. It's highly procedural and does many different things: First it requests a project with id `123`, then requests a user whose id is the value of `project.ownerID`, then proceeds to do something useful with the user. If there's an error, it is logged to console.
-
-```javascript
-// AVOID
-function doStuff() { /*...*/ }
-
-function json(response) {
-	return response.json()
-}
-function doStuffWithProjectOwner(projectID) {
-	fetch("/api/v1/projects/" + projectID, {method: "GET"}).then(json).then(function(project) {
-		fetch("/api/v1/users/" + project.ownerID, {method: "GET"}).then(json).then(function(user) {
-			doStuff(user)
-		})
-		.catch(function(e) {
-			console.log(e)
-		})
-	})
-	.catch(function(e) {
-		console.log(e)
-	})
-}
-doStuffWithProjectOwner(123)
-```
-
-Here's a refactored version that defines composable, easy-to-reuse units, and that takes advantage of the error propagation feature of Promises to avoid repetitive error handling code:
-
-```javascript
-// PREFER
-function findProject(id) {
-	return fetch("/api/v1/projects/" + id, {method: "GET"}).then(json)
-}
-function findUser(id) {
-	return fetch("/api/v1/users/" + id, {method: "GET"}).then(json)
-}
-function getProjectOwnerID(project) {
-	return project.ownerID
-}
-
-function doStuffWithProjectOwner(projectID) {
-	return findProject(projectID)
-		.then(getProjectOwnerID)
-		.then(findUser)
-		.then(doStuff)
-		.catch(function(e) {
-			console.log(e)
-		})
-}
-
-doStuffWithProjectOwner(123)
-```
-
-The code above separates each request into a `findProject` and `findUser` functions which can be used in more use cases than only finding the user object that owns a project.
-
-You can think of `.then` callbacks as pipes: the `getProjectOwnerID` receives the response of the `findProject` request as an input, and return an id, which is then passed as the input to `findUser`.
-
-The feature of Promises that let us simplify error handling is that promises *absorb* other promises: in the `.then(findUser)` line, `findUser` returns a promise. Instead of a promise being passed as an input to the next callback, the promise chain waits for the `findUser` promise to complete, and only then continues down the chain of callbacks with the resolved value. If `findUser` throws an error, the `.catch` callback handles it, in addition to handling erros from `findProject` (and from `getProjectOwnerID`, for that matter).
-
-Promises provide the machinery that facilitates writing small straightforward functions and composing them in flexible ways.
-
-Mithril streams have many similarities to promises. The example above could be written like this:
-
-```javascript
-// PREFER
-function findProject(id) {
-	return m.request({method: "GET", url: "/api/v1/projects/:id", data: {id: id}})
-}
-function findUser(id) {
-	return m.request({method: "GET", url: "/api/v1/users/:id", data: {id: id}})
-}
-function getProjectOwnerID(project) {
-	return project.ownerID
-}
-
-function doStuffWithProjectOwner(projectID) {
-	return findProject(projectID)
-		.run(getProjectOwnerID)
-		.run(findUser)
-		.run(doStuff)
-		.catch(function(e) {
-			console.log(e)
-		})
-}
-
-doStuffWithProjectOwner(123)
-```
-
-Aside from the API signature difference between `fetch` and `m.request`, the only change required to achieve the same functionality was to replace all instances of `.then` with `.run`.
-
-However, stream have some additional interesting properties. Let's suppose project objects have a `team` property that contains a list of user objects, and we wanted to display a list of designers and a list of developers in a project:
-
-```javascript
-function getProjectTeam(project) {
-	return project.team
-}
-function getTeamUsersByType(team, type) {
-	return team.filter(function(user) {
-		return user.type === type
-	})
-}
-var project = findProject(123)
-var team = project.run(getProjectTeam)
-var designers = team.run(function(team) {
-	return getTeamUsersByType(team, "designer")
-})
-var developers = team.run(function(team) {
-	return getTeamUsersByType(team, "developer")
-})
-```
-
-Now let's suppose that the team changed for the project and we need to fetch the `project` object from the server again. We would logically also want to update `designers` and `developers` so that the UI displays the correct users in their respective lists.
-
-Fortunately, `project` is a stream, and `team`, `designers` and `developers` are streams derived from `project`. So to update the state of all these streams, we only need to do this:
-
-```javascript
-findProject(123).run(project)
-```
-
-Doing so updates all the streams, and therefore there's no need to place the filtering code in the view, where the filtering code would recompute the same thing on every render.
-
-Returning streams from `m.request` streamlines use cases where efficient reactivity is desired, without losing the composable semantics of promises.

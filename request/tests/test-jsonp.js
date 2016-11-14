@@ -3,15 +3,14 @@
 var o = require("../../ospec/ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
-var StreamFactory = require("../../util/stream")
+var Promise = require("../../promise/promise")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
 	var mock, jsonp, spy
 	o.beforeEach(function() {
 		mock = xhrMock()
-		spy = o.spy()
-		jsonp = new Request(mock, StreamFactory(spy)).jsonp
+		jsonp = new Request(mock, Promise).jsonp
 	})
 
 	o("works", function(done) {
@@ -21,9 +20,9 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify({a: 1}) + ")"}
 			}
 		})
-		jsonp({url: "/item"}).run(function(data) {
+		jsonp({url: "/item"}).then(function(data) {
 			o(data).deepEquals({a: 1})
-		}).run(done)
+		}).then(done)
 	})
 	o("works w/ other querystring params", function(done) {
 		mock.$defineRoutes({
@@ -32,10 +31,10 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify(queryData) + ")"}
 			}
 		})
-		jsonp({url: "/item", data: {a: "b", c: "d"}}).run(function(data) {
+		jsonp({url: "/item", data: {a: "b", c: "d"}}).then(function(data) {
 			delete data["callback"]
 			o(data).deepEquals({a: "b", c: "d"})
-		}).run(done)
+		}).then(done)
 	})
 	o("works w/ custom callbackKey", function(done) {
 		mock.$defineRoutes({
@@ -44,9 +43,9 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["cb"] + "(" + JSON.stringify({a: 2}) + ")"}
 			}
 		})
-		jsonp({url: "/item", callbackKey: "cb"}).run(function(data) {
+		jsonp({url: "/item", callbackKey: "cb"}).then(function(data) {
 			o(data).deepEquals({a: 2})
-		}).run(done)
+		}).then(done)
 	})
 	o("handles error", function(done) {
 		jsonp({url: "/item", callbackKey: "cb"}).catch(function(e) {

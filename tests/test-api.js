@@ -44,36 +44,6 @@ o.spec("api", function() {
 			o(vnode.children[0].tag).equals("div")
 		})
 	})
-	o.spec("m.prop", function() {
-		o("works", function() {
-			var stream = m.prop(5)
-			var doubled = stream.run(function(value) {return value * 2})
-			
-			o(doubled()).equals(10)
-		})
-		o("m.prop.combine works", function() {
-			var added = m.prop.combine(function(a, b) {return a() + b()}, [
-				m.prop(1),
-				m.prop(2),
-			])
-			
-			o(added()).equals(3)
-		})
-		o("m.prop.merge works", function() {
-			var added = m.prop.merge([
-				m.prop(1),
-				m.prop(2),
-			])
-			.run(function(values) {return values[0] + values[1]})
-			
-			o(added()).equals(3)
-		})
-		o("m.prop.reject works", function() {
-			var stream = m.prop.reject(new Error("error"))
-			
-			o(stream.error().message).equals("error")
-		})
-	})
 	o.spec("m.withAttr", function() {
 		o("works", function() {
 			var spy = o.spy()
@@ -190,9 +160,6 @@ o.spec("api", function() {
 	o.spec("m.request", function() {
 		o("works", function() {
 			o(typeof m.request).equals("function") // TODO improve
-		})
-		o("return value is stream", function() {
-			o(m.request({method: "GET", url: "[invalid]"}).constructor).equals(m.prop().constructor)
 		})
 	})
 	o.spec("m.jsonp", function() {

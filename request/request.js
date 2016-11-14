@@ -2,100 +2,105 @@
 
 var buildQueryString = require("../querystring/build")
 
-module.exports = function($window, Stream) {
+module.exports = function($window, Promise) {
 	var callbackCount = 0
 
+	var count = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
+	function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
 
+	function finalize(promise) {
+		var then = promise.then
+		promise.then = function() {
+			count++
+			var next = then.apply(promise, arguments)
+			next.then(complete, function(e) {
+				complete()
+				throw e
+			})
+			return finalize(next)
+		}
+		return promise
+	}
+	
 	function request(args, extra) {
-		if(typeof args === "string"){
-			var url = args
-
-			if(typeof extra === "object")	args = extra
-			else args = {}
-
-			if(typeof args.url === "undefined") args.url = url
-		}
-
-		if(typeof args.method === "undefined") args.method = "GET"
-
-		var stream = Stream()
-		if (args.initialValue !== undefined) stream(args.initialValue)
-		args.method = args.method.toUpperCase()
-
-		var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
-
-		if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
-		if (typeof args.deserialize !== "function") args.deserialize = deserialize
-		if (typeof args.extract !== "function") args.extract = extract
-
-		args.url = interpolate(args.url, args.data)
-		if (useBody) args.data = args.serialize(args.data)
-		else args.url = assemble(args.url, args.data)
-
-		var xhr = new $window.XMLHttpRequest()
-		xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-
-		if (args.serialize === JSON.stringify && useBody) {
-			xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
-		}
-		if (args.deserialize === deserialize) {
-			xhr.setRequestHeader("Accept", "application/json, text/*")
-		}
-
-		if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4) {
-				try {
-					var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-					if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-						stream(cast(args.type, response))
-					}
-					else {
-						var error = new Error(xhr.responseText)
-						for (var key in response) error[key] = response[key]
-						stream.error(error)
-					}
-				}
-				catch (e) {
-					stream.error(e)
-				}
-				if (typeof oncompletion === "function") oncompletion()
+		return finalize(new Promise(function(resolve, reject) {
+			if (typeof args === "string") {
+				var url = args
+				args = extra || {}
+				if (args.url == null) args.url = url
 			}
-		}
 
-		if (useBody && (args.data != null)) xhr.send(args.data)
-		else xhr.send()
+			if (args.method == null) args.method = "GET"
+			args.method = args.method.toUpperCase()
 
-		return stream
+			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+
+			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
+			if (typeof args.deserialize !== "function") args.deserialize = deserialize
+			if (typeof args.extract !== "function") args.extract = extract
+
+			args.url = interpolate(args.url, args.data)
+			if (useBody) args.data = args.serialize(args.data)
+			else args.url = assemble(args.url, args.data)
+
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+
+			if (args.serialize === JSON.stringify && useBody) {
+				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
+			}
+			if (args.deserialize === deserialize) {
+				xhr.setRequestHeader("Accept", "application/json, text/*")
+			}
+
+			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					try {
+						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+							resolve(cast(args.type, response))
+						}
+						else {
+							var error = new Error(xhr.responseText)
+							for (var key in response) error[key] = response[key]
+							reject(error)
+						}
+					}
+					catch (e) {
+						reject(e)
+					}
+				}
+			}
+
+			if (useBody && (args.data != null)) xhr.send(args.data)
+			else xhr.send()
+		}))
 	}
 
 	function jsonp(args) {
-		var stream = Stream()
-		if (args.initialValue !== undefined) stream(args.initialValue)
-
-		var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-		var script = $window.document.createElement("script")
-		$window[callbackName] = function(data) {
-			script.parentNode.removeChild(script)
-			stream(cast(args.type, data))
-			if (typeof oncompletion === "function") oncompletion()
-			delete $window[callbackName]
-		}
-		script.onerror = function() {
-			script.parentNode.removeChild(script)
-			stream.error(new Error("JSONP request failed"))
-			if (typeof oncompletion === "function") oncompletion()
-			delete $window[callbackName]
-		}
-		if (args.data == null) args.data = {}
-		args.url = interpolate(args.url, args.data)
-		args.data[args.callbackKey || "callback"] = callbackName
-		script.src = assemble(args.url, args.data)
-		$window.document.documentElement.appendChild(script)
-		return stream
+		return finalize(new Promise(function(resolve, reject) {
+			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
+			var script = $window.document.createElement("script")
+			$window[callbackName] = function(data) {
+				script.parentNode.removeChild(script)
+				resolve(cast(args.type, data))
+				delete $window[callbackName]
+			}
+			script.onerror = function() {
+				script.parentNode.removeChild(script)
+				reject(new Error("JSONP request failed"))
+				delete $window[callbackName]
+			}
+			if (args.data == null) args.data = {}
+			args.url = interpolate(args.url, args.data)
+			args.data[args.callbackKey || "callback"] = callbackName
+			script.src = assemble(args.url, args.data)
+			$window.document.documentElement.appendChild(script)
+		}))
 	}
 
 	function interpolate(url, data) {

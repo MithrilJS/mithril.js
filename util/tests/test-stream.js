@@ -918,6 +918,11 @@ o.spec("stream", function() {
 
 			o(mapped()()).equals(undefined)
 		})
+		o("has alias", function() {
+			var stream = Stream(undefined)
+
+			o(stream["fantasy-land/map"]).equals(stream.map)
+		})
 	})
 	o.spec("ap", function() {
 		o("works", function() {

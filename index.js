@@ -6,10 +6,10 @@ var redrawService = require("./redraw")
 
 requestService.setCompletionCallback(redrawService.publish)
 
+m.Promise = require("./promise/promise")
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")
-m.prop = require("./stream")
 m.render = require("./render").render
 m.redraw = redrawService.publish
 m.request = requestService.request

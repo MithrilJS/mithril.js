@@ -1,2 +1,2 @@
-var Stream = require("./stream")
-module.exports = require("./request/request")(window, Stream)
+var PromisePolyfill = require("./promise/promise")
+module.exports = require("./request/request")(window, PromisePolyfill)

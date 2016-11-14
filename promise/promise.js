@@ -1,7 +1,7 @@
 "use strict"
 /** @constructor */
-var Promise = function(executor) {
-	if (!(this instanceof Promise)) throw new Error("Promise must be called with `new`")
+var PromisePolyfill = function(executor) {
+	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
 	if (typeof executor !== "function") throw new TypeError("executor must be a function")
 
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
@@ -44,7 +44,7 @@ var Promise = function(executor) {
 
 	executeOnce(executor)
 }
-Promise.prototype.then = function(onFulfilled, onRejection) {
+PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
 	var self = this, instance = self._instance
 	function handle(callback, list, next, state) {
 		list.push(function(value) {
@@ -54,22 +54,22 @@ Promise.prototype.then = function(onFulfilled, onRejection) {
 		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
 	}
 	var resolveNext, rejectNext
-	var promise = new Promise(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	var promise = new PromisePolyfill(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
 	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
 	return promise
 }
-Promise.prototype.catch = function(onRejection) {
+PromisePolyfill.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
 }
-Promise.resolve = function(value) {
-	if (value instanceof Promise) return value
-	return new Promise(function(resolve) {resolve(value)})
+PromisePolyfill.resolve = function(value) {
+	if (value instanceof PromisePolyfill) return value
+	return new PromisePolyfill(function(resolve) {resolve(value)})
 }
-Promise.reject = function(value) {
-	return new Promise(function(resolve, reject) {reject(value)})
+PromisePolyfill.reject = function(value) {
+	return new PromisePolyfill(function(resolve, reject) {reject(value)})
 }
-Promise.all = function(list) {
-	return new Promise(function(resolve, reject) {
+PromisePolyfill.all = function(list) {
+	return new PromisePolyfill(function(resolve, reject) {
 		var total = list.length, count = 0, values = []
 		if (list.length === 0) resolve([])
 		else for (var i = 0; i < list.length; i++) {
@@ -87,12 +87,12 @@ Promise.all = function(list) {
 		}
 	})
 }
-Promise.race = function(list) {
-	return new Promise(function(resolve, reject) {
+PromisePolyfill.race = function(list) {
+	return new PromisePolyfill(function(resolve, reject) {
 		for (var i = 0; i < list.length; i++) {
 			list[i].then(resolve, reject)
 		}
 	})
 }
 
-module.exports = Promise
+module.exports = typeof Promise !== "undefined" ? Promise : PromisePolyfill
