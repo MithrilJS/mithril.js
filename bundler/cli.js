@@ -3,7 +3,7 @@
 var bundle = require("./bundle")
 var minify = require("./minify")
 
-var aliases = {o: "output", m: "minify", w: "watch"}
+var aliases = {o: "output", m: "minify", w: "watch", a: "aggressive"}
 var params = {}
 var args = process.argv.slice(2), command = null
 for (var i = 0; i < args.length; i++) {
@@ -23,4 +23,4 @@ function add(value) {
 }
 
 bundle(params.input, params.output, {watch: params.watch})
-if (params.minify) minify(params.output, params.output, {watch: params.watch})
+if (params.minify) minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive})
