@@ -74,7 +74,7 @@ var Data = {
 				url: "/api/todos",
 			})
 			.then(function(items) {
-				Data.todos.items = items
+				Data.todos.list = items
 			})
 		}
 	}
@@ -96,7 +96,7 @@ m.route(document.body, "/", {
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.items` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
 
 ---
 
@@ -115,7 +115,7 @@ var Data = {
 				url: "/api/todos",
 			})
 			.then(function(items) {
-				Data.todos.items = items
+				Data.todos.list = items
 			})
 			.catch(function(e) {
 				Data.todos.error = e.message

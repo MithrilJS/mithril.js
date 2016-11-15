@@ -6,13 +6,13 @@ var state = {
 			localStorage["todos-mithril"] = JSON.stringify(state.todos)
 		})
 	},
-	
+
 	todos: JSON.parse(localStorage["todos-mithril"] || "[]"),
 	editing: null,
 	filter: "",
 	remaining: 0,
 	todosByStatus: [],
-	
+
 	createTodo: function(title) {
 		state.todos.push({title: title.trim(), completed: false})
 	},
@@ -97,7 +97,7 @@ var Todos = {
 				m("input#toggle-all[type='checkbox']", {checked: state.remaining === 0, onclick: ui.toggleAll}),
 				m("label[for='toggle-all']", {onclick: ui.toggleAll}, "Mark all as complete"),
 				m("ul#todo-list", [
-					state.todos.map(function(todo) {
+					state.todosByStatus.map(function(todo) {
 						return m("li", {class: (todo.completed ? "completed" : "") + " " + (todo === state.editing ? "editing" : "")}, [
 							m(".view", [
 								m("input.toggle[type='checkbox']", {checked: todo.completed, onclick: function() {ui.toggle(todo)}}),
@@ -115,9 +115,9 @@ var Todos = {
 					state.remaining === 1 ? " item left" : " items left",
 				]),
 				m("ul#filters", [
-					m("li", m("a[href='/']", {oncreate: m.route.link, class: state.filter === "" ? "selected" : ""}, "All")),
-					m("li", m("a[href='/active']", {oncreate: m.route.link, class: state.filter === "active" ? "selected" : ""}, "Active")),
-					m("li", m("a[href='/completed']", {oncreate: m.route.link, class: state.filter === "completed" ? "selected" : ""}, "Completed")),
+					m("li", m("a[href='/']", {oncreate: m.route.link, class: state.showing === "" ? "selected" : ""}, "All")),
+					m("li", m("a[href='/active']", {oncreate: m.route.link, class: state.showing === "active" ? "selected" : ""}, "Active")),
+					m("li", m("a[href='/completed']", {oncreate: m.route.link, class: state.showing === "completed" ? "selected" : ""}, "Completed")),
 				]),
 				m("button#clear-completed", {onclick: function() {state.dispatch("clear")}}, "Clear completed"),
 			]) : null,
