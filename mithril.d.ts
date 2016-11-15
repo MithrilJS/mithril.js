@@ -259,6 +259,13 @@ declare namespace Mithril {
 			param(key: string): string;
 
 			/**
+			* Gets all route parameters.
+			*
+			* @return All route parameters.
+			*/
+			param(): Object;
+
+			/**
 			* The current routing mode. This may be changed before calling
 			* m.route to change the part of the URL used to perform the routing.
 			*
