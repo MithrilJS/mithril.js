@@ -142,7 +142,7 @@ m.route(document.body, "/", {
 })
 ```
 
-There are a few difference between this example and the one before. Here, `Data.todos.list` is `null` at the beginning. Also, there's an extra field `error` for holding an error message, and the view of the `Todos` component was modified to displays an error message if one exists, or display a loading icon if `Data.todos.list` is not an array.
+There are a few differences between this example and the one before. Here, `Data.todos.list` is `null` at the beginning. Also, there's an extra field `error` for holding an error message, and the view of the `Todos` component was modified to displays an error message if one exists, or display a loading icon if `Data.todos.list` is not an array.
 
 ---
 
