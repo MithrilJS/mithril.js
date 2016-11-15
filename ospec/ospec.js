@@ -72,7 +72,7 @@ module.exports = new function init() {
 
 				var fn = fns[cursor++]
 				if (fn.length > 0) {
-					var timeout = 0, delay = 40, s = new Date
+					var timeout = 0, delay = 200, s = new Date
 					var isDone = false
 					var body = fn.toString()
 					var arg = (body.match(/\(([\w_$]+)/) || body.match(/([\w_$]+)\s*=>/) || []).pop()
