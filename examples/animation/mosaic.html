@@ -21,13 +21,8 @@
 	</head>
 	<body>
 		<div id="root"></div>
-		<script src="../../module/module.js"></script>
-		<script src="../../render/vnode.js"></script>
-		<script src="../../render/hyperscript.js"></script>
-		<script src="../../render/render.js"></script>
+		<script src="../../mithril.js"></script>
 		<script>
-var m = require("../../render/hyperscript")
-var renderer = require("../../render/render")(window)
 var root = document.getElementById("root")
 
 var empty = []
@@ -53,7 +48,7 @@ function exit(vnode, done) {
 function run() {
 	cells = cells === full ? empty : full
 
-	renderer.render(root, [view()])
+	m.render(root, [view()])
 
 	setTimeout(run, 2000)
 }

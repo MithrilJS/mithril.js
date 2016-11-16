@@ -7,14 +7,8 @@
 	</head>
 	<body>
 		<div id="root"></div>
-		<script src="../../module/module.js"></script>
-		<script src="../../render/vnode.js"></script>
-		<script src="../../render/hyperscript.js"></script>
-		<script src="../../render/render.js"></script>
+		<script src="../../mithril.js"></script>
 		<script>
-var m = require("../../render/hyperscript")
-var render = require("../../render/render")(window).render
-
 var tiger = m("svg[id='svg2'][version='1.1'][viewBox='0 0 900 900'][xmlns='http://www.w3.org/2000/svg']",
 	m("g[fill='none'][id='g4'][transform='matrix(1.7656463,0,0,1.7656463,324.90716,255.00942)']", [
 		m("g[fill='#FFF'][id='g6'][stroke='#000'][stroke-width='0.17200001']",
@@ -740,7 +734,7 @@ var tiger = m("svg[id='svg2'][version='1.1'][viewBox='0 0 900 900'][xmlns='http:
 	])
 )
 
-render(document.getElementById("root"), [tiger])
+m.render(document.getElementById("root"), [tiger])
 		</script>
 	</body>
 </html>

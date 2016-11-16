@@ -7,14 +7,8 @@
 	</head>
 	<body>
 		<div id="root"></div>
-		<script src="../../module/module.js"></script>
-		<script src="../../render/vnode.js"></script>
-		<script src="../../render/hyperscript.js"></script>
-		<script src="../../render/render.js"></script>
+		<script src="../../mithril.js"></script>
 		<script>
-var m = require("../../render/hyperscript")
-var render = require("../../render/render")(window).render
-
 //http://codepen.io/RobinVr/pen/kEoqc
 var ring = m(".top",
 	m(".middle",
@@ -830,7 +824,7 @@ var ring = m(".top",
 	)
 )
 
-render(document.getElementById("root"), [ring])
+m.render(document.getElementById("root"), [ring])
 		</script>
 	</body>
 </html>
