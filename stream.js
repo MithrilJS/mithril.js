@@ -1,1 +1,1 @@
-module.exports = require("./util/stream")(console.log.bind(console))
+module.exports = require("./stream/stream")

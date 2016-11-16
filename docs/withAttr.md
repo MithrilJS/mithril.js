@@ -11,7 +11,7 @@
 
 Creates an event handler. The event handler takes the value of a DOM element's property and calls a function with it as the argument.
 
-This helper function is typically used in conjunction with [`m.prop()`](prop.md) to implement data binding. It is provided to help decouple the browser's event model from application code.
+This helper function is provided to help decouple the browser's event model from application code.
 
 `m.withAttr(attrName, callback, thisArg?)`
 
@@ -35,16 +35,21 @@ document.body.onclick = m.withAttr("title", function(value) {
 })
 ```
 
-Typically, `m.withAttr()` can be used in Mithril component views to implement two-way binding:
+Typically, `m.withAttr()` can be used in Mithril component views to avoid polluting the data layer with DOM event model concerns:
 
 ```javascript
-var title = m.prop()
+var Data = {
+	email: "",
+	setEmail: function(email) {
+		Data.email = email.toLowerCase()
+	}
+}
 
 var MyComponent = {
 	view: function() {
 		return m("input", {
-			oninput: m.withAttr("value", title),
-			value: title()
+			oninput: m.withAttr("value", Data.setEmail),
+			value: Data.email
 		})
 	}
 }
@@ -59,12 +64,15 @@ m.mount(document.body, MyComponent)
 The `m.withAttr()` helper reads the value of the element to which the event handler is bound, which is not necessarily the same as the element where the event originated.
 
 ```javascript
-var url = m.prop()
+var Data = {
+	url: "",
+	setURL: function(url) {Data.url = url}
+}
 
 var MyComponent = {
 	view: function() {
-		return m("a[href='/foo']", {onclick: m.withAttr("href", url)}, [
-			m("span", url())
+		return m("a[href='/foo']", {onclick: m.withAttr("href", Data.setURL)}, [
+			m("span", Data.url)
 		])
 	}
 }
@@ -84,15 +92,21 @@ The first argument of `m.withAttr()` can be either an attribute or a property.
 
 ```javascript
 // reads from `select.selectedIndex` property
-var index = m.prop(0)
-m("select", {onclick: m.withAttr("selectedIndex", index)})
+var Data = {
+	index: 0,
+	setIndex: function(index) {Data.index = index}
+}
+m("select", {onclick: m.withAttr("selectedIndex", Data.setIndex)})
 ```
 
 If a value can be both an attribute *and* a property, the property value is used.
 
 ```javascript
 // value is a boolean, because the `input.checked` property is boolean
-var value = m.prop(false)
-m("input", {onclick: m.withAttr("checked", value)})
+var Data = {
+	selected: false,
+	setSelected: function(selected) {Data.selected = selected}
+}
+m("input[type=checkbox]", {onclick: m.withAttr("checked", Data.setSelected)})
 ```
 

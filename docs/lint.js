@@ -44,8 +44,11 @@ function ensureCodeIsRunnable(file, data) {
 	}
 
 	try {
+		initMocks()
 		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, {exports: {}}, function(dep) {
 			if (dep.indexOf("./mycomponent") === 0) return {view: function() {}}
+			if (dep.indexOf("mithril/ospec/ospec") === 0) return global.o
+			if (dep.indexOf("mithril/stream") === 0) return global.stream
 			if (dep === "mithril") return global.m
 		})
 	}
@@ -58,6 +61,39 @@ function ensureCommentStyle(file, data) {
 	codeBlocks.forEach(function(block) {
 		block = block.slice(13, -3)
 		if (block.match(/(^|\s)\/\/[\S]/)) console.log(file + " - comment missing space\n\n" + block + "\n\n---\n\n")
+	})
+}
+
+function initMocks() {
+	global.window = require("../test-utils/browserMock")()
+	global.document = window.document
+	global.m = require("../index")
+	global.o = require("../ospec/ospec")
+	global.stream = require("../stream")
+
+	//routes consumed by request.md
+	global.window.$defineRoutes({
+		"GET /api/v1/users": function(request) {
+			return {status: 200, responseText: JSON.stringify([{name: ""}])}
+		},
+		"GET /api/v1/todos": function(request) {
+			return {status: 200, responseText: JSON.stringify([])}
+		},
+		"POST /api/v1/upload": function(request) {
+			return {status: 200, responseText: JSON.stringify([])}
+		},
+		"GET /files/icon.svg": function(request) {
+			return {status: 200, responseText: "<svg></svg>"}
+		},
+		"GET /files/data.csv": function(request) {
+			return {status: 200, responseText: "a,b,c"}
+		},
+		"GET /api/v1/users/123": function(request) {
+			return {status: 200, responseText: JSON.stringify({id: 123})}
+		},
+		"GET /api/v1/users/foo:bar": function(request) {
+			return {status: 200, responseText: JSON.stringify({id: 123})}
+		},
 	})
 }
 
@@ -87,14 +123,9 @@ function traverseDirectory(pathname, callback) {
 	})
 }
 
-//init mocks
-global.window = require("../test-utils/browserMock")()
-global.document = window.document
-global.m = require("../index")
-
 //run
 traverseDirectory("./docs", function(pathname) {
-	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0 && pathname.indexOf("route") < 0) {
+	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0 && pathname.indexOf("tutorial") < 0) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
 			else lint(pathname, data)

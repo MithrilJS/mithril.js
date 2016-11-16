@@ -200,7 +200,7 @@ Typically, redrawing from an `oninit` or `onbeforeupdate` hook is meaningless si
 
 ```javascript
 // AVOID
-var greeting = m.prop("")
+var greeting = ""
 
 var BrokenComponent = {
 	onupdate: function() {
@@ -208,16 +208,16 @@ var BrokenComponent = {
 		m.redraw()
 	},
 	view: function() {
-		return m("div[title=Hello]", {onclick: m.withAttr("title", greeting)}, this.greeting)
+		return m("div[title=Hello]", {onclick: m.withAttr("title", function(v) {greeting = v})}, this.greeting)
 	}
 }
 
 // PREFER
-var greeting = m.prop("")
+var greeting = ""
 
 var WorkingComponent = {
 	view: function() {
-		return m("div[title=Hello]", {onclick: m.withAttr("title", greeting)}, greeting())
+		return m("div[title=Hello]", {onclick: m.withAttr("title", function(v) {greeting = v})}, greeting)
 	}
 }
 ```

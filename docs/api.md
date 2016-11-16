@@ -12,9 +12,10 @@
 - [m.jsonp](jsonp.md)
 - [m.parseQueryString](parseQueryString.md)
 - [m.buildQueryString](buildQueryString.md)
-- [m.prop](prop.md)
 - [m.withAttr](withAttr.md)
 - [m.trust](trust.md)
 - [m.fragment](fragment.md)
 - [m.redraw](redraw.md)
 - [m.version](version.md)
+
+- [stream](stream.md)

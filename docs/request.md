@@ -71,7 +71,7 @@ var Data = {
 		fetch: function() {
 			m.request({
 				method: "GET",
-				url: "/api/todos",
+				url: "/api/v1/todos",
 			})
 			.then(function(items) {
 				Data.todos.list = items
@@ -112,7 +112,7 @@ var Data = {
 		fetch: function() {
 			m.request({
 				method: "GET",
-				url: "/api/todos",
+				url: "/api/v1/todos",
 			})
 			.then(function(items) {
 				Data.todos.list = items

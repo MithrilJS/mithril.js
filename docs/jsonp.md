@@ -38,7 +38,7 @@ JSON-P has several limitations: it can only use GET requests, it implicitly trus
 Some services follow the de-facto convention of responding with JSON-P if a `callback` querystring key is provided, thus making `m.jsonp` automatically work without any effort:
 
 ```javascript
-m.jsonp({url: "https://api.github.com/users/lhorie"}).run(function(response) {
+m.jsonp({url: "https://api.github.com/users/lhorie"}).then(function(response) {
 	console.log(response.data.login) // logs "lhorie"
 })
 ```
@@ -50,7 +50,7 @@ m.jsonp({
 	url: "https://api.flickr.com/services/feeds/photos_public.gne?tags=kitten&format=json",
 	callbackKey: "jsoncallback",
 })
-.run(function(response) {
+.then(function(response) {
 	console.log(response.link) // logs "https://www.flickr.com/photos/tags/kitten/"
 })
 ```
@@ -63,7 +63,7 @@ m.jsonp({
 	url: "https://api.github.com/users/lhorie",
 	callbackName: "__callback",
 })
-.run(function(response) {
+.then(function(response) {
 	console.log(response.data.login) // logs "lhorie"
 })
 ```
