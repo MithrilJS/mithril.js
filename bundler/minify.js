@@ -1,12 +1,10 @@
+"use strict"
+
 var http = require("http")
 var querystring = require("querystring")
 var fs = require("fs")
 
-module.exports = function(input, output, options) {
-	function format(n) {
-		return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
-	}
-
+module.exports = function(input, output, options, done) {
 	function minify(input, output) {
 		var code = fs.readFileSync(input, "utf8")
 
@@ -42,11 +40,10 @@ module.exports = function(input, output, options) {
 				}
 				else {
 					fs.writeFileSync(output, results.compiledCode, "utf8")
-					
-					var stats = results.statistics
+
 					console.log("done")
-					console.log("Original size: " + format(stats.originalGzipSize) + " bytes gzipped (" + format(stats.originalSize) + " bytes uncompressed)")
-					console.log("Compiled size: " + format(stats.compressedGzipSize) + " bytes gzipped (" + format(stats.compressedSize) + " bytes uncompressed)")
+
+					if(typeof done === "function") done(results.statistics)
 				}
 			})
 		})
