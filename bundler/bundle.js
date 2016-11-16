@@ -20,7 +20,7 @@ function run(input, output) {
 		var modules = {}
 		var bindings = {}
 		var declaration = /^\s*(?:var|let|const|function)[\t ]+([\w_$]+)/gm
-		var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
+		var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.\[\]"'`]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
 		var uuid = 0
 		var process = function(filepath, data) {
 			data.replace(declaration, function(match, binding) {bindings[binding] = 0})
