@@ -1,6 +1,6 @@
 "use strict"
 
-var guid = 0, noop = function() {}, HALT = {}
+var guid = 0, HALT = {}
 function createStream() {
 	function stream() {
 		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0])
