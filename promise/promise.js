@@ -95,4 +95,9 @@ PromisePolyfill.race = function(list) {
 	})
 }
 
+if (typeof Promise === "undefined") {
+	if (typeof window !== "undefined") window.Promise = PromisePolyfill
+	else if (typeof global !== "undefined") global.Promise = PromisePolyfill
+}
+
 module.exports = typeof Promise !== "undefined" ? Promise : PromisePolyfill

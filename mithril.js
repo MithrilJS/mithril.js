@@ -173,6 +173,10 @@ PromisePolyfill0.race = function(list) {
 		}
 	})
 }
+if (typeof Promise === "undefined") {
+	if (typeof window !== "undefined") window.Promise = PromisePolyfill0
+	else if (typeof global !== "undefined") global.Promise = PromisePolyfill0
+}
 var PromisePolyfill = typeof Promise !== "undefined" ? Promise : PromisePolyfill0
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
@@ -337,8 +341,7 @@ var _11 = function() {
 }
 var redrawService = _11()
 requestService.setCompletionCallback(redrawService.publish)
-m.Promise = PromisePolyfill
-var _14 = function($window) {
+var _13 = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
@@ -873,7 +876,7 @@ var _14 = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
-var renderService = _14(window)
+var renderService = _13(window)
 var throttle = function(callback1) {
 	//60fps translates to 16.6ms, round it down since setTimeout requires int
 	var time = 16
@@ -907,7 +910,7 @@ var autoredraw = function(root, renderer, pubsub, callback0) {
 	}
 	return root.redraw = run1
 }
-var _18 = function(renderer, pubsub) {
+var _17 = function(renderer, pubsub) {
 	return function(root, component) {
 		if (component === null) {
 			renderer.render(root, [])
@@ -923,7 +926,7 @@ var _18 = function(renderer, pubsub) {
 		run0()
 	}
 }
-m.mount = _18(renderService, redrawService)
+m.mount = _17(renderService, redrawService)
 var mount = m.mount
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1060,7 +1063,7 @@ var coreRouter = function($window) {
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-var _24 = function($window, mount0) {
+var _23 = function($window, mount0) {
 	var router = coreRouter($window)
 	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
 	var RouteComponent = {view: function() {
@@ -1105,7 +1108,7 @@ var _24 = function($window, mount0) {
 	route.get = function() {return currentPath}
 	return route
 }
-m.route = _24(window, mount)
+m.route = _23(window, mount)
 m.withAttr = function(attrName, callback2, context) {
 	return function(e) {
 		return callback2.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))

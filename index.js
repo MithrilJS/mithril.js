@@ -6,7 +6,6 @@ var redrawService = require("./redraw")
 
 requestService.setCompletionCallback(redrawService.publish)
 
-m.Promise = require("./promise/promise")
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")

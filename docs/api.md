@@ -18,4 +18,5 @@
 - [m.redraw](redraw.md)
 - [m.version](version.md)
 
-- [stream](stream.md)
+- [Promise](promise.md)
+- [Stream](stream.md)
