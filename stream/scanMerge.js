@@ -1,7 +1,5 @@
 "use strict"
 
-var combine = require("./stream").combine
-
 module.exports = function(tuples, seed) {
 	var streams = tuples.map(function(tuple) {
 		var stream = tuple[0]
@@ -9,7 +7,7 @@ module.exports = function(tuples, seed) {
 		return stream
 	})
 
-	var newStream = combine(function() {
+	var newStream = streams[0].constructor.combine(function() {
 		var changed = arguments[arguments.length - 1]
 
 		streams.forEach(function(stream, idx) {
