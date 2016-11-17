@@ -1,9 +1,7 @@
 "use strict"
 
-var combine = require("./stream").combine
-
 module.exports = function (reducer, seed, stream) {
-	var newStream = combine(function (s) {
+	var newStream = stream.constructor.combine(function (s) {
 		return seed = reducer(seed, s._state.value)
 	}, [stream])
 
