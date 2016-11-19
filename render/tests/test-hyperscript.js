@@ -449,7 +449,7 @@ o.spec("hyperscript", function() {
 			]")
 
 			o(vnode.attrs.id).equals("foo")
-			o(vnode.attrs.clasName).equals("bar")
+			o(vnode.attrs.className).equals("bar")
 		})
 		o("allows newlines within attributes", function() {
 			var vnode = m(`[\n\
