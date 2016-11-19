@@ -2,7 +2,7 @@
 
 var Vnode = require("../render/vnode")
 
-var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[\s*(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\s*\])/g
+var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[\s*(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.|\n|\r)*?)\5)?\s*\])/g
 var selectorCache = {}
 function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && selector.view == null) {
