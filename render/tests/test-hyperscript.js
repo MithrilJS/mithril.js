@@ -429,7 +429,7 @@ o.spec("hyperscript", function() {
 		})
 	})
 	o.spec("whitespace", function() {
-		o("allows whitespace between tokens in attribute declarations", function() {
+		o("tolerant of whitespace between tokens in attribute declarations", function() {
 			var vnode = m("span[\n\
 				id    = foo\n\
 			][\n\
@@ -441,7 +441,10 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals("span")
 			o(vnode.attrs.id).equals("foo")
-			o(vnode.attrs.className).equals("bar baz")
+			o(vnode.attrs.className).equals("\n\
+					bar\n\
+					baz\n\
+				")
 		})
 	})
 })
