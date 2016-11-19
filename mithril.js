@@ -112,7 +112,8 @@
 			} else if (match[3].charAt(0) === "[") { // #1195
 				var attrValue = match[6]
 				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1")
-				cell.attrs[match[4]] = attrValue || true
+				if (match[4] === "class") classes.push(attrValue)
+				else cell.attrs[match[4]] = attrValue || true
 			}
 		}
 
