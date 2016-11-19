@@ -184,6 +184,11 @@ o.spec("hyperscript", function() {
 
 			o(vnode.attrs.className).equals("a")
 		})
+		o("handles 'class' as a verbose attribute declaration", function() {
+			var vnode = m("[class=a]")
+
+			o(vnode.attrs.className).equals("a")
+		})
 		o("handles merging classes w/ class property", function() {
 			var vnode = m(".a", {class: "b"})
 
