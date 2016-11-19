@@ -9,6 +9,7 @@
 	test(function () { return m("div").tag === "div" })
 	test(function () { return m(".foo").tag === "div" })
 	test(function () { return m(".foo").attrs.className === "foo" })
+	test(function () { return m("[class=a]").attrs.className === "a" })
 	test(function () { return m("[title=bar]").tag === "div" })
 	test(function () { return m("[title=bar]").attrs.title === "bar" })
 	test(function () { return m("[empty]").attrs.empty === true })
