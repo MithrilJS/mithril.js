@@ -44,7 +44,7 @@ function updateState(stream, value) {
 }
 function updateDependency(stream, mustSync) {
 	var state = stream._state, parents = state.parents
-	if (parents.length > 0 && parents.filter(active).length === parents.length && (mustSync || parents.filter(changed).length > 0)) {
+	if (parents.length > 0 && parents.every(active) && (mustSync || parents.some(changed))) {
 		var value = stream._state.derive()
 		if (value === HALT) return false
 		updateState(stream, value)
@@ -56,7 +56,7 @@ function finalize(stream) {
 }
 
 function combine(fn, streams) {
-	if (streams.length > streams.filter(valid).length) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
+	if (!streams.every(valid)) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
 	return initDependency(createStream(), streams, function() {
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	})
