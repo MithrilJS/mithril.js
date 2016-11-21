@@ -52,18 +52,23 @@ function hyperscript(selector) {
 		}
 	}
 
-	var attrs = {}, children = []
-	function processArgument(arg) {
-		if (arg == null || typeof arg === "object" && arg.tag === undefined && !isArray(arg)) {
+	var args = Array.prototype.slice.call(arguments),
+		attrs = {}, children = [], childrenIndex = 0
+	args.forEach(function(arg, index) {
+		if (!index) return
+		if (!childrenIndex && (arg == null || typeof arg === "object" && arg.tag === undefined && !isArray(arg))) {
 			Object.keys(arg || {}).forEach(function(key) {
 				attrs[key] = arg[key]
 			})
 		} else {
-			if (isArray(arg)) children = children.concat(arg)
-				else children.push(arg)
+			childrenIndex = childrenIndex ? childrenIndex : index
+			if (index === childrenIndex && args.length === childrenIndex + 1 && isArray(arg)) {
+				children = children.concat(arg)
+			} else {
+				children.push(arg)
+			}
 		}
-	}
-	for (var i = 1; i < arguments.length; i++) processArgument(arguments[i])
+	})
 
 	if (typeof selector === "string") return selectorCache[selector](attrs, Vnode.normalizeChildren(children))
 

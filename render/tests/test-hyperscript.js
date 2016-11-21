@@ -179,6 +179,13 @@ o.spec("hyperscript", function() {
 			o(vnode.attrs.a).equals("b")
 			o(vnode.attrs.c).equals("d")
 		})
+		o("handle fragmented attrs", function() {
+			var vnode = m("div", {a: "b"}, {c: "d"})
+
+			o(vnode.tag).equals("div")
+			o(vnode.attrs.a).equals("b")
+			o(vnode.attrs.c).equals("d")
+		})
 		o("handles className attrs property", function() {
 			var vnode = m("div", {className: "a"})
 
