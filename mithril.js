@@ -758,6 +758,8 @@ var _13 = function($window) {
 		else if (key1 in element && !isAttribute(key1) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			//setting select[value] to same value while having select open blinks select dropdown in Chrome
+			if (vnode.tag === "select" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "option" && key1 === "value" && vnode.dom.value === value) return
 			element[key1] = value
