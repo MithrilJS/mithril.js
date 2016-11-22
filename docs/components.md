@@ -26,6 +26,28 @@ m(Example)
 
 ---
 
+### Passing data to components
+
+Data can be passed to component instances through an `attrs` object as a parameter in the hyperscript function:
+
+```javascript
+m(Example, {name: "Floyd"})
+```
+
+`attrs` data can be accessed in the component's view or lifecycle methods via the `vnode`:
+
+```javascript
+var Example = {
+	view: function (vnode) {
+		return m("div", "Hello, " + vnode.attrs.name)
+	}
+}
+```
+
+NOTE: Lifecycle methods can also be provided via attrs, so you should avoid using the lifecycle method names for your own callbacks as they will be invoked by Mithril. Use lifecycle methods in `attrs` only when you specifically wish to create lifecycle hooks.
+
+---
+
 ### Lifecycle methods
 
 Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove` and `onbeforeupdate`.
@@ -68,6 +90,8 @@ m(ComponentWithHooks, {oninit: initialize})
 ```
 
 Lifecycle methods in vnodes do not override component methods, nor vice versa. Component lifecycle methods are always run after the vnode's corresponding method.
+
+Take care not to use lifecycle method names for your own callback function names in vnodes.
 
 To learn more about lifecycle methods, [see the lifecycle methods page](lifecycle-methods.md).
 

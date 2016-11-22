@@ -32,7 +32,7 @@ Argument               | Type                              | Required | Descript
 `options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
-`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored.
+`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored and the string returned from the extract callback will not be parsed as JSON.
 `options.useBody`      | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 **returns**            | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
@@ -186,7 +186,7 @@ Sometimes, it is desirable to abort a request. For example, in an autocompleter/
 var searchXHR = null
 function search() {
 	abortPreviousSearch()
-	
+
 	m.request({
 		method: "GET",
 		url: "/api/v1/users",
@@ -223,7 +223,7 @@ Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/We
 ```javascript
 function upload(e) {
 	var file = e.target.files[0]
-	
+
 	var data = new FormData()
 	data.append("myfile", file)
 }
@@ -234,10 +234,10 @@ Next, you need to call `m.request` and set `options.method` to an HTTP method th
 ```javascript
 function upload(e) {
 	var file = e.target.files[0]
-	
+
 	var data = new FormData()
 	data.append("myfile", file)
-	
+
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
@@ -261,12 +261,12 @@ m.render(document.body, [
 
 function upload(e) {
 	var files = e.target.files
-	
+
 	var data = new FormData()
 	for (var i = 0; i < files.length; i++) {
 		data.append("file" + i, file)
 	}
-	
+
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
@@ -297,10 +297,10 @@ m.mount(document.body, {
 
 function upload(e) {
 	var file = e.target.files[0]
-	
+
 	var data = new FormData()
 	data.append("myfile", file)
-	
+
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
@@ -308,7 +308,7 @@ function upload(e) {
 		config: function(xhr) {
 			xhr.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
-				
+
 				m.redraw() // tell Mithril that data changed and a re-render is needed
 			})
 		}
