@@ -2,6 +2,25 @@
 
 ### NPM
 
+#### Quick start
+
+```
+#install
+npm install mithril@rewrite --save
+
+# add this line into the scripts section in package.json
+#	"scripts": {
+#		"build": "bundle index.js --output app.js --watch"
+#	}
+
+# create an `index.js` file
+
+# run bundler
+npm run build
+```
+
+#### Step by step
+
 NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the Javascript ecosystem. Download and install [Node.js](https://nodejs.org); NPM will be automatically installed as well.
 
 To use Mithril via NPM:
@@ -33,7 +52,7 @@ The easiest way to create a bundle is to setup an NPM script for Mithril's bundl
 		"build": "bundle index.js --output app.js --watch"
 	},
 	"dependencies": {
-		"mithril": "^1.0.0-rc.3"
+		"mithril": "^1.0.0-rc.5"
 	}
 }
 ```

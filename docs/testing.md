@@ -2,7 +2,7 @@
 
 Mithril comes with a testing framework called [ospec](../ospec/README.md). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
 
-The easist way to setup the test runner is to create an NPM script for it. Open your project's `package.json` file and add a `test` entry under the `scripts` section:
+The easist way to setup the test runner is to create an NPM script for it. Open your project's `package.json` file and edit the `test` line under the `scripts` section:
 
 ```
 {
@@ -12,7 +12,7 @@ The easist way to setup the test runner is to create an NPM script for it. Open 
 		"test": "ospec"
 	},
 	"dependencies": {
-		"mithril": "github:mithril@1.0.0-rc.2"
+		"mithril": "^1.0.0-rc.5"
 	}
 }
 ```
