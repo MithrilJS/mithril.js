@@ -19,22 +19,23 @@
 
 `promise = m.request([url,] options)`
 
-Argument               | Type                              | Required | Description
----------------------- | --------------------------------- | -------- | ---
-`url`                  | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
-`options.method`       | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
-`options.url`          | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
-`options.data`         | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
-`options.async`        | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
-`options.user`         | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
-`options.password`     | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
-`options.config`       | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.serialize`    | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
-`options.deserialize`  | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
-`options.extract`      | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored and the string returned from the extract callback will not be parsed as JSON.
-`options.useBody`      | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
-**returns**            | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+Argument                  | Type                              | Required | Description
+------------------------- | --------------------------------- | -------- | ---
+`url`                     | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
+`options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
+`options.url`             | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
+`options.data`            | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
+`options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
+`options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
+`options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
+`options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
+`options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
+`options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
+`options.extract`         | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored and the string returned from the extract callback will not be parsed as JSON.
+`options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
+**returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
 [How to read signatures](signatures.md)
 

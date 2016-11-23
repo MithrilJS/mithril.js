@@ -54,6 +54,7 @@ module.exports = function($window, Promise) {
 			if (args.deserialize === deserialize) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
+			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 
