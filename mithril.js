@@ -30,7 +30,8 @@ function hyperscript(selector) {
 			else if (match[3][0] === "[") {
 				var attrValue = match[6]
 				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
-				attributes[match[4]] = attrValue || true
+				if (match[4] === "class") classes.push(attrValue)
+				else attributes[match[4]] = attrValue || true
 			}
 		}
 		if (classes.length > 0) attributes.className = classes.join(" ")
@@ -757,6 +758,8 @@ var _13 = function($window) {
 		else if (key1 in element && !isAttribute(key1) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			//setting select[value] to same value while having select open blinks select dropdown in Chrome
+			if (vnode.tag === "select" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "option" && key1 === "value" && vnode.dom.value === value) return
 			element[key1] = value
