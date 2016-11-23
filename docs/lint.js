@@ -70,11 +70,18 @@ function initMocks() {
 	global.m = require("../index")
 	global.o = require("../ospec/ospec")
 	global.stream = require("../stream")
+	global.alert = function() {}
 
 	//routes consumed by request.md
 	global.window.$defineRoutes({
 		"GET /api/v1/users": function(request) {
 			return {status: 200, responseText: JSON.stringify([{name: ""}])}
+		},
+		"GET /api/v1/users/search": function(request) {
+			return {status: 200, responseText: JSON.stringify([{id: 1, name: ""}])}
+		},
+		"GET /api/v1/users/1/projects": function(request) {
+			return {status: 200, responseText: JSON.stringify([{id: 1, name: ""}])}
 		},
 		"GET /api/v1/todos": function(request) {
 			return {status: 200, responseText: JSON.stringify([])}
@@ -125,7 +132,7 @@ function traverseDirectory(pathname, callback) {
 
 //run
 traverseDirectory("./docs", function(pathname) {
-	if (pathname.indexOf(".md") > -1 && pathname.indexOf("migration") < 0 && pathname.indexOf("tutorial") < 0) {
+	if (pathname.indexOf(".md") > -1 && !pathname.match(/migration|zero|simple|node_modules/)) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
 			else lint(pathname, data)

@@ -191,9 +191,9 @@ In the refactored version, it's trivial to test whether `getFirstTen` has any of
 
 Promises absorb other promises. Basically, this means you can never receive a Promise as an argument to `onFulfilled` or `onRejected` callbacks for `then` and `catch` methods. This feature allows us to flatten nested promises to make code more manageable.
 
-```Javascript
+```javascript
 function searchUsers(q) {return m.request("/api/v1/users/search", {data: {q: q}})}
-function getUserProjects() {return m.request("/api/v1/user/" + id + "/projects")}
+function getUserProjects(id) {return m.request("/api/v1/users/" + id + "/projects")}
 
 // AVOID: pyramid of doom
 searchUsers("John").then(function(users) {
@@ -230,7 +230,7 @@ searchUsers("John")
   .then(getProjectTitles)
   .then(alert)
   .catch(function(e) {
-    console.error(e)
+    console.log(e)
   })
 ```
 
@@ -275,10 +275,10 @@ Promise.all([
   // data[0] is an array of users whose names are John
   // data[1] is an array of users whose names are Mary
 
-  //the returned value is equivalent to [
-  //  getUserNames(data[0]),
-  //  getUserNames(data[1]),
-  //]
+  // the returned value is equivalent to [
+  //   getUserNames(data[0]),
+  //   getUserNames(data[1]),
+  // ]
   return data.map(getUserNames)
 })
 .then(alert)
