@@ -1,1 +1,6 @@
 * text=auto
+mithril.js binary
+mithril-full.js binary
+*.min.js binary
+**/mithril.js text=auto
+**/mithril-full.js text=auto

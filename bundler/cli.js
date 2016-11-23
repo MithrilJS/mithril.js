@@ -27,22 +27,22 @@ function add(value) {
 bundle(params.input, params.output, {watch: params.watch})
 if (params.minify) {
 	minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive}, function(stats) {
-		var readme, kb;
+		var readme, name;
 
 		function format(n) {
-			return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+			return (n / 1024).toFixed(2) + " KB"
 		}
 
-		console.log("Original size: " + format(stats.originalGzipSize) + " bytes gzipped (" + format(stats.originalSize) + " bytes uncompressed)")
-		console.log("Compiled size: " + format(stats.compressedGzipSize) + " bytes gzipped (" + format(stats.compressedSize) + " bytes uncompressed)")
+		console.log("Original size for " + params.output + ": " + format(stats.originalGzipSize) + " gzipped (" + format(stats.originalSize) + " uncompressed)")
+		console.log("Compiled size for " + params.output + ": " + format(stats.compressedGzipSize) + " gzipped (" + format(stats.compressedSize) + " uncompressed)")
 
 		readme = fs.readFileSync("./README.md", "utf8")
-		kb = stats.compressedGzipSize / 1024
+		name = params.minify === true ? "" : "-" + params.minify
 
 		fs.writeFileSync("./README.md",
 			readme.replace(
-				/(<!-- size -->)(.+?)(<!-- \/size -->)/,
-				"$1" + (kb % 1 ? kb.toFixed(2) : kb) + " KB$3"
+				new RegExp("(<!-- size" + name + " -->).+?(<!-- /size -->)"),
+				"$1" + format(stats.compressedGzipSize) + "$2"
 			)
 		)
 	})
