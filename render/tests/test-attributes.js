@@ -79,9 +79,9 @@ o.spec("attributes", function() {
 	o.spec("canvas width and height", function() {
 		o("uses attribute API", function() {
 			var canvas = {tag: "canvas", attrs: {width: "100%"}}
-			
+
 			render(root, canvas)
-			
+
 			o(canvas.dom.attributes["width"].nodeValue).equals("100%")
 			o(canvas.dom.width).equals(100)
 		})
@@ -93,6 +93,60 @@ o.spec("attributes", function() {
 			render(root, [a]);
 
 			o(a.dom.attributes["class"].nodeValue).equals("test")
+		})
+	})
+	o.spec("contenteditable throws on untrusted children", function() {
+		o("including text nodes", function() {
+			var div = {tag: "div", attrs: {contenteditable: true}, text: ''}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){}
+
+			o(succeeded).equals(false)
+		})
+		o("including elements", function() {
+			var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "script", attrs: {src: "http://evil.com"}}]}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){}
+
+			o(succeeded).equals(false)
+		})
+		o("tolerating empty children", function() {
+			var div = {tag: "div", attrs: {contenteditable: true}, children: []}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){}
+
+			o(succeeded).equals(true)
+		})
+		o("tolerating trusted content", function() {
+			var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "<", children: "<a></a>"}]}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){}
+
+			o(succeeded).equals(true)
 		})
 	})
 })
