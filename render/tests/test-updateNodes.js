@@ -715,6 +715,22 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom.nodeName).equals("A")
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
+	o("change type, position and length", function() {
+		var vnodes = {tag: "div", children: [
+			undefined, 
+			{tag: "#", children: "a"}
+		]}
+		var updated = {tag: "div", children: [
+			{tag: "[", children: [{tag: "#", children: "b"}]},
+			undefined,
+			undefined
+		]}
+
+		render(root, vnodes)
+		render(root, updated)
+		
+		o(root.firstChild.childNodes.length).equals(1)
+	})
 	o("removes then recreates then reverses children", function() {
 		var vnodes = [{tag: "a", key: 1, children: [{tag: "i", key: 3}, {tag: "s", key: 4}]}, {tag: "b", key: 2}]
 		var temp1 = []

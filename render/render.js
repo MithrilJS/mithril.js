@@ -141,7 +141,9 @@ module.exports = function($window) {
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldStart], v = vnodes[start]
 					if (o === v && !recycling) oldStart++, start++
-					else if (o != null && v != null && o.key === v.key) {
+					else if (o == null) oldStart++
+					else if (v == null) start++
+					else if (o.key === v.key) {
 						oldStart++, start++
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
 						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
@@ -149,7 +151,9 @@ module.exports = function($window) {
 					else {
 						var o = old[oldEnd]
 						if (o === v && !recycling) oldEnd--, start++
-						else if (o != null && v != null && o.key === v.key) {
+						else if (o == null) oldEnd--
+						else if (v == null) start++
+						else if (o.key === v.key) {
 							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 							oldEnd--, start++
@@ -160,7 +164,9 @@ module.exports = function($window) {
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldEnd], v = vnodes[end]
 					if (o === v && !recycling) oldEnd--, end--
-					else if (o != null && v != null && o.key === v.key) {
+					else if (o == null) oldEnd--
+					else if (v == null) end--
+					else if (o.key === v.key) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 						if (o.dom != null) nextSibling = o.dom
