@@ -142,7 +142,7 @@ module.exports = new function init() {
 				}
 				return true
 			}
-			if (a.length === b.length && (a instanceof Array && b instanceof Array || aIsArgs && bIsArgs)) {
+			if (a.length === b.length && (Array.isArray(a) && Array.isArray(b) || aIsArgs && bIsArgs)) {
 				for (var i = 0; i < a.length; i++) {
 					if (!deepEqual(a[i], b[i])) return false
 				}
@@ -185,7 +185,7 @@ module.exports = new function init() {
 		results.push(result)
 	}
 	function serialize(value) {
-		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
+		if (value === null || (typeof value === "object" && !Array.isArray(value)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
