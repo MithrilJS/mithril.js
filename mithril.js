@@ -467,7 +467,6 @@ var _13 = function($window) {
 			else {
 				var recycling = isRecyclable(old, vnodes)
 				if (recycling) old = old.concat(old.pool)
-				
 				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldStart], v = vnodes[start]
@@ -677,7 +676,7 @@ var _13 = function($window) {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (children != null || vnode.text != null) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
 	}
 	//remove
 	function removeNodes(vnodes, start, end, context) {
