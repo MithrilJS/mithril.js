@@ -347,7 +347,7 @@ module.exports = function($window) {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (children != null || vnode.text != null) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
 	}
 
 	//remove
