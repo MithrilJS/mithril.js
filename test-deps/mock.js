@@ -75,17 +75,6 @@ window.mock = (function () {
 					else this.childNodes.splice(referenceIndex, 0, node)
 				},
 
-				insertAdjacentHTML: function (position, html) {
-					// TODO: accept markup
-					if (position === "beforebegin") {
-						this.parentNode.insertBefore(
-							document.createTextNode(html),
-							this)
-					} else if (position === "beforeend") {
-						this.appendChild(document.createTextNode(html))
-					}
-				},
-
 				setAttribute: function (name, value) {
 					this[name] = value.toString()
 				},
