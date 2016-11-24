@@ -456,18 +456,18 @@ var _13 = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			var recycling = isRecyclable(old, vnodes)
-			if (recycling) old = old.concat(old.pool)
 			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
-					if (recycling && old[i].tag === vnodes[i].tag) insertNode(parent, toFragment(old[i]), getNextSibling(old, i + 1, nextSibling))
+					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
 				}
 			}
 			else {
+				var recycling = isRecyclable(old, vnodes)
+				if (recycling) old = old.concat(old.pool)
+				
 				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 				while (oldEnd >= oldStart && end >= start) {
 					var o = old[oldStart], v = vnodes[start]
