@@ -37,6 +37,8 @@
 		for (var i = 0; i < div.childNodes; i++) {
 			frag.appendChild(div.childNodes[i])
 		}
+
+		return frag
 	}
 
 	var hasOwn = {}.hasOwnProperty
