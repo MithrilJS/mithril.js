@@ -15,6 +15,7 @@ function parse(file) {
 	try {return JSON.parse(json)} catch (e) {throw new Error("invalid JSON: " + json)}
 }
 
+var error
 function run(input, output) {
 	try {
 		var modules = {}
@@ -56,8 +57,11 @@ function run(input, output) {
 			var code = read(filepath)
 			// if there's a syntax error, report w/ proper stack trace
 			try {new Function(code)} catch (e) {
-				proc.exec("node " + filename, function(error) {
-					if (error !== null) console.log("\x1b[31m" + error.message)
+				proc.exec("node " + filepath, function(e) {
+					if (e !== null && e.message !== error) {
+						error = e.message
+						console.log("\x1b[31m" + e.message + "\x1b[0m")
+					}
 				})
 			}
 			
@@ -111,7 +115,11 @@ function run(input, output) {
 		
 		code = "new function() {\n" + code + "\n}"
 		
-		if (!isFile(output) || code !== read(output)) fs.writeFileSync(output, code, "utf8")
+		if (!isFile(output) || code !== read(output)) {
+			try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
+			error = null
+			fs.writeFileSync(output, code, "utf8")
+		}
 	}
 	catch (e) {
 		console.error(e.message)
