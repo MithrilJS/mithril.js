@@ -298,7 +298,7 @@ m.render(document.body, m(Component, {greeting: "hello"}))
 
 Conversely, for similar reasons, if a component instance is created outside of a view, future redraws will perform an equality check on the node and skip it. Therefore component instances should always be created inside views:
 
-```
+```javascript
 // AVOID
 var Counter = {
 	count: 0,
@@ -329,8 +329,8 @@ m.mount(document.body, {
 
 In the example above, clicking the counter component button will increase its state count, but its view will not be triggered because the vnode representing the component shares the same reference, and therefore the render process doesn't diff them. You should always call components in the view to ensure a new vnode is created:
 
-```
-// Prefer
+```javascript
+// PREFER
 var Counter = {
 	count: 0,
 	view: function(vnode) {
