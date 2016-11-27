@@ -169,11 +169,11 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 ### Avoid anti-patterns
 
-Try to keep component interfaces generic by default - use custom interfaces when implementation isn't generic.
+Although Mithril is flexible, some code patterns are discouraged:
 
 #### Avoiding restrictive interfaces
 
-A component has a restrictive interface when it is unnecessarily specific in its use of attributes. Custom attributes should be used when a component has a very specific purpose or requires special internal logic, but this often isn't the case - attributes and children should be used where possible.
+Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
 
 In the example below, the `button` configuration is severely limited: it does not support any events other than `onclick`, it's not styleable and it only accepts text as children (but not elements, fragments or trusted HTML).
 
@@ -188,7 +188,7 @@ var RestrictiveComponent = {
 }
 ```
 
-If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node, if it makes sense to do so.
+If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node.
 
 ```javascript
 // PREFER
