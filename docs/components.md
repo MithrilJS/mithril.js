@@ -261,7 +261,9 @@ m(BetterHeader, {
 })
 ```
 
-#### Avoid component factories
+#### Define components statically, call them dynamically
+
+##### Avoid creating component definitions inside views
 
 If you create a component from within a `view` method (either directly inline or by calling a function that does so), each redraw will have a different clone of the component. When diffing component vnodes, if the component referenced by the new vnode is not strictly equal to the one referenced by the old component, the two are assumed to be different components even if they ultimately run equivalent code. This means components created dynamically via a factory will always be re-created from scratch.
 
@@ -290,4 +292,66 @@ var Component = {
 m.render(document.body, m(Component, {greeting: "hello"}))
 // calling a second time does not modify DOM
 m.render(document.body, m(Component, {greeting: "hello"}))
+```
+
+##### Avoid creating component instances outside views
+
+Conversely, for similar reasons, if a component instance is created outside of a view, future redraws will perform an equality check on the node and skip it. Therefore component instances should always be created inside views:
+
+```
+// AVOID
+var Counter = {
+	count: 0,
+	view: function(vnode) {
+		return m("div",
+			m("p", "Count: " + vnode.state.count ),
+
+			m("button", {
+				onclick: function() {
+					vnode.state.count++
+				}
+			}, "Increase count")
+		)
+	}
+}
+
+var counter = m(Counter)
+
+m.mount(document.body, {
+	view: function(vnode) {
+		return [
+			m("h1", "My app"),
+			counter
+		]
+	}
+})
+```
+
+In the example above, clicking the counter component button will increase its state count, but its view will not be triggered because the vnode representing the component shares the same reference, and therefore the render process doesn't diff them. You should always call components in the view to ensure a new vnode is created:
+
+```
+// Prefer
+var Counter = {
+	count: 0,
+	view: function(vnode) {
+		return m("div",
+			m("p", "Count: " + vnode.state.count ),
+
+			m("button", {
+				onclick: function() {
+					vnode.state.count++
+				}
+			}, "Increase count")
+		)
+	}
+}
+
+m.mount(document.body, {
+	view: function(vnode) {
+		return [
+			m("h1", "My app"),
+			m(Counter)
+		]
+	}
+})
 ```
