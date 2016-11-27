@@ -169,11 +169,11 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 ### Avoid anti-patterns
 
-Although Mithril is flexible, some code patterns are discouraged:
+Try to keep component interfaces generic by default - use custom interfaces when implementation isn't generic.
 
-#### Avoid restrictive interfaces
+#### Avoiding restrictive interfaces
 
-A component has a restrictive interface when it exposes only specific properties, under the assumption that other properties will not be needed, or that they can be added at a later time.
+A component has a restrictive interface when it is unnecessarily specific in its use of attributes. Custom attributes should be used when a component has a very specific purpose or requires special internal logic, but this often isn't the case - attributes and children should be used where possible.
 
 In the example below, the `button` configuration is severely limited: it does not support any events other than `onclick`, it's not styleable and it only accepts text as children (but not elements, fragments or trusted HTML).
 
@@ -188,7 +188,7 @@ var RestrictiveComponent = {
 }
 ```
 
-It's preferable to allow passing through parameters to a component's root node, if it makes sense to do so:
+If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node, if it makes sense to do so.
 
 ```javascript
 // PREFER
@@ -201,7 +201,9 @@ var FlexibleComponent = {
 }
 ```
 
-#### Avoid magic indexes
+#### Don't manipulate `children`
+
+However, if a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
 
 Often it's desirable to define multiple sets of children, for example, if a component has a configurable title and body.
 
@@ -233,7 +235,7 @@ m(Header, [
 ])
 ```
 
-The component above makes different children look different based on where they appear in the array. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
+The component above breaks the assumption that children will be output in the same contiguous format as they are received. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
 
 ```javascript
 // PREFER
