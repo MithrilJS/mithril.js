@@ -171,7 +171,7 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 Although Mithril is flexible, some code patterns are discouraged:
 
-#### Avoiding restrictive interfaces
+#### Avoid restrictive interfaces
 
 Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
 
