@@ -10,6 +10,7 @@
 - [Monitoring progress](#monitoring-progress)
 - [Casting response to a type](#casting-response-to-a-type)
 - [Non-JSON responses](#non-json-responses)
+- [Retrieving response details](#retrieving-response-details)
 - [Why JSON instead of HTML](#why-json-instead-of-html)
 - [Why XMLHttpRequest instead of fetch](#why-xmlhttprequest-instead-of-fetch)
 
