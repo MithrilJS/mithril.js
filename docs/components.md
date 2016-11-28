@@ -173,7 +173,7 @@ Although Mithril is flexible, some code patterns are discouraged:
 
 #### Avoid restrictive interfaces
 
-A component has a restrictive interface when it exposes only specific properties, under the assumption that other properties will not be needed, or that they can be added at a later time.
+Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
 
 In the example below, the `button` configuration is severely limited: it does not support any events other than `onclick`, it's not styleable and it only accepts text as children (but not elements, fragments or trusted HTML).
 
@@ -188,7 +188,7 @@ var RestrictiveComponent = {
 }
 ```
 
-It's preferable to allow passing through parameters to a component's root node, if it makes sense to do so:
+If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node.
 
 ```javascript
 // PREFER
@@ -201,7 +201,9 @@ var FlexibleComponent = {
 }
 ```
 
-#### Avoid magic indexes
+#### Don't manipulate `children`
+
+However, if a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
 
 Often it's desirable to define multiple sets of children, for example, if a component has a configurable title and body.
 
@@ -233,7 +235,7 @@ m(Header, [
 ])
 ```
 
-The component above makes different children look different based on where they appear in the array. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
+The component above breaks the assumption that children will be output in the same contiguous format as they are received. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
 
 ```javascript
 // PREFER
