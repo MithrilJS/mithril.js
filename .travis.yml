@@ -13,8 +13,11 @@ install:
   - npm install
   - npm install @alrra/travis-scripts@^3.0.1
 
+# Lint (but don't fail build) before running tests
+before_script: npm run lint || true
+
 # Run more than just npm test
-script: npm run lint && npm run build && npm test
+script: npm run build && npm test
 
 # After a successful build create bundles & commit back to the repo
 after_success:
