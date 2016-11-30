@@ -9,7 +9,7 @@ requestService.setCompletionCallback(redrawService.publish)
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")
-m.render = require( "./render").render
+m.render = require("./render").render
 m.redraw = redrawService.publish
 m.request = requestService.request
 m.jsonp = requestService.jsonp
