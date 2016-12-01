@@ -1,13 +1,13 @@
 # mount(root, component)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Performance considerations](#performance-considerations)
 - [Differences from m.render](#differences-from-m-render)
 
 ---
 
-### API
+### Signature
 
 `m.mount(element, component)`
 

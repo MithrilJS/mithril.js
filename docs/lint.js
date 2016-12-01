@@ -86,6 +86,9 @@ function initMocks() {
 		"GET /api/v1/todos": function(request) {
 			return {status: 200, responseText: JSON.stringify([])}
 		},
+		"PUT /api/v1/users/1": function(request) {
+			return {status: 200, responseText: request.query.callback ? request.query.callback + "([])" : "[]"}
+		},
 		"POST /api/v1/upload": function(request) {
 			return {status: 200, responseText: JSON.stringify([])}
 		},

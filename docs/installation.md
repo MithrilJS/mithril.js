@@ -4,7 +4,7 @@
 
 If you're new to Javascript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
-```
+```markup
 <script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
 ```
 
@@ -14,7 +14,7 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 #### Quick start
 
-```
+```bash
 # 1) install
 npm install mithril@rewrite --save
 
@@ -37,14 +37,14 @@ NPM (Node package manager) is the default package manager that is bundled w/ Nod
 
 To use Mithril via NPM, go to your project folder, and run `npm init --yes` from the command line. This will create a file called `package.json`.
 
-```
+```bash
 npm init --yes
 # creates a file called package.json
 ```
 
 Then, run `npm install mithril@rewrite --save` to install Mithril. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
 
-```
+```bash
 npm install mithril@rewrite --save
 ```
 
@@ -149,13 +149,6 @@ webpack --watch
 
 If you don't have the ability to run a bundler script due to company security policies, there's an options to not use a module system at all:
 
-```javascript
-// index.js
-
-// if a CommonJS environment is not detected, Mithril will be created in the global scope
-m.render(document.body, "hello world")
-```
-
 ```markup
 <html>
   <head>
@@ -166,4 +159,11 @@ m.render(document.body, "hello world")
     <script src="index.js"></script>
   </body>
 </html>
+```
+
+```javascript
+// index.js
+
+// if a CommonJS environment is not detected, Mithril will be created in the global scope
+m.render(document.body, "hello world")
 ```

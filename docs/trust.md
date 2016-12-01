@@ -1,6 +1,6 @@
 # trust(html)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Security considerations](#security-considerations)
 - [Scripts that do not run](#scripts-that-do-not-run)
@@ -8,7 +8,7 @@
 
 ---
 
-### API
+### Signature
 
 Generates a trusted HTML [vnode](vnodes.md)
 

@@ -1,11 +1,11 @@
 # parseQueryString(string)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 
 ---
 
-### API
+### Signature
 
 `object = m.parseQueryString(string)`
 

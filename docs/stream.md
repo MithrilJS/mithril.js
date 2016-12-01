@@ -1,17 +1,17 @@
 # stream()
 
-- [API](#api)
-- [Static members](#static-members)
-	- [stream.combine](#streamcombine)
-	- [stream.merge](#streammerge)
-	- [stream.HALT](#streamhalt)
-	- [stream["fantasy-land/of"]](#streamfantasy-landof)
-- [Instance members](#static-members)
-	- [stream.map](#streammap)
-	- [stream.end](#streamend)
-	- [stream["fantasy-land/of"]](#streamfantasy-landof)
-	- [stream["fantasy-land/map"]](#streamfantasy-landmap)
-	- [stream["fantasy-land/ap"]](#streamfantasy-landap)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [stream.combine](#streamcombine)
+		- [stream.merge](#streammerge)
+		- [stream.HALT](#streamhalt)
+		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+	- [Instance members](#static-members)
+		- [stream.map](#streammap)
+		- [stream.end](#streamend)
+		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+		- [stream["fantasy-land/map"]](#streamfantasy-landmap)
+		- [stream["fantasy-land/ap"]](#streamfantasy-landap)
 - [Basic usage](#basic-usage)
 	- [Streams as variables](#streams-as-variables)
 	- [Bidirectional bindings](#bidirectional-bindings)
@@ -25,7 +25,7 @@
 
 ---
 
-### API
+### Signature
 
 Creates a stream
 

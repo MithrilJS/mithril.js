@@ -1,11 +1,11 @@
 # version
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 
 ---
 
-### API
+### Signature
 
 `m.version`
 

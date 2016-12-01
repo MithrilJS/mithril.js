@@ -1,14 +1,14 @@
 # Promise(executor)
 
-- [API](#api)
-- [Static members](#static-members)
-	- [Promise.resolve](#promiseresolve)
-	- [Promise.reject](#promisereject)
-	- [Promise.all](#promiseall)
-	- [Promise.race](#promiserace)
-- [Instance members](#static-members)
-  - [promise.then](#promisethen)
-  - [promise.catch](#promisecatch)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [Promise.resolve](#promiseresolve)
+		- [Promise.reject](#promisereject)
+		- [Promise.all](#promiseall)
+		- [Promise.race](#promiserace)
+	- [Instance members](#instance-members)
+	  - [promise.then](#promisethen)
+	  - [promise.catch](#promisecatch)
 - [How it works](#how-it-works)
 - [Promise chaining](#promise-chaining)
 - [Promise absorption](#promise-absorption)
@@ -18,7 +18,7 @@
 
 ---
 
-### API
+### Signature
 
 `promise = new Promise(executor)`
 
@@ -146,7 +146,7 @@ promise.then(function(value) {
 })
 ```
 
-Promises are useful for working with [asynchronous](https://en.wikipedia.org/wiki/Asynchrony_(computer_programming)) APIs, such as [`m.request`](request.md)
+Promises are useful for working with asynchronous APIs, such as [`m.request`](request.md)
 
 Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other Javascript code to run in the meantime. When they are done, they call a function with their results.
 

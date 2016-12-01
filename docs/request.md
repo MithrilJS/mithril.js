@@ -1,6 +1,6 @@
 # request(options)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Loading icons and error messages](#loading-icons-and-error-messages)
@@ -15,7 +15,7 @@
 
 ---
 
-### API
+### Signature
 
 `promise = m.request([url,] options)`
 
