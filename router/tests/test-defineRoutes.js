@@ -36,7 +36,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -49,7 +49,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
+						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -62,7 +62,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
+						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -79,7 +79,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -92,7 +92,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x"}, "/test/x", "/test/:a"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x"}, "/test/x", "/test/:a", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -105,7 +105,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x", b: "y"}, "/test/x/y", "/test/:a/:b"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x", b: "y"}, "/test/x/y", "/test/:a/:b", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -118,7 +118,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x/y"}, "/test/x/y", "/test/:a..."])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x/y"}, "/test/x/y", "/test/:a...", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -131,7 +131,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b&c=d", "/test"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b&c=d", "/test", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -144,7 +144,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test#a=b&c=d", "/test"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test#a=b&c=d", "/test", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -157,7 +157,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b#c=d", "/test"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b#c=d", "/test", true])
 						o(onFail.callCount).equals(0)
 						
 						done()
@@ -194,7 +194,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x", true])
 						
 						done()
 					})
@@ -206,7 +206,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
+						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a...", true])
 						
 						done()
 					})
@@ -222,7 +222,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x", true])
 						
 						done()
 					})
@@ -238,7 +238,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
+						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a...", true])
 						
 						done()
 					})
@@ -253,7 +253,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
+						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x", true])
 						
 						done()
 					})
@@ -268,7 +268,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
+						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a...", true])
 						
 						done()
 					})
@@ -291,7 +291,7 @@ o.spec("Router.defineRoutes", function() {
 					replay()
 
 					o(onRouteChange.callCount).equals(2)
-					o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
+					o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test", false])
 					o(onFail.callCount).equals(0)
 				})
 			})

@@ -328,22 +328,7 @@ var _8 = function($window, Promise) {
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
 var requestService = _8(window, PromisePolyfill)
-var _11 = function() {
-	var callbacks = []
-	function unsubscribe(callback) {
-		var index = callbacks.indexOf(callback)
-		if (index > -1) callbacks.splice(index, 1)
-	}
-    function publish() {
-        for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i].apply(this, arguments)
-        }
-    }
-	return {subscribe: callbacks.push.bind(callbacks), unsubscribe: unsubscribe, publish: publish}
-}
-var redrawService = _11()
-requestService.setCompletionCallback(redrawService.publish)
-var _13 = function($window) {
+var coreRenderer = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 	var onevent
@@ -642,8 +627,8 @@ var _13 = function($window) {
 		for (var i = 0; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				var key1 = vnode.key
-				if (key1 != null) map[key1] = i
+				var key2 = vnode.key
+				if (key2 != null) map[key2] = i
 			}
 		}
 		return map
@@ -749,34 +734,34 @@ var _13 = function($window) {
 	}
 	//attrs2
 	function setAttrs(vnode, attrs2, ns) {
-		for (var key1 in attrs2) {
-			setAttr(vnode, key1, null, attrs2[key1], ns)
+		for (var key2 in attrs2) {
+			setAttr(vnode, key2, null, attrs2[key2], ns)
 		}
 	}
-	function setAttr(vnode, key1, old, value, ns) {
+	function setAttr(vnode, key2, old, value, ns) {
 		var element = vnode.dom
-		if (key1 === "key" || (old === value && !isFormAttribute(vnode, key1)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key1)) return
-		var nsLastIndex = key1.indexOf(":")
-		if (nsLastIndex > -1 && key1.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key1.slice(nsLastIndex + 1), value)
+		if (key2 === "key" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
+		var nsLastIndex = key2.indexOf(":")
+		if (nsLastIndex > -1 && key2.substr(0, nsLastIndex) === "xlink") {
+			element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(nsLastIndex + 1), value)
 		}
-		else if (key1[0] === "o" && key1[1] === "n" && typeof value === "function") updateEvent(vnode, key1, value)
-		else if (key1 === "style") updateStyle(element, old, value)
-		else if (key1 in element && !isAttribute(key1) && ns === undefined) {
+		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value)
+		else if (key2 === "style") updateStyle(element, old, value)
+		else if (key2 in element && !isAttribute(key2) && ns === undefined) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "select" && key1 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key1 === "value" && vnode.dom.value === value) return
-			element[key1] = value
+			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value === value) return
+			element[key2] = value
 		}
 		else {
 			if (typeof value === "boolean") {
-				if (value) element.setAttribute(key1, "")
-				else element.removeAttribute(key1)
+				if (value) element.setAttribute(key2, "")
+				else element.removeAttribute(key2)
 			}
-			else element.setAttribute(key1 === "className" ? "class" : key1, value)
+			else element.setAttribute(key2 === "className" ? "class" : key2, value)
 		}
 	}
 	function setLateAttrs(vnode) {
@@ -788,16 +773,16 @@ var _13 = function($window) {
 	}
 	function updateAttrs(vnode, old, attrs2, ns) {
 		if (attrs2 != null) {
-			for (var key1 in attrs2) {
-				setAttr(vnode, key1, old && old[key1], attrs2[key1], ns)
+			for (var key2 in attrs2) {
+				setAttr(vnode, key2, old && old[key2], attrs2[key2], ns)
 			}
 		}
 		if (old != null) {
-			for (var key1 in old) {
-				if (attrs2 == null || !(key1 in attrs2)) {
-					if (key1 === "className") key1 = "class"
-					if (key1[0] === "o" && key1[1] === "n" && !isLifecycleMethod(key1)) updateEvent(vnode, key1, undefined)
-					else if (key1 !== "key") vnode.dom.removeAttribute(key1)
+			for (var key2 in old) {
+				if (attrs2 == null || !(key2 in attrs2)) {
+					if (key2 === "className") key2 = "class"
+					if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
+					else if (key2 !== "key") vnode.dom.removeAttribute(key2)
 				}
 			}
 		}
@@ -821,32 +806,32 @@ var _13 = function($window) {
 		else if (typeof style === "string") element.style.cssText = style
 		else {
 			if (typeof old === "string") element.style.cssText = ""
-			for (var key1 in style) {
-				element.style[key1] = style[key1]
+			for (var key2 in style) {
+				element.style[key2] = style[key2]
 			}
 			if (old != null && typeof old !== "string") {
-				for (var key1 in old) {
-					if (!(key1 in style)) element.style[key1] = ""
+				for (var key2 in old) {
+					if (!(key2 in style)) element.style[key2] = ""
 				}
 			}
 		}
 	}
 	//event
-	function updateEvent(vnode, key1, value) {
+	function updateEvent(vnode, key2, value) {
 		var element = vnode.dom
 		var callback = function(e) {
 			var result = value.call(element, e)
 			if (typeof onevent === "function") onevent.call(element, e)
 			return result
 		}
-		if (key1 in element) element[key1] = typeof value === "function" ? callback : null
+		if (key2 in element) element[key2] = typeof value === "function" ? callback : null
 		else {
-			var eventName = key1.slice(2)
+			var eventName = key2.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key1] != null) element.removeEventListener(eventName, vnode.events[key1], false)
+			if (vnode.events[key2] != null) element.removeEventListener(eventName, vnode.events[key2], false)
 			if (typeof value === "function") {
-				vnode.events[key1] = callback
-				element.addEventListener(eventName, vnode.events[key1], false)
+				vnode.events[key2] = callback
+				element.addEventListener(eventName, vnode.events[key2], false)
 			}
 		}
 	}
@@ -888,79 +873,90 @@ var _13 = function($window) {
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
-var renderService = _13(window)
-var throttle = function(callback1) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
-	return function(synchronous) {
-		var now = Date.now()
-		if (synchronous === true || last === 0 || now - last >= time) {
-			last = now
-			callback1()
-		}
-		else if (pending === null) {
-			pending = timeout(function() {
-				pending = null
-				callback1()
-				last = Date.now()
-			}, time - (now - last))
-		}
+var _11 = function($window) {
+	var renderService = coreRenderer($window)
+	renderService.setEventCallback(function(e) {
+		if (e.redraw !== false) redraw()
+	})
+	
+	var callbacks = []
+	function subscribe(key1, callback) {
+		unsubscribe(key1)
+		callbacks.push(key1, callback)
 	}
+	function unsubscribe(key1) {
+		var index = callbacks.indexOf(key1)
+		if (index > -1) callbacks.splice(index, 2)
+	}
+    function redraw() {
+        for (var i = 1; i < callbacks.length; i += 2) {
+            callbacks[i]()
+        }
+    }
+	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
-var autoredraw = function(root, renderer, pubsub, callback0) {
-	var run1 = throttle(callback0)
-	if (renderer != null) {
-		renderer.setEventCallback(function(e) {
-			if (e.redraw !== false) pubsub.publish()
-		})
+var redrawService = _11(window)
+requestService.setCompletionCallback(redrawService.redraw)
+var _16 = function(redrawService0) {
+	function throttle(callback0) {
+		//60fps translates to 16.6ms, round it down since setTimeout requires int
+		var time = 16
+		var last = 0, pending = null
+		var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+		return function() {
+			var now = Date.now()
+			if (last === 0 || now - last >= time) {
+				last = now
+				callback0()
+			}
+			else if (pending === null) {
+				pending = timeout(function() {
+					pending = null
+					callback0()
+					last = Date.now()
+				}, time - (now - last))
+			}
+		}
 	}
-	if (pubsub != null) {
-		if (root.redraw) pubsub.unsubscribe(root.redraw)
-		pubsub.subscribe(run1)
-	}
-	return root.redraw = run1
-}
-var _17 = function(renderer, pubsub) {
+	
 	return function(root, component) {
 		if (component === null) {
-			renderer.render(root, [])
-			pubsub.unsubscribe(root.redraw)
-			delete root.redraw
+			redrawService0.render(root, [])
+			redrawService0.unsubscribe(root)
 			return
 		}
 		
 		if (component.view == null) throw new Error("m.mount(element, component) expects a component, not a vnode")
-		var run0 = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(root, Vnode(component, undefined, undefined, undefined, undefined, undefined))
+		
+		var run0 = throttle(function() {
+			redrawService0.render(root, Vnode(component))
 		})
+		redrawService0.subscribe(root, run0)
 		run0()
 	}
 }
-m.mount = _17(renderService, redrawService)
-var mount = m.mount
+m.mount = _16(redrawService)
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 	var entries = string.split("&"), data0 = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key3 = decodeURIComponent(entry[0])
+		var key4 = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
 		if (value === "true") value = true
 		else if (value === "false") value = false
-		var levels = key3.split(/\]\[?|\[/)
+		var levels = key4.split(/\]\[?|\[/)
 		var cursor = data0
-		if (key3.indexOf("[") > -1) levels.pop()
+		if (key4.indexOf("[") > -1) levels.pop()
 		for (var j = 0; j < levels.length; j++) {
 			var level = levels[j], nextLevel = levels[j + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j === levels.length - 1
 			if (level === "") {
-				var key3 = levels.slice(0, j).join()
-				if (counters[key3] == null) counters[key3] = 0
-				level = counters[key3]++
+				var key4 = levels.slice(0, j).join()
+				if (counters[key4] == null) counters[key4] = 0
+				level = counters[key4]++
 			}
 			if (cursor[level] == null) {
 				cursor[level] = isValue ? value : isNumber ? [] : {}
@@ -982,11 +978,11 @@ var coreRouter = function($window) {
 	}
 	var asyncId
 	function debounceAsync(f) {
-		return function() {
+		return function(e) {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				f()
+				f(e)
 			})
 		}
 	}
@@ -997,11 +993,11 @@ var coreRouter = function($window) {
 		if (queryIndex > -1) {
 			var queryEnd = hashIndex > -1 ? hashIndex : path.length
 			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key2 in queryParams) queryData[key2] = queryParams[key2]
+			for (var key3 in queryParams) queryData[key3] = queryParams[key3]
 		}
 		if (hashIndex > -1) {
 			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key2 in hashParams) hashData[key2] = hashParams[key2]
+			for (var key3 in hashParams) hashData[key3] = hashParams[key3]
 		}
 		return path.slice(0, pathEnd)
 	}
@@ -1017,7 +1013,7 @@ var coreRouter = function($window) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
-			for (var key2 in data) queryData[key2] = data[key2]
+			for (var key3 in data) queryData[key3] = data[key3]
 			path = path.replace(/:([^\/]+)/g, function(match2, token) {
 				delete queryData[token]
 				return data[token]
@@ -1030,16 +1026,16 @@ var coreRouter = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix1 + path)
 			else $window.history.pushState(null, null, prefix1 + path)
-			$window.onpopstate()
+			$window.onpopstate(true)
 		}
 		else $window.location.href = prefix1 + path
 	}
-	function defineRoutes(routes, resolve0, reject) {
+	function defineRoutes(routes, resolve, reject) {
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix1.charAt(0) === "#") $window.onhashchange = resolveRoute
-		resolveRoute()
+		resolveRoute(true)
 		
-		function resolveRoute() {
+		function resolveRoute(isRouteChange) {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
@@ -1053,14 +1049,14 @@ var coreRouter = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve0(routes[route0], params, path, route0)
+						resolve(routes[route0], params, path, route0, !!isRouteChange)
 					})
 					return
 				}
 			}
 			reject(path, params)
 		}
-		return resolveRoute
+		return function() {resolveRoute(false)}
 	}
 	function link(vnode2) {
 		vnode2.dom.setAttribute("href", prefix1 + vnode2.attrs.href)
@@ -1075,64 +1071,60 @@ var coreRouter = function($window) {
 	}
 	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
 }
-var _23 = function($window, mount0) {
-	var router = coreRouter($window)
-	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
-	var RouteComponent = {view: function() {
-		return [currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))]
-	}}
-	function defaultRender(vnode1) {
-		return vnode1
-	}
+var _20 = function($window, redrawService0) {
+	var routeService = coreRouter($window)
+	
+	var identity = function(v) {return v}
+	var current = {render: identity, component: null, path: null, resolve: null}
 	var route = function(root, defaultRoute, routes) {
-		currentComponent = "div"
-		currentRender = defaultRender
-		currentArgs = null
-		mount0(root, RouteComponent)
-		router.defineRoutes(routes, function(payload, args0, path) {
-			var isResolver = typeof payload.view !== "function"
-			var render1 = defaultRender
-			var resolve = currentResolve = function (component) {
-				if (resolve !== currentResolve) return
-				currentResolve = null
-				currentComponent = component != null ? component : isResolver ? "div" : payload
-				currentRender = render1
-				currentArgs = args0
-				currentPath = path
-				root.redraw(true)
+		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
+		var render1 = function(resolver, component, params, path) {
+			current.render = resolver.render || identity
+			current.component = component
+			current.path = path
+			current.resolve = null
+			redrawService0.render(root, current.render(Vnode(component, undefined, params)))
+		}
+		var run1 = routeService.defineRoutes(routes, function(component, params, path, route, isRouteChange) {
+			if (component.view) render1({}, component, params, path)
+			else {
+				if (component.onmatch) {
+					if (isRouteChange === false && current.path === path || current.resolve != null) render1(current, current.component, params)
+					else {
+						current.resolve = function(resolved) {
+							render1(component, resolved, params, path)
+						}
+						component.onmatch(function(resolved) {
+							if (current.path !== path && current.resolve != null) current.resolve(resolved)
+						}, params, path)
+					}
+				}
+				else render1(component, "div", params, path)
 			}
-			var onmatch = function() {
-				resolve()
-			}
-			if (isResolver) {
-				if (typeof payload.render === "function") render1 = payload.render.bind(payload)
-				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
-			}
-		
-			onmatch.call(payload, resolve, args0, path)
 		}, function() {
-			router.setPath(defaultRoute, null, {replace: true})
+			routeService.setPath(defaultRoute)
 		})
+		redrawService0.subscribe(root, run1)
 	}
-	route.link = router.link
-	route.prefix = router.setPrefix
-	route.set = router.setPath
-	route.get = function() {return currentPath}
+	route.set = routeService.setPath
+	route.get = function() {return current.path}
+	route.prefix = routeService.setPrefix
+	route.link = routeService.link
 	return route
 }
-m.route = _23(window, mount)
-m.withAttr = function(attrName, callback2, context) {
+m.route = _20(window, redrawService)
+m.withAttr = function(attrName, callback1, context) {
 	return function(e) {
-		return callback2.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.render = renderService.render
-m.redraw = redrawService.publish
+m.render = redrawService.render
+m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.0-rc.5"
+m.version = "1.0.0-rc.6"
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }

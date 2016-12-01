@@ -1,23 +1,42 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var autoredraw = require("../api/autoredraw")
 
-module.exports = function(renderer, pubsub) {
+module.exports = function(redrawService) {
+	function throttle(callback) {
+		//60fps translates to 16.6ms, round it down since setTimeout requires int
+		var time = 16
+		var last = 0, pending = null
+		var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+		return function() {
+			var now = Date.now()
+			if (last === 0 || now - last >= time) {
+				last = now
+				callback()
+			}
+			else if (pending === null) {
+				pending = timeout(function() {
+					pending = null
+					callback()
+					last = Date.now()
+				}, time - (now - last))
+			}
+		}
+	}
+	
 	return function(root, component) {
 		if (component === null) {
-			renderer.render(root, [])
-			pubsub.unsubscribe(root.redraw)
-			delete root.redraw
+			redrawService.render(root, [])
+			redrawService.unsubscribe(root)
 			return
 		}
 		
 		if (component.view == null) throw new Error("m.mount(element, component) expects a component, not a vnode")
-
-		var run = autoredraw(root, renderer, pubsub, function() {
-			renderer.render(root, Vnode(component, undefined, undefined, undefined, undefined, undefined))
+		
+		var run = throttle(function() {
+			redrawService.render(root, Vnode(component))
 		})
-
+		redrawService.subscribe(root, run)
 		run()
 	}
 }

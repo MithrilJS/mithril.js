@@ -273,6 +273,30 @@ o.spec("bundler", function() {
 		remove("d.js")
 		remove("out.js")
 	})
+	o("works if included multiple times", function() {
+		write("a.js", `module.exports = 123`)
+		write("b.js", `var a = require("./a").toString()\nmodule.exports = a`)
+		write("c.js", `var a = require("./a").toString()\nvar b = require("./b")`)
+		bundle(ns + "c.js", ns + "out.js")
+		
+		o(read("out.js")).equals(`new function() {\nvar _0 = 123\nvar a = _0.toString()\nvar a0 = _0.toString()\nvar b = a0\n}`)
+		
+		remove("a.js")
+		remove("b.js")
+		remove("c.js")
+	})
+	o("works if included multiple times reverse", function() {
+		write("a.js", `module.exports = 123`)
+		write("b.js", `var a = require("./a").toString()\nmodule.exports = a`)
+		write("c.js", `var b = require("./b")\nvar a = require("./a").toString()`)
+		bundle(ns + "c.js", ns + "out.js")
+		
+		o(read("out.js")).equals(`new function() {\nvar _0 = 123\nvar a0 = _0.toString()\nvar b = a0\nvar a = _0.toString()\n}`)
+		
+		remove("a.js")
+		remove("b.js")
+		remove("c.js")
+	})
 	o("reuses binding if possible", function() {
 		write("a.js", `var b = require("./b")\nvar c = require("./c")`)
 		write("b.js", `var d = require("./d")\nmodule.exports = function() {return d + 1}`)

@@ -3,55 +3,44 @@
 var Vnode = require("../render/vnode")
 var coreRouter = require("../router/router")
 
-module.exports = function($window, mount) {
-	var router = coreRouter($window)
-	var currentResolve, currentComponent, currentRender, currentArgs, currentPath
-
-	var RouteComponent = {view: function() {
-		return [currentRender(Vnode(currentComponent, null, currentArgs, undefined, undefined, undefined))]
-	}}
-	function defaultRender(vnode) {
-		return vnode
-	}
+module.exports = function($window, redrawService) {
+	var routeService = coreRouter($window)
+	
+	var identity = function(v) {return v}
+	var current = {render: identity, component: null, path: null, resolve: null}
 	var route = function(root, defaultRoute, routes) {
-		currentComponent = "div"
-		currentRender = defaultRender
-		currentArgs = null
-
-		mount(root, RouteComponent)
-
-		router.defineRoutes(routes, function(payload, args, path) {
-			var isResolver = typeof payload.view !== "function"
-			var render = defaultRender
-
-			var resolve = currentResolve = function (component) {
-				if (resolve !== currentResolve) return
-				currentResolve = null
-
-				currentComponent = component != null ? component : isResolver ? "div" : payload
-				currentRender = render
-				currentArgs = args
-				currentPath = path
-
-				root.redraw(true)
+		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
+		var render = function(resolver, component, params, path) {
+			current.render = resolver.render || identity
+			current.component = component
+			current.path = path
+			current.resolve = null
+			redrawService.render(root, current.render(Vnode(component, undefined, params)))
+		}
+		var run = routeService.defineRoutes(routes, function(component, params, path, route, isRouteChange) {
+			if (component.view) render({}, component, params, path)
+			else {
+				if (component.onmatch) {
+					if (isRouteChange === false && current.path === path || current.resolve != null) render(current, current.component, params)
+					else {
+						current.resolve = function(resolved) {
+							render(component, resolved, params, path)
+						}
+						component.onmatch(function(resolved) {
+							if (current.path !== path && current.resolve != null) current.resolve(resolved)
+						}, params, path)
+					}
+				}
+				else render(component, "div", params, path)
 			}
-			var onmatch = function() {
-				resolve()
-			}
-			if (isResolver) {
-				if (typeof payload.render === "function") render = payload.render.bind(payload)
-				if (typeof payload.onmatch === "function") onmatch = payload.onmatch
-			}
-		
-			onmatch.call(payload, resolve, args, path)
 		}, function() {
-			router.setPath(defaultRoute, null, {replace: true})
+			routeService.setPath(defaultRoute)
 		})
+		redrawService.subscribe(root, run)
 	}
-	route.link = router.link
-	route.prefix = router.setPrefix
-	route.set = router.setPath
-	route.get = function() {return currentPath}
-
+	route.set = routeService.setPath
+	route.get = function() {return current.path}
+	route.prefix = routeService.setPrefix
+	route.link = routeService.link
 	return route
 }

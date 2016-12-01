@@ -18,11 +18,11 @@ module.exports = function($window) {
 
 	var asyncId
 	function debounceAsync(f) {
-		return function() {
+		return function(e) {
 			if (asyncId != null) return
 			asyncId = callAsync(function() {
 				asyncId = null
-				f()
+				f(e)
 			})
 
 		}
@@ -73,7 +73,7 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate()
+			$window.onpopstate(true)
 		}
 		else $window.location.href = prefix + path
 	}
@@ -81,9 +81,9 @@ module.exports = function($window) {
 	function defineRoutes(routes, resolve, reject) {
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
-		resolveRoute()
+		resolveRoute(true)
 		
-		function resolveRoute() {
+		function resolveRoute(isRouteChange) {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
@@ -98,7 +98,7 @@ module.exports = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route], params, path, route)
+						resolve(routes[route], params, path, route, !!isRouteChange)
 					})
 					return
 				}
@@ -106,7 +106,7 @@ module.exports = function($window) {
 
 			reject(path, params)
 		}
-		return resolveRoute
+		return function() {resolveRoute(false)}
 	}
 
 	function link(vnode) {
