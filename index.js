@@ -11,9 +11,12 @@ m.render = redrawService.render
 m.redraw = redrawService.redraw
 m.request = function(){
   var request = requestService.request.apply(this, arguments)
+  var options = arguments[1] || arguments[0]
 
-  request.then(redrawService.publish)
-  request.catch(redrawService.publish)
+  if(options.redraw !== false){
+    request.then(redrawService.publish)
+    request.catch(redrawService.publish)
+  }
 
   return request
 }
