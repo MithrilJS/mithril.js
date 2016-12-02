@@ -5,25 +5,18 @@ var buildQueryString = require("../querystring/build")
 module.exports = function($window, Promise) {
 	var callbackCount = 0
 
-	var count = 0
-	var oncompletion
-	function setCompletionCallback(callback) {oncompletion = callback}
-	function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
-
 	function finalize(promise) {
 		var then = promise.then
 		promise.then = function() {
-			count++
 			var next = then.apply(promise, arguments)
-			next.then(complete, function(e) {
-				complete()
+			next.then(undefined, function(e) {
 				throw e
 			})
 			return finalize(next)
 		}
 		return promise
 	}
-	
+
 	function request(args, extra) {
 		return finalize(new Promise(function(resolve, reject) {
 			if (typeof args === "string") {
@@ -146,5 +139,5 @@ module.exports = function($window, Promise) {
 		return data
 	}
 
-	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
+	return {request: request, jsonp: jsonp}
 }
