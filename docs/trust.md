@@ -1,5 +1,6 @@
 # trust(html)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Security considerations](#security-considerations)
@@ -8,9 +9,15 @@
 
 ---
 
-### Signature
+### Description
 
-Generates a trusted HTML [vnode](vnodes.md)
+Turns an HTML string into unescaped HTML. **Do not use `m.trust` on unsanitized user input.**
+
+Always try to use an [alternative method](#avoid-trusting-html) first, before considering using `m.trust`.
+
+---
+
+### Signature
 
 `vnode = m.trust(html)`
 

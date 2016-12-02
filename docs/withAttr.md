@@ -1,17 +1,38 @@
 # withAttr(attrName, callback)
 
+- [Description](#description)
 - [Signature](#signature)
-- [How to use](#how-to-use)
+- [How it works](#how-it-works)
 - [Predictable event target](#predictable-event-target)
 - [Attributes and properties](#attributes-and-properties)
 
 ---
 
+### Description
+
+Returns an event handler that runs `callback` with the value of the specified DOM attribute
+
+```javascript
+var state: {
+	value = ""
+	setValue: function(v) {value = v}
+}
+
+var Component = {
+	view: function() {
+		return m("input", {
+			oninput: m.withAttr("value", state.setValue),
+			value: state.value,
+		})
+	}
+}
+
+m.mount(document.body, Component)
+```
+
+---
+
 ### Signature
-
-Creates an event handler. The event handler takes the value of a DOM element's property and calls a function with it as the argument.
-
-This helper function is provided to help decouple the browser's event model from application code.
 
 `m.withAttr(attrName, callback, thisArg?)`
 
@@ -26,7 +47,11 @@ Argument    | Type                 | Required | Description
 
 ---
 
-### How to use
+### How it works
+
+The `m.withAttr` method creates an event handler. The event handler takes the value of a DOM element's property and calls a function with it as the argument.
+
+This helper function is provided to help decouple the browser's event model from application code.
 
 ```javascript
 // standalone usage

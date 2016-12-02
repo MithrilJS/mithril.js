@@ -1,6 +1,6 @@
 {
 	"name": "mithril",
-	"version": "1.0.0-rc.5",
+	"version": "1.0.0-rc.6",
 	"description": "A framework for building brilliant applications",
 	"author": "Leo Horie",
 	"license": "MIT",
@@ -12,13 +12,15 @@
 		"build-browser": "node bundler/cli browser.js -o mithril.js",
 		"build-min": "node bundler/cli browser.js -o mithril.min.js -m",
 		"lintdocs": "node docs/lint",
+		"gendocs": "node docs/generate",
 		"lint": "eslint .",
 		"test": "node ospec/bin/ospec",
 		"cover": "istanbul cover --print both ospec/bin/ospec"
 	},
 	"devDependencies": {
 		"eslint": "^2.10.2",
-		"istanbul": "^0.4.3"
+		"istanbul": "^0.4.3",
+		"marked": "^0.3.6"
 	},
 	"publishConfig": {
 		"tag": "rewrite"

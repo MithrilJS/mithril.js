@@ -1,7 +1,19 @@
 # parseQueryString(string)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
+
+---
+
+### Description
+
+Turns a string of the form `?a=1&b=2` to an object
+
+```javascript
+var object = m.parseQueryString("a=1&b=2")
+// {a: "1", b: "2"}
+```
 
 ---
 

@@ -1,10 +1,22 @@
 # render(element, vnodes)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Why Virtual DOM](#why-virtual-dom)
 - [Differences from other API methods](#differences-from-other-api-methods)
 - [Standalone usage](#standalone-usage)
+
+---
+
+### Description
+
+Renders a template to the DOM
+
+```javascript
+m.render(document.body, "hello")
+// <body>hello</body>
+```
 
 ---
 

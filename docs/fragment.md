@@ -1,7 +1,14 @@
 # fragment(attrs, children)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
+
+---
+
+### Description
+
+Allows attaching lifecycle methods to a fragment [vnode](vnodes.md)
 
 ---
 

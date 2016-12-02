@@ -1,5 +1,6 @@
 # route(root, defaultRoute, routes)
 
+- [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
 		- [route.set](#routeset)
@@ -18,6 +19,24 @@
 - [Wrapping a layout component](#wrapping-a-layout-component)
 - [Authentication](#authentication)
 - [Code splitting](#code-splitting)
+
+---
+
+### Description
+
+Navigate between "pages" within an application
+
+```javascript
+var Home = {
+	view: function() {
+		return "Welcome"
+	}
+}
+
+m.route(document.body, "/home", {
+	"/home": Home, // defines `http://localhost/#!/home`
+})
+```
 
 ---
 

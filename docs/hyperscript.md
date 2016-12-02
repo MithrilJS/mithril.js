@@ -1,5 +1,6 @@
 # m(selector, attributes, children)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
@@ -14,6 +15,24 @@
 - [SVG and MathML](#svg-and-mathml)
 - [Making templates dynamic](#making-templates-dynamic)
 - [Avoid anti-patterns](#avoid-anti-patterns)
+
+---
+
+### Description
+
+Represents an HTML element in a Mithril view
+
+```javascript
+m("div", {class: "foo"}, "hello")
+// represents <div class="foo">hello</div>
+```
+
+You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E) via a Babel plugin.
+
+```markup
+/** jsx m */
+<div class="foo">hello</div>
+```
 
 ---
 

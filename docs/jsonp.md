@@ -1,8 +1,26 @@
 # jsonp(options)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
+
+---
+
+### Description
+
+Makes JSON-P requests. Typically, it's useful to interact with servers that allow JSON-P but that don't have CORS enabled.
+
+```javascript
+m.jsonp({
+	url: "/api/v1/users/:id",
+	data: {id: 1},
+	callbackKey: "callback",
+})
+.then(function(result) {
+	console.log(result)
+})
+```
 
 ---
 

@@ -1,5 +1,6 @@
 # Promise(executor)
 
+- [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
 		- [Promise.resolve](#promiseresolve)
@@ -14,7 +15,16 @@
 - [Promise absorption](#promise-absorption)
 - [Error handling](#error-handling)
 - [Shorthands](#shorthands)
-- [Waiting for multiple promises](#waiting-for-multiple-promises)
+- [Multiple promises](#multiple-promises)
+- [Why not callbacks](#why-not-callbacks)
+
+---
+
+### Description
+
+A [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
+
+A Promise is a mechanism for working with asynchronous computations.
 
 ---
 
@@ -262,7 +272,7 @@ promise
 
 ---
 
-### Waiting for multiple promises
+### Multiple promises
 
 In some occasions, you may need to make HTTP requests in parallel, and run code after all requests complete. This can be accomplished by `Promise.all`
 
@@ -287,3 +297,13 @@ Promise.all([
 In the example above, there are two user searches happening in parallel. Once they both complete, we take the names of all the users and alert them.
 
 This example also illustrates another benefit of smaller functions: we reused the `getUserNames` function we had created above.
+
+---
+
+### Why not callbacks
+
+Callbacks are another mechanism for working with asynchrounous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an `onscroll` event handler).
+
+However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).
+
+In addition, promises can considerably reduce boilerplate related to error handling.

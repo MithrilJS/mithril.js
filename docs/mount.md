@@ -1,9 +1,31 @@
 # mount(root, component)
 
+- [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Performance considerations](#performance-considerations)
 - [Differences from m.render](#differences-from-m-render)
+
+---
+
+### Description
+
+Activates a component, enabling it to autoredraw on user events
+
+```javascript
+var state = {
+	count: 0,
+	inc: function() {state.count++}
+}
+
+var Counter = {
+	view: function() {
+		return m("div", {onclick: state.inc}, state.count)
+	}
+}
+
+m.mount(document.body, Counter)
+```
 
 ---
 

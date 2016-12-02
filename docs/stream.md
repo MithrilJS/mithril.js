@@ -1,5 +1,6 @@
 # stream()
 
+- [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
 		- [stream.combine](#streamcombine)
@@ -22,6 +23,16 @@
 - [Serializing streams](#serializing-streams)
 - [Streams do not trigger rendering](#streams-do-not-trigger-rendering)
 - [What is Fantasy Land](#what-is-fantasy-land)
+
+---
+
+### Description
+
+A Stream is a reactive data structure, similar to cells in spreadsheet applications.
+
+For example, in a spreadsheet, if `A1 = B1 + C1`, then changing the value of `B1` or `C1` automatically changes the value of `A1`.
+
+Similarly, you can make a stream depend on other streams so that changing the value of one automatically updates the other. This is useful when you have very expensive computations and want to only run them when necessary, as opposed to, say, on every redraw.
 
 ---
 
