@@ -1117,7 +1117,8 @@ m.withAttr = function(attrName, callback1, context) {
 		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-m.render = redrawService.render
+var _27 = coreRenderer(window)
+m.render = _27.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
