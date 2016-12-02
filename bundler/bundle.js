@@ -15,6 +15,7 @@ function parse(file) {
 	try {return JSON.parse(json)} catch (e) {throw new Error("invalid JSON: " + json)}
 }
 
+var error
 function run(input, output) {
 	try {
 		var modules = {}
@@ -31,8 +32,9 @@ function run(input, output) {
 				def = def || "", variable = variable || "", eq = eq || "", rest = rest || ""
 				if (def[0] === ",") def = "\nvar ", pre = "\n"
 				var dependency = resolve(filepath, filename)
-				var code = process(dependency, pre + (modules[dependency] == null ? exportCode(filename, dependency, def, variable, eq, rest, uuid) : def + variable + eq + modules[dependency]))
-				modules[dependency] = rest ? "_" + uuid : variable
+				var localUUID = uuid // global uuid can update from nested `process` call, ensure same id is used on declaration and consumption
+				var code = process(dependency, pre + (modules[dependency] == null ? exportCode(filename, dependency, def, variable, eq, rest, localUUID) : def + variable + eq + modules[dependency]))
+				modules[dependency] = rest ? "_" + localUUID : variable
 				uuid++
 				return code + rest
 			})
@@ -56,8 +58,11 @@ function run(input, output) {
 			var code = read(filepath)
 			// if there's a syntax error, report w/ proper stack trace
 			try {new Function(code)} catch (e) {
-				proc.exec("node " + filename, function(error) {
-					if (error !== null) console.log("\x1b[31m" + error.message)
+				proc.exec("node " + filepath, function(e) {
+					if (e !== null && e.message !== error) {
+						error = e.message
+						console.log("\x1b[31m" + e.message + "\x1b[0m")
+					}
 				})
 			}
 			
@@ -111,7 +116,11 @@ function run(input, output) {
 		
 		code = "new function() {\n" + code + "\n}"
 		
-		if (!isFile(output) || code !== read(output)) fs.writeFileSync(output, code, "utf8")
+		if (!isFile(output) || code !== read(output)) {
+			//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
+			error = null
+			fs.writeFileSync(output, code, "utf8")
+		}
 	}
 	catch (e) {
 		console.error(e.message)
@@ -121,7 +130,7 @@ function run(input, output) {
 module.exports = function(input, output, options) {
 	run(input, output)
 	if (options && options.watch) {
-		fs.watch(process.cwd(), {recursive: true}, function(file) {
+		fs.watch(process.cwd(), {recursive: true}, function(file, type) {
 			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run(input, output)
 		})
 	}

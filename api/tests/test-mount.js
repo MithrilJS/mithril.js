@@ -5,20 +5,20 @@ var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
-var apiPubSub = require("../../api/pubsub")
+var apiRedraw = require("../../api/redraw")
 var apiMounter = require("../../api/mount")
 
 o.spec("mount", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, redraw, mount, render
+	var $window, root, redrawService, mount, render
 
 	o.beforeEach(function() {
 		$window = domMock()
 
 		root = $window.document.body
 
-		redraw = apiPubSub()
-		mount = apiMounter(coreRenderer($window), redraw)
+		redrawService = apiRedraw($window)
+		mount = apiMounter(redrawService)
 		render = coreRenderer($window).render
 	})
 
@@ -42,18 +42,16 @@ o.spec("mount", function() {
 		o(root.firstChild.nodeName).equals("DIV")
 	})
 
-	o("mounting null deletes `redraw` from `root`", function() {
+	o("mounting null unmounts", function() {
 		mount(root, {
 			view : function() {
 				return m("div")
 			}
 		})
 
-		o(typeof root.redraw).equals('function')
-
 		mount(root, null)
 
-		o(typeof root.redraw).equals('undefined')
+		o(root.childNodes.length).equals(0)
 	})
 
 	o("redraws on events", function(done) {
@@ -206,7 +204,7 @@ o.spec("mount", function() {
 		o(oninit.callCount).equals(1)
 		o(onupdate.callCount).equals(0)
 
-		redraw.publish()
+		redrawService.redraw()
 
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {

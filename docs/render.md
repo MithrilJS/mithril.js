@@ -1,6 +1,6 @@
 # render(element, vnodes)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Why Virtual DOM](#why-virtual-dom)
 - [Differences from other API methods](#differences-from-other-api-methods)
@@ -8,7 +8,7 @@
 
 ---
 
-### API
+### Signature
 
 `m.render(element, vnodes)`
 
@@ -51,6 +51,8 @@ Another difference is that `m.render` method expects a [vnode](vnodes.md) (or a 
 ---
 
 ### Standalone usage
+
+`var render = require("mithril/render")`
 
 The `m.render` module is similar in scope to view libraries like Knockout, React and Vue. It is approximately 500 lines of code (3kb min+gzip) and implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril and can be used as a standalone library.
 

@@ -1,14 +1,14 @@
 # route(root, defaultRoute, routes)
 
-- [API](#api)
-- [Static members](#static-members)
-	- [route.set](#routeset)
-	- [route.get](#routeget)
-	- [route.prefix](#routeprefix)
-	- [route.link](#routelink)
-- [RouteResolver](#routeresolver)
-	- [routeResolver.onmatch](#routeresolveronmatch)
-	- [routeResolver.render](#routeresolverrender)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [route.set](#routeset)
+		- [route.get](#routeget)
+		- [route.prefix](#routeprefix)
+		- [route.link](#routelink)
+	- [RouteResolver](#routeresolver)
+		- [routeResolver.onmatch](#routeresolveronmatch)
+		- [routeResolver.render](#routeresolverrender)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
@@ -21,7 +21,7 @@
 
 ---
 
-### API
+### Signature
 
 `m.route(root, defaultRoute, routes)`
 

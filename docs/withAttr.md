@@ -1,13 +1,13 @@
 # withAttr(attrName, callback)
 
-- [API](#api)
+- [Signature](#signature)
 - [How to use](#how-to-use)
 - [Predictable event target](#predictable-event-target)
 - [Attributes and properties](#attributes-and-properties)
 
 ---
 
-### API
+### Signature
 
 Creates an event handler. The event handler takes the value of a DOM element's property and calls a function with it as the argument.
 

@@ -1,13 +1,13 @@
-# fragment(html)
+# fragment(attrs, children)
 
-- [API](#api)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 
 ---
 
-### API
+### Signature
 
-Generates a trusted HTML [vnode](vnodes.md)
+Generates a fragment [vnode](vnodes.md)
 
 `vnode = m.fragment(attrs, children)`
 

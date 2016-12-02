@@ -7,8 +7,8 @@ var redrawService = require("./redraw")
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")
-m.render = require("./render").render
-m.redraw = redrawService.publish
+m.render = redrawService.render
+m.redraw = redrawService.redraw
 m.request = function(){
   var request = requestService.request.apply(this, arguments)
 
