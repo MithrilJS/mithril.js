@@ -6,10 +6,13 @@ var Request = require("../../request/request")
 var Promise = require("../../promise/promise")
 
 o.spec("xhr", function() {
-	var mock, xhr
+	var mock, xhr, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
-		xhr = new Request(mock, Promise).request
+		var requestService = Request(mock, Promise)
+		xhr = requestService.request
+		complete = o.spy()
+		requestService.setCompletionCallback(complete)
 	})
 
 	o.spec("success", function() {
@@ -294,6 +297,37 @@ o.spec("xhr", function() {
 				o(typeof xhr.open).equals("function")
 				o(typeof xhr.send).equals("function")
 			}
+		})
+		o("requests don't block each other", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			xhr("/item").then(function() {
+				return xhr("/item")
+			})
+			xhr("/item").then(function() {
+				return xhr("/item")
+			})
+			setTimeout(function() {
+				o(complete.callCount).equals(4)
+				done()
+			}, 20)
+		})
+		o("requests trigger finally once with a chained then", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			var promise = xhr("/item")
+			promise.then(function() {}).then(function() {})
+			promise.then(function() {}).then(function() {})
+			setTimeout(function() {
+				o(complete.callCount).equals(1)
+				done()
+			}, 20)
 		})
 	})
 	o.spec("failure", function() {
