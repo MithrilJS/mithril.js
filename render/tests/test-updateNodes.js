@@ -879,4 +879,17 @@ o.spec("updateNodes", function() {
 
 		o(onupdate.callCount).equals(0)
 	})
+	o("null stays in place", function() {
+		var vnodes = [{tag: "div"}, {tag: "a"}]
+		var temp = [null, {tag: "a"}]
+		var updated = [{tag: "div"}, {tag: "a"}]
+		
+		render(root, vnodes)
+		var before = vnodes[1].dom
+		render(root, temp)
+		render(root, updated)
+		var after = updated[1].dom
+		
+		o(before).equals(after)
+	})
 })
