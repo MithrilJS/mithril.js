@@ -11,6 +11,7 @@
 	- [Keys](keys.md)
 - Social
 	- [Community chat](https://gitter.im/lhorie/mithril.js)
+	- [Contributing](contributing.md)
 	- [Credits](credits.md)
 - Misc
 	- [Change log/Migration](change-log.md)
