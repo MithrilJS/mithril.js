@@ -202,31 +202,34 @@ var buildQueryString = function(object) {
 }
 var _8 = function($window, Promise) {
 	var callbackCount = 0
-	var count = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
-	function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
-	function finalize(promise0) {
-		var then0 = promise0.then
-		promise0.then = function() {
-			count++
-			var next = then0.apply(promise0, arguments)
-			next.then(complete, function(e) {
-				complete()
-				throw e
-			})
-			return finalize(next)
+	function finalizer() {
+		var count = 0
+		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
+		return function finalize(promise0) {
+			var then0 = promise0.then, catcher = promise0.catch
+			promise0.then = function() {
+				count++
+				var next = then0.apply(promise0, arguments)
+				next.then(complete, function(e) {
+					complete()
+					throw e
+				})
+				return finalize(next)
+			}
+			return promise0
 		}
-		return promise0
 	}
 	
 	function request(args, extra) {
-		return finalize(new Promise(function(resolve, reject) {
-			if (typeof args === "string") {
-				var url = args
-				args = extra || {}
-				if (args.url == null) args.url = url
-			}
+		var finalize = finalizer()
+		if (typeof args === "string") {
+			var url = args
+			args = extra || {}
+			if (args.url == null) args.url = url
+		}
+		var promise0 = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
 			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
@@ -266,10 +269,12 @@ var _8 = function($window, Promise) {
 			}
 			if (useBody && (args.data != null)) xhr.send(args.data)
 			else xhr.send()
-		}))
+		})
+		return args.redraw ===  false ? promise0 : finalize(promise0)
 	}
 	function jsonp(args) {
-		return finalize(new Promise(function(resolve, reject) {
+		var finalize = finalizer()
+		var promise0 = new Promise(function(resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
 			$window[callbackName] = function(data) {
@@ -287,7 +292,8 @@ var _8 = function($window, Promise) {
 			args.data[args.callbackKey || "callback"] = callbackName
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
-		}))
+		})
+		return args.redraw === false? promise0 : finalize(promise0)
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
@@ -441,9 +447,16 @@ var coreRenderer = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
+			var isUnkeyed = false
+			for (var i = 0; i < vnodes.length; i++) {
+				if (vnodes[i] != null) {
+					isUnkeyed = vnodes[i].key == null
+					break
+				}
+			}
+			if (old.length === vnodes.length && isUnkeyed) {
 				for (var i = 0; i < old.length; i++) {
-					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
+					if (old[i] === vnodes[i]) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
@@ -1124,7 +1137,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.0-rc.5"
+m.version = "1.0.0-rc.6"
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }
