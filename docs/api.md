@@ -124,8 +124,8 @@ var querystring = m.buildQueryString({a: "1", b: "2"})
 #### m.withAttr(attrName, callback) - [docs](withAttr.md)
 
 ```javascript
-var state: {
-	value = ""
+var state = {
+	value: "",
 	setValue: function(v) {value = v}
 }
 

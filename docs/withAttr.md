@@ -13,8 +13,8 @@
 Returns an event handler that runs `callback` with the value of the specified DOM attribute
 
 ```javascript
-var state: {
-	value = ""
+var state = {
+	value: "",
 	setValue: function(v) {value = v}
 }
 

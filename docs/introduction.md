@@ -23,10 +23,10 @@ The easiest way to try out Mithril is to include it from a CDN, and follow this 
 Let's create an HTML file to follow along: 
 
 ```markup
-<div id="root"></div>
+<body></body>
 <script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
 <script>
-var root = document.getElementById("root")
+var root = document.body
 
 // your code goes here!
 </script>
@@ -39,6 +39,8 @@ var root = document.getElementById("root")
 Let's start as small as well can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
 
 ```javascript
+var root = document.body
+
 m.render(root, "Hello world")
 ```
 
