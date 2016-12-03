@@ -98,7 +98,7 @@ module.exports = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route], params, path, route, !!isRouteChange)
+						resolve(routes[route], params, path, route, Boolean(isRouteChange))
 					})
 					return
 				}
