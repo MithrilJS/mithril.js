@@ -3,6 +3,7 @@ var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
+try {fs.mkdirSync("docs/archive/")} catch (e) {}
 try {fs.mkdirSync("docs/archive/" + version)} catch (e) {}
 try {fs.mkdirSync("docs/archive/" + version + "/lib")} catch (e) {}
 try {fs.mkdirSync("docs/archive/" + version + "/lib/prism")} catch (e) {}
