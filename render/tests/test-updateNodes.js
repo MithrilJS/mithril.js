@@ -880,9 +880,12 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 	o("null stays in place", function() {
-		var vnodes = [{tag: "div"}, {tag: "a"}]
-		var temp = [null, {tag: "a"}]
-		var updated = [{tag: "div"}, {tag: "a"}]
+		var create = o.spy()
+		var update = o.spy()
+		var remove = o.spy()
+		var vnodes = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
+		var temp = [null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
+		var updated = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		
 		render(root, vnodes)
 		var before = vnodes[1].dom
@@ -891,5 +894,27 @@ o.spec("updateNodes", function() {
 		var after = updated[1].dom
 		
 		o(before).equals(after)
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(2)
+		o(remove.callCount).equals(0)
+	})
+	o("null stays in place if not first", function() {
+		var create = o.spy()
+		var update = o.spy()
+		var remove = o.spy()
+		var vnodes = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
+		var temp = [{tag: "b"}, null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
+		var updated = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
+		
+		render(root, vnodes)
+		var before = vnodes[2].dom
+		render(root, temp)
+		render(root, updated)
+		var after = updated[2].dom
+		
+		o(before).equals(after)
+		o(create.callCount).equals(1)
+		o(update.callCount).equals(2)
+		o(remove.callCount).equals(0)
 	})
 })
