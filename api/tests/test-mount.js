@@ -159,7 +159,7 @@ o.spec("mount", function() {
 
 	o("event handlers can skip redraw", function(done) {
 		var onupdate = o.spy()
-		var oninit   = o.spy()
+		var oninit = o.spy()
 		var e = $window.document.createEvent("MouseEvents")
 
 		e.initEvent("click", true, true)
@@ -195,8 +195,8 @@ o.spec("mount", function() {
 		mount(root, {
 			view : function() {
 				return m("div", {
-					oninit   : oninit,
-					onupdate : onupdate
+					oninit: oninit,
+					onupdate: onupdate
 				})
 			}
 		})
@@ -212,5 +212,25 @@ o.spec("mount", function() {
 
 			done()
 		}, FRAME_BUDGET)
+	})
+	
+	o("throttles", function(done, timeout) {
+		timeout(200)
+
+		var i = 0
+		mount(root, {view: function() {i++}})
+		var before = i
+
+		redrawService.redraw()
+		redrawService.redraw()
+
+		var after = i
+
+		setTimeout(function(){
+			o(before).equals(1)
+			o(after).equals(1)
+			o(i).equals(2)
+			done()
+		},40)
 	})
 })
