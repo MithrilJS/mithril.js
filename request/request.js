@@ -25,14 +25,18 @@ module.exports = function($window, Promise) {
 			return promise
 		}
 	}
-	
-	function request(args, extra) {
-		var finalize = finalizer()
+	function normalize(args, extra) {
 		if (typeof args === "string") {
 			var url = args
 			args = extra || {}
 			if (args.url == null) args.url = url
 		}
+		return args
+	}
+	
+	function request(args, extra) {
+		var finalize = finalizer()
+		args = normalize(args, extra)
 
 		var promise = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
@@ -83,11 +87,13 @@ module.exports = function($window, Promise) {
 			if (useBody && (args.data != null)) xhr.send(args.data)
 			else xhr.send()
 		})
-		return args.redraw ===  false ? promise : finalize(promise)
+		return args.background ===  true ? promise : finalize(promise)
 	}
 
-	function jsonp(args) {
+	function jsonp(args, extra) {
 		var finalize = finalizer()
+		args = normalize(args, extra)
+		
 		var promise = new Promise(function(resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
@@ -107,7 +113,7 @@ module.exports = function($window, Promise) {
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
 		})
-		return args.redraw === false? promise : finalize(promise)
+		return args.background === true? promise : finalize(promise)
 	}
 
 	function interpolate(url, data) {

@@ -329,6 +329,19 @@ o.spec("xhr", function() {
 				done()
 			}, 20)
 		})
+		o("requests does not trigger finally when background: true", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			var promise = xhr("/item", {background: true}).then(function() {})
+			
+			setTimeout(function() {
+				o(complete.callCount).equals(0)
+				done()
+			}, 20)
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
