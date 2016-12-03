@@ -208,7 +208,7 @@ var _8 = function($window, Promise) {
 		var count = 0
 		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
 		return function finalize(promise0) {
-			var then0 = promise0.then, catcher = promise0.catch
+			var then0 = promise0.then
 			promise0.then = function() {
 				count++
 				var next = then0.apply(promise0, arguments)
@@ -274,7 +274,7 @@ var _8 = function($window, Promise) {
 			if (useBody && (args.data != null)) xhr.send(args.data)
 			else xhr.send()
 		})
-		return args.background ===  true ? promise0 : finalize(promise0)
+		return args.background === true ? promise0 : finalize(promise0)
 	}
 	function jsonp(args, extra) {
 		var finalize = finalizer()
@@ -1067,7 +1067,7 @@ var coreRouter = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route0], params, path, route0, !!isRouteChange)
+						resolve(routes[route0], params, path, route0, Boolean(isRouteChange))
 					})
 					return
 				}
