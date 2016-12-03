@@ -221,14 +221,18 @@ var _8 = function($window, Promise) {
 			return promise0
 		}
 	}
-	
-	function request(args, extra) {
-		var finalize = finalizer()
+	function normalize(args, extra) {
 		if (typeof args === "string") {
 			var url = args
 			args = extra || {}
 			if (args.url == null) args.url = url
 		}
+		return args
+	}
+	
+	function request(args, extra) {
+		var finalize = finalizer()
+		args = normalize(args, extra)
 		var promise0 = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
@@ -270,10 +274,12 @@ var _8 = function($window, Promise) {
 			if (useBody && (args.data != null)) xhr.send(args.data)
 			else xhr.send()
 		})
-		return args.redraw ===  false ? promise0 : finalize(promise0)
+		return args.background ===  true ? promise0 : finalize(promise0)
 	}
-	function jsonp(args) {
+	function jsonp(args, extra) {
 		var finalize = finalizer()
+		args = normalize(args, extra)
+		
 		var promise0 = new Promise(function(resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
@@ -293,7 +299,7 @@ var _8 = function($window, Promise) {
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
 		})
-		return args.redraw === false? promise0 : finalize(promise0)
+		return args.background === true? promise0 : finalize(promise0)
 	}
 	function interpolate(url, data) {
 		if (data == null) return url
@@ -983,7 +989,7 @@ var coreRouter = function($window) {
 	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
 	var prefix1 = "#!"
 	function setPrefix(value) {prefix1 = value}
-	function normalize(fragment0) {
+	function normalize1(fragment0) {
 		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
 		return data
@@ -1016,9 +1022,9 @@ var coreRouter = function($window) {
 	function getPath() {
 		var type2 = prefix1.charAt(0)
 		switch (type2) {
-			case "#": return normalize("hash").slice(prefix1.length)
-			case "?": return normalize("search").slice(prefix1.length) + normalize("hash")
-			default: return normalize("pathname").slice(prefix1.length) + normalize("search") + normalize("hash")
+			case "#": return normalize1("hash").slice(prefix1.length)
+			case "?": return normalize1("search").slice(prefix1.length) + normalize1("hash")
+			default: return normalize1("pathname").slice(prefix1.length) + normalize1("search") + normalize1("hash")
 		}
 	}
 	function setPath(path, data, options) {
