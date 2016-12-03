@@ -1,6 +1,14 @@
-# Migrating from `v0.2.x` to `v1.x`
+# Change log
+
+- [Migrating from v0.2.x](#migrating-from-v02x)
+
+---
+
+### Migrating from `v0.2.x`
 
 `v1.x` is largely API-compatible with `v0.2.x`, but there are some breaking changes.
+
+If you are migrating, consider using the [mithril-codemods](https://www.npmjs.com/package/mithril-codemods) tool to help automate the most straightforward migrations.
 
 - [`m.prop` removed](#mprop-removed)
 - [`m.component` removed](#mcomponent-removed)

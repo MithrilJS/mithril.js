@@ -9,8 +9,8 @@
 	- [Components](components.md)
 	- [Lifecycle methods](lifecycle-methods.md)
 	- [Keys](keys.md)
-- Migration
-	- [Migrating from 0.2.x](migration.md)
-- Meta
-	- [Chat room](https://gitter.im/lhorie/mithril.js)
+- Social
+	- [Community chat](https://gitter.im/lhorie/mithril.js)
 	- [Credits](credits.md)
+- Misc
+	- [Change log/Migration](change-log.md)
