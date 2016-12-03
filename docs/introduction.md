@@ -86,7 +86,15 @@ m("main", [
 ])
 ```
 
-Note: If you would rather use `<html>` syntax, [you can do so by using Babel](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E).
+Note: If you prefer `<html>` syntax, [it's possible via Babel](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E).
+
+```markup
+// HTML syntax via Babel's JSX plugin
+<main>
+	<h1 class="title">My first app</h1>
+	<button>A button</button>
+</main>
+```
 
 ---
 
