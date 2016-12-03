@@ -165,8 +165,8 @@ o.spec("route", function() {
 
 				o("event handlers can skip redraw", function(done) {
 					var onupdate = o.spy()
-					var oninit   = o.spy()
-					var onclick  = o.spy()
+					var oninit = o.spy()
+					var onclick = o.spy()
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
