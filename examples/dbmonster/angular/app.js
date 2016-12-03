@@ -32,9 +32,10 @@ var AppComponent = ng.core.Component({selector: "my-app"})
 		this.update()
 	},
 	update: function() {
+		requestAnimationFrame(function() {self.update()})
+		
 		var self = this
 		self.databases = ENV.generateData().toArray()
-		setTimeout(function() {self.update()}, ENV.timeout)
 
 		if (renderStage === 0) {
 			renderStage = 1
