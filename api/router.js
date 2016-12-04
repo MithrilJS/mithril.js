@@ -27,7 +27,7 @@ module.exports = function($window, redrawService) {
 							render(component, resolved, params, path)
 						}
 						component.onmatch(function(resolved) {
-							if (current.path !== path && current.resolve != null) current.resolve(resolved)
+							if (current.resolve != null) current.resolve(resolved)
 						}, params, path)
 					}
 				}
