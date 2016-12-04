@@ -238,25 +238,28 @@ o.spec("route", function() {
 						}
 					}
 
+					var resolver = {
+						onmatch: function(resolve, args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							resolve(Component)
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id" : {
-							onmatch: function(resolve, args, requestedPath) {
-								matchCount++
-
-								o(args.id).equals("abc")
-								o(requestedPath).equals("/abc")
-
-								resolve(Component)
-							},
-							render: function(vnode) {
-								renderCount++
-
-								o(vnode.attrs.id).equals("abc")
-
-								return vnode
-							},
-						},
+						"/:id" : resolver
 					})
 
 					o(matchCount).equals(1)
