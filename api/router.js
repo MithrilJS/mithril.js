@@ -17,11 +17,11 @@ module.exports = function($window, redrawService) {
 			current.resolve = null
 			redrawService.render(root, current.render(Vnode(component, undefined, params)))
 		}
-		var run = routeService.defineRoutes(routes, function(component, params, path, route, isRouteChange) {
+		var run = routeService.defineRoutes(routes, function(component, params, path, route, isAction) {
 			if (component.view) render({}, component, params, path)
 			else {
 				if (component.onmatch) {
-					if (isRouteChange === false && current.path === path || current.resolve != null) render(current, current.component, params)
+					if (isAction === false && current.path === path || current.resolve != null) render(current, current.component, params)
 					else {
 						current.resolve = function(resolved) {
 							render(component, resolved, params, path)

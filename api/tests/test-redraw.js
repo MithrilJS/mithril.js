@@ -17,11 +17,13 @@ o.spec("redrawService", function() {
 		redrawService.redraw()
 	})
 
-	o("should run a single renderer entry", function() {
+	o("should run a single renderer entry", function(done) {
 		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
 
+		o(spy.callCount).equals(0)
+		
 		redrawService.redraw()
 
 		o(spy.callCount).equals(1)
@@ -30,10 +32,15 @@ o.spec("redrawService", function() {
 		redrawService.redraw()
 		redrawService.redraw()
 
-		o(spy.callCount).equals(4)
+		o(spy.callCount).equals(1)
+		setTimeout(function() {
+			o(spy.callCount).equals(2)
+			
+			done()
+		}, 20)
 	})
 
-	o("should run all renderer entries", function() {
+	o("should run all renderer entries", function(done) {
 		var el1 = $document.createElement("div")
 		var el2 = $document.createElement("div")
 		var el3 = $document.createElement("div")
@@ -53,9 +60,17 @@ o.spec("redrawService", function() {
 
 		redrawService.redraw()
 
-		o(spy1.callCount).equals(2)
-		o(spy2.callCount).equals(2)
-		o(spy3.callCount).equals(2)
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(1)
+		o(spy3.callCount).equals(1)
+
+		setTimeout(function() {
+			o(spy1.callCount).equals(2)
+			o(spy2.callCount).equals(2)
+			o(spy3.callCount).equals(2)
+			
+			done()
+		}, 20)
 	})
 
 	o("should stop running after unsubscribe", function() {

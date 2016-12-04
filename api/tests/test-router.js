@@ -608,6 +608,30 @@ o.spec("route", function() {
 						done()
 					}, 30)
 				})
+
+				o("throttles", function(done, timeout) {
+					timeout(200)
+
+					var i = 0
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/": {view: function(v) {i++}}
+					})
+					var before = i
+
+					redrawService.redraw()
+					redrawService.redraw()
+					redrawService.redraw()
+					redrawService.redraw()
+					var after = i
+
+					setTimeout(function(){
+						o(before).equals(1) // routes synchronously
+						o(after).equals(2) // redraws synchronously
+						o(i).equals(3) // throttles rest
+						done()
+					},40)
+				})
 			})
 		})
 	})

@@ -79,11 +79,7 @@ module.exports = function($window) {
 	}
 
 	function defineRoutes(routes, resolve, reject) {
-		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
-		resolveRoute(true)
-		
-		function resolveRoute(isRouteChange) {
+		function resolveRoute(isAction) {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
@@ -98,7 +94,7 @@ module.exports = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route], params, path, route, Boolean(isRouteChange))
+						resolve(routes[route], params, path, route, Boolean(isAction))
 					})
 					return
 				}
@@ -106,7 +102,12 @@ module.exports = function($window) {
 
 			reject(path, params)
 		}
-		return function() {resolveRoute(false)}
+		
+		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
+		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
+		resolveRoute(true)
+		
+		return resolveRoute
 	}
 
 	function link(vnode) {

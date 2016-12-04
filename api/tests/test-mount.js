@@ -223,12 +223,14 @@ o.spec("mount", function() {
 
 		redrawService.redraw()
 		redrawService.redraw()
+		redrawService.redraw()
+		redrawService.redraw()
 
 		var after = i
 
 		setTimeout(function(){
-			o(before).equals(1)
-			o(after).equals(1)
+			o(before).equals(1) // mounts synchronously
+			o(after).equals(1) // throttles rest
 			o(i).equals(2)
 			done()
 		},40)
