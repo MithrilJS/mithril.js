@@ -1,0 +1,17 @@
+- Tutorials
+	- [Installation](installation.md)
+	- [Introduction](introduction.md)
+	- [Tutorial](tutorial.md)
+	- [Testing](testing.md)
+	- [Examples](examples.md)
+- Key concepts
+	- [Vnodes](vnodes.md)
+	- [Components](components.md)
+	- [Lifecycle methods](lifecycle-methods.md)
+	- [Keys](keys.md)
+- Social
+	- [Community chat](https://gitter.im/lhorie/mithril.js)
+	- [Contributing](contributing.md)
+	- [Credits](credits.md)
+- Misc
+	- [Change log/Migration](change-log.md)

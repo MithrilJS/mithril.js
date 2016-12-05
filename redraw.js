@@ -1,1 +1,1 @@
-module.exports = require("./api/pubsub")()
+module.exports = require("./api/redraw")(window)

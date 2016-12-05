@@ -1,13 +1,20 @@
-# fragment(html)
+# fragment(attrs, children)
 
-- [API](#api)
+- [Description](#description)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 
 ---
 
-### API
+### Description
 
-Generates a trusted HTML [vnode](vnodes.md)
+Allows attaching lifecycle methods to a fragment [vnode](vnodes.md)
+
+---
+
+### Signature
+
+Generates a fragment [vnode](vnodes.md)
 
 `vnode = m.fragment(attrs, children)`
 

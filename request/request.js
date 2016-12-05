@@ -5,33 +5,40 @@ var buildQueryString = require("../querystring/build")
 module.exports = function($window, Promise) {
 	var callbackCount = 0
 
-	var count = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
-	function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
+	function finalizer() {
+		var count = 0
+		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
 
-	function finalize(promise) {
-		var then = promise.then
-		promise.then = function() {
-			count++
-			var next = then.apply(promise, arguments)
-			next.then(complete, function(e) {
-				complete()
-				throw e
-			})
-			return finalize(next)
+		return function finalize(promise) {
+			var then = promise.then
+			promise.then = function() {
+				count++
+				var next = then.apply(promise, arguments)
+				next.then(complete, function(e) {
+					complete()
+					throw e
+				})
+				return finalize(next)
+			}
+			return promise
 		}
-		return promise
+	}
+	function normalize(args, extra) {
+		if (typeof args === "string") {
+			var url = args
+			args = extra || {}
+			if (args.url == null) args.url = url
+		}
+		return args
 	}
 
 	function request(args, extra) {
-		return finalize(new Promise(function(resolve, reject) {
-			if (typeof args === "string") {
-				var url = args
-				args = extra || {}
-				if (args.url == null) args.url = url
-			}
+		var finalize = finalizer()
+		args = normalize(args, extra)
 
+		var promise = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
 
@@ -79,11 +86,15 @@ module.exports = function($window, Promise) {
 
 			if (useBody && (args.data != null)) xhr.send(args.data)
 			else xhr.send()
-		}))
+		})
+		return args.background === true ? promise : finalize(promise)
 	}
 
-	function jsonp(args) {
-		return finalize(new Promise(function(resolve, reject) {
+	function jsonp(args, extra) {
+		var finalize = finalizer()
+		args = normalize(args, extra)
+		
+		var promise = new Promise(function(resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
 			$window[callbackName] = function(data) {
@@ -101,7 +112,8 @@ module.exports = function($window, Promise) {
 			args.data[args.callbackKey || "callback"] = callbackName
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
-		}))
+		})
+		return args.background === true? promise : finalize(promise)
 	}
 
 	function interpolate(url, data) {

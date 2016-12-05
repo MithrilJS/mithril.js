@@ -1,6 +1,6 @@
 # Testing
 
-Mithril comes with a testing framework called [ospec](../ospec/README.md). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
+Mithril comes with a testing framework called [ospec](https://github.com/lhorie/mithril.js/tree/rewrite/ospec). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
 
 The easist way to setup the test runner is to create an NPM script for it. Open your project's `package.json` file and edit the `test` line under the `scripts` section:
 
@@ -37,6 +37,8 @@ To run the test, use the command `npm test`. Ospec considers any Javascript file
 ```
 npm test
 ```
+
+---
 
 ### Good testing practices
 

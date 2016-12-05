@@ -16,7 +16,7 @@ The first time a virtual DOM tree is rendered, it is used as a blueprint to crea
 
 Typically, Virtual DOM trees are then recreated every render cycle, which normally occurs in response to event handlers or to data changes. Mithril *diffs* a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.
 
-It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundres of thousands of objects in less than a millisecond. On the other hand, modifying the DOM is several orders of magnitude more expensive than creating vnodes.
+It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundreds of thousands of objects in less than a millisecond. On the other hand, modifying the DOM is several orders of magnitude more expensive than creating vnodes.
 
 For that reason, Mithril uses a sophisticated and highly optimized virtual DOM diffing algorithm to minimize the amount of DOM updates. Mithril *also* generates carefully crafted vnode data structures that are compiled by Javascript engines for near-native data structure access performance. In addition, Mithril aggressively optimizes the function that creates vnodes as well.
 

@@ -8,7 +8,7 @@ o.spec("api", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
 	o.beforeEach(function() {
 		var mock = browserMock()
-		if (typeof global !== "undefined") global.window = mock, global.document = mock.document
+		if (typeof global !== "undefined") global.window = mock
 		m = require("../mithril")
 	})
 	

@@ -73,16 +73,12 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate()
+			$window.onpopstate(true)
 		}
 		else $window.location.href = prefix + path
 	}
 
 	function defineRoutes(routes, resolve, reject) {
-		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
-		resolveRoute()
-		
 		function resolveRoute() {
 			var path = getPath()
 			var params = {}
@@ -106,7 +102,10 @@ module.exports = function($window) {
 
 			reject(path, params)
 		}
-		return resolveRoute
+		
+		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
+		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
+		resolveRoute()
 	}
 
 	function link(vnode) {

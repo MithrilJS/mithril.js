@@ -1,14 +1,15 @@
 # route(root, defaultRoute, routes)
 
-- [API](#api)
-- [Static members](#static-members)
-	- [route.set](#routeset)
-	- [route.get](#routeget)
-	- [route.prefix](#routeprefix)
-	- [route.link](#routelink)
-- [RouteResolver](#routeresolver)
-	- [routeResolver.onmatch](#routeresolveronmatch)
-	- [routeResolver.render](#routeresolverrender)
+- [Description](#description)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [route.set](#routeset)
+		- [route.get](#routeget)
+		- [route.prefix](#routeprefix)
+		- [route.link](#routelink)
+	- [RouteResolver](#routeresolver)
+		- [routeResolver.onmatch](#routeresolveronmatch)
+		- [routeResolver.render](#routeresolverrender)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
@@ -21,7 +22,25 @@
 
 ---
 
-### API
+### Description
+
+Navigate between "pages" within an application
+
+```javascript
+var Home = {
+	view: function() {
+		return "Welcome"
+	}
+}
+
+m.route(document.body, "/home", {
+	"/home": Home, // defines `http://localhost/#!/home`
+})
+```
+
+---
+
+### Signature
 
 `m.route(root, defaultRoute, routes)`
 

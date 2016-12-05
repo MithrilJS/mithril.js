@@ -13,6 +13,12 @@ install:
   - npm install
   - npm install @alrra/travis-scripts@^3.0.1
 
+# Lint (but don't fail build) before running tests
+before_script: npm run lint || true
+
+# Run more than just npm test
+script: npm run build && npm test
+
 # After a successful build create bundles & commit back to the repo
 after_success:
   - |
@@ -29,8 +35,7 @@ after_success:
                           --path-encrypted-key "./.deploy.enc"
     
     # Build & commit changes
-    $(npm bin)/commit-changes --commands "npm run build" \
-                              --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
+    $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
                               --branch "$BRANCH"
 
 env:
