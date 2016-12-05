@@ -1,24 +1,34 @@
 # Promise(executor)
 
-- [API](#api)
-- [Static members](#static-members)
-	- [Promise.resolve](#promiseresolve)
-	- [Promise.reject](#promisereject)
-	- [Promise.all](#promiseall)
-	- [Promise.race](#promiserace)
-- [Instance members](#static-members)
-  - [promise.then](#promisethen)
-  - [promise.catch](#promisecatch)
+- [Description](#description)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [Promise.resolve](#promiseresolve)
+		- [Promise.reject](#promisereject)
+		- [Promise.all](#promiseall)
+		- [Promise.race](#promiserace)
+	- [Instance members](#instance-members)
+	  - [promise.then](#promisethen)
+	  - [promise.catch](#promisecatch)
 - [How it works](#how-it-works)
 - [Promise chaining](#promise-chaining)
 - [Promise absorption](#promise-absorption)
 - [Error handling](#error-handling)
 - [Shorthands](#shorthands)
-- [Waiting for multiple promises](#waiting-for-multiple-promises)
+- [Multiple promises](#multiple-promises)
+- [Why not callbacks](#why-not-callbacks)
 
 ---
 
-### API
+### Description
+
+A [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
+
+A Promise is a mechanism for working with asynchronous computations.
+
+---
+
+### Signature
 
 `promise = new Promise(executor)`
 
@@ -146,7 +156,7 @@ promise.then(function(value) {
 })
 ```
 
-Promises are useful for working with [asynchronous](https://en.wikipedia.org/wiki/Asynchrony_(computer_programming)) APIs, such as [`m.request`](request.md)
+Promises are useful for working with asynchronous APIs, such as [`m.request`](request.md)
 
 Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other Javascript code to run in the meantime. When they are done, they call a function with their results.
 
@@ -262,7 +272,7 @@ promise
 
 ---
 
-### Waiting for multiple promises
+### Multiple promises
 
 In some occasions, you may need to make HTTP requests in parallel, and run code after all requests complete. This can be accomplished by `Promise.all`
 
@@ -287,3 +297,13 @@ Promise.all([
 In the example above, there are two user searches happening in parallel. Once they both complete, we take the names of all the users and alert them.
 
 This example also illustrates another benefit of smaller functions: we reused the `getUserNames` function we had created above.
+
+---
+
+### Why not callbacks
+
+Callbacks are another mechanism for working with asynchrounous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an `onscroll` event handler).
+
+However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).
+
+In addition, promises can considerably reduce boilerplate related to error handling.

@@ -86,6 +86,9 @@ function initMocks() {
 		"GET /api/v1/todos": function(request) {
 			return {status: 200, responseText: JSON.stringify([])}
 		},
+		"PUT /api/v1/users/1": function(request) {
+			return {status: 200, responseText: request.query.callback ? request.query.callback + "([])" : "[]"}
+		},
 		"POST /api/v1/upload": function(request) {
 			return {status: 200, responseText: JSON.stringify([])}
 		},
@@ -132,11 +135,11 @@ function traverseDirectory(pathname, callback) {
 
 //run
 traverseDirectory("./docs", function(pathname) {
-	if (pathname.indexOf(".md") > -1 && !pathname.match(/migration|zero|simple|node_modules/)) {
+	if (pathname.indexOf(".md") > -1 && !pathname.match(/change-log|node_modules/)) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
 			else lint(pathname, data)
 		})
 	}
 })
-
+.then(process.exit)

@@ -1,11 +1,23 @@
 # buildQueryString(object)
 
-- [API](#api)
+- [Description](#description)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 
 ---
 
-### API
+### Description
+
+Turns an object into a string of form `a=1&b=2`
+
+```javascript
+var querystring = m.buildQueryString({a: "1", b: "2"})
+// "a=1&b=2"
+```
+
+---
+
+### Signature
 
 `querystring = m.buildQueryString(object)`
 

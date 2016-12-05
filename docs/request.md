@@ -1,6 +1,7 @@
 # request(options)
 
-- [API](#api)
+- [Description](#description)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
 - [Loading icons and error messages](#loading-icons-and-error-messages)
@@ -12,11 +13,29 @@
 - [Non-JSON responses](#non-json-responses)
 - [Retrieving response details](#retrieving-response-details)
 - [Why JSON instead of HTML](#why-json-instead-of-html)
-- [Why XMLHttpRequest instead of fetch](#why-xmlhttprequest-instead-of-fetch)
+- [Why XHR instead of fetch](#why-xhr-instead-of-fetch)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
-### API
+### Description
+
+Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
+
+```javascript
+m.request({
+	method: "PUT",
+	url: "/api/v1/users/:id",
+	data: {id: 1, name: "test"}
+})
+.then(function(result) {
+	console.log(result)
+})
+```
+
+---
+
+### Signature
 
 `promise = m.request([url,] options)`
 
@@ -36,6 +55,7 @@ Argument                  | Type                              | Required | Descr
 `options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
 `options.extract`         | `string = Function(xhr, options)` | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for reading response headers and cookies. Defaults to a function that returns `xhr.responseText`. If defined, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. If a custom `extract` callback is set, `options.deserialize` is ignored and the string returned from the extract callback will not be parsed as JSON.
 `options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
+`options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
 [How to read signatures](signatures.md)
@@ -422,7 +442,7 @@ Data services may be organized in many different ways depending on the nature of
 
 ---
 
-### Why XMLHttpRequest instead of fetch
+### Why XHR instead of fetch
 
 [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) is a newer Web API for fetching resources from servers, similar to `XMLHttpRequest`.
 
@@ -431,11 +451,13 @@ Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
-- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and Safari.
+- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer, Safari and Android (non-Chromium).
 
-Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's `m.request`.
+Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
 
-Despite being much smaller, `m.request` supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md). The `fetch` polyfill does not support any of those.
+Despite being much smaller, Mithril's XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril's autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
+
+In addition, Mithril's XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
 
 The `fetch()` API does have a few technical advantages over `XMLHttpRequest` in a few uncommon cases:
 
@@ -443,3 +465,24 @@ The `fetch()` API does have a few technical advantages over `XMLHttpRequest` in 
 - it integrates to the [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), which provides an extra layer of control over how and when network requests happen. This API also allows access to push notifications and background synchronization features.
 
 In typical scenarios, streaming won't provide noticeable performance benefits because it's generally not advisable to download megabytes of data to begin with. Also, the memory gains from repeatedly reusing small buffers may be offset or nullified if they result in excessive browser repaints. For those reasons, choosing `fetch()` streaming instead of `m.request` is only recommended for extremely resource intensive applications.
+
+---
+
+### Avoid anti-patterns
+
+#### Promises are not the response data
+
+The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if Javascript waited for it, it would freeze the application until the data was available.
+
+```javascript
+// AVOID
+var users = m.request("/api/v1/users")
+console.log("list of users:", users)
+// `users` is NOT a list of users, it's a promise
+
+// PREFER
+m.request("/api/v1/users").then(function(users) {
+	console.log("list of users:", users)
+})
+```
+

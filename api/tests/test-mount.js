@@ -5,20 +5,20 @@ var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
-var apiPubSub = require("../../api/pubsub")
+var apiRedraw = require("../../api/redraw")
 var apiMounter = require("../../api/mount")
 
 o.spec("mount", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, redraw, mount, render
+	var $window, root, redrawService, mount, render
 
 	o.beforeEach(function() {
 		$window = domMock()
 
 		root = $window.document.body
 
-		redraw = apiPubSub()
-		mount = apiMounter(coreRenderer($window), redraw)
+		redrawService = apiRedraw($window)
+		mount = apiMounter(redrawService)
 		render = coreRenderer($window).render
 	})
 
@@ -42,18 +42,16 @@ o.spec("mount", function() {
 		o(root.firstChild.nodeName).equals("DIV")
 	})
 
-	o("mounting null deletes `redraw` from `root`", function() {
+	o("mounting null unmounts", function() {
 		mount(root, {
 			view : function() {
 				return m("div")
 			}
 		})
 
-		o(typeof root.redraw).equals('function')
-
 		mount(root, null)
 
-		o(typeof root.redraw).equals('undefined')
+		o(root.childNodes.length).equals(0)
 	})
 
 	o("redraws on events", function(done) {
@@ -161,7 +159,7 @@ o.spec("mount", function() {
 
 	o("event handlers can skip redraw", function(done) {
 		var onupdate = o.spy()
-		var oninit   = o.spy()
+		var oninit = o.spy()
 		var e = $window.document.createEvent("MouseEvents")
 
 		e.initEvent("click", true, true)
@@ -197,8 +195,8 @@ o.spec("mount", function() {
 		mount(root, {
 			view : function() {
 				return m("div", {
-					oninit   : oninit,
-					onupdate : onupdate
+					oninit: oninit,
+					onupdate: onupdate
 				})
 			}
 		})
@@ -206,7 +204,7 @@ o.spec("mount", function() {
 		o(oninit.callCount).equals(1)
 		o(onupdate.callCount).equals(0)
 
-		redraw.publish()
+		redrawService.redraw()
 
 		// Wrapped to give time for the rate-limited redraw to fire
 		setTimeout(function() {
@@ -214,5 +212,27 @@ o.spec("mount", function() {
 
 			done()
 		}, FRAME_BUDGET)
+	})
+	
+	o("throttles", function(done, timeout) {
+		timeout(200)
+
+		var i = 0
+		mount(root, {view: function() {i++}})
+		var before = i
+
+		redrawService.redraw()
+		redrawService.redraw()
+		redrawService.redraw()
+		redrawService.redraw()
+
+		var after = i
+
+		setTimeout(function(){
+			o(before).equals(1) // mounts synchronously
+			o(after).equals(1) // throttles rest
+			o(i).equals(2)
+			done()
+		},40)
 	})
 })

@@ -6,25 +6,23 @@ var browserMock = require("../../test-utils/browserMock")
 
 var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
-var apiPubSub = require("../../api/pubsub")
+var apiRedraw = require("../../api/redraw")
 var apiRouter = require("../../api/router")
-var apiMounter = require("../../api/mount")
 
 o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var FRAME_BUDGET = Math.floor(1000 / 60)
-				var $window, root, redraw, mount, route
+				var $window, root, redrawService, route
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
 
 					root = $window.document.body
 
-					redraw = apiPubSub()
-					mount = apiMounter(coreRenderer($window), redraw)
-					route = apiRouter($window, mount)
+					redrawService = apiRedraw($window)
+					route = apiRouter($window, redrawService)
 					route.prefix(prefix)
 				})
 
@@ -59,7 +57,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redraw.publish(true)
+					redrawService.redraw()
 
 					o(view.callCount).equals(2)
 
@@ -122,15 +120,15 @@ o.spec("route", function() {
 
 					o(oninit.callCount).equals(1)
 
-					redraw.publish(true)
+					redrawService.redraw()
 
 					o(onupdate.callCount).equals(1)
 				})
 
 				o("redraws on events", function(done) {
 					var onupdate = o.spy()
-					var oninit   = o.spy()
-					var onclick  = o.spy()
+					var oninit = o.spy()
+					var onclick = o.spy()
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -167,8 +165,8 @@ o.spec("route", function() {
 
 				o("event handlers can skip redraw", function(done) {
 					var onupdate = o.spy()
-					var oninit   = o.spy()
-					var onclick  = o.spy()
+					var oninit = o.spy()
+					var onclick = o.spy()
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -240,25 +238,28 @@ o.spec("route", function() {
 						}
 					}
 
+					var resolver = {
+						onmatch: function(resolve, args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							resolve(Component)
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id" : {
-							onmatch: function(resolve, args, requestedPath) {
-								matchCount++
-
-								o(args.id).equals("abc")
-								o(requestedPath).equals("/abc")
-
-								resolve(Component)
-							},
-							render: function(vnode) {
-								renderCount++
-
-								o(vnode.attrs.id).equals("abc")
-
-								return vnode
-							},
-						},
+						"/:id" : resolver
 					})
 
 					o(matchCount).equals(1)
@@ -403,7 +404,7 @@ o.spec("route", function() {
 					o(matchCount).equals(1)
 					o(renderCount).equals(1)
 
-					redraw.publish(true)
+					redrawService.redraw()
 
 					o(matchCount).equals(1)
 					o(renderCount).equals(2)
@@ -505,7 +506,7 @@ o.spec("route", function() {
 						o(view.callCount).equals(1)
 						o(onmatch.callCount).equals(1)
 
-						redraw.publish(true)
+						redrawService.redraw()
 
 						o(view.callCount).equals(2)
 						o(onmatch.callCount).equals(1)
@@ -515,22 +516,25 @@ o.spec("route", function() {
 				})
 
 				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
-					var onmatch = o.spy(function(resolve){resolve()})
+					var onmatch = o.spy(function(resolve) {resolve()})
+					var render = o.spy(function(){return m("div")})
 
 					$window.location.href = prefix + "/"
 					route(root, '/', {
-						"/":{
+						"/": {
 							onmatch: onmatch,
-							render: function(){return m("div")}
+							render: render
 						}
 					})
 
 					o(onmatch.callCount).equals(1)
+					o(render.callCount).equals(1)
 
 					route.set(route.get())
 
 					setTimeout(function() {
 						o(onmatch.callCount).equals(2)
+						o(render.callCount).equals(2)
 
 						done()
 					}, FRAME_BUDGET)
@@ -609,6 +613,53 @@ o.spec("route", function() {
 
 						done()
 					}, 30)
+				})
+
+				o("route changes activate onbeforeremove", function(done, timeout) {
+					var spy = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a": {
+							onbeforeremove: spy,
+							view: function() {}
+						},
+						"/b": {
+							view: function() {}
+						}
+					})
+
+					route.set("/b")
+
+					setTimeout(function() {
+						o(spy.callCount).equals(1)
+
+						done()
+					}, 30)
+				})
+
+				o("throttles", function(done, timeout) {
+					timeout(200)
+
+					var i = 0
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/": {view: function(v) {i++}}
+					})
+					var before = i
+
+					redrawService.redraw()
+					redrawService.redraw()
+					redrawService.redraw()
+					redrawService.redraw()
+					var after = i
+
+					setTimeout(function(){
+						o(before).equals(1) // routes synchronously
+						o(after).equals(2) // redraws synchronously
+						o(i).equals(3) // throttles rest
+						done()
+					},40)
 				})
 			})
 		})

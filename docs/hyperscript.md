@@ -1,6 +1,7 @@
 # m(selector, attributes, children)
 
-- [API](#api)
+- [Description](#description)
+- [Signature](#signature)
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
@@ -17,13 +18,31 @@
 
 ---
 
-### API
+### Description
+
+Represents an HTML element in a Mithril view
+
+```javascript
+m("div", {class: "foo"}, "hello")
+// represents <div class="foo">hello</div>
+```
+
+You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E) via a Babel plugin.
+
+```markup
+/** jsx m */
+<div class="foo">hello</div>
+```
+
+---
+
+### Signature
 
 `vnode = m(selector, attributes, children)`
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
-`selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](https://github.com/lhorie/mithril.js/blob/rewrite/docs/components.md)
+`selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](components.md)
 `attributes` | `Object`                                   | No       | HTML attributes or element properties
 `children`   | `Array<Vnode>|String|Number|Boolean`       | No       | Child [vnodes](vnodes.md#structure). Can be written as [splat arguments](signatures.md#splats)
 **returns**  | `Vnode`                                    |          | A [vnode](vnodes.md#structure)

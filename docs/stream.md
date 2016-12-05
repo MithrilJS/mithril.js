@@ -1,17 +1,18 @@
 # stream()
 
-- [API](#api)
-- [Static members](#static-members)
-	- [stream.combine](#streamcombine)
-	- [stream.merge](#streammerge)
-	- [stream.HALT](#streamhalt)
-	- [stream["fantasy-land/of"]](#streamfantasy-landof)
-- [Instance members](#static-members)
-	- [stream.map](#streammap)
-	- [stream.end](#streamend)
-	- [stream["fantasy-land/of"]](#streamfantasy-landof)
-	- [stream["fantasy-land/map"]](#streamfantasy-landmap)
-	- [stream["fantasy-land/ap"]](#streamfantasy-landap)
+- [Description](#description)
+- [Signature](#signature)
+	- [Static members](#static-members)
+		- [stream.combine](#streamcombine)
+		- [stream.merge](#streammerge)
+		- [stream.HALT](#streamhalt)
+		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+	- [Instance members](#static-members)
+		- [stream.map](#streammap)
+		- [stream.end](#streamend)
+		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+		- [stream["fantasy-land/map"]](#streamfantasy-landmap)
+		- [stream["fantasy-land/ap"]](#streamfantasy-landap)
 - [Basic usage](#basic-usage)
 	- [Streams as variables](#streams-as-variables)
 	- [Bidirectional bindings](#bidirectional-bindings)
@@ -25,7 +26,17 @@
 
 ---
 
-### API
+### Description
+
+A Stream is a reactive data structure, similar to cells in spreadsheet applications.
+
+For example, in a spreadsheet, if `A1 = B1 + C1`, then changing the value of `B1` or `C1` automatically changes the value of `A1`.
+
+Similarly, you can make a stream depend on other streams so that changing the value of one automatically updates the other. This is useful when you have very expensive computations and want to only run them when necessary, as opposed to, say, on every redraw.
+
+---
+
+### Signature
 
 Creates a stream
 

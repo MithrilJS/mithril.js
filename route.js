@@ -1,3 +1,3 @@
-var mount = require("./mount")
+var redrawService = require("./redraw")
 
-module.exports = require("./api/router")(window, mount)
+module.exports = require("./api/router")(window, redrawService)

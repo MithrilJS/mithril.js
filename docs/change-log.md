@@ -1,6 +1,14 @@
-# Migrating from `v0.2.x` to `v1.x`
+# Change log
+
+- [Migrating from v0.2.x](#migrating-from-v02x)
+
+---
+
+### Migrating from `v0.2.x`
 
 `v1.x` is largely API-compatible with `v0.2.x`, but there are some breaking changes.
+
+If you are migrating, consider using the [mithril-codemods](https://www.npmjs.com/package/mithril-codemods) tool to help automate the most straightforward migrations.
 
 - [`m.prop` removed](#mprop-removed)
 - [`m.component` removed](#mcomponent-removed)
@@ -18,16 +26,20 @@
 - [`m.route` and anchor tags](#mroute-and-anchor-tags)
 - [Reading/writing the current route](#readingwriting-the-current-route)
 - [Accessing route params](#accessing-route-params)
+- [Preventing unmounting](#preventing-unmounting)
 - [`m.request`](#mrequest)
+- [`m.sync` removed](#msync-removed)
 - [`xlink` namespace required](#xlink-namespace-required)
 - [Nested arrays in views](#nested-arrays-in-views)
 - [`vnode` equality checks](#vnode-equality-checks)
+- [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
+- [Synchronous redraw removed](#synchronous-redraw-removed)
 
 ---
 
 ## `m.prop` removed
 
-In `v1.x`, `m.prop` is now a more powerful stream micro-library, but it's no longer part of core.
+In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core.
 
 ### `v0.2.x`
 
@@ -441,9 +453,42 @@ m.route(document.body, "/booga", {
 
 ---
 
+## Preventing unmounting
+
+It is no longer possible to prevent unmounting via `onunload`'s `e.preventDefault()`. Instead you should explicitly call `m.route.set` when the expected conditions are met.
+
+### `v0.2.x`
+
+```javascript
+var Component = {
+	controller: function() {
+		this.onunload = function(e) {
+			if (condition) e.preventDefault()
+		}
+	},
+	view: function() {
+		return m("a[href=/]", {config: m.route})
+	}
+}
+```
+
+### `v1.x`
+
+```javascript
+var Component = {
+	view: function() {
+		return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
+	}
+}
+```
+
+---
+
 ## m.request
 
-Promises returned by [m.request](request.md) are no longer `m.prop` getter-setters. In addition, `initialValue` is no longer a supported option.
+Promises returned by [m.request](request.md) are no longer `m.prop` getter-setters. In addition, `initialValue`, `unwrapSuccess` and `unwrapError` are no longer supported options.
+
+In addition, requests no longer have `m.startComputation`/`m.endComputation` semantics. Instead, redraws are always triggered when a request promise chain completes (unless `background:true` is set).
 
 ### `v0.2.x`
 
@@ -476,7 +521,13 @@ setTimeout(function() {
 }, 1000)
 ```
 
-The equivalent of `m.sync` is now `Promise.all`
+Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve its promise, and the `deserialize` callback is ignored.
+
+---
+
+## `m.sync` removed
+
+`m.sync` has been removed in favor of `Promise.all`
 
 ### `v0.2.x`
 
@@ -501,8 +552,6 @@ Promise.all([
 	console.log("Contributors:", users[0].name, "and", users[1].name);
 })
 ```
-
-Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve its promise, and the `deserialize` callback is ignored.
 
 ---
 
@@ -539,3 +588,27 @@ Arrays now represent [fragments](fragment.md), which are structurally significan
 ## `vnode` equality checks
 
 If a vnode is strictly equal to the vnode occupying its place in the last draw, v1.x will skip that part of the tree without checking for mutations or triggering any lifecycle methods in the subtree. The component documentation contains [more detail on this issue](components.md#avoid-creating-component-instances-outside-views).
+
+---
+
+## `m.startComputation`/`m.endComputation` removed
+
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x
+
+---
+
+## Synchronous redraw removed
+
+In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
+
+### `v0.2.x`
+
+```javascript
+m.redraw(true); // redraws immediately & synchronously
+```
+
+### `v1.x`
+
+```javascript
+m.redraw(); // schedules a redraw on the next requestAnimationFrame tick
+```

@@ -182,7 +182,7 @@ module.exports = {
         "prefer-const": "error",
         "prefer-reflect": "off",
         "prefer-rest-params": "off",
-        "prefer-spread": "error",
+        "prefer-spread": "off",
         "prefer-template": "off",
         "quote-props": "off",
         "quotes": [

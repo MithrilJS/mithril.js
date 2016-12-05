@@ -38,14 +38,13 @@ var DBMon = React.createClass({
 
 var root = document.getElementById("app")
 function update() {
+	requestAnimationFrame(update)
+	
 	data = ENV.generateData().toArray()
 
 	perfMonitor.startProfile("render")
 	ReactDOM.render(h(DBMon, null), root)
-
 	perfMonitor.endProfile("render")
-
-	setTimeout(update, ENV.timeout)
 }
 
 update()

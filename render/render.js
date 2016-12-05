@@ -124,9 +124,16 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			if (old.length === vnodes.length && vnodes[0] != null && vnodes[0].key == null) {
+			var isUnkeyed = false
+			for (var i = 0; i < vnodes.length; i++) {
+				if (vnodes[i] != null) {
+					isUnkeyed = vnodes[i].key == null
+					break
+				}
+			}
+			if (old.length === vnodes.length && isUnkeyed) {
 				for (var i = 0; i < old.length; i++) {
-					if (old[i] === vnodes[i] || old[i] == null && vnodes[i] == null) continue
+					if (old[i] === vnodes[i]) continue
 					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
@@ -508,15 +515,16 @@ module.exports = function($window) {
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
-		var callback = function(e) {
+		var callback = typeof onevent !== "function" ? value : function(e) {
 			var result = value.call(element, e)
-			if (typeof onevent === "function") onevent.call(element, e)
+			onevent.call(element, e)
 			return result
 		}
 		if (key in element) element[key] = typeof value === "function" ? callback : null
 		else {
 			var eventName = key.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
+			if (vnode.events[key] === callback) return
 			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
 			if (typeof value === "function") {
 				vnode.events[key] = callback
