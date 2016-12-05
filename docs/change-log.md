@@ -15,7 +15,6 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`config` function](#config-function)
 - [Changes in redraw behaviour](#changes-in-redraw-behaviour)
    - [No more redraw locks](#no-more-redraw-locks)
-   - [No more automatic redraw on request resolution](#no-more-automatic-redraw-on-request-resolution)
    - [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
 - [Component `controller` function](#component-controller-function)
 - [Component arguments](#component-arguments)
@@ -128,28 +127,6 @@ Mithril's rendering engine still operates on the basis of semi-automated global 
 ### No more redraw locks
 
 In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked draw logic: by default, `m.request` would lock the draw loop on execution and unlock when all pending requests had resolved - the same behaviour could be invoked manually using `m.startComputation()` and `m.endComputation()`. The latter APIs and the associated behaviour has been removed in v1.x. Redraw locking can lead to buggy UIs: the concerns of one part of the application should not be allowed to prevent other parts of the view from updating to reflect change.
-
-### No more automatic redraw on request resolution
-
-While Mithril-bound events trigger a redraw by default ([unless the redraw is cancelled](#cancelling-redraw-from-event-handlers)), `m.request` no longer triggers a redraw on resolution. This behaviour must be now be specified explicity:
-
-### `v0.2.x`
-
-```javascript
-var data = m.request({
-    method : 'GET',
-    url : '/api'
-})
-```
-
-### `v1.x`
-
-```javascript
-var data = m.request({
-    method : 'GET',
-    url : '/api'
-}).then(m.redraw)
-```
 
 ### Cancelling redraw from event handlers
 
