@@ -89,15 +89,13 @@ module.exports = function (grunt) { // eslint-disable-line
 				"!archive/**",
 				"!deploy/**",
 				"!mithril.closure-compiler-externs.js",
-				"!docs/layout/lib/**",
-				// TODO(impinball): Finish this.
-				"!mithril.js"
+				"!docs/layout/lib/**"
 			]
 		},
 
 		mocha_phantomjs: { // eslint-disable-line camelcase
 			test: {
-				src: ["test/index.html"],
+				src: ["test/index.html", "tests/index.html"],
 				options: {
 					reporter: "dot"
 				}
@@ -367,7 +365,7 @@ module.exports = function (grunt) { // eslint-disable-line
 	grunt.loadNpmTasks("grunt-mocha-phantomjs")
 
 	grunt.registerTask("build", [
-		//"lint",
+		// "lint",
 		"test",
 		"uglify",
 		"zip",

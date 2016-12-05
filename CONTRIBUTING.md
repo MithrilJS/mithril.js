@@ -22,7 +22,6 @@ We welcome any and all contributions. This is a community-driven project. Althou
 
 1. Please try to adhere to the style guide. Most of it is checked by ESLint. ESLint is also set up to check for other common errors, such as undeclared variables and invalid `typeof` values.
 2. Please make sure there are no regressions with your patch. Please don't disable existing tests, and please don't send a PR with new, disabled tests.
-	- There are a few known failing tests currently (PRs welcome): [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.deferred.js#L121-L125) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.render.js#L1321-L1343) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L106-L131) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L134-L162) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L165-L191) [*](https://github.com/lhorie/mithril.js/blob/next/test/mithril.route.js#L194-L222)
 3. For any new features introduced, be sure to write new unit tests for it. Maximum coverage is what we want.
 4. Try to not leave any extra `TODO`s, `FIXME`s, etc. in your code. ESLint will nag at you until you fix whatever problem it is.
 	- Note that it's only a warning, not an error. It won't fail the CI tests, and there's a few outstanding ones inside Mithril right now.

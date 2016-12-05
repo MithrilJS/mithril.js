@@ -4,5 +4,11 @@
 <script src="mock.js"></script>
 <script src="../mithril.js"></script>
 <script src="mithril-tests.js"></script>
+<script>
+// shim for running the old test suite with grunt-mocha-phantomjs like the new one
+if ('callPhantom' in window) {
+    window.callPhantom({ testRunEnded: 1})
+}
+</script>
 
 <p>Open the console to see the test report</p>

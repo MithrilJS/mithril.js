@@ -37,6 +37,10 @@ describe("m()", function () {
 		expect(m("[title=bar]")).to.have.deep.property("attrs.title", "bar")
 	})
 
+	it("sets attr without a value as an empty string", function () {
+		expect(m("[empty]")).to.have.deep.property("attrs.empty", true)
+	})
+
 	it("sets correct single quoted attr", function () {
 		expect(m("[title=\'bar\']")).to.have.deep.property("attrs.title", "bar")
 	})
@@ -212,5 +216,13 @@ describe("m()", function () {
 
 		m.component(component, args).controller()
 		expect(spy.secondCall).to.have.been.calledWith(args)
+	})
+
+	it("does not proxy to m.component() if the object does not have .view() method", function () {
+		var component = {}
+
+		var args = {age: 12}
+
+		expect(m.bind(m, component, args)).to.throw()
 	})
 })

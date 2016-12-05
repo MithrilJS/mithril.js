@@ -1,7 +1,18 @@
+/* global Promise */
+
 ;(function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
 	var m = factory(global)
+	/*	Set dependencies when no window for isomorphic compatibility */
+	if(typeof window === "undefined") {
+		m.deps({
+			document: typeof document !== "undefined"? document: {},
+			location: typeof location !== "undefined"? location: {},
+			clearTimeout: clearTimeout,
+			setTimeout: setTimeout
+		});
+	}
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
 	} else if (typeof define === "function" && define.amd) {
@@ -10,11 +21,11 @@
 		global.m = m
 	}
 	/* eslint-enable no-undef */
-})(typeof window !== "undefined" ? window : {}, function (global, undefined) { // eslint-disable-line
+})(typeof window !== "undefined" ? window : this, function factory(global, undefined) { // eslint-disable-line
 	"use strict"
 
 	m.version = function () {
-		return "v0.2.2-rc.1"
+		return "v0.2.5"
 	}
 
 	var hasOwn = {}.hasOwnProperty
@@ -74,6 +85,8 @@
 		return global
 	}
 
+	m.deps.factory = m.factory = factory
+
 	m.deps(global)
 
 	/**
@@ -84,7 +97,9 @@
 
 	function parseTagAttrs(cell, tag) {
 		var classes = []
-		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g
+		/* eslint-disable max-len */
+		var parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
+		/* eslint-enable max-len */
 		var match
 
 		while ((match = parser.exec(tag))) {
@@ -94,9 +109,11 @@
 				cell.attrs.id = match[2]
 			} else if (match[1] === ".") {
 				classes.push(match[2])
-			} else if (match[3][0] === "[") {
-				var pair = /\[(.+?)(?:=("|'|)(.*?)\2)?\]/.exec(match[3])
-				cell.attrs[pair[1]] = pair[3] || (pair[2] ? "" : true)
+			} else if (match[3].charAt(0) === "[") { // #1195
+				var attrValue = match[6]
+				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1")
+				if (match[4] === "class") classes.push(attrValue)
+				else cell.attrs[match[4]] = attrValue || true
 			}
 		}
 
@@ -141,9 +158,13 @@
 	 *                      or splat (optional)
 	 */
 	function m(tag, pairs) {
-		var args = [].slice.call(arguments, 1)
+		var args = []
 
-		if (isObject(tag)) return parameterize(tag, args)
+		for (var i = 1, length = arguments.length; i < length; i++) {
+			args[i - 1] = arguments[i]
+		}
+
+		if (tag && isFunction(tag.view)) return parameterize(tag, args)
 
 		if (!isString(tag)) {
 			throw new Error("selector in m(selector, attrs, children) should " +
@@ -183,7 +204,9 @@
 		// value of Console.log in some versions of Firefox (behavior depends on
 		// version)
 		try {
-			if (data != null && data.toString() != null) return data
+			if (typeof data !== "boolean" &&
+					data != null &&
+					data.toString() != null) return data
 		} catch (e) {
 			// silently ignore errors
 		}
@@ -235,8 +258,10 @@
 		})
 
 		var actions = []
-		for (var prop in existing) if (hasOwn.call(existing, prop)) {
-			actions.push(existing[prop])
+		for (var prop in existing) {
+			if (hasOwn.call(existing, prop)) {
+				actions.push(existing[prop])
+			}
 		}
 
 		var changes = actions.sort(sortChanges)
@@ -367,8 +392,10 @@
 
 			if (cached.controllers) {
 				forEach(cached.controllers, function (controller) {
-					if (controller.onunload) controller.onunload({preventDefault: noop});
-				});
+					if (controller.onunload) {
+						controller.onunload({preventDefault: noop})
+					}
+				})
 			}
 		}
 	}
@@ -402,7 +429,7 @@
 
 				if (pendingRequests && controller.onunload) {
 					var onunload = controller.onunload
-					controller.onunload = noop
+					controller.onunload = function (){}
 					controller.onunload.$old = onunload
 				}
 			})
@@ -522,6 +549,7 @@
 		}
 		cached = new data.constructor(data)
 		cached.nodes = nodes
+		cached.$trusted = data.$trusted
 		return cached
 	}
 
@@ -548,10 +576,7 @@
 		if (item.$trusted) {
 			// fix offset of next element if item was a trusted string w/ more
 			// than one html element
-			// the first clause in the regexp matches elements
-			// the second clause (after the pipe) matches text nodes
-			var match = item.match(/<[^\/]|\>\s*[^<]/g)
-			if (match != null) return match.length
+			return item.nodes.length
 		} else if (isArray(item)) {
 			return item.length
 		}
@@ -719,13 +744,6 @@
 			cached.children.nodes = []
 		}
 
-		// edge case: setting value on <select> doesn't work before children
-		// exist, so set it again after children have been created
-		if (data.tag === "select" && "value" in data.attrs) {
-			setAttributes(node, data.tag, {value: data.attrs.value}, {},
-				namespace)
-		}
-
 		return cached
 	}
 
@@ -750,7 +768,9 @@
 	var unloaders = []
 
 	function updateLists(views, controllers, view, controller) {
-		if (controller.onunload != null && unloaders.map(function(u) {return u.handler}).indexOf(controller.onunload) < 0) {
+		if (controller.onunload != null &&
+				unloaders.map(function (u) { return u.handler })
+					.indexOf(controller.onunload) < 0) {
 			unloaders.push({
 				controller: controller,
 				handler: controller.onunload
@@ -762,11 +782,32 @@
 	}
 
 	var forcing = false
-	function checkView(data, view, cached, cachedControllers, controllers, views) {
-		var controller = getController(cached.views, view, cachedControllers, data.controller)
+	function checkView(
+		data,
+		view,
+		cached,
+		cachedControllers,
+		controllers,
+		views
+	) {
+		var controller = getController(
+			cached.views,
+			view,
+			cachedControllers,
+			data.controller)
+
 		var key = data && data.attrs && data.attrs.key
-		data = pendingRequests === 0 || forcing || cachedControllers && cachedControllers.indexOf(controller) > -1 ? data.view(controller) : {tag: "placeholder"}
-		if (data.subtree === "retain") return data;
+
+		if (pendingRequests === 0 ||
+				forcing ||
+				cachedControllers &&
+					cachedControllers.indexOf(controller) > -1) {
+			data = data.view(controller)
+		} else {
+			data = {tag: "placeholder"}
+		}
+
+		if (data.subtree === "retain") return data
 		data.attrs = data.attrs || {}
 		data.attrs.key = key
 		updateLists(views, controllers, view, controller)
@@ -831,6 +872,9 @@
 			// set attributes first, then create children
 			var attrs = constructAttrs(data, node, namespace, hasKeys)
 
+			// add the node to its parent before attaching children to it
+			insertNode(parentElement, node, index)
+
 			var children = constructChildren(data, node, cached, editable,
 				namespace, configs)
 
@@ -854,7 +898,14 @@
 				controllers)
 		}
 
-		if (isNew || shouldReattach === true && node != null) {
+		// edge case: setting value on <select> doesn't work before children
+		// exist, so set it again after children have been created/updated
+		if (data.tag === "select" && "value" in data.attrs) {
+			setAttributes(node, data.tag, {value: data.attrs.value}, {},
+				namespace)
+		}
+
+		if (!isNew && shouldReattach === true && node != null) {
 			insertNode(parentElement, node, index)
 		}
 
@@ -973,14 +1024,22 @@
 	}
 
 	function copyStyleAttrs(node, dataAttr, cachedAttr) {
-		for (var rule in dataAttr) if (hasOwn.call(dataAttr, rule)) {
-			if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) {
-				node.style[rule] = dataAttr[rule]
+		if (cachedAttr === dataAttr) {
+			node.style = ""
+			cachedAttr = {}
+		}
+		for (var rule in dataAttr) {
+			if (hasOwn.call(dataAttr, rule)) {
+				if (cachedAttr == null || cachedAttr[rule] !== dataAttr[rule]) {
+					node.style[rule] = dataAttr[rule]
+				}
 			}
 		}
 
-		for (rule in cachedAttr) if (hasOwn.call(cachedAttr, rule)) {
-			if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+		for (rule in cachedAttr) {
+			if (hasOwn.call(cachedAttr, rule)) {
+				if (!hasOwn.call(dataAttr, rule)) node.style[rule] = ""
+			}
 		}
 	}
 
@@ -1033,15 +1092,28 @@
 			//
 			// #348 don't set the value if not needed - otherwise, cursor
 			// placement breaks in Chrome
+			// #1252 likewise when `contenteditable` is set on an element.
 			try {
-				if (tag !== "input" || node[attrName] !== dataAttr) {
+				if (
+					tag !== "input" && !node.isContentEditable
+					/* eslint-disable eqeqeq */
+					|| node[attrName] != dataAttr
+					/* eslint-enable eqeqeq */
+				) {
 					node[attrName] = dataAttr
 				}
 			} catch (e) {
 				node.setAttribute(attrName, dataAttr)
 			}
+		} else {
+			try {
+				node.setAttribute(attrName, dataAttr)
+			} catch (e) {
+				// IE8 doesn't allow change input attributes and throws
+				// an exception. Unfortunately it cannot be handled, because
+				// error code is not informative.
+			}
 		}
-		else node.setAttribute(attrName, dataAttr)
 	}
 
 	function trySetAttr(
@@ -1053,7 +1125,10 @@
 		tag,
 		namespace
 	) {
-		if (!(attrName in cachedAttrs) || (cachedAttr !== dataAttr)) {
+		if (!(attrName in cachedAttrs) ||
+				(cachedAttr !== dataAttr) ||
+				typeof dataAttr === "object" ||
+				($document.activeElement === node)) {
 			cachedAttrs[attrName] = dataAttr
 			try {
 				return setSingleAttr(
@@ -1069,23 +1144,28 @@
 				if (e.message.indexOf("Invalid argument") < 0) throw e
 			}
 		} else if (attrName === "value" && tag === "input" &&
-				node.value !== dataAttr) {
-			// #348 dataAttr may not be a string, so use loose comparison
+								/* eslint-disable eqeqeq */
+								node.value != dataAttr) {
+								// #348 dataAttr may not be a string,
+								// so use loose comparison
+								/* eslint-enable eqeqeq */
 			node.value = dataAttr
 		}
 	}
 
 	function setAttributes(node, tag, dataAttrs, cachedAttrs, namespace) {
-		for (var attrName in dataAttrs) if (hasOwn.call(dataAttrs, attrName)) {
-			if (trySetAttr(
-					node,
-					attrName,
-					dataAttrs[attrName],
-					cachedAttrs[attrName],
-					cachedAttrs,
-					tag,
-					namespace)) {
-				continue
+		for (var attrName in dataAttrs) {
+			if (hasOwn.call(dataAttrs, attrName)) {
+				if (trySetAttr(
+						node,
+						attrName,
+						dataAttrs[attrName],
+						cachedAttrs[attrName],
+						cachedAttrs,
+						tag,
+						namespace)) {
+					continue
+				}
 			}
 		}
 		return cachedAttrs
@@ -1137,7 +1217,39 @@
 				$document.createRange().createContextualFragment(data))
 		} catch (e) {
 			parentElement.insertAdjacentHTML("beforeend", data)
+			replaceScriptNodes(parentElement)
 		}
+	}
+
+	// Replace script tags inside given DOM element with executable ones.
+	// Will also check children recursively and replace any found script
+	// tags in same manner.
+	function replaceScriptNodes(node) {
+		if (node.tagName === "SCRIPT") {
+			node.parentNode.replaceChild(buildExecutableNode(node), node)
+		} else {
+			var children = node.childNodes
+			if (children && children.length) {
+				for (var i = 0; i < children.length; i++) {
+					replaceScriptNodes(children[i])
+				}
+			}
+		}
+
+		return node
+	}
+
+	// Replace script element with one whose contents are executable.
+	function buildExecutableNode(node){
+		var scriptEl = document.createElement("script")
+		var attrs = node.attributes
+
+		for (var i = 0; i < attrs.length; i++) {
+			scriptEl.setAttribute(attrs[i].name, attrs[i].value)
+		}
+
+		scriptEl.text = node.innerHTML
+		return scriptEl
 	}
 
 	function injectHTML(parentElement, index, data) {
@@ -1260,6 +1372,7 @@
 		}
 
 		prop.toJSON = function () {
+			if (store && isFunction(store.toJSON)) return store.toJSON()
 			return store
 		}
 
@@ -1267,7 +1380,9 @@
 	}
 
 	m.prop = function (store) {
-		if ((store != null && isObject(store) || isFunction(store)) &&
+		if ((store != null && (isObject(store) || isFunction(store)) ||
+					((typeof Promise !== "undefined") &&
+						(store instanceof Promise))) &&
 				isFunction(store.then)) {
 			return propify(store)
 		}
@@ -1312,7 +1427,11 @@
 	}
 
 	m.component = function (component) {
-		var args = [].slice.call(arguments, 1)
+		var args = new Array(arguments.length - 1)
+
+		for (var i = 1; i < arguments.length; i++) {
+			args[i - 1] = arguments[i]
+		}
 
 		return parameterize(component, args)
 	}
@@ -1345,15 +1464,20 @@
 				removeRootElement(root, index)
 			}
 			return controllers[index]
-		} else if (component == null) {
-			removeRootElement(root, index)
+		} else {
+			if (component == null) {
+				removeRootElement(root, index)
+			}
+			if (previousRoute) {
+				currentRoute = previousRoute
+			}
 		}
 	}
 
 	m.mount = m.module = function (root, component) {
 		if (!root) {
-			throw new Error("Please ensure the DOM element exists before " +
-				"rendering a template into it.")
+			throw new Error("Ensure the DOM element being passed to " +
+				"m.route/m.mount/m.render is not undefined.")
 		}
 
 		var index = roots.indexOf(root)
@@ -1393,6 +1517,7 @@
 		components.splice(index, 1)
 		reset(root)
 		nodeCache.splice(getCellCacheKey(root), 1)
+		unloaders = []
 	}
 
 	var redrawing = false
@@ -1404,7 +1529,7 @@
 		try {
 			// lastRedrawId is a positive number if a second redraw is requested
 			// before the next animation frame
-			// lastRedrawID is null if it's the first redraw and not an event
+			// lastRedrawId is null if it's the first redraw and not an event
 			// handler
 			if (lastRedrawId && !force) {
 				// when setTimeout: only reschedule redraw if time between now
@@ -1463,7 +1588,7 @@
 
 	m.withAttr = function (prop, withAttrCallback, callbackThis) {
 		return function (e) {
-			e = e || event
+			e = e || window.event
 			/* eslint-disable no-invalid-this */
 			var currentTarget = e.currentTarget || this
 			var _this = callbackThis || this
@@ -1479,7 +1604,7 @@
 	var modes = {pathname: "", hash: "#", search: "?"}
 	var redirect = noop
 	var isDefaultRoute = false
-	var routeParams, currentRoute
+	var routeParams, currentRoute, previousRoute
 
 	m.route = function (root, arg1, arg2, vdom) { // eslint-disable-line
 		// m.route()
@@ -1532,7 +1657,7 @@
 		}
 		// m.route(route, params, shouldReplaceHistoryEntry)
 		if (isString(root)) {
-			var oldRoute = currentRoute
+			previousRoute = currentRoute
 			currentRoute = root
 
 			var args = arg1 || {}
@@ -1545,8 +1670,10 @@
 				params = {}
 			}
 
-			for (var i in args) if (hasOwn.call(args, i)) {
-				params[i] = args[i]
+			for (var i in args) {
+				if (hasOwn.call(args, i)) {
+					params[i] = args[i]
+				}
 			}
 
 			var querystring = buildQueryString(params)
@@ -1566,20 +1693,30 @@
 
 			var replaceHistory =
 				(arguments.length === 3 ? arg2 : arg1) === true ||
-				oldRoute === root
+				previousRoute === currentRoute
 
 			if (global.history.pushState) {
 				var method = replaceHistory ? "replaceState" : "pushState"
 				computePreRedrawHook = setScroll
 				computePostRedrawHook = function () {
-					global.history[method](null, $document.title,
-						modes[m.route.mode] + currentRoute)
+					try {
+						global.history[method](null, $document.title,
+							modes[m.route.mode] + currentRoute)
+					} catch (err) {
+						// In the event of a pushState or replaceState failure,
+						// fallback to a standard redirect. This is specifically
+						// to address a Safari security error when attempting to
+						// call pushState more than 100 times.
+						$location[m.route.mode] = currentRoute
+					}
 				}
 				redirect(modes[m.route.mode] + currentRoute)
 			} else {
 				$location[m.route.mode] = currentRoute
 				redirect(modes[m.route.mode] + currentRoute)
 			}
+
+			previousRoute = null
 		}
 	}
 
@@ -1622,29 +1759,31 @@
 			return true
 		}
 
-		for (var route in router) if (hasOwn.call(router, route)) {
-			if (route === path) {
-				m.mount(root, router[route])
-				return true
-			}
-
-			var matcher = new RegExp("^" + route
-				.replace(/:[^\/]+?\.{3}/g, "(.*?)")
-				.replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-
-			if (matcher.test(path)) {
-				/* eslint-disable no-loop-func */
-				path.replace(matcher, function () {
-					var keys = route.match(/:[^\/]+/g) || []
-					var values = [].slice.call(arguments, 1, -2)
-					forEach(keys, function (key, i) {
-						routeParams[key.replace(/:|\./g, "")] =
-							decodeURIComponent(values[i])
-					})
+		for (var route in router) {
+			if (hasOwn.call(router, route)) {
+				if (route === path) {
 					m.mount(root, router[route])
-				})
-				/* eslint-enable no-loop-func */
-				return true
+					return true
+				}
+
+				var matcher = new RegExp("^" + route
+					.replace(/:[^\/]+?\.{3}/g, "(.*?)")
+					.replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+
+				if (matcher.test(path)) {
+					/* eslint-disable no-loop-func */
+					path.replace(matcher, function () {
+						var keys = route.match(/:[^\/]+/g) || []
+						var values = [].slice.call(arguments, 1, -2)
+						forEach(keys, function (key, i) {
+							routeParams[key.replace(/:|\./g, "")] =
+								decodeURIComponent(values[i])
+						})
+						m.mount(root, router[route])
+					})
+					/* eslint-enable no-loop-func */
+					return true
+				}
 			}
 		}
 	}
@@ -1690,32 +1829,35 @@
 		var duplicates = {}
 		var str = []
 
-		for (var prop in object) if (hasOwn.call(object, prop)) {
-			var key = prefix ? prefix + "[" + prop + "]" : prop
-			var value = object[prop]
+		for (var prop in object) {
+			if (hasOwn.call(object, prop)) {
+				var key = prefix ? prefix + "[" + prop + "]" : prop
+				var value = object[prop]
 
-			if (value === null) {
-				str.push(encodeURIComponent(key))
-			} else if (isObject(value)) {
-				str.push(buildQueryString(value, key))
-			} else if (isArray(value)) {
-				var keys = []
-				duplicates[key] = duplicates[key] || {}
-				/* eslint-disable no-loop-func */
-				forEach(value, function (item) {
-					/* eslint-enable no-loop-func */
-					if (!duplicates[key][item]) {
-						duplicates[key][item] = true
-						keys.push(encodeURIComponent(key) + "=" +
-							encodeURIComponent(item))
-					}
-				})
-				str.push(keys.join("&"))
-			} else if (value !== undefined) {
-				str.push(encodeURIComponent(key) + "=" +
-					encodeURIComponent(value))
+				if (value === null) {
+					str.push(encodeURIComponent(key))
+				} else if (isObject(value)) {
+					str.push(buildQueryString(value, key))
+				} else if (isArray(value)) {
+					var keys = []
+					duplicates[key] = duplicates[key] || {}
+					/* eslint-disable no-loop-func */
+					forEach(value, function (item) {
+						/* eslint-enable no-loop-func */
+						if (!duplicates[key][item]) {
+							duplicates[key][item] = true
+							keys.push(encodeURIComponent(key) + "=" +
+								encodeURIComponent(item))
+						}
+					})
+					str.push(keys.join("&"))
+				} else if (value !== undefined) {
+					str.push(encodeURIComponent(key) + "=" +
+						encodeURIComponent(value))
+				}
 			}
 		}
+
 		return str.join("&")
 	}
 
@@ -1733,8 +1875,7 @@
 			if (params[key] != null) {
 				if (!isArray(params[key])) params[key] = [params[key]]
 				params[key].push(value)
-			}
-			else params[key] = value
+			} else params[key] = value
 		})
 
 		return params
@@ -1762,7 +1903,7 @@
 			return propify(promise.then(resolve, reject), initialValue)
 		}
 
-		prop.catch = prop.then.bind(null, null)
+		prop["catch"] = prop.then.bind(null, null)
 		return prop
 	}
 	// Promiz.mithril.js | Zolmeister | MIT
@@ -1923,7 +2064,7 @@
 	m.sync = function (args) {
 		var deferred = m.deferred()
 		var outstanding = args.length
-		var results = new Array(outstanding)
+		var results = []
 		var method = "resolve"
 
 		function synchronizer(pos, resolved) {
@@ -1952,7 +2093,7 @@
 	function identity(value) { return value }
 
 	function handleJsonp(options) {
-		var callbackKey = "mithril_callback_" +
+		var callbackKey = options.callbackName || "mithril_callback_" +
 			new Date().getTime() + "_" +
 			(Math.round(Math.random() * 1e16)).toString(36)
 
@@ -2061,9 +2202,9 @@
 
 	function parameterizeUrl(url, data) {
 		if (data) {
-			url = url.replace(/:[a-z]\w+/gi, function(token){
+			url = url.replace(/:[a-z]\w+/gi, function (token){
 				var key = token.slice(1)
-				var value = data[key]
+				var value = data[key] || token
 				delete data[key]
 				return value
 			})
@@ -2128,6 +2269,7 @@
 				}
 			} catch (e) {
 				deferred.reject(e)
+				m.deferred.onerror(e)
 			} finally {
 				if (options.background !== true) m.endComputation()
 			}
@@ -2139,4 +2281,4 @@
 	}
 
 	return m
-})
+}); // eslint-disable-line

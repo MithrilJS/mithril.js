@@ -1,5 +1,39 @@
 ## Change Log
 
+[v0.2.5](http://mithril.js.org/archive/v0.2.5)
+
+### News:
+
+-	performance improvements in IE (thanks to @gyandeeps)
+-	m.request now has a `callbackName` option to specify the name of the javascript function that gets called on JSONP response [#1072](https://github.com/lhorie/mithril.js/issues/1072)
+
+### Bug Fixes:
+
+-	fix active form element syncing [#691](https://github.com/lhorie/mithril.js/issues/691)
+-	ignore url interpolations without value in m.request [#1039](https://github.com/lhorie/mithril.js/issues/1039)
+-	fixed native promise absorption in `m.prop` [#1076](https://github.com/lhorie/mithril.js/issues/1076)
+
+---
+
+[v0.2.4](http://mithril.js.org/archive/v0.2.4)
+
+### Bug Fixes:
+
+-	fix regression that caused errors to be swallowed in promises returned by m.request [#968](https://github.com/lhorie/mithril.js/issues/968)
+-	fix ReferenceError when calling an event handler via mithril-query without an event argument
+
+---
+
+[v0.2.3](http://mithril.js.org/archive/v0.2.3)
+
+### Bug Fixes:
+
+-	fix regression that prevented string keys
+-	fix handling of read-only attributes [#925](https://github.com/lhorie/mithril.js/issues/925)
+-	fix double unloading issue [#931](https://github.com/lhorie/mithril.js/issues/931)
+
+---
+
 [v0.2.2-rc.1](http://mithril.js.org/archive/v0.2.2-rc.1)
 
 ### Bug Fixes:
@@ -7,7 +41,11 @@
 -	revert regressions from 0.2.1 refactor
 -	revert `finally` because it's not in the ES6 promise spec
 
+---
+
 [v0.2.1](http://mithril.js.org/archive/v0.2.1)
+
+**IMPORTANT NOTE: Due to some unfortunate factors, 0.2.1 is not a stable release. Please use either 0.2.0 or latest instead**
 
 ### News:
 

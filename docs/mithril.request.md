@@ -272,6 +272,7 @@ data.append("file", file)
 m.request({
 	method: "POST",
 	url: "/upload",
+	data: data,
 	serialize: function(data) {return data}
 })
 ```
@@ -447,6 +448,7 @@ where:
 		String dataType,
 		String url,
 		String callbackKey,
+		String callbackName,
 		Object<any> data
 	}
 ```
@@ -533,7 +535,7 @@ where:
 		demo.view = function(ctrl) {
 			return m("div", [
 				//in the first redraw, there's no user, so ensure we don't throw an error
-				ctrl.user ? ctrl.user.name : "no user"
+				ctrl.user() ? ctrl.user().name : "no user"
 			])
 		}
 		```
@@ -659,6 +661,12 @@ where:
 		The name of the querystring key that defines the name of the callback function to be called by the response. Defaults to "callback"
 		
 		This option is useful for web services that use uncommon conventions for defining jsonp callbacks (e.g. foo.com/?jsonpCallback=doSomething)
+		
+	-	**String callbackName**
+	
+		The name of callback function to be called by the response. Defaults to a unique auto-generated name
+		
+		This option is useful for web services serving static files and to prevent cache busting.
 		
 	-	**Object<any> data** (optional)
 	

@@ -1,7 +1,7 @@
 {
   "name": "mithril",
-  "description": "Mithril.js beta build - use this to help us test the releases before they are released",
-  "version": "0.2.2-rc.1",
+  "description": "Mithril.js - A Javascript Framework for Building Brilliant Applications",
+  "version": "0.2.5",
   "homepage": "http://mithril.js.org",
   "license": "MIT",
   "author": {
@@ -15,6 +15,9 @@
     "url" : "http://github.com/lhorie/mithril.js/issues"
   },
   "scripts": {
+    "build": "grunt build",
+    "lint": "grunt lint",
+    "sauce": "grunt sauce",
     "test": "grunt test"
   },
   "main": "mithril.js",
@@ -43,6 +46,7 @@
     "mithril.min.js",
     "mithril.min.js.map",
     "mithril.js",
-    "README.*"
+    "mithril.d.js",
+    "index.d.js"
   ]
 }

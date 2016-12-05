@@ -42,6 +42,22 @@ describe("m.prop()", function () {
 		expect(JSON.stringify(obj)).to.equal('{"prop":"test"}')
 	})
 
+	it("correctly stringifies Date", function () {
+		var prop = m.prop(new Date(999))
+		expect(JSON.stringify(prop)).to.equal('"1970-01-01T00:00:00.999Z"')
+	})
+
+	it("correctly stringifies object with toJSON method", function () {
+		function Thing(name) {
+			this.name = name
+		}
+		Thing.prototype.toJSON = function() {
+			return {kind: 'Thing', name: this.name}
+		}
+		var banana = m.prop(new Thing("bannana"))
+		expect(JSON.stringify(banana)).to.equal('{"kind":"Thing","name":"bannana"}')
+	})
+
 	it("correctly wraps Mithril promises", function () {
 		var defer = m.deferred()
 		var prop = m.prop(defer.promise)

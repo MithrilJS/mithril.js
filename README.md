@@ -1,4 +1,4 @@
-[![JS.ORG](https://img.shields.io/badge/js.org-mithril-ffb400.svg?style=flat-square)](http://js.org)
+[![JS.ORG](https://img.shields.io/badge/js.org-mithril-ffb400.svg?style=flat-square)](http://mithril.js.org/)
 [![Join the chat at https://gitter.im/lhorie/mithril.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lhorie/mithril.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/lhorie/mithril.js.svg?branch=master)](https://travis-ci.org/lhorie/mithril.js)
 
@@ -6,7 +6,7 @@
 
 A Javascript Framework for Building Brilliant Applications
 
-See the [website](http://mithril.js.org) for documentation
+See the [website](http://mithril.js.org) for documentation and the [wiki](https://github.com/lhorie/mithril.js/wiki) for more
 
 There's also a [blog](http://lhorie.github.io/mithril-blog) and a [mailing list](https://groups.google.com/forum/#!forum/mithriljs)
 

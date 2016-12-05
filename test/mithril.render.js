@@ -57,6 +57,24 @@ describe("m.render()", function () {
 		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
 	})
 
+	it("renders `null` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [null]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
+	it("renders `true` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [true]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
+	it("renders `false` body to empty string", function () {
+		var root = mock.document.createElement("div")
+		m.render(root, m("div", [false]))
+		expect(root.childNodes[0].childNodes[0].nodeValue).to.equal("")
+	})
+
 	it("uses the W3C URI as default namespace for SVG children", function () {
 		var root = mock.document.createElement("div")
 		m.render(root, m("svg", [m("g")]))
@@ -1548,6 +1566,16 @@ describe("m.render()", function () {
 			m.render(root, m("select", m("option", {value: ""}, "aaa")))
 			expect(root.childNodes[0].innerHTML)
 				.to.equal('<option value="">aaa</option>')
+		})
+
+		it("sets correct <select> value", function () {
+			var root = document.createElement("div")
+			m.render(root, m("select", {value: "b"}, [
+				m("option", {value: "a"}, "aaa"),
+				m("option", {value: "b"}, "bbb")
+			]))
+			// This works only if select value is set after its options exist.
+			expect(root.childNodes[0].value).to.equal("b")
 		})
 
 		it("caches children of editable on update", function () {

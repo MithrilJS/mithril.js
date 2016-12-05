@@ -1,0 +1,17 @@
+<!doctype html>
+<title>HTML to Mithril Template Converter</title>
+
+<h1>HTML to Mithril Template Converter</h1>
+<p>
+	If you have HTML you want to convert into a Mithril template, paste it below
+	and press the "Convert" button. In case you're wondering, this itself is a
+	Mithril app.
+</p>
+
+<div id="converter"></div>
+
+<script src="../mithril.min.js"></script>
+<script src="template-converter.js"></script>
+<script>
+m.mount(document.getElementById("converter"), templateConverter)
+</script>

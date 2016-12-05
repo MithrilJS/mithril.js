@@ -102,8 +102,7 @@ describe("m.route()", function () {
 		expect(route2).to.equal("/test13")
 	})
 
-	// FIXME: this causes others to fail
-	xdit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 		var spy = sinon.spy()
 
@@ -128,10 +127,10 @@ describe("m.route()", function () {
 		route("/b")
 
 		expect(spy).to.not.have.been.called
+		expect(m.route()).to.equal("/a")
 	})
 
-	// FIXME: this causes others to fail
-	xdit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
+	dit("skips route change if subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
 		mode("search")
 
 		var spy = sinon.spy()
@@ -159,66 +158,7 @@ describe("m.route()", function () {
 		route("/b")
 
 		expect(spy).to.not.have.been.called
-	})
-
-	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried component ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
-		mode("search")
-
-		var spy = sinon.spy()
-
-		var sub = {
-			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
-			},
-			view: function () {
-				return m("div")
-			}
-		}
-
-		route(root, "/a", {
-			"/a": pure(function () { return sub }),
-
-			"/b": {
-				controller: spy,
-				view: noop
-			}
-		})
-
-		route("/b")
-
-		expect(spy).to.not.have.been.called
-	})
-
-	// FIXME: this causes others to fail
-	xdit("skips route change if non-curried subcomponent ctrl.onunload calls preventDefault", function (root) { // eslint-disable-line
-		mode("search")
-
-		var spy = sinon.spy()
-
-		var subsub = {
-			controller: function () {
-				this.onunload = function (e) { e.preventDefault() }
-			},
-			view: function () {
-				return m("div")
-			}
-		}
-
-		var sub = pure(function () { return subsub })
-
-		route(root, "/a", {
-			"/a": pure(function () { return sub }),
-
-			"/b": {
-				controller: spy,
-				view: noop
-			}
-		})
-
-		route("/b")
-
-		expect(spy).to.not.have.been.called
+		expect(m.route()).to.equal("/a")
 	})
 
 	dit("initializes a component's constructor on route change", function (root) { // eslint-disable-line
@@ -896,6 +836,36 @@ describe("m.route()", function () {
 		route("/a")
 
 		expect(mock.history.$$length).to.equal(0)
+	})
+
+	dit("modify history when redirecting to same route with different parameters", function(root) {
+		mode("search")
+		mock.history.$$length = 0
+
+		route(root, "/a", {
+			"/a": pure(function () { return "a" }),
+			"/b": pure(function () { return "b" })
+		})
+
+		route("/b")
+		route("/b", { foo: "bar" })
+
+		expect(mock.history.$$length).to.equal(2)
+	})
+
+	dit("doesn't modify history when redirecting to same route with same parameters", function(root) {
+		mode("search")
+		mock.history.$$length = 0
+
+		route(root, "/a", {
+			"/a": pure(function () { return "a" }),
+			"/b": pure(function () { return "b" })
+		})
+
+		route("/b", { foo: "bar" })
+		route("/b", { foo: "bar" })
+
+		expect(mock.history.$$length).to.equal(1)
 	})
 
 	context("m.route.strategy() === \"all\", identical views", function () {
