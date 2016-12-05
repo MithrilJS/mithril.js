@@ -837,15 +837,16 @@ var coreRenderer = function($window) {
 	//event
 	function updateEvent(vnode, key2, value) {
 		var element = vnode.dom
-		var callback = function(e) {
+		var callback = typeof onevent !== "function" ? value : function(e) {
 			var result = value.call(element, e)
-			if (typeof onevent === "function") onevent.call(element, e)
+			onevent.call(element, e)
 			return result
 		}
 		if (key2 in element) element[key2] = typeof value === "function" ? callback : null
 		else {
 			var eventName = key2.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
+			if (vnode.events[key2] === callback) return
 			if (vnode.events[key2] != null) element.removeEventListener(eventName, vnode.events[key2], false)
 			if (typeof value === "function") {
 				vnode.events[key2] = callback
