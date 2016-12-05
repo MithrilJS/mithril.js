@@ -1,8 +1,8 @@
 # Mithril.js - A framework for building brilliant applications
 
-[Installation](docs/installation.md) | [API](docs/api.md) | [Examples](docs/examples.md) | [Migration Guide](docs/v1.x-migration.md)
+[Installation](docs/installation.md) | [API](docs/api.md) | [Examples](docs/examples.md) | [Changelog/Migration Guide](docs/change-log.md)
 
-Note: This branch is the upcoming version 1.0. It's a rewrite from the ground up and it's not backwards compatible with [Mithril 0.2.x](http://mithril.js.org). You can find preliminary [documentation here](docs) and [migration guide here](docs/v1.x-migration.md)
+Note: This branch is the upcoming version 1.0. It's a rewrite from the ground up and it's not backwards compatible with [Mithril 0.2.x](http://mithril.js.org). You can find preliminary [documentation here](docs) and [migration guide here](docs/change-log.md)
 
 This rewrite aims to fix longstanding API design issues, significantly improve performance, and clean up the codebase.
 
