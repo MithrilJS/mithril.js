@@ -1092,28 +1092,27 @@ var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	
 	var identity = function(v) {return v}
-	var current = {}
+	var currentResolver, currentComponent, currentParams, currentPath, currentResolve
 	var route = function(root, defaultRoute, routes) {
-		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(resolver, component, params, path) {
-			current = {resolver: resolver, component: component, params: params, path: path, resolve: null}
-			current.resolver.render = resolver.render || identity
+			currentResolver = resolver, currentComponent = component, currentParams = params, currentPath = path, currentResolve = null
+			currentResolver.render = resolver.render || identity
 			render1()
 		}
 		var render1 = function() {
-			if (current.resolver != null) redrawService0.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
+			if (currentResolver != null) redrawService0.render(root, currentResolver.render(Vnode(currentComponent, currentParams.key, currentParams)))
 		}
 		routeService.defineRoutes(routes, function(component, params, path) {
 			if (component.view) update({}, component, params, path)
 			else {
 				if (component.onmatch) {
-					if (current.resolve != null) update(component, current.component, params, path)
+					if (currentResolve != null) update(component, currentComponent, params, path)
 					else {
-						current.resolve = function(resolved) {
+						currentResolve = function(resolved) {
 							update(component, resolved, params, path)
 						}
 						component.onmatch(function(resolved) {
-							if (current.resolve != null) current.resolve(resolved)
+							if (currentResolve != null) currentResolve(resolved)
 						}, params, path)
 					}
 				}
@@ -1125,7 +1124,7 @@ var _20 = function($window, redrawService0) {
 		redrawService0.subscribe(root, render1)
 	}
 	route.set = routeService.setPath
-	route.get = function() {return current.path}
+	route.get = function() {return currentPath}
 	route.prefix = routeService.setPrefix
 	route.link = routeService.link
 	return route

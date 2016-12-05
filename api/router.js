@@ -7,32 +7,32 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 	
 	var identity = function(v) {return v}
-	var current = {}
+	var resolver, component, attrs, currentPath, resolve
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var update = function(resolver, component, params, path) {
-			current = {resolver: resolver, component: component, params: params, path: path, resolve: null}
-			current.resolver.render = resolver.render || identity
+		var update = function(routeResolver, comp, params, path) {
+			resolver = routeResolver, component = comp, attrs = params, currentPath = path, resolve = null
+			resolver.render = routeResolver.render || identity
 			render()
 		}
 		var render = function() {
-			if (current.resolver != null) redrawService.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
+			if (resolver != null) redrawService.render(root, resolver.render(Vnode(component, attrs.key, attrs)))
 		}
-		routeService.defineRoutes(routes, function(component, params, path) {
-			if (component.view) update({}, component, params, path)
+		routeService.defineRoutes(routes, function(payload, params, path) {
+			if (payload.view) update({}, payload, params, path)
 			else {
-				if (component.onmatch) {
-					if (current.resolve != null) update(component, current.component, params, path)
+				if (payload.onmatch) {
+					if (resolve != null) update(payload, component, params, path)
 					else {
-						current.resolve = function(resolved) {
-							update(component, resolved, params, path)
+						resolve = function(resolved) {
+							update(payload, resolved, params, path)
 						}
-						component.onmatch(function(resolved) {
-							if (current.resolve != null) current.resolve(resolved)
+						payload.onmatch(function(resolved) {
+							if (resolve != null) resolve(resolved)
 						}, params, path)
 					}
 				}
-				else update(component, "div", params, path)
+				else update(payload, "div", params, path)
 			}
 		}, function() {
 			routeService.setPath(defaultRoute)
@@ -40,7 +40,7 @@ module.exports = function($window, redrawService) {
 		redrawService.subscribe(root, render)
 	}
 	route.set = routeService.setPath
-	route.get = function() {return current.path}
+	route.get = function() {return currentPath}
 	route.prefix = routeService.setPrefix
 	route.link = routeService.link
 	return route
