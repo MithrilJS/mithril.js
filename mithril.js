@@ -1092,31 +1092,32 @@ var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	
 	var identity = function(v) {return v}
-	var currentResolver, currentComponent, currentParams, currentPath, currentResolve
+	var resolver, component, attrs3, currentPath, resolve
 	var route = function(root, defaultRoute, routes) {
-		var update = function(resolver, component, params, path) {
-			currentResolver = resolver, currentComponent = component, currentParams = params, currentPath = path, currentResolve = null
-			currentResolver.render = resolver.render || identity
+		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
+		var update = function(routeResolver, comp, params, path) {
+			resolver = routeResolver, component = comp, attrs3 = params, currentPath = path, resolve = null
+			resolver.render = routeResolver.render || identity
 			render1()
 		}
 		var render1 = function() {
-			if (currentResolver != null) redrawService0.render(root, currentResolver.render(Vnode(currentComponent, currentParams.key, currentParams)))
+			if (resolver != null) redrawService0.render(root, resolver.render(Vnode(component, attrs3.key, attrs3)))
 		}
-		routeService.defineRoutes(routes, function(component, params, path) {
-			if (component.view) update({}, component, params, path)
+		routeService.defineRoutes(routes, function(payload, params, path) {
+			if (payload.view) update({}, payload, params, path)
 			else {
-				if (component.onmatch) {
-					if (currentResolve != null) update(component, currentComponent, params, path)
+				if (payload.onmatch) {
+					if (resolve != null) update(payload, component, params, path)
 					else {
-						currentResolve = function(resolved) {
-							update(component, resolved, params, path)
+						resolve = function(resolved) {
+							update(payload, resolved, params, path)
 						}
-						component.onmatch(function(resolved) {
-							if (currentResolve != null) currentResolve(resolved)
+						payload.onmatch(function(resolved) {
+							if (resolve != null) resolve(resolved)
 						}, params, path)
 					}
 				}
-				else update(component, "div", params, path)
+				else update(payload, "div", params, path)
 			}
 		}, function() {
 			routeService.setPath(defaultRoute)
