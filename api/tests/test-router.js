@@ -609,6 +609,29 @@ o.spec("route", function() {
 					}, 30)
 				})
 
+				o("route changes activate onbeforeremove", function(done, timeout) {
+					var spy = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a": {
+							onbeforeremove: spy,
+							view: function() {}
+						},
+						"/b": {
+							view: function() {}
+						}
+					})
+
+					route.set("/b")
+
+					setTimeout(function() {
+						o(spy.callCount).equals(1)
+
+						done()
+					}, 30)
+				})
+
 				o("throttles", function(done, timeout) {
 					timeout(200)
 
