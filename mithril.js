@@ -1103,7 +1103,7 @@ var _20 = function($window, redrawService0) {
 		var render1 = function() {
 			redrawService0.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
 		}
-		routeService.defineRoutes(routes, function(component, params, path, route) {
+		routeService.defineRoutes(routes, function(component, params, path) {
 			if (component.view) update({}, component, params, path)
 			else {
 				if (component.onmatch) {
