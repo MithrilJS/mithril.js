@@ -521,7 +521,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, '/', {
-						"/":{
+						"/": {
 							onmatch: onmatch,
 							render: render
 						}

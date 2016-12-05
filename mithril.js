@@ -960,21 +960,21 @@ var parseQueryString = function(string) {
 	var entries = string.split("&"), data0 = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key4 = decodeURIComponent(entry[0])
+		var key5 = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
 		if (value === "true") value = true
 		else if (value === "false") value = false
-		var levels = key4.split(/\]\[?|\[/)
+		var levels = key5.split(/\]\[?|\[/)
 		var cursor = data0
-		if (key4.indexOf("[") > -1) levels.pop()
+		if (key5.indexOf("[") > -1) levels.pop()
 		for (var j = 0; j < levels.length; j++) {
 			var level = levels[j], nextLevel = levels[j + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j === levels.length - 1
 			if (level === "") {
-				var key4 = levels.slice(0, j).join()
-				if (counters[key4] == null) counters[key4] = 0
-				level = counters[key4]++
+				var key5 = levels.slice(0, j).join()
+				if (counters[key5] == null) counters[key5] = 0
+				level = counters[key5]++
 			}
 			if (cursor[level] == null) {
 				cursor[level] = isValue ? value : isNumber ? [] : {}
@@ -996,11 +996,11 @@ var coreRouter = function($window) {
 	}
 	var asyncId
 	function debounceAsync(f) {
-		return function(e) {
+		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				f(e)
+				f()
 			})
 		}
 	}
@@ -1011,11 +1011,11 @@ var coreRouter = function($window) {
 		if (queryIndex > -1) {
 			var queryEnd = hashIndex > -1 ? hashIndex : path.length
 			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key3 in queryParams) queryData[key3] = queryParams[key3]
+			for (var key4 in queryParams) queryData[key4] = queryParams[key4]
 		}
 		if (hashIndex > -1) {
 			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key3 in hashParams) hashData[key3] = hashParams[key3]
+			for (var key4 in hashParams) hashData[key4] = hashParams[key4]
 		}
 		return path.slice(0, pathEnd)
 	}
@@ -1031,7 +1031,7 @@ var coreRouter = function($window) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
-			for (var key3 in data) queryData[key3] = data[key3]
+			for (var key4 in data) queryData[key4] = data[key4]
 			path = path.replace(/:([^\/]+)/g, function(match2, token) {
 				delete queryData[token]
 				return data[token]
@@ -1049,7 +1049,7 @@ var coreRouter = function($window) {
 		else $window.location.href = prefix1 + path
 	}
 	function defineRoutes(routes, resolve, reject) {
-		function resolveRoute(isAction) {
+		function resolveRoute() {
 			var path = getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
@@ -1063,7 +1063,7 @@ var coreRouter = function($window) {
 						for (var i = 0; i < keys.length; i++) {
 							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 						}
-						resolve(routes[route0], params, path, route0, Boolean(isAction))
+						resolve(routes[route0], params, path, route0)
 					})
 					return
 				}
@@ -1073,9 +1073,7 @@ var coreRouter = function($window) {
 		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (prefix1.charAt(0) === "#") $window.onhashchange = resolveRoute
-		resolveRoute(true)
-		
-		return resolveRoute
+		resolveRoute()
 	}
 	function link(vnode2) {
 		vnode2.dom.setAttribute("href", prefix1 + vnode2.attrs.href)
@@ -1094,36 +1092,37 @@ var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	
 	var identity = function(v) {return v}
-	var current = {render: identity, component: null, path: null, resolve: null}
+	var current = {}
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var render1 = function(resolver, component, params, path) {
-			current.render = resolver.render || identity
-			current.component = component
-			current.path = path
-			current.resolve = null
-			redrawService0.render(root, current.render.call(resolver, Vnode(component, undefined, params)))
+		var update = function(resolver, component, params, path) {
+			current = {resolver: resolver, component: component, params: params, path: path, resolve: null}
+			current.resolver.render = resolver.render || identity
+			render1()
 		}
-		var run1 = routeService.defineRoutes(routes, function(component, params, path, route, isAction) {
-			if (component.view) render1({}, component, params, path)
+		var render1 = function() {
+			redrawService0.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
+		}
+		routeService.defineRoutes(routes, function(component, params, path, route) {
+			if (component.view) update({}, component, params, path)
 			else {
 				if (component.onmatch) {
-					if (isAction === false && current.path === path || current.resolve != null) render1(current, current.component, params)
+					if (current.resolve != null) update(component, current.component, params, path)
 					else {
 						current.resolve = function(resolved) {
-							render1(component, resolved, params, path)
+							update(component, resolved, params, path)
 						}
 						component.onmatch(function(resolved) {
 							if (current.resolve != null) current.resolve(resolved)
 						}, params, path)
 					}
 				}
-				else render1(component, "div", params, path)
+				else update(component, "div", params, path)
 			}
 		}, function() {
 			routeService.setPath(defaultRoute)
 		})
-		redrawService0.subscribe(root, run1)
+		redrawService0.subscribe(root, render1)
 	}
 	route.set = routeService.setPath
 	route.get = function() {return current.path}
