@@ -16,7 +16,7 @@ module.exports = function($window, redrawService) {
 			render()
 		}
 		var render = function() {
-			redrawService.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
+			if (current.resolver != null) redrawService.render(root, current.resolver.render(Vnode(current.component, current.params.key, current.params)))
 		}
 		routeService.defineRoutes(routes, function(component, params, path) {
 			if (component.view) update({}, component, params, path)
