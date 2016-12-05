@@ -15,7 +15,7 @@ module.exports = function($window, redrawService) {
 			current.component = component
 			current.path = path
 			current.resolve = null
-			redrawService.render(root, current.render(Vnode(component, undefined, params)))
+			redrawService.render(root, current.render.call(resolver, Vnode(component, undefined, params)))
 		}
 		var run = routeService.defineRoutes(routes, function(component, params, path, route, isAction) {
 			if (component.view) render({}, component, params, path)
@@ -27,7 +27,7 @@ module.exports = function($window, redrawService) {
 							render(component, resolved, params, path)
 						}
 						component.onmatch(function(resolved) {
-							if (current.path !== path && current.resolve != null) current.resolve(resolved)
+							if (current.resolve != null) current.resolve(resolved)
 						}, params, path)
 					}
 				}

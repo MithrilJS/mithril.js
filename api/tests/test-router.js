@@ -238,25 +238,28 @@ o.spec("route", function() {
 						}
 					}
 
+					var resolver = {
+						onmatch: function(resolve, args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							resolve(Component)
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id" : {
-							onmatch: function(resolve, args, requestedPath) {
-								matchCount++
-
-								o(args.id).equals("abc")
-								o(requestedPath).equals("/abc")
-
-								resolve(Component)
-							},
-							render: function(vnode) {
-								renderCount++
-
-								o(vnode.attrs.id).equals("abc")
-
-								return vnode
-							},
-						},
+						"/:id" : resolver
 					})
 
 					o(matchCount).equals(1)
@@ -514,21 +517,24 @@ o.spec("route", function() {
 
 				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
 					var onmatch = o.spy(function(resolve) {resolve()})
+					var render = o.spy(function(){return m("div")})
 
 					$window.location.href = prefix + "/"
 					route(root, '/', {
 						"/":{
 							onmatch: onmatch,
-							render: function(){return m("div")}
+							render: render
 						}
 					})
 
 					o(onmatch.callCount).equals(1)
+					o(render.callCount).equals(1)
 
 					route.set(route.get())
 
 					setTimeout(function() {
 						o(onmatch.callCount).equals(2)
+						o(render.callCount).equals(2)
 
 						done()
 					}, FRAME_BUDGET)
