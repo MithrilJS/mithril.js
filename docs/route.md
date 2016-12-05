@@ -258,7 +258,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 ---
 
-### Changing route prefix
+### Changing router prefix
 
 The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
 
@@ -402,14 +402,12 @@ module.export = {
 ```javascript
 // index.js
 function load(file, done) {
-	m.request({
-		method: "GET",
-		url: file,
+	m.request(file, {
 		extract: function(xhr) {
 			return new Function("var module = {};" + xhr.responseText + ";return module.exports;")
 		}
 	})
-	.run(done)
+	.then(done)
 }
 
 m.route(document.body, "/", {
