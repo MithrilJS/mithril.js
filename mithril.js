@@ -1101,7 +1101,7 @@ var _20 = function($window, redrawService0) {
 			current.component = component
 			current.path = path
 			current.resolve = null
-			redrawService0.render(root, current.render(Vnode(component, undefined, params)))
+			redrawService0.render(root, current.render.call(resolver, Vnode(component, undefined, params)))
 		}
 		var run1 = routeService.defineRoutes(routes, function(component, params, path, route, isAction) {
 			if (component.view) render1({}, component, params, path)
@@ -1113,7 +1113,7 @@ var _20 = function($window, redrawService0) {
 							render1(component, resolved, params, path)
 						}
 						component.onmatch(function(resolved) {
-							if (current.path !== path && current.resolve != null) current.resolve(resolved)
+							if (current.resolve != null) current.resolve(resolved)
 						}, params, path)
 					}
 				}
