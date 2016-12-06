@@ -1,5 +1,6 @@
 "use strict"
 
+var Promise = require("../promise/promise")
 var buildQueryString = require("../querystring/build")
 var parseQueryString = require("../querystring/parse")
 
@@ -19,12 +20,13 @@ module.exports = function($window) {
 	var asyncId
 	function debounceAsync(f) {
 		return function() {
-			if (asyncId != null) return
-			asyncId = callAsync(function() {
-				asyncId = null
-				f()
-			})
-
+			return new Promise(function(resolve, reject) {
+				if (asyncId != null) return reject()
+				asyncId = callAsync(function() {
+					asyncId = null
+					resolve(f())
+				})
+			});
 		}
 	}
 
@@ -73,9 +75,12 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate(true)
+			return $window.onpopstate()
 		}
-		else $window.location.href = prefix + path
+		else {
+			$window.location.href = prefix + path
+			return Promise.resolve(prefix + path)
+		}
 	}
 
 	function defineRoutes(routes, resolve, reject) {
@@ -116,7 +121,7 @@ module.exports = function($window) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(prefix) === 0) href = href.slice(prefix.length)
-			setPath(href, undefined, undefined)
+			return setPath(href, undefined, undefined)
 		}
 	}
 
