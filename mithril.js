@@ -954,6 +954,7 @@ var _16 = function(redrawService0) {
 	}
 }
 m.mount = _16(redrawService)
+var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -1135,8 +1136,8 @@ m.withAttr = function(attrName, callback1, context) {
 		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-var _27 = coreRenderer(window)
-m.render = _27.render
+var _28 = coreRenderer(window)
+m.render = _28.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
