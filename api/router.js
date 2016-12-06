@@ -8,6 +8,7 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
+	var reject = new Promise(identity)
 	var render, component, attrs, currentPath
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
@@ -23,7 +24,7 @@ module.exports = function($window, redrawService) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+					Promise.resolve(payload.onmatch(params, path, reject)).then(function(resolved) {
 						update(payload, resolved, params, path)
 					})
 				}
