@@ -1092,37 +1092,31 @@ var coreRouter = function($window) {
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v) {return v}
-	var resolver, component, attrs3, currentPath, resolve
+	var render1, component, attrs3, currentPath
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			resolver = routeResolver, component = comp, attrs3 = params, currentPath = path, resolve = null
-			resolver.render = routeResolver.render || identity
-			render1()
+			component = comp || "div", attrs3 = params, currentPath = path
+			render1 = (routeResolver.render || identity).bind(routeResolver)
+			run1()
 		}
-		var render1 = function() {
-			if (resolver != null) redrawService0.render(root, resolver.render(Vnode(component || "div", attrs3.key, attrs3)))
+		var run1 = function() {
+			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
-					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						})
-					}
+					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+						update(payload, resolved, params, path)
+					})
 				}
 				else update(payload, "div", params, path)
 			}
 		}, function() {
 			routeService.setPath(defaultRoute)
 		})
-		redrawService0.subscribe(root, render1)
+		redrawService0.subscribe(root, run1)
 	}
 	route.set = routeService.setPath
 	route.get = function() {return currentPath}
