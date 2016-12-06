@@ -8,6 +8,7 @@ var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
 var apiRedraw = require("../../api/redraw")
 var apiRouter = require("../../api/router")
+var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
@@ -229,7 +230,7 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
-				o("accepts RouteResolver", function() {
+				o("accepts RouteResolver", function(done) {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
@@ -239,13 +240,13 @@ o.spec("route", function() {
 					}
 
 					var resolver = {
-						onmatch: function(resolve, args, requestedPath) {
+						onmatch: function(args, requestedPath) {
 							matchCount++
 
 							o(args.id).equals("abc")
 							o(requestedPath).equals("/abc")
 							o(this).equals(resolver)
-							resolve(Component)
+							return Component
 						},
 						render: function(vnode) {
 							renderCount++
@@ -262,12 +263,15 @@ o.spec("route", function() {
 						"/:id" : resolver
 					})
 
-					o(matchCount).equals(1)
-					o(renderCount).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
+					setTimeout(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+						o(root.firstChild.nodeName).equals("DIV")
+						done()
+					}, 20)
 				})
 
-				o("accepts RouteResolver without `render` method as payload", function() {
+				o("accepts RouteResolver without `render` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {
 						view: function() {
@@ -278,20 +282,22 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(resolve, args, requestedPath) {
+							onmatch: function(args, requestedPath) {
 								matchCount++
 
 								o(args.id).equals("abc")
 								o(requestedPath).equals("/abc")
 
-								resolve(Component)
+								return Component
 							},
 						},
 					})
 
-					o(matchCount).equals(1)
-
-					o(root.firstChild.nodeName).equals("DIV")
+					setTimeout(function() {
+						o(matchCount).equals(1)
+						o(root.firstChild.nodeName).equals("DIV")
+						done()
+					}, 20)
 				})
 
 				o("changing `vnode.key` in `render` resets the component", function(done, timeout){
@@ -378,7 +384,7 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
-				o("calls onmatch and view correct number of times", function() {
+				o("calls onmatch and view correct number of times", function(done) {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
@@ -390,9 +396,9 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function(resolve) {
+							onmatch: function() {
 								matchCount++
-								resolve(Component)
+								return Component
 							},
 							render: function(vnode) {
 								renderCount++
@@ -401,13 +407,52 @@ o.spec("route", function() {
 						},
 					})
 
-					o(matchCount).equals(1)
-					o(renderCount).equals(1)
+					setTimeout(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
 
-					redrawService.redraw()
+						redrawService.redraw()
 
-					o(matchCount).equals(1)
-					o(renderCount).equals(2)
+						o(matchCount).equals(1)
+						o(renderCount).equals(2)
+						
+						done()
+					}, 20)
+				})
+
+				o("calls onmatch and view correct number of times when not onmatch returns undefined", function(done) {
+					var matchCount = 0
+					var renderCount = 0
+					var Component = {
+						view: function() {
+							return m("div")
+						}
+					}
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							onmatch: function() {
+								matchCount++
+							},
+							render: function(vnode) {
+								renderCount++
+								return {tag: Component}
+							},
+						},
+					})
+
+					setTimeout(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+
+						redrawService.redraw()
+
+						o(matchCount).equals(1)
+						o(renderCount).equals(2)
+						
+						done()
+					}, 20)
 				})
 
 				o("onmatch can redirect to another route", function(done) {
@@ -458,38 +503,11 @@ o.spec("route", function() {
 					}, FRAME_BUDGET)
 				})
 
-				o("onmatch resolution callback resolves at most once", function(done) {
-					var resolveCount = 0
-					var resolvedComponent
-					var A = {view: function() {}}
-					var B = {view: function() {}}
-					var C = {view: function() {}}
-
-					$window.location.href = prefix + "/"
-					route(root, "/", {
-						"/": {
-							onmatch: function(resolve) {
-								resolve(A)
-								resolve(B)
-								callAsync(function() {resolve(C)})
-							},
-							render: function(vnode) {
-								resolveCount++
-								resolvedComponent = vnode.tag
-							}
-						},
-					})
-					setTimeout(function() {
-						o(resolveCount).equals(1)
-						o(resolvedComponent).equals(A)
-
-						done()
-					}, FRAME_BUDGET)
-				})
-
 				o("the previous view redraws while onmatch resolution is pending (#1268)", function(done) {
 					var view = o.spy()
-					var onmatch = o.spy()
+					var onmatch = o.spy(function() {
+						return new Promise(function() {})
+					})
 
 					$window.location.href = prefix + "/a"
 					route(root, "/", {
@@ -516,7 +534,7 @@ o.spec("route", function() {
 				})
 
 				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
-					var onmatch = o.spy(function(resolve) {resolve()})
+					var onmatch = o.spy()
 					var render = o.spy(function(){return m("div")})
 
 					$window.location.href = prefix + "/"
@@ -527,16 +545,18 @@ o.spec("route", function() {
 						}
 					})
 
-					o(onmatch.callCount).equals(1)
-					o(render.callCount).equals(1)
-
-					route.set(route.get())
-
 					setTimeout(function() {
-						o(onmatch.callCount).equals(2)
-						o(render.callCount).equals(2)
+						o(onmatch.callCount).equals(1)
+						o(render.callCount).equals(1)
 
-						done()
+						route.set(route.get())
+
+						setTimeout(function() {
+							o(onmatch.callCount).equals(2)
+							o(render.callCount).equals(2)
+
+							done()
+						}, FRAME_BUDGET)
 					}, FRAME_BUDGET)
 				})
 
@@ -544,8 +564,12 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/": {view: function(){}},
-						"/2": {onmatch: function(){}}
+						"/": {view: function() {}},
+						"/2": {
+							onmatch: function() {
+								return new Promise(function() {})
+							}
+						}
 					})
 
 
@@ -596,8 +620,10 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
-							onmatch: function(resolve) {
-								setTimeout(resolve, 20)
+							onmatch: function() {
+								return new Promise(function(resolve) {
+									setTimeout(resolve, 20)
+								})
 							},
 							render: function(vnode) {resolved = "a"}
 						},

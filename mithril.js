@@ -995,12 +995,12 @@ var coreRouter = function($window) {
 		return data
 	}
 	var asyncId
-	function debounceAsync(f) {
+	function debounceAsync(callback0) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				f()
+				callback0()
 			})
 		}
 	}
@@ -1044,7 +1044,7 @@ var coreRouter = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix1 + path)
 			else $window.history.pushState(null, null, prefix1 + path)
-			$window.onpopstate(true)
+			$window.onpopstate()
 		}
 		else $window.location.href = prefix1 + path
 	}
@@ -1090,7 +1090,6 @@ var coreRouter = function($window) {
 }
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
-	
 	var identity = function(v) {return v}
 	var resolver, component, attrs3, currentPath, resolve
 	var route = function(root, defaultRoute, routes) {
@@ -1101,7 +1100,7 @@ var _20 = function($window, redrawService0) {
 			render1()
 		}
 		var render1 = function() {
-			if (resolver != null) redrawService0.render(root, resolver.render(Vnode(component, attrs3.key, attrs3)))
+			if (resolver != null) redrawService0.render(root, resolver.render(Vnode(component || "div", attrs3.key, attrs3)))
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			if (payload.view) update({}, payload, params, path)
@@ -1112,9 +1111,9 @@ var _20 = function($window, redrawService0) {
 						resolve = function(resolved) {
 							update(payload, resolved, params, path)
 						}
-						payload.onmatch(function(resolved) {
+						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
 							if (resolve != null) resolve(resolved)
-						}, params, path)
+						})
 					}
 				}
 				else update(payload, "div", params, path)
@@ -1131,9 +1130,9 @@ var _20 = function($window, redrawService0) {
 	return route
 }
 m.route = _20(window, redrawService)
-m.withAttr = function(attrName, callback0, context) {
+m.withAttr = function(attrName, callback1, context) {
 	return function(e) {
-		return callback0.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
 var _27 = coreRenderer(window)
