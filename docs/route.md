@@ -257,7 +257,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 ---
 
-### Changing route prefix
+### Changing router prefix
 
 The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
 
