@@ -8,11 +8,11 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
-	var render, component, attrs, currentPath, resolve
+	var render, component, attrs, currentPath
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			component = comp || "div", attrs = params, currentPath = path, resolve = null
+			component = comp || "div", attrs = params, currentPath = path
 			render = (routeResolver.render || identity).bind(routeResolver)
 			run()
 		}
@@ -23,15 +23,9 @@ module.exports = function($window, redrawService) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
-					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						})
-					}
+					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+						update(payload, resolved, params, path)
+					})
 				}
 				else update(payload, "div", params, path)
 			}
