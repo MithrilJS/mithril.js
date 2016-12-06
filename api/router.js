@@ -25,7 +25,7 @@ module.exports = function($window, redrawService) {
 					if (waiting != null) update(payload, component, params, path)
 					else {
 						waiting = Promise.resolve(payload.onmatch(params, path))
-							.then(function() {update(payload, component, params, path)})
+							.then(function(comp) {update(payload, comp != null ? comp : component, params, path)})
 					}
 				}
 				else update(payload, "div", params, path)
