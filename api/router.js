@@ -5,13 +5,13 @@ var coreRouter = require("../router/router")
 
 module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
-	
+
 	var identity = function(v) {return v}
-	var resolver, component, attrs, currentPath, resolve
+	var resolver, component, attrs, currentPath, waiting
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			resolver = routeResolver, component = comp, attrs = params, currentPath = path, resolve = null
+			resolver = routeResolver, component = comp, attrs = params, currentPath = path, waiting = null
 			resolver.render = routeResolver.render || identity
 			render()
 		}
@@ -22,14 +22,10 @@ module.exports = function($window, redrawService) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
+					if (waiting != null) update(payload, component, params, path)
 					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						payload.onmatch(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						}, params, path)
+						waiting = Promise.resolve(payload.onmatch(params, path))
+							.then(function() {update(payload, component, params, path)})
 					}
 				}
 				else update(payload, "div", params, path)
