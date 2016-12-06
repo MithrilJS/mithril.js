@@ -640,16 +640,22 @@ o.spec("route", function() {
 				})
 
 				o("calling route.set invalidates pending onmatch resolution", function(done) {
+					var rendered = false
 					var resolved
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
 							onmatch: function() {
-								return Promise.resolve(function(resolve) {
-									setTimeout(resolve, 0)
+								return new Promise(function(resolve) {
+									callAsync(function() {
+										callAsync(function() {
+											resolve({view: function() {}})
+										})
+									})
 								})
 							},
 							render: function(vnode) {
+								rendered = true
 								resolved = "a"
 							}
 						},
@@ -662,11 +668,12 @@ o.spec("route", function() {
 
 					route.set("/b")
 
-					setTimeout(function() {
+					callAsync(function() {
+						o(rendered).equals(false)
 						o(resolved).equals("b")
 
 						done()
-					}, 2) //FIXME magic number
+					})
 				})
 
 				o("route changes activate onbeforeremove", function(done) {
