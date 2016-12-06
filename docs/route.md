@@ -384,9 +384,9 @@ For the sake of simplicity, in the example above, the user's logged in status is
 
 ### Code splitting
 
-In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by calling the `resolve` callback of the `onmatch` hook asynchronously:
+In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by returning a promise from the `onmatch` hook:
 
-At its simplest form, one could do the following:
+At its most basic form, one could do the following:
 
 ```javascript
 // Home.js

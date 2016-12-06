@@ -1,6 +1,7 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
+var Promise = require("../promise/promise")
 var coreRouter = require("../router/router")
 
 module.exports = function($window, redrawService) {
