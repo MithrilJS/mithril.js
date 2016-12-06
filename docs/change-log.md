@@ -27,6 +27,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [Accessing route params](#accessing-route-params)
 - [Preventing unmounting](#preventing-unmounting)
 - [`m.request`](#mrequest)
+- [`m.deferred` removed](#mdeferred-removed)
 - [`m.sync` removed](#msync-removed)
 - [`xlink` namespace required](#xlink-namespace-required)
 - [Nested arrays in views](#nested-arrays-in-views)
@@ -502,9 +503,45 @@ Additionally, if the `extract` option is passed to `m.request` the return value 
 
 ---
 
+## `m.deferred` removed
+
+`v0.2.x` used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. `v1.x` uses Promises instead, and implements a [polyfill](promises.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
+
+### `v0.2.x`
+
+```javascript
+var greetAsync = function() {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve("hello");
+    }, 1000);
+    return deferred.promise;
+};
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+```
+
+### `v1.x`
+
+```javascript
+var greetAsync = new Promise(function(resolve){
+    setTimeout(function() {
+        resolve("hello");
+    }, 1000);
+});
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+```
+
+---
+
 ## `m.sync` removed
 
-`m.sync` has been removed in favor of `Promise.all`
+Since `v1.x` uses standards-compliant Promises, `m.sync` is redundant. Use `Promise.all` instead.
 
 ### `v0.2.x`
 
@@ -570,7 +607,7 @@ If a vnode is strictly equal to the vnode occupying its place in the last draw, 
 
 ## `m.startComputation`/`m.endComputation` removed
 
-They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
 
 ---
 
