@@ -17,14 +17,13 @@ module.exports = function($window) {
 	}
 
 	var asyncId
-	function debounceAsync(f) {
+	function debounceAsync(callback) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync(function() {
 				asyncId = null
-				f()
+				callback()
 			})
-
 		}
 	}
 
@@ -73,7 +72,7 @@ module.exports = function($window) {
 		if (supportsPushState) {
 			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
 			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate(true)
+			$window.onpopstate()
 		}
 		else $window.location.href = prefix + path
 	}

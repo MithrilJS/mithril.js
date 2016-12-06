@@ -5,7 +5,7 @@ var coreRouter = require("../router/router")
 
 module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
-	
+
 	var identity = function(v) {return v}
 	var resolver, component, attrs, currentPath, resolve
 	var route = function(root, defaultRoute, routes) {
@@ -16,7 +16,7 @@ module.exports = function($window, redrawService) {
 			render()
 		}
 		var render = function() {
-			if (resolver != null) redrawService.render(root, resolver.render(Vnode(component, attrs.key, attrs)))
+			if (resolver != null) redrawService.render(root, resolver.render(Vnode(component || "div", attrs.key, attrs)))
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			if (payload.view) update({}, payload, params, path)
@@ -27,9 +27,9 @@ module.exports = function($window, redrawService) {
 						resolve = function(resolved) {
 							update(payload, resolved, params, path)
 						}
-						payload.onmatch(function(resolved) {
+						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
 							if (resolve != null) resolve(resolved)
-						}, params, path)
+						})
 					}
 				}
 				else update(payload, "div", params, path)
