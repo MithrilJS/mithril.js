@@ -202,7 +202,10 @@ module.exports = new function init() {
 				status = 1
 			}
 		}
-		console.log(results.length + " assertions completed in " + Math.round(new Date - start) + "ms")
+		console.log(
+			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
+			"of which " + results.filter(function(result){return result.error}).length + " failed"
+		)
 		if (hasProcess && status === 1) process.exit(1)
 	}
 
