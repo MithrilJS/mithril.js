@@ -454,15 +454,18 @@ o.spec("route", function() {
 					})
 				})
 
+
 				o("onmatch can redirect to another route", function(done) {
 					var redirected = false
-
+					var render = o.spy()
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: function(params, path, reject) {
 								route.set("/b")
-							}
+								return reject
+							},
+							render: render
 						},
 						"/b" : {
 							view: function(vnode){
@@ -472,6 +475,7 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						o(render.callCount).equals(0)
 						o(redirected).equals(true)
 
 						done()
