@@ -5,6 +5,7 @@ var parseURL = require("../test-utils/parseURL")
 module.exports = function(options) {
 	if (options == null) options = {}
 	
+	var $window = options.window || {}
 	var protocol = options.protocol || "http:"
 	var hostname = options.hostname || "localhost"
 	var port = ""
@@ -32,7 +33,7 @@ module.exports = function(options) {
 		}
 		return isNew
 	}
-
+	
 	function prefix(prefix, value) {
 		if (value === "") return ""
 		return (value.charAt(0) !== prefix ? prefix : "") + value
@@ -46,125 +47,125 @@ module.exports = function(options) {
 	function unload() {
 		if (typeof $window.onunload === "function") $window.onunload({type: "unload"})
 	}
-	var $window = {
-		location: {
-			get protocol() {
-				return protocol
-			},
-			get hostname() {
-				return hostname
-			},
-			get port() {
-				return port
-			},
-			get pathname() {
-				return pathname
-			},
-			get search() {
-				return search
-			},
-			get hash() {
-				return hash
-			},
-			get origin() {
-				if (protocol === "file:") return "null"
-				return protocol + "//" + hostname + prefix(":", port)
-			},
-			get host() {
-				if (protocol === "file:") return ""
-				return hostname + prefix(":", port)
-			},
-			get href() {
-				return getURL()
-			},
 
-			set protocol(value) {
-				throw new Error("Protocol is read-only")
-			},
-			set hostname(value) {
-				unload()
-				past.push({url: getURL(), isNew: true})
-				future = []
-				hostname = value
-			},
-			set port(value) {
-				if (protocol === "file:") throw new Error("Port is read-only under `file://` protocol")
-				unload()
-				past.push({url: getURL(), isNew: true})
-				future = []
-				port = value
-			},
-			set pathname(value) {
-				if (protocol === "file:") throw new Error("Pathname is read-only under `file://` protocol")
-				unload()
-				past.push({url: getURL(), isNew: true})
-				future = []
-				pathname = prefix("/", value)
-			},
-			set search(value) {
-				unload()
-				past.push({url: getURL(), isNew: true})
-				future = []
-				search = prefix("?", value)
-			},
-			set hash(value) {
-				var oldHash = hash
-				past.push({url: getURL(), isNew: false})
-				future = []
-				hash = prefix("#", value)
-				if (oldHash != hash) hashchange()
-			},
+	$window.location = {
+		get protocol() {
+			return protocol
+		},
+		get hostname() {
+			return hostname
+		},
+		get port() {
+			return port
+		},
+		get pathname() {
+			return pathname
+		},
+		get search() {
+			return search
+		},
+		get hash() {
+			return hash
+		},
+		get origin() {
+			if (protocol === "file:") return "null"
+			return protocol + "//" + hostname + prefix(":", port)
+		},
+		get host() {
+			if (protocol === "file:") return ""
+			return hostname + prefix(":", port)
+		},
+		get href() {
+			return getURL()
+		},
 
-			set origin(value) {
-				//origin is writable but ignored
-			},
-			set host(value) {
-				//host is writable but ignored in Chrome
-			},
-			set href(value) {
-				var url = getURL()
-				var isNew = setURL(value)
-				if (isNew) {
-					setURL(url)
-					unload()
-					setURL(value)
-				}
-				past.push({url: url, isNew: isNew})
-				future = []
-			},
+		set protocol(value) {
+			throw new Error("Protocol is read-only")
 		},
-		history: {
-			pushState: function(data, title, url) {
-				past.push({url: getURL(), isNew: false})
-				future = []
-				setURL(url)
-			},
-			replaceState: function(data, title, url) {
-				future = []
-				setURL(url)
-			},
-			back: function() {
-				var entry = past.pop()
-				if (entry != null) {
-					if (entry.isNew) unload()
-					future.push({url: getURL(), isNew: false})
-					setURL(entry.url)
-					if (!entry.isNew) popstate()
-				}
-			},
-			forward: function() {
-				var entry = future.pop()
-				if (entry != null) {
-					if (entry.isNew) unload()
-					past.push({url: getURL(), isNew: false})
-					setURL(entry.url)
-					if (!entry.isNew) popstate()
-				}
-			},
+		set hostname(value) {
+			unload()
+			past.push({url: getURL(), isNew: true})
+			future = []
+			hostname = value
 		},
-		onpopstate: null,
-		onhashchange: null,
-		onunload: null,
+		set port(value) {
+			if (protocol === "file:") throw new Error("Port is read-only under `file://` protocol")
+			unload()
+			past.push({url: getURL(), isNew: true})
+			future = []
+			port = value
+		},
+		set pathname(value) {
+			if (protocol === "file:") throw new Error("Pathname is read-only under `file://` protocol")
+			unload()
+			past.push({url: getURL(), isNew: true})
+			future = []
+			pathname = prefix("/", value)
+		},
+		set search(value) {
+			unload()
+			past.push({url: getURL(), isNew: true})
+			future = []
+			search = prefix("?", value)
+		},
+		set hash(value) {
+			var oldHash = hash
+			past.push({url: getURL(), isNew: false})
+			future = []
+			hash = prefix("#", value)
+			if (oldHash != hash) hashchange()
+		},
+
+		set origin(value) {
+			//origin is writable but ignored
+		},
+		set host(value) {
+			//host is writable but ignored in Chrome
+		},
+		set href(value) {
+			var url = getURL()
+			var isNew = setURL(value)
+			if (isNew) {
+				setURL(url)
+				unload()
+				setURL(value)
+			}
+			past.push({url: url, isNew: isNew})
+			future = []
+		},
 	}
+	$window.history = {
+		pushState: function(data, title, url) {
+			past.push({url: getURL(), isNew: false})
+			future = []
+			setURL(url)
+		},
+		replaceState: function(data, title, url) {
+			future = []
+			setURL(url)
+		},
+		back: function() {
+			var entry = past.pop()
+			if (entry != null) {
+				if (entry.isNew) unload()
+				future.push({url: getURL(), isNew: false})
+				setURL(entry.url)
+				if (!entry.isNew) popstate()
+			}
+		},
+		forward: function() {
+			var entry = future.pop()
+			if (entry != null) {
+				if (entry.isNew) unload()
+				past.push({url: getURL(), isNew: false})
+				setURL(entry.url)
+				if (!entry.isNew) popstate()
+			}
+		},
+	}
+	$window.onpopstate = null,
+	$window.onhashchange = null,
+	$window.onunload = null
+
 	return $window
 }
