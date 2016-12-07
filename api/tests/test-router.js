@@ -456,13 +456,15 @@ o.spec("route", function() {
 
 				o("onmatch can redirect to another route", function(done) {
 					var redirected = false
-
+					var render = o.spy()
+					
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
 								route.set("/b")
-							}
+							},
+							render: render
 						},
 						"/b" : {
 							view: function(vnode){
@@ -472,6 +474,7 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						o(render.callCount).equals(0)
 						o(redirected).equals(true)
 
 						done()
@@ -480,13 +483,15 @@ o.spec("route", function() {
 
 				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function(done) {
 					var redirected = false
+					var render = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
 								route.set("/b")
-							}
+							},
+							render: render
 						},
 						"/b" : {
 							onmatch: function() {
@@ -497,6 +502,7 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						o(render.callCount).equals(0)
 						o(redirected).equals(true)
 
 						done()
@@ -505,13 +511,15 @@ o.spec("route", function() {
 
 				o("onmatch can redirect to another route that has RouteResolver w/ only render", function(done) {
 					var redirected = false
+					var render = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
 								route.set("/b")
-							}
+							},
+							render: render
 						},
 						"/b" : {
 							render: function(vnode){
@@ -521,9 +529,98 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						o(render.callCount).equals(0)
 						o(redirected).equals(true)
 
 						done()
+					})
+				})
+
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ onmatch", function(done) {
+					var redirected = false
+					var render = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/b", {
+						"/a" : {
+							onmatch: function() {
+								route.set("/c")
+							},
+							render: render
+						},
+						"/b" : {
+							onmatch: function(vnode){
+								redirected = true
+								return {view: function() {}}
+							}
+						}
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							o(render.callCount).equals(0)
+							o(redirected).equals(true)
+
+							done()
+						})
+					})
+				})
+
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ render", function(done) {
+					var redirected = false
+					var render = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/b", {
+						"/a" : {
+							onmatch: function() {
+								route.set("/c")
+							},
+							render: render
+						},
+						"/b" : {
+							render: function(vnode){
+								redirected = true
+							}
+						}
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							o(render.callCount).equals(0)
+							o(redirected).equals(true)
+
+							done()
+						})
+					})
+				})
+
+				o("onmatch can redirect to a non-existent route that defaults to a component", function(done) {
+					var redirected = false
+					var render = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/b", {
+						"/a" : {
+							onmatch: function() {
+								route.set("/c")
+							},
+							render: render
+						},
+						"/b" : {
+							view: function(vnode){
+								redirected = true
+							}
+						}
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							o(render.callCount).equals(0)
+							o(redirected).equals(true)
+
+							done()
+						})
 					})
 				})
 
@@ -609,9 +706,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("routing with RouteResolver works more than once", function(done, timeout) {
-					timeout(200)
-
+				o("routing with RouteResolver works more than once", function(done) {
 					$window.location.href = prefix + "/a"
 					route(root, '/a', {
 						'/a': {
@@ -673,6 +768,47 @@ o.spec("route", function() {
 						o(resolved).equals("b")
 
 						done()
+					})
+				})
+
+				o("calling route.set invalidates pending onmatch resolution", function(done) {
+					var rendered = false
+					var resolved
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a": {
+							onmatch: function() {
+								return new Promise(function(resolve) {
+									callAsync(function() {
+										callAsync(function() {
+											resolve({view: function() {rendered = true}})
+										})
+									})
+								})
+							},
+							render: function(vnode) {
+								rendered = true
+								resolved = "a"
+							}
+						},
+						"/b": {
+							view: function() {
+								resolved = "b"
+							}
+						}
+					})
+
+					route.set("/b")
+
+					callAsync(function() {
+						o(rendered).equals(false)
+						o(resolved).equals("b")
+
+						callAsync(function() {
+							o(rendered).equals(false)
+							o(resolved).equals("b")
+							done()
+						})
 					})
 				})
 
