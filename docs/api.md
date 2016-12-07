@@ -126,7 +126,7 @@ var querystring = m.buildQueryString({a: "1", b: "2"})
 ```javascript
 var state = {
 	value: "",
-	setValue: function(v) {value = v}
+	setValue: function(v) {state.value = v}
 }
 
 var Component = {
