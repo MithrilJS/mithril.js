@@ -231,12 +231,12 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
-				o("accepts RouteResolver", function(done) {
+				o("accepts RouteResolver with onmatch that returns Component", function(done) {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
 						view: function() {
-							return m("div")
+							return m("span")
 						}
 					}
 
@@ -267,7 +267,48 @@ o.spec("route", function() {
 					callAsync(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
-						o(root.firstChild.nodeName).equals("DIV")
+						o(root.firstChild.nodeName).equals("SPAN")
+						done()
+					})
+				})
+
+				o("accepts RouteResolver with onmatch that returns Promise<Component>", function(done) {
+					var matchCount = 0
+					var renderCount = 0
+					var Component = {
+						view: function() {
+							return m("span")
+						}
+					}
+
+					var resolver = {
+						onmatch: function(args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							return Promise.resolve(Component)
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
+					$window.location.href = prefix + "/abc"
+					route(root, "/abc", {
+						"/:id" : resolver
+					})
+
+					callAsync(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+						o(root.firstChild.nodeName).equals("SPAN")
 						done()
 					})
 				})
@@ -835,6 +876,37 @@ o.spec("route", function() {
 					})
 				})
 
+				o("asynchronous route.set in onmatch works", function(done) {
+					var rendered = false, resolved
+					route(root, "/a", {
+						"/a": {
+							onmatch: function() {
+								return Promise.resolve().then(function() {
+									route.set("/b")
+								})
+							},
+							render: function(vnode) {
+								rendered = true
+								resolved = "a"
+							}
+						},
+						"/b": {
+							view: function() {
+								resolved = "b"
+							}
+						},
+					})
+					
+					callAsync(function() {
+						callAsync(function() {
+							o(rendered).equals(false)
+							o(resolved).equals("b")
+							
+							done()
+						})
+					})
+				})
+				
 				o("throttles", function(done, timeout) {
 					timeout(200)
 
