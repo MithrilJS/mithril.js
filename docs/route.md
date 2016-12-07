@@ -16,10 +16,10 @@
 - [Routing parameters](#routing-parameters)
 - [Changing router prefix](#changing-router-prefix)
 - [Advanced component resolution](#advanced-component-resolution)
-- [Wrapping a layout component](#wrapping-a-layout-component)
-- [Authentication](#authentication)
-- [Preloading data](#preloading-data)
-- [Code splitting](#code-splitting)
+	- [Wrapping a layout component](#wrapping-a-layout-component)
+	- [Authentication](#authentication)
+	- [Preloading data](#preloading-data)
+	- [Code splitting](#code-splitting)
 
 ---
 
@@ -111,6 +111,8 @@ A RouterResolver is an object that contains an `onmatch` method and/or a `render
 The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)
 
 This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading. To render a component asynchronously return a promise that resolves to a component.
+
+For more information on `onmatch`, see the [advanced component resolution](#advanced-component-resolution) section
 
 `routeResolver.onmatch(args, requestedPath)`
 
@@ -304,7 +306,7 @@ RouteResolvers are useful for implementing a variety of advanced routing use cas
 
 ---
 
-### Wrapping a layout component
+#### Wrapping a layout component
 
 It's often desirable to wrap all or most of the routed components in a reusable shell (often called a "layout"). In order to do that, you first need to create a component that contains the common markup that will wrap around the various different components:
 
@@ -348,7 +350,7 @@ Note that in this case, if the Layout component the `oninit` and `oncreate` life
 
 ---
 
-### Authentication
+#### Authentication
 
 The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
@@ -387,7 +389,7 @@ For the sake of simplicity, in the example above, the user's logged in status is
 
 ---
 
-### Preloading data
+#### Preloading data
 
 Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
 
@@ -443,7 +445,7 @@ Above, `render` only runs after the request completes, making the ternary operat
 
 ---
 
-### Code splitting
+#### Code splitting
 
 In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by returning a promise from the `onmatch` hook:
 
