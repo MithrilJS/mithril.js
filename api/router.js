@@ -8,11 +8,11 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
-	var routing = false, render, component, attrs, currentPath, resolve
+	var render, component, attrs, currentPath, updatePending = false
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, resolve = null
+			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, updatePending = false
 			render = (routeResolver.render || identity).bind(routeResolver)
 			run()
 		}
@@ -26,15 +26,10 @@ module.exports = function($window, redrawService) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
-					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						}, bail)
-					}
+					updatePending = true
+					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+						if (updatePending) update(payload, resolved, params, path)
+					}, bail)
 				}
 				else update(payload, "div", params, path)
 			}
@@ -42,8 +37,8 @@ module.exports = function($window, redrawService) {
 		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {
-		if (resolve != null) options = {replace: true}
-		resolve = null
+		if (updatePending) options = {replace: true}
+		updatePending = false
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
