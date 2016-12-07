@@ -122,7 +122,7 @@ Argument        | Type                           | Description
 
 If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
 
-If `onmatch` returns a promise that gets rejected, the router redirects back to `defaultRoute`.
+If `onmatch` returns a promise that gets rejected, the router redirects back to `defaultRoute`. You may override this behavior by calling `.catch` on the promise chain before returning it.
 
 ##### routeResolver.render
 

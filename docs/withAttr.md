@@ -15,7 +15,7 @@ Returns an event handler that runs `callback` with the value of the specified DO
 ```javascript
 var state = {
 	value: "",
-	setValue: function(v) {value = v}
+	setValue: function(v) {state.value = v}
 }
 
 var Component = {
