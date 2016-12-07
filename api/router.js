@@ -12,12 +12,15 @@ module.exports = function($window, redrawService) {
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			component = comp || "div", attrs = params, currentPath = path, resolve = null
+			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, resolve = null
 			render = (routeResolver.render || identity).bind(routeResolver)
 			run()
 		}
 		var run = function() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
+		}
+		var bail = function() {
+			routeService.setPath(defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			if (payload.view) update({}, payload, params, path)
@@ -30,14 +33,12 @@ module.exports = function($window, redrawService) {
 						}
 						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
 							if (resolve != null) resolve(resolved)
-						})
+						}, bail)
 					}
 				}
 				else update(payload, "div", params, path)
 			}
-		}, function() {
-			routeService.setPath(defaultRoute)
-		})
+		}, bail)
 		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {

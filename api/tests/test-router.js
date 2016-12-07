@@ -313,6 +313,125 @@ o.spec("route", function() {
 					})
 				})
 
+				o("accepts RouteResolver with onmatch that returns Promise<undefined>", function(done) {
+					var matchCount = 0
+					var renderCount = 0
+					var Component = {
+						view: function() {
+							return m("span")
+						}
+					}
+
+					var resolver = {
+						onmatch: function(args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							return Promise.resolve()
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
+					$window.location.href = prefix + "/abc"
+					route(root, "/abc", {
+						"/:id" : resolver
+					})
+
+					callAsync(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+						o(root.firstChild.nodeName).equals("DIV")
+						done()
+					})
+				})
+
+				o("accepts RouteResolver with onmatch that returns Promise<any>", function(done) {
+					var matchCount = 0
+					var renderCount = 0
+					var Component = {
+						view: function() {
+							return m("span")
+						}
+					}
+
+					var resolver = {
+						onmatch: function(args, requestedPath) {
+							matchCount++
+
+							o(args.id).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(this).equals(resolver)
+							return Promise.resolve([])
+						},
+						render: function(vnode) {
+							renderCount++
+
+							o(vnode.attrs.id).equals("abc")
+							o(this).equals(resolver)
+
+							return vnode
+						},
+					}
+
+					$window.location.href = prefix + "/abc"
+					route(root, "/abc", {
+						"/:id" : resolver
+					})
+
+					callAsync(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(1)
+						o(root.firstChild.nodeName).equals("DIV")
+						done()
+					})
+				})
+
+				o("accepts RouteResolver with onmatch that returns rejected Promise", function(done) {
+					var matchCount = 0
+					var renderCount = 0
+					var spy = o.spy()
+					var Component = {
+						view: function() {
+							return m("span")
+						}
+					}
+
+					var resolver = {
+						onmatch: function(args, requestedPath) {
+							matchCount++
+							return Promise.reject(new Error("error"))
+						},
+						render: function(vnode) {
+							renderCount++
+							return vnode
+						},
+					}
+
+					$window.location.href = prefix + "/test/1"
+					route(root, "/default", {
+						"/default" : {view: spy},
+						"/test/:id" : resolver
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							o(matchCount).equals(1)
+							o(renderCount).equals(0)
+							o(spy.callCount).equals(1)
+							done()
+						})
+					})
+				})
+
 				o("accepts RouteResolver without `render` method as payload", function(done) {
 					var matchCount = 0
 					var Component = {

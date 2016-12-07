@@ -18,6 +18,7 @@
 - [Advanced component resolution](#advanced-component-resolution)
 - [Wrapping a layout component](#wrapping-a-layout-component)
 - [Authentication](#authentication)
+- [Preloading data](#preloading-data)
 - [Code splitting](#code-splitting)
 
 ---
@@ -107,7 +108,7 @@ A RouterResolver is an object that contains an `onmatch` method and/or a `render
 
 ##### routeResolver.onmatch
 
-The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic or analytics tracking)
+The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)
 
 This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading. To render a component asynchronously return a promise that resolves to a component.
 
@@ -117,7 +118,11 @@ Argument        | Type                           | Description
 --------------- | ------------------------------ | ---
 `args`          | `Object`                       | The [routing parameters](#routing-parameters)
 `requestedPath` | `String`                       | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-**returns**     | `Promise<Component>|undefined` | Returns a promise that resolves to a component, or undefined
+**returns**     | `Component|Promise<Component>` | Returns a component or a promise that resolves to a component
+
+If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
+
+If `onmatch` returns a promise that gets rejected, the router redirects back to `defaultRoute`.
 
 ##### routeResolver.render
 
@@ -127,8 +132,8 @@ The `render` method is called on every redraw for a matching route. It is simila
 
 Argument            | Type            | Description
 ------------------- | --------------- | ----------- 
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
+`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
+`vnode.attrs`       | `Object`        | A map of URL parameter values
 **returns**         | `Vnode`         | Returns a vnode
 
 ---
@@ -379,6 +384,62 @@ m.route(document.body, "/secret", {
 When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
 
 For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user.
+
+---
+
+### Preloading data
+
+Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
+
+```javascript
+var state = {
+	users: [],
+	loadUsers: function() {
+		return m.request("/api/v1/users").then(function(users) {
+			state.users = users
+		})
+	}
+}
+
+m.route(document.body, "/user/list", {
+	"/user/list": {
+		oninit: loadUsers,
+		view: function() {
+			return state.users.length > 0 ? state.users.map(function() {
+				return m("div", user.id)
+			}) : "loading"
+		}
+	},
+})
+```
+
+In the example above, on the first render, the UI displays `"loading"` since `state.users` is an empty array before the request completes. Then, once data is available, the UI redraws and a list of user ids is shown.
+
+RouteResolvers can be used as a mechanism to preload data before rendering a component in order to avoid UI flickering and thus bypassing the need for a loading indicator:
+
+```javascript
+var state = {
+	users: [],
+	loadUsers: function() {
+		return m.request("/api/v1/users").then(function(users) {
+			state.users = users
+		})
+	}
+}
+
+m.route(document.body, "/user/list", {
+	"/user/list": {
+		onmatch: loadUsers,
+		render: function() {
+			return state.users.length > 0 ? state.users.map(function() {
+				return m("div", user.id)
+			}) : "loading"
+		}
+	},
+})
+```
+
+Above, `render` only runs after the request completes, making the ternary operator redundant.
 
 ---
 
