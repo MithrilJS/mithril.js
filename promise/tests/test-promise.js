@@ -403,6 +403,24 @@ o.spec("promise", function() {
 				done()
 			})
 		})
+		o("triggers all branched rejection handlers upon rejection", function(done) {
+			var promise = Promise.reject()
+			var then    = o.spy()
+			var catch1  = o.spy()
+			var catch2  = o.spy()
+			var catch3  = o.spy()
+
+			promise.catch(catch1)
+			promise.then(then, catch2).catch(catch3)
+
+			promise.then(null, function(){
+				o(catch1.callCount).equals(1, "first branch catch triggers")
+				o(then.callCount).equals(0, "second branch then resolution handler doesn't trigger")
+				o(catch2.callCount).equals(1, "second branch then rejection handler triggers")
+				o(catch3.callCount).equals(1, "second branch subseqent catch triggers")
+				done()
+			})
+		})
 		o("does not absorb resolved promise via static rejector", function(done) {
 			var promise = Promise.reject(Promise.resolve(1))
 
