@@ -1081,11 +1081,11 @@ var coreRouter = function($window) {
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v) {return v}
-	var routing = false, render1, component, attrs3, currentPath, resolve
+	var render1, component, attrs3, currentPath, updatePending = false
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, resolve = null
+			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, updatePending = false
 			render1 = (routeResolver.render || identity).bind(routeResolver)
 			run1()
 		}
@@ -1099,15 +1099,10 @@ var _20 = function($window, redrawService0) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
-					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						}, bail)
-					}
+					updatePending = true
+					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+						if (updatePending) update(payload, resolved, params, path)
+					}, bail)
 				}
 				else update(payload, "div", params, path)
 			}
@@ -1115,8 +1110,8 @@ var _20 = function($window, redrawService0) {
 		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
-		if (resolve != null) options = {replace: true}
-		resolve = null
+		if (updatePending) options = {replace: true}
+		updatePending = false
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
