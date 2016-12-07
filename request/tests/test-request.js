@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
+var callAsync = require("../../test-utils/callAsync")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 var Promise = require("../../promise/promise")
@@ -384,21 +385,24 @@ o.spec("xhr", function() {
 				}
 			})
 			var request = xhr({method: "GET", url: "/item"})
-			var then    = o.spy()
-			var catch1  = o.spy()
-			var catch2  = o.spy()
-			var catch3  = o.spy()
+			var then = o.spy()
+			var catch1 = o.spy()
+			var catch2 = o.spy()
+			var catch3 = o.spy()
 
 			request.catch(catch1)
-			request.then(then, catch2).catch(catch3)
+			request.then(then, catch2)
+			request.then(then).catch(catch3)
 
-			setTimeout(function(){
-				o(catch1.callCount).equals(1, "first branch catch triggers")
-				o(then.callCount).equals(0, "second branch then resolution handler doesn't trigger")
-				o(catch2.callCount).equals(1, "second branch then rejection handler triggers")
-				o(catch3.callCount).equals(1, "second branch subseqent catch triggers")
-				done()
-			}, 10)
+			callAsync(function() {
+				callAsync(function() {
+					o(catch1.callCount).equals(1)
+					o(then.callCount).equals(0)
+					o(catch2.callCount).equals(1)
+					o(catch3.callCount).equals(1)
+					done()
+				})
+			})
 		})
 	})
 })
