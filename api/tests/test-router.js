@@ -627,7 +627,7 @@ o.spec("route", function() {
 							render: render
 						},
 						"/b" : {
-							view: function(vnode){
+							view: function() {
 								redirected = true
 							}
 						}
@@ -644,6 +644,7 @@ o.spec("route", function() {
 				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function(done) {
 					var redirected = false
 					var render = o.spy()
+					var view = o.spy(function() {return m("div")})
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
@@ -656,16 +657,21 @@ o.spec("route", function() {
 						"/b" : {
 							onmatch: function() {
 								redirected = true
-								return {view: function() {}}
+								return {view: view}
 							}
 						}
 					})
 
 					callAsync(function() {
-						o(render.callCount).equals(0)
-						o(redirected).equals(true)
+						callAsync(function() {
+							o(render.callCount).equals(0)
+							o(redirected).equals(true)
+							o(view.callCount).equals(1)
+							o(root.childNodes.length).equals(1)
+							o(root.firstChild.nodeName).equals("DIV")
 
-						done()
+							done()
+						})
 					})
 				})
 
@@ -693,6 +699,118 @@ o.spec("route", function() {
 						o(redirected).equals(true)
 
 						done()
+					})
+				})
+
+				o("onmatch can redirect to another route that has RouteResolver whose onmatch resolves asynchronously", function(done) {
+					var redirected = false
+					var render = o.spy()
+					var view = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a" : {
+							onmatch: function() {
+								route.set("/b")
+							},
+							render: render
+						},
+						"/b" : {
+							onmatch: function() {
+								redirected = true
+								return new Promise(function(fulfill){
+									callAsync(function(){
+										fulfill({view: view})
+									})
+								})
+							}
+						}
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							callAsync(function() {
+								o(render.callCount).equals(0)
+								o(redirected).equals(true)
+								o(view.callCount).equals(1)
+
+								done()
+							})
+						})
+					})
+				})
+
+				o("onmatch can redirect to another route asynchronously", function(done) {
+					var redirected = false
+					var render = o.spy()
+					var view = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a" : {
+							onmatch: function() {
+								callAsync(function() {route.set("/b")})
+								return new Promise(function() {})
+							},
+							render: render
+						},
+						"/b" : {
+							onmatch: function() {
+								redirected = true
+								return {view: view}
+							}
+						}
+					})
+
+					callAsync(function() {
+						callAsync(function() {
+							callAsync(function() {
+								o(render.callCount).equals(0)
+								o(redirected).equals(true)
+								o(view.callCount).equals(1)
+
+								done()
+							})
+						})
+					})
+				})
+
+				o("onmatch can redirect w/ window.history.back()", function(done) {
+
+					var render = o.spy()
+					var component = {view: o.spy()}
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a" : {
+							onmatch: function() {
+								return component
+							},
+							render: function(vnode) {
+								return vnode
+							}
+						},
+						"/b" : {
+							onmatch: function() {
+								$window.history.back()
+								return new Promise(function() {})
+							},
+							render: render
+						}
+					})
+
+					callAsync(function() {
+						route.set('/b')
+						callAsync(function() {
+							callAsync(function() {
+								callAsync(function() {
+									o(render.callCount).equals(0)
+									o(component.view.callCount).equals(2)
+
+									done()
+								})
+							})
+						})
 					})
 				})
 
