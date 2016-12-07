@@ -18,7 +18,7 @@ module.exports = function($window, Promise) {
 				var next = then.apply(promise, arguments)
 				next.then(complete, function(e) {
 					complete()
-					throw e
+					if (count === 0) throw e
 				})
 				return finalize(next)
 			}
