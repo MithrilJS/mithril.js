@@ -2172,9 +2172,9 @@
 		}
 
 		if (isObject(options.headers)) {
-			for (var header in headers) {
-				if (hasOwn.call(headers, header)) {
-					xhr.setRequestHeader(header, headers[header])
+			for (var header in options.headers) {
+				if (hasOwn.call(options.headers, header)) {
+					xhr.setRequestHeader(header, options.headers[header])
 				}
 			}
 		}
