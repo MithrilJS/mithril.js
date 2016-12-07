@@ -13,7 +13,7 @@ o.spec("Router.getPath", function() {
 				o.beforeEach(function() {
 					$window = pushStateMock(env)
 					router = new Router($window)
-					router.setPrefix(prefix)
+					router.prefix = prefix
 					onRouteChange = o.spy()
 					onFail = o.spy()
 				})

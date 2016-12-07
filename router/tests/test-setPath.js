@@ -14,7 +14,7 @@ o.spec("Router.setPath", function() {
 				o.beforeEach(function() {
 					$window = pushStateMock(env)
 					router = new Router($window)
-					router.setPrefix(prefix)
+					router.prefix = prefix
 					onRouteChange = o.spy()
 					onFail = o.spy()
 				})
@@ -88,7 +88,7 @@ o.spec("Router.setPath", function() {
 					$window.location.href = "file://" + prefix + "/test"
 
 					router = new Router($window)
-					router.setPrefix(prefix)
+					router.prefix = prefix
 
 					router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
 

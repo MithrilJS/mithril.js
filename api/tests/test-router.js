@@ -358,7 +358,7 @@ o.spec("route", function() {
 					})
 					callAsync(function() {
 						o(oninit.callCount).equals(1)
-						route.set('/def')
+						route.set("/def")
 						callAsync(function() {
 							o(oninit.callCount).equals(2)
 							done()
@@ -897,12 +897,14 @@ o.spec("route", function() {
 						},
 					})
 					
-					callAsync(function() {
-						callAsync(function() {
-							o(rendered).equals(false)
-							o(resolved).equals("b")
-							
-							done()
+					callAsync(function() { // tick for popstate for /a
+						callAsync(function() { // tick for promise in onmatch
+							callAsync(function() { // tick for onpopstate for /b
+								o(rendered).equals(false)
+								o(resolved).equals("b")
+								
+								done()
+							})
 						})
 					})
 				})

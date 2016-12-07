@@ -988,8 +988,6 @@ var parseQueryString = function(string) {
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
-	var prefix1 = "#!"
-	function setPrefix(value) {prefix1 = value}
 	function normalize1(fragment0) {
 		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
@@ -1020,15 +1018,16 @@ var coreRouter = function($window) {
 		}
 		return path.slice(0, pathEnd)
 	}
-	function getPath() {
-		var type2 = prefix1.charAt(0)
+	var router = {prefix: "#!"}
+	router.getPath = function() {
+		var type2 = router.prefix.charAt(0)
 		switch (type2) {
-			case "#": return normalize1("hash").slice(prefix1.length)
-			case "?": return normalize1("search").slice(prefix1.length) + normalize1("hash")
-			default: return normalize1("pathname").slice(prefix1.length) + normalize1("search") + normalize1("hash")
+			case "#": return normalize1("hash").slice(router.prefix.length)
+			case "?": return normalize1("search").slice(router.prefix.length) + normalize1("hash")
+			default: return normalize1("pathname").slice(router.prefix.length) + normalize1("search") + normalize1("hash")
 		}
 	}
-	function setPath(path, data, options) {
+	router.setPath = function(path, data, options) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
@@ -1043,15 +1042,15 @@ var coreRouter = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 		if (supportsPushState) {
-			if (options && options.replace) $window.history.replaceState(null, null, prefix1 + path)
-			else $window.history.pushState(null, null, prefix1 + path)
+			if (options && options.replace) $window.history.replaceState(null, null, router.prefix + path)
+			else $window.history.pushState(null, null, router.prefix + path)
 			$window.onpopstate()
 		}
-		else $window.location.href = prefix1 + path
+		else $window.location.href = router.prefix + path
 	}
-	function defineRoutes(routes, resolve, reject) {
+	router.defineRoutes = function(routes, resolve, reject) {
 		function resolveRoute() {
-			var path = getPath()
+			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
@@ -1073,21 +1072,11 @@ var coreRouter = function($window) {
 		}
 		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (prefix1.charAt(0) === "#") $window.onhashchange = resolveRoute
+		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-	function link(vnode2) {
-		vnode2.dom.setAttribute("href", prefix1 + vnode2.attrs.href)
-		vnode2.dom.onclick = function(e) {
-			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
-			e.preventDefault()
-			e.redraw = false
-			var href = this.getAttribute("href")
-			if (href.indexOf(prefix1) === 0) href = href.slice(prefix1.length)
-			setPath(href, undefined, undefined)
-		}
-	}
-	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
+	
+	return router
 }
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
@@ -1125,12 +1114,23 @@ var _20 = function($window, redrawService0) {
 		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
+		if (resolve != null) options = {replace: true}
 		resolve = null
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
-	route.prefix = routeService.setPrefix
-	route.link = routeService.link
+	route.prefix = function(prefix0) {routeService.prefix = prefix0}
+	route.link = function(vnode1) {
+		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
+		vnode1.dom.onclick = function(e) {
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
+			e.preventDefault()
+			e.redraw = false
+			var href = this.getAttribute("href")
+			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
+			route.set(href, undefined, undefined)
+		}
+	}
 	return route
 }
 m.route = _20(window, redrawService)
