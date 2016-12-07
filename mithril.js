@@ -1092,11 +1092,11 @@ var coreRouter = function($window) {
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v) {return v}
-	var render1, component, attrs3, currentPath
+	var routing = false, render1, component, attrs3, currentPath, resolve
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			component = comp || "div", attrs3 = params, currentPath = path
+			component = comp || "div", attrs3 = params, currentPath = path, resolve = null
 			render1 = (routeResolver.render || identity).bind(routeResolver)
 			run1()
 		}
@@ -1107,9 +1107,15 @@ var _20 = function($window, redrawService0) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-						update(payload, resolved, params, path)
-					})
+					if (resolve != null) update(payload, component, params, path)
+					else {
+						resolve = function(resolved) {
+							update(payload, resolved, params, path)
+						}
+						Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+							if (resolve != null) resolve(resolved)
+						})
+					}
 				}
 				else update(payload, "div", params, path)
 			}
@@ -1118,7 +1124,10 @@ var _20 = function($window, redrawService0) {
 		})
 		redrawService0.subscribe(root, run1)
 	}
-	route.set = routeService.setPath
+	route.set = function(path, data, options) {
+		resolve = null
+		routeService.setPath(path, data, options)
+	}
 	route.get = function() {return currentPath}
 	route.prefix = routeService.setPrefix
 	route.link = routeService.link
