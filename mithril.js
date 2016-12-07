@@ -2171,6 +2171,14 @@
 			if (maybeXhr != null) xhr = maybeXhr
 		}
 
+		if (isObject(options.headers)) {
+			for (var header in headers) {
+				if (hasOwn.call(headers, header)) {
+					xhr.setRequestHeader(header, headers[header])
+				}
+			}
+		}
+
 		var data = options.method === "GET" || !options.data ? "" : options.data
 
 		if (data && !isString(data) && data.constructor !== global.FormData) {
