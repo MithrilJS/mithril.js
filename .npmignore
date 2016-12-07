@@ -1,0 +1,20 @@
+# Configuration files
+.deploy.env
+.editorconfig
+.eslintrc.js
+.gitattributes
+.gitignore
+.travis.yml
+
+# Tests
+test-utils/
+tests/
+
+# Documentation
+docs/
+examples/
+CONTRIBUTING.md
+
+# Browser stub (use index.js w/ a bundler or mithril.js w/o one instead)
+module/
+browser.js
