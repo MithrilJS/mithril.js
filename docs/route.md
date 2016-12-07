@@ -429,7 +429,7 @@ var state = {
 
 m.route(document.body, "/user/list", {
 	"/user/list": {
-		onmatch: loadUsers,
+		onmatch: state.loadUsers,
 		render: function() {
 			return state.users.length > 0 ? state.users.map(function() {
 				return m("div", user.id)
