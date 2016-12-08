@@ -932,6 +932,63 @@ o.spec("route", function() {
 					})
 				})
 
+				o.only("when two async routes are racing, the last one set cancels the finalization of the first", function(done) {
+					var renderA = o.spy()
+					var renderB = o.spy()
+					var onmatchA = o.spy(function(){
+						return new Promise(function(fulfill) {
+							setTimeout(function(){
+								fulfill()
+							}, 10)
+						})
+					})
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a": {
+							onmatch: onmatchA,
+							render: renderA
+						},
+						"/b": {
+							onmatch: function(){
+								var p = new Promise(function(fulfill) {
+									o(onmatchA.callCount).equals(1)
+									o(renderA.callCount).equals(0)
+									o(renderB.callCount).equals(0)
+
+									setTimeout(function(){
+										o(onmatchA.callCount).equals(1)
+										o(renderA.callCount).equals(0)
+										o(renderB.callCount).equals(0)
+
+										fulfill()
+
+										p.then(function(){
+											o(onmatchA.callCount).equals(1)
+											o(renderA.callCount).equals(0)
+											o(renderB.callCount).equals(1)
+
+											done()											
+										})
+									}, 20)
+								})
+								return p
+							},
+							render: renderB
+						}
+					})
+
+					callAsync(function() {
+						o(onmatchA.callCount).equals(1)
+						o(renderA.callCount).equals(0)
+						o(renderB.callCount).equals(0)
+						route.set("/b")
+						o(onmatchA.callCount).equals(1)
+						o(renderA.callCount).equals(0)
+						o(renderB.callCount).equals(0)
+					})
+				})
+
 				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
 					var onmatch = o.spy()
 					var render = o.spy(function() {return m("div")})
