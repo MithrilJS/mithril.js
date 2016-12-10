@@ -1590,7 +1590,7 @@ describe("m.render()", function () {
 			expect(root.childNodes[0].innerHTML).to.equal(t1.valueOf())
 		})
 
-		it("caches children of editable on update", function () {
+		it("editable node w/ focus is updated on data change", function () {
 			var root = document.createElement('div')
 
 			// need this in order for focus & activeElement to work properly
