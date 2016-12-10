@@ -1588,7 +1588,26 @@ describe("m.render()", function () {
 			m.render(root, m("span", {contenteditable: false}, t1))
 
 			expect(root.childNodes[0].innerHTML).to.equal(t1.valueOf())
-
 		})
+
+		it("editable node w/ focus is updated on data change", function () {
+			var root = document.createElement('div')
+
+			// need this in order for focus & activeElement to work properly
+			document.body.appendChild(root)
+
+			m.render(root, m('span', {
+				config: function(el) { el.focus() },
+				contenteditable: true
+			}, 'a'))
+
+			m.render(root, m('span', {
+				config: function(el) { el.focus() },
+				contenteditable: true
+			}, 'b'))
+
+			expect(root.childNodes[0].innerHTML).to.equal('b')
+		})
+
 	})
 })

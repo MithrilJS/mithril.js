@@ -524,7 +524,7 @@
 		parentTag
 	) {
 		var nodes = cached.nodes
-		if (!editable || editable !== $document.activeElement) {
+		if (!editable || editable !== $document.activeElement || data !== cached) {
 			if (data.$trusted) {
 				clear(nodes, cached)
 				nodes = injectHTML(parentElement, index, data)
