@@ -1589,5 +1589,25 @@ describe("m.render()", function () {
 
 			expect(root.childNodes[0].innerHTML).to.equal(t1.valueOf())
 		})
+
+		it("caches children of editable on update", function () {
+			var root = document.createElement('div')
+
+			// need this in order for focus & activeElement to work properly
+			document.body.appendChild(root)
+
+			m.render(root, m('span', {
+				config: function(el) { el.focus() },
+				contenteditable: true
+			}, 'a'))
+
+			m.render(root, m('span', {
+				config: function(el) { el.focus() },
+				contenteditable: true
+			}, 'b'))
+
+			expect(root.childNodes[0].innerHTML).to.equal('b')
+		})
+
 	})
 })
