@@ -881,6 +881,54 @@
 	})
 
 	test(function () {
+		// nested component onunloads shouldn't re-execute on parent unload
+		mock.requestAnimationFrame.$resolve()
+		mock.location.search = "?"
+
+		var root = mock.document.createElement("div")
+		var renderSubComponent = true
+		var unloads = 0
+
+		m.route(root, "/a", {
+			"/a": {
+				view: function () {
+					return m("div",
+							renderSubComponent
+						? m( {
+							controller: function () {
+								this.onunload = function(){
+									unloads++
+								}
+							},
+							view: function () {
+								return m("div", "A subcomponent")
+							}
+						} )
+						: m("div", "Not a subcomponent")
+					)
+				}
+			},
+			"/:b": {
+				view: function () {
+					m("div", "Another route")
+				}
+			}
+		})
+
+		mock.requestAnimationFrame.$resolve()
+
+		renderSubComponent = false
+
+		mock.requestAnimationFrame.$resolve()
+
+		m.route("/b")
+
+		mock.requestAnimationFrame.$resolve()
+
+		return unloads === 1
+	})
+
+	test(function () {
 		// calling preventDefault from non-curried component's onunload should
 		// prevent route change
 		mock.requestAnimationFrame.$resolve()
