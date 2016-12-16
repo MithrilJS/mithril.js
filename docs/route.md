@@ -39,6 +39,8 @@ m.route(document.body, "/home", {
 })
 ```
 
+You can only have one `m.route` call per application.
+
 ---
 
 ### Signature
