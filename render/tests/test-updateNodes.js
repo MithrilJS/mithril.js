@@ -104,6 +104,15 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.nodeValue).equals("a")
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
+	o("handles undefined to null noop", function() {
+		var vnodes = [null, {tag: "div"}]
+		var updated = [undefined, {tag: "div"}]
+
+		render(root, vnodes)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(1)
+	})
 	o("reverses els w/ even count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var updated = [{tag: "s", key: 4}, {tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]

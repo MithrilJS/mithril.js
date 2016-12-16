@@ -134,7 +134,7 @@ module.exports = function($window) {
 			if (old.length === vnodes.length && isUnkeyed) {
 				for (var i = 0; i < old.length; i++) {
 					if (old[i] === vnodes[i]) continue
-					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+					else if (old[i] == null && vnodes[i] != null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
 					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
 				}
