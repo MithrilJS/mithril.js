@@ -13,7 +13,9 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`m.prop` removed](#mprop-removed)
 - [`m.component` removed](#mcomponent-removed)
 - [`config` function](#config-function)
-- [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
+- [Changes in redraw behaviour](#changes-in-redraw-behaviour)
+   - [No more redraw locks](#no-more-redraw-locks)
+   - [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
 - [Component `controller` function](#component-controller-function)
 - [Component arguments](#component-arguments)
 - [`view()` parameters](#view-parameters)
@@ -25,6 +27,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [Accessing route params](#accessing-route-params)
 - [Preventing unmounting](#preventing-unmounting)
 - [`m.request`](#mrequest)
+- [`m.deferred` removed](#mdeferred-removed)
 - [`m.sync` removed](#msync-removed)
 - [`xlink` namespace required](#xlink-namespace-required)
 - [Nested arrays in views](#nested-arrays-in-views)
@@ -118,7 +121,15 @@ If available the DOM-Element of the vnode can be accessed at `vnode.dom`.
 
 ---
 
-## Cancelling redraw from event handlers
+## Changes in redraw behaviour
+
+Mithril's rendering engine still operates on the basis of semi-automated global redraws, but some APIs and behaviours differ:
+
+### No more redraw locks
+
+In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked draw logic: by default, `m.request` would lock the draw loop on execution and unlock when all pending requests had resolved - the same behaviour could be invoked manually using `m.startComputation()` and `m.endComputation()`. The latter APIs and the associated behaviour has been removed in v1.x. Redraw locking can lead to buggy UIs: the concerns of one part of the application should not be allowed to prevent other parts of the view from updating to reflect change.
+
+### Cancelling redraw from event handlers
 
 `m.mount()` and `m.route()` still automatically redraw after a DOM event handler runs. Cancelling these redraws from within your event handlers is now done by setting the `redraw` property on the passed-in event object to `false`.
 
@@ -492,9 +503,45 @@ Additionally, if the `extract` option is passed to `m.request` the return value 
 
 ---
 
+## `m.deferred` removed
+
+`v0.2.x` used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. `v1.x` uses Promises instead, and implements a [polyfill](promises.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
+
+### `v0.2.x`
+
+```javascript
+var greetAsync = function() {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve("hello");
+    }, 1000);
+    return deferred.promise;
+};
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+```
+
+### `v1.x`
+
+```javascript
+var greetAsync = new Promise(function(resolve){
+    setTimeout(function() {
+        resolve("hello");
+    }, 1000);
+});
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+```
+
+---
+
 ## `m.sync` removed
 
-`m.sync` has been removed in favor of `Promise.all`
+Since `v1.x` uses standards-compliant Promises, `m.sync` is redundant. Use `Promise.all` instead.
 
 ### `v0.2.x`
 
@@ -560,7 +607,7 @@ If a vnode is strictly equal to the vnode occupying its place in the last draw, 
 
 ## `m.startComputation`/`m.endComputation` removed
 
-They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
 
 ---
 

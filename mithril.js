@@ -214,7 +214,7 @@ var _8 = function($window, Promise) {
 				var next = then0.apply(promise0, arguments)
 				next.then(complete, function(e) {
 					complete()
-					throw e
+					if (count === 0) throw e
 				})
 				return finalize(next)
 			}
@@ -953,6 +953,7 @@ var _16 = function(redrawService0) {
 	}
 }
 m.mount = _16(redrawService)
+var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -986,20 +987,18 @@ var parseQueryString = function(string) {
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
-	var prefix1 = "#!"
-	function setPrefix(value) {prefix1 = value}
 	function normalize1(fragment0) {
 		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
 	var asyncId
-	function debounceAsync(f) {
+	function debounceAsync(callback0) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				f()
+				callback0()
 			})
 		}
 	}
@@ -1018,15 +1017,16 @@ var coreRouter = function($window) {
 		}
 		return path.slice(0, pathEnd)
 	}
-	function getPath() {
-		var type2 = prefix1.charAt(0)
+	var router = {prefix: "#!"}
+	router.getPath = function() {
+		var type2 = router.prefix.charAt(0)
 		switch (type2) {
-			case "#": return normalize1("hash").slice(prefix1.length)
-			case "?": return normalize1("search").slice(prefix1.length) + normalize1("hash")
-			default: return normalize1("pathname").slice(prefix1.length) + normalize1("search") + normalize1("hash")
+			case "#": return normalize1("hash").slice(router.prefix.length)
+			case "?": return normalize1("search").slice(router.prefix.length) + normalize1("hash")
+			default: return normalize1("pathname").slice(router.prefix.length) + normalize1("search") + normalize1("hash")
 		}
 	}
-	function setPath(path, data, options) {
+	router.setPath = function(path, data, options) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
@@ -1041,15 +1041,15 @@ var coreRouter = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 		if (supportsPushState) {
-			if (options && options.replace) $window.history.replaceState(null, null, prefix1 + path)
-			else $window.history.pushState(null, null, prefix1 + path)
-			$window.onpopstate(true)
+			if (options && options.replace) $window.history.replaceState(null, null, router.prefix + path)
+			else $window.history.pushState(null, null, router.prefix + path)
+			$window.onpopstate()
 		}
-		else $window.location.href = prefix1 + path
+		else $window.location.href = router.prefix + path
 	}
-	function defineRoutes(routes, resolve, reject) {
+	router.defineRoutes = function(routes, resolve, reject) {
 		function resolveRoute() {
-			var path = getPath()
+			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
@@ -1071,72 +1071,71 @@ var coreRouter = function($window) {
 		}
 		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (prefix1.charAt(0) === "#") $window.onhashchange = resolveRoute
+		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-	function link(vnode2) {
-		vnode2.dom.setAttribute("href", prefix1 + vnode2.attrs.href)
-		vnode2.dom.onclick = function(e) {
-			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
-			e.preventDefault()
-			e.redraw = false
-			var href = this.getAttribute("href")
-			if (href.indexOf(prefix1) === 0) href = href.slice(prefix1.length)
-			setPath(href, undefined, undefined)
-		}
-	}
-	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
+	
+	return router
 }
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
-	
 	var identity = function(v) {return v}
-	var resolver, component, attrs3, currentPath, resolve
+	var render1, component, attrs3, currentPath, updatePending = false
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		var update = function(routeResolver, comp, params, path) {
-			resolver = routeResolver, component = comp, attrs3 = params, currentPath = path, resolve = null
-			resolver.render = routeResolver.render || identity
-			render1()
+			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, updatePending = false
+			render1 = (routeResolver.render || identity).bind(routeResolver)
+			run1()
 		}
-		var render1 = function() {
-			if (resolver != null) redrawService0.render(root, resolver.render(Vnode(component, attrs3.key, attrs3)))
+		var run1 = function() {
+			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
+		}
+		var bail = function() {
+			routeService.setPath(defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			if (payload.view) update({}, payload, params, path)
 			else {
 				if (payload.onmatch) {
-					if (resolve != null) update(payload, component, params, path)
-					else {
-						resolve = function(resolved) {
-							update(payload, resolved, params, path)
-						}
-						payload.onmatch(function(resolved) {
-							if (resolve != null) resolve(resolved)
-						}, params, path)
-					}
+					updatePending = true
+					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+						if (updatePending) update(payload, resolved, params, path)
+					}, bail)
 				}
 				else update(payload, "div", params, path)
 			}
-		}, function() {
-			routeService.setPath(defaultRoute)
-		})
-		redrawService0.subscribe(root, render1)
+		}, bail)
+		redrawService0.subscribe(root, run1)
 	}
-	route.set = routeService.setPath
+	route.set = function(path, data, options) {
+		if (updatePending) options = {replace: true}
+		updatePending = false
+		routeService.setPath(path, data, options)
+	}
 	route.get = function() {return currentPath}
-	route.prefix = routeService.setPrefix
-	route.link = routeService.link
+	route.prefix = function(prefix0) {routeService.prefix = prefix0}
+	route.link = function(vnode1) {
+		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
+		vnode1.dom.onclick = function(e) {
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
+			e.preventDefault()
+			e.redraw = false
+			var href = this.getAttribute("href")
+			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
+			route.set(href, undefined, undefined)
+		}
+	}
 	return route
 }
 m.route = _20(window, redrawService)
-m.withAttr = function(attrName, callback0, context) {
+m.withAttr = function(attrName, callback1, context) {
 	return function(e) {
-		return callback0.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-var _27 = coreRenderer(window)
-m.render = _27.render
+var _28 = coreRenderer(window)
+m.render = _28.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp

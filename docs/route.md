@@ -16,9 +16,10 @@
 - [Routing parameters](#routing-parameters)
 - [Changing router prefix](#changing-router-prefix)
 - [Advanced component resolution](#advanced-component-resolution)
-- [Wrapping a layout component](#wrapping-a-layout-component)
-- [Authentication](#authentication)
-- [Code splitting](#code-splitting)
+	- [Wrapping a layout component](#wrapping-a-layout-component)
+	- [Authentication](#authentication)
+	- [Preloading data](#preloading-data)
+	- [Code splitting](#code-splitting)
 
 ---
 
@@ -107,18 +108,23 @@ A RouterResolver is an object that contains an `onmatch` method and/or a `render
 
 ##### routeResolver.onmatch
 
-The `onmatch` hook is called when the router needs to find a component to render. It is called once when a router path changes, but not on subsequent redraws. It can be used to run logic before a component initializes (for example authentication logic)
+The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)
 
-This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading.
+This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading. To render a component asynchronously return a promise that resolves to a component.
 
-`routeResolver.onmatch(resolve, args, requestedPath)`
+For more information on `onmatch`, see the [advanced component resolution](#advanced-component-resolution) section
 
-Argument        | Type                     | Description
---------------- | ------------------------ | ---
-`resolve`       | `Component -> undefined` | Call this function with a component as the first argument to use it as the route's component
-`args`          | `Object`                 | The [routing parameters](#routing-parameters)
-`requestedPath` | `String`                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-**returns**     |                          | Returns `undefined`
+`routeResolver.onmatch(args, requestedPath)`
+
+Argument        | Type                           | Description
+--------------- | ------------------------------ | ---
+`args`          | `Object`                       | The [routing parameters](#routing-parameters)
+`requestedPath` | `String`                       | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+**returns**     | `Component|Promise<Component>` | Returns a component or a promise that resolves to a component
+
+If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
+
+If `onmatch` returns a promise that gets rejected, the router redirects back to `defaultRoute`. You may override this behavior by calling `.catch` on the promise chain before returning it.
 
 ##### routeResolver.render
 
@@ -128,8 +134,8 @@ The `render` method is called on every redraw for a matching route. It is simila
 
 Argument            | Type            | Description
 ------------------- | --------------- | ----------- 
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode's `tag` field defaults to a `div`
-`vnode.attrs`       | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If the routeResolver does not have a `resolve` method, the vnode defaults to a `div`
+`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
+`vnode.attrs`       | `Object`        | A map of URL parameter values
 **returns**         | `Vnode`         | Returns a vnode
 
 ---
@@ -258,7 +264,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 ---
 
-### Changing route prefix
+### Changing router prefix
 
 The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
 
@@ -286,8 +292,8 @@ Instead of mapping a component to a route, you can specify a RouteResolver objec
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(resolve, args, requestedPath) {
-			resolve(Home)
+		onmatch: function(args, requestedPath) {
+			return Home
 		},
 		render: function(vnode) {
 			return vnode // equivalent to m(Home)
@@ -300,7 +306,7 @@ RouteResolvers are useful for implementing a variety of advanced routing use cas
 
 ---
 
-### Wrapping a layout component
+#### Wrapping a layout component
 
 It's often desirable to wrap all or most of the routed components in a reusable shell (often called a "layout"). In order to do that, you first need to create a component that contains the common markup that will wrap around the various different components:
 
@@ -344,7 +350,7 @@ Note that in this case, if the Layout component the `oninit` and `oncreate` life
 
 ---
 
-### Authentication
+#### Authentication
 
 The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
@@ -366,10 +372,12 @@ var Login = {
 
 m.route(document.body, "/secret", {
 	"/secret": {
-		onmatch: function(resolve) {
-			if (isLoggedIn) resolve(Home)
-			else m.route.set("/login")
+		onmatch: function() {
+			if (!isLoggedIn) m.route.set("/login")
 		},
+		render: function() {
+			return m(Home)
+		}
 	},
 	"/login": Login
 })
@@ -381,11 +389,67 @@ For the sake of simplicity, in the example above, the user's logged in status is
 
 ---
 
-### Code splitting
+#### Preloading data
 
-In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by calling the `resolve` callback of the `onmatch` hook asynchronously:
+Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
 
-At its simplest form, one could do the following:
+```javascript
+var state = {
+	users: [],
+	loadUsers: function() {
+		return m.request("/api/v1/users").then(function(users) {
+			state.users = users
+		})
+	}
+}
+
+m.route(document.body, "/user/list", {
+	"/user/list": {
+		oninit: state.loadUsers,
+		view: function() {
+			return state.users.length > 0 ? state.users.map(function() {
+				return m("div", user.id)
+			}) : "loading"
+		}
+	},
+})
+```
+
+In the example above, on the first render, the UI displays `"loading"` since `state.users` is an empty array before the request completes. Then, once data is available, the UI redraws and a list of user ids is shown.
+
+RouteResolvers can be used as a mechanism to preload data before rendering a component in order to avoid UI flickering and thus bypassing the need for a loading indicator:
+
+```javascript
+var state = {
+	users: [],
+	loadUsers: function() {
+		return m.request("/api/v1/users").then(function(users) {
+			state.users = users
+		})
+	}
+}
+
+m.route(document.body, "/user/list", {
+	"/user/list": {
+		onmatch: state.loadUsers,
+		render: function() {
+			return state.users.length > 0 ? state.users.map(function() {
+				return m("div", user.id)
+			}) : "loading"
+		}
+	},
+})
+```
+
+Above, `render` only runs after the request completes, making the ternary operator redundant.
+
+---
+
+#### Code splitting
+
+In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by returning a promise from the `onmatch` hook:
+
+At its most basic form, one could do the following:
 
 ```javascript
 // Home.js
@@ -401,21 +465,20 @@ module.export = {
 
 ```javascript
 // index.js
-function load(file, done) {
-	m.request({
+function load(file) {
+	return m.request({
 		method: "GET",
 		url: file,
 		extract: function(xhr) {
 			return new Function("var module = {};" + xhr.responseText + ";return module.exports;")
 		}
 	})
-	.run(done)
 }
 
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(resolve) {
-			load("Home.js", resolve)
+		onmatch: function() {
+			return load("Home.js")
 		},
 	},
 })
@@ -428,9 +491,11 @@ Fortunately, there are a number of tools that facilitate the task of bundling mo
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(resolve) {
+		onmatch: function() {
 			// using Webpack async code splitting
-			require(['./Home.js'], resolve)
+			return new Promise(function(resolve) {
+				require(['./Home.js'], resolve)
+			})
 		},
 	},
 })

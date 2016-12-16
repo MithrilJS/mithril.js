@@ -76,7 +76,7 @@ m.request({
 })
 ```
 
-Calls to `m.request` return a [promise](promise.md).
+A call to `m.request` return a [promise](promise.md) and trigger a redraw upon completion of its promise chain.
 
 By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
 

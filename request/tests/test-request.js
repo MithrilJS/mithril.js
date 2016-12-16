@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
+var callAsync = require("../../test-utils/callAsync")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 var Promise = require("../../promise/promise")
@@ -336,7 +337,7 @@ o.spec("xhr", function() {
 				}
 			})
 			var promise = xhr("/item", {background: true}).then(function() {})
-			
+
 			setTimeout(function() {
 				o(complete.callCount).equals(0)
 				done()
@@ -376,6 +377,32 @@ o.spec("xhr", function() {
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e.message).equals("error")
 			}).then(done)
+		})
+		o("triggers all branched catches upon rejection", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 500, responseText: "error"}
+				}
+			})
+			var request = xhr({method: "GET", url: "/item"})
+			var then = o.spy()
+			var catch1 = o.spy()
+			var catch2 = o.spy()
+			var catch3 = o.spy()
+
+			request.catch(catch1)
+			request.then(then, catch2)
+			request.then(then).catch(catch3)
+
+			callAsync(function() {
+				callAsync(function() {
+					o(catch1.callCount).equals(1)
+					o(then.callCount).equals(0)
+					o(catch2.callCount).equals(1)
+					o(catch3.callCount).equals(1)
+					done()
+				})
+			})
 		})
 	})
 })

@@ -7,9 +7,6 @@ module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
-	var prefix = "#!"
-	function setPrefix(value) {prefix = value}
-
 	function normalize(fragment) {
 		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
@@ -17,14 +14,13 @@ module.exports = function($window) {
 	}
 
 	var asyncId
-	function debounceAsync(f) {
+	function debounceAsync(callback) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync(function() {
 				asyncId = null
-				f()
+				callback()
 			})
-
 		}
 	}
 
@@ -44,16 +40,16 @@ module.exports = function($window) {
 		return path.slice(0, pathEnd)
 	}
 
-	function getPath() {
-		var type = prefix.charAt(0)
+	var router = {prefix: "#!"}
+	router.getPath = function() {
+		var type = router.prefix.charAt(0)
 		switch (type) {
-			case "#": return normalize("hash").slice(prefix.length)
-			case "?": return normalize("search").slice(prefix.length) + normalize("hash")
-			default: return normalize("pathname").slice(prefix.length) + normalize("search") + normalize("hash")
+			case "#": return normalize("hash").slice(router.prefix.length)
+			case "?": return normalize("search").slice(router.prefix.length) + normalize("hash")
+			default: return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
 		}
 	}
-
-	function setPath(path, data, options) {
+	router.setPath = function(path, data, options) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
@@ -71,16 +67,15 @@ module.exports = function($window) {
 		if (hash) path += "#" + hash
 
 		if (supportsPushState) {
-			if (options && options.replace) $window.history.replaceState(null, null, prefix + path)
-			else $window.history.pushState(null, null, prefix + path)
-			$window.onpopstate(true)
+			if (options && options.replace) $window.history.replaceState(null, null, router.prefix + path)
+			else $window.history.pushState(null, null, router.prefix + path)
+			$window.onpopstate()
 		}
-		else $window.location.href = prefix + path
+		else $window.location.href = router.prefix + path
 	}
-
-	function defineRoutes(routes, resolve, reject) {
+	router.defineRoutes = function(routes, resolve, reject) {
 		function resolveRoute() {
-			var path = getPath()
+			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
@@ -104,21 +99,9 @@ module.exports = function($window) {
 		}
 		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
+		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-
-	function link(vnode) {
-		vnode.dom.setAttribute("href", prefix + vnode.attrs.href)
-		vnode.dom.onclick = function(e) {
-			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
-			e.preventDefault()
-			e.redraw = false
-			var href = this.getAttribute("href")
-			if (href.indexOf(prefix) === 0) href = href.slice(prefix.length)
-			setPath(href, undefined, undefined)
-		}
-	}
-
-	return {setPrefix: setPrefix, getPath: getPath, setPath: setPath, defineRoutes: defineRoutes, link: link}
+	
+	return router
 }

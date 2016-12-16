@@ -4,7 +4,7 @@
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Performance considerations](#performance-considerations)
-- [Differences from m.render](#differences-from-m-render)
+- [Differences from m.render](#differences-from-mrender)
 
 ---
 
