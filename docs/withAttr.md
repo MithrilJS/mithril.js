@@ -63,18 +63,18 @@ document.body.onclick = m.withAttr("title", function(value) {
 Typically, `m.withAttr()` can be used in Mithril component views to avoid polluting the data layer with DOM event model concerns:
 
 ```javascript
-var Data = {
+var state = {
 	email: "",
 	setEmail: function(email) {
-		Data.email = email.toLowerCase()
+		state.email = email.toLowerCase()
 	}
 }
 
 var MyComponent = {
 	view: function() {
 		return m("input", {
-			oninput: m.withAttr("value", Data.setEmail),
-			value: Data.email
+			oninput: m.withAttr("value", state.setEmail),
+			value: state.email
 		})
 	}
 }
@@ -89,15 +89,15 @@ m.mount(document.body, MyComponent)
 The `m.withAttr()` helper reads the value of the element to which the event handler is bound, which is not necessarily the same as the element where the event originated.
 
 ```javascript
-var Data = {
+var state = {
 	url: "",
-	setURL: function(url) {Data.url = url}
+	setURL: function(url) {state.url = url}
 }
 
 var MyComponent = {
 	view: function() {
-		return m("a[href='/foo']", {onclick: m.withAttr("href", Data.setURL)}, [
-			m("span", Data.url)
+		return m("a[href='/foo']", {onclick: m.withAttr("href", state.setURL)}, [
+			m("span", state.url)
 		])
 	}
 }
@@ -117,21 +117,21 @@ The first argument of `m.withAttr()` can be either an attribute or a property.
 
 ```javascript
 // reads from `select.selectedIndex` property
-var Data = {
+var state = {
 	index: 0,
-	setIndex: function(index) {Data.index = index}
+	setIndex: function(index) {state.index = index}
 }
-m("select", {onclick: m.withAttr("selectedIndex", Data.setIndex)})
+m("select", {onclick: m.withAttr("selectedIndex", state.setIndex)})
 ```
 
 If a value can be both an attribute *and* a property, the property value is used.
 
 ```javascript
 // value is a boolean, because the `input.checked` property is boolean
-var Data = {
+var state = {
 	selected: false,
-	setSelected: function(selected) {Data.selected = selected}
+	setSelected: function(selected) {state.selected = selected}
 }
-m("input[type=checkbox]", {onclick: m.withAttr("checked", Data.setSelected)})
+m("input[type=checkbox]", {onclick: m.withAttr("checked", state.setSelected)})
 ```
 
