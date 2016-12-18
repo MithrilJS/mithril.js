@@ -13,7 +13,7 @@ module.exports = function(options) {
 	var search = ""
 	var hash = ""
 
-	var past = [], future = []
+	var past = [{url: getURL(), isNew: true, state: null, title: null}], future = []
 
 	function getURL() {
 		if (protocol === "file:") return protocol + "//" + pathname + search + hash
@@ -42,7 +42,7 @@ module.exports = function(options) {
 		if (typeof $window.onhashchange === "function") $window.onhashchange({type: "hashchange"})
 	}
 	function popstate() {
-		if (typeof $window.onpopstate === "function") $window.onpopstate({type: "popstate"})
+		if (typeof $window.onpopstate === "function") $window.onpopstate({type: "popstate", state: $window.history.state})
 	}
 	function unload() {
 		if (typeof $window.onunload === "function") $window.onunload({type: "unload"})
@@ -135,20 +135,22 @@ module.exports = function(options) {
 		},
 	}
 	$window.history = {
-		pushState: function(data, title, url) {
-			past.push({url: getURL(), isNew: false})
+		pushState: function(state, title, url) {
+			past.push({url: getURL(), isNew: false, state: state, title: title})
 			future = []
 			setURL(url)
 		},
-		replaceState: function(data, title, url) {
-			future = []
+		replaceState: function(state, title, url) {
+			var entry = past[past.length - 1]
+			entry.state = state
+			entry.title = title
 			setURL(url)
 		},
 		back: function() {
-			var entry = past.pop()
-			if (entry != null) {
+			if (past.length > 1) {
+				var entry = past.pop()
 				if (entry.isNew) unload()
-				future.push({url: getURL(), isNew: false})
+				future.push({url: getURL(), isNew: false, state: entry.state, title: entry.title})
 				setURL(entry.url)
 				if (!entry.isNew) popstate()
 			}
@@ -157,10 +159,13 @@ module.exports = function(options) {
 			var entry = future.pop()
 			if (entry != null) {
 				if (entry.isNew) unload()
-				past.push({url: getURL(), isNew: false})
+				past.push({url: getURL(), isNew: false, state: entry.state, title: entry.title})
 				setURL(entry.url)
 				if (!entry.isNew) popstate()
 			}
+		},
+		get state() {
+			return past.length === 0 ? null : past[past.length - 1].state
 		},
 	}
 	$window.onpopstate = null,
