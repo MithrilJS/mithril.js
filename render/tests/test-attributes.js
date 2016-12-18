@@ -11,7 +11,68 @@ o.spec("attributes", function() {
 		root = $window.document.body
 		render = vdom($window).render
 	})
+	o.spec("customElements", function(){
+		
+		o("when vnode is customElement, custom setAttribute called", function(){
 
+			var normalFirstDraw = [
+				{ tag: "input", attrs: { wow: 'text' } },
+				{ tag: "input", attrs: { wow: 'text' } },
+				{ tag: "input", attrs: { wow: 'text' } },
+			]
+
+			var normalSecondDraw = [
+				{ tag: "input", attrs: { wow: 'text' } },
+				{ tag: "input", attrs: { wow: 'text' } },
+				{ tag: "input", attrs: { wow: 'text' } },
+			]
+
+			var customFirstDraw = [
+				{ tag: "custom-element", attrs: { custom: 'x' } },
+				{ tag: "input", attrs: { is: 'something-special', custom: 'x' } },
+				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'x' } }
+			]
+
+			var customSecondDraw = [
+				{ tag: "custom-element", attrs: { custom: 'y' } },
+				{ tag: "input", attrs: { is: 'something-special', custom: 'y' } },
+				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'y' } }
+			]
+
+			var draws = [
+				normalFirstDraw, normalSecondDraw,
+				 customFirstDraw, customSecondDraw
+			]
+
+			var customRedraws = 2
+			var customSetAttrCalls = customFirstDraw.length * customRedraws;
+			var innerHTMLCalls = normalFirstDraw.length
+
+			var f = $window.document.createElement
+			var spy
+
+			$window.document.createElement = function(tag, is){
+				var el = f(tag, is)
+				if(!spy){
+					spy = o.spy(el.setAttribute)
+				}
+				el.setAttribute = spy
+
+				return el
+			}
+
+			draws.forEach(
+				function(view) { 
+					render(root, view) 
+				}
+			)
+			
+			o(spy.callCount).equals(
+				customSetAttrCalls + innerHTMLCalls
+			)
+		})
+
+	})
 	o.spec("input readonly", function() {
 		o("when input readonly is true, attribute is present", function() {
 			var a = {tag: "input", attrs: {readonly: true}}

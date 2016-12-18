@@ -435,14 +435,14 @@ module.exports = function($window) {
 	}
 	function setAttr(vnode, key, old, value, ns) {
 		var element = vnode.dom
-		if (key === "key" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
+		if (key === "key" || key === "is" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
 		}
 		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
-		else if (key in element && !isAttribute(key) && ns === undefined) {
+		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
@@ -490,6 +490,9 @@ module.exports = function($window) {
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
+	}
+	function isCustomElement(vnode){
+		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
 	}
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
