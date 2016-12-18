@@ -15,38 +15,19 @@ o.spec("attributes", function() {
 		
 		o("when vnode is customElement, custom setAttribute called", function(){
 
-			var normalFirstDraw = [
-				{ tag: "input", attrs: { wow: 'text' } },
-				{ tag: "input", attrs: { wow: 'text' } },
-				{ tag: "input", attrs: { wow: 'text' } },
+			var normal =  [
+				{ tag: "input", attrs: { value: 'hello' } },
+				{ tag: "input", attrs: { value: 'hello' } },
+				{ tag: "input", attrs: { value: 'hello' } }
 			]
-
-			var normalSecondDraw = [
-				{ tag: "input", attrs: { wow: 'text' } },
-				{ tag: "input", attrs: { wow: 'text' } },
-				{ tag: "input", attrs: { wow: 'text' } },
-			]
-
-			var customFirstDraw = [
+			
+			var custom = [
 				{ tag: "custom-element", attrs: { custom: 'x' } },
 				{ tag: "input", attrs: { is: 'something-special', custom: 'x' } },
 				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'x' } }
 			]
 
-			var customSecondDraw = [
-				{ tag: "custom-element", attrs: { custom: 'y' } },
-				{ tag: "input", attrs: { is: 'something-special', custom: 'y' } },
-				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'y' } }
-			]
-
-			var draws = [
-				normalFirstDraw, normalSecondDraw,
-				 customFirstDraw, customSecondDraw
-			]
-
-			var customRedraws = 2
-			var customSetAttrCalls = customFirstDraw.length * customRedraws;
-			var innerHTMLCalls = normalFirstDraw.length
+			var view = normal.concat(custom)
 
 			var f = $window.document.createElement
 			var spy
@@ -61,15 +42,9 @@ o.spec("attributes", function() {
 				return el
 			}
 
-			draws.forEach(
-				function(view) { 
-					render(root, view) 
-				}
-			)
+			render(root, view)
 			
-			o(spy.callCount).equals(
-				customSetAttrCalls + innerHTMLCalls
-			)
+			o(spy.callCount).equals( custom.length )
 		})
 
 	})
