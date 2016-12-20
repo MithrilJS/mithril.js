@@ -112,4 +112,5 @@ createStream.merge = merge
 createStream.combine = combine
 createStream.HALT = HALT
 
-module.exports = createStream
+if (typeof module !== "undefined") module["exports"] = createStream
+else window.stream = createStream
