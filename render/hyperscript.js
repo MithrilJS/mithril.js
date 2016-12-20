@@ -4,6 +4,11 @@ var Vnode = require("../render/vnode")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
+
+function isArray(obj) {
+	return obj instanceof Array
+}
+
 function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && selector.view == null) {
 		throw Error("The selector must be either a string or a component.");
@@ -41,29 +46,34 @@ function hyperscript(selector) {
 					break
 				}
 			}
-			if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
+			if (isArray(children) && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 			else childList = children
 
 			return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 		}
 	}
-	var attrs, children, childrenIndex
-	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !(arguments[1] instanceof Array)) {
-		attrs = arguments[1]
-		childrenIndex = 2
-	}
-	else childrenIndex = 1
-	if (arguments.length === childrenIndex + 1) {
-		children = arguments[childrenIndex] instanceof Array ? arguments[childrenIndex] : [arguments[childrenIndex]]
-	}
-	else {
-		children = []
-		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
-	}
 
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
+	var args = Array.prototype.slice.call(arguments),
+		attrs = {}, children = [], childrenIndex = 0
+	args.forEach(function(arg, index) {
+		if (!index) return
+		if (!childrenIndex && (arg == null || typeof arg === "object" && arg.tag === undefined && !isArray(arg))) {
+			Object.keys(arg || {}).forEach(function(key) {
+				attrs[key] = arg[key]
+			})
+		} else {
+			childrenIndex = childrenIndex ? childrenIndex : index
+			if (index === childrenIndex && args.length === childrenIndex + 1 && isArray(arg)) {
+				children = children.concat(arg)
+			} else {
+				children.push(arg)
+			}
+		}
+	})
 
-	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
+	if (typeof selector === "string") return selectorCache[selector](attrs, Vnode.normalizeChildren(children))
+
+	return Vnode(selector, attrs && attrs.key, attrs, Vnode.normalizeChildren(children), undefined, undefined)
 }
 
 module.exports = hyperscript
