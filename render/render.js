@@ -2,7 +2,7 @@
 
 var Vnode = require("../render/vnode")
 
-module.exports = function($window) {
+var render = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 
@@ -580,3 +580,7 @@ module.exports = function($window) {
 
 	return {render: render, setEventCallback: setEventCallback}
 }
+
+render.vnode = Vnode;
+
+module.exports = render;
