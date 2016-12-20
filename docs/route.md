@@ -390,30 +390,75 @@ In the example above, the layout merely consists of a `<div class="layout">` tha
 One way to wrap the layout is to define an anonymous component in the routes map:
 
 ```javascript
+// example 1
 m.route(document.body, "/", {
 	"/": {
 		view: function() {
 			return m(Layout, m(Home))
 		},
+	},
+	"/form": {
+		view: function() {
+			return m(Layout, m(Form))
+		},
 	}
 })
 ```
 
-However, note that because the top level component is an anonymous component, jumping from route to route will tear down the anonymous component and recreate the DOM from scratch. If the Layout component had [lifecycle methods](lifecycle-methods.md) defined, the `oninit` and `oncreate` hooks would fire on every route change. Depending on the application, this may or may not be desirable.
+However, note that because the top level component is an anonymous component, jumping from the `/` route to the `/form` route (or vice-versa) will tear down the anonymous component and recreate the DOM from scratch. If the Layout component had [lifecycle methods](lifecycle-methods.md) defined, the `oninit` and `oncreate` hooks would fire on every route change. Depending on the application, this may or may not be desirable.
 
 If you would prefer to have the Layout component be diffed and maintained intact rather than recreated from scratch, you should instead use a RouteResolver as the root object:
 
 ```javascript
+// example 2
 m.route(document.body, "/", {
 	"/": {
 		render: function() {
 			return m(Layout, m(Home))
+		},
+	},
+	"/form": {
+		render: function() {
+			return m(Layout, m(Form))
 		},
 	}
 })
 ```
 
 Note that in this case, if the Layout component the `oninit` and `oncreate` lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).
+
+To clarify the difference between the two examples, example 1 is equivalent to this code:
+
+```javascript
+// functionally equivalent to example 1
+var Anon1 = {
+	view: function() {
+		return m(Layout, m(Home))
+	},
+}
+var Anon2 = {
+	view: function() {
+		return m(Layout, m(Form))
+	},
+}
+
+m.route(document.body, "/", {
+	"/": {
+		render: function() {
+			return m(Anon1)
+		}
+	},
+	"/form": {
+		render: function() {
+			return m(Anon2)
+		}
+	},
+})
+```
+
+Since `Anon1` and `Anon2` are different components, their subtrees (including `Layout`) are recreated from scratch. This is also what happens when components are used directly without a RouteResolver.
+
+In example 2, since `Layout` is the top-level component in both routes, the DOM for the `Layout` component is diffed (i.e. left intact if it has no changes), and only the change from `Home` to `Form` triggers a recreation of that subsection of the DOM.
 
 ---
 
