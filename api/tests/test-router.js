@@ -78,6 +78,8 @@ o.spec("route", function() {
 					callAsync(function() {
 						o(root.firstChild.nodeName).equals("DIV")
 
+						o($window.location.pathname).equals("/a")
+
 						$window.history.back()
 
 						o($window.location.pathname).equals("/")
