@@ -78,7 +78,7 @@ o.spec("route", function() {
 					callAsync(function() {
 						o(root.firstChild.nodeName).equals("DIV")
 
-						o($window.location.pathname).equals("/a")
+						o(route.get()).equals("/a")
 
 						$window.history.back()
 
@@ -576,7 +576,7 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-						
+
 						done()
 					})
 				})
@@ -611,7 +611,7 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-						
+
 						done()
 					})
 				})
@@ -619,7 +619,7 @@ o.spec("route", function() {
 				o("onmatch can redirect to another route", function(done) {
 					var redirected = false
 					var render = o.spy()
-					
+
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
@@ -970,7 +970,7 @@ o.spec("route", function() {
 											o(renderA.callCount).equals(0)
 											o(renderB.callCount).equals(1)
 
-											done()											
+											done()
 										})
 									}, 20)
 								})
@@ -1192,19 +1192,19 @@ o.spec("route", function() {
 							}
 						},
 					})
-					
+
 					callAsync(function() { // tick for popstate for /a
 						callAsync(function() { // tick for promise in onmatch
 							callAsync(function() { // tick for onpopstate for /b
 								o(rendered).equals(false)
 								o(resolved).equals("b")
-								
+
 								done()
 							})
 						})
 					})
 				})
-				
+
 				o("throttles", function(done, timeout) {
 					timeout(200)
 
