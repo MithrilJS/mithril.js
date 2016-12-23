@@ -51,7 +51,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("routed mount points can redraw synchronoulsy (#1275)", function() {
+				o("routed mount points can redraw synchronously (#1275)", function() {
 					var view = o.spy()
 
 					$window.location.href = prefix + "/"
@@ -77,6 +77,8 @@ o.spec("route", function() {
 
 					callAsync(function() {
 						o(root.firstChild.nodeName).equals("DIV")
+
+						o($window.location.pathname).equals("/a")
 
 						$window.history.back()
 
