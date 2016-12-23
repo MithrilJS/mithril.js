@@ -66,7 +66,9 @@ o.spec("route", function() {
 				})
 
 				o("default route doesn't break back button", function(done) {
-					$window.location.href = "http://google.com"
+					$window.location.href = "http://old.com"
+					$window.location.href = "http://new.com"
+
 					route(root, "/a", {
 						"/a" : {
 							view: function() {
@@ -83,6 +85,7 @@ o.spec("route", function() {
 						$window.history.back()
 
 						o($window.location.pathname).equals("/")
+						o($window.location.hostname).equals("old.com")
 
 						done()
 					})
