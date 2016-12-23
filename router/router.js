@@ -67,9 +67,11 @@ module.exports = function($window) {
 		if (hash) path += "#" + hash
 
 		if (supportsPushState) {
-			if (options && options.replace) $window.history.replaceState(null, null, router.prefix + path)
-			else $window.history.pushState(null, null, router.prefix + path)
+			var state = options ? options.state : null
+			var title = options ? options.title : null
 			$window.onpopstate()
+			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path)
+			else $window.history.pushState(state, title, router.prefix + path)
 		}
 		else $window.location.href = router.prefix + path
 	}
@@ -79,6 +81,10 @@ module.exports = function($window) {
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
+			var state = $window.history.state
+			if (state != null) {
+				for (var k in state) params[k] = state[k]
+			}
 			for (var route in routes) {
 				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 

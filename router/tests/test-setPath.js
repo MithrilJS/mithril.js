@@ -153,6 +153,18 @@ o.spec("Router.setPath", function() {
 						done()
 					})
 				})
+				o("state works", function(done) {
+					$window.location.href = prefix + "/test"
+					router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
+
+					callAsync(function() {
+						router.setPath("/other", null, {state: {a: 1}})
+
+						o($window.history.state).deepEquals({a: 1})
+						
+						done()
+					})
+				})
 			})
 		})
 	})

@@ -453,83 +453,84 @@ var coreRenderer = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			var isUnkeyed = false
-			for (var i = 0; i < vnodes.length; i++) {
-				if (vnodes[i] != null) {
-					isUnkeyed = vnodes[i].key == null
-					break
+			if (old.length === vnodes.length) {
+				var isUnkeyed = false
+				for (var i = 0; i < vnodes.length; i++) {
+					if (vnodes[i] != null && old[i] != null) {
+						isUnkeyed = vnodes[i].key == null && old[i].key == null
+						break
+					}
+				}
+				if (isUnkeyed) {
+					for (var i = 0; i < old.length; i++) {
+						if (old[i] === vnodes[i]) continue
+						else if (old[i] == null && vnodes[i] != null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
+						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
+					}
+					return
 				}
 			}
-			if (old.length === vnodes.length && isUnkeyed) {
-				for (var i = 0; i < old.length; i++) {
-					if (old[i] === vnodes[i]) continue
-					else if (old[i] == null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
-					else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-					else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
+			var recycling = isRecyclable(old, vnodes)
+			if (recycling) old = old.concat(old.pool)
+			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
+			while (oldEnd >= oldStart && end >= start) {
+				var o = old[oldStart], v = vnodes[start]
+				if (o === v && !recycling) oldStart++, start++
+				else if (o == null) oldStart++
+				else if (v == null) start++
+				else if (o.key === v.key) {
+					oldStart++, start++
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
-			}
-			else {
-				var recycling = isRecyclable(old, vnodes)
-				if (recycling) old = old.concat(old.pool)
-				var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
-				while (oldEnd >= oldStart && end >= start) {
-					var o = old[oldStart], v = vnodes[start]
-					if (o === v && !recycling) oldStart++, start++
-					else if (o == null) oldStart++
+				else {
+					var o = old[oldEnd]
+					if (o === v && !recycling) oldEnd--, start++
+					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						oldStart++, start++
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
-						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-					}
-					else {
-						var o = old[oldEnd]
-						if (o === v && !recycling) oldEnd--, start++
-						else if (o == null) oldEnd--
-						else if (v == null) start++
-						else if (o.key === v.key) {
-							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
-							oldEnd--, start++
-						}
-						else break
-					}
-				}
-				while (oldEnd >= oldStart && end >= start) {
-					var o = old[oldEnd], v = vnodes[end]
-					if (o === v && !recycling) oldEnd--, end--
-					else if (o == null) oldEnd--
-					else if (v == null) end--
-					else if (o.key === v.key) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-						if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-						if (o.dom != null) nextSibling = o.dom
-						oldEnd--, end--
+						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+						oldEnd--, start++
 					}
-					else {
-						if (!map) map = getKeyMap(old, oldEnd)
-						if (v != null) {
-							var oldIndex = map[v.key]
-							if (oldIndex != null) {
-								var movable = old[oldIndex]
-								updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-								insertNode(parent, toFragment(movable), nextSibling)
-								old[oldIndex].skip = true
-								if (movable.dom != null) nextSibling = movable.dom
-							}
-							else {
-								var dom = createNode(v, hooks, undefined)
-								insertNode(parent, dom, nextSibling)
-								nextSibling = dom
-							}
-						}
-						end--
-					}
-					if (end < start) break
+					else break
 				}
-				createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-				removeNodes(old, oldStart, oldEnd + 1, vnodes)
 			}
+			while (oldEnd >= oldStart && end >= start) {
+				var o = old[oldEnd], v = vnodes[end]
+				if (o === v && !recycling) oldEnd--, end--
+				else if (o == null) oldEnd--
+				else if (v == null) end--
+				else if (o.key === v.key) {
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					if (o.dom != null) nextSibling = o.dom
+					oldEnd--, end--
+				}
+				else {
+					if (!map) map = getKeyMap(old, oldEnd)
+					if (v != null) {
+						var oldIndex = map[v.key]
+						if (oldIndex != null) {
+							var movable = old[oldIndex]
+							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+							insertNode(parent, toFragment(movable), nextSibling)
+							old[oldIndex].skip = true
+							if (movable.dom != null) nextSibling = movable.dom
+						}
+						else {
+							var dom = createNode(v, hooks, undefined)
+							insertNode(parent, dom, nextSibling)
+							nextSibling = dom
+						}
+					}
+					end--
+				}
+				if (end < start) break
+			}
+			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+			removeNodes(old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
@@ -758,14 +759,14 @@ var coreRenderer = function($window) {
 	}
 	function setAttr(vnode, key2, old, value, ns) {
 		var element = vnode.dom
-		if (key2 === "key" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
+		if (key2 === "key" || key2 === "is" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
 		var nsLastIndex = key2.indexOf(":")
 		if (nsLastIndex > -1 && key2.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(nsLastIndex + 1), value)
 		}
 		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value)
 		else if (key2 === "style") updateStyle(element, old, value)
-		else if (key2 in element && !isAttribute(key2) && ns === undefined) {
+		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
@@ -813,6 +814,9 @@ var coreRenderer = function($window) {
 	}
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
+	}
+	function isCustomElement(vnode){
+		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
 	}
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
@@ -1042,9 +1046,11 @@ var coreRouter = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 		if (supportsPushState) {
-			if (options && options.replace) $window.history.replaceState(null, null, router.prefix + path)
-			else $window.history.pushState(null, null, router.prefix + path)
+			var state = options ? options.state : null
+			var title = options ? options.title : null
 			$window.onpopstate()
+			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path)
+			else $window.history.pushState(state, title, router.prefix + path)
 		}
 		else $window.location.href = router.prefix + path
 	}
@@ -1054,6 +1060,10 @@ var coreRouter = function($window) {
 			var params = {}
 			var pathname = parsePath(path, params, params)
 			
+			var state = $window.history.state
+			if (state != null) {
+				for (var k in state) params[k] = state[k]
+			}
 			for (var route0 in routes) {
 				var matcher = new RegExp("^" + route0.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 				if (matcher.test(pathname)) {
@@ -1081,14 +1091,9 @@ var coreRouter = function($window) {
 var _20 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v) {return v}
-	var render1, component, attrs3, currentPath, updatePending = false
+	var render1, component, attrs3, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var update = function(routeResolver, comp, params, path) {
-			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, updatePending = false
-			render1 = (routeResolver.render || identity).bind(routeResolver)
-			run1()
-		}
 		var run1 = function() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
@@ -1096,22 +1101,27 @@ var _20 = function($window, redrawService0) {
 			routeService.setPath(defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
-			if (payload.view) update({}, payload, params, path)
+			var update = lastUpdate = function(routeResolver, comp) {
+				if (update !== lastUpdate) return
+				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, lastUpdate = null
+				render1 = (routeResolver.render || identity).bind(routeResolver)
+				run1()
+			}
+			if (payload.view) update({}, payload)
 			else {
 				if (payload.onmatch) {
-					updatePending = true
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-						if (updatePending) update(payload, resolved, params, path)
+						update(payload, resolved)
 					}, bail)
 				}
-				else update(payload, "div", params, path)
+				else update(payload, "div")
 			}
 		}, bail)
 		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
-		if (updatePending) options = {replace: true}
-		updatePending = false
+		if (lastUpdate != null) options = {replace: true}
+		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
@@ -1143,6 +1153,7 @@ m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
 m.version = "1.0.0-rc.6"
+m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }

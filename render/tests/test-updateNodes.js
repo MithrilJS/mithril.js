@@ -104,6 +104,15 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.nodeValue).equals("a")
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
+	o("handles undefined to null noop", function() {
+		var vnodes = [null, {tag: "div"}]
+		var updated = [undefined, {tag: "div"}]
+
+		render(root, vnodes)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(1)
+	})
 	o("reverses els w/ even count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]
 		var updated = [{tag: "s", key: 4}, {tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
@@ -871,7 +880,7 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 	o("cached, keyed nodes skip diff", function () {
-		var onupdate = o.spy();
+		var onupdate = o.spy()
 		var cached = {tag:"a", key:"a", attrs:{onupdate: onupdate}}
 
 		render(root, cached)
@@ -916,5 +925,15 @@ o.spec("updateNodes", function() {
 		o(create.callCount).equals(1)
 		o(update.callCount).equals(2)
 		o(remove.callCount).equals(0)
+	})
+	o("component is recreated if key changes to undefined", function () {
+		var vnode = {tag: "b", key: 1}
+		var updated = {tag: "b"}
+		
+		render(root, vnode)
+		var dom = vnode.dom
+		render(root, updated)
+		
+		o(vnode.dom).notEquals(updated.dom)
 	})
 })

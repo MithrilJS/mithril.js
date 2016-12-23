@@ -14,6 +14,9 @@
 - [Typical usage](#typical-usage)
 - [Navigating to different routes](#navigating-to-different-routes)
 - [Routing parameters](#routing-parameters)
+	- [Key parameter](#key-parameter)
+	- [Variadic routes](#variadic-routes)
+	- [History state](#history-state)
 - [Changing router prefix](#changing-router-prefix)
 - [Advanced component resolution](#advanced-component-resolution)
 	- [Wrapping a layout component](#wrapping-a-layout-component)
@@ -38,6 +41,8 @@ m.route(document.body, "/home", {
 	"/home": Home, // defines `http://localhost/#!/home`
 })
 ```
+
+You can only have one `m.route` call per application.
 
 ---
 
@@ -68,6 +73,8 @@ Argument          | Type      | Required | Description
 `path`            | `String`  | Yes      | The path to route to, without a prefix. The path may include slots for routing parameters
 `data`            | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
 `options.replace` | `Boolean` | No       | Whether to create a new history entry or to replace the current one. Defaults to false
+`options.state`   | `Object`  | No       | The `state` object to pass to the underlying `history.pushState` / `history.replaceState` call. This state object becomes available in the `history.state` property, and is merged into the [routing parameters](#routing-parameters) object. Note that this option only works when using the pushState API, but is ignored if the router falls back to hashchange mode (i.e. if the pushState API is not available)
+`options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
 ##### route.get
@@ -252,6 +259,28 @@ It's possible to have multiple arguments in a route, for example `/edit/:project
 
 In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched routed.
 
+#### Key parameter
+
+When a user navigates from a parameterized route to the same route with a different parameter (e.g. going from `/page/1` to `/page/2` given a route `/page/:id`, the component would not be recreated from scratch since both routes resolve to the same component, and thus result in a virtual dom in-place diff. This has the side-effect of triggering the `onupdate` hook, rather than `oninit`/`oncreate`. However, it's relatively common for a developer to want to synchronize the recreation of the component to the route change event.
+
+To achieve that, it's possible to combine route parameterization with the virtual dom [key reconciliation](keys.md) feature:
+
+```javascript
+m.route(document.body, "/edit/1", {
+	"/edit/:key": Edit,
+})
+```
+
+This means that the [vnode](vnodes.md) that is created for the root component of the route has a route parameter object `key`. Route parameters become `attrs` in the vnode. Thus, when jumping from one page to another, the `key` changes and causes the component to be recreated from scratch (since the key tells the virtual dom engine that old and new components are different entities).
+
+You can take that idea further to create components that recreate themselves when reloaded:
+
+`m.route.set(m.route.get(), {key: Date.now()})`
+
+Or even use the [`history state`](#history-state) feature to achieve reloadable components without polluting the URL:
+
+`m.route.set(m.route.get(), null, {state: {key: Date.now()}})`
+
 #### Variadic routes
 
 It's also possible to have variadic routes, i.e. a route with an argument that contains URL pathnames that contain slashes:
@@ -261,6 +290,44 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 	"/files/:file...": Edit,
 })
 ```
+
+#### History state
+
+It's possible to take full advantage of the underlying `history.pushState` API to improve user's navigation experience. For example, an application could "remember" the state of a large form when the user leaves a page by navigating away, such that if the user pressed the back button in the browser, they'd have the form filled rather than a blank form.
+
+For example, you could create a form like this:
+
+```javascript
+var state = {
+	term: "",
+	search: function() {
+		// save the state for this route
+		// this is equivalent to `history.replaceState({term: state.term}, null, location.href)`
+		m.route.set(m.route.get(), null, {replace: true, state: {term: state.term}})
+		
+		// navigate away
+		location.href = "https://google.com/?q=" + state.term
+	}
+}
+
+var Form = {
+	oninit: function(vnode) {
+		state.term = vnode.attrs.term || "" // populated from the `history.state` property if the user presses the back button
+	},
+	view: function() {
+		return m("form", [
+			m("input[placeholder='Search']", {oninput: m.withAttr("value", function(v) {state.term = v}), value: state.term}),
+			m("button", {onclick: state.search}, "Search")
+		])
+	}
+}
+
+m.route(document.body, "/", {
+	"/": Form,
+})
+```
+
+This way, if the user searches and presses the back button to return to the application, the input will still be populated with the search term. This technique can improve the user experience of large forms and other apps where non-persisted state is laborious for a user to produce.
 
 ---
 
@@ -323,30 +390,75 @@ In the example above, the layout merely consists of a `<div class="layout">` tha
 One way to wrap the layout is to define an anonymous component in the routes map:
 
 ```javascript
+// example 1
 m.route(document.body, "/", {
 	"/": {
 		view: function() {
 			return m(Layout, m(Home))
 		},
+	},
+	"/form": {
+		view: function() {
+			return m(Layout, m(Form))
+		},
 	}
 })
 ```
 
-However, note that because the top level component is an anonymous component, jumping from route to route will tear down the anonymous component and recreate the DOM from scratch. If the Layout component had [lifecycle methods](lifecycle-methods.md) defined, the `oninit` and `oncreate` hooks would fire on every route change. Depending on the application, this may or may not be desirable.
+However, note that because the top level component is an anonymous component, jumping from the `/` route to the `/form` route (or vice-versa) will tear down the anonymous component and recreate the DOM from scratch. If the Layout component had [lifecycle methods](lifecycle-methods.md) defined, the `oninit` and `oncreate` hooks would fire on every route change. Depending on the application, this may or may not be desirable.
 
 If you would prefer to have the Layout component be diffed and maintained intact rather than recreated from scratch, you should instead use a RouteResolver as the root object:
 
 ```javascript
+// example 2
 m.route(document.body, "/", {
 	"/": {
 		render: function() {
 			return m(Layout, m(Home))
+		},
+	},
+	"/form": {
+		render: function() {
+			return m(Layout, m(Form))
 		},
 	}
 })
 ```
 
 Note that in this case, if the Layout component the `oninit` and `oncreate` lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).
+
+To clarify the difference between the two examples, example 1 is equivalent to this code:
+
+```javascript
+// functionally equivalent to example 1
+var Anon1 = {
+	view: function() {
+		return m(Layout, m(Home))
+	},
+}
+var Anon2 = {
+	view: function() {
+		return m(Layout, m(Form))
+	},
+}
+
+m.route(document.body, "/", {
+	"/": {
+		render: function() {
+			return m(Anon1)
+		}
+	},
+	"/form": {
+		render: function() {
+			return m(Anon2)
+		}
+	},
+})
+```
+
+Since `Anon1` and `Anon2` are different components, their subtrees (including `Layout`) are recreated from scratch. This is also what happens when components are used directly without a RouteResolver.
+
+In example 2, since `Layout` is the top-level component in both routes, the DOM for the `Layout` component is diffed (i.e. left intact if it has no changes), and only the change from `Home` to `Form` triggers a recreation of that subsection of the DOM.
 
 ---
 
@@ -407,7 +519,7 @@ m.route(document.body, "/user/list", {
 	"/user/list": {
 		oninit: state.loadUsers,
 		view: function() {
-			return state.users.length > 0 ? state.users.map(function() {
+			return state.users.length > 0 ? state.users.map(function(user) {
 				return m("div", user.id)
 			}) : "loading"
 		}
@@ -433,7 +545,7 @@ m.route(document.body, "/user/list", {
 	"/user/list": {
 		onmatch: state.loadUsers,
 		render: function() {
-			return state.users.length > 0 ? state.users.map(function() {
+			return state.users.length > 0 ? state.users.map(function(user) {
 				return m("div", user.id)
 			}) : "loading"
 		}
