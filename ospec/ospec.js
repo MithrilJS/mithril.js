@@ -197,7 +197,8 @@ module.exports = new function init() {
 		var status = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
-				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
+				var lflf = r.error.lastIndexOf('\n\n')
+				var stackTrace = lflf === -1 ? '' : r.error.slice(lflf + 2).replace(/[^\n]*[\/\\]ospec[\/\\]ospec\.js[^\n]*(?:\n|$)/g, '')
 				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 				status = 1
 			}
