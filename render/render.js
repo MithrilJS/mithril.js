@@ -370,15 +370,6 @@ module.exports = function($window) {
 			}
 		}
 	}
-	function once(f) {
-		var called = false
-		return function() {
-			if (!called) {
-				called = true
-				f()
-			}
-		}
-	}
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		if (vnode.attrs && vnode.attrs.onbeforeremove) {

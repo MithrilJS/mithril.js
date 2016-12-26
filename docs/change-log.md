@@ -110,8 +110,8 @@ m("div", {
     onbeforeupdate : function(vnode, old) { /*...*/ },
     // Called after the node is updated
     onupdate : function(vnode) { /*...*/ },
-    // Called before the node is removed, call done() when ready for the node to be removed from the DOM
-    onbeforeremove : function(vnode, done) { /*...*/ },
+    // Called before the node is removed, return a Promise that resolves when ready for the node to be removed from the DOM
+    onbeforeremove : function(vnode) { /*...*/ },
     // Called before the node is removed, but after onbeforeremove calls done()
     onremove : function(vnode) { /*...*/ }
 });
