@@ -1098,7 +1098,7 @@ var _20 = function($window, redrawService0) {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
 		var bail = function() {
-			routeService.setPath(defaultRoute)
+			routeService.setPath(defaultRoute, null, { replace: true })
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
@@ -1153,6 +1153,7 @@ m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
 m.version = "1.0.0-rc.6"
+m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }

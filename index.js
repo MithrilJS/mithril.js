@@ -16,5 +16,6 @@ m.jsonp = requestService.jsonp
 m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.version = "bleeding-edge"
+m.vnode = require("./render/vnode")
 
 module.exports = m

@@ -51,7 +51,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("routed mount points can redraw synchronoulsy (#1275)", function() {
+				o("routed mount points can redraw synchronously (#1275)", function() {
 					var view = o.spy()
 
 					$window.location.href = prefix + "/"
@@ -66,7 +66,9 @@ o.spec("route", function() {
 				})
 
 				o("default route doesn't break back button", function(done) {
-					$window.location.href = "http://google.com"
+					$window.location.href = "http://old.com"
+					$window.location.href = "http://new.com"
+
 					route(root, "/a", {
 						"/a" : {
 							view: function() {
@@ -78,9 +80,12 @@ o.spec("route", function() {
 					callAsync(function() {
 						o(root.firstChild.nodeName).equals("DIV")
 
+						o(route.get()).equals("/a")
+
 						$window.history.back()
 
 						o($window.location.pathname).equals("/")
+						o($window.location.hostname).equals("old.com")
 
 						done()
 					})
@@ -574,7 +579,7 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-						
+
 						done()
 					})
 				})
@@ -609,7 +614,7 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-						
+
 						done()
 					})
 				})
@@ -617,7 +622,7 @@ o.spec("route", function() {
 				o("onmatch can redirect to another route", function(done) {
 					var redirected = false
 					var render = o.spy()
-					
+
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
@@ -968,7 +973,7 @@ o.spec("route", function() {
 											o(renderA.callCount).equals(0)
 											o(renderB.callCount).equals(1)
 
-											done()											
+											done()
 										})
 									}, 20)
 								})
@@ -1190,19 +1195,19 @@ o.spec("route", function() {
 							}
 						},
 					})
-					
+
 					callAsync(function() { // tick for popstate for /a
 						callAsync(function() { // tick for promise in onmatch
 							callAsync(function() { // tick for onpopstate for /b
 								o(rendered).equals(false)
 								o(resolved).equals("b")
-								
+
 								done()
 							})
 						})
 					})
 				})
-				
+
 				o("throttles", function(done, timeout) {
 					timeout(200)
 
