@@ -82,8 +82,8 @@ hyperscript.fragment = function(attrs1, children) {
 }
 var m = hyperscript
 /** @constructor */
-var PromisePolyfill0 = function(executor) {
-	if (!(this instanceof PromisePolyfill0)) throw new Error("Promise must be called with `new`")
+var PromisePolyfill = function(executor) {
+	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
 	if (typeof executor !== "function") throw new TypeError("executor must be a function")
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
 	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
@@ -124,7 +124,7 @@ var PromisePolyfill0 = function(executor) {
 	}
 	executeOnce(executor)
 }
-PromisePolyfill0.prototype.then = function(onFulfilled, onRejection) {
+PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
 	var self = this, instance = self._instance
 	function handle(callback, list, next, state) {
 		list.push(function(value) {
@@ -134,22 +134,22 @@ PromisePolyfill0.prototype.then = function(onFulfilled, onRejection) {
 		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
 	}
 	var resolveNext, rejectNext
-	var promise = new PromisePolyfill0(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
+	var promise = new PromisePolyfill(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
 	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
 	return promise
 }
-PromisePolyfill0.prototype.catch = function(onRejection) {
+PromisePolyfill.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
 }
-PromisePolyfill0.resolve = function(value) {
-	if (value instanceof PromisePolyfill0) return value
-	return new PromisePolyfill0(function(resolve) {resolve(value)})
+PromisePolyfill.resolve = function(value) {
+	if (value instanceof PromisePolyfill) return value
+	return new PromisePolyfill(function(resolve) {resolve(value)})
 }
-PromisePolyfill0.reject = function(value) {
-	return new PromisePolyfill0(function(resolve, reject) {reject(value)})
+PromisePolyfill.reject = function(value) {
+	return new PromisePolyfill(function(resolve, reject) {reject(value)})
 }
-PromisePolyfill0.all = function(list) {
-	return new PromisePolyfill0(function(resolve, reject) {
+PromisePolyfill.all = function(list) {
+	return new PromisePolyfill(function(resolve, reject) {
 		var total = list.length, count = 0, values = []
 		if (list.length === 0) resolve([])
 		else for (var i = 0; i < list.length; i++) {
@@ -167,18 +167,21 @@ PromisePolyfill0.all = function(list) {
 		}
 	})
 }
-PromisePolyfill0.race = function(list) {
-	return new PromisePolyfill0(function(resolve, reject) {
+PromisePolyfill.race = function(list) {
+	return new PromisePolyfill(function(resolve, reject) {
 		for (var i = 0; i < list.length; i++) {
 			list[i].then(resolve, reject)
 		}
 	})
 }
-if (typeof Promise === "undefined") {
-	if (typeof window !== "undefined") window.Promise = PromisePolyfill0
-	else if (typeof global !== "undefined") global.Promise = PromisePolyfill0
+if (typeof window !== "undefined") {
+	if (typeof window.Promise === "undefined") window.Promise = PromisePolyfill
+	var PromisePolyfill = window.Promise
+} else if (typeof global !== "undefined") {
+	if (typeof global.Promise === "undefined") global.Promise = PromisePolyfill
+	var PromisePolyfill = global.Promise
+} else {
 }
-var PromisePolyfill = typeof Promise !== "undefined" ? Promise : PromisePolyfill0
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
