@@ -428,7 +428,9 @@ var coreRenderer = function($window) {
 	function createComponent(vnode, hooks, ns) {
 		// For object literals since `Vnode()` always sets the `state` field.
 		if (!vnode.state) vnode.state = {}
-		assign(vnode.state, vnode.tag)
+		var constructor = function() {}
+		constructor.prototype = vnode.tag
+		vnode.state = new constructor
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
 		view.reentrantLock = true
@@ -705,12 +707,18 @@ var coreRenderer = function($window) {
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		if (vnode.attrs && vnode.attrs.onbeforeremove) {
-			expected++
-			vnode.attrs.onbeforeremove.call(vnode.state, vnode, once(continuation))
+			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
+			}
 		}
 		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-			expected++
-			vnode.tag.onbeforeremove.call(vnode.state, vnode, once(continuation))
+			var result = vnode.tag.onbeforeremove.call(vnode.state, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
+			}
 		}
 		continuation()
 		function continuation() {
@@ -878,9 +886,6 @@ var coreRenderer = function($window) {
 			return true
 		}
 		return false
-	}
-	function assign(target, source) {
-		Object.keys(source).forEach(function(k){target[k] = source[k]})
 	}
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
@@ -1098,7 +1103,7 @@ var _20 = function($window, redrawService0) {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
 		var bail = function() {
-			routeService.setPath(defaultRoute, null, { replace: true })
+			routeService.setPath(defaultRoute, null, {replace: true})
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
