@@ -97,7 +97,9 @@ module.exports = function($window) {
 	function createComponent(vnode, hooks, ns) {
 		// For object literals since `Vnode()` always sets the `state` field.
 		if (!vnode.state) vnode.state = {}
-		assign(vnode.state, vnode.tag)
+		var constructor = function() {}
+		constructor.prototype = vnode.tag
+		vnode.state = new constructor
 
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
@@ -380,12 +382,18 @@ module.exports = function($window) {
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		if (vnode.attrs && vnode.attrs.onbeforeremove) {
-			expected++
-			vnode.attrs.onbeforeremove.call(vnode.state, vnode, once(continuation))
+			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
+			}
 		}
 		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-			expected++
-			vnode.tag.onbeforeremove.call(vnode.state, vnode, once(continuation))
+			var result = vnode.tag.onbeforeremove.call(vnode.state, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
+			}
 		}
 		continuation()
 		function continuation() {
@@ -557,10 +565,6 @@ module.exports = function($window) {
 			return true
 		}
 		return false
-	}
-
-	function assign(target, source) {
-		Object.keys(source).forEach(function(k){target[k] = source[k]})
 	}
 
 	function render(dom, vnodes) {

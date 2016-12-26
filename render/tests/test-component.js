@@ -588,14 +588,12 @@ o.spec("component", function() {
 		o("calls onbeforeremove", function() {
 			var called = 0
 			var component = {
-				onbeforeremove: function(vnode, done) {
+				onbeforeremove: function(vnode) {
 					called++
 
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
-
-					done()
 				},
 				view: function() {
 					return {tag: "div", attrs: {id: "a"}, text: "b"}
@@ -614,14 +612,12 @@ o.spec("component", function() {
 		o("calls onbeforeremove when returning fragment", function() {
 			var called = 0
 			var component = {
-				onbeforeremove: function(vnode, done) {
+				onbeforeremove: function(vnode) {
 					called++
 
 					o(vnode.dom).notEquals(undefined)
 					o(vnode.dom).equals(root.firstChild)
 					o(root.childNodes.length).equals(1)
-
-					done()
 				},
 				view: function() {
 					return [{tag: "div", attrs: {id: "a"}, text: "b"}]
@@ -672,6 +668,10 @@ o.spec("component", function() {
 			function init(vnode) {
 				o(vnode.state.data).deepEquals(data)
 				o(vnode.state.data).equals(data)
+				
+				//inherits state via prototype
+				component.x = 1
+				o(vnode.state.x).equals(1)
 			}
 		})
 		o("state copy is shallow", function() {
