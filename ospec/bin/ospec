@@ -15,6 +15,7 @@ function traverseDirectory(pathname, callback) {
 					if (err) reject(err)
 					var promises = []
 					for (var i = 0; i < pathnames.length; i++) {
+						if (pathnames[i] === "node_modules") continue
 						pathnames[i] = path.join(pathname, pathnames[i])
 						promises.push(traverseDirectory(pathnames[i], callback))
 					}
@@ -31,7 +32,6 @@ function traverseDirectory(pathname, callback) {
 }
 
 traverseDirectory(".", function(pathname, stat, children) {
-	if (pathname.indexOf("node_modules") > -1) return
 	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
 		require(path.normalize(process.cwd()) + "/" + pathname)
 	}
