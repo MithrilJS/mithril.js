@@ -83,13 +83,13 @@ Open the `package.json` that you created earlier, and add an entry to the `scrip
 
 Remember this is a JSON file, so object key names such as `"scripts"` and `"build"` must be inside of double quotes.
 
-Now you can run the script via `npm run build` in your command line window. This looks up the `bundle` command in the NPM path, reads `index.js` and creates a file called `app.js` which includes both Mithril and the `hello world` code above.
+Now you can run the script via `npm run build` in your command line window. This looks up the `webpack` command in the NPM path, reads `index.js` and creates a file called `app.js` which includes both Mithril and the `hello world` code above. If you want to run the `webpack` command directly from the command line, you need to either add `node_modules/.bin` to your PATH, or install webpack globally via `npm install webpack -g`. It's, however, recommended that you always install webpack locally and use npm scripts, to ensure builds are reproducible in different computers.
 
 ```
 npm run build
 ```
 
-The `--watch` flag tells the `bundle` command to watch the file system and automatically recreate `app.js` if file changes are detected.
+The `--watch` flag tells webpack to watch the file system and automatically recreate `app.js` if file changes are detected.
 
 Now that you have created a bundle, you can then reference the `app.js` file from an HTML file:
 
