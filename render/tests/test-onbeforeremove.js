@@ -158,14 +158,14 @@ o.spec("onbeforeremove", function() {
 
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(root.firstChild.firstChild.nodeValue).equals("1")
-		
+
 		callAsync(function() {
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild.firstChild.nodeValue).equals("2")
-			
+
 			done()
 		})
 	})
@@ -182,6 +182,27 @@ o.spec("onbeforeremove", function() {
 		callAsync(function() {
 			o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
 			done()
+		})
+	})
+	o("awaits promise resolution before removing the node", function(done) {
+		var view = o.spy()
+		var onremove = o.spy()
+		var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
+		var component = {
+			onbeforeremove: onbeforeremove,
+			onremove: onremove,
+			view: view,
+		}
+		render(root, [{tag: component}])
+		render(root, [])
+
+		callAsync(function(){
+			o(onremove.callCount).equals(0)
+
+			callAsync(function() {
+				o(onremove.callCount).equals(1)
+				done()
+			})
 		})
 	})
 })
