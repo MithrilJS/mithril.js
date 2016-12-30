@@ -14,6 +14,7 @@
 - [Using variable data formats](#using-variable-data-formats)
 - [Extracting Metadata from the Response](#extracting-metadata-from-the-response)
 - [Custom request rejections](#custom-request-rejections)
+- [Setting headers](#setting-headers)
 - [Configuring the underlying XMLHttpRequest](#configuring-the-underlying-xmlhttprequest)
 - [Aborting a request](#aborting-a-request)
 - [Using JSON-P](#using-json-p)
@@ -132,7 +133,7 @@ In the example below, we bind an error getter-setter to our previous controller 
 //controller
 var controller = function() {
 	this.error = m.prop("")
-	
+
 	this.users = User.listEven().then(function(users) {
 		if (users.length == 0) m.route("/add");
 	}, this.error)
@@ -145,7 +146,7 @@ If the controller doesn't already have a success callback to run after a request
 //controller
 var controller = function() {
 	this.error = m.prop("")
-	
+
 	this.users = User.listEven().then(null, this.error)
 }
 ```
@@ -337,15 +338,34 @@ You can read more about the [promise exception monitor here](mithril.deferred.md
 
 ---
 
+### Setting headers
+
+The `headers` option can be used to add or modify existing headers. The example The example below shows how to configure a `POST` request where the server expects requests to have a `Content-Type: application/json` header.
+
+```javascript
+m.request({
+    method: "POST",
+    url: "/foo",
+    headers: {"Content-Type": "application/json"}
+});
+```
+
+---
+
 ### Configuring the underlying XMLHttpRequest
 
-The `config` option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise.
-
-The example below shows how to configure a request where the server expects requests to have a `Content-Type: application/json` header
+The `config` option can be used to arbitrarily configure the native XMLHttpRequest instance and to access properties that would not be accessible otherwise. For example, this is how to listen for progress notifications.
 
 ```javascript
 var xhrConfig = function(xhr) {
-	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.onprogress = function(ev) {
+		ev = ev || event;
+		if (ev.lengthComputable) {
+			console.log(ev.loaded + " bytes sent out of " + ev.total + " total.")
+		} else {
+			console.log(ev.loaded + " bytes sent.")
+		}
+	}
 }
 
 m.request({method: "POST", url: "/foo", config: xhrConfig});
@@ -456,35 +476,35 @@ where:
 -	**XHROptions options**
 
 	A map of options for the XMLHttpRequest
-	
+
 	-	**String method**
-	
+
 		The HTTP method. Must be either `"GET"`, `"POST"`, `"PUT"`, `"DELETE"`, `"HEAD"` or `"OPTIONS"`
-		
+
 	-	**String url**
-	
+
 		The URL to request. If the URL is not in the same domain as the application, the target server must be configured to accept cross-domain requests from the application's domain, i.e. its responses must include the header `Access-Control-Allow-Origin: *`.
-	
+
 	-	**String user** (optional)
-	
+
 		A user for HTTP authentication. Defaults to `undefined`
-		
+
 	-	**String password** (optional)
-	
+
 		A password for HTTP authentication. Defaults to `undefined`
-		
+
 	-	**Object<any> data** (optional)
-	
+
 		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
-		
+
 	-	**Boolean background** (optional)
-	
+
 		Determines whether the `m.request` can affect template rendering. Defaults to false.
-		
+
 		If this option is set to true, then the request does NOT call [`m.startComputation` / `m.endComputation`](mithril.computation.md) internally, and therefore the completion of the request does not trigger an update of the view, even if data has been changed. This option is useful for running operations in the background (i.e. without user intervention).
-		
+
 		In order to force a redraw after a background request, use [`m.redraw`](mithril.redraw.md), or `m.startComputation` / `m.endComputation`.
-		
+
 		```javascript
 		var demo = {}
 
@@ -503,9 +523,9 @@ where:
 			])
 		}
 		```
-		
+
 		It's strongly recommended that you set an `initialValue` option in ALL requests if you set the `background` option to true.
-		
+
 		When calling multiple background AJAX requests, it's recommended that you use [`m.sync`](mithril.sync.md) to batch redraw once at the end of all requests, as opposed to repeatedly redrawing after every request:
 
 		```javascript
@@ -514,15 +534,15 @@ where:
 		demo.controller = function() {
 			var users = m.request({method: "GET", url: "/api/users", background: true, initialValue: []})
 			var projects = m.request({method: "GET", url: "/api/projects", background: true, initialValue: []})
-			
+
 			m.sync([users, projects]).then(m.redraw)
-			
+
 			return {users: users, projects: projects}
 		}
 		```
-		
+
 		Make sure to add null checks if your request value can be null
-		
+
 		```javascript
 		var demo = {}
 
@@ -539,105 +559,109 @@ where:
 			])
 		}
 		```
-		
+
 	-	**any initialValue** (optional)
-	
+
 		The value that populates the returned getter-setter before the request completes. This is useful when using the `background` option, in order to avoid the need for null checks in views that may be attempting to access the returned getter-setter before the asynchronous request resolves.
-		
+
 		It is strongly recommended that you always set this option to avoid future surprises.
-		
+
 	-	**any unwrapSuccess(any data, XMLHttpRequest xhr)** (optional)
 
 		A preprocessor function to unwrap the data from a success response in case the response contains metadata wrapping the data.
-		
+
 		The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
-		
+
 		For example, if the response is `{data: [{name: "John"}, {name: "Mary"}]}` and the unwrap function is `function(response) {return response.data}`, then the response will be considered to be `[{name: "John"}, {name: "Mary"}]` when processing the `type` parameter
-		
+
 		-	**Object<any> | Array<any> data**
-		
+
 			The data to unwrap
-			
+
 		-	**returns Object<any> | Array<any> unwrappedData**
-		
+
 			The unwrapped data
 
 	-	**any unwrapError(any data, XMLHttpRequest xhr)** (optional)
 
 		A preprocessor function to unwrap the data from an error response in case the response contains metadata wrapping the data.
-		
+
 		The default value (if this parameter is falsy) is the identity function `function(value) {return value}`
-		
+
 		-	**Object<any> | Array<any> data**
-		
+
 			The data to unwrap
-			
+
 		-	**returns Object<any> | Array<any> unwrappedData**
-		
+
 			The unwrapped data
-			
+
 	-	**String serialize(any dataToSerialize)** (optional)
 
 		Method to use to serialize the request data
-		
+
 		The default value (if this parameter is falsy) is `JSON.stringify`
-			
+
 		-	**any dataToSerialize**
-		
+
 			Data to be serialized
-			
+
 		-	**returns String serializedData**
-		
+
 	-	**any deserialize(String dataToDeserialize)** (optional)
 
 		Method to use to deserialize the response data
-		
+
 		The default value (if this parameter is falsy) is `JSON.parse`
-		
+
 		-	**String dataToDeserialize**
-		
+
 			Data to be deserialized
-			
+
 		-	**returns any deserializedData**
-		
+
 	-	**any extract(XMLHttpRequest xhr, XHROptions options)** (optional)
-	
+
 		Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.
 
 		If this parameter is falsy, the default value is a function that returns `xhr.responseText`.
-		
+
 	-	**void type(Object<any> data)** (optional)
 
 		The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by `type`
-		
+
 		If this parameter is falsy, the deserialized data will not be wrapped.
-		
+
 		For example, if `type` is the following class:
-		
+
 		```javascript
 		var User = function(data) {
 			this.name = m.prop(data.name);
 		}
 		```
-		
+
 		And the data is `[{name: "John"}, {name: "Mary"}]`, then the response will contain an array of two User instances.
-		
+
+	-	**Object<String> headers** (optional)
+
+		Additional headers to set on the request, if any. Each header is specified as a key-value pair.
+
 	-	**XMLHttpRequest? config(XMLHttpRequest xhr, XHROptions options)** (optional)
-		
-		An initialization function that runs after `open` and before `send`. Useful for adding request headers and when using XHR2 features, such as the XMLHttpRequest's `upload` property.
-		
+
+		An initialization function that runs after `open` and before `send`. Useful for using XHR2 features, such as the XMLHttpRequest's `upload` property or `progress` event.
+
 		-	**XMLHttpRequest xhr**
-		
+
 			The XMLHttpRequest instance.
-			
+
 		-	**XHROptions options**
-			
+
 			The `options` parameter that was passed into `m.request` call
-			
+
 		-	**returns XMLHttpRequest? xhr**
-		
+
 			You may return an XHR-like object (e.g. a XDomainRequest instance) to override the provided XHR instance altogether.
-	
+
 -	**returns Promise promise**
 
 	returns a promise that can bind callbacks which get called on completion of the AJAX request.
@@ -647,29 +671,27 @@ where:
 -	**JSONPOptions options**
 
 	A map of options for JSONP requests
-	
+
 	-	**String dataType**
-	
+
 		Must be the string "jsonp"
-		
+
 	-	**String url**
-	
+
 		The URL to request. If the URL is not in the same domain as the application, the target server must be configured to accept cross-domain requests from the application's domain, i.e. its responses must include the header `Access-Control-Allow-Origin: *`.
 
 	-	**String callbackKey**
-	
+
 		The name of the querystring key that defines the name of the callback function to be called by the response. Defaults to "callback"
-		
+
 		This option is useful for web services that use uncommon conventions for defining jsonp callbacks (e.g. foo.com/?jsonpCallback=doSomething)
-		
+
 	-	**String callbackName**
-	
+
 		The name of callback function to be called by the response. Defaults to a unique auto-generated name
-		
+
 		This option is useful for web services serving static files and to prevent cache busting.
-		
+
 	-	**Object<any> data** (optional)
-	
+
 		Data to be sent. It's automatically placed in the appropriate section of the request with the appropriate serialization based on `method`
-		
-		

@@ -7,11 +7,11 @@
 	/*	Set dependencies when no window for isomorphic compatibility */
 	if(typeof window === "undefined") {
 		m.deps({
-			document: typeof document !== "undefined"? document: {},
-			location: typeof location !== "undefined"? location: {},
+			document: typeof document !== "undefined" ? document : {},
+			location: typeof location !== "undefined" ? location : {},
 			clearTimeout: clearTimeout,
 			setTimeout: setTimeout
-		});
+		})
 	}
 	if (typeof module === "object" && module != null && module.exports) {
 		module.exports = m
@@ -524,7 +524,8 @@
 		parentTag
 	) {
 		var nodes = cached.nodes
-		if (!editable || editable !== $document.activeElement || data !== cached) {
+		if (!editable || editable !== $document.activeElement ||
+				data !== cached) {
 			if (data.$trusted) {
 				clear(nodes, cached)
 				nodes = injectHTML(parentElement, index, data)
@@ -1095,10 +1096,8 @@
 			// #1252 likewise when `contenteditable` is set on an element.
 			try {
 				if (
-					tag !== "input" && !node.isContentEditable
-					/* eslint-disable eqeqeq */
-					|| node[attrName] != dataAttr
-					/* eslint-enable eqeqeq */
+					tag !== "input" && !node.isContentEditable ||
+					node[attrName] != dataAttr // eslint-disable-line eqeqeq
 				) {
 					node[attrName] = dataAttr
 				}
@@ -1436,6 +1435,8 @@
 		return parameterize(component, args)
 	}
 
+	var currentRoute, previousRoute
+
 	function checkPrevented(component, root, index, isPrevented) {
 		if (!isPrevented) {
 			m.redraw.strategy("all")
@@ -1468,6 +1469,7 @@
 			if (component == null) {
 				removeRootElement(root, index)
 			}
+
 			if (previousRoute) {
 				currentRoute = previousRoute
 			}
@@ -1604,7 +1606,7 @@
 	var modes = {pathname: "", hash: "#", search: "?"}
 	var redirect = noop
 	var isDefaultRoute = false
-	var routeParams, currentRoute, previousRoute
+	var routeParams
 
 	m.route = function (root, arg1, arg2, vdom) { // eslint-disable-line
 		// m.route()
@@ -2166,17 +2168,17 @@
 			xhr.setRequestHeader("Accept", "application/json, text/*")
 		}
 
-		if (isFunction(options.config)) {
-			var maybeXhr = options.config(xhr, options)
-			if (maybeXhr != null) xhr = maybeXhr
-		}
-
 		if (isObject(options.headers)) {
 			for (var header in options.headers) {
 				if (hasOwn.call(options.headers, header)) {
 					xhr.setRequestHeader(header, options.headers[header])
 				}
 			}
+		}
+
+		if (isFunction(options.config)) {
+			var maybeXhr = options.config(xhr, options)
+			if (maybeXhr != null) xhr = maybeXhr
 		}
 
 		var data = options.method === "GET" || !options.data ? "" : options.data

@@ -146,7 +146,6 @@ describe("m.request()", function () {
 		expect(xhr.$headers).to.not.have.property("Content-Type")
 	})
 
-
 	it("sets xhr request headers as per the headers config", function () {
 		var error = m.prop()
 
@@ -169,6 +168,37 @@ describe("m.request()", function () {
 		expect(xhr.$headers).to.have.property(
 			"CustomHeader",
 			"CustomValue")
+	})
+
+	it("overwrites existing headers", function () {
+		var error = m.prop()
+
+		m.request({
+			method: "POST",
+			url: "test",
+			// Trigger the Content-Type addition
+			data: {foo: "bar"},
+			headers: {
+				"Authorization" : "Bearer 12345abcd12345",
+				"CustomHeader" : "CustomValue",
+				"Content-Type" : "CustomType"
+			}
+		}).then(null, error)
+
+		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.onreadystatechange()
+
+		expect(xhr.$headers).to.have.property(
+			"Authorization",
+			"Bearer 12345abcd12345")
+
+		expect(xhr.$headers).to.have.property(
+			"CustomHeader",
+			"CustomValue")
+
+		expect(xhr.$headers).to.have.property(
+			"Content-Type",
+			"CustomType")
 	})
 
 
