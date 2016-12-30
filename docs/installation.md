@@ -155,7 +155,7 @@ If you don't have the ability to run a bundler script due to company security po
     <title>Hello world</title>
   </head>
   <body>
-    <script src="node_modules/mithril/mithril.js"></script>
+    <script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
     <script src="index.js"></script>
   </body>
 </html>
