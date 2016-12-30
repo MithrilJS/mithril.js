@@ -17,10 +17,11 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 ```bash
 # 1) install
 npm install mithril@rewrite --save
+npm install webpack --save
 
 # 2) add this line into the scripts section in package.json
 #	"scripts": {
-#		"build": "bundle index.js --output app.js --watch"
+#		"build": "webpack index.js app.js --watch"
 #	}
 
 # 3) create an `index.js` file
@@ -63,16 +64,19 @@ CommonJS is a de-facto standard for modularizing Javascript code, and it's used 
 
 Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single Javascript file before running in a client-side application.
 
-The easiest way to create a bundle is to setup an NPM script for Mithril's bundler. To do so, open the `package.json` that you created earlier, and add an entry to the `scripts` section:
+The easiest way to create a bundle is to setup an NPM script for Webpack. To install webpack, run this from the command line:
+
+```bash
+npm install webpack
+```
+
+Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
 
 ```
 {
 	"name": "my-project",
 	"scripts": {
-		"build": "bundle index.js --output app.js --watch"
-	},
-	"dependencies": {
-		"mithril": "^1.0.0-rc.5"
+		"build": "webpack index.js app.js --watch"
 	}
 }
 ```
@@ -126,23 +130,19 @@ Note that in this example, we're using `m.mount`, which wires up the component t
 
 #### Alternate ways to use Mithril
 
-##### Webpack
+##### Mithril bundler
 
-Webpack is a popular tool for bundling modular code. The biggest advantage of Webpack is that it has a relatively large ecosystem of plugins. The downside of that is that it can be difficult to configure correctly.
+Mithril comes with a bundler tool of its own. It is sufficient for projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.
 
-To use webpack, you must first install it by running `npm install webpack --save-dev`. Then you need to create a `webpack.config.js` file. Here's a basic configuration file that is equivalent to the Mithril bundler command in the first section of this page:
+If you want to try it and give feedback, you can open `package.json` and change the npm script for webpack to this:
 
-```javascript
-module.exports = {
-	entry: "./index.js",
-	output: {filename: "app.js"},
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"build": "bundle index.js --output app.js --watch"
+	}
 }
-```
-
-To run webpack, use the command `webpack --watch`.
-
-```
-webpack --watch
 ```
 
 ##### Vanilla
