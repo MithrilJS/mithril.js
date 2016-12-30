@@ -343,6 +343,43 @@ o.spec("xhr", function() {
 				done()
 			}, 20)
 		})
+		o("headers are set when header arg passed", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			xhr({method: "POST", url: "/item", config: config, headers: {"Custom-Header": "Value"}}).then(done)
+
+			function config(xhr) {
+				o(xhr.getRequestHeader("Custom-Header")).equals("Value")
+			}
+		})
+		o("headers are with higher precedence than default headers", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			xhr({method: "POST", url: "/item", config: config, headers: {"Content-Type": "Value"}}).then(done)
+
+			function config(xhr) {
+				o(xhr.getRequestHeader("Content-Type")).equals("Value")
+			}
+		})
+		o("json headers are set to the correct default value", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: ""}
+				}
+			})
+			xhr({method: "POST", url: "/item", config: config}).then(done)
+
+			function config(xhr) {
+				o(xhr.getRequestHeader("Content-Type")).equals("application/json; charset=utf-8")
+				o(xhr.getRequestHeader("Accept")).equals("application/json, text/*")
+			}
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
