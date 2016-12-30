@@ -146,6 +146,32 @@ describe("m.request()", function () {
 		expect(xhr.$headers).to.not.have.property("Content-Type")
 	})
 
+
+	it("sets xhr request headers as per the headers config", function () {
+		var error = m.prop()
+
+		m.request({
+			method: "POST",
+			url: "test",
+			headers: {
+				"Authorization" : "Bearer 12345abcd12345",
+				"CustomHeader" : "CustomValue"
+			}
+		}).then(null, error)
+
+		var xhr = mock.XMLHttpRequest.$instances.pop()
+		xhr.onreadystatechange()
+
+		expect(xhr.$headers).to.have.property(
+			"Authorization",
+			"Bearer 12345abcd12345")
+
+		expect(xhr.$headers).to.have.property(
+			"CustomHeader",
+			"CustomValue")
+	})
+
+
 	it("correctly sets initial value", function () {
 		var prop = m.request({
 			method: "POST",

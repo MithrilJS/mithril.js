@@ -841,6 +841,11 @@ declare namespace Mithril {
 		password?: string;
 
 		/**
+		* An optional object map of headers with their respective values
+		*/
+		headers?: {[key: string]: string};
+
+		/**
 		* An optional function to run between `open` and `send`, useful for
 		* adding request headers or using XHR2 features such as the `upload`
 		* property. It is even possible to override the XHR altogether with a
