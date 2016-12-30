@@ -67,7 +67,7 @@ Most browser today do not natively support modularization systems (CommonJS or E
 The easiest way to create a bundle is to setup an NPM script for Webpack. To install webpack, run this from the command line:
 
 ```bash
-npm install webpack
+npm install webpack --save
 ```
 
 Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
