@@ -841,9 +841,9 @@ declare namespace Mithril {
 		password?: string;
 
 		/**
-		* An Optional Object Map of headers
+		* An optional object map of headers with their respective values
 		*/
-		headers?: Object;
+		headers?: {[key: string]: string};
 
 		/**
 		* An optional function to run between `open` and `send`, useful for
