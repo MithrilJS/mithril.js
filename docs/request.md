@@ -50,6 +50,7 @@ Argument                  | Type                              | Required | Descr
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
 `options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
 `options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the response. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses.
@@ -404,7 +405,21 @@ function parseCSV(data) {
 }
 ```
 
-Ignoring the fact that the parseCSV function above doesn't handle a lot of cases that a proper CSV parser would, the code above logs an array of arrays
+Ignoring the fact that the parseCSV function above doesn't handle a lot of cases that a proper CSV parser would, the code above logs an array of arrays.
+
+Custom headers may also be helpful in this regard. For example, if you're requesting an SVG, you probably want to set the content type accordingly. To override the default JSON request type, set `options.headers` to an object of key-value pairs corresponding to request header names and values.
+
+```javascript
+m.request({
+	method: "GET",
+	url: "/files/image.svg",
+	headers: {
+		"Content-Type": "image/svg+xml; charset=utf-8",
+		"Accept": "image/svg, text/*"
+	},
+	deserialize: function(value) {return value}
+})
+```
 
 ---
 
@@ -485,4 +500,3 @@ m.request("/api/v1/users").then(function(users) {
 	console.log("list of users:", users)
 })
 ```
-

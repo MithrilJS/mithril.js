@@ -33,7 +33,7 @@ module.exports = function($window, Promise) {
 		}
 		return args
 	}
-	
+
 	function request(args, extra) {
 		var finalize = finalizer()
 		args = normalize(args, extra)
@@ -62,6 +62,10 @@ module.exports = function($window, Promise) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
+
+			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
+				xhr.setRequestHeader(key, args.headers[key])
+			}
 
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 
@@ -93,7 +97,7 @@ module.exports = function($window, Promise) {
 	function jsonp(args, extra) {
 		var finalize = finalizer()
 		args = normalize(args, extra)
-		
+
 		var promise = new Promise(function(resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")

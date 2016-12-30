@@ -14,7 +14,13 @@ module.exports = function() {
 	var $window = {
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
-			this.setRequestHeader = function(header, value) {}
+			var headers = {}
+			this.setRequestHeader = function(header, value) {
+				headers[header] = value
+			}
+			this.getRequestHeader = function(header) {
+				return headers[header]
+			}
 			this.open = function(method, url, async, user, password) {
 				var urlData = parseURL(url, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
 				args.method = method
