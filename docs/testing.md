@@ -65,7 +65,7 @@ module.exports = {
 
 We can then create a `tests/MyComponent.js` file and create a test for this component like this:
 
-```
+```javascript
 var MyComponent = require("MyComponent")
 
 o.spec("MyComponent", function() {
