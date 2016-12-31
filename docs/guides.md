@@ -1,7 +1,7 @@
 - Tutorials
 	- [Installation](installation.md)
 	- [Introduction](introduction.md)
-	- [Tutorial](tutorial.md)
+	- [Tutorial](simple-application.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 - Key concepts
@@ -14,4 +14,5 @@
 	- [Contributing](contributing.md)
 	- [Credits](credits.md)
 - Misc
+	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)

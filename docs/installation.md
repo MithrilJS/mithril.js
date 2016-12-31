@@ -1,5 +1,8 @@
 # Installation
 
+- [CDN](#cdn)
+- [NPM](#npm)
+
 ### CDN
 
 If you're new to Javascript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
@@ -11,33 +14,6 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 ---
 
 ### NPM
-
-#### Quick start with Budo
-
-The [budo browserify development server](https://github.com/mattdesl/budo) 
-allows for the fastest way to have your pure JavaScript app (no HTML file needed) 
-running in the browser with the covenient live reload feature on any source changes.
-
-```bash
-# 1) install
-npm install mithril@rewrite --save
-npm install budo -g
-
-# 2) add this line into the scripts section in package.json
-#	"scripts": {
-#		"start": "budo --live --open index.js"
-#	}
-
-# 3) create an `index.js` file
-
-# 4) run budo
-npm start
-```
-
-The source file `index.js` will be compiled (bundled) and a browser window opens showing the result.
-Any changes in the source files will instantly get recompiled and the 
-browser will refresh reflecting the changes.
-
 
 #### Quick start with Webpack
 
@@ -61,6 +37,10 @@ npm run build
 # 6) open `index.html` in the (default) browser
 open index.html
 ```
+
+The source file `index.js` will be compiled (bundled) and a browser window opens showing the result.
+Any changes in the source files will instantly get recompiled and the 
+browser will refresh reflecting the changes.
 
 #### Step by step
 
@@ -166,9 +146,31 @@ m.mount(document.body, MyComponent)
 
 Note that in this example, we're using `m.mount`, which wires up the component to Mithril's autoredraw system. In most applications, you will want to use `m.mount` (or `m.route` if your application has multiple screens) instead of `m.render` to take advantage of the autoredraw system, rather than re-rendering manually every time a change occurs.
 
-#### Alternate ways to use Mithril
+---
 
-##### Mithril bundler
+### Alternate ways to use Mithril
+
+#### Live reload development environment
+
+Live reload is a feature where code changes automatically trigger the page to reload. [Budo](https://github.com/mattdesl/budo) is one tool that enables live reloading.
+
+```bash
+# 1) install
+npm install mithril@rewrite --save
+npm install budo -g
+
+# 2) add this line into the scripts section in package.json
+#	"scripts": {
+#		"start": "budo --live --open index.js"
+#	}
+
+# 3) create an `index.js` file
+
+# 4) run budo
+npm start
+```
+
+#### Mithril bundler
 
 Mithril comes with a bundler tool of its own. It is sufficient for projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.
 
@@ -183,7 +185,7 @@ If you want to try it and give feedback, you can open `package.json` and change 
 }
 ```
 
-##### Vanilla
+#### Vanilla
 
 If you don't have the ability to run a bundler script due to company security policies, there's an options to not use a module system at all:
 

@@ -8,11 +8,7 @@ The easist way to setup the test runner is to create an NPM script for it. Open 
 {
 	"name": "my-project",
 	"scripts": {
-		"build": "bundle index.js --output app.js --watch",
 		"test": "ospec"
-	},
-	"dependencies": {
-		"mithril": "^1.0.0-rc.5"
 	}
 }
 ```

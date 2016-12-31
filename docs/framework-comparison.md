@@ -1,5 +1,9 @@
 # Framework comparison
 
+- [React](#react)
+- [Angular](#angular)
+- [Vue](#vue)
+
 If you're reading this page, you probably have used other frameworks to build applications, and you want to know if Mithril would help you solve your problems more effectively.
 
 In this page, you will find common arguments about other frameworks and comments on where Mithril is similar or why it differs from them.
