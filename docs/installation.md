@@ -12,7 +12,34 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 ### NPM
 
-#### Quick start
+#### Quick start with Budo
+
+The [budo browserify development server](https://github.com/mattdesl/budo) 
+allows for the fastest way to have your pure JavaScript app (no HTML file needed) 
+running in the browser with the covenient live reload feature on any source changes.
+
+```bash
+# 1) install
+npm install mithril@rewrite --save
+npm install budo -g
+
+# 2) add this line into the scripts section in package.json
+#	"scripts": {
+#		"start": "budo --live --open index.js"
+#	}
+
+# 3) create an `index.js` file
+
+# 4) run budo
+npm start
+```
+
+The source file `index.js` will be compiled (bundled) and a browser window opens showing the result.
+Any changes in the source files will instantly get recompiled and the 
+browser will refresh reflecting the changes.
+
+
+#### Quick start with Webpack
 
 ```bash
 # 1) install
@@ -26,8 +53,13 @@ npm install webpack --save
 
 # 3) create an `index.js` file
 
-# 4) run bundler
+# 4) create an `index.html` file loading `app.js`
+
+# 5) run bundler
 npm run build
+
+# 6) open `index.html` in the (default) browser
+open index.html
 ```
 
 #### Step by step
@@ -43,7 +75,13 @@ npm init --yes
 # creates a file called package.json
 ```
 
-Then, run `npm install mithril@rewrite --save` to install Mithril. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
+Then, run 
+
+```bash
+npm install mithril@rewrite --save
+```
+
+to install Mithril. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
 
 ```bash
 npm install mithril@rewrite --save
