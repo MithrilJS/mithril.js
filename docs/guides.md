@@ -11,9 +11,8 @@
 	- [Keys](keys.md)
 - Social
 	- [Community chat](https://gitter.im/lhorie/mithril.js)
-	- [Wiki](https://github.com/lhorie/mithril.js/wiki)
-	- [Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
-	- [Contributing](contributing.md)
+	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
+	- [How to contribute](contributing.md)
 	- [Credits](credits.md)
 - Misc
 	- [Framework comparison](framework-comparison.md)

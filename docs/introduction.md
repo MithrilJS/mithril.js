@@ -13,7 +13,7 @@
 ### What is Mithril?
 
 Mithril is a client-side Javascript framework for building Single Page Applications.  
-It's small (< 8kb gzip) and batteries-included.
+It's small (< 8kb gzip), fast and batteries-included.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
