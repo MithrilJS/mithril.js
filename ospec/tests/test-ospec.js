@@ -37,12 +37,27 @@ o.spec("ospec", function() {
 			o({a: [1, 2], b: 3}).deepEquals({a: [1, 2], b: 3})
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
 			
+			var sparse1 = [void 1, void 2, void 3]
+			delete sparse1[0]
+			var sparse2 = [void 1, void 2, void 3]
+			delete sparse2[1]
+
+			o(sparse1).notDeepEquals(sparse2)
+
 			var monkeypatch1 = [1, 2]
 			monkeypatch1.field = 3
 			var monkeypatch2 = [1, 2]
 			monkeypatch2.field = 4
 			
 			o(monkeypatch1).notDeepEquals([1, 2])
+			o(monkeypatch1).notDeepEquals(monkeypatch2)
+
+			monkeypatch2.field = 3
+			o(monkeypatch1).deepEquals(monkeypatch2)
+
+			monkeypatch1.undef = undefined
+			monkeypatch2.UNDEF = undefined
+
 			o(monkeypatch1).notDeepEquals(monkeypatch2)
 
 			var values = ["a", "", 1, 0, true, false, null, undefined, Date(0), ["a"], [], function() {return arguments}.call(), new Uint8Array(), {a: 1}, {}]
