@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Closure Compiler externs for Mithril.
+ * @see http://mithril.js.org
+ * @externs
+ */
 var m = {
     "render": function () {},
     "mount": function () {},
@@ -14,4 +19,4 @@ var m = {
     "request": function () {},
     "deps": function () {},
     "component": function() {}
-}
+};
