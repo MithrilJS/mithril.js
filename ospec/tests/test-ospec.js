@@ -28,7 +28,7 @@ o.spec("ospec", function() {
 		o.beforeEach(function() {b = 1})
 		o.afterEach(function() {b = 0})
 
-		o("assertions", function() {
+		o.only("assertions", function() {
 			var spy = o.spy()
 			spy(a)
 
@@ -36,6 +36,14 @@ o.spec("ospec", function() {
 			o(a).notEquals(2)
 			o({a: [1, 2], b: 3}).deepEquals({a: [1, 2], b: 3})
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
+			
+			var monkeypatch1 = [1, 2]
+			monkeypatch1.field = 3
+			var monkeypatch2 = [1, 2]
+			monkeypatch2.field = 4
+			
+			o(monkeypatch1).notDeepEquals([1, 2])
+			o(monkeypatch1).notDeepEquals(monkeypatch2)
 
 			var values = ["a", "", 1, 0, true, false, null, undefined, Date(0), ["a"], [], function() {return arguments}.call(), new Uint8Array(), {a: 1}, {}]
 			for (var i = 0; i < values.length; i++) {

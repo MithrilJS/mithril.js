@@ -143,8 +143,11 @@ module.exports = new function init() {
 				return true
 			}
 			if (a.length === b.length && (a instanceof Array && b instanceof Array || aIsArgs && bIsArgs)) {
-				for (var i = 0; i < a.length; i++) {
-					if (!deepEqual(a[i], b[i])) return false
+				var aKeys = Object.getOwnPropertyNames(a), bKeys = Object.getOwnPropertyNames(b)
+				if (aKeys.length !== bKeys.length) return false
+				var larger = aKeys.length < bKeys.length ? bKeys : aKeys
+				for (var i = 0; i < larger.length; i++) {
+					if (!deepEqual(a[larger[i]], b[larger[i]])) return false
 				}
 				return true
 			}
