@@ -36,6 +36,13 @@ o.spec("ospec", function() {
 			o(a).notEquals(2)
 			o({a: [1, 2], b: 3}).deepEquals({a: [1, 2], b: 3})
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
+
+			var undef1 = {undef: void 0}
+			var undef2 = {UNDEF: void 0}
+
+			o(undef1).notDeepEquals(undef2)
+			o(undef1).notDeepEquals({})
+			o({}).notDeepEquals(undef1)
 			
 			var sparse1 = [void 1, void 2, void 3]
 			delete sparse1[0]
