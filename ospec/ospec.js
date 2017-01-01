@@ -135,7 +135,7 @@ module.exports = new function init() {
 			var aIsArgs = isArguments(a), bIsArgs = isArguments(b)
 			if (a.constructor === Object && b.constructor === Object && !aIsArgs && !bIsArgs) {
 				for (var i in a) {
-					if (!deepEqual(a[i], b[i])) return false
+					if ((!(i in b)) || !deepEqual(a[i], b[i])) return false
 				}
 				for (var i in b) {
 					if (!(i in a)) return false
