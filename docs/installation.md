@@ -63,10 +63,6 @@ npm install mithril@rewrite --save
 
 to install Mithril. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
 
-```bash
-npm install mithril@rewrite --save
-```
-
 You are now ready to start using Mithril. The recommended way to structure code is to modularize it via CommonJS modules:
 
 ```javascript
