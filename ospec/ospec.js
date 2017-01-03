@@ -1,7 +1,7 @@
 "use strict"
 
 module.exports = new function init() {
-	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, hasProcess = typeof process === "object"
+	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object"
 
 	function o(subject, predicate) {
 		ctx[subject] = predicate
@@ -67,7 +67,6 @@ module.exports = new function init() {
 			next()
 
 			function next() {
-				stack++
 				if (cursor === fns.length) return
 
 				var fn = fns[cursor++]
@@ -104,8 +103,7 @@ module.exports = new function init() {
 				}
 				else {
 					fn()
-					if (stack < 5000) next()
-					else (hasProcess ? process.nextTick : setTimeout)(next, stack = 0)
+					nextTickish(next)
 				}
 			}
 		}
@@ -209,6 +207,15 @@ module.exports = new function init() {
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
 		)
 		if (hasProcess && status === 1) process.exit(1)
+	}
+
+	if(hasProcess) {
+		nextTickish = process.nextTick
+	} else {
+		nextTickish = function fakeFastNextTick(fn) {
+			if (stack++ < 5000) next()
+			else setTimeout(next, stack = 0)
+		}
 	}
 
 	return o
