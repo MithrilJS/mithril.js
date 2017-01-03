@@ -38,10 +38,6 @@ npm run build
 open index.html
 ```
 
-The source file `index.js` will be compiled (bundled) and a browser window opens showing the result.
-Any changes in the source files will instantly get recompiled and the 
-browser will refresh reflecting the changes.
-
 #### Step by step
 
 For production-level projects, the recommended way of installing Mithril is to use NPM.
@@ -165,6 +161,8 @@ npm install budo -g
 # 4) run budo
 npm start
 ```
+
+The source file `index.js` will be compiled (bundled) and a browser window opens showing the result. Any changes in the source files will instantly get recompiled and the browser will refresh reflecting the changes.
 
 #### Mithril bundler
 
