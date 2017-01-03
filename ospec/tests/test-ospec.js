@@ -8,7 +8,7 @@ new function(o) {
 
 	o.spec("ospec", function() {
 		o("skipped", function() {
-			o(1).equals(1)
+			o(true).equals(false)
 		})
 		o.only(".only()", function() {
 			o(2).equals(2)
@@ -28,7 +28,7 @@ o.spec("ospec", function() {
 		o.beforeEach(function() {b = 1})
 		o.afterEach(function() {b = 0})
 
-		o.only("assertions", function() {
+		o("assertions", function() {
 			var spy = o.spy()
 			spy(a)
 
