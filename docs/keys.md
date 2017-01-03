@@ -132,9 +132,7 @@ users.map(function(u) {
 
 // PREFER
 users.map(function(u) {
-	return {tag: "[", key: u.id, children: [
-		m("button", u.name)
-	]}
+	return m.fragment({key: u.id}, m("button", u.name))
 })
 ```
 
