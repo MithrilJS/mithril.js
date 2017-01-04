@@ -8,37 +8,37 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
-	var render, component, attrs, currentPath, updatePending = false
+	var render, component, attrs, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var update = function(routeResolver, comp, params, path) {
-			component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, updatePending = false
-			render = (routeResolver.render || identity).bind(routeResolver)
-			run()
-		}
 		var run = function() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 		}
 		var bail = function() {
-			routeService.setPath(defaultRoute)
+			routeService.setPath(defaultRoute, null, {replace: true})
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
-			if (payload.view) update({}, payload, params, path)
+			var update = lastUpdate = function(routeResolver, comp) {
+				if (update !== lastUpdate) return
+				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, lastUpdate = null
+				render = (routeResolver.render || identity).bind(routeResolver)
+				run()
+			}
+			if (payload.view) update({}, payload)
 			else {
 				if (payload.onmatch) {
-					updatePending = true
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-						if (updatePending) update(payload, resolved, params, path)
+						update(payload, resolved)
 					}, bail)
 				}
-				else update(payload, "div", params, path)
+				else update(payload, "div")
 			}
 		}, bail)
 		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {
-		if (updatePending) options = {replace: true}
-		updatePending = false
+		if (lastUpdate != null) options = {replace: true}
+		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}

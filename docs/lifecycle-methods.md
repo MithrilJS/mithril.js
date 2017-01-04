@@ -130,7 +130,7 @@ m(RedrawReporter, {data: "Hello"})
 
 ### onbeforeremove
 
-The `onbeforeremove(vnode, done)` hook is called before a DOM element is detached from the document. Mithril only detaches the DOM element after the `done` callback is called. The `done` callback can be called asynchronously, making it possible to run exit animations before detaching the element.
+The `onbeforeremove(vnode)` hook is called before a DOM element is detached from the document. If a Promise is returned, Mithril only detaches the DOM element after the promise completes.
 
 This hook is only called on the DOM element that loses its `parentNode`, but it does not get called in its child elements.
 
@@ -138,9 +138,11 @@ Like in other hooks, the `this` keyword in the `onbeforeremove` callback points 
 
 ```javascript
 var Fader = {
-	onbeforeremove: function(vnode, done) {
+	onbeforeremove: function(vnode) {
 		vnode.dom.classList.add("fade-out")
-		setTimeout(done, 1000)
+		return new Promise(function(resolve) {
+			setTimeout(resolve, 1000)
+		})
 	},
 	view: function() {
 		return m("div", "Bye")

@@ -63,9 +63,12 @@ var ComponentWithHooks = {
 	onupdate: function(vnode) {
 		console.log("DOM updated")
 	},
-	onbeforeremove: function(vnode, done) {
+	onbeforeremove: function(vnode) {
 		console.log("exit animation can start")
-		done()
+		return new Promise(function(resolve) {
+			// call after animation completes
+			resolve()
+		})
 	},
 	onremove: function(vnode) {
 		console.log("removing DOM element")

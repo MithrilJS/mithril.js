@@ -16,5 +16,4 @@
 - Optional
 	- [Stream](stream.md)
 - Tooling
-	- [Bundler](bundler.md)
-	- [Ospec](ospec.md)
+	- [Ospec](https://github.com/lhorie/mithril.js/blob/rewrite/ospec)

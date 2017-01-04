@@ -4,7 +4,7 @@
 
 Noiseless testing framework
 
-Version: 1.2 
+Version: 1.2.2 
 License: MIT
 
 ## About

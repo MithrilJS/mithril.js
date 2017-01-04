@@ -135,16 +135,18 @@ module.exports = new function init() {
 			var aIsArgs = isArguments(a), bIsArgs = isArguments(b)
 			if (a.constructor === Object && b.constructor === Object && !aIsArgs && !bIsArgs) {
 				for (var i in a) {
-					if (!deepEqual(a[i], b[i])) return false
+					if ((!(i in b)) || !deepEqual(a[i], b[i])) return false
 				}
 				for (var i in b) {
 					if (!(i in a)) return false
 				}
 				return true
 			}
-			if (a.length === b.length && (Array.isArray(a) && Array.isArray(b) || aIsArgs && bIsArgs)) {
-				for (var i = 0; i < a.length; i++) {
-					if (!deepEqual(a[i], b[i])) return false
+			if (a.length === b.length && (a instanceof Array && b instanceof Array || aIsArgs && bIsArgs)) {
+				var aKeys = Object.getOwnPropertyNames(a), bKeys = Object.getOwnPropertyNames(b)
+				if (aKeys.length !== bKeys.length) return false
+				for (var i = 0; i < aKeys.length; i++) {
+					if (!b.hasOwnProperty(aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
 				}
 				return true
 			}
@@ -185,7 +187,7 @@ module.exports = new function init() {
 		results.push(result)
 	}
 	function serialize(value) {
-		if (value === null || (typeof value === "object" && !Array.isArray(value)) || typeof value === "number") return String(value)
+		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}

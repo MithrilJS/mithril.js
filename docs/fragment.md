@@ -10,6 +10,23 @@
 
 Allows attaching lifecycle methods to a fragment [vnode](vnodes.md)
 
+```javascript
+var groupVisible = true
+var log = function() {
+	console.log("group is now visible")
+}
+
+m("ul", [
+	m("li", "child 1"),
+	m("li", "child 2"),
+	groupVisible ? m.fragment({oninit: log}, [
+		// a fragment containing two elements
+		m("li", "child 3"),
+		m("li", "child 4"),
+	]) : null
+])
+```
+
 ---
 
 ### Signature

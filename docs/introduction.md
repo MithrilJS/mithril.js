@@ -12,9 +12,14 @@
 
 ### What is Mithril?
 
-Mithril is a framework for building Single Page Applications. It's small but batteries-included.
+Mithril is a client-side Javascript framework for building Single Page Applications.  
+It's small (< 8kb gzip), fast and batteries-included.
+
+If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
 ---
+
+Note: This introduction assumes you have basic level of Javacript knowledge. If you don't, there are many great resources to learn. [Speaking Javascript](http://speakingjs.com/es5/index.html) is a good e-book for absolute beginners. If you're already familiar with other programming languages, the [Eloquent Javascript](http://eloquentjavascript.net/) e-book might be more suitable for you. [Codecademy](https://www.codecademy.com/learn/javascript) is another good resource that emphasizes learning via interactivity.
 
 ### Getting started
 
@@ -86,7 +91,7 @@ m("main", [
 ])
 ```
 
-Note: If you prefer `<html>` syntax, [it's possible via Babel](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E).
+Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](https://babeljs.io/docs/plugins/transform-react-jsx/).
 
 ```markup
 // HTML syntax via Babel's JSX plugin

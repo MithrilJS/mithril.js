@@ -5,6 +5,7 @@
 - [Structure](#structure)
 - [Vnode types](#vnode-types)
 - [Monomorphic class](#monomorphic-class)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
@@ -100,3 +101,13 @@ Only element tag names and components can be the first argument of the `m()` fun
 The `mithril/render/vnode` module is used by Mithril to generate all vnodes. This ensures modern Javascript engines can optimize virtual dom diffing by always compiling vnodes to the same hidden class.
 
 When creating libraries that emit vnodes, you should use this module instead of writing naked Javascript objects in order to ensure a high level of rendering performance.
+
+---
+
+### Avoid anti-patterns
+
+#### Avoid memoizing mutable vnodes
+
+Vnodes are supposed to represent the state of the DOM at a certain point in time. Mithril's rendering engine assumes a reused vnode is unchanged, so modifying a vnode that was used in a previous render will result in undefined behavior.
+
+It is possible to reuse vnodes to prevent a diff, but it's preferable to use the `onbeforeupdate` hook to make your intent clear to other developers (or your future self).

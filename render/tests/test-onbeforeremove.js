@@ -4,6 +4,7 @@ var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var Promise = require("../../promise/promise")
 
 o.spec("onbeforeremove", function() {
 	var $window, root, render
@@ -43,17 +44,13 @@ o.spec("onbeforeremove", function() {
 		render(root, [vnode])
 		render(root, [])
 
-		function remove(node, complete) {
+		function remove(node) {
 			o(node).equals(vnode)
 			o(this).equals(vnode.state)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
 			callAsync(function() {
-				o(root.childNodes.length).equals(1)
-
-				complete()
-
 				o(root.childNodes.length).equals(0)
 
 				done()
@@ -66,16 +63,12 @@ o.spec("onbeforeremove", function() {
 		render(root, [vnode])
 		render(root, [])
 
-		function remove(node, complete) {
+		function remove(node) {
 			o(node).equals(vnode)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
 			callAsync(function() {
-				o(root.childNodes.length).equals(1)
-
-				complete()
-
 				o(root.childNodes.length).equals(0)
 
 				done()
@@ -88,16 +81,12 @@ o.spec("onbeforeremove", function() {
 		render(root, [vnode])
 		render(root, [])
 
-		function remove(node, complete) {
+		function remove(node) {
 			o(node).equals(vnode)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
 			callAsync(function() {
-				o(root.childNodes.length).equals(1)
-
-				complete()
-
 				o(root.childNodes.length).equals(0)
 
 				done()
@@ -110,16 +99,12 @@ o.spec("onbeforeremove", function() {
 		render(root, [vnode])
 		render(root, [])
 
-		function remove(node, complete) {
+		function remove(node) {
 			o(node).equals(vnode)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
 			callAsync(function() {
-				o(root.childNodes.length).equals(1)
-
-				complete()
-
 				o(root.childNodes.length).equals(0)
 
 				done()
@@ -133,17 +118,12 @@ o.spec("onbeforeremove", function() {
 		render(root, [vnode])
 		render(root, [])
 
-		function remove(node, complete) {
+		function remove(node) {
 			o(node).equals(vnode)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
 
 			callAsync(function() {
-				o(root.childNodes.length).equals(1)
-				o(spy.callCount).equals(0)
-
-				complete()
-
 				o(root.childNodes.length).equals(0)
 				o(spy.callCount).equals(1)
 
@@ -161,7 +141,7 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
 	o("does not recycle when there's an onbeforeremove", function() {
-		var remove = function(vnode, done) {done()}
+		var remove = function(vnode) {}
 		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
 		var updated = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
 
@@ -171,26 +151,27 @@ o.spec("onbeforeremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
-	o("does not leave elements out of order during removal", function() {
-		var finish
-		var remove = function(vnode, done) {finish = done}
+	o("does not leave elements out of order during removal", function(done) {
+		var remove = function(vnode) {return Promise.resolve()}
 		var vnodes = [{tag: "div", key: 1, attrs: {onbeforeremove: remove}, text: "1"}, {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}]
 		var updated = {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}
 
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.childNodes.length).equals(2)
 		o(root.firstChild.firstChild.nodeValue).equals("1")
-		
-		finish()
-		
-		o(root.childNodes.length).equals(1)
-		o(root.firstChild.firstChild.nodeValue).equals("2")
+
+		callAsync(function() {
+			o(root.childNodes.length).equals(1)
+			o(root.firstChild.firstChild.nodeValue).equals("2")
+
+			done()
+		})
 	})
-	o("finalizes the remove phase only once when `done()` is called synchronously from both attrs- and tag.onbeforeremove", function() {
+	o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
 		var onremove = o.spy()
-		var onbeforeremove = function(vnode, done){done()}
+		var onbeforeremove = function(){return Promise.resolve()}
 		var component = {
 			onbeforeremove: onbeforeremove,
 			onremove: onremove,
@@ -198,30 +179,30 @@ o.spec("onbeforeremove", function() {
 		}
 		render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
 		render(root, [])
-		o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
+		callAsync(function() {
+			o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
+			done()
+		})
 	})
-	o("doesn't finalize prematurely if `done` is called twice in the `tag` hook", function(done) {
-		var async = false
+	o("awaits promise resolution before removing the node", function(done) {
+		var view = o.spy()
+		var onremove = o.spy()
+		var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
 		var component = {
-			view: function() {},
-			onbeforeremove: function(vnode, doneRemoving){
-				doneRemoving()
-				doneRemoving()
-			},
-			onremove: function() {
-				o(async).equals(true)
-				done()
-			},
+			onbeforeremove: onbeforeremove,
+			onremove: onremove,
+			view: view,
 		}
-		render(root, [{
-			tag:component,
-			attrs: {
-				onbeforeremove: function(vnode, doneRemoving){
-					callAsync(doneRemoving)
-				}
-			}
-		}])
+		render(root, [{tag: component}])
 		render(root, [])
-		async = true
+
+		callAsync(function(){
+			o(onremove.callCount).equals(0)
+
+			callAsync(function() {
+				o(onremove.callCount).equals(1)
+				done()
+			})
+		})
 	})
 })

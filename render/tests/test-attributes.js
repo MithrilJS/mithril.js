@@ -11,7 +11,43 @@ o.spec("attributes", function() {
 		root = $window.document.body
 		render = vdom($window).render
 	})
+	o.spec("customElements", function(){
+		
+		o("when vnode is customElement, custom setAttribute called", function(){
 
+			var normal =  [
+				{ tag: "input", attrs: { value: 'hello' } },
+				{ tag: "input", attrs: { value: 'hello' } },
+				{ tag: "input", attrs: { value: 'hello' } }
+			]
+			
+			var custom = [
+				{ tag: "custom-element", attrs: { custom: 'x' } },
+				{ tag: "input", attrs: { is: 'something-special', custom: 'x' } },
+				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'x' } }
+			]
+
+			var view = normal.concat(custom)
+
+			var f = $window.document.createElement
+			var spy
+
+			$window.document.createElement = function(tag, is){
+				var el = f(tag, is)
+				if(!spy){
+					spy = o.spy(el.setAttribute)
+				}
+				el.setAttribute = spy
+
+				return el
+			}
+
+			render(root, view)
+			
+			o(spy.callCount).equals( custom.length )
+		})
+
+	})
 	o.spec("input readonly", function() {
 		o("when input readonly is true, attribute is present", function() {
 			var a = {tag: "input", attrs: {readonly: true}}
