@@ -152,7 +152,7 @@ module.exports = function($window, Promise) {
 
 	function cast(type, data) {
 		if (typeof type === "function") {
-			if (data instanceof Array) {
+			if (Array.isArray(data)) {
 				for (var i = 0; i < data.length; i++) {
 					data[i] = new type(data[i])
 				}

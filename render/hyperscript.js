@@ -41,20 +41,20 @@ function hyperscript(selector) {
 					break
 				}
 			}
-			if (children instanceof Array && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
+			if (Array.isArray(children) && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
 			else childList = children
 
 			return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
 		}
 	}
 	var attrs, children, childrenIndex
-	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !(arguments[1] instanceof Array)) {
+	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !Array.isArray(arguments[1])) {
 		attrs = arguments[1]
 		childrenIndex = 2
 	}
 	else childrenIndex = 1
 	if (arguments.length === childrenIndex + 1) {
-		children = arguments[childrenIndex] instanceof Array ? arguments[childrenIndex] : [arguments[childrenIndex]]
+		children = Array.isArray(arguments[childrenIndex]) ? arguments[childrenIndex] : [arguments[childrenIndex]]
 	}
 	else {
 		children = []

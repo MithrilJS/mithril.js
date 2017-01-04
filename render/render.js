@@ -417,7 +417,7 @@ module.exports = function($window) {
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
-			if (children instanceof Array) {
+			if (Array.isArray(children)) {
 				for (var i = 0; i < children.length; i++) {
 					var child = children[i]
 					if (child != null) onremove(child)
@@ -566,7 +566,7 @@ module.exports = function($window) {
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 
-		if (!(vnodes instanceof Array)) vnodes = [vnodes]
+		if (!Array.isArray(vnodes)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()

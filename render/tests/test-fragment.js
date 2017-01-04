@@ -11,7 +11,7 @@ o.spec("fragment", function() {
 
 		o(frag.tag).equals("[")
 
-		o(frag.children instanceof Array).equals(true)
+		o(Array.isArray(frag.children)).equals(true)
 		o(frag.children.length).equals(1)
 		o(frag.children[0]).equals(child)
 
@@ -24,7 +24,7 @@ o.spec("fragment", function() {
 		var frag = fragment(attrs, [])
 		o(frag.tag).equals("[")
 
-		o(frag.children instanceof Array).equals(true)
+		o(Array.isArray(frag.children)).equals(true)
 		o(frag.children.length).equals(0)
 
 		o(frag.attrs).equals(attrs)
