@@ -12,15 +12,16 @@
 
 ### What is Mithril?
 
-Mithril is a client-side Javascript framework for building Single Page Applications. It's small and batteries-included.
+Mithril is a client-side Javascript framework for building Single Page Applications.  
+It's small (< 8kb gzip), fast and batteries-included.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
 ---
 
-### Getting started
+Note: This introduction assumes you have basic level of Javacript knowledge. If you don't, there are many great resources to learn. [Speaking Javascript](http://speakingjs.com/es5/index.html) is a good e-book for absolute beginners. If you're already familiar with other programming languages, the [Eloquent Javascript](http://eloquentjavascript.net/) e-book might be more suitable for you. [Codecademy](https://www.codecademy.com/learn/javascript) is another good resource that emphasizes learning via interactivity.
 
-This introduction assumes you know Javacript. If you don't, there are many great resources to learn. [Speaking Javascript](http://speakingjs.com/es5/index.html) is a good e-book for absolute beginners. If you're already familiar with other programming languages, the [Eloquent Javascript](http://eloquentjavascript.net/) e-book might be more suitable for you. [Codecademy](https://www.codecademy.com/learn/javascript) is another good resource that emphasizes learning via interactivity.
+### Getting started
 
 The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface but it'll only take 10 minutes.
 

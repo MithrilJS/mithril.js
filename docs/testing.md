@@ -8,11 +8,7 @@ The easist way to setup the test runner is to create an NPM script for it. Open 
 {
 	"name": "my-project",
 	"scripts": {
-		"build": "bundle index.js --output app.js --watch",
 		"test": "ospec"
-	},
-	"dependencies": {
-		"mithril": "^1.0.0-rc.5"
 	}
 }
 ```
@@ -48,3 +44,42 @@ Writing tests upfront requires specifications to be frozen. Upfront tests are a 
 
 Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertedly broken and that previously fixed bugs do not get re-introduced by unrelated changes.
 
+---
+
+### Unit testing
+
+Unit testing is the practice of isolating a part of an application (typically a single module), and asserting that, given some inputs, it produces the expected outputs.
+
+Testing a Mithril component is easy. Let's assume we have a simple component like this:
+
+```javascript
+// MyComponent.js
+var m = require("mithril")
+
+module.exports = {
+	view: function() {
+		return m("div", "Hello world")
+	}
+}
+```
+
+We can then create a `tests/MyComponent.js` file and create a test for this component like this:
+
+```javascript
+var MyComponent = require("MyComponent")
+
+o.spec("MyComponent", function() {
+	o("returns a div", function() {
+		var vnode = MyComponent.view()
+		
+		o(vnode.tag).equals("div")
+		o(vnode.children.length).equals(1)
+		o(vnode.children[0].tag).equals("#")
+		o(vnode.children[0].children).equals("Hello world")
+	})
+})
+```
+
+Typically, you wouldn't test the structure of the vnode tree so granularly, and you would instead only test non-trivial, dynamic aspects of the view. A tool that can help making testing easier with deep vnode trees is [Mithril Query](https://github.com/StephanHoyer/mithril-query).
+
+Sometimes, you need to mock the dependencies of a module in order to test the module in isolation. [Mockery](https://github.com/mfncooper/mockery) is one tool that allows you to do that.

@@ -5,8 +5,11 @@ nav a {border-left:1px solid #ddd;padding:0 10px;}
 nav a:first-child {border:0;padding-left:0;}
 main {margin-bottom:100px;}
 main section {margin-left:270px;}
-h1 {margin:0 0 15px;}
-h5 {font-style:italic;}
+h1 {font-size:24px;margin:0 0 15px;}
+h2 {font-size:22px;margin:30px 0 15px;}
+h3 {font-size:20px;margin:30px 0 15px;}
+h4 {font-size:18px;margin:15px 0 15px;}
+h5 {font-weight:bold;margin:15px 0 15px;}
 pre,code {background:#eee;font-family:monospace;}
 pre {border-left:3px solid #1e5799;overflow:auto;padding:10px 20px;}
 code {border:1px solid #ddd;display:inline-block;margin:0 0 1px;padding:3px;white-space:pre;}

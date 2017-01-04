@@ -135,7 +135,7 @@ module.exports = new function init() {
 			var aIsArgs = isArguments(a), bIsArgs = isArguments(b)
 			if (a.constructor === Object && b.constructor === Object && !aIsArgs && !bIsArgs) {
 				for (var i in a) {
-					if (!deepEqual(a[i], b[i])) return false
+					if ((!(i in b)) || !deepEqual(a[i], b[i])) return false
 				}
 				for (var i in b) {
 					if (!(i in a)) return false
@@ -143,8 +143,10 @@ module.exports = new function init() {
 				return true
 			}
 			if (a.length === b.length && (a instanceof Array && b instanceof Array || aIsArgs && bIsArgs)) {
-				for (var i = 0; i < a.length; i++) {
-					if (!deepEqual(a[i], b[i])) return false
+				var aKeys = Object.getOwnPropertyNames(a), bKeys = Object.getOwnPropertyNames(b)
+				if (aKeys.length !== bKeys.length) return false
+				for (var i = 0; i < aKeys.length; i++) {
+					if (!b.hasOwnProperty(aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
 				}
 				return true
 			}

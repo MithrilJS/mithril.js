@@ -1,7 +1,7 @@
 - Tutorials
 	- [Installation](installation.md)
 	- [Introduction](introduction.md)
-	- [Tutorial](tutorial.md)
+	- [Tutorial](simple-application.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 - Key concepts
@@ -11,7 +11,9 @@
 	- [Keys](keys.md)
 - Social
 	- [Community chat](https://gitter.im/lhorie/mithril.js)
-	- [Contributing](contributing.md)
+	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
+	- [How to contribute](contributing.md)
 	- [Credits](credits.md)
 - Misc
+	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)
