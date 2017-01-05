@@ -545,9 +545,9 @@ m.route(document.body, "/user/list", {
 	"/user/list": {
 		onmatch: state.loadUsers,
 		render: function() {
-			return state.users.length > 0 ? state.users.map(function(user) {
+			return state.users.map(function(user) {
 				return m("div", user.id)
-			}) : "loading"
+			})
 		}
 	},
 })
