@@ -96,10 +96,7 @@ module.exports = function($window) {
 	}
 	function createComponent(vnode, hooks, ns) {
 		// For object literals since `Vnode()` always sets the `state` field.
-		if (!vnode.state) vnode.state = {}
-		var constructor = function() {}
-		constructor.prototype = vnode.tag
-		vnode.state = new constructor
+		if (!vnode.state) vnode.state = Object.create(vnode.tag)
 
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
