@@ -48,10 +48,10 @@ o.spec("normalize", function() {
 		o(node.tag).equals("#")
 		o(node.children).equals(true)
 	})
-	o("normalizes falsy boolean into text node", function() {
+	o("normalizes falsy boolean into empty text node", function() {
 		var node = Vnode.normalize(false)
 
 		o(node.tag).equals("#")
-		o(node.children).equals(false)
+		o(node.children).equals("")
 	})
 })

@@ -104,7 +104,7 @@ o.spec("component", function() {
 			visible = false
 			render(root, [{tag: component}])
 
-			o(root.firstChild.nodeValue).equals("false")
+			o(root.firstChild.nodeValue).equals("")
 		})
 		o("updates root from null to null", function() {
 			var component = {
@@ -232,7 +232,7 @@ o.spec("component", function() {
 			render(root, [{tag: component}])
 
 			o(root.firstChild.nodeType).equals(3)
-			o(root.firstChild.nodeValue).equals("false")
+			o(root.firstChild.nodeValue).equals("")
 		})
 		o("can return null", function() {
 			var component = {
@@ -668,7 +668,7 @@ o.spec("component", function() {
 			function init(vnode) {
 				o(vnode.state.data).deepEquals(data)
 				o(vnode.state.data).equals(data)
-				
+
 				//inherits state via prototype
 				component.x = 1
 				o(vnode.state.x).equals(1)
