@@ -44,7 +44,7 @@ Components can be used by using a convention of uppercasing the first letter of 
 
 ```javascript
 m.mount(document.body, <MyComponent />)
-// equivalent to m.mount(document.body, m(Component))
+// equivalent to m.mount(document.body, m(MyComponent))
 ```
 
 ---
