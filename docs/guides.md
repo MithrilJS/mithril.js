@@ -9,6 +9,7 @@
 	- [Components](components.md)
 	- [Lifecycle methods](lifecycle-methods.md)
 	- [Keys](keys.md)
+	- [Autoredraw system](autoredraw.md)
 - Social
 	- [Community chat](https://gitter.im/lhorie/mithril.js)
 	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
