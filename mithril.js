@@ -1389,6 +1389,7 @@
 		return gettersetter(store)
 	}
 
+	var dummyComponent = {controller: noop}
 	var roots = []
 	var components = []
 	var controllers = []
@@ -1447,7 +1448,7 @@
 			if (component) {
 				currentComponent = topComponent = component
 			} else {
-				currentComponent = topComponent = component = {controller: noop}
+				currentComponent = topComponent = component = dummyComponent
 			}
 
 			var controller = new (component.controller || noop)()
@@ -1461,8 +1462,9 @@
 				components[index] = component
 			}
 			endFirstComputation()
-			if (component === null) {
+			if (component === dummyComponent) {
 				removeRootElement(root, index)
+				return
 			}
 			return controllers[index]
 		} else {
