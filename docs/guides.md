@@ -2,6 +2,8 @@
 	- [Installation](installation.md)
 	- [Introduction](introduction.md)
 	- [Tutorial](simple-application.md)
+	- [JSX](jsx.md)
+	- [ES6](es6.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 - Key concepts
