@@ -4,9 +4,8 @@ module.exports = new function init() {
 	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, hasProcess = typeof process === "object"
 
 	function o(subject, predicate) {
-		subject = unique(subject, predicate)
-		ctx[subject] = predicate
 		if (predicate === undefined) return new Assert(subject)
+		ctx[unique(subject)] = predicate
 	}
 	o.before = hook("__before")
 	o.after = hook("__after")
@@ -15,8 +14,7 @@ module.exports = new function init() {
 	o.new = init
 	o.spec = function(subject, predicate) {
 		var parent = ctx
-		subject = unique(subject, predicate)
-		ctx = ctx[subject] = {}
+		ctx = ctx[unique(subject)] = {}
 		predicate()
 		ctx = parent
 	}
@@ -77,7 +75,7 @@ module.exports = new function init() {
 					var timeout = 0, delay = 200, s = new Date
 					var isDone = false
 					var body = fn.toString()
-					var arg = (body.match(/\(([\w_$]+)/) || body.match(/([\w_$]+)\s*=>/) || []).pop()
+					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
 						fn(function done() {
@@ -112,12 +110,15 @@ module.exports = new function init() {
 			}
 		}
 	}
-	function unique(subject, predicate) {
-		if (ctx.hasOwnProperty(subject) && predicate) {
-			console.warn("A test named `" + subject + "` was already defined")
-			subject = subject + "*"
+	var dedupeCounter = 0
+	function unique(subject) {
+		var res = subject
+		if (ctx.hasOwnProperty(subject)) {
+			console.warn("A test or a spec named `" + subject + "` was already defined")	
+			while (ctx.hasOwnProperty(res)) res = subject + ' (' + ++dedupeCounter + ')'
+			dedupeCounter = 0
 		}
-		return subject
+		return res
 	}
 	function hook(name) {
 		return function(predicate) {
