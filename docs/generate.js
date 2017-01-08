@@ -39,6 +39,7 @@ function generate(pathname) {
 				})
 				.replace(/\.md/gim, ".html") // fix links
 			var html = layout
+				.replace(/\[version\]/, version) // update version
 				.replace(/\[body\]/, marked(fixed))
 				.replace(/<h5 id="([^"]+?)">([^<]+?)<\/h5>/gim, function(match, id, text) { // fix anchors
 					return "<h5 id=\"" + text.toLowerCase().replace(/\.|\[|\]|&quot;|\//g, "") + "\">" + text + "</h5>"

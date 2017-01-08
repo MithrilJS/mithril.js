@@ -13,7 +13,7 @@
 ### What is Mithril?
 
 Mithril is a client-side Javascript framework for building Single Page Applications.  
-It's small (< 8kb gzip), fast and batteries-included.
+It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
@@ -23,7 +23,7 @@ Note: This introduction assumes you have basic level of Javacript knowledge. If 
 
 ### Getting started
 
-The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface but it'll only take 10 minutes.
+The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
 Let's create an HTML file to follow along: 
 

@@ -10,7 +10,6 @@
 	- [Lifecycle methods](lifecycle-methods.md)
 	- [Keys](keys.md)
 - Social
-	- [Community chat](https://gitter.im/lhorie/mithril.js)
 	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
 	- [How to contribute](contributing.md)
 	- [Credits](credits.md)

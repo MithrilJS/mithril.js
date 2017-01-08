@@ -20,16 +20,17 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 ```bash
 # 1) install
 npm install mithril@rewrite --save
+
 npm install webpack --save
 
 # 2) add this line into the scripts section in package.json
 #	"scripts": {
-#		"build": "webpack index.js app.js --watch"
+#		"build": "webpack src/index.js lib/app.js --watch"
 #	}
 
-# 3) create an `index.js` file
+# 3) create an `src/index.js` file
 
-# 4) create an `index.html` file loading `app.js`
+# 4) create an `index.html` file containing `<script src="lib/app.js"></script>`
 
 # 5) run bundler
 npm run build
