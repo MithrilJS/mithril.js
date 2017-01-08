@@ -91,15 +91,15 @@ m.route(document.body, "/", {
 
 Mithril does not redraw after `setTimeout`, `setInterval`, `requestAnimationFrame` and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call [`m.redraw()`](redraw.md).
 
-Mithril also does not redraw after lifecycle methods. This is because lifecycle methods run within the redraw cycle and allowing a nested redraw to run could cause loss of stability or even stack overflows. If you need to trigger a redraw within a lifecycle method, you should call `m.redraw` from within the callback of an asynchronous function such as `requestAnimationFrame`, `Promise.resolve` or `setTimeout`.
+Mithril also does not redraw after lifecycle methods. Parts of the UI may be redrawn after an `oninit` handler, but other parts of the UI may already have been redrawn when a given `oninit` handler fires. Handlers like `oncreate` and `onupdate` fire after the UI has been redrawn.
+
+If you need to explicitly trigger a redraw within a lifecycle method, you should call `m.redraw()`, which will trigger an asynchronous redraw.
 
 ```javascript
 var StableComponent = {
   oncreate: function(vnode) {
     vnode.state.height = vnode.dom.offsetHeight
-    requestAnimationFrame(function() {
-      m.redraw()
-    })
+    m.redraw()
   },
   view: function() {
     return m("div", "This component is " + vnode.state.height + "px tall")
@@ -118,3 +118,5 @@ m.render(document.body, m(MyComponent))
 // don't wrap the component for m.mount
 m.mount(document.body, MyComponent)
 ```
+
+Mithril may also avoid auto-redrawing if the frequency of requested redraws is higher than one animation frame (typically around 16ms). This means, for example, that when using fast-firing events like `onresize` or `onscroll`, Mithril will automatically throttle the number of redraws to avoid lag.
