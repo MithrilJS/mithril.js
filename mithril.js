@@ -5,7 +5,7 @@ function Vnode(tag, key, attrs0, children, text, dom) {
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
-	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node, undefined, undefined)
+	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
 	return node
 }
 Vnode.normalizeChildren = function normalizeChildren(children) {
@@ -430,11 +430,7 @@ var coreRenderer = function($window) {
 		return element
 	}
 	function createComponent(vnode, hooks, ns) {
-		// For object literals since `Vnode()` always sets the `state` field.
-		if (!vnode.state) vnode.state = {}
-		var constructor = function() {}
-		constructor.prototype = vnode.tag
-		vnode.state = new constructor
+		vnode.state = Object.create(vnode.tag)
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
 		view.reentrantLock = true
