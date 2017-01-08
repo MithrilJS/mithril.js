@@ -262,7 +262,7 @@ The `m.route` call specifies that the application will be rendered into `documen
 
 Refreshing the page in the browser should now append `#!/list` to the URL to indicate that routing is working. Since that route render UserList, we should still see the list of people on screen as before.
 
-The `#!` snippet is known as a hashbang, and it's a commonly used string for implementing client-side routing. It's possible to configure this string it via [`m.route.prefix`](route.md#routeprefix). Some configurations require supporting server-side changes, so we'll just continue using the hashbang for the rest of this tutorial.
+The `#!` snippet is known as a hashbang, and it's a commonly used string for implementing client-side routing. It's possible to configure this string it via [`m.route.prefix`](route.md#mrouteprefix). Some configurations require supporting server-side changes, so we'll just continue using the hashbang for the rest of this tutorial.
 
 ---
 
@@ -385,7 +385,7 @@ var User = {
 			User.list = result.data
 		})
 	},
-	
+
 	current: {},
 	load: function(id) {
 		return m.request({
@@ -498,7 +498,7 @@ var User = {
 			User.list = result.data
 		})
 	},
-	
+
 	current: {},
 	load: function(id) {
 		return m.request({
@@ -511,7 +511,7 @@ var User = {
 			User.current = result
 		})
 	},
-	
+
 	save: function() {
 		return m.request({
 			method: "PUT",

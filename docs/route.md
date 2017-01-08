@@ -3,10 +3,10 @@
 - [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
-		- [route.set](#routeset)
-		- [route.get](#routeget)
-		- [route.prefix](#routeprefix)
-		- [route.link](#routelink)
+		- [m.route.set](#mrouteset)
+		- [m.route.get](#mrouteget)
+		- [m.route.prefix](#mrouteprefix)
+		- [m.route.link](#mroutelink)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -62,7 +62,7 @@ Argument               | Type                                     | Required | D
 
 #### Static members
 
-##### route.set
+##### m.route.set
 
 Redirects to a matching route, or to the default route if no matching routes can be found.
 
@@ -77,7 +77,7 @@ Argument          | Type      | Required | Description
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
-##### route.get
+##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
 
@@ -87,7 +87,7 @@ Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
 **returns**       | String    |          | Returns the last fully resolved path
 
-##### route.prefix
+##### m.route.prefix
 
 Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
 
@@ -98,7 +98,7 @@ Argument          | Type      | Required | Description
 `prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategy) used by Mithril.
 **returns**       |           |          | Returns `undefined`
 
-##### route.link
+##### m.route.link
 
 `eventHandler = m.route.link(vnode)`
 
@@ -140,7 +140,7 @@ The `render` method is called on every redraw for a matching route. It is simila
 `vnode = routeResolve.render(vnode)`
 
 Argument            | Type            | Description
-------------------- | --------------- | ----------- 
+------------------- | --------------- | -----------
 `vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
 `vnode.attrs`       | `Object`        | A map of URL parameter values
 **returns**         | `Vnode`         | Returns a vnode
@@ -304,7 +304,7 @@ var state = {
 		// save the state for this route
 		// this is equivalent to `history.replaceState({term: state.term}, null, location.href)`
 		m.route.set(m.route.get(), null, {replace: true, state: {term: state.term}})
-		
+
 		// navigate away
 		location.href = "https://google.com/?q=" + state.term
 	}

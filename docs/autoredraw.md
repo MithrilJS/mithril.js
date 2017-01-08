@@ -63,7 +63,7 @@ m.request("/api/v1/users", {background: true}).then(function() {
 
 ### After route changes
 
-Mithril automatically redraws after [`m.route.set()`](route.md#routeset) calls (or route changes via links that use [`m.route.link`](route.md#routelink)
+Mithril automatically redraws after [`m.route.set()`](route.md#mrouteset) calls (or route changes via links that use [`m.route.link`](route.md#mroutelink)
 
 ```javascript
 var RoutedComponent = {

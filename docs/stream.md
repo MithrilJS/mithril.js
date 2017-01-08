@@ -3,10 +3,10 @@
 - [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
-		- [stream.combine](#streamcombine)
-		- [stream.merge](#streammerge)
-		- [stream.HALT](#streamhalt)
-		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+		- [Stream.combine](#streamcombine)
+		- [Stream.merge](#streammerge)
+		- [Stream.HALT](#streamhalt)
+		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#static-members)
 		- [stream.map](#streammap)
 		- [stream.end](#streamend)
@@ -34,6 +34,12 @@ For example, in a spreadsheet, if `A1 = B1 + C1`, then changing the value of `B1
 
 Similarly, you can make a stream depend on other streams so that changing the value of one automatically updates the other. This is useful when you have very expensive computations and want to only run them when necessary, as opposed to, say, on every redraw.
 
+Streams are NOT bundled with Mithril's core distribution. To include the Streams module, use:
+
+```javascript
+var Stream = require("mithril/stream")
+```
+
 ---
 
 ### Signature
@@ -53,7 +59,7 @@ Argument    | Type                 | Required | Description
 
 #### Static members
 
-##### stream.combine
+##### Stream.combine
 
 Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams)
 
@@ -85,7 +91,7 @@ Argument     | Type                 | Required | Description
 
 ---
 
-##### stream.merge
+##### Stream.merge
 
 Creates a stream whose value is the array of values from an array of streams
 
@@ -94,19 +100,19 @@ Creates a stream whose value is the array of values from an array of streams
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
 `streams`    | `Array<Stream>`      | Yes      | A list of streams
-**returns**  | `Stream`             |          | Returns a stream whose value is an array of input stream values 
+**returns**  | `Stream`             |          | Returns a stream whose value is an array of input stream values
 
 [How to read signatures](signatures.md)
 
 ---
 
-##### stream.HALT
+##### Stream.HALT
 
 A special value that can be returned to stream callbacks to halt execution of downstreams
 
 ---
 
-##### stream["fantasy-land/of"]
+##### Stream["fantasy-land/of"]
 
 This method is functionally identical to `stream`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
