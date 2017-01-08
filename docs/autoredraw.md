@@ -89,7 +89,7 @@ m.route(document.body, "/", {
 
 ### When Mithril does not redraws
 
-Mithril does not redraw after 3rd party library event handlers. In those cases, you must manually call [`m.redraw()`](redraw.md).
+Mithril does not redraw after `setTimeout`, `setInterval`, `requestAnimationFrame` and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call [`m.redraw()`](redraw.md).
 
 Mithril also does not redraw after lifecycle methods. This is because lifecycle methods run within the redraw cycle and allowing a nested redraw to run could cause loss of stability or even stack overflows. If you need to trigger a redraw within a lifecycle method, you should call `m.redraw` from within the callback of an asynchronous function such as `requestAnimationFrame`, `Promise.resolve` or `setTimeout`.
 
