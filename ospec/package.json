@@ -1,6 +1,6 @@
 {
   "name": "ospec",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
   "directories": {

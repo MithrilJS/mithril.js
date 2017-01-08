@@ -4,6 +4,7 @@ module.exports = new function init() {
 	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, hasProcess = typeof process === "object"
 
 	function o(subject, predicate) {
+		subject = unique(subject, predicate)
 		ctx[subject] = predicate
 		if (predicate === undefined) return new Assert(subject)
 	}
@@ -14,6 +15,7 @@ module.exports = new function init() {
 	o.new = init
 	o.spec = function(subject, predicate) {
 		var parent = ctx
+		subject = unique(subject, predicate)
 		ctx = ctx[subject] = {}
 		predicate()
 		ctx = parent
@@ -109,6 +111,13 @@ module.exports = new function init() {
 				}
 			}
 		}
+	}
+	function unique(subject, predicate) {
+		if (ctx.hasOwnProperty(subject) && predicate) {
+			console.warn("A test named `" + subject + "` was already defined")
+			subject = subject + "*"
+		}
+		return subject
 	}
 	function hook(name) {
 		return function(predicate) {

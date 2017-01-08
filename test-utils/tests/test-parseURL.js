@@ -136,7 +136,7 @@ o.spec("parseURL", function() {
 			o(data.search).equals("?a/c")
 			o(data.hash).equals("")
 		})
-		o("handles search w/ slash", function() {
+		o("handles search w/ colon", function() {
 			var data = parseURL("http://www.google.com/test?a:c")
 			o(data.pathname).equals("/test")
 			o(data.search).equals("?a:c")

@@ -64,17 +64,6 @@ o.spec("jsonp", function() {
 			o(data).deepEquals({a: 2})
 		}).then(done)
 	})
-	o("works w/ custom callbackKey", function(done) {
-		mock.$defineRoutes({
-			"GET /item": function(request) {
-				var queryData = parseQueryString(request.query)
-				return {status: 200, responseText: queryData["cb"] + "(" + JSON.stringify({a: 2}) + ")"}
-			}
-		})
-		jsonp({url: "/item", callbackKey: "cb"}).then(function(data) {
-			o(data).deepEquals({a: 2})
-		}).then(done)
-	})
 	o("requests don't block each other", function(done) {
 		mock.$defineRoutes({
 			"GET /item": function(request) {
