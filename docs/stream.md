@@ -46,7 +46,7 @@ var Stream = require("mithril/stream")
 
 Creates a stream
 
-`stream = stream(value)`
+`stream = Stream(value)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
@@ -63,7 +63,7 @@ Argument    | Type                 | Required | Description
 
 Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams)
 
-`stream = stream.combine(combiner, streams)`
+`stream = Stream.combine(combiner, streams)`
 
 Argument    | Type                        | Required | Description
 ----------- | --------------------------- | -------- | ---
@@ -95,7 +95,7 @@ Argument     | Type                 | Required | Description
 
 Creates a stream whose value is the array of values from an array of streams
 
-`stream = stream.merge(streams)`
+`stream = Stream.merge(streams)`
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
