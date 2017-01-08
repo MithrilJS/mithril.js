@@ -2,6 +2,7 @@
 
 - [Description](#description)
 - [Setup](#setup)
+- [Using Babel with Webpack](#using-babel-with-webpack)
 - [JSX vs hyperscript](#jsx-vs-hyperscript)
 - [Converting HTML](#converting-html)
 
@@ -51,55 +52,124 @@ m.mount(document.body, <MyComponent />)
 
 ### Setup
 
-The simplest way to use JSX is via a [Babel](https://babeljs.io/) plugin. To install, use this command:
+The simplest way to use JSX is via a [Babel](https://babeljs.io/) plugin.
+
+Babel requires NPM, which is automatically installed when you install [Node.js](https://nodejs.org/en/). Once NPM is installed, create a project folder and run this command:
 
 ```bash
-npm install babel-cli babel-preset-es2015 transform-react-jsx --save-dev
+npm init -y
+```
+
+If you want to use Webpack and Babel together, [skip to the section below](#using-babel-with-webpack).
+
+To install Babel as a standalone tool, use this command:
+
+```bash
+npm install babel-cli babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
 
 ```
 {
-  "presets": ["es2015"],
-  "plugins": [
-    ["transform-react-jsx", {
-      "pragma": "m"
-    }]
-  ]
+	"presets": ["es2015"],
+	"plugins": [
+		["transform-react-jsx", {
+			"pragma": "m"
+		}]
+	]
 }
 ```
 
 To run Babel as a standalone tool, run this from the command line:
 
 ```bash
-babel src --out-dir lib --source-maps
+babel src --out-dir bin --source-maps
 ```
 
 #### Using Babel with Webpack
 
-If you're using Webpack as a bundler, you can integrate Babel to Webpack, however this requires some additional dependencies, in addition to the steps above.
+If you're already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.
 
 ```bash
-npm install babel-core babel-loader --save-dev
+npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
 ```
 
-Create a file called `.webpack.config`
+Create a `.babelrc` file:
+
+```
+{
+	"presets": ["es2015"],
+	"plugins": [
+		["transform-react-jsx", {
+			"pragma": "m"
+		}]
+	]
+}
+```
+
+Next, create a file called `webpack.config.js`
 
 ```javascript
 module.exports = {
-    entry: './src/index.js',
-    output: {
-        path: './bin',
-        filename: 'app.js',
-    },
-    module: {
-        loaders: [{
-            test: /\.js$/,
-            exclude: /node_modules/,
-            loader: 'babel-loader'
-        }]
-    }
+	entry: './src/index.js',
+	output: {
+		path: './bin',
+		filename: 'app.js',
+	},
+	module: {
+		loaders: [{
+			test: /\.js$/,
+			exclude: /node_modules/,
+			loader: 'babel-loader'
+		}]
+	}
+}
+```
+
+This configuration assumes the source code file for the application entry point is in `src/index.js`, and this will output the bundle to `bin/app.js`.
+
+To run the bundler, setup an npm script. Open `package.json` and add this entry under `"scripts"`:
+
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"start": "webpack -d --watch"
+	}
+}
+```
+
+You can now then run the bundler by running this from the command line:
+
+```bash
+npm start
+```
+
+#### Production build
+
+To generate a minified file, open `package.json` and add a new npm script called `build`:
+
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"start": "webpack -d --watch",
+		"build": "webpack -p",
+	}
+}
+```
+
+You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
+
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"start": "webpack -d --watch",
+		"build": "webpack -p",
+		"heroku-postbuild": "webpack -p"
+	}
 }
 ```
 
@@ -107,9 +177,9 @@ module.exports = {
 
 ### JSX vs hyperscript
 
-JSX is essentially a trade-off: it introduces a non-standard syntax that cannot be run without appropriate tooling, in order to allow a developer to write HTML code using curly braces. The main benefit of using JSX instead of regular HTML is that the JSX specification is much stricter and yields syntax errors when appropriate, whereas HTML is far too forgiving and makes syntax issues difficult to spot.
+JSX is essentially a trade-off: it introduces a non-standard syntax that cannot be run without appropriate tooling, in order to allow a developer to write HTML code using curly braces. The main benefit of using JSX instead of regular HTML is that the JSX specification is much stricter and yields syntax errors when appropriate, whereas HTML is far too forgiving and can make syntax issues difficult to spot.
 
-Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute). Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`.
+Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute. Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`.
 
 JSX is useful for teams where HTML is primarily written by someone without Javascript experience, but it requires a significant amount of tooling to maintain (whereas plain HTML can, for the most part, simply be opened in a browser)
 

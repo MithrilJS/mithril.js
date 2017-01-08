@@ -25,15 +25,15 @@ npm install webpack --save
 
 # 2) add this line into the scripts section in package.json
 #	"scripts": {
-#		"build": "webpack src/index.js lib/app.js --watch"
+#		"start": "webpack src/index.js bin/app.js --watch"
 #	}
 
 # 3) create an `src/index.js` file
 
-# 4) create an `index.html` file containing `<script src="lib/app.js"></script>`
+# 4) create an `index.html` file containing `<script src="bin/app.js"></script>`
 
 # 5) run bundler
-npm run build
+npm start
 
 # 6) open `index.html` in the (default) browser
 open index.html
@@ -52,13 +52,13 @@ npm init --yes
 # creates a file called package.json
 ```
 
-Then, run 
+Then, to install Mithril, run:
 
 ```bash
 npm install mithril@rewrite --save
 ```
 
-to install Mithril. This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
+This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
 
 You are now ready to start using Mithril. The recommended way to structure code is to modularize it via CommonJS modules:
 
@@ -75,10 +75,10 @@ CommonJS is a de-facto standard for modularizing Javascript code, and it's used 
 
 Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single Javascript file before running in a client-side application.
 
-The easiest way to create a bundle is to setup an NPM script for [Webpack](https://webpack.js.org/). To install Webpack, run this from the command line:
+A popular way for creating a bundle is to setup an NPM script for [Webpack](https://webpack.js.org/). To install Webpack, run this from the command line:
 
 ```bash
-npm install webpack --save
+npm install webpack --save-dev
 ```
 
 Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
@@ -87,22 +87,24 @@ Open the `package.json` that you created earlier, and add an entry to the `scrip
 {
 	"name": "my-project",
 	"scripts": {
-		"build": "webpack index.js app.js --watch"
+		"start": "webpack src/index.js bin/app.js -d --watch"
 	}
 }
 ```
 
-Remember this is a JSON file, so object key names such as `"scripts"` and `"build"` must be inside of double quotes.
+Remember this is a JSON file, so object key names such as `"scripts"` and `"start"` must be inside of double quotes.
 
-Now you can run the script via `npm run build` in your command line window. This looks up the `webpack` command in the NPM path, reads `index.js` and creates a file called `app.js` which includes both Mithril and the `hello world` code above. If you want to run the `webpack` command directly from the command line, you need to either add `node_modules/.bin` to your PATH, or install webpack globally via `npm install webpack -g`. It's, however, recommended that you always install webpack locally and use npm scripts, to ensure builds are reproducible in different computers.
-
-```
-npm run build
-```
+The `-d` flag tells webpack to use development mode, which produces source maps for a better debugging experience.
 
 The `--watch` flag tells webpack to watch the file system and automatically recreate `app.js` if file changes are detected.
 
-Now that you have created a bundle, you can then reference the `app.js` file from an HTML file:
+Now you can run the script via `npm start` in your command line window. This looks up the `webpack` command in the NPM path, reads `index.js` and creates a file called `app.js` which includes both Mithril and the `hello world` code above. If you want to run the `webpack` command directly from the command line, you need to either add `node_modules/.bin` to your PATH, or install webpack globally via `npm install webpack -g`. It's, however, recommended that you always install webpack locally and use npm scripts, to ensure builds are reproducible in different computers.
+
+```
+npm start
+```
+
+Now that you have created a bundle, you can then reference the `bin/app.js` file from an HTML file:
 
 ```markup
 <html>
@@ -110,7 +112,7 @@ Now that you have created a bundle, you can then reference the `app.js` file fro
     <title>Hello world</title>
   </head>
   <body>
-    <script src="app.js"></script>
+    <script src="bin/app.js"></script>
   </body>
 </html>
 ```
@@ -138,6 +140,33 @@ m.mount(document.body, MyComponent)
 ```
 
 Note that in this example, we're using `m.mount`, which wires up the component to Mithril's autoredraw system. In most applications, you will want to use `m.mount` (or `m.route` if your application has multiple screens) instead of `m.render` to take advantage of the autoredraw system, rather than re-rendering manually every time a change occurs.
+
+#### Production build
+
+If you open bin/app.js, you'll notice that the Webpack bundle is not minified, so this file is not ideal for a live application. To generate a minified file, open `package.json` and add a new npm script:
+
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"start": "webpack src/index.js bin/app.js -d --watch",
+		"build": "webpack src/index.js bin/app.js -p",
+	}
+}
+```
+
+You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
+
+```
+{
+	"name": "my-project",
+	"scripts": {
+		"start": "webpack -d --watch",
+		"build": "webpack -p",
+		"heroku-postbuild": "webpack -p"
+	}
+}
+```
 
 ---
 
@@ -167,7 +196,7 @@ The source file `index.js` will be compiled (bundled) and a browser window opens
 
 #### Mithril bundler
 
-Mithril comes with a bundler tool of its own. It is sufficient for projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.
+Mithril comes with a bundler tool of its own. It is sufficient for ES5-based projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.
 
 If you want to try it and give feedback, you can open `package.json` and change the npm script for webpack to this:
 

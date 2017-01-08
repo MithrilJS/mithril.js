@@ -14,6 +14,7 @@
 - [Keys](#keys)
 - [SVG and MathML](#svg-and-mathml)
 - [Making templates dynamic](#making-templates-dynamic)
+- [Converting HTML](#converting-html)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
@@ -342,6 +343,14 @@ m("div", isError ? "An error occurred" : "Saved") // <div>Saved</div>
 ```
 
 You cannot use Javascript statements such as `if` or `for` within Javascript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
+
+---
+
+### Converting HTML
+
+In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
+
+When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
 
 ---
 
