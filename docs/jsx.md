@@ -38,7 +38,8 @@ When using JSX, it's possible to interpolate Javascript expressions within JSX t
 ```jsx
 var greeting = "Hello"
 var url = "http://google.com"
-var div = <a href={url}>{greeting + "!"}</a>
+var link = <a href={url}>{greeting + "!"}</a>
+// yields <a href="http://google.com">Hello</a>
 ```
 
 Components can be used by using a convention of uppercasing the first letter of the component name:
