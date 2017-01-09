@@ -603,3 +603,4 @@ In the `/edit/:id` route, there's also a `vnode` argument that carries the route
 Refresh the page in the browser and now you'll see the global navigation on every page in the app.
 
 ---
+

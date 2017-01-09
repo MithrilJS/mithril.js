@@ -45,11 +45,29 @@ function ensureCodeIsRunnable(file, data) {
 
 	try {
 		initMocks()
-		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, {exports: {}}, function(dep) {
+		var module = {exports: {}}
+		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, module, function(dep) {
 			if (dep.indexOf("./mycomponent") === 0) return {view: function() {}}
 			if (dep.indexOf("mithril/ospec/ospec") === 0) return global.o
 			if (dep.indexOf("mithril/stream") === 0) return global.stream
 			if (dep === "mithril") return global.m
+			
+			if (dep === "../model/User") return {
+				list: [],
+				current: {},
+				loadList: function() {
+					return Promise.resolve({data: []})
+				},
+				load: function() {
+					return Promise.resolve({firstName: "", lastName: ""})
+				},
+				save: function() {
+					return Promise.resolve()
+				},
+			}
+			if (dep === "./view/UserList") return {view: function() {}}
+			if (dep === "./view/UserForm") return {view: function() {}}
+			if (dep === "./view/Layout") return {view: function() {}}
 		})
 	}
 	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
