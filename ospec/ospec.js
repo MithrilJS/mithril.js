@@ -1,7 +1,7 @@
 "use strict"
 
 module.exports = new function init() {
-	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, hasProcess = typeof process === "object"
+	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
 	function o(subject, predicate) {
 		if (predicate === undefined) return new Assert(subject)
@@ -156,7 +156,7 @@ module.exports = new function init() {
 				var aKeys = Object.getOwnPropertyNames(a), bKeys = Object.getOwnPropertyNames(b)
 				if (aKeys.length !== bKeys.length) return false
 				for (var i = 0; i < aKeys.length; i++) {
-					if (!b.hasOwnProperty(aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
+					if (!hasOwn.call(b, aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
 				}
 				return true
 			}
