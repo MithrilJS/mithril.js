@@ -29,7 +29,7 @@ npm install babel-cli babel-preset-es2015 babel-plugin-transform-react-jsx --sav
 
 Create a `.babelrc` file:
 
-```
+```json
 {
 	"presets": ["es2015"],
 	"plugins": [
@@ -56,7 +56,7 @@ npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-r
 
 Create a `.babelrc` file:
 
-```
+```json
 {
 	"presets": ["es2015"],
 	"plugins": [
@@ -90,7 +90,7 @@ This configuration assumes the source code file for the application entry point 
 
 To run the bundler, setup an npm script. Open `package.json` and add this entry under `"scripts"`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -109,7 +109,7 @@ npm start
 
 To generate a minified file, open `package.json` and add a new npm script called `build`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -121,7 +121,7 @@ To generate a minified file, open `package.json` and add a new npm script called
 
 You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
