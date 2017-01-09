@@ -110,15 +110,12 @@ module.exports = new function init() {
 			}
 		}
 	}
-	var dedupeCounter = 0
 	function unique(subject) {
-		var res = subject
-		if (ctx.hasOwnProperty(subject)) {
+		if (hasOwn.call(ctx, subject)) {
 			console.warn("A test or a spec named `" + subject + "` was already defined")	
-			while (ctx.hasOwnProperty(res)) res = subject + ' (' + ++dedupeCounter + ')'
-			dedupeCounter = 0
+			while (hasOwn.call(ctx, subject)) subject += '*'
 		}
-		return res
+		return subject
 	}
 	function hook(name) {
 		return function(predicate) {
