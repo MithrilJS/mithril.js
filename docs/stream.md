@@ -83,7 +83,7 @@ Specifies how the value of a computed stream is generated. See [combining stream
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
-`streams...` | splat of `Stream`s   | No       | Splat of zero or more streams that correspond to the streams passed as the second argument to [`stream.combine`](#stream-combine.md)
+`streams...` | splat of `Stream`s   | No       | Splat of zero or more streams that correspond to the streams passed as the second argument to [`stream.combine`](#stream-combine)
 `changed`    | `Array<Stream>`      | Yes      | List of streams that were affected by an update
 **returns**  | `any`                |          | Returns a computed value
 

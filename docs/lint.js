@@ -2,6 +2,8 @@
 
 var fs = require("fs")
 var path = require("path")
+var http = require("http")
+var url = require("url")
 
 //lint rules
 function lint(file, data) {
@@ -9,6 +11,7 @@ function lint(file, data) {
 	ensureCodeIsSyntaticallyValid(file, data)
 	ensureCodeIsRunnable(file, data)
 	ensureCommentStyle(file, data)
+	ensureLinkIsValid(file, data)
 }
 
 function ensureCodeIsHighlightable(file, data) {
@@ -79,6 +82,21 @@ function ensureCommentStyle(file, data) {
 	codeBlocks.forEach(function(block) {
 		block = block.slice(13, -3)
 		if (block.match(/(^|\s)\/\/[\S]/)) console.log(file + " - comment missing space\n\n" + block + "\n\n---\n\n")
+	})
+}
+
+function ensureLinkIsValid(file, data) {
+	var links = data.match(/\]\(([^\)]+)\)/gim)
+	links.forEach(function(match) {
+		var link = match.slice(2, -1)
+		var path = link.match(/[\w-]+\.md/)
+		if (link.match(/http/)) {
+			var u = url.parse(link)
+			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function(r) {
+				console.log(file + " - broken external link: " + link)
+			})
+		}
+		else if (path && !fs.existsSync("docs/" + path)) console.log(file + " - broken link: " + link)
 	})
 }
 

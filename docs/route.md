@@ -89,13 +89,13 @@ Argument          | Type      | Required | Description
 
 ##### m.route.prefix
 
-Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
+Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
 `m.route.prefix(prefix)`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategy) used by Mithril.
+`prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategies) used by Mithril.
 **returns**       |           |          | Returns `undefined`
 
 ##### m.route.link
@@ -333,7 +333,7 @@ This way, if the user searches and presses the back button to return to the appl
 
 ### Changing router prefix
 
-The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
+The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
 ```javascript
 // set to pathname strategy
