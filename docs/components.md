@@ -28,13 +28,13 @@ m(Example)
 
 ### Passing data to components
 
-Data can be passed to component instances through an `attrs` object as a parameter in the hyperscript function:
+Data can be passed to component instances by passing an `attrs` object as the second parameter in the hyperscript function:
 
 ```javascript
 m(Example, {name: "Floyd"})
 ```
 
-`attrs` data can be accessed in the component's view or lifecycle methods via the `vnode`:
+This data can be accessed in the component's view or lifecycle methods via the `vnode.attrs`:
 
 ```javascript
 var Example = {
@@ -44,7 +44,7 @@ var Example = {
 }
 ```
 
-NOTE: Lifecycle methods can also be provided via attrs, so you should avoid using the lifecycle method names for your own callbacks as they will be invoked by Mithril. Use lifecycle methods in `attrs` only when you specifically wish to create lifecycle hooks.
+NOTE: Lifecycle methods can also be provided via the `attrs` object, so you should avoid using the lifecycle method names for your own callbacks as they would also be invoked by Mithril. Use lifecycle methods in `attrs` only when you specifically wish to create lifecycle hooks.
 
 ---
 
@@ -108,7 +108,7 @@ The state of a component can be accessed three ways: as a blueprint at initializ
 
 #### At initialization
 
-Any property attached to the component object is deep-cloned for every instance of the component. This allows simple state initialization.
+Any property attached to the component object is copied for every instance of the component. This allows simple state initialization.
 
 In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
 
