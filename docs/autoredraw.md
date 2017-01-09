@@ -12,13 +12,13 @@ Mithril automatically redraws after DOM event handlers that are defined in a Mit
 
 ```javascript
 var MyComponent = {
-  view: function() {
-    return m("div", {onclick: doSomething})
-  }
+	view: function() {
+		return m("div", {onclick: doSomething})
+	}
 }
 
 function doSomething() {
-  //a redraw happens synchronously after this function runs
+	// a redraw happens synchronously after this function runs
 }
 
 m.mount(document.body, MyComponent)
@@ -28,14 +28,14 @@ You can disable an auto-redraw for specific events by setting `e.redraw` to `fal
 
 ```javascript
 var MyComponent = {
-  view: function() {
-    return m("div", {onclick: doSomething})
-  }
+	view: function() {
+		return m("div", {onclick: doSomething})
+	}
 }
 
 function doSomething(e) {
-  e.redraw = false
-  // no longer triggers a redraw when the div is clicked
+	e.redraw = false
+	// no longer triggers a redraw when the div is clicked
 }
 
 m.mount(document.body, MyComponent)
@@ -48,7 +48,7 @@ Mithril automatically redraws after [`m.request`](request.md) completes:
 
 ```javascript
 m.request("/api/v1/users").then(function() {
-  //a redraw happens after this function runs
+	// a redraw happens after this function runs
 })
 ```
 
@@ -56,7 +56,7 @@ You can disable an auto-redraw for a specific request by setting the `background
 
 ```javascript
 m.request("/api/v1/users", {background: true}).then(function() {
-  //does not trigger a redraw
+	// does not trigger a redraw
 })
 ```
 
@@ -67,21 +67,21 @@ Mithril automatically redraws after [`m.route.set()`](route.md#mrouteset) calls 
 
 ```javascript
 var RoutedComponent = {
-  view: function() {
-    return [
-      // a redraw happens asynchronously after the route changes
-      m("a", {href: "/", oncreate: m.route.link}),
-      m("div", {
-        onclick: function() {
-          m.route.set("/")
-        }
-      }),
-    ]
-  }
+	view: function() {
+		return [
+			// a redraw happens asynchronously after the route changes
+			m("a", {href: "/", oncreate: m.route.link}),
+			m("div", {
+				onclick: function() {
+					m.route.set("/")
+				}
+			}),
+		]
+	}
 }
 
 m.route(document.body, "/", {
-  "/": RoutedComponent,
+	"/": RoutedComponent,
 })
 ```
 
@@ -97,13 +97,13 @@ If you need to explicitly trigger a redraw within a lifecycle method, you should
 
 ```javascript
 var StableComponent = {
-  oncreate: function(vnode) {
-    vnode.state.height = vnode.dom.offsetHeight
-    m.redraw()
-  },
-  view: function() {
-    return m("div", "This component is " + vnode.state.height + "px tall")
-  }
+	oncreate: function(vnode) {
+		vnode.state.height = vnode.dom.offsetHeight
+		m.redraw()
+	},
+	view: function() {
+		return m("div", "This component is " + vnode.state.height + "px tall")
+	}
 }
 ```
 

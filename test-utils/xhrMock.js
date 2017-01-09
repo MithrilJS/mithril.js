@@ -7,8 +7,8 @@ var parseQueryString = require("../querystring/parse")
 module.exports = function() {
 	var routes = {}
 	var callback = "callback"
-	var serverErrorHandler = function() {
-		return {status: 500, responseText: "server error, most likely the URL was not defined"}
+	var serverErrorHandler = function(url) {
+		return {status: 500, responseText: "server error, most likely the URL was not defined " + url}
 	}
 
 	var $window = {
@@ -32,7 +32,7 @@ module.exports = function() {
 			}
 			this.send = function(body) {
 				var self = this
-				var handler = routes[args.method + " " + args.pathname] || serverErrorHandler
+				var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
 				var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
 				self.readyState = 4
 				self.status = data.status
@@ -54,7 +54,7 @@ module.exports = function() {
 					element.parentNode = this
 					if (element.nodeName === "SCRIPT") {
 						var urlData = parseURL(element.src, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
-						var handler = routes["GET " + urlData.pathname] || serverErrorHandler
+						var handler = routes["GET " + urlData.pathname] || serverErrorHandler.bind(null, element.src)
 						var data = handler({url: urlData.pathname, query: urlData.search, body: null})
 						var query = parseQueryString(urlData.search)
 						callAsync(function() {

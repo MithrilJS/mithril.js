@@ -122,6 +122,9 @@ function initMocks() {
 		"GET /api/v1/users/foo:bar": function(request) {
 			return {status: 200, responseText: JSON.stringify({id: 123})}
 		},
+		"GET /files/image.svg": function(request) {
+			return {status: 200, responseText: "<svg></svg>"}
+		},
 	})
 }
 

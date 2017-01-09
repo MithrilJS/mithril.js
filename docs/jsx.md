@@ -12,7 +12,7 @@
 
 JSX is a syntax extension that enables you to write HTML tags interspersed with Javascript.
 
-```
+```jsx
 var MyComponent = {
   view: function() {
     return m("main", [
@@ -35,7 +35,7 @@ var MyComponent = {
 
 When using JSX, it's possible to interpolate Javascript expressions within JSX tags by using curly braces:
 
-```
+```jsx
 var greeting = "Hello"
 var url = "http://google.com"
 var div = <a href={url}>{greeting + "!"}</a>
@@ -43,7 +43,7 @@ var div = <a href={url}>{greeting + "!"}</a>
 
 Components can be used by using a convention of uppercasing the first letter of the component name:
 
-```javascript
+```jsx
 m.mount(document.body, <MyComponent />)
 // equivalent to m.mount(document.body, m(MyComponent))
 ```
@@ -190,7 +190,7 @@ Hyperscript is the compiled representation of JSX. It's designed to be readable 
 
 In addition, since hyperscript is plain Javascript, it's often more natural to indent than JSX:
 
-```
+```jsx
 //JSX
 var BigComponent = {
   activate: function() {/*...*/},
