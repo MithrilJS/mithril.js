@@ -9,6 +9,9 @@ o.spec("hyperscript", function() {
 		o("throws on non-string selector w/o a view property", function(done) {
 			try {m({})} catch(e) {done()}
 		})
+		o("throws on double processed component", function(done) {
+			try {m(m({view: function () {}}))} catch(e) {done()}
+		})
 		o("handles tag in selector", function() {
 			var vnode = m("a")
 

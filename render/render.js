@@ -29,6 +29,9 @@ module.exports = function($window) {
 				default: return createElement(vnode, hooks, ns)
 			}
 		}
+		else if (!tag && vnode.view) {
+			throw Error("It seems the component has not been processed by the hyperscript.\nConvert the code with pattern 'm(aParent, aChild)' to 'm(aParent, m(aChild))'");
+		}
 		else return createComponent(vnode, hooks, ns)
 	}
 	function createText(vnode) {
