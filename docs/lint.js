@@ -92,7 +92,7 @@ function ensureLinkIsValid(file, data) {
 		var path = link.match(/[\w-]+\.md/)
 		if (link.match(/http/)) {
 			var u = url.parse(link)
-			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function(r) {
+			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function() {
 				console.log(file + " - broken external link: " + link)
 			})
 		}
