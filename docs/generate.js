@@ -37,7 +37,7 @@ function generate(pathname) {
 					var modified = guides.match(link) ? guides.replace(link, replace) : methods.replace(link, replace)
 					return title + modified + "\n\n"
 				})
-				.replace(/(\[[^\]]+)(\.md)/gim, function(match, path, extension) {
+				.replace(/(\]\([^\)]+)(\.md)/gim, function(match, path, extension) {
 					return path + (path.match(/http/) ? extension : ".html")
 				}) // fix links
 			var html = layout
