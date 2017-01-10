@@ -1,5 +1,12 @@
 /* global Promise */
 
+/*
+Mithril v0.2.4
+http://mithril.js.org
+(c) 2014-2016 Leo Horie
+License: MIT
+*/
+
 ;(function (global, factory) { // eslint-disable-line
 	"use strict"
 	/* eslint-disable no-undef */
