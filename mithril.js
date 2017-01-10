@@ -383,7 +383,7 @@
 	function maybeRecreateObject(data, cached, dataAttrKeys) {
 		// if an element is different enough from the one in cache, recreate it
 		if (isDifferentEnough(data, cached, dataAttrKeys)) {
-			if (cached.nodes.length) clear(cached.nodes)
+			if (cached.nodes.length) clear(cached.nodes, cached)
 
 			if (cached.configContext &&
 					isFunction(cached.configContext.onunload)) {
