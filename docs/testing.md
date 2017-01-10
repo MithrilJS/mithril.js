@@ -21,7 +21,7 @@ To setup a test suite, create a `tests` folder and inside of it, create a test f
 // file: tests/math-test.js
 var o = require("mithril/ospec/ospec")
 
-o("math", function() {
+o.spec("math", function() {
 	o("addition works", function() {
 		o(1 + 2).equals(3)
 	})
