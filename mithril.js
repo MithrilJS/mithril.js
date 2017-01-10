@@ -28,6 +28,19 @@
 		return "v0.2.5"
 	}
 
+	var div = document.createElement("div")
+	var frag = document.createDocumentFragment()
+
+	function toDOM(HTML){
+		div.innerHTML = HTML
+
+		for (var i = 0; i < div.childNodes; i++) {
+			frag.appendChild(div.childNodes[i])
+		}
+
+		return frag
+	}
+
 	var hasOwn = {}.hasOwnProperty
 	var type = {}.toString
 
@@ -1215,7 +1228,7 @@
 			parentElement.appendChild(
 				$document.createRange().createContextualFragment(data))
 		} catch (e) {
-			parentElement.insertAdjacentHTML("beforeend", data)
+			parentElement.insertBefore(toDOM(data), parentElement.lastChild)
 			replaceScriptNodes(parentElement)
 		}
 	}
@@ -1258,10 +1271,10 @@
 			var placeholder = $document.createElement("span")
 			if (isElement) {
 				parentElement.insertBefore(placeholder, nextSibling || null)
-				placeholder.insertAdjacentHTML("beforebegin", data)
+				parentElement.insertBefore(toDOM(data), placeholder)
 				parentElement.removeChild(placeholder)
 			} else {
-				nextSibling.insertAdjacentHTML("beforebegin", data)
+				parentElement.insertBefore(toDOM(data), nextSibling)
 			}
 		} else {
 			appendTextFragment(parentElement, data)
