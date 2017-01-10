@@ -219,7 +219,7 @@ module.exports = new function init() {
 	if(hasProcess) {
 		nextTickish = process.nextTick
 	} else {
-		nextTickish = function fakeFastNextTick(fn) {
+		nextTickish = function fakeFastNextTick(next) {
 			if (stack++ < 5000) next()
 			else setTimeout(next, stack = 0)
 		}
