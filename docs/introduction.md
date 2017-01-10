@@ -27,7 +27,7 @@ The easiest way to try out Mithril is to include it from a CDN, and follow this 
 
 Let's create an HTML file to follow along:
 
-```markup
+```html
 <body></body>
 <script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
 <script>
@@ -93,7 +93,7 @@ m("main", [
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
-```markup
+```jsx
 // HTML syntax via Babel's JSX plugin
 <main>
 	<h1 class="title">My first app</h1>
@@ -126,7 +126,7 @@ m.mount(root, Hello)
 
 As you would expect, doing so creates this markup:
 
-```markup
+```html
 <main>
 	<h1 class="title">My first app</h1>
 	<button>A button</button>
