@@ -10,7 +10,7 @@ module.exports = function(object) {
 	return args.join("&")
 
 	function destructure(key, value) {
-		if (value instanceof Array) {
+		if (Array.isArray(value)) {
 			for (var i = 0; i < value.length; i++) {
 				destructure(key + "[" + i + "]", value[i])
 			}

@@ -1084,43 +1084,6 @@ o.spec("route", function() {
 								return new Promise(function(resolve) {
 									callAsync(function() {
 										callAsync(function() {
-											resolve({view: function() {}})
-										})
-									})
-								})
-							},
-							render: function(vnode) {
-								rendered = true
-								resolved = "a"
-							}
-						},
-						"/b": {
-							view: function() {
-								resolved = "b"
-							}
-						}
-					})
-
-					route.set("/b")
-
-					callAsync(function() {
-						o(rendered).equals(false)
-						o(resolved).equals("b")
-
-						done()
-					})
-				})
-
-				o("calling route.set invalidates pending onmatch resolution", function(done) {
-					var rendered = false
-					var resolved
-					$window.location.href = prefix + "/a"
-					route(root, "/a", {
-						"/a": {
-							onmatch: function() {
-								return new Promise(function(resolve) {
-									callAsync(function() {
-										callAsync(function() {
 											resolve({view: function() {rendered = true}})
 										})
 									})

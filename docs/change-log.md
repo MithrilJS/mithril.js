@@ -69,14 +69,14 @@ In `v0.2.x` components could be created using either `m(component)` or `m.compon
 
 ```javascript
 // These are equivalent
-m.component(component);
-m(component);
+m.component(component)
+m(component)
 ```
 
 ### `v1.x`
 
 ```javascript
-m(component);
+m(component)
 ```
 
 ---
@@ -93,7 +93,7 @@ m("div", {
         // runs on each redraw
         // isInitialized is a boolean representing if the node has been added to the DOM
     }
-});
+})
 ```
 
 ### `v1.x`
@@ -114,7 +114,7 @@ m("div", {
     onbeforeremove : function(vnode) { /*...*/ },
     // Called before the node is removed, but after onbeforeremove calls done()
     onremove : function(vnode) { /*...*/ }
-});
+})
 ```
 
 If available the DOM-Element of the vnode can be accessed at `vnode.dom`.
@@ -138,7 +138,7 @@ In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked dr
 ```javascript
 m("div", {
     onclick : function(e) {
-        m.redraw.strategy("none");
+        m.redraw.strategy("none")
     }
 })
 ```
@@ -148,7 +148,7 @@ m("div", {
 ```javascript
 m("div", {
     onclick : function(e) {
-        e.redraw = false;
+        e.redraw = false
     }
 })
 ```
@@ -164,15 +164,15 @@ In `v1.x` there is no more `controller` property in components, use `oninit` ins
 ```javascript
 m.mount(document.body, {
     controller : function() {
-        var ctrl = this;
+        var ctrl = this
 
-        ctrl.fooga = 1;
+        ctrl.fooga = 1
     },
 
     view : function(ctrl) {
-        return m("p", ctrl.fooga);
+        return m("p", ctrl.fooga)
     }
-});
+})
 ```
 
 ### `v1.x`
@@ -180,29 +180,29 @@ m.mount(document.body, {
 ```javascript
 m.mount(document.body, {
     oninit : function(vnode) {
-        vnode.state.fooga = 1;
+        vnode.state.fooga = 1
     },
 
     view : function(vnode) {
-        return m("p", vnode.state.fooga);
+        return m("p", vnode.state.fooga)
     }
-});
+})
 
 // OR
 
 m.mount(document.body, {
     oninit : function(vnode) {
-        var state = this;  // this is bound to vnode.state by default
+        var state = this  // this is bound to vnode.state by default
 
-        state.fooga = 1;
+        state.fooga = 1
     },
 
     view : function(vnode) {
-        var state = this; // this is bound to vnode.state by default
+        var state = this // this is bound to vnode.state by default
 
-        return m("p", state.fooga);
+        return m("p", state.fooga)
     }
-});
+})
 ```
 
 ---
@@ -222,9 +222,9 @@ var component = {
     view : function(ctrl, options) {
         // options.fooga == 1
     }
-};
+}
 
-m("div", m.component(component, { fooga : 1 }));
+m("div", m.component(component, { fooga : 1 }))
 ```
 
 ### `v1.x`
@@ -238,9 +238,9 @@ var component = {
     view : function(vnode) {
         // vnode.attrs.fooga == 1
     }
-};
+}
 
-m("div", m(component, { fooga : 1 }));
+m("div", m(component, { fooga : 1 }))
 ```
 
 ---
@@ -258,7 +258,7 @@ m.mount(document.body, {
     view : function(ctrl, options) {
         // ...
     }
-});
+})
 ```
 
 ### `v1.x`
@@ -273,7 +273,7 @@ m.mount(document.body, {
         // Use vnode.state instead of ctrl
         // Use vnode.attrs instead of options
     }
-});
+})
 ```
 
 ---
@@ -285,13 +285,13 @@ In `v0.2.x` you could pass components as the second argument of `m()` w/o any wr
 ### `v0.2.x`
 
 ```javascript
-m("div", component);
+m("div", component)
 ```
 
 ### `v1.x`
 
 ```javascript
-m("div", m(component));
+m("div", m(component))
 ```
 
 ---
@@ -305,8 +305,8 @@ In `v1.x`, components are required instead in both cases.
 ### `v0.2.x`
 
 ```javascript
-m.mount(element, m('i', 'hello'));
-m.mount(element, m(Component, attrs));
+m.mount(element, m('i', 'hello'))
+m.mount(element, m(Component, attrs))
 
 m.route(element, '/', {
     '/': m('b', 'bye')
@@ -316,8 +316,8 @@ m.route(element, '/', {
 ### `v1.x`
 
 ```javascript
-m.mount(element, {view: function () {return m('i', 'hello')}});
-m.mount(element, {view: function () {return m(Component, attrs)}});
+m.mount(element, {view: function () {return m('i', 'hello')}})
+m.mount(element, {view: function () {return m(Component, attrs)}})
 
 m.route(element, '/', {
     '/': {view: function () {return m('b', 'bye')}}
@@ -333,15 +333,15 @@ In `v0.2.x` the routing mode could be set by assigning a string of `"pathname"`,
 ### `v0.2.x`
 
 ```javascript
-m.route.mode = "pathname";
-m.route.mode = "search";
+m.route.mode = "pathname"
+m.route.mode = "search"
 ```
 
 ### `v1.x`
 
 ```javascript
-m.route.prefix("");
-m.route.prefix("?");
+m.route.prefix("")
+m.route.prefix("?")
 ```
 
 ---
@@ -383,17 +383,17 @@ In `v0.2.x` all interaction w/ the current route happened via `m.route()`. In `v
 m.route()
 
 // Setting a new route
-m.route("/other/route");
+m.route("/other/route")
 ```
 
 ### `v1.x`
 
 ```javascript
 // Getting the current route
-m.route.get();
+m.route.get()
 
 // Setting a new route
-m.route.set("/other/route");
+m.route.set("/other/route")
 ```
 
 ---
@@ -408,10 +408,10 @@ In `v0.2.x` reading route params was all handled through the `m.route.param()` m
 m.route(document.body, "/booga", {
     "/:attr" : {
         view : function() {
-            m.route.param("attr"); // "booga"
+            m.route.param("attr") // "booga"
         }
     }
-});
+})
 ```
 
 ### `v1.x`
@@ -420,13 +420,13 @@ m.route(document.body, "/booga", {
 m.route(document.body, "/booga", {
     "/:attr" : {
         oninit : function(vnode) {
-            vnode.attrs.attr; // "booga"
+            vnode.attrs.attr // "booga"
         },
         view : function(vnode) {
-            vnode.attrs.attr; // "booga"
+            vnode.attrs.attr // "booga"
         }
     }
-});
+})
 ```
 
 ---
@@ -511,16 +511,16 @@ Additionally, if the `extract` option is passed to `m.request` the return value 
 
 ```javascript
 var greetAsync = function() {
-    var deferred = m.deferred();
+    var deferred = m.deferred()
     setTimeout(function() {
-        deferred.resolve("hello");
-    }, 1000);
-    return deferred.promise;
-};
+        deferred.resolve("hello")
+    }, 1000)
+    return deferred.promise
+}
 
 greetAsync()
     .then(function(value) {return value + " world"})
-    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+    .then(function(value) {console.log(value)}) //logs "hello world" after 1 second
 ```
 
 ### `v1.x`
@@ -528,13 +528,13 @@ greetAsync()
 ```javascript
 var greetAsync = new Promise(function(resolve){
     setTimeout(function() {
-        resolve("hello");
-    }, 1000);
-});
+        resolve("hello")
+    }, 1000)
+})
 
 greetAsync()
     .then(function(value) {return value + " world"})
-    .then(function(value) {console.log(value)}); //logs "hello world" after 1 second
+    .then(function(value) {console.log(value)}) //logs "hello world" after 1 second
 ```
 
 ---
@@ -551,7 +551,7 @@ m.sync([
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
 ])
 .then(function (users) {
-	console.log("Contributors:", users[0].name, "and", users[1].name);
+	console.log("Contributors:", users[0].name, "and", users[1].name)
 })
 ```
 
@@ -563,7 +563,7 @@ Promise.all([
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
 ])
 .then(function (users) {
-	console.log("Contributors:", users[0].name, "and", users[1].name);
+	console.log("Contributors:", users[0].name, "and", users[1].name)
 })
 ```
 
@@ -618,11 +618,11 @@ In v0.2.x it was possible to force mithril to redraw immediately by passing a tr
 ### `v0.2.x`
 
 ```javascript
-m.redraw(true); // redraws immediately & synchronously
+m.redraw(true) // redraws immediately & synchronously
 ```
 
 ### `v1.x`
 
 ```javascript
-m.redraw(); // schedules a redraw on the next requestAnimationFrame tick
+m.redraw() // schedules a redraw on the next requestAnimationFrame tick
 ```

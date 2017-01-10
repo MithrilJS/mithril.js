@@ -382,12 +382,6 @@ o.spec("pushStateMock", function() {
 
 			o($window.onpopstate.callCount).equals(2)
 		})
-		o("history.back() without history does not trigger onpopstate", function() {
-			$window.onpopstate = o.spy()
-			$window.history.back()
-
-			o($window.onpopstate.callCount).equals(0)
-		})
 		o("history.forward() without history does not trigger onpopstate", function() {
 			$window.onpopstate = o.spy()
 			$window.history.forward()

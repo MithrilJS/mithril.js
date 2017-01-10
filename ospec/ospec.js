@@ -1,11 +1,11 @@
 "use strict"
 
 module.exports = new function init() {
-	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object"
+	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
 	function o(subject, predicate) {
-		ctx[subject] = predicate
 		if (predicate === undefined) return new Assert(subject)
+		ctx[unique(subject)] = predicate
 	}
 	o.before = hook("__before")
 	o.after = hook("__after")
@@ -14,7 +14,7 @@ module.exports = new function init() {
 	o.new = init
 	o.spec = function(subject, predicate) {
 		var parent = ctx
-		ctx = ctx[subject] = {}
+		ctx = ctx[unique(subject)] = {}
 		predicate()
 		ctx = parent
 	}
@@ -74,7 +74,7 @@ module.exports = new function init() {
 					var timeout = 0, delay = 200, s = new Date
 					var isDone = false
 					var body = fn.toString()
-					var arg = (body.match(/\(([\w_$]+)/) || body.match(/([\w_$]+)\s*=>/) || []).pop()
+					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
 						fn(function done() {
@@ -107,6 +107,13 @@ module.exports = new function init() {
 				}
 			}
 		}
+	}
+	function unique(subject) {
+		if (hasOwn.call(ctx, subject)) {
+			console.warn("A test or a spec named `" + subject + "` was already defined")	
+			while (hasOwn.call(ctx, subject)) subject += '*'
+		}
+		return subject
 	}
 	function hook(name) {
 		return function(predicate) {
@@ -144,7 +151,7 @@ module.exports = new function init() {
 				var aKeys = Object.getOwnPropertyNames(a), bKeys = Object.getOwnPropertyNames(b)
 				if (aKeys.length !== bKeys.length) return false
 				for (var i = 0; i < aKeys.length; i++) {
-					if (!b.hasOwnProperty(aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
+					if (!hasOwn.call(b, aKeys[i]) || !deepEqual(a[aKeys[i]], b[aKeys[i]])) return false
 				}
 				return true
 			}

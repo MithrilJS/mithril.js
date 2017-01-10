@@ -13,7 +13,7 @@
 ### What is Mithril?
 
 Mithril is a client-side Javascript framework for building Single Page Applications.  
-It's small (< 8kb gzip), fast and batteries-included.
+It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
@@ -23,9 +23,9 @@ Note: This introduction assumes you have basic level of Javacript knowledge. If 
 
 ### Getting started
 
-The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface but it'll only take 10 minutes.
+The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
-Let's create an HTML file to follow along: 
+Let's create an HTML file to follow along:
 
 ```markup
 <body></body>
@@ -91,7 +91,7 @@ m("main", [
 ])
 ```
 
-Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](https://babeljs.io/docs/plugins/transform-react-jsx/).
+Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
 ```markup
 // HTML syntax via Babel's JSX plugin
@@ -236,8 +236,3 @@ Clicking the button should now update the count.
 We covered how to create and update HTML, how to create components, routes for a Single Page Application, and interacted with a server via XHR.
 
 This should be enough to get you started writing the frontend for a real application. Now that you are comfortable with the basics of the Mithril API, [be sure to check out the simple application tutorial](simple-application.md), which walks you through building a realistic application.
-
-
-
-
-

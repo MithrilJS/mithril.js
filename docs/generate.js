@@ -37,8 +37,11 @@ function generate(pathname) {
 					var modified = guides.match(link) ? guides.replace(link, replace) : methods.replace(link, replace)
 					return title + modified + "\n\n"
 				})
-				.replace(/\.md/gim, ".html") // fix links
+				.replace(/(\]\([^\)]+)(\.md)/gim, function(match, path, extension) {
+					return path + (path.match(/http/) ? extension : ".html")
+				}) // fix links
 			var html = layout
+				.replace(/\[version\]/, version) // update version
 				.replace(/\[body\]/, marked(fixed))
 				.replace(/<h5 id="([^"]+?)">([^<]+?)<\/h5>/gim, function(match, id, text) { // fix anchors
 					return "<h5 id=\"" + text.toLowerCase().replace(/\.|\[|\]|&quot;|\//g, "") + "\">" + text + "</h5>"

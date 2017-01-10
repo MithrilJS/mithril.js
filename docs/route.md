@@ -3,10 +3,10 @@
 - [Description](#description)
 - [Signature](#signature)
 	- [Static members](#static-members)
-		- [route.set](#routeset)
-		- [route.get](#routeget)
-		- [route.prefix](#routeprefix)
-		- [route.link](#routelink)
+		- [m.route.set](#mrouteset)
+		- [m.route.get](#mrouteget)
+		- [m.route.prefix](#mrouteprefix)
+		- [m.route.link](#mroutelink)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -62,7 +62,7 @@ Argument               | Type                                     | Required | D
 
 #### Static members
 
-##### route.set
+##### m.route.set
 
 Redirects to a matching route, or to the default route if no matching routes can be found.
 
@@ -77,7 +77,7 @@ Argument          | Type      | Required | Description
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
-##### route.get
+##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
 
@@ -87,18 +87,18 @@ Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
 **returns**       | String    |          | Returns the last fully resolved path
 
-##### route.prefix
+##### m.route.prefix
 
-Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
+Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
 `m.route.prefix(prefix)`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategy) used by Mithril.
+`prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategies) used by Mithril.
 **returns**       |           |          | Returns `undefined`
 
-##### route.link
+##### m.route.link
 
 `eventHandler = m.route.link(vnode)`
 
@@ -109,7 +109,7 @@ Argument          | Type        | Required | Description
 
 #### RouteResolver
 
-A RouterResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present.
+A RouterResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
 
 `routeResolver = {onmatch, render}`
 
@@ -140,7 +140,7 @@ The `render` method is called on every redraw for a matching route. It is simila
 `vnode = routeResolve.render(vnode)`
 
 Argument            | Type            | Description
-------------------- | --------------- | ----------- 
+------------------- | --------------- | -----------
 `vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
 `vnode.attrs`       | `Object`        | A map of URL parameter values
 **returns**         | `Vnode`         | Returns a vnode
@@ -304,7 +304,7 @@ var state = {
 		// save the state for this route
 		// this is equivalent to `history.replaceState({term: state.term}, null, location.href)`
 		m.route.set(m.route.get(), null, {replace: true, state: {term: state.term}})
-		
+
 		// navigate away
 		location.href = "https://google.com/?q=" + state.term
 	}
@@ -333,7 +333,7 @@ This way, if the user searches and presses the back button to return to the appl
 
 ### Changing router prefix
 
-The router prefix is a fragment of the URL that dictates the underlying [strategy](routing-strategies.md) used by the router.
+The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
 ```javascript
 // set to pathname strategy
@@ -545,9 +545,9 @@ m.route(document.body, "/user/list", {
 	"/user/list": {
 		onmatch: state.loadUsers,
 		render: function() {
-			return state.users.length > 0 ? state.users.map(function(user) {
+			return state.users.map(function(user) {
 				return m("div", user.id)
-			}) : "loading"
+			})
 		}
 	},
 })

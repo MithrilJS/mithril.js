@@ -4,7 +4,7 @@
 
 Noiseless testing framework
 
-Version: 1.2.2 
+Version: 1.2.3  
 License: MIT
 
 ## About
@@ -278,28 +278,19 @@ ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
 	$ npm test
 ```
 
-#### (Optionally) Install Globally
+#### Installing ospec globally
+
+While it's recommended to install ospec locally to maintain reproducible environments, sometimes it may be deemed appropriate to install it globally. To do so, run this command:
 
 ```
-	$ npm i -g ospec
-	$ ospec
-```
-
-#### (Optionally) Evaluate ES6+ code:
-
-One way to accomplish this would be to include the 'babel-cli' module (`npm i babel-cli`)
-
-(This would pre-suppose that you're already using babel in your project and thus have it configured to your liking).
-
-```
-	$ babel-node ospec
+npm install ospec -g
 ```
 
 ---
 
 ## API
 
-*Square brackets denote optional arguments
+Square brackets denote optional arguments
 
 ### void o.spec(String title, Function tests)
 

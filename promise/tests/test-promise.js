@@ -27,7 +27,7 @@ o.spec("promise", function() {
 
 			o(promise instanceof Promise).equals(true)
 		})
-		o("static resolve returns promise", function() {
+		o("static reject returns promise", function() {
 			var promise = Promise.reject()
 			promise.catch(function() {})
 
@@ -141,7 +141,7 @@ o.spec("promise", function() {
 				done()
 			})
 		})
-		o("non-function onFulfilled is ignored", function(done) {
+		o("non-function onFulfilled with no second param is ignored", function(done) {
 			var promise = Promise.resolve(1)
 
 			promise.then(null).then(function(value) {

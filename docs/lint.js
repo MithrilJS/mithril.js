@@ -2,6 +2,8 @@
 
 var fs = require("fs")
 var path = require("path")
+var http = require("http")
+var url = require("url")
 
 //lint rules
 function lint(file, data) {
@@ -9,6 +11,7 @@ function lint(file, data) {
 	ensureCodeIsSyntaticallyValid(file, data)
 	ensureCodeIsRunnable(file, data)
 	ensureCommentStyle(file, data)
+	ensureLinkIsValid(file, data)
 }
 
 function ensureCodeIsHighlightable(file, data) {
@@ -45,11 +48,29 @@ function ensureCodeIsRunnable(file, data) {
 
 	try {
 		initMocks()
-		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, {exports: {}}, function(dep) {
+		var module = {exports: {}}
+		new Function("console,fetch,module,require", code).call(this, silentConsole, fetch, module, function(dep) {
 			if (dep.indexOf("./mycomponent") === 0) return {view: function() {}}
 			if (dep.indexOf("mithril/ospec/ospec") === 0) return global.o
 			if (dep.indexOf("mithril/stream") === 0) return global.stream
 			if (dep === "mithril") return global.m
+			
+			if (dep === "../model/User") return {
+				list: [],
+				current: {},
+				loadList: function() {
+					return Promise.resolve({data: []})
+				},
+				load: function() {
+					return Promise.resolve({firstName: "", lastName: ""})
+				},
+				save: function() {
+					return Promise.resolve()
+				},
+			}
+			if (dep === "./view/UserList") return {view: function() {}}
+			if (dep === "./view/UserForm") return {view: function() {}}
+			if (dep === "./view/Layout") return {view: function() {}}
 		})
 	}
 	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
@@ -61,6 +82,21 @@ function ensureCommentStyle(file, data) {
 	codeBlocks.forEach(function(block) {
 		block = block.slice(13, -3)
 		if (block.match(/(^|\s)\/\/[\S]/)) console.log(file + " - comment missing space\n\n" + block + "\n\n---\n\n")
+	})
+}
+
+function ensureLinkIsValid(file, data) {
+	var links = data.match(/\]\(([^\)]+)\)/gim)
+	links.forEach(function(match) {
+		var link = match.slice(2, -1)
+		var path = link.match(/[\w-]+\.md/)
+		if (link.match(/http/)) {
+			var u = url.parse(link)
+			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function() {
+				console.log(file + " - broken external link: " + link)
+			})
+		}
+		else if (path && !fs.existsSync("docs/" + path)) console.log(file + " - broken link: " + link)
 	})
 }
 
@@ -103,6 +139,9 @@ function initMocks() {
 		},
 		"GET /api/v1/users/foo:bar": function(request) {
 			return {status: 200, responseText: JSON.stringify({id: 123})}
+		},
+		"GET /files/image.svg": function(request) {
+			return {status: 200, responseText: "<svg></svg>"}
 		},
 	})
 }

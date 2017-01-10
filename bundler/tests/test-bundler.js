@@ -214,14 +214,14 @@ o.spec("bundler", function() {
 		write("c.js", `var cc = 2\nmodule.exports = cc`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar x = {}\var bb = 1\nnx.b = bb\nvar cc = 1\nx.c = cc\n}`)
+		o(read("out.js")).equals(`new function() {\nvar x = {}\nvar bb = 1\nx.b = bb\nvar cc = 2\nx.c = cc\n}`)
 		
 		remove("a.js")
 		remove("b.js")
 		remove("c.js")
 		remove("out.js")
 	})
-	o("works if assigned to property", function() {
+	o("works if assigned to property using bracket notation", function() {
 		write("a.js", `var x = {}\nx["b"] = require("./b")\nx["c"] = require("./c")`)
 		write("b.js", `var bb = 1\nmodule.exports = bb`)
 		write("c.js", `var cc = 2\nmodule.exports = cc`)

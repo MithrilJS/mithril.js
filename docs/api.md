@@ -45,19 +45,19 @@ m.route(document.body, "/home", {
 })
 ```
 
-#### m.route.set(path) - [docs](route.md#routeset)
+#### m.route.set(path) - [docs](route.md#mrouteset)
 
 ```javascript
 m.route.set("/home")
 ```
 
-#### m.route.get() - [docs](route.md#routeget)
+#### m.route.get() - [docs](route.md#mrouteget)
 
 ```javascript
 var currentRoute = m.route.get()
 ```
 
-#### m.route.prefix(prefix) - [docs](route.md#routeprefix)
+#### m.route.prefix(prefix) - [docs](route.md#mrouteprefix)
 
 Call this before `m.route()`
 
@@ -65,7 +65,7 @@ Call this before `m.route()`
 m.route.prefix("#!")
 ```
 
-#### m.route.link() - [docs](route.md#routelink)
+#### m.route.link() - [docs](route.md#mroutelink)
 
 ```javascript
 m("a[href='/Home']", {oncreate: m.route.link}, "Go to home page")
@@ -171,4 +171,3 @@ var Counter = {
 
 m.mount(document.body, Counter)
 ```
-

@@ -2,6 +2,8 @@
 	- [Installation](installation.md)
 	- [Introduction](introduction.md)
 	- [Tutorial](simple-application.md)
+	- [JSX](jsx.md)
+	- [ES6](es6.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 - Key concepts
@@ -9,8 +11,8 @@
 	- [Components](components.md)
 	- [Lifecycle methods](lifecycle-methods.md)
 	- [Keys](keys.md)
+	- [Autoredraw system](autoredraw.md)
 - Social
-	- [Community chat](https://gitter.im/lhorie/mithril.js)
 	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
 	- [How to contribute](contributing.md)
 	- [Credits](credits.md)
