@@ -14,7 +14,7 @@ You DON'T need to call it if data is modified within the execution context of an
 
 You DO need to call it in `setTimeout`/`setInterval`/`requestAnimationFrame` callbacks, or callbacks from 3rd party libraries.
 
-Typically, `m.redraw` triggers an asynchronous redraws, but it may trigger synchronously if Mithril detects it's possible to improves performance by doing so (i.e. if no redraw was requested within the last animation frame). You should write code assuming that it always redraws asynchronously.
+Typically, `m.redraw` triggers an asynchronous redraws, but it may trigger synchronously if Mithril detects it's possible to improve performance by doing so (i.e. if no redraw was requested within the last animation frame). You should write code assuming that it always redraws asynchronously.
 
 ---
 

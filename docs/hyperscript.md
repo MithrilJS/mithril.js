@@ -170,7 +170,7 @@ Mithril supports both strings and objects as valid `style` values. In other word
 ```javascript
 m("div", {style: "background:red;"})
 m("div", {style: {background: "red"}})
-m("div[style=background:red")
+m("div[style=background:red]")
 ```
 
 Using a string as a `style` would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.
