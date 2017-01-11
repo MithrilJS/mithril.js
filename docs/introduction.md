@@ -93,7 +93,7 @@ m("main", [
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
-```markup
+```jsx
 // HTML syntax via Babel's JSX plugin
 <main>
 	<h1 class="title">My first app</h1>

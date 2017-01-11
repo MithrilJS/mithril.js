@@ -1,12 +1,30 @@
 # Framework comparison
 
+- [Why not X?](#why-not-insert-favorite-framework-here)
+- [Why use Mithril?](#why-use-mithril)
 - [React](#react)
 - [Angular](#angular)
 - [Vue](#vue)
 
 If you're reading this page, you probably have used other frameworks to build applications, and you want to know if Mithril would help you solve your problems more effectively.
 
-In this page, you will find common arguments about other frameworks and comments on where Mithril is similar or why it differs from them.
+---
+
+## Why not [insert favorite framework here]?
+
+The reality is that most modern frameworks are fast, well-suited to build complex applications, and highly maintainable if you know how to use them effectively. There are examples of highly complex applications in the wild using just about every popular framework: Udemy uses Angular, AirBnB uses React, Gitlab uses Vue, Guild Wars 2 uses Mithril (yes, inside the game!). Clearly, these are all production-quality frameworks.
+
+As a rule of thumb, if your team is already heavily invested in another framework/library/stack, it makes more sense to stick with it, unless your team agrees that there's a very strong reason to justify a costly rewrite.
+
+If you're starting something new, do consider giving Mithril a try, if nothing else, to see how much value Mithril adopters have been getting out of 8kb (gzipped) of code.
+
+---
+
+## Why use Mithril?
+
+In one sentence: because **Mithril is pragmatic**. If you don't believe me, take 10 minutes to go over the [guide](introduction.md) to see how much it accomplishes, compared with official guides for other frameworks.
+
+Mithril is all about getting stuff done. It comes out of the box with a compact set of tools that you'll likely need for building Single Page Applications, and no distractions. The Mithril API is small and focused, and it's designed to leverage previous knowledge - e.g. view language is Javascript, HTML attributes have no syntax caveats, Promises are Promises, hyperscript selectors mirror CSS and is JSX-compatible, `m.request` option names mirror [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) - all of this so you can get up to speed fast.
 
 ---
 
@@ -14,15 +32,15 @@ In this page, you will find common arguments about other frameworks and comments
 
 React is a view library maintained by Facebook.
 
-React and Mithril share a lot of similarities
+React and Mithril share a lot of similarities. If you already learned React, you already know almost all you need to build apps with Mithril.
 
 - They both use virtual DOM, lifecycle methods and key-based reconciliation
 - They both organize views via components
 - They both use Javascript as a flow control mechanism within views
 
-The most obvious difference between React and Mithril is in their scope. React is a view library, so a typical React-based application relies on third-party libraries for routing, XHR and state management. Using a library oriented approach allows developers to customize their stack to precisely match their needs. The not-so-nice way of saying that is that too much choice can lead to analysis paralysis, excessive configuration/boilerplate complexity, and [bikeshedding](https://en.wiktionary.org/wiki/bikeshedding). At worst, it can lead to a hodge-podge of different dependencies and architectures, making it difficult for new team members to transfer knowledge from one project to the next.
+The most obvious difference between React and Mithril is in their scope. React is a view library, so a typical React-based application relies on third-party libraries for routing, XHR and state management. Using a library oriented approach allows developers to customize their stack to precisely match their needs. The not-so-nice way of saying that is that React-based architectures can vary wildly from project to project.
 
-Mithril has built-in modules for common necessities such as routing and XHR. This batteries-included approach is preferable for teams that value consistency and ease of onboarding. 
+Mithril has built-in modules for common necessities such as routing and XHR, and the [guide](simple-application.md) demonstrates idiomatic usage. This approach is preferable for teams that value consistency and ease of onboarding.
 
 ### Performance
 
@@ -80,6 +98,8 @@ React documentation is clear and well written, and includes a good API reference
 
 Mithril documentation also includes [introductory](introduction.md) [tutorials](simple-application.md), pages about advanced concepts, and an extensive API reference section, which includes input/output type information, examples for various common use cases and advice against misuse and anti-patterns. It also includes a cheatsheet for quick reference.
 
+Unfortunately, since React is limited to being only a view library, its documentation does not explore how to use React in the context of a real-life application. As a result, there are many popular state management libraries and as a result, architectures using React can differ drastically from company to company (or even between projects).
+
 ---
 
 ## Angular
@@ -121,7 +141,7 @@ Angular 2 has a lot more concepts to understand: on the language level, Typescri
 
 If we compare apples to apples, Angular 2 and Mithril have similar learning curves: in both, components are a central aspect of architecture, and both have reasonable routing and XHR tools.
 
-With that being said, Angular has a lot more concepts to learn than Mithril. It offers Angular-specific APIs for many things that often can be trivially implemented (e.g. pluralization is essentially a switch statement, "required" validation is simply an equality check, etc). Angular templates also have several layers of abstractions to emulate what Javascript does natively in Mithril - Angular's `ng-if`/`ngIf` is a *directive*, which uses a custom *parser* and *compiler* to evaluate an expression string and emulate lexical scoping... and so on.
+With that being said, Angular has a lot more concepts to learn than Mithril. It offers Angular-specific APIs for many things that often can be trivially implemented (e.g. pluralization is essentially a switch statement, "required" validation is simply an equality check, etc). Angular templates also have several layers of abstractions to emulate what Javascript does natively in Mithril - Angular's `ng-if`/`ngIf` is a *directive*, which uses a custom *parser* and *compiler* to evaluate an expression string and emulate lexical scoping... and so on. Mithril tends to be a lot more transparent, and therefore easier to reason about.
 
 ### Documentation
 
@@ -140,9 +160,9 @@ Vue and Mithril have a lot of differences but they also share some similarities:
 - They both use virtual DOM and lifecycle methods
 - Both organize views via components
 
-Vue also provides tools for routing and state management as separate modules. Vue looks very similar to Angular and provides a similar directive system, HTML-based templates and logic flow directives. It differs from Angular in that it implements a monkeypatching reactive API that overwrites native methods in a component's data (whereas Angular 1 uses dirty checking and digest/apply cycles to achieve similar results). Similar to Angular 2, Vue compiles HTML templates into functions, but the compiled functions look more like Mithril or React views, rather than Angular's compiled rendering functions.
+Vue also provides tools for routing and state management as separate modules. Vue looks very similar to Angular and provides a similar directive system, HTML-based templates and logic flow directives. It differs from Angular in that it implements a monkeypatching reactive system that overwrites native methods in a component's data (whereas Angular 1 uses dirty checking and digest/apply cycles to achieve similar results). Similar to Angular 2, Vue compiles HTML templates into functions, but the compiled functions look more like Mithril or React views, rather than Angular's compiled rendering functions.
 
-Vue is significantly smaller than Angular when comparing apples to apples, but not as small as Mithril (Vue core is around 23kb gzipped, whereas the equivalent rendering module in Mithril is around 4kb gzipped). Both have similar performance characteristics.
+Vue is significantly smaller than Angular when comparing apples to apples, but not as small as Mithril (Vue core is around 23kb gzipped, whereas the equivalent rendering module in Mithril is around 4kb gzipped). Both have similar performance characteristics, but benchmarks often suggest Mithril is slightly faster.
 
 ### Performance
 
@@ -164,14 +184,16 @@ Vue    | Mithril
 
 ### Complexity
 
-One could argue that Vue templates are more complex than Mithril due to the fact that they use Vue-specific syntax for logic flow, whereas Mithril view language is always just Javascript.
+Vue is heavily inspired by Angular and has many things that Angular does (e.g. directives, filters, `v-cloak`), but also has things inspired by React (e.g. components). As of Vue 2.0, it's also possible to write templates using hyperscript/JSX syntax (in addition to single-file components and the various webpack-based language transpilation plugins). Vue provides both bi-directional data binding and an optional Redux-like state management library, and unlike Angular, it provides no style guide. The many-ways-of-doing-one-thing approach can cause architectural fragmentation in long-lived projects.
 
-As of Vue 2.0, it's also possible to write templates using hyperscript/JSX syntax (in addition to single-file components and the various webpack-based language transpilation plugins) so Vue codebases may be less consistent across projects and have higher onboarding costs in terms of technologies compared to idiomatic Mithril projects.
-
-Vue provides both bi-directional data binding and an optional Redux-like state management library, and unlike Angular, it provides no style guide. The many-ways-of-doing-one-thing approach has a risk of causing architectural fragmentation in long-lived projects.
-
-The Mithril [tutorial](simple-application.md) implements an *idiomatic* application. This means that while it's *possible* to structure a Mithril codebase in different ways, there's a recommended way to architecture the application.
+Mithril has far less concepts and typically organizes applications in terms of components and a data layer. There are no different ways of defining components, and thus there's no need to install different sets of tools to make different flavors work.
 
 ### Documentation
 
-Both Vue and Mithril have thorough documentation. Both include a good API reference with examples, tutorials for getting started, as well as pages covering various advanced concepts.
+Both Vue and Mithril have good documentation. Both include a good API reference with examples, tutorials for getting started, as well as pages covering various advanced concepts.
+
+However, due to Vue's many-ways-to-do-one-thing approach, some things are not adequately documented. For example, there's no documentation on hyperscript syntax or usage.
+
+Mithril documentation typically errs on the side of being overly thorough if a topic involves things outside of the scope of Mithril. For example, when a topic involves a 3rd party library, Mithril documentation walks through the installation process for the 3rd party library.
+
+Mithril's tutorials also cover a lot more ground than Vue's: the [Vue tutorial](https://vuejs.org/v2/guide/#Getting-Started) finishes with a static list of foodstuff. [Mithril's 10 minute guide](introduction.md) covers the majority of its API and goes over key aspects of real-life applications, such as fetching data from a server and routing (and there's a [longer, more thorough tutorial](simple-application.md) if that's not enough).
