@@ -54,6 +54,10 @@ module.exports = function($window, redrawService) {
 			route.set(href, undefined, undefined)
 		}
 	}
+	route.params = function(key) {
+		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
+		return attrs
+	}
 
 	return route
 }
