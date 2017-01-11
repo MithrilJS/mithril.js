@@ -40,6 +40,12 @@ Streams are NOT bundled with Mithril's core distribution. To include the Streams
 var Stream = require("mithril/stream")
 ```
 
+You can also download the module directly if your environment does not support a bundling toolchain:
+
+```markup
+<script src="https://cdn.rawgit.com/lhorie/mithril.js/rewrite/stream/stream.js"></script>
+```
+
 ---
 
 ### Signature
