@@ -87,7 +87,7 @@ m.route(document.body, "/", {
 
 ---
 
-### When Mithril does not redraws
+### When Mithril does not redraw
 
 Mithril does not redraw after `setTimeout`, `setInterval`, `requestAnimationFrame` and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call [`m.redraw()`](redraw.md).
 
