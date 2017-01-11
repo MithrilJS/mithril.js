@@ -39,7 +39,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 
 ## `m.prop` removed
 
-In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core.
+In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core. You can read about how to use the optional Streams module in [the documentation](streams.md).
 
 ### `v0.2.x`
 
@@ -499,7 +499,7 @@ setTimeout(function() {
 }, 1000)
 ```
 
-Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve its promise, and the `deserialize` callback is ignored.
+Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve the request promise, and the `deserialize` callback is ignored.
 
 ---
 
