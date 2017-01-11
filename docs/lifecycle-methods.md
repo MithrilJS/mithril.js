@@ -65,7 +65,7 @@ var ComponentWithState = {
 		this.data = vnode.attrs.data
 	},
 	view: function() {
-		return m("div", this.data)
+		return m("div", this.data) // displays data from initialization time
 	}
 }
 
@@ -193,64 +193,6 @@ This hook is useful to reduce lag in updates in cases where there is a overly la
 ### Avoid anti-patterns
 
 Although Mithril is flexible, some code patterns are discouraged:
-
-#### Do not redraw synchronously from lifecycle hooks
-
-The [`m.render`](render.md) method modifies DOM state, and therefore it's [non-reentrant](https://en.wikipedia.org/wiki/Reentrancy_(computing)). All lifecyle methods are called by `m.render()`, and therefore you cannot call `m.render`, `m.mount`, `m.route` or `m.redraw` from a lifecycle method. Redrawing synchronously from a lifecycle method will result in **undefined behavior**.
-
-Typically, redrawing from an `oninit` or `onbeforeupdate` hook is meaningless since the element in question renders shortly after them anyways. If redrawing is required from any other hooks, you should consider moving code up the execution path; for example, refactor it so that the application code runs on an event handler, before its natural redraw occurs.
-
-```javascript
-// AVOID
-var greeting = ""
-
-var BrokenComponent = {
-	onupdate: function() {
-		this.greeting = greeting()
-		m.redraw()
-	},
-	view: function() {
-		return m("div[title=Hello]", {onclick: m.withAttr("title", function(v) {greeting = v})}, this.greeting)
-	}
-}
-
-// PREFER
-var greeting = ""
-
-var WorkingComponent = {
-	view: function() {
-		return m("div[title=Hello]", {onclick: m.withAttr("title", function(v) {greeting = v})}, greeting)
-	}
-}
-```
-
-On rare occasions, there may not be a way to refactor a redraw out of a lifecycle method due to dependencies on layout values (e.g. scrollbar position, an element's updated offsetHeight, etc). In those cases, you should redraw asynchronously, by wrapping the redraw call in a `requestAnimationFrame`, `setTimeout` or similar function.
-
-```javascript
-// AVOID
-var BrokenComponent = {
-	onupdate: function(vnode) {
-		var oldWidth = this.width
-		this.width = vnode.dom.offsetWidth
-		if (oldWidth !== this.width) m.redraw()
-	},
-	view: function() {
-		return m("div", {onclick: function() {console.log("calculating width")}}, "Width is: " + this.width)
-	}
-}
-
-// PREFER
-var WorkingComponent = {
-	onupdate: function(vnode) {
-		var oldWidth = this.width
-		this.width = vnode.dom.offsetWidth
-		if (oldWidth !== this.width) requestAnimationFrame(m.redraw)
-	},
-	view: function() {
-		return m("div", {onclick: function() {console.log("calculating width")}}, "Width is: " + this.width)
-	}
-}
-```
 
 #### Avoid premature optimizations
 
