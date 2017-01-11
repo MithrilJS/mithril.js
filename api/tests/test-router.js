@@ -1208,6 +1208,9 @@ o.spec("route", function() {
 						}
 					})
 
+					o(route.params("id")).equals(undefined);
+					o(route.params()).deepEquals(undefined);
+
 					callAsync(function() {
 						o(route.params("id")).equals("1")
 						o(route.params()).deepEquals({id:"1"})
