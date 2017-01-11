@@ -174,6 +174,12 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 Although Mithril is flexible, some code patterns are discouraged:
 
+#### Avoid fat components
+
+Generally speaking, a "fat" component is a component that has custom instance methods. In other words, you should avoid attaching functions to `vnode.state` or `this`. It's exceedingly rare to have logic that logically fits in a component instance method and that can't be reused by other components. It's relatively common that said logic might be needed by a different component down the road.
+
+It's easier to refactor code if that logic is placed in the data layer than if it's tied to a component state.
+
 #### Avoid restrictive interfaces
 
 Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
@@ -206,7 +212,7 @@ var FlexibleComponent = {
 
 #### Don't manipulate `children`
 
-However, if a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
+If a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
 
 Often it's desirable to define multiple sets of children, for example, if a component has a configurable title and body.
 

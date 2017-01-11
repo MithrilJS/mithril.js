@@ -2,8 +2,11 @@
 	- [Installation](installation.md)
 	- [Introduction](introduction.md)
 	- [Tutorial](simple-application.md)
+- Resources
 	- [JSX](jsx.md)
 	- [ES6](es6.md)
+	- [CSS](css.md)
+	- [Animation](animation.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 - Key concepts
