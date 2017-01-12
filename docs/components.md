@@ -180,6 +180,83 @@ Generally speaking, a "fat" component is a component that has custom instance me
 
 It's easier to refactor code if that logic is placed in the data layer than if it's tied to a component state.
 
+Consider this fat component:
+
+```javascript
+// views/Login.js
+// AVOID
+var Login = {
+	username: "",
+	password: "",
+	setUsername: function(value) {
+		this.username = value
+	},
+	setPassword: function(value) {
+		this.password = value
+	},
+	canSubmit: function() {
+		return this.username !== "" && this.password !== ""
+	},
+	login: function() {/*...*/},
+	view: function() {
+		return m(".login", [
+			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), this.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), this.password}),
+			m("button", {disabled: !this.canSubmit(), onclick: this.login}, "Login"),
+		])
+	}
+}
+```
+
+Normally, in the context of a larger application, a login component like the one above exists alongside components for user registration and password recovery. Imagine that we want to be able to prepopulate the email field when navigating from the login screen to the registration or password recovery screens (or vice versa), so that the user doesn't need to re-type their email if they happened to fill the wrong page (or maybe you want to bump the user to the registration form if a username is not found).
+
+Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its our state, which by definition makes this state difficult to access from outside.
+
+It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
+
+```
+// models/Auth.js
+// PREFER
+var Auth = {
+	username: "",
+	password: "",
+	setUsername: function(value) {
+		Auth.username = value
+	},
+	setPassword: function(value) {
+		Auth.password = value
+	},
+	canSubmit: function() {
+		return Auth.username !== "" && Auth.password !== ""
+	},
+	login: function() {/*...*/},
+}
+
+module.exports = Auth
+```
+
+Then, we can clean up the component:
+
+```
+// views/Login.js
+// PREFER
+var Auth = require("../models/Auth")
+
+var Login = {
+	view: function() {
+		return m(".login", [
+			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), Auth.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), Auth.password}),
+			m("button", {disabled: !Auth.canSubmit(), onclick: Auth.login}, "Login"),
+		])
+	}
+}
+```
+
+This way, the `Auth` module is now the source of truth for auth-related state, and a `Register` component can easily access this data, and even reuse methods like `canSubmit`, if needed. In addition, if validation code is required (for example, for the email field), you only need to modify `setEmail`, and that change will do email validation for any component that modifies an email field.
+
+As a bonus, notice that we no longer need to use `.bind` to keep a reference to the state for the component's event handlers.
+
 #### Avoid restrictive interfaces
 
 Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
