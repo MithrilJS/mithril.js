@@ -1133,6 +1133,10 @@ var _20 = function($window, redrawService0) {
 			route.set(href, undefined, undefined)
 		}
 	}
+	route.param = function(key3) {
+		if(typeof attrs3 !== "undefined" && typeof key3 !== "undefined") return attrs3[key3]
+		return attrs3
+	}
 	return route
 }
 m.route = _20(window, redrawService)
