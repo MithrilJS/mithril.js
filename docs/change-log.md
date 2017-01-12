@@ -400,13 +400,16 @@ m.route.set("/other/route")
 
 ## Accessing route params
 
-In `v0.2.x` reading route params was all handled through the `m.route.param()` method. In `v1.x` any route params are passed as the `attrs` object on the vnode passed as the first argument to lifecycle methods/`view`.
+In `v0.2.x` reading route params was entirely handled through `m.route.param()`. This API is still available in `v1.x`, and additionally any route params are passed as properties in the `attrs` object on the vnode.
 
 ### `v0.2.x`
 
 ```javascript
 m.route(document.body, "/booga", {
     "/:attr" : {
+    	controller : function() {
+			m.route.param("attr") // "booga"
+		},
         view : function() {
             m.route.param("attr") // "booga"
         }
@@ -421,9 +424,11 @@ m.route(document.body, "/booga", {
     "/:attr" : {
         oninit : function(vnode) {
             vnode.attrs.attr // "booga"
+	    	m.route.param("attr") // "booga"
         },
         view : function(vnode) {
             vnode.attrs.attr // "booga"
+	    	m.route.param("attr") // "booga"
         }
     }
 })
