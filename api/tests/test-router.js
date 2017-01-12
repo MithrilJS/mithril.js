@@ -1194,6 +1194,30 @@ o.spec("route", function() {
 						done()
 					}, FRAME_BUDGET * 2)
 				})
+
+				o("m.route.param is available outside of route handlers", function(done) {
+					$window.location.href = prefix + "/"
+
+					route(root, "/1", {
+						"/:id" : {
+							view : function() {
+								o(route.param("id")).equals("1")
+
+								return m("div")
+							}
+						}
+					})
+
+					o(route.param("id")).equals(undefined);
+					o(route.param()).deepEquals(undefined);
+
+					callAsync(function() {
+						o(route.param("id")).equals("1")
+						o(route.param()).deepEquals({id:"1"})
+
+						done()
+					})
+				})
 			})
 		})
 	})
