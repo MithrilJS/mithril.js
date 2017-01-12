@@ -572,7 +572,7 @@ declare namespace Mithril {
 		*
 		* @see m.component
 		*/
-		view(ctrl?: T, ...args: any[]): VirtualElement;
+		view(ctrl?: T, ...args: any[]): VirtualElement | Array<VirtualElement>;
 	}
 
 	/**
