@@ -16,6 +16,8 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [Changes in redraw behaviour](#changes-in-redraw-behaviour)
    - [No more redraw locks](#no-more-redraw-locks)
    - [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
+   - [Synchronous redraw removed](#synchronous-redraw-removed)
+   - [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
 - [Component `controller` function](#component-controller-function)
 - [Component arguments](#component-arguments)
 - [`view()` parameters](#view-parameters)
@@ -32,8 +34,6 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`xlink` namespace required](#xlink-namespace-required)
 - [Nested arrays in views](#nested-arrays-in-views)
 - [`vnode` equality checks](#vnode-equality-checks)
-- [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
-- [Synchronous redraw removed](#synchronous-redraw-removed)
 
 ---
 
@@ -110,7 +110,8 @@ m("div", {
     onbeforeupdate : function(vnode, old) { /*...*/ },
     // Called after the node is updated
     onupdate : function(vnode) { /*...*/ },
-    // Called before the node is removed, return a Promise that resolves when ready for the node to be removed from the DOM
+    // Called before the node is removed, return a Promise that resolves when
+	// ready for the node to be removed from the DOM
     onbeforeremove : function(vnode) { /*...*/ },
     // Called before the node is removed, but after onbeforeremove calls done()
     onremove : function(vnode) { /*...*/ }
@@ -133,7 +134,7 @@ In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked dr
 
 `m.mount()` and `m.route()` still automatically redraw after a DOM event handler runs. Cancelling these redraws from within your event handlers is now done by setting the `redraw` property on the passed-in event object to `false`.
 
-### `v0.2.x`
+#### `v0.2.x`
 
 ```javascript
 m("div", {
@@ -143,7 +144,7 @@ m("div", {
 })
 ```
 
-### `v1.x`
+#### `v1.x`
 
 ```javascript
 m("div", {
@@ -152,6 +153,26 @@ m("div", {
     }
 })
 ```
+
+### Synchronous redraw removed
+
+In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
+
+#### `v0.2.x`
+
+```javascript
+m.redraw(true) // redraws immediately & synchronously
+```
+
+#### `v1.x`
+
+```javascript
+m.redraw() // schedules a redraw on the next requestAnimationFrame tick
+```
+
+### `m.startComputation`/`m.endComputation` removed
+
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
 
 ---
 
@@ -607,27 +628,3 @@ Arrays now represent [fragments](fragment.md), which are structurally significan
 ## `vnode` equality checks
 
 If a vnode is strictly equal to the vnode occupying its place in the last draw, v1.x will skip that part of the tree without checking for mutations or triggering any lifecycle methods in the subtree. The component documentation contains [more detail on this issue](components.md#avoid-creating-component-instances-outside-views).
-
----
-
-## `m.startComputation`/`m.endComputation` removed
-
-They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
-
----
-
-## Synchronous redraw removed
-
-In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
-
-### `v0.2.x`
-
-```javascript
-m.redraw(true) // redraws immediately & synchronously
-```
-
-### `v1.x`
-
-```javascript
-m.redraw() // schedules a redraw on the next requestAnimationFrame tick
-```
