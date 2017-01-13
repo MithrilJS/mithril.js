@@ -259,7 +259,9 @@ var _8 = function($window, Promise) {
 			}
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4) {
+				// Don't throw errors on xhr.abort(). XMLHttpRequests ends up in a state of
+				// xhr.status == 0 and xhr.readyState == 4 if aborted after open, but before completion.
+				if (xhr.status && xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
 						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
