@@ -10,7 +10,7 @@ function traverseDirectory(pathname, callback) {
 	return new Promise(function(resolve, reject) {
 		fs.lstat(pathname, function(err, stat) {
 			if (err) reject(err)
-			if (stat.isDirectory()) {
+			if (stat && stat.isDirectory()) {
 				fs.readdir(pathname, function(err, pathnames) {
 					if (err) reject(err)
 					var promises = []
