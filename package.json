@@ -15,7 +15,11 @@
 		"gendocs": "node docs/generate",
 		"lint": "eslint .",
 		"test": "node ospec/bin/ospec",
-		"cover": "istanbul cover --print both ospec/bin/ospec"
+		"posttest": "npm run lint || true",
+		"cover": "istanbul cover --print both ospec/bin/ospec",
+		"preversion": "npm run test",
+		"version": "npm run build && git add mithril.js mithril.min.js",
+		"postversion": "git push --follow-tags"
 	},
 	"devDependencies": {
 		"eslint": "^2.10.2",

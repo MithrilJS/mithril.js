@@ -1,22 +1,21 @@
 sudo: false
 
+# Only care about running tests against latest node
 language: node_js
 node_js:
 - node
 
+# Keep node_modules around, it speeds up builds & they don't change often
 cache:
   directories:
   - node_modules
 
 # Custom install step so the travis scripts don't need to be in package.json
 install:
-  - npm install
-  - npm install @alrra/travis-scripts@^3.0.1
+- npm install
+- npm install @alrra/travis-scripts@^3.0.1
 
-# Lint (but don't fail build) before running tests
-before_script: npm run lint || true
-
-# Run more than just npm test
+# Bundle before running tests so the bundle is always up-to-date
 script: npm run build && npm test
 
 # After a successful build create bundles & commit back to the repo
@@ -46,3 +45,15 @@ env:
     # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
     - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
     - secure: Rf/ldEO9d4vItJhe6EmqWpFAyCARzoCb422nHnjr1hYJknnwIXpgyZ1C/7On/9o7rWPPf+8WcHC/rgjK2rthKCldzdG5I60LfWSNzap9lk3Aa4TpSCoDBuEp7JVvDr5tc3rKnBXVT71hOay7RSx1StWzXiJs9mjaeVMJzYzRT78=
+
+# Deploy to npm on successful builds
+deploy:
+  provider: npm
+  email: npm@patcavit.com
+  skip_cleanup:
+  api_key:
+    secure: ADElvD1oxn9GfEG7dDOggX96b36A/cGEybovAc0221CCKzv5kWCavMrtxneiJYI6N/n24abSlbM90vMfU84FEzH0Ev28dGVokRP4ad6VRkISszKlYVEP8Lds4QxfKh78jZlUxmxM0B3vmQ1kYJbTBqp3ICtaJ5ptEQHWhrLtxnc=
+  on:
+    tags: true
+    repo: lhorie/mithril.js
+    branch: rewrite
