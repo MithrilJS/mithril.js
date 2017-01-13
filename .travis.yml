@@ -50,7 +50,7 @@ env:
 deploy:
   provider: npm
   email: npm@patcavit.com
-  skip_cleanup:
+  skip_cleanup: true
   api_key:
     secure: ADElvD1oxn9GfEG7dDOggX96b36A/cGEybovAc0221CCKzv5kWCavMrtxneiJYI6N/n24abSlbM90vMfU84FEzH0Ev28dGVokRP4ad6VRkISszKlYVEP8Lds4QxfKh78jZlUxmxM0B3vmQ1kYJbTBqp3ICtaJ5ptEQHWhrLtxnc=
   on:
