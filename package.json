@@ -1,36 +1,36 @@
 {
-	"name": "mithril",
-	"version": "1.0.0-rc.7",
-	"description": "A framework for building brilliant applications",
-	"author": "Leo Horie",
-	"license": "MIT",
-	"main": "index.js",
-	"repository": "lhorie/mithril.js",
-	"scripts": {
-		"dev": "node bundler/cli browser.js -o mithril.js -w",
-		"build": "npm run build-browser & npm run build-min",
-		"build-browser": "node bundler/cli browser.js -o mithril.js",
-		"build-min": "node bundler/cli browser.js -o mithril.min.js -m",
-		"lintdocs": "node docs/lint",
-		"gendocs": "node docs/generate",
-		"lint": "eslint .",
-		"test": "node ospec/bin/ospec",
-		"posttest": "npm run lint || true",
-		"cover": "istanbul cover --print both ospec/bin/ospec",
-		"preversion": "npm run test",
-		"version": "npm run build && git add mithril.js mithril.min.js",
-		"postversion": "git push --follow-tags"
-	},
-	"devDependencies": {
-		"eslint": "^2.10.2",
-		"istanbul": "^0.4.3",
-		"marked": "^0.3.6"
-	},
-	"publishConfig": {
-		"tag": "rewrite"
-	},
-	"bin": {
-		"ospec": "./ospec/bin/ospec",
-		"bundle": "./bundler/bin/bundle"
-	}
+  "name": "mithril",
+  "version": "1.0.0-rc.7",
+  "description": "A framework for building brilliant applications",
+  "author": "Leo Horie",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": "lhorie/mithril.js",
+  "scripts": {
+    "dev": "node bundler/cli browser.js -o mithril.js -w",
+    "build": "npm run build-browser & npm run build-min",
+    "build-browser": "node bundler/cli browser.js -o mithril.js",
+    "build-min": "node bundler/cli browser.js -o mithril.min.js -m",
+    "lintdocs": "node docs/lint",
+    "gendocs": "node docs/generate",
+    "lint": "eslint .",
+    "test": "node ospec/bin/ospec",
+    "posttest": "npm run lint || true",
+    "cover": "istanbul cover --print both ospec/bin/ospec",
+    "preversion": "npm run test",
+    "version": "npm run build && git add mithril.js mithril.min.js",
+    "postversion": "git push --follow-tags"
+  },
+  "devDependencies": {
+    "eslint": "^2.10.2",
+    "istanbul": "^0.4.3",
+    "marked": "^0.3.6"
+  },
+  "publishConfig": {
+    "tag": "rewrite"
+  },
+  "bin": {
+    "ospec": "./ospec/bin/ospec",
+    "bundle": "./bundler/bin/bundle"
+  }
 }
