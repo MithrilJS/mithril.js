@@ -16,13 +16,16 @@ install:
 - npm install @alrra/travis-scripts@^3.0.1
 
 # Bundle before running tests so the bundle is always up-to-date
-script: npm run build && npm test
+before_script: npm run build
+
+# This is the default, but leaving so it is obvious
+# script: npm test
 
 # After a successful build create bundles & commit back to the repo
 after_success:
   - |
     
-    # Only want to commit things on commits to $BRANCH
+    # Only want to commit things on $BRANCH
     if [ "$TRAVIS_EVENT_TYPE" == "pull_request" ] || [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
       echo "Artifacts only built on $BRANCH"
       exit 0
@@ -33,10 +36,11 @@ after_success:
                           --iv "$encrypted_8b86e0359d64_iv" \
                           --path-encrypted-key "./.deploy.enc"
     
-    # Build & commit changes
+    # Commit changes (if there were any) from running build earlier
     $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
                               --branch "$BRANCH"
 
+# Environment configuration
 env:
   global:
     # Restrict the branch this will activate on
