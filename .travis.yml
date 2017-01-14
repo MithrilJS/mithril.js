@@ -50,7 +50,7 @@ env:
     - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
     - secure: Rf/ldEO9d4vItJhe6EmqWpFAyCARzoCb422nHnjr1hYJknnwIXpgyZ1C/7On/9o7rWPPf+8WcHC/rgjK2rthKCldzdG5I60LfWSNzap9lk3Aa4TpSCoDBuEp7JVvDr5tc3rKnBXVT71hOay7RSx1StWzXiJs9mjaeVMJzYzRT78=
 
-# Deploy to npm on successful builds
+# Deploy to npm on tagged commits that successfully build
 deploy:
   provider: npm
   email: npm@patcavit.com
