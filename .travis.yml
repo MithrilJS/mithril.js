@@ -25,21 +25,20 @@ before_script: npm run build
 after_success:
   - |
     
-    # Only want to commit things on $BRANCH
-    if [ "$TRAVIS_EVENT_TYPE" == "pull_request" ] || [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
-      echo "Artifacts only committed on $BRANCH"
-      exit 0
-    fi
+    # Only want to commit when building a push on whatever $BRANCH is
+    if [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$TRAVIS_BRANCH" == "$BRANCH" ]; then
+      # Set up SSH environment
+      $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
+                            --iv "$encrypted_8b86e0359d64_iv" \
+                            --path-encrypted-key "./.deploy.enc"
       
-    # Set up SSH environment
-    $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
-                          --iv "$encrypted_8b86e0359d64_iv" \
-                          --path-encrypted-key "./.deploy.enc"
-    
-    # Commit changes (if there were any) from running build earlier
-    $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
-                              --branch "$BRANCH"
+      # Commit changes (if there were any) from running build earlier
+      $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
+                                --branch "$BRANCH"
+    fi
 
+    echo "Not commiting build artifacts"
+    
 # Environment configuration
 env:
   global:
