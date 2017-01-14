@@ -35,7 +35,8 @@ after_success:
                             --path-encrypted-key "./.deploy.enc"
       
       # Commit changes (if there were any) from running build earlier
-      $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
+      $(npm bin)/commit-changes --commands "echo committing"
+                                --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
                                 --branch "$BRANCH"
     else
       echo "Not submitting build artifacts"
