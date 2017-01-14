@@ -26,7 +26,9 @@ after_success:
   - |
     
     # Only want to commit when building a push on whatever $BRANCH is
-    if [ "$TRAVIS_EVENT_TYPE" == "push" ] && [ "$TRAVIS_BRANCH" == "$BRANCH" ]; then
+    if [ "$TRAVIS_EVENT_TYPE" == "push" ] &&
+       [ "$TRAVIS_BRANCH" == "$BRANCH" ] &&
+       [ "$TRAVIS_REPO_SLUG" == "$REPO" ]; then
       # Set up SSH environment
       $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
                             --iv "$encrypted_8b86e0359d64_iv" \
@@ -35,15 +37,16 @@ after_success:
       # Commit changes (if there were any) from running build earlier
       $(npm bin)/commit-changes --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
                                 --branch "$BRANCH"
+    else
+      echo "Not submitting build artifacts"
     fi
-
-    echo "Not commiting build artifacts"
     
 # Environment configuration
 env:
   global:
     # Restrict the branch this will activate on
     - BRANCH=rewrite
+    - REPO=lhorie/mithril.js
     
     # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
     - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
