@@ -60,4 +60,3 @@ deploy:
   on:
     tags: true
     repo: lhorie/mithril.js
-    branch: rewrite
