@@ -486,9 +486,7 @@ m.route(document.body, "/secret", {
 	"/secret": {
 		onmatch: function() {
 			if (!isLoggedIn) m.route.set("/login")
-		},
-		render: function() {
-			return m(Home)
+			else return Home
 		}
 	},
 	"/login": Login
@@ -497,7 +495,50 @@ m.route(document.body, "/secret", {
 
 When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
 
-For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user.
+For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user:
+
+```javascript
+var Auth = {
+	username: "",
+	password: "",
+	
+	setUsername: function(value) {
+		Auth.username = value
+	},
+	setPassword: function(value) {
+		Auth.password = value
+	},
+	login: function() {
+		m.request({
+			url: "/api/v1/auth",
+			data: {username: Auth.username, password: Auth.password}
+		}).then(function(data) {
+			localStorage.setItem("auth-token": data.token)
+			m.route.set("/secret")
+		})
+	}
+}
+
+var Login = {
+	view: function() {
+		return m("form", [
+			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("button[type=button]", {onclick: Auth.login, "Login")
+		])
+	}
+}
+
+m.route(document.body, "/secret", {
+	"/secret": {
+		onmatch: function() {
+			if (!localStorage.getItem("auth-token")) m.route.set("/login")
+			else return Home
+		}
+	},
+	"/login": Login
+})
+```
 
 ---
 

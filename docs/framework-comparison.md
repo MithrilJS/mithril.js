@@ -16,15 +16,15 @@ The reality is that most modern frameworks are fast, well-suited to build comple
 
 As a rule of thumb, if your team is already heavily invested in another framework/library/stack, it makes more sense to stick with it, unless your team agrees that there's a very strong reason to justify a costly rewrite.
 
-If you're starting something new, do consider giving Mithril a try, if nothing else, to see how much value Mithril adopters have been getting out of 8kb (gzipped) of code.
+However, if you're starting something new, do consider giving Mithril a try, if nothing else, to see how much value Mithril adopters have been getting out of 8kb (gzipped) of code. Mithril is used by many well-known companies (e.g. Vimeo, Nike, Fitbit), and it powers large open-sourced platforms too (e.g. Lichess, Flarum). 
 
 ---
 
 ## Why use Mithril?
 
-In one sentence: because **Mithril is pragmatic**. If you don't believe me, take 10 minutes to go over the [guide](introduction.md) to see how much it accomplishes, compared with official guides for other frameworks.
+In one sentence: because **Mithril is pragmatic**. The 10 minutes [guide](introduction.md) is a good example: that's how long it takes to get working knowledge of Mithril's virtual DOM system, XHR and routing tools.
 
-Mithril is all about getting stuff done. It comes out of the box with a compact set of tools that you'll likely need for building Single Page Applications, and no distractions. The Mithril API is small and focused, and it's designed to leverage previous knowledge - e.g. view language is Javascript, HTML attributes have no syntax caveats, Promises are Promises, hyperscript selectors mirror CSS and is JSX-compatible, `m.request` option names mirror [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) - all of this so you can get up to speed fast.
+Mithril is all about getting work done efficiently. Doing file uploads? [The docs show you how](request.md#file-uploads). Authentication? [Documented too](route.md#authentication). Exit animations? [You got it](animation.md). No extra libraries, no magic.
 
 ---
 
@@ -38,9 +38,9 @@ React and Mithril share a lot of similarities. If you already learned React, you
 - They both organize views via components
 - They both use Javascript as a flow control mechanism within views
 
-The most obvious difference between React and Mithril is in their scope. React is a view library, so a typical React-based application relies on third-party libraries for routing, XHR and state management. Using a library oriented approach allows developers to customize their stack to precisely match their needs. The not-so-nice way of saying that is that React-based architectures can vary wildly from project to project.
+The most obvious difference between React and Mithril is in their scope. React is a view library, so a typical React-based application relies on third-party libraries for routing, XHR and state management. Using a library oriented approach allows developers to customize their stack to precisely match their needs. The not-so-nice way of saying that is that React-based architectures can vary wildly from project to project, and that those projects are that much more likely to cross the 1MB size line.
 
-Mithril has built-in modules for common necessities such as routing and XHR, and the [guide](simple-application.md) demonstrates idiomatic usage. This approach is preferable for teams that value consistency and ease of onboarding.
+Mithril has built-in modules for common necessities such as routing and XHR, and the [guide](simple-application.md) demonstrates idiomatic usage. This approach is preferable for teams that value consistency and ease of onboarding. 
 
 ### Performance
 
@@ -94,11 +94,11 @@ Idiomatic React requires working knowledge of JSX and its caveats, and therefore
 
 ### Documentation
 
-React documentation is clear and well written, and includes a good API reference, tutorials for getting started, as well as pages covering various advanced concepts.
+React documentation is clear and well written, and includes a good API reference, tutorials for getting started, as well as pages covering various advanced concepts. Unfortunately, since React is limited to being only a view library, its documentation does not explore how to use React idiomatically in the context of a real-life application. As a result, there are many popular state management libraries and thus architectures using React can differ drastically from company to company (or even between projects).
 
 Mithril documentation also includes [introductory](introduction.md) [tutorials](simple-application.md), pages about advanced concepts, and an extensive API reference section, which includes input/output type information, examples for various common use cases and advice against misuse and anti-patterns. It also includes a cheatsheet for quick reference.
 
-Unfortunately, since React is limited to being only a view library, its documentation does not explore how to use React in the context of a real-life application. As a result, there are many popular state management libraries and as a result, architectures using React can differ drastically from company to company (or even between projects).
+Mithril documentation also demonstrates simple, close-to-the-metal solutions to common use cases in real-life applications where it's appropriate to inform a developer that web standards may be now on par with larger established libraries.
 
 ---
 
@@ -149,6 +149,9 @@ Angular 2 documentation provides an extensive introductory tutorial, and another
 
 Mithril documentation includes [introductory](introduction.md) [tutorials](simple-application.md), pages about advanced concepts, and an extensive API reference section, which includes input/output type information, examples for various common use cases and advice against misuse and anti-patterns. It also includes a cheatsheet for quick reference.
 
+Mithril documentation also demonstrates simple, close-to-the-metal solutions to common use cases in real-life applications where it's appropriate to inform a developer that web standards may be now on par with larger established libraries.
+
+
 ---
 
 ## Vue
@@ -194,6 +197,6 @@ Both Vue and Mithril have good documentation. Both include a good API reference 
 
 However, due to Vue's many-ways-to-do-one-thing approach, some things are not adequately documented. For example, there's no documentation on hyperscript syntax or usage.
 
-Mithril documentation typically errs on the side of being overly thorough if a topic involves things outside of the scope of Mithril. For example, when a topic involves a 3rd party library, Mithril documentation walks through the installation process for the 3rd party library.
+Mithril documentation typically errs on the side of being overly thorough if a topic involves things outside of the scope of Mithril. For example, when a topic involves a 3rd party library, Mithril documentation walks through the installation process for the 3rd party library. Mithril documentation also often demonstrates simple, close-to-the-metal solutions to common use cases in real-life applications where it's appropriate to inform a developer that web standards may be now on par with larger established libraries.
 
 Mithril's tutorials also cover a lot more ground than Vue's: the [Vue tutorial](https://vuejs.org/v2/guide/#Getting-Started) finishes with a static list of foodstuff. [Mithril's 10 minute guide](introduction.md) covers the majority of its API and goes over key aspects of real-life applications, such as fetching data from a server and routing (and there's a [longer, more thorough tutorial](simple-application.md) if that's not enough).

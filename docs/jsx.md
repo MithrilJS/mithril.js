@@ -10,7 +10,7 @@
 
 ### Description
 
-JSX is a syntax extension that enables you to write HTML tags interspersed with Javascript.
+JSX is a syntax extension that enables you to write HTML tags interspersed with Javascript. It's not part of any Javascript standards and it's not required for building applications, but it may be more pleasing to use depending on your team's preferences.
 
 ```jsx
 var MyComponent = {
