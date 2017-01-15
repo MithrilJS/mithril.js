@@ -28,16 +28,19 @@ after_success:
     # Only want to commit when building a push on whatever $BRANCH is
     if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
        [ "$TRAVIS_BRANCH" == "$BRANCH" ] && \
-       [ "$TRAVIS_REPO_SLUG" == "$REPO" ]; then
+       [ "$TRAVIS_REPO_SLUG" == "$REPO" ]
+    then
       # Set up SSH environment
-      $(npm bin)/set-up-ssh --key "$encrypted_8b86e0359d64_key" \
-                            --iv "$encrypted_8b86e0359d64_iv" \
-                            --path-encrypted-key "./.deploy.enc"
+      $(npm bin)/set-up-ssh \
+        --key "$encrypted_8b86e0359d64_key" \
+        --iv "$encrypted_8b86e0359d64_iv" \
+        --path-encrypted-key "./.deploy.enc"
       
       # Commit changes (if there were any) from running build earlier
-      $(npm bin)/commit-changes --commands "echo committing" \
-                                --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
-                                --branch "$BRANCH"
+      $(npm bin)/commit-changes \
+        --commands "echo committing" \
+        --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
+        --branch "$BRANCH"
     else
       echo "Not submitting build artifacts"
     fi

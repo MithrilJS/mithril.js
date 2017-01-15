@@ -429,7 +429,7 @@ Similar to the `UserList` component, `oninit` calls `User.load()`. Remember we h
 Now, let's modify the `UserList` view so that we can navigate from there to a `UserForm`:
 
 ```javascript
-// src/views/UserForm.js
+// src/views/UserList.js
 var m = require("mithril")
 var User = require("../model/User")
 
@@ -456,7 +456,7 @@ The form itself still doesn't save when you press "Save". Let's make this form w
 ```javascript
 // src/views/UserForm.js
 var m = require("mithril")
-var User = require("./model/User")
+var User = require("../model/User")
 
 module.exports = {
 	oninit: function(vnode) {User.load(vnode.attrs.id)},
@@ -536,7 +536,9 @@ Currently, we're only able to navigate back to the user list via the browser bac
 Let's create a file `src/views/Layout.js`:
 
 ```javascript
-var Layout = {
+var m = require("mithril")
+
+module.exports = {
 	view: function(vnode) {
 		return m("main.layout", [
 			m("nav.menu", [
@@ -579,6 +581,7 @@ var m = require("mithril")
 
 var UserList = require("./view/UserList")
 var UserForm = require("./view/UserForm")
+var Layout = require("./view/Layout")
 
 m.route(document.body, "/list", {
 	"/list": {
@@ -609,4 +612,3 @@ This concludes the tutorial.
 In this tutorial, we went through the process of creating a very simple application where we can list users from a server and edit them individually. As an extra exercise, try to implement user creation and deletion on your own.
 
 If you want to see more examples of Mithril code, check the [examples](examples.md) page. If you have questions, feel free to drop by the [Mithril chat room](https://gitter.im/lhorie/mithril.js).
-
