@@ -94,7 +94,7 @@ We can verify that both the enter and exit animations work by mounting the `Togg
 m.mount(document.body, Toggler)
 ```
 
-Note that the `onbeforeremove` hook only fires on the element that loses its `parentNode` when an elements gets detached from the DOM. This behavior is by design and exists to prevent a potential jarring user experience where every conceivable exit animation on the page would run on a route change. If your exit animation is not running, make sure to attach the `onbeforeremove` handler as high up the tree as it makes sense to ensure that your animation code is called.
+Note that the `onbeforeremove` hook only fires on the element that loses its `parentNode` when an element gets detached from the DOM. This behavior is by design and exists to prevent a potential jarring user experience where every conceivable exit animation on the page would run on a route change. If your exit animation is not running, make sure to attach the `onbeforeremove` handler as high up the tree as it makes sense to ensure that your animation code is called.
 
 ---
 
