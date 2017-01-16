@@ -516,7 +516,7 @@ var User = {
 		return m.request({
 			method: "PUT",
 			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
-			data: User.current,
+			data: Object.assign({}, User.current),
 			withCredentials: true,
 		})
 	}
