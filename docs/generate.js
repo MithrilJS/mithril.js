@@ -25,6 +25,7 @@ function generate(pathname) {
 			var markdown = fs.readFileSync(pathname, "utf-8")
 			var fixed = markdown
 				.replace(/(`[^`]+?)<(.*`)/gim, "$1&lt;$2") // fix generic syntax
+				.replace(/&lt;\//gim, "</") // then revert broken html
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
 					return "<code>" + (a + b + c).replace(/\|/g, "&#124;") + "</code>"
 				})
