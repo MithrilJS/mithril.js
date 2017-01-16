@@ -410,7 +410,7 @@ Notice we added a `User.current` property, and a `User.load(id)` method which po
 ```javascript
 // src/views/UserForm.js
 var m = require("mithril")
-var User = require("./models/User")
+var User = require("../models/User")
 
 module.exports = {
 	oninit: function(vnode) {User.load(vnode.attrs.id)},
