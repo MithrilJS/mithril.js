@@ -380,6 +380,18 @@ o.spec("xhr", function() {
 				o(xhr.getRequestHeader("Accept")).equals("application/json, text/*")
 			}
 		})
+		o("data maintains after interpolate", function() {
+			mock.$defineRoutes({
+				"PUT /items/:x": function() {
+					return {status: 200, responseText: ""}
+				}
+			})
+			var data = {x: 1, y: 2}
+			var dataCopy = Object.assign({}, data);
+			xhr({method: "PUT", url: "/items/:x", data})
+
+			o(data).deepEquals(dataCopy)
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
