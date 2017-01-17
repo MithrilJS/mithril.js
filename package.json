@@ -21,6 +21,7 @@
     "test": "grunt test"
   },
   "main": "mithril.js",
+  "typings": "mithril.d.ts",
   "devDependencies": {
     "chai": "^3.4.0",
     "eslint": "^1.7.3",
