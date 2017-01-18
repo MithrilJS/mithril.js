@@ -4,7 +4,7 @@ Mithril was originally written by Leo Horie, but it is where it is today thanks 
 
 Special thanks to:
 
-- Pat Cavit, who exposed most of the public API for Mithril 1.0 and brought in test coverage
+- Pat Cavit, who exposed most of the public API for Mithril 1.0, brought in test coverage and automated the publishing process
 - Isiah Meadows, who brought in linting, modernized the test suite and has been a strong voice in design discussions
 - Zoli Kahan, who replaced the original Promise implementation with one that actually worked properly
 - Alec Embke, who single-handedly wrote the JSON-P implementation

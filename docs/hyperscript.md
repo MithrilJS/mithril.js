@@ -181,7 +181,7 @@ Mithril does not attempt to add units to number values.
 
 ### Events
 
-Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on<event>` property, such as `touchstart`
+Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on${event}` property, such as `touchstart`
 
 ```javascript
 function doSomething(e) {
