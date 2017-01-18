@@ -1,12 +1,15 @@
 "use strict"
 
-module.exports = function(object) {
+module.exports = function(object, dataKeys) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 
 	var args = []
-	for (var key in object) {
+	dataKeys = dataKeys || Object.keys(object)
+	for (var i = 0; i < dataKeys.length; i++) {
+		var key = dataKeys[i]
 		destructure(key, object[key])
 	}
+	
 	return args.join("&")
 
 	function destructure(key, value) {
