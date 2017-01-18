@@ -35,9 +35,11 @@ traverseDirectory(".", function(pathname, stat, children) {
 	}
 })
 .then(function () {
-	for (var modulePath in require.cache) {
-		if (/\/ospec\.js$/.test(modulePath)) {
-			require(modulePath).run()
+	if (/\/ospec\.js$/.test(modulePath)) {
+		var instance = require(modulePath)
+		if (typeof instance=='function' &&
+				instance.spec && instance.run) {
+			instance.run()
 		}
 	}
 })
