@@ -24,8 +24,6 @@ function generate(pathname) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
 			var fixed = markdown
-				.replace(/(`[^`]+?)<(.*`)/gim, "$1&lt;$2") // fix generic syntax
-				.replace(/&lt;\//gim, "</") // then revert broken html
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
 					return "<code>" + (a + b + c).replace(/\|/g, "&#124;") + "</code>"
 				})
@@ -41,9 +39,11 @@ function generate(pathname) {
 				.replace(/(\]\([^\)]+)(\.md)/gim, function(match, path, extension) {
 					return path + (path.match(/http/) ? extension : ".html")
 				}) // fix links
+			var markedHtml = marked(fixed)
+				.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;") // Fix type signatures containing Array<...>
 			var html = layout
 				.replace(/\[version\]/, version) // update version
-				.replace(/\[body\]/, marked(fixed))
+				.replace(/\[body\]/, markedHtml)
 				.replace(/<h5 id="([^"]+?)">([^<]+?)<\/h5>/gim, function(match, id, text) { // fix anchors
 					return "<h5 id=\"" + text.toLowerCase().replace(/\.|\[|\]|&quot;|\//g, "") + "\">" + text + "</h5>"
 				})
