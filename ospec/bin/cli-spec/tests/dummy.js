@@ -1,2 +1,6 @@
-var o = require('ospec')
-o(1).equals(1)
+var o = require('../test-utils/ospec')
+
+var runs = 0
+o('runs only once', function(){
+	o(++runs).equals(1)
+})
