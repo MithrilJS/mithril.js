@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var fs = require("fs")
 var path = require("path")
 
@@ -38,7 +37,7 @@ traverseDirectory(".", function(pathname, stat, children) {
 	for (var modulePath in require.cache) {
 		if (/\/ospec\.js$/.test(modulePath)) {
 			var instance = require(modulePath)
-			if (typeof instance=='function' && instance.spec && instance.run) {
+			if (typeof instance=='function' && instance.spec && instance.run && instance._main_instance) {
 				instance.run()
 			}
 		}

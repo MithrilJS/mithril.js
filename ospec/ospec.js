@@ -227,3 +227,5 @@ module.exports = new function init() {
 
 	return o
 }
+
+module.exports._main_instance = true
