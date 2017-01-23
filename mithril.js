@@ -1143,7 +1143,7 @@ var _20 = function($window, redrawService0) {
 m.route = _20(window, redrawService)
 m.withAttr = function(attrName, callback1, context) {
 	return function(e) {
-		return callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
 var _28 = coreRenderer(window)
