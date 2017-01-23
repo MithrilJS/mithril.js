@@ -154,7 +154,7 @@ var Fader = {
 
 ### onremove
 
-The `onremove(vnode)` hook is called before a DOM element is removed from the document. If a `onbeforeremove` hook is also defined, the `onremove` hook runs after the `done` callback is called.
+The `onremove(vnode)` hook is called before a DOM element is removed from the document. If a `onbeforeremove` hook is also defined, the `onremove` hook runs after the promise returned from `onbeforeremove` is completed.
 
 This hook is called on any element that is removed from the document, regardless of whether it was directly detached from its parent or whether it is a child of another element that was detached.
 
