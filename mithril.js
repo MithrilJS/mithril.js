@@ -182,15 +182,12 @@ if (typeof window !== "undefined") {
 	var PromisePolyfill = global.Promise
 } else {
 }
-var buildQueryString = function(object, dataKeys0) {
+var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
-	dataKeys0 = dataKeys0 || Object.keys(object)
-	for (var i = 0; i < dataKeys0.length; i++) {
-		var key0 = dataKeys0[i]
+	for (var key0 in object) {
 		destructure(key0, object[key0])
 	}
-	
 	return args.join("&")
 	function destructure(key0, value) {
 		if (Array.isArray(value)) {
@@ -210,7 +207,6 @@ var _8 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
-	
 	function finalizer() {
 		var count = 0
 		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
@@ -246,10 +242,9 @@ var _8 = function($window, Promise) {
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
-			var dataKeys = args.data && Object.keys(args.data)
-			args.url = interpolate(args.url, args.data, dataKeys)
-			if (useBody) args.data = args.serialize(args.data, dataKeys)
-			else args.url = assemble(args.url, args.data, dataKeys)
+			args.url = interpolate(args.url, args.data)
+			if (useBody) args.data = args.serialize(args.data)
+			else args.url = assemble(args.url, args.data)
 			var xhr = new $window.XMLHttpRequest()
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 			if (args.serialize === JSON.stringify && useBody) {
@@ -312,26 +307,19 @@ var _8 = function($window, Promise) {
 		})
 		return args.background === true? promise0 : finalize(promise0)
 	}
-	function interpolate(url, data, dataKeys) {
+	function interpolate(url, data) {
 		if (data == null) return url
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)
 			if (data[key] != null) {
 				url = url.replace(tokens[i], data[key])
-			
-				if (Array.isArray(dataKeys)) {
-					var keyIndex = dataKeys.indexOf(key)
-					if (keyIndex > -1) {
-						dataKeys.splice(keyIndex)
-					}
-				}
 			}
 		}
 		return url
 	}
-	function assemble(url, data, dataKeys) {
-		var querystring = buildQueryString(data, dataKeys)
+	function assemble(url, data) {
+		var querystring = buildQueryString(data)
 		if (querystring !== "") {
 			var prefix = url.indexOf("?") < 0 ? "?" : "&"
 			url += prefix + querystring
