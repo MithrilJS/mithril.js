@@ -68,7 +68,7 @@ window.templateConverter = (function () {
 
 			if (el.attrs.class) {
 				virtual += "." + el.attrs.class.replace(/\s+/g, ".")
-				el.attrs.class = undefined
+				delete el.attrs.class;
 			}
 
 			each(Object.keys(el.attrs).sort(), function (attrName) {
