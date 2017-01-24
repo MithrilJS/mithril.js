@@ -39,7 +39,7 @@ m.mount(document.body, Component)
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `attrName`  | `String`             | Yes      | The name of the attribute or property whose value will be used
-`callback`  | `any -> Boolean?`    | Yes      | The callback
+`callback`  | `any -> undefined`   | Yes      | The callback
 `thisArg`   | `any`                | No       | An object to bind to the `this` keyword in the callback function
 **returns** | `Event -> undefined` |          | An event handler function
 
