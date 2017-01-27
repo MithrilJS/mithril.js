@@ -1,6 +1,6 @@
 - Tutorials
 	- [Installation](installation.md)
-	- [Introduction](introduction.md)
+	- [Introduction](index.md)
 	- [Tutorial](simple-application.md)
 - Resources
 	- [JSX](jsx.md)

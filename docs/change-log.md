@@ -1,6 +1,7 @@
 # Change log
 
 - [Migrating from v0.2.x](#migrating-from-v02x)
+- [Older docs](http://mithril.js.org/archive/v0.2.5/change-log.html)
 
 ---
 

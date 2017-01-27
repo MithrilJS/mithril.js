@@ -200,8 +200,8 @@ var Login = {
 	login: function() {/*...*/},
 	view: function() {
 		return m(".login", [
-			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), this.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), this.password}),
+			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), value: this.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), value: this.password}),
 			m("button", {disabled: !this.canSubmit(), onclick: this.login}, "Login"),
 		])
 	}
@@ -214,7 +214,7 @@ Right away, we see that sharing the `username` and `password` fields from this c
 
 It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
 
-```
+```javascript
 // models/Auth.js
 // PREFER
 var Auth = {
@@ -237,7 +237,7 @@ module.exports = Auth
 
 Then, we can clean up the component:
 
-```
+```javascript
 // views/Login.js
 // PREFER
 var Auth = require("../models/Auth")
@@ -245,8 +245,8 @@ var Auth = require("../models/Auth")
 var Login = {
 	view: function() {
 		return m(".login", [
-			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), Auth.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), Auth.password}),
+			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
 			m("button", {disabled: !Auth.canSubmit(), onclick: Auth.login}, "Login"),
 		])
 	}

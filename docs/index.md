@@ -12,14 +12,45 @@
 
 ### What is Mithril?
 
-Mithril is a client-side Javascript framework for building Single Page Applications.  
+Mithril is a modern client-side Javascript framework for building Single Page Applications.  
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
+
+<style>
+@keyframes grow {
+	from {transform:scaleX(0)}
+	to {transform:scaleX(100%)}
+}
+</style>
+<div style="display:flex;margin:0 0 30px;">
+	<div style="width:50%;">
+		<h5>Download size</h5>
+		<small>Mithril (8kb)</small>
+		<div style="animation:grow 0.08s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:4%;"></div>
+		<small style="color:#aaa;">Vue + Vue-Router + Vuex + fetch (40kb)</small>
+		<div style="animation:grow 0.4s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:20%"></div>
+		<small style="color:#aaa;">React + React-Router + Redux + fetch (64kb)</small>
+		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:32%"></div>
+		<small style="color:#aaa;">Angular (135kb)</small>
+		<div style="animation:grow 1.35s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:68%"></div>
+	</div>
+	<div style="width:50%;">
+		<h5>Performance</h5>
+		<small>Mithril (6.4ms)</small>
+		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:24%;"></div>
+		<small style="color:#aaa;">Vue (9.8ms)</small>
+		<div style="animation:grow 0.98s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:40%"></div>
+		<small style="color:#aaa;">React (12.1ms)</small>
+		<div style="animation:grow 1.21s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:48%"></div>
+		<small style="color:#aaa;">Angular (11.5ms)</small>
+		<div style="animation:grow 1.15s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:44%"></div>
+	</div>
+</div>
+
+Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
 ---
-
-Note: This introduction assumes you have basic level of Javacript knowledge. If you don't, there are many great resources to learn. [Speaking Javascript](http://speakingjs.com/es5/index.html) is a good e-book for absolute beginners. If you're already familiar with other programming languages, the [Eloquent Javascript](http://eloquentjavascript.net/) e-book might be more suitable for you. [Codecademy](https://www.codecademy.com/learn/javascript) is another good resource that emphasizes learning via interactivity.
 
 ### Getting started
 
@@ -142,7 +173,8 @@ var Hello = {
 	view: function() {
 		return m("main", [
 			m("h1", {class: "title"}, "My first app"),
-			m("button", {onclick: function() {count++}}, count + " clicks"), // changed this line
+			// changed the next line
+			m("button", {onclick: function() {count++}}, count + " clicks"),
 		])
 	}
 }

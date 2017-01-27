@@ -3,10 +3,10 @@ var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
-try {fs.mkdirSync("docs/archive/")} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version)} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version + "/lib")} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version + "/lib/prism")} catch (e) {}
+try {fs.mkdirSync("archive")} catch (e) {}
+try {fs.mkdirSync("archive/v" + version)} catch (e) {}
+try {fs.mkdirSync("archive/v" + version + "/lib")} catch (e) {}
+try {fs.mkdirSync("archive/v" + version + "/lib/prism")} catch (e) {}
 
 var guides = fs.readFileSync("docs/guides.md", "utf-8")
 var methods = fs.readFileSync("docs/methods.md", "utf-8")
@@ -47,11 +47,10 @@ function generate(pathname) {
 				.replace(/<h5 id="([^"]+?)">([^<]+?)<\/h5>/gim, function(match, id, text) { // fix anchors
 					return "<h5 id=\"" + text.toLowerCase().replace(/\.|\[|\]|&quot;|\//g, "") + "\">" + text + "</h5>"
 				})
-			fs.writeFileSync("docs/archive/" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
+			fs.writeFileSync("archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 		}
-		else {
-			fs.writeFileSync("docs/archive/" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
+		else if (!pathname.match(/lint|generate/)) {
+			fs.writeFileSync("archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
 		}
 	}
 }
-
