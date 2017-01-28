@@ -29,6 +29,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [Reading/writing the current route](#readingwriting-the-current-route)
 - [Accessing route params](#accessing-route-params)
 - [Preventing unmounting](#preventing-unmounting)
+- [Run code on component removal](#run-code-on-component-removal)
 - [`m.request`](#mrequest)
 - [`m.deferred` removed](#mdeferred-removed)
 - [`m.sync` removed](#msync-removed)
@@ -483,6 +484,40 @@ var Component = {
 var Component = {
 	view: function() {
 		return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
+	}
+}
+```
+
+---
+
+## Run code on component removal
+
+Components no longer call `this.onunload` when they are being removed. They now use the standardized lifecycle hook `onremove`.
+
+### `v0.2.x`
+
+```javascript
+var Component = {
+	controller: function() {
+		this.onunload = function(e) {
+			// ...
+		}
+	},
+	view: function() {
+		// ...
+	}
+}
+```
+
+### `v1.x`
+
+```javascript
+var Component = {
+	onremove : function() {
+		// ...
+	}
+	view: function() {
+		// ...
 	}
 }
 ```
