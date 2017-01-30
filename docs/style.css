@@ -10,6 +10,7 @@ h2 {font-size:22px;margin:45px 0 15px;}
 h3 {font-size:20px;margin:45px 0 15px;}
 h4 {font-size:18px;margin:30px 0 15px;}
 h5 {font-weight:bold;margin:15px 0 15px;}
+h1 img {transform:rotate(180deg);vertical-align:middle;width:20px;}
 h1 small {font-size:16px;}
 p {margin:0 0 15px;}
 pre,code {background:#eee;font-family:monospace;font-size:14px;}
@@ -35,10 +36,17 @@ h1 + ul ul {margin:0 0 2px;padding:0 0 0 15px;}
 h1 + ul ul li {border:0;}
 h1 + ul strong + ul {border-left:3px solid #1e5799;}
 
+.hamburger {display:none;}
+
 @media (max-width: 767px) {
+	.hamburger {display:block;font-size:30px;padding:0 10px;position:fixed;right:0;top:0;}
+	.hamburger:hover {text-decoration:none;}
 	main section {margin:0;}
+	header section {margin:0 0 20px;position:static;width:auto;}
+	h1 + ul {background:#eee;border:1px solid #ccc;box-sizing:border-box;display:none;height:100%;margin:0;overflow:auto;padding:20px;position:fixed;right:0;top:0;width:100%;}
 	h1 + ul + hr {display:block;}
-	header section,h1 + ul {margin:0 0 20px;position:static;width:auto;}
+	.navigating h1 + ul {display:block;}
+	.navigating {overflow:hidden;}
 }
 @media (max-width: 1024px) {
 	table,table tbody,table tr,table th,table td {display:block;}
@@ -61,4 +69,8 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 	#angular ~ table td:nth-child(1):before {content:"Angular:";}
 	#vue ~ table td:nth-child(1):before {content:"Vue:";}
 	#comparisons ~ table td:nth-child(2):before {content:"Mithril:";}
+}
+@media print {
+	nav,h1 + ul {display:none;}
+	main section {margin:0;}
 }

@@ -60,7 +60,7 @@ Let's create an HTML file to follow along:
 
 ```markup
 <body></body>
-<script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
+<script src="http://unpkg.com/mithril/mithril.js"></script>
 <script>
 var root = document.body
 

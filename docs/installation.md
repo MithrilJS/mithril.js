@@ -8,7 +8,7 @@
 If you're new to Javascript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
 ```markup
-<script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
+<script src="http://unpkg.com/mithril/mithril.js"></script>
 ```
 
 ---
@@ -19,7 +19,7 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 ```bash
 # 1) install
-npm install mithril@rewrite --save
+npm install mithril --save
 
 npm install webpack --save
 
@@ -55,7 +55,7 @@ npm init --yes
 Then, to install Mithril, run:
 
 ```bash
-npm install mithril@rewrite --save
+npm install mithril --save
 ```
 
 This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
@@ -178,7 +178,7 @@ Live reload is a feature where code changes automatically trigger the page to re
 
 ```bash
 # 1) install
-npm install mithril@rewrite --save
+npm install mithril --save
 npm install budo -g
 
 # 2) add this line into the scripts section in package.json
