@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 	<head>
@@ -15,6 +16,20 @@
 		<script src="../test-utils/browserMock.js"></script>
 		<script src="../mithril.js"></script>
 		<script src="test-api.js"></script>
+=======
+<!doctype html>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-shim.min.js"></script>-->
+<script src="test.js"></script>
+<script src="mock.js"></script>
+<script src="../mithril.js"></script>
+<script src="mithril-tests.js"></script>
+<script>
+// shim for running the old test suite with grunt-mocha-phantomjs like the new one
+if ('callPhantom' in window) {
+    window.callPhantom({ testRunEnded: 1})
+}
+</script>
+>>>>>>> origin/next
 
 		<script>require("../ospec/ospec").run()</script>
 	</body>
