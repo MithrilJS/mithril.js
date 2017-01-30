@@ -81,7 +81,7 @@ m.mount(document.body, <Hero>Hello</Hero>)
 
 ### CSS in JS
 
-In plain CSS, all selectors live in the global scope and a prone to name collisions and specificity conflicts. CSS-in-JS aims to solve the issue of scoping in CSS, i.e. it groups related styles into non-global modules that are invisible to each other. CSS-in-JS is suitable for extremely large dev teams working on a single codebase, but it's not a good choice for most teams.
+In plain CSS, all selectors live in the global scope and are prone to name collisions and specificity conflicts. CSS-in-JS aims to solve the issue of scoping in CSS, i.e. it groups related styles into non-global modules that are invisible to each other. CSS-in-JS is suitable for extremely large dev teams working on a single codebase, but it's not a good choice for most teams.
 
 Nowadays there are [a lot of CSS-in-JS libraries with various degrees of robustness](https://github.com/MicheleBertoli/css-in-js). 
 
@@ -89,6 +89,6 @@ The main problem with many of these libraries is that even though they require a
 
 Often sacrifices also need to be made at time of debugging, when mapping rendered CSS class names back to their source. Often all you get in browser developer tools is a class like `button_fvp6zc2gdj35evhsl73ffzq_0 danger_fgdl0s2a5fmle5g56rbuax71_0` with useless source maps (or worse, entirely criptic class names).
 
-Another common issue is lack of support for less basic CSS features such as `@keyframes` and @font-face.
+Another common issue is lack of support for less basic CSS features such as `@keyframes` and `@font-face`.
 
-If you are adamant on using a CSS-in-JS library, consider using [J2C](https://github.com/j2css/j2c).
+If you are adamant about using a CSS-in-JS library, consider using [J2C](https://github.com/j2css/j2c), which works without configuration and implements `@keyframes` and `@font-face`.
