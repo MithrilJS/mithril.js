@@ -306,7 +306,6 @@ var Header = {
 	}
 }
 
-<<<<<<< HEAD
 m(Header, [
 	m("h1", "My title"),
 	m("h2", "Lorem ipsum"),
@@ -321,25 +320,6 @@ m(Header, [
 	m("h2", "Lorem ipsum"),
 ])
 ```
-=======
-//ContactForm no longer calls `Contact.save`
-var ContactForm = {
-	controller: function(args) {
-	        var ctrl = this
-		ctrl.contact = m.prop(new Contact())
-		ctrl.save = function(contact) {
-			Observable.trigger("saveContact", {contact: contact})
-			ctrl.contact = m.prop(new Contact()) //reset to empty contact
-		}
-		return ctrl
-	},
-	view: function(ctrl, args) {
-		var contact = ctrl.contact()
-
-		return m("form", [
-			m("label", "Name"),
-			m("input", {oninput: m.withAttr("value", contact.name), value: contact.name()}),
->>>>>>> origin/next
 
 The component above breaks the assumption that children will be output in the same contiguous format as they are received. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
 

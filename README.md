@@ -15,6 +15,12 @@
 Mithril is a modern client-side Javascript framework for building Single Page Applications.  
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
+<style>
+@keyframes grow {
+	from {transform:scaleX(0)}
+	to {transform:scaleX(100%)}
+}
+</style>
 <div style="display:flex;margin:0 0 30px;">
 	<div style="width:50%;">
 		<h5>Download size</h5>
