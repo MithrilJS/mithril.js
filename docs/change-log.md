@@ -41,7 +41,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 
 ## `m.prop` removed
 
-In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core. You can read about how to use the optional Streams module in [the documentation](streams.md).
+In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core. You can read about how to use the optional Streams module in [the documentation](stream.md).
 
 ### `v0.2.x`
 
