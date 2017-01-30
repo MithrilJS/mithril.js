@@ -38,6 +38,11 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 
 .hamburger {display:none;}
 
+@keyframes grow {
+	from {transform:scaleX(0)}
+	to {transform:scaleX(100%)}
+}
+
 @media (max-width: 767px) {
 	.hamburger {display:block;font-size:30px;padding:0 10px;position:fixed;right:0;top:0;}
 	.hamburger:hover {text-decoration:none;}
