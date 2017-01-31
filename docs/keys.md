@@ -106,9 +106,11 @@ var Button = {
 		return m("button", {key: vnode.attrs.id}, u.name)
 	}
 }
+
+// PREFER
 users.map(function(u) {
 	return m("div", [
-		m(Button, {id: u.id}, u.name) // key should be here, not in component
+		m(Button, {key: u.id}, u.name) // key should be here, not in component
 	])
 })
 ```
