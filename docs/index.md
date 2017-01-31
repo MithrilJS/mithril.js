@@ -53,13 +53,14 @@ The easiest way to try out Mithril is to include it from a CDN, and follow this 
 Let's create an HTML file to follow along:
 
 ```markup
-<body></body>
-<script src="http://unpkg.com/mithril/mithril.js"></script>
-<script>
-var root = document.body
+<body>
+	<script src="http://unpkg.com/mithril/mithril.js"></script>
+	<script>
+	var root = document.body
 
-// your code goes here!
-</script>
+	// your code goes here!
+	</script>
+</body>
 ```
 
 ---
