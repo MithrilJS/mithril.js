@@ -28,7 +28,7 @@ It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the 
 		<div style="animation:grow 1.35s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:68%"></div>
 	</div>
 	<div style="width:50%;">
-		<h5>Performance</h5>
+		<h5>Rendering Time</h5>
 		<small>Mithril (6.4ms)</small>
 		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:24%;"></div>
 		<small style="color:#aaa;">Vue (9.8ms)</small>
