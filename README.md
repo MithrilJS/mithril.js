@@ -28,7 +28,7 @@ It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the 
 		<div style="animation:grow 1.35s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:68%"></div>
 	</div>
 	<div style="width:50%;">
-		<h5>Performance</h5>
+		<h5>Rendering Time</h5>
 		<small>Mithril (6.4ms)</small>
 		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:24%;"></div>
 		<small style="color:#aaa;">Vue (9.8ms)</small>
@@ -223,7 +223,7 @@ Basically, XHR is just a way to talk to a server.
 
 Let's change our click counter to make it save data on a server. For the server, we'll use [REM](http://rem-rest-api.herokuapp.com), a mock REST API designed for toy apps like this tutorial.
 
-First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `useCredentials` means to enable cookies (a requirement for the REM API to work)
+First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `withCredentials` means to enable cookies (a requirement for the REM API to work)
 
 ```javascript
 var count = 0
@@ -232,7 +232,7 @@ var increment = function() {
 		method: "PUT",
 		url: "http://rem-rest-api.herokuapp.com/api/tutorial/1",
 		data: {count: count + 1},
-		useCredentials: true,
+		withCredentials: true,
 	})
 	.then(function(data) {
 		count = parseInt(data.count)
