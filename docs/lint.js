@@ -88,7 +88,7 @@ function ensureLinkIsValid(file, data) {
 	var links = data.match(/\]\(([^\)]+?)\)/gim) || []
 	links.forEach(function(match) {
 		var link = match.slice(2, -1)
-		var path = link.match(/[\w-]+\.md/)
+		var path = (link.match(/[\w-#]+\.md/) || [])[0]
 		if (link.match(/http/)) {
 			var u = url.parse(link)
 			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function() {
