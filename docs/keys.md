@@ -3,7 +3,6 @@
 - [What are keys](#what-are-keys)
 - [How to use](#how-to-use)
 - [Debugging key related issues](#debugging-key-related-issues)
-- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
@@ -152,3 +151,29 @@ var things = [
 ]
 ```
 
+#### Avoid mixing keyed and non-keyed vnodes in the same array
+
+An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.
+
+```javascript
+// AVOID
+m("div", [
+	m("div", "a"),
+	m("div", {key: 1}, "b"),
+])
+
+// PREFER
+m("div", [
+	m("div", {key: 0}, "a"),
+	m("div", {key: 1}, "b"),
+])
+
+
+// PREFER
+m("div", [
+	m("div", "a"),
+	[
+		m("div", {key: 1}, "b"),
+	]
+])
+```

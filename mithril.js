@@ -918,7 +918,6 @@ var _11 = function($window) {
 	renderService.setEventCallback(function(e) {
 		if (e.redraw !== false) redraw()
 	})
-	
 	var callbacks = []
 	function subscribe(key1, callback) {
 		unsubscribe(key1)
