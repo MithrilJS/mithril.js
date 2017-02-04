@@ -25,7 +25,7 @@ function generate(pathname) {
 			generate(pathname + "/" + filename)
 		})
 	}
-	else if (!pathname.match(/tutorials|archive/)) {
+	else if (!pathname.match(/tutorials|archive|guides|methods/)) {
 		if (pathname.match(/\.md$/)) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
