@@ -14,8 +14,9 @@ module.exports = function($window, redrawService) {
 		var run = function() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 		}
-		var bail = function() {
-			routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path) {
+			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {

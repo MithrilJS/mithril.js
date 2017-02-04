@@ -1056,7 +1056,6 @@ var coreRouter = function($window) {
 			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
 			var state = $window.history.state
 			if (state != null) {
 				for (var k in state) params[k] = state[k]
@@ -1077,12 +1076,10 @@ var coreRouter = function($window) {
 			}
 			reject(path, params)
 		}
-		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-	
 	return router
 }
 var _20 = function($window, redrawService0) {
@@ -1094,8 +1091,9 @@ var _20 = function($window, redrawService0) {
 		var run1 = function() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
-		var bail = function() {
-			routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path) {
+			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {

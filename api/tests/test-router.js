@@ -108,7 +108,7 @@ o.spec("route", function() {
 						done()
 					}
 				})
-
+				
 				o("redraws when render function is executed", function() {
 					var onupdate = o.spy()
 					var oninit = o.spy()
