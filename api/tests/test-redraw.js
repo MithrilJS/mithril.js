@@ -2,6 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
+var throttleMocker = require("../../test-utils/throttleMock")
 var apiRedraw = require("../../api/redraw")
 
 o.spec("redrawService", function() {
@@ -17,25 +18,39 @@ o.spec("redrawService", function() {
 		redrawService.redraw()
 	})
 
+	o("honours throttleMock", function() {
+		var throttleMock = throttleMocker()
+		redrawService = apiRedraw(domMock(), throttleMock.throttle)
+		var spy = o.spy()
+
+		redrawService.subscribe(root, spy)
+
+		o(spy.callCount).equals(0)
+
+		redrawService.redraw()
+
+		o(spy.callCount).equals(0)
+
+		throttleMock.fire()
+
+		o(spy.callCount).equals(1)
+	})
+
 	o("should run a single renderer entry", function(done) {
 		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
 
 		o(spy.callCount).equals(0)
-		
-		redrawService.redraw()
-
-		o(spy.callCount).equals(1)
 
 		redrawService.redraw()
 		redrawService.redraw()
 		redrawService.redraw()
 
-		o(spy.callCount).equals(1)
+		o(spy.callCount).equals(0)
 		setTimeout(function() {
-			o(spy.callCount).equals(2)
-			
+			o(spy.callCount).equals(1)
+
 			done()
 		}, 20)
 	})
@@ -54,27 +69,29 @@ o.spec("redrawService", function() {
 
 		redrawService.redraw()
 
-		o(spy1.callCount).equals(1)
-		o(spy2.callCount).equals(1)
-		o(spy3.callCount).equals(1)
+		o(spy1.callCount).equals(0)
+		o(spy2.callCount).equals(0)
+		o(spy3.callCount).equals(0)
 
 		redrawService.redraw()
 
-		o(spy1.callCount).equals(1)
-		o(spy2.callCount).equals(1)
-		o(spy3.callCount).equals(1)
+		o(spy1.callCount).equals(0)
+		o(spy2.callCount).equals(0)
+		o(spy3.callCount).equals(0)
 
 		setTimeout(function() {
-			o(spy1.callCount).equals(2)
-			o(spy2.callCount).equals(2)
-			o(spy3.callCount).equals(2)
-			
+			o(spy1.callCount).equals(1)
+			o(spy2.callCount).equals(1)
+			o(spy3.callCount).equals(1)
+
 			done()
 		}, 20)
 	})
 
-	o("should stop running after unsubscribe", function() {
-		var spy = o.spy()
+	o("should stop running after unsubscribe", function(done) {
+		var spy = o.spy(function() {
+			throw new Error("This shouldn't have been called")
+		})
 
 		redrawService.subscribe(root, spy)
 		redrawService.unsubscribe(root, spy)
@@ -82,9 +99,14 @@ o.spec("redrawService", function() {
 		redrawService.redraw()
 
 		o(spy.callCount).equals(0)
+		setTimeout(function() {
+			o(spy.callCount).equals(0)
+
+			done()
+		}, 20)
 	})
 
-	o("does nothing on invalid unsubscribe", function() {
+	o("does nothing on invalid unsubscribe", function(done) {
 		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
@@ -92,6 +114,10 @@ o.spec("redrawService", function() {
 
 		redrawService.redraw()
 
-		o(spy.callCount).equals(1)
+		setTimeout(function() {
+			o(spy.callCount).equals(1)
+
+			done()
+		}, 20)
 	})
 })

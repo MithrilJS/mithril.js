@@ -65,7 +65,7 @@ Argument               | Type                                     | Required | D
 
 ##### m.route.set
 
-Redirects to a matching route, or to the default route if no matching routes can be found.
+Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
 `m.route.set(path, data, options)`
 
