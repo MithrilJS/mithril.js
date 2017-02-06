@@ -438,11 +438,11 @@ module.exports = function($window) {
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "input" && key === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "select" && key === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "select" && key === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key === "value" && vnode.dom.value === value) return
+			if (vnode.tag === "option" && key === "value" && vnode.dom.value == value) return
 			element[key] = value
 		}
 		else {
