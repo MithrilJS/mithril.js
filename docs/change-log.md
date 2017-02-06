@@ -28,6 +28,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`m.route` and anchor tags](#mroute-and-anchor-tags)
 - [Reading/writing the current route](#readingwriting-the-current-route)
 - [Accessing route params](#accessing-route-params)
+- [Building/Parsing query strings](#buildingparsing-query-strings)
 - [Preventing unmounting](#preventing-unmounting)
 - [Run code on component removal](#run-code-on-component-removal)
 - [`m.request`](#mrequest)
@@ -455,6 +456,28 @@ m.route(document.body, "/booga", {
         }
     }
 })
+```
+
+---
+
+## Building/Parsing query strings
+
+`v0.2.x` used methods hanging off of `m.route`, `m.route.buildQueryString()` and `m.route.parseQueryString()`. In `v1.x` these have been broken out and attached to the root `m`.
+
+### `v0.2.x`
+
+```javascript
+var qs = m.route.buildQueryString({ a : 1 });
+
+var obj = m.route.parseQueryString("a=1");
+```
+
+### `v1.x`
+
+```javascript
+var qs = m.buildQueryString({ a : 1 });
+
+var obj = m.parseQueryString("a=1");
 ```
 
 ---
