@@ -54,7 +54,7 @@ Let's create an HTML file to follow along:
 
 ```markup
 <body>
-	<script src="http://unpkg.com/mithril/mithril.js"></script>
+	<script src="//unpkg.com/mithril/mithril.js"></script>
 	<script>
 	var root = document.body
 
@@ -231,7 +231,7 @@ var count = 0
 var increment = function() {
 	m.request({
 		method: "PUT",
-		url: "http://rem-rest-api.herokuapp.com/api/tutorial/1",
+		url: "//rem-rest-api.herokuapp.com/api/tutorial/1",
 		data: {count: count + 1},
 		withCredentials: true,
 	})
