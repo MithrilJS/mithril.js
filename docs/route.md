@@ -385,7 +385,7 @@ var Layout = {
 }
 ```
 
-In the example above, the layout merely consists of a `<div class="layout">` that contains the children passed to the component, but in a real life scenario it could be as complex as neeeded.
+In the example above, the layout merely consists of a `<div class="layout">` that contains the children passed to the component, but in a real life scenario it could be as complex as needed.
 
 One way to wrap the layout is to define an anonymous component in the routes map:
 
