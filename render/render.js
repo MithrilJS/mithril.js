@@ -14,30 +14,32 @@ module.exports = function($window) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+				createNode(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
 	}
-	function createNode(vnode, hooks, ns) {
+	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
-				case "#": return createText(vnode)
-				case "<": return createHTML(vnode)
-				case "[": return createFragment(vnode, hooks, ns)
-				default: return createElement(vnode, hooks, ns)
+				case "#": return createText(parent, vnode, nextSibling)
+				case "<": return createHTML(parent, vnode, nextSibling)
+				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
+				default: return createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(vnode, hooks, ns)
+		else return createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
-	function createText(vnode) {
-		return vnode.dom = $doc.createTextNode(vnode.children)
+	function createText(parent, vnode, nextSibling) {
+		vnode.dom = $doc.createTextNode(vnode.children)
+		insertNode(parent, vnode.dom, nextSibling)
+		return vnode.dom
 	}
-	function createHTML(vnode) {
+	function createHTML(parent, vnode, nextSibling) {
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
-		var temp = $doc.createElement(parent)
+		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
+		var temp = $doc.createElement(parent1)
 
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
@@ -47,9 +49,10 @@ module.exports = function($window) {
 		while (child = temp.firstChild) {
 			fragment.appendChild(child)
 		}
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createFragment(vnode, hooks, ns) {
+	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
@@ -57,9 +60,10 @@ module.exports = function($window) {
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createElement(vnode, hooks, ns) {
+	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -78,6 +82,8 @@ module.exports = function($window) {
 			setAttrs(vnode, attrs, ns)
 		}
 
+		insertNode(parent, element, nextSibling)
+
 		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
 			setContentEditable(vnode)
 		}
@@ -94,7 +100,7 @@ module.exports = function($window) {
 		}
 		return element
 	}
-	function createComponent(vnode, hooks, ns) {
+	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		vnode.state = Object.create(vnode.tag)
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
@@ -104,9 +110,10 @@ module.exports = function($window) {
 		view.reentrantLock = null
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
-			var element = createNode(vnode.instance, hooks, ns)
+			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			insertNode(parent, element, nextSibling)
 			return element
 		}
 		else {
@@ -132,7 +139,7 @@ module.exports = function($window) {
 				if (isUnkeyed) {
 					for (var i = 0; i < old.length; i++) {
 						if (old[i] === vnodes[i]) continue
-						else if (old[i] == null && vnodes[i] != null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
 						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
 					}
@@ -189,8 +196,7 @@ module.exports = function($window) {
 							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(v, hooks, undefined)
-							insertNode(parent, dom, nextSibling)
+							var dom = createNode(parent, v, hooks, undefined, nextSibling)
 							nextSibling = dom
 						}
 					}
@@ -223,7 +229,7 @@ module.exports = function($window) {
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -235,7 +241,7 @@ module.exports = function($window) {
 	function updateHTML(parent, old, vnode, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			insertNode(parent, createHTML(vnode), nextSibling)
+			createHTML(parent, vnode, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
@@ -284,7 +290,7 @@ module.exports = function($window) {
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
