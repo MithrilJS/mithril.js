@@ -187,7 +187,7 @@ o.spec("oninit", function() {
 			called = true
 
 			o(vnode.dom).equals(undefined)
-			o(root.childNodes.length).equals(0)
+			o(root.childNodes.length).equals(1)
 		}
 		o(called).equals(true)
 	})
