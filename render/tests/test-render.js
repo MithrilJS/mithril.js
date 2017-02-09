@@ -55,7 +55,7 @@ o.spec("render", function() {
 
 		o(threwOuter).equals(true)
 	})
-	o("lifecycle methods work in children of recycled", function() {
+	o("lifecycle methods work in keyed children of recycled keyed", function() {
 		var createA = o.spy()
 		var updateA = o.spy()
 		var removeA = o.spy()
@@ -72,6 +72,34 @@ o.spec("render", function() {
 			return {tag: "div", key: 2, children: [
 				{tag: "div", key: 21, attrs: {oncreate: createB, onupdate: updateB, onremove: removeB}},
 				{tag: "div", key: 22}
+			]}
+		}
+		render(root, a())
+		render(root, b())
+		render(root, a())
+
+		o(createA.callCount).equals(2)
+		o(updateA.callCount).equals(0)
+		o(removeA.callCount).equals(1)
+		o(createB.callCount).equals(1)
+		o(updateB.callCount).equals(0)
+		o(removeB.callCount).equals(1)
+	})
+	o("lifecycle methods work in unkeyed children of recycled keyed", function() {
+		var createA = o.spy()
+		var updateA = o.spy()
+		var removeA = o.spy()
+		var createB = o.spy()
+		var updateB = o.spy()
+		var removeB = o.spy()
+		var a = function() {
+			return {tag: "div", key: 1, children: [
+				{tag: "div", attrs: {oncreate: createA, onupdate: updateA, onremove: removeA}},
+			]}
+		}
+		var b = function() {
+			return {tag: "div", key: 2, children: [
+				{tag: "div", attrs: {oncreate: createB, onupdate: updateB, onremove: removeB}},
 			]}
 		}
 		render(root, a())
