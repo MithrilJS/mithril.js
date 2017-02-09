@@ -44,6 +44,8 @@ Mithril is used by companies like Vimeo and Nike, and open source platforms like
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](http://mithril.js.org/framework-comparison.html) page.
 
+Mithril supports browsers all the way back to IE9, no polyfills required.
+
 ---
 
 ### Getting started
