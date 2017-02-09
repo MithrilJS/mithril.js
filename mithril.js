@@ -355,30 +355,32 @@ var coreRenderer = function($window) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+				createNode(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
 	}
-	function createNode(vnode, hooks, ns) {
+	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
 			switch (tag) {
-				case "#": return createText(vnode)
-				case "<": return createHTML(vnode)
-				case "[": return createFragment(vnode, hooks, ns)
-				default: return createElement(vnode, hooks, ns)
+				case "#": return createText(parent, vnode, nextSibling)
+				case "<": return createHTML(parent, vnode, nextSibling)
+				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
+				default: return createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(vnode, hooks, ns)
+		else return createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
-	function createText(vnode) {
-		return vnode.dom = $doc.createTextNode(vnode.children)
+	function createText(parent, vnode, nextSibling) {
+		vnode.dom = $doc.createTextNode(vnode.children)
+		insertNode(parent, vnode.dom, nextSibling)
+		return vnode.dom
 	}
-	function createHTML(vnode) {
+	function createHTML(parent, vnode, nextSibling) {
 		var match1 = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
-		var temp = $doc.createElement(parent)
+		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
+		var temp = $doc.createElement(parent1)
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -387,9 +389,10 @@ var coreRenderer = function($window) {
 		while (child = temp.firstChild) {
 			fragment.appendChild(child)
 		}
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createFragment(vnode, hooks, ns) {
+	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
@@ -397,9 +400,10 @@ var coreRenderer = function($window) {
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createElement(vnode, hooks, ns) {
+	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -414,6 +418,7 @@ var coreRenderer = function($window) {
 		if (attrs2 != null) {
 			setAttrs(vnode, attrs2, ns)
 		}
+		insertNode(parent, element, nextSibling)
 		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
 			setContentEditable(vnode)
 		}
@@ -430,7 +435,7 @@ var coreRenderer = function($window) {
 		}
 		return element
 	}
-	function createComponent(vnode, hooks, ns) {
+	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		vnode.state = Object.create(vnode.tag)
 		var view = vnode.tag.view
 		if (view.reentrantLock != null) return $emptyFragment
@@ -440,9 +445,10 @@ var coreRenderer = function($window) {
 		view.reentrantLock = null
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
-			var element = createNode(vnode.instance, hooks, ns)
+			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			insertNode(parent, element, nextSibling)
 			return element
 		}
 		else {
@@ -451,7 +457,7 @@ var coreRenderer = function($window) {
 		}
 	}
 	//update
-	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
+	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
@@ -467,15 +473,16 @@ var coreRenderer = function($window) {
 				if (isUnkeyed) {
 					for (var i = 0; i < old.length; i++) {
 						if (old[i] === vnodes[i]) continue
-						else if (old[i] == null && vnodes[i] != null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
 						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
 						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
 					}
 					return
 				}
 			}
-			var recycling = isRecyclable(old, vnodes)
+			recycling = recycling || isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
+			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -523,8 +530,7 @@ var coreRenderer = function($window) {
 							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(v, hooks, undefined)
-							insertNode(parent, dom, nextSibling)
+							var dom = createNode(parent, v, hooks, undefined, nextSibling)
 							nextSibling = dom
 						}
 					}
@@ -549,15 +555,15 @@ var coreRenderer = function($window) {
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, hooks, ns)
+					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, recycling, hooks, ns)
 				}
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -569,12 +575,12 @@ var coreRenderer = function($window) {
 	function updateHTML(parent, old, vnode, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			insertNode(parent, createHTML(vnode), nextSibling)
+			createHTML(parent, vnode, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
+	function updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, recycling, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -588,7 +594,7 @@ var coreRenderer = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, hooks, ns) {
+	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -611,14 +617,14 @@ var coreRenderer = function($window) {
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			updateNodes(element, old.children, vnode.children, recycling, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
 		updateLifecycle(vnode.tag, vnode, hooks, recycling)
 		if (vnode.instance != null) {
-			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
@@ -886,7 +892,7 @@ var coreRenderer = function($window) {
 		// First time0 rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()

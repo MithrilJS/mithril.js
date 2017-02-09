@@ -1,7 +1,21 @@
 # Change log
 
+- [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
-- [Older docs](http://mithril.js.org/archive/v0.2.5/change-log.html)
+- [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+
+---
+
+### v1.0.1
+
+#### News
+
+- performance improvements in IE [#1598](https://github.com/lhorie/mithril.js/pull/1598)
+
+#### Bug fixes
+
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/lhorie/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/lhorie/mithril.js/issues/1609)
 
 ---
 

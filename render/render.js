@@ -123,7 +123,7 @@ module.exports = function($window) {
 	}
 
 	//update
-	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
+	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
@@ -146,9 +146,9 @@ module.exports = function($window) {
 					return
 				}
 			}
-			var recycling = isRecyclable(old, vnodes)
+			recycling = recycling || isRecyclable(old, vnodes)
 			if (recycling) old = old.concat(old.pool)
-
+			
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -221,8 +221,8 @@ module.exports = function($window) {
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, hooks, ns)
+					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, recycling, hooks, ns)
 				}
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
@@ -245,8 +245,8 @@ module.exports = function($window) {
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
+	function updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, recycling, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -260,7 +260,7 @@ module.exports = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, hooks, ns) {
+	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -283,7 +283,7 @@ module.exports = function($window) {
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			updateNodes(element, old.children, vnode.children, recycling, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
@@ -568,7 +568,7 @@ module.exports = function($window) {
 		if (dom.vnodes == null) dom.textContent = ""
 
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()

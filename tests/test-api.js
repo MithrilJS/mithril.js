@@ -11,11 +11,11 @@ o.spec("api", function() {
 		if (typeof global !== "undefined") global.window = mock
 		m = require("../mithril")
 	})
-	
+
 	o.spec("m", function() {
 		o("works", function() {
 			var vnode = m("div")
-			
+
 			o(vnode.tag).equals("div")
 		})
 	})
@@ -29,7 +29,7 @@ o.spec("api", function() {
 	o.spec("m.trust", function() {
 		o("works", function() {
 			var vnode = m.trust("<br>")
-			
+
 			o(vnode.tag).equals("<")
 			o(vnode.children).equals("<br>")
 		})
@@ -37,7 +37,7 @@ o.spec("api", function() {
 	o.spec("m.fragment", function() {
 		o("works", function() {
 			var vnode = m.fragment({key: 123}, [m("div")])
-			
+
 			o(vnode.tag).equals("[")
 			o(vnode.key).equals(123)
 			o(vnode.children.length).equals(1)
@@ -48,23 +48,23 @@ o.spec("api", function() {
 		o("works", function() {
 			var spy = o.spy()
 			var handler = m.withAttr("value", spy)
-			
+
 			handler({currentTarget: {value: 10}})
-			
+
 			o(spy.args[0]).equals(10)
 		})
 	})
 	o.spec("m.parseQueryString", function() {
 		o("works", function() {
 			var query = m.parseQueryString("?a=1&b=2")
-			
+
 			o(query).deepEquals({a: "1", b: "2"})
 		})
 	})
 	o.spec("m.buildQueryString", function() {
 		o("works", function() {
 			var query = m.buildQueryString({a: 1, b: 2})
-			
+
 			o(query).equals("a=1&b=2")
 		})
 	})
@@ -72,7 +72,7 @@ o.spec("api", function() {
 		o("works", function() {
 			var root = window.document.createElement("div")
 			m.render(root, m("div"))
-			
+
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 		})
@@ -81,7 +81,7 @@ o.spec("api", function() {
 		o("works", function() {
 			var root = window.document.createElement("div")
 			m.mount(root, {view: function() {return m("div")}})
-			
+
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
 		})
@@ -92,11 +92,11 @@ o.spec("api", function() {
 			m.route(root, "/a", {
 				"/a": {view: function() {return m("div")}}
 			})
-			
+
 			setTimeout(function() {
 				o(root.childNodes.length).equals(1)
 				o(root.firstChild.nodeName).equals("DIV")
-				
+
 				done()
 			}, FRAME_BUDGET)
 		})
@@ -106,11 +106,11 @@ o.spec("api", function() {
 			m.route(root, "/a", {
 				"/a": {view: function() {return m("div")}}
 			})
-			
+
 			setTimeout(function() {
 				o(root.childNodes.length).equals(1)
 				o(root.firstChild.nodeName).equals("DIV")
-				
+
 				done()
 			}, FRAME_BUDGET)
 		})
@@ -119,10 +119,10 @@ o.spec("api", function() {
 			m.route(root, "/a", {
 				"/a": {view: function() {return m("div")}}
 			})
-			
+
 			setTimeout(function() {
 				o(m.route.get()).equals("/a")
-				
+
 				done()
 			}, FRAME_BUDGET)
 		})
@@ -132,12 +132,12 @@ o.spec("api", function() {
 			m.route(root, "/a", {
 				"/:id": {view: function() {return m("div")}}
 			})
-			
+
 			setTimeout(function() {
 				m.route.set("/b")
 				setTimeout(function() {
 					o(m.route.get()).equals("/b")
-				
+
 					done()
 				}, FRAME_BUDGET)
 			}, FRAME_BUDGET)
@@ -150,9 +150,9 @@ o.spec("api", function() {
 			m.mount(root, {view: function() {count++}})
 			setTimeout(function() {
 				m.redraw()
-				
+
 				o(count).equals(2)
-				
+
 				done()
 			}, FRAME_BUDGET)
 		})

@@ -17,10 +17,10 @@ Special thanks to:
 - Leon Sorokin, for writing a DOM instrumentation tool that helped improve performance in Mithril 1.0
 - Jordan Walke, whose work on React was prior art to the implementation of keys in Mithril
 - Pierre-Yves Gérardy, who consistently makes high quality contributions
+- Gyandeep Singh, who contributed significant IE performance improvements
 
 Other people who also deserve recognition:
 
 - Arthur Clemens - creator of [Polythene](https://github.com/ArthurClemens/Polythene) and the [HTML-to-Mithril converter](http://arthurclemens.github.io/mithril-template-converter/index.html)
 - Stephan Hoyer - creator of [mithril-node-render](https://github.com/StephanHoyer/mithril-node-render), [mithril-query](https://github.com/StephanHoyer/mithril-query) and [mithril-source-hint](https://github.com/StephanHoyer/mithril-source-hint)
 - the countless people who have reported and fixed bugs, participated in discussions, and helped promote Mithril
-
