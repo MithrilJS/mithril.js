@@ -95,7 +95,7 @@ Let's wrap our text in an `<h1>` tag.
 m.render(root, m("h1", "My first app"))
 ```
 
-The `m()` function can be used to describe any HTML structure you want. So if you to add a class to the `<h1>`:
+The `m()` function can be used to describe any HTML structure you want. So if you need to add a class to the `<h1>`:
 
 ```javascript
 m("h1", {class: "title"}, "My first app")
