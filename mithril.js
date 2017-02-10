@@ -481,7 +481,10 @@ var coreRenderer = function($window) {
 				}
 			}
 			recycling = recycling || isRecyclable(old, vnodes)
-			if (recycling) old = old.concat(old.pool)
+			if (recycling) {
+				var pool = old.pool
+				old = old.concat(old.pool)
+			}
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -489,8 +492,9 @@ var coreRenderer = function($window) {
 				else if (o == null) oldStart++
 				else if (v == null) start++
 				else if (o.key === v.key) {
+					var shouldRecycle = (pool != null && oldStart >= old.length - pool.length) || ((pool == null) && recycling)
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
@@ -499,7 +503,8 @@ var coreRenderer = function($window) {
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+						var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
 					}
@@ -512,7 +517,8 @@ var coreRenderer = function($window) {
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+					var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
@@ -523,6 +529,7 @@ var coreRenderer = function($window) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
 							var movable = old[oldIndex]
+							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
 							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true

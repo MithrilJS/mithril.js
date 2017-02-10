@@ -1,8 +1,18 @@
 # Change log
 
+- [v1.0.2](#v101)
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+
+---
+
+### v1.0.2
+
+#### Bug fixes
+
+- fix IE11 input[type] error - [#1610](https://github.com/lhorie/mithril.js/issues/1610)
+- apply [#1609](https://github.com/lhorie/mithril.js/issues/1609) to unkeyed children case
 
 ---
 

@@ -113,4 +113,40 @@ o.spec("render", function() {
 		o(updateB.callCount).equals(0)
 		o(removeB.callCount).equals(1)
 	})
+	o.only("update lifecycle methods work on children of recycled keyed", function() {
+		var createA = o.spy()
+		var updateA = o.spy()
+		var removeA = o.spy()
+		var createB = o.spy()
+		var updateB = o.spy()
+		var removeB = o.spy()
+
+		var a = function() {
+			return {tag: "div", key: 1, children: [
+				{tag: "div", attrs: {oncreate: createA, onupdate: updateA, onremove: removeA}},
+			]}
+		}
+		var b = function() {
+			return {tag: "div", key: 2, children: [
+				{tag: "div", attrs: {oncreate: createB, onupdate: updateB, onremove: removeB}},
+			]}
+		}
+		render(root, a())
+		render(root, a())
+		o(createA.callCount).equals(1)
+		o(updateA.callCount).equals(1)
+		o(removeA.callCount).equals(0)
+
+		render(root, b())
+		o(createA.callCount).equals(1)
+		o(updateA.callCount).equals(1)
+		o(removeA.callCount).equals(1)
+
+		render(root, a())
+		render(root, a())
+
+		o(createA.callCount).equals(2)
+		o(updateA.callCount).equals(2)
+		o(removeA.callCount).equals(1)
+	})
 })
