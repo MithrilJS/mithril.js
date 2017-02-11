@@ -12,7 +12,7 @@ new function(o) {
 		})
 		o.only(".only()", function() {
 			o(2).equals(2)
-		})
+		}, true)
 	})
 
 	o.run()
