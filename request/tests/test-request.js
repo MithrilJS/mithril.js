@@ -390,6 +390,22 @@ o.spec("xhr", function() {
 				o(xhr.getRequestHeader("Accept")).equals("application/json, text/*")
 			}
 		})
+		o("doesn't fail on abort", function(done) {
+			var s = new Date
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			var failed = false
+			xhr({method: "GET", url: "/item", config: function (xhr) { setTimeout(function() { xhr.abort() }, 0) }}).catch(function() {
+				failed = true
+			}).then(function() {
+				o(failed).equals(false)
+			}).then(function() {
+				done()
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
@@ -462,6 +478,16 @@ o.spec("xhr", function() {
 					done()
 				})
 			})
+		})
+		o("rejects on cors-like error", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 0}
+				}
+			})
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+			}).then(done)
 		})
 	})
 })
