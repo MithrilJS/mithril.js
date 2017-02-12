@@ -36,6 +36,7 @@ Argument               | Type                              | Required | Descript
 `options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.callbackName` | `String`                          | No       | The name of the function that will be called as the callback. Defaults to a randomized string (e.g. `_mithril_6888197422121285_0({a: 1})`
 `options.callbackKey`  | `String`                          | No       | The name of the querystring parameter name that specifies the callback name. Defaults to `callback` (e.g. `/someapi?callback=_mithril_6888197422121285_0`)
+`options.background`   | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**            | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through `type` method
 
 [How to read signatures](signatures.md)
