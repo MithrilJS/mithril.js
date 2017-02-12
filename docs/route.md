@@ -143,7 +143,7 @@ Argument            | Type                 | Description
 ------------------- | -------------------- | -----------
 `vnode`             | `Object`             | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
 `vnode.attrs`       | `Object`             | A map of URL parameter values
-**returns**         | `Vnode|Array<Vnode>` | Returns a vnode or array of vnodes
+**returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
 
 ---
 
