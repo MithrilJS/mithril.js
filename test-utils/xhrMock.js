@@ -15,6 +15,7 @@ module.exports = function() {
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
 			var headers = {}
+			var aborted = false
 			this.setRequestHeader = function(header, value) {
 				headers[header] = value
 			}
@@ -32,17 +33,24 @@ module.exports = function() {
 			}
 			this.send = function(body) {
 				var self = this
-				var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
-				var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
+				if(!aborted) {
+					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
+					var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
+					self.status = data.status
+					self.responseText = data.responseText
+				} else {
+					self.status = 0
+				}
 				self.readyState = 4
-				self.status = data.status
-				self.responseText = data.responseText
 				if (args.async === true) {
 					var s = new Date
 					callAsync(function() {
 						if (typeof self.onreadystatechange === "function") self.onreadystatechange()
 					})
 				}
+			}
+			this.abort = function() {
+				aborted = true
 			}
 		},
 		document: {
