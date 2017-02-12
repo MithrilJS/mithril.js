@@ -18,7 +18,10 @@ module.exports = new function init() {
 		predicate()
 		ctx = parent
 	}
-	o.only = function(subject, predicate) {o(subject, only = predicate)}
+	o.only = function(subject, predicate, silent) {
+		if (!silent) console.log(highlight("/!\\ WARNING /!\\ o.only() mode"))
+		o(subject, only = predicate)
+	}
 	o.spy = function(fn) {
 		var spy = function() {
 			spy.this = this
