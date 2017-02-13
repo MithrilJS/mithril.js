@@ -1,11 +1,18 @@
 "use strict"
 
 module.exports = new function init() {
-	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
 	function o(subject, predicate) {
-		if (predicate === undefined) return new Assert(subject)
-		ctx[unique(subject)] = predicate
+		if (predicate === undefined) {
+			if (results == null) throw new Error("Assertions should not occur outside test definitions")
+			return new Assert(subject)
+		}
+		else if (results == null) {
+			ctx[unique(subject)] = predicate
+		} else {
+			throw new Error("Test definition shouldn't be nested. To group tests use `o.spec()`")
+		}
 	}
 	o.before = hook("__before")
 	o.after = hook("__after")
@@ -40,6 +47,7 @@ module.exports = new function init() {
 		return spy
 	}
 	o.run = function() {
+		results = []
 		start = new Date
 		test(spec, [], [], report)
 
