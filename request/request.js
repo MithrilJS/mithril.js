@@ -73,16 +73,21 @@ module.exports = function($window, Promise) {
 			xhr.onreadystatechange = function() {
 				// Don't throw errors on xhr.abort(). XMLHttpRequests ends up in a state of
 				// xhr.status == 0 and xhr.readyState == 4 if aborted after open, but before completion.
-				if (xhr.status && xhr.readyState === 4) {
+				if (xhr.readyState === 4) {
 					try {
-						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-							resolve(cast(args.type, response))
+						if (xhr.status === 0) {
+							xhr.ontimeout = function() {reject(new Error("timeout"))}
 						}
 						else {
-							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
-							reject(error)
+							var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
+							if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+								resolve(cast(args.type, response))
+							}
+							else {
+								var error = new Error(xhr.responseText)
+								for (var key in response) error[key] = response[key]
+								reject(error)
+							}
 						}
 					}
 					catch (e) {
