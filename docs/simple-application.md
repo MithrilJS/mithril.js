@@ -74,7 +74,7 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET http://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 ```javascript
 // src/models/User.js
@@ -85,7 +85,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -357,7 +357,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -380,7 +380,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -392,7 +392,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
+			url: "https://rem-rest-api.herokuapp.com/api/users/:id",
 			data: {id: id},
 			withCredentials: true,
 		})
@@ -461,7 +461,12 @@ var User = require("../models/User")
 module.exports = {
 	oninit: function(vnode) {User.load(vnode.attrs.id)},
 	view: function() {
-		return m("form", [
+		return m("form", {
+				onsubmit: function(e) {
+					e.preventDefault()
+					User.save()
+				}
+			}, [
 			m("label.label", "First name"),
 			m("input.input[type=text][placeholder=First name]", {
 				oninput: m.withAttr("value", function(value) {User.current.firstName = value}),
@@ -472,7 +477,7 @@ module.exports = {
 				oninput: m.withAttr("value", function(value) {User.current.lastName = value}),
 				value: User.current.lastName
 			}),
-			m("button.button[type=submit]", {onclick: User.save}, "Save"),
+			m("button.button[type=submit]", "Save"),
 		])
 	}
 }
@@ -491,7 +496,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -503,7 +508,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
+			url: "https://rem-rest-api.herokuapp.com/api/users/:id",
 			data: {id: id},
 			withCredentials: true,
 		})
@@ -515,7 +520,7 @@ var User = {
 	save: function() {
 		return m.request({
 			method: "PUT",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
+			url: "https://rem-rest-api.herokuapp.com/api/users/:id",
 			data: User.current,
 			withCredentials: true,
 		})
