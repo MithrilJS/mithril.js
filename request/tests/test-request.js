@@ -406,6 +406,23 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
+		o("doesn't fail on file:// status 0", function(done) {
+			var s = new Date
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 0, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			var failed = false
+			xhr({method: "GET", url: "file:///item"}).catch(function() {
+				failed = true
+			}).then(function(data) {
+				o(failed).equals(false)
+				o(data).deepEquals({a: 1})
+			}).then(function() {
+				done()
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
