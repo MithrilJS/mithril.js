@@ -635,11 +635,13 @@ greetAsync()
 ### `v1.x`
 
 ```javascript
-var greetAsync = new Promise(function(resolve){
-    setTimeout(function() {
-        resolve("hello")
-    }, 1000)
-})
+var greetAsync = function(){
+    return new Promise(function(resolve){
+        setTimeout(function() {
+            resolve("hello")
+        }, 1000)
+    })
+}
 
 greetAsync()
     .then(function(value) {return value + " world"})
