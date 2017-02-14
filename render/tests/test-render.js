@@ -113,7 +113,7 @@ o.spec("render", function() {
 		o(updateB.callCount).equals(0)
 		o(removeB.callCount).equals(1)
 	})
-	o.only("update lifecycle methods work on children of recycled keyed", function() {
+	o("update lifecycle methods work on children of recycled keyed", function() {
 		var createA = o.spy()
 		var updateA = o.spy()
 		var removeA = o.spy()
