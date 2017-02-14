@@ -46,7 +46,7 @@ global.window = require("mithril/test-utils/browserMock.js")();
 global.document = window.document;
 ```
 
-Once that snippet has been run you can `require("mithril")` and it should be quiet happy.
+Once that snippet has been run you can `require("mithril")` and it should be quite happy.
 
 ---
 
