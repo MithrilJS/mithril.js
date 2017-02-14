@@ -34,6 +34,20 @@ To run the test, use the command `npm test`. Ospec considers any Javascript file
 npm test
 ```
 
+## Running mithril in a non-browser environment
+
+Mithril has a few dependencies on globals that exist in all its supported browser environments but are missing in all non-browser environments. To work around this you can use the browser mocks that ship with the mithril npm package.
+
+The simplest way to do this is ensure the following snippet of code runs **before** you include mithril itself in your project.
+
+```js
+// Polyfill DOM env for mithril
+global.window = require("mithril/test-utils/browserMock.js")();
+global.document = window.document;
+```
+
+Once that snippet has been run you can `require("mithril")` and it should be quiet happy.
+
 ---
 
 ### Good testing practices
