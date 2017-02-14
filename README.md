@@ -69,7 +69,7 @@ Let's create an HTML file to follow along:
 
 ### Hello world
 
-Let's start as small as well can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
+Let's start as small as we can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
 
 ```javascript
 var root = document.body
