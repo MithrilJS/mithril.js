@@ -2,6 +2,8 @@
 
 var buildQueryString = require("../querystring/build")
 
+var FILE_PROTOCOL_REGEX = new RegExp('^file://', 'i')
+
 module.exports = function($window, Promise) {
 	var callbackCount = 0
 
@@ -86,7 +88,7 @@ module.exports = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
