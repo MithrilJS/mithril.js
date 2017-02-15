@@ -153,7 +153,7 @@ o.spec("mount", function() {
 
 				done()
 			}, FRAME_BUDGET)
-		}, FRAME_BUDGET)
+		}, FRAME_BUDGET * 2)
 
 	})
 
