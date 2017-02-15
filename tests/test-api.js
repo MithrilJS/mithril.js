@@ -150,10 +150,12 @@ o.spec("api", function() {
 			m.mount(root, {view: function() {count++}})
 			setTimeout(function() {
 				m.redraw()
-				
-				o(count).equals(2)
-				
-				done()
+
+				setTimeout(function() {
+					o(count).equals(2)
+
+					done()
+				}, FRAME_BUDGET)
 			}, FRAME_BUDGET)
 		})
 	})
