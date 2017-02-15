@@ -32,7 +32,7 @@ o.spec("render", function() {
 		o(threw).equals(true)
 	})
 
-	o("does not enter infinite loop when oninit triggers render and view throws", function(done) {
+	o("does not enter infinite loop when oninit triggers render and view throws with an object literal component", function(done) {
 		var A = {
 			oninit: init,
 			view: function() {throw new Error("error")}
@@ -54,6 +54,128 @@ o.spec("render", function() {
 		try {run()} catch (e) {threwOuter = true}
 
 		o(threwOuter).equals(true)
+	})
+	o("does not try to re-initialize a constructibe component whose view has thrown", function() {
+		var oninit = o.spy()
+		var onbeforeupdate = o.spy()
+		function A(){}
+		A.prototype.view = function() {throw new Error("error")}
+		A.prototype.oninit = oninit
+		A.prototype.onbeforeupdate = onbeforeupdate
+		var throwCount = 0
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+	})
+	o("does not try to re-initialize a constructible component whose oninit has thrown", function() {
+		var oninit = o.spy(function(){throw new Error("error")})
+		var onbeforeupdate = o.spy()
+		function A(){}
+		A.prototype.view = function(){}
+		A.prototype.oninit = oninit
+		A.prototype.onbeforeupdate = onbeforeupdate
+		var throwCount = 0
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+	})
+	o("does not try to re-initialize a constructible component whose constructor has thrown", function() {
+		var oninit = o.spy()
+		var onbeforeupdate = o.spy()
+		function A(){throw new Error("error")}
+		A.prototype.view = function() {}
+		A.prototype.oninit = oninit
+		A.prototype.onbeforeupdate = onbeforeupdate
+		var throwCount = 0
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(0)
+		o(onbeforeupdate.callCount).equals(0)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(0)
+		o(onbeforeupdate.callCount).equals(0)
+	})
+	o("does not try to re-initialize a factory component whose view has thrown", function() {
+		var oninit = o.spy()
+		var onbeforeupdate = o.spy()
+		function A() {
+			return {
+				view: function(vnode) {throw new Error("error")},
+				oninit: oninit,
+				onbeforeupdate: onbeforeupdate
+			}
+		}
+		var throwCount = 0
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+	})
+	o("does not try to re-initialize a factory component whose oninit has thrown", function() {
+		var oninit = o.spy(function(vnode) {throw new Error("error")})
+		var onbeforeupdate = o.spy()
+		function A() {
+			return {
+				view: function(vnode) {},
+				oninit: oninit,
+				onbeforeupdate: onbeforeupdate
+			}
+		}
+		var throwCount = 0
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+		o(oninit.callCount).equals(1)
+		o(onbeforeupdate.callCount).equals(0)
+	})
+	o("does not try to re-initialize a factory component whose factory has thrown", function() {
+		function A() {
+			throw new Error("error")
+		}
+		var throwCount = 0
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
+
+		try {render(root, {tag: A})} catch (e) {throwCount++}
+
+		o(throwCount).equals(1)
 	})
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
 		var createA = o.spy()
