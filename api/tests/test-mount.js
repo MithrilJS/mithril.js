@@ -32,10 +32,40 @@ o.spec("mount", function() {
 		o(threw).equals(true)
 	})
 
-	o("renders into `root`", function() {
+	o("throws on invalid component", function() {
+		var threw = false
+		try {
+			mount(root, {})
+		} catch (e) {
+			threw = true
+		}
+		o(threw).equals(true)
+	})
+
+	o("renders into `root` (POJO component)", function() {
 		mount(root, {
 			view : function() {
 				return m("div")
+			}
+		})
+
+		o(root.firstChild.nodeName).equals("DIV")
+	})
+
+	o("renders into `root` (class component)", function() {
+		function Cmp(){}
+		Cmp.prototype.view = function(){return m("div")}
+		mount(root, Cmp)
+
+		o(root.firstChild.nodeName).equals("DIV")
+	})
+
+	o("renders into `root` factory (factory component)", function() {
+		mount(root, function(){
+			return {
+				view : function() {
+					return m("div")
+				}
 			}
 		})
 
