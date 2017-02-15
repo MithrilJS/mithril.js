@@ -35,11 +35,11 @@ Generates a fragment [vnode](vnodes.md)
 
 `vnode = m.fragment(attrs, children)`
 
-Argument    | Type                                 | Required | Description
------------ | ------------------------------------ | -------- | ---
-`attrs`     | `Object`                             | Yes      | A map of attributes
-`children`  | `Array<Vnode>|String|Number|Boolean` | Yes      | A list of vnodes
-**returns** | `Vnode`                              |          | A fragment [vnode](vnodes.md)
+Argument    | Type                                                | Required | Description
+----------- | --------------------------------------------------- | -------- | ---
+`attrs`     | `Object`                                            | Yes      | A map of attributes
+`children`  | `Array<Vnode|String|Number|Boolean|null|undefined>` | Yes      | A list of vnodes
+**returns** | `Vnode`                                             |          | A fragment [vnode](vnodes.md)
 
 [How to read signatures](signatures.md)
 

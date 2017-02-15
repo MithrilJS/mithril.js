@@ -123,11 +123,11 @@ For more information on `onmatch`, see the [advanced component resolution](#adva
 
 `routeResolver.onmatch(args, requestedPath)`
 
-Argument        | Type                           | Description
---------------- | ------------------------------ | ---
-`args`          | `Object`                       | The [routing parameters](#routing-parameters)
-`requestedPath` | `String`                       | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-**returns**     | `Component|Promise<Component>` | Returns a component or a promise that resolves to a component
+Argument        | Type                                     | Description
+--------------- | ---------------------------------------- | ---
+`args`          | `Object`                                 | The [routing parameters](#routing-parameters)
+`requestedPath` | `String`                                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+**returns**     | `Component|Promise<Component>|undefined` | Returns a component or a promise that resolves to a component
 
 If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
 
@@ -139,11 +139,11 @@ The `render` method is called on every redraw for a matching route. It is simila
 
 `vnode = routeResolve.render(vnode)`
 
-Argument            | Type            | Description
-------------------- | --------------- | -----------
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
-`vnode.attrs`       | `Object`        | A map of URL parameter values
-**returns**         | `Vnode`         | Returns a vnode
+Argument            | Type                 | Description
+------------------- | -------------------- | -----------
+`vnode`             | `Object`             | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
+`vnode.attrs`       | `Object`             | A map of URL parameter values
+**returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
 
 ---
 
@@ -501,7 +501,7 @@ For the sake of simplicity, in the example above, the user's logged in status is
 var Auth = {
 	username: "",
 	password: "",
-	
+
 	setUsername: function(value) {
 		Auth.username = value
 	},
