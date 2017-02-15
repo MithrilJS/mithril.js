@@ -397,13 +397,30 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
+
 			var failed = false
-			xhr({method: "GET", url: "/item", config: function (xhr) { setTimeout(function() { xhr.abort() }, 0) }}).catch(function() {
+			var resolved = false
+			function handleAbort(xhr) {
+				var onreadystatechange = xhr.onreadystatechange // probably not set yet
+				var testonreadystatechange = function() {
+					onreadystatechange.call(xhr)
+					setTimeout(function() { // allow promises to (not) resolve first
+						o(failed).equals(false)
+						o(resolved).equals(false)
+						done()
+					}, 0)
+				}
+				Object.defineProperty(xhr, 'onreadystatechange', {
+					set: function(val) { onreadystatechange = val }
+					, get: function() { return testonreadystatechange }
+				})
+				xhr.abort()
+			}
+			xhr({method: "GET", url: "/item", config: handleAbort}).catch(function() {
 				failed = true
-			}).then(function() {
-				o(failed).equals(false)
-			}).then(function() {
-				done()
+			})
+			.then(function() {
+				resolved = true
 			})
 		})
 		o("doesn't fail on file:// status 0", function(done) {
