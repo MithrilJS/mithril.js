@@ -1,0 +1,13 @@
+{
+  "name": "mithril-stream",
+  "version": "1.0.0",
+  "description": "Streaming data, mithril-style",
+  "main": "stream.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [ "stream", "reactive", "data" ],
+  "author": "Leo Horie <lhorie@hotmail.com>",
+  "license": "MIT",
+  "repository": "lhorie/mithril.js"
+}
