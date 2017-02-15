@@ -20,7 +20,7 @@ new function(o) {
 
 o.spec("ospec", function() {
 	o.spec("sync", function() {
-		var a = 0, b = 0
+		var a = 0, b = 0, illegalAssertionThrows = false
 
 		o.before(function() {a = 1})
 		o.after(function() {a = 0})
@@ -28,7 +28,15 @@ o.spec("ospec", function() {
 		o.beforeEach(function() {b = 1})
 		o.afterEach(function() {b = 0})
 
+		try {o('illegal assertion')} catch (e) {illegalAssertionThrows = true}
+
 		o("assertions", function() {
+			var nestedTestDeclarationThrows = false
+			try {o('illegal nested test', function(){})} catch (e) {nestedTestDeclarationThrows = true}
+
+			o(illegalAssertionThrows).equals(true)
+			o(nestedTestDeclarationThrows).equals(true)
+
 			var spy = o.spy()
 			spy(a)
 
