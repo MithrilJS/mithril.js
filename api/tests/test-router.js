@@ -51,11 +51,44 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("routed mount points can redraw synchronously (#1275)", function() {
+				o("routed mount points can redraw synchronously (POJO component)", function() {
 					var view = o.spy()
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {"/":{view:view}})
+
+					o(view.callCount).equals(1)
+
+					redrawService.redraw()
+
+					o(view.callCount).equals(2)
+
+				})
+
+				o("routed mount points can redraw synchronously (constructible component)", function() {
+					var view = o.spy()
+
+					var Cmp = function(){}
+					Cmp.prototype.view = view
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {"/":Cmp})
+
+					o(view.callCount).equals(1)
+
+					redrawService.redraw()
+
+					o(view.callCount).equals(2)
+
+				})
+
+				o("routed mount points can redraw synchronously (factory component)", function() {
+					var view = o.spy()
+
+					function Cmp() {return {view: view}}
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {"/":Cmp})
 
 					o(view.callCount).equals(1)
 
