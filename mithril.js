@@ -17,7 +17,7 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 function hyperscript(selector) {
-	if (selector == null || typeof selector !== "string" && typeof selector.view !== "function") {
+	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
 	if (typeof selector === "string" && selectorCache[selector] === undefined) {
@@ -436,13 +436,23 @@ var coreRenderer = function($window) {
 		return element
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
-		vnode.state = Object.create(vnode.tag)
-		var view = vnode.tag.view
-		if (view.reentrantLock != null) return $emptyFragment
-		view.reentrantLock = true
-		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Vnode.normalize(view.call(vnode.state, vnode))
-		view.reentrantLock = null
+		var sentinel
+		if (typeof vnode.tag === "function") {
+			vnode.state = null
+			sentinel = vnode.tag
+			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			sentinel.$$reentrantLock$$ = true
+			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
+		} else {
+			// For object literals since `Vnode()` always sets the `state` field.
+			vnode.state = Object.create(vnode.tag)
+			sentinel = vnode.state.view
+			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			sentinel.$$reentrantLock$$ = true
+		}
+		initLifecycle(vnode.state, vnode, hooks)
+		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+		sentinel.$$reentrantLock$$ = null
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -627,8 +637,8 @@ var coreRenderer = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
-		updateLifecycle(vnode.tag, vnode, hooks, recycling)
+		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+		updateLifecycle(vnode.state, vnode, hooks, recycling)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
@@ -717,8 +727,8 @@ var coreRenderer = function($window) {
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-			var result = vnode.tag.onbeforeremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && vnode.state.onbeforeremove) {
+			var result = vnode.state.onbeforeremove(vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -751,7 +761,7 @@ var coreRenderer = function($window) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && vnode.state.onremove) vnode.state.onremove(vnode)
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
@@ -882,7 +892,7 @@ var coreRenderer = function($window) {
 	function shouldUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") forceComponentUpdate = vnode.state.onbeforeupdate(vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
