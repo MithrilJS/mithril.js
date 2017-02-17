@@ -49,7 +49,7 @@ after_success:
 env:
   global:
     # Restrict the branch this will activate on
-    - BRANCH=rewrite
+    - BRANCH=next
     - REPO=lhorie/mithril.js
     
     # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
