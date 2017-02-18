@@ -21,11 +21,12 @@ module.exports = function($window, redrawService) {
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
-				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, lastUpdate = null
+				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				run()
 			}
-			if (payload.view) update({}, payload)
+			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
