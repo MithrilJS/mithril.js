@@ -390,6 +390,56 @@ o.spec("xhr", function() {
 				o(xhr.getRequestHeader("Accept")).equals("application/json, text/*")
 			}
 		})
+		o("doesn't fail on abort", function(done) {
+			var s = new Date
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+
+			var failed = false
+			var resolved = false
+			function handleAbort(xhr) {
+				var onreadystatechange = xhr.onreadystatechange // probably not set yet
+				var testonreadystatechange = function() {
+					onreadystatechange.call(xhr)
+					setTimeout(function() { // allow promises to (not) resolve first
+						o(failed).equals(false)
+						o(resolved).equals(false)
+						done()
+					}, 0)
+				}
+				Object.defineProperty(xhr, 'onreadystatechange', {
+					set: function(val) { onreadystatechange = val }
+					, get: function() { return testonreadystatechange }
+				})
+				xhr.abort()
+			}
+			xhr({method: "GET", url: "/item", config: handleAbort}).catch(function() {
+				failed = true
+			})
+			.then(function() {
+				resolved = true
+			})
+		})
+		o("doesn't fail on file:// status 0", function(done) {
+			var s = new Date
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 0, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			var failed = false
+			xhr({method: "GET", url: "file:///item"}).catch(function() {
+				failed = true
+			}).then(function(data) {
+				o(failed).equals(false)
+				o(data).deepEquals({a: 1})
+			}).then(function() {
+				done()
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
@@ -462,6 +512,16 @@ o.spec("xhr", function() {
 					done()
 				})
 			})
+		})
+		o("rejects on cors-like error", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 0}
+				}
+			})
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+			}).then(done)
 		})
 	})
 })
