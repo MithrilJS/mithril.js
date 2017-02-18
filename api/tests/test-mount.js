@@ -60,7 +60,7 @@ o.spec("mount", function() {
 		o(root.firstChild.nodeName).equals("DIV")
 	})
 
-	o("renders into `root` factory (factory component)", function() {
+	o("renders into `root` (closure component)", function() {
 		mount(root, function(){
 			return {
 				view : function() {
