@@ -113,37 +113,43 @@ o.spec("onremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
-	o("calls onremove on nested component", function() {
-		var spy = o.spy()
-		var comp = {
-			view: function() {return m(outer)}
-		}
-		var outer = {
-			view: function() {return m(inner)}
-		}
-		var inner = {
-			onremove: spy,
-			view: function() {return m("div")}
-		}
-		render(root, {tag: comp})
-		render(root, null)
-		
-		o(spy.callCount).equals(1)
-	})
-	o("calls onremove on nested component child", function() {
-		var spy = o.spy()
-		var comp = {
-			view: function() {return m(outer)}
-		}
-		var outer = {
-			view: function() {return m(inner, m("a", {onremove: spy}))}
-		}
-		var inner = {
-			view: function(vnode) {return m("div", vnode.children)}
-		}
-		render(root, {tag: comp})
-		render(root, null)
-		
-		o(spy.callCount).equals(1)
+	;[components[0]].forEach(function(cmp){
+		o.spec(cmp.kind, function(){
+			var createComponent = cmp.create
+
+			o("calls onremove on nested component", function() {
+				var spy = o.spy()
+				var comp = {
+					view: function() {return m(outer)}
+				}
+				var outer = {
+					view: function() {return m(inner)}
+				}
+				var inner = {
+					onremove: spy,
+					view: function() {return m("div")}
+				}
+				render(root, {tag: comp})
+				render(root, null)
+				
+				o(spy.callCount).equals(1)
+			})
+			o("calls onremove on nested component child", function() {
+				var spy = o.spy()
+				var comp = {
+					view: function() {return m(outer)}
+				}
+				var outer = {
+					view: function() {return m(inner, m("a", {onremove: spy}))}
+				}
+				var inner = {
+					view: function(vnode) {return m("div", vnode.children)}
+				}
+				render(root, {tag: comp})
+				render(root, null)
+				
+				o(spy.callCount).equals(1)
+			})
+		})
 	})
 })

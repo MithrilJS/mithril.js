@@ -120,171 +120,177 @@ o.spec("onbeforeupdate", function() {
 		o(count).equals(1)
 	})
 
-	o("prevents update in component", function() {
-		var component = {
-			onbeforeupdate: function() {return false},
-			view: function(vnode) {
-				return {tag: "div", children: vnode.children}
-			},
-		}
-		var vnode = {tag: component, children: [{tag: "#", children: "a"}]}
-		var updated = {tag: component, children: [{tag: "#", children: "b"}]}
+	;[components[0]].forEach(function(cmp){
+		o.spec(cmp.kind, function(){
+			var createComponent = cmp.create
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("prevents update in component", function() {
+				var component = {
+					onbeforeupdate: function() {return false},
+					view: function(vnode) {
+						return {tag: "div", children: vnode.children}
+					},
+				}
+				var vnode = {tag: component, children: [{tag: "#", children: "a"}]}
+				var updated = {tag: component, children: [{tag: "#", children: "b"}]}
 
-		o(root.firstChild.firstChild.nodeValue).equals("a")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("prevents update if returning false in component and false in vnode", function() {
-		var component = {
-			onbeforeupdate: function() {return false},
-			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
-			},
-		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+				o(root.firstChild.firstChild.nodeValue).equals("a")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("prevents update if returning false in component and false in vnode", function() {
+				var component = {
+					onbeforeupdate: function() {return false},
+					view: function(vnode) {
+						return {tag: "div", attrs: {id: vnode.attrs.id}}
+					},
+				}
+				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
+				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("a")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("does not prevent update if returning true in component and true in vnode", function() {
-		var component = {
-			onbeforeupdate: function() {return true},
-			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
-			},
-		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+				o(root.firstChild.attributes["id"].nodeValue).equals("a")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("does not prevent update if returning true in component and true in vnode", function() {
+				var component = {
+					onbeforeupdate: function() {return true},
+					view: function(vnode) {
+						return {tag: "div", attrs: {id: vnode.attrs.id}}
+					},
+				}
+				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
+				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("does not prevent update if returning false in component but true in vnode", function() {
-		var component = {
-			onbeforeupdate: function() {return false},
-			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
-			},
-		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("does not prevent update if returning false in component but true in vnode", function() {
+				var component = {
+					onbeforeupdate: function() {return false},
+					view: function(vnode) {
+						return {tag: "div", attrs: {id: vnode.attrs.id}}
+					},
+				}
+				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
+				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("does not prevent update if returning true in component but false in vnode", function() {
-		var component = {
-			onbeforeupdate: function() {return true},
-			view: function(vnode) {
-				return {tag: "div", attrs: {id: vnode.attrs.id}}
-			},
-		}
-		var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-		var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("does not prevent update if returning true in component but false in vnode", function() {
+				var component = {
+					onbeforeupdate: function() {return true},
+					view: function(vnode) {
+						return {tag: "div", attrs: {id: vnode.attrs.id}}
+					},
+				}
+				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
+				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("does not prevent update if returning true from component", function() {
-		var component = {
-			onbeforeupdate: function() {return true},
-			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
-			},
-		}
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("does not prevent update if returning true from component", function() {
+				var component = {
+					onbeforeupdate: function() {return true},
+					view: function(vnode) {
+						return {tag: "div", attrs: vnode.attrs}
+					},
+				}
+				var vnode = {tag: component, attrs: {id: "a"}}
+				var updated = {tag: component, attrs: {id: "b"}}
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
-	})
+				render(root, [vnode])
+				render(root, [updated])
 
-	o("accepts arguments for comparison in component", function() {
-		var component = {
-			onbeforeupdate: onbeforeupdate,
-			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
-			},
-		}
-		var count = 0
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+			})
 
-		render(root, [vnode])
-		render(root, [updated])
+			o("accepts arguments for comparison in component", function() {
+				var component = {
+					onbeforeupdate: onbeforeupdate,
+					view: function(vnode) {
+						return {tag: "div", attrs: vnode.attrs}
+					},
+				}
+				var count = 0
+				var vnode = {tag: component, attrs: {id: "a"}}
+				var updated = {tag: component, attrs: {id: "b"}}
 
-		function onbeforeupdate(vnode, old) {
-			count++
+				render(root, [vnode])
+				render(root, [updated])
 
-			o(old.attrs.id).equals("a")
-			o(vnode.attrs.id).equals("b")
+				function onbeforeupdate(vnode, old) {
+					count++
 
-			return old.attrs.id !== vnode.attrs.id
-		}
+					o(old.attrs.id).equals("a")
+					o(vnode.attrs.id).equals("b")
 
-		o(count).equals(1)
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
-	})
+					return old.attrs.id !== vnode.attrs.id
+				}
 
-	o("is not called on component creation", function() {
-		var component = {
-			onbeforeupdate: onbeforeupdate,
-			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
-			},
-		}
+				o(count).equals(1)
+				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+			})
 
-		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a"}}
-		var updated = {tag: "div", attrs: {id: "b"}}
+			o("is not called on component creation", function() {
+				var component = {
+					onbeforeupdate: onbeforeupdate,
+					view: function(vnode) {
+						return {tag: "div", attrs: vnode.attrs}
+					},
+				}
 
-		render(root, [vnode])
+				var count = 0
+				var vnode = {tag: "div", attrs: {id: "a"}}
+				var updated = {tag: "div", attrs: {id: "b"}}
 
-		function onbeforeupdate(vnode, old) {
-			count++
-			return true
-		}
+				render(root, [vnode])
 
-		o(count).equals(0)
-	})
+				function onbeforeupdate(vnode, old) {
+					count++
+					return true
+				}
 
-	o("is called only once on component update", function() {
-		var component = {
-			onbeforeupdate: onbeforeupdate,
-			view: function(vnode) {
-				return {tag: "div", attrs: vnode.attrs}
-			},
-		}
+				o(count).equals(0)
+			})
 
-		var count = 0
-		var vnode = {tag: component, attrs: {id: "a"}}
-		var updated = {tag: component, attrs: {id: "b"}}
+			o("is called only once on component update", function() {
+				var component = {
+					onbeforeupdate: onbeforeupdate,
+					view: function(vnode) {
+						return {tag: "div", attrs: vnode.attrs}
+					},
+				}
 
-		render(root, [vnode])
-		render(root, [updated])
+				var count = 0
+				var vnode = {tag: component, attrs: {id: "a"}}
+				var updated = {tag: component, attrs: {id: "b"}}
 
-		function onbeforeupdate(vnode, old) {
-			count++
-			return true
-		}
+				render(root, [vnode])
+				render(root, [updated])
 
-		o(count).equals(1)
+				function onbeforeupdate(vnode, old) {
+					count++
+					return true
+				}
+
+				o(count).equals(1)
+			})
+		})
 	})
 })

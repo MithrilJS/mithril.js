@@ -905,36 +905,42 @@ o.spec("updateNodes", function() {
 		
 		o(vnode.dom).notEquals(updated.dom)
 	})
-	o("fragment child toggles from null when followed by null component then tag", function() {
-		var component = {view: function() {return null}}
-		var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
-		var temp = [{tag: "[", children: [null, {tag: component}, {tag: "b"}]}]
-		var updated = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
+	;[components[0]].forEach(function(cmp){
+		o.spec(cmp.kind, function(){
+			var createComponent = cmp.create
 
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
+			o("fragment child toggles from null when followed by null component then tag", function() {
+				var component = {view: function() {return null}}
+				var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
+				var temp = [{tag: "[", children: [null, {tag: component}, {tag: "b"}]}]
+				var updated = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
 
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("B")
-	})
-	o("fragment child toggles from null in component when followed by null component then tag", function() {
-		var flag = true
-		var a = {view: function() {return flag ? {tag: "a"} : null}}
-		var b = {view: function() {return null}}
-		var vnodes = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
-		var temp = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
-		var updated = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+				render(root, vnodes)
+				render(root, temp)
+				render(root, updated)
 
-		render(root, vnodes)
-		flag = false
-		render(root, temp)
-		flag = true
-		render(root, updated)
+				o(root.childNodes.length).equals(2)
+				o(root.childNodes[0].nodeName).equals("A")
+				o(root.childNodes[1].nodeName).equals("B")
+			})
+			o("fragment child toggles from null in component when followed by null component then tag", function() {
+				var flag = true
+				var a = {view: function() {return flag ? {tag: "a"} : null}}
+				var b = {view: function() {return null}}
+				var vnodes = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+				var temp = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+				var updated = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
 
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("S")
+				render(root, vnodes)
+				flag = false
+				render(root, temp)
+				flag = true
+				render(root, updated)
+
+				o(root.childNodes.length).equals(2)
+				o(root.childNodes[0].nodeName).equals("A")
+				o(root.childNodes[1].nodeName).equals("S")
+			})
+		})
 	})
 })
