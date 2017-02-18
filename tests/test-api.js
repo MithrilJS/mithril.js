@@ -68,6 +68,16 @@ o.spec("api", function() {
 			o(query).equals("a=1&b=2")
 		})
 	})
+	o.spec("m.request", function() {
+		o("works", function() {
+			o(typeof m.request).equals("function") // TODO improve
+		})
+	})
+	o.spec("m.jsonp", function() {
+		o("works", function() {
+			o(typeof m.jsonp).equals("function") // TODO improve
+		})
+	})
 	o.spec("m.render", function() {
 		o("works", function() {
 			var root = window.document.createElement("div")
@@ -155,16 +165,6 @@ o.spec("api", function() {
 
 				done()
 			}, FRAME_BUDGET)
-		})
-	})
-	o.spec("m.request", function() {
-		o("works", function() {
-			o(typeof m.request).equals("function") // TODO improve
-		})
-	})
-	o.spec("m.jsonp", function() {
-		o("works", function() {
-			o(typeof m.jsonp).equals("function") // TODO improve
 		})
 	})
 })
