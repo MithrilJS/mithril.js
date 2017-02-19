@@ -656,6 +656,130 @@ o.spec("component", function() {
 
 					o(vnode.dom).notEquals(updated.dom)
 				})
+				o("lifecycle timing megatest (for a single component)", function() {
+					var methods = {
+						view: o.spy(function() {
+							return ""
+						})
+					}
+					var attrs = {}
+					var hooks = [
+						"oninit", "oncreate", "onbeforeupdate",
+						"onupdate", "onbeforeremove", "onremove"
+					]
+					hooks.forEach(function(hook) {
+						// the `attrs` hooks are called before  the component ones
+						attrs[hook] = o.spy(function() {
+							o(attrs[hook].callCount).equals(methods[hook].callCount + 1)
+						})
+						methods[hook] = o.spy(function() {
+							o(attrs[hook].callCount).equals(methods[hook].callCount)
+						})
+					})
+
+					var component = createComponent(methods)
+
+					o(methods.view.callCount).equals(0)
+					o(methods.oninit.callCount).equals(0)
+					o(methods.oncreate.callCount).equals(0)
+					o(methods.onbeforeupdate.callCount).equals(0)
+					o(methods.onupdate.callCount).equals(0)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [{tag: component, attrs: attrs}])
+
+					o(methods.view.callCount).equals(1)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(0)
+					o(methods.onupdate.callCount).equals(0)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [{tag: component, attrs: attrs}])
+
+					o(methods.view.callCount).equals(2)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(1)
+					o(methods.onupdate.callCount).equals(1)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [])
+
+					o(methods.view.callCount).equals(2)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(1)
+					o(methods.onupdate.callCount).equals(1)
+					o(methods.onbeforeremove.callCount).equals(1)
+					o(methods.onremove.callCount).equals(1)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+				})
+				o("hook state and arguments validation", function(){
+					var methods = {
+						view: o.spy(function(vnode) {
+							o(this).equals(vnode.state)
+							return ""
+						})
+					}
+					var attrs = {}
+					var hooks = [
+						"oninit", "oncreate", "onbeforeupdate",
+						"onupdate", "onbeforeremove", "onremove"
+					]
+					hooks.forEach(function(hook) {
+						attrs[hook] = o.spy(function(vnode){
+							// #1638, the assertion passes for `oninit` because both values are wrong.
+							if (hook !== 'oncreate') o(this).equals(vnode.state)(hook)
+						})
+						methods[hook] = o.spy(function(vnode){
+							o(this).equals(vnode.state)
+						})
+					})
+
+					var component = createComponent(methods)
+
+					render(root, [{tag: component, attrs: attrs}])
+					render(root, [{tag: component, attrs: attrs}])
+					render(root, [])
+
+					hooks.forEach(function(hook) {
+						// #1638
+						if (hook !== "oninit" && hook !== 'oncreate') o(attrs[hook].this).equals(methods.view.this)(hook)
+						o(methods[hook].this).equals(methods.view.this)(hook)
+					})
+
+					o(methods.view.args.length).equals(1)
+					o(methods.oninit.args.length).equals(1)
+					o(methods.oncreate.args.length).equals(1)
+					o(methods.onbeforeupdate.args.length).equals(2)
+					o(methods.onupdate.args.length).equals(1)
+					o(methods.onbeforeremove.args.length).equals(1)
+					o(methods.onremove.args.length).equals(1)
+
+					hooks.forEach(function(hook) {
+						o(methods[hook].args.length).equals(attrs[hook].args.length)(hook)
+					})
+
+				})
 			})
 			o.spec("state", function() {
 				o("initializes state", function() {
@@ -675,7 +799,7 @@ o.spec("component", function() {
 						o(vnode.state.data).equals(data)
 					}
 				})
-				o('state "copy" is shallow', function() {
+				o('state proxies to the component object/prototype', function() {
 					var called = 0
 					var body = {a: 1}
 					var data = [body]
@@ -698,11 +822,10 @@ o.spec("component", function() {
 		})
 	})
 	o.spec("Tests specific to certain component kinds", function() {
-
-		o.spec("POJO state", function() {
-			o("copies state", function() {
+		o.spec("state", function() {
+			o("POJO", function() {
 				var called = 0
-				var data = {a: 1}
+				var data = {}
 				var component = {
 					data: data,
 					oninit: init,
@@ -721,142 +844,54 @@ o.spec("component", function() {
 					o(vnode.state.x).equals(1)
 				}
 			})
-		})
+			o("Constructible", function() {
+				var oninit = o.spy()
+				var component = o.spy(function(vnode){
+					o(vnode.state).equals(null)
+					// #1638
+					// o(oninit.callCount).equals(0)
+				})
+				var view = o.spy(function(){
+					o(this instanceof component).equals(true)
+					return ""
+				})
+				component.prototype.view = view
+				component.prototype.oninit = oninit
 
-		o("Classes can be used as components", function() {
-			function MyComponent(vnode){
-				o(vnode.state).equals(null)
-			}
-			var proto = MyComponent.prototype
+				var context
 
-			var context
+				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [])
 
-			proto.oninit = o.spy(function(vnode) {
-				o(this).equals(vnode.state)
-				context = this
+				o(component.callCount).equals(1)
+				o(oninit.callCount).equals(2)
+				o(view.callCount).equals(2)
 			})
-			proto.oncreate = o.spy()
-			proto.onbeforeupdate = o.spy()
-			proto.onupdate = o.spy()
-			proto.onbeforeremove = o.spy()
-			proto.onremove = o.spy()
-			proto.view = o.spy(function() {
-				return ""
+			o("Closure", function() {
+				var state
+				var oninit = o.spy()
+				var view = o.spy(function() {
+					o(this).equals(state)
+					return ""
+				})
+				var component = o.spy(function(vnode) {
+					o(vnode.state).equals(null)
+					// #1638
+					// o(oninit.callCount).equals(0)
+					return state = {
+						view: view
+					}
+				})
+
+				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [])
+
+				o(component.callCount).equals(1)
+				o(oninit.callCount).equals(1)
+				o(view.callCount).equals(2)
 			})
-
-			render(root, [{tag: MyComponent}])
-
-			o(context instanceof MyComponent).equals(true)
-
-			o(proto.view.callCount).equals(1)
-			o(proto.oncreate.callCount).equals(1)
-			o(proto.onbeforeupdate.callCount).equals(0)
-			o(proto.onupdate.callCount).equals(0)
-			o(proto.onbeforeremove.callCount).equals(0)
-			o(proto.onremove.callCount).equals(0)
-
-			render(root, [{tag: MyComponent}])
-
-			o(proto.view.callCount).equals(2)
-			o(proto.oncreate.callCount).equals(1)
-			o(proto.onbeforeupdate.callCount).equals(1)
-			o(proto.onupdate.callCount).equals(1)
-			o(proto.onbeforeremove.callCount).equals(0)
-			o(proto.onremove.callCount).equals(0)
-
-			render(root, [])
-
-			o(proto.view.callCount).equals(2)
-			o(proto.oncreate.callCount).equals(1)
-			o(proto.onbeforeupdate.callCount).equals(1)
-			o(proto.onupdate.callCount).equals(1)
-			o(proto.onbeforeremove.callCount).equals(1)
-			o(proto.onremove.callCount).equals(1)
-
-			o(proto.oninit.this).equals(context)
-			o(proto.view.this).equals(context)
-			o(proto.oncreate.this).equals(context)
-			o(proto.onbeforeupdate.this).equals(context)
-			o(proto.onupdate.this).equals(context)
-			o(proto.onbeforeremove.this).equals(context)
-			o(proto.onremove.this).equals(context)
-
-			o(proto.oninit.args.length).equals(1)
-			o(proto.view.args.length).equals(1)
-			o(proto.oncreate.args.length).equals(1)
-			o(proto.onbeforeupdate.args.length).equals(2)
-			o(proto.onupdate.args.length).equals(1)
-			o(proto.onbeforeremove.args.length).equals(1)
-			o(proto.onremove.args.length).equals(1)
-		})
-		o("Closure functions can be used as components", function() {
-			var state, context
-			function component(vnode) {
-				o(vnode.state).equals(null)
-
-				return state = {
-					oninit: o.spy(function(vnode) {
-						o(this).equals(vnode.state)
-						context = this
-					}),
-					oncreate: o.spy(),
-					onbeforeupdate: o.spy(),
-					onupdate: o.spy(),
-					onbeforeremove: o.spy(),
-					onremove: o.spy(),
-					view: o.spy(function() {
-						return ""
-					})
-				}
-			}
-
-			render(root, [{tag: component}])
-
-			o(state).equals(context)
-
-			o(state.oninit.callCount).equals(1)
-			o(state.view.callCount).equals(1)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(0)
-			o(state.onupdate.callCount).equals(0)
-			o(state.onbeforeremove.callCount).equals(0)
-			o(state.onremove.callCount).equals(0)
-
-			render(root, [{tag: component}])
-
-			o(state.oninit.callCount).equals(1)
-			o(state.view.callCount).equals(2)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(1)
-			o(state.onupdate.callCount).equals(1)
-			o(state.onbeforeremove.callCount).equals(0)
-			o(state.onremove.callCount).equals(0)
-
-			render(root, [])
-
-			o(state.oninit.callCount).equals(1)
-			o(state.view.callCount).equals(2)
-			o(state.oncreate.callCount).equals(1)
-			o(state.onbeforeupdate.callCount).equals(1)
-			o(state.onupdate.callCount).equals(1)
-			o(state.onbeforeremove.callCount).equals(1)
-			o(state.onremove.callCount).equals(1)
-
-			o(state.oninit.this).equals(state)
-			o(state.view.this).equals(state)
-			o(state.oncreate.this).equals(state)
-			o(state.onbeforeupdate.this).equals(state)
-			o(state.onupdate.this).equals(state)
-			o(state.onbeforeremove.this).equals(state)
-			o(state.onremove.this).equals(state)
-
-			o(state.oninit.args.length).equals(1)
-			o(state.view.args.length).equals(1)
-			o(state.oncreate.args.length).equals(1)
-			o(state.onbeforeupdate.args.length).equals(2)
-			o(state.onupdate.args.length).equals(1)
-			o(state.onbeforeremove.args.length).equals(1)
-			o(state.onremove.args.length).equals(1)
 		})
 	})
 })
