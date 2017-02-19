@@ -125,12 +125,12 @@ o.spec("onbeforeupdate", function() {
 			var createComponent = cmp.create
 
 			o("prevents update in component", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
 						return {tag: "div", children: vnode.children}
 					},
-				}
+				})
 				var vnode = {tag: component, children: [{tag: "#", children: "a"}]}
 				var updated = {tag: component, children: [{tag: "#", children: "b"}]}
 
@@ -141,12 +141,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("prevents update if returning false in component and false in vnode", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
 						return {tag: "div", attrs: {id: vnode.attrs.id}}
 					},
-				}
+				})
 				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
 				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 
@@ -157,12 +157,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("does not prevent update if returning true in component and true in vnode", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
 						return {tag: "div", attrs: {id: vnode.attrs.id}}
 					},
-				}
+				})
 				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
 				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 
@@ -173,12 +173,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("does not prevent update if returning false in component but true in vnode", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
 						return {tag: "div", attrs: {id: vnode.attrs.id}}
 					},
-				}
+				})
 				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
 				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
 
@@ -189,12 +189,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("does not prevent update if returning true in component but false in vnode", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
 						return {tag: "div", attrs: {id: vnode.attrs.id}}
 					},
-				}
+				})
 				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
 				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
 
@@ -205,12 +205,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("does not prevent update if returning true from component", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
 						return {tag: "div", attrs: vnode.attrs}
 					},
-				}
+				})
 				var vnode = {tag: component, attrs: {id: "a"}}
 				var updated = {tag: component, attrs: {id: "b"}}
 
@@ -221,12 +221,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("accepts arguments for comparison in component", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
 						return {tag: "div", attrs: vnode.attrs}
 					},
-				}
+				})
 				var count = 0
 				var vnode = {tag: component, attrs: {id: "a"}}
 				var updated = {tag: component, attrs: {id: "b"}}
@@ -248,12 +248,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("is not called on component creation", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
 						return {tag: "div", attrs: vnode.attrs}
 					},
-				}
+				})
 
 				var count = 0
 				var vnode = {tag: "div", attrs: {id: "a"}}
@@ -270,12 +270,12 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("is called only once on component update", function() {
-				var component = {
+				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
 						return {tag: "div", attrs: vnode.attrs}
 					},
-				}
+				})
 
 				var count = 0
 				var vnode = {tag: component, attrs: {id: "a"}}

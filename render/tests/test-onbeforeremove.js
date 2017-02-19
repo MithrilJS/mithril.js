@@ -176,11 +176,11 @@ o.spec("onbeforeremove", function() {
 			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
 				var onremove = o.spy()
 				var onbeforeremove = function(){return Promise.resolve()}
-				var component = {
+				var component = createComponent({
 					onbeforeremove: onbeforeremove,
 					onremove: onremove,
 					view: function() {},
-				}
+				})
 				render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
 				render(root, [])
 				callAsync(function() {
@@ -192,11 +192,11 @@ o.spec("onbeforeremove", function() {
 				var view = o.spy()
 				var onremove = o.spy()
 				var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
-				var component = {
+				var component = createComponent({
 					onbeforeremove: onbeforeremove,
 					onremove: onremove,
 					view: view,
-				}
+				})
 				render(root, [{tag: component}])
 				render(root, [])
 
