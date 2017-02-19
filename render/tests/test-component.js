@@ -658,7 +658,7 @@ o.spec("component", function() {
 				})
 			})
 			o.spec("state", function() {
-				o("copies state", function() {
+				o("initializes state", function() {
 					var called = 0
 					var data = {a: 1}
 					var component = {
@@ -672,15 +672,10 @@ o.spec("component", function() {
 					render(root, [{tag: component}])
 
 					function init(vnode) {
-						o(vnode.state.data).deepEquals(data)
 						o(vnode.state.data).equals(data)
-
-						//inherits state via prototype
-						component.x = 1
-						o(vnode.state.x).equals(1)
 					}
 				})
-				o("state copy is shallow", function() {
+				o('state "copy" is shallow', function() {
 					var called = 0
 					var body = {a: 1}
 					var data = [body]
@@ -702,7 +697,32 @@ o.spec("component", function() {
 			})
 		})
 	})
-	o.spec("Alternative ways to specify components", function() {
+	o.spec("Tests specific to certain component kinds", function() {
+
+		o.spec("POJO state", function() {
+			o("copies state", function() {
+				var called = 0
+				var data = {a: 1}
+				var component = {
+					data: data,
+					oninit: init,
+					view: function() {
+						return ""
+					}
+				}
+
+				render(root, [{tag: component}])
+
+				function init(vnode) {
+					o(vnode.state.data).equals(data)
+
+					//inherits state via prototype
+					component.x = 1
+					o(vnode.state.x).equals(1)
+				}
+			})
+		})
+
 		o("Classes can be used as components", function() {
 			function MyComponent(vnode){
 				o(vnode.state).equals(null)
@@ -769,7 +789,7 @@ o.spec("component", function() {
 			o(proto.onbeforeremove.args.length).equals(1)
 			o(proto.onremove.args.length).equals(1)
 		})
-		o("Factory functions can be used as components", function() {
+		o("Closure functions can be used as components", function() {
 			var state, context
 			function component(vnode) {
 				o(vnode.state).equals(null)
