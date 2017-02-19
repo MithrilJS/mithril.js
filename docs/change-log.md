@@ -9,10 +9,17 @@
 
 ### v1.0.2
 
+#### News
+
+- support for ES6 class components
+- updated typescript definitions
+
 #### Bug fixes
 
 - fix IE11 input[type] error - [#1610](https://github.com/lhorie/mithril.js/issues/1610)
 - apply [#1609](https://github.com/lhorie/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/lhorie/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/lhorie/mithril.js/issues/1593)
 
 ---
 
