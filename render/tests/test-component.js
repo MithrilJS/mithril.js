@@ -747,8 +747,7 @@ o.spec("component", function() {
 					]
 					hooks.forEach(function(hook) {
 						attrs[hook] = o.spy(function(vnode){
-							// #1638, the assertion passes for `oninit` because both values are wrong.
-							if (hook !== 'oncreate') o(this).equals(vnode.state)(hook)
+							o(this).equals(vnode.state)(hook)
 						})
 						methods[hook] = o.spy(function(vnode){
 							o(this).equals(vnode.state)
@@ -762,8 +761,7 @@ o.spec("component", function() {
 					render(root, [])
 
 					hooks.forEach(function(hook) {
-						// #1638
-						if (hook !== "oninit" && hook !== 'oncreate') o(attrs[hook].this).equals(methods.view.this)(hook)
+						o(attrs[hook].this).equals(methods.view.this)(hook)
 						o(methods[hook].this).equals(methods.view.this)(hook)
 					})
 
@@ -848,8 +846,7 @@ o.spec("component", function() {
 				var oninit = o.spy()
 				var component = o.spy(function(vnode){
 					o(vnode.state).equals(null)
-					// #1638
-					// o(oninit.callCount).equals(0)
+					o(oninit.callCount).equals(0)
 				})
 				var view = o.spy(function(){
 					o(this instanceof component).equals(true)
@@ -877,8 +874,7 @@ o.spec("component", function() {
 				})
 				var component = o.spy(function(vnode) {
 					o(vnode.state).equals(null)
-					// #1638
-					// o(oninit.callCount).equals(0)
+					o(oninit.callCount).equals(0)
 					return state = {
 						view: view
 					}
