@@ -88,7 +88,7 @@ o.spec("api", function() {
 			o(root.firstChild.nodeName).equals("DIV")
 		})
 	})
-	;[components[0]].forEach(function(cmp){
+	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 

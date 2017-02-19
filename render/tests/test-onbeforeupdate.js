@@ -120,7 +120,7 @@ o.spec("onbeforeupdate", function() {
 		o(count).equals(1)
 	})
 
-	;[components[0]].forEach(function(cmp){
+	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 

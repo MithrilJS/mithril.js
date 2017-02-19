@@ -33,7 +33,7 @@ o.spec("mount", function() {
 		o(threw).equals(true)
 	})
 
-	;[components[0]].forEach(function(cmp){
+	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 
@@ -47,32 +47,12 @@ o.spec("mount", function() {
 				o(threw).equals(true)
 			})
 
-			o("renders into `root` (POJO component)", function() {
+			o("renders into `root`", function() {
 				mount(root, createComponent({
 					view : function() {
 						return m("div")
 					}
 				}))
-
-				o(root.firstChild.nodeName).equals("DIV")
-			})
-
-			o("renders into `root` (class component)", function() {
-				function Cmp(){}
-				Cmp.prototype.view = function(){return m("div")}
-				mount(root, Cmp)
-
-				o(root.firstChild.nodeName).equals("DIV")
-			})
-
-			o("renders into `root` (closure component)", function() {
-				mount(root, function(){
-					return {
-						view : function() {
-							return m("div")
-						}
-					}
-				})
 
 				o(root.firstChild.nodeName).equals("DIV")
 			})

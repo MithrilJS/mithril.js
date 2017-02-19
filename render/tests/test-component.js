@@ -14,7 +14,7 @@ o.spec("component", function() {
 		render = vdom($window).render
 	})
 
-	;[components[0]].forEach(function(cmp){
+	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 

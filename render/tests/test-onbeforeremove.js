@@ -170,7 +170,7 @@ o.spec("onbeforeremove", function() {
 			done()
 		})
 	})
-	;[components[0]].forEach(function(cmp){
+	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
