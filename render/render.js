@@ -20,8 +20,8 @@ module.exports = function($window) {
 	}
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
+			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": return createText(parent, vnode, nextSibling)
 				case "<": return createHTML(parent, vnode, nextSibling)
@@ -116,6 +116,7 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 		}
 
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
 		sentinel.$$reentrantLock$$ = null
