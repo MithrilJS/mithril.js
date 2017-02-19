@@ -324,7 +324,7 @@ module.exports = {
 			m("input.input[type=text][placeholder=First name]"),
 			m("label.label", "Last name"),
 			m("input.input[placeholder=Last name]"),
-			m("button.button[type=submit]", "Save"),
+			m("button.button[type=button]", "Save"),
 		])
 	}
 }
@@ -420,7 +420,7 @@ module.exports = {
 			m("input.input[type=text][placeholder=First name]", {value: User.current.firstName}),
 			m("label.label", "Last name"),
 			m("input.input[placeholder=Last name]", {value: User.current.lastName}),
-			m("button.button[type=submit]", "Save"),
+			m("button.button[type=button]", "Save"),
 		])
 	}
 }
@@ -477,7 +477,7 @@ module.exports = {
 				oninput: m.withAttr("value", function(value) {User.current.lastName = value}),
 				value: User.current.lastName
 			}),
-			m("button.button[type=submit]", "Save"),
+			m("button.button[type=button]", "Save"),
 		])
 	}
 }
