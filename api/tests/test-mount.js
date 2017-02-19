@@ -40,7 +40,7 @@ o.spec("mount", function() {
 			o("throws on invalid `root` DOM node", function() {
 				var threw = false
 				try {
-					mount(null, {view: function() {}})
+					mount(null, createComponent({view: function() {}}))
 				} catch (e) {
 					threw = true
 				}
@@ -48,11 +48,11 @@ o.spec("mount", function() {
 			})
 
 			o("renders into `root` (POJO component)", function() {
-				mount(root, {
+				mount(root, createComponent({
 					view : function() {
 						return m("div")
 					}
-				})
+				}))
 
 				o(root.firstChild.nodeName).equals("DIV")
 			})
@@ -78,11 +78,11 @@ o.spec("mount", function() {
 			})
 
 			o("mounting null unmounts", function() {
-				mount(root, {
+				mount(root, createComponent({
 					view : function() {
 						return m("div")
 					}
-				})
+				}))
 
 				mount(root, null)
 
@@ -97,7 +97,7 @@ o.spec("mount", function() {
 
 				e.initEvent("click", true, true)
 
-				mount(root, {
+				mount(root, createComponent({
 					view : function() {
 						return m("div", {
 							oninit   : oninit,
@@ -105,7 +105,7 @@ o.spec("mount", function() {
 							onclick  : onclick,
 						})
 					}
-				})
+				}))
 
 				root.firstChild.dispatchEvent(e)
 
@@ -144,7 +144,7 @@ o.spec("mount", function() {
 					m("#child1")
 				])
 
-				mount(root.childNodes[0], {
+				mount(root.childNodes[0], createComponent({
 					view : function() {
 						return m("div", {
 							oninit   : oninit0,
@@ -152,12 +152,12 @@ o.spec("mount", function() {
 							onclick  : onclick0,
 						})
 					}
-				})
+				}))
 
 				o(oninit0.callCount).equals(1)
 				o(onupdate0.callCount).equals(0)
 
-				mount(root.childNodes[1], {
+				mount(root.childNodes[1], createComponent({
 					view : function() {
 						return m("div", {
 							oninit   : oninit1,
@@ -165,7 +165,7 @@ o.spec("mount", function() {
 							onclick  : onclick1,
 						})
 					}
-				})
+				}))
 
 				o(oninit1.callCount).equals(1)
 				o(onupdate1.callCount).equals(0)
@@ -199,7 +199,7 @@ o.spec("mount", function() {
 
 				e.initEvent("click", true, true)
 
-				mount(root, {
+				mount(root, createComponent({
 					view: function() {
 						return m("div", {
 							oninit: oninit,
@@ -209,7 +209,7 @@ o.spec("mount", function() {
 							}
 						})
 					}
-				})
+				}))
 
 				root.firstChild.dispatchEvent(e)
 
@@ -227,14 +227,14 @@ o.spec("mount", function() {
 				var onupdate = o.spy()
 				var oninit = o.spy()
 
-				mount(root, {
+				mount(root, createComponent({
 					view : function() {
 						return m("div", {
 							oninit: oninit,
 							onupdate: onupdate
 						})
 					}
-				})
+				}))
 
 				o(oninit.callCount).equals(1)
 				o(onupdate.callCount).equals(0)
@@ -253,7 +253,7 @@ o.spec("mount", function() {
 				timeout(200)
 
 				var i = 0
-				mount(root, {view: function() {i++}})
+				mount(root, createComponent({view: function() {i++}}))
 				var before = i
 
 				redrawService.redraw()

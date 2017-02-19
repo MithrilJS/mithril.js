@@ -397,7 +397,7 @@ o.spec("component", function() {
 				o("calls oninit before view", function() {
 					var viewCalled = false
 
-					render(root, {
+					render(root, createComponent({
 						tag: {
 							view: function() {
 								viewCalled = true
@@ -407,7 +407,7 @@ o.spec("component", function() {
 								o(viewCalled).equals(false)
 							},
 						}
-					})
+					}))
 				})
 				o("does not calls oninit on redraw", function() {
 					var init = o.spy()
@@ -661,13 +661,13 @@ o.spec("component", function() {
 				o("initializes state", function() {
 					var called = 0
 					var data = {a: 1}
-					var component = {
+					var component = createComponent({
 						data: data,
 						oninit: init,
 						view: function() {
 							return ""
 						}
-					}
+					})
 
 					render(root, [{tag: component}])
 
@@ -679,13 +679,13 @@ o.spec("component", function() {
 					var called = 0
 					var body = {a: 1}
 					var data = [body]
-					var component = {
+					var component = createComponent({
 						data: data,
 						oninit: init,
 						view: function() {
 							return ""
 						}
-					}
+					})
 
 					render(root, [{tag: component}])
 

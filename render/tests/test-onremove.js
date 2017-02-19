@@ -119,16 +119,16 @@ o.spec("onremove", function() {
 
 			o("calls onremove on nested component", function() {
 				var spy = o.spy()
-				var comp = {
+				var comp = createComponent({
 					view: function() {return m(outer)}
-				}
-				var outer = {
+				})
+				var outer = createComponent({
 					view: function() {return m(inner)}
-				}
-				var inner = {
+				})
+				var inner = createComponent({
 					onremove: spy,
 					view: function() {return m("div")}
-				}
+				})
 				render(root, {tag: comp})
 				render(root, null)
 				
@@ -136,15 +136,15 @@ o.spec("onremove", function() {
 			})
 			o("calls onremove on nested component child", function() {
 				var spy = o.spy()
-				var comp = {
+				var comp = createComponent({
 					view: function() {return m(outer)}
-				}
-				var outer = {
+				})
+				var outer = createComponent({
 					view: function() {return m(inner, m("a", {onremove: spy}))}
-				}
-				var inner = {
+				})
+				var inner = createComponent({
 					view: function(vnode) {return m("div", vnode.children)}
-				}
+				})
 				render(root, {tag: comp})
 				render(root, null)
 				

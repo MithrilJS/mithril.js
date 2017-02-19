@@ -910,7 +910,7 @@ o.spec("updateNodes", function() {
 			var createComponent = cmp.create
 
 			o("fragment child toggles from null when followed by null component then tag", function() {
-				var component = {view: function() {return null}}
+				var component = createComponent({view: function() {return null}})
 				var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
 				var temp = [{tag: "[", children: [null, {tag: component}, {tag: "b"}]}]
 				var updated = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
@@ -925,8 +925,8 @@ o.spec("updateNodes", function() {
 			})
 			o("fragment child toggles from null in component when followed by null component then tag", function() {
 				var flag = true
-				var a = {view: function() {return flag ? {tag: "a"} : null}}
-				var b = {view: function() {return null}}
+				var a = createComponent({view: function() {return flag ? {tag: "a"} : null}})
+				var b = createComponent({view: function() {return null}})
 				var vnodes = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
 				var temp = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
 				var updated = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]

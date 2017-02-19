@@ -95,7 +95,7 @@ o.spec("api", function() {
 			o.spec("m.mount", function() {
 				o("works", function() {
 					var root = window.document.createElement("div")
-					m.mount(root, {view: function() {return m("div")}})
+					m.mount(root, createComponent({view: function() {return m("div")}}))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -105,7 +105,7 @@ o.spec("api", function() {
 				o("works", function(done) {
 					var root = window.document.createElement("div")
 					m.route(root, "/a", {
-						"/a": {view: function() {return m("div")}}
+						"/a": createComponent({view: function() {return m("div")}})
 					})
 
 					setTimeout(function() {
@@ -119,7 +119,7 @@ o.spec("api", function() {
 					var root = window.document.createElement("div")
 					m.route.prefix("#")
 					m.route(root, "/a", {
-						"/a": {view: function() {return m("div")}}
+						"/a": createComponent({view: function() {return m("div")}})
 					})
 
 					setTimeout(function() {
@@ -132,7 +132,7 @@ o.spec("api", function() {
 				o("m.route.get", function(done) {
 					var root = window.document.createElement("div")
 					m.route(root, "/a", {
-						"/a": {view: function() {return m("div")}}
+						"/a": createComponent({view: function() {return m("div")}})
 					})
 
 					setTimeout(function() {
@@ -145,7 +145,7 @@ o.spec("api", function() {
 					timeout(100)
 					var root = window.document.createElement("div")
 					m.route(root, "/a", {
-						"/:id": {view: function() {return m("div")}}
+						"/:id": createComponent({view: function() {return m("div")}})
 					})
 
 					setTimeout(function() {
@@ -162,7 +162,7 @@ o.spec("api", function() {
 				o("works", function(done) {
 					var count = 0
 					var root = window.document.createElement("div")
-					m.mount(root, {view: function() {count++}})
+					m.mount(root, createComponent({view: function() {count++}}))
 					setTimeout(function() {
 						m.redraw()
 
