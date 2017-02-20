@@ -776,7 +776,28 @@ o.spec("component", function() {
 					hooks.forEach(function(hook) {
 						o(methods[hook].args.length).equals(attrs[hook].args.length)(hook)
 					})
+				})
+				o("recycled components get a fresh state", function() {
+					var step = 0
+					var firstState
+					var view = o.spy(function(vnode) {
+						if (step === 0) {
+							firstState = vnode.state
+						} else {
+							o(vnode.state).notEquals(firstState)
+						}
+						return {tag: 'div'}
+					})
+					var component = createComponent({view: view})
 
+					render(root, [{tag: 'div', children: [{tag: component, key: 1}]}])
+					var child = root.firstChild.firstChild
+					render(root, [])
+					step = 1
+					render(root, [{tag: 'div', children: [{tag: component, key: 1}]}])
+
+					o(child).equals(root.firstChild.firstChild)
+					o(view.callCount).equals(2)
 				})
 			})
 			o.spec("state", function() {
