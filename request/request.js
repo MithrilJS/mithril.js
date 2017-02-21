@@ -124,13 +124,12 @@ module.exports = function($window, Promise) {
 	}
 
 	function interpolate(url, data) {
-		if (data == null) return url
-
 		var tokens = url.match(/:[^\/]+/gi) || []
 		for (var i = 0; i < tokens.length; i++) {
 			var key = tokens[i].slice(1)
 			if (data[key] != null) {
 				url = url.replace(tokens[i], data[key])
+				delete data[key]
 			}
 		}
 		return url
