@@ -437,6 +437,16 @@ o.spec("xhr", function() {
 				o(e.message).equals("error")
 			}).then(done)
 		})
+		o("rejects on server timeout", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function(request) {
+					return {status: 0}
+				}
+			})
+			xhr({method: "GET", url: "/item"}).catch(function(e) {
+				o(e.message).equals("timeout")
+			}).then(done)
+		})
 		o("triggers all branched catches upon rejection", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function(request) {

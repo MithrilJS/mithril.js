@@ -41,6 +41,7 @@ module.exports = function() {
 					var s = new Date
 					callAsync(function() {
 						if (typeof self.onreadystatechange === "function") self.onreadystatechange()
+						if (self.status === 0 && typeof self.ontimeout === "function") self.ontimeout();
 					})
 				}
 			}
