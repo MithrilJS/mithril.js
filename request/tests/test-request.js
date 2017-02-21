@@ -123,7 +123,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: "?x=y"})
+				o(data).deepEquals({a: "/item/y"})
 			}).then(done)
 		})
 		o("works w/ parameterized url via POST", function(done) {
@@ -133,7 +133,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: {x: "y"}})
+				o(data).deepEquals({a: "/item/y"})
 			}).then(done)
 		})
 		o("works w/ array", function(done) {
