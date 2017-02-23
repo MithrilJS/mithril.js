@@ -38,7 +38,7 @@ var state = {
 	update: function(title) {
 		if (state.editing != null) {
 			state.editing.title = title.trim()
-			if (state.editing.title === "") destroy(state.editing)
+			if (state.editing.title === "") state.destroy(state.editing)
 			state.editing = null
 		}
 	},
