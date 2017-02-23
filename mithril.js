@@ -203,7 +203,7 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key0) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var FILE_PROTOCOL_REGEX = new RegExp('^file://', 'i')
+var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
 var _8 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
