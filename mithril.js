@@ -238,7 +238,7 @@ var _8 = function($window, Promise) {
 		var promise0 = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
-			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = (args.method === "GET" || args.method === "TRACE") ? false : (typeof args.useBody === "boolean" ? args.useBody : true)
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
