@@ -203,3 +203,4 @@ users.map(function(user){
 	// Key is specifically extracted: data model is given its own property
 	return m(UserComponent, {key: user.id, model: user}) 
 })
+```
