@@ -100,7 +100,7 @@ module.exports = function($window) {
 		}
 		return element
 	}
-	function createComponent(parent, vnode, hooks, ns, nextSibling) {
+	function initComponent(vnode, hooks) {
 		var sentinel
 		if (typeof vnode.tag === "function") {
 			vnode.state = null
@@ -120,7 +120,9 @@ module.exports = function($window) {
 		initLifecycle(vnode.state, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
 		sentinel.$$reentrantLock$$ = null
-
+	}
+	function createComponent(parent, vnode, hooks, ns, nextSibling) {
+		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -233,11 +235,12 @@ module.exports = function($window) {
 		if (oldTag === tag) {
 			vnode.state = old.state
 			vnode.events = old.events
-			if (shouldUpdate(vnode, old)) return
-			if (vnode.attrs != null) {
-				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
-			}
+			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
+				if (vnode.attrs != null) {
+					if (recycling) initLifecycle(vnode.attrs, vnode, hooks)
+					else updateLifecycle(vnode.attrs, vnode, hooks)
+				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, nextSibling); break
@@ -307,8 +310,13 @@ module.exports = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
-		updateLifecycle(vnode.state, vnode, hooks, recycling)
+		if (recycling) {
+			initComponent(vnode, hooks)
+		} else {
+			vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
+			updateLifecycle(vnode.state, vnode, hooks)
+		}
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
@@ -562,11 +570,10 @@ module.exports = function($window) {
 		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
 		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
 	}
-	function updateLifecycle(source, vnode, hooks, recycling) {
-		if (recycling) initLifecycle(source, vnode, hooks)
-		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
+	function updateLifecycle(source, vnode, hooks) {
+		if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
-	function shouldUpdate(vnode, old) {
+	function shouldNotUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") forceComponentUpdate = vnode.state.onbeforeupdate(vnode, old)
