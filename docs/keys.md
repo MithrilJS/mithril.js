@@ -177,3 +177,29 @@ m("div", [
 	]
 ])
 ```
+
+#### Avoid passing model data directly to components if the model uses `key` as a data property
+
+The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialise, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:
+
+```javascript
+// Data model
+var users = [
+	{id: 1, name: "John", key: 'a'},
+	{id: 2, name: "Mary", key: 'b'},
+]
+
+// Later on...
+users[0].key = 'c'
+
+// AVOID
+users.map(function(user){
+	// The component for John will be destroyed and recreated
+	return m(UserComponent, user) 
+})
+
+// PREFER
+users.map(function(user){
+	// Key is specifically extracted: data model is given its own property
+	return m(UserComponent, {key: user.id, model: user}) 
+})
