@@ -56,12 +56,12 @@ module.exports = function($window, Promise) {
 			else args.url = assemble(args.url, args.data)
 
 			var xhr = new $window.XMLHttpRequest(),
-				aborted = false,
 				_abort = xhr.abort
 
 
 			xhr.abort = function abort() {
-				aborted = true
+				// Don't throw errors on xhr.abort().
+				xhr.onreadystatechange = null
 				_abort.call(xhr)
 			}
 
@@ -82,9 +82,6 @@ module.exports = function($window, Promise) {
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 
 			xhr.onreadystatechange = function() {
-				// Don't throw errors on xhr.abort().
-				if(aborted) return
-
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))

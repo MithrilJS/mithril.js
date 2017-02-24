@@ -396,21 +396,22 @@ o.spec("xhr", function() {
 
 			var failed = false
 			var resolved = false
-			function handleAbort(xhr) {
-				var onreadystatechange = xhr.onreadystatechange // probably not set yet
+			var xhrInstance
+			function handleAbort(x) {
+				var onreadystatechange = x.onreadystatechange // probably not set yet
 				var testonreadystatechange = function() {
-					onreadystatechange.call(xhr)
-					setTimeout(function() { // allow promises to (not) resolve first
+					if(onreadystatechange) onreadystatechange.call(x)
+					callAsync(function() { // allow promises to (not) resolve first
 						o(failed).equals(false)
 						o(resolved).equals(false)
 						done()
-					}, 0)
+					})
 				}
-				Object.defineProperty(xhr, "onreadystatechange", {
+				Object.defineProperty(x, "onreadystatechange", {
 					set: function(val) { onreadystatechange = val },
 					get: function() { return testonreadystatechange }
 				})
-				xhr.abort()
+				xhrInstance = x
 			}
 			xhr({method: "GET", url: "/item", config: handleAbort}).catch(function() {
 				failed = true
@@ -418,6 +419,7 @@ o.spec("xhr", function() {
 			.then(function() {
 				resolved = true
 			})
+			xhrInstance.abort()
 		})
 		o("doesn't fail on file:// status 0", function(done) {
 			mock.$defineRoutes({
