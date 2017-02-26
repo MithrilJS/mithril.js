@@ -203,6 +203,7 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key0) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
+var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
 var _8 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
@@ -238,14 +239,20 @@ var _8 = function($window, Promise) {
 		var promise0 = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
-			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = (args.method === "GET" || args.method === "TRACE") ? false : (typeof args.useBody === "boolean" ? args.useBody : true)
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
 			args.url = interpolate(args.url, args.data)
 			if (useBody) args.data = args.serialize(args.data)
 			else args.url = assemble(args.url, args.data)
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new $window.XMLHttpRequest(),
+				aborted = false,
+				_abort = xhr.abort
+			xhr.abort = function abort() {
+				aborted = true
+				_abort.call(xhr)
+			}
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 			if (args.serialize === JSON.stringify && useBody) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
@@ -259,12 +266,12 @@ var _8 = function($window, Promise) {
 			}
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 			xhr.onreadystatechange = function() {
-				// Don't throw errors on xhr.abort(). XMLHttpRequests ends up in a state of
-				// xhr.status == 0 and xhr.readyState == 4 if aborted after open, but before completion.
-				if (xhr.status && xhr.readyState === 4) {
+				// Don't throw errors on xhr.abort().
+				if(aborted) return
+				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
@@ -795,6 +802,11 @@ var coreRenderer = function($window) {
 			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value == value) return
+			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
+			if (vnode.tag === "input" && key2 === "type") {
+				element.setAttribute(key2, value)
+				return
+			}
 			element[key2] = value
 		}
 		else {
