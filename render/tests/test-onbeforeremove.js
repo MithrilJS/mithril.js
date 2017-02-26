@@ -2,7 +2,6 @@
 
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var Promise = require("../../promise/promise")
@@ -170,44 +169,39 @@ o.spec("onbeforeremove", function() {
 			done()
 		})
 	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
-			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
-				var onremove = o.spy()
-				var onbeforeremove = function(){return Promise.resolve()}
-				var component = createComponent({
-					onbeforeremove: onbeforeremove,
-					onremove: onremove,
-					view: function() {},
-				})
-				render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
-				render(root, [])
-				callAsync(function() {
-					o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
-					done()
-				})
-			})
-			o("awaits promise resolution before removing the node", function(done) {
-				var view = o.spy()
-				var onremove = o.spy()
-				var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
-				var component = createComponent({
-					onbeforeremove: onbeforeremove,
-					onremove: onremove,
-					view: view,
-				})
-				render(root, [{tag: component}])
-				render(root, [])
+	o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
+		var onremove = o.spy()
+		var onbeforeremove = function(){return Promise.resolve()}
+		var component = {
+			onbeforeremove: onbeforeremove,
+			onremove: onremove,
+			view: function() {},
+		}
+		render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
+		render(root, [])
+		callAsync(function() {
+			o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
+			done()
+		})
+	})
+	o("awaits promise resolution before removing the node", function(done) {
+		var view = o.spy()
+		var onremove = o.spy()
+		var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
+		var component = {
+			onbeforeremove: onbeforeremove,
+			onremove: onremove,
+			view: view,
+		}
+		render(root, [{tag: component}])
+		render(root, [])
 
-				callAsync(function(){
-					o(onremove.callCount).equals(0)
+		callAsync(function(){
+			o(onremove.callCount).equals(0)
 
-					callAsync(function() {
-						o(onremove.callCount).equals(1)
-						done()
-					})
-				})
+			callAsync(function() {
+				o(onremove.callCount).equals(1)
+				done()
 			})
 		})
 	})

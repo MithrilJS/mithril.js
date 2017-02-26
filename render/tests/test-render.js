@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
@@ -119,7 +118,7 @@ o.spec("render", function() {
 		o(oninit.callCount).equals(0)
 		o(onbeforeupdate.callCount).equals(0)
 	})
-	o("does not try to re-initialize a closure component whose view has thrown", function() {
+	o("does not try to re-initialize a factory component whose view has thrown", function() {
 		var oninit = o.spy()
 		var onbeforeupdate = o.spy()
 		function A() {
@@ -142,7 +141,7 @@ o.spec("render", function() {
 		o(oninit.callCount).equals(1)
 		o(onbeforeupdate.callCount).equals(0)
 	})
-	o("does not try to re-initialize a closure component whose oninit has thrown", function() {
+	o("does not try to re-initialize a factory component whose oninit has thrown", function() {
 		var oninit = o.spy(function(vnode) {throw new Error("error")})
 		var onbeforeupdate = o.spy()
 		function A() {
@@ -165,7 +164,7 @@ o.spec("render", function() {
 		o(oninit.callCount).equals(1)
 		o(onbeforeupdate.callCount).equals(0)
 	})
-	o("does not try to re-initialize a closure component whose closure has thrown", function() {
+	o("does not try to re-initialize a factory component whose factory has thrown", function() {
 		function A() {
 			throw new Error("error")
 		}

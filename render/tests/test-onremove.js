@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
@@ -81,6 +80,39 @@ o.spec("onremove", function() {
 		o(remove.this).equals(vnode.state)
 		o(remove.args[0]).equals(vnode)
 	})
+	o("calls onremove on nested component", function() {
+		var spy = o.spy()
+		var comp = {
+			view: function() {return m(outer)}
+		}
+		var outer = {
+			view: function() {return m(inner)}
+		}
+		var inner = {
+			onremove: spy,
+			view: function() {return m("div")}
+		}
+		render(root, {tag: comp})
+		render(root, null)
+		
+		o(spy.callCount).equals(1)
+	})
+	o("calls onremove on nested component child", function() {
+		var spy = o.spy()
+		var comp = {
+			view: function() {return m(outer)}
+		}
+		var outer = {
+			view: function() {return m(inner, m("a", {onremove: spy}))}
+		}
+		var inner = {
+			view: function(vnode) {return m("div", vnode.children)}
+		}
+		render(root, {tag: comp})
+		render(root, null)
+		
+		o(spy.callCount).equals(1)
+	})
 	o("does not set onremove as an event handler", function() {
 		var remove = o.spy()
 		var vnode = {tag: "div", attrs: {onremove: remove}, children: []}
@@ -112,44 +144,5 @@ o.spec("onremove", function() {
 		render(root, [updated])
 
 		o(vnode.dom).notEquals(updated.dom)
-	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
-
-			o("calls onremove on nested component", function() {
-				var spy = o.spy()
-				var comp = createComponent({
-					view: function() {return m(outer)}
-				})
-				var outer = createComponent({
-					view: function() {return m(inner)}
-				})
-				var inner = createComponent({
-					onremove: spy,
-					view: function() {return m("div")}
-				})
-				render(root, {tag: comp})
-				render(root, null)
-				
-				o(spy.callCount).equals(1)
-			})
-			o("calls onremove on nested component child", function() {
-				var spy = o.spy()
-				var comp = createComponent({
-					view: function() {return m(outer)}
-				})
-				var outer = createComponent({
-					view: function() {return m(inner, m("a", {onremove: spy}))}
-				})
-				var inner = createComponent({
-					view: function(vnode) {return m("div", vnode.children)}
-				})
-				render(root, {tag: comp})
-				render(root, null)
-				
-				o(spy.callCount).equals(1)
-			})
-		})
 	})
 })

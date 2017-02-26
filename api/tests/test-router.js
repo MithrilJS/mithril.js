@@ -82,7 +82,7 @@ o.spec("route", function() {
 
 				})
 
-				o("routed mount points can redraw synchronously (closure component)", function() {
+				o("routed mount points can redraw synchronously (factory component)", function() {
 					var view = o.spy()
 
 					function Cmp() {return {view: view}}

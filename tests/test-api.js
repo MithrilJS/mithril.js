@@ -2,7 +2,6 @@
 
 var o = require("../ospec/ospec")
 var browserMock = require("../test-utils/browserMock")
-var components = require("../test-utils/components")
 
 o.spec("api", function() {
 	var m
@@ -69,16 +68,6 @@ o.spec("api", function() {
 			o(query).equals("a=1&b=2")
 		})
 	})
-	o.spec("m.request", function() {
-		o("works", function() {
-			o(typeof m.request).equals("function") // TODO improve
-		})
-	})
-	o.spec("m.jsonp", function() {
-		o("works", function() {
-			o(typeof m.jsonp).equals("function") // TODO improve
-		})
-	})
 	o.spec("m.render", function() {
 		o("works", function() {
 			var root = window.document.createElement("div")
@@ -88,90 +77,94 @@ o.spec("api", function() {
 			o(root.firstChild.nodeName).equals("DIV")
 		})
 	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	o.spec("m.mount", function() {
+		o("works", function() {
+			var root = window.document.createElement("div")
+			m.mount(root, {view: function() {return m("div")}})
 
-			o.spec("m.mount", function() {
-				o("works", function() {
-					var root = window.document.createElement("div")
-					m.mount(root, createComponent({view: function() {return m("div")}}))
-
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
-				})
+			o(root.childNodes.length).equals(1)
+			o(root.firstChild.nodeName).equals("DIV")
+		})
+	})
+	o.spec("m.route", function() {
+		o("works", function(done) {
+			var root = window.document.createElement("div")
+			m.route(root, "/a", {
+				"/a": {view: function() {return m("div")}}
 			})
-			o.spec("m.route", function() {
-				o("works", function(done) {
-					var root = window.document.createElement("div")
-					m.route(root, "/a", {
-						"/a": createComponent({view: function() {return m("div")}})
-					})
 
-					setTimeout(function() {
-						o(root.childNodes.length).equals(1)
-						o(root.firstChild.nodeName).equals("DIV")
+			setTimeout(function() {
+				o(root.childNodes.length).equals(1)
+				o(root.firstChild.nodeName).equals("DIV")
 
-						done()
-					}, FRAME_BUDGET)
-				})
-				o("m.route.prefix", function(done) {
-					var root = window.document.createElement("div")
-					m.route.prefix("#")
-					m.route(root, "/a", {
-						"/a": createComponent({view: function() {return m("div")}})
-					})
-
-					setTimeout(function() {
-						o(root.childNodes.length).equals(1)
-						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
-				})
-				o("m.route.get", function(done) {
-					var root = window.document.createElement("div")
-					m.route(root, "/a", {
-						"/a": createComponent({view: function() {return m("div")}})
-					})
-
-					setTimeout(function() {
-						o(m.route.get()).equals("/a")
-
-						done()
-					}, FRAME_BUDGET)
-				})
-				o("m.route.set", function(done, timeout) {
-					timeout(100)
-					var root = window.document.createElement("div")
-					m.route(root, "/a", {
-						"/:id": createComponent({view: function() {return m("div")}})
-					})
-
-					setTimeout(function() {
-						m.route.set("/b")
-						setTimeout(function() {
-							o(m.route.get()).equals("/b")
-
-							done()
-						}, FRAME_BUDGET)
-					}, FRAME_BUDGET)
-				})
+				done()
+			}, FRAME_BUDGET)
+		})
+		o("m.route.prefix", function(done) {
+			var root = window.document.createElement("div")
+			m.route.prefix("#")
+			m.route(root, "/a", {
+				"/a": {view: function() {return m("div")}}
 			})
-			o.spec("m.redraw", function() {
-				o("works", function(done) {
-					var count = 0
-					var root = window.document.createElement("div")
-					m.mount(root, createComponent({view: function() {count++}}))
-					setTimeout(function() {
-						m.redraw()
 
-						o(count).equals(2)
+			setTimeout(function() {
+				o(root.childNodes.length).equals(1)
+				o(root.firstChild.nodeName).equals("DIV")
 
-						done()
-					}, FRAME_BUDGET)
-				})
+				done()
+			}, FRAME_BUDGET)
+		})
+		o("m.route.get", function(done) {
+			var root = window.document.createElement("div")
+			m.route(root, "/a", {
+				"/a": {view: function() {return m("div")}}
 			})
+
+			setTimeout(function() {
+				o(m.route.get()).equals("/a")
+
+				done()
+			}, FRAME_BUDGET)
+		})
+		o("m.route.set", function(done, timeout) {
+			timeout(100)
+			var root = window.document.createElement("div")
+			m.route(root, "/a", {
+				"/:id": {view: function() {return m("div")}}
+			})
+
+			setTimeout(function() {
+				m.route.set("/b")
+				setTimeout(function() {
+					o(m.route.get()).equals("/b")
+
+					done()
+				}, FRAME_BUDGET)
+			}, FRAME_BUDGET)
+		})
+	})
+	o.spec("m.redraw", function() {
+		o("works", function(done) {
+			var count = 0
+			var root = window.document.createElement("div")
+			m.mount(root, {view: function() {count++}})
+			setTimeout(function() {
+				m.redraw()
+
+				o(count).equals(2)
+
+				done()
+			}, FRAME_BUDGET)
+		})
+	})
+	o.spec("m.request", function() {
+		o("works", function() {
+			o(typeof m.request).equals("function") // TODO improve
+		})
+	})
+	o.spec("m.jsonp", function() {
+		o("works", function() {
+			o(typeof m.jsonp).equals("function") // TODO improve
 		})
 	})
 })
