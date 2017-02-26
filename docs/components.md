@@ -109,7 +109,7 @@ The state of a component can be accessed three ways: as a blueprint at initializ
 
 #### At initialization
 
-Any property attached to the component object is copied for every instance of the component. This allows simple state initialization.
+The component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
 
 In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
 
