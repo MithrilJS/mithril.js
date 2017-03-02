@@ -59,7 +59,6 @@ o.spec("onupdate", function() {
 	})
 	o("does not call old onupdate when removing the onupdate property in new vnode", function() {
 		var create = o.spy()
-		var update = o.spy()
 		var vnode = {tag: "a", attrs: {onupdate: create}}
 		var updated = {tag: "a"}
 

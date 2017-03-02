@@ -71,8 +71,8 @@ o.spec("mount", function() {
 
 			o("redraws on events", function(done) {
 				var onupdate = o.spy()
-				var oninit   = o.spy()
-				var onclick  = o.spy()
+				var oninit = o.spy()
+				var onclick = o.spy()
 				var e = $window.document.createEvent("MouseEvents")
 
 				e.initEvent("click", true, true)
@@ -107,13 +107,13 @@ o.spec("mount", function() {
 
 			o("redraws several mount points on events", function(done, timeout) {
 				timeout(60)
-				
+
 				var onupdate0 = o.spy()
-				var oninit0   = o.spy()
-				var onclick0  = o.spy()
+				var oninit0 = o.spy()
+				var onclick0 = o.spy()
 				var onupdate1 = o.spy()
-				var oninit1   = o.spy()
-				var onclick1  = o.spy()
+				var oninit1 = o.spy()
+				var onclick1 = o.spy()
 
 				var e = $window.document.createEvent("MouseEvents")
 
@@ -228,7 +228,7 @@ o.spec("mount", function() {
 					done()
 				}, FRAME_BUDGET)
 			})
-			
+
 			o("throttles", function(done, timeout) {
 				timeout(200)
 

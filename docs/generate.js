@@ -1,15 +1,17 @@
+"use strict"
+
 var fs = require("fs")
 var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
-try {fs.mkdirSync("../mithril")} catch (e) {}
-try {fs.mkdirSync("../mithril/archive")} catch (e) {}
-try {fs.mkdirSync("../mithril/archive/v" + version)} catch (e) {}
-try {fs.mkdirSync("../mithril/archive/v" + version + "/lib")} catch (e) {}
-try {fs.mkdirSync("../mithril/archive/v" + version + "/lib/prism")} catch (e) {}
-try {fs.mkdirSync("../mithril/lib")} catch (e) {}
-try {fs.mkdirSync("../mithril/lib/prism")} catch (e) {}
+try {fs.mkdirSync("../mithril")} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/archive")} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/archive/v" + version)} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/archive/v" + version + "/lib")} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/archive/v" + version + "/lib/prism")} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/lib")} catch (e) {/* ignore */}
+try {fs.mkdirSync("../mithril/lib/prism")} catch (e) {/* ignore */}
 
 var guides = fs.readFileSync("docs/guides.md", "utf-8")
 var methods = fs.readFileSync("docs/methods.md", "utf-8")
@@ -33,7 +35,7 @@ function generate(pathname) {
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
 					return "<code>" + (a + b + c).replace(/\|/g, "&#124;") + "</code>"
 				})
-				.replace(/(^# .+?(?:\r?\n){2,}?)(?:(-(?:.|\r|\n)+?)((?:\r?\n){2,})|)/m, function(match, title, nav, space) { // inject menu
+				.replace(/(^# .+?(?:\r?\n){2,}?)(?:(-(?:.|\r|\n)+?)((?:\r?\n){2,})|)/m, function(match, title, nav) { // inject menu
 					var file = path.basename(pathname)
 					var link = new RegExp("([ \t]*)(- )(\\[.+?\\]\\(" + file + "\\))")
 					var replace = function(match, space, li, link) {
@@ -53,7 +55,7 @@ function generate(pathname) {
 				.replace(/\[version\]/, version) // update version
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
-					return "<h" + n + " id=\"" + text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-") + "\">" + text + "</h" + n + ">"
+					return "<h" + n + ' id="' + text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-") + '">' + text + "</h" + n + ">"
 				})
 			fs.writeFileSync("../mithril/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 			fs.writeFileSync("../mithril/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")

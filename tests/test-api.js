@@ -10,7 +10,7 @@ o.spec("api", function() {
 	o.beforeEach(function() {
 		var mock = browserMock()
 		if (typeof global !== "undefined") global.window = mock
-		m = require("../mithril")
+		m = require("../mithril") // eslint-disable-line global-require
 	})
 
 	o.spec("m", function() {

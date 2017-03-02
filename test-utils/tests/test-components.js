@@ -6,8 +6,8 @@ var components = require("../../test-utils/components")
 o.spec("test-utils/components", function() {
   var test = o.spy(function(component) {
     return function() {
-      o('works', function() {
-        o(typeof component.kind).equals('string')
+      o("works", function() {
+        o(typeof component.kind).equals("string")
 
         var methods = {oninit: function(){}, view: function(){}}
 
@@ -21,7 +21,7 @@ o.spec("test-utils/components", function() {
           cmp2 = new (component.create(methods))
         } else if (component.kind === "closure") {
           cmp1 = component.create()()
-          cmp2 = component.create(methods)()          
+          cmp2 = component.create(methods)()
         } else {
           throw new Error("unexpected component kind")
         }
@@ -34,7 +34,7 @@ o.spec("test-utils/components", function() {
         o(vnode != null).equals(true)
         o(vnode).deepEquals({tag: "div"})
 
-        if (component.kind !== 'constructible') {
+        if (component.kind !== "constructible") {
           o(cmp2).deepEquals(methods)
         } else {
           // deepEquals doesn't search the prototype, do it manually

@@ -168,13 +168,13 @@ o.spec("pushStateMock", function() {
 	})
 	o.spec("set protocol", function() {
 		o("setting protocol throws", function(done) {
-			var old = $window.location.href
 			try {
 				$window.location.protocol = "https://"
 			}
 			catch (e) {
-				done()
+				return done()
 			}
+			throw new Error("Expected an error")
 		})
 	})
 	o.spec("set port", function() {
@@ -413,17 +413,17 @@ o.spec("pushStateMock", function() {
 		})
 		o("replaceState does not break forward history", function() {
 			$window.onpopstate = o.spy()
-			
+
 			$window.history.pushState(null, null, "b")
 			$window.history.back()
 
 			o($window.onpopstate.callCount).equals(1)
 			o($window.location.href).equals("http://localhost/")
-			
+
 			$window.history.replaceState(null, null, "a")
-			
+
 			o($window.location.href).equals("http://localhost/a")
-			
+
 			$window.history.forward()
 
 			o($window.onpopstate.callCount).equals(2)
@@ -431,46 +431,46 @@ o.spec("pushStateMock", function() {
 		})
 		o("pushstate retains state", function() {
 			$window.onpopstate = o.spy()
-			
+
 			$window.history.pushState({a: 1}, null, "#a")
 			$window.history.pushState({b: 2}, null, "#b")
-			
+
 			o($window.onpopstate.callCount).equals(0)
 
 			$window.history.back()
-			
+
 			o($window.onpopstate.callCount).equals(1)
 			o($window.onpopstate.args[0].type).equals("popstate")
 			o($window.onpopstate.args[0].state).deepEquals({a: 1})
 
 			$window.history.back()
-			
+
 			o($window.onpopstate.callCount).equals(2)
 			o($window.onpopstate.args[0].type).equals("popstate")
 			o($window.onpopstate.args[0].state).equals(null)
 
 			$window.history.forward()
-			
+
 			o($window.onpopstate.callCount).equals(3)
 			o($window.onpopstate.args[0].type).equals("popstate")
 			o($window.onpopstate.args[0].state).deepEquals({a: 1})
 
 			$window.history.forward()
-			
+
 			o($window.onpopstate.callCount).equals(4)
 			o($window.onpopstate.args[0].type).equals("popstate")
 			o($window.onpopstate.args[0].state).deepEquals({b: 2})
 		})
 		o("replacestate replaces state", function() {
 			$window.onpopstate = o.spy(pop)
-			
+
 			$window.history.replaceState({a: 1}, null, "a")
-			
+
 			o($window.history.state).deepEquals({a: 1})
-			
+
 			$window.history.pushState(null, null, "a")
 			$window.history.back()
-			
+
 			function pop(e) {
 				o(e.state).deepEquals({a: 1})
 				o($window.history.state).deepEquals({a: 1})

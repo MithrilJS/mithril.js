@@ -7,7 +7,7 @@ var Promise = require("../../promise/promise")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
-	var mock, jsonp, spy, complete
+	var mock, jsonp, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
 		var requestService = Request(mock, Promise)
@@ -28,7 +28,6 @@ o.spec("jsonp", function() {
 		}).then(done)
 	})
 	o("first argument can be a string aliasing url property", function(done){
-		var s = new Date
 		mock.$defineRoutes({
 			"GET /item": function(request) {
 				var queryData = parseQueryString(request.query)
@@ -104,8 +103,8 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "([])"}
 			}
 		})
-		var promise = jsonp("/item", {background: true}).then(function() {})
-		
+		jsonp("/item", {background: true}).then(function() {})
+
 		setTimeout(function() {
 			o(complete.callCount).equals(0)
 			done()

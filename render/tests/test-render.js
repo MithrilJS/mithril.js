@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
@@ -124,7 +123,7 @@ o.spec("render", function() {
 		var onbeforeupdate = o.spy()
 		function A() {
 			return {
-				view: function(vnode) {throw new Error("error")},
+				view: function() {throw new Error("error")},
 				oninit: oninit,
 				onbeforeupdate: onbeforeupdate
 			}
@@ -143,11 +142,11 @@ o.spec("render", function() {
 		o(onbeforeupdate.callCount).equals(0)
 	})
 	o("does not try to re-initialize a closure component whose oninit has thrown", function() {
-		var oninit = o.spy(function(vnode) {throw new Error("error")})
+		var oninit = o.spy(function() {throw new Error("error")})
 		var onbeforeupdate = o.spy()
 		function A() {
 			return {
-				view: function(vnode) {},
+				view: function() {},
 				oninit: oninit,
 				onbeforeupdate: onbeforeupdate
 			}

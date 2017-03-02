@@ -28,11 +28,11 @@ o.spec("ospec", function() {
 		o.beforeEach(function() {b = 1})
 		o.afterEach(function() {b = 0})
 
-		try {o('illegal assertion')} catch (e) {illegalAssertionThrows = true}
+		try {o("illegal assertion")} catch (e) {illegalAssertionThrows = true}
 
 		o("assertions", function() {
 			var nestedTestDeclarationThrows = false
-			try {o('illegal nested test', function(){})} catch (e) {nestedTestDeclarationThrows = true}
+			try {o("illegal nested test", function(){})} catch (e) {nestedTestDeclarationThrows = true}
 
 			o(illegalAssertionThrows).equals(true)
 			o(nestedTestDeclarationThrows).equals(true)
@@ -51,7 +51,7 @@ o.spec("ospec", function() {
 			o(undef1).notDeepEquals(undef2)
 			o(undef1).notDeepEquals({})
 			o({}).notDeepEquals(undef1)
-			
+
 			var sparse1 = [void 1, void 2, void 3]
 			delete sparse1[0]
 			var sparse2 = [void 1, void 2, void 3]
@@ -63,7 +63,7 @@ o.spec("ospec", function() {
 			monkeypatch1.field = 3
 			var monkeypatch2 = [1, 2]
 			monkeypatch2.field = 4
-			
+
 			o(monkeypatch1).notDeepEquals([1, 2])
 			o(monkeypatch1).notDeepEquals(monkeypatch2)
 
