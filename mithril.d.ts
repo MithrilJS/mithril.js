@@ -238,6 +238,18 @@ declare namespace Mithril {
 		/** A special value that can be returned to stream callbacks to halt execution of downstreams. */
 		HALT: any;
 	}
+
+	interface StreamScan {
+		/** Creates a new stream with the results of calling the function on every incoming stream with and accumulator and the incoming value. */
+		<T,U>(fn: (acc: U, value: T) => U, acc: U, stream: Stream<T>): Stream<U>;
+	}
+
+	interface StreamScanMerge {
+		/** Takes an array of pairs of streams and scan functions and merges all those streams using the given functions into a single stream. */
+		<T,U>(pairs: [Stream<T>, (acc: U, value: T) => U][], acc: U): Stream<U>;
+		/** Takes an array of pairs of streams and scan functions and merges all those streams using the given functions into a single stream. */
+		<U>(pairs: [Stream<any>, (acc: U, value: any) => U][], acc: U): Stream<U>;
+	}
 }
 
 declare module 'mithril' {
@@ -283,4 +295,14 @@ declare module 'mithril/util/withAttr' {
 declare module 'mithril/stream' {
 	const s: Mithril.StreamFactory;
 	export = s;
+}
+
+declare module 'mithril/stream/scan' {
+	const s: Mithril.StreamScan;
+	export = s;
+}
+
+declare module 'mithril/stream/scanMerge' {
+	const sm: Mithril.StreamScanMerge;
+	export = sm;
 }
