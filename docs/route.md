@@ -257,8 +257,6 @@ In the example above, we defined a route `/edit/:id`. This creates a dynamic rou
 
 It's possible to have multiple arguments in a route, for example `/edit/:projectID/:userID` would yield the properties `projectID` and `userID` on the component's vnode attributes object.
 
-In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched routed.
-
 #### Key parameter
 
 When a user navigates from a parameterized route to the same route with a different parameter (e.g. going from `/page/1` to `/page/2` given a route `/page/:id`, the component would not be recreated from scratch since both routes resolve to the same component, and thus result in a virtual dom in-place diff. This has the side-effect of triggering the `onupdate` hook, rather than `oninit`/`oncreate`. However, it's relatively common for a developer to want to synchronize the recreation of the component to the route change event.
