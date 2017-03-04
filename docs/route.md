@@ -257,7 +257,7 @@ In the example above, we defined a route `/edit/:id`. This creates a dynamic rou
 
 It's possible to have multiple arguments in a route, for example `/edit/:projectID/:userID` would yield the properties `projectID` and `userID` on the component's vnode attributes object.
 
-In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched routed.
+In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched route.
 
 #### Key parameter
 
