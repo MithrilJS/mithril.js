@@ -115,6 +115,7 @@ createStream.combine = combine
 createStream.HALT = HALT
 
 if (typeof module !== "undefined") module["exports"] = createStream
-else window.stream = createStream
+else if (typeof window.m === "function" && !("stream" in window.m)) window.m.stream = createStream
+else window.m = {stream : createStream}
 
 }
