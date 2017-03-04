@@ -1,5 +1,7 @@
 "use strict"
 
+new function() {
+
 var guid = 0, HALT = {}
 function createStream() {
 	function stream() {
@@ -114,3 +116,5 @@ createStream.HALT = HALT
 
 if (typeof module !== "undefined") module["exports"] = createStream
 else window.stream = createStream
+
+}
