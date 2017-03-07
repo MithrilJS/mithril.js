@@ -21,8 +21,7 @@ o.spec("bundler", function() {
 		write("a.js", `var b = require("./b")`)
 		write("b.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
-		
-		o(read("out.js")).equals(`new function() {\nvar b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -33,7 +32,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = 1;`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b = 1;\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b = 1;\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -44,7 +43,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nlet b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nlet b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -55,7 +54,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nconst b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nconst b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -66,7 +65,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar a = {}\na.b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar a = {}\na.b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -77,7 +76,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b = {}\nb = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b = {}\nb = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -88,7 +87,7 @@ o.spec("bundler", function() {
 		write("b.js", `"use strict"\nmodule.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\n"use strict"\nvar b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\n"use strict"\nvar b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -99,7 +98,7 @@ o.spec("bundler", function() {
 		write("b.js", `'use strict'\nmodule.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\n'use strict'\nvar b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\n'use strict'\nvar b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -110,7 +109,7 @@ o.spec("bundler", function() {
 		write("b.js", `'use strict'\nmodule.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\n"use strict"\nvar b = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\n"use strict"\nvar b = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -121,7 +120,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = function() {return a}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nwindow.a = 1\nvar b = function() {return a}\n}`)
+		o(read("out.js")).equals(`;(function() {\nwindow.a = 1\nvar b = function() {return a}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -132,7 +131,7 @@ o.spec("bundler", function() {
 		write("b.js", `1 + 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\n1 + 1\n}`)
+		o(read("out.js")).equals(`;(function() {\n1 + 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -143,7 +142,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = []`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = []\nvar b = _0.toString()\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = []\nvar b = _0.toString()\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -154,7 +153,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = []`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = []\nvar b = _0\n\t.toString()\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = []\nvar b = _0\n\t.toString()\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -165,7 +164,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = function() {}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = function() {}\nvar b = _0()\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = function() {}\nvar b = _0()\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -176,7 +175,7 @@ o.spec("bundler", function() {
 		write("b.js", `module.exports = function() {}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = function() {}\nvar b = _0\n()\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = function() {}\nvar b = _0\n()\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -188,7 +187,7 @@ o.spec("bundler", function() {
 		write("c.js", `var b = require("./b")\nmodule.exports = function() {return b}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = []\nvar b = _0.toString()\nvar b0 = _0\nvar c = function() {return b0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = []\nvar b = _0.toString()\nvar b0 = _0\nvar c = function() {return b0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -201,7 +200,7 @@ o.spec("bundler", function() {
 		write("c.js", `var x\nmodule.exports = 2`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b = 1\nvar x\nvar c = 2\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b = 1\nvar x\nvar c = 2\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -214,7 +213,7 @@ o.spec("bundler", function() {
 		write("c.js", `var cc = 2\nmodule.exports = cc`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar x = {}\nvar bb = 1\nx.b = bb\nvar cc = 2\nx.c = cc\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar x = {}\nvar bb = 1\nx.b = bb\nvar cc = 2\nx.c = cc\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -227,7 +226,7 @@ o.spec("bundler", function() {
 		write("c.js", `var cc = 2\nmodule.exports = cc`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar x = {}\nvar bb = 1\nx["b"] = bb\nvar cc = 2\nx["c"] = cc\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar x = {}\nvar bb = 1\nx["b"] = bb\nvar cc = 2\nx["c"] = cc\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -239,7 +238,7 @@ o.spec("bundler", function() {
 		write("b.js", `var b = 1\nmodule.exports = 2`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b0 = 1\nvar b = 2\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b0 = 1\nvar b = 2\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -251,7 +250,7 @@ o.spec("bundler", function() {
 		write("c.js", `var b = {}\nmodule.exports = b`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b = {}\nb.x = 1\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b = {}\nb.x = 1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -265,7 +264,7 @@ o.spec("bundler", function() {
 		write("d.js", `var a = 3\nmodule.exports = a`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar a = 1\nvar b = a\nvar a0 = 2\nvar c = a0\nvar a1 = 3\nvar d = a1\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar a = 1\nvar b = a\nvar a0 = 2\nvar c = a0\nvar a1 = 3\nvar d = a1\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -279,7 +278,7 @@ o.spec("bundler", function() {
 		write("c.js", `var a = require("./a").toString()\nvar b = require("./b")`)
 		bundle(ns + "c.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = 123\nvar a = _0.toString()\nvar a0 = _0.toString()\nvar b = a0\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = 123\nvar a = _0.toString()\nvar a0 = _0.toString()\nvar b = a0\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -291,7 +290,7 @@ o.spec("bundler", function() {
 		write("c.js", `var b = require("./b")\nvar a = require("./a").toString()`)
 		bundle(ns + "c.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar _0 = 123\nvar a0 = _0.toString()\nvar b = a0\nvar a = _0.toString()\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar _0 = 123\nvar a0 = _0.toString()\nvar b = a0\nvar a = _0.toString()\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -304,7 +303,7 @@ o.spec("bundler", function() {
 		write("d.js", `module.exports = 1`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar d = 1\nvar b = function() {return d + 1}\nvar c = function() {return d + 2}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar d = 1\nvar b = function() {return d + 1}\nvar c = function() {return d + 2}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -317,7 +316,7 @@ o.spec("bundler", function() {
 		write("b.js", `var b = 1\nmodule.exports = function() {return b}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b0 = 1\nvar b = function() {return b0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b0 = 1\nvar b = function() {return b0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -328,7 +327,7 @@ o.spec("bundler", function() {
 		write("b.js", `var a = 2\nmodule.exports = function() {return a}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar a = 1\nvar a0 = 2\nvar b = function() {return a0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar a = 1\nvar a0 = 2\nvar b = function() {return a0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -339,7 +338,7 @@ o.spec("bundler", function() {
 		write("b.js", `var a = 2\nmodule.exports = function() {return a}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nfunction a() {}\nvar a0 = 2\nvar b = function() {return a0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nfunction a() {}\nvar a0 = 2\nvar b = function() {return a0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -351,7 +350,7 @@ o.spec("bundler", function() {
 		write("c.js", `var a = 2\nmodule.exports = function() {return a}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar a = 1\nvar b = function() {return a}\nvar a0 = 2\nvar c = function() {return a0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar a = 1\nvar b = function() {return a}\nvar a0 = 2\nvar c = function() {return a0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -363,7 +362,7 @@ o.spec("bundler", function() {
 		write("b.js", `var b = "b b b \\\" b"\nmodule.exports = function() {return b}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b0 = "b b b \\\" b"\nvar b = function() {return b0}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b0 = "b b b \\\" b"\nvar b = function() {return b0}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
@@ -374,7 +373,7 @@ o.spec("bundler", function() {
 		write("b.js", `var b = {b: 1}\nmodule.exports = function() {return b.b}`)
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(`new function() {\nvar b0 = {b: 1}\nvar b = function() {return b0.b}\n}`)
+		o(read("out.js")).equals(`;(function() {\nvar b0 = {b: 1}\nvar b = function() {return b0.b}\n}());`)
 		
 		remove("a.js")
 		remove("b.js")
