@@ -1,4 +1,4 @@
-new function() {
+;(function() {
 
 function Vnode(tag, key, attrs0, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
@@ -1198,4 +1198,4 @@ m.version = "1.0.1"
 m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
-}
+}());
