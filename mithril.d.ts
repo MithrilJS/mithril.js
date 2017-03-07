@@ -13,15 +13,15 @@ declare namespace Mithril {
 		/** The oninit hook is called before a vnode is touched by the virtual DOM engine. */
 		oninit?: (this: State, vnode: Vnode<Attrs, State>) => any;
 		/** The oncreate hook is called after a DOM element is created and attached to the document. */
-		oncreate?: (this: State, vnode: Vnode<Attrs, State>) => any;
+		oncreate?: (this: State, vnode: VnodeDOM<Attrs, State>) => any;
 		/** The onbeforeupdate hook is called before a vnode is diffed in a update. */
-		onbeforeremove?: (this: State, vnode: Vnode<Attrs, State>) => Promise<any> | void;
+		onbeforeremove?: (this: State, vnode: VnodeDOM<Attrs, State>) => Promise<any> | void;
 		/** The onupdate hook is called after a DOM element is updated, while attached to the document. */
-		onremove?: (this: State, vnode: Vnode<Attrs, State>) => any;
+		onremove?: (this: State, vnode: VnodeDOM<Attrs, State>) => any;
 		/** The onbeforeremove hook is called before a DOM element is detached from the document. If a Promise is returned, Mithril only detaches the DOM element after the promise completes. */
 		onbeforeupdate?: (this: State, vnode: Vnode<Attrs, State>, old: Vnode<Attrs, State>) => boolean | void;
 		/** The onremove hook is called before a DOM element is removed from the document. */
-		onupdate?: (this: State, vnode: Vnode<Attrs, State>) => any;
+		onupdate?: (this: State, vnode: VnodeDOM<Attrs, State>) => any;
 	}
 
 	interface Hyperscript {
@@ -227,13 +227,22 @@ declare namespace Mithril {
 		children?: Children;
 		/** This is used instead of children if a vnode contains a text node as its only child. This is done for performance reasons. Component vnodes never use the text property even if they have a text node as their only child. */
 		text?: string | number | boolean;
+	}
+
+	// In some lifecycle methods, Vnode will have a dom property
+	// and possibly a domSize property.
+	interface VnodeDOM<Attrs, State> extends Vnode<Attrs, State> {
+
 		/** Points to the element that corresponds to the vnode. */
-		dom?: Element;
+		dom: Element;
+
 		/** This defines the number of DOM elements that the vnode represents (starting from the element referenced by the dom property). */
 		domSize?: number;
 	}
 
 	interface CVnode<A> extends Vnode<A, ClassComponent<A>> { }
+
+	interface CVnodeDOM<A> extends VnodeDOM<A, ClassComponent<A>> { }
 
 	/** Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse. Any Javascript object that has a view method is a Mithril component. Components can be consumed via the m() utility. */
 	interface Component<Attrs, State extends Lifecycle<Attrs, State>> extends Lifecycle<Attrs, State> {
