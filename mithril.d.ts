@@ -34,7 +34,7 @@ declare namespace Mithril {
 		/** Creates a virtual element (Vnode). */
 		<Attrs, State>(component: ComponentTypes<Attrs, State>, ...args: Children[]): Vnode<Attrs, State>;
 		/** Creates a fragment virtual element (Vnode). */
-		fragment(attrs: Lifecycle<any, any> & { [key: string]: any }, children: ChildArray | string | number | boolean): Vnode<any, any>;
+		fragment(attrs: Lifecycle<any, any> & { [key: string]: any }, children: ChildArrayOrPrimitive): Vnode<any, any>;
 		/** Turns an HTML string into a virtual element (Vnode). Do not use trust on unsanitized user input. */
 		trust(html: string): Vnode<any, any>;
 	}
@@ -212,6 +212,7 @@ declare namespace Mithril {
 	type Child = Vnode<any, any> | string | number | boolean | null | undefined;
 	interface ChildArray extends Array<Children> { }
 	type Children = Child | ChildArray;
+	type ChildArrayOrPrimitive = ChildArray | string | number | boolean;
 
 	/** Virtual DOM nodes, or vnodes, are Javascript objects that represent an element (or parts of the DOM). */
 	interface Vnode<Attrs, State extends Lifecycle<Attrs, State>> {
@@ -224,7 +225,7 @@ declare namespace Mithril {
 		/** The value used to map a DOM element to its respective item in an array of data. */
 		key?: string | number;
 		/** In most vnode types, the children property is an array of vnodes. For text and trusted HTML vnodes, The children property is either a string, a number or a boolean. */
-		children?: Children;
+		children?: ChildArrayOrPrimitive;
 		/** This is used instead of children if a vnode contains a text node as its only child. This is done for performance reasons. Component vnodes never use the text property even if they have a text node as their only child. */
 		text?: string | number | boolean;
 	}
