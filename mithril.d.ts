@@ -19,7 +19,7 @@ declare namespace Mithril {
 		/** The onupdate hook is called after a DOM element is updated, while attached to the document. */
 		onremove?: (this: State, vnode: VnodeDOM<Attrs, State>) => any;
 		/** The onbeforeremove hook is called before a DOM element is detached from the document. If a Promise is returned, Mithril only detaches the DOM element after the promise completes. */
-		onbeforeupdate?: (this: State, vnode: Vnode<Attrs, State>, old: Vnode<Attrs, State>) => boolean | void;
+		onbeforeupdate?: (this: State, vnode: VnodeDOM<Attrs, State>, old: VnodeDOM<Attrs, State>) => boolean | void;
 		/** The onremove hook is called before a DOM element is removed from the document. */
 		onupdate?: (this: State, vnode: VnodeDOM<Attrs, State>) => any;
 	}
