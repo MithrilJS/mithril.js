@@ -21,6 +21,7 @@ module.exports = function($window) {
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (typeof tag === "string") {
+			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": return createText(parent, vnode, nextSibling)
@@ -238,7 +239,10 @@ module.exports = function($window) {
 			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
 				if (vnode.attrs != null) {
-					if (recycling) initLifecycle(vnode.attrs, vnode, hooks)
+					if (recycling) {
+						vnode.state = {}
+						initLifecycle(vnode.attrs, vnode, hooks)
+					}
 					else updateLifecycle(vnode.attrs, vnode, hooks)
 				}
 				switch (oldTag) {
