@@ -318,7 +318,7 @@ declare namespace Mithril {
 	}
 
 	/** This represents the attributes available for configuring virtual elements, beyond the applicable DOM attributes.*/
-	interface Attributes {
+	interface Attributes extends Lifecycle<any, any> {
 		/** The class name(s) for this virtual element, as a space-separated list. */
 		className?: string;
 		/** The class name(s) for this virtual element, as a space-separated list. */
