@@ -1,7 +1,7 @@
 ;(function() {
 
 function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined, skip: false}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -389,6 +389,7 @@ var coreRenderer = function($window) {
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (typeof tag === "string") {
+			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": return createText(parent, vnode, nextSibling)
@@ -597,7 +598,10 @@ var coreRenderer = function($window) {
 			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
 				if (vnode.attrs != null) {
-					if (recycling) initLifecycle(vnode.attrs, vnode, hooks)
+					if (recycling) {
+						vnode.state = {}
+						initLifecycle(vnode.attrs, vnode, hooks)
+					}
 					else updateLifecycle(vnode.attrs, vnode, hooks)
 				}
 				switch (oldTag) {
