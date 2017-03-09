@@ -1,7 +1,7 @@
-new function() {
+;(function() {
 
 function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined, skip: false}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -16,62 +16,82 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 }
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
+var hasOwn = {}.hasOwnProperty
+function compileSelector(selector) {
+	var match, tag = "div", classes = [], attrs = {}
+	while (match = selectorParser.exec(selector)) {
+		var type = match[1], value = match[2]
+		if (type === "" && value !== "") tag = value
+		else if (type === "#") attrs.id = value
+		else if (type === ".") classes.push(value)
+		else if (match[3][0] === "[") {
+			var attrValue = match[6]
+			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
+			if (match[4] === "class") classes.push(attrValue)
+			else attrs[match[4]] = attrValue || true
+		}
+	}
+	if (classes.length > 0) attrs.className = classes.join(" ")
+	return selectorCache[selector] = {tag: tag, attrs: attrs}
+}
+function execSelector(state, attrs, children) {
+	var hasAttrs = false, childList, text
+	var className = attrs.className || attrs.class
+	for (var key in state.attrs) {
+		if (hasOwn.call(state.attrs, key)) {
+			attrs[key] = state.attrs[key]
+		}
+	}
+	if (className != null) {
+		if (attrs.class != null) {
+			attrs.class = undefined
+			attrs.className = className
+		}
+		if (state.attrs.className != null) {
+			attrs.className = state.attrs.className + " " + className
+		}
+	}
+	for (var key in attrs) {
+		if (hasOwn.call(attrs, key) && key !== "key") {
+			hasAttrs = true
+			break
+		}
+	}
+	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
+		text = children[0].children
+	} else {
+		childList = children
+	}
+	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
+}
 function hyperscript(selector) {
+	// Because sloppy mode sucks
+	var attrs = arguments[1], start = 2, children
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	if (typeof selector === "string" && selectorCache[selector] === undefined) {
-		var match, tag, classes = [], attributes = {}
-		while (match = selectorParser.exec(selector)) {
-			var type = match[1], value = match[2]
-			if (type === "" && value !== "") tag = value
-			else if (type === "#") attributes.id = value
-			else if (type === ".") classes.push(value)
-			else if (match[3][0] === "[") {
-				var attrValue = match[6]
-				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
-				if (match[4] === "class") classes.push(attrValue)
-				else attributes[match[4]] = attrValue || true
-			}
-		}
-		if (classes.length > 0) attributes.className = classes.join(" ")
-		selectorCache[selector] = function(attrs, children) {
-			var hasAttrs = false, childList, text
-			var className = attrs.className || attrs.class
-			for (var key in attributes) attrs[key] = attributes[key]
-			if (className !== undefined) {
-				if (attrs.class !== undefined) {
-					attrs.class = undefined
-					attrs.className = className
-				}
-				if (attributes.className !== undefined) attrs.className = attributes.className + " " + className
-			}
-			for (var key in attrs) {
-				if (key !== "key") {
-					hasAttrs = true
-					break
-				}
-			}
-			if (Array.isArray(children) && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
-			else childList = children
-			return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
-		}
+	if (typeof selector === "string") {
+		var cached = selectorCache[selector] || compileSelector(selector)
 	}
-	var attrs, children, childrenIndex
-	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !Array.isArray(arguments[1])) {
-		attrs = arguments[1]
-		childrenIndex = 2
+	if (!attrs) {
+		attrs = {}
+	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
+		attrs = {}
+		start = 1
 	}
-	else childrenIndex = 1
-	if (arguments.length === childrenIndex + 1) {
-		children = Array.isArray(arguments[childrenIndex]) ? arguments[childrenIndex] : [arguments[childrenIndex]]
-	}
-	else {
+	if (arguments.length === start + 1) {
+		children = arguments[start]
+		if (!Array.isArray(children)) children = [children]
+	} else {
 		children = []
-		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
+		while (start < arguments.length) children.push(arguments[start++])
 	}
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
-	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
+	var normalized = Vnode.normalizeChildren(children)
+	if (typeof selector === "string") {
+		return execSelector(cached, attrs, normalized)
+	} else {
+		return Vnode(selector, attrs.key, attrs, normalized)
+	}
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
@@ -369,6 +389,7 @@ var coreRenderer = function($window) {
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (typeof tag === "string") {
+			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": return createText(parent, vnode, nextSibling)
@@ -577,7 +598,10 @@ var coreRenderer = function($window) {
 			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
 				if (vnode.attrs != null) {
-					if (recycling) initLifecycle(vnode.attrs, vnode, hooks)
+					if (recycling) {
+						vnode.state = {}
+						initLifecycle(vnode.attrs, vnode, hooks)
+					}
 					else updateLifecycle(vnode.attrs, vnode, hooks)
 				}
 				switch (oldTag) {
@@ -1198,4 +1222,4 @@ m.version = "1.0.1"
 m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
-}
+}());

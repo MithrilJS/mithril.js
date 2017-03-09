@@ -5,13 +5,13 @@ var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
-try {fs.mkdirSync("../mithril")} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/archive")} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/archive/v" + version)} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/archive/v" + version + "/lib")} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/archive/v" + version + "/lib/prism")} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/lib")} catch (e) {/* ignore */}
-try {fs.mkdirSync("../mithril/lib/prism")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive/v" + version + "/lib")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive/v" + version + "/lib/prism")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/lib")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/lib/prism")} catch (e) {/* ignore */}
 
 var guides = fs.readFileSync("docs/guides.md", "utf-8")
 var methods = fs.readFileSync("docs/methods.md", "utf-8")
@@ -57,12 +57,12 @@ function generate(pathname) {
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
 					return "<h" + n + ' id="' + text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-") + '">' + text + "</h" + n + ">"
 				})
-			fs.writeFileSync("../mithril/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
-			fs.writeFileSync("../mithril/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
+			fs.writeFileSync("./dist/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
+			fs.writeFileSync("./dist/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 		}
 		else if (!pathname.match(/lint|generate/)) {
-			fs.writeFileSync("../mithril/archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
-			fs.writeFileSync("../mithril/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
+			fs.writeFileSync("./dist/archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
+			fs.writeFileSync("./dist/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
 		}
 	}
 }
