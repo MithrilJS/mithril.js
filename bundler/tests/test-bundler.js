@@ -90,7 +90,7 @@ o.spec("bundler", function() {
 		write("b.js", '"use strict"\nmodule.exports = 1')
 		bundle(ns + "a.js", ns + "out.js")
 		
-		o(read("out.js")).equals(";(function() {\n"use strict"\nvar b = 1\n}());")
+		o(read("out.js")).equals(';(function() {\n"use strict"\nvar b = 1\n}());')
 
 		remove("a.js")
 		remove("b.js")
@@ -112,7 +112,7 @@ o.spec("bundler", function() {
 		write("b.js", "'use strict'\nmodule.exports = 1")
 		bundle(ns + "a.js", ns + "out.js")
 
-		o(read("out.js")).equals(";(function() {\n"use strict"\nvar b = 1\n}());")
+		o(read("out.js")).equals(';(function() {\n"use strict"\nvar b = 1\n}());')
 	
 		remove("a.js")
 		remove("b.js")
@@ -229,7 +229,7 @@ o.spec("bundler", function() {
 		write("c.js", "var cc = 2\nmodule.exports = cc")
 		bundle(ns + "a.js", ns + "out.js")
 
-		o(read("out.js")).equals(";(function() {\nvar x = {}\nvar bb = 1\nx["b"] = bb\nvar cc = 2\nx["c"] = cc\n}());")
+		o(read("out.js")).equals(';(function() {\nvar x = {}\nvar bb = 1\nx["b"] = bb\nvar cc = 2\nx["c"] = cc\n}());')
 
 		remove("a.js")
 		remove("b.js")
