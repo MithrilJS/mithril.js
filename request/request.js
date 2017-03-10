@@ -83,7 +83,7 @@ module.exports = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || /^file:\/\//.test(args.url)) {
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || /^file:\/\//i.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
