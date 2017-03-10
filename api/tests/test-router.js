@@ -6,7 +6,6 @@ var browserMock = require("../../test-utils/browserMock")
 
 var m = require("../../render/hyperscript")
 var callAsync = require("../../test-utils/callAsync")
-var coreRenderer = require("../../render/render")
 var apiRedraw = require("../../api/redraw")
 var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
@@ -31,7 +30,7 @@ o.spec("route", function() {
 				o("throws on invalid `root` DOM node", function() {
 					var threw = false
 					try {
-						route(null, '/', {'/':{view: function() {}}})
+						route(null, "/", {"/":{view: function() {}}})
 					} catch (e) {
 						threw = true
 					}
@@ -141,7 +140,7 @@ o.spec("route", function() {
 						done()
 					}
 				})
-				
+
 				o("redraws when render function is executed", function() {
 					var onupdate = o.spy()
 					var oninit = o.spy()
@@ -206,7 +205,6 @@ o.spec("route", function() {
 				o("event handlers can skip redraw", function(done) {
 					var onupdate = o.spy()
 					var oninit = o.spy()
-					var onclick = o.spy()
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -354,11 +352,6 @@ o.spec("route", function() {
 				o("accepts RouteResolver with onmatch that returns Promise<undefined>", function(done) {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
-						view: function() {
-							return m("span")
-						}
-					}
 
 					var resolver = {
 						onmatch: function(args, requestedPath) {
@@ -395,11 +388,6 @@ o.spec("route", function() {
 				o("accepts RouteResolver with onmatch that returns Promise<any>", function(done) {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
-						view: function() {
-							return m("span")
-						}
-					}
 
 					var resolver = {
 						onmatch: function(args, requestedPath) {
@@ -437,14 +425,9 @@ o.spec("route", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var spy = o.spy()
-					var Component = {
-						view: function() {
-							return m("span")
-						}
-					}
 
 					var resolver = {
-						onmatch: function(args, requestedPath) {
+						onmatch: function() {
 							matchCount++
 							return Promise.reject(new Error("error"))
 						},
@@ -499,7 +482,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("changing `vnode.key` in `render` resets the component", function(done, timeout){
+				o("changing `vnode.key` in `render` resets the component", function(done){
 					var oninit = o.spy()
 					var Component = {
 						oninit: oninit,
@@ -548,22 +531,15 @@ o.spec("route", function() {
 				})
 
 				o("RouteResolver `render` does not have component semantics", function(done) {
-					var renderCount = 0
-					var A = {
-						view: function() {
-							return m("div")
-						}
-					}
-
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							render: function(vnode) {
+							render: function() {
 								return m("div")
 							},
 						},
 						"/b" : {
-							render: function(vnode) {
+							render: function() {
 								return m("div")
 							},
 						},
@@ -632,7 +608,7 @@ o.spec("route", function() {
 							onmatch: function() {
 								matchCount++
 							},
-							render: function(vnode) {
+							render: function() {
 								renderCount++
 								return {tag: Component}
 							},
@@ -726,7 +702,7 @@ o.spec("route", function() {
 							render: render
 						},
 						"/b" : {
-							render: function(vnode){
+							render: function(){
 								redirected = true
 							}
 						}
@@ -838,7 +814,7 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
-						route.set('/b')
+						route.set("/b")
 						callAsync(function() {
 							callAsync(function() {
 								callAsync(function() {
@@ -865,7 +841,7 @@ o.spec("route", function() {
 							render: render
 						},
 						"/b" : {
-							onmatch: function(vnode){
+							onmatch: function(){
 								redirected = true
 								return {view: function() {}}
 							}
@@ -895,7 +871,7 @@ o.spec("route", function() {
 							render: render
 						},
 						"/b" : {
-							render: function(vnode){
+							render: function(){
 								redirected = true
 							}
 						}
@@ -924,7 +900,7 @@ o.spec("route", function() {
 							render: render
 						},
 						"/b" : {
-							view: function(vnode){
+							view: function(){
 								redirected = true
 							}
 						}
@@ -1032,7 +1008,7 @@ o.spec("route", function() {
 					var render = o.spy(function() {return m("div")})
 
 					$window.location.href = prefix + "/"
-					route(root, '/', {
+					route(root, "/", {
 						"/": {
 							onmatch: onmatch,
 							render: render
@@ -1081,23 +1057,23 @@ o.spec("route", function() {
 
 				o("routing with RouteResolver works more than once", function(done) {
 					$window.location.href = prefix + "/a"
-					route(root, '/a', {
-						'/a': {
+					route(root, "/a", {
+						"/a": {
 							render: function() {
 								return m("a", "a")
 							}
 						},
-						'/b': {
+						"/b": {
 							render: function() {
 								return m("b", "b")
 							}
 						}
 					})
 
-					route.set('/b')
+					route.set("/b")
 
 					callAsync(function() {
-						route.set('/a')
+						route.set("/a")
 
 						callAsync(function() {
 							o(root.firstChild.nodeName).equals("A")
@@ -1122,7 +1098,7 @@ o.spec("route", function() {
 									})
 								})
 							},
-							render: function(vnode) {
+							render: function() {
 								rendered = true
 								resolved = "a"
 							}
@@ -1180,7 +1156,7 @@ o.spec("route", function() {
 									route.set("/b")
 								})
 							},
-							render: function(vnode) {
+							render: function() {
 								rendered = true
 								resolved = "a"
 							}
@@ -1210,7 +1186,7 @@ o.spec("route", function() {
 					var i = 0
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/": {view: function(v) {i++}}
+						"/": {view: function() {i++}}
 					})
 					var before = i
 

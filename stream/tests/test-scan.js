@@ -22,7 +22,7 @@ o.spec("scan", function() {
 		parent(7)
 		parent("11")
 		parent(undefined)
-		parent({ a: 1 })
+		parent({a: 1})
 		var result = child()
 
 		// deepEquals fails on arrays?
@@ -32,4 +32,3 @@ o.spec("scan", function() {
 		o(result[3]).deepEquals({a: 1})
 	})
 })
-

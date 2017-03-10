@@ -1,11 +1,6 @@
-coverage
 .vscode
-examples
-docs
-node_modules
-tests
-test-utils
-ospec
-mithril.js
-mithril.min.js
-archive
+/node_modules
+/examples
+/docs/lib
+/mithril.js
+/mithril.min.js

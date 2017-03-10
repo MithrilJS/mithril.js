@@ -188,7 +188,7 @@ module.exports = {
         "quotes": [
             "error",
             "double",
-            "avoid-escape"
+            {"avoidEscape": true}
         ],
         "radix": [
             "error",
@@ -209,7 +209,7 @@ module.exports = {
         "space-infix-ops": "off",
         "space-unary-ops": "error",
         "spaced-comment": "off",
-        "strict": "off",
+        "strict": ["error", "global"],
         "template-curly-spacing": "error",
         "valid-jsdoc": "off",
         "vars-on-top": "off",

@@ -63,7 +63,7 @@ o.spec("component", function() {
 				o("updates root from null", function() {
 					var visible = false
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return visible ? {tag: "div"} : null
 						}
 					})
@@ -76,7 +76,7 @@ o.spec("component", function() {
 				o("updates root from primitive", function() {
 					var visible = false
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return visible ? {tag: "div"} : false
 						}
 					})
@@ -89,7 +89,7 @@ o.spec("component", function() {
 				o("updates root to null", function() {
 					var visible = true
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return visible ? {tag: "div"} : null
 						}
 					})
@@ -102,7 +102,7 @@ o.spec("component", function() {
 				o("updates root to primitive", function() {
 					var visible = true
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return visible ? {tag: "div"} : false
 						}
 					})
@@ -114,7 +114,7 @@ o.spec("component", function() {
 				})
 				o("updates root from null to null", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return null
 						}
 					})
@@ -125,7 +125,7 @@ o.spec("component", function() {
 				})
 				o("removes", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return {tag: "div"}
 						}
 					})
@@ -138,7 +138,7 @@ o.spec("component", function() {
 				})
 				o("svg works when creating across component boundary", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return {tag: "g"}
 						}
 					})
@@ -148,7 +148,7 @@ o.spec("component", function() {
 				})
 				o("svg works when updating across component boundary", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return {tag: "g"}
 						}
 					})
@@ -161,7 +161,7 @@ o.spec("component", function() {
 			o.spec("return value", function() {
 				o("can return fragments", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return [
 								{tag: "label"},
 								{tag: "input"},
@@ -176,7 +176,7 @@ o.spec("component", function() {
 				})
 				o("can return string", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return "a"
 						}
 					})
@@ -187,7 +187,7 @@ o.spec("component", function() {
 				})
 				o("can return falsy string", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return ""
 						}
 					})
@@ -198,7 +198,7 @@ o.spec("component", function() {
 				})
 				o("can return number", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return 1
 						}
 					})
@@ -209,7 +209,7 @@ o.spec("component", function() {
 				})
 				o("can return falsy number", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return 0
 						}
 					})
@@ -220,7 +220,7 @@ o.spec("component", function() {
 				})
 				o("can return boolean", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return true
 						}
 					})
@@ -231,7 +231,7 @@ o.spec("component", function() {
 				})
 				o("can return falsy boolean", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return false
 						}
 					})
@@ -242,7 +242,7 @@ o.spec("component", function() {
 				})
 				o("can return null", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return null
 						}
 					})
@@ -252,7 +252,7 @@ o.spec("component", function() {
 				})
 				o("can return undefined", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return undefined
 						}
 					})
@@ -278,7 +278,7 @@ o.spec("component", function() {
 				})
 				o("can update when returning fragments", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return [
 								{tag: "label"},
 								{tag: "input"},
@@ -294,7 +294,7 @@ o.spec("component", function() {
 				})
 				o("can update when returning primitive", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return "a"
 						}
 					})
@@ -306,7 +306,7 @@ o.spec("component", function() {
 				})
 				o("can update when returning null", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return null
 						}
 					})
@@ -317,7 +317,7 @@ o.spec("component", function() {
 				})
 				o("can remove when returning fragments", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return [
 								{tag: "label"},
 								{tag: "input"},
@@ -334,7 +334,7 @@ o.spec("component", function() {
 				})
 				o("can remove when returning primitive", function() {
 					var component = createComponent({
-						view: function(vnode) {
+						view: function() {
 							return "a"
 						}
 					})
@@ -403,7 +403,7 @@ o.spec("component", function() {
 								viewCalled = true
 								return [{tag: "div", attrs: {id: "a"}, text: "b"}]
 							},
-							oninit: function(vnode) {
+							oninit: function() {
 								o(viewCalled).equals(false)
 							},
 						}
@@ -646,7 +646,6 @@ o.spec("component", function() {
 							return {tag: "div"}
 						}
 					})
-					var update = o.spy()
 					var vnode = {tag: component, key: 1}
 					var updated = {tag: component, key: 1}
 
@@ -786,15 +785,15 @@ o.spec("component", function() {
 						} else {
 							o(vnode.state).notEquals(firstState)
 						}
-						return {tag: 'div'}
+						return {tag: "div"}
 					})
 					var component = createComponent({view: view})
 
-					render(root, [{tag: 'div', children: [{tag: component, key: 1}]}])
+					render(root, [{tag: "div", children: [{tag: component, key: 1}]}])
 					var child = root.firstChild.firstChild
 					render(root, [])
 					step = 1
-					render(root, [{tag: 'div', children: [{tag: component, key: 1}]}])
+					render(root, [{tag: "div", children: [{tag: component, key: 1}]}])
 
 					o(child).equals(root.firstChild.firstChild)
 					o(view.callCount).equals(2)
@@ -802,7 +801,6 @@ o.spec("component", function() {
 			})
 			o.spec("state", function() {
 				o("initializes state", function() {
-					var called = 0
 					var data = {a: 1}
 					var component = createComponent(createComponent({
 						data: data,
@@ -818,8 +816,7 @@ o.spec("component", function() {
 						o(vnode.state.data).equals(data)
 					}
 				})
-				o('state proxies to the component object/prototype', function() {
-					var called = 0
+				o("state proxies to the component object/prototype", function() {
 					var body = {a: 1}
 					var data = [body]
 					var component = createComponent(createComponent({
@@ -843,7 +840,6 @@ o.spec("component", function() {
 	o.spec("Tests specific to certain component kinds", function() {
 		o.spec("state", function() {
 			o("POJO", function() {
-				var called = 0
 				var data = {}
 				var component = {
 					data: data,
@@ -875,8 +871,6 @@ o.spec("component", function() {
 				})
 				component.prototype.view = view
 				component.prototype.oninit = oninit
-
-				var context
 
 				render(root, [{tag: component, attrs: {oninit: oninit}}])
 				render(root, [{tag: component, attrs: {oninit: oninit}}])

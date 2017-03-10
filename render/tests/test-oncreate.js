@@ -128,7 +128,6 @@ o.spec("oncreate", function() {
 	})
 	o("does not call oncreate when removing", function() {
 		var create = o.spy()
-		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oncreate: create}, state: {}}
 
 		render(root, [vnode])

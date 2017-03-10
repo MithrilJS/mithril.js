@@ -128,7 +128,6 @@ o.spec("oninit", function() {
 	})
 	o("does not call oninit when removing", function() {
 		var create = o.spy()
-		var update = o.spy()
 		var vnode = {tag: "div", attrs: {oninit: create}, state: {}}
 
 		render(root, [vnode])

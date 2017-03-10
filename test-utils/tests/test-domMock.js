@@ -321,7 +321,7 @@ o.spec("domMock", function() {
 			o(div.getAttribute("id")).equals("aaa")
 		})
 	})
-	
+
 	o.spec("setAttribute", function() {
 		o("works", function() {
 			var div = $document.createElement("div")
@@ -393,7 +393,6 @@ o.spec("domMock", function() {
 	o.spec("textContent", function() {
 		o("works", function() {
 			var div = $document.createElement("div")
-			var a = $document.createElement("a")
 			div.textContent = "aaa"
 
 			o(div.childNodes.length).equals(1)
@@ -402,7 +401,6 @@ o.spec("domMock", function() {
 		})
 		o("works with empty string", function() {
 			var div = $document.createElement("div")
-			var a = $document.createElement("a")
 			div.textContent = ""
 
 			o(div.childNodes.length).equals(0)
@@ -514,8 +512,8 @@ o.spec("domMock", function() {
 			var div = $document.createElement("div")
 			div.style.cssText = "background: url(';'); font-family: \";\""
 
-			o(div.style.background).equals("url(';')")			
-			o(div.style.fontFamily).equals("\";\"")			
+			o(div.style.background).equals("url(';')")
+			o(div.style.fontFamily).equals('";"')
 			o(div.style.cssText).equals("background: url(';'); font-family: \";\";")
 		})
 		o("comments in style.cssText are stripped", function(){
@@ -534,9 +532,10 @@ o.spec("domMock", function() {
 
 		})
 		o("setting style throws", function () {
+			var div = $document.createElement("div")
 			var err = false
 			try {
-				div.style = ''
+				div.style = ""
 			} catch (e) {
 				err = e
 			}
@@ -919,55 +918,55 @@ o.spec("domMock", function() {
 		o.spec("canvas width and height", function() {
 			o("setting property works", function() {
 				var canvas = $document.createElement("canvas")
-				
+
 				canvas.width = 100
 				o(canvas.attributes["width"].nodeValue).equals("100")
 				o(canvas.width).equals(100)
-				
+
 				canvas.height = 100
 				o(canvas.attributes["height"].nodeValue).equals("100")
 				o(canvas.height).equals(100)
 			})
 			o("setting string casts to number", function() {
 				var canvas = $document.createElement("canvas")
-				
+
 				canvas.width = "100"
 				o(canvas.attributes["width"].nodeValue).equals("100")
 				o(canvas.width).equals(100)
-				
+
 				canvas.height = "100"
 				o(canvas.attributes["height"].nodeValue).equals("100")
 				o(canvas.height).equals(100)
 			})
 			o("setting float casts to int", function() {
 				var canvas = $document.createElement("canvas")
-				
+
 				canvas.width = 1.2
 				o(canvas.attributes["width"].nodeValue).equals("1")
 				o(canvas.width).equals(1)
-				
+
 				canvas.height = 1.2
 				o(canvas.attributes["height"].nodeValue).equals("1")
 				o(canvas.height).equals(1)
 			})
 			o("setting percentage fails", function() {
 				var canvas = $document.createElement("canvas")
-				
+
 				canvas.width = "100%"
 				o(canvas.attributes["width"].nodeValue).equals("0")
 				o(canvas.width).equals(0)
-				
+
 				canvas.height = "100%"
 				o(canvas.attributes["height"].nodeValue).equals("0")
 				o(canvas.height).equals(0)
 			})
 			o("setting attribute works", function() {
 				var canvas = $document.createElement("canvas")
-				
+
 				canvas.setAttribute("width", "100%")
 				o(canvas.attributes["width"].nodeValue).equals("100%")
 				o(canvas.width).equals(100)
-				
+
 				canvas.setAttribute("height", "100%")
 				o(canvas.attributes["height"].nodeValue).equals("100%")
 				o(canvas.height).equals(100)
