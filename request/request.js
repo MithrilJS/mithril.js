@@ -2,7 +2,7 @@
 
 var buildQueryString = require("../querystring/build")
 
-var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
+var FILE_PROTOCOL_REGEX = /^file:\/\//i
 
 module.exports = function($window, Promise) {
 	var callbackCount = 0
