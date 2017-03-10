@@ -924,6 +924,10 @@ var coreRenderer = function($window) {
 				vnode.events[key2] = callback
 				element.addEventListener(eventName, vnode.events[key2], false)
 			}
+
+			if (isFunction(options.onreadystatechange)) {
+				options.onreadystatechange()
+			}
 		}
 	}
 	//lifecycle
