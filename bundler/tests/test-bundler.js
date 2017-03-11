@@ -24,9 +24,9 @@ o.spec("bundler", function() {
 		write("b.js", "module.exports = 1")
 		bundle(ns + "a.js", ns + "out.js")
 
-    o(read("out.js")).equals(";(function() {\nvar b = 1\n}());")
+		o(read("out.js")).equals(";(function() {\nvar b = 1\n}());")
 
-    remove("a.js")
+		remove("a.js")
 		remove("b.js")
 		remove("out.js")
 	})
@@ -35,7 +35,7 @@ o.spec("bundler", function() {
 		write("b.js", "module.exports = 1;")
 		bundle(ns + "a.js", ns + "out.js")
 		
-    o(read("out.js")).equals(";(function() {\nvar b = 1;\n}());")
+		o(read("out.js")).equals(";(function() {\nvar b = 1;\n}());")
 
 		remove("a.js")
 		remove("b.js")
@@ -46,7 +46,7 @@ o.spec("bundler", function() {
 		write("b.js", "module.exports = 1")
 		bundle(ns + "a.js", ns + "out.js")
 		
-    o(read("out.js")).equals(";(function() {\nlet b = 1\n}());")
+		o(read("out.js")).equals(";(function() {\nlet b = 1\n}());")
 
 		remove("a.js")
 		remove("b.js")
@@ -57,7 +57,7 @@ o.spec("bundler", function() {
 		write("b.js", "module.exports = 1")
 		bundle(ns + "a.js", ns + "out.js")
 		
-    o(read("out.js")).equals(";(function() {\nconst b = 1\n}());")
+		o(read("out.js")).equals(";(function() {\nconst b = 1\n}());")
 
 		remove("a.js")
 		remove("b.js")
@@ -156,9 +156,9 @@ o.spec("bundler", function() {
 		write("b.js", "module.exports = []")
 		bundle(ns + "a.js", ns + "out.js")
 
-    o(read("out.js")).equals(";(function() {\nvar _0 = []\nvar b = _0\n\t.toString()\n}());")
+		o(read("out.js")).equals(";(function() {\nvar _0 = []\nvar b = _0\n\t.toString()\n}());")
 
-    remove("a.js")
+		remove("a.js")
 		remove("b.js")
 		remove("out.js")
 	})
@@ -169,7 +169,7 @@ o.spec("bundler", function() {
 
 		o(read("out.js")).equals(";(function() {\nvar _0 = function() {}\nvar b = _0()\n}());")
 
-    remove("a.js")
+		remove("a.js")
 		remove("b.js")
 		remove("out.js")
 	})

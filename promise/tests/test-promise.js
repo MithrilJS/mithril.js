@@ -584,15 +584,15 @@ o.spec("promise", function() {
 			var readCount = 0
 			var promise = Promise.resolve(1).then(function() {
 				return Object.create(null, {
-                    then: {
-                        get: function () {
-                            ++readCount
-                            return function(onFulfilled) {
-                                onFulfilled()
-                            }
-                        }
-                    }
-                })
+					then: {
+						get: function () {
+							++readCount
+							return function(onFulfilled) {
+								onFulfilled()
+							}
+						}
+					}
+				})
 			})
 
 			promise.then(function() {

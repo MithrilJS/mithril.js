@@ -14,6 +14,7 @@
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "node ospec/bin/ospec",
     "posttest": "npm run lint || true",
     "cover": "istanbul cover --print both ospec/bin/ospec",

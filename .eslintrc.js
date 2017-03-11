@@ -60,7 +60,14 @@ module.exports = {
         "id-blacklist": "error",
         "id-length": "off",
         "id-match": "error",
-        "indent": "off",
+        "indent": [
+            "warn", 
+            "tab", 
+            {
+                "outerIIFEBody": 0,
+                "SwitchCase": 1
+            }
+        ],
         "init-declarations": "off",
         "jsx-quotes": "error",
         "key-spacing": "off",
@@ -217,5 +224,6 @@ module.exports = {
         "wrap-regex": "error",
         "yield-star-spacing": "error",
         "yoda": "off"
-    }
+    },
+    "root": true
 };
