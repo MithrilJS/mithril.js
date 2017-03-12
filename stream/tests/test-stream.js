@@ -162,6 +162,7 @@ o.spec("stream", function() {
 			})
 
 			o(b()).equals(undefined)
+			o(count).equals(0)
 		})
 		o("combine will throw with a helpful error if given non-stream values", function () {
 			var spy = o.spy()

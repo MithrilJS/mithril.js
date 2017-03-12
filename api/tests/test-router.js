@@ -528,6 +528,7 @@ o.spec("route", function() {
 					})
 
 					o(root.firstChild.nodeName).equals("DIV")
+					o(renderCount).equals(1)
 				})
 
 				o("RouteResolver `render` does not have component semantics", function(done) {
