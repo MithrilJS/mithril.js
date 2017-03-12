@@ -994,11 +994,11 @@ var _11 = function($window) {
 		var index = callbacks.indexOf(key1)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-    function redraw() {
-        for (var i = 1; i < callbacks.length; i += 2) {
-            callbacks[i]()
-        }
-    }
+	function redraw() {
+		for (var i = 1; i < callbacks.length; i += 2) {
+			callbacks[i]()
+		}
+	}
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
 var redrawService = _11(window)
