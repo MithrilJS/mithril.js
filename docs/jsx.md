@@ -45,8 +45,8 @@ var link = <a href={url}>{greeting + "!"}</a>
 Components can be used by using a convention of uppercasing the first letter of the component name:
 
 ```jsx
-m.mount(document.body, <MyComponent />)
-// equivalent to m.mount(document.body, m(MyComponent))
+m.render(document.body, <MyComponent />)
+// equivalent to m.render(document.body, m(MyComponent))
 ```
 
 ---
