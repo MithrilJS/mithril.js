@@ -7,6 +7,7 @@
 		- [m.route.get](#mrouteget)
 		- [m.route.prefix](#mrouteprefix)
 		- [m.route.link](#mroutelink)
+		- [m.route.param](#mrouteparam)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -100,12 +101,31 @@ Argument          | Type      | Required | Description
 
 ##### m.route.link
 
+This function can be used as the `oncreate` hook in a `m("a")` vnode: `m("a[href=/]", {oncreate: m.route.link})`.
+
+Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
+
 `eventHandler = m.route.link(vnode)`
 
 Argument          | Type        | Required | Description
 ----------------- | ----------- | -------- | ---
 `vnode`           | `Vnode`     | Yes      | This method is meant to be used in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` hook](lifecycle-methods.md)
 **returns**       | Function(e) |          | Returns an event handler that calls `m.route.set` with the link's `href` as the `path`
+
+##### m.route.param
+
+Retrieves a route parameter. A route parameter is a key-value pair. Route parameters may come from a few different places:
+
+- route interpolations (e.g. if a route is `/users/:id`, and it resolves to `/users/1`, the route parameter has a key `id` and value `"1"`)
+- router querystrings (e.g. if the path is `/users?page=1`, the route parameter has a key `page` and value `"1"`)
+- `history.state` (e.g. if history.state is `{foo: "bar"}`, the route parameter has key `foo` and value `"bar"`)
+
+`value = m.route.param(key)`
+
+Argument          | Type            | Required | Description
+----------------- | --------------- | -------- | ---
+`key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
+**returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
 
 #### RouteResolver
 
