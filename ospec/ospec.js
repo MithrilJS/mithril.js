@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise, no-process-exit */
 "use strict"
 
 module.exports = new function init() {
@@ -121,8 +122,8 @@ module.exports = new function init() {
 	}
 	function unique(subject) {
 		if (hasOwn.call(ctx, subject)) {
-			console.warn("A test or a spec named `" + subject + "` was already defined")	
-			while (hasOwn.call(ctx, subject)) subject += '*'
+			console.warn("A test or a spec named `" + subject + "` was already defined")
+			while (hasOwn.call(ctx, subject)) subject += "*"
 		}
 		return subject
 	}

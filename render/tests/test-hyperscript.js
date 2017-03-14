@@ -1,3 +1,5 @@
+"use strict"
+
 var o = require("../../ospec/ospec")
 var m = require("../../render/hyperscript")
 

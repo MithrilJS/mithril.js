@@ -213,10 +213,10 @@ o.spec("updateElement", function() {
 	})
 	o("updates svg child", function() {
 		var vnode = {tag: "svg", children: [{
-			tag: 'circle'
+			tag: "circle"
 		}]}
 		var updated = {tag: "svg", children: [{
-			tag: 'line'
+			tag: "line"
 		}]}
 
 		render(root, [vnode])
@@ -235,7 +235,7 @@ o.spec("updateElement", function() {
 
 		render(root, [vnode])
 		var c = vnode.dom
-		
+
 		o(root.childNodes.length).equals(1)
 		o(a).equals(c)
 	})
@@ -254,7 +254,7 @@ o.spec("updateElement", function() {
 
 		render(root, [e, b, f])
 		var y = root.childNodes[1]
-		
+
 		o(root.childNodes.length).equals(3)
 		o(x).equals(y)
 	})

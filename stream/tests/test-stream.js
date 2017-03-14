@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
-var callAsync = require("../../test-utils/callAsync")
 var Stream = require("../stream")
 
 o.spec("stream", function() {
@@ -105,7 +104,7 @@ o.spec("stream", function() {
 			var streams = []
 			var a = Stream()
 			var b = Stream()
-			var c = Stream.combine(function(a, b, changed) {
+			Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
 
@@ -119,7 +118,7 @@ o.spec("stream", function() {
 			var streams = []
 			var a = Stream(3)
 			var b = Stream(5)
-			var c = Stream.combine(function(a, b, changed) {
+			Stream.combine(function(a, b, changed) {
 				streams = changed
 			}, [a, b])
 
@@ -130,7 +129,7 @@ o.spec("stream", function() {
 		})
 		o("combine can return undefined", function() {
 			var a = Stream(1)
-			var b = Stream.combine(function(a) {
+			var b = Stream.combine(function() {
 				return undefined
 			}, [a])
 
@@ -138,7 +137,7 @@ o.spec("stream", function() {
 		})
 		o("combine can return stream", function() {
 			var a = Stream(1)
-			var b = Stream.combine(function(a) {
+			var b = Stream.combine(function() {
 				return Stream(2)
 			}, [a])
 
@@ -146,7 +145,7 @@ o.spec("stream", function() {
 		})
 		o("combine can return pending stream", function() {
 			var a = Stream(1)
-			var b = Stream.combine(function(a) {
+			var b = Stream.combine(function() {
 				return Stream()
 			}, [a])
 
@@ -155,22 +154,22 @@ o.spec("stream", function() {
 		o("combine can halt", function() {
 			var count = 0
 			var a = Stream(1)
-			var b = Stream.combine(function(a) {
+			var b = Stream.combine(function() {
 				return Stream.HALT
-			}, [a])
-			["fantasy-land/map"](function() {
+			}, [a])["fantasy-land/map"](function() {
 				count++
 				return 1
 			})
 
 			o(b()).equals(undefined)
+			o(count).equals(0)
 		})
 		o("combine will throw with a helpful error if given non-stream values", function () {
 			var spy = o.spy()
 			var a = Stream(1)
 			var thrown = null;
 			try {
-				var b = Stream.combine(spy, [a, ''])
+				Stream.combine(spy, [a, ""])
 			} catch (e) {
 				thrown = e
 			}
@@ -210,8 +209,9 @@ o.spec("stream", function() {
 			var a = Stream()
 			var b = Stream()
 
-			var all = Stream.merge([a.map(id), b.map(id)]).map(function(data) {
+			Stream.merge([a.map(id), b.map(id)]).map(function(data) {
 				value = data[0] + data[1]
+				return undefined
 			})
 
 			a(1)
@@ -344,7 +344,7 @@ o.spec("stream", function() {
 		})
 		o("works with pending stream", function() {
 			var stream = Stream(undefined)
-			var mapped = stream["fantasy-land/map"](function(value) {return Stream()})
+			var mapped = stream["fantasy-land/map"](function() {return Stream()})
 
 			o(mapped()()).equals(undefined)
 		})

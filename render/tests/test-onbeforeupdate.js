@@ -92,11 +92,10 @@ o.spec("onbeforeupdate", function() {
 	o("is not called on creation", function() {
 		var count = 0
 		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
 
 		render(root, [vnode])
 
-		function onbeforeupdate(vnode, old) {
+		function onbeforeupdate() {
 			count++
 			return true
 		}
@@ -112,7 +111,7 @@ o.spec("onbeforeupdate", function() {
 		render(root, [vnode])
 		render(root, [updated])
 
-		function onbeforeupdate(vnode, old) {
+		function onbeforeupdate() {
 			count++
 			return true
 		}
@@ -263,7 +262,7 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("is not called on component creation", function() {
-				var component = createComponent({
+				createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
 						return {tag: "div", attrs: vnode.attrs}
@@ -272,11 +271,10 @@ o.spec("onbeforeupdate", function() {
 
 				var count = 0
 				var vnode = {tag: "div", attrs: {id: "a"}}
-				var updated = {tag: "div", attrs: {id: "b"}}
 
 				render(root, [vnode])
 
-				function onbeforeupdate(vnode, old) {
+				function onbeforeupdate() {
 					count++
 					return true
 				}
@@ -299,7 +297,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				function onbeforeupdate(vnode, old) {
+				function onbeforeupdate() {
 					count++
 					return true
 				}

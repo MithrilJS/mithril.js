@@ -727,7 +727,7 @@ o.spec("updateNodes", function() {
 	})
 	o("change type, position and length", function() {
 		var vnodes = {tag: "div", children: [
-			undefined, 
+			undefined,
 			{tag: "#", children: "a"}
 		]}
 		var updated = {tag: "div", children: [
@@ -738,7 +738,7 @@ o.spec("updateNodes", function() {
 
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.firstChild.childNodes.length).equals(1)
 	})
 	o("removes then recreates then reverses children", function() {
@@ -864,13 +864,13 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var temp = [null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var updated = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
-		
+
 		render(root, vnodes)
 		var before = vnodes[1].dom
 		render(root, temp)
 		render(root, updated)
 		var after = updated[1].dom
-		
+
 		o(before).equals(after)
 		o(create.callCount).equals(1)
 		o(update.callCount).equals(2)
@@ -883,13 +883,13 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var temp = [{tag: "b"}, null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var updated = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
-		
+
 		render(root, vnodes)
 		var before = vnodes[2].dom
 		render(root, temp)
 		render(root, updated)
 		var after = updated[2].dom
-		
+
 		o(before).equals(after)
 		o(create.callCount).equals(1)
 		o(update.callCount).equals(2)
@@ -898,11 +898,10 @@ o.spec("updateNodes", function() {
 	o("node is recreated if key changes to undefined", function () {
 		var vnode = {tag: "b", key: 1}
 		var updated = {tag: "b"}
-		
+
 		render(root, vnode)
-		var dom = vnode.dom
 		render(root, updated)
-		
+
 		o(vnode.dom).notEquals(updated.dom)
 	})
 	components.forEach(function(cmp){

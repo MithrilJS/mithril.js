@@ -96,7 +96,7 @@ module.exports = function() {
 		declList = declList.replace(
 			/("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*')|\/\*[\s\S]*?\*\//g,
 			function(m, str){
-				return str || ''
+				return str || ""
 			}
 		)
 		/*eslint-disable no-cond-assign*/
@@ -115,7 +115,7 @@ module.exports = function() {
 	var activeElement
 	var $window = {
 		document: {
-			createElement: function(tag, is) {
+			createElement: function(tag) {
 				var cssText = ""
 				var style = {}
 				Object.defineProperty(style, "cssText", {
@@ -211,11 +211,11 @@ module.exports = function() {
 						else this.setAttribute("class", value)
 					},
 					focus: function() {activeElement = this},
-					addEventListener: function(type, callback, useCapture) {
+					addEventListener: function(type, callback) {
 						if (events[type] == null) events[type] = [callback]
 						else events[type].push(callback)
 					},
-					removeEventListener: function(type, callback, useCapture) {
+					removeEventListener: function(type, callback) {
 						if (events[type] != null) {
 							var index = events[type].indexOf(callback)
 							if (index > -1) events[type].splice(index, 1)
@@ -241,7 +241,6 @@ module.exports = function() {
 				}
 
 				if (element.nodeName === "A") {
-					var href
 					Object.defineProperty(element, "href", {
 						get: function() {return this.attributes["href"] === undefined ? "" : "[FIXME implement]"},
 						set: function(value) {this.setAttribute("href", value)},
@@ -271,7 +270,9 @@ module.exports = function() {
 						enumerable: true,
 					})
 				}
-				
+
+				/* eslint-disable radix */
+
 				if (element.nodeName === "CANVAS") {
 					Object.defineProperty(element, "width", {
 						get: function() {return this.attributes["width"] ? Math.floor(parseInt(this.attributes["width"].nodeValue) || 0) : 300},
@@ -282,6 +283,8 @@ module.exports = function() {
 						set: function(value) {this.setAttribute("height", Math.floor(Number(value) || 0).toString())},
 					})
 				}
+
+				/* eslint-enable radix */
 
 				function getOptions(element) {
 					var options = []
@@ -297,17 +300,18 @@ module.exports = function() {
 						element.firstChild != null ? element.firstChild.nodeValue : ""
 				}
 				if (element.nodeName === "SELECT") {
-					var selectedValue, selectedIndex = 0
+					// var selectedValue
+					var selectedIndex = 0
 					Object.defineProperty(element, "selectedIndex", {
 						get: function() {return getOptions(this).length > 0 ? selectedIndex : -1},
 						set: function(value) {
 							var options = getOptions(this)
 							if (value >= 0 && value < options.length) {
-								selectedValue = getOptionValue(options[selectedIndex])
+								// selectedValue = getOptionValue(options[selectedIndex])
 								selectedIndex = value
 							}
 							else {
-								selectedValue = ""
+								// selectedValue = ""
 								selectedIndex = -1
 							}
 						},
@@ -323,12 +327,12 @@ module.exports = function() {
 							var stringValue = String(value)
 							for (var i = 0; i < options.length; i++) {
 								if (getOptionValue(options[i]) === stringValue) {
-									selectedValue = stringValue
+									// selectedValue = stringValue
 									selectedIndex = i
 									return
 								}
 							}
-							selectedValue = stringValue
+							// selectedValue = stringValue
 							selectedIndex = -1
 						},
 						enumerable: true,

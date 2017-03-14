@@ -57,7 +57,7 @@ o.spec("promise", function() {
 	o.spec("resolve", function() {
 		o("resolves once", function(done) {
 			var callCount = 0
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				resolve(1)
 				resolve(2)
 				callAsync(function() {resolve(3)})
@@ -89,7 +89,7 @@ o.spec("promise", function() {
 			var promise = Promise.resolve()
 
 			state = 1
-			promise.then(function(value) {
+			promise.then(function() {
 				o(state).equals(2)
 				done()
 			})
@@ -104,7 +104,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("resolves asynchronously via executor", function(done) {
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				callAsync(function() {resolve(1)})
 			})
 
@@ -185,7 +185,7 @@ o.spec("promise", function() {
 			var promise = Promise.reject()
 
 			state = 1
-			promise.then(null, function(value) {
+			promise.then(null, function() {
 				o(state).equals(2)
 				done()
 			})
@@ -232,7 +232,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("rejects via executor on error", function(done) {
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function() {
 				throw 1
 			})
 
@@ -281,7 +281,7 @@ o.spec("promise", function() {
 			}).then(done)
 		})
 		o("absorbs resolved promise in executor resolve", function(done) {
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				var p = Promise.resolve(1)
 				resolve(p)
 			})
@@ -310,7 +310,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("absorbs rejected promise in executor resolve", function(done) {
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				resolve(Promise.reject(1))
 			})
 
@@ -330,7 +330,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("absorbs pending promise that resolves via static resolver", function(done) {
-			var pending = new Promise(function(resolve, reject) {
+			var pending = new Promise(function(resolve) {
 				setTimeout(function() {resolve(1)}, 10)
 			})
 			var promise = Promise.resolve(pending)
@@ -341,10 +341,10 @@ o.spec("promise", function() {
 			})
 		})
 		o("absorbs pending promise that resolves in executor resolve", function(done) {
-			var pending = new Promise(function(resolve, reject) {
+			var pending = new Promise(function(resolve) {
 				setTimeout(function() {resolve(1)}, 10)
 			})
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				resolve(pending)
 			})
 
@@ -354,7 +354,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("absorbs pending promise that resolves on fulfillment", function(done) {
-			var pending = new Promise(function(resolve, reject) {
+			var pending = new Promise(function(resolve) {
 				setTimeout(function() {resolve(1)}, 10)
 			})
 			var promise = Promise.resolve()
@@ -381,7 +381,7 @@ o.spec("promise", function() {
 			var pending = new Promise(function(resolve, reject) {
 				setTimeout(function() {reject(1)}, 10)
 			})
-			var promise = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve) {
 				resolve(pending)
 			})
 
@@ -521,7 +521,7 @@ o.spec("promise", function() {
 	o.spec("race", function() {
 		o("resolves to first resolved", function(done) {
 			var a = Promise.resolve(1)
-			var b = new Promise(function(resolve, reject) {
+			var b = new Promise(function(resolve) {
 				callAsync(function() {resolve(2)})
 			})
 			Promise.race([a, b]).then(function(value) {
@@ -542,7 +542,7 @@ o.spec("promise", function() {
 	})
 	o.spec("all", function() {
 		o("resolves to array", function(done) {
-			var a = new Promise(function(resolve, reject) {
+			var a = new Promise(function(resolve) {
 				callAsync(function() {resolve(1)})
 			})
 			var b = Promise.resolve(2)
@@ -558,7 +558,7 @@ o.spec("promise", function() {
 			})
 		})
 		o("resolves non-promise to itself", function(done) {
-			var a = new Promise(function(resolve, reject) {
+			var a = new Promise(function(resolve) {
 				callAsync(function() {resolve(1)})
 			})
 			var b = Promise.resolve(2)
@@ -584,18 +584,18 @@ o.spec("promise", function() {
 			var readCount = 0
 			var promise = Promise.resolve(1).then(function() {
 				return Object.create(null, {
-                    then: {
-                        get: function () {
-                            ++readCount
-                            return function(onFulfilled) {
-                                onFulfilled()
-                            }
-                        }
-                    }
-                })
+					then: {
+						get: function () {
+							++readCount
+							return function(onFulfilled) {
+								onFulfilled()
+							}
+						}
+					}
+				})
 			})
 
-			promise.then(function(value) {
+			promise.then(function() {
 				o(readCount).equals(1)
 				done()
 			})

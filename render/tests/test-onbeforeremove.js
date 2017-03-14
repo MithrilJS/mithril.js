@@ -17,7 +17,6 @@ o.spec("onbeforeremove", function() {
 
 	o("does not call onbeforeremove when creating", function() {
 		var create = o.spy()
-		var update = o.spy()
 		var vnode = {tag: "div", attrs: {onbeforeremove: create}}
 
 		render(root, [vnode])
@@ -142,7 +141,7 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
 	o("does not recycle when there's an onbeforeremove", function() {
-		var remove = function(vnode) {}
+		var remove = function() {}
 		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
 		var updated = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
 
@@ -153,7 +152,7 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom).notEquals(updated.dom)
 	})
 	o("does not leave elements out of order during removal", function(done) {
-		var remove = function(vnode) {return Promise.resolve()}
+		var remove = function() {return Promise.resolve()}
 		var vnodes = [{tag: "div", key: 1, attrs: {onbeforeremove: remove}, text: "1"}, {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}]
 		var updated = {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}
 
