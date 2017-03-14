@@ -101,16 +101,26 @@ Argument          | Type      | Required | Description
 
 ##### m.route.link
 
-This function can be used as the `oncreate` hook in a `m("a")` vnode: `m("a[href=/]", {oncreate: m.route.link})`.
+This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
+
+```JS
+m("a[href=/]", {oncreate: m.route.link})`.
+```
 
 Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
 
-`eventHandler = m.route.link(vnode)`
+If the `href` attribute is not static, the `onupdate` hook must also be set:
+
+```JS
+m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})`
+```
+
+`m.route.link(vnode)`
 
 Argument          | Type        | Required | Description
 ----------------- | ----------- | -------- | ---
-`vnode`           | `Vnode`     | Yes      | This method is meant to be used in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` hook](lifecycle-methods.md)
-**returns**       | Function(e) |          | Returns an event handler that calls `m.route.set` with the link's `href` as the `path`
+`vnode`           | `Vnode`     | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
+**returns**       |             |          | Returns `undefined`
 
 ##### m.route.param
 
