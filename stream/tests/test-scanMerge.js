@@ -2,14 +2,13 @@
 
 var o = require("../../ospec/ospec")
 var stream = require("../stream")
-var scanMerge = require("../scanMerge")
 
 o.spec("scanMerge", function() {
 	o("defaults to seed", function() {
 		var parent1 = stream()
 		var parent2 = stream()
 
-		var child = scanMerge([
+		var child = stream.scanMerge([
 			[parent1, function(out, p1) {
 				return out + p1
 			}],
@@ -25,7 +24,7 @@ o.spec("scanMerge", function() {
 		var parent1 = stream()
 		var parent2 = stream()
 
-		var child = scanMerge([
+		var child = stream.scanMerge([
 			[parent1, function(out, p1) {
 				return out + p1
 			}],
