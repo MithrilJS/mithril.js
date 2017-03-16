@@ -127,7 +127,7 @@ module.exports = function($window) {
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			if (vnode.instance[0] === vnode) throw Error("A view cannot return the vnode it received as arguments")
+			if (vnode.instance.children[0] === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
