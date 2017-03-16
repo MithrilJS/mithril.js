@@ -2,12 +2,11 @@
 
 var o = require("../../ospec/ospec")
 var stream = require("../stream")
-var scan = require("../scan")
 
 o.spec("scan", function() {
 	o("defaults to seed", function() {
 		var parent = stream()
-		var child = scan(function(out, p) {
+		var child = stream.scan(function(out, p) {
 			return out - p
 		}, 123, parent)
 		o(child()).equals(123)
@@ -15,7 +14,7 @@ o.spec("scan", function() {
 
 	o("accumulates values as expected", function() {
 		var parent = stream()
-		var child = scan(function(arr, p) {
+		var child = stream.scan(function(arr, p) {
 			return arr.concat(p)
 		}, [], parent)
 

@@ -109,9 +109,44 @@ function merge(streams) {
 		return streams.map(function(s) {return s()})
 	}, streams)
 }
+
+function scan(reducer, seed, stream) {
+	var newStream = combine(function (s) {
+		return seed = reducer(seed, s._state.value)
+	}, [stream])
+
+	if (newStream._state.state === 0) newStream(seed)
+
+	return newStream
+}
+
+function scanMerge(tuples, seed) {
+	var streams = tuples.map(function(tuple) {
+		var stream = tuple[0]
+		if (stream._state.state === 0) stream(undefined)
+		return stream
+	})
+
+	var newStream = combine(function() {
+		var changed = arguments[arguments.length - 1]
+
+		streams.forEach(function(stream, idx) {
+			if (changed.indexOf(stream) > -1) {
+				seed = tuples[idx][1](seed, stream._state.value)
+			}
+		})
+
+		return seed
+	}, streams)
+
+	return newStream
+}
+
 createStream["fantasy-land/of"] = createStream
 createStream.merge = merge
 createStream.combine = combine
+createStream.scan = scan
+createStream.scanMerge = scanMerge
 createStream.HALT = HALT
 
 if (typeof module !== "undefined") module["exports"] = createStream
