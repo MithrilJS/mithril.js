@@ -233,7 +233,7 @@ module.exports = function($window) {
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
-		if (oldTag === tag) {
+		if (oldTag === tag && vnode.key === old.key) {
 			vnode.state = old.state
 			vnode.events = old.events
 			if (!recycling && shouldNotUpdate(vnode, old)) return
