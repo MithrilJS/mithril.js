@@ -4,14 +4,14 @@ Releasing new builds of mithril is mostly automated via `npm version`
 
 ## Publishing to NPM
 
-1. `npm version <major|minor|patch|semver> -m "v%s"`
+1. `npm run release <major|minor|patch|semver>`
 
 All further steps are automated and run as follows:
 
-2. Tests are run
-3. Linting is run (but doesn't fail build)
-4. Version number in package.json is incremented
-5. New bundles are generated using updated version
+2. New bundles are generated using updated version
+3. Tests are run
+4. Linting is run (but doesn't fail build)
+5. Version number in package.json is incremented
 6. `git add` called on bundle output
 7. `package.json` and updated bundles are committed to git
 8. previous commit is tagged using new version number
@@ -27,7 +27,9 @@ All further steps are automated and run as follows:
 
 ## Publishing a GitHub release
 
-**TODO**
+Happens automatically as part of the [Publishing to NPM](#publishing-to-npm) process described above.
+
+Does require a manual description to be added though, as the auto-generated one isn't very interesting.
 
 ## Updating `docs/change-log.md`
 

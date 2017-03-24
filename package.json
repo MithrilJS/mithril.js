@@ -1,6 +1,6 @@
 {
   "name": "mithril",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
@@ -14,11 +14,13 @@
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "node ospec/bin/ospec",
     "posttest": "npm run lint || true",
     "cover": "istanbul cover --print both ospec/bin/ospec",
+    "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
-    "version": "npm run build && npm run gendocs && git add mithril.js mithril.min.js",
+    "version": "npm run build && git add mithril.js mithril.min.js",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
