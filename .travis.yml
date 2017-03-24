@@ -45,7 +45,7 @@ after_success:
        [ "$TRAVIS_REPO_SLUG" == "lhorie/mithril.js" ]
     then
       # Generate docs
-      $(npm-bin) run gendocs
+      npm run gendocs
       
       # Commit docs to gh-pages branch
       # Using --add to ensure that archived versions aren't lost
