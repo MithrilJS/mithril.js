@@ -58,7 +58,7 @@ function finalize(stream) {
 }
 
 function combine(fn, streams) {
-	if (!streams.every(valid)) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
+	if (!streams.every(valid)) throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
 	return initDependency(createStream(), streams, function() {
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	})
