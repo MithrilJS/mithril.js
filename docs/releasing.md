@@ -4,7 +4,7 @@ Releasing new builds of mithril is mostly automated via `npm version`
 
 ## Publishing to NPM
 
-1. `npm version <major|minor|patch|semver> -m "v%s"`
+1. `npm run release <major|minor|patch|semver>`
 
 All further steps are automated and run as follows:
 
