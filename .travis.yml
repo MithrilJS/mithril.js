@@ -39,7 +39,7 @@ after_success:
       --branch "next"
     
     # Only want to commit docs when building pushes on master &
-    # this doesn't have the built-in branch protection likt commit-changes
+    # this doesn't have the built-in branch protection like commit-changes
     if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
        [ "$TRAVIS_BRANCH" == "master" ] && \
        [ "$TRAVIS_REPO_SLUG" == "lhorie/mithril.js" ]
