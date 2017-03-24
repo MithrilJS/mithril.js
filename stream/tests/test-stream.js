@@ -263,6 +263,15 @@ o.spec("stream", function() {
 
 			o(doubled()).equals(4)
 		})
+		o("end stream can be mapped to", function() {
+		    var stream = Stream()
+		    var spy = o.spy()
+
+		    stream.end.map(spy)
+		    stream.end(true)
+
+		    o(spy.callCount).equals(1)
+		})		
 	})
 	o.spec("valueOf", function() {
 		o("works", function() {
