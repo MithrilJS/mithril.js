@@ -119,13 +119,15 @@ module.exports = function($window) {
 
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+		var output = vnode.state.view(vnode)
+		if (!Array.isArray(output)) output = [output]
+		vnode.instance = Vnode.normalize(output)
 		sentinel.$$reentrantLock$$ = null
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
+			if (vnode.instance.children[0] === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
@@ -317,7 +319,9 @@ module.exports = function($window) {
 		if (recycling) {
 			initComponent(vnode, hooks)
 		} else {
-			vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+			var output = vnode.state.view(vnode)
+			if (!Array.isArray(output)) output = [output]
+			vnode.instance = Vnode.normalize(output)
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 			updateLifecycle(vnode.state, vnode, hooks)
 		}
