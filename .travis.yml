@@ -75,6 +75,7 @@ deploy:
     on:
       tags: true
       repo: lhorie/mithril.js
+      branch: master
   
   - provider: npm
     email: npm@patcavit.com
@@ -83,3 +84,4 @@ deploy:
     on:
       tags: true
       repo: lhorie/mithril.js
+      branch: master
