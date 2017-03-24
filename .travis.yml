@@ -64,20 +64,20 @@ env:
 
 # Deploy to npm and github pages on tagged commits that successfully build
 deploy:
-  skip_cleanup: true
-  
   - provider: releases
     api_key:
       secure: PauFuz+pn7oRpHn2JTl4k3+iWjOofyBYBvavPQVNdXgKws9mGj0i2n5k2oIDU09VD7NeyEkwP6tdLCUFNaR8uwTJH/TBXMZE95oxUEaliFreA0nOiI3WkG4NCW0GwUoIIn1yL14y6+9oEBinWUia8DIn9kZNS11DNDgQpIPnoQQ=
     file:
       - "mithril.js"
       - "mithril.min.js"
+    skip_cleanup: true
     on:
       tags: true
       repo: lhorie/mithril.js
       branch: master
   
   - provider: npm
+    skip_cleanup: true
     email: npm@patcavit.com
     api_key:
       secure: ADElvD1oxn9GfEG7dDOggX96b36A/cGEybovAc0221CCKzv5kWCavMrtxneiJYI6N/n24abSlbM90vMfU84FEzH0Ev28dGVokRP4ad6VRkISszKlYVEP8Lds4QxfKh78jZlUxmxM0B3vmQ1kYJbTBqp3ICtaJ5ptEQHWhrLtxnc=
