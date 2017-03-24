@@ -61,8 +61,8 @@ module.exports = {
         "id-length": "off",
         "id-match": "error",
         "indent": [
-            "warn", 
-            "tab", 
+            "warn",
+            "tab",
             {
                 "outerIIFEBody": 0,
                 "SwitchCase": 1
