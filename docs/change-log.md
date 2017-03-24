@@ -1,7 +1,38 @@
 # Change log
 
+- [v1.0.2](#v101)
+- [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
-- [Older docs](http://mithril.js.org/archive/v0.2.5/change-log.html)
+- [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+
+---
+
+### v1.0.2
+
+#### News
+
+- support for ES6 class components
+- updated typescript definitions
+
+#### Bug fixes
+
+- fix IE11 input[type] error - [#1610](https://github.com/lhorie/mithril.js/issues/1610)
+- apply [#1609](https://github.com/lhorie/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/lhorie/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/lhorie/mithril.js/issues/1593)
+
+---
+
+### v1.0.1
+
+#### News
+
+- performance improvements in IE [#1598](https://github.com/lhorie/mithril.js/pull/1598)
+
+#### Bug fixes
+
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/lhorie/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/lhorie/mithril.js/issues/1609)
 
 ---
 
@@ -28,6 +59,7 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`m.route` and anchor tags](#mroute-and-anchor-tags)
 - [Reading/writing the current route](#readingwriting-the-current-route)
 - [Accessing route params](#accessing-route-params)
+- [Building/Parsing query strings](#buildingparsing-query-strings)
 - [Preventing unmounting](#preventing-unmounting)
 - [Run code on component removal](#run-code-on-component-removal)
 - [`m.request`](#mrequest)
@@ -459,6 +491,28 @@ m.route(document.body, "/booga", {
 
 ---
 
+## Building/Parsing query strings
+
+`v0.2.x` used methods hanging off of `m.route`, `m.route.buildQueryString()` and `m.route.parseQueryString()`. In `v1.x` these have been broken out and attached to the root `m`.
+
+### `v0.2.x`
+
+```javascript
+var qs = m.route.buildQueryString({ a : 1 });
+
+var obj = m.route.parseQueryString("a=1");
+```
+
+### `v1.x`
+
+```javascript
+var qs = m.buildQueryString({ a : 1 });
+
+var obj = m.parseQueryString("a=1");
+```
+
+---
+
 ## Preventing unmounting
 
 It is no longer possible to prevent unmounting via `onunload`'s `e.preventDefault()`. Instead you should explicitly call `m.route.set` when the expected conditions are met.
@@ -588,11 +642,13 @@ greetAsync()
 ### `v1.x`
 
 ```javascript
-var greetAsync = new Promise(function(resolve){
-    setTimeout(function() {
-        resolve("hello")
-    }, 1000)
-})
+var greetAsync = function() {
+	return new Promise(function(resolve){
+	    setTimeout(function() {
+	        resolve("hello")
+	    }, 1000)
+	})
+}
 
 greetAsync()
     .then(function(value) {return value + " world"})

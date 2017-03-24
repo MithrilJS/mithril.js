@@ -22,7 +22,7 @@ However, if you're starting something new, do consider giving Mithril a try, if 
 
 ## Why use Mithril?
 
-In one sentence: because **Mithril is pragmatic**. The 10 minutes [guide](index.md) is a good example: that's how long it takes to learn components, XHR and routing - and that's just about the right amount of knowledge needed to build useful applications.
+In one sentence: because **Mithril is pragmatic**. This [10 minute guide](index.md) is a good example: that's how long it takes to learn components, XHR and routing - and that's just about the right amount of knowledge needed to build useful applications.
 
 Mithril is all about getting meaningful work done efficiently. Doing file uploads? [The docs show you how](request.md#file-uploads). Authentication? [Documented too](route.md#authentication). Exit animations? [You got it](animation.md). No extra libraries, no magic.
 

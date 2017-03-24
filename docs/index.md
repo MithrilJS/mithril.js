@@ -44,6 +44,8 @@ Mithril is used by companies like Vimeo and Nike, and open source platforms like
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
+Mithril supports browsers all the way back to IE9, no polyfills required.
+
 ---
 
 ### Getting started
@@ -54,7 +56,7 @@ Let's create an HTML file to follow along:
 
 ```markup
 <body>
-	<script src="http://unpkg.com/mithril/mithril.js"></script>
+	<script src="//unpkg.com/mithril/mithril.js"></script>
 	<script>
 	var root = document.body
 
@@ -93,7 +95,7 @@ Let's wrap our text in an `<h1>` tag.
 m.render(root, m("h1", "My first app"))
 ```
 
-The `m()` function can be used to describe any HTML structure you want. So if you to add a class to the `<h1>`:
+The `m()` function can be used to describe any HTML structure you want. So if you need to add a class to the `<h1>`:
 
 ```javascript
 m("h1", {class: "title"}, "My first app")
@@ -231,7 +233,7 @@ var count = 0
 var increment = function() {
 	m.request({
 		method: "PUT",
-		url: "http://rem-rest-api.herokuapp.com/api/tutorial/1",
+		url: "//rem-rest-api.herokuapp.com/api/tutorial/1",
 		data: {count: count + 1},
 		withCredentials: true,
 	})

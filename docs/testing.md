@@ -36,6 +36,22 @@ npm test
 
 ---
 
+### Running mithril in a non-browser environment
+
+Mithril has a few dependencies on globals that exist in all its supported browser environments but are missing in all non-browser environments. To work around this you can use the browser mocks that ship with the mithril npm package.
+
+The simplest way to do this is ensure the following snippet of code runs **before** you include mithril itself in your project.
+
+```js
+// Polyfill DOM env for mithril
+global.window = require("mithril/test-utils/browserMock.js")();
+global.document = window.document;
+```
+
+Once that snippet has been run you can `require("mithril")` and it should be quite happy.
+
+---
+
 ### Good testing practices
 
 Generally speaking, there are two ways to write tests: upfront and after the fact.
