@@ -47,6 +47,10 @@ after_success:
       # Generate docs
       npm run gendocs
       
+      # Set up git env
+      git config --global user.email "$GH_USER_EMAIL"
+      git config --global user.name "$GH_USER_NAME"
+
       # Commit docs to gh-pages branch
       # Using --add to ensure that archived versions aren't lost
       # Using --repo to force it to go over SSH so the saved keys are used (tschaub/gh-pages#160)
