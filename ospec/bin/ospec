@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+"use strict"
+
+var fs = require("fs")
+var path = require("path")
+
+var o = require("../ospec")
+
+function traverseDirectory(pathname, callback) {
+	pathname = pathname.replace(/\\/g, "/")
+	return new Promise(function(resolve, reject) {
+		fs.lstat(pathname, function(err, stat) {
+			if (err) reject(err)
+			if (stat && stat.isDirectory()) {
+				fs.readdir(pathname, function(err, pathnames) {
+					if (err) reject(err)
+					var promises = []
+					for (var i = 0; i < pathnames.length; i++) {
+						if (pathnames[i] === "node_modules") continue
+						pathnames[i] = path.join(pathname, pathnames[i])
+						promises.push(traverseDirectory(pathnames[i], callback))
+					}
+					callback(pathname, stat, pathnames)
+					resolve(Promise.all(promises))
+				})
+			}
+			else {
+				callback(pathname, stat)
+				resolve(pathname)
+			}
+		})
+	})
+}
+
+traverseDirectory(".", function(pathname) {
+	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
+		require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
+	}
+})
+.then(o.run)
+.catch(function(e) {
+	console.log(e.stack)
+})
+
+process.on("unhandledRejection", function(e) {
+	console.log("Uncaught (in promise) " + e.stack)
+})

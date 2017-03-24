@@ -1,0 +1,8 @@
+# Development-specific files
+.deploy.env
+.editorconfig
+.eslintrc.js
+.gitattributes
+.gitignore
+.travis.yml
+CONTRIBUTING.md

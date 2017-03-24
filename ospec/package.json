@@ -1,0 +1,16 @@
+{
+  "name": "ospec",
+  "version": "1.2.3",
+  "description": "Noiseless testing framework",
+  "main": "ospec.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [ "testing" ],
+  "author": "Leo Horie <lhorie@hotmail.com>",
+  "license": "MIT",
+  "bin": {
+    "ospec": "./bin/ospec"
+  },
+  "repository": "lhorie/mithril.js#rewrite"
+}
