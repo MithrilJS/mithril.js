@@ -5,6 +5,8 @@
 	- [Static members](#static-members)
 		- [Stream.combine](#streamcombine)
 		- [Stream.merge](#streammerge)
+		- [Stream.scan](#streamscan)
+		- [Stream.scanMerge](#streamscanmerge)
 		- [Stream.HALT](#streamhalt)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#static-members)
@@ -109,6 +111,39 @@ Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
 `streams`    | `Array<Stream>`      | Yes      | A list of streams
 **returns**  | `Stream`             |          | Returns a stream whose value is an array of input stream values
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.scan
+
+Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.
+
+`stream = Stream.scan(fn, accumulator, stream)`
+
+Argument      | Type                             | Required | Description
+------------- | -------------------------------- | -------- | ---
+`fn`          | `(accumulator, value) -> result` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`accumulator` | `any`                            | Yes      | The starting value for the accumulator
+`stream`      | `Stream`                         | Yes      | Stream containing the values
+**returns**   | `Stream`                         |          | Returns a new stream containing the result
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.scanMerge
+
+Takes an array of pairs of streams and scan functions and merges all those streams using the given functions into a single stream.
+
+`stream = Stream.scanMerge(pairs, accumulator)`
+
+Argument      | Type                                             | Required | Description
+------------- | ------------------------------------------------ | -------- | ---
+`pairs`       | `Array<[Stream, (accumulator, value) -> value]>` | Yes      | An array of tuples of stream and scan functions
+`accumulator` | `any`                                            | Yes      | The starting value for the accumulator
+**returns**   | `Stream`                                         |          | Returns a new stream containing the result
 
 [How to read signatures](signatures.md)
 
