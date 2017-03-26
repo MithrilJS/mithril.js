@@ -119,12 +119,12 @@ module.exports = function($window) {
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
 		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
@@ -317,6 +317,7 @@ module.exports = function($window) {
 			initComponent(vnode, hooks)
 		} else {
 			vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 			updateLifecycle(vnode.state, vnode, hooks)
 		}

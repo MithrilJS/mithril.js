@@ -260,8 +260,9 @@ o.spec("component", function() {
 
 					o(root.childNodes.length).equals(0)
 				})
-				o("throws a custom error if it returns itself", function() {
+				o("throws a custom error if it returns itself when created", function() {
 					// A view that returns its vnode would otherwise trigger an infinite loop
+					var threw = false
 					var component = createComponent({
 						view: function(vnode) {
 							return vnode
@@ -271,10 +272,41 @@ o.spec("component", function() {
 						render(root, [{tag: component}])
 					}
 					catch (e) {
+						threw = true
 						o(e instanceof Error).equals(true)
 						// Call stack exception is a RangeError
 						o(e instanceof RangeError).equals(false)
 					}
+					o(threw).equals(true)
+				})
+				o("throws a custom error if it returns itself when updated", function() {
+					// A view that returns its vnode would otherwise trigger an infinite loop
+					var threw = false
+					var init = true
+					var oninit = o.spy()
+					var component = createComponent({
+						oninit: oninit,
+						view: function(vnode) {
+							if (init) return init = false
+							else return vnode
+						}
+					})
+					render(root, [{tag: component}])
+
+					o(root.firstChild.nodeType).equals(3)
+					o(root.firstChild.nodeValue).equals("")
+
+					try {
+						render(root, [{tag: component}])
+					}
+					catch (e) {
+						threw = true
+						o(e instanceof Error).equals(true)
+						// Call stack exception is a RangeError
+						o(e instanceof RangeError).equals(false)
+					}
+					o(threw).equals(true)
+					o(oninit.callCount).equals(1)
 				})
 				o("can update when returning fragments", function() {
 					var component = createComponent({
