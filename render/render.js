@@ -115,10 +115,10 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-
+		vnode._state = vnode.state
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		initLifecycle(vnode.state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+		initLifecycle(vnode._state, vnode, hooks)
+		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
@@ -234,6 +234,7 @@ module.exports = function($window) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
+			vnode._state = old._state
 			vnode.events = old.events
 			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
@@ -316,10 +317,10 @@ module.exports = function($window) {
 		if (recycling) {
 			initComponent(vnode, hooks)
 		} else {
-			vnode.instance = Vnode.normalize(vnode.state.view(vnode))
+			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-			updateLifecycle(vnode.state, vnode, hooks)
+			updateLifecycle(vnode._state, vnode, hooks)
 		}
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -412,8 +413,8 @@ module.exports = function($window) {
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && vnode.state.onbeforeremove) {
-			var result = vnode.state.onbeforeremove(vnode)
+		if (typeof vnode.tag !== "string" && vnode._state.onbeforeremove) {
+			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -446,7 +447,7 @@ module.exports = function($window) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && vnode.state.onremove) vnode.state.onremove(vnode)
+		if (typeof vnode.tag !== "string" && vnode._state.onremove) vnode._state.onremove.call(vnode.state, vnode)
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
@@ -585,7 +586,7 @@ module.exports = function($window) {
 	function shouldNotUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") forceComponentUpdate = vnode.state.onbeforeupdate(vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeupdate === "function") forceComponentUpdate = vnode._state.onbeforeupdate.call(vnode.state, vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
