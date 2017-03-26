@@ -103,18 +103,17 @@ module.exports = function($window) {
 	}
 	function initComponent(vnode, hooks) {
 		var sentinel
-		if (typeof vnode.tag === "function") {
+		if (typeof vnode.tag.view === "function") {
+			vnode.state = Object.create(vnode.tag)
+			sentinel = vnode.state.view
+			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			sentinel.$$reentrantLock$$ = true
+		} else {
 			vnode.state = null
 			sentinel = vnode.tag
 			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
-		} else {
-			// For object literals since `Vnode()` always sets the `state` field.
-			vnode.state = Object.create(vnode.tag)
-			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
-			sentinel.$$reentrantLock$$ = true
 		}
 
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
