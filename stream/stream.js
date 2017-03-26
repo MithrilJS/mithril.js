@@ -16,7 +16,7 @@ function createStream() {
 }
 function initStream(stream) {
 	stream.constructor = createStream
-	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined}
+	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined, unregister: undefined}
 	stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
 	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 
@@ -25,7 +25,10 @@ function initStream(stream) {
 			if (!stream._state.endStream) {
 				var endStream = createStream()
 				endStream.map(function(value) {
-					if (value === true) unregisterStream(stream), unregisterStream(endStream)
+					if (value === true) {
+						unregisterStream(stream)
+						endStream._state.unregister = function(){unregisterStream(endStream)}
+					}
 					return value
 				})
 				stream._state.endStream = endStream
@@ -37,6 +40,7 @@ function initStream(stream) {
 function updateStream(stream, value) {
 	updateState(stream, value)
 	for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+	if (stream._state.unregister != null) stream._state.unregister()
 	finalize(stream)
 }
 function updateState(stream, value) {
