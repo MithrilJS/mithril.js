@@ -4,7 +4,7 @@ var parseURL = require("../test-utils/parseURL")
 
 module.exports = function(options) {
 	if (options == null) options = {}
-	
+
 	var $window = options.window || {}
 	var protocol = options.protocol || "http:"
 	var hostname = options.hostname || "localhost"
@@ -33,7 +33,7 @@ module.exports = function(options) {
 		}
 		return isNew
 	}
-	
+
 	function prefix(prefix, value) {
 		if (value === "") return ""
 		return (value.charAt(0) !== prefix ? prefix : "") + value

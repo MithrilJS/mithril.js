@@ -80,7 +80,7 @@ module.exports = function($window) {
 			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
+
 			var state = $window.history.state
 			if (state != null) {
 				for (var k in state) params[k] = state[k]
@@ -103,11 +103,11 @@ module.exports = function($window) {
 
 			reject(path, params)
 		}
-		
+
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-	
+
 	return router
 }

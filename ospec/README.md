@@ -278,12 +278,20 @@ ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
 	$ npm test
 ```
 
-#### Installing ospec globally
+#### Direct use from the command line
 
-While it's recommended to install ospec locally to maintain reproducible environments, sometimes it may be deemed appropriate to install it globally. To do so, run this command:
+Ospec doesn't work when installed globally. Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+
+To work around this limitation, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
 
 ```
-npm install ospec -g
+npm install npm-run -g
+```
+
+Then, from a project that has ospec installed as a (dev) dependency:
+
+```
+npm-run ospec
 ```
 
 ---

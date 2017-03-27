@@ -18,7 +18,6 @@ o.spec("xhr", function() {
 
 	o.spec("success", function() {
 		o("works via GET", function(done) {
-			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
@@ -31,7 +30,6 @@ o.spec("xhr", function() {
 			})
 		})
 		o("implicit GET method", function(done){
-			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
@@ -44,7 +42,6 @@ o.spec("xhr", function() {
 			})
 		})
 		o("first argument can be a string aliasing url property", function(done){
-			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
@@ -172,7 +169,7 @@ o.spec("xhr", function() {
 			}
 
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
 				}
 			})
@@ -186,7 +183,7 @@ o.spec("xhr", function() {
 			}
 
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
 				}
 			})
@@ -228,12 +225,12 @@ o.spec("xhr", function() {
 			}
 
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
 			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).equals('{"test":123}')
 			}).then(done)
 		})
 		o("deserialize parameter works in POST", function(done) {
@@ -242,40 +239,40 @@ o.spec("xhr", function() {
 			}
 
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
 			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).equals('{"test":123}')
 			}).then(done)
 		})
 		o("extract parameter works in GET", function(done) {
-			var extract = function(data) {
+			var extract = function() {
 				return JSON.stringify({test: 123})
 			}
 
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
 			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).equals('{"test":123}')
 			}).then(done)
 		})
 		o("extract parameter works in POST", function(done) {
-			var extract = function(data) {
+			var extract = function() {
 				return JSON.stringify({test: 123})
 			}
 
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
 			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).equals('{"test":123}')
 			}).then(done)
 		})
 		o("ignores deserialize if extract is defined", function(done) {
@@ -285,7 +282,7 @@ o.spec("xhr", function() {
 			var deserialize = o.spy()
 
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
@@ -297,7 +294,7 @@ o.spec("xhr", function() {
 		})
 		o("config parameter works", function(done) {
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
@@ -311,7 +308,7 @@ o.spec("xhr", function() {
 		})
 		o("requests don't block each other", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
@@ -328,7 +325,7 @@ o.spec("xhr", function() {
 		})
 		o("requests trigger finally once with a chained then", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
@@ -342,11 +339,11 @@ o.spec("xhr", function() {
 		})
 		o("requests does not trigger finally when background: true", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
-			var promise = xhr("/item", {background: true}).then(function() {})
+			xhr("/item", {background: true}).then(function() {})
 
 			setTimeout(function() {
 				o(complete.callCount).equals(0)
@@ -355,7 +352,7 @@ o.spec("xhr", function() {
 		})
 		o("headers are set when header arg passed", function(done) {
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
@@ -367,7 +364,7 @@ o.spec("xhr", function() {
 		})
 		o("headers are with higher precedence than default headers", function(done) {
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
@@ -379,7 +376,7 @@ o.spec("xhr", function() {
 		})
 		o("json headers are set to the correct default value", function(done) {
 			mock.$defineRoutes({
-				"POST /item": function(request) {
+				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
@@ -391,7 +388,6 @@ o.spec("xhr", function() {
 			}
 		})
 		o("doesn't fail on abort", function(done) {
-			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
@@ -410,9 +406,9 @@ o.spec("xhr", function() {
 						done()
 					}, 0)
 				}
-				Object.defineProperty(xhr, 'onreadystatechange', {
-					set: function(val) { onreadystatechange = val }
-					, get: function() { return testonreadystatechange }
+				Object.defineProperty(xhr, "onreadystatechange", {
+					set: function(val) { onreadystatechange = val },
+					get: function() { return testonreadystatechange }
 				})
 				xhr.abort()
 			}
@@ -424,7 +420,6 @@ o.spec("xhr", function() {
 			})
 		})
 		o("doesn't fail on file:// status 0", function(done) {
-			var s = new Date
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 0, responseText: JSON.stringify({a: 1})}
@@ -456,7 +451,7 @@ o.spec("xhr", function() {
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({error: "error"})}
 				}
 			})
@@ -467,7 +462,7 @@ o.spec("xhr", function() {
 		})
 		o("extends Error with JSON response", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({message: "error", stack: "error on line 1"})}
 				}
 			})
@@ -479,7 +474,7 @@ o.spec("xhr", function() {
 		})
 		o("rejects on non-JSON server error", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
@@ -489,7 +484,7 @@ o.spec("xhr", function() {
 		})
 		o("triggers all branched catches upon rejection", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
@@ -515,7 +510,7 @@ o.spec("xhr", function() {
 		})
 		o("rejects on cors-like error", function(done) {
 			mock.$defineRoutes({
-				"GET /item": function(request) {
+				"GET /item": function() {
 					return {status: 0}
 				}
 			})

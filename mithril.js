@@ -1,7 +1,7 @@
-new function() {
-
+;(function() {
+"use strict"
 function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: {}, events: undefined, instance: undefined, skip: false}
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, _state: undefined, events: undefined, instance: undefined, skip: false}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -16,62 +16,82 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 }
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
+var hasOwn = {}.hasOwnProperty
+function compileSelector(selector) {
+	var match, tag = "div", classes = [], attrs = {}
+	while (match = selectorParser.exec(selector)) {
+		var type = match[1], value = match[2]
+		if (type === "" && value !== "") tag = value
+		else if (type === "#") attrs.id = value
+		else if (type === ".") classes.push(value)
+		else if (match[3][0] === "[") {
+			var attrValue = match[6]
+			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
+			if (match[4] === "class") classes.push(attrValue)
+			else attrs[match[4]] = attrValue || true
+		}
+	}
+	if (classes.length > 0) attrs.className = classes.join(" ")
+	return selectorCache[selector] = {tag: tag, attrs: attrs}
+}
+function execSelector(state, attrs, children) {
+	var hasAttrs = false, childList, text
+	var className = attrs.className || attrs.class
+	for (var key in state.attrs) {
+		if (hasOwn.call(state.attrs, key)) {
+			attrs[key] = state.attrs[key]
+		}
+	}
+	if (className != null) {
+		if (attrs.class != null) {
+			attrs.class = undefined
+			attrs.className = className
+		}
+		if (state.attrs.className != null) {
+			attrs.className = state.attrs.className + " " + className
+		}
+	}
+	for (var key in attrs) {
+		if (hasOwn.call(attrs, key) && key !== "key") {
+			hasAttrs = true
+			break
+		}
+	}
+	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
+		text = children[0].children
+	} else {
+		childList = children
+	}
+	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
+}
 function hyperscript(selector) {
-	if (selector == null || typeof selector !== "string" && typeof selector.view !== "function") {
+	// Because sloppy mode sucks
+	var attrs = arguments[1], start = 2, children
+	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	if (typeof selector === "string" && selectorCache[selector] === undefined) {
-		var match, tag, classes = [], attributes = {}
-		while (match = selectorParser.exec(selector)) {
-			var type = match[1], value = match[2]
-			if (type === "" && value !== "") tag = value
-			else if (type === "#") attributes.id = value
-			else if (type === ".") classes.push(value)
-			else if (match[3][0] === "[") {
-				var attrValue = match[6]
-				if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
-				if (match[4] === "class") classes.push(attrValue)
-				else attributes[match[4]] = attrValue || true
-			}
-		}
-		if (classes.length > 0) attributes.className = classes.join(" ")
-		selectorCache[selector] = function(attrs, children) {
-			var hasAttrs = false, childList, text
-			var className = attrs.className || attrs.class
-			for (var key in attributes) attrs[key] = attributes[key]
-			if (className !== undefined) {
-				if (attrs.class !== undefined) {
-					attrs.class = undefined
-					attrs.className = className
-				}
-				if (attributes.className !== undefined) attrs.className = attributes.className + " " + className
-			}
-			for (var key in attrs) {
-				if (key !== "key") {
-					hasAttrs = true
-					break
-				}
-			}
-			if (Array.isArray(children) && children.length == 1 && children[0] != null && children[0].tag === "#") text = children[0].children
-			else childList = children
-			return Vnode(tag || "div", attrs.key, hasAttrs ? attrs : undefined, childList, text, undefined)
-		}
+	if (typeof selector === "string") {
+		var cached = selectorCache[selector] || compileSelector(selector)
 	}
-	var attrs, children, childrenIndex
-	if (arguments[1] == null || typeof arguments[1] === "object" && arguments[1].tag === undefined && !Array.isArray(arguments[1])) {
-		attrs = arguments[1]
-		childrenIndex = 2
+	if (!attrs) {
+		attrs = {}
+	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
+		attrs = {}
+		start = 1
 	}
-	else childrenIndex = 1
-	if (arguments.length === childrenIndex + 1) {
-		children = Array.isArray(arguments[childrenIndex]) ? arguments[childrenIndex] : [arguments[childrenIndex]]
-	}
-	else {
+	if (arguments.length === start + 1) {
+		children = arguments[start]
+		if (!Array.isArray(children)) children = [children]
+	} else {
 		children = []
-		for (var i = childrenIndex; i < arguments.length; i++) children.push(arguments[i])
+		while (start < arguments.length) children.push(arguments[start++])
 	}
-	if (typeof selector === "string") return selectorCache[selector](attrs || {}, Vnode.normalizeChildren(children))
-	return Vnode(selector, attrs && attrs.key, attrs || {}, Vnode.normalizeChildren(children), undefined, undefined)
+	var normalized = Vnode.normalizeChildren(children)
+	if (typeof selector === "string") {
+		return execSelector(cached, attrs, normalized)
+	} else {
+		return Vnode(selector, attrs.key, attrs, normalized)
+	}
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
@@ -203,6 +223,7 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key0) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
+var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
 var _8 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
@@ -238,14 +259,20 @@ var _8 = function($window, Promise) {
 		var promise0 = new Promise(function(resolve, reject) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
-			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = (args.method === "GET" || args.method === "TRACE") ? false : (typeof args.useBody === "boolean" ? args.useBody : true)
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
 			args.url = interpolate(args.url, args.data)
 			if (useBody) args.data = args.serialize(args.data)
 			else args.url = assemble(args.url, args.data)
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new $window.XMLHttpRequest(),
+				aborted = false,
+				_abort = xhr.abort
+			xhr.abort = function abort() {
+				aborted = true
+				_abort.call(xhr)
+			}
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 			if (args.serialize === JSON.stringify && useBody) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
@@ -259,12 +286,12 @@ var _8 = function($window, Promise) {
 			}
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 			xhr.onreadystatechange = function() {
-				// Don't throw errors on xhr.abort(). XMLHttpRequests ends up in a state of
-				// xhr.status == 0 and xhr.readyState == 4 if aborted after open, but before completion.
-				if (xhr.status && xhr.readyState === 4) {
+				// Don't throw errors on xhr.abort().
+				if(aborted) return
+				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
@@ -355,30 +382,33 @@ var coreRenderer = function($window) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
-				insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+				createNode(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
 	}
-	function createNode(vnode, hooks, ns) {
+	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		if (typeof tag === "string") {
+			vnode.state = {}
+			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
-				case "#": return createText(vnode)
-				case "<": return createHTML(vnode)
-				case "[": return createFragment(vnode, hooks, ns)
-				default: return createElement(vnode, hooks, ns)
+				case "#": return createText(parent, vnode, nextSibling)
+				case "<": return createHTML(parent, vnode, nextSibling)
+				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
+				default: return createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(vnode, hooks, ns)
+		else return createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
-	function createText(vnode) {
-		return vnode.dom = $doc.createTextNode(vnode.children)
+	function createText(parent, vnode, nextSibling) {
+		vnode.dom = $doc.createTextNode(vnode.children)
+		insertNode(parent, vnode.dom, nextSibling)
+		return vnode.dom
 	}
-	function createHTML(vnode) {
+	function createHTML(parent, vnode, nextSibling) {
 		var match1 = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
-		var temp = $doc.createElement(parent)
+		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
+		var temp = $doc.createElement(parent1)
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
@@ -387,9 +417,10 @@ var coreRenderer = function($window) {
 		while (child = temp.firstChild) {
 			fragment.appendChild(child)
 		}
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createFragment(vnode, hooks, ns) {
+	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
@@ -397,9 +428,10 @@ var coreRenderer = function($window) {
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
+		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createElement(vnode, hooks, ns) {
+	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -414,6 +446,7 @@ var coreRenderer = function($window) {
 		if (attrs2 != null) {
 			setAttrs(vnode, attrs2, ns)
 		}
+		insertNode(parent, element, nextSibling)
 		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
 			setContentEditable(vnode)
 		}
@@ -430,19 +463,34 @@ var coreRenderer = function($window) {
 		}
 		return element
 	}
-	function createComponent(vnode, hooks, ns) {
-		vnode.state = Object.create(vnode.tag)
-		var view = vnode.tag.view
-		if (view.reentrantLock != null) return $emptyFragment
-		view.reentrantLock = true
-		initLifecycle(vnode.tag, vnode, hooks)
-		vnode.instance = Vnode.normalize(view.call(vnode.state, vnode))
-		view.reentrantLock = null
+	function initComponent(vnode, hooks) {
+		var sentinel
+		if (typeof vnode.tag.view === "function") {
+			vnode.state = Object.create(vnode.tag)
+			sentinel = vnode.state.view
+			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			sentinel.$$reentrantLock$$ = true
+		} else {
+			vnode.state = void 0
+			sentinel = vnode.tag
+			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			sentinel.$$reentrantLock$$ = true
+			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
+		}
+		vnode._state = vnode.state
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
+		initLifecycle(vnode._state, vnode, hooks)
+		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		sentinel.$$reentrantLock$$ = null
+	}
+	function createComponent(parent, vnode, hooks, ns, nextSibling) {
+		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as arguments")
-			var element = createNode(vnode.instance, hooks, ns)
+			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			insertNode(parent, element, nextSibling)
 			return element
 		}
 		else {
@@ -451,7 +499,7 @@ var coreRenderer = function($window) {
 		}
 	}
 	//update
-	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
+	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
@@ -467,15 +515,18 @@ var coreRenderer = function($window) {
 				if (isUnkeyed) {
 					for (var i = 0; i < old.length; i++) {
 						if (old[i] === vnodes[i]) continue
-						else if (old[i] == null && vnodes[i] != null) insertNode(parent, createNode(vnodes[i], hooks, ns), getNextSibling(old, i + 1, nextSibling))
+						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
 						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), false, ns)
+						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
 					}
 					return
 				}
 			}
-			var recycling = isRecyclable(old, vnodes)
-			if (recycling) old = old.concat(old.pool)
+			recycling = recycling || isRecyclable(old, vnodes)
+			if (recycling) {
+				var pool = old.pool
+				old = old.concat(old.pool)
+			}
 			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
 			while (oldEnd >= oldStart && end >= start) {
 				var o = old[oldStart], v = vnodes[start]
@@ -483,8 +534,9 @@ var coreRenderer = function($window) {
 				else if (o == null) oldStart++
 				else if (v == null) start++
 				else if (o.key === v.key) {
+					var shouldRecycle = (pool != null && oldStart >= old.length - pool.length) || ((pool == null) && recycling)
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), recycling, ns)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
@@ -493,7 +545,8 @@ var coreRenderer = function($window) {
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+						var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
 					}
@@ -506,7 +559,8 @@ var coreRenderer = function($window) {
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+					var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
@@ -517,14 +571,14 @@ var coreRenderer = function($window) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
 							var movable = old[oldIndex]
+							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
 							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true
 							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(v, hooks, undefined)
-							insertNode(parent, dom, nextSibling)
+							var dom = createNode(parent, v, hooks, undefined, nextSibling)
 							nextSibling = dom
 						}
 					}
@@ -540,24 +594,29 @@ var coreRenderer = function($window) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
+			vnode._state = old._state
 			vnode.events = old.events
-			if (shouldUpdate(vnode, old)) return
-			if (vnode.attrs != null) {
-				updateLifecycle(vnode.attrs, vnode, hooks, recycling)
-			}
+			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
+				if (vnode.attrs != null) {
+					if (recycling) {
+						vnode.state = {}
+						initLifecycle(vnode.attrs, vnode, hooks)
+					}
+					else updateLifecycle(vnode.attrs, vnode, hooks)
+				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, hooks, ns)
+					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, recycling, hooks, ns)
 				}
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
 			removeNode(old, null)
-			insertNode(parent, createNode(vnode, hooks, ns), nextSibling)
+			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
 	function updateText(old, vnode) {
@@ -569,12 +628,12 @@ var coreRenderer = function($window) {
 	function updateHTML(parent, old, vnode, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			insertNode(parent, createHTML(vnode), nextSibling)
+			createHTML(parent, vnode, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
+	function updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, recycling, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -588,7 +647,7 @@ var coreRenderer = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, hooks, ns) {
+	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
 		switch (vnode.tag) {
 			case "svg": ns = "http://www.w3.org/2000/svg"; break
@@ -611,14 +670,20 @@ var coreRenderer = function($window) {
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			updateNodes(element, old.children, vnode.children, recycling, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		vnode.instance = Vnode.normalize(vnode.tag.view.call(vnode.state, vnode))
-		updateLifecycle(vnode.tag, vnode, hooks, recycling)
+		if (recycling) {
+			initComponent(vnode, hooks)
+		} else {
+			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
+			updateLifecycle(vnode._state, vnode, hooks)
+		}
 		if (vnode.instance != null) {
-			if (old.instance == null) insertNode(parent, createNode(vnode.instance, hooks, ns), nextSibling)
+			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
@@ -698,15 +763,15 @@ var coreRenderer = function($window) {
 	}
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
-		if (vnode.attrs && vnode.attrs.onbeforeremove) {
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
 			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && vnode.tag.onbeforeremove) {
-			var result = vnode.tag.onbeforeremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
+			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -738,8 +803,8 @@ var coreRenderer = function($window) {
 		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
-		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && vnode.tag.onremove) vnode.tag.onremove.call(vnode.state, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
@@ -768,14 +833,14 @@ var coreRenderer = function($window) {
 		else if (key2 === "style") updateStyle(element, old, value)
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
 			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value === value && vnode.dom === $doc.activeElement) return
+			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value === value) return
+			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value == value) return
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
-				element.setAttribute(key2, value);
+				element.setAttribute(key2, value)
 				return
 			}
 			element[key2] = value
@@ -868,14 +933,13 @@ var coreRenderer = function($window) {
 		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
 		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
 	}
-	function updateLifecycle(source, vnode, hooks, recycling) {
-		if (recycling) initLifecycle(source, vnode, hooks)
-		else if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
+	function updateLifecycle(source, vnode, hooks) {
+		if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
 	}
-	function shouldUpdate(vnode, old) {
+	function shouldNotUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
 		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode.tag.onbeforeupdate === "function") forceComponentUpdate = vnode.tag.onbeforeupdate.call(vnode.state, vnode, old)
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeupdate === "function") forceComponentUpdate = vnode._state.onbeforeupdate.call(vnode.state, vnode, old)
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
@@ -891,7 +955,7 @@ var coreRenderer = function($window) {
 		// First time0 rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, undefined)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
@@ -923,7 +987,6 @@ var _11 = function($window) {
 	renderService.setEventCallback(function(e) {
 		if (e.redraw !== false) redraw()
 	})
-	
 	var callbacks = []
 	function subscribe(key1, callback) {
 		unsubscribe(key1)
@@ -933,11 +996,11 @@ var _11 = function($window) {
 		var index = callbacks.indexOf(key1)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-    function redraw() {
-        for (var i = 1; i < callbacks.length; i += 2) {
-            callbacks[i]()
-        }
-    }
+	function redraw() {
+		for (var i = 1; i < callbacks.length; i += 2) {
+			callbacks[i]()
+		}
+	}
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
 var redrawService = _11(window)
@@ -950,7 +1013,7 @@ var _16 = function(redrawService0) {
 			return
 		}
 		
-		if (component.view == null) throw new Error("m.mount(element, component) expects a component, not a vnode")
+		if (component.view == null && typeof component !== "function") throw new Error("m.mount(element, component) expects a component, not a vnode")
 		
 		var run0 = function() {
 			redrawService0.render(root, Vnode(component))
@@ -1061,7 +1124,6 @@ var coreRouter = function($window) {
 			var path = router.getPath()
 			var params = {}
 			var pathname = parsePath(path, params, params)
-			
 			var state = $window.history.state
 			if (state != null) {
 				for (var k in state) params[k] = state[k]
@@ -1082,12 +1144,10 @@ var coreRouter = function($window) {
 			}
 			reject(path, params)
 		}
-		
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
 		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
-	
 	return router
 }
 var _20 = function($window, redrawService0) {
@@ -1099,17 +1159,19 @@ var _20 = function($window, redrawService0) {
 		var run1 = function() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
-		var bail = function() {
-			routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path) {
+			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
-				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs3 = params, currentPath = path, lastUpdate = null
+				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+				attrs3 = params, currentPath = path, lastUpdate = null
 				render1 = (routeResolver.render || identity).bind(routeResolver)
 				run1()
 			}
-			if (payload.view) update({}, payload)
+			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
@@ -1158,8 +1220,8 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.0"
+m.version = "1.0.1"
 m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
-}
+}());

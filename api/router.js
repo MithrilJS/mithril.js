@@ -14,17 +14,19 @@ module.exports = function($window, redrawService) {
 		var run = function() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 		}
-		var bail = function() {
-			routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path) {
+			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
-				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, lastUpdate = null
+				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				run()
 			}
-			if (payload.view) update({}, payload)
+			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {

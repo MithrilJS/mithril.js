@@ -1,6 +1,7 @@
 "use strict"
 
 var o = require("../../ospec/ospec")
+var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
@@ -726,7 +727,7 @@ o.spec("updateNodes", function() {
 	})
 	o("change type, position and length", function() {
 		var vnodes = {tag: "div", children: [
-			undefined, 
+			undefined,
 			{tag: "#", children: "a"}
 		]}
 		var updated = {tag: "div", children: [
@@ -737,7 +738,7 @@ o.spec("updateNodes", function() {
 
 		render(root, vnodes)
 		render(root, updated)
-		
+
 		o(root.firstChild.childNodes.length).equals(1)
 	})
 	o("removes then recreates then reverses children", function() {
@@ -838,38 +839,6 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeName).equals("B")
 	})
-	o("fragment child toggles from null when followed by null component then tag", function() {
-		var component = {view: function() {return null}}
-		var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
-		var temp = [{tag: "[", children: [null, {tag: component}, {tag: "b"}]}]
-		var updated = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("B")
-	})
-	o("fragment child toggles from null in component when followed by null component then tag", function() {
-		var flag = true
-		var a = {view: function() {return flag ? {tag: "a"} : null}}
-		var b = {view: function() {return null}}
-		var vnodes = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
-		var temp = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
-		var updated = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
-
-		render(root, vnodes)
-		flag = false
-		render(root, temp)
-		flag = true
-		render(root, updated)
-
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("S")
-	})
 	o("cached, non-keyed nodes skip diff", function () {
 		var onupdate = o.spy();
 		var cached = {tag:"a", attrs:{onupdate: onupdate}}
@@ -895,13 +864,13 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var temp = [null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var updated = [{tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
-		
+
 		render(root, vnodes)
 		var before = vnodes[1].dom
 		render(root, temp)
 		render(root, updated)
 		var after = updated[1].dom
-		
+
 		o(before).equals(after)
 		o(create.callCount).equals(1)
 		o(update.callCount).equals(2)
@@ -914,26 +883,63 @@ o.spec("updateNodes", function() {
 		var vnodes = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var temp = [{tag: "b"}, null, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
 		var updated = [{tag: "b"}, {tag: "div"}, {tag: "a", attrs: {oncreate: create, onupdate: update, onremove: remove}}]
-		
+
 		render(root, vnodes)
 		var before = vnodes[2].dom
 		render(root, temp)
 		render(root, updated)
 		var after = updated[2].dom
-		
+
 		o(before).equals(after)
 		o(create.callCount).equals(1)
 		o(update.callCount).equals(2)
 		o(remove.callCount).equals(0)
 	})
-	o("component is recreated if key changes to undefined", function () {
+	o("node is recreated if key changes to undefined", function () {
 		var vnode = {tag: "b", key: 1}
 		var updated = {tag: "b"}
-		
+
 		render(root, vnode)
-		var dom = vnode.dom
 		render(root, updated)
-		
+
 		o(vnode.dom).notEquals(updated.dom)
+	})
+	components.forEach(function(cmp){
+		o.spec(cmp.kind, function(){
+			var createComponent = cmp.create
+
+			o("fragment child toggles from null when followed by null component then tag", function() {
+				var component = createComponent({view: function() {return null}})
+				var vnodes = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
+				var temp = [{tag: "[", children: [null, {tag: component}, {tag: "b"}]}]
+				var updated = [{tag: "[", children: [{tag: "a"}, {tag: component}, {tag: "b"}]}]
+
+				render(root, vnodes)
+				render(root, temp)
+				render(root, updated)
+
+				o(root.childNodes.length).equals(2)
+				o(root.childNodes[0].nodeName).equals("A")
+				o(root.childNodes[1].nodeName).equals("B")
+			})
+			o("fragment child toggles from null in component when followed by null component then tag", function() {
+				var flag = true
+				var a = createComponent({view: function() {return flag ? {tag: "a"} : null}})
+				var b = createComponent({view: function() {return null}})
+				var vnodes = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+				var temp = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+				var updated = [{tag: "[", children: [{tag: a}, {tag: b}, {tag: "s"}]}]
+
+				render(root, vnodes)
+				flag = false
+				render(root, temp)
+				flag = true
+				render(root, updated)
+
+				o(root.childNodes.length).equals(2)
+				o(root.childNodes[0].nodeName).equals("A")
+				o(root.childNodes[1].nodeName).equals("S")
+			})
+		})
 	})
 })

@@ -17,7 +17,7 @@ o.spec("browserMock", function() {
 	})
 	o("$window.onhashchange can be reached from the pushStateMock functions", function(done) {
 		$window.onhashchange = o.spy()
-		$window.location.hash = '#a'
+		$window.location.hash = "#a"
 
 		callAsync(function(){
 			o($window.onhashchange.callCount).equals(1)
@@ -33,7 +33,7 @@ o.spec("browserMock", function() {
 	})
 	o("$window.onunload can be reached from the pushStateMock functions", function() {
 		$window.onunload = o.spy()
-		$window.location.href = '/a'
+		$window.location.href = "/a"
 
 		o($window.onunload.callCount).equals(1)
 	})

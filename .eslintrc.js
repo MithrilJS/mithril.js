@@ -60,7 +60,14 @@ module.exports = {
         "id-blacklist": "error",
         "id-length": "off",
         "id-match": "error",
-        "indent": "off",
+        "indent": [
+            "warn",
+            "tab",
+            {
+                "outerIIFEBody": 0,
+                "SwitchCase": 1
+            }
+        ],
         "init-declarations": "off",
         "jsx-quotes": "error",
         "key-spacing": "off",
@@ -188,7 +195,7 @@ module.exports = {
         "quotes": [
             "error",
             "double",
-            "avoid-escape"
+            {"avoidEscape": true}
         ],
         "radix": [
             "error",
@@ -209,7 +216,7 @@ module.exports = {
         "space-infix-ops": "off",
         "space-unary-ops": "error",
         "spaced-comment": "off",
-        "strict": "off",
+        "strict": ["error", "global"],
         "template-curly-spacing": "error",
         "valid-jsdoc": "off",
         "vars-on-top": "off",
@@ -217,5 +224,6 @@ module.exports = {
         "wrap-regex": "error",
         "yield-star-spacing": "error",
         "yoda": "off"
-    }
+    },
+    "root": true
 };

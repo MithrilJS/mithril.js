@@ -6,7 +6,7 @@ var Router = require("../../router/router")
 
 o.spec("Router.getPath", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", '/foo'].forEach(function(prefix) {
+		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, router, onRouteChange, onFail
 

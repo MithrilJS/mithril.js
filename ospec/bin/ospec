@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict"
 
 var fs = require("fs")
 var path = require("path")
@@ -31,9 +32,9 @@ function traverseDirectory(pathname, callback) {
 	})
 }
 
-traverseDirectory(".", function(pathname, stat, children) {
+traverseDirectory(".", function(pathname) {
 	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
-		require(path.normalize(process.cwd()) + "/" + pathname)
+		require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
 	}
 })
 .then(o.run)

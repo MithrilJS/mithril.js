@@ -12,19 +12,19 @@ o.spec("attributes", function() {
 		render = vdom($window).render
 	})
 	o.spec("customElements", function(){
-		
+
 		o("when vnode is customElement, custom setAttribute called", function(){
 
-			var normal =  [
-				{ tag: "input", attrs: { value: 'hello' } },
-				{ tag: "input", attrs: { value: 'hello' } },
-				{ tag: "input", attrs: { value: 'hello' } }
+			var normal = [
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}}
 			]
-			
+
 			var custom = [
-				{ tag: "custom-element", attrs: { custom: 'x' } },
-				{ tag: "input", attrs: { is: 'something-special', custom: 'x' } },
-				{ tag: "custom-element", attrs: { is: 'something-special', custom: 'x' } }
+				{tag: "custom-element", attrs: {custom: "x"}},
+				{tag: "input", attrs: {is: "something-special", custom: "x"}},
+				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
 			]
 
 			var view = normal.concat(custom)
@@ -43,8 +43,8 @@ o.spec("attributes", function() {
 			}
 
 			render(root, view)
-			
-			o(spy.callCount).equals( custom.length )
+
+			o(spy.callCount).equals(custom.length)
 		})
 
 	})
@@ -133,7 +133,7 @@ o.spec("attributes", function() {
 	})
 	o.spec("contenteditable throws on untrusted children", function() {
 		o("including text nodes", function() {
-			var div = {tag: "div", attrs: {contenteditable: true}, text: ''}
+			var div = {tag: "div", attrs: {contenteditable: true}, text: ""}
 			var succeeded = false
 
 			try {
@@ -141,7 +141,7 @@ o.spec("attributes", function() {
 
 				succeeded = true
 			}
-			catch(e){}
+			catch(e){/* ignore */}
 
 			o(succeeded).equals(false)
 		})
@@ -154,7 +154,7 @@ o.spec("attributes", function() {
 
 				succeeded = true
 			}
-			catch(e){}
+			catch(e){/* ignore */}
 
 			o(succeeded).equals(false)
 		})
@@ -167,7 +167,7 @@ o.spec("attributes", function() {
 
 				succeeded = true
 			}
-			catch(e){}
+			catch(e){/* ignore */}
 
 			o(succeeded).equals(true)
 		})
@@ -180,7 +180,7 @@ o.spec("attributes", function() {
 
 				succeeded = true
 			}
-			catch(e){}
+			catch(e){/* ignore */}
 
 			o(succeeded).equals(true)
 		})
