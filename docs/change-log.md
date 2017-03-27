@@ -13,7 +13,6 @@
 
 - support for ES6 class components
 - support for closure components
-- updated typescript definitions
 
 #### Bug fixes
 
