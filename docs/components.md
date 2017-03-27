@@ -101,6 +101,109 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 ---
 
+### Alternate component syntaxes
+
+#### ES6 classes
+
+Components can also be written using ES6 class syntax:
+
+```javascript
+class ES6ClassComponent {
+	constructor(vnode) {
+		// vnode.state is undefined at this point
+		this.kind = "ES6 class"
+	}
+	view() {
+		return m("div", "Hello from an " + this.kind)
+	}
+	oncreate() {
+		console.log(`A ${this.kind} component was created`)
+	}
+}
+```
+
+Component classes must define a `view()` method.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(ES6ClassComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, ES6ClassComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": ES6ClassComponent
+})
+
+// EXAMPLE: component composition
+class AnotherES6ClassComponent {
+	view() {
+		return m("main", [
+			m(ES6ClassComponent)
+		])
+	}
+}
+```
+
+More generally, a constructible function whose `.prototype.view` is a function will be treated as a class.
+
+#### Closure components
+
+Functionally minded developers may prefer using the "closure component" syntax:
+
+```javascript
+function closureComponent(vnode) {
+	// vnode.state is undefined at this point
+	var kind = "closure component"
+
+	return {
+		view: function() {
+			return m("div", "Hello from a " + kind)
+		},
+		oncreate: function() {
+			console.log("We've created a " + kind)
+		}
+	}
+}
+```
+
+The returned object must hold a `view` function.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(closureComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, closuresComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": closureComponent
+})
+
+// EXAMPLE: component composition
+function anotherClosureComponent() {
+	return {
+		view: function() {
+			return m("main", [
+				m(closureComponent)
+			])
+		}
+	}
+}
+```
+
+#### Mixing component kinds
+
+Components can be freely mixed. A Class component can have closure or POJO components as children, etc...
+
+---
+
 ### State
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
@@ -109,7 +212,7 @@ The state of a component can be accessed three ways: as a blueprint at initializ
 
 #### At initialization
 
-The component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
+For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
 
 In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
 
@@ -126,6 +229,10 @@ m(ComponentWithInitialState)
 // Equivalent HTML
 // <div>Initial content</div>
 ```
+
+For class components, the state is an instance of the class.
+
+For closure components, the state is the object returned by the closure. The state object is mostly redundant for closure components (since variables defined in the closure scope can be used instead).
 
 #### Via vnode.state
 
@@ -168,44 +275,6 @@ m(ComponentUsingThis, {text: "Hello"})
 ```
 
 Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
-
----
-
-### ES6 classes
-
-Components can also be written using ES6 class syntax:
-
-```javascript
-class ES6ClassComponent {
-	view() {
-		return m("div", "Hello from an ES6 class")
-	}
-}
-```
-
-They can be consumed in the same way regular components can.
-
-```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ES6ClassComponent))
-
-// EXAMPLE: via m.mount
-m.mount(document.body, ES6ClassComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ES6ClassComponent
-})
-
-// EXAMPLE: component composition
-class AnotherES6ClassComponent {
-	view() {
-		return m("main", [
-			m(ES6ClassComponent)
-		])
-	}
-}
-```
 
 ---
 
