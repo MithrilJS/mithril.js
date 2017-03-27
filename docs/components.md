@@ -114,7 +114,7 @@ class ES6ClassComponent {
 		this.kind = "ES6 class"
 	}
 	view() {
-		return m("div", "Hello from an " + this.kind)
+		return m("div", `Hello from an ${this.kind}`)
 	}
 	oncreate() {
 		console.log(`A ${this.kind} component was created`)
@@ -122,7 +122,7 @@ class ES6ClassComponent {
 }
 ```
 
-Component classes must define a `view()` method.
+Component classes must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
 
 They can be consumed in the same way regular components can.
 
@@ -148,8 +148,6 @@ class AnotherES6ClassComponent {
 }
 ```
 
-More generally, a constructible function whose `.prototype.view` is a function will be treated as a class.
-
 #### Closure components
 
 Functionally minded developers may prefer using the "closure component" syntax:
@@ -170,7 +168,7 @@ function closureComponent(vnode) {
 }
 ```
 
-The returned object must hold a `view` function.
+The returned object must hold a `view` function, used to get the tree to render.
 
 They can be consumed in the same way regular components can.
 
@@ -230,9 +228,9 @@ m(ComponentWithInitialState)
 // <div>Initial content</div>
 ```
 
-For class components, the state is an instance of the class.
+For class components, the state is an instance of the class, set right after the constructor is called.
 
-For closure components, the state is the object returned by the closure. The state object is mostly redundant for closure components (since variables defined in the closure scope can be used instead).
+For closure components, the state is the object returned by the closure, set right after the closure returns. The state object is mostly redundant for closure components (since variables defined in the closure scope can be used instead).
 
 #### Via vnode.state
 
