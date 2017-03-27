@@ -260,8 +260,9 @@ o.spec("component", function() {
 
 					o(root.childNodes.length).equals(0)
 				})
-				o("throws a custom error if it returns itself", function() {
+				o("throws a custom error if it returns itself when created", function() {
 					// A view that returns its vnode would otherwise trigger an infinite loop
+					var threw = false
 					var component = createComponent({
 						view: function(vnode) {
 							return vnode
@@ -271,10 +272,41 @@ o.spec("component", function() {
 						render(root, [{tag: component}])
 					}
 					catch (e) {
+						threw = true
 						o(e instanceof Error).equals(true)
 						// Call stack exception is a RangeError
 						o(e instanceof RangeError).equals(false)
 					}
+					o(threw).equals(true)
+				})
+				o("throws a custom error if it returns itself when updated", function() {
+					// A view that returns its vnode would otherwise trigger an infinite loop
+					var threw = false
+					var init = true
+					var oninit = o.spy()
+					var component = createComponent({
+						oninit: oninit,
+						view: function(vnode) {
+							if (init) return init = false
+							else return vnode
+						}
+					})
+					render(root, [{tag: component}])
+
+					o(root.firstChild.nodeType).equals(3)
+					o(root.firstChild.nodeValue).equals("")
+
+					try {
+						render(root, [{tag: component}])
+					}
+					catch (e) {
+						threw = true
+						o(e instanceof Error).equals(true)
+						// Call stack exception is a RangeError
+						o(e instanceof RangeError).equals(false)
+					}
+					o(threw).equals(true)
+					o(oninit.callCount).equals(1)
 				})
 				o("can update when returning fragments", function() {
 					var component = createComponent({
@@ -732,6 +764,97 @@ o.spec("component", function() {
 						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
 					})
 				})
+				o("lifecycle timing megatest (for a single component with the state overwritten)", function() {
+					var methods = {
+						view: o.spy(function(vnode) {
+							o(vnode.state).equals(1)
+							return ""
+						})
+					}
+					var attrs = {}
+					var hooks = [
+						"oninit", "oncreate", "onbeforeupdate",
+						"onupdate", "onbeforeremove", "onremove"
+					]
+					hooks.forEach(function(hook) {
+						// the `attrs` hooks are called before  the component ones
+						attrs[hook] = o.spy(function(vnode) {
+							o(vnode.state).equals(1)
+							o(attrs[hook].callCount).equals(methods[hook].callCount + 1)
+						})
+						methods[hook] = o.spy(function(vnode) {
+							o(vnode.state).equals(1)
+							o(attrs[hook].callCount).equals(methods[hook].callCount)
+						})
+					})
+
+					var attrsOninit = attrs.oninit
+					var methodsOninit = methods.oninit
+					attrs.oninit = o.spy(function(vnode){
+						vnode.state = 1
+						return attrsOninit.call(this, vnode)
+					})
+					methods.oninit = o.spy(function(vnode){
+						vnode.state = 1
+						return methodsOninit.call(this, vnode)
+					})
+
+					var component = createComponent(methods)
+
+					o(methods.view.callCount).equals(0)
+					o(methods.oninit.callCount).equals(0)
+					o(methods.oncreate.callCount).equals(0)
+					o(methods.onbeforeupdate.callCount).equals(0)
+					o(methods.onupdate.callCount).equals(0)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [{tag: component, attrs: attrs}])
+
+					o(methods.view.callCount).equals(1)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(0)
+					o(methods.onupdate.callCount).equals(0)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [{tag: component, attrs: attrs}])
+
+					o(methods.view.callCount).equals(2)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(1)
+					o(methods.onupdate.callCount).equals(1)
+					o(methods.onbeforeremove.callCount).equals(0)
+					o(methods.onremove.callCount).equals(0)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+
+					render(root, [])
+
+					o(methods.view.callCount).equals(2)
+					o(methods.oninit.callCount).equals(1)
+					o(methods.oncreate.callCount).equals(1)
+					o(methods.onbeforeupdate.callCount).equals(1)
+					o(methods.onupdate.callCount).equals(1)
+					o(methods.onbeforeremove.callCount).equals(1)
+					o(methods.onremove.callCount).equals(1)
+
+					hooks.forEach(function(hook) {
+						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+					})
+				})
 				o("hook state and arguments validation", function(){
 					var methods = {
 						view: o.spy(function(vnode) {
@@ -862,7 +985,7 @@ o.spec("component", function() {
 			o("Constructible", function() {
 				var oninit = o.spy()
 				var component = o.spy(function(vnode){
-					o(vnode.state).equals(null)
+					o(vnode.state).equals(undefined)
 					o(oninit.callCount).equals(0)
 				})
 				var view = o.spy(function(){
@@ -888,7 +1011,7 @@ o.spec("component", function() {
 					return ""
 				})
 				var component = o.spy(function(vnode) {
-					o(vnode.state).equals(null)
+					o(vnode.state).equals(undefined)
 					o(oninit.callCount).equals(0)
 					return state = {
 						view: view
