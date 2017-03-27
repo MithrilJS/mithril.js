@@ -406,14 +406,14 @@ module.exports = function($window) {
 	}
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
-		if (vnode.attrs && vnode.attrs.onbeforeremove) {
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
 			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && vnode._state.onbeforeremove) {
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
 			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
@@ -446,8 +446,8 @@ module.exports = function($window) {
 		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
-		if (vnode.attrs && vnode.attrs.onremove) vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && vnode._state.onremove) vnode._state.onremove.call(vnode.state, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
 		if (vnode.instance != null) onremove(vnode.instance)
 		else {
 			var children = vnode.children
