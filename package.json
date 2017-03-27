@@ -28,9 +28,6 @@
     "istanbul": "^0.4.3",
     "marked": "^0.3.6"
   },
-  "publishConfig": {
-    "tag": "next"
-  },
   "bin": {
     "ospec": "./ospec/bin/ospec",
     "bundle": "./bundler/bin/bundle"
