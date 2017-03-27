@@ -1,17 +1,18 @@
 # Change log
 
-- [v1.0.2](#v101)
+- [v1.1.0](#v110)
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
 
 ---
 
-### v1.0.2
+### v1.1.0
 
 #### News
 
 - support for ES6 class components
+- support for closure components
 - updated typescript definitions
 
 #### Bug fixes
