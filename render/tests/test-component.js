@@ -894,7 +894,7 @@ o.spec("component", function() {
 			o("Constructible", function() {
 				var oninit = o.spy()
 				var component = o.spy(function(vnode){
-					o(vnode.state).equals(null)
+					o(vnode.state).equals(undefined)
 					o(oninit.callCount).equals(0)
 				})
 				var view = o.spy(function(){
@@ -920,7 +920,7 @@ o.spec("component", function() {
 					return ""
 				})
 				var component = o.spy(function(vnode) {
-					o(vnode.state).equals(null)
+					o(vnode.state).equals(undefined)
 					o(oninit.callCount).equals(0)
 					return state = {
 						view: view

@@ -109,7 +109,7 @@ module.exports = function($window) {
 			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
 			sentinel.$$reentrantLock$$ = true
 		} else {
-			vnode.state = null
+			vnode.state = void 0
 			sentinel = vnode.tag
 			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
 			sentinel.$$reentrantLock$$ = true
