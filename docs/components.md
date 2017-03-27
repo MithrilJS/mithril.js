@@ -276,44 +276,6 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 ---
 
-### ES6 classes
-
-Components can also be written using ES6 class syntax:
-
-```javascript
-class ES6ClassComponent {
-	view() {
-		return m("div", "Hello from an ES6 class")
-	}
-}
-```
-
-They can be consumed in the same way regular components can.
-
-```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ES6ClassComponent))
-
-// EXAMPLE: via m.mount
-m.mount(document.body, ES6ClassComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ES6ClassComponent
-})
-
-// EXAMPLE: component composition
-class AnotherES6ClassComponent {
-	view() {
-		return m("main", [
-			m(ES6ClassComponent)
-		])
-	}
-}
-```
-
----
-
 ### Avoid anti-patterns
 
 Although Mithril is flexible, some code patterns are discouraged:
