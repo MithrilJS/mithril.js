@@ -2,9 +2,9 @@
 
 - [Structure](#structure)
 - [Lifecycle methods](#lifecycle-methods)
+- [Syntactic variants](#syntactic-variants)
 - [State](#state)
-- [ES6 classes](#es6-classes)
-- [Avoid-anti-patterns](#avoid-anti-patterns)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
 
@@ -101,7 +101,7 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 ---
 
-### Alternate component syntaxes
+### Syntactic variants
 
 #### ES6 classes
 
