@@ -13,8 +13,8 @@ try {fs.mkdirSync("./dist/archive/v" + version + "/lib/prism")} catch (e) {/* ig
 try {fs.mkdirSync("./dist/lib")} catch (e) {/* ignore */}
 try {fs.mkdirSync("./dist/lib/prism")} catch (e) {/* ignore */}
 
-var guides = fs.readFileSync("docs/guides.md", "utf-8")
-var methods = fs.readFileSync("docs/methods.md", "utf-8")
+var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
+var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
 
 var index = fs.readFileSync("docs/index.md", "utf-8")
 fs.writeFileSync("README.md", index.replace(/(\]\()(.+?)\.md(\))/g, "$1http://mithril.js.org/$2.html$3"), "utf-8")
@@ -27,7 +27,7 @@ function generate(pathname) {
 			generate(pathname + "/" + filename)
 		})
 	}
-	else if (!pathname.match(/tutorials|archive|guides|methods/)) {
+	else if (!pathname.match(/tutorials|archive|nav-/)) {
 		if (pathname.match(/\.md$/)) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
