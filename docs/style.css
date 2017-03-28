@@ -15,8 +15,8 @@ h1 img {transform:rotate(180deg);vertical-align:middle;width:20px;}
 h1 small {font-size:16px;}
 p {margin:0 0 15px;}
 pre,code {background:#eee;font-family:monospace;font-size:14px;}
-pre {border-left:3px solid #1e5799;overflow:auto;padding:10px 20px;}
-code {border:1px solid #ddd;display:inline-block;margin:0 0 1px;padding:3px;white-space:pre;}
+pre {border-left:3px solid #1e5799;overflow:auto;padding:10px 20px;margin:20px 0;}
+code {border:1px solid #ddd;display:inline-block;margin:0 0 1px;padding:5px 3px;white-space:pre;}
 pre code {border:0;margin:0;padding:0;}
 table {border-collapse:collapse;margin:0 0 30px;width:100%;}
 tbody tr:nth-child(odd) {background:#fafafa;}
@@ -80,3 +80,10 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 	nav,h1 + ul {display:none;}
 	main section {margin:0;}
 }
+
+/* prism theming */
+.token.comment,.token.prolog,.token.doctype,.token.cdata {color:#888;}
+.token.property,.token.tag,.token.boolean,.token.number,.token.constant,.token.symbol {color:#905;}
+.token.selector,.token.attr-name,.token.string,.token.builtin {color:#690;}
+.token.atrule,.token.attr-value,.token.punctuation,.token.keyword {color:#1e5799;}
+.token.regex,.token.important {color:#e90;}

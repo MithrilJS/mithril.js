@@ -8,10 +8,6 @@ var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
 try {fs.mkdirSync("./dist")} catch (e) {/* ignore */}
 try {fs.mkdirSync("./dist/archive")} catch (e) {/* ignore */}
 try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
-try {fs.mkdirSync("./dist/archive/v" + version + "/lib")} catch (e) {/* ignore */}
-try {fs.mkdirSync("./dist/archive/v" + version + "/lib/prism")} catch (e) {/* ignore */}
-try {fs.mkdirSync("./dist/lib")} catch (e) {/* ignore */}
-try {fs.mkdirSync("./dist/lib/prism")} catch (e) {/* ignore */}
 
 var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
 var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
