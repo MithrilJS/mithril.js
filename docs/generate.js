@@ -51,7 +51,9 @@ function generate(pathname) {
 				.replace(/\[version\]/, version) // update version
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
-					return "<h" + n + ' id="' + text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-") + '">' + text + "</h" + n + ">"
+					var anchor = text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-");
+
+					return `<h${n} id="${anchor}"><a href="#${anchor}">${text}</a></h${n}>`;
 				})
 			fs.writeFileSync("./dist/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 			fs.writeFileSync("./dist/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
