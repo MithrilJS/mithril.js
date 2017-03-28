@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Mithril</title>
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic" rel="stylesheet" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="mithril.min.zip">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.1.8)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html">m</a></li>
+								<li><a href="mithril.prop.html">m.prop</a></li>
+								<li><a href="mithril.withAttr.html">m.withAttr</a></li>
+								<li><a href="mithril.module.html">m.module</a></li>
+								<li><a href="mithril.trust.html">m.trust</a></li>
+								<li><a href="mithril.render.html">m.render</a></li>
+								<li><a href="mithril.redraw.html">m.redraw</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting">m.route(path)</a></li>
+										<li><a href="mithril.route.html#mode-abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param">m.route.param</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html">m.request</a></li>
+								<li><a href="mithril.deferred.html">m.deferred</a></li>
+								<li><a href="mithril.sync.html">m.sync</a></li>
+								<li><a href="mithril.computation.html">m.startComputation / m.endComputation</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="m-deferred">m.deferred</h2>
+<p>This is a low-level method in Mithril. It&#39;s a modified version of the Thenable API.</p>
+<p>A deferred is an asynchrony monad. It exposes a <code>promise</code> property which can <em>bind</em> callbacks to build a computation tree.</p>
+<p>The deferred object can then <em>apply</em> a value by calling either <code>resolve</code> or <code>reject</code>, which then dispatches the value to be processed to the computation tree.</p>
+<p>Each computation function takes a value as a parameter and is expected to return another value, which in turns is forwarded along to the next computation function (or functions) in the tree.</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">//standalone usage
+var greetAsync = function() {
+    var deferred = m.deferred();
+    setTimeout(function() {
+        deferred.resolve(&quot;hello&quot;);
+    }, 1000);
+    return deferred.promise;
+};
+
+greetAsync()
+    .then(function(value) {return value + &quot; world&quot;})
+    .then(function(value) {console.log(value)}); //logs &quot;hello world&quot; after 1 second</code></pre>
+<hr>
+<h3 id="differences-from-promises-a-">Differences from Promises/A+</h3>
+<p>For the most part, Mithril promises behave as you&#39;d expect a <a href="http://promises-aplus.github.io/promises-spec/">Promise/A+</a> promise to behave, but with a few key differences:</p>
+<p>Mithril promises forward a value downstream if a resolution callback returns <code>undefined</code>. This allows simpler debugging of promise chains:</p>
+<pre><code class="lang-javascript">var data = m.request({method: &quot;GET&quot;, url: &quot;/data&quot;})
+    .then(console.log) //Mithril promises let us debug like this
+    .then(doStuff)
+
+var data = m.request({method: &quot;GET&quot;, url: &quot;/data&quot;})
+    .then(function(value) { // Promises/A+ would require us to declare an anonymous function
+        console.log(value) // here&#39;s the debugging snippet
+        return value // and we need to remember to return the value as well
+    })
+    .then(doStuff) // or else `doStuff` will break</code></pre>
+<p>Another subtle difference is that the Promises/A+ require a callback to run in a different execution context than its respective <code>then</code> method. This requirement exists to support an obscure edge cases and incurs <a href="http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/">a significant performance hit on each link of a promise chain</a>. To be more specific, the performance hit can come either in the form of a 4ms minimum delay (if the implementation uses <code>setTimeout</code>), or from having to load a <a href="https://raw.githubusercontent.com/NobleJS/setImmediate/master/setImmediate.js">bunch of hacky polyfill code</a> for a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window.setImmediate">feature that is not being considered for addition by some browser vendors</a>.</p>
+<p>To illustrate the difference between Mithril and A+ promises, consider the code below:</p>
+<pre><code class="lang-javascript">var deferred = m.deferred()
+
+deferred.promise.then(function() {
+    console.log(1)
+})
+
+deferred.resolve(&quot;value&quot;)
+
+console.log(2)</code></pre>
+<p>In the example above, A+ promises are required to log <code>2</code> before logging <code>1</code>, whereas Mithril logs <code>1</code> before <code>2</code>. Typically <code>resolve</code>/<code>reject</code> are called asynchronously after the <code>then</code> method is called, so normally this difference does not matter.</p>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">Deferred deferred()
+
+where:
+    Deferred :: Object { Promise promise, void resolve(any value), void reject(any value) }
+    Promise :: GetterSetter { Promise then(any successCallback(any value), any errorCallback(any value)) }
+    GetterSetter :: any getterSetter([any value])</code></pre>
+<ul>
+<li><p><strong>GetterSetter { Promise then([any successCallback(any value) [, any errorCallback(any value)]]) } promise</strong></p>
+<p>A promise has a method called <code>then</code> which takes two computation callbacks as parameters.</p>
+<p>The <code>then</code> method returns another promise whose computations (if any) receive their inputs from the parent promise&#39;s computation.</p>
+<p>A promise is also a getter-setter (see <a href="mithril.prop"><code>m.prop</code></a>). After a call to either <code>resolve</code> or <code>reject</code>, it holds the result of the parent&#39;s computation (or the <code>resolve</code>/<code>reject</code> value, if the promise has no parent promises)</p>
+<ul>
+<li><p><strong>Promise then([any successCallback(any value) [, any errorCallback(any value)]])</strong></p>
+<p>This method accepts two callbacks which process a value passed to the <code>resolve</code> and <code>reject</code> methods, respectively, and pass the processed value to the returned promise</p>
+<ul>
+<li><p><strong>any successCallback(any value)</strong> (optional)</p>
+<p>The <code>successCallback</code> is called if <code>resolve</code> is called in the root <code>deferred</code>.</p>
+<p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
+<p>If this function returns undefined, then it passes the <code>value</code> argument to the next step in the thennable queue, if any</p>
+</li>
+<li><p><strong>any errorCallback(any value)</strong> (optional)</p>
+<p>The <code>errorCallback</code> is called if <code>reject</code> is called in the root <code>deferred</code>.</p>
+<p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
+<p>If this function returns undefined, then it passes the <code>value</code> argument to the next step in the thennable queue, if any</p>
+</li>
+<li><p><strong>returns Promise promise</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>void resolve(any value)</strong></p>
+<p>This method passes a value to the <code>successCallback</code> of the deferred object&#39;s child promise</p>
+</li>
+<li><p><strong>void reject(any value)</strong></p>
+<p>This method passes a value to the <code>errorCallback</code> of the deferred object&#39;s child promise</p>
+</li>
+</ul>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>

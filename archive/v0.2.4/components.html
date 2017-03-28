@@ -1,0 +1,561 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Components - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="core-topics">Core Topics</h2>
+							<ul>
+								<li><a href="installation.html">Installation</a></li>
+								<li><a href="getting-started.html">Getting Started</a></li>
+								<li><a href="routing.html">Routing</a></li>
+								<li><a href="web-services.html">Web Services</a></li>
+								<li><a href="components.html">Components</a></li>
+							</ul>
+							<h2 id="advanced-topics.html">Advanced Topics</h2>
+							<ul>
+								<li><a href="auto-redrawing.html">The Auto-Redrawing System</a></li>
+								<li><a href="integration.html">Integrating with Other Libraries</a></li>
+								<li><a href="optimizing-performance.html">Compiling Templates</a></li>
+							</ul>
+							<h2 id="misc">Misc</h2>
+							<ul>
+								<li><a href="comparison.html">Differences from Other MVC Frameworks</a></li>
+								<li><a href="benchmarks.html">Benchmarks</a></li>
+								<li><a href="practices.html">Good Practices</a></li>
+								<li><a href="tools.html">Useful Tools</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="components">Components</h2>
+<hr>
+<ul>
+<li><a href="#application-architecture-with-components">Application architecture with components</a><ul>
+<li><a href="#aggregation-of-responsibility">Aggregation of responsibility</a></li>
+<li><a href="#distribution-of-concrete-responsibilities">Distribution of concrete responsibilities</a></li>
+<li><a href="#cross-communication-in-single-purpose-components">Cross-communication in single-purpose components</a></li>
+<li><a href="#the-observer-pattern">The observer pattern</a></li>
+<li><a href="#hybrid-architecture">Hybrid architecture</a></li>
+<li><a href="#classic-mvc">Classic MVC</a></li>
+</ul>
+</li>
+<li><a href="#example-html5-drag-n-drop-file-uploader-component">Example: HTML5 drag-n-drop file uploader component</a></li>
+</ul>
+<hr>
+<h2 id="application-architecture-with-components">Application architecture with components</h2>
+<p>Components are versatile tools to organize code and can be used in a variety of ways.</p>
+<p>Let&#39;s create a simple model entity which we&#39;ll use in a simple application, to illustrate different usage patterns for components:</p>
+<pre><code class="lang-javascript">var Contact = function(data) {
+    data = data || {}
+    this.id = m.prop(data.id || &quot;&quot;)
+    this.name = m.prop(data.name || &quot;&quot;)
+    this.email = m.prop(data.email || &quot;&quot;)
+}
+Contact.list = function(data) {
+    return m.request({method: &quot;GET&quot;, url: &quot;/api/contact&quot;, type: Contact})
+}
+Contact.save = function(data) {
+    return m.request({method: &quot;POST&quot;, url: &quot;/api/contact&quot;, data: data})
+}
+</code></pre>
+<p>Here, we&#39;ve defined a class called <code>Contact</code>. A contact has an id, a name and an email. There are two static methods: <code>list</code> for retrieving a list of contacts, and <code>save</code> to save a single contact. These methods assume that the AJAX responses return contacts in JSON format, containing the same fields as the class.</p>
+<h3 id="aggregation-of-responsibility">Aggregation of responsibility</h3>
+<p>One way of organizing components is to use component parameter lists to send data downstream, and to define events to bubble data back upstream to a centralized module who is responsible for interfacing with the model layer.</p>
+<pre><code class="lang-javascript">var ContactsWidget = {
+    controller: function update() {
+        this.contacts = Contact.list()
+        this.save = function(contact) {
+            Contact.save(contact).then(update.bind(this))
+        }.bind(this)
+    },
+    view: function(ctrl) {
+        return [
+            m.component(ContactForm, {onsave: ctrl.save}),
+            m.component(ContactList, {contacts: ctrl.contacts})
+        ]
+    }
+}
+
+var ContactForm = {
+    controller: function(args) {
+        this.contact = m.prop(args.contact || new Contact())
+    },
+    view: function(ctrl, args) {
+        var contact = ctrl.contact()
+
+        return m(&quot;form&quot;, [
+            m(&quot;label&quot;, &quot;Name&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.name), value: contact.name()}),
+
+            m(&quot;label&quot;, &quot;Email&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.email), value: contact.email()}),
+
+            m(&quot;button[type=button]&quot;, {onclick: args.onsave.bind(this, contact)}, &quot;Save&quot;)
+        ])
+    }
+}
+
+var ContactList = {
+    view: function(ctrl, args) {
+        return m(&quot;table&quot;, [
+            args.contacts().map(function(contact) {
+                return m(&quot;tr&quot;, [
+                    m(&quot;td&quot;, contact.id()),
+                    m(&quot;td&quot;, contact.name()),
+                    m(&quot;td&quot;, contact.email())
+                ])
+            })
+        ])
+    }
+}
+
+m.mount(document.body, ContactsWidget)
+</code></pre>
+<p>In the example above, there are 3 components. <code>ContactsWidget</code> is the top level module being rendered to <code>document.body</code>, and it is the module that has the responsibility of talking to our Model entity <code>Contact</code>, which we defined earlier.</p>
+<p>The <code>ContactForm</code> component is, as its name suggests, a form that allows us to edit the fields of a <code>Contact</code> entity. It exposes an event called <code>onsave</code> which is fired when the Save button is pressed on the form. In addition, it stores the unsaved contact entity internally within the component (<code>this.contact = m.prop(args.contact || new Contact())</code>).</p>
+<p>The <code>ContactList</code> component displays a table showing all the contact entities that are passed to it via the <code>contacts</code> argument.</p>
+<p>The most interesting component is <code>ContactsWidget</code>:</p>
+<ol>
+<li><p>on initialization, it fetches the list of contacts (<code>this.contacts = Contact.list</code>)</p>
+</li>
+<li><p>when <code>save</code> is called, it saves a contact (<code>Contact.save(contact)</code>)</p>
+</li>
+<li><p>after saving the contact, it reloads the list (<code>.then(update.bind(this))</code>)</p>
+</li>
+</ol>
+<p><code>update</code> is the controller function itself, so defining it as a promise callback simply means that the controller is re-initialized after the previous asynchronous operation (<code>Contact.save()</code>)</p>
+<p>Aggregating responsibility in a top-level component allows the developer to manage multiple model entities easily: any given AJAX request only needs to be performed once regardless of how many components need its data, and refreshing the data set is simple.</p>
+<p>In addition, components can be reused in different contexts. Notice that the <code>ContactList</code> does not care about whether <code>args.contacts</code> refers to all the contacts in the database, or just contacts that match some criteria. Similarly, <code>ContactForm</code> can be used to both create new contacts as well as edit existing ones. The implications of saving are left to the parent component to handle.</p>
+<p>This architecture can yield highly flexible and reusable code, but flexibility can also increase the cognitive load of the system (for example, you need to look at both the top-level module and <code>ContactList</code> in order to know what is the data being displayed (and how it&#39;s being filtered, etc). In addition, having a deeply nested tree of components can result in a lot of intermediate &quot;pass-through&quot; arguments and event handlers.</p>
+<hr>
+<h3 id="distribution-of-concrete-responsibilities">Distribution of concrete responsibilities</h3>
+<p>Another way of organizing code is to distribute concrete responsibilities across multiple modules.</p>
+<p>Here&#39;s a refactored version of the sample app above to illustrate:</p>
+<pre><code class="lang-javascript">var ContactForm = {
+    controller: function() {
+        this.contact = m.prop(new Contact())
+        this.save = function(contact) {
+            Contact.save(contact)
+        }
+    },
+    view: function(ctrl) {
+        var contact = ctrl.contact()
+
+        return m(&quot;form&quot;, [
+            m(&quot;label&quot;, &quot;Name&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.name), value: contact.name()}),
+
+            m(&quot;label&quot;, &quot;Email&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.email), value: contact.email()}),
+
+            m(&quot;button[type=button]&quot;, {onclick: ctrl.save.bind(this, contact)}, &quot;Save&quot;)
+        ])
+    }
+}
+
+var ContactList = {
+    controller: function() {
+        this.contacts = Contact.list()
+    },
+    view: function(ctrl) {
+        return m(&quot;table&quot;, [
+            ctrl.contacts().map(function(contact) {
+                return m(&quot;tr&quot;, [
+                    m(&quot;td&quot;, contact.id()),
+                    m(&quot;td&quot;, contact.name()),
+                    m(&quot;td&quot;, contact.email())
+                ])
+            })
+        ])
+    }
+}
+
+m.route(document.body, &quot;/&quot;, {
+    &quot;/list&quot;: ContactList,
+    &quot;/create&quot;: ContactForm
+})
+</code></pre>
+<p>Notice that now each component is self-contained: each has a separate route, and each component does exactly one thing. These components are designed to not interface with other components. On the one hand, it&#39;s extremely easy to reason about the behavior of the components since they only serve a single purpose, but on the other hand they don&#39;t have the flexibility that the previous example did (e.g. in this iteration, <code>ContactList</code> can only list all of the contacts in the database, not an arbitrary subset.</p>
+<p>Also, notice that since these components are designed to encapsulate their behavior, they cannot easily affect other components. In practice, this means that if the two components were in a <code>ContactsWidget</code> component as before, saving a contact would not update the list without some extra code.</p>
+<h4 id="cross-communication-in-single-purpose-components">Cross-communication in single-purpose components</h4>
+<p>Here&#39;s one way to implement cross-communication between single purpose components:</p>
+<pre><code class="lang-javascript">var Observable = function() {
+    var controllers = []
+    return {
+        register: function(controller) {
+            return function() {
+                var ctrl = new controller
+                ctrl.onunload = function() {
+                    controllers.splice(controllers.indexOf(ctrl), 1)
+                }
+                controllers.push({instance: ctrl, controller: controller})
+                return ctrl
+            }
+        },
+        trigger: function() {
+            controllers.map(function(c) {
+                ctrl = new c.controller
+                for (var i in ctrl) c.instance[i] = ctrl[i]
+            })
+        }
+    }
+}.call()
+
+
+var ContactsWidget = {
+    view: function(ctrl) {
+        return [
+            ContactForm,
+            ContactList
+        ]
+    }
+}
+
+var ContactForm = {
+    controller: function() {
+        this.contact = m.prop(new Contact())
+        this.save = function(contact) {
+            Contact.save(contact).then(Observable.trigger)
+        }
+    },
+    view: function(ctrl) {
+        var contact = ctrl.contact()
+
+        return m(&quot;form&quot;, [
+            m(&quot;label&quot;, &quot;Name&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.name), value: contact.name()}),
+
+            m(&quot;label&quot;, &quot;Email&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.email), value: contact.email()}),
+
+            m(&quot;button[type=button]&quot;, {onclick: ctrl.save.bind(this, contact)}, &quot;Save&quot;)
+        ])
+    }
+}
+
+var ContactList = {
+    controller: Observable.register(function() {
+        this.contacts = Contact.list()
+    }),
+    view: function(ctrl) {
+        return m(&quot;table&quot;, [
+            ctrl.contacts().map(function(contact) {
+                return m(&quot;tr&quot;, [
+                    m(&quot;td&quot;, contact.id()),
+                    m(&quot;td&quot;, contact.name()),
+                    m(&quot;td&quot;, contact.email())
+                ])
+            })
+        ])
+    }
+}
+
+m.mount(document.body, ContactsWidget)
+</code></pre>
+<p>In this iteration, both the <code>ContactForm</code> and <code>ContactList</code> components are now children of the <code>ContactsWidget</code> component and they appear simultaneously on the same page.</p>
+<p>The <code>Observable</code> object exposes two methods: <code>register</code> which marks a controller as a Observable entity, and <code>trigger</code> which reloads controllers marked by <code>register</code>. Controllers are deregistered when their <code>onunload</code> event is triggered.</p>
+<p>The <code>ContactList</code> component&#39;s controller is marked as Observable, and the <code>save</code> event handler in <code>ContactForm</code> calls <code>Observable.trigger</code> after saving.</p>
+<p>This mechanism allows multiple components to be reloaded in response to non-idempotent operations.</p>
+<p>One extremely important aspect of this architecture is that since components encapsulate their internal state, then by definition it&#39;s harder to reason about AJAX request redundancy (i.e. how to prevent two identical AJAX requests originating from two different components).</p>
+<h3 id="the-observer-pattern">The observer pattern</h3>
+<p>The <code>Observable</code> object can be further refactored so that <code>trigger</code> broadcasts to &quot;channels&quot;, which controllers can subscribe to. This is known, appropriately, as the <a href="http://en.wikipedia.org/wiki/Observer_pattern">observer pattern</a>.</p>
+<pre><code class="lang-javascript">var Observable = function() {
+    var channels = {}
+    return {
+        register: function(subscriptions, controller) {
+            return function self() {
+                var ctrl = new controller
+                var reload = controller.bind(ctrl)
+                Observable.on(subscriptions, reload)
+                ctrl.onunload = function() {
+                    Observable.off(reload)
+                }
+                return ctrl
+            }
+        },
+        on: function(subscriptions, callback) {
+            subscriptions.forEach(function(subscription) {
+                if (!channels[subscription]) channels[subscription] = []
+                channels[subscription].push(callback)
+            })
+        },
+        off: function(callback) {
+            for (var channel in channels) {
+                var index = channels[channel].indexOf(callback)
+                if (index &gt; -1) channels[channel].splice(index, 1)
+            }
+        },
+        trigger: function(channel, args) {
+            console.log(&quot;triggered: &quot; + channel)
+            channels[channel].map(function(callback) {
+                callback(args)
+            })
+        }
+    }
+}.call()
+</code></pre>
+<p>This pattern is useful to decouple chains of dependencies (however care should be taken to avoid &quot;come-from hell&quot;, i.e. difficulty in following a chains of events because they are too numerous and arbitrarily inter-dependent)</p>
+<h3 id="hybrid-architecture">Hybrid architecture</h3>
+<p>It&#39;s of course possible to use both aggregation of responsibility and the observer pattern at the same time.</p>
+<p>The example below shows a variation of the contacts app where <code>ContactForm</code> is responsible for saving.</p>
+<pre><code class="lang-javascript">var ContactsWidget = {
+    controller: Observable.register([&quot;updateContact&quot;], function() {
+        this.contacts = Contact.list()
+    }),
+    view: function(ctrl) {
+        return [
+            m.component(ContactForm),
+            m.component(ContactList, {contacts: ctrl.contacts})
+        ]
+    }
+}
+
+var ContactForm = {
+    controller: function(args) {
+        this.contact = m.prop(new Contact())
+        this.save = function(contact) {
+            Contact.save(contact).then(Observable.trigger(&quot;updateContact&quot;))
+        }
+    },
+    view: function(ctrl, args) {
+        var contact = ctrl.contact()
+
+        return m(&quot;form&quot;, [
+            m(&quot;label&quot;, &quot;Name&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.name), value: contact.name()}),
+
+            m(&quot;label&quot;, &quot;Email&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.email), value: contact.email()}),
+
+            m(&quot;button[type=button]&quot;, {onclick: ctrl.save.bind(this, contact)}, &quot;Save&quot;)
+        ])
+    }
+}
+
+var ContactList = {
+    view: function(ctrl, args) {
+        return m(&quot;table&quot;, [
+            args.contacts().map(function(contact) {
+                return m(&quot;tr&quot;, [
+                    m(&quot;td&quot;, contact.id()),
+                    m(&quot;td&quot;, contact.name()),
+                    m(&quot;td&quot;, contact.email())
+                ])
+            })
+        ])
+    }
+}
+
+m.mount(document.body, ContactsWidget)
+</code></pre>
+<p>Here, the data fetching is still centralized in the top-level component, so that we can avoid duplicate AJAX requests when fetching data.</p>
+<p>And moving the responsibility of saving to the <code>ContactForm</code> component alleviates the need to send data back up the component tree, making the handling of non-idempotent operations less prone to pass-through argument noise.</p>
+<hr>
+<h3 id="classic-mvc">Classic MVC</h3>
+<p>Here&#39;s one last, but relevant variation of the pattern above.</p>
+<pre><code class="lang-javascript">//model layer observer
+Observable.on([&quot;saveContact&quot;], function(data) {
+    Contact.save(data.contact).then(Observable.trigger(&quot;updateContact&quot;))
+})
+
+//ContactsWidget is the same as before
+var ContactsWidget = {
+    controller: Observable.register([&quot;updateContact&quot;], function() {
+        this.contacts = Contact.list()
+    }),
+    view: function(ctrl) {
+        return [
+            m.component(ContactForm),
+            ctrl.contacts() === undefined
+              ? m(&quot;div&quot;, &quot;loading contacts...&quot;) //waiting for promise to resolve
+              : m.component(ContactList, {contacts: ctrl.contacts})
+        ]
+    }
+}
+
+//ContactList no longer calls `Contact.save`
+var ContactForm = {
+    controller: function(args) {
+            var ctrl = this
+        ctrl.contact = m.prop(new Contact())
+        ctrl.save = function(contact) {
+            Observable.trigger(&quot;saveContact&quot;, {contact: contact})
+            ctrl.contact = m.prop(new Contact()) //reset to empty contact
+        }
+        return ctrl
+    },
+    view: function(ctrl, args) {
+        var contact = ctrl.contact()
+
+        return m(&quot;form&quot;, [
+            m(&quot;label&quot;, &quot;Name&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.name), value: contact.name()}),
+
+            m(&quot;label&quot;, &quot;Email&quot;),
+            m(&quot;input&quot;, {oninput: m.withAttr(&quot;value&quot;, contact.email), value: contact.email()}),
+
+            m(&quot;button[type=button]&quot;, {onclick: ctrl.save.bind(this, contact)}, &quot;Save&quot;)
+        ])
+    }
+}
+
+//ContactList is the same as before
+var ContactList = {
+    view: function(ctrl, args) {
+        return m(&quot;table&quot;, [
+            args.contacts().map(function(contact) {
+                return m(&quot;tr&quot;, [
+                    m(&quot;td&quot;, contact.id()),
+                    m(&quot;td&quot;, contact.name()),
+                    m(&quot;td&quot;, contact.email())
+                ])
+            })
+        ])
+    }
+}
+
+m.mount(document.body, ContactsWidget)
+</code></pre>
+<p>Here we&#39;ve moved <code>Contact.save(contact).then(Observable.trigger(&quot;updateContact&quot;))</code> out of the <code>ContactForm</code> component and into the model layer. In its place, <code>ContactForm</code> merely emits an action, which is then handled by this model layer observer.</p>
+<p>This allows swapping the implementation of the <code>saveContact</code> handler without changing the <code>ContactForm</code> component.</p>
+<hr>
+<h3 id="example-html5-drag-n-drop-file-uploader-component">Example: HTML5 drag-n-drop file uploader component</h3>
+<p>Here&#39;s an example of a not-so-trivial component: a drag-n-drop file uploader. In addition to the <code>controller</code> and <code>view</code> properties that make the <code>Uploader</code> object usable as a component, it also has an <code>upload</code> convenience function that provides a basic upload model method, and a <code>serialize</code> function that allows files to be serialized as JSON in regular requests encoded as <code>application/x-www-form-urlencoded</code>.</p>
+<p>These two functions are here to illustrate the ability to expose APIs to component consumers that complement the component&#39;s user interface. By bundling model methods in the component, we avoid hard-coding how files are handled once they&#39;re dropped in, and instead, we provide a useful library of functions that can be consumed flexibly to meet the demands on an application.</p>
+<pre><code class="lang-javascript">var Uploader = {
+    upload: function(options) {
+        var formData = new FormData
+        for (var key in options.data) {
+            for (var i = 0; i &lt; options.data[key].length; i++) {
+                formData.append(key, options.data[key][i])
+            }
+        }
+
+        //simply pass the FormData object intact to the underlying XMLHttpRequest, instead of JSON.stringify&#39;ing it
+        options.serialize = function(value) {return value}
+        options.data = formData
+
+        return m.request(options)
+    },
+    serialize: function(files) {
+        var promises = files.map(function(file) {
+            var deferred = m.deferred()
+
+            var reader = new FileReader
+            reader.readAsDataURL()
+            reader.onloadend = function(e) {
+                deferred.resolve(e.result)
+            }
+            reader.onerror = deferred.reject
+            return deferred.promise
+        })
+        return m.sync(promises)
+    },
+    controller: function(args) {
+        this.noop = function(e) {
+            e.preventDefault()
+        }
+        this.update = function(e) {
+            e.preventDefault()
+            if (typeof args.onchange == &quot;function&quot;) {
+                args.onchange([].slice.call((e.dataTransfer || e.target).files))
+            }
+        }
+    },
+    view: function(ctrl, args) {
+        return m(&quot;.uploader&quot;, {ondragover: ctrl.noop, ondrop: ctrl.update})
+    }
+}
+</code></pre>
+<p>Below are some examples of consuming the <code>Uploader</code> component:</p>
+<pre><code class="lang-javascript">//usage demo 1: standalone multipart/form-data upload when files are dropped into the component
+var Demo1 = {
+    controller: function() {
+        return {
+            upload: function(files) {
+                Uploader.upload({method: &quot;POST&quot;, url: &quot;/api/files&quot;, data: {files: files}}).then(function() {
+                    alert(&quot;uploaded!&quot;)
+                })
+            }
+        }
+    },
+    view: function(ctrl) {
+        return [
+            m(&quot;h1&quot;, &quot;Uploader demo&quot;),
+            m.component(Uploader, {onchange: ctrl.upload})
+        ]
+    }
+}
+</code></pre>
+<p><a href="http://jsfiddle.net/vL22kjvs/5/">Demo</a></p>
+<pre><code class="lang-javascript">//usage demo 2: upload as base-64 encoded data url from a parent form
+var Demo2 = {
+    Asset: {
+        save: function(data) {
+            return m.request({method: &quot;POST&quot;, url: &quot;/api/assets&quot;, data: data})
+        }
+    },
+
+    controller: function() {
+        var files = m.prop([])
+        return {
+            files: files,
+            save: function() {
+                Uploader.serialize(files()).then(function(files) {
+                    Demo2.Asset.save({files: files}).then(function() {
+                        alert(&quot;Uploaded!&quot;)
+                    })
+                })
+            }
+        }
+    },
+    view: function(ctrl) {
+        return [
+            m(&quot;h1&quot;, &quot;Uploader demo&quot;),
+            m(&quot;p&quot;, &quot;Drag and drop a file below. An alert box will appear when the upload finishes&quot;),
+            m(&quot;form&quot;, [
+                m.component(Uploader, {onchange: ctrl.files}),
+                ctrl.files().map(function(file) {
+                    return file.name
+                }).join(),
+                m(&quot;button[type=button]&quot;, {onclick: ctrl.save}, &quot;Upload&quot;)
+            ])
+        ]
+    }
+}
+</code></pre>
+<p><a href="http://jsfiddle.net/vL22kjvs/6/">Demo</a></p>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>

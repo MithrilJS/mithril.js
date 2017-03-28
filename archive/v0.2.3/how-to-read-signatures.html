@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+	<head>
+		<title>How to Read Signatures - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.2.3)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html" title="A utility to create virtual elements">m</a></li>
+								<li><a href="mithril.component.html" title="Parameterizes a component">m.component</a></li>
+								<li><a href="mithril.mount.html" title="Renders a component">m.mount</a></li>
+								<li><a href="mithril.prop.html" title="A getter-setter utility">m.prop</a></li>
+								<li><a href="mithril.withAttr.html" title="A event handler factory utility">m.withAttr</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html" title="A routing utility">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes" title="Defines what routes exist">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting" title="Redirects to a route">m.route(path, params, replaceHistory)</a></li>
+										<li><a href="mithril.route.html#reading-current-route" title="Read the current route">m.route()</a></li>
+										<li><a href="mithril.route.html#mode-abstraction" title="Routing mode abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode" title="Whether routing uses location hash, querystring or pathname">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param" title="Read an argument from a parameterized route">m.route.param</a></li>
+										<li><a href="mithril.route.html#buildQueryString" title="Serialize data into querystring format">m.route.buildQueryString</a></li>
+										<li><a href="mithril.route.html#parseQueryString" title="Read an argument from a parameterized route">m.route.parseQueryString</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html" title="A high-level AJAX utility">m.request</a></li>
+								<li><a href="mithril.deferred.html" title="A Promise factory">m.deferred</a></li>
+								<li><a href="mithril.sync.html" title="A Promise aggregator">m.sync</a></li>
+							</ul>
+							<h3 id="html">HTML</h3>
+							<ul>
+								<li><a href="mithril.trust.html" title="A method to unescape HTML">m.trust</a></li>
+							</ul>
+							<h3 id="rendering">Rendering</h3>
+							<ul>
+								<li><a href="mithril.render.html" title="The lowest level rendering method">m.render</a></li>
+								<li><a href="mithril.redraw.html" title="A high-level explicit rendering method">m.redraw</a>
+									<ul>
+										<li><a href="mithril.redraw.html#strategy" title="A flag that drives the rendering strategy for the next redraw">m.redraw.strategy(strategy)</a></li>
+									</ul>
+								</li>
+								<li><a href="mithril.computation.html" title="Utilities to integrate asynchronous contexts to the rendering system">m.startComputation / m.endComputation</a></li>
+							</ul>
+							<h3 id="data">Testing</h3>
+							<ul>
+								<li><a href="mithril.deps.html" title="The dependency injector">m.deps</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="how-to-read-signatures">How to Read Signatures</h2>
+<p>Rather than providing concrete classes like other frameworks, Mithril provides methods that operate on plain old Javascript objects (POJOs) that match given signatures.</p>
+<p>A signature is a description of its static type. For functions, it shows the parameters of the function, its return value and their expected types. For objects and arrays, it shows the expected data structure and the expected types of their members.</p>
+<p>Method signatures in this documentation follow a syntax similar to Java syntax, with some extra additions:</p>
+<pre><code class="lang-clike">ReturnType methodName(ParameterType1 param1, ParameterType2 param2)
+</code></pre>
+<h3 id="optional-parameters">Optional Parameters</h3>
+<p>Square brackets denote optional parameters. In the example below, <code>param2</code> and <code>param3</code> can both be omitted, but passing a value to <code>param2</code> is required if also passing a value to <code>param3</code>:</p>
+<pre><code class="lang-clike">String test(String arg1 [, String arg2 [, String arg3]])
+</code></pre>
+<pre><code class="lang-javascript">//examples of valid function calls
+test(&quot;first&quot;);
+test(&quot;first&quot;, &quot;second&quot;);
+test(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;);
+</code></pre>
+<h3 id="type-placeholders">Type Placeholders</h3>
+<p>The word <code>void</code> is used as a type when a function does not return a value (i.e. undefined):</p>
+<pre><code class="lang-clike">void test()
+</code></pre>
+<pre><code class="lang-javascript">console.log(test()); // undefined
+</code></pre>
+<p>The word <code>any</code> is used as a type if there are no type restrictions on a parameter:</p>
+<pre><code class="lang-clike">void test(any value)
+</code></pre>
+<pre><code class="lang-javascript">//examples of valid function calls
+test(&quot;hello&quot;);
+test(1);
+test([&quot;hello&quot;, &quot;world&quot;]);
+</code></pre>
+<h3 id="arrays">Arrays</h3>
+<p>Arrays use Generics syntax to denote the expected type of array members:</p>
+<pre><code class="lang-clike">void test(Array&lt;String&gt; values)
+</code></pre>
+<pre><code class="lang-javascript">//example of a valid function call
+test([&quot;first&quot;, &quot;second&quot;]);
+</code></pre>
+<h3 id="objects-as-key-value-maps">Objects as Key-Value Maps</h3>
+<p>Objects also use Generics syntax when they are meant to be used as a key-value map. Keys are always strings and, in key-value maps, can have any name.</p>
+<pre><code class="lang-clike">void test(Object&lt;Number&gt; values)
+</code></pre>
+<pre><code class="lang-javascript">//example of a valid function call
+test({first: 1, second: 2});
+</code></pre>
+<h3 id="objects-as-class-interfaces">Objects as Class Interfaces</h3>
+<p>Objects that require specific keys are denoted using curly brace syntax:</p>
+<pre><code class="lang-clike">void test(Object {String first, Number second} value)
+</code></pre>
+<pre><code class="lang-javascript">//example of a valid function call
+test({first: &quot;first&quot;, second: 2});
+</code></pre>
+<h3 id="type-aliasing">Type Aliasing</h3>
+<p>Some types are aliases of more complex types. For example, in the example below, we created an alias called <code>ComplexType</code> for the type from the previous example</p>
+<pre><code class="lang-clike">void test(ComplexType value)
+
+where:
+    ComplexType :: Object {String first, Number second}
+
+//example of a valid function call
+test({first: &quot;first&quot;, second: 2})
+</code></pre>
+<h3 id="mixin-types">Mixin Types</h3>
+<p>Curly brace syntax can also appear on other base types to denote that the value contains static members. For example, in the example below, a value of type <code>ComplexType</code> is a string, but it also has a boolean property called <code>flag</code>:</p>
+<pre><code class="lang-clike">ComplexType :: String { Boolean flag }
+</code></pre>
+<pre><code class="lang-javascript">//an example
+var a = aComplexTypeValue
+typeof a == &quot;string&quot; // true
+&quot;flag&quot; in a // true
+a.flag = true
+</code></pre>
+<p>In the following example, a value of type <code>ComplexType</code> is a function, with a property called <code>label</code></p>
+<pre><code class="lang-clike">ComplexType :: void test() { String label }
+</code></pre>
+<pre><code class="lang-javascript">//an example
+var a = aComplexTypeValue
+typeof a == &quot;function&quot; // true
+&quot;label&quot; in a // true
+a.label = &quot;first&quot;
+</code></pre>
+<h3 id="polymorphic-types">Polymorphic Types</h3>
+<p>When multiple (but not all) types are accepted, the pipe <code>|</code> is used to delimit the list of valid types</p>
+<pre><code class="lang-clike">void test(Children children, Value value)
+
+where:
+    Children :: Array&lt;String text | Number number&gt;
+    Value :: String | Number
+</code></pre>
+<pre><code class="lang-javascript">//examples of valid function calls
+test([&quot;test&quot;, 2], &quot;second&quot;)
+test([1, 2, 3], &quot;second&quot;)
+test([1, &quot;test&quot;, 3], 2)
+</code></pre>
+<p>Pipe syntax within Object curly brace syntax means that, for a specific key, name has specific type requirements.</p>
+<p>In the example below, the <code>value</code> parameter should be a key-value map. This map may contain a key called <code>config</code>, whose value should be a function.</p>
+<pre><code class="lang-clike">void test(Object { any | void config(DOMElement) } value)
+</code></pre>
+<pre><code class="lang-javascript">//example of a valid function call
+test({ first: &quot;first&quot;, config: function(element) { /*do stuff*/ } })
+</code></pre>
+<h3 id="nullable-types">Nullable Types</h3>
+<p>A question mark <code>?</code> after a type denotes that a value can be either of that type or <code>undefined</code>.</p>
+<pre><code class="lang-clink">XMLHttpRequest? config()
+</code></pre>
+<p>In the example above, the <code>config</code> function is expected to return either an instance of the XMLHttpRequest object or <code>undefined</code></p>
+<h3 id="splat">Splat</h3>
+<p>An ellipsis <code>...</code> means that an array argument can instead be a list of arguments</p>
+<pre><code class="lang-clike">VirtualElement m(String selector [, Attributes attributes] [, Children... children])
+</code></pre>
+<p>In the example above, we can define children as an array:</p>
+<pre><code class="lang-javascript">m(&quot;div&quot;, {title: &quot;foo&quot;}, [&quot;child 1&quot;, &quot;child 2&quot;, &quot;child 3&quot;])
+</code></pre>
+<p>And we also define it as a list of arguments (note that lack of square brackets)</p>
+<pre><code class="lang-javascript">m(&quot;div&quot;, {title: &quot;foo&quot;}, &quot;child 1&quot;, &quot;child 2&quot;, &quot;child 3&quot;)
+</code></pre>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>
