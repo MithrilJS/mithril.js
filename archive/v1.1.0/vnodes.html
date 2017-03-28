@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Virtual DOM nodes - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="virtual-dom-nodes">Virtual DOM nodes</h1>
+				<h1 id="virtual-dom-nodes"><a href="#virtual-dom-nodes">Virtual DOM nodes</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -68,7 +67,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="what-is-virtual-dom">What is virtual DOM</h3>
+<h3 id="what-is-virtual-dom"><a href="#what-is-virtual-dom">What is virtual DOM</a></h3>
 <p>A virtual DOM tree is a Javascript data structure that describes a DOM tree. It consists of nested virtual DOM nodes, also known as <em>vnodes</em>.</p>
 <p>The first time a virtual DOM tree is rendered, it is used as a blueprint to create a DOM tree that matches its structure.</p>
 <p>Typically, virtual DOM trees are then recreated every render cycle, which normally occurs in response to event handlers or to data changes. Mithril <em>diffs</em> a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.</p>
@@ -79,7 +78,7 @@
 <p>In contrast, HTML is a retained mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.</p>
 <p>Virtual DOM goes one step further than HTML by allowing you to write <em>dynamic</em> DOM trees without having to manually write multiple sets of DOM API calls to efficiently synchronize the UI to arbitrary data changes.</p>
 <hr>
-<h3 id="basics">Basics</h3>
+<h3 id="basics"><a href="#basics">Basics</a></h3>
 <p>Virtual DOM nodes, or <em>vnodes</em>, are javascript objects that represent DOM elements (or parts of the DOM). Mithril&#39;s virtual DOM engine consumes a tree of vnodes to produce a DOM tree.</p>
 <p>Vnodes are created via the <a href="hyperscript.html"><code>m()</code></a> hyperscript utility:</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {id: &quot;test&quot;}, &quot;hello&quot;)
@@ -99,7 +98,7 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 // &lt;div style=&quot;color:red;&quot;&gt;Hello world&lt;/div&gt;
 </code></pre>
 <hr>
-<h3 id="structure">Structure</h3>
+<h3 id="structure"><a href="#structure">Structure</a></h3>
 <p>Virtual DOM nodes, or <em>vnodes</em>, are Javascript objects that represent an element (or parts of the DOM) and have the following properties:</p>
 <table>
 <thead>
@@ -173,7 +172,7 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 </tbody>
 </table>
 <hr>
-<h3 id="vnode-types">Vnode types</h3>
+<h3 id="vnode-types"><a href="#vnode-types">Vnode types</a></h3>
 <p>The <code>tag</code> property of a vnode determines its type. There are five vnode types:</p>
 <table>
 <thead>
@@ -214,12 +213,12 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 <p>Everything in a virtual DOM tree is a vnode, including text. The <code>m()</code> utility automatically normalizes its <code>children</code> argument and turns strings into text vnodes and nested arrays into fragment vnodes.</p>
 <p>Only element tag names and components can be the first argument of the <code>m()</code> function. In other words, <code>[</code>, <code>#</code> and <code>&lt;</code> are not valid <code>selector</code> arguments for <code>m()</code>. Trusted HTML vnodes can be created via <a href="trust.html"><code>m.trust()</code></a></p>
 <hr>
-<h3 id="monomorphic-class">Monomorphic class</h3>
+<h3 id="monomorphic-class"><a href="#monomorphic-class">Monomorphic class</a></h3>
 <p>The <code>mithril/render/vnode</code> module is used by Mithril to generate all vnodes. This ensures modern Javascript engines can optimize virtual dom diffing by always compiling vnodes to the same hidden class.</p>
 <p>When creating libraries that emit vnodes, you should use this module instead of writing naked Javascript objects in order to ensure a high level of rendering performance.</p>
 <hr>
-<h3 id="avoid-anti-patterns">Avoid anti-patterns</h3>
-<h4 id="avoid-memoizing-mutable-vnodes">Avoid memoizing mutable vnodes</h4>
+<h3 id="avoid-anti-patterns"><a href="#avoid-anti-patterns">Avoid anti-patterns</a></h3>
+<h4 id="avoid-memoizing-mutable-vnodes"><a href="#avoid-memoizing-mutable-vnodes">Avoid memoizing mutable vnodes</a></h4>
 <p>Vnodes are supposed to represent the state of the DOM at a certain point in time. Mithril&#39;s rendering engine assumes a reused vnode is unchanged, so modifying a vnode that was used in a previous render will result in undefined behavior.</p>
 <p>It is possible to reuse vnodes to prevent a diff, but it&#39;s preferable to use the <code>onbeforeupdate</code> hook to make your intent clear to other developers (or your future self).</p>
 
@@ -227,7 +226,8 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

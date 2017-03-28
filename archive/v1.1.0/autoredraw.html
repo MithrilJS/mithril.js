@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> The auto-redraw system - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="the-auto-redraw-system">The auto-redraw system</h1>
+				<h1 id="the-auto-redraw-system"><a href="#the-auto-redraw-system">The auto-redraw system</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -62,7 +61,7 @@
 <p>Mithril implements a virtual DOM diffing system for fast rendering, and in addition, it offers various mechanisms to gain granular control over the rendering of an application.</p>
 <p>When used idiomatically, Mithril employs an auto-redraw system that synchronizes the DOM whenever changes are made in the data layer. The auto-redraw system becomes enabled when you call <code>m.mount</code> or <code>m.route</code> (but it stays disabled if your app is bootstrapped solely via <code>m.render</code> calls).</p>
 <p>The auto-redraw system simply consists of triggering a re-render function behind the scenes after certain functions complete.</p>
-<h3 id="after-event-handlers">After event handlers</h3>
+<h3 id="after-event-handlers"><a href="#after-event-handlers">After event handlers</a></h3>
 <p>Mithril automatically redraws after DOM event handlers that are defined in a Mithril view:</p>
 <pre><code class="lang-javascript">var MyComponent = {
     view: function() {
@@ -90,7 +89,7 @@ function doSomething(e) {
 
 m.mount(document.body, MyComponent)
 </code></pre>
-<h3 id="after-mrequest">After m.request</h3>
+<h3 id="after-mrequest"><a href="#after-mrequest">After m.request</a></h3>
 <p>Mithril automatically redraws after <a href="request.html"><code>m.request</code></a> completes:</p>
 <pre><code class="lang-javascript">m.request(&quot;/api/v1/users&quot;).then(function() {
     // a redraw happens after this function runs
@@ -101,7 +100,7 @@ m.mount(document.body, MyComponent)
     // does not trigger a redraw
 })
 </code></pre>
-<h3 id="after-route-changes">After route changes</h3>
+<h3 id="after-route-changes"><a href="#after-route-changes">After route changes</a></h3>
 <p>Mithril automatically redraws after <a href="route.html#mrouteset"><code>m.route.set()</code></a> calls (or route changes via links that use <a href="route.html#mroutelink"><code>m.route.link</code></a></p>
 <pre><code class="lang-javascript">var RoutedComponent = {
     view: function() {
@@ -122,7 +121,7 @@ m.route(document.body, &quot;/&quot;, {
 })
 </code></pre>
 <hr>
-<h3 id="when-mithril-does-not-redraw">When Mithril does not redraw</h3>
+<h3 id="when-mithril-does-not-redraw"><a href="#when-mithril-does-not-redraw">When Mithril does not redraw</a></h3>
 <p>Mithril does not redraw after <code>setTimeout</code>, <code>setInterval</code>, <code>requestAnimationFrame</code>, raw <code>Promise</code> resolutions and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call <a href="redraw.html"><code>m.redraw()</code></a>.</p>
 <p>Mithril also does not redraw after lifecycle methods. Parts of the UI may be redrawn after an <code>oninit</code> handler, but other parts of the UI may already have been redrawn when a given <code>oninit</code> handler fires. Handlers like <code>oncreate</code> and <code>onupdate</code> fire after the UI has been redrawn.</p>
 <p>If you need to explicitly trigger a redraw within a lifecycle method, you should call <code>m.redraw()</code>, which will trigger an asynchronous redraw.</p>
@@ -150,7 +149,8 @@ m.mount(document.body, MyComponent)
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

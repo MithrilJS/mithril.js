@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Promise(executor) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="promiseexecutor">Promise(executor)</h1>
+				<h1 id="promiseexecutor"><a href="#promiseexecutor">Promise(executor)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -76,11 +75,11 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>A <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise">ES6 Promise</a> polyfill.</p>
 <p>A Promise is a mechanism for working with asynchronous computations.</p>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>promise = new Promise(executor)</code></p>
 <table>
 <thead>
@@ -108,7 +107,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h5 id="executor">executor</h5>
+<h5 id="executor"><a href="#executor">executor</a></h5>
 <p><code>executor(resolve, reject)</code></p>
 <table>
 <thead>
@@ -142,8 +141,8 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h4 id="static-members">Static members</h4>
-<h5 id="promiseresolve">Promise.resolve</h5>
+<h4 id="static-members"><a href="#static-members">Static members</a></h4>
+<h5 id="promiseresolve"><a href="#promiseresolve">Promise.resolve</a></h5>
 <p><code>promise = Promise.resolve(value)</code></p>
 <table>
 <thead>
@@ -171,7 +170,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h5 id="promisereject">Promise.reject</h5>
+<h5 id="promisereject"><a href="#promisereject">Promise.reject</a></h5>
 <p><code>promise = Promise.reject(value)</code></p>
 <table>
 <thead>
@@ -199,7 +198,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h5 id="promiseall">Promise.all</h5>
+<h5 id="promiseall"><a href="#promiseall">Promise.all</a></h5>
 <p><code>promise = Promise.all(promises)</code></p>
 <table>
 <thead>
@@ -227,7 +226,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h5 id="promiserace">Promise.race</h5>
+<h5 id="promiserace"><a href="#promiserace">Promise.race</a></h5>
 <p><code>promise = Promise.race(promises)</code></p>
 <table>
 <thead>
@@ -255,8 +254,8 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h4 id="instance-members">Instance members</h4>
-<h5 id="promisethen">promise.then</h5>
+<h4 id="instance-members"><a href="#instance-members">Instance members</a></h4>
+<h5 id="promisethen"><a href="#promisethen">promise.then</a></h5>
 <p><code>nextPromise = promise.then(onFulfilled, onRejected)</code></p>
 <table>
 <thead>
@@ -290,7 +289,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h5 id="promisecatch">promise.catch</h5>
+<h5 id="promisecatch"><a href="#promisecatch">promise.catch</a></h5>
 <p><code>nextPromise = promise.catch(onRejected)</code></p>
 <table>
 <thead>
@@ -318,7 +317,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h3 id="how-it-works">How it works</h3>
+<h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
 <p>A Promise is an object that represents a value which may be available in the future</p>
 <pre><code class="lang-javascript">// this promise resolves after one second
 var promise = new Promise(function(resolve, reject) {
@@ -336,7 +335,7 @@ promise.then(function(value) {
 <p>Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the <code>return</code> statement of a function. Instead, they do their work in the background, allowing other Javascript code to run in the meantime. When they are done, they call a function with their results.</p>
 <p>The <code>m.request</code> function takes time to run because it makes an HTTP request to a remote server and has to wait for a response, which may take several milliseconds due to network latency.</p>
 <hr>
-<h3 id="promise-chaining">Promise chaining</h3>
+<h3 id="promise-chaining"><a href="#promise-chaining">Promise chaining</a></h3>
 <p>Promises can be chained. Returning a value from a <code>then</code> callback makes it available as the argument to the next <code>then</code> callback. This allows refactoring code into smaller functions</p>
 <pre><code class="lang-javascript">function getUsers() {return m.request(&quot;/api/v1/users&quot;)}
 
@@ -361,7 +360,7 @@ getUsers()
 <p>In the original code above, it&#39;s very difficult to test the god function since you must make an HTTP request to run the code, and there&#39;s an <code>alert()</code> call at the end of the function</p>
 <p>In the refactored version, it&#39;s trivial to test whether <code>getFirstTen</code> has any off-by-one errors, or whether we forgot to add a space between the first and last names in <code>getUserName</code>.</p>
 <hr>
-<h3 id="promise-absorption">Promise absorption</h3>
+<h3 id="promise-absorption"><a href="#promise-absorption">Promise absorption</a></h3>
 <p>Promises absorb other promises. Basically, this means you can never receive a Promise as an argument to <code>onFulfilled</code> or <code>onRejected</code> callbacks for <code>then</code> and <code>catch</code> methods. This feature allows us to flatten nested promises to make code more manageable.</p>
 <pre><code class="lang-javascript">function searchUsers(q) {return m.request(&quot;/api/v1/users/search&quot;, {data: {q: q}})}
 function getUserProjects(id) {return m.request(&quot;/api/v1/users/&quot; + id + &quot;/projects&quot;)}
@@ -387,7 +386,7 @@ searchUsers(&quot;John&quot;)
 </code></pre>
 <p>In the refactored code, <code>getFirstId</code> returns an id, which is passed as the first argument to <code>getUserProjects</code>. That, in turn, returns a promise that resolves to a list of projects. This promise is absorbed, so the first argument to <code>getProjectTitles</code> is not a promise, but the list of projects. <code>getProjectTitles</code> returns a list of titles, and that list is finally alerted.</p>
 <hr>
-<h3 id="error-handling">Error handling</h3>
+<h3 id="error-handling"><a href="#error-handling">Error handling</a></h3>
 <p>Promises can propagate errors to appropriate handlers.</p>
 <pre><code class="lang-javascript">searchUsers(&quot;John&quot;)
   .then(getFirstId)
@@ -403,7 +402,7 @@ searchUsers(&quot;John&quot;)
 <p>The error handler would also catch a null reference exception if <code>searchUsers</code> returned no results, and <code>getFirstId</code> attempted to access the <code>id</code> property of a non-existent array item.</p>
 <p>Thanks to these error propagation semantics, it&#39;s easy to keep each function small and testable without sprinkling <code>try</code>/<code>catch</code> blocks everywhere.</p>
 <hr>
-<h3 id="shorthands">Shorthands</h3>
+<h3 id="shorthands"><a href="#shorthands">Shorthands</a></h3>
 <p>Sometimes, you already have a value, but want to wrap it in a Promise. It&#39;s for this purpose that <code>Promise.resolve</code> and <code>Promise.reject</code> exist.</p>
 <pre><code class="lang-javascript">// suppose this list came from localStorage
 var users = [{id: 1, firstName: &quot;John&quot;, lastName: &quot;Doe&quot;}]
@@ -416,7 +415,7 @@ promise
   .then(alert)
 </code></pre>
 <hr>
-<h3 id="multiple-promises">Multiple promises</h3>
+<h3 id="multiple-promises"><a href="#multiple-promises">Multiple promises</a></h3>
 <p>In some occasions, you may need to make HTTP requests in parallel, and run code after all requests complete. This can be accomplished by <code>Promise.all</code></p>
 <pre><code class="lang-javascript">Promise.all([
   searchUsers(&quot;John&quot;),
@@ -437,7 +436,7 @@ promise
 <p>In the example above, there are two user searches happening in parallel. Once they both complete, we take the names of all the users and alert them.</p>
 <p>This example also illustrates another benefit of smaller functions: we reused the <code>getUserNames</code> function we had created above.</p>
 <hr>
-<h3 id="why-not-callbacks">Why not callbacks</h3>
+<h3 id="why-not-callbacks"><a href="#why-not-callbacks">Why not callbacks</a></h3>
 <p>Callbacks are another mechanism for working with asynchrounous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an <code>onscroll</code> event handler).</p>
 <p>However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).</p>
 <p>In addition, promises can considerably reduce boilerplate related to error handling.</p>
@@ -446,7 +445,8 @@ promise
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

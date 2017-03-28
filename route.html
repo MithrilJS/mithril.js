@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> route(root, defaultRoute, routes) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="routeroot,-defaultroute,-routes">route(root, defaultRoute, routes)</h1>
+				<h1 id="routeroot,-defaultroute,-routes"><a href="#routeroot,-defaultroute,-routes">route(root, defaultRoute, routes)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -87,7 +86,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Navigate between &quot;pages&quot; within an application</p>
 <pre><code class="lang-javascript">var Home = {
     view: function() {
@@ -101,7 +100,7 @@ m.route(document.body, &quot;/home&quot;, {
 </code></pre>
 <p>You can only have one <code>m.route</code> call per application.</p>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>m.route(root, defaultRoute, routes)</code></p>
 <table>
 <thead>
@@ -140,8 +139,8 @@ m.route(document.body, &quot;/home&quot;, {
 </tbody>
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
-<h4 id="static-members">Static members</h4>
-<h5 id="mrouteset">m.route.set</h5>
+<h4 id="static-members"><a href="#static-members">Static members</a></h4>
+<h5 id="mrouteset"><a href="#mrouteset">m.route.set</a></h5>
 <p>Redirects to a matching route, or to the default route if no matching routes can be found.</p>
 <p><code>m.route.set(path, data, options)</code></p>
 <table>
@@ -192,7 +191,7 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 </tbody>
 </table>
-<h5 id="mrouteget">m.route.get</h5>
+<h5 id="mrouteget"><a href="#mrouteget">m.route.get</a></h5>
 <p>Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is <a href="#code-splitting">pending resolution</a>.</p>
 <p><code>path = m.route.get()</code></p>
 <table>
@@ -213,7 +212,7 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 </tbody>
 </table>
-<h5 id="mrouteprefix">m.route.prefix</h5>
+<h5 id="mrouteprefix"><a href="#mrouteprefix">m.route.prefix</a></h5>
 <p>Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying <a href="#routing-strategies">strategy</a> used by the router.</p>
 <p><code>m.route.prefix(prefix)</code></p>
 <table>
@@ -240,7 +239,7 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 </tbody>
 </table>
-<h5 id="mroutelink">m.route.link</h5>
+<h5 id="mroutelink"><a href="#mroutelink">m.route.link</a></h5>
 <p>This function can be used as the <code>oncreate</code> (and <code>onupdate</code>) hook in a <code>m(&quot;a&quot;)</code> vnode:</p>
 <pre><code class="lang-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link})`.
 </code></pre>
@@ -273,7 +272,7 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 </tbody>
 </table>
-<h5 id="mrouteparam">m.route.param</h5>
+<h5 id="mrouteparam"><a href="#mrouteparam">m.route.param</a></h5>
 <p>Retrieves a route parameter. A route parameter is a key-value pair. Route parameters may come from a few different places:</p>
 <ul>
 <li>route interpolations (e.g. if a route is <code>/users/:id</code>, and it resolves to <code>/users/1</code>, the route parameter has a key <code>id</code> and value <code>&quot;1&quot;</code>)</li>
@@ -305,10 +304,10 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 </tbody>
 </table>
-<h4 id="routeresolver">RouteResolver</h4>
+<h4 id="routeresolver"><a href="#routeresolver">RouteResolver</a></h4>
 <p>A RouterResolver is an object that contains an <code>onmatch</code> method and/or a <code>render</code> method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the <code>m.route</code> call, whereas component definitions should be in their own modules.</p>
 <p><code>routeResolver = {onmatch, render}</code></p>
-<h5 id="routeresolveronmatch">routeResolver.onmatch</h5>
+<h5 id="routeresolveronmatch"><a href="#routeresolveronmatch">routeResolver.onmatch</a></h5>
 <p>The <code>onmatch</code> hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)</p>
 <p>This method also allows you to asynchronously define what component will be rendered, making it suitable for code splitting and asynchronous module loading. To render a component asynchronously return a promise that resolves to a component.</p>
 <p>For more information on <code>onmatch</code>, see the <a href="#advanced-component-resolution">advanced component resolution</a> section</p>
@@ -341,7 +340,7 @@ m.route(document.body, &quot;/home&quot;, {
 </table>
 <p>If <code>onmatch</code> returns a component or a promise that resolves to a component, this component is used as the <code>vnode.tag</code> for the first argument in the RouteResolver&#39;s <code>render</code> method. Otherwise, <code>vnode.tag</code> is set to <code>&quot;div&quot;</code>. Similarly, if the <code>onmatch</code> method is omitted, <code>vnode.tag</code> is also <code>&quot;div&quot;</code>.</p>
 <p>If <code>onmatch</code> returns a promise that gets rejected, the router redirects back to <code>defaultRoute</code>. You may override this behavior by calling <code>.catch</code> on the promise chain before returning it.</p>
-<h5 id="routeresolverrender">routeResolver.render</h5>
+<h5 id="routeresolverrender"><a href="#routeresolverrender">routeResolver.render</a></h5>
 <p>The <code>render</code> method is called on every redraw for a matching route. It is similar to the <code>view</code> method in components and it exists to simplify <a href="#wrapping-a-layout-component">component composition</a>.</p>
 <p><code>vnode = routeResolve.render(vnode)</code></p>
 <table>
@@ -371,11 +370,11 @@ m.route(document.body, &quot;/home&quot;, {
 </tbody>
 </table>
 <hr>
-<h4 id="how-it-works">How it works</h4>
+<h4 id="how-it-works"><a href="#how-it-works">How it works</a></h4>
 <p>Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a &quot;page&quot; to another without causing a full browser refresh.</p>
 <p>It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser&#39;s history mechanism.</p>
 <p>Routing without page refreshes is made partially possible by the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState("><code>history.pushState</code></a>_method) API. Using this API, it&#39;s possible to programmatically change the URL displayed by the browser after a page has loaded, but it&#39;s the application developer&#39;s responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.</p>
-<h4 id="routing-strategies">Routing strategies</h4>
+<h4 id="routing-strategies"><a href="#routing-strategies">Routing strategies</a></h4>
 <p>The routing strategy dictates how a library might actually implement routing. There are three general strategies that can be used to implement a SPA routing system, and each has different caveats:</p>
 <ul>
 <li>Using the <a href="https://en.wikipedia.org/wiki/Fragment_identifier">fragment identifier</a> (aka the hash) portion of the URL. A URL using this strategy typically looks like <code>http://localhost/#!/page1</code></li>
@@ -388,7 +387,7 @@ m.route(document.body, &quot;/home&quot;, {
 <p>Single page applications that use the hash strategy often use the convention of having an exclamation mark after the hash to indicate that they&#39;re using the hash as a routing mechanism and not for the purposes of linking to anchors. The <code>#!</code> string is known as a <em>hashbang</em>.</p>
 <p>The default strategy uses the hashbang.</p>
 <hr>
-<h3 id="typical-usage">Typical usage</h3>
+<h3 id="typical-usage"><a href="#typical-usage">Typical usage</a></h3>
 <p>Normally, you need to create a few <a href="components.html">components</a> to map routes to:</p>
 <pre><code class="lang-javascript">var Home = {
     view: function() {
@@ -426,12 +425,12 @@ var Page1 = {
 </code></pre>
 <p>Here we specify two routes: <code>/</code> and <code>/page1</code>, which render their respective components when the user navigates to each URL. By default, the SPA router prefix is <code>#!</code></p>
 <hr>
-<h3 id="navigating-to-different-routes">Navigating to different routes</h3>
+<h3 id="navigating-to-different-routes"><a href="#navigating-to-different-routes">Navigating to different routes</a></h3>
 <p>In the example above, the <code>Menu</code> component has two links. You can specify that their <code>href</code> attribute is a route URL (rather than being a regular link that navigates away from the current page), by adding the hook <code>{oncreate: m.route.link}</code></p>
 <p>You can also navigate programmatically, via <code>m.route.set(route)</code>. For example, <code>m.route.set(&quot;/page1&quot;)</code>.</p>
 <p>When navigating to routes, there&#39;s no need to explicitly specify the router prefix. In other words, don&#39;t add the hashbang <code>#!</code> in front of the route path when linking via <code>m.route.link</code> or redirecting.</p>
 <hr>
-<h3 id="routing-parameters">Routing parameters</h3>
+<h3 id="routing-parameters"><a href="#routing-parameters">Routing parameters</a></h3>
 <p>Sometimes we want to have a variable id or similar data appear in a route, but we don&#39;t want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:</p>
 <pre><code class="lang-javascript">var Edit = {
     view: function(vnode) {
@@ -447,7 +446,7 @@ m.route(document.body, &quot;/edit/1&quot;, {
 </code></pre>
 <p>In the example above, we defined a route <code>/edit/:id</code>. This creates a dynamic route that matches any URL that starts with <code>/edit/</code> and is followed by some data (e.g. <code>/edit/1</code>, <code>edit/234</code>, etc). The <code>id</code> value is then mapped as an attribute of the component&#39;s <a href="vnodes.html">vnode</a> (<code>vnode.attrs.id</code>)</p>
 <p>It&#39;s possible to have multiple arguments in a route, for example <code>/edit/:projectID/:userID</code> would yield the properties <code>projectID</code> and <code>userID</code> on the component&#39;s vnode attributes object.</p>
-<h4 id="key-parameter">Key parameter</h4>
+<h4 id="key-parameter"><a href="#key-parameter">Key parameter</a></h4>
 <p>When a user navigates from a parameterized route to the same route with a different parameter (e.g. going from <code>/page/1</code> to <code>/page/2</code> given a route <code>/page/:id</code>, the component would not be recreated from scratch since both routes resolve to the same component, and thus result in a virtual dom in-place diff. This has the side-effect of triggering the <code>onupdate</code> hook, rather than <code>oninit</code>/<code>oncreate</code>. However, it&#39;s relatively common for a developer to want to synchronize the recreation of the component to the route change event.</p>
 <p>To achieve that, it&#39;s possible to combine route parameterization with the virtual dom <a href="keys.html">key reconciliation</a> feature:</p>
 <pre><code class="lang-javascript">m.route(document.body, &quot;/edit/1&quot;, {
@@ -459,13 +458,13 @@ m.route(document.body, &quot;/edit/1&quot;, {
 <p><code>m.route.set(m.route.get(), {key: Date.now()})</code></p>
 <p>Or even use the <a href="#history-state"><code>history state</code></a> feature to achieve reloadable components without polluting the URL:</p>
 <p><code>m.route.set(m.route.get(), null, {state: {key: Date.now()}})</code></p>
-<h4 id="variadic-routes">Variadic routes</h4>
+<h4 id="variadic-routes"><a href="#variadic-routes">Variadic routes</a></h4>
 <p>It&#39;s also possible to have variadic routes, i.e. a route with an argument that contains URL pathnames that contain slashes:</p>
 <pre><code class="lang-javascript">m.route(document.body, &quot;/edit/pictures/image.jpg&quot;, {
     &quot;/files/:file...&quot;: Edit,
 })
 </code></pre>
-<h4 id="history-state">History state</h4>
+<h4 id="history-state"><a href="#history-state">History state</a></h4>
 <p>It&#39;s possible to take full advantage of the underlying <code>history.pushState</code> API to improve user&#39;s navigation experience. For example, an application could &quot;remember&quot; the state of a large form when the user leaves a page by navigating away, such that if the user pressed the back button in the browser, they&#39;d have the form filled rather than a blank form.</p>
 <p>For example, you could create a form like this:</p>
 <pre><code class="lang-javascript">var state = {
@@ -498,7 +497,7 @@ m.route(document.body, &quot;/&quot;, {
 </code></pre>
 <p>This way, if the user searches and presses the back button to return to the application, the input will still be populated with the search term. This technique can improve the user experience of large forms and other apps where non-persisted state is laborious for a user to produce.</p>
 <hr>
-<h3 id="changing-router-prefix">Changing router prefix</h3>
+<h3 id="changing-router-prefix"><a href="#changing-router-prefix">Changing router prefix</a></h3>
 <p>The router prefix is a fragment of the URL that dictates the underlying <a href="#routing-strategies">strategy</a> used by the router.</p>
 <pre><code class="lang-javascript">// set to pathname strategy
 m.route.prefix(&quot;&quot;)
@@ -514,7 +513,7 @@ m.route.prefix(&quot;#&quot;)
 m.route.prefix(&quot;/my-app&quot;)
 </code></pre>
 <hr>
-<h3 id="advanced-component-resolution">Advanced component resolution</h3>
+<h3 id="advanced-component-resolution"><a href="#advanced-component-resolution">Advanced component resolution</a></h3>
 <p>Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a <code>onmatch()</code> and/or a <code>render()</code> method. Both methods are optional but at least one of them must be present.</p>
 <pre><code class="lang-javascript">m.route(document.body, &quot;/&quot;, {
     &quot;/&quot;: {
@@ -529,7 +528,7 @@ m.route.prefix(&quot;/my-app&quot;)
 </code></pre>
 <p>RouteResolvers are useful for implementing a variety of advanced routing use cases.</p>
 <hr>
-<h4 id="wrapping-a-layout-component">Wrapping a layout component</h4>
+<h4 id="wrapping-a-layout-component"><a href="#wrapping-a-layout-component">Wrapping a layout component</a></h4>
 <p>It&#39;s often desirable to wrap all or most of the routed components in a reusable shell (often called a &quot;layout&quot;). In order to do that, you first need to create a component that contains the common markup that will wrap around the various different components:</p>
 <pre><code class="lang-javascript">var Layout = {
     view: function(vnode) {
@@ -599,7 +598,7 @@ m.route(document.body, &quot;/&quot;, {
 <p>Since <code>Anon1</code> and <code>Anon2</code> are different components, their subtrees (including <code>Layout</code>) are recreated from scratch. This is also what happens when components are used directly without a RouteResolver.</p>
 <p>In example 2, since <code>Layout</code> is the top-level component in both routes, the DOM for the <code>Layout</code> component is diffed (i.e. left intact if it has no changes), and only the change from <code>Home</code> to <code>Form</code> triggers a recreation of that subsection of the DOM.</p>
 <hr>
-<h4 id="authentication">Authentication</h4>
+<h4 id="authentication"><a href="#authentication">Authentication</a></h4>
 <p>The RouterResolver&#39;s <code>onmatch</code> hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the <code>/secret</code> page unless they login.</p>
 <pre><code class="lang-javascript">var isLoggedIn = false
 
@@ -670,7 +669,7 @@ m.route(document.body, &quot;/secret&quot;, {
 })
 </code></pre>
 <hr>
-<h4 id="preloading-data">Preloading data</h4>
+<h4 id="preloading-data"><a href="#preloading-data">Preloading data</a></h4>
 <p>Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).</p>
 <pre><code class="lang-javascript">var state = {
     users: [],
@@ -716,7 +715,7 @@ m.route(document.body, &quot;/user/list&quot;, {
 </code></pre>
 <p>Above, <code>render</code> only runs after the request completes, making the ternary operator redundant.</p>
 <hr>
-<h4 id="code-splitting">Code splitting</h4>
+<h4 id="code-splitting"><a href="#code-splitting">Code splitting</a></h4>
 <p>In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by returning a promise from the <code>onmatch</code> hook:</p>
 <p>At its most basic form, one could do the following:</p>
 <pre><code class="lang-javascript">// Home.js
@@ -766,7 +765,8 @@ m.route(document.body, &quot;/&quot;, {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

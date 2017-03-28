@@ -6,17 +6,10 @@ nav a {border-left:1px solid #ddd;padding:0 10px;}
 nav a:first-child {border:0;padding-left:0;}
 main {margin-bottom:100px;}
 main section {margin-left:270px;}
-h1 {font-size:24px;margin:0 0 15px;}
-h2 {font-size:22px;margin:45px 0 15px;}
-h3 {font-size:20px;margin:45px 0 15px;}
-h4 {font-size:18px;margin:30px 0 15px;}
-h5 {font-weight:bold;margin:15px 0 15px;}
-h1 img {transform:rotate(180deg);vertical-align:middle;width:20px;}
-h1 small {font-size:16px;}
 p {margin:0 0 15px;}
 pre,code {background:#eee;font-family:monospace;font-size:14px;}
-pre {border-left:3px solid #1e5799;overflow:auto;padding:10px 20px;}
-code {border:1px solid #ddd;display:inline-block;margin:0 0 1px;padding:3px;white-space:pre;}
+pre {border-left:3px solid #1e5799;overflow:auto;padding:10px 20px;margin:20px 0;}
+code {border:1px solid #ddd;display:inline-block;margin:0 0 1px;padding:5px 3px;white-space:pre;}
 pre code {border:0;margin:0;padding:0;}
 table {border-collapse:collapse;margin:0 0 30px;width:100%;}
 tbody tr:nth-child(odd) {background:#fafafa;}
@@ -28,6 +21,21 @@ a {color:#1e5799;text-decoration:none;}
 a:hover {text-decoration:underline;}
 hr {border:0;border-bottom:1px solid #ddd;margin:30px 0;}
 
+/* Headings */
+h1,h2,h3,h4,h5 {position:relative}
+h1 {font-size:24px;margin:0 0 15px;}
+h2 {font-size:22px;margin:45px 0 15px;}
+h3 {font-size:20px;margin:45px 0 15px;}
+h4 {font-size:18px;margin:30px 0 15px;}
+h5 {font-weight:bold;margin:15px 0 15px;}
+h1 img {transform:rotate(180deg);vertical-align:middle;width:20px;}
+h1 small {font-size:16px;}
+h2 a,h3 a,h4 a,h5 a,
+h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,
+h2 a:active,h3 a:active,h4 a:active,h5 a:active,
+h2 a:visited,h3 a:visited,h4 a:visited,h5 a:visited {color:#000;text-decoration:none;}
+h2::before,h3::before,h4::before,h5::before {content:"#";position:absolute;left:-20px;visibility:hidden;}
+h2:hover::before,h3:hover::before,h4:hover::before,h5:hover::before {visibility:visible;}
 #signature + p code {padding:3px 10px;}
 h1 + ul {margin:40px 0 0 -270px;padding:0;position:absolute;width:250px;}
 h1 + ul + hr {display:none;}
@@ -80,3 +88,10 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 	nav,h1 + ul {display:none;}
 	main section {margin:0;}
 }
+
+/* prism theming */
+.token.comment,.token.prolog,.token.doctype,.token.cdata {color:#888;}
+.token.property,.token.tag,.token.boolean,.token.number,.token.constant,.token.symbol {color:#905;}
+.token.selector,.token.attr-name,.token.string,.token.builtin {color:#690;}
+.token.atrule,.token.attr-value,.token.punctuation,.token.keyword {color:#1e5799;}
+.token.regex,.token.important {color:#e90;}

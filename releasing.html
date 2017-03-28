@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Releasing - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="releasing">Releasing</h1>
+				<h1 id="releasing"><a href="#releasing">Releasing</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -50,9 +49,10 @@
 </ul>
 </li>
 </ul>
-<p>Releasing new builds of mithril is mostly automated via <code>npm version</code></p>
-<h2 id="publishing-to-npm">Publishing to NPM</h2>
+<h2 id="publishing-to-npm"><a href="#publishing-to-npm">Publishing to NPM</a></h2>
+<p>Releasing new builds of mithril to NPM is mostly automated via <code>npm run release</code></p>
 <ol>
+<li>Update information in <code>docs/change-log.md</code> to match reality &amp; the new version that will be released</li>
 <li><code>npm run release &lt;major|minor|patch|semver&gt;</code></li>
 </ol>
 <p>All further steps are automated and run as follows:</p>
@@ -74,17 +74,29 @@
 <li>Travis sees that this commit has a tag associated with it</li>
 <li>Travis will use the encrypted npm creds in <code>.travis.yml</code> to publish a new version to npm</li>
 </ol>
-<h2 id="publishing-a-github-release">Publishing a GitHub release</h2>
+<h2 id="publishing-a-github-release"><a href="#publishing-a-github-release">Publishing a GitHub release</a></h2>
 <p>Happens automatically as part of the <a href="#publishing-to-npm">Publishing to NPM</a> process described above.</p>
-<p>Does require a manual description to be added though, as the auto-generated one isn&#39;t very interesting.</p>
-<h2 id="updating-docschange-logmd">Updating <code>docs/change-log.md</code></h2>
-<p><strong>TODO</strong></p>
+<p>Does require a manual description to be added though, as the auto-generated one isn&#39;t very interesting. I suggest coming up with a fun title &amp; then copying the <code>docs/change-log.md</code> entry for the build.</p>
+<h2 id="updating-docschange-logmd"><a href="#updating-docschange-logmd">Updating <code>docs/change-log.md</code></a></h2>
+<p>This is still a manual process, I&#39;m sorry.</p>
+<h2 id="updating-docs-outside-of-a-new-version"><a href="#updating-docs-outside-of-a-new-version">Updating docs (outside of a new version)</a></h2>
+<p>Fixes to documentation can land whenever, updates to the site are published via Travis.</p>
+<ol>
+<li><code>git co next</code></li>
+<li><code>git pull lhorie next</code></li>
+<li><code>git co master</code></li>
+<li><code>git co next -- ./docs</code></li>
+<li>Ensure that no new features are added</li>
+<li><code>git push lhorie</code></li>
+<li>After the Travis build completes new docs should appear in ~3 minutes</li>
+</ol>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

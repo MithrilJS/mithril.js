@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> request(options) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="requestoptions">request(options)</h1>
+				<h1 id="requestoptions"><a href="#requestoptions">request(options)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -68,7 +67,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Makes XHR (aka AJAX) requests, and returns a <a href="promise.html">promise</a></p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;PUT&quot;,
@@ -80,7 +79,7 @@
 })
 </code></pre>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>promise = m.request([url,] options)</code></p>
 <table>
 <thead>
@@ -198,7 +197,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h3 id="how-it-works">How it works</h3>
+<h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
 <p>The <code>m.request</code> utility is a thin wrapper around <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest"><code>XMLHttpRequest</code></a>, and allows making HTTP requests to remote servers in order to save and/or retrieve data from a database.</p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;GET&quot;,
@@ -211,7 +210,7 @@
 <p>A call to <code>m.request</code> return a <a href="promise.html">promise</a> and trigger a redraw upon completion of its promise chain.</p>
 <p>By default, <code>m.request</code> assumes the response is in JSON format and parses it into a Javascript object (or array).</p>
 <hr>
-<h3 id="typical-usage">Typical usage</h3>
+<h3 id="typical-usage"><a href="#typical-usage">Typical usage</a></h3>
 <p>Here&#39;s an illustrative example of a component that uses <code>m.request</code> to retrieve some data from a server.</p>
 <pre><code class="lang-javascript">var Data = {
     todos: {
@@ -244,7 +243,7 @@ m.route(document.body, &quot;/&quot;, {
 <p>Let&#39;s assume making a request to the server URL <code>/api/items</code> returns an array of objects in JSON format.</p>
 <p>When <code>m.route</code> is called at the bottom, the <code>Todos</code> component is initialized. <code>oninit</code> is called, which calls <code>m.request</code>. This retrieves an array of objects from the server asynchronously. &quot;Asynchronously&quot; means that Javascript continues running other code while it waits for the response from server. In this case, it means <code>fetch</code> returns, and the component is rendered using the original empty array as <code>Data.todos.list</code>. Once the request to the server completes, the array of objects <code>items</code> is assigned to <code>Data.todos.list</code> and the component is rendered again, yielding a list of <code>&lt;div&gt;</code>s containing the titles of each todo.</p>
 <hr>
-<h3 id="loading-icons-and-error-messages">Loading icons and error messages</h3>
+<h3 id="loading-icons-and-error-messages"><a href="#loading-icons-and-error-messages">Loading icons and error messages</a></h3>
 <p>Here&#39;s an expanded version of the example above that implements a loading indicator and an error message:</p>
 <pre><code class="lang-javascript">var Data = {
     todos: {
@@ -284,7 +283,7 @@ m.route(document.body, &quot;/&quot;, {
 </code></pre>
 <p>There are a few differences between this example and the one before. Here, <code>Data.todos.list</code> is <code>null</code> at the beginning. Also, there&#39;s an extra field <code>error</code> for holding an error message, and the view of the <code>Todos</code> component was modified to displays an error message if one exists, or display a loading icon if <code>Data.todos.list</code> is not an array.</p>
 <hr>
-<h3 id="dynamic-urls">Dynamic URLs</h3>
+<h3 id="dynamic-urls"><a href="#dynamic-urls">Dynamic URLs</a></h3>
 <p>Request URLs may contain interpolations:</p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;GET&quot;,
@@ -304,7 +303,7 @@ m.route(document.body, &quot;/&quot;, {
 </code></pre>
 <p>In the code above, the request becomes <code>GET /api/v1/users/foo:bar</code></p>
 <hr>
-<h3 id="aborting-requests">Aborting requests</h3>
+<h3 id="aborting-requests"><a href="#aborting-requests">Aborting requests</a></h3>
 <p>Sometimes, it is desirable to abort a request. For example, in an autocompleter/typeahead widget, you want to ensure that only the last request completes, because typically autocompleters fire several requests as the user types  and HTTP requests may complete out of order due to the unpredictable nature of networks. If another request finishes after the last fired request, the widget would display less relevant (or potentially wrong) data than if the last fired request finished last.</p>
 <p><code>m.request()</code> exposes its underlying <code>XMLHttpRequest</code> object via the <code>options.config</code> parameter, which allows you to save a reference to that object and call its <code>abort</code> method when required:</p>
 <pre><code class="lang-javascript">var searchXHR = null
@@ -324,7 +323,7 @@ function abortPreviousSearch() {
 }
 </code></pre>
 <hr>
-<h3 id="file-uploads">File uploads</h3>
+<h3 id="file-uploads"><a href="#file-uploads">File uploads</a></h3>
 <p>To upload files, first you need to get a reference to a <a href="https://developer.mozilla.org/en/docs/Web/API/File"><code>File</code></a> object. The easiest way to do that is from a <code>&lt;input type=&quot;file&quot;&gt;</code>.</p>
 <pre><code class="lang-javascript">m.render(document.body, [
     m(&quot;input[type=file]&quot;, {onchange: upload})
@@ -358,7 +357,7 @@ function upload(e) {
 }
 </code></pre>
 <p>Assuming the server is configured to accept multipart requests, the file information will be associated with the <code>myfile</code> key.</p>
-<h4 id="multiple-file-uploads">Multiple file uploads</h4>
+<h4 id="multiple-file-uploads"><a href="#multiple-file-uploads">Multiple file uploads</a></h4>
 <p>It&#39;s possible to upload multiple files in one request. Doing so will make the batch upload atomic, i.e. no files will be processed if there&#39;s an error during the upload, so it&#39;s not possible to have only part of the files saved. If you want to save as many files as possible in the event of a network failure, you should consider uploading each file in a separate request instead.</p>
 <p>To upload multiple files, simply append them all to the <code>FormData</code> object. When using a file input, you can get a list of files by adding the <code>multiple</code> attribute to the input:</p>
 <pre><code class="lang-javascript">m.render(document.body, [
@@ -381,7 +380,7 @@ function upload(e) {
 }
 </code></pre>
 <hr>
-<h3 id="monitoring-progress">Monitoring progress</h3>
+<h3 id="monitoring-progress"><a href="#monitoring-progress">Monitoring progress</a></h3>
 <p>Sometimes, if a request is inherently slow (e.g. a large file upload), it&#39;s desirable to display a progress indicator to the user to signal that the application is still working.</p>
 <p><code>m.request()</code> exposes its underlying <code>XMLHttpRequest</code> object via the <code>options.config</code> parameter, which allows you to attach event listeners to the XMLHttpRequest object:</p>
 <pre><code class="lang-javascript">var progress = 0
@@ -417,7 +416,7 @@ function upload(e) {
 </code></pre>
 <p>In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the <code>config</code> callback, a <code>progress</code> event handler is registered. This event handler is fired whenever there&#39;s a progress update in the XMLHttpRequest. Because the XMLHttpRequest&#39;s progress event is not directly handled by Mithril&#39;s virtual DOM engine, <code>m.redraw()</code> must be called to signal to Mithril that data has changed and a redraw is required.</p>
 <hr>
-<h3 id="casting-response-to-a-type">Casting response to a type</h3>
+<h3 id="casting-response-to-a-type"><a href="#casting-response-to-a-type">Casting response to a type</a></h3>
 <p>Depending on the overall application architecture, it may be desirable to transform the response data of a request to a specific class or type (for example, to uniformly parse date fields or to have helper methods).</p>
 <p>You can pass a constructor as the <code>options.type</code> parameter and Mithril will instantiate it for each object in the HTTP response.</p>
 <pre><code class="lang-javascript">function User(data) {
@@ -435,7 +434,7 @@ m.request({
 </code></pre>
 <p>In the example above, assuming <code>/api/v1/users</code> returns an array of objects, the <code>User</code> constructor will be instantiated (i.e. called as <code>new User(data)</code>) for each object in the array. If the response returned a single object, that object would be used as the <code>data</code> argument.</p>
 <hr>
-<h3 id="non-json-responses">Non-JSON responses</h3>
+<h3 id="non-json-responses"><a href="#non-json-responses">Non-JSON responses</a></h3>
 <p>Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril attempts to parse a response as if it was JSON. To override that behavior, define a custom <code>options.deserialize</code> function:</p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;GET&quot;,
@@ -477,7 +476,7 @@ function parseCSV(data) {
 })
 </code></pre>
 <hr>
-<h3 id="retrieving-response-details">Retrieving response details</h3>
+<h3 id="retrieving-response-details"><a href="#retrieving-response-details">Retrieving response details</a></h3>
 <p>By default Mithril attempts to parse a response as JSON and returns <code>xhr.responseText</code>. It may be useful to inspect a server response in more detail, this can be accomplished by passing a custom <code>options.extract</code> function:</p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;GET&quot;,
@@ -490,14 +489,14 @@ function parseCSV(data) {
 </code></pre>
 <p>The parameter to <code>options.extract</code> is the XMLHttpRequest object once its operation is completed, but before it has been passed to the returned promise chain, so the promise may still end up in an rejected state if processing throws an exception.</p>
 <hr>
-<h3 id="why-json-instead-of-html">Why JSON instead of HTML</h3>
+<h3 id="why-json-instead-of-html"><a href="#why-json-instead-of-html">Why JSON instead of HTML</a></h3>
 <p>Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.</p>
 <p>By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via Javascript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a <a href="https://en.wikipedia.org/wiki/Retained_mode">retained mode</a> UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.</p>
 <p>By default, <code>m.request</code> expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.</p>
 <p>You should avoid trying to render server-generated dynamic HTML with Mithril. If you have an existing application that does use a server-side templating system, and you wish to re-architecture it, first decide whether the effort is feasible at all to begin with. Migrating from a thick server architecture to a thick client architecture is typically a somewhat large effort, and involves refactoring logic out of templates into logical data services (and the testing that goes with it).</p>
 <p>Data services may be organized in many different ways depending on the nature of the application. <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a> architectures are popular with API providers, and <a href="https://en.wikipedia.org/wiki/Service-oriented_architecture">service oriented architectures</a> are often required where there are lots of highly transactional workflows.</p>
 <hr>
-<h3 id="why-xhr-instead-of-fetch">Why XHR instead of fetch</h3>
+<h3 id="why-xhr-instead-of-fetch"><a href="#why-xhr-instead-of-fetch">Why XHR instead of fetch</a></h3>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API"><code>fetch()</code></a> is a newer Web API for fetching resources from servers, similar to <code>XMLHttpRequest</code>.</p>
 <p>Mithril&#39;s <code>m.request</code> uses <code>XMLHttpRequest</code> instead of <code>fetch()</code> for a number of reasons:</p>
 <ul>
@@ -516,8 +515,8 @@ function parseCSV(data) {
 </ul>
 <p>In typical scenarios, streaming won&#39;t provide noticeable performance benefits because it&#39;s generally not advisable to download megabytes of data to begin with. Also, the memory gains from repeatedly reusing small buffers may be offset or nullified if they result in excessive browser repaints. For those reasons, choosing <code>fetch()</code> streaming instead of <code>m.request</code> is only recommended for extremely resource intensive applications.</p>
 <hr>
-<h3 id="avoid-anti-patterns">Avoid anti-patterns</h3>
-<h4 id="promises-are-not-the-response-data">Promises are not the response data</h4>
+<h3 id="avoid-anti-patterns"><a href="#avoid-anti-patterns">Avoid anti-patterns</a></h3>
+<h4 id="promises-are-not-the-response-data"><a href="#promises-are-not-the-response-data">Promises are not the response data</a></h4>
 <p>The <code>m.request</code> method returns a <a href="promise.html">Promise</a>, not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if Javascript waited for it, it would freeze the application until the data was available.</p>
 <pre><code class="lang-javascript">// AVOID
 var users = m.request(&quot;/api/v1/users&quot;)
@@ -534,7 +533,8 @@ m.request(&quot;/api/v1/users&quot;).then(function(users) {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

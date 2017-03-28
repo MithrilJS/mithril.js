@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> CSS - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="css">CSS</h1>
+				<h1 id="css"><a href="#css">CSS</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -65,7 +64,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="vanilla-css">Vanilla CSS</h3>
+<h3 id="vanilla-css"><a href="#vanilla-css">Vanilla CSS</a></h3>
 <p>For various reasons, CSS has a bad reputation and often developers reach for complex tools in an attempt to make styling more manageable. In this section, we&#39;ll take a step back and cover some tips on writing plain CSS:</p>
 <ul>
 <li><p><strong>Avoid using the space operator</strong> - The vast majority of CSS maintainability issues are due to CSS specificity issues. The space operator defines a descendant (e.g. <code>.a .b</code>) and at the same time, it increases the level of specificity for the CSS rules that apply to that selector, sometimes overriding styles unexpectedly.</p>
@@ -111,7 +110,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="tachyons">Tachyons</h3>
+<h3 id="tachyons"><a href="#tachyons">Tachyons</a></h3>
 <p><a href="https://github.com/tachyons-css/tachyons">Tachyons</a> is a CSS framework, but the concept behind it can easily be used without the library itself.</p>
 <p>The basic idea is that every class name must declare one and only one CSS rule. For example, <code>bw1</code> stands for <code>border-width:1px;</code>. To create a complex style, one simply combines class names representing each of the required CSS rules. For example, <code>.black.bg-dark-blue.br2</code> styles an element with blue background, black text and a 4px border-radius.</p>
 <p>Since each class is small and atomic, it&#39;s essentially impossible to run into CSS conflicts.</p>
@@ -122,7 +121,7 @@ m.mount(document.body, &lt;Hero&gt;Hello&lt;/Hero&gt;)
 // equivalent to `m(&quot;.black.bg-dark.br2.pa3&quot;, &quot;Hello&quot;)`
 </code></pre>
 <hr>
-<h3 id="css-in-js">CSS in JS</h3>
+<h3 id="css-in-js"><a href="#css-in-js">CSS in JS</a></h3>
 <p>In plain CSS, all selectors live in the global scope and are prone to name collisions and specificity conflicts. CSS-in-JS aims to solve the issue of scoping in CSS, i.e. it groups related styles into non-global modules that are invisible to each other. CSS-in-JS is suitable for extremely large dev teams working on a single codebase, but it&#39;s not a good choice for most teams.</p>
 <p>Nowadays there are <a href="https://github.com/MicheleBertoli/css-in-js">a lot of CSS-in-JS libraries with various degrees of robustness</a>. </p>
 <p>The main problem with many of these libraries is that even though they require a non-trivial amount of transpiler tooling and configuration, they also require sacrificing code readability in order to work, e.g. <code>&lt;a class={classnames(styles.button, styles.danger)}&gt;&lt;/a&gt;</code> vs <code>&lt;a class=&quot;button danger&quot;&gt;&lt;/a&gt;</code> (or <code>m(&quot;a.button.danger&quot;)</code> if we&#39;re using hyperscript).</p>
@@ -134,7 +133,8 @@ m.mount(document.body, &lt;Hero&gt;Hello&lt;/Hero&gt;)
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

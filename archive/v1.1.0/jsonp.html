@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> jsonp(options) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="jsonpoptions">jsonp(options)</h1>
+				<h1 id="jsonpoptions"><a href="#jsonpoptions">jsonp(options)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -57,7 +56,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Makes JSON-P requests. Typically, it&#39;s useful to interact with servers that allow JSON-P but that don&#39;t have CORS enabled.</p>
 <pre><code class="lang-javascript">m.jsonp({
     url: &quot;/api/v1/users/:id&quot;,
@@ -69,7 +68,7 @@
 })
 </code></pre>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>promise = m.jsonp([url,] options)</code></p>
 <table>
 <thead>
@@ -133,12 +132,12 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h4 id="how-it-works">How it works</h4>
+<h4 id="how-it-works"><a href="#how-it-works">How it works</a></h4>
 <p>The <code>m.jsonp</code> utility is useful for third party APIs that can return data in <a href="https://en.wikipedia.org/wiki/JSONP">JSON-P</a> format.</p>
 <p>In a nutshell, JSON-P consists of creating a <code>script</code> tag whose <code>src</code> attribute points to a script that lives in the server outside of your control. Typically, you are required to define a global function and specify its name in the querystring of the script&#39;s URL. The response will return code that calls your global function, passing the server&#39;s data as the first parameter.</p>
 <p>JSON-P has several limitations: it can only use GET requests, it implicitly trusts that the third party server won&#39;t serve malicious code and it requires polluting the global Javascript scope. Nonetheless, it is sometimes the only available way to retrieve data from a service (for example, if the service doesn&#39;t support <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>).</p>
 <hr>
-<h3 id="typical-usage">Typical usage</h3>
+<h3 id="typical-usage"><a href="#typical-usage">Typical usage</a></h3>
 <p>Some services follow the de-facto convention of responding with JSON-P if a <code>callback</code> querystring key is provided, thus making <code>m.jsonp</code> automatically work without any effort:</p>
 <pre><code class="lang-javascript">m.jsonp({url: &quot;https://api.github.com/users/lhorie&quot;}).then(function(response) {
     console.log(response.data.login) // logs &quot;lhorie&quot;
@@ -168,7 +167,8 @@ m.jsonp({
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

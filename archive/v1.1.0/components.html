@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Components - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="components">Components</h1>
+				<h1 id="components"><a href="#components">Components</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -44,9 +43,9 @@
 <li><strong><a href="components.html">Components</a></strong><ul>
 <li><a href="#structure">Structure</a></li>
 <li><a href="#lifecycle-methods">Lifecycle methods</a></li>
+<li><a href="#syntactic-variants">Syntactic variants</a></li>
 <li><a href="#state">State</a></li>
-<li><a href="#es6-classes">ES6 classes</a></li>
-<li><a href="#avoid-anti-patterns">Avoid-anti-patterns</a></li>
+<li><a href="#avoid-anti-patterns">Avoid anti-patterns</a></li>
 </ul>
 </li>
 <li><a href="lifecycle-methods.html">Lifecycle methods</a></li>
@@ -66,7 +65,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="structure">Structure</h3>
+<h3 id="structure"><a href="#structure">Structure</a></h3>
 <p>Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.</p>
 <p>Any Javascript object that has a view method is a Mithril component. Components can be consumed via the <a href="hyperscript.html"><code>m()</code></a> utility:</p>
 <pre><code class="lang-javascript">var Example = {
@@ -81,7 +80,7 @@ m(Example)
 // &lt;div&gt;Hello&lt;/div&gt;
 </code></pre>
 <hr>
-<h3 id="passing-data-to-components">Passing data to components</h3>
+<h3 id="passing-data-to-components"><a href="#passing-data-to-components">Passing data to components</a></h3>
 <p>Data can be passed to component instances by passing an <code>attrs</code> object as the second parameter in the hyperscript function:</p>
 <pre><code class="lang-javascript">m(Example, {name: &quot;Floyd&quot;})
 </code></pre>
@@ -94,7 +93,7 @@ m(Example)
 </code></pre>
 <p>NOTE: Lifecycle methods can also be provided via the <code>attrs</code> object, so you should avoid using the lifecycle method names for your own callbacks as they would also be invoked by Mithril. Use lifecycle methods in <code>attrs</code> only when you specifically wish to create lifecycle hooks.</p>
 <hr>
-<h3 id="lifecycle-methods">Lifecycle methods</h3>
+<h3 id="lifecycle-methods"><a href="#lifecycle-methods">Lifecycle methods</a></h3>
 <p>Components can have the same <a href="lifecycle-methods.html">lifecycle methods</a> as virtual DOM nodes: <code>oninit</code>, <code>oncreate</code>, <code>onupdate</code>, <code>onbeforeremove</code>, <code>onremove</code> and <code>onbeforeupdate</code>.</p>
 <pre><code class="lang-javascript">var ComponentWithHooks = {
     oninit: function(vnode) {
@@ -135,8 +134,8 @@ m(ComponentWithHooks, {oninit: initialize})
 <p>Take care not to use lifecycle method names for your own callback function names in vnodes.</p>
 <p>To learn more about lifecycle methods, <a href="lifecycle-methods.html">see the lifecycle methods page</a>.</p>
 <hr>
-<h3 id="alternate-component-syntaxes">Alternate component syntaxes</h3>
-<h4 id="es6-classes">ES6 classes</h4>
+<h3 id="syntactic-variants"><a href="#syntactic-variants">Syntactic variants</a></h3>
+<h4 id="es6-classes"><a href="#es6-classes">ES6 classes</a></h4>
 <p>Components can also be written using ES6 class syntax:</p>
 <pre><code class="lang-javascript">class ES6ClassComponent {
     constructor(vnode) {
@@ -173,7 +172,7 @@ class AnotherES6ClassComponent {
     }
 }
 </code></pre>
-<h4 id="closure-components">Closure components</h4>
+<h4 id="closure-components"><a href="#closure-components">Closure components</a></h4>
 <p>Functionally minded developers may prefer using the &quot;closure component&quot; syntax:</p>
 <pre><code class="lang-javascript">function closureComponent(vnode) {
     // vnode.state is undefined at this point
@@ -213,13 +212,13 @@ function anotherClosureComponent() {
     }
 }
 </code></pre>
-<h4 id="mixing-component-kinds">Mixing component kinds</h4>
+<h4 id="mixing-component-kinds"><a href="#mixing-component-kinds">Mixing component kinds</a></h4>
 <p>Components can be freely mixed. A Class component can have closure or POJO components as children, etc...</p>
 <hr>
-<h3 id="state">State</h3>
+<h3 id="state"><a href="#state">State</a></h3>
 <p>Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.</p>
 <p>The state of a component can be accessed three ways: as a blueprint at initialization, via <code>vnode.state</code> and via the <code>this</code> keyword in component methods.</p>
-<h4 id="at-initialization">At initialization</h4>
+<h4 id="at-initialization"><a href="#at-initialization">At initialization</a></h4>
 <p>For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of <code>vnode.state</code>. This allows simple state initialization.</p>
 <p>In the example below, <code>data</code> is a property of the <code>ComponentWithInitialState</code> component&#39;s state object.</p>
 <pre><code class="lang-javascript">var ComponentWithInitialState = {
@@ -236,7 +235,7 @@ m(ComponentWithInitialState)
 </code></pre>
 <p>For class components, the state is an instance of the class, set right after the constructor is called.</p>
 <p>For closure components, the state is the object returned by the closure, set right after the closure returns. The state object is mostly redundant for closure components (since variables defined in the closure scope can be used instead).</p>
-<h4 id="via-vnodestate">Via vnode.state</h4>
+<h4 id="via-vnodestate"><a href="#via-vnodestate">Via vnode.state</a></h4>
 <p>State can also be accessed via the <code>vnode.state</code> property, which is available to all lifecycle methods as well as the <code>view</code> method of a component.</p>
 <pre><code class="lang-javascript">var ComponentWithDynamicState = {
     oninit: function(vnode) {
@@ -252,7 +251,7 @@ m(ComponentWithDynamicState, {text: &quot;Hello&quot;})
 // Equivalent HTML
 // &lt;div&gt;Hello&lt;/div&gt;
 </code></pre>
-<h4 id="via-the-this-keyword">Via the this keyword</h4>
+<h4 id="via-the-this-keyword"><a href="#via-the-this-keyword">Via the this keyword</a></h4>
 <p>State can also be accessed via the <code>this</code> keyword, which is available to all lifecycle methods as well as the <code>view</code> method of a component.</p>
 <pre><code class="lang-javascript">var ComponentUsingThis = {
     oninit: function(vnode) {
@@ -270,9 +269,9 @@ m(ComponentUsingThis, {text: &quot;Hello&quot;})
 </code></pre>
 <p>Be aware that when using ES5 functions, the value of <code>this</code> in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use <code>vnode.state</code>.</p>
 <hr>
-<h3 id="avoid-anti-patterns">Avoid anti-patterns</h3>
+<h3 id="avoid-anti-patterns"><a href="#avoid-anti-patterns">Avoid anti-patterns</a></h3>
 <p>Although Mithril is flexible, some code patterns are discouraged:</p>
-<h4 id="avoid-fat-components">Avoid fat components</h4>
+<h4 id="avoid-fat-components"><a href="#avoid-fat-components">Avoid fat components</a></h4>
 <p>Generally speaking, a &quot;fat&quot; component is a component that has custom instance methods. In other words, you should avoid attaching functions to <code>vnode.state</code> or <code>this</code>. It&#39;s exceedingly rare to have logic that logically fits in a component instance method and that can&#39;t be reused by other components. It&#39;s relatively common that said logic might be needed by a different component down the road.</p>
 <p>It&#39;s easier to refactor code if that logic is placed in the data layer than if it&#39;s tied to a component state.</p>
 <p>Consider this fat component:</p>
@@ -339,7 +338,7 @@ var Login = {
 </code></pre>
 <p>This way, the <code>Auth</code> module is now the source of truth for auth-related state, and a <code>Register</code> component can easily access this data, and even reuse methods like <code>canSubmit</code>, if needed. In addition, if validation code is required (for example, for the email field), you only need to modify <code>setEmail</code>, and that change will do email validation for any component that modifies an email field.</p>
 <p>As a bonus, notice that we no longer need to use <code>.bind</code> to keep a reference to the state for the component&#39;s event handlers.</p>
-<h4 id="avoid-restrictive-interfaces">Avoid restrictive interfaces</h4>
+<h4 id="avoid-restrictive-interfaces"><a href="#avoid-restrictive-interfaces">Avoid restrictive interfaces</a></h4>
 <p>Try to keep component interfaces generic - using <code>attrs</code> and <code>children</code> directly - unless the component requires special logic to operate on input.</p>
 <p>In the example below, the <code>button</code> configuration is severely limited: it does not support any events other than <code>onclick</code>, it&#39;s not styleable and it only accepts text as children (but not elements, fragments or trusted HTML).</p>
 <pre><code class="lang-javascript">// AVOID
@@ -361,7 +360,7 @@ var FlexibleComponent = {
     }
 }
 </code></pre>
-<h4 id="don&#39;t-manipulate-children">Don&#39;t manipulate <code>children</code></h4>
+<h4 id="don&#39;t-manipulate-children"><a href="#don&#39;t-manipulate-children">Don&#39;t manipulate <code>children</code></a></h4>
 <p>If a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.</p>
 <p>Often it&#39;s desirable to define multiple sets of children, for example, if a component has a configurable title and body.</p>
 <p>Avoid destructuring the <code>children</code> property for this purpose.</p>
@@ -414,8 +413,8 @@ m(BetterHeader, {
     tagline: m(&quot;h2&quot;, &quot;Lorem ipsum&quot;),
 })
 </code></pre>
-<h4 id="define-components-statically,-call-them-dynamically">Define components statically, call them dynamically</h4>
-<h5 id="avoid-creating-component-definitions-inside-views">Avoid creating component definitions inside views</h5>
+<h4 id="define-components-statically,-call-them-dynamically"><a href="#define-components-statically,-call-them-dynamically">Define components statically, call them dynamically</a></h4>
+<h5 id="avoid-creating-component-definitions-inside-views"><a href="#avoid-creating-component-definitions-inside-views">Avoid creating component definitions inside views</a></h5>
 <p>If you create a component from within a <code>view</code> method (either directly inline or by calling a function that does so), each redraw will have a different clone of the component. When diffing component vnodes, if the component referenced by the new vnode is not strictly equal to the one referenced by the old component, the two are assumed to be different components even if they ultimately run equivalent code. This means components created dynamically via a factory will always be re-created from scratch.</p>
 <p>For that reason you should avoid recreating components. Instead, consume components idiomatically.</p>
 <pre><code class="lang-javascript">// AVOID
@@ -441,7 +440,7 @@ m.render(document.body, m(Component, {greeting: &quot;hello&quot;}))
 // calling a second time does not modify DOM
 m.render(document.body, m(Component, {greeting: &quot;hello&quot;}))
 </code></pre>
-<h5 id="avoid-creating-component-instances-outside-views">Avoid creating component instances outside views</h5>
+<h5 id="avoid-creating-component-instances-outside-views"><a href="#avoid-creating-component-instances-outside-views">Avoid creating component instances outside views</a></h5>
 <p>Conversely, for similar reasons, if a component instance is created outside of a view, future redraws will perform an equality check on the node and skip it. Therefore component instances should always be created inside views:</p>
 <pre><code class="lang-javascript">// AVOID
 var Counter = {
@@ -501,7 +500,8 @@ m.mount(document.body, {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

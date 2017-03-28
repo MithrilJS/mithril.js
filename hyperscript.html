@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> m(selector, attributes, children) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="mselector,-attributes,-children">m(selector, attributes, children)</h1>
+				<h1 id="mselector,-attributes,-children"><a href="#mselector,-attributes,-children">m(selector, attributes, children)</a></h1>
 <ul>
 <li>Core<ul>
 <li><strong><a href="hyperscript.html">m</a></strong><ul>
@@ -69,7 +68,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Represents an HTML element in a Mithril view</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {class: &quot;foo&quot;}, &quot;hello&quot;)
 // represents &lt;div class=&quot;foo&quot;&gt;hello&lt;/div&gt;
@@ -79,7 +78,7 @@
 &lt;div class=&quot;foo&quot;&gt;hello&lt;/div&gt;
 </code></pre>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>vnode = m(selector, attributes, children)</code></p>
 <table>
 <thead>
@@ -119,7 +118,7 @@
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h3 id="how-it-works">How it works</h3>
+<h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
 <p>Mithril provides a hyperscript function <code>m()</code>, which allows expressing any HTML structure using javascript syntax. It accepts a <code>selector</code> string (required), an <code>attributes</code> object (optional) and a <code>children</code> array (optional).</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {id: &quot;box&quot;}, &quot;hello&quot;)
 
@@ -135,7 +134,7 @@ var vnode = {tag: &quot;div&quot;, attrs: {id: &quot;box&quot;}, children: [ /*.
 </code></pre>
 <p>Calling <code>m.render()</code> multiple times does <strong>not</strong> recreate the DOM tree from scratch each time. Instead, each call will only make a change to a DOM tree if it is absolutely necessary to reflect the virtual DOM tree passed into the call. This behavior is desirable because recreating the DOM from scratch is very expensive, and causes issues such as loss of input focus, among other things. By contrast, updating the DOM only where necessary is comparatively much faster and makes it easier to maintain complex UIs that handle multiple user stories.</p>
 <hr>
-<h3 id="flexibility">Flexibility</h3>
+<h3 id="flexibility"><a href="#flexibility">Flexibility</a></h3>
 <p>The <code>m()</code> function is both <em>polymorphic</em> and <em>variadic</em>. In other words, it&#39;s very flexible in what it expects as input parameters:</p>
 <pre><code class="lang-javascript">// simple tag
 m(&quot;div&quot;) // &lt;div&gt;&lt;/div&gt;
@@ -157,7 +156,7 @@ m(&quot;ul&quot;,               // &lt;ul&gt;
 )                     // &lt;/ul&gt;
 </code></pre>
 <hr>
-<h3 id="css-selectors">CSS selectors</h3>
+<h3 id="css-selectors"><a href="#css-selectors">CSS selectors</a></h3>
 <p>The first argument of <code>m()</code> can be any CSS selector that can describe an HTML element. It accepts any valid CSS combinations of <code>#</code> (id), <code>.</code> (class) and <code>[]</code> (attribute) syntax.</p>
 <pre><code class="lang-javascript">m(&quot;div#hello&quot;)
 // &lt;div id=&quot;hello&quot;&gt;&lt;/div&gt;
@@ -186,7 +185,7 @@ m(&quot;a.link[href=/]&quot;, {
 </code></pre>
 <p>If there are class names in both first and second arguments of <code>m()</code>, they are merged together as you would expect.</p>
 <hr>
-<h3 id="dom-attributes">DOM attributes</h3>
+<h3 id="dom-attributes"><a href="#dom-attributes">DOM attributes</a></h3>
 <p>Mithril uses both the Javascript API and the DOM API (<code>setAttribute</code>) to resolve attributes. This means you can use both syntaxes to refer to attributes.</p>
 <p>For example, in the Javascript API, the <code>readonly</code> attribute is called <code>element.readOnly</code> (notice the uppercase). In Mithril, all of the following are supported:</p>
 <pre><code class="lang-javascript">m(&quot;input&quot;, {readonly: true}) // lowercase
@@ -195,7 +194,7 @@ m(&quot;input[readonly]&quot;)
 m(&quot;input[readOnly]&quot;)
 </code></pre>
 <hr>
-<h3 id="style-attribute">Style attribute</h3>
+<h3 id="style-attribute"><a href="#style-attribute">Style attribute</a></h3>
 <p>Mithril supports both strings and objects as valid <code>style</code> values. In other words, all of the following are supported:</p>
 <pre><code class="lang-javascript">m(&quot;div&quot;, {style: &quot;background:red;&quot;})
 m(&quot;div&quot;, {style: {background: &quot;red&quot;}})
@@ -204,7 +203,7 @@ m(&quot;div[style=background:red]&quot;)
 <p>Using a string as a <code>style</code> would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.</p>
 <p>Mithril does not attempt to add units to number values.</p>
 <hr>
-<h3 id="events">Events</h3>
+<h3 id="events"><a href="#events">Events</a></h3>
 <p>Mithril supports event handler binding for all DOM events, including events whose specs do not define an <code>on${event}</code> property, such as <code>touchstart</code></p>
 <pre><code class="lang-javascript">function doSomething(e) {
     console.log(e)
@@ -213,7 +212,7 @@ m(&quot;div[style=background:red]&quot;)
 m(&quot;div&quot;, {onclick: doSomething})
 </code></pre>
 <hr>
-<h3 id="properties">Properties</h3>
+<h3 id="properties"><a href="#properties">Properties</a></h3>
 <p>Mithril supports DOM functionality that is accessible via properties such as <code>&lt;select&gt;</code>&#39;s <code>selectedIndex</code> and <code>value</code> properties.</p>
 <pre><code class="lang-javascript">m(&quot;select&quot;, {selectedIndex: 0}, [
     m(&quot;option&quot;, &quot;Option A&quot;),
@@ -221,7 +220,7 @@ m(&quot;div&quot;, {onclick: doSomething})
 ])
 </code></pre>
 <hr>
-<h3 id="components">Components</h3>
+<h3 id="components"><a href="#components">Components</a></h3>
 <p><a href="components.html">Components</a> allow you to encapsulate logic into a unit and use it as if it was an element. They are the base for making large, scalable applications.</p>
 <p>A component is any Javascript object that contains a <code>view</code> method. To consume a component, pass the component as the first argument to <code>m()</code> instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.</p>
 <pre><code class="lang-javascript">// define a component
@@ -239,7 +238,7 @@ m(Greeter, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 </code></pre>
 <p>To learn more about components, <a href="components.html">see the components page</a>.</p>
 <hr>
-<h3 id="lifecycle-methods">Lifecycle methods</h3>
+<h3 id="lifecycle-methods"><a href="#lifecycle-methods">Lifecycle methods</a></h3>
 <p>Vnodes and components can have lifecycle methods (also known as <em>hooks</em>), which are called at various points during the lifetime of a DOM element. The lifecycle methods supported by Mithril are: <code>oninit</code>, <code>oncreate</code>, <code>onupdate</code>, <code>onbeforeremove</code>, <code>onremove</code>, and <code>onbeforeupdate</code>.</p>
 <p>Lifecycle methods are defined in the same way as DOM event handlers, but receive the vnode as an argument, instead of an Event object:</p>
 <pre><code class="lang-javascript">function initialize(vnode) {
@@ -284,7 +283,7 @@ m(&quot;div&quot;, {oninit: initialize})
 </table>
 <p>To learn more about lifecycle methods, <a href="lifecycle-methods.html">see the lifecycle methods page</a>.</p>
 <hr>
-<h3 id="keys">Keys</h3>
+<h3 id="keys"><a href="#keys">Keys</a></h3>
 <p>Vnodes in a list can have a special attribute called <code>key</code>, which can be used to manage the identity of the DOM element as the model data that generates the vnode list changes.</p>
 <p>Typically, <code>key</code> should be the unique identifier field of the objects in the data array.</p>
 <pre><code class="lang-javascript">var users = [
@@ -303,7 +302,7 @@ m.render(document.body, userInputs(users))
 <p>Having a key means that if the <code>users</code> array is shuffled and the view is re-rendered, the inputs will be shuffled in the exact same order, so as to maintain correct focus and DOM state.</p>
 <p>To learn more about keys, <a href="keys.html">see the keys page</a></p>
 <hr>
-<h3 id="svg-and-mathml">SVG and MathML</h3>
+<h3 id="svg-and-mathml"><a href="#svg-and-mathml">SVG and MathML</a></h3>
 <p>Mithril fully supports SVG. Xlink is also supported, but unlike in pre-v1.0 versions of Mithril, must have the namespace explicitly defined:</p>
 <pre><code class="lang-javascript">m(&quot;svg&quot;, [
     m(&quot;image[xlink:href=&#39;image.gif&#39;]&quot;)
@@ -311,14 +310,14 @@ m.render(document.body, userInputs(users))
 </code></pre>
 <p>MathML is also fully supported.</p>
 <hr>
-<h3 id="making-templates-dynamic">Making templates dynamic</h3>
+<h3 id="making-templates-dynamic"><a href="#making-templates-dynamic">Making templates dynamic</a></h3>
 <p>Since nested vnodes are just plain Javascript expressions, you can simply use Javascript facilities to manipulate them</p>
-<h4 id="dynamic-text">Dynamic text</h4>
+<h4 id="dynamic-text"><a href="#dynamic-text">Dynamic text</a></h4>
 <pre><code class="lang-javascript">var user = {name: &quot;John&quot;}
 
 m(&quot;.name&quot;, user.name) // &lt;div class=&quot;name&quot;&gt;John&lt;/div&gt;
 </code></pre>
-<h4 id="loops">Loops</h4>
+<h4 id="loops"><a href="#loops">Loops</a></h4>
 <p>Use <code>Array</code> methods such as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"><code>map</code></a> to iterate over lists of data</p>
 <pre><code class="lang-javascript">var users = [
     {name: &quot;John&quot;},
@@ -335,7 +334,7 @@ m(&quot;ul&quot;, users.map(function(u) { // &lt;ul&gt;
 //   m(&quot;li&quot;, u.name)
 // ))
 </code></pre>
-<h4 id="conditionals">Conditionals</h4>
+<h4 id="conditionals"><a href="#conditionals">Conditionals</a></h4>
 <p>Use the ternary operator to conditionally set content on a view</p>
 <pre><code class="lang-javascript">var isError = false
 
@@ -343,13 +342,13 @@ m(&quot;div&quot;, isError ? &quot;An error occurred&quot; : &quot;Saved&quot;) 
 </code></pre>
 <p>You cannot use Javascript statements such as <code>if</code> or <code>for</code> within Javascript expressions. It&#39;s preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.</p>
 <hr>
-<h3 id="converting-html">Converting HTML</h3>
+<h3 id="converting-html"><a href="#converting-html">Converting HTML</a></h3>
 <p>In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.</p>
 <p>When using hyperscript, it&#39;s necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can <a href="http://arthurclemens.github.io/mithril-template-converter/index.html">use the HTML-to-Mithril-template converter</a>.</p>
 <hr>
-<h3 id="avoid-anti-patterns">Avoid Anti-patterns</h3>
+<h3 id="avoid-anti-patterns"><a href="#avoid-anti-patterns">Avoid Anti-patterns</a></h3>
 <p>Although Mithril is flexible, some code patterns are discouraged:</p>
-<h4 id="avoid-dynamic-selectors">Avoid dynamic selectors</h4>
+<h4 id="avoid-dynamic-selectors"><a href="#avoid-dynamic-selectors">Avoid dynamic selectors</a></h4>
 <p>Different DOM elements have different attributes, and often different behaviors. Making a selector configurable can leak the implementation details of a component out of its unit.</p>
 <pre><code class="lang-javascript">// AVOID
 var BadInput = {
@@ -390,7 +389,7 @@ var BetterLabeledComponent = {
     }
 }
 </code></pre>
-<h4 id="avoid-statements-in-view-methods">Avoid statements in view methods</h4>
+<h4 id="avoid-statements-in-view-methods"><a href="#avoid-statements-in-view-methods">Avoid statements in view methods</a></h4>
 <p>Javascript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)</p>
 <pre><code class="lang-javascript">// AVOID
 var BadListComponent = {
@@ -414,7 +413,7 @@ var BetterListComponent = {
     }
 }
 </code></pre>
-<h4 id="avoid-creating-vnodes-outside-views">Avoid creating vnodes outside views</h4>
+<h4 id="avoid-creating-vnodes-outside-views"><a href="#avoid-creating-vnodes-outside-views">Avoid creating vnodes outside views</a></h4>
 <p>When a redraw encounters a vnode which is strictly equal to the one in the previous render, it will be skipped and its contents will not be updated. While this may seem like an opportunity for performance optimisation, it should be avoided because it prevents dynamic changes in that node&#39;s tree - this leads to side-effects such as downstream lifecycle methods failing to trigger on redraw. In this sense, Mithril vnodes are immutable: new vnodes are compared to old ones; mutations to vnodes are not persisted.</p>
 <p>The component documentation contains <a href="components.html#avoid-creating-component-instances-outside-views">more detail and an example of this anti-pattern</a>.</p>
 
@@ -422,7 +421,8 @@ var BetterListComponent = {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

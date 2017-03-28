@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Introduction - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="introduction">Introduction</h1>
+				<h1 id="introduction"><a href="#introduction">Introduction</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -69,8 +68,9 @@
 </li>
 </ul>
 <hr>
-<h3 id="what-is-mithril?">What is Mithril?</h3>
-<p>Mithril is a modern client-side Javascript framework for building Single Page Applications.<br>It&#39;s small (&lt; 8kb gzip), fast and provides routing and XHR utilities out of the box.</p>
+<h3 id="what-is-mithril?"><a href="#what-is-mithril?">What is Mithril?</a></h3>
+<p>Mithril is a modern client-side Javascript framework for building Single Page Applications.
+It&#39;s small (&lt; 8kb gzip), fast and provides routing and XHR utilities out of the box.</p>
 <div style="display:flex;margin:0 0 30px;">
     <div style="width:50%;">
         <h5>Download size</h5>
@@ -100,7 +100,7 @@
 <p>If you are an experienced developer and want to know how Mithril compares to other frameworks, see the <a href="framework-comparison.html">framework comparison</a> page.</p>
 <p>Mithril supports browsers all the way back to IE9, no polyfills required.</p>
 <hr>
-<h3 id="getting-started">Getting started</h3>
+<h3 id="getting-started"><a href="#getting-started">Getting started</a></h3>
 <p>The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It&#39;ll cover the majority of the API surface (including routing and XHR) but it&#39;ll only take 10 minutes.</p>
 <p>Let&#39;s create an HTML file to follow along:</p>
 <pre><code class="lang-markup">&lt;body&gt;
@@ -113,8 +113,8 @@
 &lt;/body&gt;
 </code></pre>
 <hr>
-<h3 id="hello-world">Hello world</h3>
-<p>Let&#39;s start as small as well can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you&#39;ll learn better)</p>
+<h3 id="hello-world"><a href="#hello-world">Hello world</a></h3>
+<p>Let&#39;s start as small as we can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you&#39;ll learn better)</p>
 <pre><code class="lang-javascript">var root = document.body
 
 m.render(root, &quot;Hello world&quot;)
@@ -124,7 +124,7 @@ m.render(root, &quot;Hello world&quot;)
 </code></pre>
 <p>As you can see, you use the same code to both create and update HTML. Mithril automatically figures out the most efficient way of updating the text, rather than blindly recreating it from scratch.</p>
 <hr>
-<h3 id="dom-elements">DOM elements</h3>
+<h3 id="dom-elements"><a href="#dom-elements">DOM elements</a></h3>
 <p>Let&#39;s wrap our text in an <code>&lt;h1&gt;</code> tag.</p>
 <pre><code class="lang-javascript">m.render(root, m(&quot;h1&quot;, &quot;My first app&quot;))
 </code></pre>
@@ -151,7 +151,7 @@ m.render(root, &quot;Hello world&quot;)
 &lt;/main&gt;
 </code></pre>
 <hr>
-<h3 id="components">Components</h3>
+<h3 id="components"><a href="#components">Components</a></h3>
 <p>A Mithril component is just an object with a <code>view</code> function. Here&#39;s the code above as a component:</p>
 <pre><code class="lang-javascript">var Hello = {
     view: function() {
@@ -190,7 +190,7 @@ m.mount(root, Hello)
 <p>You can now update the label of the button by clicking the button. Since we used <code>m.mount</code>, you don&#39;t need to manually call <code>m.render</code> to apply the changes in the <code>count</code> variable to the HTML; Mithril does it for you.</p>
 <p>If you&#39;re wondering about performance, it turns out Mithril is very fast at rendering updates, because it only touches the parts of the DOM it absolutely needs to. So in our example above, when you click the button, the text in it is the only part of the DOM Mithril actually updates.</p>
 <hr>
-<h3 id="routing">Routing</h3>
+<h3 id="routing"><a href="#routing">Routing</a></h3>
 <p>Routing just means going from one screen to another in an application with several screens.</p>
 <p>Let&#39;s add a splash page that appears before our click counter. First we create a component for it:</p>
 <pre><code class="lang-javascript">var Splash = {
@@ -210,7 +210,7 @@ m.mount(root, Hello)
 <p>The <code>&quot;/splash&quot;</code> right after <code>root</code> means that&#39;s the default route, i.e. if the hashbang in the URL doesn&#39;t point to one of the defined routes (<code>/splash</code> and <code>/hello</code>, in our case), then Mithril redirects to the default route. So if you open the page in a browser and your URL is <code>http://localhost</code>, then you get redirected to <code>http://localhost/#!/splash</code>.</p>
 <p>Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to <code>http://localhost/#!/hello</code>. You can navigate back and forth to the splash page using the browser&#39;s back and next button.</p>
 <hr>
-<h3 id="xhr">XHR</h3>
+<h3 id="xhr"><a href="#xhr">XHR</a></h3>
 <p>Basically, XHR is just a way to talk to a server.</p>
 <p>Let&#39;s change our click counter to make it save data on a server. For the server, we&#39;ll use <a href="http://rem-rest-api.herokuapp.com">REM</a>, a mock REST API designed for toy apps like this tutorial.</p>
 <p>First we create a function that calls <code>m.request</code>. The <code>url</code> specifies an endpoint that represents a resource, the <code>method</code> specifies the type of action we&#39;re taking (typically the <code>PUT</code> method <a href="https://en.wiktionary.org/wiki/upsert">upserts</a>), <code>data</code> is the payload that we&#39;re sending to the endpoint and <code>withCredentials</code> means to enable cookies (a requirement for the REM API to work)</p>
@@ -247,7 +247,8 @@ var increment = function() {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

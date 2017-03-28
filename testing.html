@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Testing - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="testing">Testing</h1>
+				<h1 id="testing"><a href="#testing">Testing</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -81,7 +80,7 @@ o.spec(&quot;math&quot;, function() {
 <p>To run the test, use the command <code>npm test</code>. Ospec considers any Javascript file inside of a <code>tests</code> folder (anywhere in the project) to be a test.</p>
 <pre><code>npm test
 </code></pre><hr>
-<h3 id="running-mithril-in-a-non-browser-environment">Running mithril in a non-browser environment</h3>
+<h3 id="running-mithril-in-a-non-browser-environment"><a href="#running-mithril-in-a-non-browser-environment">Running mithril in a non-browser environment</a></h3>
 <p>Mithril has a few dependencies on globals that exist in all its supported browser environments but are missing in all non-browser environments. To work around this you can use the browser mocks that ship with the mithril npm package.</p>
 <p>The simplest way to do this is ensure the following snippet of code runs <strong>before</strong> you include mithril itself in your project.</p>
 <pre><code class="lang-js">// Polyfill DOM env for mithril
@@ -90,12 +89,12 @@ global.document = window.document;
 </code></pre>
 <p>Once that snippet has been run you can <code>require(&quot;mithril&quot;)</code> and it should be quite happy.</p>
 <hr>
-<h3 id="good-testing-practices">Good testing practices</h3>
+<h3 id="good-testing-practices"><a href="#good-testing-practices">Good testing practices</a></h3>
 <p>Generally speaking, there are two ways to write tests: upfront and after the fact.</p>
 <p>Writing tests upfront requires specifications to be frozen. Upfront tests are a great way of codifying the rules that a yet-to-be-implemented API must obey. However, writing tests upfront may not be a suitable strategy if you don&#39;t have a reasonable idea of what your project will look like, if the scope of the API is not well known or if it&#39;s likely to change (e.g. based on previous history at the company).</p>
 <p>Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertedly broken and that previously fixed bugs do not get re-introduced by unrelated changes.</p>
 <hr>
-<h3 id="unit-testing">Unit testing</h3>
+<h3 id="unit-testing"><a href="#unit-testing">Unit testing</a></h3>
 <p>Unit testing is the practice of isolating a part of an application (typically a single module), and asserting that, given some inputs, it produces the expected outputs.</p>
 <p>Testing a Mithril component is easy. Let&#39;s assume we have a simple component like this:</p>
 <pre><code class="lang-javascript">// MyComponent.js
@@ -128,7 +127,8 @@ o.spec(&quot;MyComponent&quot;, function() {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

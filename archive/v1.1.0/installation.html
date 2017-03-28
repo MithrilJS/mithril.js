@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> Installation - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="installation">Installation</h1>
+				<h1 id="installation"><a href="#installation">Installation</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><strong><a href="installation.html">Installation</a></strong><ul>
@@ -63,13 +62,13 @@
 </ul>
 </li>
 </ul>
-<h3 id="cdn">CDN</h3>
+<h3 id="cdn"><a href="#cdn">CDN</a></h3>
 <p>If you&#39;re new to Javascript or just want a very simple setup to get your feet wet, you can get Mithril from a <a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a>:</p>
 <pre><code class="lang-markup">&lt;script src=&quot;https://unpkg.com/mithril/mithril.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <hr>
-<h3 id="npm">NPM</h3>
-<h4 id="quick-start-with-webpack">Quick start with Webpack</h4>
+<h3 id="npm"><a href="#npm">NPM</a></h3>
+<h4 id="quick-start-with-webpack"><a href="#quick-start-with-webpack">Quick start with Webpack</a></h4>
 <pre><code class="lang-bash"># 1) install
 npm install mithril --save
 
@@ -90,7 +89,7 @@ npm start
 # 6) open `index.html` in the (default) browser
 open index.html
 </code></pre>
-<h4 id="step-by-step">Step by step</h4>
+<h4 id="step-by-step"><a href="#step-by-step">Step by step</a></h4>
 <p>For production-level projects, the recommended way of installing Mithril is to use NPM.</p>
 <p>NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the Javascript ecosystem. Download and install <a href="https://nodejs.org">Node.js</a>; NPM will be automatically installed as well.</p>
 <p>To use Mithril via NPM, go to your project folder, and run <code>npm init --yes</code> from the command line. This will create a file called <code>package.json</code>.</p>
@@ -151,7 +150,7 @@ var MyComponent = require(&quot;./mycomponent&quot;)
 m.mount(document.body, MyComponent)
 </code></pre>
 <p>Note that in this example, we&#39;re using <code>m.mount</code>, which wires up the component to Mithril&#39;s autoredraw system. In most applications, you will want to use <code>m.mount</code> (or <code>m.route</code> if your application has multiple screens) instead of <code>m.render</code> to take advantage of the autoredraw system, rather than re-rendering manually every time a change occurs.</p>
-<h4 id="production-build">Production build</h4>
+<h4 id="production-build"><a href="#production-build">Production build</a></h4>
 <p>If you open bin/app.js, you&#39;ll notice that the Webpack bundle is not minified, so this file is not ideal for a live application. To generate a minified file, open <code>package.json</code> and add a new npm script:</p>
 <pre><code>{
     &quot;name&quot;: &quot;my-project&quot;,
@@ -170,8 +169,8 @@ m.mount(document.body, MyComponent)
     }
 }
 </code></pre><hr>
-<h3 id="alternate-ways-to-use-mithril">Alternate ways to use Mithril</h3>
-<h4 id="live-reload-development-environment">Live reload development environment</h4>
+<h3 id="alternate-ways-to-use-mithril"><a href="#alternate-ways-to-use-mithril">Alternate ways to use Mithril</a></h3>
+<h4 id="live-reload-development-environment"><a href="#live-reload-development-environment">Live reload development environment</a></h4>
 <p>Live reload is a feature where code changes automatically trigger the page to reload. <a href="https://github.com/mattdesl/budo">Budo</a> is one tool that enables live reloading.</p>
 <pre><code class="lang-bash"># 1) install
 npm install mithril --save
@@ -188,7 +187,7 @@ npm install budo -g
 npm start
 </code></pre>
 <p>The source file <code>index.js</code> will be compiled (bundled) and a browser window opens showing the result. Any changes in the source files will instantly get recompiled and the browser will refresh reflecting the changes.</p>
-<h4 id="mithril-bundler">Mithril bundler</h4>
+<h4 id="mithril-bundler"><a href="#mithril-bundler">Mithril bundler</a></h4>
 <p>Mithril comes with a bundler tool of its own. It is sufficient for ES5-based projects that have no other dependencies other than Mithril, but it&#39;s currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.</p>
 <p>If you want to try it and give feedback, you can open <code>package.json</code> and change the npm script for webpack to this:</p>
 <pre><code>{
@@ -197,7 +196,7 @@ npm start
         &quot;build&quot;: &quot;bundle index.js --output app.js --watch&quot;
     }
 }
-</code></pre><h4 id="vanilla">Vanilla</h4>
+</code></pre><h4 id="vanilla"><a href="#vanilla">Vanilla</a></h4>
 <p>If you don&#39;t have the ability to run a bundler script due to company security policies, there&#39;s an options to not use a module system at all:</p>
 <pre><code class="lang-markup">&lt;html&gt;
   &lt;head&gt;
@@ -219,7 +218,8 @@ m.render(document.body, &quot;hello world&quot;)
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

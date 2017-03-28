@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> withAttr(attrName, callback) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="withattrattrname,-callback">withAttr(attrName, callback)</h1>
+				<h1 id="withattrattrname,-callback"><a href="#withattrattrname,-callback">withAttr(attrName, callback)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -58,7 +57,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Returns an event handler that runs <code>callback</code> with the value of the specified DOM attribute</p>
 <pre><code class="lang-javascript">var state = {
     value: &quot;&quot;,
@@ -77,7 +76,7 @@ var Component = {
 m.mount(document.body, Component)
 </code></pre>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>m.withAttr(attrName, callback, thisArg?)</code></p>
 <table>
 <thead>
@@ -117,7 +116,7 @@ m.mount(document.body, Component)
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h3 id="how-it-works">How it works</h3>
+<h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
 <p>The <code>m.withAttr</code> method creates an event handler. The event handler takes the value of a DOM element&#39;s property and calls a function with it as the argument.</p>
 <p>This helper function is provided to help decouple the browser&#39;s event model from application code.</p>
 <pre><code class="lang-javascript">// standalone usage
@@ -145,7 +144,7 @@ var MyComponent = {
 m.mount(document.body, MyComponent)
 </code></pre>
 <hr>
-<h3 id="predictable-event-target">Predictable event target</h3>
+<h3 id="predictable-event-target"><a href="#predictable-event-target">Predictable event target</a></h3>
 <p>The <code>m.withAttr()</code> helper reads the value of the element to which the event handler is bound, which is not necessarily the same as the element where the event originated.</p>
 <pre><code class="lang-javascript">var state = {
     url: &quot;&quot;,
@@ -165,7 +164,7 @@ m.mount(document.body, MyComponent)
 <p>In the example above, if the user clicks on the text within the link, <code>e.target</code> will point to the <code>&lt;span&gt;</code>, not the <code>&lt;a&gt;</code>.</p>
 <p>While this behavior works as per its specs, it&#39;s not very intuitive or useful most of the time. Therefore, <code>m.withAttr</code> uses the value of <code>e.currentTarget</code> which does point to the <code>&lt;a&gt;</code>, as one would normally expect.</p>
 <hr>
-<h3 id="attributes-and-properties">Attributes and properties</h3>
+<h3 id="attributes-and-properties"><a href="#attributes-and-properties">Attributes and properties</a></h3>
 <p>The first argument of <code>m.withAttr()</code> can be either an attribute or a property.</p>
 <pre><code class="lang-javascript">// reads from `select.selectedIndex` property
 var state = {
@@ -187,7 +186,8 @@ m(&quot;input[type=checkbox]&quot;, {onclick: m.withAttr(&quot;checked&quot;, st
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

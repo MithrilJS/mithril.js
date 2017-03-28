@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> mount(root, component) - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="mountroot,-component">mount(root, component)</h1>
+				<h1 id="mountroot,-component"><a href="#mountroot,-component">mount(root, component)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href="hyperscript.html">m</a></li>
@@ -58,7 +57,7 @@
 </li>
 </ul>
 <hr>
-<h3 id="description">Description</h3>
+<h3 id="description"><a href="#description">Description</a></h3>
 <p>Activates a component, enabling it to autoredraw on user events</p>
 <pre><code class="lang-javascript">var state = {
     count: 0,
@@ -74,7 +73,7 @@ var Counter = {
 m.mount(document.body, Counter)
 </code></pre>
 <hr>
-<h3 id="signature">Signature</h3>
+<h3 id="signature"><a href="#signature">Signature</a></h3>
 <p><code>m.mount(element, component)</code></p>
 <table>
 <thead>
@@ -108,19 +107,19 @@ m.mount(document.body, Counter)
 </table>
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
-<h3 id="how-it-works">How it works</h3>
+<h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
 <p>Similar to <a href="render.html"><code>m.render()</code></a>, the <code>m.mount()</code> method takes a component and mounts a corresponding DOM tree into <code>element</code>. If <code>element</code> already has a DOM tree mounted via a previous <code>m.mount()</code> call, the component is diffed against the previous vnode tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.</p>
-<h4 id="replace-a-component">Replace a component</h4>
+<h4 id="replace-a-component"><a href="#replace-a-component">Replace a component</a></h4>
 <p>Running <code>mount(element, OtherComponent)</code> where <code>element</code> is a current mount point replaces the component previously mounted with <code>OtherComponent</code>.</p>
-<h4 id="unmount">Unmount</h4>
+<h4 id="unmount"><a href="#unmount">Unmount</a></h4>
 <p>Using <code>m.mount(element, null)</code> on an element with a previously mounted component unmounts it and cleans up Mithril internal state. This can be useful to prevent memory leaks when removing the <code>root</code> node manually from the DOM.</p>
 <hr>
-<h3 id="performance-considerations">Performance considerations</h3>
+<h3 id="performance-considerations"><a href="#performance-considerations">Performance considerations</a></h3>
 <p>It may seem wasteful to generate a vnode tree on every redraw, but as it turns out, creating and comparing Javascript data structures is surprisingly cheap compared to reading and modifying the DOM.</p>
 <p>Touching the DOM can be extremely expensive for a couple of reasons. Alternating reads and writes can adversely affect performance by causing several browser repaints to occur in quick succession, whereas comparing virtual dom trees allows writes to be batched into a single repaint. Also, the performance characteristics of various DOM operations vary between implementations and can be difficult to learn and optimize for all browsers. For example, in some implementations, reading <code>childNodes.length</code> has a complexity of O(n); in some, reading <code>parentNode</code> causes a repaint, etc.</p>
 <p>In contrast, traversing a javascript data structure has a much more predictable and sane performance profile, and in addition, a vnode tree is implemented in such a way that enables modern javascript engines to apply aggressive optimizations such as hidden classes for even better performance.</p>
 <hr>
-<h3 id="differences-from-mrender">Differences from m.render</h3>
+<h3 id="differences-from-mrender"><a href="#differences-from-mrender">Differences from m.render</a></h3>
 <p>A component rendered via <code>m.mount</code> automatically auto-redraws in response to view events, <code>m.redraw()</code> calls or <code>m.request()</code> calls. Vnodes rendered via <code>m.render()</code> do not.</p>
 <p><code>m.mount()</code> is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril&#39;s auto-redrawing facilities.</p>
 <p><code>m.render()</code> is suitable for library authors who wish to manually control rendering (e.g. when hooking to a third party router, or using third party data-layer libraries like Redux).</p>
@@ -129,7 +128,8 @@ m.mount(document.body, Counter)
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

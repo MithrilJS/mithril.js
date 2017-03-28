@@ -2,8 +2,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title> ES6 - Mithril.js</title>
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
@@ -22,7 +21,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="es6">ES6</h1>
+				<h1 id="es6"><a href="#es6">ES6</a></h1>
 <ul>
 <li>Tutorials<ul>
 <li><a href="installation.html">Installation</a></li>
@@ -66,7 +65,7 @@
 <hr>
 <p>Mithril is written in ES5, and is fully compatible with ES6 as well. ES6 is a recent update to Javascript that introduces new syntax sugar for various common cases. It&#39;s not yet fully supported by all major browsers and it&#39;s not a requirement for writing application, but it may be pleasing to use depending on your team&#39;s preferences.</p>
 <p>In some limited environments, it&#39;s possible to use a significant subset of ES6 directly without extra tooling (for example, in internal applications that do not support IE). However, for the vast majority of use cases, a compiler toolchain like <a href="https://babeljs.io">Babel</a> is required to compile ES6 features down to ES5.</p>
-<h3 id="setup">Setup</h3>
+<h3 id="setup"><a href="#setup">Setup</a></h3>
 <p>The simplest way to setup an ES6 compilation toolchain is via <a href="https://babeljs.io/">Babel</a>.</p>
 <p>Babel requires NPM, which is automatically installed when you install <a href="https://nodejs.org/en/">Node.js</a>. Once NPM is installed, create a project folder and run this command:</p>
 <pre><code class="lang-bash">npm init -y
@@ -88,7 +87,7 @@
 <p>To run Babel as a standalone tool, run this from the command line:</p>
 <pre><code class="lang-bash">babel src --out-dir bin --source-maps
 </code></pre>
-<h4 id="using-babel-with-webpack">Using Babel with Webpack</h4>
+<h4 id="using-babel-with-webpack"><a href="#using-babel-with-webpack">Using Babel with Webpack</a></h4>
 <p>If you&#39;re already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.</p>
 <pre><code class="lang-bash">npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
 </code></pre>
@@ -130,7 +129,7 @@
 <p>You can now then run the bundler by running this from the command line:</p>
 <pre><code class="lang-bash">npm start
 </code></pre>
-<h4 id="production-build">Production build</h4>
+<h4 id="production-build"><a href="#production-build">Production build</a></h4>
 <p>To generate a minified file, open <code>package.json</code> and add a new npm script called <code>build</code>:</p>
 <pre><code class="lang-json">{
     &quot;name&quot;: &quot;my-project&quot;,
@@ -155,7 +154,8 @@
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="lib/prism/prism.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"
