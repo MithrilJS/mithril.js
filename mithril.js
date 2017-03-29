@@ -73,7 +73,7 @@ function hyperscript(selector) {
 	if (typeof selector === "string") {
 		var cached = selectorCache[selector] || compileSelector(selector)
 	}
-	if (!attrs) {
+	if (attrs == null) {
 		attrs = {}
 	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
 		attrs = {}
