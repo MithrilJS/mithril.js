@@ -273,11 +273,6 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0]).equals(null)
 			o(vnode.children[1]).equals(undefined)
 		})
-		o("handles falsy number single child without attrs", function() {
-			var vnode = m("div", 0)
-
-			o(vnode.text).equals(0)
-		})
 	})
 	o.spec("permutations", function() {
 		o("handles null attr and children", function() {
