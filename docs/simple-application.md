@@ -477,7 +477,7 @@ module.exports = {
 				oninput: m.withAttr("value", function(value) {User.current.lastName = value}),
 				value: User.current.lastName
 			}),
-			m("button.button[type=button]", "Save"),
+			m("button.button[type=submit]", "Save"),
 		])
 	}
 }
