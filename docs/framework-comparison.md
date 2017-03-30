@@ -203,7 +203,7 @@ Vue    | Mithril
 
 Vue is heavily inspired by Angular and has many things that Angular does (e.g. directives, filters, bi-directional bindings, `v-cloak`), but also has things inspired by React (e.g. components). As of Vue 2.0, it's also possible to write templates using hyperscript/JSX syntax (in addition to single-file components and the various webpack-based language transpilation plugins). Vue provides both bi-directional data binding and an optional Redux-like state management library, but unlike Angular, it provides no style guide. The many-ways-of-doing-one-thing approach can cause architectural fragmentation in long-lived projects.
 
-Mithril has far less concepts and typically organizes applications in terms of components and a data layer.  There's no need to install different sets of tools to make different flavors work, because all component creation styles in Mithril output the same vnode structure.
+Mithril has far less concepts and typically organizes applications in terms of components and a data layer.  All component creation styles in Mithril output the same vnode structure using native Javascript features only.  The direct consequence of leaning on the language is less tooling and a simpler project setup.
 
 #### Documentation
 
