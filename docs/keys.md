@@ -96,21 +96,21 @@ users.map(function(u) {
 
 #### Avoid hiding keys in component root elements
 
-If you refactor the code and put the button inside a component, the key must be moved out of the component and placed back where the component took the place of the button.
+If you refactor the code and make a user component, the key must be moved out of the component and put on the component itself, since it is now the immediate child of the array.
 
 ```javascript
 // AVOID
-var Button = {
+var User = {
 	view: function(vnode) {
-		return m("button", {key: vnode.attrs.id}, u.name)
+		return m("div", { key: vnode.attrs.user.id }, [
+      m(Button, vnode.attrs.user.name)
+    ])
 	}
 }
 
 // PREFER
 users.map(function(u) {
-	return m("div", [
-		m(Button, {key: u.id}, u.name) // key should be here, not in component
-	])
+	return m(User, { key: u.id, user: u }) // key should be here, not in component
 })
 ```
 
@@ -195,12 +195,12 @@ users[0].key = 'c'
 // AVOID
 users.map(function(user){
 	// The component for John will be destroyed and recreated
-	return m(UserComponent, user) 
+	return m(UserComponent, user)
 })
 
 // PREFER
 users.map(function(user){
 	// Key is specifically extracted: data model is given its own property
-	return m(UserComponent, {key: user.id, model: user}) 
+	return m(UserComponent, {key: user.id, model: user})
 })
 ```
