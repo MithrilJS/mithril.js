@@ -1,6 +1,18 @@
 "use strict"
 
 var parseURL = require("../test-utils/parseURL")
+var callAsync = require("../test-utils/callAsync.js")
+
+function debouncedAsync(f) {
+	var ref
+	return function() {
+		if (ref != null) return
+		ref = callAsync(function(){
+			ref = null
+			f()
+		})
+	}
+}
 
 module.exports = function(options) {
 	if (options == null) options = {}
@@ -29,7 +41,9 @@ module.exports = function(options) {
 		if (data.search != null && data.search !== search) search = data.search, isNew = true
 		if (data.hash != null && data.hash !== hash) {
 			hash = data.hash
-			if (!isNew) hashchange()
+			if (!isNew) {
+				hashchange()
+			}
 		}
 		return isNew
 	}
@@ -38,9 +52,10 @@ module.exports = function(options) {
 		if (value === "") return ""
 		return (value.charAt(0) !== prefix ? prefix : "") + value
 	}
-	function hashchange() {
+	function _hashchange() {
 		if (typeof $window.onhashchange === "function") $window.onhashchange({type: "hashchange"})
 	}
+	var hashchange = debouncedAsync(_hashchange)
 	function popstate() {
 		if (typeof $window.onpopstate === "function") $window.onpopstate({type: "popstate", state: $window.history.state})
 	}
