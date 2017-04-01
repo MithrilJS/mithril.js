@@ -22,7 +22,7 @@
 - [Changing router prefix](#changing-router-prefix)
 - [Advanced component resolution](#advanced-component-resolution)
 	- [Wrapping a layout component](#wrapping-a-layout-component)
-	- [Authentication](#authentication)
+	- [Redirection](#redirection)
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
 	- [Typed routes](#typed-routes)
@@ -623,9 +623,13 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 ---
 
-#### Authentication
+#### Redirection
 
-The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. You can use either Mithril's `m.route.set()` or native HTML's `history` API. When redirecting with the `history` API, the `onmatch` hook must return a never-resolving Promise to prevent resolution of the matched route. `m.route.set()` cancels resolution of the matched route internally, so this isn't necessary with it.
+
+##### Example: authentication
+
+The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
