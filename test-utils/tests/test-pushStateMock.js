@@ -2,7 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var pushStateMock = require("../../test-utils/pushStateMock")
-
+var callAsync = require("../../test-utils/callAsync")
 o.spec("pushStateMock", function() {
 
 	var $window
@@ -478,93 +478,160 @@ o.spec("pushStateMock", function() {
 		})
 	})
 	o.spec("onhashchance", function() {
-		o("onhashchange triggers on location.href change", function() {
+		o("onhashchange triggers on location.href change", function(done) {
 			$window.onhashchange = o.spy()
 			$window.location.href = "http://localhost/#a"
 
-			o($window.onhashchange.callCount).equals(1)
-			o($window.onhashchange.args[0].type).equals("hashchange")
+			callAsync(function(){
+				o($window.onhashchange.callCount).equals(1)
+				o($window.onhashchange.args[0].type).equals("hashchange")
+				done()
+			})
 		})
-		o("onhashchange triggers on relative location.href change", function() {
+		o("onhashchange triggers on relative location.href change", function(done) {
 			$window.onhashchange = o.spy()
 			$window.location.href = "#a"
 
-			o($window.onhashchange.callCount).equals(1)
+			callAsync(function(){
+				o($window.onhashchange.callCount).equals(1)
+				done()
+			})
 		})
-		o("onhashchange triggers on location.hash change", function() {
+		o("onhashchange triggers on location.hash change", function(done) {
 			$window.onhashchange = o.spy()
 			$window.location.hash = "#a"
 
-			o($window.onhashchange.callCount).equals(1)
+			callAsync(function(){
+				o($window.onhashchange.callCount).equals(1)
+				done()
+			})
 		})
-		o("onhashchange does not trigger on page change", function() {
+		o("onhashchange does not trigger on page change", function(done) {
 			$window.onhashchange = o.spy()
 			$window.location.href = "http://localhost/a"
 
-			o($window.onhashchange.callCount).equals(0)
+			callAsync(function(){
+				o($window.onhashchange.callCount).equals(0)
+				done()
+			})
 		})
-		o("onhashchange does not trigger on page change with different hash", function() {
+		o("onhashchange does not trigger on page change with different hash", function(done) {
 			$window.location.href = "http://localhost/#a"
-			$window.onhashchange = o.spy()
-			$window.location.href = "http://localhost/a#b"
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.location.href = "http://localhost/a#b"
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
-		o("onhashchange does not trigger on page change with same hash", function() {
+		o("onhashchange does not trigger on page change with same hash", function(done) {
 			$window.location.href = "http://localhost/#b"
-			$window.onhashchange = o.spy()
-			$window.location.href = "http://localhost/a#b"
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.location.href = "http://localhost/a#b"
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
-		o("onhashchange triggers on history.back()", function() {
+		o("onhashchange triggers on history.back()", function(done) {
 			$window.location.href = "#a"
-			$window.onhashchange = o.spy()
-			$window.history.back()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
 
-			o($window.onhashchange.callCount).equals(1)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(1)
+					done()
+				})
+			})
 		})
-		o("onhashchange triggers on history.forward()", function() {
+		o("onhashchange triggers on history.forward()", function(done) {
 			$window.location.href = "#a"
-			$window.onhashchange = o.spy()
-			$window.history.back()
-			$window.history.forward()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
+				callAsync(function(){
+					$window.history.forward()
 
-			o($window.onhashchange.callCount).equals(2)
+					callAsync(function(){
+						o($window.onhashchange.callCount).equals(2)
+						done()
+					})
+				})
+			})
 		})
-		o("onhashchange does not trigger on history.back() that causes page change with different hash", function() {
+		o("onhashchange triggers once when the hash changes twice in a single tick", function(done) {
+			$window.location.href = "#a"
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
+				$window.history.forward()
+
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(1)
+					done()
+				})
+			})
+		})
+		o("onhashchange does not trigger on history.back() that causes page change with different hash", function(done) {
 			$window.location.href = "#a"
 			$window.location.href = "a#b"
-			$window.onhashchange = o.spy()
-			$window.history.back()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
-		o("onhashchange does not trigger on history.back() that causes page change with same hash", function() {
+		o("onhashchange does not trigger on history.back() that causes page change with same hash", function(done) {
 			$window.location.href = "#a"
 			$window.location.href = "a#a"
-			$window.onhashchange = o.spy()
-			$window.history.back()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
-		o("onhashchange does not trigger on history.forward() that causes page change with different hash", function() {
+		o("onhashchange does not trigger on history.forward() that causes page change with different hash", function(done) {
 			$window.location.href = "#a"
 			$window.location.href = "a#b"
-			$window.onhashchange = o.spy()
-			$window.history.back()
-			$window.history.forward()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
+				$window.history.forward()
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
-		o("onhashchange does not trigger on history.forward() that causes page change with same hash", function() {
+		o("onhashchange does not trigger on history.forward() that causes page change with same hash", function(done) {
 			$window.location.href = "#a"
 			$window.location.href = "a#b"
-			$window.onhashchange = o.spy()
-			$window.history.back()
-			$window.history.forward()
+			callAsync(function(){
+				$window.onhashchange = o.spy()
+				$window.history.back()
+				$window.history.forward()
 
-			o($window.onhashchange.callCount).equals(0)
+				callAsync(function(){
+					o($window.onhashchange.callCount).equals(0)
+					done()
+				})
+			})
 		})
 	})
 	o.spec("onunload", function() {
