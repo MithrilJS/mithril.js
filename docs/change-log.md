@@ -1,5 +1,6 @@
 # Change log
 
+- [v1.1.1](#v111)
 - [v1.1.0](#v110)
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
@@ -7,12 +8,21 @@
 
 ---
 
+### v1.1.1
+
+#### Bug fixes
+
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/lhorie/mithril.js/issues/#1752) / [#1753](https://github.com/lhorie/mithril.js/pull/#1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: remove `attrs.class` after normalizing to `attrs.className` - [#1764](https://github.com/lhorie/mithril.js/issues/#1764) / [#1769](https://github.com/lhorie/mithril.js/pull/#1769)
+- documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
 ### v1.1.0
 
 #### News
 
 - support for ES6 class components
 - support for closure components
+- improvements in build and release automation
 
 #### Bug fixes
 
