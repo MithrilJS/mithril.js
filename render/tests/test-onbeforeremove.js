@@ -199,9 +199,8 @@ o.spec("onbeforeremove", function() {
 				render(root, [{tag: component}])
 				render(root, [])
 
+				o(onremove.callCount).equals(0)
 				callAsync(function(){
-					o(onremove.callCount).equals(0)
-
 					callAsync(function() {
 						o(onremove.callCount).equals(1)
 						done()
