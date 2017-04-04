@@ -42,8 +42,8 @@ function execSelector(state, attrs, children) {
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className != null) {
-		if (attrs.class != null) {
+	if (className !== undefined) {
+		if (attrs.class !== undefined) {
 			attrs.class = undefined
 			attrs.className = className
 		}
