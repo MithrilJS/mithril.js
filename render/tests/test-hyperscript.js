@@ -17,13 +17,6 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("a")
 		})
 		o("v1.0.1 bug-for-bug regression suite", function(){
-			o
-			console.log(m('a', {
-				class: null
-			}).attrs, {
-				class: undefined,
-				className: null
-			})
 			o(m('a', {
 				class: null
 			}).attrs).deepEquals({
@@ -46,12 +39,6 @@ o.spec("hyperscript", function() {
 			}).attrs).deepEquals({
 				class: undefined,
 				className: true
-			})
-			console.log(m('a.x', {
-				class: null
-			}).attrs, {
-				class: undefined,
-				className: "x null"
 			})
 			o(m('a.x', {
 				class: null
