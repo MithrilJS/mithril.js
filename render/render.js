@@ -8,6 +8,10 @@ module.exports = function($window) {
 
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
+	function attachVnodeToDom (dom, vnode) {
+		if (!dom) return
+		dom.vnodes = [vnode]
+	}
 
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
@@ -128,6 +132,7 @@ module.exports = function($window) {
 			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+			attachVnodeToDom(vnode.dom, vnode)
 			insertNode(parent, element, nextSibling)
 			return element
 		}
@@ -327,6 +332,7 @@ module.exports = function($window) {
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
+			attachVnodeToDom(vnode.dom, vnode)
 		}
 		else if (old.instance != null) {
 			removeNode(old.instance, null)
@@ -597,6 +603,9 @@ module.exports = function($window) {
 	}
 
 	function render(dom, vnodes) {
+		// granular update through render(vnode)
+		if (dom.tag && dom.dom.vnodes) render(dom.dom, Object.assign({}, dom))
+
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = $doc.activeElement
