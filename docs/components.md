@@ -316,7 +316,7 @@ var Login = {
 
 Normally, in the context of a larger application, a login component like the one above exists alongside components for user registration and password recovery. Imagine that we want to be able to prepopulate the email field when navigating from the login screen to the registration or password recovery screens (or vice versa), so that the user doesn't need to re-type their email if they happened to fill the wrong page (or maybe you want to bump the user to the registration form if a username is not found).
 
-Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its own state, which by definition makes this state difficult to access from outside.
+Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its our state, which by definition makes this state difficult to access from outside.
 
 It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
 
