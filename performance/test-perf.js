@@ -277,7 +277,7 @@ o.spec("perf", function() {
 				m.render(scratch, m(Parent, {child : Root}));
 				m.render(scratch, m(Parent, {child : Empty}));
 			},
-			verify("repeated trees", 3300, done)
+			verify("repeated trees", 3500, done)
 		);
 	});
 
