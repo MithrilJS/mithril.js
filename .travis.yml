@@ -18,8 +18,10 @@ install:
 # Bundle before running tests so the bundle is always up-to-date
 before_script: npm run build
 
-# This is the default, but leaving so it is obvious
-# script: npm test
+# Run tests, lint, and then check for perf regressions
+script:
+- npm test
+- npm run perf
 
 # After a successful build commit changes back to repo
 after_success:
