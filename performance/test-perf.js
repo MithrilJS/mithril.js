@@ -31,19 +31,30 @@ var browserMock = require("../test-utils/browserMock")
 
 var now = typeof performance!=="undefined" && performance.now ? () => performance.now() : () => Number(new Date());
 
+function verify(name, threshold, result, done) {
+	console.log(`PERF: ${name}: ${Math.floor(result.hz)}/s (${result.ticks} ticks, ${threshold} allowed)`);
+
+	o(result.ticks <= threshold).equals(true);
+
+	done();
+}
+
 function loop(iter, time) {
 	var start = now(),
 		count = 0;
-	while (now()-start < time) {
+
+	// Run as many instances of iter as possible
+	while (now() - start < time) {
 		count++;
 		iter();
 	}
+
 	return count;
 }
 
 function benchmark(iter, callback) {
 	var a = 0, // eslint-disable-line no-unused-vars
-		count = 2,
+		count = 5,
 		time = 500,
 		passes = 0,
 		noops = loop(noop, time),
@@ -59,14 +70,22 @@ function benchmark(iter, callback) {
 
 	function next() {
 		iterations += loop(iter, time);
-		setTimeout(++passes===count ? done : next, 10);
+
+		setTimeout(++passes === count ? done : next, 10);
 	}
 
 	function done() {
 		var ticks = Math.round(noops / iterations * count),
-			hz = iterations / count / time * 1000,
-			message = `${Math.floor(hz)}/s (${ticks} ticks)`;
-		callback({iterations, noops, count, time, ticks, hz, message});
+			hz = iterations / count / time * 1000;
+
+		callback({
+			iterations : iterations,
+			noops : noops,
+			count : count,
+			time : time,
+			ticks : ticks,
+			hz : hz
+		});
 	}
 
 	next();
@@ -145,12 +164,8 @@ o.spec("perf", function() {
 
 		benchmark(
 			() => m.render(scratch, vdom),
-			({ticks, message}) => {
-				console.log(`PERF: rerender without changes: ${message}`);
-
-				o(ticks < 150).equals(true);
-
-				done();
+			(out) => {
+				verify("rerender without changes", 5, out, done)
 			}
 		);
 	});
@@ -234,12 +249,8 @@ o.spec("perf", function() {
 				m.render(scratch, m(Parent, {child : Root}));
 				m.render(scratch, m(Parent, {child : Empty}));
 			},
-			({ticks, message}) => {
-				console.log(`PERF: repeated trees: ${message}`);
-
-				o(ticks < 2000).equals(true);
-
-				done();
+			(out) => {
+				verify("repeated trees", 1200, out, done);
 			}
 		);
 	});
@@ -300,15 +311,11 @@ o.spec("perf", function() {
 						)
 					)
 				)),
-			({ticks, message}) => {
-				console.log(`PERF: large VDOM tree: ${message}`);
-
-				o(ticks < 2000).equals(true);
-
-				done();
+			(out) => {
+				verify("large VDOM tree", 700, out, done);
 			}
 		);
-	});
+	})
 
 	o("mutate styles/properties", (done, timeout) => {
 		timeout(5000);
@@ -355,12 +362,8 @@ o.spec("perf", function() {
 
 		benchmark(
 			() => m.render(scratch, app(++count)),
-			({ticks, message}) => {
-				console.log(`PERF: mutate styles/properties: ${message}`);
-
-				o(ticks < 350).equals(true);
-
-				done();
+			(out) => {
+				verify("mutate styles/properties", 100, out, done);
 			}
 		);
 	});
