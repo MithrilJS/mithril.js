@@ -29,7 +29,7 @@ SOFTWARE.
 var o = require("../ospec/ospec")
 var browserMock = require("../test-utils/browserMock")
 
-var now = typeof performance!=="undefined" && performance.now ? function () { return performance.now(); } : function () { return Date.now(); };
+var now = typeof performance!=="undefined" && performance.now ? function () { return performance.now() } : function () { return Date.now() }
 
 function verify(name, threshold, done) {
 	return function(result) {
@@ -39,25 +39,25 @@ function verify(name, threshold, done) {
 				result.ticks + " ticks, " +
 				Math.floor((result.ticks / threshold) * 100) + "% of threshold" +
 			")"
-		);
+		)
 
-		o(result.ticks <= threshold).equals(true)(result.ticks + " ticks, " + threshold + " allowed");
+		o(result.ticks <= threshold).equals(true)(result.ticks + " ticks, " + threshold + " allowed")
 
-		done();
-	};
+		done()
+	}
 }
 
 function loop(iter, time) {
 	var start = now(),
-		count = 0;
+		count = 0
 
 	// Run as many instances of iter as possible
 	while (now() - start < time) {
-		count++;
-		iter();
+		count++
+		iter()
 	}
 
-	return count;
+	return count
 }
 
 function benchmark(iter, callback) {
@@ -66,26 +66,26 @@ function benchmark(iter, callback) {
 		time = 500,
 		passes = 0,
 		total = 0,
-		noops, i;
+		noops, i
 
 	function noop() {
-		try { a++; } finally { a += Math.random(); }
+		try { a++ } finally { a += Math.random() }
 	}
 
 	// warm
 	for(i=100; i--;) {
-		noop();
-		iter();
+		noop()
+		iter()
 	}
 
 	// Count how many noops() occur in the time period
-	noops = loop(noop, time);
+	noops = loop(noop, time)
 
 	// run iter() through loop() `count` times
 	function next() {
-		total += loop(iter, time);
+		total += loop(iter, time)
 
-		setTimeout(++passes === count ? done : next, 10);
+		setTimeout(++passes === count ? done : next, 10)
 	}
 
 	function done() {
@@ -96,33 +96,33 @@ function benchmark(iter, callback) {
 			time  : time,
 			ticks : Math.round(noops / total * count),
 			hz    : total / count / time * 1000
-		});
+		})
 	}
 
-	next();
+	next()
 }
 
 o.spec("perf", function() {
 	var m, scratch
 
 	o.before(function () {
-		var doc = typeof document !== "undefined" ? document : null;
+		var doc = typeof document !== "undefined" ? document : null
 
 		if(!doc) {
 			var mock = browserMock()
 			if (typeof global !== "undefined") { global.window = mock }
 
-			doc = mock.document;
+			doc = mock.document
 		}
 
 		m = require("../mithril") // eslint-disable-line global-require
 
 		scratch = doc.createElement("div");
-		(doc.body || doc.documentElement).appendChild(scratch);
+		(doc.body || doc.documentElement).appendChild(scratch)
 	})
 
 	o.afterEach(function () {
-		scratch.innerHTML = "";
+		scratch.innerHTML = ""
 	})
 
 	o.after(function () {
@@ -130,7 +130,7 @@ o.spec("perf", function() {
 	})
 
 	o("rerender without changes", function (done, timeout) {
-		timeout(5000);
+		timeout(5000)
 
 		var vdom = m("div", {"class": "foo bar", "data-foo": "bar", p: 2},
 			m("header",
@@ -172,18 +172,18 @@ o.spec("perf", function() {
 					)
 				)
 			)
-		);
+		)
 
 		benchmark(
 			function () {
-				m.render(scratch, vdom);
+				m.render(scratch, vdom)
 			},
 			verify("rerender without changes", 5, done)
-		);
-	});
+		)
+	})
 
 	o("repeated trees", function (done, timeout) {
-		timeout(5000);
+		timeout(5000)
 
 		var Header = {
 			view : function () {
@@ -193,7 +193,7 @@ o.spec("perf", function() {
 						m("a", {href: "/foo"}, "Foo"),
 						m("a", {href: "/bar"}, "Bar")
 					)
-				);
+				)
 			}
 		}
 
@@ -211,7 +211,7 @@ o.spec("perf", function() {
 						)
 					),
 					m(ButtonBar, null)
-				);
+				)
 			}
 		}
 
@@ -234,19 +234,19 @@ o.spec("perf", function() {
 						{style: {margin: 0, padding: "10px", overflow: "visible"}},
 						"Object CSS"
 					)
-				);
+				)
 			}
 		}
 
 		var Button = {
 			view : function (vnode) {
-				return m("button", vnode.attrs, vnode.children);
+				return m("button", vnode.attrs, vnode.children)
 			}
 		}
 
 		var Main = {
 			view : function () {
-				return m(Form);
+				return m(Form)
 			}
 		}
 
@@ -256,44 +256,32 @@ o.spec("perf", function() {
 					{"class": "foo bar", "data-foo": "bar", p: 2},
 					m(Header, null),
 					m(Main, null)
-				);
-			}
-		}
-
-		var Empty = {
-			view : function () {
-				return m("div");
-			}
-		}
-
-		var Parent = {
-			view : function (vnode) {
-				return m(vnode.attrs.child);
+				)
 			}
 		}
 
 		benchmark(
 			function () {
-				m.render(scratch, m(Parent, {child : Root}));
-				m.render(scratch, m(Parent, {child : Empty}));
+				m.render(scratch, [m(Root)])
+				m.render(scratch, [])
 			},
 			verify("repeated trees", 3500, done)
-		);
-	});
+		)
+	})
 
 	o("construct large VDOM tree", function (done, timeout) {
-		timeout(5000);
+		timeout(5000)
 
 		var fields = [],
-			out = [];
+			out = []
 
 		for(var i=100; i--;) {
-			fields.push((i * 999).toString(36));
+			fields.push((i * 999).toString(36))
 		}
 
 		function digest(vnode) {
-			out.push(vnode);
-			out.length = 0;
+			out.push(vnode)
+			out.length = 0
 		}
 
 		benchmark(
@@ -318,7 +306,7 @@ o.spec("perf", function() {
 											field,
 											":",
 											m("input", {placeholder: field})
-										);
+										)
 									})
 								),
 								m("button-bar",
@@ -342,41 +330,41 @@ o.spec("perf", function() {
 							)
 						)
 					)
-				);
+				)
 			},
 			verify("construct large VDOM tree", 2500, done)
-		);
+		)
 	})
 
 	o("mutate styles/properties", function (done, timeout) {
-		timeout(5000);
+		timeout(5000)
 
 		var counter = 0
-		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c; }; }
-		var get = function (obj, i) { return obj[i%obj.length]; }
+		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
+		var get = function (obj, i) { return obj[i%obj.length] }
 		var classes = ["foo", "foo bar", "", "baz-bat", null]
 		var styles = []
 		var multivalue = ["0 1px", "0 0 1px 0", "0", "1px", "20px 10px", "7em 5px", "1px 0 5em 2px"]
 		var stylekeys = [
 			["left", keyLooper(3)],
 			["top", keyLooper(2)],
-			["margin", function (c) { return get(multivalue, c).replace("1px", c+"px"); }],
-			["padding", function (c) { return get(multivalue, c); }],
-			["position", function (c) { return c%5 ? c%2 ? "absolute" : "relative" : null; }],
-			["display", function (c) { return c%10 ? c%2 ? "block" : "inline" : "none"; }],
-			["color", function (c) { return ("rgba(" + (c%255) + ", " + (255 - c%255) + ", " + (50+c%150) + ", " + (c%50/50) + ")"); }],
-			["border", function (c) { return c%5 ? ((c%10) + "px " + (c%2?"solid":"dotted") + " " + (stylekeys[6][1](c))) : ""; }]
+			["margin", function (c) { return get(multivalue, c).replace("1px", c+"px") }],
+			["padding", function (c) { return get(multivalue, c) }],
+			["position", function (c) { return c%5 ? c%2 ? "absolute" : "relative" : null }],
+			["display", function (c) { return c%10 ? c%2 ? "block" : "inline" : "none" }],
+			["color", function (c) { return ("rgba(" + (c%255) + ", " + (255 - c%255) + ", " + (50+c%150) + ", " + (c%50/50) + ")") }],
+			["border", function (c) { return c%5 ? ((c%10) + "px " + (c%2?"solid":"dotted") + " " + (stylekeys[6][1](c))) : "" }]
 		]
 		var count = 0
 		var i, j, style, conf, app
 
 		for (i=0; i<1000; i++) {
-			style = {};
+			style = {}
 			for (j=0; j<i%10; j++) {
-				conf = get(stylekeys, ++counter);
-				style[conf[0]] = conf[1](counter);
+				conf = get(stylekeys, ++counter)
+				style[conf[0]] = conf[1](counter)
 			}
-			styles[i] = style;
+			styles[i] = style
 		}
 
 		app = function (index) {
@@ -390,16 +378,16 @@ o.spec("perf", function() {
 					m("p", {style: get(styles, index * 2)}, "p3"),
 					m("p", {style: get(styles, index * 3 + 1)}, "p4")
 				)
-			);
-		};
+			)
+		}
 
 		benchmark(
 			function () {
-				m.render(scratch, app(++count));
+				m.render(scratch, app(++count))
 			},
 			verify("mutate styles/properties", 300, done)
-		);
-	});
+		)
+	})
 })
 
-o.run();
+o.run()
