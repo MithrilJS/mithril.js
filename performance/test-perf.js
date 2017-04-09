@@ -342,7 +342,7 @@ o.spec("perf", function() {
 		var counter = 0
 		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
 		var get = function (obj, i) { return obj[i%obj.length] }
-		var classes = ["foo", "foo bar", "", "baz-bat", null]
+		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga"]
 		var styles = []
 		var multivalue = ["0 1px", "0 0 1px 0", "0", "1px", "20px 10px", "7em 5px", "1px 0 5em 2px"]
 		var stylekeys = [
@@ -376,7 +376,7 @@ o.spec("perf", function() {
 				},
 				m("input", {type: "checkbox", checked: index % 3 == 0}),
 				m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
-				m("div", {class: get(classes, index * 10)},
+				m("div", {class: get(classes, index * 11)},
 					m("p", {style: get(styles, index)}, "p1"),
 					m("p", {style: get(styles, index + 1)}, "p2"),
 					m("p", {style: get(styles, index * 2)}, "p3"),
@@ -389,7 +389,7 @@ o.spec("perf", function() {
 			function () {
 				m.render(scratch, app(++count))
 			},
-			verify("mutate styles/properties", 300, done)
+			verify("mutate styles/properties", 350, done)
 		)
 	})
 })
