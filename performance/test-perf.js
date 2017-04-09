@@ -132,9 +132,9 @@ o.spec("perf", function() {
 	o("rerender without changes", function (done, timeout) {
 		timeout(5000)
 
-		var vdom = m("div", {"class": "foo bar", "data-foo": "bar", p: 2},
+		var vdom = m("div", {class: "foo bar", "data-foo": "bar", p: 2},
 			m("header",
-				m("h1", {"class": "asdf"}, "a ", "b", " c ", 0, " d"),
+				m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
 				m("nav",
 					m("a", {href: "/foo"}, "Foo"),
 					m("a", {href: "/bar"}, "Bar")
@@ -188,7 +188,7 @@ o.spec("perf", function() {
 		var Header = {
 			view : function () {
 				return m("header",
-					m("h1", {"class": "asdf"}, "a ", "b", " c ", 0, " d"),
+					m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
 					m("nav",
 						m("a", {href: "/foo"}, "Foo"),
 						m("a", {href: "/bar"}, "Bar")
@@ -253,7 +253,7 @@ o.spec("perf", function() {
 		var Root = {
 			view : function () {
 				return m("div",
-					{"class": "foo bar", "data-foo": "bar", p: 2},
+					{class: "foo bar", "data-foo": "bar", p: 2},
 					m(Header, null),
 					m(Main, null)
 				)
@@ -287,9 +287,9 @@ o.spec("perf", function() {
 		benchmark(
 			function () {
 				return digest(
-					m("div", {"class": "foo bar", "data-foo": "bar", p: 2},
+					m("div", {class: "foo bar", "data-foo": "bar", p: 2},
 						m("header",
-							m("h1", {"class": "asdf"}, "a ", "b", " c ", 0, " d"),
+							m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
 							m("nav",
 								m("a", {href: "/foo"}, "Foo"),
 								m("a", {href: "/bar"}, "Bar")
@@ -369,10 +369,14 @@ o.spec("perf", function() {
 
 		app = function (index) {
 			return m("div",
-				{"class": get(classes, index), "data-index": index, title: index.toString(36)},
+				{
+					class: get(classes, index),
+					"data-index": index,
+					title: index.toString(36)
+				},
 				m("input", {type: "checkbox", checked: index % 3 == 0}),
 				m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
-				m("div", {"class": get(classes, index * 10)},
+				m("div", {class: get(classes, index * 10)},
 					m("p", {style: get(styles, index)}, "p1"),
 					m("p", {style: get(styles, index + 1)}, "p2"),
 					m("p", {style: get(styles, index * 2)}, "p3"),
