@@ -277,6 +277,9 @@ o.spec("perf", function() {
 				function () {
 					m.render(scratch, [m(Root)])
 					m.render(scratch, [])
+
+					// Second empty render is to clear out the pool of nodes
+					// so that there's nothing that can be recycled
 					m.render(scratch, [])
 				},
 				verify("repeated trees (no recycling)", 3500, done)
