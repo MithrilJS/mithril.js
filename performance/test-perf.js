@@ -182,9 +182,7 @@ o.spec("perf", function() {
 		)
 	})
 
-	o("repeated trees", function (done, timeout) {
-		timeout(5000)
-
+	o.spec("repeated tress", function() {
 		var Header = {
 			view : function () {
 				return m("header",
@@ -260,13 +258,30 @@ o.spec("perf", function() {
 			}
 		}
 
-		benchmark(
-			function () {
-				m.render(scratch, [m(Root)])
-				m.render(scratch, [])
-			},
-			verify("repeated trees", 3500, done)
-		)
+		o("recycled", function (done, timeout) {
+			timeout(5000)
+
+			benchmark(
+				function () {
+					m.render(scratch, [m(Root)])
+					m.render(scratch, [])
+				},
+				verify("repeated trees (recycled)", 3500, done)
+			)
+		})
+
+		o("no recycling", function (done, timeout) {
+			timeout(5000)
+
+			benchmark(
+				function () {
+					m.render(scratch, [m(Root)])
+					m.render(scratch, [])
+					m.render(scratch, [])
+				},
+				verify("repeated trees (no recycling)", 3500, done)
+			)
+		})
 	})
 
 	o("construct large VDOM tree", function (done, timeout) {
