@@ -50,7 +50,7 @@ Mithril supports browsers all the way back to IE9, no polyfills required.
 
 ### Getting started
 
-The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
+An easy way to try out Mithril is to include it from a CDN and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
 Let's create an HTML file to follow along:
 
@@ -64,6 +64,11 @@ Let's create an HTML file to follow along:
 	</script>
 </body>
 ```
+
+To make things simpler you can fork this pen which already has the latest version of mithril loaded.
+
+<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
