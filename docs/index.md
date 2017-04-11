@@ -50,7 +50,7 @@ Mithril supports browsers all the way back to IE9, no polyfills required.
 
 ### Getting started
 
-The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
+An easy way to try out Mithril is to include it from a CDN and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
 Let's create an HTML file to follow along:
 
@@ -64,6 +64,11 @@ Let's create an HTML file to follow along:
 	</script>
 </body>
 ```
+
+To make things simpler you can fork this pen which already has the latest version of mithril loaded.
+
+<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
@@ -84,6 +89,11 @@ m.render(root, "My first app")
 ```
 
 As you can see, you use the same code to both create and update HTML. Mithril automatically figures out the most efficient way of updating the text, rather than blindly recreating it from scratch.
+
+#### Live Example
+
+<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
@@ -118,6 +128,11 @@ m("main", [
 	m("button", "A button"),
 ])
 ```
+
+#### Live Example
+
+<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
@@ -185,6 +200,11 @@ You can now update the label of the button by clicking the button. Since we used
 
 If you're wondering about performance, it turns out Mithril is very fast at rendering updates, because it only touches the parts of the DOM it absolutely needs to. So in our example above, when you click the button, the text in it is the only part of the DOM Mithril actually updates.
 
+#### Live Example
+
+<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+
 ---
 
 ### Routing
@@ -217,6 +237,11 @@ The `m.route` function still has the same auto-redrawing functionality that `m.m
 The `"/splash"` right after `root` means that's the default route, i.e. if the hashbang in the URL doesn't point to one of the defined routes (`/splash` and `/hello`, in our case), then Mithril redirects to the default route. So if you open the page in a browser and your URL is `http://localhost`, then you get redirected to `http://localhost/#!/splash`.
 
 Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to `http://localhost/#!/hello`. You can navigate back and forth to the splash page using the browser's back and next button.
+
+#### Live Example
+
+<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
@@ -259,6 +284,11 @@ var Hello = {
 ```
 
 Clicking the button should now update the count.
+
+#### Live Example
+
+<p data-height="265" data-theme-id="light" data-slug-hash="WjeQBW" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril XHR Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/WjeQBW/">Mithril XHR Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
