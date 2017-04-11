@@ -367,7 +367,7 @@
 <p>A co-dependent stream that unregisters dependent streams when set to true. See <a href="#ended-state">ended state</a>.</p>
 <p><code>endStream = stream().end</code></p>
 <hr>
-<h5 id="streamfantasy-landof"><a href="#streamfantasy-landof">stream[&quot;fantasy-land/of&quot;]</a></h5>
+<h5 id="streamfantasy-landof1"><a href="#streamfantasy-landof1">stream[&quot;fantasy-land/of&quot;]</a></h5>
 <p>This method is functionally identical to <code>stream</code>. It exists to conform to <a href="https://github.com/fantasyland/fantasy-land">Fantasy Land&#39;s Applicative specification</a>. For more information, see the <a href="#what-is-fantasy-land">What is Fantasy Land</a> section.</p>
 <p><code>stream = stream()[&quot;fantasy-land/of&quot;](value)</code></p>
 <table>
@@ -667,8 +667,9 @@ function plusOne(a) {
 				<small>License: MIT. &copy; Leo Horie.</small>
 			</section>
 		</main>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
+		<script src="https://unpkg.com/mithril@1.1.1/mithril.js" async></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"
