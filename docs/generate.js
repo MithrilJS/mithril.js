@@ -48,7 +48,7 @@ function generate(pathname) {
 			var title = fixed.match(/^#([^\n\r]+)/i) || []
 			var html = layout
 				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
-				.replace(/\[version\]/, version) // update version
+				.replace(/\[version\]/g, version) // update version
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
 					var anchor = text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-");

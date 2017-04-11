@@ -65,6 +65,8 @@ Let's create an HTML file to follow along:
 </body>
 ```
 
+Mithril is also loaded onto this page already, so you can start poking at the `m` object in the developer console right away if you'd like!
+
 ---
 
 ### Hello world
