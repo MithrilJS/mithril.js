@@ -70,6 +70,8 @@ To make things simpler you can fork this pen which already has the latest versio
 <p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
+Mithril is also loaded onto this page already, so you can start poking at the `m` object in the developer console right away if you'd like!
+
 ---
 
 ### Hello world
