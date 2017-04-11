@@ -12,8 +12,8 @@
 
 #### Bug fixes
 
-- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/lhorie/mithril.js/issues/#1752) / [#1753](https://github.com/lhorie/mithril.js/pull/#1753) ([@StephanHoyer](https://github.com/StephanHoyer))
-- hyperscript: remove `attrs.class` after normalizing to `attrs.className` - [#1764](https://github.com/lhorie/mithril.js/issues/#1764) / [#1769](https://github.com/lhorie/mithril.js/pull/#1769)
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/lhorie/mithril.js/issues/1752) / [#1753](https://github.com/lhorie/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/lhorie/mithril.js/issues/1764) / [#1769](https://github.com/lhorie/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
 
 ### v1.1.0

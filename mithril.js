@@ -42,8 +42,8 @@ function execSelector(state, attrs, children) {
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className != null) {
-		if (attrs.class != null) {
+	if (className !== undefined) {
+		if (attrs.class !== undefined) {
 			attrs.class = undefined
 			attrs.className = className
 		}
@@ -1220,7 +1220,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.1"
+m.version = "1.1.1"
 m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
