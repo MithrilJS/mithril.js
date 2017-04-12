@@ -26,7 +26,7 @@ SOFTWARE.
 */
 
 var browserMock = require("../test-utils/browserMock")
-var Benchmark = require("benchmark");
+var Benchmark = require("benchmark")
 
 var m, scratch;
 
