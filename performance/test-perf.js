@@ -1,3 +1,4 @@
+/* global Benchmark */
 "use strict"
 
 /* Based off of preact's perf tests, so including their MIT license */
@@ -26,7 +27,8 @@ SOFTWARE.
 */
 
 var browserMock = require("../test-utils/browserMock")
-var Benchmark = require("benchmark");
+
+var B = Benchmark || require("benchmark") // eslint-disable-line global-require
 
 var m, scratch;
 
@@ -48,7 +50,7 @@ scratch = doc.createElement("div");
 (doc.body || doc.documentElement).appendChild(scratch)
 
 // Initialize benchmark suite
-var suite = new Benchmark.Suite("mithril perf")
+var suite = new B.Suite("mithril perf")
 
 suite.on("start", function() {
 	this.start = Date.now();
