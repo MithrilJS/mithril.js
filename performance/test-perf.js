@@ -1,3 +1,4 @@
+/* global Benchmark */
 "use strict"
 
 /* Based off of preact's perf tests, so including their MIT license */
@@ -28,7 +29,7 @@ SOFTWARE.
 var browserMock = require("../test-utils/browserMock")
 
 // Do this silly dance so browser testing works
-var B = window.Benchmark || require("benchmark") // eslint-disable-line global-require
+var B = typeof Benchmark === "undefined" ? require("benchmark") : Benchmark
 
 var m, scratch;
 
