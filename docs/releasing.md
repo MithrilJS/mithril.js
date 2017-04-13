@@ -61,9 +61,33 @@ $ git push lhorie master
 
 11. Travis will push the new release to npm & create a GitHub release
 
+### Merge `master` back into `next`
+
+This helps to ensure that the `version` field of `package.json` doesn't get out of date.
+
+12. Switch to `next` and make sure it's up to date
+
+```bash
+$ git co next
+$ git pull --rebase lhorie next
+```
+
+13. Merge `master` back onto `next`
+
+```bash
+$ git merge master
+```
+
+14. Push the changes to your fork & `lhorie/mithril.js`
+
+```bash
+$ git push
+$ git push lhorie next
+```
+
 ### Update the GitHub release
 
-12. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
+15. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
 
 ## Updating mithril.js.org
 
