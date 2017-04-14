@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
-    "eslint": "^3.16.1",
-    "istanbul": "^0.4.3",
+    "eslint": "^3.19.0",
+    "istanbul": "^0.4.5",
     "marked": "^0.3.6"
   },
   "bin": {
