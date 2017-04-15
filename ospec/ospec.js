@@ -193,7 +193,7 @@ module.exports = new function init() {
 	function record(message, error) {
 		var result = {pass: message === null}
 		if (result.pass === false) {
-			if (error == null) {
+			if (error == null || typeof error === "string") {
 				error = new Error
 				if (error.stack === undefined) new function() {try {throw error} catch (e) {error = e}}
 			}
