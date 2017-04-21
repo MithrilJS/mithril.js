@@ -439,4 +439,36 @@ o.spec("hyperscript", function() {
 			o(vnode.children[0].children).equals("b")
 		})
 	})
+	o.spec("whitespace tolerance", function() {
+		o("tolerant of whitespace (including new lines) between tokens in attribute declarations", function() {
+			var vnode = m("[\n\
+				id = foo\n\
+			]")
+
+			o(vnode.attrs.id).equals("foo")
+		})
+		o("allows multiple whitespace-tolerant attributes", function() {
+			var vnode = m("[\n\
+				id     = foo\n\
+			][\n\
+				class  = bar\n\
+			]")
+
+			o(vnode.attrs.id).equals("foo")
+			o(vnode.attrs.className).equals("bar")
+		})
+		o("allows newlines within attributes", function() {
+			var vnode = m(`[\n\
+				class = '\n\
+					bar\n\
+					baz\n\
+				'\n\
+			]`)
+
+			o(vnode.attrs.className).equals("\n\
+					bar\n\
+					baz\n\
+				")
+		})
+	})
 })
