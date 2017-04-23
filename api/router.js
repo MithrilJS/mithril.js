@@ -53,7 +53,9 @@ module.exports = function($window, redrawService) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			route.set(href, undefined, undefined)
+			var options = undefined;
+			if(vnode.attrs.history_replace === true) options = {replace: true}
+			route.set(href, undefined, options)
 		}
 	}
 	route.param = function(key) {

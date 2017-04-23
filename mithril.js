@@ -1096,7 +1096,7 @@ var coreRouter = function($window) {
 			default: return normalize1("pathname").slice(router.prefix.length) + normalize1("search") + normalize1("hash")
 		}
 	}
-	router.setPath = function(path, data, options) {
+	router.setPath = function(path, data, options0) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
 		if (data != null) {
@@ -1111,10 +1111,10 @@ var coreRouter = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 		if (supportsPushState) {
-			var state = options ? options.state : null
-			var title = options ? options.title : null
+			var state = options0 ? options0.state : null
+			var title = options0 ? options0.title : null
 			$window.onpopstate()
-			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path)
+			if (options0 && options0.replace) $window.history.replaceState(state, title, router.prefix + path)
 			else $window.history.pushState(state, title, router.prefix + path)
 		}
 		else $window.location.href = router.prefix + path
@@ -1198,7 +1198,9 @@ var _20 = function($window, redrawService0) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			route.set(href, undefined, undefined)
+			var options = undefined;
+			if(vnode1.attrs.history_replace === true) options = {replace: true}
+			route.set(href, undefined, options)
 		}
 	}
 	route.param = function(key3) {
