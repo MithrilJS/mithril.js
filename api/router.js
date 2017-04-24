@@ -60,7 +60,7 @@ module.exports = function($window, redrawService) {
 		if (typeof args === "boolean")
 			return link.bind(link, arguments[0])
 		else
-			return link(arguments[0])
+			return link(false, arguments[0])
 	}
 	route.param = function(key) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
