@@ -912,7 +912,7 @@ var coreRenderer = function($window) {
 	function updateEvent(vnode, key2, value) {
 		var element = vnode.dom
 		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
+			var result = value.call(element, e, vnode)
 			onevent.call(element, e)
 			return result
 		}
