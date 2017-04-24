@@ -38,14 +38,7 @@ module.exports = function($window, redrawService) {
 		}, bail)
 		redrawService.subscribe(root, run)
 	}
-	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true}
-		lastUpdate = null
-		routeService.setPath(path, data, options)
-	}
-	route.get = function() {return currentPath}
-	route.prefix = function(prefix) {routeService.prefix = prefix}
-	route.link = function(vnode) {
+	var link = function(vnode, replace) {
 		vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
 			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
@@ -54,9 +47,22 @@ module.exports = function($window, redrawService) {
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
 			var options = undefined;
-			if(vnode.attrs.history_replace === true) options = {replace: true}
+			if(replace === true) options = {replace: true}
 			route.set(href, undefined, options)
 		}
+	}
+	route.set = function(path, data, options) {
+		if (lastUpdate != null) options = {replace: true}
+		lastUpdate = null
+		routeService.setPath(path, data, options)
+	}
+	route.get = function() {return currentPath}
+	route.prefix = function(prefix) {routeService.prefix = prefix}
+	route.link = function(vnode) {
+		link(vnode, false)
+	}
+	route.link_nohistory = function(vnode) {
+		link(vnode, true)
 	}
 	route.param = function(key) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
