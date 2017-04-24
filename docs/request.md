@@ -287,7 +287,7 @@ function upload(e) {
 
 	var data = new FormData()
 	for (var i = 0; i < files.length; i++) {
-		data.append("file" + i, file)
+		data.append("file" + i, files[i])
 	}
 
 	m.request({
