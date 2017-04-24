@@ -53,9 +53,7 @@ module.exports = function($window, redrawService) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			var options
-			if(replace === true) options = {replace: true}
-			route.set(href, undefined, options)
+			route.set(href, undefined, replace ? {replace: true} : undefined)
 		}
 	}
 	route.link = function(args) {
