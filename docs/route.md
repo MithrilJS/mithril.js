@@ -319,6 +319,20 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 })
 ```
 
+#### Handling 404s
+
+For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+
+In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
+
+```javascript
+m.route(document.body, "/", {
+  "/": homeComponent,
+  // [...]
+  "/:404...": errorPageComponent
+});
+ ```
+
 #### History state
 
 It's possible to take full advantage of the underlying `history.pushState` API to improve user's navigation experience. For example, an application could "remember" the state of a large form when the user leaves a page by navigating away, such that if the user pressed the back button in the browser, they'd have the form filled rather than a blank form.
