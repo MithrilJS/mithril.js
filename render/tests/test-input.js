@@ -80,6 +80,16 @@ o.spec("form inputs", function() {
 			o(select.dom.selectedIndex).equals(0)
 		})
 
+		o("select option can have empty string value", function() {
+			var select = {tag: "select", children :[
+				{tag: "option", attrs: {value: ""}, text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("")
+		})
+
 		o("select yields invalid value without children", function() {
 			var select = {tag: "select", attrs: {value: "a"}}
 
