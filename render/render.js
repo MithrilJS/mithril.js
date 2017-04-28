@@ -539,7 +539,7 @@ module.exports = function($window) {
 	//style
 	function updateStyle(element, old, style) {
 		if (old === style) element.style.cssText = "", old = null
-		if (style == null) element.style.cssText = ""
+		if (!style) element.style.cssText = ""
 		else if (typeof style === "string") element.style.cssText = style
 		else {
 			if (typeof old === "string") element.style.cssText = ""
@@ -565,7 +565,7 @@ module.exports = function($window) {
 		if (key in element) element[key] = typeof value === "function" ? callback : null
 		else {
 			var eventName = key.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
+			if (!vnode.events) vnode.events = {}
 			if (vnode.events[key] === callback) return
 			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
 			if (typeof value === "function") {
