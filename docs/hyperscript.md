@@ -181,7 +181,7 @@ Mithril does not attempt to add units to number values.
 
 ### Events
 
-Mithril supports event handler binding for all DOM events, using `addEventListener` under the hood to add events in case they don't have a corresponding `on${event}` property, such as the native `touchstart` or third-party events like Bootstrap's `show.bs.modal`.
+Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on${event}` property, such as `touchstart`
 
 ```javascript
 function doSomething(e) {
@@ -189,38 +189,6 @@ function doSomething(e) {
 }
 
 m("div", {onclick: doSomething})
-```
-
-You may access the element itself through `this` like so, which is useful for things like form validation:
-
-```javascript
-function submit(e) {
-	this.validate()
-	m.request("api/form-endpoint", {
-		method: "POST",
-		data: new FormData(this),
-		background: true
-	})
-	.then(function () {
-		m.route.set("/form-submit")
-	})
-}
-
-m("form", {onsubmit: submit}, [
-	// ...
-])
-```
-
-It also provides access to the event's own literal vnode via `vnode`, so you may easily access its `attrs` and `children` through it, from an external function.
-
-```javascript
-function handleClick(e, vnode) {
-	vnode.attrs.context.validateValue(this.value)
-}
-
-m("div", [
-	m("input", {type: "text", context: this, onclick: handleClick})
-])
 ```
 
 ---
