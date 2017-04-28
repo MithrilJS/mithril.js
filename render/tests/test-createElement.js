@@ -55,7 +55,10 @@ o.spec("createElement", function() {
 		o(vnode.dom.childNodes[1].nodeName).equals("B")
 	})
 	o("creates svg", function() {
-		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}}]}
+		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+			{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}},
+			{tag: "foreignObject", children: [{tag: "body", attrs: {xmlns: "http://www.w3.org/1999/xhtml"}}]}
+		]}
 		render(root, [vnode])
 
 		o(vnode.dom.nodeName).equals("svg")
@@ -64,6 +67,9 @@ o.spec("createElement", function() {
 		o(vnode.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(vnode.dom.firstChild.attributes["href"].nodeValue).equals("javascript:;")
 		o(vnode.dom.firstChild.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+		o(vnode.dom.childNodes[1].nodeName).equals("foreignObject")
+		o(vnode.dom.childNodes[1].firstChild.nodeName).equals("body")
+		o(vnode.dom.childNodes[1].firstChild.namespaceURI).equals("http://www.w3.org/1999/xhtml")
 	})
 	o("sets attributes correctly for svg", function() {
 		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", attrs: {viewBox: "0 0 100 100"}}

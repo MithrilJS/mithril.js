@@ -64,15 +64,20 @@ module.exports = function($window) {
 		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
-	function createElement(parent, vnode, hooks, ns, nextSibling) {
-		var tag = vnode.tag
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
+	function getNamespace(vnode) {
+		var ns = {
+			svg: "http://www.w3.org/2000/svg",
+			math: "http://www.w3.org/1998/Math/MathML"
 		}
 
+		return ns = vnode.attrs && vnode.attrs.xmlns || ns[vnode.tag]
+	}
+	function createElement(parent, vnode, hooks, ns, nextSibling) {
+		var tag = vnode.tag
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
+
+		ns = getNamespace(vnode) || ns
 
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
@@ -289,10 +294,8 @@ module.exports = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
+		ns = getNamespace(vnode) || ns
+
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
