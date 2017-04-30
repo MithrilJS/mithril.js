@@ -122,13 +122,13 @@ o.spec("form inputs", function() {
 
 			//test that value reverts to textContent when value omitted
 			select = {tag: "select", children :[
-				{tag: "option", text: "ccc"}
+				{tag: "option", text: "aaa"}
 			]}
 
 			render(root, [select])
 
-			o(select.dom.firstChild.value).equals("ccc")
-			o(select.dom.value).equals("ccc")
+			o(select.dom.firstChild.value).equals("aaa")
+			o(select.dom.value).equals("aaa")
 		})
 
 		o("select yields invalid value without children", function() {
