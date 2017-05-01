@@ -26,20 +26,18 @@
 		<script>
 var root = document.getElementById("root")
 
-var empty = []
-var full = []
-for (var i = 0; i < 100; i++) full.push(i)
+const range = (start, end) => {
+	let full = []
+	for (let i = start; i < end; i++) full.push(i)
+	return full
+}
 
-function exit(vnode) {
+const exit = vnode => {
 	vnode.dom.classList.add("exit")
 	return new Promise(function(resolve) {
 		setTimeout(resolve, 1000)
 	})
 }
-
-// toggle state
-const reducer = (state, action) => state === full 
-	? empty : full
 
 // actions -> state -> vnode
 const view = exit => cells => 
@@ -50,22 +48,19 @@ const view = exit => cells =>
 		})
 	))
 
-
-// Pipe regular constant values into the actions stream
-const delayedConstant = (value, delay) => actions => {
-	setInterval(_ => actions(value), delay)
+// emit alternate values from the array into actions stream
+const alternate = delay => values => actions => {
+	let i = 1
+	setInterval(() => actions(values[i = 1 - i]), delay)
 	return actions
 }
 
-// prepare action stream
-const actions = delayedConstant('toggle', 1000)(m.stream())
-
-// iterate reducer - toggle full/empty
-m.stream.scan(reducer, empty, actions)
-				// pipe state stream into view
-				.map(view(exit))
-				// pipe view stream into render
-				.map(vnode => m.render(root, vnode))
+// prepare stream alternating between empty and full
+alternate(1000)([[], range(0, 100)])(m.stream())
+	// pipe state stream into view
+	.map(view(exit))
+	// pipe view stream into render
+	.map(vnode => m.render(root, vnode))
 
 		</script>
 	</body>
