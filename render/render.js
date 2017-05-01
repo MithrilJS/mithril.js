@@ -481,7 +481,7 @@ module.exports = function($window) {
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "select" && key === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key === "value" && vnode.dom.value == value) return
+			if (vnode.tag === "option" && key === "value" && old != null && vnode.dom.value == value) return
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode.tag === "input" && key === "type") {
 				element.setAttribute(key, value)

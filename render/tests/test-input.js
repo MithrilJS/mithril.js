@@ -90,6 +90,47 @@ o.spec("form inputs", function() {
 			o(select.dom.firstChild.value).equals("")
 		})
 
+		o("option value defaults to textContent unless explicitly set", function() {
+			var select = {tag: "select", children :[
+				{tag: "option", text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("aaa")
+			o(select.dom.value).equals("aaa")
+
+			//test that value changes when content changes
+			select = {tag: "select", children :[
+				{tag: "option", text: "bbb"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("bbb")
+			o(select.dom.value).equals("bbb")
+
+			//test that value can be set to "" in subsequent render
+			select = {tag: "select", children :[
+				{tag: "option", attrs: {value: ""}, text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("")
+			o(select.dom.value).equals("")
+
+			//test that value reverts to textContent when value omitted
+			select = {tag: "select", children :[
+				{tag: "option", text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("aaa")
+			o(select.dom.value).equals("aaa")
+		})
+
 		o("select yields invalid value without children", function() {
 			var select = {tag: "select", attrs: {value: "a"}}
 
