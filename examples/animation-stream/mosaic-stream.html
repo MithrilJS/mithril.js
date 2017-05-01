@@ -39,28 +39,32 @@ const exit = vnode => {
 	})
 }
 
-const backgroundPosition = i => 
-	(i % 10 * 11) + "% " 
-	+ (Math.floor(i / 10) * 11) + "%"
+const backgroundPosition = step => i => 
+	// X
+	(i % step * (step+1)) + "% " 
+	// Y
+	+ (Math.floor(i / step) * (step+1)) + "%"
 
 // actions -> state -> vnode
 const view = exit => cells => 
 	m(".container", cells.map(i => 
 	 	m(".slice", {
-			style: {backgroundPosition: backgroundPosition(i)},
+			style: {backgroundPosition: backgroundPosition(10)(i)},
 			onbeforeremove: exit
 		})
 	))
 
-// emit alternate values from the array into actions stream
-const alternate = delay => values => actions => {
+// delayed alternate array[0] and array[1] and pipe into actions stream
+const alternate = delay => array => actions => {
 	let i = 1
-	setInterval(() => actions(values[i = 1 - i]), delay)
+	setInterval(() => actions(array[i = 1 - i]), delay)
 	return actions
 }
 
+const delay = 2000
+
 // prepare stream alternating between empty and full
-alternate(1000)([[], range(0, 100)])(m.stream())
+alternate(delay)([[], range(0, 10 * 10)])(m.stream())
 	// pipe state stream into view
 	.map(view(exit))
 	// pipe view stream into render
