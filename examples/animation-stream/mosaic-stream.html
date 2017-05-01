@@ -80,11 +80,8 @@ const actions = delayedConstant('toggle', 1000)(m.stream())
 
 // iterate reducer - toggles full/empty
 m.stream.scan(reducer, empty, actions)
-
-	.map(state => {
-		m.render(root, [view(exit)(state)])
-	})
-	// .map(x => console.log(x))
+				.map(view(exit))
+				.map(vnode => m.render(root, vnode))
 
 
 // Finally run the app
