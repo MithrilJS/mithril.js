@@ -38,6 +38,19 @@ module.exports = function($window, redrawService) {
 		}, bail)
 		redrawService.subscribe(root, run)
 	}
+	var link = function(vnode, replace) {
+		vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
+		vnode.dom.onclick = function(e) {
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
+			e.preventDefault()
+			e.redraw = false
+			var href = this.getAttribute("href")
+			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
+			var options = undefined;
+			if(replace === true) options = {replace: true}
+			route.set(href, undefined, options)
+		}
+	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) options = {replace: true}
 		lastUpdate = null
@@ -46,15 +59,10 @@ module.exports = function($window, redrawService) {
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix) {routeService.prefix = prefix}
 	route.link = function(vnode) {
-		vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
-		vnode.dom.onclick = function(e) {
-			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
-			e.preventDefault()
-			e.redraw = false
-			var href = this.getAttribute("href")
-			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			route.set(href, undefined, undefined)
-		}
+		link(vnode, false)
+	}
+	route.link_nohistory = function(vnode) {
+		link(vnode, true)
 	}
 	route.param = function(key) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
