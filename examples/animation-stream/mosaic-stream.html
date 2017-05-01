@@ -33,14 +33,14 @@ for (var i = 0; i < 100; i++) full.push(i)
 // state
 var cells
 
-function view() {
-	return m(".container", cells.map(function(i) {
-		return m(".slice", {
+const view = exit => cells => 
+	m(".container", cells.map(i => 
+	 	m(".slice", {
 			style: {backgroundPosition: (i % 10 * 11) + "% " + (Math.floor(i / 10) * 11) + "%"},
 			onbeforeremove: exit
 		})
-	}))
-}
+	))
+
 
 function exit(vnode) {
 	vnode.dom.classList.add("exit")
@@ -82,8 +82,7 @@ const actions = delayedConstant('toggle', 1000)(m.stream())
 m.stream.scan(reducer, empty, actions)
 
 	.map(state => {
-		cells = state
-		m.render(root, [view()])
+		m.render(root, [view(exit)(state)])
 	})
 	// .map(x => console.log(x))
 
