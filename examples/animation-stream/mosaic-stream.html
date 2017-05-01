@@ -39,11 +39,15 @@ const exit = vnode => {
 	})
 }
 
+const backgroundPosition = i => 
+	(i % 10 * 11) + "% " 
+	+ (Math.floor(i / 10) * 11) + "%"
+
 // actions -> state -> vnode
 const view = exit => cells => 
 	m(".container", cells.map(i => 
 	 	m(".slice", {
-			style: {backgroundPosition: (i % 10 * 11) + "% " + (Math.floor(i / 10) * 11) + "%"},
+			style: {backgroundPosition: backgroundPosition(i)},
 			onbeforeremove: exit
 		})
 	))
