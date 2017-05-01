@@ -8,9 +8,10 @@
   "repository": "lhorie/mithril.js",
   "scripts": {
     "dev": "node bundler/cli browser.js -o mithril.js -w",
-    "build": "npm run build-browser & npm run build-min",
-    "build-browser": "node bundler/cli browser.js -o mithril.js",
-    "build-min": "node bundler/cli browser.js -o mithril.min.js -m",
+    "dev-stream": "node bundler/cli stream/stream.js -o stream.js -w",
+    "build": "npm run build-browser && npm run build-min",
+    "build-browser": "node bundler/cli browser.js -o mithril.js && node bundler/cli stream/stream.js -o stream.js",
+    "build-min": "node bundler/cli browser.js -o mithril.min.js -m && node bundler/cli stream/stream.js -o stream.min.js -m",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint . || true",
@@ -21,7 +22,7 @@
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
-    "version": "npm run build && git add mithril.js mithril.min.js",
+    "version": "npm run build && git add mithril.js mithril.min.js stream.js stream.min.js",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
