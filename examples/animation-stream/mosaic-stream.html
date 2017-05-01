@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Mosaic</title>
+		<style>
+#root {margin:auto;max-width:600px;width:100%;}
+.slice {animation:enter 1s;animation-fill-mode:forwards;background-image:url(flowers.jpg);height:60px;float:left;opacity:0;width:60px;}
+.slice:nth-child(10n) {clear:right;}
+.exit {animation:exit 1s;}
+
+@keyframes enter {
+	from {opacity:0;transform:rotate(-90deg) scale(0);}
+	to {opacity:1;transform:rotate(0) scale(1);}
+}
+@keyframes exit {
+	from {opacity:1;transform:rotate(0) scale(1);}
+	to {opacity:0;transform:rotate(90deg) scale(0);}
+}
+		</style>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script src="../../mithril.js"></script>
+		<script src="../../stream/stream.js"></script>
+		<script>
+var root = document.getElementById("root")
+
+var empty = []
+var full = []
+for (var i = 0; i < 100; i++) full.push(i)
+
+// state
+var cells
+
+function view() {
+	return m(".container", cells.map(function(i) {
+		return m(".slice", {
+			style: {backgroundPosition: (i % 10 * 11) + "% " + (Math.floor(i / 10) * 11) + "%"},
+			onbeforeremove: exit
+		})
+	}))
+}
+
+function exit(vnode) {
+	vnode.dom.classList.add("exit")
+	return new Promise(function(resolve) {
+		setTimeout(resolve, 1000)
+	})
+}
+
+
+// Pipe regular constant values into the actions stream
+const delayedConstant = (value, delay) => actions => {
+	setInterval(_ => actions(value), delay)
+	return actions
+}
+
+
+// Drivers
+const render = elm => vnode => m.render(elm, vnode)
+const runApp = elm => (reducer, view, initState) => actions => 
+	// iterate over actions
+	m.stream
+	.scan(reducer, initState, actions)
+
+	// pipe into view
+	// view events wil update the actionStream
+	.map(view(actions))
+
+	// render to DOM
+	.map(render(elm))
+
+
+
+const actions = delayedConstant(true, 1000)(m.stream())
+	.map(_ => {
+		cells = cells === full ? empty : full
+		m.render(root, [view()])
+	})
+	// .map(x => console.log(x))
+
+
+// Finally run the app
+// runApp(elm)(reducer, view)(actions)
+
+		</script>
+	</body>
+</html>
