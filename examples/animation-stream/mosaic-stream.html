@@ -30,9 +30,18 @@ var empty = []
 var full = []
 for (var i = 0; i < 100; i++) full.push(i)
 
-// state
-var cells
+function exit(vnode) {
+	vnode.dom.classList.add("exit")
+	return new Promise(function(resolve) {
+		setTimeout(resolve, 1000)
+	})
+}
 
+// toggle state
+const reducer = (state, action) => state === full 
+	? empty : full
+
+// actions -> state -> vnode
 const view = exit => cells => 
 	m(".container", cells.map(i => 
 	 	m(".slice", {
@@ -42,50 +51,21 @@ const view = exit => cells =>
 	))
 
 
-function exit(vnode) {
-	vnode.dom.classList.add("exit")
-	return new Promise(function(resolve) {
-		setTimeout(resolve, 1000)
-	})
-}
-
-
 // Pipe regular constant values into the actions stream
 const delayedConstant = (value, delay) => actions => {
 	setInterval(_ => actions(value), delay)
 	return actions
 }
 
-
-// Drivers
-const render = elm => vnode => m.render(elm, vnode)
-const runApp = elm => (reducer, view, initState) => actions => 
-	// iterate over actions
-	m.stream
-	.scan(reducer, initState, actions)
-
-	// pipe into view
-	// view events wil update the actionStream
-	.map(view(actions))
-
-	// render to DOM
-	.map(render(elm))
-
-
-const reducer = (state, action) => state === full 
-	? empty : full
-
-
+// prepare action stream
 const actions = delayedConstant('toggle', 1000)(m.stream())
 
-// iterate reducer - toggles full/empty
+// iterate reducer - toggle full/empty
 m.stream.scan(reducer, empty, actions)
+				// pipe state stream into view
 				.map(view(exit))
+				// pipe view stream into render
 				.map(vnode => m.render(root, vnode))
-
-
-// Finally run the app
-// runApp(elm)(reducer, view)(actions)
 
 		</script>
 	</body>
