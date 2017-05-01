@@ -61,10 +61,8 @@ const alternate = delay => array => actions => {
 	return actions
 }
 
-const delay = 2000
-
 // prepare stream alternating between empty and full
-alternate(delay)([[], range(0, 10 * 10)])(m.stream())
+alternate(2000)([[], range(0, 10 * 10)])(m.stream())
 	// pipe state stream into view
 	.map(view(exit))
 	// pipe view stream into render
