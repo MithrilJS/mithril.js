@@ -464,6 +464,12 @@ m.route(document.body, &quot;/edit/1&quot;, {
     &quot;/files/:file...&quot;: Edit,
 })
 </code></pre>
+<p>For isomorphic / universal javascript app, variadic route is very usefull to display custom 404 error page.
+<br>
+In a case of 404 Not Found error, Express or similar send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
+</p>
+<pre><code class="lang-javascript">"/...": errorPageComponent
+</code></pre>
 <h4 id="history-state"><a href="#history-state">History state</a></h4>
 <p>It&#39;s possible to take full advantage of the underlying <code>history.pushState</code> API to improve user&#39;s navigation experience. For example, an application could &quot;remember&quot; the state of a large form when the user leaves a page by navigating away, such that if the user pressed the back button in the browser, they&#39;d have the form filled rather than a blank form.</p>
 <p>For example, you could create a form like this:</p>
