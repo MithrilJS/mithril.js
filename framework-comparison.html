@@ -4,6 +4,7 @@
 		<title> Framework comparison - Mithril.js</title>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
+		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
 	<body>
@@ -14,8 +15,8 @@
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
-					<a href="https://gitter.im/lhorie/mithril.js">Chat</a>
-					<a href="https://github.com/lhorie/mithril.js">Github</a>
+					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
+					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
 				</nav>
 			</section>
 		</header>
@@ -47,9 +48,10 @@
 </ul>
 </li>
 <li>Social<ul>
-<li><a href="https://github.com/lhorie/mithril.js/wiki/JOBS">Mithril Jobs</a></li>
+<li><a href="https://github.com/MithrilJS/mithril.js/wiki/JOBS">Mithril Jobs</a></li>
 <li><a href="contributing.html">How to contribute</a></li>
 <li><a href="credits.html">Credits</a></li>
+<li><a href="code-of-conduct.html">Code of Conduct</a></li>
 </ul>
 </li>
 <li>Misc<ul>
@@ -126,7 +128,7 @@
 <p>What these numbers show is that not only does Mithril initializes significantly faster, it can process upwards of 20,000 virtual DOM nodes before React is ready to use.</p>
 <h5 id="update-performance"><a href="#update-performance">Update performance</a></h5>
 <p>Update performance can be even more important than first-render performance, since updates can happen many times while a Single Page Application is running.</p>
-<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare a <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/react/index.html">React implementation</a> and a <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Sample results are shown below:</p>
+<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare a <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/react/index.html">React implementation</a> and a <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Sample results are shown below:</p>
 <table>
 <thead>
 <tr>
@@ -173,7 +175,7 @@
 <p>With that being said, the smallest known Angular 2 bundle is a <a href="https://www.lucidchart.com/techblog/2016/09/26/improving-angular-2-load-times/">29kb hello world</a> compressed w/ the Brotli algorithm (it&#39;s 35kb using standard gzip), and with most of Angular&#39;s useful functionality removed. By comparison, a Mithril hello world - including the entire Mithril core - would not be over 8kb gzipped (a more optimized bundle could easily be half of that).</p>
 <p>Also, remember that frameworks like Angular and Mithril are designed for non-trivial application, so an application that managed to use all of Angular&#39;s API surface would need to download several hundred kb of framework code, rather than merely 29kb.</p>
 <h5 id="update-performance1"><a href="#update-performance1">Update performance</a></h5>
-<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare an <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/angular/index.html">Angular implementation</a> and a <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Both implementations are naive (i.e. no optimizations). Sample results are shown below:</p>
+<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare an <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/angular/index.html">Angular implementation</a> and a <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Both implementations are naive (i.e. no optimizations). Sample results are shown below:</p>
 <table>
 <thead>
 <tr>
@@ -226,7 +228,7 @@
 </table>
 <p>Library load times matter in applications that don&#39;t stay open for long periods of time (for example, anything in mobile) and cannot be improved via caching or other optimization techniques.</p>
 <h5 id="update-performance2"><a href="#update-performance2">Update performance</a></h5>
-<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare a <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/vue/index.html">Vue implementation</a> and a <a href="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Both implementations are naive (i.e. no optimizations). Sample results are shown below:</p>
+<p>A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and <code>setTimeout</code> clamping delay, so the most meaningful number to look at is the mean render time. You can compare a <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/vue/index.html">Vue implementation</a> and a <a href="http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html">Mithril implementation</a>. Both implementations are naive (i.e. no optimizations). Sample results are shown below:</p>
 <table>
 <thead>
 <tr>
