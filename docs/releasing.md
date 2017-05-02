@@ -4,19 +4,44 @@
 
 ### Prepare the release
 
-1. Determine patch level of the change
-2. Update information in `docs/change-log.md` to match reality & the new version that will be released
+1. Ensure your local branch is up to date
+
+```bash
+$ git co next
+$ git pull --rebase lhorie next
+```
+
+2. Determine patch level of the change
+3. Update information in `docs/change-log.md` to match reality of the new version being prepared for release
+4. Commit changes to `next`
+
+```
+$ git add .
+$ git commit -m "Preparing for release"
+
+# Push to your branch
+$ git push
+
+# Push to lhorie/mithril.js
+$ git push lhorie next
+```
 
 ### Merge from `next` to `master`
 
-3. Switch to `master` and merge `next` on top of it
+5. Switch to `master` and make sure it's up to date
 
 ```bash
 $ git co master
+$ git pull --rebase lhorie master
+```
+
+6. merge `next` on top of it
+
+```bash
 $ git merge next
 ```
 
-4. Clean & update npm dependencies and ensure the tests are passing.
+7. Clean & update npm dependencies and ensure the tests are passing.
 
 ```bash
 $ npm prune
@@ -26,12 +51,43 @@ $ npm test
 
 ### Publish the release
 
-5. `npm run release <major|minor|patch|semver>`, see the docs for [`npm version`](https://docs.npmjs.com/cli/version)
-6. Travis will push the new release to npm & create a GitHub release
+8. `npm run release <major|minor|patch|semver>`, see the docs for [`npm version`](https://docs.npmjs.com/cli/version)
+9. The changes will be automatically pushed to your fork
+10. Push the changes to `lhorie/mithril.js`
+
+```bash
+$ git push lhorie master
+```
+
+11. Travis will push the new release to npm & create a GitHub release
+
+### Merge `master` back into `next`
+
+This helps to ensure that the `version` field of `package.json` doesn't get out of date.
+
+12. Switch to `next` and make sure it's up to date
+
+```bash
+$ git co next
+$ git pull --rebase lhorie next
+```
+
+13. Merge `master` back onto `next`
+
+```bash
+$ git merge master
+```
+
+14. Push the changes to your fork & `lhorie/mithril.js`
+
+```bash
+$ git push
+$ git push lhorie next
+```
 
 ### Update the GitHub release
 
-7. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
+15. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
 
 ## Updating mithril.js.org
 
