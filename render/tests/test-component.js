@@ -958,6 +958,30 @@ o.spec("component", function() {
 					}
 				})
 			})
+			o.spec("granular update", function () {
+				o("works", function() {
+					var childVnode
+					var childComponent = createComponent({
+						view: function(vnode) {
+							childVnode = vnode;
+							return {tag: "p", attrs: {id: "aP"}, text: vnode.attrs.value}
+						}
+					})
+					var parentComponent = createComponent({
+						view: function() {
+							return {tag: "div", attrs: {id: "a"}, children: [{tag: childComponent, attrs: {value: "a p"}}]}
+						}
+					})
+					var node = {tag: parentComponent}
+
+					render(root, [node])
+					o(root.firstChild.firstChild.firstChild.nodeValue).equals("a p")
+
+					childVnode.attrs.value = "b p"
+					render(childVnode)
+					o(root.firstChild.firstChild.firstChild.nodeValue).equals("b p")
+				})
+			})
 		})
 	})
 	o.spec("Tests specific to certain component kinds", function() {
