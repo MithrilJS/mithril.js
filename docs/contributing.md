@@ -4,7 +4,7 @@
 
 ## How do I go about contributing ideas or new features?
 
-Create an [issue thread on Github](https://github.com/lhorie/mithril.js/issues/new) to suggest your idea so the community can discuss it.
+Create an [issue thread on Github](https://github.com/MithrilJS/mithril.js/issues/new) to suggest your idea so the community can discuss it.
 
 If the consensus is that it's a good idea, the fastest way to get it into a release is to send a pull request. Without a PR, the time to implement the feature will depend on the bandwidth of the development team and its list of priorities.
 

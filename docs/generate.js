@@ -66,8 +66,9 @@ function generate(pathname) {
 			fs.writeFileSync("./dist/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 		}
 		else if (!pathname.match(/lint|generate/)) {
-			fs.writeFileSync("./dist/archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
-			fs.writeFileSync("./dist/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
+			var encoding = (/\.(ico|png)$/i).test(path.extname(pathname)) ? "binary" : "utf-8";
+			fs.writeFileSync("./dist/archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, encoding), encoding)
+			fs.writeFileSync("./dist/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, encoding), encoding)
 		}
 	}
 }
