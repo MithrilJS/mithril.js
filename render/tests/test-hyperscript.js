@@ -218,6 +218,18 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals(true)
 		})
+		o("handles explicit empty string value for input", function() {
++			var vnode = m('input[value=""]')
++			
++			o(vnode.tag).equals("input")
++			o(vnode.attrs.value).equals("")
++		})
++		o("handles explicit empty string value for option", function() {
++			var vnode = m('option[value=""]')
++			
++			o(vnode.tag).equals("option")
++			o(vnode.attrs.value).equals("")
++		})
 	})
 	o.spec("attrs", function() {
 		o("handles string attr", function() {
