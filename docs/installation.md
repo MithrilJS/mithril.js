@@ -219,7 +219,7 @@ If you don't have the ability to run a bundler script due to company security po
     <title>Hello world</title>
   </head>
   <body>
-    <script src="https://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/MithrilJS/mithril.js/master/mithril.js"></script>
     <script src="index.js"></script>
   </body>
 </html>
