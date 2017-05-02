@@ -12,5 +12,5 @@
   "bin": {
     "ospec": "./bin/ospec"
   },
-  "repository": "lhorie/mithril.js#rewrite"
+  "repository": "MithrilJS/mithril.js"
 }

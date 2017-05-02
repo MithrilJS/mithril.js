@@ -9,5 +9,5 @@
   "keywords": [ "stream", "reactive", "data" ],
   "author": "Leo Horie <lhorie@hotmail.com>",
   "license": "MIT",
-  "repository": "lhorie/mithril.js"
+  "repository": "MithrilJS/mithril.js"
 }
