@@ -68,6 +68,27 @@ o.spec("oncreate", function() {
 		o(createA.this).equals(updated.state)
 		o(createA.args[0]).equals(updated)
 	})
+	o("calls oncreate when key changes", function() {
+
+		return console.log('Pending test (TODO: Delete this line)')
+
+		var create = o.spy()
+		var vnode = {tag: "div", state: {}, children: [
+			{tag: "div", state: {}},
+			{tag: "div", key: 1, state: {}},
+		]}
+		var updated = {tag: "div", state: {}, children:[
+			{tag: "div", state: {}},
+			{tag: "div", key: 2, attrs: {oncreate: create}, state:{}},
+		]}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		o(create.callCount).equals(1)
+		o(create.this).equals(updated.children[0].state)
+		o(create.args[0]).equals(updated.children[0])
+	})
 	o("does not call oncreate when noop", function() {
 		var create = o.spy()
 		var update = o.spy()
