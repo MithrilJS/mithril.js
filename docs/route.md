@@ -21,7 +21,7 @@
 - [Changing router prefix](#changing-router-prefix)
 - [Advanced component resolution](#advanced-component-resolution)
 	- [Wrapping a layout component](#wrapping-a-layout-component)
-	- [Authentication](#authentication)
+	- [Redirection](#redirection)
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
 
@@ -504,9 +504,13 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 ---
 
-#### Authentication
+#### Redirection
 
-The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. You can use either `m.route.set()` or `window.history.back()` `.forward()`, etc... When redirecting with the `history` API, the `onmatch` hook must return `new Promise(function(){})` to suspend the resolution of the current route. A fresh Promise must be returned every time since recycling a pending Promise leads to memory leaks. `m.route.set()` takes care of cancelling the resolution of the aborted route, there's no need to return a pending Promise in that case.
+
+##### Example: authentication
+
+The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
