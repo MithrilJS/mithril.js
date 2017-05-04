@@ -124,7 +124,7 @@ Argument          | Type        | Required | Description
 
 ##### m.route.param
 
-Retrieves a route parameter. A route parameter is a key-value pair. Note that in the `onmatch` function of a RouterResolver, route parameters are unavailable from `m.route.param` and are passed as an argument instead due to internal timing of the route resolution mechanism. Route parameters may come from a few different places:
+Retrieves a route parameter from the last fully resolved route. A route parameter is a key-value pair. Route parameters may come from a few different places:
 
 - route interpolations (e.g. if a route is `/users/:id`, and it resolves to `/users/1`, the route parameter has a key `id` and value `"1"`)
 - router querystrings (e.g. if the path is `/users?page=1`, the route parameter has a key `page` and value `"1"`)
@@ -136,6 +136,8 @@ Argument          | Type            | Required | Description
 ----------------- | --------------- | -------- | ---
 `key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
 **returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
+
+ Note that in the `onmatch` function of a RouterResolver, the new route hasn't yet been fully resolved, and `m.route.params()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
 
 #### RouteResolver
 
