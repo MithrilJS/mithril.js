@@ -140,4 +140,16 @@ o.spec("ospec", function() {
 			})
 		})
 	})
+	o.spec('duplicate names', function() {
+		var spy = o.spy()
+		o.spec('foo', function(){
+			o('bar', spy)
+			o('bar', spy)
+		})
+		o.spec('foo', spy)
+
+		o("let's count", function() {
+			o(spy.callCount).equals(3)
+		})
+	})
 })
