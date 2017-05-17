@@ -57,8 +57,8 @@ module.exports = function($window, redrawService) {
 		}
 	}
 	route.link = function(args) {
-		if (typeof args.prototype.view === "undefined") return link.bind(link, args)
-		return link({replace: true}, args)
+		if (typeof args.tag === "undefined") return link.bind(link, args)
+		return link({}, args)
 	}
 	route.param = function(key) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
