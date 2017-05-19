@@ -5,7 +5,7 @@
   "author": "Leo Horie",
   "license": "MIT",
   "main": "mithril.js",
-  "repository": "lhorie/mithril.js",
+  "repository": "MithrilJS/mithril.js",
   "scripts": {
     "dev": "node bundler/cli browser.js -o mithril.js -w",
     "build": "npm run build-browser & npm run build-min",
@@ -13,10 +13,11 @@
     "build-min": "node bundler/cli browser.js -o mithril.min.js -m",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
-    "lint": "eslint .",
+    "lint": "eslint . || true",
     "lint:fix": "eslint . --fix",
+    "perf": "node performance/test-perf.js",
     "test": "node ospec/bin/ospec",
-    "posttest": "npm run lint || true",
+    "posttest": "npm run lint",
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
@@ -24,8 +25,9 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "eslint": "^3.16.1",
-    "istanbul": "^0.4.3",
+    "benchmark": "^2.1.4",
+    "eslint": "^3.19.0",
+    "istanbul": "^0.4.5",
     "marked": "^0.3.6"
   },
   "bin": {

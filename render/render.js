@@ -6,8 +6,17 @@ module.exports = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 
+	var nameSpace = {
+		svg: "http://www.w3.org/2000/svg",
+		math: "http://www.w3.org/1998/Math/MathML"
+	}
+
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
+
+	function getNameSpace(vnode) {
+		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	}
 
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
@@ -66,13 +75,10 @@ module.exports = function($window) {
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
-
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
+
+		ns = getNameSpace(vnode) || ns
 
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
@@ -289,10 +295,8 @@ module.exports = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
+		ns = getNameSpace(vnode) || ns
+
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
@@ -481,7 +485,7 @@ module.exports = function($window) {
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "select" && key === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key === "value" && vnode.dom.value == value) return
+			if (vnode.tag === "option" && key === "value" && old != null && vnode.dom.value == value) return
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode.tag === "input" && key === "type") {
 				element.setAttribute(key, value)

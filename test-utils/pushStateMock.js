@@ -1,7 +1,7 @@
 "use strict"
 
 var parseURL = require("../test-utils/parseURL")
-var callAsync = require("../test-utils/callAsync.js")
+var callAsync = require("../test-utils/callAsync")
 
 function debouncedAsync(f) {
 	var ref

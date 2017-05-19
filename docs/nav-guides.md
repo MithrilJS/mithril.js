@@ -17,9 +17,10 @@
 	- [Keys](keys.md)
 	- [Autoredraw system](autoredraw.md)
 - Social
-	- [Mithril Jobs](https://github.com/lhorie/mithril.js/wiki/JOBS)
+	- [Mithril Jobs](https://github.com/MithrilJS/mithril.js/wiki/JOBS)
 	- [How to contribute](contributing.md)
 	- [Credits](credits.md)
+	- [Code of Conduct](code-of-conduct.md)
 - Misc
 	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)

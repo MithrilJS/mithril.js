@@ -28,7 +28,7 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue || true
+			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
@@ -375,8 +375,15 @@ var requestService = _8(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
+	var nameSpace = {
+		svg: "http://www.w3.org/2000/svg",
+		math: "http://www.w3.org/1998/Math/MathML"
+	}
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
+	function getNameSpace(vnode) {
+		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -433,12 +440,9 @@ var coreRenderer = function($window) {
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
 		var attrs2 = vnode.attrs
 		var is = attrs2 && attrs2.is
+		ns = getNameSpace(vnode) || ns
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
@@ -649,10 +653,7 @@ var coreRenderer = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
+		ns = getNameSpace(vnode) || ns
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
@@ -837,7 +838,7 @@ var coreRenderer = function($window) {
 			//setting select[value] to same value while having select open blinks select dropdown in Chrome
 			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
 			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value == value) return
+			if (vnode.tag === "option" && key2 === "value" && old != null && vnode.dom.value == value) return
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
 				element.setAttribute(key2, value)

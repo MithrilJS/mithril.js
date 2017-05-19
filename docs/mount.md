@@ -27,6 +27,10 @@ var Counter = {
 m.mount(document.body, Counter)
 ```
 
+To pass arguments when mounting a component use:
+```javascript
+m.mount(element, {view: function () {return m(Component, attrs)}})
+```
 ---
 
 ### Signature

@@ -16,10 +16,12 @@ install:
 - npm install @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
 
 # Bundle before running tests so the bundle is always up-to-date
-before_script: npm run build
+before_script: npm run build --silent
 
-# This is the default, but leaving so it is obvious
-# script: npm test
+# Run tests, lint, and then check for perf regressions
+script:
+- npm test --silent
+- npm run perf --silent
 
 # After a successful build commit changes back to repo
 after_success:
@@ -42,7 +44,7 @@ after_success:
     # this doesn't have the built-in branch protection like commit-changes
     if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
        [ "$TRAVIS_BRANCH" == "master" ] && \
-       [ "$TRAVIS_REPO_SLUG" == "lhorie/mithril.js" ]
+       [ "$TRAVIS_REPO_SLUG" == "MithrilJS/mithril.js" ]
     then
       # Generate docs
       npm run gendocs
@@ -57,7 +59,7 @@ after_success:
       $(npm bin)/gh-pages \
         --dist ./dist \
         --add \
-        --repo "git@github.com:lhorie/mithril.js.git" \
+        --repo "git@github.com:MithrilJS/mithril.js.git" \
         --message "Generated docs for commit $TRAVIS_COMMIT [skip ci]"
     else
       echo "Not submitting documentation updates"
@@ -81,7 +83,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-      repo: lhorie/mithril.js
+      repo: MithrilJS/mithril.js
       branch: master
   
   - provider: npm
@@ -91,5 +93,5 @@ deploy:
       secure: ADElvD1oxn9GfEG7dDOggX96b36A/cGEybovAc0221CCKzv5kWCavMrtxneiJYI6N/n24abSlbM90vMfU84FEzH0Ev28dGVokRP4ad6VRkISszKlYVEP8Lds4QxfKh78jZlUxmxM0B3vmQ1kYJbTBqp3ICtaJ5ptEQHWhrLtxnc=
     on:
       tags: true
-      repo: lhorie/mithril.js
+      repo: MithrilJS/mithril.js
       branch: master
