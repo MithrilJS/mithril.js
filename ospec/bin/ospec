@@ -17,6 +17,7 @@ function traverseDirectory(pathname, callback) {
 					var promises = []
 					for (var i = 0; i < pathnames.length; i++) {
 						if (pathnames[i] === "node_modules") continue
+						if (pathnames[i][0] === ".") continue
 						pathnames[i] = path.join(pathname, pathnames[i])
 						promises.push(traverseDirectory(pathnames[i], callback))
 					}
