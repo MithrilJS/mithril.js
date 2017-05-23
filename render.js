@@ -1,1 +1,1 @@
-module.exports = require("./render/render")(window)
+module.exports = require("./renderer")(window).render
