@@ -518,19 +518,20 @@ var User = {
 	},
 
 	save: function() {
-		return m.request({
+		m.request({
 			method: "PUT",
 			url: "https://rem-rest-api.herokuapp.com/api/users/:id",
 			data: User.current,
 			withCredentials: true,
 		})
+		return false
 	}
 }
 
 module.exports = User
 ```
 
-In the `save` method at the bottom, we used the `PUT` HTTP method to indicate that we are upserting data to the server.
+In the `save` method at the bottom, we used the `PUT` HTTP method to indicate that we are upserting data to the server. The `return false` is to prevent the default submit behavior.
 
 Now try editing the name of a user in the application. Once you save a change, you should be able to see the change reflected in the list of users.
 
