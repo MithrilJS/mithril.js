@@ -170,9 +170,9 @@ o.spec("onupdate", function() {
 		function update(vnode) {
 			called = true
 
-			o(vnode.dom.parentNode.attributes["id"].nodeValue).equals("11")
-			o(vnode.dom.attributes["id"].nodeValue).equals("22")
-			o(vnode.dom.childNodes[0].attributes["id"].nodeValue).equals("33")
+			o(vnode.dom.parentNode.attributes["id"].value).equals("11")
+			o(vnode.dom.attributes["id"].value).equals("22")
+			o(vnode.dom.childNodes[0].attributes["id"].value).equals("33")
 		}
 		o(called).equals(true)
 	})

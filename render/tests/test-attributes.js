@@ -54,7 +54,7 @@ o.spec("attributes", function() {
 
 			render(root, [a])
 
-			o(a.dom.attributes["readonly"].nodeValue).equals("")
+			o(a.dom.attributes["readonly"].value).equals("")
 		})
 		o("when input readonly is false, attribute is not present", function() {
 			var a = {tag: "input", attrs: {readonly: false}}
@@ -118,7 +118,7 @@ o.spec("attributes", function() {
 
 			render(root, canvas)
 
-			o(canvas.dom.attributes["width"].nodeValue).equals("100%")
+			o(canvas.dom.attributes["width"].value).equals("100%")
 			o(canvas.dom.width).equals(100)
 		})
 	})
@@ -128,7 +128,7 @@ o.spec("attributes", function() {
 
 			render(root, [a]);
 
-			o(a.dom.attributes["class"].nodeValue).equals("test")
+			o(a.dom.attributes["class"].value).equals("test")
 		})
 	})
 	o.spec("contenteditable throws on untrusted children", function() {

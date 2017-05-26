@@ -21,7 +21,7 @@ o.spec("onbeforeupdate", function() {
 		render(root, [vnode])
 		render(root, [updated])
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("a")
+		o(root.firstChild.attributes["id"].value).equals("a")
 	})
 
 	o("prevents update in text", function() {
@@ -65,7 +65,7 @@ o.spec("onbeforeupdate", function() {
 		render(root, [vnode])
 		render(root, [updated])
 
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
+		o(root.firstChild.attributes["id"].value).equals("b")
 	})
 
 	o("accepts arguments for comparison", function() {
@@ -86,7 +86,7 @@ o.spec("onbeforeupdate", function() {
 		}
 
 		o(count).equals(1)
-		o(root.firstChild.attributes["id"].nodeValue).equals("b")
+		o(root.firstChild.attributes["id"].value).equals("b")
 	})
 
 	o("is not called on creation", function() {
@@ -167,7 +167,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].nodeValue).equals("a")
+				o(root.firstChild.attributes["id"].value).equals("a")
 			})
 
 			o("does not prevent update if returning true in component and true in vnode", function() {
@@ -183,7 +183,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
 			o("does not prevent update if returning false in component but true in vnode", function() {
@@ -199,7 +199,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
 			o("does not prevent update if returning true in component but false in vnode", function() {
@@ -215,7 +215,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
 			o("does not prevent update if returning true from component", function() {
@@ -231,7 +231,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
 			o("accepts arguments for comparison in component", function() {
@@ -258,7 +258,7 @@ o.spec("onbeforeupdate", function() {
 				}
 
 				o(count).equals(1)
-				o(root.firstChild.attributes["id"].nodeValue).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
 			o("is not called on component creation", function() {
