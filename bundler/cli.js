@@ -36,14 +36,19 @@ if (params.minify) {
 		console.log("Original size: " + format(stats.originalGzipSize) + " bytes gzipped (" + format(stats.originalSize) + " bytes uncompressed)")
 		console.log("Compiled size: " + format(stats.compressedGzipSize) + " bytes gzipped (" + format(stats.compressedSize) + " bytes uncompressed)")
 
-		readme = fs.readFileSync("./README.md", "utf8")
-		kb = stats.compressedGzipSize / 1024
+		// Only update the readme if currently bundling mithril (not stream)
+		if (params.output === 'mithril.min.js') {
+			readme = fs.readFileSync("./README.md", "utf8")
+			kb = stats.compressedGzipSize / 1024
 
-		fs.writeFileSync("./README.md",
-			readme.replace(
-				/(<!-- size -->)(.+?)(<!-- \/size -->)/,
-				"$1" + (kb % 1 ? kb.toFixed(2) : kb) + " KB$3"
+			fs.writeFileSync("./README.md",
+				readme.replace(
+					/(<!-- size -->)(.+?)(<!-- \/size -->)/,
+					"$1" + (kb % 1 ? kb.toFixed(2) : kb) + " KB$3"
+				)
 			)
-		)
+
+			console.log("Updated readme")
+		}
 	})
 }
