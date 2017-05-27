@@ -37,7 +37,7 @@ if (params.minify) {
 		console.log("Compiled size: " + format(stats.compressedGzipSize) + " bytes gzipped (" + format(stats.compressedSize) + " bytes uncompressed)")
 
 		// Only update the readme if currently bundling mithril (not stream)
-		if (params.output === 'mithril.min.js') {
+		if (params.output === "mithril.min.js") {
 			readme = fs.readFileSync("./README.md", "utf8")
 			kb = stats.compressedGzipSize / 1024
 
