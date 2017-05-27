@@ -12,8 +12,8 @@
 
 #### Bug fixes
 
-- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/lhorie/mithril.js/issues/1752) / [#1753](https://github.com/lhorie/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
-- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/lhorie/mithril.js/issues/1764) / [#1769](https://github.com/lhorie/mithril.js/pull/1769)
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
 
 ### v1.1.0
@@ -26,10 +26,10 @@
 
 #### Bug fixes
 
-- fix IE11 input[type] error - [#1610](https://github.com/lhorie/mithril.js/issues/1610)
-- apply [#1609](https://github.com/lhorie/mithril.js/issues/1609) to unkeyed children case
-- fix abort detection [#1612](https://github.com/lhorie/mithril.js/issues/1612)
-- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/lhorie/mithril.js/issues/1593)
+- fix IE11 input[type] error - [#1610](https://github.com/MithrilJS/mithril.js/issues/1610)
+- apply [#1609](https://github.com/MithrilJS/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/MithrilJS/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/MithrilJS/mithril.js/issues/1593)
 
 ---
 
@@ -37,12 +37,12 @@
 
 #### News
 
-- performance improvements in IE [#1598](https://github.com/lhorie/mithril.js/pull/1598)
+- performance improvements in IE [#1598](https://github.com/MithrilJS/mithril.js/pull/1598)
 
 #### Bug fixes
 
-- prevent infinite loop in non-existent default route - [#1579](https://github.com/lhorie/mithril.js/issues/1579)
-- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/lhorie/mithril.js/issues/1609)
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/MithrilJS/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/MithrilJS/mithril.js/issues/1609)
 
 ---
 
