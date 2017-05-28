@@ -43,7 +43,7 @@ if (params.minify) {
 
 			fs.writeFileSync("./README.md",
 				readme.replace(
-					/(Mithril \(|It\'s small \()([0-9]\.*[0-9]*)kb/g,
+					/(Mithril \(|It\'s small \()([0-9]+\.*[0-9]*)kb/g,
 					"$1" + (kb % 1 ? (Math.round(kb * 10) / 10).toFixed(1) : kb) + "kb"
 				)
 			)
