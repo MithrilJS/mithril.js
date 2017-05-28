@@ -30,6 +30,7 @@ module.exports = function(options) {
 		}
 	}
 	function getSpies(element) {
+		if (element == null || typeof element !== "object") throw new Error("Element expected")
 		if(options.spy) return spymap[spymap.indexOf(element) + 1]
 	}
 
@@ -314,6 +315,7 @@ module.exports = function(options) {
 						enumerable: true,
 					})
 
+					// we currently emulate the non-ie behavior, but emulating ie may be more useful (throw when an invalid type is set)
 					var typeSetter = spy(function(v) {
 						this.setAttribute("type", v)
 					})
