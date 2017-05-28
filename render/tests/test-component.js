@@ -694,4 +694,20 @@ o.spec("component", function() {
 			}
 		})
 	})
+	o.spec("misc", function() {
+		o("doesn't lose track of the dom of a cached component (regression test for #1206)", function() {
+			var cached = {tag:{
+				view: function () {
+					return {tag:'p', attrs:{
+						onbeforeupdate: function(vnode, old){
+							o(old.dom).notEquals(undefined)
+						}
+					},text:'foo'};
+				}
+			}}
+
+			render($window.document.body, cached)
+			render($window.document.body, cached)
+		})
+	})
 })
