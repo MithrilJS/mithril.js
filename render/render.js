@@ -675,10 +675,9 @@ module.exports = function($window) {
 			return
 		}
 		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
-		var element = vnode.dom
-		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
-		else if (key === "style") updateStyle(element, old, value)
-		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
+		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
+		else if (key === "style") updateStyle(vnode.dom, old, value)
+		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {
 				var normalized = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
@@ -696,17 +695,17 @@ module.exports = function($window) {
 			}
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode.tag === "input" && key === "type") {
-				element.setAttribute(key, value)
+				vnode.dom.setAttribute(key, value)
 				return
 			}
-			element[key] = value
+			vnode.dom[key] = value
 		}
 		else {
 			if (typeof value === "boolean") {
-				if (value) element.setAttribute(key, "")
-				else element.removeAttribute(key)
+				if (value) vnode.dom.setAttribute(key, "")
+				else vnode.dom.removeAttribute(key)
 			}
-			else element.setAttribute(key === "className" ? "class" : key, value)
+			else vnode.dom.setAttribute(key === "className" ? "class" : key, value)
 		}
 	}
 	function removeAttr(vnode, key, old, ns) {
