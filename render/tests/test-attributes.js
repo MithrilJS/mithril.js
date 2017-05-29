@@ -203,10 +203,10 @@ o.spec("attributes", function() {
 
 			o(b.dom.value).equals("")
 
-      // #1595 redux
-      render(root, [c]);
+			// #1595 redux
+			render(root, [c]);
 
-      o(c.dom.value).equals("0")
+			o(c.dom.value).equals("0")
 		})
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
@@ -476,7 +476,7 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("")
 
-      // #1595 redux
+			// #1595 redux
 			render(root, [b])
 
 			o(b.dom.value).equals("0")
