@@ -44,11 +44,10 @@ o.spec("attributes", function() {
 			o(b.dom.hasAttribute("id")).equals(true)
 			o(b.dom.getAttribute("id")).equals("test")
 
+			// #1804
 			render(root, [c]);
 
-			// #1804
-			// TODO: uncomment
-			// o(c.dom.hasAttribute("id")).equals(false)
+			o(c.dom.hasAttribute("id")).equals(false)
 		})
 	})
 	o.spec("customElements", function(){
@@ -147,7 +146,7 @@ o.spec("attributes", function() {
 		o("a lack of attribute removes `value`", function() {
 			var a = {tag: "input", attrs: {}}
 			var b = {tag: "input", attrs: {value: "test"}}
-			// var c = {tag: "input", attrs: {}}
+			var c = {tag: "input", attrs: {}}
 
 			render(root, [a])
 
@@ -158,10 +157,9 @@ o.spec("attributes", function() {
 			o(a.dom.value).equals("test")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [c])
+			render(root, [c])
 
-			// o(a.dom.value).equals("")
+			o(a.dom.value).equals("")
 		})
 		o("can be set as number", function() {
 			var a = {tag: "input", attrs: {value: 1}}
@@ -276,17 +274,16 @@ o.spec("attributes", function() {
 	o.spec("textarea.value", function() {
 		o("can be removed by not passing a value", function() {
 			var a = {tag: "textarea", attrs: {value:"x"}}
-			// var b = {tag: "textarea", attrs: {}}
+			var b = {tag: "textarea", attrs: {}}
 
 			render(root, [a])
 
 			o(a.dom.value).equals("x")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [b])
+			render(root, [b])
 
-			// o(b.dom.value).equals("")
+			o(b.dom.value).equals("")
 		})
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
