@@ -726,6 +726,9 @@ module.exports = function($window) {
 			else element.setAttribute(key === "className" ? "class" : key, value)
 		}
 	}
+	function removeAttr(vnode, key, old, ns) {
+
+	}
 	function setLateAttrs(vnode) {
 		var attrs = vnode.attrs
 		if (vnode.tag === "select" && attrs != null) {
