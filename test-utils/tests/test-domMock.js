@@ -349,6 +349,7 @@ o.spec("domMock", function() {
 			div.setAttribute("id", "aaa")
 
 			o(div.attributes["id"].value).equals("aaa")
+			o(div.attributes["id"].nodeValue).equals("aaa")
 			o(div.attributes["id"].namespaceURI).equals(null)
 		})
 		o("works w/ number", function() {
@@ -381,6 +382,10 @@ o.spec("domMock", function() {
 			div.attributes["id"].value = 123
 
 			o(div.attributes["id"].value).equals("123")
+
+			div.attributes["id"].nodeValue = 456
+
+			o(div.attributes["id"].value).equals("456")
 		})
 	})
 	o.spec("hasAttribute", function() {

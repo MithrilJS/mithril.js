@@ -111,6 +111,10 @@ module.exports = function(options) {
 				nodeValue = "" + value
 				/*eslint-enable no-implicit-coercion*/
 			},
+			get nodeValue() {return nodeValue},
+			set nodeValue(value) {
+				this.value = value
+			}
 		}
 	}
 	function setAttributeNS(ns, name, value) {
