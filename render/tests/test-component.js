@@ -30,7 +30,7 @@ o.spec("component", function() {
 					render(root, [node])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("receives arguments", function() {
@@ -44,7 +44,7 @@ o.spec("component", function() {
 					render(root, [node])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("updates", function() {
@@ -57,7 +57,7 @@ o.spec("component", function() {
 					render(root, [{tag: component, attrs: {id: "c"}, text: "d"}])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("c")
+					o(root.firstChild.attributes["id"].value).equals("c")
 					o(root.firstChild.firstChild.nodeValue).equals("d")
 				})
 				o("updates root from null", function() {
@@ -400,7 +400,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls oninit when returning fragment", function() {
@@ -423,7 +423,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls oninit before view", function() {
@@ -479,7 +479,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("does not calls oncreate on redraw", function() {
@@ -520,7 +520,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onupdate", function() {
@@ -546,7 +546,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onupdate when returning fragment", function() {
@@ -572,7 +572,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onremove", function() {
