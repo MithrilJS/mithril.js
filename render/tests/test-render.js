@@ -271,4 +271,26 @@ o.spec("render", function() {
 		o(updateA.callCount).equals(2)
 		o(removeA.callCount).equals(1)
 	})
+	o("svg namespace is preserved in keyed diff (#1820)", function(){
+		// note that this only exerciese one branch of the keyed diff algo
+		var svg = {tag:"svg", children: [
+			{tag:"g", key: 0},
+			{tag:"g", key: 1}
+		]}
+		render(root, [svg])
+
+		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+
+		svg = {tag:"svg", children: [
+			{tag:"g", key: 1, attrs: {x: 1}},
+			{tag:"g", key: 2, attrs: {x: 2}}
+		]}
+		render(root, [svg])
+
+		o(svg.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+	})
 })
