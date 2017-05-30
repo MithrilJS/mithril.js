@@ -582,7 +582,7 @@ var coreRenderer = function($window) {
 							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(parent, v, hooks, undefined, nextSibling)
+							var dom = createNode(parent, v, hooks, ns, nextSibling)
 							nextSibling = dom
 						}
 					}
