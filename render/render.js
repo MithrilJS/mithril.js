@@ -115,7 +115,7 @@ module.exports = function($window) {
 
 		insertNode(parent, element, nextSibling)
 
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
+		if (attrs != null && attrs.contenteditable != null) {
 			setContentEditable(vnode)
 		}
 		else {
@@ -126,7 +126,7 @@ module.exports = function($window) {
 			if (vnode.children != null) {
 				var children = vnode.children
 				createNodes(element, children, 0, children.length, hooks, null, ns)
-				setLateAttrs(vnode)
+				if (vnode.tag === "select" && attrs != null) setLateSelectAttrs(vnode, attrs)
 			}
 		}
 	}
@@ -687,37 +687,23 @@ module.exports = function($window) {
 	function setAttr(vnode, key, old, value, ns) {
 		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
-		if (typeof value === "undefined" && key === "value" && old !== value) {
-			vnode.dom.value = ""
-			return
-		}
-		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
+		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value == null) return
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
+		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
 			if (key === "value") {
 				var normalized = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select") {
-					if (value === null) {
-						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
-					} else {
-						if (old !== null && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
-					}
-				}
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === normalized) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === normalized) return
 			}
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
-			if (vnode.tag === "input" && key === "type") {
-				vnode.dom.setAttribute(key, value)
-				return
-			}
-			vnode.dom[key] = value
-		}
-		else {
+			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
+			else vnode.dom[key] = value
+		} else {
 			if (typeof value === "boolean") {
 				if (value) vnode.dom.setAttribute(key, "")
 				else vnode.dom.removeAttribute(key)
@@ -726,14 +712,40 @@ module.exports = function($window) {
 		}
 	}
 	function removeAttr(vnode, key, old, ns) {
-
-	}
-	function setLateAttrs(vnode) {
-		var attrs = vnode.attrs
-		if (vnode.tag === "select" && attrs != null) {
-			if ("value" in attrs) setAttr(vnode, "value", null, attrs.value, undefined)
-			if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
+		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		var nsLastIndex = key.indexOf(":")
+		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
+			vnode.dom.removeAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1))
 		}
+		else if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
+		else if (key === "style") updateStyle(vnode.dom, old, null)
+		else if (
+			key in vnode.dom && !isAttribute(key)
+			&& key !== "className"
+			&& !(vnode.tag === "option" && key === "value")
+			&& !(vnode.tag === "input" && key === "type")
+			&& ns === undefined
+			&& !isCustomElement(vnode.tag, vnode.attrs || {})
+		) {
+			vnode.dom[key] = null
+		} else {
+			if (old !== false) vnode.dom.removeAttribute(key === "className" ? "class" : key)
+		}
+	}
+	function setLateSelectAttrs(vnode, attrs) {
+		if ("value" in attrs) {
+			if(attrs.value === null) {
+				if (vnode.dom.selectedIndex !== -1) vnode.dom.value = null
+			} else {
+				/*eslint-disable no-implicit-coercion*/
+				var normalized = "" + attrs.value
+				/*eslint-enable no-implicit-coercion*/
+				if (vnode.dom.value !== normalized || vnode.dom.selectedIndex === -1) {
+					vnode.dom.value = normalized
+				}
+			}
+		}
+		if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
 		if (attrs != null) {
@@ -743,10 +755,8 @@ module.exports = function($window) {
 		}
 		if (old != null) {
 			for (var key in old) {
-				if (attrs == null || !(key in attrs)) {
-					if (key === "className") key = "class"
-					if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
-					else if (key !== "key") vnode.dom.removeAttribute(key)
+				if (attrs == null || attrs[key] == null) {
+					removeAttr(vnode, key, old[key], ns)
 				}
 			}
 		}
@@ -760,8 +770,8 @@ module.exports = function($window) {
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
 	}
-	function isCustomElement(vnode){
-		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
+	function isCustomElement(tag, attrs){
+		return attrs.is || tag.indexOf("-") > -1
 	}
 
 	//style
