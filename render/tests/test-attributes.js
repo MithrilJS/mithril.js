@@ -373,15 +373,15 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("1")
 		})
-		o("null becomes 'null'", function() {
+		o("null removes the attribute", function() {
 			var a = {tag: "option", attrs: {value: null}}
 			var b = {tag: "option", attrs: {value: "test"}}
 			var c = {tag: "option", attrs: {value: null}}
 
 			render(root, [a]);
 
-			o(a.dom.value).equals("null")
-			o(a.dom.getAttribute("value")).equals("null")
+			o(a.dom.value).equals("")
+			o(a.dom.hasAttribute("value")).equals(false)
 
 			render(root, [b]);
 
@@ -390,8 +390,8 @@ o.spec("attributes", function() {
 
 			render(root, [c]);
 
-			o(c.dom.value).equals("null")
-			o(c.dom.getAttribute("value")).equals("null")
+			o(c.dom.value).equals("")
+			o(c.dom.hasAttribute("value")).equals(false)
 		})
 		o("'' and 0 are different values", function() {
 			var a = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}
