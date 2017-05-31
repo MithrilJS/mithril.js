@@ -33,5 +33,9 @@
   "bin": {
     "ospec": "./ospec/bin/ospec",
     "bundle": "./bundler/bin/bundle"
+  },
+  "dependencies": {
+    "@alrra/travis-scripts": "^3.0.1",
+    "gh-pages": "^0.12.0"
   }
 }
