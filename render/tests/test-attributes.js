@@ -193,6 +193,7 @@ o.spec("attributes", function() {
 		o("'' and 0 are different values", function() {
 			var a = {tag: "input", attrs: {value: 0}, children:[{tag:"#", children:""}]}
 			var b = {tag: "input", attrs: {value: ""}, children:[{tag:"#", children:""}]}
+			var c = {tag: "input", attrs: {value: 0}, children:[{tag:"#", children:""}]}
 
 			render(root, [a]);
 
@@ -200,13 +201,12 @@ o.spec("attributes", function() {
 
 			render(root, [b]);
 
-			o(a.dom.value).equals("")
+			o(b.dom.value).equals("")
 
-      // #1959 redux
-      // TODO: UNCOMMENT
-      // render(root, [a]);
+			// #1595 redux
+			render(root, [c]);
 
-      // o(a.dom.value).equals("0")
+			o(c.dom.value).equals("0")
 		})
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
@@ -362,6 +362,7 @@ o.spec("attributes", function() {
 		o("'' and 0 are different values", function() {
 			var a = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}
 			var b = {tag: "option", attrs: {value: ""}, children:[{tag:"#", children:""}]}
+			var c = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}
 
 			render(root, [a]);
 
@@ -371,11 +372,10 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("")
 
-			// #1959 redux
-			// TODO: UNCOMMENT
-			// render(root, [a]);
+			// #1595 redux
+			render(root, [c]);
 
-			// o(a.dom.value).equals("0")
+			o(c.dom.value).equals("0")
 		})
 		o("isn't set when equivalent to the previous value", function() {
 			var $window = domMock({spy: o.spy})
@@ -469,18 +469,38 @@ o.spec("attributes", function() {
 		})
 		o("'' and 0 are different values when focused", function() {
 			var a = makeSelect("")
-			// var b = makeSelect(0)
+			var b = makeSelect(0)
 
 			render(root, [a])
 			a.dom.focus()
 
 			o(a.dom.value).equals("")
 
-      // #1959 redux
-      // TODO: UNCOMMENT
-			// render(root, [b])
+			// #1595 redux
+			render(root, [b])
 
-			// o(b.dom.value).equals("0")
+			o(b.dom.value).equals("0")
+		})
+		o("'' and null are different values when focused", function() {
+			var a = makeSelect("")
+			var b = makeSelect(null)
+			var c = makeSelect("")
+
+			render(root, [a])
+			a.dom.focus()
+
+			o(a.dom.value).equals("")
+			o(a.dom.selectedIndex).equals(4)
+
+			render(root, [b])
+
+			o(b.dom.value).equals("")
+			o(b.dom.selectedIndex).equals(-1)
+
+			render(root, [c])
+
+			o(c.dom.value).equals("")
+			o(c.dom.selectedIndex).equals(4)
 		})
 		o("updates with the same value do not re-set the attribute if the select has focus", function() {
 			var $window = domMock({spy: o.spy})
