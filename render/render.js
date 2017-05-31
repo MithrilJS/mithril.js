@@ -481,9 +481,7 @@ module.exports = function($window) {
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {
-				/*eslint-disable no-implicit-coercion*/
-				var normalized = "" + value
-				/*eslint-enable no-implicit-coercion*/
+				var normalized = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				if (vnode.tag === "input" && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
