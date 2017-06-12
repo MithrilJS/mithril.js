@@ -288,6 +288,43 @@ o.spec("attributes", function() {
 
 			// o(b.dom.value).equals("")
 		})
+		o("isn't set when equivalent to the previous value and focused", function() {
+			var $window = domMock({spy: o.spy})
+			var root = $window.document.body
+			var render = vdom($window).render
+
+			var a = {tag: "textarea"}
+			var b = {tag: "textarea", attrs: {value: "1"}}
+			var c = {tag: "textarea", attrs: {value: "1"}}
+			var d = {tag: "textarea", attrs: {value: 1}}
+			var e = {tag: "textarea", attrs: {value: 2}}
+
+			render(root, [a])
+			var spies = $window.__getSpies(a.dom)
+			a.dom.focus()
+
+			o(spies.valueSetter.callCount).equals(0)
+
+			render(root, [b])
+
+			o(b.dom.value).equals("1")
+			o(spies.valueSetter.callCount).equals(1)
+
+			render(root, [c])
+
+			o(c.dom.value).equals("1")
+			o(spies.valueSetter.callCount).equals(1)
+
+			render(root, [d])
+
+			o(d.dom.value).equals("1")
+			o(spies.valueSetter.callCount).equals(1)
+
+			render(root, [e])
+
+			o(d.dom.value).equals("2")
+			o(spies.valueSetter.callCount).equals(2)
+		})
 	})
 	o.spec("link href", function() {
 		o("when link href is true, attribute is present", function() {
