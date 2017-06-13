@@ -14,8 +14,9 @@ module.exports = function() {
       }
     },
     fire: function() {
-      queue.forEach(function(fn) {fn()})
-      queue.length = 0
+      var tasks = queue
+      queue = []
+      tasks.forEach(function(fn) {fn()})
     },
     queueLength: function(){
       return queue.length
