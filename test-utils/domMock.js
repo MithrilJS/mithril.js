@@ -345,17 +345,21 @@ module.exports = function(options) {
 				if (element.nodeName === "TEXTAREA") {
 					var wasNeverSet = true
 					var value = ""
+					var valueSetter = spy(function(v) {
+						wasNeverSet = false
+						/*eslint-disable no-implicit-coercion*/
+						value = v === null ? "" : "" + v
+						/*eslint-enable no-implicit-coercion*/
+					})
 					Object.defineProperty(element, "value", {
 						get: function() {
 							return wasNeverSet && this.firstChild ? this.firstChild.nodeValue : value
 						},
-						set: function(v) {
-							wasNeverSet = false
-							/*eslint-disable no-implicit-coercion*/
-							value = v === null ? "" : "" + v
-							/*eslint-enable no-implicit-coercion*/
-						},
+						set: valueSetter,
 						enumerable: true,
+					})
+					registerSpies(element, {
+						valueSetter: valueSetter
 					})
 				}
 

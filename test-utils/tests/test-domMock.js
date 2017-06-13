@@ -1237,5 +1237,21 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.this).equals(option)
 			o(spies.valueSetter.args[0]).equals("aaa")
 		})
+		o("textarea elements have spies on value setters", function() {
+			var textarea = $window.document.createElement("textarea")
+
+			var spies = $window.__getSpies(textarea)
+
+			o(typeof spies).equals("object")
+			o(spies).notEquals(null)
+			o(typeof spies.valueSetter).equals("function")
+			o(spies.valueSetter.callCount).equals(0)
+
+			textarea.value = "aaa"
+
+			o(spies.valueSetter.callCount).equals(1)
+			o(spies.valueSetter.this).equals(textarea)
+			o(spies.valueSetter.args[0]).equals("aaa")
+		})
 	})
 })
