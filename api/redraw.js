@@ -19,26 +19,32 @@ function throttle(callback) {
 	}
 }
 
+
 module.exports = function($window, throttleMock) {
-	var _throttle = throttleMock || throttle
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
 		if (e.redraw !== false) redraw()
 	})
 
 	var callbacks = []
+	var rendering = false
+
 	function subscribe(key, callback) {
 		unsubscribe(key)
-		callbacks.push(key, _throttle(callback))
+		callbacks.push(key, callback)
 	}
 	function unsubscribe(key) {
 		var index = callbacks.indexOf(key)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-	function redraw() {
-		for (var i = 1; i < callbacks.length; i += 2) {
-			callbacks[i]()
-		}
+	function sync() {
+		if (rendering) throw new Error("Nested m.redraw.sync() call")
+		rendering = true
+		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
+		rendering = false
 	}
+
+	var redraw = (throttleMock || throttle)(sync)
+	redraw.sync = sync
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
