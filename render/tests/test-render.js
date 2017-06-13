@@ -293,4 +293,10 @@ o.spec("render", function() {
 		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
+	o("the namespace of the root is passed to children", function() {
+		render(root, [{tag: "svg"}])
+		o(root.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+		render(root.childNodes[0], [{tag: "g"}])
+		o(root.childNodes[0].childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+	})
 })
