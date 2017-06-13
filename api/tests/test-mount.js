@@ -11,7 +11,6 @@ var apiRedraw = require("../../api/redraw")
 var apiMounter = require("../../api/mount")
 
 o.spec("mount", function() {
-	var FRAME_BUDGET = Math.floor(1000 / 60)
 	var $window, root, redrawService, mount, render, throttleMock
 
 	o.beforeEach(function() {

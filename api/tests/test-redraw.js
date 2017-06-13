@@ -166,6 +166,6 @@ o.spec("redrawService", function() {
 
 		o(spy1.callCount).equals(2)
 		o(spy2.callCount).equals(2)
-		o(spy3.callCount).equals(2)		
+		o(spy3.callCount).equals(2)
 	})
 })

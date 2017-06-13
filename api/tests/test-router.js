@@ -15,7 +15,6 @@ o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var FRAME_BUDGET = Math.floor(1000 / 60)
 				var $window, root, redrawService, route, throttleMock
 
 				o.beforeEach(function() {
@@ -552,12 +551,12 @@ o.spec("route", function() {
 					route(root, "/a", {
 						"/a" : {
 							render: function() {
-								return m("div", m('p'))
+								return m("div", m("p"))
 							},
 						},
 						"/b" : {
 							render: function() {
-								return m("div", m('a'))
+								return m("div", m("a"))
 							},
 						},
 					})
@@ -840,7 +839,7 @@ o.spec("route", function() {
 					callAsync(function() {
 						throttleMock.fire()
 
-						route.set('/b')
+						route.set("/b")
 						callAsync(function() {
 							callAsync(function() {
 								callAsync(function() {
@@ -1110,7 +1109,7 @@ o.spec("route", function() {
 
 						o(root.firstChild.nodeName).equals("B")
 
-						route.set('/a')
+						route.set("/a")
 
 						callAsync(function() {
 							throttleMock.fire()
