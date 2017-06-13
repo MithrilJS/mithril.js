@@ -836,7 +836,7 @@ var coreRenderer = function($window) {
 			if (key2 === "value") {
 				var normalized0 = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if (vnode.tag === "input" && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select") {
 					if (value === null) {
