@@ -52,7 +52,7 @@ o.spec("mount", function() {
 				o(threw).equals(true)
 			})
 
-			o("renders into `root`", function() {
+			o("renders into `root` synchronoulsy", function() {
 				mount(root, createComponent({
 					view : function() {
 						return m("div")
@@ -72,6 +72,36 @@ o.spec("mount", function() {
 				mount(root, null)
 
 				o(root.childNodes.length).equals(0)
+			})
+
+			o("Mounting a second root doesn't cause the first one to redraw", function() {
+				var view = o.spy(function() {
+					return m("div")
+				})
+
+				render(root, [
+					m("#child0"),
+					m("#child1")
+				])
+
+				mount(root.childNodes[0], createComponent({
+					view : view
+				}))
+
+				o(root.firstChild.nodeName).equals("DIV")
+				o(view.callCount).equals(1)
+
+				mount(root.childNodes[1], createComponent({
+					view : function() {
+						return m("div")
+					}
+				}))
+
+				o(view.callCount).equals(1)
+
+				throttleMock.fire()
+
+				o(view.callCount).equals(1)
 			})
 
 			o("redraws on events", function() {
