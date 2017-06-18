@@ -1,18 +1,7 @@
 "use strict"
 
 var parseURL = require("../test-utils/parseURL")
-var callAsync = require("../test-utils/callAsync")
-
-function debouncedAsync(f) {
-	var ref
-	return function() {
-		if (ref != null) return
-		ref = callAsync(function(){
-			ref = null
-			f()
-		})
-	}
-}
+var debouncedAsync = require("../test-utils/debouncedAsync")
 
 module.exports = function(options) {
 	if (options == null) options = {}
