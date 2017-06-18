@@ -11,16 +11,17 @@ o.spec("Router.defineRoutes", function() {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, router, onRouteChange, onFail
 
-				o.beforeEach(function() {
+				function init(href) {
+					env.href = href || ""
 					$window = pushStateMock(env)
 					router = new Router($window)
 					router.prefix = prefix
 					onRouteChange = o.spy()
 					onFail = o.spy()
-				})
+				}
 
 				o("calls onRouteChange on init", function(done) {
-					$window.location.href = prefix + "/a"
+					init(prefix + "/a")
 					router.defineRoutes({"/a": {data: 1}}, onRouteChange, onFail)
 					
 					callAsync(function() {
@@ -31,7 +32,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 				
 				o("resolves to route", function(done) {
-					$window.location.href = prefix + "/test"
+					init(prefix + "/test")
 					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -44,7 +45,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("resolves to route w/ escaped unicode", function(done) {
-					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6"
+					init(prefix + "/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6")
 					router.defineRoutes({"/ö": {data: 2}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -57,7 +58,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("resolves to route w/ unicode", function(done) {
-					$window.location.href = prefix + "/ö?ö=ö#ö=ö"
+					init(prefix + "/ö?ö=ö#ö=ö")
 					router.defineRoutes({"/ö": {data: 2}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -70,7 +71,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("resolves to route on fallback mode", function(done) {
-					$window.location.href = "file://" + prefix + "/test"
+					init("file://" + prefix + "/test")
 
 					router = new Router($window)
 					router.prefix = prefix
@@ -87,7 +88,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles parameterized route", function(done) {
-					$window.location.href = prefix + "/test/x"
+					init(prefix + "/test/x")
 					router.defineRoutes({"/test/:a": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -100,7 +101,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles multi-parameterized route", function(done) {
-					$window.location.href = prefix + "/test/x/y"
+					init(prefix + "/test/x/y")
 					router.defineRoutes({"/test/:a/:b": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -113,7 +114,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles rest parameterized route", function(done) {
-					$window.location.href = prefix + "/test/x/y"
+					init(prefix + "/test/x/y")
 					router.defineRoutes({"/test/:a...": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -126,7 +127,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles route with search", function(done) {
-					$window.location.href = prefix + "/test?a=b&c=d"
+					init(prefix + "/test?a=b&c=d")
 					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -139,7 +140,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles route with hash", function(done) {
-					$window.location.href = prefix + "/test#a=b&c=d"
+					init(prefix + "/test#a=b&c=d")
 					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -152,7 +153,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles route with search and hash", function(done) {
-					$window.location.href = prefix + "/test?a=b#c=d"
+					init(prefix + "/test?a=b#c=d")
 					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -165,7 +166,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("calls reject", function(done) {
-					$window.location.href = prefix + "/test"
+					init(prefix + "/test")
 					router.defineRoutes({"/other": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -177,7 +178,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("calls reject w/ search and hash", function(done) {
-					$window.location.href = prefix + "/test?a=b#c=d"
+					init(prefix + "/test?a=b#c=d")
 					router.defineRoutes({"/other": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -189,7 +190,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles out of order routes", function(done) {
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes({"/z/y/x": {data: 1}, "/:a...": {data: 2}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -201,7 +202,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles reverse out of order routes", function(done) {
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes({"/:a...": {data: 2}, "/z/y/x": {data: 1}}, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -217,7 +218,7 @@ o.spec("Router.defineRoutes", function() {
 					routes["/z/y/x"] = {data: 1}
 					routes["/:a..."] = {data: 2}
 
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes(routes, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -233,7 +234,7 @@ o.spec("Router.defineRoutes", function() {
 					routes["/:a..."] = {data: 2}
 					routes["/z/y/x"] = {data: 1}
 
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes(routes, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -248,7 +249,7 @@ o.spec("Router.defineRoutes", function() {
 					var routes = {"/z/y/x": {data: 1}}
 					routes["/:a..."] = {data: 2}
 
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes(routes, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -263,7 +264,7 @@ o.spec("Router.defineRoutes", function() {
 					var routes = {"/:a...": {data: 2}}
 					routes["/z/y/x"] = {data: 12}
 
-					$window.location.href = prefix + "/z/y/x"
+					init(prefix + "/z/y/x")
 					router.defineRoutes(routes, onRouteChange, onFail)
 
 					callAsync(function() {
@@ -275,7 +276,7 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("handles non-ascii routes", function(done) {
-					$window.location.href = prefix + "/ö"
+					init(prefix + "/ö")
 					router.defineRoutes({"/ö": "aaa"}, onRouteChange, onFail)
 
 					callAsync(function() {

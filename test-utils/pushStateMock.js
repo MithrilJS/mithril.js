@@ -8,7 +8,7 @@ module.exports = function(options) {
 
 	var $window = options.window || {}
 	var parsedURL = parseURL(
-		options.pathQueryFragment || "",
+		options.href || "",
 		{
 			protocol: options.protocol || "http:",
 			hostname: options.hostname || "localhost",
@@ -19,7 +19,7 @@ module.exports = function(options) {
 	var protocol = parsedURL.protocol
 	var hostname = parsedURL.hostname
 	var port = parsedURL.port
-	var pathname = parsedURL.pathname
+	var pathname = parsedURL.pathname || "/"
 	var search = parsedURL.search
 	var hash = parsedURL.hash
 

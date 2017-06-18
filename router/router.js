@@ -73,7 +73,11 @@ module.exports = function($window) {
 			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path)
 			else $window.history.pushState(state, title, router.prefix + path)
 		}
-		else $window.location.href = router.prefix + path
+		else if (path !== router.getPath()) {
+			$window.location.href = router.prefix + path
+		} else {
+			$window.onhashchange()
+		}
 	}
 	router.defineRoutes = function(routes, resolve, reject) {
 		function resolveRoute() {
