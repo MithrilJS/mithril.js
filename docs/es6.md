@@ -70,10 +70,12 @@ Create a `.babelrc` file:
 Next, create a file called `webpack.config.js`
 
 ```javascript
+const path = require('path')
+
 module.exports = {
 	entry: './src/index.js',
 	output: {
-		path: './bin',
+		path: path.resolve(__dirname, './bin'),
 		filename: 'app.js',
 	},
 	module: {
