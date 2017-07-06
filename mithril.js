@@ -996,7 +996,8 @@ function throttle(callback) {
 var _11 = function($window) {
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
-		if (e.redraw !== false) redraw()
+		if (e.redraw === false) e.redraw = undefined
+		else redraw()
 	})
 	var callbacks = []
 	function subscribe(key1, callback) {
@@ -1195,7 +1196,10 @@ var _20 = function($window, redrawService0) {
 		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true}
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
 		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}
