@@ -1,8 +1,10 @@
 /* eslint-disable no-bitwise, no-process-exit */
 "use strict"
 
-module.exports = new function init() {
+module.exports = new function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+
+	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
 		if (predicate === undefined) {
@@ -222,6 +224,7 @@ module.exports = new function init() {
 			}
 		}
 		console.log(
+			(name ? name + ": " : "") +
 			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
 		)
