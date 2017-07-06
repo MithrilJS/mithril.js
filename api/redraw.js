@@ -26,7 +26,8 @@ function throttle(callback) {
 module.exports = function($window) {
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
-		if (e.redraw !== false) redraw()
+		if (e.redraw === false) e.redraw = undefined
+		else redraw()
 	})
 
 	var callbacks = []

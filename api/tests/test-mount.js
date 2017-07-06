@@ -5,7 +5,6 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 
 var m = require("../../render/hyperscript")
-var coreRenderer = require("../../render/render")
 var apiRedraw = require("../../api/redraw")
 var apiMounter = require("../../api/mount")
 
@@ -20,7 +19,7 @@ o.spec("mount", function() {
 
 		redrawService = apiRedraw($window)
 		mount = apiMounter(redrawService)
-		render = coreRenderer($window).render
+		render = redrawService.render
 	})
 
 	o("throws on invalid component", function() {

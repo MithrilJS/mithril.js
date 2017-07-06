@@ -224,9 +224,11 @@ o.spec("route", function() {
 						}
 					})
 
+					o(oninit.callCount).equals(1)
+
 					root.firstChild.dispatchEvent(e)
 
-					o(oninit.callCount).equals(1)
+					o(e.redraw).notEquals(false)
 
 					// Wrapped to ensure no redraw fired
 					callAsync(function() {
