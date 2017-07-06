@@ -5,6 +5,8 @@
 	- [Static members](#static-members)
 		- [Stream.combine](#streamcombine)
 		- [Stream.merge](#streammerge)
+		- [Stream.scan](#streamscan)
+		- [Stream.scanMerge](#streamscanmerge)
 		- [Stream.HALT](#streamhalt)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#static-members)
@@ -39,6 +41,14 @@ Streams are NOT bundled with Mithril's core distribution. To include the Streams
 ```javascript
 var Stream = require("mithril/stream")
 ```
+
+You can also download the module directly if your environment does not support a bundling toolchain:
+
+```markup
+<script src="https://unpkg.com/mithril-stream"></script>
+```
+
+When loaded directly with a `<script>` tag (rather than required), the stream library will be exposed as `window.m.stream`. If `window.m` is already defined (e.g. because you also use the main Mithril script), it will attach itself to the existing object. Otherwise it creates a new `window.m`. If you want to use streams in conjunction with Mithril as raw script tags, you should include Mithril in your page before `mithril-stream`, because `mithril` will otherwise overwrite the `window.m` object defined by `mithril-stream`. This is not a concern when the libraries are consumed as CommonJS modules (using `require(...)`).
 
 ---
 
@@ -83,7 +93,7 @@ Specifies how the value of a computed stream is generated. See [combining stream
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
-`streams...` | splat of `Stream`s   | No       | Splat of zero or more streams that correspond to the streams passed as the second argument to [`stream.combine`](#stream-combine)
+`streams...` | splat of `Streams`   | No       | Splat of zero or more streams that correspond to the streams passed as the second argument to [`stream.combine`](#stream-combine)
 `changed`    | `Array<Stream>`      | Yes      | List of streams that were affected by an update
 **returns**  | `any`                |          | Returns a computed value
 
@@ -101,6 +111,39 @@ Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
 `streams`    | `Array<Stream>`      | Yes      | A list of streams
 **returns**  | `Stream`             |          | Returns a stream whose value is an array of input stream values
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.scan
+
+Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.
+
+`stream = Stream.scan(fn, accumulator, stream)`
+
+Argument      | Type                             | Required | Description
+------------- | -------------------------------- | -------- | ---
+`fn`          | `(accumulator, value) -> result` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`accumulator` | `any`                            | Yes      | The starting value for the accumulator
+`stream`      | `Stream`                         | Yes      | Stream containing the values
+**returns**   | `Stream`                         |          | Returns a new stream containing the result
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.scanMerge
+
+Takes an array of pairs of streams and scan functions and merges all those streams using the given functions into a single stream.
+
+`stream = Stream.scanMerge(pairs, accumulator)`
+
+Argument      | Type                                             | Required | Description
+------------- | ------------------------------------------------ | -------- | ---
+`pairs`       | `Array<[Stream, (accumulator, value) -> value]>` | Yes      | An array of tuples of stream and scan functions
+`accumulator` | `any`                                            | Yes      | The starting value for the accumulator
+**returns**   | `Stream`                                         |          | Returns a new stream containing the result
 
 [How to read signatures](signatures.md)
 

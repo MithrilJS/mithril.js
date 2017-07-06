@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict"
 
 var fs = require("fs")
 var path = require("path")
@@ -37,7 +38,7 @@ function ensureCodeIsSyntaticallyValid(file, data) {
 function ensureCodeIsRunnable(file, data) {
 	var codeBlocks = data.match(/```javascript(.|\n|\r)*?```/gim) || []
 	var code = codeBlocks.map(function(block) {return block.slice(13, -3)}).join(";")
-	
+
 	//stubs
 	var silentConsole = {log: function() {}}
 	var fetch = function() {
@@ -54,7 +55,7 @@ function ensureCodeIsRunnable(file, data) {
 			if (dep.indexOf("mithril/ospec/ospec") === 0) return global.o
 			if (dep.indexOf("mithril/stream") === 0) return global.stream
 			if (dep === "mithril") return global.m
-			
+
 			if (dep === "../model/User") return {
 				list: [],
 				current: {},
@@ -74,7 +75,6 @@ function ensureCodeIsRunnable(file, data) {
 		})
 	}
 	catch (e) {console.log(file + " - javascript code cannot run\n\n" + e.stack + "\n\n" + code + "\n\n---\n\n")}
-	
 }
 
 function ensureCommentStyle(file, data) {
@@ -86,10 +86,10 @@ function ensureCommentStyle(file, data) {
 }
 
 function ensureLinkIsValid(file, data) {
-	var links = data.match(/\]\(([^\)]+)\)/gim)
+	var links = data.match(/\]\(([^\)]+?)\)/gim) || []
 	links.forEach(function(match) {
 		var link = match.slice(2, -1)
-		var path = link.match(/[\w-]+\.md/)
+		var path = (link.match(/[\w-#]+\.md/) || [])[0]
 		if (link.match(/http/)) {
 			var u = url.parse(link)
 			http.request({method: "HEAD", host: u.host, path: u.pathname, port: 80}).on("error", function() {
@@ -101,46 +101,46 @@ function ensureLinkIsValid(file, data) {
 }
 
 function initMocks() {
-	global.window = require("../test-utils/browserMock")()
+	global.window = require("../test-utils/browserMock")() // eslint-disable-line global-require
 	global.document = window.document
-	global.m = require("../index")
-	global.o = require("../ospec/ospec")
-	global.stream = require("../stream")
+	global.m = require("../index") // eslint-disable-line global-require
+	global.o = require("../ospec/ospec") // eslint-disable-line global-require
+	global.stream = require("../stream") // eslint-disable-line global-require
 	global.alert = function() {}
 
 	//routes consumed by request.md
 	global.window.$defineRoutes({
-		"GET /api/v1/users": function(request) {
+		"GET /api/v1/users": function() {
 			return {status: 200, responseText: JSON.stringify([{name: ""}])}
 		},
-		"GET /api/v1/users/search": function(request) {
+		"GET /api/v1/users/search": function() {
 			return {status: 200, responseText: JSON.stringify([{id: 1, name: ""}])}
 		},
-		"GET /api/v1/users/1/projects": function(request) {
+		"GET /api/v1/users/1/projects": function() {
 			return {status: 200, responseText: JSON.stringify([{id: 1, name: ""}])}
 		},
-		"GET /api/v1/todos": function(request) {
+		"GET /api/v1/todos": function() {
 			return {status: 200, responseText: JSON.stringify([])}
 		},
 		"PUT /api/v1/users/1": function(request) {
 			return {status: 200, responseText: request.query.callback ? request.query.callback + "([])" : "[]"}
 		},
-		"POST /api/v1/upload": function(request) {
+		"POST /api/v1/upload": function() {
 			return {status: 200, responseText: JSON.stringify([])}
 		},
-		"GET /files/icon.svg": function(request) {
+		"GET /files/icon.svg": function() {
 			return {status: 200, responseText: "<svg></svg>"}
 		},
-		"GET /files/data.csv": function(request) {
+		"GET /files/data.csv": function() {
 			return {status: 200, responseText: "a,b,c"}
 		},
-		"GET /api/v1/users/123": function(request) {
+		"GET /api/v1/users/123": function() {
 			return {status: 200, responseText: JSON.stringify({id: 123})}
 		},
-		"GET /api/v1/users/foo:bar": function(request) {
+		"GET /api/v1/users/foo:bar": function() {
 			return {status: 200, responseText: JSON.stringify({id: 123})}
 		},
-		"GET /files/image.svg": function(request) {
+		"GET /files/image.svg": function() {
 			return {status: 200, responseText: "<svg></svg>"}
 		},
 	})

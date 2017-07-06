@@ -3,7 +3,6 @@
 - [What are keys](#what-are-keys)
 - [How to use](#how-to-use)
 - [Debugging key related issues](#debugging-key-related-issues)
-- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ---
 
@@ -97,19 +96,21 @@ users.map(function(u) {
 
 #### Avoid hiding keys in component root elements
 
-If you refactor the code and put the button inside a component, the key must be moved out of the component and placed back where the component took the place of the button.
+If you refactor the code and make a user component, the key must be moved out of the component and put on the component itself, since it is now the immediate child of the array.
 
 ```javascript
 // AVOID
-var Button = {
+var User = {
 	view: function(vnode) {
-		return m("button", {key: vnode.attrs.id}, u.name)
+		return m("div", { key: vnode.attrs.user.id }, [
+      m(Button, vnode.attrs.user.name)
+    ])
 	}
 }
+
+// PREFER
 users.map(function(u) {
-	return m("div", [
-		m(Button, {id: u.id}, u.name) // key should be here, not in component
-	])
+	return m(User, { key: u.id, user: u }) // key should be here, not in component
 })
 ```
 
@@ -150,3 +151,56 @@ var things = [
 ]
 ```
 
+#### Avoid mixing keyed and non-keyed vnodes in the same array
+
+An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.
+
+```javascript
+// AVOID
+m("div", [
+	m("div", "a"),
+	m("div", {key: 1}, "b"),
+])
+
+// PREFER
+m("div", [
+	m("div", {key: 0}, "a"),
+	m("div", {key: 1}, "b"),
+])
+
+
+// PREFER
+m("div", [
+	m("div", "a"),
+	[
+		m("div", {key: 1}, "b"),
+	]
+])
+```
+
+#### Avoid passing model data directly to components if the model uses `key` as a data property
+
+The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialise, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:
+
+```javascript
+// Data model
+var users = [
+	{id: 1, name: "John", key: 'a'},
+	{id: 2, name: "Mary", key: 'b'},
+]
+
+// Later on...
+users[0].key = 'c'
+
+// AVOID
+users.map(function(user){
+	// The component for John will be destroyed and recreated
+	return m(UserComponent, user)
+})
+
+// PREFER
+users.map(function(user){
+	// Key is specifically extracted: data model is given its own property
+	return m(UserComponent, {key: user.id, model: user})
+})
+```

@@ -3,7 +3,7 @@
 module.exports = function parseURL(url, root) {
 	var data = {}
 	var protocolIndex = url.indexOf("://")
-	var pathnameIndex = protocolIndex > - 1 ? url.indexOf("/", protocolIndex + 3) : url.indexOf("/")
+	var pathnameIndex = protocolIndex > -1 ? url.indexOf("/", protocolIndex + 3) : url.indexOf("/")
 	var searchIndex = url.indexOf("?")
 	var hashIndex = url.indexOf("#")
 	if ((pathnameIndex > searchIndex && searchIndex > -1) || (pathnameIndex > hashIndex && hashIndex > -1)) pathnameIndex = -1

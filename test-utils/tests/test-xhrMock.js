@@ -5,13 +5,13 @@ var xhrMock = require("../../test-utils/xhrMock")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("xhrMock", function() {
-	var $window, ajax
+	var $window
 	o.beforeEach(function() {
 		$window = xhrMock()
 	})
 
 	o.spec("xhr", function() {
-		o("works", function(done, timeout) {
+		o("works", function(done) {
 			$window.$defineRoutes({
 				"GET /item": function(request) {
 					o(request.url).equals("/item")
@@ -29,7 +29,7 @@ o.spec("xhrMock", function() {
 			}
 			xhr.send()
 		})
-		o("works w/ search", function(done, timeout) {
+		o("works w/ search", function(done) {
 			$window.$defineRoutes({
 				"GET /item": function(request) {
 					o(request.query).equals("?a=b")
@@ -45,7 +45,7 @@ o.spec("xhrMock", function() {
 			}
 			xhr.send()
 		})
-		o("works w/ body", function(done, timeout) {
+		o("works w/ body", function(done) {
 			$window.$defineRoutes({
 				"POST /item": function(request) {
 					o(request.body).equals("a=b")
@@ -61,7 +61,7 @@ o.spec("xhrMock", function() {
 			}
 			xhr.send("a=b")
 		})
-		o("handles routing error", function(done, timeout) {
+		o("handles routing error", function(done) {
 			var xhr = new $window.XMLHttpRequest()
 			xhr.open("GET", "/nonexistent")
 			xhr.onreadystatechange = function() {
@@ -113,7 +113,7 @@ o.spec("xhrMock", function() {
 				done()
 			}
 		})
-		o("works with other querystring params", function(done, timeout) {
+		o("works with other querystring params", function(done) {
 			$window.$defineRoutes({
 				"GET /test": function(request) {
 					var queryData = parseQueryString(request.query)

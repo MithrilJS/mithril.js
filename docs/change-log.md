@@ -1,6 +1,48 @@
 # Change log
 
+- [v1.1.1](#v111)
+- [v1.1.0](#v110)
+- [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
+- [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+
+---
+
+### v1.1.1
+
+#### Bug fixes
+
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
+- documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+### v1.1.0
+
+#### News
+
+- support for ES6 class components
+- support for closure components
+- improvements in build and release automation
+
+#### Bug fixes
+
+- fix IE11 input[type] error - [#1610](https://github.com/MithrilJS/mithril.js/issues/1610)
+- apply [#1609](https://github.com/MithrilJS/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/MithrilJS/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/MithrilJS/mithril.js/issues/1593)
+
+---
+
+### v1.0.1
+
+#### News
+
+- performance improvements in IE [#1598](https://github.com/MithrilJS/mithril.js/pull/1598)
+
+#### Bug fixes
+
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/MithrilJS/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/MithrilJS/mithril.js/issues/1609)
 
 ---
 
@@ -16,6 +58,8 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [Changes in redraw behaviour](#changes-in-redraw-behaviour)
    - [No more redraw locks](#no-more-redraw-locks)
    - [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
+   - [Synchronous redraw removed](#synchronous-redraw-removed)
+   - [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
 - [Component `controller` function](#component-controller-function)
 - [Component arguments](#component-arguments)
 - [`view()` parameters](#view-parameters)
@@ -25,21 +69,21 @@ If you are migrating, consider using the [mithril-codemods](https://www.npmjs.co
 - [`m.route` and anchor tags](#mroute-and-anchor-tags)
 - [Reading/writing the current route](#readingwriting-the-current-route)
 - [Accessing route params](#accessing-route-params)
+- [Building/Parsing query strings](#buildingparsing-query-strings)
 - [Preventing unmounting](#preventing-unmounting)
+- [Run code on component removal](#run-code-on-component-removal)
 - [`m.request`](#mrequest)
 - [`m.deferred` removed](#mdeferred-removed)
 - [`m.sync` removed](#msync-removed)
 - [`xlink` namespace required](#xlink-namespace-required)
 - [Nested arrays in views](#nested-arrays-in-views)
 - [`vnode` equality checks](#vnode-equality-checks)
-- [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
-- [Synchronous redraw removed](#synchronous-redraw-removed)
 
 ---
 
 ## `m.prop` removed
 
-In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core.
+In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core. You can read about how to use the optional Streams module in [the documentation](stream.md).
 
 ### `v0.2.x`
 
@@ -110,7 +154,8 @@ m("div", {
     onbeforeupdate : function(vnode, old) { /*...*/ },
     // Called after the node is updated
     onupdate : function(vnode) { /*...*/ },
-    // Called before the node is removed, return a Promise that resolves when ready for the node to be removed from the DOM
+    // Called before the node is removed, return a Promise that resolves when
+	// ready for the node to be removed from the DOM
     onbeforeremove : function(vnode) { /*...*/ },
     // Called before the node is removed, but after onbeforeremove calls done()
     onremove : function(vnode) { /*...*/ }
@@ -133,7 +178,7 @@ In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked dr
 
 `m.mount()` and `m.route()` still automatically redraw after a DOM event handler runs. Cancelling these redraws from within your event handlers is now done by setting the `redraw` property on the passed-in event object to `false`.
 
-### `v0.2.x`
+#### `v0.2.x`
 
 ```javascript
 m("div", {
@@ -143,7 +188,7 @@ m("div", {
 })
 ```
 
-### `v1.x`
+#### `v1.x`
 
 ```javascript
 m("div", {
@@ -152,6 +197,26 @@ m("div", {
     }
 })
 ```
+
+### Synchronous redraw removed
+
+In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
+
+#### `v0.2.x`
+
+```javascript
+m.redraw(true) // redraws immediately & synchronously
+```
+
+#### `v1.x`
+
+```javascript
+m.redraw() // schedules a redraw on the next requestAnimationFrame tick
+```
+
+### `m.startComputation`/`m.endComputation` removed
+
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
 
 ---
 
@@ -400,13 +465,16 @@ m.route.set("/other/route")
 
 ## Accessing route params
 
-In `v0.2.x` reading route params was all handled through the `m.route.param()` method. In `v1.x` any route params are passed as the `attrs` object on the vnode passed as the first argument to lifecycle methods/`view`.
+In `v0.2.x` reading route params was entirely handled through `m.route.param()`. This API is still available in `v1.x`, and additionally any route params are passed as properties in the `attrs` object on the vnode.
 
 ### `v0.2.x`
 
 ```javascript
 m.route(document.body, "/booga", {
     "/:attr" : {
+    	controller : function() {
+			m.route.param("attr") // "booga"
+		},
         view : function() {
             m.route.param("attr") // "booga"
         }
@@ -421,12 +489,36 @@ m.route(document.body, "/booga", {
     "/:attr" : {
         oninit : function(vnode) {
             vnode.attrs.attr // "booga"
+	    	m.route.param("attr") // "booga"
         },
         view : function(vnode) {
             vnode.attrs.attr // "booga"
+	    	m.route.param("attr") // "booga"
         }
     }
 })
+```
+
+---
+
+## Building/Parsing query strings
+
+`v0.2.x` used methods hanging off of `m.route`, `m.route.buildQueryString()` and `m.route.parseQueryString()`. In `v1.x` these have been broken out and attached to the root `m`.
+
+### `v0.2.x`
+
+```javascript
+var qs = m.route.buildQueryString({ a : 1 });
+
+var obj = m.route.parseQueryString("a=1");
+```
+
+### `v1.x`
+
+```javascript
+var qs = m.buildQueryString({ a : 1 });
+
+var obj = m.parseQueryString("a=1");
 ```
 
 ---
@@ -456,6 +548,40 @@ var Component = {
 var Component = {
 	view: function() {
 		return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
+	}
+}
+```
+
+---
+
+## Run code on component removal
+
+Components no longer call `this.onunload` when they are being removed. They now use the standardized lifecycle hook `onremove`.
+
+### `v0.2.x`
+
+```javascript
+var Component = {
+	controller: function() {
+		this.onunload = function(e) {
+			// ...
+		}
+	},
+	view: function() {
+		// ...
+	}
+}
+```
+
+### `v1.x`
+
+```javascript
+var Component = {
+	onremove : function() {
+		// ...
+	}
+	view: function() {
+		// ...
 	}
 }
 ```
@@ -499,7 +625,7 @@ setTimeout(function() {
 }, 1000)
 ```
 
-Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve its promise, and the `deserialize` callback is ignored.
+Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve the request promise, and the `deserialize` callback is ignored.
 
 ---
 
@@ -526,11 +652,13 @@ greetAsync()
 ### `v1.x`
 
 ```javascript
-var greetAsync = new Promise(function(resolve){
-    setTimeout(function() {
-        resolve("hello")
-    }, 1000)
-})
+var greetAsync = function() {
+	return new Promise(function(resolve){
+	    setTimeout(function() {
+	        resolve("hello")
+	    }, 1000)
+	})
+}
 
 greetAsync()
     .then(function(value) {return value + " world"})
@@ -602,27 +730,3 @@ Arrays now represent [fragments](fragment.md), which are structurally significan
 ## `vnode` equality checks
 
 If a vnode is strictly equal to the vnode occupying its place in the last draw, v1.x will skip that part of the tree without checking for mutations or triggering any lifecycle methods in the subtree. The component documentation contains [more detail on this issue](components.md#avoid-creating-component-instances-outside-views).
-
----
-
-## `m.startComputation`/`m.endComputation` removed
-
-They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
-
----
-
-## Synchronous redraw removed
-
-In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
-
-### `v0.2.x`
-
-```javascript
-m.redraw(true) // redraws immediately & synchronously
-```
-
-### `v1.x`
-
-```javascript
-m.redraw() // schedules a redraw on the next requestAnimationFrame tick
-```

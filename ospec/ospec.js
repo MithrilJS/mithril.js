@@ -1,13 +1,21 @@
+/* eslint-disable no-bitwise, no-process-exit */
 "use strict"
 
 module.exports = new function init(name) {
-	var spec = {}, subjects = [], results = [], only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
 	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
-		if (predicate === undefined) return new Assert(subject)
-		ctx[unique(subject)] = predicate
+		if (predicate === undefined) {
+			if (results == null) throw new Error("Assertions should not occur outside test definitions")
+			return new Assert(subject)
+		}
+		else if (results == null) {
+			ctx[unique(subject)] = predicate
+		} else {
+			throw new Error("Test definition shouldn't be nested. To group tests use `o.spec()`")
+		}
 	}
 	o.before = hook("__before")
 	o.after = hook("__after")
@@ -20,7 +28,10 @@ module.exports = new function init(name) {
 		predicate()
 		ctx = parent
 	}
-	o.only = function(subject, predicate) {o(subject, only = predicate)}
+	o.only = function(subject, predicate, silent) {
+		if (!silent) console.log(highlight("/!\\ WARNING /!\\ o.only() mode"))
+		o(subject, only = predicate)
+	}
 	o.spy = function(fn) {
 		var spy = function() {
 			spy.this = this
@@ -39,6 +50,7 @@ module.exports = new function init(name) {
 		return spy
 	}
 	o.run = function() {
+		results = []
 		start = new Date
 		test(spec, [], [], report)
 
@@ -112,8 +124,8 @@ module.exports = new function init(name) {
 	}
 	function unique(subject) {
 		if (hasOwn.call(ctx, subject)) {
-			console.warn("A test or a spec named `" + subject + "` was already defined")	
-			while (hasOwn.call(ctx, subject)) subject += '*'
+			console.warn("A test or a spec named `" + subject + "` was already defined")
+			while (hasOwn.call(ctx, subject)) subject += "*"
 		}
 		return subject
 	}

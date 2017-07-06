@@ -1,15 +1,19 @@
+"use strict"
+
 var fs = require("fs")
 var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
-try {fs.mkdirSync("docs/archive/")} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version)} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version + "/lib")} catch (e) {}
-try {fs.mkdirSync("docs/archive/" + version + "/lib/prism")} catch (e) {}
+try {fs.mkdirSync("./dist")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive")} catch (e) {/* ignore */}
+try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
 
-var guides = fs.readFileSync("docs/guides.md", "utf-8")
-var methods = fs.readFileSync("docs/methods.md", "utf-8")
+var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
+var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
+
+var index = fs.readFileSync("docs/index.md", "utf-8")
+fs.writeFileSync("README.md", index.replace(/(\]\()(.+?)\.md(\))/g, "$1http://mithril.js.org/$2.html$3"), "utf-8")
 
 generate("docs")
 
@@ -19,16 +23,16 @@ function generate(pathname) {
 			generate(pathname + "/" + filename)
 		})
 	}
-	else if (!pathname.match(/tutorials|archive/)) {
+	else if (!pathname.match(/tutorials|archive|nav-/)) {
 		if (pathname.match(/\.md$/)) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
+			var anchors = {}
 			var fixed = markdown
-				.replace(/(`[^`]+?)<(.*`)/gim, "$1&lt;$2") // fix generic syntax
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
 					return "<code>" + (a + b + c).replace(/\|/g, "&#124;") + "</code>"
 				})
-				.replace(/(^# .+?(?:\r?\n){2,}?)(?:(-(?:.|\r|\n)+?)((?:\r?\n){2,})|)/m, function(match, title, nav, space) { // inject menu
+				.replace(/(^# .+?(?:\r?\n){2,}?)(?:(-(?:.|\r|\n)+?)((?:\r?\n){2,})|)/m, function(match, title, nav) { // inject menu
 					var file = path.basename(pathname)
 					var link = new RegExp("([ \t]*)(- )(\\[.+?\\]\\(" + file + "\\))")
 					var replace = function(match, space, li, link) {
@@ -40,17 +44,31 @@ function generate(pathname) {
 				.replace(/(\]\([^\)]+)(\.md)/gim, function(match, path, extension) {
 					return path + (path.match(/http/) ? extension : ".html")
 				}) // fix links
+			var markedHtml = marked(fixed)
+				.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;") // Fix type signatures containing Array<...>
+			var title = fixed.match(/^#([^\n\r]+)/i) || []
 			var html = layout
-				.replace(/\[version\]/, version) // update version
-				.replace(/\[body\]/, marked(fixed))
-				.replace(/<h5 id="([^"]+?)">([^<]+?)<\/h5>/gim, function(match, id, text) { // fix anchors
-					return "<h5 id=\"" + text.toLowerCase().replace(/\.|\[|\]|&quot;|\//g, "") + "\">" + text + "</h5>"
+				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
+				.replace(/\[version\]/g, version) // update version
+				.replace(/\[body\]/, markedHtml)
+				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
+					var anchor = text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-");
+
+					if(anchor in anchors) {
+						anchor += ++anchors[anchor]
+					} else {
+						anchors[anchor] = 0;
+					}
+
+					return `<h${n} id="${anchor}"><a href="#${anchor}">${text}</a></h${n}>`;
 				})
-			fs.writeFileSync("docs/archive/" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
+			fs.writeFileSync("./dist/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
+			fs.writeFileSync("./dist/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 		}
-		else {
-			fs.writeFileSync("docs/archive/" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, "utf-8"), "utf-8")
+		else if (!pathname.match(/lint|generate/)) {
+			var encoding = (/\.(ico|png)$/i).test(path.extname(pathname)) ? "binary" : "utf-8";
+			fs.writeFileSync("./dist/archive/v" + version + "/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, encoding), encoding)
+			fs.writeFileSync("./dist/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, encoding), encoding)
 		}
 	}
 }
-

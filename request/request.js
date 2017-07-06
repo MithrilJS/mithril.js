@@ -2,11 +2,14 @@
 
 var buildQueryString = require("../querystring/build")
 
+var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
+
 module.exports = function($window, Promise) {
 	var callbackCount = 0
 
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
+
 	function finalizer() {
 		var count = 0
 		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
@@ -42,7 +45,7 @@ module.exports = function($window, Promise) {
 			if (args.method == null) args.method = "GET"
 			args.method = args.method.toUpperCase()
 
-			var useBody = typeof args.useBody === "boolean" ? args.useBody : args.method !== "GET" && args.method !== "TRACE"
+			var useBody = (args.method === "GET" || args.method === "TRACE") ? false : (typeof args.useBody === "boolean" ? args.useBody : true)
 
 			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
@@ -52,7 +55,16 @@ module.exports = function($window, Promise) {
 			if (useBody) args.data = args.serialize(args.data)
 			else args.url = assemble(args.url, args.data)
 
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new $window.XMLHttpRequest(),
+				aborted = false,
+				_abort = xhr.abort
+
+
+			xhr.abort = function abort() {
+				aborted = true
+				_abort.call(xhr)
+			}
+
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
 			if (args.serialize === JSON.stringify && useBody) {
@@ -70,10 +82,13 @@ module.exports = function($window, Promise) {
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 
 			xhr.onreadystatechange = function() {
+				// Don't throw errors on xhr.abort().
+				if(aborted) return
+
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
@@ -128,7 +143,6 @@ module.exports = function($window, Promise) {
 			var key = tokens[i].slice(1)
 			if (data[key] != null) {
 				url = url.replace(tokens[i], data[key])
-				delete data[key]
 			}
 		}
 		return url

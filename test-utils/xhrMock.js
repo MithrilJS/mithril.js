@@ -6,7 +6,7 @@ var parseQueryString = require("../querystring/parse")
 
 module.exports = function() {
 	var routes = {}
-	var callback = "callback"
+	// var callback = "callback"
 	var serverErrorHandler = function(url) {
 		return {status: 500, responseText: "server error, most likely the URL was not defined " + url}
 	}
@@ -15,6 +15,7 @@ module.exports = function() {
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
 			var headers = {}
+			var aborted = false
 			this.setRequestHeader = function(header, value) {
 				headers[header] = value
 			}
@@ -32,17 +33,23 @@ module.exports = function() {
 			}
 			this.send = function(body) {
 				var self = this
-				var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
-				var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
+				if(!aborted) {
+					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
+					var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
+					self.status = data.status
+					self.responseText = data.responseText
+				} else {
+					self.status = 0
+				}
 				self.readyState = 4
-				self.status = data.status
-				self.responseText = data.responseText
 				if (args.async === true) {
-					var s = new Date
 					callAsync(function() {
 						if (typeof self.onreadystatechange === "function") self.onreadystatechange()
 					})
 				}
+			}
+			this.abort = function() {
+				aborted = true
 			}
 		},
 		document: {
@@ -56,7 +63,7 @@ module.exports = function() {
 						var urlData = parseURL(element.src, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
 						var handler = routes["GET " + urlData.pathname] || serverErrorHandler.bind(null, element.src)
 						var data = handler({url: urlData.pathname, query: urlData.search, body: null})
-						var query = parseQueryString(urlData.search)
+						parseQueryString(urlData.search)
 						callAsync(function() {
 							if (data.status === 200) {
 								new Function("$window", "with ($window) return " + data.responseText).call($window, $window)
@@ -75,8 +82,8 @@ module.exports = function() {
 		$defineRoutes: function(rules) {
 			routes = rules
 		},
-		$defineJSONPCallbackKey: function(key) {
-			callback = key
+		$defineJSONPCallbackKey: function(/* key */) {
+			// callback = key
 		},
 	}
 	return $window

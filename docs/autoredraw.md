@@ -87,9 +87,9 @@ m.route(document.body, "/", {
 
 ---
 
-### When Mithril does not redraws
+### When Mithril does not redraw
 
-Mithril does not redraw after `setTimeout`, `setInterval`, `requestAnimationFrame` and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call [`m.redraw()`](redraw.md).
+Mithril does not redraw after `setTimeout`, `setInterval`, `requestAnimationFrame`, raw `Promise` resolutions and 3rd party library event handlers (e.g. Socket.io callbacks). In those cases, you must manually call [`m.redraw()`](redraw.md).
 
 Mithril also does not redraw after lifecycle methods. Parts of the UI may be redrawn after an `oninit` handler, but other parts of the UI may already have been redrawn when a given `oninit` handler fires. Handlers like `oncreate` and `onupdate` fire after the UI has been redrawn.
 

@@ -40,9 +40,11 @@ function view() {
 	}))
 }
 
-function exit(vnode, done) {
+function exit(vnode) {
 	vnode.dom.classList.add("exit")
-	setTimeout(done, 1000)
+	return new Promise(function(resolve) {
+		setTimeout(resolve, 1000)
+	})
 }
 
 function run() {

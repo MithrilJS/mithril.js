@@ -7,6 +7,7 @@ module.exports = function(object) {
 	for (var key in object) {
 		destructure(key, object[key])
 	}
+
 	return args.join("&")
 
 	function destructure(key, value) {

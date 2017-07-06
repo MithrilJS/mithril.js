@@ -170,7 +170,7 @@ Mithril supports both strings and objects as valid `style` values. In other word
 ```javascript
 m("div", {style: "background:red;"})
 m("div", {style: {background: "red"}})
-m("div[style=background:red")
+m("div[style=background:red]")
 ```
 
 Using a string as a `style` would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.
@@ -181,7 +181,7 @@ Mithril does not attempt to add units to number values.
 
 ### Events
 
-Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on<event>` property, such as `touchstart`
+Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on${event}` property, such as `touchstart`
 
 ```javascript
 function doSomething(e) {

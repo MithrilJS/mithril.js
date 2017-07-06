@@ -14,17 +14,19 @@ module.exports = function($window, redrawService) {
 		var run = function() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 		}
-		var bail = function() {
-			routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path) {
+			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
-				component = comp != null && typeof comp.view === "function" ? comp : "div", attrs = params, currentPath = path, lastUpdate = null
+				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				run()
 			}
-			if (payload.view) update({}, payload)
+			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
 					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
@@ -37,7 +39,10 @@ module.exports = function($window, redrawService) {
 		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true}
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
 		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}
@@ -53,6 +58,10 @@ module.exports = function($window, redrawService) {
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
 			route.set(href, undefined, undefined)
 		}
+	}
+	route.param = function(key) {
+		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
+		return attrs
 	}
 
 	return route

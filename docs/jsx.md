@@ -10,7 +10,7 @@
 
 ### Description
 
-JSX is a syntax extension that enables you to write HTML tags interspersed with Javascript.
+JSX is a syntax extension that enables you to write HTML tags interspersed with Javascript. It's not part of any Javascript standards and it's not required for building applications, but it may be more pleasing to use depending on your team's preferences.
 
 ```jsx
 var MyComponent = {
@@ -39,14 +39,14 @@ When using JSX, it's possible to interpolate Javascript expressions within JSX t
 var greeting = "Hello"
 var url = "http://google.com"
 var link = <a href={url}>{greeting + "!"}</a>
-// yields <a href="http://google.com">Hello</a>
+// yields <a href="http://google.com">Hello!</a>
 ```
 
 Components can be used by using a convention of uppercasing the first letter of the component name:
 
 ```jsx
-m.mount(document.body, <MyComponent />)
-// equivalent to m.mount(document.body, m(MyComponent))
+m.render(document.body, <MyComponent />)
+// equivalent to m.render(document.body, m(MyComponent))
 ```
 
 ---
@@ -112,10 +112,12 @@ Create a `.babelrc` file:
 Next, create a file called `webpack.config.js`
 
 ```javascript
+const path = require('path')
+
 module.exports = {
 	entry: './src/index.js',
 	output: {
-		path: './bin',
+		path: path.resolve(__dirname, './bin'),
 		filename: 'app.js',
 	},
 	module: {
@@ -186,8 +188,8 @@ JSX is useful for teams where HTML is primarily written by someone without Javas
 
 Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
 
-1 - it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
-2 - static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<div class="button"></div>`
+- it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
+- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<div class="button"></div>`
 
 In addition, since hyperscript is plain Javascript, it's often more natural to indent than JSX:
 

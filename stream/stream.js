@@ -1,5 +1,7 @@
 "use strict"
 
+;(function() {
+
 var guid = 0, HALT = {}
 function createStream() {
 	function stream() {
@@ -14,7 +16,7 @@ function createStream() {
 }
 function initStream(stream) {
 	stream.constructor = createStream
-	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined}
+	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined, unregister: undefined}
 	stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
 	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
 
@@ -23,7 +25,10 @@ function initStream(stream) {
 			if (!stream._state.endStream) {
 				var endStream = createStream()
 				endStream.map(function(value) {
-					if (value === true) unregisterStream(stream), unregisterStream(endStream)
+					if (value === true) {
+						unregisterStream(stream)
+						endStream._state.unregister = function(){unregisterStream(endStream)}
+					}
 					return value
 				})
 				stream._state.endStream = endStream
@@ -35,6 +40,7 @@ function initStream(stream) {
 function updateStream(stream, value) {
 	updateState(stream, value)
 	for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
+	if (stream._state.unregister != null) stream._state.unregister()
 	finalize(stream)
 }
 function updateState(stream, value) {
@@ -56,7 +62,7 @@ function finalize(stream) {
 }
 
 function combine(fn, streams) {
-	if (!streams.every(valid)) throw new Error("Ensure that each item passed to m.prop.combine/m.prop.merge is a stream")
+	if (!streams.every(valid)) throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
 	return initDependency(createStream(), streams, function() {
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	})
@@ -107,10 +113,48 @@ function merge(streams) {
 		return streams.map(function(s) {return s()})
 	}, streams)
 }
+
+function scan(reducer, seed, stream) {
+	var newStream = combine(function (s) {
+		return seed = reducer(seed, s._state.value)
+	}, [stream])
+
+	if (newStream._state.state === 0) newStream(seed)
+
+	return newStream
+}
+
+function scanMerge(tuples, seed) {
+	var streams = tuples.map(function(tuple) {
+		var stream = tuple[0]
+		if (stream._state.state === 0) stream(undefined)
+		return stream
+	})
+
+	var newStream = combine(function() {
+		var changed = arguments[arguments.length - 1]
+
+		streams.forEach(function(stream, idx) {
+			if (changed.indexOf(stream) > -1) {
+				seed = tuples[idx][1](seed, stream._state.value)
+			}
+		})
+
+		return seed
+	}, streams)
+
+	return newStream
+}
+
 createStream["fantasy-land/of"] = createStream
 createStream.merge = merge
 createStream.combine = combine
+createStream.scan = scan
+createStream.scanMerge = scanMerge
 createStream.HALT = HALT
 
 if (typeof module !== "undefined") module["exports"] = createStream
-else window.stream = createStream
+else if (typeof window.m === "function" && !("stream" in window.m)) window.m.stream = createStream
+else window.m = {stream : createStream}
+
+}());

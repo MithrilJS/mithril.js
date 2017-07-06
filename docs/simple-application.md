@@ -13,14 +13,14 @@ First let's create an entry point for the application. Create a file `index.html
 		<title>My Application</title>
 	</head>
 	<body>
-		<script src="app.js"></script>
+		<script src="bin/app.js"></script>
 	</body>
 </html>
 ```
 
 The `<!doctype html>` line indicates this is an HTML 5 document. The first `charset` meta tag indicates the encoding of the document and the `viewport` meta tag dictates how mobile browsers should scale the page. The `title` tag contains the text to be displayed on the browser tab for this application, and the `script` tag indicates what is the path to the Javascript file that controls the application.
 
-We could create the entire application in a single Javascript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `app.js`.
+We could create the entire application in a single Javascript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
 
 There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern Javascript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
 
@@ -61,7 +61,7 @@ module.exports = User
 Next we create a function that will trigger an XHR call. Let's call it `loadList`
 
 ```javascript
-// models/User.js
+// src/models/User.js
 var m = require("mithril")
 
 var User = {
@@ -74,10 +74,10 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET http://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 ```javascript
-// models/User.js
+// src/models/User.js
 var m = require("mithril")
 
 var User = {
@@ -85,7 +85,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -99,7 +99,7 @@ module.exports = User
 
 The `method` option is an [HTTP method](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods). To retrieve data from the server without causing side-effects on the server, we need to use the `GET` method. The `url` is the address for the API endpoint. The `withCredentials: true` line indicates that we're using cookies (which is a requirement for the REM API).
 
-The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a Javascript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `reesult.data` array to `User.list`.
+The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a Javascript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
 
 Notice we also have a `return` statement in `loadList`. This is a general good practice when working with Promises, which allows us to register more callbacks to run after the completion of the XHR request.
 
@@ -112,15 +112,17 @@ Now, let's create a view module so that we can display data from our User model 
 Create a file called `src/views/UserList.js`. First, let's include Mithril and our model, since we'll need to use both:
 
 ```javascript
+// src/views/UserList.js
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 ```
 
 Next, let's create a Mithril component. A component is simply an object that has a `view` method:
 
 ```javascript
+// src/views/UserList.js
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 
 module.exports = {
 	view: function() {
@@ -135,7 +137,7 @@ Let's use Mithril hyperscript to create a list of items. Hyperscript is the most
 
 ```javascript
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 
 module.exports = {
 	view: function() {
@@ -149,16 +151,15 @@ The `".user-list"` string is a CSS selector, and as you would expect, `.user-lis
 Now, let's reference the list of users from the model we created earlier (`User.list`) to dynamically loop through data:
 
 ```javascript
+// src/views/UserList.js
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 
 module.exports = {
 	view: function() {
-		return m(".user-list", [
-			User.list.map(function(user) {
-				return m(".user-list-item", user.firstName + " " + user.lastName)
-			})
-		])
+		return m(".user-list", User.list.map(function(user) {
+			return m(".user-list-item", user.firstName + " " + user.lastName)
+		}))
 	}
 }
 ```
@@ -168,38 +169,38 @@ Since `User.list` is a Javascript array, and since hyperscript views are just Ja
 The problem, of course, is that we never called the `User.loadList` function. Therefore, `User.list` is still an empty array, and thus this view would render a blank page. Since we want `User.loadList` to be called when we render this component, we can take advantage of component [lifecycle methods](lifecycle-methods.md):
 
 ```javascript
+// src/views/UserList.js
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 
 module.exports = {
 	oninit: User.loadList,
 	view: function() {
-		return m(".user-list", [
-			User.list.map(function(user) {
-				return m(".user-list-item", user.firstName + " " + user.lastName)
-			})
-		])
+		return m(".user-list", User.list.map(function(user) {
+			return m(".user-list-item", user.firstName + " " + user.lastName)
+		}))
 	}
 }
 ```
 
 Notice that we added an `oninit` method to the component, which references `User.loadList`. This means that when the component initializes, User.loadList will be called, triggering an XHR request. When the server returns a response, `User.list` gets populated.
 
-Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common newbie mistake: calling the function immediately means that the XHR request will fire even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
+Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common pitfall for developers new to javascript: calling the function immediately means that the XHR request will fire as soon as the source code is evaluated, even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
 
 ---
 
-Let's render the view from the entry point file `index.js` we created earlier:
+Let's render the view from the entry point file `src/index.js` we created earlier:
 
 ```javascript
+// src/index.js
 var m = require("mithril")
 
-var UserList = require("./view/UserList")
+var UserList = require("./views/UserList")
 
 m.mount(document.body, UserList)
 ```
 
-The `m.mount` call renders the specified component (`UserList`) into a DOM element (`document.body`), erasing any DOM that were there previously. Opening the HTML file in a browser should now display a list of person names.
+The `m.mount` call renders the specified component (`UserList`) into a DOM element (`document.body`), erasing any DOM that was there previously. Opening the HTML file in a browser should now display a list of person names.
 
 ---
 
@@ -207,9 +208,9 @@ Right now, the list looks rather plain because we have not defined any styles.
 
 There are many similar conventions and libraries that help organize application styles nowadays. Some, like [Bootstrap](http://getbootstrap.com/) dictate a specific set of HTML structures and semantically meaningful class names, which has the upside of providing low cognitive dissonance, but the downside of making customization more difficult. Others, like [Tachyons](http://tachyons.io/) provide a large number of self-describing, atomic class names at the cost of making the class names themselves non-semantic. "CSS-in-JS" is another type of CSS system that is growing in popularity, which basically consists of scoping CSS via transpilation tooling. CSS-in-JS libraries achieve maintainability by reducing the size of the problem space, but come at the cost of having high complexity.
 
-Regardless of what CSS convention/library you choose, a good rule of thumb is to avoid the cascading aspect of CSS. To keep this tutorial simple, we'll just use plain CSS with overly explicit class names, so that the styles themselves provide the atomicity of Tachyons, and class name collisions are made unlikely through the verbosity of the class names. Plain CSS can be sufficient for low-complexity projects (e.g. 3 to 6 man-months of initial implementation time and few project phases)
+Regardless of what CSS convention/library you choose, a good rule of thumb is to avoid the cascading aspect of CSS. To keep this tutorial simple, we'll just use plain CSS with overly explicit class names, so that the styles themselves provide the atomicity of Tachyons, and class name collisions are made unlikely through the verbosity of the class names. Plain CSS can be sufficient for low-complexity projects (e.g. 3 to 6 man-months of initial implementation time and few project phases).
 
-To add styles, let's first create a file called `styles.css` and include it in the `index.html` file
+To add styles, let's first create a file called `styles.css` and include it in the `index.html` file:
 
 ```markup
 <!doctype html>
@@ -221,7 +222,7 @@ To add styles, let's first create a file called `styles.css` and include it in t
 		<link href="styles.css" rel="stylesheet" />
 	</head>
 	<body>
-		<script src="app.js"></script>
+		<script src="bin/app.js"></script>
 	</body>
 </html>
 ```
@@ -249,9 +250,10 @@ Routing means binding a screen to a unique URL, to create the ability to go from
 We can add routing by changing the `m.mount` call to a `m.route` call:
 
 ```javascript
+// src/index.js
 var m = require("mithril")
 
-var UserList = require("./view/UserList")
+var UserList = require("./views/UserList")
 
 m.route(document.body, "/list", {
 	"/list": UserList
@@ -278,14 +280,14 @@ module.exports = {
 }
 ```
 
-Then we can `require` this new module from `index.js`
+Then we can `require` this new module from `src/index.js`
 
 ```javascript
-// index.js
+// src/index.js
 var m = require("mithril")
 
-var UserList = require("./view/UserList")
-var UserForm = require("./view/UserForm")
+var UserList = require("./views/UserList")
+var UserForm = require("./views/UserForm")
 
 m.route(document.body, "/list", {
 	"/list": UserList
@@ -295,11 +297,11 @@ m.route(document.body, "/list", {
 And finally, we can create a route that references it:
 
 ```javascript
-// index.js
+// src/index.js
 var m = require("mithril")
 
-var UserList = require("./view/UserList")
-var UserForm = require("./view/UserForm")
+var UserList = require("./views/UserList")
+var UserForm = require("./views/UserForm")
 
 m.route(document.body, "/list", {
 	"/list": UserList,
@@ -322,7 +324,7 @@ module.exports = {
 			m("input.input[type=text][placeholder=First name]"),
 			m("label.label", "Last name"),
 			m("input.input[placeholder=Last name]"),
-			m("button.button[type=submit]", "Save"),
+			m("button.button[type=button]", "Save"),
 		])
 	}
 }
@@ -344,7 +346,7 @@ body,.input,.button {font:normal 16px Verdana;margin:0;}
 .button:hover {background:#e8e8e8;}
 ```
 
-Right now, this component does nothing to respond to user events. Let's add some code to our `User` model in `src/model/User.js`. This is how the code is right now:
+Right now, this component does nothing to respond to user events. Let's add some code to our `User` model in `src/models/User.js`. This is how the code is right now:
 
 ```javascript
 // src/models/User.js
@@ -355,7 +357,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -378,7 +380,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -390,8 +392,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
-			data: {id: id},
+			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -408,7 +409,7 @@ Notice we added a `User.current` property, and a `User.load(id)` method which po
 ```javascript
 // src/views/UserForm.js
 var m = require("mithril")
-var User = require("./model/User")
+var User = require("../models/User")
 
 module.exports = {
 	oninit: function(vnode) {User.load(vnode.attrs.id)},
@@ -418,7 +419,7 @@ module.exports = {
 			m("input.input[type=text][placeholder=First name]", {value: User.current.firstName}),
 			m("label.label", "Last name"),
 			m("input.input[placeholder=Last name]", {value: User.current.lastName}),
-			m("button.button[type=submit]", "Save"),
+			m("button.button[type=button]", "Save"),
 		])
 	}
 }
@@ -429,18 +430,16 @@ Similar to the `UserList` component, `oninit` calls `User.load()`. Remember we h
 Now, let's modify the `UserList` view so that we can navigate from there to a `UserForm`:
 
 ```javascript
-// src/views/UserForm.js
+// src/views/UserList.js
 var m = require("mithril")
-var User = require("../model/User")
+var User = require("../models/User")
 
 module.exports = {
 	oninit: User.loadList,
 	view: function() {
-		return m(".user-list", [
-			User.list.map(function(user) {
-				return m("a.user-list-item", {href: "/edit/" + user.id, oncreate: m.route.link}, user.firstName + " " + user.lastName)
-			})
-		])
+		return m(".user-list", User.list.map(function(user) {
+			return m("a.user-list-item", {href: "/edit/" + user.id, oncreate: m.route.link}, user.firstName + " " + user.lastName)
+		}))
 	}
 }
 ```
@@ -456,12 +455,17 @@ The form itself still doesn't save when you press "Save". Let's make this form w
 ```javascript
 // src/views/UserForm.js
 var m = require("mithril")
-var User = require("./model/User")
+var User = require("../models/User")
 
 module.exports = {
 	oninit: function(vnode) {User.load(vnode.attrs.id)},
 	view: function() {
-		return m("form", [
+		return m("form", {
+				onsubmit: function(e) {
+					e.preventDefault()
+					User.save()
+				}
+			}, [
 			m("label.label", "First name"),
 			m("input.input[type=text][placeholder=First name]", {
 				oninput: m.withAttr("value", function(value) {User.current.firstName = value}),
@@ -472,7 +476,7 @@ module.exports = {
 				oninput: m.withAttr("value", function(value) {User.current.lastName = value}),
 				value: User.current.lastName
 			}),
-			m("button.button[type=submit]", {onclick: User.save}, "Save"),
+			m("button.button[type=submit]", "Save"),
 		])
 	}
 }
@@ -491,7 +495,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users",
+			url: "https://rem-rest-api.herokuapp.com/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -503,8 +507,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
-			data: {id: id},
+			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -515,7 +518,7 @@ var User = {
 	save: function() {
 		return m.request({
 			method: "PUT",
-			url: "http://rem-rest-api.herokuapp.com/api/users/:id",
+			url: "https://rem-rest-api.herokuapp.com/api/users/" + User.current.id,
 			data: User.current,
 			withCredentials: true,
 		})
@@ -536,7 +539,9 @@ Currently, we're only able to navigate back to the user list via the browser bac
 Let's create a file `src/views/Layout.js`:
 
 ```javascript
-var Layout = {
+var m = require("mithril")
+
+module.exports = {
 	view: function(vnode) {
 		return m("main.layout", [
 			m("nav.menu", [
@@ -571,14 +576,15 @@ body,.input,.button {font:normal 16px Verdana;margin:0;}
 .button:hover {background:#e8e8e8;}
 ```
 
-Let's change the router in `index.js` to add our layout into the mix:
+Let's change the router in `src/index.js` to add our layout into the mix:
 
 ```javascript
-// index.js
+// src/index.js
 var m = require("mithril")
 
-var UserList = require("./view/UserList")
-var UserForm = require("./view/UserForm")
+var UserList = require("./views/UserList")
+var UserForm = require("./views/UserForm")
+var Layout = require("./views/Layout")
 
 m.route(document.body, "/list", {
 	"/list": {
@@ -598,7 +604,7 @@ We replaced each component with a [RouteResolver](route.md#routeresolver) (basic
 
 The interesting thing to pay attention to is how components can be used instead of a selector string in a `m()` call. Here, in the `/list` route, we have `m(Layout, m(UserList))`. This means there's a root vnode that represents an instance of `Layout`, which has a `UserList` vnode as its only child.
 
-In the `/edit/:id` route, there's also a `vnode` argument that carries the route parameters into the `UserForm` component. So if the URL is `/edit/1`, then `vnode.attrs` in this case is `{id: 1}`, and this `m(UserForm, vnode.attrs)` is equivalent to `m(UserForm, {id: 1})`. The equivalent JSX code would be `<UserForm id={vnode.attrs} />`.
+In the `/edit/:id` route, there's also a `vnode` argument that carries the route parameters into the `UserForm` component. So if the URL is `/edit/1`, then `vnode.attrs` in this case is `{id: 1}`, and this `m(UserForm, vnode.attrs)` is equivalent to `m(UserForm, {id: 1})`. The equivalent JSX code would be `<UserForm id={vnode.attrs.id} />`.
 
 Refresh the page in the browser and now you'll see the global navigation on every page in the app.
 
@@ -608,5 +614,4 @@ This concludes the tutorial.
 
 In this tutorial, we went through the process of creating a very simple application where we can list users from a server and edit them individually. As an extra exercise, try to implement user creation and deletion on your own.
 
-If you want to see more examples of Mithril code, check the [examples](examples.md) page. If you have questions, feel free to drop by the [Mithril chat room](https://gitter.im/lhorie/mithril.js).
-
+If you want to see more examples of Mithril code, check the [examples](examples.md) page. If you have questions, feel free to drop by the [Mithril chat room](https://gitter.im/MithrilJS/mithril.js).

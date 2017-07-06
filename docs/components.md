@@ -2,8 +2,9 @@
 
 - [Structure](#structure)
 - [Lifecycle methods](#lifecycle-methods)
+- [Syntactic variants](#syntactic-variants)
 - [State](#state)
-- [Avoid-anti-patterns](#avoid-anti-patterns)
+- [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
 
@@ -100,6 +101,107 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 ---
 
+### Syntactic variants
+
+#### ES6 classes
+
+Components can also be written using ES6 class syntax:
+
+```javascript
+class ES6ClassComponent {
+	constructor(vnode) {
+		// vnode.state is undefined at this point
+		this.kind = "ES6 class"
+	}
+	view() {
+		return m("div", `Hello from an ${this.kind}`)
+	}
+	oncreate() {
+		console.log(`A ${this.kind} component was created`)
+	}
+}
+```
+
+Component classes must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(ES6ClassComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, ES6ClassComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": ES6ClassComponent
+})
+
+// EXAMPLE: component composition
+class AnotherES6ClassComponent {
+	view() {
+		return m("main", [
+			m(ES6ClassComponent)
+		])
+	}
+}
+```
+
+#### Closure components
+
+Functionally minded developers may prefer using the "closure component" syntax:
+
+```javascript
+function closureComponent(vnode) {
+	// vnode.state is undefined at this point
+	var kind = "closure component"
+
+	return {
+		view: function() {
+			return m("div", "Hello from a " + kind)
+		},
+		oncreate: function() {
+			console.log("We've created a " + kind)
+		}
+	}
+}
+```
+
+The returned object must hold a `view` function, used to get the tree to render.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(closureComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, closuresComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": closureComponent
+})
+
+// EXAMPLE: component composition
+function anotherClosureComponent() {
+	return {
+		view: function() {
+			return m("main", [
+				m(closureComponent)
+			])
+		}
+	}
+}
+```
+
+#### Mixing component kinds
+
+Components can be freely mixed. A Class component can have closure or POJO components as children, etc...
+
+---
+
 ### State
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
@@ -108,7 +210,7 @@ The state of a component can be accessed three ways: as a blueprint at initializ
 
 #### At initialization
 
-Any property attached to the component object is copied for every instance of the component. This allows simple state initialization.
+For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
 
 In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
 
@@ -125,6 +227,10 @@ m(ComponentWithInitialState)
 // Equivalent HTML
 // <div>Initial content</div>
 ```
+
+For class components, the state is an instance of the class, set right after the constructor is called.
+
+For closure components, the state is the object returned by the closure, set right after the closure returns. The state object is mostly redundant for closure components (since variables defined in the closure scope can be used instead).
 
 #### Via vnode.state
 
@@ -174,6 +280,89 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 Although Mithril is flexible, some code patterns are discouraged:
 
+#### Avoid fat components
+
+Generally speaking, a "fat" component is a component that has custom instance methods. In other words, you should avoid attaching functions to `vnode.state` or `this`. It's exceedingly rare to have logic that logically fits in a component instance method and that can't be reused by other components. It's relatively common that said logic might be needed by a different component down the road.
+
+It's easier to refactor code if that logic is placed in the data layer than if it's tied to a component state.
+
+Consider this fat component:
+
+```javascript
+// views/Login.js
+// AVOID
+var Login = {
+	username: "",
+	password: "",
+	setUsername: function(value) {
+		this.username = value
+	},
+	setPassword: function(value) {
+		this.password = value
+	},
+	canSubmit: function() {
+		return this.username !== "" && this.password !== ""
+	},
+	login: function() {/*...*/},
+	view: function() {
+		return m(".login", [
+			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), value: this.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), value: this.password}),
+			m("button", {disabled: !this.canSubmit(), onclick: this.login}, "Login"),
+		])
+	}
+}
+```
+
+Normally, in the context of a larger application, a login component like the one above exists alongside components for user registration and password recovery. Imagine that we want to be able to prepopulate the email field when navigating from the login screen to the registration or password recovery screens (or vice versa), so that the user doesn't need to re-type their email if they happened to fill the wrong page (or maybe you want to bump the user to the registration form if a username is not found).
+
+Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its state, which by definition makes this state difficult to access from outside.
+
+It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
+
+```javascript
+// models/Auth.js
+// PREFER
+var Auth = {
+	username: "",
+	password: "",
+	setUsername: function(value) {
+		Auth.username = value
+	},
+	setPassword: function(value) {
+		Auth.password = value
+	},
+	canSubmit: function() {
+		return Auth.username !== "" && Auth.password !== ""
+	},
+	login: function() {/*...*/},
+}
+
+module.exports = Auth
+```
+
+Then, we can clean up the component:
+
+```javascript
+// views/Login.js
+// PREFER
+var Auth = require("../models/Auth")
+
+var Login = {
+	view: function() {
+		return m(".login", [
+			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("button", {disabled: !Auth.canSubmit(), onclick: Auth.login}, "Login"),
+		])
+	}
+}
+```
+
+This way, the `Auth` module is now the source of truth for auth-related state, and a `Register` component can easily access this data, and even reuse methods like `canSubmit`, if needed. In addition, if validation code is required (for example, for the email field), you only need to modify `setEmail`, and that change will do email validation for any component that modifies an email field.
+
+As a bonus, notice that we no longer need to use `.bind` to keep a reference to the state for the component's event handlers.
+
 #### Avoid restrictive interfaces
 
 Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
@@ -206,7 +395,7 @@ var FlexibleComponent = {
 
 #### Don't manipulate `children`
 
-However, if a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
+If a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.
 
 Often it's desirable to define multiple sets of children, for example, if a component has a configurable title and body.
 

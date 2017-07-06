@@ -69,7 +69,7 @@ o.spec("event", function() {
 		o(onevent.args[0].type).equals("click")
 		o(onevent.args[0].target).equals(div.dom)
 		o(div.dom).equals(updated.dom)
-		o(div.dom.attributes["id"].nodeValue).equals("b")
+		o(div.dom.attributes["id"].value).equals("b")
 	})
 
 	o("handles ontransitionend", function() {

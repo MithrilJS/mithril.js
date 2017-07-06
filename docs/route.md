@@ -7,6 +7,7 @@
 		- [m.route.get](#mrouteget)
 		- [m.route.prefix](#mrouteprefix)
 		- [m.route.link](#mroutelink)
+		- [m.route.param](#mrouteparam)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -100,16 +101,47 @@ Argument          | Type      | Required | Description
 
 ##### m.route.link
 
-`eventHandler = m.route.link(vnode)`
+This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
+
+```JS
+m("a[href=/]", {oncreate: m.route.link})`.
+```
+
+Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
+
+If the `href` attribute is not static, the `onupdate` hook must also be set:
+
+```JS
+m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})`
+```
+
+`m.route.link(vnode)`
 
 Argument          | Type        | Required | Description
 ----------------- | ----------- | -------- | ---
-`vnode`           | `Vnode`     | Yes      | This method is meant to be used in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` hook](lifecycle-methods.md)
-**returns**       | Function(e) |          | Returns an event handler that calls `m.route.set` with the link's `href` as the `path`
+`vnode`           | `Vnode`     | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
+**returns**       |             |          | Returns `undefined`
+
+##### m.route.param
+
+Retrieves a route parameter from the last fully resolved route. A route parameter is a key-value pair. Route parameters may come from a few different places:
+
+- route interpolations (e.g. if a route is `/users/:id`, and it resolves to `/users/1`, the route parameter has a key `id` and value `"1"`)
+- router querystrings (e.g. if the path is `/users?page=1`, the route parameter has a key `page` and value `"1"`)
+- `history.state` (e.g. if history.state is `{foo: "bar"}`, the route parameter has key `foo` and value `"bar"`)
+
+`value = m.route.param(key)`
+
+Argument          | Type            | Required | Description
+----------------- | --------------- | -------- | ---
+`key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
+**returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
+
+ Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.params()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
 
 #### RouteResolver
 
-A RouterResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
+A RouteResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
 
 `routeResolver = {onmatch, render}`
 
@@ -123,11 +155,11 @@ For more information on `onmatch`, see the [advanced component resolution](#adva
 
 `routeResolver.onmatch(args, requestedPath)`
 
-Argument        | Type                           | Description
---------------- | ------------------------------ | ---
-`args`          | `Object`                       | The [routing parameters](#routing-parameters)
-`requestedPath` | `String`                       | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-**returns**     | `Component|Promise<Component>` | Returns a component or a promise that resolves to a component
+Argument        | Type                                     | Description
+--------------- | ---------------------------------------- | ---
+`args`          | `Object`                                 | The [routing parameters](#routing-parameters)
+`requestedPath` | `String`                                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+**returns**     | `Component|Promise<Component>|undefined` | Returns a component or a promise that resolves to a component
 
 If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
 
@@ -139,11 +171,11 @@ The `render` method is called on every redraw for a matching route. It is simila
 
 `vnode = routeResolve.render(vnode)`
 
-Argument            | Type            | Description
-------------------- | --------------- | -----------
-`vnode`             | `Object`        | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
-`vnode.attrs`       | `Object`        | A map of URL parameter values
-**returns**         | `Vnode`         | Returns a vnode
+Argument            | Type                 | Description
+------------------- | -------------------- | -----------
+`vnode`             | `Object`             | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
+`vnode.attrs`       | `Object`             | A map of URL parameter values
+**returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
 
 ---
 
@@ -257,8 +289,6 @@ In the example above, we defined a route `/edit/:id`. This creates a dynamic rou
 
 It's possible to have multiple arguments in a route, for example `/edit/:projectID/:userID` would yield the properties `projectID` and `userID` on the component's vnode attributes object.
 
-In addition to routing parameters, the `attrs` object also includes a `path` property that contains the current route path, and a `route` property that contains the matched routed.
-
 #### Key parameter
 
 When a user navigates from a parameterized route to the same route with a different parameter (e.g. going from `/page/1` to `/page/2` given a route `/page/:id`, the component would not be recreated from scratch since both routes resolve to the same component, and thus result in a virtual dom in-place diff. This has the side-effect of triggering the `onupdate` hook, rather than `oninit`/`oncreate`. However, it's relatively common for a developer to want to synchronize the recreation of the component to the route change event.
@@ -290,6 +320,20 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 	"/files/:file...": Edit,
 })
 ```
+
+#### Handling 404s
+
+For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+
+In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
+
+```javascript
+m.route(document.body, "/", {
+  "/": homeComponent,
+  // [...]
+  "/:404...": errorPageComponent
+});
+ ```
 
 #### History state
 
@@ -385,7 +429,7 @@ var Layout = {
 }
 ```
 
-In the example above, the layout merely consists of a `<div class="layout">` that contains the children passed to the component, but in a real life scenario it could be as complex as neeeded.
+In the example above, the layout merely consists of a `<div class="layout">` that contains the children passed to the component, but in a real life scenario it could be as complex as needed.
 
 One way to wrap the layout is to define an anonymous component in the routes map:
 
@@ -464,7 +508,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 #### Authentication
 
-The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
@@ -486,9 +530,7 @@ m.route(document.body, "/secret", {
 	"/secret": {
 		onmatch: function() {
 			if (!isLoggedIn) m.route.set("/login")
-		},
-		render: function() {
-			return m(Home)
+			else return Home
 		}
 	},
 	"/login": Login
@@ -497,7 +539,50 @@ m.route(document.body, "/secret", {
 
 When the application loads, `onmatch` is called and since `isLoggedIn` is false, the application redirects to `/login`. Once the user pressed the login button, `isLoggedIn` would be set to true, and the application would redirect to `/secret`. The `onmatch` hook would run once again, and since `isLoggedIn` is true this time, the application would render the `Home` component.
 
-For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user.
+For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user:
+
+```javascript
+var Auth = {
+	username: "",
+	password: "",
+
+	setUsername: function(value) {
+		Auth.username = value
+	},
+	setPassword: function(value) {
+		Auth.password = value
+	},
+	login: function() {
+		m.request({
+			url: "/api/v1/auth",
+			data: {username: Auth.username, password: Auth.password}
+		}).then(function(data) {
+			localStorage.setItem("auth-token": data.token)
+			m.route.set("/secret")
+		})
+	}
+}
+
+var Login = {
+	view: function() {
+		return m("form", [
+			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
+			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("button[type=button]", {onclick: Auth.login, "Login")
+		])
+	}
+}
+
+m.route(document.body, "/secret", {
+	"/secret": {
+		onmatch: function() {
+			if (!localStorage.getItem("auth-token")) m.route.set("/login")
+			else return Home
+		}
+	},
+	"/login": Login
+})
+```
 
 ---
 

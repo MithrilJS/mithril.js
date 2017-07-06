@@ -12,36 +12,71 @@
 
 ### What is Mithril?
 
-Mithril is a client-side Javascript framework for building Single Page Applications.  
+Mithril is a modern client-side Javascript framework for building Single Page Applications.
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
+
+<div style="display:flex;margin:0 0 30px;">
+	<div style="width:50%;">
+		<h5>Download size</h5>
+		<small>Mithril (8kb)</small>
+		<div style="animation:grow 0.08s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:4%;"></div>
+		<small style="color:#aaa;">Vue + Vue-Router + Vuex + fetch (40kb)</small>
+		<div style="animation:grow 0.4s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:20%"></div>
+		<small style="color:#aaa;">React + React-Router + Redux + fetch (64kb)</small>
+		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:32%"></div>
+		<small style="color:#aaa;">Angular (135kb)</small>
+		<div style="animation:grow 1.35s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:68%"></div>
+	</div>
+	<div style="width:50%;">
+		<h5>Performance</h5>
+		<small>Mithril (6.4ms)</small>
+		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:24%;"></div>
+		<small style="color:#aaa;">Vue (9.8ms)</small>
+		<div style="animation:grow 0.98s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:40%"></div>
+		<small style="color:#aaa;">React (12.1ms)</small>
+		<div style="animation:grow 1.21s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:48%"></div>
+		<small style="color:#aaa;">Angular (11.5ms)</small>
+		<div style="animation:grow 1.15s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:44%"></div>
+	</div>
+</div>
+
+Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess.
 
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
----
+Mithril supports browsers all the way back to IE9, no polyfills required.
 
-Note: This introduction assumes you have basic level of Javacript knowledge. If you don't, there are many great resources to learn. [Speaking Javascript](http://speakingjs.com/es5/index.html) is a good e-book for absolute beginners. If you're already familiar with other programming languages, the [Eloquent Javascript](http://eloquentjavascript.net/) e-book might be more suitable for you. [Codecademy](https://www.codecademy.com/learn/javascript) is another good resource that emphasizes learning via interactivity.
+---
 
 ### Getting started
 
-The easiest way to try out Mithril is to include it from a CDN, and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
+An easy way to try out Mithril is to include it from a CDN and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
 Let's create an HTML file to follow along:
 
 ```markup
-<body></body>
-<script src="http://cdn.rawgit.com/lhorie/mithril.js/rewrite/mithril.js"></script>
-<script>
-var root = document.body
+<body>
+	<script src="//unpkg.com/mithril/mithril.js"></script>
+	<script>
+	var root = document.body
 
-// your code goes here!
-</script>
+	// your code goes here!
+	</script>
+</body>
 ```
+
+To make things simpler you can fork this pen which already has the latest version of mithril loaded.
+
+<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+
+Mithril is also loaded onto this page already, so you can start poking at the `m` object in the developer console right away if you'd like!
 
 ---
 
 ### Hello world
 
-Let's start as small as well can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
+Let's start as small as we can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
 
 ```javascript
 var root = document.body
@@ -57,6 +92,11 @@ m.render(root, "My first app")
 
 As you can see, you use the same code to both create and update HTML. Mithril automatically figures out the most efficient way of updating the text, rather than blindly recreating it from scratch.
 
+#### Live Example
+
+<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+
 ---
 
 ### DOM elements
@@ -67,7 +107,7 @@ Let's wrap our text in an `<h1>` tag.
 m.render(root, m("h1", "My first app"))
 ```
 
-The `m()` function can be used to describe any HTML structure you want. So if you to add a class to the `<h1>`:
+The `m()` function can be used to describe any HTML structure you want. So if you need to add a class to the `<h1>`:
 
 ```javascript
 m("h1", {class: "title"}, "My first app")
@@ -91,9 +131,14 @@ m("main", [
 ])
 ```
 
+#### Live Example
+
+<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
-```markup
+```jsx
 // HTML syntax via Babel's JSX plugin
 <main>
 	<h1 class="title">My first app</h1>
@@ -142,7 +187,8 @@ var Hello = {
 	view: function() {
 		return m("main", [
 			m("h1", {class: "title"}, "My first app"),
-			m("button", {onclick: function() {count++}}, count + " clicks"), // changed this line
+			// changed the next line
+			m("button", {onclick: function() {count++}}, count + " clicks"),
 		])
 	}
 }
@@ -155,6 +201,11 @@ We defined an `onclick` event on the button, which increments a variable `count`
 You can now update the label of the button by clicking the button. Since we used `m.mount`, you don't need to manually call `m.render` to apply the changes in the `count` variable to the HTML; Mithril does it for you.
 
 If you're wondering about performance, it turns out Mithril is very fast at rendering updates, because it only touches the parts of the DOM it absolutely needs to. So in our example above, when you click the button, the text in it is the only part of the DOM Mithril actually updates.
+
+#### Live Example
+
+<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
@@ -189,6 +240,11 @@ The `"/splash"` right after `root` means that's the default route, i.e. if the h
 
 Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to `http://localhost/#!/hello`. You can navigate back and forth to the splash page using the browser's back and next button.
 
+#### Live Example
+
+<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+
 ---
 
 ### XHR
@@ -197,16 +253,16 @@ Basically, XHR is just a way to talk to a server.
 
 Let's change our click counter to make it save data on a server. For the server, we'll use [REM](http://rem-rest-api.herokuapp.com), a mock REST API designed for toy apps like this tutorial.
 
-First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `useCredentials` means to enable cookies (a requirement for the REM API to work)
+First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `withCredentials` means to enable cookies (a requirement for the REM API to work)
 
 ```javascript
 var count = 0
 var increment = function() {
 	m.request({
 		method: "PUT",
-		url: "http://rem-rest-api.herokuapp.com/api/tutorial/1",
+		url: "//rem-rest-api.herokuapp.com/api/tutorial/1",
 		data: {count: count + 1},
-		useCredentials: true,
+		withCredentials: true,
 	})
 	.then(function(data) {
 		count = parseInt(data.count)
@@ -230,6 +286,11 @@ var Hello = {
 ```
 
 Clicking the button should now update the count.
+
+#### Live Example
+
+<p data-height="265" data-theme-id="light" data-slug-hash="WjeQBW" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril XHR Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/WjeQBW/">Mithril XHR Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
 

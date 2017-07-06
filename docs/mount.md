@@ -27,6 +27,10 @@ var Counter = {
 m.mount(document.body, Counter)
 ```
 
+To pass arguments when mounting a component use:
+```javascript
+m.mount(element, {view: function () {return m(Component, attrs)}})
+```
 ---
 
 ### Signature
@@ -69,7 +73,7 @@ In contrast, traversing a javascript data structure has a much more predictable 
 
 ### Differences from m.render
 
-A component rendered via `m.mount` automatically auto-redraws in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not. Note that calls to `m.prop()` do not trigger auto-redraws.
+A component rendered via `m.mount` automatically auto-redraws in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not.
 
 `m.mount()` is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril's auto-redrawing facilities.
 

@@ -38,7 +38,7 @@ var state = {
 	update: function(title) {
 		if (state.editing != null) {
 			state.editing.title = title.trim()
-			if (state.editing.title === "") destroy(state.editing)
+			if (state.editing.title === "") state.destroy(state.editing)
 			state.editing = null
 		}
 	},
@@ -104,7 +104,7 @@ var Todos = {
 								m("label", {ondblclick: function() {state.dispatch("edit", [todo])}}, todo.title),
 								m("button.destroy", {onclick: function() {state.dispatch("destroy", [todo])}}),
 							]),
-							m("input.edit", {onupdate: function(vnode) {ui.focus(vnode, todo)}, onkeypress: ui.save, onblur: ui.save})
+							m("input.edit", {onupdate: function(vnode) {ui.focus(vnode, todo)}, onkeyup: ui.save, onblur: ui.save})
 						])
 					}),
 				]),

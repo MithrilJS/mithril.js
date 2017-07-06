@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict"
 
 var fs = require("fs")
 var path = require("path")
@@ -10,12 +11,13 @@ function traverseDirectory(pathname, callback) {
 	return new Promise(function(resolve, reject) {
 		fs.lstat(pathname, function(err, stat) {
 			if (err) reject(err)
-			if (stat.isDirectory()) {
+			if (stat && stat.isDirectory()) {
 				fs.readdir(pathname, function(err, pathnames) {
 					if (err) reject(err)
 					var promises = []
 					for (var i = 0; i < pathnames.length; i++) {
 						if (pathnames[i] === "node_modules") continue
+						if (pathnames[i][0] === ".") continue
 						pathnames[i] = path.join(pathname, pathnames[i])
 						promises.push(traverseDirectory(pathnames[i], callback))
 					}
@@ -31,9 +33,9 @@ function traverseDirectory(pathname, callback) {
 	})
 }
 
-traverseDirectory(".", function(pathname, stat, children) {
+traverseDirectory(".", function(pathname) {
 	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
-		require(path.normalize(process.cwd()) + "/" + pathname)
+		require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
 	}
 })
 .then(o.run)

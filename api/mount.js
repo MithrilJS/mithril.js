@@ -10,7 +10,7 @@ module.exports = function(redrawService) {
 			return
 		}
 		
-		if (component.view == null) throw new Error("m.mount(element, component) expects a component, not a vnode")
+		if (component.view == null && typeof component !== "function") throw new Error("m.mount(element, component) expects a component, not a vnode")
 		
 		var run = function() {
 			redrawService.render(root, Vnode(component))

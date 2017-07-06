@@ -39,9 +39,9 @@ m.mount(document.body, Component)
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `attrName`  | `String`             | Yes      | The name of the attribute or property whose value will be used
-`callback`  | `any -> Boolean?`    | Yes      | The callback
+`callback`  | `any -> undefined`   | Yes      | The callback
 `thisArg`   | `any`                | No       | An object to bind to the `this` keyword in the callback function
-**returns** | `Event -> Boolean?`  |          | An event handler function
+**returns** | `Event -> undefined` |          | An event handler function
 
 [How to read signatures](signatures.md)
 
@@ -134,4 +134,3 @@ var state = {
 }
 m("input[type=checkbox]", {onclick: m.withAttr("checked", state.setSelected)})
 ```
-
