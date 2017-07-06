@@ -39,7 +39,10 @@ module.exports = function($window, redrawService) {
 		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true}
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
 		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}

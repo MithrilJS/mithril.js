@@ -667,7 +667,7 @@ o.spec("route", function() {
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
-								route.set("/b")
+								route.set("/b", {}, {state: {a: 5}})
 							},
 							render: render
 						},
@@ -686,6 +686,7 @@ o.spec("route", function() {
 							o(view.callCount).equals(1)
 							o(root.childNodes.length).equals(1)
 							o(root.firstChild.nodeName).equals("DIV")
+							o($window.history.state).deepEquals({a: 5})
 
 							done()
 						})
