@@ -267,6 +267,31 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
+				o("passes options on route.link", function() {
+					var opts = {}
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							view: function() {
+								return m("a", {
+									href: "/test",
+									oncreate: route.link(opts)
+								})
+							}
+						}
+					})
+					route.set = o.spy(route.set)
+
+					root.firstChild.dispatchEvent(e)
+
+					o(route.set.callCount).equals(1)
+					o(route.set.args[2]).equals(opts)
+				})
+
 				o("accepts RouteResolver with onmatch that returns Component", function(done) {
 					var matchCount = 0
 					var renderCount = 0
