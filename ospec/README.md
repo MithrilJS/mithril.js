@@ -252,7 +252,7 @@ o.run()
 The `o.new()` method can be used to create new instances of ospec, which can be run in parallel. Note that each instance will report independently, and there's no aggregation of results.
 
 ```javascript
-var _o = o.new()
+var _o = o.new('optional name')
 _o("a test", function() {
 	_o(1).equals(1)
 })
