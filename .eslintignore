@@ -4,4 +4,6 @@
 /examples
 /mithril.js
 /mithril.min.js
+/stream.js
+/stream.min.js
 /node_modules
