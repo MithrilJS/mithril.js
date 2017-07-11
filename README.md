@@ -1,3 +1,5 @@
+![](http://img.badgesize.io/MithrilJS/mithril.js/master/mithril.min.js.svg?compression=gzip)
+
 # Introduction
 
 - [What is Mithril?](#what-is-mithril)
@@ -13,12 +15,12 @@
 ### What is Mithril?
 
 Mithril is a modern client-side Javascript framework for building Single Page Applications.  
-It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
+It's small (< 9kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
 	<div style="width:50%;">
 		<h5>Download size</h5>
-		<small>Mithril (8kb)</small>
+		<small>Mithril (9kb)</small>
 		<div style="animation:grow 0.08s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:4%;"></div>
 		<small style="color:#aaa;">Vue + Vue-Router + Vuex + fetch (40kb)</small>
 		<div style="animation:grow 0.4s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:20%"></div>
