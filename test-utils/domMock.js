@@ -1,6 +1,39 @@
 "use strict"
 
-module.exports = function() {
+/*
+Known limitations:
+
+- `option.selected` can't be set/read when the option doesn't have a `select` parent
+- `element.attributes` is just a map of attribute names => Attr objects stubs
+- ...
+
+*/
+
+/*
+options:
+- spy:(f: Function) => Function
+*/
+
+module.exports = function(options) {
+	options = options || {}
+	var spy = options.spy || function(f){return f}
+	var spymap = []
+	function registerSpies(element, spies) {
+		if(options.spy) {
+			var i = spymap.indexOf(element)
+			if (i === -1) {
+				spymap.push(element, spies)
+			} else {
+				var existing = spymap[i + 1]
+				for (var k in spies) existing[k] = spies[k]
+			}
+		}
+	}
+	function getSpies(element) {
+		if (element == null || typeof element !== "object") throw new Error("Element expected")
+		if(options.spy) return spymap[spymap.indexOf(element) + 1]
+	}
+
 	function isModernEvent(type) {
 		return type === "transitionstart" || type === "transitionend" || type === "animationstart" || type === "animationend"
 	}
@@ -62,14 +95,26 @@ module.exports = function() {
 	}
 	function getAttribute(name) {
 		if (this.attributes[name] == null) return null
-		return this.attributes[name].nodeValue
+		return this.attributes[name].value
 	}
 	function setAttribute(name, value) {
-		var nodeValue = String(value)
+		/*eslint-disable no-implicit-coercion*/
+		// this is the correct kind of conversion, passing a Symbol throws in browsers too.
+		var nodeValue = "" + value
+		/*eslint-enable no-implicit-coercion*/
+
 		this.attributes[name] = {
 			namespaceURI: null,
+			get value() {return nodeValue},
+			set value(value) {
+				/*eslint-disable no-implicit-coercion*/
+				nodeValue = "" + value
+				/*eslint-enable no-implicit-coercion*/
+			},
 			get nodeValue() {return nodeValue},
-			set nodeValue(value) {nodeValue = String(value)},
+			set nodeValue(value) {
+				this.value = value
+			}
 		}
 	}
 	function setAttributeNS(ns, name, value) {
@@ -78,6 +123,9 @@ module.exports = function() {
 	}
 	function removeAttribute(name) {
 		delete this.attributes[name]
+	}
+	function hasAttribute(name) {
+		return name in this.attributes
 	}
 	var declListTokenizer = /;|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'/g
 	/**
@@ -150,6 +198,7 @@ module.exports = function() {
 					appendChild: appendChild,
 					removeChild: removeChild,
 					insertBefore: insertBefore,
+					hasAttribute: hasAttribute,
 					getAttribute: getAttribute,
 					setAttribute: setAttribute,
 					setAttributeNS: setAttributeNS,
@@ -204,7 +253,7 @@ module.exports = function() {
 						throw new Error("setting element.style is not portable")
 					},
 					get className() {
-						return this.attributes["class"] ? this.attributes["class"].nodeValue : ""
+						return this.attributes["class"] ? this.attributes["class"].value : ""
 					},
 					set className(value) {
 						if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot set property className of SVGElement")
@@ -222,7 +271,7 @@ module.exports = function() {
 						}
 					},
 					dispatchEvent: function(e) {
-						if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].nodeValue === "checkbox" && e.type === "click") {
+						if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].value === "checkbox" && e.type === "click") {
 							this.checked = !this.checked
 						}
 
@@ -256,18 +305,61 @@ module.exports = function() {
 						enumerable: true,
 					})
 
-					element.value = ""
-				}
-
-				if (element.nodeName === "TEXTAREA") {
-					var value
+					var value = ""
+					var valueSetter = spy(function(v) {
+						/*eslint-disable no-implicit-coercion*/
+						value = v === null ? "" : "" + v
+						/*eslint-enable no-implicit-coercion*/
+					})
 					Object.defineProperty(element, "value", {
 						get: function() {
-							return value != null ? value :
-								this.firstChild ? this.firstChild.nodeValue : ""
+							return value
 						},
-						set: function(v) {value = v},
+						set: valueSetter,
 						enumerable: true,
+					})
+
+					// we currently emulate the non-ie behavior, but emulating ie may be more useful (throw when an invalid type is set)
+					var typeSetter = spy(function(v) {
+						this.setAttribute("type", v)
+					})
+					Object.defineProperty(element, "type", {
+						get: function() {
+							if (!this.hasAttribute("type")) return "text"
+							var type = this.getAttribute("type")
+							return (/^(?:radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image)$/)
+							.test(type)
+							? type
+							: "text"
+						},
+						set: typeSetter,
+						enumerable: true,
+					})
+					registerSpies(element, {
+						valueSetter: valueSetter,
+						typeSetter: typeSetter
+					})
+				}
+
+
+				if (element.nodeName === "TEXTAREA") {
+					var wasNeverSet = true
+					var value = ""
+					var valueSetter = spy(function(v) {
+						wasNeverSet = false
+						/*eslint-disable no-implicit-coercion*/
+						value = v === null ? "" : "" + v
+						/*eslint-enable no-implicit-coercion*/
+					})
+					Object.defineProperty(element, "value", {
+						get: function() {
+							return wasNeverSet && this.firstChild ? this.firstChild.nodeValue : value
+						},
+						set: valueSetter,
+						enumerable: true,
+					})
+					registerSpies(element, {
+						valueSetter: valueSetter
 					})
 				}
 
@@ -275,11 +367,11 @@ module.exports = function() {
 
 				if (element.nodeName === "CANVAS") {
 					Object.defineProperty(element, "width", {
-						get: function() {return this.attributes["width"] ? Math.floor(parseInt(this.attributes["width"].nodeValue) || 0) : 300},
+						get: function() {return this.attributes["width"] ? Math.floor(parseInt(this.attributes["width"].value) || 0) : 300},
 						set: function(value) {this.setAttribute("width", Math.floor(Number(value) || 0).toString())},
 					})
 					Object.defineProperty(element, "height", {
-						get: function() {return this.attributes["height"] ? Math.floor(parseInt(this.attributes["height"].nodeValue) || 0) : 300},
+						get: function() {return this.attributes["height"] ? Math.floor(parseInt(this.attributes["height"].value) || 0) : 300},
 						set: function(value) {this.setAttribute("height", Math.floor(Number(value) || 0).toString())},
 					})
 				}
@@ -296,7 +388,7 @@ module.exports = function() {
 				}
 				function getOptionValue(element) {
 					return element.attributes["value"] != null ?
-						element.attributes["value"].nodeValue :
+						element.attributes["value"].value :
 						element.firstChild != null ? element.firstChild.nodeValue : ""
 				}
 				if (element.nodeName === "SELECT") {
@@ -317,14 +409,14 @@ module.exports = function() {
 						},
 						enumerable: true,
 					})
-					Object.defineProperty(element, "value", {
-						get: function() {
-							if (this.selectedIndex > -1) return getOptionValue(getOptions(this)[this.selectedIndex])
-							return ""
-						},
-						set: function(value) {
+					var valueSetter = spy(function(value) {
+						if (value === null) {
+							selectedIndex = -1
+						} else {
 							var options = getOptions(this)
-							var stringValue = String(value)
+							/*eslint-disable no-implicit-coercion*/
+							var stringValue = "" + value
+							/*eslint-enable no-implicit-coercion*/
 							for (var i = 0; i < options.length; i++) {
 								if (getOptionValue(options[i]) === stringValue) {
 									// selectedValue = stringValue
@@ -334,19 +426,37 @@ module.exports = function() {
 							}
 							// selectedValue = stringValue
 							selectedIndex = -1
+						}
+					})
+					Object.defineProperty(element, "value", {
+						get: function() {
+							if (this.selectedIndex > -1) return getOptionValue(getOptions(this)[this.selectedIndex])
+							return ""
 						},
+						set: valueSetter,
 						enumerable: true,
+					})
+					registerSpies(element, {
+						valueSetter: valueSetter
 					})
 				}
 				if (element.nodeName === "OPTION") {
+					var valueSetter = spy(function(value) {
+						/*eslint-disable no-implicit-coercion*/
+						this.setAttribute("value", value === null ? "" : "" + value)
+						/*eslint-enable no-implicit-coercion*/
+					})
 					Object.defineProperty(element, "value", {
 						get: function() {return getOptionValue(this)},
-						set: function(value) {
-							this.setAttribute("value", value)
-						},
+						set: valueSetter,
 						enumerable: true,
 					})
+					registerSpies(element, {
+						valueSetter: valueSetter
+					})
+
 					Object.defineProperty(element, "selected", {
+						// TODO? handle `selected` without a parent (works in browsers)
 						get: function() {
 							var options = getOptions(this.parentNode)
 							var index = options.indexOf(this)
@@ -372,13 +482,19 @@ module.exports = function() {
 				return element
 			},
 			createTextNode: function(text) {
-				var nodeValue = String(text)
+				/*eslint-disable no-implicit-coercion*/
+				var nodeValue = "" + text
+				/*eslint-enable no-implicit-coercion*/
 				return {
 					nodeType: 3,
 					nodeName: "#text",
 					parentNode: null,
 					get nodeValue() {return nodeValue},
-					set nodeValue(value) {nodeValue = String(value)},
+					set nodeValue(value) {
+						/*eslint-disable no-implicit-coercion*/
+						nodeValue = "" + value
+						/*eslint-enable no-implicit-coercion*/
+					},
 				}
 			},
 			createDocumentFragment: function() {
@@ -408,6 +524,8 @@ module.exports = function() {
 	$window.document.body = $window.document.createElement("body")
 	$window.document.documentElement.appendChild($window.document.body)
 	activeElement = $window.document.body
+
+	if (options.spy) $window.__getSpies = getSpies
 
 	return $window
 }
