@@ -17,7 +17,7 @@
 - core: Fix select option to allow empty string value [#1814](https://github.com/MithrilJS/mithril.js/issues/1814) ([#1828](https://github.com/MithrilJS/mithril.js/pull/1828) [@spacejack](https://github.com/spacejack))
 - core: Reset e.redraw when it was set to `false` [#1850](https://github.com/MithrilJS/mithril.js/issues/1850) ([#1890](https://github.com/MithrilJS/mithril.js/pull/1890))
 - core: differentiate between `{ value: "" }` and `{ value: 0 }` for form elements [#1595 comment](https://github.com/MithrilJS/mithril.js/pull/1595#issuecomment-304071453) ([#1862](https://github.com/MithrilJS/mithril.js/pull/1862))
-- core: Don't reset the cursor of textareas in IE10 when setting an identical `value` [#1870](https://github.com/MithrilJS/mithril.js/issues/1870) (([#1871](https://github.com/MithrilJS/mithril.js/pull/1871)))
+- core: Don't reset the cursor of textareas in IE10 when setting an identical `value` [#1870](https://github.com/MithrilJS/mithril.js/issues/1870) ([#1871](https://github.com/MithrilJS/mithril.js/pull/1871))
 - hypertext: Correct handling of `[value=""]` ([#1843](https://github.com/MithrilJS/mithril.js/issues/1843), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards))
 - router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
 - stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
@@ -33,7 +33,7 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 
 #### Other:
 
-- Addition of a performance regression test suite (#)
+- Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
 
 ### v1.1.1
