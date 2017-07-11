@@ -36,6 +36,5 @@
     "ospec": "./ospec/bin/ospec",
     "bundle": "./bundler/bin/bundle"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
