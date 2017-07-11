@@ -1,5 +1,6 @@
 # Change log
 
+- [v1.1.3](#v113)
 - [v1.1.2](#v112)
 - [v1.1.1](#v111)
 - [v1.1.0](#v110)
@@ -8,6 +9,12 @@
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
 
 ---
+
+### v1.1.3
+
+#### Bug fixes:
+
+- move out npm dependencies added by mistake
 
 ### v1.1.2
 
