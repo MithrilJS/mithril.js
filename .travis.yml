@@ -3,7 +3,7 @@ sudo: false
 # Only care about running tests against latest node
 language: node_js
 node_js:
-- node
+- "6"
 
 # Keep node_modules around, it speeds up builds & they don't change often
 cache:
