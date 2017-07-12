@@ -25,10 +25,8 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@alrra/travis-scripts": "^3.0.1",
     "benchmark": "^2.1.4",
     "eslint": "^3.19.0",
-    "gh-pages": "^0.12.0",
     "istanbul": "^0.4.5",
     "marked": "^0.3.6"
   },

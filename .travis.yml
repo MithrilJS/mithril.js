@@ -13,7 +13,7 @@ cache:
 # Custom install step so the travis-only stuff doesn't need to be in package.json
 install:
 - npm install
-- npm install @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
+- npm install --no-save @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
 
 # Bundle before running tests so the bundle is always up-to-date
 before_script: npm run build --silent
