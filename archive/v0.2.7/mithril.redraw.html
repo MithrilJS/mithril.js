@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+	<head>
+		<title>m.redraw - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.2.7)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html" title="A utility to create virtual elements">m</a></li>
+								<li><a href="mithril.component.html" title="Parameterizes a component">m.component</a></li>
+								<li><a href="mithril.mount.html" title="Renders a component">m.mount</a></li>
+								<li><a href="mithril.prop.html" title="A getter-setter utility">m.prop</a></li>
+								<li><a href="mithril.withAttr.html" title="A event handler factory utility">m.withAttr</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html" title="A routing utility">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes" title="Defines what routes exist">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting" title="Redirects to a route">m.route(path, params, replaceHistory)</a></li>
+										<li><a href="mithril.route.html#reading-current-route" title="Read the current route">m.route()</a></li>
+										<li><a href="mithril.route.html#mode-abstraction" title="Routing mode abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode" title="Whether routing uses location hash, querystring or pathname">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param" title="Read an argument from a parameterized route">m.route.param</a></li>
+										<li><a href="mithril.route.html#buildQueryString" title="Serialize data into querystring format">m.route.buildQueryString</a></li>
+										<li><a href="mithril.route.html#parseQueryString" title="Read an argument from a parameterized route">m.route.parseQueryString</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html" title="A high-level AJAX utility">m.request</a></li>
+								<li><a href="mithril.deferred.html" title="A Promise factory">m.deferred</a></li>
+								<li><a href="mithril.sync.html" title="A Promise aggregator">m.sync</a></li>
+							</ul>
+							<h3 id="html">HTML</h3>
+							<ul>
+								<li><a href="mithril.trust.html" title="A method to unescape HTML">m.trust</a></li>
+							</ul>
+							<h3 id="rendering">Rendering</h3>
+							<ul>
+								<li><a href="mithril.render.html" title="The lowest level rendering method">m.render</a></li>
+								<li><a href="mithril.redraw.html" title="A high-level explicit rendering method">m.redraw</a>
+									<ul>
+										<li><a href="mithril.redraw.html#strategy" title="A flag that drives the rendering strategy for the next redraw">m.redraw.strategy(strategy)</a></li>
+									</ul>
+								</li>
+								<li><a href="mithril.computation.html" title="Utilities to integrate asynchronous contexts to the rendering system">m.startComputation / m.endComputation</a></li>
+							</ul>
+							<h3 id="data">Testing</h3>
+							<ul>
+								<li><a href="mithril.deps.html" title="The dependency injector">m.deps</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="m-redraw">m.redraw</h2>
+<hr>
+<ul>
+<li><a href="#changing-redraw-strategy">Changing redraw strategy</a></li>
+<li><a href="#difference-between-computation-methods-and-m-redraw">Difference between computation methods and m.redraw</a></li>
+<li><a href="#preventing-redraws-on-events">Preventing redraws on events</a></li>
+<li><a href="#forcing-redraw">Forcing redraw</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
+<hr>
+<p>Redraws the view. Use <a href="mithril.mount.html"><code>m.mount()</code></a> or <a href="mithril.route.html"><code>m.route()</code></a> to activate a component.</p>
+<p>Calling <code>m.redraw</code> triggers a redraw regardless of whether AJAX requests (and other asynchronous services) are completed. Therefore, you should ensure that templates have null checks in place to account for the possibility of variables being uninitialized when the forced redraw occurs.</p>
+<p>If you are developing an asynchronous model-level service and finding that Mithril is not redrawing the view after your code runs, you should consider using <a href="mithril.computation.html"><code>m.startComputation</code> and <code>m.endComputation</code></a> to integrate with Mithril&#39;s auto-redrawing system instead.</p>
+<p>Assuming your templates have appropriate null checks in place, <code>m.redraw</code> is useful for transient DOM state such as loading indicators and to commit state to the DOM for the purposes of reading back computed values (for example, <code>offsetWidth</code> or <code>scrollHeight</code>)</p>
+<hr>
+<h3 id="difference-between-computation-methods-and-m-redraw">Difference between computation methods and m.redraw</h3>
+<p>The <a href="mithril.computation.html"><code>m.startComputation</code> / <code>m.endComputation</code> pair</a> is designed to be &quot;stacked&quot;, i.e. multiple asynchronous services can each call this pair of functions to indicate that they want the redrawing algorithm to wait for them to finish before a redraw occurs. In contrast, <code>m.redraw</code> is &quot;aggressive&quot;: it redraws as many times as it is called (with the caveat that redraws are batched if they occur less than one animation frame apart in time). In practice, this means that calling <code>m.redraw</code> may cause a redraw to happen before some AJAX calls have finished, which in turn, may cause null reference exceptions in templates that try to use the data from these requests without first checking that the data exists.</p>
+<p>Therefore, using the computation methods is recommended in order to reduce the amount of intermediate redraws that would otherwise occur as multiple asynchronous services are resolved.</p>
+<p>When computation methods are used dilligently and religiously, templates are never redrawn with incomplete data. However, it&#39;s important to always write conditional tests in templates to account for the possibility of nullables, because redraws may come to occur more aggressively than data is available (perhaps because a newly introduced 3rd party library calls <code>m.redraw</code>, or because you might want a more aggressive redraw policy to implement a specific feature down the road).</p>
+<p>Defending against nullables can typically be achieved via the <code>initialValue</code> option in <a href="mithril.request.html"><code>m.request</code></a> and basic null checks (e.g. <code>data ? m(&quot;div&quot;, data) : null</code>).</p>
+<hr>
+<h3 id="changing-redraw-strategy">Changing redraw strategy</h3>
+<p>If you need to change how Mithril performs a redraw, you can change the value of the <code>m.redraw.strategy</code> getter-setter to either <code>&quot;all&quot;</code>, <code>&quot;diff&quot;</code> or <code>&quot;none&quot;</code>. The new strategy will apply to the next scheduled redraw, if any. By default, Mithril sets this value to <code>&quot;all&quot;</code> before running controller constructors, and it sets it to <code>&quot;diff&quot;</code> before event handlers are triggered.</p>
+<p>After the redraw, Mithril resets the value of the flag to either &quot;all&quot; or &quot;diff&quot;, depending on whether the redraw was due to a route change or not.</p>
+<p>Changing the flag outside of a redrawable context does nothing since the flag gets reset when entering one of the documented redrawable contexts above.</p>
+<p>When the flag is set to &quot;all&quot;, Mithril throws away the current view and redraws from scratch. This is the default for going from one route to another.</p>
+<p>When the flag is set to &quot;diff&quot;, Mithril performs a diff between the old view and the new view and applies patches to the DOM only where needed.</p>
+<p>When the flag is set to &quot;none&quot;, Mithril skips the next redraw. You don&#39;t need to change this flag to something else again later, since Mithril does that for you.</p>
+<pre><code class="lang-javascript">var Component1 = {
+    controller: function() {
+        //this component will attempt to diff its template when routing, as opposed to re-creating the view from scratch.
+        //this allows config contexts to live across route changes, if its element does not need to be recreated by the diff
+        m.redraw.strategy(&quot;diff&quot;)
+    },
+    view: function() {
+        return m(&quot;h1&quot;, {config: Component1.config}, &quot;test&quot;) //assume all routes display the same thing
+    },
+    config: function(el, isInit, ctx) {
+        if (!isInit) ctx.data = &quot;foo&quot; //we wish to initialize this only once, even if the route changes
+    }
+}
+</code></pre>
+<p>Common reasons why one might need to change redraw strategy are:</p>
+<ul>
+<li><p>in order to prevent redraw when dealing with <code>keypress</code> events where the event&#39;s keyCode is not of interest</p>
+<pre><code class="lang-javascript">//model
+var saved = false
+function save(e) {
+   if (e.keyCode == 13) {
+       //this causes a redraw, since event handlers active auto-redrawing by default
+       saved = true
+   }
+   else {
+       //we don&#39;t care about other keys, so don&#39;t redraw
+       m.redraw.strategy(&quot;none&quot;)
+   }
+}
+
+//view
+var view = function() {
+   return m(&quot;div&quot;, [
+       m(&quot;button[type=button]&quot;, {onkeypress: save}, &quot;Save&quot;),
+       saved ? &quot;Saved&quot; : &quot;&quot;
+   ])
+}
+</code></pre>
+</li>
+<li><p>in order to avoid the full-page recreation when changing routes, for the sake of performance of global 3rd party components.</p>
+<pre><code class="lang-javascript">//diff when routing, instead of redrawing from scratch
+//this preserves the `&lt;input&gt;` element and its 3rd party plugin after route changes, since the `&lt;input&gt;` doesn&#39;t change
+var Component1 = {
+   controller: function() {
+       m.redraw.strategy(&quot;diff&quot;)
+   },
+   view: function() {
+       return m(&quot;div&quot;, [
+           m(&quot;h1&quot;, &quot;Hello Foo&quot;),
+           m(&quot;input&quot;, {config: plugin}) //assuming `plugin` initializes a 3rd party library
+       ])
+   }
+}
+
+var Component2 = {
+   controller: function() {
+       m.redraw.strategy(&quot;diff&quot;)
+   },
+   view: function() {
+       return m(&quot;div&quot;, [
+           m(&quot;h1&quot;, &quot;Hello Bar&quot;),
+           m(&quot;input&quot;, {config: plugin}) //assuming `plugin` initializes a 3rd party library
+       ])
+   }
+}
+
+m.route(document.body, &quot;/foo&quot;, {
+   &quot;/foo&quot;: Component1,
+   &quot;/bar&quot;: Component2,
+})
+</code></pre>
+</li>
+</ul>
+<p>Note that the redraw strategy is a global setting that affects the entire template trees of all components on the page. In order to prevent redraws in <em>some parts</em> of an application, but not others, see <a href="mithril.render.html#subtree-directives">subtree directives</a></p>
+<p>You can also configure individual elements to always be diffed, instead of recreated from scratch (even across route changes), by using the <a href="mithril.html#persisting-dom-elements-across-route-changes"><code>ctx.retain</code> flag</a>. If you need to persist DOM state across route changes, it&#39;s recommended that you use the <code>ctx.retain</code> flag instead of <code>m.redraw.strategy(&quot;diff&quot;)</code>.</p>
+<hr>
+<h3 id="preventing-redraws-on-events">Preventing redraws on events</h3>
+<p>Sometimes you only care about a particular condition in an event and want the event to not trigger a redraw if this condition is not met. 
+For example, you might only be interested in running a redraw if a user presses the space bar, and you might not want to waste a redraw if the user presses any other key. In that case, it&#39;s possible to skip redrawing altogether by calling <code>m.redraw.strategy(&quot;none&quot;)</code></p>
+<pre><code class="lang-javascript">m(&quot;input&quot;, {onkeydown: function(e) {
+    if (e.keyCode == 13) vm.save() //do things and re-render only if the `enter` key was pressed
+    else m.redraw.strategy(&quot;none&quot;) //otherwise, ignore
+}})
+</code></pre>
+<p>There are some important semantic caveats for <code>m.redraw.strategy(&quot;none&quot;)</code> that you should be aware of: Setting the strategy to <code>&quot;none&quot;</code> only affects <strong>synchronous</strong> redraws. As soon as the event handler returns, the strategy is set back to &quot;diff&quot;.</p>
+<p>If you set strategy to <code>&quot;none&quot;</code> but then proceed to trigger a redraw asynchronously, either via <code>start/endComputation</code>, <code>m.redraw</code> or <code>m.request</code>, a redraw <em>will</em> occur, using the <code>&quot;diff&quot;</code> strategy.</p>
+<p>Additionally, calling <code>m.redraw</code> synchronously after calling <code>m.redraw.strategy(&quot;none&quot;)</code> resets the strategy to <code>&quot;diff&quot;</code>.</p>
+<p>Lastly, be aware that if a user action triggers more than one event handler (for example, oninput and onkeypress, or an event bubbling up to event handlers in multiple ancestor elements), every event triggers a redraw by default. Setting strategy to none in any one of those handlers will not affect the redrawing strategy of other handlers (and remember that <code>strategy(&quot;none&quot;)</code> has no effect on asynchronous redraws).</p>
+<hr>
+<h3 id="forcing-redraw">Forcing redraw</h3>
+<p>If you find yourself needing to redraw before the browsers normal redraw cycle, you can force a synchronous redraw by passing a boolean <code>true</code> as a parameter to <code>m.redraw</code>.</p>
+<pre><code class="lang-javascript">m.redraw(true) // force
+</code></pre>
+<p>Normally, you should only do this if you need to synchronously read a value from the DOM that requires a browser repaint (e.g. <code>offsetTop</code> or a CSS rule). If you need to read DOM values, try to read them all at once, because alternating reading and writing to the DOM causes multiple browser repaints, and repaints are expensive.</p>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">void redraw([Boolean forceSync]) { GetterSetter strategy }
+
+where:
+    GetterSetter :: String getterSetter([String value])
+</code></pre>
+<ul>
+<li><p><strong>Boolean forceSync</strong> (optional)</p>
+<p>If set to true, forces the redraw to be synchronous. By default, event handlers schedule redraws to be done asynchronously in order to allow simultaneous events to run before redrawing (for example, the keypress and input are often used together for inputs). Defaults to <code>false</code></p>
+</li>
+<li><p><a name="strategy"></a></p>
+<h3 id="m-redraw-strategy">m.redraw.strategy</h3>
+<p><strong>GetterSetter strategy</strong></p>
+<p>The <code>m.redraw.strategy</code> getter-setter indicates how the next component redraw will occur. It can be one of three values:</p>
+<ul>
+<li><code>&quot;all&quot;</code> - recreates the DOM tree from scratch</li>
+<li><code>&quot;diff&quot;</code> - updates only DOM elements if needed</li>
+<li><code>&quot;none&quot;</code> - leaves the DOM tree intact</li>
+</ul>
+<p>This value can be programmatically changed in controllers and event handlers to modify the next redrawing strategy. It is modified internally by Mithril to the value <code>&quot;all&quot;</code> before running controller constructors, and to the value <code>&quot;diff&quot;</code> after all redraws.</p>
+<p>Calling this function without arguments returns the currently assigned redraw strategy.</p>
+</li>
+</ul>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>

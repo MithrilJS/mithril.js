@@ -1,7 +1,7 @@
 {
   "name": "mithril",
   "description": "Mithril.js - A Javascript Framework for Building Brilliant Applications",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "homepage": "https://mithril.js.org",
   "license": "MIT",
   "author": {
