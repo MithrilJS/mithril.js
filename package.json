@@ -7,10 +7,10 @@
   "main": "mithril.js",
   "repository": "MithrilJS/mithril.js",
   "scripts": {
-    "dev": "node bundler/cli browser.js -o mithril.js -w",
+    "dev": "node bundler/cli browser.js -output mithril.js -watch",
     "build": "npm run build-browser & npm run build-min",
-    "build-browser": "node bundler/cli browser.js -o mithril.js",
-    "build-min": "node bundler/cli browser.js -o mithril.min.js -m",
+    "build-browser": "node bundler/cli browser.js -output mithril.js",
+    "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint . || true",
