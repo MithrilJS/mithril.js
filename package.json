@@ -2,17 +2,14 @@
   "name": "mithril",
   "description": "Mithril.js - A Javascript Framework for Building Brilliant Applications",
   "version": "0.2.5",
-  "homepage": "http://mithril.js.org",
+  "homepage": "https://mithril.js.org",
   "license": "MIT",
   "author": {
     "name": "Leo Horie"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:lhorie/mithril.js.git"
-  },
+  "repository": "MithrilJS/mithril.js#v0_2_x",
   "bugs": {
-    "url" : "http://github.com/lhorie/mithril.js/issues"
+    "url": "https://github.com/MithrilJS/mithril.js/issues?q=is%3Aopen+is%3Aissue+label%3A0.2.x"
   },
   "scripts": {
     "build": "grunt build",
