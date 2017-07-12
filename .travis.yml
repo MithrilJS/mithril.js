@@ -84,7 +84,6 @@ deploy:
     on:
       tags: true
       repo: MithrilJS/mithril.js
-      branch: master
   
   - provider: npm
     skip_cleanup: true
@@ -94,4 +93,3 @@ deploy:
     on:
       tags: true
       repo: MithrilJS/mithril.js
-      branch: master
