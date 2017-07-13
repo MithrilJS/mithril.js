@@ -1,11 +1,9 @@
-# ospec
+ospec [![NPM Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![NPM License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
+=====
 
 [About](#about) | [Usage](#usage) | [API](#api) | [Goals](#goals)
 
 Noiseless testing framework
-
-Version: 1.2.3  
-License: MIT
 
 ## About
 
