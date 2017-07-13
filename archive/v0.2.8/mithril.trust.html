@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+	<head>
+		<title>m.trust - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.2.8)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html" title="A utility to create virtual elements">m</a></li>
+								<li><a href="mithril.component.html" title="Parameterizes a component">m.component</a></li>
+								<li><a href="mithril.mount.html" title="Renders a component">m.mount</a></li>
+								<li><a href="mithril.prop.html" title="A getter-setter utility">m.prop</a></li>
+								<li><a href="mithril.withAttr.html" title="A event handler factory utility">m.withAttr</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html" title="A routing utility">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes" title="Defines what routes exist">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting" title="Redirects to a route">m.route(path, params, replaceHistory)</a></li>
+										<li><a href="mithril.route.html#reading-current-route" title="Read the current route">m.route()</a></li>
+										<li><a href="mithril.route.html#mode-abstraction" title="Routing mode abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode" title="Whether routing uses location hash, querystring or pathname">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param" title="Read an argument from a parameterized route">m.route.param</a></li>
+										<li><a href="mithril.route.html#buildQueryString" title="Serialize data into querystring format">m.route.buildQueryString</a></li>
+										<li><a href="mithril.route.html#parseQueryString" title="Read an argument from a parameterized route">m.route.parseQueryString</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html" title="A high-level AJAX utility">m.request</a></li>
+								<li><a href="mithril.deferred.html" title="A Promise factory">m.deferred</a></li>
+								<li><a href="mithril.sync.html" title="A Promise aggregator">m.sync</a></li>
+							</ul>
+							<h3 id="html">HTML</h3>
+							<ul>
+								<li><a href="mithril.trust.html" title="A method to unescape HTML">m.trust</a></li>
+							</ul>
+							<h3 id="rendering">Rendering</h3>
+							<ul>
+								<li><a href="mithril.render.html" title="The lowest level rendering method">m.render</a></li>
+								<li><a href="mithril.redraw.html" title="A high-level explicit rendering method">m.redraw</a>
+									<ul>
+										<li><a href="mithril.redraw.html#strategy" title="A flag that drives the rendering strategy for the next redraw">m.redraw.strategy(strategy)</a></li>
+									</ul>
+								</li>
+								<li><a href="mithril.computation.html" title="Utilities to integrate asynchronous contexts to the rendering system">m.startComputation / m.endComputation</a></li>
+							</ul>
+							<h3 id="data">Testing</h3>
+							<ul>
+								<li><a href="mithril.deps.html" title="The dependency injector">m.deps</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="m-trust">m.trust</h2>
+<p>If you&#39;re writing a template for a view, use <code>m()</code> instead.</p>
+<p>This method flags a string as trusted HTML.</p>
+<p>Trusted HTML is allowed to render arbitrary, potentially invalid markup, as well as run arbitrary Javascript, and therefore the developer is responsible for either:</p>
+<ul>
+<li><p>sanitizing the markup contained in the string, or</p>
+</li>
+<li><p>acknowledging that the string is authorized to run any code that may be contained within it.</p>
+</li>
+</ul>
+<p>Note that browsers ignore <code>&lt;script&gt;</code> tags that have been inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible <code>innerHTML</code> property), their rendering engines cannot backtrack to the parsing-stage if the script calls something like <code>document.write(&quot;&lt;/body&gt;&quot;)</code>.</p>
+<p>For this reason, <code>m.trust</code> will not auto-run <code>&lt;script&gt;</code> tags from trusted strings.</p>
+<p>Browsers do, however, allow scripts to be run asynchronously via a number of execution points, such as the <code>onload</code> or <code>onerror</code> attributes in <code>&lt;img&gt;</code> and <code>&lt;iframe&gt;</code>.</p>
+<p>IE also allows running of Javascript via CSS behaviors in <code>&lt;link&gt;</code>/<code>&lt;style&gt;</code> tags and <code>style</code> attributes.</p>
+<p>It&#39;s worth noting that the execution points listed above are commonly used for security attacks in combination with malformed markup, e.g. strings with mismatched attribute quotes like <code>&quot; onload=&quot;alert(1)</code>.</p>
+<p>Mithril templates are defended against these attacks by default, except when markup is injected via <code>m.trust</code>.</p>
+<p>It is the developer&#39;s responsibility to ensure the input to <code>m.trust</code> cannot be maliciously modified by user-entered data.</p>
+<hr>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">//assume this content comes from the server
+var content = &quot;&lt;h1&gt;Error: invalid user&lt;/h1&gt;&quot;;
+
+m.render(&quot;body&quot;, [
+    m(&quot;div&quot;, m.trust(content))
+]);
+</code></pre>
+<p>yields:</p>
+<pre><code class="lang-markup">&lt;body&gt;
+    &lt;div&gt;
+        &lt;h1&gt;Error: invalid user&lt;/h1&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+</code></pre>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">String trust(String html)
+</code></pre>
+<ul>
+<li><p><strong>String html</strong></p>
+<p>A string containing HTML markup</p>
+</li>
+<li><p><strong>returns String trustedHtml</strong></p>
+<p>The returned string is a String object instance (as opposed to a string primitive) containing the same HTML content, and exposing a flag property for internal use within Mithril. Do not create or manipulate trust flags manually.</p>
+<p>Also note that concatenating or splitting a trusted string removes the trust flag. If doing such operations, the final string needs to be flagged as trusted.</p>
+</li>
+</ul>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>

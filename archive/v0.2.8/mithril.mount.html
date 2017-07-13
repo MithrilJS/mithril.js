@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+	<head>
+		<title>m.mount - Mithril</title>
+		<meta name="description" value="Mithril.js - a Javascript Framework for Building Brilliant Applications" />
+		<link href="lib/prism/prism.css" rel="stylesheet" />
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header>
+			<nav class="container">
+				<a href="index.html" class="logo"><span>&#9675;</span> Mithril</a>
+				<a href="getting-started.html">Guide</a>
+				<a href="mithril.html">API</a>
+				<a href="community.html">Community</a>
+				<a href="http://lhorie.github.io/mithril-blog">Learn</a>
+				<a href="installation.html">Download</a>
+				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
+			</nav>
+		</header>
+		<main>
+			<section class="content">
+				<div class="container">
+					<div class="row">
+						<div class="col(3,3,12)">
+							<h2 id="api">API (v0.2.8)</h2>
+							<h3 id="core">Core</h3>
+							<ul>
+								<li><a href="mithril.html" title="A utility to create virtual elements">m</a></li>
+								<li><a href="mithril.component.html" title="Parameterizes a component">m.component</a></li>
+								<li><a href="mithril.mount.html" title="Renders a component">m.mount</a></li>
+								<li><a href="mithril.prop.html" title="A getter-setter utility">m.prop</a></li>
+								<li><a href="mithril.withAttr.html" title="A event handler factory utility">m.withAttr</a></li>
+							</ul>
+							<h3 id="routing">Routing</h3>
+							<ul>
+								<li><a href="mithril.route.html" title="A routing utility">m.route</a>
+									<ul>
+										<li><a href="mithril.route.html#defining-routes" title="Defines what routes exist">m.route(rootElement, defaultRoute, routes)</a></li>
+										<li><a href="mithril.route.html#redirecting" title="Redirects to a route">m.route(path, params, replaceHistory)</a></li>
+										<li><a href="mithril.route.html#reading-current-route" title="Read the current route">m.route()</a></li>
+										<li><a href="mithril.route.html#mode-abstraction" title="Routing mode abstraction">m.route(element)</a></li>
+										<li><a href="mithril.route.html#mode" title="Whether routing uses location hash, querystring or pathname">m.route.mode</a></li>
+										<li><a href="mithril.route.html#param" title="Read an argument from a parameterized route">m.route.param</a></li>
+										<li><a href="mithril.route.html#buildQueryString" title="Serialize data into querystring format">m.route.buildQueryString</a></li>
+										<li><a href="mithril.route.html#parseQueryString" title="Read an argument from a parameterized route">m.route.parseQueryString</a></li>
+									</ul>
+								</li>
+							</ul>
+							<h3 id="data">Data</h3>
+							<ul>
+								<li><a href="mithril.request.html" title="A high-level AJAX utility">m.request</a></li>
+								<li><a href="mithril.deferred.html" title="A Promise factory">m.deferred</a></li>
+								<li><a href="mithril.sync.html" title="A Promise aggregator">m.sync</a></li>
+							</ul>
+							<h3 id="html">HTML</h3>
+							<ul>
+								<li><a href="mithril.trust.html" title="A method to unescape HTML">m.trust</a></li>
+							</ul>
+							<h3 id="rendering">Rendering</h3>
+							<ul>
+								<li><a href="mithril.render.html" title="The lowest level rendering method">m.render</a></li>
+								<li><a href="mithril.redraw.html" title="A high-level explicit rendering method">m.redraw</a>
+									<ul>
+										<li><a href="mithril.redraw.html#strategy" title="A flag that drives the rendering strategy for the next redraw">m.redraw.strategy(strategy)</a></li>
+									</ul>
+								</li>
+								<li><a href="mithril.computation.html" title="Utilities to integrate asynchronous contexts to the rendering system">m.startComputation / m.endComputation</a></li>
+							</ul>
+							<h3 id="data">Testing</h3>
+							<ul>
+								<li><a href="mithril.deps.html" title="The dependency injector">m.deps</a></li>
+							</ul>
+							
+							<h2 id="archive">History</h2>
+							<ul>
+								<li><a href="roadmap.html">Roadmap</a></li>
+								<li><a href="change-log.html">Change log</a></li>
+							</ul>
+						</div>
+						<div class="col(9,9,12)">
+							<h2 id="m-mount">m.mount</h2>
+<hr>
+<ul>
+<li><a href="#rendering-components">Rendering Components</a></li>
+<li><a href="#signature">Signature</a></li>
+</ul>
+<hr>
+<p>Mounting is the process of rendering a <a href="mithril.component.html">component</a> into a DOM element.</p>
+<p>The different between <code>m.mount</code> and <a href="mithril.render.html"><code>m.render</code></a> is that a component rendered via <code>m.mount</code> auto-redraws automatically when event handlers are triggered, whereas components rendered via <code>m.render</code> do not.</p>
+<p>In order to allow a user to navigate between different pages by loading and unloading components, consider using <a href="mithril.route.html"><code>m.route</code></a> instead.</p>
+<hr>
+<h2 id="rendering-components">Rendering Components</h2>
+<h3 id="usage">Usage</h3>
+<p>Calling <code>m.mount</code> with a DOM element as the first argument and a component as the second argument will call the component&#39;s controller function, and then call the component&#39;s view function. The return value of the controller function is passed to the view function as its first argument.</p>
+<pre><code class="lang-javascript">var MyComponent = {
+    controller: function() {
+        return {greeting: &quot;Hello&quot;}
+    },
+    view: function(ctrl) {
+        return m(&quot;h1&quot;, ctrl.greeting)
+    }
+}
+
+m.mount(document.body, MyComponent)
+
+//&lt;body&gt;&lt;h1&gt;Hello&lt;/h1&gt;&lt;/body&gt;
+</code></pre>
+<p>For more information on components, see <a href="mithril.component.html"><code>m.component</code></a>.</p>
+<hr>
+<h3 id="signature">Signature</h3>
+<p><a href="how-to-read-signatures.html">How to read signatures</a></p>
+<pre><code class="lang-clike">Object mount(DOMElement rootElement, Component component)
+
+where:
+    Component :: Object { Controller, View }
+    Controller :: SimpleController | UnloadableController
+    SimpleController :: void controller([Object attributes [, any... args]])
+    UnloadableController :: void controller([Object attributes [, any... args]]) { prototype: void unload(UnloadEvent e) }
+    UnloadEvent :: Object {void preventDefault()}
+    View :: void view(Object controllerInstance [, Object attributes [, any... args]])
+</code></pre>
+<ul>
+<li><p><strong>DOMElement rootElement</strong></p>
+<p>A DOM element which will contain the view&#39;s template.</p>
+</li>
+<li><p><strong>Component component</strong></p>
+<p>A component is supposed to be an Object with two keys: <code>controller</code> and <code>view</code>. Each of those should point to a Javascript function. If the <code>controller</code> is omitted, Mithril will provide one, pointing to an empty function.</p>
+<p>When <code>m.mount</code> is called, the controller function runs, and its return value is returned by the <code>m.mount</code> call.</p>
+<p>Once the controller code finishes executing (and this may include waiting for AJAX requests to complete), the view class is instantiated, and the instance of the controller is passed as an argument to the view&#39;s constructor.</p>
+</li>
+<li><p><strong>returns Object controllerInstance</strong></p>
+<p>An instance of the controller constructor</p>
+</li>
+</ul>
+
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<div class="container">
+				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
+				<br />&copy; 2014 Leo Horie
+			</div>
+		</footer>
+		<script src="lib/prism/prism.js"></script>
+	</body>
+</html>
