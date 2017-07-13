@@ -1,5 +1,57 @@
 ## Change Log
 
+[v0.2.8](http://mithril.js.org/archive/v0.2.8) - Final v0.2.x release
+
+### News:
+
+-	add TypeScript definition file to NPM [#1110](https://github.com/lhorie/mithril.js/issues/1110)
+
+### Bug Fixes:
+
+#### Core
+
+-	update style attribute if it is a mutated object
+-	render booleans as empty strings [#1103](https://github.com/lhorie/mithril.js/issues/1103)
+-	value on select tag are set when options are changed [#1091](https://github.com/lhorie/mithril.js/issues/1091) [#1106](https://github.com/lhorie/mithril.js/issues/1106)
+-	remove unloaders when root element is removed [#1117](https://github.com/lhorie/mithril.js/issues/1117)
+-	redraw trusted content with multiple nodes [#956](https://github.com/lhorie/mithril.js/issues/956) [#1159](https://github.com/lhorie/mithril.js/issues/1159)
+-	fix potential overwriting of onunload.$old [#1203](https://github.com/lhorie/mithril.js/issues/1203)
+-	fix cursor position bugs in Chrome [#348](https://github.com/lhorie/mithril.js/issues/348) [#1252](https://github.com/lhorie/mithril.js/issues/1252) [#1253](https://github.com/lhorie/mithril.js/issues/1253)
+-	cache the childrens of editable elements [#900](https://github.com/lhorie/mithril.js/issues/900) [#1310](https://github.com/lhorie/mithril.js/issues/1310)
+-	update contenteditable node w/ focus is when data is changed [#1458](https://github.com/lhorie/mithril.js/issues/1458) [#1475](https://github.com/MithrilJS/mithril.js/pull/1475)
+
+#### Hyperscript (`m()`)
+
+-	fix attributes values parsing [#1080](https://github.com/lhorie/mithril.js/issues/1080)
+-	fix valueless attributes [#1093](https://github.com/lhorie/mithril.js/issues/1093)
+-	proper component check at m() [#1144](https://github.com/lhorie/mithril.js/issues/1144)
+-	Allow verbose class attribute declaration [#1411](https://github.com/MithrilJS/mithril.js/pull/1411)
+#### `m.route`
+
+-	restore m.route() to the previous value after a canceled navigation [#1131](https://github.com/lhorie/mithril.js/issues/1131)
+-	push route to history stack, when using parameters [#1124](https://github.com/lhorie/mithril.js/issues/1124) [#1125](https://github.com/lhorie/mithril.js/issues/1125) [#1137](https://github.com/lhorie/mithril.js/issues/1137)
+
+#### `m.request`
+
+-	allow m.request headers to be set via config [#1464](https://github.com/MithrilJS/mithril.js/pull/1464)
+
+#### `m.prop`
+
+-	JSON.stringify(m.prop(x)) use x.toJSON method when possible [#1071](https://github.com/lhorie/mithril.js/issues/1071)
+
+#### Misc
+
+-	various docs and non-code fixes [#1028](https://github.com/MithrilJS/mithril.js/pull/1028) [#1078](https://github.com/lhorie/mithril.js/issues/1078) [#1081](https://github.com/lhorie/mithril.js/issues/1081) [#1094](https://github.com/lhorie/mithril.js/issues/1094) [#1111](https://github.com/lhorie/mithril.js/issues/1111) [#1129](https://github.com/lhorie/mithril.js/issues/1129) [#1160](https://github.com/lhorie/mithril.js/issues/1160) [#1364](https://github.com/lhorie/mithril.js/issues/1364) [#1428](https://github.com/MithrilJS/mithril.js/pull/1428) [#1499](https://github.com/MithrilJS/mithril.js/pull/1499) [#1503](https://github.com/MithrilJS/mithril.js/pull/1503)
+-	restore IE8/9 compat [#1119](https://github.com/lhorie/mithril.js/issues/1119) [#1195](https://github.com/lhorie/mithril.js/issues/1195) [#1226](https://github.com/lhorie/mithril.js/issues/1226) [#1381](https://github.com/MithrilJS/mithril.js/pull/1381)
+-	restore m.factory() [#1162](https://github.com/lhorie/mithril.js/issues/1162)
+-	set dependencies when no window for isomorphic compatibility [#1236](https://github.com/lhorie/mithril.js/issues/1236)
+- TypeScript typings improvements [#1336](https://github.com/lhorie/mithril.js/issues/1336) [#1343](https://github.com/lhorie/mithril.js/issues/1343) [#1383](https://github.com/MithrilJS/mithril.js/pull/1383) [#1379](https://github.com/lhorie/mithril.js/issues/1379) [#1398](https://github.com/MithrilJS/mithril.js/pull/1398)
+
+---
+
+v0.2.6 and v0.2.7 were misreleases of v0.2.8
+
+---
 [v0.2.5](http://mithril.js.org/archive/v0.2.5)
 
 ### News:
