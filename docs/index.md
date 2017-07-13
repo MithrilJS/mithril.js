@@ -1,3 +1,7 @@
+[![JS.ORG](https://img.shields.io/badge/js.org-mithril-ffb400.svg?style=flat-square)](http://mithril.js.org/)
+[![Join the chat at https://gitter.im/MithrilJS/mithril.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MithrilJS/mithril.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/MithrilJS/mithril.js.svg?branch=master)](https://travis-ci.org/MithrilJS/mithril.js)
+
 # Introduction
 
 - [What is Mithril?](#what-is-mithril)
