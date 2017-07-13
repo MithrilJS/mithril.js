@@ -15,13 +15,16 @@ install:
 - npm install
 - npm install --no-save @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
 
-# Bundle before running tests so the bundle is always up-to-date
-before_script: npm run build --silent
+# Create bundles before running tests so they're always up-to-date
+# Pass -save to build-min so it'll update the readme as well
+before_script:
+- npm run build-browser
+- npm run build-min -- -save
 
 # Run tests, lint, and then check for perf regressions
 script:
-- npm test --silent
-- npm run perf --silent
+- npm test
+- npm run perf
 
 # After a successful build commit changes back to repo
 after_success:
