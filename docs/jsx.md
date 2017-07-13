@@ -98,7 +98,7 @@ npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-r
 
 Create a `.babelrc` file:
 
-```
+```json
 {
 	"presets": ["es2015"],
 	"plugins": [
@@ -129,6 +129,8 @@ module.exports = {
 	}
 }
 ```
+
+For those familiar with Webpack already, please note that adding the Babel options to the `babel-loader` section of your `webpack.config.js` will throw an error, so you need to include them in the separate `.babelrc` file.
 
 This configuration assumes the source code file for the application entry point is in `src/index.js`, and this will output the bundle to `bin/app.js`.
 
