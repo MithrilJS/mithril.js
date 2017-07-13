@@ -80,6 +80,55 @@
 						</div>
 						<div class="col(9,9,12)">
 							<h2 id="change-log">Change Log</h2>
+<p><a href="http://mithril.js.org/archive/v0.2.8">v0.2.8</a> - Final v0.2.x release</p>
+<h3 id="news-">News:</h3>
+<ul>
+<li>add TypeScript definition file to NPM <a href="https://github.com/lhorie/mithril.js/issues/1110">#1110</a></li>
+</ul>
+<h3 id="bug-fixes-">Bug Fixes:</h3>
+<h4 id="core">Core</h4>
+<ul>
+<li>update style attribute if it is a mutated object</li>
+<li>render booleans as empty strings <a href="https://github.com/lhorie/mithril.js/issues/1103">#1103</a></li>
+<li>value on select tag are set when options are changed <a href="https://github.com/lhorie/mithril.js/issues/1091">#1091</a> <a href="https://github.com/lhorie/mithril.js/issues/1106">#1106</a></li>
+<li>remove unloaders when root element is removed <a href="https://github.com/lhorie/mithril.js/issues/1117">#1117</a></li>
+<li>redraw trusted content with multiple nodes <a href="https://github.com/lhorie/mithril.js/issues/956">#956</a> <a href="https://github.com/lhorie/mithril.js/issues/1159">#1159</a></li>
+<li>fix potential overwriting of onunload.$old <a href="https://github.com/lhorie/mithril.js/issues/1203">#1203</a></li>
+<li>fix cursor position bugs in Chrome <a href="https://github.com/lhorie/mithril.js/issues/348">#348</a> <a href="https://github.com/lhorie/mithril.js/issues/1252">#1252</a> <a href="https://github.com/lhorie/mithril.js/issues/1253">#1253</a></li>
+<li>cache the childrens of editable elements <a href="https://github.com/lhorie/mithril.js/issues/900">#900</a> <a href="https://github.com/lhorie/mithril.js/issues/1310">#1310</a></li>
+<li>update contenteditable node w/ focus is when data is changed <a href="https://github.com/lhorie/mithril.js/issues/1458">#1458</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1475">#1475</a></li>
+</ul>
+<h4 id="hyperscript-m-">Hyperscript (<code>m()</code>)</h4>
+<ul>
+<li>fix attributes values parsing <a href="https://github.com/lhorie/mithril.js/issues/1080">#1080</a></li>
+<li>fix valueless attributes <a href="https://github.com/lhorie/mithril.js/issues/1093">#1093</a></li>
+<li>proper component check at m() <a href="https://github.com/lhorie/mithril.js/issues/1144">#1144</a></li>
+<li><p>Allow verbose class attribute declaration <a href="https://github.com/MithrilJS/mithril.js/pull/1411">#1411</a></p>
+<h4 id="-m-route-"><code>m.route</code></h4>
+</li>
+<li><p>restore m.route() to the previous value after a canceled navigation <a href="https://github.com/lhorie/mithril.js/issues/1131">#1131</a></p>
+</li>
+<li>push route to history stack, when using parameters <a href="https://github.com/lhorie/mithril.js/issues/1124">#1124</a> <a href="https://github.com/lhorie/mithril.js/issues/1125">#1125</a> <a href="https://github.com/lhorie/mithril.js/issues/1137">#1137</a></li>
+</ul>
+<h4 id="-m-request-"><code>m.request</code></h4>
+<ul>
+<li>allow m.request headers to be set via config <a href="https://github.com/MithrilJS/mithril.js/pull/1464">#1464</a></li>
+</ul>
+<h4 id="-m-prop-"><code>m.prop</code></h4>
+<ul>
+<li>JSON.stringify(m.prop(x)) use x.toJSON method when possible <a href="https://github.com/lhorie/mithril.js/issues/1071">#1071</a></li>
+</ul>
+<h4 id="misc">Misc</h4>
+<ul>
+<li>various docs and non-code fixes <a href="https://github.com/MithrilJS/mithril.js/pull/1028">#1028</a> <a href="https://github.com/lhorie/mithril.js/issues/1078">#1078</a> <a href="https://github.com/lhorie/mithril.js/issues/1081">#1081</a> <a href="https://github.com/lhorie/mithril.js/issues/1094">#1094</a> <a href="https://github.com/lhorie/mithril.js/issues/1111">#1111</a> <a href="https://github.com/lhorie/mithril.js/issues/1129">#1129</a> <a href="https://github.com/lhorie/mithril.js/issues/1160">#1160</a> <a href="https://github.com/lhorie/mithril.js/issues/1364">#1364</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1428">#1428</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1499">#1499</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1503">#1503</a></li>
+<li>restore IE8/9 compat <a href="https://github.com/lhorie/mithril.js/issues/1119">#1119</a> <a href="https://github.com/lhorie/mithril.js/issues/1195">#1195</a> <a href="https://github.com/lhorie/mithril.js/issues/1226">#1226</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1381">#1381</a></li>
+<li>restore m.factory() <a href="https://github.com/lhorie/mithril.js/issues/1162">#1162</a></li>
+<li>set dependencies when no window for isomorphic compatibility <a href="https://github.com/lhorie/mithril.js/issues/1236">#1236</a></li>
+<li>TypeScript typings improvements <a href="https://github.com/lhorie/mithril.js/issues/1336">#1336</a> <a href="https://github.com/lhorie/mithril.js/issues/1343">#1343</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1383">#1383</a> <a href="https://github.com/lhorie/mithril.js/issues/1379">#1379</a> <a href="https://github.com/MithrilJS/mithril.js/pull/1398">#1398</a></li>
+</ul>
+<hr>
+<p>v0.2.6 and v0.2.7 were misreleases of v0.2.8</p>
+<hr>
 <p><a href="http://mithril.js.org/archive/v0.2.5">v0.2.5</a></p>
 <h3 id="news-">News:</h3>
 <ul>
