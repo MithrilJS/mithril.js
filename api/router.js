@@ -11,9 +11,14 @@ module.exports = function($window, redrawService) {
 	var render, component, attrs, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var run = function() {
+		function run() {
 			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 		}
+		var redraw = function() {
+			run()
+			redraw = redrawService.redraw
+		}
+		redrawService.subscribe(root, run)
 		var bail = function(path) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
@@ -24,7 +29,7 @@ module.exports = function($window, redrawService) {
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
-				run()
+				redraw()
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
@@ -36,7 +41,6 @@ module.exports = function($window, redrawService) {
 				else update(payload, "div")
 			}
 		}, bail)
-		redrawService.subscribe(root, run)
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {
