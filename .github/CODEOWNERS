@@ -1,0 +1,11 @@
+# Leo owns everything, for better or worse
+*   @lhorie
+
+.travis.yml     @tivac
+package.json    @tivac
+.npmignore      @tivac
+.eslintrc.js    @tivac
+.eslintignore   @tivac
+README.md       @tivac
+docs/           @tivac
+performance/    @tivac
