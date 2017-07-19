@@ -296,7 +296,8 @@ var _8 = function($window, Promise) {
 						}
 						else {
 							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
+							error.code = xhr.status
+							error.response = response
 							reject(error)
 						}
 					}
