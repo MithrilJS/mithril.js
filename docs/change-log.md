@@ -10,11 +10,30 @@
 
 ---
 
+### v2.0.0 (WIP)
+
+#### Breaking changes
+
+- API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+
+#### News
+
+- API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+
+#### Bug fixes
+
+- API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+
+---
+
 ### v1.1.3
 
 #### Bug fixes:
 
 - move out npm dependencies added by mistake
+
+---
 
 ### v1.1.2
 
@@ -42,6 +61,7 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 
 - Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
+---
 
 ### v1.1.1
 
@@ -50,6 +70,8 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 - hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
 - hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+---
 
 ### v1.1.0
 
