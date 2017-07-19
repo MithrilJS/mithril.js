@@ -51,7 +51,6 @@ module.exports = function($window, Promise) {
 			if (typeof args.deserialize !== "function") args.deserialize = deserialize
 			if (typeof args.extract !== "function") args.extract = extract
 
-			args.url = interpolate(args.url, args.data)
 			if (useBody) args.data = args.serialize(args.data)
 			else args.url = assemble(args.url, args.data)
 
@@ -127,25 +126,11 @@ module.exports = function($window, Promise) {
 				delete $window[callbackName]
 			}
 			if (args.data == null) args.data = {}
-			args.url = interpolate(args.url, args.data)
 			args.data[args.callbackKey || "callback"] = callbackName
 			script.src = assemble(args.url, args.data)
 			$window.document.documentElement.appendChild(script)
 		})
 		return args.background === true? promise : finalize(promise)
-	}
-
-	function interpolate(url, data) {
-		if (data == null) return url
-
-		var tokens = url.match(/:[^\/]+/gi) || []
-		for (var i = 0; i < tokens.length; i++) {
-			var key = tokens[i].slice(1)
-			if (data[key] != null) {
-				url = url.replace(tokens[i], data[key])
-			}
-		}
-		return url
 	}
 
 	function assemble(url, data) {
