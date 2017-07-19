@@ -8,6 +8,7 @@ var fs   = require("fs"),
 	pinpoint = require("pinpoint"),
 	dedent  = require("dedent"),
 
+	// Various views of changed/added files
 	jsfiles = danger.git.created_files
 		.concat(danger.git.modified_files)
 		.filter((file) => path.extname(file) === ".js"),
@@ -37,7 +38,7 @@ if(appfiles.length && !changelog) {
 	warn(`Please include a ${link("docs/change-log.md", "changelog")} entry.`)
 }
 
-// Be careful of leaving testing shortcuts in the codebase
+// Call out if `o.only(...)` was left in
 jsfiles
 	.filter((file) => file.indexOf("tests/") > -1)
 	.forEach(file => {
