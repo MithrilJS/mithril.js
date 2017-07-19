@@ -31,8 +31,7 @@
     "marked": "^0.3.6"
   },
   "bin": {
-    "ospec": "./ospec/bin/ospec",
-    "bundle": "./bundler/bin/bundle"
+    "ospec": "./ospec/bin/ospec"
   },
   "dependencies": {}
 }
