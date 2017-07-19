@@ -10,30 +10,36 @@ var fs   = require("fs"),
 
 	jsfiles = danger.git.created_files
 		.concat(danger.git.modified_files)
-		.filter((file) => path.extname(file) === ".js");
+		.filter((file) => path.extname(file) === ".js"),
 
-function link(file, anchor) {
+	changelog = danger.git.modified_files.find((file) =>
+		file === "docs/change-log.md"
+	),
+
+	appfiles = jsfiles.filter((file) =>
+		file.indexOf("tests/") === -1
+	);
+
+function link(file, anchor, text) {
 	var repo = danger.github.pr.head.repo.html_url,
 		ref = danger.github.pr.head.ref;
 
-	return danger.utils.href(`${repo}/blob/${ref}/${file}${anchor || ""}`, file);
+	return danger.utils.href(`${repo}/blob/${ref}/${file}${anchor || ""}`, file || text);
 }
 
-// Every JS file should start with "use strict";
-jsfiles
-	.forEach((file) => {
-		var loc = fs.readFileSync(file, "utf8").indexOf(`"use strict";`);
+// All PRs should be targeted against `next`
+if(danger.github.pr.base.ref !== "next") {
+	warn("PRs should be based on `next`, rebase before submitting please");
+}
 
-		if(loc === 0) {
-			return;
-		}
-
-		warn(`${link(file, "#L1")} does not declare strict mode immediately`);
-	});
+// Any non-test JS changes should probably have a change-log entry
+if(appfiles.length && !changelog) {
+	warn(`Please include a ${link("docs/change-log.md", "changelog")} entry.`)
+}
 
 // Be careful of leaving testing shortcuts in the codebase
 jsfiles
-	.filter((file) => file.indexOf("test") > -1)
+	.filter((file) => file.indexOf("tests/") > -1)
 	.forEach(file => {
 		var code = fs.readFileSync(file, "utf8"),
 			locs = locater.find("o.only", code);
