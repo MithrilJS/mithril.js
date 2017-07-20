@@ -1,15 +1,15 @@
-/* eslint-disable */
+/* global danger warn fail */
 "use strict";
 
-var fs   = require("fs"),
+var fs = require("fs"),
 	path = require("path"),
 
-	locater  = require("locater"),
+	locater = require("locater"),
 	pinpoint = require("pinpoint"),
-	dedent  = require("dedent"),
+	dedent = require("dedent");
 
-	// Various views of changed/added files
-	jsfiles = danger.git.created_files
+// Various views of changed/added files
+var jsfiles = danger.git.created_files
 		.concat(danger.git.modified_files)
 		.filter((file) => path.extname(file) === ".js"),
 
@@ -41,7 +41,7 @@ if(appfiles.length && !changelog) {
 // Call out if `o.only(...)` was left in
 jsfiles
 	.filter((file) => file.indexOf("tests/") > -1)
-	.forEach(file => {
+	.forEach((file) => {
 		var code = fs.readFileSync(file, "utf8"),
 			locs = locater.find("o.only", code);
 
@@ -49,7 +49,7 @@ jsfiles
 			fail(dedent(`
 				${link(file, `#L${loc.line}`)} is preventing tests from running.
 				<pre lang="javascript">
-				${pinpoint(code, { line: loc.line, column : loc.cursor })}
+				${pinpoint(code, {line: loc.line, column : loc.cursor})}
 				</pre>
 			`))
 		)
