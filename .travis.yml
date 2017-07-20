@@ -13,7 +13,8 @@ cache:
 # Custom install step so the travis-only stuff doesn't need to be in package.json
 install:
 - npm install
-- npm install --no-save @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
+# This is to prevent lint-staged/prettier from running on the bundles
+- npm rm husky
 
 # Run danger, build bundles (so they're always up to date)
 before_script:
