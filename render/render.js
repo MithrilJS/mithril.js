@@ -12,6 +12,7 @@ module.exports = function($window) {
 	}
 
 	var onevent
+
 	function setEventCallback(callback) {
 		return (onevent = callback)
 	}
@@ -98,9 +99,9 @@ module.exports = function($window) {
 
 		var element = ns
 			? is
-				? $doc.createElementNS(ns, tag, { is: is })
+				? $doc.createElementNS(ns, tag, {is: is})
 				: $doc.createElementNS(ns, tag)
-			: is ? $doc.createElement(tag, { is: is }) : $doc.createElement(tag)
+			: is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
 		vnode.dom = element
 
 		if (attrs != null) {
@@ -912,5 +913,5 @@ module.exports = function($window) {
 		if ($doc.activeElement !== active) active.focus()
 	}
 
-	return { render: render, setEventCallback: setEventCallback }
+	return {render: render, setEventCallback: setEventCallback}
 }
