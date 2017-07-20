@@ -15,6 +15,9 @@ install:
 - npm install
 - npm install --no-save @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
 
+# This is to prevent lint-staged/prettier from running on the bundles
+- npm rm husky
+
 # Create bundles before running tests so they're always up-to-date
 # Pass -save to build-min so it'll update the readme as well
 before_script:

@@ -38,7 +38,7 @@
     "ospec": "./ospec/bin/ospec"
   },
   "lint-staged": {
-    "*.js,!mithril.js,!mithril.min.js": [
+    "*.js": [
       "prettier --use-tabs --no-semi --no-bracket-spacing --write",
       "git add"
     ]
