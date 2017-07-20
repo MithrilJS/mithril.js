@@ -39,7 +39,7 @@
   },
   "lint-staged": {
     "*.js,!mithril.js,!mithril.min.js": [
-      "prettier --use-tabs --no-semi --write",
+      "prettier --use-tabs --no-semi --no-bracket-spacing --write",
       "git add"
     ]
   }
