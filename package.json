@@ -11,6 +11,7 @@
     "build": "npm run build-browser & npm run build-min",
     "build-browser": "node bundler/cli browser.js -output mithril.js",
     "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
+    "precommit": "lint-staged",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint . || true",
@@ -27,10 +28,19 @@
   "devDependencies": {
     "benchmark": "^2.1.4",
     "eslint": "^3.19.0",
+    "husky": "^0.14.3",
     "istanbul": "^0.4.5",
-    "marked": "^0.3.6"
+    "lint-staged": "^4.0.2",
+    "marked": "^0.3.6",
+    "prettier": "^1.5.3"
   },
   "bin": {
     "ospec": "./ospec/bin/ospec"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --use-tabs --no-semi --no-bracket-spacing --write",
+      "git add"
+    ]
   }
 }
