@@ -15,10 +15,11 @@ install:
 - npm install
 - npm install --no-save @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
 
-# Create bundles before running tests so they're always up-to-date
-# Pass -save to build-min so it'll update the readme as well
+# Run danger, build bundles (so they're always up to date)
 before_script:
+- npx danger run
 - npm run build-browser
+# Pass -save so it'll update the readme as well
 - npm run build-min -- -save
 
 # Run tests, lint, and then check for perf regressions

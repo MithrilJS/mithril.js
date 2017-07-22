@@ -35,7 +35,9 @@ if(danger.github.pr.base.ref !== "next") {
 
 // Any non-test JS changes should probably have a change-log entry
 if(appfiles.length && !changelog) {
-	warn(`Please include a ${link("docs/change-log.md", "changelog")} entry.`)
+	warn(dedent(`
+		Please add an entry to ${link("docs/change-log.md")}.
+	`))
 }
 
 // Call out if `o.only(...)` was left in
@@ -47,7 +49,7 @@ jsfiles
 
 		locs.forEach((loc) =>
 			fail(dedent(`
-				${link(file, `#L${loc.line}`)} is preventing tests from running.
+				Please remove the \`o.only\` from ${link(file, `#L${loc.line}`)}.
 				<pre lang="javascript">
 				${pinpoint(code, {line: loc.line, column : loc.cursor})}
 				</pre>
