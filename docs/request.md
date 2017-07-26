@@ -77,7 +77,7 @@ m.request({
 })
 ```
 
-A call to `m.request` return a [promise](promise.md) and trigger a redraw upon completion of its promise chain.
+A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
 
 By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
 
@@ -287,7 +287,7 @@ function upload(e) {
 
 	var data = new FormData()
 	for (var i = 0; i < files.length; i++) {
-		data.append("file" + i, file)
+		data.append("file" + i, files[i])
 	}
 
 	m.request({
@@ -329,7 +329,7 @@ function upload(e) {
 		url: "/api/v1/upload",
 		data: data,
 		config: function(xhr) {
-			xhr.addEventListener("progress", function(e) {
+			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
 
 				m.redraw() // tell Mithril that data changed and a re-render is needed

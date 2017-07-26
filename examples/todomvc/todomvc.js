@@ -62,7 +62,7 @@ var state = {
 //view
 var Todos = {
 	add: function(e) {
-		if (e.keyCode === 13) {
+		if (e.keyCode === 13 && e.target.value) {
 			state.dispatch("createTodo", [e.target.value])
 			e.target.value = ""
 		}

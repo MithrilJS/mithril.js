@@ -1,49 +1,114 @@
-# Releasing
+# Mithril Release Processes
 
-## Publishing to NPM
+**Note** These steps all assume that `MithrilJS/mithril.js` is a git remote named `mithriljs`, adjust accordingly if that doesn't match your setup.
 
-Releasing new builds of mithril to NPM is mostly automated via `npm run release`
+## Releasing a new Mithril version
 
-1. Update information in `docs/change-log.md` to match reality & the new version that will be released
-2. `npm run release <major|minor|patch|semver>`
+### Prepare the release
 
-All further steps are automated and run as follows:
+1. Ensure your local branch is up to date
 
-3. New bundles are generated using updated version
-4. Tests are run
-5. Linting is run (but doesn't fail build)
-6. Version number in package.json is incremented
-7. `git add` called on bundle output
-8. `package.json` and updated bundles are committed to git
-9. previous commit is tagged using new version number
-10. `git push --follow-tags` pushes up new version commit & tag to github
-11. Travis sees new release, starts build
-12. Travis generates new bundles before running tests
-13. Travis runs tests
-14. Travis lints files (but can't fail build)
-15. If build fails, abort
-16. Build succeeded, so travis will commit back any changes to the repo (but there won't be any)
-17. Travis sees that this commit has a tag associated with it
-18. Travis will use the encrypted npm creds in `.travis.yml` to publish a new version to npm
+```bash
+$ git co next
+$ git pull --rebase mithriljs next
+```
 
-## Publishing a GitHub release
+2. Determine patch level of the change
+3. Update information in `docs/change-log.md` to match reality of the new version being prepared for release
+4. Commit changes to `next`
 
-Happens automatically as part of the [Publishing to NPM](#publishing-to-npm) process described above.
+```
+$ git add .
+$ git commit -m "Preparing for release"
 
-Does require a manual description to be added though, as the auto-generated one isn't very interesting. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
+# Push to your branch
+$ git push
 
-## Updating `docs/change-log.md`
+# Push to MithrilJS/mithril.js
+$ git push mithriljs next
+```
 
-This is still a manual process, I'm sorry.
+### Merge from `next` to `master`
 
-## Updating docs (outside of a new version)
+5. Switch to `master` and make sure it's up to date
+
+```bash
+$ git co master
+$ git pull --rebase mithriljs master
+```
+
+6. merge `next` on top of it
+
+```bash
+$ git merge next
+```
+
+7. Clean & update npm dependencies and ensure the tests are passing.
+
+```bash
+$ npm prune
+$ npm i
+$ npm test
+```
+
+### Publish the release
+
+8. `npm run release <major|minor|patch|semver>`, see the docs for [`npm version`](https://docs.npmjs.com/cli/version)
+9. The changes will be automatically pushed to your fork
+10. Push the changes to `MithrilJS/mithril.js`
+
+```bash
+$ git push mithriljs master
+```
+
+11. Travis will push the new release to npm & create a GitHub release
+
+### Merge `master` back into `next`
+
+This helps to ensure that the `version` field of `package.json` doesn't get out of date.
+
+12. Switch to `next` and make sure it's up to date
+
+```bash
+$ git co next
+$ git pull --rebase mithriljs next
+```
+
+13. Merge `master` back onto `next`
+
+```bash
+$ git merge master
+```
+
+14. Push the changes to your fork & `MithrilJS/mithril.js`
+
+```bash
+$ git push
+$ git push mithriljs next
+```
+
+### Update the GitHub release
+
+15. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/change-log.md` entry for the build.
+
+## Updating mithril.js.org
 
 Fixes to documentation can land whenever, updates to the site are published via Travis.
 
-1. `git co next`
-2. `git pull lhorie next`
-3. `git co master`
-4. `git co next -- ./docs`
-5. Ensure that no new features are added
-6. `git push lhorie`
-7. After the Travis build completes new docs should appear in ~3 minutes
+```bash
+# These steps assume that MithrilJS/mithril.js is a git remote named "mithriljs"
+
+# Ensure your next branch is up to date
+$ git co next
+$ git pull mithriljs next
+
+# Splat the docs folder from next onto master
+$ git co master
+$ git co next -- ./docs
+
+# Manually ensure that no new feature docs were added
+
+$ git push mithriljs
+```
+
+After the Travis build completes the updated docs should appear on https://mithril.js.org in a few minutes.

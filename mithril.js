@@ -28,7 +28,7 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue || true
+			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
@@ -42,8 +42,8 @@ function execSelector(state, attrs, children) {
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className != null) {
-		if (attrs.class != null) {
+	if (className !== undefined) {
+		if (attrs.class !== undefined) {
 			attrs.class = undefined
 			attrs.className = className
 		}
@@ -296,7 +296,8 @@ var _8 = function($window, Promise) {
 						}
 						else {
 							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
+							error.code = xhr.status
+							error.response = response
 							reject(error)
 						}
 					}
@@ -375,8 +376,15 @@ var requestService = _8(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
+	var nameSpace = {
+		svg: "http://www.w3.org/2000/svg",
+		math: "http://www.w3.org/1998/Math/MathML"
+	}
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
+	function getNameSpace(vnode) {
+		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -433,12 +441,9 @@ var coreRenderer = function($window) {
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
 		var attrs2 = vnode.attrs
 		var is = attrs2 && attrs2.is
+		ns = getNameSpace(vnode) || ns
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
@@ -501,7 +506,7 @@ var coreRenderer = function($window) {
 	//update
 	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined)
+		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
 			if (old.length === vnodes.length) {
@@ -578,7 +583,7 @@ var coreRenderer = function($window) {
 							if (movable.dom != null) nextSibling = movable.dom
 						}
 						else {
-							var dom = createNode(parent, v, hooks, undefined, nextSibling)
+							var dom = createNode(parent, v, hooks, ns, nextSibling)
 							nextSibling = dom
 						}
 					}
@@ -649,10 +654,7 @@ var coreRenderer = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
+		ns = getNameSpace(vnode) || ns
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
@@ -832,12 +834,21 @@ var coreRenderer = function($window) {
 		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value)
 		else if (key2 === "style") updateStyle(element, old, value)
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
-			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
-			//setting select[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
-			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value == value) return
+			if (key2 === "value") {
+				var normalized0 = "" + value // eslint-disable-line no-implicit-coercion
+				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				//setting select[value] to same value while having select open blinks select dropdown in Chrome
+				if (vnode.tag === "select") {
+					if (value === null) {
+						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
+					} else {
+						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+					}
+				}
+				//setting option[value] to same value while having select open blinks select dropdown in Chrome
+				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized0) return
+			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
 				element.setAttribute(key2, value)
@@ -952,10 +963,11 @@ var coreRenderer = function($window) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = $doc.activeElement
-		// First time0 rendering into a node clears it out
+		var namespace = dom.namespaceURI
+		// First time rendering0 into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, undefined)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		if ($doc.activeElement !== active) active.focus()
@@ -964,43 +976,44 @@ var coreRenderer = function($window) {
 }
 function throttle(callback) {
 	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
+	var delay = 16
 	var last = 0, pending = null
 	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
 	return function() {
-		var now = Date.now()
-		if (last === 0 || now - last >= time) {
-			last = now
-			callback()
-		}
-		else if (pending === null) {
+		var elapsed = Date.now() - last
+		if (pending === null) {
 			pending = timeout(function() {
 				pending = null
 				callback()
 				last = Date.now()
-			}, time - (now - last))
+			}, delay - elapsed)
 		}
 	}
 }
-var _11 = function($window) {
+var _11 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
-		if (e.redraw !== false) redraw()
+		if (e.redraw === false) e.redraw = undefined
+		else redraw()
 	})
 	var callbacks = []
+	var rendering = false
 	function subscribe(key1, callback) {
 		unsubscribe(key1)
-		callbacks.push(key1, throttle(callback))
+		callbacks.push(key1, callback)
 	}
 	function unsubscribe(key1) {
 		var index = callbacks.indexOf(key1)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-	function redraw() {
-		for (var i = 1; i < callbacks.length; i += 2) {
-			callbacks[i]()
-		}
+	function sync() {
+		if (rendering) throw new Error("Nested m.redraw.sync() call")
+		rendering = true
+		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
+		rendering = false
 	}
+	var redraw = (throttleMock || throttle)(sync)
+	redraw.sync = sync
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
 var redrawService = _11(window)
@@ -1019,7 +1032,7 @@ var _16 = function(redrawService0) {
 			redrawService0.render(root, Vnode(component))
 		}
 		redrawService0.subscribe(root, run0)
-		redrawService0.redraw()
+		run0()
 	}
 }
 m.mount = _16(redrawService)
@@ -1156,9 +1169,14 @@ var _20 = function($window, redrawService0) {
 	var render1, component, attrs3, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var run1 = function() {
+		function run1() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
+		var redraw2 = function() {
+			run1()
+			redraw2 = redrawService0.redraw
+		}
+		redrawService0.subscribe(root, run1)
 		var bail = function(path) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
@@ -1169,7 +1187,7 @@ var _20 = function($window, redrawService0) {
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs3 = params, currentPath = path, lastUpdate = null
 				render1 = (routeResolver.render || identity).bind(routeResolver)
-				run1()
+				redraw2()
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
@@ -1181,10 +1199,12 @@ var _20 = function($window, redrawService0) {
 				else update(payload, "div")
 			}
 		}, bail)
-		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true}
+		if (lastUpdate != null) {
+			options = options || {}
+			options.replace = true
+		}
 		lastUpdate = null
 		routeService.setPath(path, data, options)
 	}
@@ -1220,7 +1240,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.0.1"
+m.version = "1.1.3"
 m.vnode = Vnode
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m

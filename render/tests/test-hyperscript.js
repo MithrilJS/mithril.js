@@ -16,6 +16,95 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals("a")
 		})
+		o("v1.0.1 bug-for-bug regression suite", function(){
+			o(m("a", {
+				class: null
+			}).attrs).deepEquals({
+				class: undefined,
+				className: null
+			})
+			o(m("a", {
+				class: undefined
+			}).attrs).deepEquals({
+				class: undefined,
+			})
+			o(m("a", {
+				class: false
+			}).attrs).deepEquals({
+				class: undefined,
+				className: false
+			})
+			o(m("a", {
+				class: true
+			}).attrs).deepEquals({
+				class: undefined,
+				className: true
+			})
+			o(m("a.x", {
+				class: null
+			}).attrs).deepEquals({
+				class: undefined,
+				className: "x null"
+			})
+			o(m("a.x", {
+				class: undefined
+			}).attrs).deepEquals({
+				class: undefined,
+				className: "x"
+			})
+			o(m("a.x", {
+				class: false
+			}).attrs).deepEquals({
+				class: undefined,
+				className: "x false"
+			})
+			o(m("a.x", {
+				class: true
+			}).attrs).deepEquals({
+				class: undefined,
+				className: "x true"
+			})
+			o(m("a", {
+				className: null
+			}).attrs).deepEquals({
+				className: null
+			})
+			o(m("a", {
+				className: undefined
+			}).attrs).deepEquals({
+				className: undefined
+			})
+			o(m("a", {
+				className: false
+			}).attrs).deepEquals({
+				className: false
+			})
+			o(m("a", {
+				className: true
+			}).attrs).deepEquals({
+				className: true
+			})
+			o(m("a.x", {
+				className: null
+			}).attrs).deepEquals({
+				className: "x"
+			})
+			o(m("a.x", {
+				className: undefined
+			}).attrs).deepEquals({
+				className: "x"
+			})
+			o(m("a.x", {
+				className: false
+			}).attrs).deepEquals({
+				className: "x"
+			})
+			o(m("a.x", {
+				className: true
+			}).attrs).deepEquals({
+				className: "x true"
+			})
+		})
 		o("handles class in selector", function() {
 			var vnode = m(".a")
 
@@ -128,6 +217,18 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals(true)
+		})
+		o("handles explicit empty string value for input", function() {
+			var vnode = m('input[value=""]')
+
+			o(vnode.tag).equals("input")
+			o(vnode.attrs.value).equals("")
+		})
+		o("handles explicit empty string value for option", function() {
+			var vnode = m('option[value=""]')
+
+			o(vnode.tag).equals("option")
+			o(vnode.attrs.value).equals("")
 		})
 	})
 	o.spec("attrs", function() {

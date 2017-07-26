@@ -65,7 +65,7 @@ Argument               | Type                                     | Required | D
 
 ##### m.route.set
 
-Redirects to a matching route, or to the default route if no matching routes can be found.
+Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
 `m.route.set(path, data, options)`
 
@@ -124,7 +124,7 @@ Argument          | Type        | Required | Description
 
 ##### m.route.param
 
-Retrieves a route parameter. A route parameter is a key-value pair. Route parameters may come from a few different places:
+Retrieves a route parameter from the last fully resolved route. A route parameter is a key-value pair. Route parameters may come from a few different places:
 
 - route interpolations (e.g. if a route is `/users/:id`, and it resolves to `/users/1`, the route parameter has a key `id` and value `"1"`)
 - router querystrings (e.g. if the path is `/users?page=1`, the route parameter has a key `page` and value `"1"`)
@@ -137,9 +137,11 @@ Argument          | Type            | Required | Description
 `key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
 **returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
 
+ Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.params()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+
 #### RouteResolver
 
-A RouterResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
+A RouteResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
 
 `routeResolver = {onmatch, render}`
 
@@ -319,6 +321,20 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 })
 ```
 
+#### Handling 404s
+
+For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+
+In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
+
+```javascript
+m.route(document.body, "/", {
+  "/": homeComponent,
+  // [...]
+  "/:404...": errorPageComponent
+});
+ ```
+
 #### History state
 
 It's possible to take full advantage of the underlying `history.pushState` API to improve user's navigation experience. For example, an application could "remember" the state of a large form when the user leaves a page by navigating away, such that if the user pressed the back button in the browser, they'd have the form filled rather than a blank form.
@@ -492,7 +508,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 #### Authentication
 
-The RouterResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false

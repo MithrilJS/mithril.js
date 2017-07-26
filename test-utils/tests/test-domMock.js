@@ -77,6 +77,27 @@ o.spec("domMock", function() {
 
 			o(node.nodeValue).equals("true")
 		})
+		if (typeof Symbol === "function") {
+			o("doesn't work with symbols", function(){
+				var threw = false
+				try {
+					$document.createTextNode(Symbol("nono"))
+				} catch(e) {
+					threw = true
+				}
+				o(threw).equals(true)
+			})
+			o("symbols can't be used as nodeValue", function(){
+				var threw = false
+				try {
+					var node = $document.createTextNode("a")
+					node.nodeValue = Symbol("nono")
+				} catch(e) {
+					threw = true
+				}
+				o(threw).equals(true)
+			})
+		}
 	})
 
 	o.spec("createDocumentFragment", function() {
@@ -327,6 +348,7 @@ o.spec("domMock", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", "aaa")
 
+			o(div.attributes["id"].value).equals("aaa")
 			o(div.attributes["id"].nodeValue).equals("aaa")
 			o(div.attributes["id"].namespaceURI).equals(null)
 		})
@@ -334,32 +356,51 @@ o.spec("domMock", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", 123)
 
-			o(div.attributes["id"].nodeValue).equals("123")
+			o(div.attributes["id"].value).equals("123")
 		})
 		o("works w/ null", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", null)
 
-			o(div.attributes["id"].nodeValue).equals("null")
+			o(div.attributes["id"].value).equals("null")
 		})
 		o("works w/ undefined", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", undefined)
 
-			o(div.attributes["id"].nodeValue).equals("undefined")
+			o(div.attributes["id"].value).equals("undefined")
 		})
 		o("works w/ object", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", {})
 
-			o(div.attributes["id"].nodeValue).equals("[object Object]")
+			o(div.attributes["id"].value).equals("[object Object]")
 		})
 		o("setting via attributes map stringifies", function() {
 			var div = $document.createElement("div")
 			div.setAttribute("id", "a")
-			div.attributes["id"].nodeValue = 123
+			div.attributes["id"].value = 123
 
-			o(div.attributes["id"].nodeValue).equals("123")
+			o(div.attributes["id"].value).equals("123")
+
+			div.attributes["id"].nodeValue = 456
+
+			o(div.attributes["id"].value).equals("456")
+		})
+	})
+	o.spec("hasAttribute", function() {
+		o("works", function() {
+			var div = $document.createElement("div")
+
+			o(div.hasAttribute("id")).equals(false)
+
+			div.setAttribute("id", "aaa")
+
+			o(div.hasAttribute("id")).equals(true)
+
+			div.removeAttribute("id")
+
+			o(div.hasAttribute("id")).equals(false)
 		})
 	})
 
@@ -368,14 +409,14 @@ o.spec("domMock", function() {
 			var div = $document.createElement("div")
 			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
 
-			o(div.attributes["href"].nodeValue).equals("aaa")
+			o(div.attributes["href"].value).equals("aaa")
 			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 		o("works w/ number", function() {
 			var div = $document.createElement("div")
 			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
 
-			o(div.attributes["href"].nodeValue).equals("123")
+			o(div.attributes["href"].value).equals("123")
 			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 	})
@@ -416,18 +457,18 @@ o.spec("domMock", function() {
 			o(div.childNodes[0].nodeName).equals("BR")
 			o(div.childNodes[1].nodeType).equals(1)
 			o(div.childNodes[1].nodeName).equals("A")
-			o(div.childNodes[1].attributes["class"].nodeValue).equals("aaa")
-			o(div.childNodes[1].attributes["id"].nodeValue).equals("xyz")
+			o(div.childNodes[1].attributes["class"].value).equals("aaa")
+			o(div.childNodes[1].attributes["id"].value).equals("xyz")
 			o(div.childNodes[1].childNodes[0].nodeType).equals(3)
 			o(div.childNodes[1].childNodes[0].nodeValue).equals("123")
 			o(div.childNodes[1].childNodes[1].nodeType).equals(1)
 			o(div.childNodes[1].childNodes[1].nodeName).equals("B")
-			o(div.childNodes[1].childNodes[1].attributes["class"].nodeValue).equals("bbb")
+			o(div.childNodes[1].childNodes[1].attributes["class"].value).equals("bbb")
 			o(div.childNodes[1].childNodes[2].nodeType).equals(3)
 			o(div.childNodes[1].childNodes[2].nodeValue).equals("234")
 			o(div.childNodes[1].childNodes[3].nodeType).equals(1)
 			o(div.childNodes[1].childNodes[3].nodeName).equals("BR")
-			o(div.childNodes[1].childNodes[3].attributes["class"].nodeValue).equals("ccc")
+			o(div.childNodes[1].childNodes[3].attributes["class"].value).equals("ccc")
 			o(div.childNodes[1].childNodes[4].nodeType).equals(3)
 			o(div.childNodes[1].childNodes[4].nodeValue).equals("345")
 		})
@@ -628,14 +669,14 @@ o.spec("domMock", function() {
 				a.setAttribute("href", "")
 
 				o(a.href).notEquals("")
-				o(a.attributes["href"].nodeValue).equals("")
+				o(a.attributes["href"].value).equals("")
 			})
 			o("is path if property is set", function() {
 				var a = $document.createElement("a")
 				a.href = ""
 
 				o(a.href).notEquals("")
-				o(a.attributes["href"].nodeValue).equals("")
+				o(a.attributes["href"].value).equals("")
 			})
 		})
 		o.spec("input[checked]", function() {
@@ -656,7 +697,7 @@ o.spec("domMock", function() {
 				input.setAttribute("checked", "")
 
 				o(input.checked).equals(true)
-				o(input.attributes["checked"].nodeValue).equals("")
+				o(input.attributes["checked"].value).equals("")
 
 				input.removeAttribute("checked")
 
@@ -699,20 +740,95 @@ o.spec("domMock", function() {
 				o("value" in input).equals(true)
 				o("value" in a).equals(false)
 			})
+			o("converts null to ''", function() {
+				var input = $document.createElement("input")
+				input.value = "x"
+
+				o(input.value).equals("x")
+
+				input.value = null
+
+				o(input.value).equals("")
+			})
+			o("converts values to strings", function() {
+				var input = $document.createElement("input")
+				input.value = 5
+
+				o(input.value).equals("5")
+
+				input.value = 0
+
+				o(input.value).equals("0")
+
+				input.value = undefined
+
+				o(input.value).equals("undefined")
+			})
+			if (typeof Symbol === "function") o("throws when set to a symbol", function() {
+				var threw = false
+				var input = $document.createElement("input")
+				try {
+					input.value = Symbol("")
+				} catch (e) {
+					o(e instanceof TypeError).equals(true)
+					threw = true
+				}
+
+				o(input.value).equals("")
+				o(threw).equals(true)
+			})
+		})
+		o.spec("input[type]", function(){
+			o("only exists in input elements", function() {
+				var input = $document.createElement("input")
+				var a = $document.createElement("a")
+
+				o("type" in input).equals(true)
+				o("type" in a).equals(false)
+			})
+			o("is 'text' by default", function() {
+				var input = $document.createElement("input")
+
+				o(input.type).equals("text")
+			})
+			"radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image"
+			.split("|").forEach(function(type) {
+				o("can be set to " + type, function(){
+					var input = $document.createElement("input")
+					input.type = type
+
+					o(input.getAttribute("type")).equals(type)
+					o(input.type).equals(type)
+				})
+				o("bad values set the attribute, but the getter corrects to 'text', " + type, function(){
+					var input = $document.createElement("input")
+					input.type = "badbad" + type
+
+					o(input.getAttribute("type")).equals("badbad" + type)
+					o(input.type).equals("text")
+				})
+			})
 		})
 		o.spec("textarea[value]", function() {
-			o("reads from child if no value", function() {
-				var input = $document.createElement("textarea")
-				input.appendChild($document.createTextNode("aaa"))
+			o("reads from child if no value was ever set", function() {
+				var textarea = $document.createElement("textarea")
+				textarea.appendChild($document.createTextNode("aaa"))
 
-				o(input.value).equals("aaa")
+				o(textarea.value).equals("aaa")
 			})
 			o("ignores child if value set", function() {
-				var input = $document.createElement("textarea")
-				input.value = "aaa"
-				input.setAttribute("value", "bbb")
+				var textarea = $document.createElement("textarea")
+				textarea.value = null
+				textarea.appendChild($document.createTextNode("aaa"))
 
-				o(input.value).equals("aaa")
+				o(textarea.value).equals("")
+			})
+			o("textarea[value] doesn't reflect `attributes.value`", function() {
+				var textarea = $document.createElement("textarea")
+				textarea.value = "aaa"
+				textarea.setAttribute("value", "bbb")
+
+				o(textarea.value).equals("aaa")
 			})
 		})
 		o.spec("select[value] and select[selectedIndex]", function() {
@@ -773,10 +889,76 @@ o.spec("domMock", function() {
 				option2.setAttribute("value", "b")
 				select.appendChild(option2)
 
+				var option3 = $document.createElement("option")
+				option3.setAttribute("value", "")
+				select.appendChild(option3)
+
+				var option4 = $document.createElement("option")
+				option4.setAttribute("value", "null")
+				select.appendChild(option4)
+
 				select.value = "b"
 
 				o(select.value).equals("b")
 				o(select.selectedIndex).equals(1)
+
+				select.value = ""
+
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(2)
+
+				select.value = "null"
+
+				o(select.value).equals("null")
+				o(select.selectedIndex).equals(3)
+
+				select.value = null
+
+				o(select.value).equals("")
+				o(select.selectedIndex).equals(-1)
+			})
+			o("setting valid value works with type conversion", function() {
+				var select = $document.createElement("select")
+
+				var option1 = $document.createElement("option")
+				option1.setAttribute("value", "0")
+				select.appendChild(option1)
+
+				var option2 = $document.createElement("option")
+				option2.setAttribute("value", "undefined")
+				select.appendChild(option2)
+
+				var option3 = $document.createElement("option")
+				option3.setAttribute("value", "")
+				select.appendChild(option3)
+
+				select.value = 0
+
+				o(select.value).equals("0")
+				o(select.selectedIndex).equals(0)
+
+				select.value = undefined
+
+				o(select.value).equals("undefined")
+				o(select.selectedIndex).equals(1)
+
+				if (typeof Symbol === "function") {
+					var threw = false
+					try {
+						select.value = Symbol("x")
+					} catch (e) {
+						threw = true
+					}
+					o(threw).equals(true)
+					o(select.value).equals("undefined")
+					o(select.selectedIndex).equals(1)
+				}
+			})
+			o("option.value = null is converted to the empty string", function() {
+				var option = $document.createElement("option")
+				option.value = null
+
+				o(option.value).equals("")
 			})
 			o("setting valid value works with optgroup", function() {
 				var select = $document.createElement("select")
@@ -920,55 +1102,55 @@ o.spec("domMock", function() {
 				var canvas = $document.createElement("canvas")
 
 				canvas.width = 100
-				o(canvas.attributes["width"].nodeValue).equals("100")
+				o(canvas.attributes["width"].value).equals("100")
 				o(canvas.width).equals(100)
 
 				canvas.height = 100
-				o(canvas.attributes["height"].nodeValue).equals("100")
+				o(canvas.attributes["height"].value).equals("100")
 				o(canvas.height).equals(100)
 			})
 			o("setting string casts to number", function() {
 				var canvas = $document.createElement("canvas")
 
 				canvas.width = "100"
-				o(canvas.attributes["width"].nodeValue).equals("100")
+				o(canvas.attributes["width"].value).equals("100")
 				o(canvas.width).equals(100)
 
 				canvas.height = "100"
-				o(canvas.attributes["height"].nodeValue).equals("100")
+				o(canvas.attributes["height"].value).equals("100")
 				o(canvas.height).equals(100)
 			})
 			o("setting float casts to int", function() {
 				var canvas = $document.createElement("canvas")
 
 				canvas.width = 1.2
-				o(canvas.attributes["width"].nodeValue).equals("1")
+				o(canvas.attributes["width"].value).equals("1")
 				o(canvas.width).equals(1)
 
 				canvas.height = 1.2
-				o(canvas.attributes["height"].nodeValue).equals("1")
+				o(canvas.attributes["height"].value).equals("1")
 				o(canvas.height).equals(1)
 			})
 			o("setting percentage fails", function() {
 				var canvas = $document.createElement("canvas")
 
 				canvas.width = "100%"
-				o(canvas.attributes["width"].nodeValue).equals("0")
+				o(canvas.attributes["width"].value).equals("0")
 				o(canvas.width).equals(0)
 
 				canvas.height = "100%"
-				o(canvas.attributes["height"].nodeValue).equals("0")
+				o(canvas.attributes["height"].value).equals("0")
 				o(canvas.height).equals(0)
 			})
 			o("setting attribute works", function() {
 				var canvas = $document.createElement("canvas")
 
 				canvas.setAttribute("width", "100%")
-				o(canvas.attributes["width"].nodeValue).equals("100%")
+				o(canvas.attributes["width"].value).equals("100%")
 				o(canvas.width).equals(100)
 
 				canvas.setAttribute("height", "100%")
-				o(canvas.attributes["height"].nodeValue).equals("100%")
+				o(canvas.attributes["height"].value).equals("100%")
 				o(canvas.height).equals(100)
 			})
 		})
@@ -979,7 +1161,7 @@ o.spec("domMock", function() {
 			el.className = "a"
 
 			o(el.className).equals("a")
-			o(el.attributes["class"].nodeValue).equals("a")
+			o(el.attributes["class"].value).equals("a")
 		})
 		o("setter throws in svg", function(done) {
 			var el = $document.createElementNS("http://www.w3.org/2000/svg", "svg")
@@ -989,6 +1171,87 @@ o.spec("domMock", function() {
 			catch (e) {
 				done()
 			}
+		})
+	})
+	o.spec("spies", function() {
+		var $window
+		o.beforeEach(function() {
+			$window = domMock({spy: o.spy})
+		})
+		o("basics", function() {
+			o(typeof $window.__getSpies).equals("function")
+			o("__getSpies" in domMock()).equals(false)
+		})
+		o("input elements have spies on value and type setters", function() {
+			var input = $window.document.createElement("input")
+
+			var spies = $window.__getSpies(input)
+
+			o(typeof spies).equals("object")
+			o(spies).notEquals(null)
+			o(typeof spies.valueSetter).equals("function")
+			o(typeof spies.typeSetter).equals("function")
+			o(spies.valueSetter.callCount).equals(0)
+			o(spies.typeSetter.callCount).equals(0)
+
+			input.value = "aaa"
+			input.type = "radio"
+
+			o(spies.valueSetter.callCount).equals(1)
+			o(spies.valueSetter.this).equals(input)
+			o(spies.valueSetter.args[0]).equals("aaa")
+
+			o(spies.typeSetter.callCount).equals(1)
+			o(spies.typeSetter.this).equals(input)
+			o(spies.typeSetter.args[0]).equals("radio")
+		})
+		o("select elements have spies on value setters", function() {
+			var select = $window.document.createElement("select")
+
+			var spies = $window.__getSpies(select)
+
+			o(typeof spies).equals("object")
+			o(spies).notEquals(null)
+			o(typeof spies.valueSetter).equals("function")
+			o(spies.valueSetter.callCount).equals(0)
+
+			select.value = "aaa"
+
+			o(spies.valueSetter.callCount).equals(1)
+			o(spies.valueSetter.this).equals(select)
+			o(spies.valueSetter.args[0]).equals("aaa")
+		})
+		o("option elements have spies on value setters", function() {
+			var option = $window.document.createElement("option")
+
+			var spies = $window.__getSpies(option)
+
+			o(typeof spies).equals("object")
+			o(spies).notEquals(null)
+			o(typeof spies.valueSetter).equals("function")
+			o(spies.valueSetter.callCount).equals(0)
+
+			option.value = "aaa"
+
+			o(spies.valueSetter.callCount).equals(1)
+			o(spies.valueSetter.this).equals(option)
+			o(spies.valueSetter.args[0]).equals("aaa")
+		})
+		o("textarea elements have spies on value setters", function() {
+			var textarea = $window.document.createElement("textarea")
+
+			var spies = $window.__getSpies(textarea)
+
+			o(typeof spies).equals("object")
+			o(spies).notEquals(null)
+			o(typeof spies.valueSetter).equals("function")
+			o(spies.valueSetter.callCount).equals(0)
+
+			textarea.value = "aaa"
+
+			o(spies.valueSetter.callCount).equals(1)
+			o(spies.valueSetter.this).equals(textarea)
+			o(spies.valueSetter.args[0]).equals("aaa")
 		})
 	})
 })

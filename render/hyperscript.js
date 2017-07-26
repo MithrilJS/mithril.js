@@ -17,7 +17,7 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue || true
+			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
@@ -34,8 +34,8 @@ function execSelector(state, attrs, children) {
 		}
 	}
 
-	if (className != null) {
-		if (attrs.class != null) {
+	if (className !== undefined) {
+		if (attrs.class !== undefined) {
 			attrs.class = undefined
 			attrs.className = className
 		}
