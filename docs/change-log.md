@@ -1,5 +1,7 @@
 # Change log
 
+- [v2.0.0](#v113)
+- [v1.1.4](#v113)
 - [v1.1.3](#v113)
 - [v1.1.2](#v112)
 - [v1.1.1](#v111)
@@ -24,6 +26,13 @@
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+
+---
+
+### v1.1.4
+
+#### Bug fixes:
+
 - core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 
 ---
