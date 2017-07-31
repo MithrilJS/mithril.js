@@ -89,6 +89,7 @@ o.spec("onremove", function() {
 
 		o(vnode.dom.onremove).equals(undefined)
 		o(vnode.dom.attributes["onremove"]).equals(undefined)
+		o(vnode.events).equals(undefined)
 	})
 	o("calls onremove on recycle", function() {
 		var remove = o.spy()
@@ -149,6 +150,46 @@ o.spec("onremove", function() {
 				render(root, null)
 				
 				o(spy.callCount).equals(1)
+			})
+			o("doesn't call onremove on children when the corresponding view returns null (after removing the parent)", function() {
+				var threw = false
+				var spy = o.spy()
+				var parent = createComponent({
+					view: function() {}
+				})
+				var child = createComponent({
+					view: function() {},
+					onremove: spy
+				})
+				render(root, {tag: parent, children: [child]})
+				try {
+					render(root, null)
+				} catch (e) {
+					threw = e
+				}
+
+				o(spy.callCount).equals(0)
+				o(threw).equals(false)
+			})
+			o("doesn't call onremove on children when the corresponding view returns null (after removing the children)", function() {
+				var threw = false
+				var spy = o.spy()
+				var parent = createComponent({
+					view: function() {}
+				})
+				var child = createComponent({
+					view: function() {},
+					onremove: spy
+				})
+				render(root, {tag: parent, children: [child]})
+				try {
+					render(root, {tag: parent})
+				} catch (e) {
+					threw = true
+				}
+
+				o(spy.callCount).equals(0)
+				o(threw).equals(false)
 			})
 		})
 	})
