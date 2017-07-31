@@ -18,6 +18,7 @@
 #### Bug fixes
 
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 
 ---
 

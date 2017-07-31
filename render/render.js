@@ -451,9 +451,10 @@ module.exports = function($window) {
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
-		if (vnode.instance != null) onremove(vnode.instance)
-		else {
+		if (typeof vnode.tag !== "string") {
+			if (typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
+			if (vnode.instance != null) onremove(vnode.instance)
+		} else {
 			var children = vnode.children
 			if (Array.isArray(children)) {
 				for (var i = 0; i < children.length; i++) {
