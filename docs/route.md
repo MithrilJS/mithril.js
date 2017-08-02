@@ -568,7 +568,7 @@ var Login = {
 		return m("form", [
 			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
 			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
-			m("button[type=button]", {onclick: Auth.login, "Login")
+			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}
 }
