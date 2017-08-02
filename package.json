@@ -28,12 +28,12 @@
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "benchmark": "^2.1.4",
-    "danger": "^1.0.0",
+    "danger": "^1.2.0",
     "dedent": "^0.7.0",
     "eslint": "^3.19.0",
     "gh-pages": "^0.12.0",
     "istanbul": "^0.4.5",
-    "lint-staged": "^4.0.2",
+    "lint-staged": "^4.0.4",
     "locater": "^1.3.0",
     "marked": "^0.3.6",
     "pinpoint": "^1.1.0"
