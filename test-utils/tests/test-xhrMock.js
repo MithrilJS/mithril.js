@@ -72,6 +72,14 @@ o.spec("xhrMock", function() {
 			}
 			xhr.send("a=b")
 		})
+		o("Setting a header twice merges the header", function() {
+			// Source: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/setRequestHeader
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open("POST", "/test")
+			xhr.setRequestHeader("Content-Type", "foo")
+			xhr.setRequestHeader("Content-Type", "bar")
+			o(xhr.getRequestHeader("Content-Type")).equals("foo, bar")
+		})
 	})
 	o.spec("jsonp", function() {
 		o("works", function(done) {
