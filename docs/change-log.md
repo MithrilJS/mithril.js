@@ -24,6 +24,7 @@
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
 
 ---
 
