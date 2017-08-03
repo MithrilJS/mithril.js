@@ -1,5 +1,7 @@
 # Change log
 
+- [v1.1.5](#v115)
+- [v1.1.4](#v114)
 - [v1.1.3](#v113)
 - [v1.1.2](#v112)
 - [v1.1.1](#v111)
@@ -10,11 +12,16 @@
 
 ---
 
+### v1.1.5
+
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
+
+---
+
 ### v1.1.4
 
 #### Bug fixes:
-- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
-
+- Fix IE bug where active element is null causing render function to throw error. ([1943]
 ---
 
 ### v1.1.3

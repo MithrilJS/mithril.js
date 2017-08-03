@@ -17,7 +17,17 @@ module.exports = function() {
 			var headers = {}
 			var aborted = false
 			this.setRequestHeader = function(header, value) {
-				headers[header] = value
+				/*
+				 the behavior of setHeader is not your expected setX API.
+				 If the header is already set, it'll merge with whatever you add
+				 rather than overwrite
+				 Source: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/setRequestHeader
+				 */
+				if (headers[header]) {
+					headers[header] += ", " + value;
+				} else {
+					headers[header] = value
+				}
 			}
 			this.getRequestHeader = function(header) {
 				return headers[header]
