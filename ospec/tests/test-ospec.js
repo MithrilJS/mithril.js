@@ -107,7 +107,7 @@ o.spec("ospec", function() {
 			o(output).deepEquals({tag: "div", children: children})
 		})
 	})
-	o.spec("async", function() {
+	o.spec("async callback", function() {
 		var a = 0, b = 0
 
 		o.before(function(done) {
@@ -145,6 +145,49 @@ o.spec("ospec", function() {
 				o(a).equals(1)("a and b should be initialized")
 
 				done()
+			})
+		})
+	})
+
+	o.spec("async promise", function() {
+		var a = 0, b = 0
+
+		function wrapPromise(fn) {
+			return new Promise(resolve => {
+				callAsync(() => {
+					fn()
+					resolve()
+				})
+			})
+		}
+
+		o.before(function() {
+			return wrapPromise(() => {
+				a = 1
+			})
+		})
+
+		o.after(function() {
+			return wrapPromise(function() {
+				a = 0
+			})
+		})
+
+		o.beforeEach(function() {
+			return wrapPromise(function() {
+				b = 1
+			})
+		})
+		o.afterEach(function() {
+			return wrapPromise(function() {
+				b = 0
+			})
+		})
+
+		o("promise functions", async function() {
+			await wrapPromise(function() {
+				o(a).equals(b)
+				o(a).equals(1)("a and b should be initialized")
 			})
 		})
 	})
