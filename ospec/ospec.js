@@ -84,23 +84,34 @@ module.exports = new function init(name) {
 				if (cursor === fns.length) return
 
 				var fn = fns[cursor++]
+				var timeout = 0, delay = 200, s = new Date
+				var isDone = false
+
+				function done() {
+					if (timeout !== undefined) {
+						timeout = clearTimeout(timeout)
+						if (delay !== Infinity) record(null)
+						if (!isDone) next()
+						else throw new Error("`" + arg + "()` should only be called once")
+						isDone = true
+					}
+					else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
+				}
+
+				function startTimer() {
+					timeout = setTimeout(function() {
+						timeout = undefined
+						record("async test timed out")
+						next()
+					}, Math.min(delay, 2147483647))
+				}
+
 				if (fn.length > 0) {
-					var timeout = 0, delay = 200, s = new Date
-					var isDone = false
 					var body = fn.toString()
 					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
-						fn(function done() {
-							if (timeout !== undefined) {
-								timeout = clearTimeout(timeout)
-								if (delay !== Infinity) record(null)
-								if (!isDone) next()
-								else throw new Error("`" + arg + "()` should only be called once")
-								isDone = true
-							}
-							else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
-						}, function(t) {delay = t})
+						fn(done, function(t) {delay = t})
 					}
 					catch (e) {
 						record(e.message, e)
@@ -108,16 +119,21 @@ module.exports = new function init(name) {
 						next()
 					}
 					if (timeout === 0) {
-						timeout = setTimeout(function() {
-							timeout = undefined
-							record("async test timed out")
-							next()
-						}, Math.min(delay, 2147483647))
+						startTimer()
 					}
 				}
 				else {
-					fn()
-					nextTickish(next)
+					var p = fn()
+					if (p && p.then) {
+						startTimer()
+						p.then(done, e => {
+							record(e.message, e)
+							subjects.pop()
+							next()
+						})
+					} else {
+						nextTickish(next)
+					}
 				}
 			}
 		}
