@@ -87,7 +87,13 @@ module.exports = new function init(name) {
 				var timeout = 0, delay = 200, s = new Date
 				var isDone = false
 
-				function done() {
+				function done(err) {
+					if (err) {
+						if (err.message) record(err.message, err)
+						else record(err)
+						subjects.pop()
+						next()
+					}
 					if (timeout !== undefined) {
 						timeout = clearTimeout(timeout)
 						if (delay !== Infinity) record(null)
@@ -114,9 +120,7 @@ module.exports = new function init(name) {
 						fn(done, function(t) {delay = t})
 					}
 					catch (e) {
-						record(e.message, e)
-						subjects.pop()
-						next()
+						done(e)
 					}
 					if (timeout === 0) {
 						startTimer()
@@ -126,11 +130,7 @@ module.exports = new function init(name) {
 					var p = fn()
 					if (p && p.then) {
 						startTimer()
-						p.then(done, e => {
-							record(e.message, e)
-							subjects.pop()
-							next()
-						})
+						p.then(function() { done() }, done)
 					} else {
 						nextTickish(next)
 					}
