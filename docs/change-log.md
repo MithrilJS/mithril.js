@@ -25,6 +25,7 @@
 
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
+- API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
 
 #### Ospec improvements:
 
