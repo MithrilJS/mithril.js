@@ -153,10 +153,14 @@ o.spec("ospec", function() {
 		var a = 0, b = 0
 
 		function wrapPromise(fn) {
-			return new Promise(resolve => {
+			return new Promise((resolve, reject) => {
 				callAsync(() => {
-					fn()
-					resolve()
+					try {
+						fn()
+						resolve()
+					} catch(e) {
+						reject(e)
+					}
 				})
 			})
 		}
