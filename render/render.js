@@ -552,6 +552,18 @@ module.exports = function($window) {
 
 	//style
 	function updateStyle(element, old, style) {
+		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
+			// Both old & new are (different) objects.
+			// Update style properties that have changed
+			for (var key in style) {
+				if (style[key] !== old[key]) element.style[key] = style[key]
+			}
+			// Remove style properties that no longer exist
+			for (var key in old) {
+				if (!(key in style)) element.style[key] = ""
+			}
+			return
+		}
 		if (old === style) element.style.cssText = "", old = null
 		if (style == null) element.style.cssText = ""
 		else if (typeof style === "string") element.style.cssText = style
