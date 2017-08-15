@@ -572,11 +572,6 @@ module.exports = function($window) {
 			for (var key in style) {
 				element.style[key] = style[key]
 			}
-			if (old != null && typeof old !== "string") {
-				for (var key in old) {
-					if (!(key in style)) element.style[key] = ""
-				}
-			}
 		}
 	}
 
