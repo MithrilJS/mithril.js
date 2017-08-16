@@ -905,6 +905,18 @@ var coreRenderer = function($window) {
 	}
 	//style
 	function updateStyle(element, old, style) {
+		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
+			// Both old & new are (different) objects.
+			// Update style properties that have changed
+			for (var key2 in style) {
+				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+			}
+			// Remove style properties that no longer exist
+			for (var key2 in old) {
+				if (!(key2 in style)) element.style[key2] = ""
+			}
+			return
+		}
 		if (old === style) element.style.cssText = "", old = null
 		if (style == null) element.style.cssText = ""
 		else if (typeof style === "string") element.style.cssText = style
@@ -912,11 +924,6 @@ var coreRenderer = function($window) {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
 				element.style[key2] = style[key2]
-			}
-			if (old != null && typeof old !== "string") {
-				for (var key2 in old) {
-					if (!(key2 in style)) element.style[key2] = ""
-				}
 			}
 		}
 	}
