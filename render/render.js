@@ -583,7 +583,7 @@ module.exports = function($window) {
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
 		var listener = typeof onevent !== "function" ? value : function(e) {
-			var result = typeof value === "function" ? value.call(element, e) : value.handleEvent(value, e)
+			var result = typeof value === "function" ? value.call(element, e) : value.handleEvent(e)
 			onevent.call(element, e)
 			return result
 		}
