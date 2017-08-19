@@ -33,7 +33,27 @@ o.spec("event", function() {
 		o(onevent.args[0].type).equals("click")
 		o(onevent.args[0].target).equals(div.dom)
 	})
-	
+
+	o("handleEvent click", function() {
+		var spy = o.spy()
+		var listener = {handleEvent: function(e) {spy(e)}}
+		var div = {tag: "div", attrs: {onclick: listener}}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [div])
+		div.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(1)
+		o(spy.this).equals(listener)
+		o(spy.args[0].type).equals("click")
+		o(spy.args[0].target).equals(div.dom)
+		o(onevent.callCount).equals(1)
+		o(onevent.this).equals(div.dom)
+		o(onevent.args[0].type).equals("click")
+		o(onevent.args[0].target).equals(div.dom)
+	})
+
 	o("removes event", function() {
 		var spy = o.spy()
 		var vnode = {tag: "a", attrs: {onclick: spy}}
@@ -45,7 +65,7 @@ o.spec("event", function() {
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 		vnode.dom.dispatchEvent(e)
-		
+
 		o(spy.callCount).equals(0)
 	})
 

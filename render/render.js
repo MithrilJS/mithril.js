@@ -582,21 +582,27 @@ module.exports = function($window) {
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
+		var valIsFunc = typeof value === "function"
 		var listener = typeof onevent !== "function" ? value : function(e) {
-			var result = typeof value === "function" ? value.call(element, e) : value.handleEvent(e)
+			var result = valIsFunc ? value.call(element, e) : value.handleEvent(e)
 			onevent.call(element, e)
 			return result
 		}
-		if (key in element) element[key] = typeof value === "function" ? listener : null
-		else {
-			var eventName = key.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key] === listener) return
-			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			if (value != null) {
-				vnode.events[key] = listener
-				element.addEventListener(eventName, vnode.events[key], false)
-			}
+		var elemHasOnEvent = key in element
+		// Prefer legacy element.onevent setter when applicable (for performance)
+		if (elemHasOnEvent) element[key] = valIsFunc ? listener : null
+		if (vnode.events === undefined) {
+			// No previous events to remove - if we set element.onevent we're done
+			if (elemHasOnEvent && (value == null || valIsFunc)) return
+			vnode.events = {}
+		}
+		if (vnode.events[key] === listener) return
+		var eventName = key.slice(2)
+		if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
+		// Only use addEventListener if we couldn't use element.onevent above
+		if (value != null && (!elemHasOnEvent || typeof value === "object")) {
+			vnode.events[key] = listener
+			element.addEventListener(eventName, vnode.events[key], false)
 		}
 	}
 
