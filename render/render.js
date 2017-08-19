@@ -478,7 +478,7 @@ module.exports = function($window) {
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
 			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
 		}
-		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
+		else if (key[0] === "o" && key[1] === "n" && isEventListener(value)) updateEvent(vnode, key, value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {
@@ -549,6 +549,10 @@ module.exports = function($window) {
 	function hasIntegrationMethods(source) {
 		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
 	}
+	/** Test if value can be used as an event listener */
+	function isEventListener(value) {
+		return typeof value === "function" || (value != null && typeof value === "object" && typeof value.handleEvent === "function")
+	}
 
 	//style
 	function updateStyle(element, old, style) {
@@ -578,19 +582,19 @@ module.exports = function($window) {
 	//event
 	function updateEvent(vnode, key, value) {
 		var element = vnode.dom
-		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
+		var listener = typeof onevent !== "function" ? value : function(e) {
+			var result = typeof value === "function" ? value.call(element, e) : value.handleEvent(value, e)
 			onevent.call(element, e)
 			return result
 		}
-		if (key in element) element[key] = typeof value === "function" ? callback : null
+		if (key in element) element[key] = typeof value === "function" ? listener : null
 		else {
 			var eventName = key.slice(2)
 			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key] === callback) return
+			if (vnode.events[key] === listener) return
 			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			if (typeof value === "function") {
-				vnode.events[key] = callback
+			if (value != null) {
+				vnode.events[key] = listener
 				element.addEventListener(eventName, vnode.events[key], false)
 			}
 		}
