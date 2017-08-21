@@ -28,6 +28,18 @@ function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
 	var className = attrs.className || attrs.class
 
+	if (Object.keys(state.attrs).length && Object.keys(attrs).length) {
+		var newAttrs = {}
+
+		for(var key in attrs) {
+			if (hasOwn.call(attrs, key)) {
+				newAttrs[key] = attrs[key]
+			}
+		}
+
+		attrs = newAttrs
+	}
+
 	for (var key in state.attrs) {
 		if (hasOwn.call(state.attrs, key)) {
 			attrs[key] = state.attrs[key]
