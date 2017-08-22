@@ -630,7 +630,7 @@ module.exports = function($window) {
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
-		if ($doc.activeElement !== active) active.focus()
+		if (active !== null && $doc.activeElement !== active) active.focus()
 	}
 
 	return {render: render, setEventCallback: setEventCallback}
