@@ -168,4 +168,35 @@ o.spec("redrawService", function() {
 		o(spy2.callCount).equals(2)
 		o(spy3.callCount).equals(2)
 	})
+	
+	o("the callback passed to redraw() is called when all roots have been redrawn", function(done) {
+		var el1 = $document.createElement("div")
+		var el2 = $document.createElement("div")
+		var el3 = $document.createElement("div")
+		var spy1 = o.spy()
+		var spy2 = o.spy()
+		var spy3 = o.spy()
+	
+		redrawService.subscribe(el1, spy1)
+		redrawService.subscribe(el2, spy2)
+		redrawService.subscribe(el3, spy3)
+	
+		o(spy1.callCount).equals(0)
+		o(spy2.callCount).equals(0)
+		o(spy3.callCount).equals(0)
+	
+		redrawService.redraw(function() {
+			o(spy1.callCount).equals(1)
+			o(spy2.callCount).equals(1)
+			o(spy3.callCount).equals(1)
+			
+			redrawService.redraw(function() {
+				o(spy1.callCount).equals(2)
+				o(spy2.callCount).equals(2)
+				o(spy3.callCount).equals(2)
+				
+				done()
+			})
+		})
+	})
 })

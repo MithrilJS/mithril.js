@@ -28,7 +28,8 @@ module.exports = function($window, throttleMock) {
 	})
 
 	var callbacks = []
-	var rendering = false
+	var rendering = 0
+	var afterRenderCallbacks = []
 
 	function subscribe(key, callback) {
 		unsubscribe(key)
@@ -39,13 +40,34 @@ module.exports = function($window, throttleMock) {
 		if (index > -1) callbacks.splice(index, 2)
 	}
 	function sync() {
-		if (rendering) throw new Error("Nested m.redraw.sync() call")
-		rendering = true
+		// [0] Required by: test-redraw > the callback passed to redraw() is called when all roots have been redrawn
+		rendering++ // [0]
 		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
-		rendering = false
+		processAfterRenderCallbacks() // [0]
+		rendering-- // [0]
+	}
+	var throttledSync = (throttleMock || throttle)(sync)
+	function redraw(afterRenderCallback, log) {
+		if (rendering) {
+			afterRenderCallbacks.push(sync)
+			if (afterRenderCallback) afterRenderCallbacks.push(afterRenderCallback)
+		} else {
+			if (afterRenderCallback) afterRenderCallbacks.push(afterRenderCallback)
+			throttledSync(log)
+		}
+	}
+	function render() {
+		rendering++
+		renderService.render.apply(renderService, arguments)
+		processAfterRenderCallbacks()
+		rendering--
+	}
+	function processAfterRenderCallbacks() {
+		while (afterRenderCallbacks.length) {
+			try { afterRenderCallbacks.shift()() } catch (e) { console.error(e) }
+		}
 	}
 
-	var redraw = (throttleMock || throttle)(sync)
 	redraw.sync = sync
-	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
+	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: render}
 }
