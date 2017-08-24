@@ -39,21 +39,21 @@ module.exports = function($window, throttleMock) {
 		var index = callbacks.indexOf(key)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-	function sync() {
+	function processCallbacks() {
 		// [0] Required by: test-redraw > the callback passed to redraw() is called when all roots have been redrawn
 		rendering++ // [0]
 		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
 		processAfterRenderCallbacks() // [0]
 		rendering-- // [0]
 	}
-	var throttledSync = (throttleMock || throttle)(sync)
+	var throttledProcessCallbacks = (throttleMock || throttle)(processCallbacks)
 	function redraw(afterRenderCallback, log) {
 		if (rendering) {
-			afterRenderCallbacks.push(sync)
+			afterRenderCallbacks.push(processCallbacks)
 			if (afterRenderCallback) afterRenderCallbacks.push(afterRenderCallback)
 		} else {
 			if (afterRenderCallback) afterRenderCallbacks.push(afterRenderCallback)
-			throttledSync(log)
+			throttledProcessCallbacks(log)
 		}
 	}
 	function render() {
@@ -68,6 +68,5 @@ module.exports = function($window, throttleMock) {
 		}
 	}
 
-	redraw.sync = sync
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: render}
 }
