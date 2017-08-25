@@ -69,11 +69,118 @@ o.spec("event", function() {
 		o(spy.callCount).equals(0)
 	})
 
+	o("removes event when null", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {onclick: spy}}
+		var updated = {tag: "a", attrs: {onclick: null}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes event when undefined", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {onclick: spy}}
+		var updated = {tag: "a", attrs: {onclick: undefined}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes event added via addEventListener when null", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
+		var updated = {tag: "a", attrs: {ontouchstart: null}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("TouchEvents")
+		e.initEvent("touchstart", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes event added via addEventListener", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
+		var updated = {tag: "a", attrs: {}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("TouchEvents")
+		e.initEvent("touchstart", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes event added via addEventListener when undefined", function() {
+		var spy = o.spy()
+		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
+		var updated = {tag: "a", attrs: {ontouchstart: undefined}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("TouchEvents")
+		e.initEvent("touchstart", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
 	o("removes EventListener object", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
 		var vnode = {tag: "a", attrs: {onclick: listener}}
 		var updated = {tag: "a", attrs: {}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes EventListener object when null", function() {
+		var spy = o.spy()
+		var listener = {handleEvent: spy}
+		var vnode = {tag: "a", attrs: {onclick: listener}}
+		var updated = {tag: "a", attrs: {onclick: null}}
+
+		render(root, [vnode])
+		render(root, [updated])
+
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+		vnode.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(0)
+	})
+
+	o("removes EventListener object when undefined", function() {
+		var spy = o.spy()
+		var listener = {handleEvent: spy}
+		var vnode = {tag: "a", attrs: {onclick: listener}}
+		var updated = {tag: "a", attrs: {onclick: undefined}}
 
 		render(root, [vnode])
 		render(root, [updated])
