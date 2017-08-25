@@ -274,10 +274,10 @@ var _8 = function($window, Promise) {
 				_abort.call(xhr)
 			}
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			if (args.serialize === JSON.stringify && useBody) {
+			if (args.serialize === JSON.stringify && useBody && !(args.headers && args.headers.hasOwnProperty("Content-Type"))) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (args.deserialize === deserialize) {
+			if (args.deserialize === deserialize && !(args.headers && args.headers.hasOwnProperty("Accept"))) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
@@ -905,6 +905,18 @@ var coreRenderer = function($window) {
 	}
 	//style
 	function updateStyle(element, old, style) {
+		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
+			// Both old & new are (different) objects.
+			// Update style properties that have changed
+			for (var key2 in style) {
+				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+			}
+			// Remove style properties that no longer exist
+			for (var key2 in old) {
+				if (!(key2 in style)) element.style[key2] = ""
+			}
+			return
+		}
 		if (old === style) element.style.cssText = "", old = null
 		if (style == null) element.style.cssText = ""
 		else if (typeof style === "string") element.style.cssText = style
@@ -912,11 +924,6 @@ var coreRenderer = function($window) {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
 				element.style[key2] = style[key2]
-			}
-			if (old != null && typeof old !== "string") {
-				for (var key2 in old) {
-					if (!(key2 in style)) element.style[key2] = ""
-				}
 			}
 		}
 	}

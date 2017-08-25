@@ -43,6 +43,8 @@ if(appfiles.length && !changelog) {
 // Call out if `o.only(...)` was left in
 jsfiles
 	.filter((file) => file.indexOf("tests/") > -1)
+	// Have to exclude test-ospec.js because it specifically has a purposeful "o.only" in it
+	.filter((file) => file.indexOf("test-ospec") === -1)
 	.forEach((file) => {
 		var code = fs.readFileSync(file, "utf8"),
 			locs = locater.find("o.only", code);

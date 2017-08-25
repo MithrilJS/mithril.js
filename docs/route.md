@@ -107,7 +107,7 @@ This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` 
 m("a[href=/]", {oncreate: m.route.link})`.
 ```
 
-Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
+Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
 
 If the `href` attribute is not static, the `onupdate` hook must also be set:
 
