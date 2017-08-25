@@ -472,13 +472,11 @@ module.exports = function($window) {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
+		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
+		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
+		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
-		if (key === "key" || key === "is" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
-		var nsLastIndex = key.indexOf(":")
-		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
-		}
-		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
+		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {
@@ -587,13 +585,15 @@ module.exports = function($window) {
 	function EventDict() {}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
-		this["on" + ev.type].call(ev.target, ev)
+		var handler = this["on" + ev.type]
+		if (typeof handler === "function") handler.call(ev.target, ev)
+		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (typeof onevent === "function") onevent.call(ev.target, ev)
 	}
 
 	//event
 	function updateEvent(vnode, key, value) {
-		if (typeof value === "function") {
+		if (typeof value === "function" || value != null && typeof value === "object") {
 			if (vnode.events == null) vnode.events = new EventDict()
 			if (vnode.events[key] === value) return
 			if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)

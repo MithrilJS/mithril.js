@@ -1,6 +1,6 @@
 # Change log
 
-- [v2.0.0](#v113)
+- [v2.0.0](#v200-wip)
 - [v1.1.4](#v113)
 - [v1.1.3](#v113)
 - [v1.1.2](#v112)
@@ -22,6 +22,7 @@
 #### News
 
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
 
 #### Bug fixes
 
@@ -31,6 +32,7 @@
 - core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
 - core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
 - core: `Object.prototype` properties can no longer interfere with event listener calls.
+- API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 
 ---
 
