@@ -575,24 +575,32 @@ module.exports = function($window) {
 		}
 	}
 
+	// Here's an explanation of how this works:
+	// 1. The event names are always (by design) prefixed by `on`.
+	// 2. The EventListener interface accepts either a function or an object
+	//    with a `handleEvent` method.
+	// 3. The object does not inherit from `Object.prototype`, to avoid
+	//    any potential interference with that (e.g. setters).
+	// 4. The event name is remapped to the handler before calling it.
+	// 5. In function-based event handlers, `ev.target === this`. We replicate
+	//    that below.
+	function EventDict() {}
+	EventDict.prototype = Object.create(null)
+	EventDict.prototype.handleEvent = function (ev) {
+		this["on" + ev.type].call(ev.target, ev)
+		if (typeof onevent === "function") onevent.call(ev.target, ev)
+	}
+
 	//event
 	function updateEvent(vnode, key, value) {
-		var element = vnode.dom
-		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
-			onevent.call(element, e)
-			return result
-		}
-		if (key in element) element[key] = typeof value === "function" ? callback : null
-		else {
-			var eventName = key.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key] === callback) return
-			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			if (typeof value === "function") {
-				vnode.events[key] = callback
-				element.addEventListener(eventName, vnode.events[key], false)
-			}
+		if (typeof value === "function") {
+			if (vnode.events == null) vnode.events = new EventDict()
+			if (vnode.events[key] === value) return
+			if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+			vnode.events[key] = value
+		} else if (vnode.events != null) {
+			if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
+			delete vnode.events[key]
 		}
 	}
 
