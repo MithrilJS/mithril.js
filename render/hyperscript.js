@@ -6,6 +6,11 @@ var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["
 var selectorCache = {}
 var hasOwn = {}.hasOwnProperty
 
+function isEmpty(object) {
+	for (var key in object) if (hasOwn.call(object, key)) return false
+	return true
+}
+
 function compileSelector(selector) {
 	var match, tag = "div", classes = [], attrs = {}
 	while (match = selectorParser.exec(selector)) {
@@ -28,7 +33,7 @@ function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
 	var className = attrs.className || attrs.class
 
-	if (Object.keys(state.attrs).length && Object.keys(attrs).length) {
+	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
 
 		for(var key in attrs) {
