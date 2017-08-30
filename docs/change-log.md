@@ -37,6 +37,7 @@
 
 - core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 - hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
+- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
 
 ---
 
