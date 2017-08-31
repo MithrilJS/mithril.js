@@ -17,6 +17,10 @@ Vnode.normalizeChildren = function normalizeChildren(children) {
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 var hasOwn = {}.hasOwnProperty
+function isEmpty(object) {
+	for (var key in object) if (hasOwn.call(object, key)) return false
+	return true
+}
 function compileSelector(selector) {
 	var match, tag = "div", classes = [], attrs = {}
 	while (match = selectorParser.exec(selector)) {
@@ -37,6 +41,15 @@ function compileSelector(selector) {
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
 	var className = attrs.className || attrs.class
+	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+		var newAttrs = {}
+		for(var key in attrs) {
+			if (hasOwn.call(attrs, key)) {
+				newAttrs[key] = attrs[key]
+			}
+		}
+		attrs = newAttrs
+	}
 	for (var key in state.attrs) {
 		if (hasOwn.call(state.attrs, key)) {
 			attrs[key] = state.attrs[key]
@@ -978,7 +991,8 @@ var coreRenderer = function($window) {
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
-		if ($doc.activeElement !== active) active.focus()
+		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+		if (active != null && $doc.activeElement !== active) active.focus()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
