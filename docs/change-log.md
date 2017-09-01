@@ -24,6 +24,11 @@
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
 
+#### Ospec improvements:
+
+- Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+- Error handling for async tests with `done` callbacks supports error as first argument
+
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
