@@ -593,14 +593,19 @@ module.exports = function($window) {
 
 	//event
 	function updateEvent(vnode, key, value) {
-		if (typeof value === "function" || value != null && typeof value === "object") {
-			if (vnode.events == null) vnode.events = new EventDict()
+		if (vnode.events != null) {
 			if (vnode.events[key] === value) return
-			if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+			if (value != null && (typeof value === "function" || typeof value === "object")) {
+				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = value
+			} else {
+				if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = undefined
+			}
+		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
+			vnode.events = new EventDict()
+			vnode.dom.addEventListener(key.slice(2), vnode.events, false)
 			vnode.events[key] = value
-		} else if (vnode.events != null) {
-			if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
-			delete vnode.events[key]
 		}
 	}
 
