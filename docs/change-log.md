@@ -44,6 +44,9 @@
 - hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
 - Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
 
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 ---
 
 ### v1.1.3
