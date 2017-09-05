@@ -22,9 +22,10 @@ You DO need to call it in `setTimeout`/`setInterval`/`requestAnimationFrame` cal
 
 `m.redraw()`
 
-Argument    | Type                 | Required | Description
------------ | -------------------- | -------- | ---
-**returns** |                      |          | Returns nothing
+Argument              | Type                 | Required | Description
+--------------------- | -------------------- | -------- | ---
+`afterRenderCallback` | `Function`           | No       | A function to be called after redraw finishes
+**returns**           |                      |          | Returns nothing
 
 #### Static members
 
@@ -44,7 +45,7 @@ When callbacks outside of Mithril run, you need to notify Mithril's rendering en
 
 To trigger a redraw, call `m.redraw()`. Note that `m.redraw` only works if you used `m.mount` or `m.route`. If you rendered via `m.render`, you should use `m.render` to redraw.
 
-`m.redraw()` always triggers an asynchronous redraws, whereas `m.redraw.sync()` triggers a synchronous one. `m.redraw()` is tied to `window.requestAnimationFrame()` (we provide a fallback for IE9). It will thus typically fire at most 60 times per second. It may fire faster if your monitor has a higher refresh rate.
+`m.redraw()` always triggers an asynchronous redraw, whereas `m.redraw.sync()` triggers a synchronous one. If you need to complete some action right after the redraw, you can pass a callback function to `m.redraw()`. `m.redraw()` is tied to `window.requestAnimationFrame()` (we provide a fallback for IE9). It will thus typically fire at most 60 times per second. It may fire faster if your monitor has a higher refresh rate. It will also fire immediately after the previous redraw when called from inside a lifecycle method.
 
 `m.redraw.sync()` is mostly intended to make videos play work in iOS. That only works in response to user-triggered events. It comes with several caveat:
 

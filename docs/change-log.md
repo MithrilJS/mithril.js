@@ -16,6 +16,7 @@
 
 #### Breaking changes
 
+- API: `m.redraw()` callback & immediate invoke from lifecycle methods ([#1946](https://github.com/MithrilJS/mithril.js/pull/1946))
 - API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 
