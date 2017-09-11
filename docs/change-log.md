@@ -10,6 +10,13 @@
 
 ---
 
+### v1.1.4
+
+#### Bug fixes:
+- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
+
+---
+
 ### v1.1.3
 
 #### Bug fixes:
