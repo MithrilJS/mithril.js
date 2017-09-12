@@ -136,6 +136,7 @@ By default, Mithril views are described using [hyperscript](hyperscript.md). Hyp
 Let's use Mithril hyperscript to create a list of items. Hyperscript is the most idiomatic way of writing Mithril views, but [JSX is another popular alternative that you could explore](jsx.md) once you're more comfortable with the basics:
 
 ```javascript
+// src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
 
@@ -539,6 +540,7 @@ Currently, we're only able to navigate back to the user list via the browser bac
 Let's create a file `src/views/Layout.js`:
 
 ```javascript
+// src/views/Layout.js
 var m = require("mithril")
 
 module.exports = {
