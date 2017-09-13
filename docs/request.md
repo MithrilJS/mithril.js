@@ -49,6 +49,7 @@ Argument                  | Type                              | Required | Descr
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
 `options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
+`options.timeout`         | `Number`                          | No       | The amount of milliseconds a request can take before automatically being [terminated](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout).  Defaults to `undefined`.
 `options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
