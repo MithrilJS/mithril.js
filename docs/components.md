@@ -61,6 +61,9 @@ var ComponentWithHooks = {
 	oncreate: function(vnode) {
 		console.log("DOM created")
 	},
+	onbeforeupdate: function(vnode, old) {
+		return true
+	},
 	onupdate: function(vnode) {
 		console.log("DOM updated")
 	},
@@ -73,9 +76,6 @@ var ComponentWithHooks = {
 	},
 	onremove: function(vnode) {
 		console.log("removing DOM element")
-	},
-	onbeforeupdate: function(vnode, old) {
-		return true
 	},
 	view: function(vnode) {
 		return "hello"
