@@ -839,13 +839,11 @@ var coreRenderer = function($window) {
 		}
 	}
 	function setAttr(vnode, key2, old, value, ns) {
+		if (key2 === "key" || key2 === "is" || isLifecycleMethod(key2)) return
+		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
+		if ((old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
-		if (key2 === "key" || key2 === "is" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
-		var nsLastIndex = key2.indexOf(":")
-		if (nsLastIndex > -1 && key2.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(nsLastIndex + 1), value)
-		}
-		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value)
+		if (key2.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
 		else if (key2 === "style") updateStyle(element, old, value)
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
 			if (key2 === "value") {
@@ -940,24 +938,38 @@ var coreRenderer = function($window) {
 			}
 		}
 	}
+	// Here's an explanation of how this works:
+	// 1. The event names are always (by design) prefixed by `on`.
+	// 2. The EventListener interface accepts either a function or an object
+	//    with a `handleEvent` method.
+	// 3. The object does not inherit from `Object.prototype`, to avoid
+	//    any potential interference with that (e.g. setters).
+	// 4. The event name is remapped to the handler0 before calling it.
+	// 5. In function-based event handlers, `ev.target === this`. We replicate
+	//    that below.
+	function EventDict() {}
+	EventDict.prototype = Object.create(null)
+	EventDict.prototype.handleEvent = function (ev) {
+		var handler0 = this["on" + ev.type]
+		if (typeof handler0 === "function") handler0.call(ev.target, ev)
+		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
+		if (typeof onevent === "function") onevent.call(ev.target, ev)
+	}
 	//event
 	function updateEvent(vnode, key2, value) {
-		var element = vnode.dom
-		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
-			onevent.call(element, e)
-			return result
-		}
-		if (key2 in element) element[key2] = typeof value === "function" ? callback : null
-		else {
-			var eventName = key2.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key2] === callback) return
-			if (vnode.events[key2] != null) element.removeEventListener(eventName, vnode.events[key2], false)
-			if (typeof value === "function") {
-				vnode.events[key2] = callback
-				element.addEventListener(eventName, vnode.events[key2], false)
+		if (vnode.events != null) {
+			if (vnode.events[key2] === value) return
+			if (value != null && (typeof value === "function" || typeof value === "object")) {
+				if (vnode.events[key2] == null) vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
+				vnode.events[key2] = value
+			} else {
+				if (vnode.events[key2] != null) vnode.dom.removeEventListener(key2.slice(2), vnode.events, false)
+				vnode.events[key2] = undefined
 			}
+		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
+			vnode.events = new EventDict()
+			vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
+			vnode.events[key2] = value
 		}
 	}
 	//lifecycle
@@ -1098,12 +1110,12 @@ var coreRouter = function($window) {
 		return data
 	}
 	var asyncId
-	function debounceAsync(callback0) {
+	function debounceAsync(callback) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				callback0()
+				callback()
 			})
 		}
 	}
@@ -1250,9 +1262,9 @@ var _20 = function($window, redrawService0) {
 	return route
 }
 m.route = _20(window, redrawService)
-m.withAttr = function(attrName, callback1, context) {
+m.withAttr = function(attrName, callback, context) {
 	return function(e) {
-		callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
 var _28 = coreRenderer(window)
