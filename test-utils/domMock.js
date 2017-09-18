@@ -278,7 +278,9 @@ module.exports = function(options) {
 						e.target = this
 						if (events[e.type] != null) {
 							for (var i = 0; i < events[e.type].length; i++) {
-								events[e.type][i].call(this, e)
+								var handler = events[e.type][i]
+								if (typeof handler === "function") handler.call(this, e)
+								else handler.handleEvent(e)
 							}
 						}
 						e.preventDefault = function() {
