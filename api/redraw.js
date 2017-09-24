@@ -41,7 +41,7 @@ module.exports = function($window, throttleMock) {
 	function sync() {
 		if (rendering) throw new Error("Nested m.redraw.sync() call")
 		rendering = true
-		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
+		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {console.error(e)}
 		rendering = false
 	}
 
