@@ -861,7 +861,7 @@ var coreRenderer = function($window) {
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized0) return
 			}
-			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
+			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
 				element.setAttribute(key2, value)
 				return
@@ -1043,7 +1043,7 @@ var _11 = function($window, throttleMock) {
 	function sync() {
 		if (rendering) throw new Error("Nested m.redraw.sync() call")
 		rendering = true
-		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {/*noop*/}
+		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {console.error(e)}
 		rendering = false
 	}
 	var redraw = (throttleMock || throttle)(sync)
