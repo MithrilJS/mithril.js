@@ -954,11 +954,11 @@ o.spec("domMock", function() {
 					o(select.selectedIndex).equals(1)
 				}
 			})
-			o("option.value = null is converted to the empty string", function() {
+			o("option.value = null is converted to 'null'", function() {
 				var option = $document.createElement("option")
 				option.value = null
 
-				o(option.value).equals("")
+				o(option.value).equals("null")
 			})
 			o("setting valid value works with optgroup", function() {
 				var select = $document.createElement("select")
