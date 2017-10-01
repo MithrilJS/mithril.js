@@ -843,7 +843,7 @@ var coreRenderer = function($window) {
 		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
 		if ((old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
-		if (key2.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
+		if (key2.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key2, value)
 		else if (key2 === "style") updateStyle(element, old, value)
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
 			if (key2 === "value") {
