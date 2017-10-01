@@ -18,6 +18,24 @@ module.exports = function($window) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
 	}
 
+	//sanity check to discourage people from doing `vnode.state = ...`
+	function checkState(vnode, original) {
+		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
+	}
+
+	//Note: the hook is passed as the `this` argument to allow proxying the
+	//arguments without requiring a full array allocation to do so. It also
+	//takes advantage of the fact the current `vnode` is the first argument in
+	//all lifecycle methods.
+	function callHook(vnode) {
+		var original = vnode.state
+		try {
+			return this.apply(original, arguments)
+		} finally {
+			checkState(vnode, original)
+		}
+	}
+
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -121,10 +139,9 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		vnode._state = vnode.state
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		initLifecycle(vnode._state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		initLifecycle(vnode.state, vnode, hooks)
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
@@ -240,7 +257,6 @@ module.exports = function($window) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
-			vnode._state = old._state
 			vnode.events = old.events
 			if (!recycling && shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
@@ -321,10 +337,10 @@ module.exports = function($window) {
 		if (recycling) {
 			initComponent(vnode, hooks)
 		} else {
-			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-			updateLifecycle(vnode._state, vnode, hooks)
+			updateLifecycle(vnode.state, vnode, hooks)
 		}
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -410,15 +426,16 @@ module.exports = function($window) {
 	}
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
+		var original = vnode.state
 		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
-			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -427,6 +444,7 @@ module.exports = function($window) {
 		continuation()
 		function continuation() {
 			if (++called === expected) {
+				checkState(vnode, original)
 				onremove(vnode)
 				if (vnode.dom) {
 					var count = vnode.domSize || 1
@@ -450,9 +468,9 @@ module.exports = function($window) {
 		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
-			if (typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
+			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
 			var children = vnode.children
@@ -611,16 +629,20 @@ module.exports = function($window) {
 
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
-		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
-		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
+		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
+		if (typeof source.oncreate === "function") hooks.push(callHook.bind(source.oncreate, vnode))
 	}
 	function updateLifecycle(source, vnode, hooks) {
-		if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
+		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeupdate === "function") forceComponentUpdate = vnode._state.onbeforeupdate.call(vnode.state, vnode, old)
+		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
+			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+		}
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
+			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+		}
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
