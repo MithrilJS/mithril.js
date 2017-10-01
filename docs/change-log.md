@@ -28,6 +28,7 @@
 - core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
 - core: `Object.prototype` properties can no longer interfere with event listener calls.
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
+- core: `xlink:href` attributes are now correctly removed
 
 ### v1.1.6
 

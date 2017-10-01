@@ -476,7 +476,7 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
-		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
+		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {

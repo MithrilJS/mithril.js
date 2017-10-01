@@ -445,7 +445,7 @@ module.exports = function(options) {
 				if (element.nodeName === "OPTION") {
 					var valueSetter = spy(function(value) {
 						/*eslint-disable no-implicit-coercion*/
-						this.setAttribute("value", value === null ? "" : "" + value)
+						this.setAttribute("value", "" + value)
 						/*eslint-enable no-implicit-coercion*/
 					})
 					Object.defineProperty(element, "value", {
