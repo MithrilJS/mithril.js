@@ -323,7 +323,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 
@@ -508,7 +508,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 #### Authentication
 
-The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
