@@ -323,7 +323,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 

@@ -58,7 +58,7 @@ Generally speaking, there are two ways to write tests: upfront and after the fac
 
 Writing tests upfront requires specifications to be frozen. Upfront tests are a great way of codifying the rules that a yet-to-be-implemented API must obey. However, writing tests upfront may not be a suitable strategy if you don't have a reasonable idea of what your project will look like, if the scope of the API is not well known or if it's likely to change (e.g. based on previous history at the company).
 
-Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertedly broken and that previously fixed bugs do not get re-introduced by unrelated changes.
+Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertently broken and that previously fixed bugs do not get re-introduced by unrelated changes.
 
 ---
 
