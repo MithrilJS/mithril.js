@@ -21,6 +21,13 @@
 - core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 - hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
 
+#### Ospec improvements
+
+- Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+- Error handling for async tests with `done` callbacks supports error as first argument
+- Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@ RodericDay](https://github.com/RodericDay))
+
+
 ---
 
 ### v1.1.5
