@@ -30,6 +30,16 @@ o.spec("form inputs", function() {
 			o($window.document.activeElement).equals(input.dom)
 		})
 
+		o("maintains focus when changed manually in hook", function() {
+			var input = {tag: "input", attrs: {oncreate: function() {
+				input.dom.focus();
+			}}};
+
+			render(root, [input])
+
+			o($window.document.activeElement).equals(input.dom)
+		})
+
 		o("syncs input value if DOM value differs from vdom value", function() {
 			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
 			var updated = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
