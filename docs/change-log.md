@@ -40,6 +40,7 @@
 - core: `Object.prototype` properties can no longer interfere with event listener calls.
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - core: `xlink:href` attributes are now correctly removed
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
 
 ---
 
