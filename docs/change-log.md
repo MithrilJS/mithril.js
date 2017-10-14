@@ -1,5 +1,6 @@
 # Change log
 
+- [v1.1.6](#v116)
 - [v1.1.5](#v115)
 - [v1.1.4](#v114)
 - [v1.1.3](#v113)
@@ -12,27 +13,41 @@
 
 ---
 
+### v1.1.6
+
+#### Bug fixes
+
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
+
+---
+
 ### v1.1.5
 
-- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
+#### Bug fixes
+
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value [#1919](https://github.com/MithrilJS/mithril.js/issues/1919) ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924), [@tskillian](https://github.com/tskillian))
 
 ---
 
 ### v1.1.4
 
-#### Bug fixes:
-- Fix IE bug where active element is null causing render function to throw error. ([1943]
+#### Bug fixes
+
+- Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
+
 ---
 
 ### v1.1.3
 
-#### Bug fixes:
+#### Bug fixes
 
 - move out npm dependencies added by mistake
 
+---
+
 ### v1.1.2
 
-#### Bug fixes:
+#### Bug fixes
 
 - core: Namespace fixes [#1819](https://github.com/MithrilJS/mithril.js/issues/1819), ([#1825](https://github.com/MithrilJS/mithril.js/pull/1825) [@SamuelTilly](https://github.com/SamuelTilly)), [#1820](https://github.com/MithrilJS/mithril.js/issues/1820) ([#1864](https://github.com/MithrilJS/mithril.js/pull/1864)), [#1872](https://github.com/MithrilJS/mithril.js/issues/1872) ([#1873](https://github.com/MithrilJS/mithril.js/pull/1873))
 - core: Fix select option to allow empty string value [#1814](https://github.com/MithrilJS/mithril.js/issues/1814) ([#1828](https://github.com/MithrilJS/mithril.js/pull/1828) [@spacejack](https://github.com/spacejack))
@@ -43,19 +58,20 @@
 - router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
 - stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
 
-#### Ospec improvements:
+#### Ospec improvements
 
 - Shell command: Ignore hidden directories and files ([#1855](https://github.com/MithrilJS/mithril.js/pull/1855) [@pdfernhout)](https://github.com/pdfernhout))
 - Library: Add the possibility to name new test suites ([#1529](https://github.com/MithrilJS/mithril.js/pull/1529))
 
-#### Docs / Repo maintenance:
+#### Docs / Repo maintenance
 
 Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](https://github.com/ACXgit), [@cavemansspa](https://github.com/cavemansspa), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards), [@dlepaux](https://github.com/dlepaux), [@isaaclyman](https://github.com/isaaclyman), [@kevinkace](https://github.com/kevinkace), [@micellius](https://github.com/micellius), [@spacejack](https://github.com/spacejack) and [@yurivish](https://github.com/yurivish)
 
-#### Other:
+#### Other
 
 - Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
+---
 
 ### v1.1.1
 
@@ -64,6 +80,8 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 - hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
 - hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+---
 
 ### v1.1.0
 
