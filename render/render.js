@@ -6,16 +6,14 @@ module.exports = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
 
-	var nameSpace = {
-		svg: "http://www.w3.org/2000/svg",
-		math: "http://www.w3.org/1998/Math/MathML"
-	}
-
 	var onevent
 	function setEventCallback(callback) {return onevent = callback}
 
-	function getNameSpace(vnode) {
-		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	function getNameSpace(vnode, ns) {
+		if (vnode.attrs != null && vnode.attrs.xmlns != null) return vnode.attrs.xmlns
+		if (vnode.tag === "svg") return "http://www.w3.org/2000/svg"
+		if (vnode.tag === "math") return "http://www.w3.org/1998/Math/MathML"
+		return ns
 	}
 
 	//sanity check to discourage people from doing `vnode.state = ...`
@@ -65,18 +63,26 @@ module.exports = function($window) {
 		return vnode.dom
 	}
 	function createHTML(parent, vnode, nextSibling) {
-		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
-		var temp = $doc.createElement(parent1)
+		var match = (/^\s*<(\w+)/im).exec(vnode.children)
+		var tag = "div"
+		if (match != null) {
+			var name = match[1]
+			if (name.charCodeAt(0) === 0x63) {
+				if (name === "col") tag = "colgroup"
+				else if (name === "caption" || name === "colgroup") tag = "table"
+			} else if (name.charCodeAt(0) === 0x74) {
+				if (name === "tr") tag = "tbody"
+				else if (name === "th" || name === "td") tag = "tr"
+				else if (name === "thead" || name === "tbody" || name === "tfoot") tag = "table"
+			}
+		}
+		var temp = $doc.createElement(tag)
 
 		temp.innerHTML = vnode.children
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
 		var fragment = $doc.createDocumentFragment()
-		var child
-		while (child = temp.firstChild) {
-			fragment.appendChild(child)
-		}
+		while (temp.firstChild != null) fragment.appendChild(temp.firstChild)
 		insertNode(parent, fragment, nextSibling)
 		return fragment
 	}
@@ -94,13 +100,13 @@ module.exports = function($window) {
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		var attrs = vnode.attrs
-		var is = attrs && attrs.is
+		var is = attrs != null ? attrs.is : undefined
 
-		ns = getNameSpace(vnode) || ns
+		ns = getNameSpace(vnode, ns)
 
-		var element = ns ?
-			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
-			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
+		var element = ns != null ?
+			is != null ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
+			is != null ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
 		vnode.dom = element
 
 		if (attrs != null) {
@@ -133,7 +139,7 @@ module.exports = function($window) {
 			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
 			sentinel.$$reentrantLock$$ = true
 		} else {
-			vnode.state = void 0
+			vnode.state = undefined
 			sentinel = vnode.tag
 			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
 			sentinel.$$reentrantLock$$ = true
@@ -167,24 +173,20 @@ module.exports = function($window) {
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
 			if (old.length === vnodes.length) {
-				var isUnkeyed = false
 				for (var i = 0; i < vnodes.length; i++) {
-					if (vnodes[i] != null && old[i] != null) {
-						isUnkeyed = vnodes[i].key == null && old[i].key == null
-						break
+					if (vnodes[i] != null && old[i] != null &&
+							vnodes[i].key == null && old[i].key == null) {
+						for (var i = 0; i < old.length; i++) {
+							if (old[i] === vnodes[i]) continue
+							else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
+							else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
+							else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
+						}
+						return
 					}
-				}
-				if (isUnkeyed) {
-					for (var i = 0; i < old.length; i++) {
-						if (old[i] === vnodes[i]) continue
-						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
-						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
-					}
-					return
 				}
 			}
-			recycling = recycling || isRecyclable(old, vnodes)
+			if (!recycling) recycling = isRecyclable(old, vnodes)
 			if (recycling) {
 				var pool = old.pool
 				old = old.concat(old.pool)
@@ -197,7 +199,7 @@ module.exports = function($window) {
 				else if (o == null) oldStart++
 				else if (v == null) start++
 				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldStart >= old.length - pool.length) || ((pool == null) && recycling)
+					var shouldRecycle = pool != null ? oldStart >= old.length - pool.length : recycling
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
@@ -208,7 +210,7 @@ module.exports = function($window) {
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+						var shouldRecycle = pool != null ? oldEnd >= old.length - pool.length : recycling
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
@@ -216,38 +218,34 @@ module.exports = function($window) {
 					else break
 				}
 			}
-			while (oldEnd >= oldStart && end >= start) {
+			for (; oldEnd >= oldStart && end >= start; oldEnd--, end--) {
 				var o = old[oldEnd], v = vnodes[end]
-				if (o === v && !recycling) oldEnd--, end--
-				else if (o == null) oldEnd--
-				else if (v == null) end--
+				if (o === v && !recycling) continue
+				else if (o == null) end++
+				else if (v == null) oldEnd++
 				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
+					var shouldRecycle = pool != null ? oldEnd >= old.length - pool.length : recycling
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
-					oldEnd--, end--
 				}
-				else {
-					if (!map) map = getKeyMap(old, oldEnd)
-					if (v != null) {
-						var oldIndex = map[v.key]
-						if (oldIndex != null) {
-							var movable = old[oldIndex]
-							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							insertNode(parent, toFragment(movable), nextSibling)
-							old[oldIndex].skip = true
-							if (movable.dom != null) nextSibling = movable.dom
-						}
-						else {
-							var dom = createNode(parent, v, hooks, ns, nextSibling)
-							nextSibling = dom
-						}
+				else if (v != null) {
+					if (map == null) map = getKeyMap(old, oldEnd)
+					var oldIndex = map[v.key]
+					if (oldIndex != null) {
+						var movable = old[oldIndex]
+						var shouldRecycle = pool != null ? oldIndex >= old.length - pool.length : recycling
+						updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+						insertNode(parent, toFragment(movable), nextSibling)
+						old[oldIndex].skip = true
+						if (movable.dom != null) nextSibling = movable.dom
 					}
-					end--
+					else {
+						var dom = createNode(parent, v, hooks, ns, nextSibling)
+						nextSibling = dom
+					}
+					oldEnd++
 				}
-				if (end < start) break
 			}
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 			removeNodes(old, oldStart, oldEnd + 1, vnodes)
@@ -311,7 +309,7 @@ module.exports = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom
-		ns = getNameSpace(vnode) || ns
+		ns = getNameSpace(vnode, ns)
 
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
@@ -360,9 +358,9 @@ module.exports = function($window) {
 	}
 	function isRecyclable(old, vnodes) {
 		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
-			var oldChildrenLength = old[0] && old[0].children && old[0].children.length || 0
-			var poolChildrenLength = old.pool[0] && old.pool[0].children && old.pool[0].children.length || 0
-			var vnodesChildrenLength = vnodes[0] && vnodes[0].children && vnodes[0].children.length || 0
+			var oldChildrenLength = old.length !== 0 && old[0].children != null ? old[0].children.length : 0
+			var poolChildrenLength = old.pool.length !== 0 && old.pool[0].children != null ? old.pool[0].children.length : 0
+			var vnodesChildrenLength = vnodes.length !== 0 && vnodes[0].children != null ? vnodes[0].children.length : 0
 			if (Math.abs(poolChildrenLength - vnodesChildrenLength) <= Math.abs(oldChildrenLength - vnodesChildrenLength)) {
 				return true
 			}
@@ -370,7 +368,7 @@ module.exports = function($window) {
 		return false
 	}
 	function getKeyMap(vnodes, end) {
-		var map = {}, i = 0
+		var map = {}
 		for (var i = 0; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
@@ -401,7 +399,7 @@ module.exports = function($window) {
 	}
 
 	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
+		if (nextSibling != null && nextSibling.parentNode != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 
@@ -427,7 +425,7 @@ module.exports = function($window) {
 	function removeNode(vnode, context) {
 		var expected = 1, called = 0
 		var original = vnode.state
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+		if (vnode.attrs != null && typeof vnode.attrs.onbeforeremove === "function") {
 			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
@@ -446,9 +444,9 @@ module.exports = function($window) {
 			if (++called === expected) {
 				checkState(vnode, original)
 				onremove(vnode)
-				if (vnode.dom) {
-					var count = vnode.domSize || 1
-					if (count > 1) {
+				if (vnode.dom != null) {
+					if (vnode.domSize != null && vnode.domSize > 1) {
+						var count = vnode.domSize
 						var dom = vnode.dom
 						while (--count) {
 							removeNodeFromDOM(dom.nextSibling)
@@ -456,7 +454,7 @@ module.exports = function($window) {
 					}
 					removeNodeFromDOM(vnode.dom)
 					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
-						if (!context.pool) context.pool = [vnode]
+						if (context.pool == null) context.pool = [vnode]
 						else context.pool.push(vnode)
 					}
 				}
@@ -468,7 +466,7 @@ module.exports = function($window) {
 		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
+		if (vnode.attrs != null && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
 			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
@@ -653,7 +651,7 @@ module.exports = function($window) {
 	}
 
 	function render(dom, vnodes) {
-		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
+		if (dom == null) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = $doc.activeElement
 		var namespace = dom.namespaceURI
