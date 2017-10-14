@@ -664,9 +664,9 @@ module.exports = function($window) {
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
-		for (var i = 0; i < hooks.length; i++) hooks[i]()
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
 		if (active != null && $doc.activeElement !== active) active.focus()
+		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 
 	return {render: render, setEventCallback: setEventCallback}
