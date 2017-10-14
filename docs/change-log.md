@@ -33,7 +33,6 @@
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
-- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
 - API: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
 - core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
 - core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
@@ -41,6 +40,12 @@
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - core: `xlink:href` attributes are now correctly removed
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
+
+---
+
+### v1.1.5
+
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
 
 ---
 
