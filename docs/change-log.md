@@ -40,6 +40,7 @@
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - core: `xlink:href` attributes are now correctly removed
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
+- render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
 
 ---
 
