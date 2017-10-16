@@ -605,7 +605,7 @@ var coreRenderer = function($window) {
 						if (oldIndex != null) {
 							var movable = old[oldIndex]
 							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
+							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
 							insertNode(parent, toFragment(movable), nextSibling)
 							old[oldIndex].skip = true
 							if (movable.dom != null) nextSibling = movable.dom
