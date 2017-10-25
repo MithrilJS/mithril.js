@@ -462,12 +462,6 @@ o.spec("attributes", function() {
 				{tag:"option", attrs: {value: ""}}
 			]}
 		}
-		o("render select options", function() {
-			var select = {tag: "select", selectedIndex: 0, children: [
-				{tag:"option", attrs: {value: "1", selected: ""}}
-			]}
-			render(root, select)
-		})
 		o("can be set as text", function() {
 			var a = makeSelect()
 			var b = makeSelect("2")
