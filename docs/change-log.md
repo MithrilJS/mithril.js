@@ -1,5 +1,8 @@
 # Change log
 
+- [v2.0.0](#v200-wip)
+- [v1.1.5](#v115)
+- [v1.1.4](#v114)
 - [v1.1.3](#v113)
 - [v1.1.2](#v112)
 - [v1.1.1](#v111)
@@ -10,11 +13,64 @@
 
 ---
 
+### v2.0.0 (WIP)
+
+#### Breaking changes
+
+- API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Assigning to `vnode.state` (as in `vnode.state = ...`) is no longer supported. Instead, an error is thrown if `vnode.state` changes upon the invocation of a lifecycle hook.
+
+#### News
+
+- API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
+
+#### Ospec improvements:
+
+- Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+- Error handling for async tests with `done` callbacks supports error as first argument
+
+#### Bug fixes
+
+- API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
+- core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
+- core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
+- core: `Object.prototype` properties can no longer interfere with event listener calls.
+- API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
+- core: `xlink:href` attributes are now correctly removed
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
+- render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
+
+---
+
+### v1.1.5
+
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
+
+---
+
+### v1.1.4
+
+#### Bug fixes:
+
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
+- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
+- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
+
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
+---
+
 ### v1.1.3
 
 #### Bug fixes:
 
 - move out npm dependencies added by mistake
+
+---
 
 ### v1.1.2
 
@@ -42,6 +98,7 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 
 - Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
+---
 
 ### v1.1.1
 
@@ -50,6 +107,8 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 - hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
 - hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+---
 
 ### v1.1.0
 

@@ -2,6 +2,8 @@
 
 - [Description](#description)
 - [Signature](#signature)
+	- [Static members](#static-members)
+		-[m.redraw.sync()](#mredrawsync)
 - [How it works](#how-it-works)
 
 ---
@@ -10,17 +12,25 @@
 
 Updates the DOM after a change in the application data layer.
 
-You DON'T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using `m.request`/`m.jsonp`.
+You DON'T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using `m.request`/`m.jsonp`. The [autoredraw](autoredraw.md) system, which is built on top of `m.redraw()` will take care of it.
 
 You DO need to call it in `setTimeout`/`setInterval`/`requestAnimationFrame` callbacks, or callbacks from 3rd party libraries.
-
-Typically, `m.redraw` triggers an asynchronous redraws, but it may trigger synchronously if Mithril detects it's possible to improve performance by doing so (i.e. if no redraw was requested within the last animation frame). You should write code assuming that it always redraws asynchronously.
 
 ---
 
 ### Signature
 
 `m.redraw()`
+
+Argument    | Type                 | Required | Description
+----------- | -------------------- | -------- | ---
+**returns** |                      |          | Returns nothing
+
+#### Static members
+
+##### m.redraw.sync
+
+`m.redraw.sync()`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
@@ -34,4 +44,12 @@ When callbacks outside of Mithril run, you need to notify Mithril's rendering en
 
 To trigger a redraw, call `m.redraw()`. Note that `m.redraw` only works if you used `m.mount` or `m.route`. If you rendered via `m.render`, you should use `m.render` to redraw.
 
-You should not call m.redraw from a [lifecycle method](lifecycle-methods.md). Doing so will result in undefined behavior.
+`m.redraw()` always triggers an asynchronous redraws, whereas `m.redraw.sync()` triggers a synchronous one. `m.redraw()` is tied to `window.requestAnimationFrame()` (we provide a fallback for IE9). It will thus typically fire at most 60 times per second. It may fire faster if your monitor has a higher refresh rate.
+
+`m.redraw.sync()` is mostly intended to make videos play work in iOS. That only works in response to user-triggered events. It comes with several caveat:
+
+- You should not call `m.redraw.sync()` from a [lifecycle method](lifecycle-methods.md) or the `view()` method of a component. Doing so will result in undefined behavior (it throws an error when possible).
+- `m.redraw.sync()` called from an event handler can cause the DOM to be modified while an event is bubbling. Depending on the structure of the old and new DOM trees, the event can finish the bubbling phase in the new tree and trigger unwanted handlers.
+- It is not throttled. One call to `m.redraw.sync()` causes immediately one `m.render()` call per root registered with [`m.mount()`](mount.md) or [`m.route()`](route.md).
+
+`m.redraw()` doesn't have any of those issues, you can call it from wherever you like.

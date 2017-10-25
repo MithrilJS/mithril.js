@@ -65,7 +65,7 @@ Argument               | Type                                     | Required | D
 
 ##### m.route.set
 
-Redirects to a matching route, or to the default route if no matching routes can be found.
+Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
 `m.route.set(path, data, options)`
 
@@ -107,7 +107,7 @@ This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` 
 m("a[href=/]", {oncreate: m.route.link})`.
 ```
 
-Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
+Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
 
 If the `href` attribute is not static, the `onupdate` hook must also be set:
 
@@ -323,7 +323,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 
@@ -508,7 +508,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 #### Authentication
 
-The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
@@ -568,7 +568,7 @@ var Login = {
 		return m("form", [
 			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
 			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
-			m("button[type=button]", {onclick: Auth.login, "Login")
+			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}
 }

@@ -278,7 +278,9 @@ module.exports = function(options) {
 						e.target = this
 						if (events[e.type] != null) {
 							for (var i = 0; i < events[e.type].length; i++) {
-								events[e.type][i].call(this, e)
+								var handler = events[e.type][i]
+								if (typeof handler === "function") handler.call(this, e)
+								else handler.handleEvent(e)
 							}
 						}
 						e.preventDefault = function() {
@@ -443,7 +445,7 @@ module.exports = function(options) {
 				if (element.nodeName === "OPTION") {
 					var valueSetter = spy(function(value) {
 						/*eslint-disable no-implicit-coercion*/
-						this.setAttribute("value", value === null ? "" : "" + value)
+						this.setAttribute("value", "" + value)
 						/*eslint-enable no-implicit-coercion*/
 					})
 					Object.defineProperty(element, "value", {

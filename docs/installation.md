@@ -17,27 +17,47 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 #### Quick start with Webpack
 
+
+1. Initialize the directory as an npm package
 ```bash
-# 1) install
-npm install mithril --save
-
-npm install webpack --save
-
-# 2) add this line into the scripts section in package.json
-#	"scripts": {
-#		"start": "webpack src/index.js bin/app.js --watch"
-#	}
-
-# 3) create an `src/index.js` file
-
-# 4) create an `index.html` file containing `<script src="bin/app.js"></script>`
-
-# 5) run bundler
-npm start
-
-# 6) open `index.html` in the (default) browser
-open index.html
+$> npm init --yes
 ```
+
+2. install required tools
+```bash
+$> npm install mithril --save
+$> npm install webpack --save
+```
+
+3. Add a "start" entry to the scripts section in `package.json`
+```js
+{
+  // ...
+  "scripts": {
+    "start": "webpack src/index.js bin/app.js --watch"
+  }
+}
+```
+
+3. Create `src/index.js`
+```js
+import m from "mithril";
+
+m.render(document.body, "hello world");
+```
+
+4. create `index.html`
+```html
+<!DOCTYPE html>
+
+<script src="bin/app.js"></script>
+```
+
+5. run bundler
+```bash
+$> npm start
+```
+6. open `index.html` in your (default) browser
 
 #### Step by step
 

@@ -163,13 +163,23 @@ o.spec("api", function() {
 					var count = 0
 					var root = window.document.createElement("div")
 					m.mount(root, createComponent({view: function() {count++}}))
+					o(count).equals(1)
+					m.redraw()
+					o(count).equals(1)
 					setTimeout(function() {
-						m.redraw()
 
 						o(count).equals(2)
 
 						done()
 					}, FRAME_BUDGET)
+				})
+				o("sync", function() {
+					var root = window.document.createElement("div")
+					var view = o.spy()
+					m.mount(root, createComponent({view: view}))
+					o(view.callCount).equals(1)
+					m.redraw.sync()
+					o(view.callCount).equals(2)
 				})
 			})
 		})

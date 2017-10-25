@@ -1,11 +1,9 @@
-# ospec
+ospec [![NPM Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![NPM License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
+=====
 
 [About](#about) | [Usage](#usage) | [API](#api) | [Goals](#goals)
 
 Noiseless testing framework
-
-Version: 1.2.3  
-License: MIT
 
 ## About
 
@@ -150,6 +148,22 @@ o("setTimeout calls callback", function(done) {
 })
 ```
 
+Alternativly you can return a promise or even use an async function in tests:
+
+```javascript
+o("promise test", function() {
+	return new Promise(function(resolve) {
+		setTimeout(resolve, 10)
+	})
+})
+```
+
+```javascript
+o("promise test", async function() {
+	await someOtherAsyncFunction()
+})
+```
+
 By default, asynchronous tests time out after 20ms. This can be changed on a per-test basis using the `timeout` argument:
 
 ```javascript
@@ -160,7 +174,22 @@ o("setTimeout calls callback", function(done, timeout) {
 })
 ```
 
-Note that the `timeout` function call must be the first statement in its test.
+Note that the `timeout` function call must be the first statement in its test.	This currently does not work for promise tests. You can combine both methods to do this:
+
+```javascript
+o("promise test", function(done, timeout) {
+	timeout(1000)
+	someOtherAsyncFunctionThatTakes900ms().then(done)
+})
+```
+
+```javascript
+o("promise test", async function(done, timeout) {
+	timeout(1000)
+	await someOtherAsyncFunctionThatTakes900ms()
+	done()
+})
+```
 
 Asynchronous tests generate an assertion that succeeds upon calling `done` or fails on timeout with the error message `async test timed out`.
 
