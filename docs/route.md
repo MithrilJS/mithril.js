@@ -588,7 +588,7 @@ m.route(document.body, "/secret", {
 
 #### Preloading data
 
-Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
+Typically, a component can load data upon initialization. Loading data this way renders the component twice. The first render pass occurs upon routing, and the second fires after the request completes. Take care to note that `loadUsers()` returns a Promise, but any Promise returned by `oninit` is currently ignored. The second render pass comes from the [`background` option for `m.request`](request.md).
 
 ```javascript
 var state = {
