@@ -200,8 +200,8 @@ o.spec("ospec", function() {
 			})
 		})
 
-		o("promise functions", async function() {
-			await wrapPromise(function() {
+		o("promise functions", function() {
+			return wrapPromise(function() {
 				o(a).equals(b)
 				o(a).equals(1)("a and b should be initialized")
 			})
