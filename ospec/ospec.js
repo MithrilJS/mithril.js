@@ -1,4 +1,4 @@
-/* eslint-disable no-bitwise, no-process-exit */
+/* eslint-disable global-require, no-bitwise, no-process-exit */
 "use strict"
 
 module.exports = new function init(name) {
