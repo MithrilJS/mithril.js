@@ -86,20 +86,25 @@ module.exports = function($window, Promise) {
 				if(aborted) return
 
 				if (xhr.readyState === 4) {
-					try {
-						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
-							resolve(cast(args.type, response))
+					if (args.extract !== extract) {
+						var response = args.extract(xhr, args)
+						resolve(cast(args.type, response))
+					} else {
+						try {
+							var response = args.deserialize(args.extract(xhr, args))
+							if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
+								resolve(cast(args.type, response))
+							}
+							else {
+								var error = new Error(xhr.responseText)
+								error.code = xhr.status
+								error.response = response
+								reject(error)
+							}
 						}
-						else {
-							var error = new Error(xhr.responseText)
-							error.code = xhr.status
-							error.response = response
-							reject(error)
+						catch (e) {
+							reject(e)
 						}
-					}
-					catch (e) {
-						reject(e)
 					}
 				}
 			}
