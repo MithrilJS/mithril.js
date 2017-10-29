@@ -1,6 +1,3 @@
-# Leo owns everything, for better or worse
-*   @lhorie
-
 .travis.yml     @tivac
 package.json    @tivac
 .npmignore      @tivac
@@ -9,4 +6,4 @@ package.json    @tivac
 README.md       @tivac
 docs/           @tivac
 performance/    @tivac
-render/         @isiahmeadows
+render/         @isiahmeadows @pygy
