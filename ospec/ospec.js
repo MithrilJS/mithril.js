@@ -49,6 +49,9 @@ module.exports = new function init(name) {
 		spy.callCount = 0
 		return spy
 	}
+	o.cleanStackTrace = function(stack) {
+		return stack.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/gm).pop()
+	}
 	o.run = function() {
 		results = []
 		start = new Date
@@ -235,7 +238,7 @@ module.exports = new function init(name) {
 		var status = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
-				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
+				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 				status = 1
 			}

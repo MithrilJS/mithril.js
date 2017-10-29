@@ -30,6 +30,7 @@
 
 - Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
 - Error handling for async tests with `done` callbacks supports error as first argument
+- Error messages which include newline characters do not swallow the stack trace ([#1495](https://github.com/MithrilJS/mithril.js/issues/1495))
 
 #### Bug fixes
 
