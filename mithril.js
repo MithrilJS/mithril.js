@@ -1264,7 +1264,7 @@ var _20 = function($window, redrawService0) {
 	}
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix0) {routeService.prefix = prefix0}
-	route.link = function(vnode1) {
+	var link = function(options, vnode1) {
 		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
 		vnode1.dom.onclick = function(e) {
 			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
@@ -1272,8 +1272,12 @@ var _20 = function($window, redrawService0) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			route.set(href, undefined, undefined)
+			route.set(href, undefined, options)
 		}
+	}
+	route.link = function(args0) {
+		if (args0.tag == null) return link.bind(link, args0)
+		return link({}, args0)
 	}
 	route.param = function(key3) {
 		if(typeof attrs3 !== "undefined" && typeof key3 !== "undefined") return attrs3[key3]
