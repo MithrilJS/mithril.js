@@ -536,7 +536,7 @@ o.spec("xhr", function() {
 		o("rejects on error in extract", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return {status: 500, responseText: JSON.stringify({message: "error"})}
+					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
 			xhr({
@@ -544,6 +544,7 @@ o.spec("xhr", function() {
 				extract: function() {throw new Error("error")}
 			}).catch(function(e) {
 				o(e instanceof Error).equals(true)
+				o(e.message).equals("error")
 			}).then(function() {
 				done()
 			})
