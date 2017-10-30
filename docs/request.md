@@ -54,7 +54,7 @@ Argument                  | Type                              | Required | Descr
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the `xhr.responseText`. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses. If `extract` is defined, `deserialize` will be skipped.
-`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `xhr.responseText`, which is in turn passed to `deserialize`. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will not automatically be parsed as JSON.
+`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `xhr.responseText`, which is in turn passed to `deserialize`. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves. Furthermore, when an extract callback is provided, exceptions are *not* thrown when the server response status code indicates an error.
 `options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
@@ -80,6 +80,8 @@ m.request({
 A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
 
 By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
+
+If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.
 
 ---
 
@@ -426,7 +428,7 @@ m.request({
 
 ### Retrieving response details
 
-By default Mithril attempts to parse a response as JSON and returns `xhr.responseText`. It may be useful to inspect a server response in more detail, this can be accomplished by passing a custom `options.extract` function:
+By default Mithril attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
 
 ```javascript
 m.request({
