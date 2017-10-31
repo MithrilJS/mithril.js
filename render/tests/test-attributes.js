@@ -462,6 +462,19 @@ o.spec("attributes", function() {
 				{tag:"option", attrs: {value: ""}}
 			]}
 		}
+		/* FIXME
+		   This incomplete test is meant for testing #1916.
+		   However it cannot be completed until #1978 is addressed
+		   which is a lack a working select.selected / option.selected
+		   attribute. Ask isiahmeadows.
+
+		o("render select options", function() {
+			var select = {tag: "select", selectedIndex: 0, children: [
+				{tag:"option", attrs: {value: "1", selected: ""}}
+			]}
+			render(root, select)
+		})
+		*/
 		o("can be set as text", function() {
 			var a = makeSelect()
 			var b = makeSelect("2")

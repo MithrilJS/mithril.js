@@ -44,6 +44,7 @@
 - core: `xlink:href` attributes are now correctly removed
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
 - render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
+- render: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916)
 
 ---
 
