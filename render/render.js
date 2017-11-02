@@ -168,7 +168,7 @@ module.exports = function($window) {
 				}
 			}
 			recycling = recycling || isRecyclable(old, vnodes)
-			if (recycling) {
+			if (recycling && old.pool != null) {
 				var pool = old.pool
 				old = old.concat(old.pool)
 			}
@@ -233,7 +233,14 @@ module.exports = function($window) {
 				if (end < start) break
 			}
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, oldEnd + 1, vnodes)
+			removeNodes(old, oldStart, Math.min(oldEnd + 1, pool == null ? old.length : old.length - pool.length), vnodes)
+			if (pool != null) {
+				var limit = Math.max(oldStart, old.length - pool.length)
+				for (; oldEnd >= limit; oldEnd--) {
+					if (old[oldEnd].skip) old[oldEnd].skip = false
+					else addToPool(old[oldEnd], vnodes)
+				}
+			}
 		}
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
@@ -437,10 +444,7 @@ module.exports = function($window) {
 						}
 					}
 					removeNodeFromDOM(vnode.dom)
-					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
-						if (!context.pool) context.pool = [vnode]
-						else context.pool.push(vnode)
-					}
+					addToPool(vnode, context)
 				}
 			}
 		}
@@ -448,6 +452,12 @@ module.exports = function($window) {
 	function removeNodeFromDOM(node) {
 		var parent = node.parentNode
 		if (parent != null) parent.removeChild(node)
+	}
+	function addToPool(vnode, context) {
+		if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
+			if (!context.pool) context.pool = [vnode]
+			else context.pool.push(vnode)
+		}
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)

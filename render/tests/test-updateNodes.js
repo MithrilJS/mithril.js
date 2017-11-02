@@ -839,6 +839,19 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeName).equals("B")
 	})
+	o("onremove doesn't fire from nodes in the pool (#1990)", function () {
+		var onremove = o.spy()
+		render(root, [
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]},
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+		])
+		render(root, [
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+		])
+		render(root,[])
+
+		o(onremove.callCount).equals(2)
+	})
 	o("cached, non-keyed nodes skip diff", function () {
 		var onupdate = o.spy();
 		var cached = {tag:"a", attrs:{onupdate: onupdate}}
@@ -857,6 +870,72 @@ o.spec("updateNodes", function() {
 
 		o(onupdate.callCount).equals(0)
 	})
+	o("keyed cached elements are re-initialized when brought back from the pool", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", key: 1, children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("uneyed cached elements are re-initialized when brought back from the pool", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("keyed cached elements are re-initialized when brought back from nested pools", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", key: 1, children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [{tag: "div", children: []}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("unkeyed cached elements are re-initialized when brought back from nested pools", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [{tag: "div", children: []}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
 	o("null stays in place", function() {
 		var create = o.spy()
 		var update = o.spy()
