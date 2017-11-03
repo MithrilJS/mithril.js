@@ -74,7 +74,9 @@ var m = require("mithril")
 
 module.exports = {
 	view: function() {
-		return m("div", "Hello world")
+		return m("div", 
+		    m("p", "Hello World")
+		)
 	}
 }
 ```
