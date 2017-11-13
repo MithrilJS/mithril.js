@@ -519,5 +519,35 @@ o.spec("xhr", function() {
 				o(e instanceof Error).equals(true)
 			}).then(done)
 		})
+		o("does not reject on status error code when extract provided", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 500, responseText: JSON.stringify({message: "error"})}
+				}
+			})
+			xhr({
+				method: "GET", url: "/item",
+				extract: function(xhr) {return JSON.parse(xhr.responseText)}
+			}).then(function(data) {
+				o(data.message).equals("error")
+				done()
+			})
+		})
+		o("rejects on error in extract", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			xhr({
+				method: "GET", url: "/item",
+				extract: function() {throw new Error("error")}
+			}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("error")
+			}).then(function() {
+				done()
+			})
+		})
 	})
 })
