@@ -113,26 +113,6 @@ o.spec("xhr", function() {
 				o(data).deepEquals({a: {x: ":y"}})
 			}).then(done)
 		})
-		o("works w/ parameterized url via GET", function(done) {
-			mock.$defineRoutes({
-				"GET /item/y": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query})}
-				}
-			})
-			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: "?x=y"})
-			}).then(done)
-		})
-		o("works w/ parameterized url via POST", function(done) {
-			mock.$defineRoutes({
-				"POST /item/y": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
-				}
-			})
-			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: {x: "y"}})
-			}).then(done)
-		})
 		o("works w/ array", function(done) {
 			mock.$defineRoutes({
 				"POST /items": function(request) {
@@ -141,26 +121,6 @@ o.spec("xhr", function() {
 			})
 			xhr({method: "POST", url: "/items", data: [{x: "y"}]}).then(function(data) {
 				o(data).deepEquals({a: "/items", b: [{x: "y"}]})
-			}).then(done)
-		})
-		o("ignores unresolved parameter via GET", function(done) {
-			mock.$defineRoutes({
-				"GET /item/:x": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url})}
-				}
-			})
-			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
-				o(data).deepEquals({a: "/item/:x"})
-			}).then(done)
-		})
-		o("ignores unresolved parameter via POST", function(done) {
-			mock.$defineRoutes({
-				"GET /item/:x": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url})}
-				}
-			})
-			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
-				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
 		o("type parameter works for Array responses", function(done) {
@@ -435,18 +395,6 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
-		/*o("data maintains after interpolate", function() {
-			mock.$defineRoutes({
-				"PUT /items/:x": function() {
-					return {status: 200, responseText: ""}
-				}
-			})
-			var data = {x: 1, y: 2}
-			var dataCopy = Object.assign({}, data);
-			xhr({method: "PUT", url: "/items/:x", data})
-
-			o(data).deepEquals(dataCopy)
-		})*/
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
