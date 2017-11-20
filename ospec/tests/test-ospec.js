@@ -18,6 +18,40 @@ new function(o) {
 	o.run()
 }(o)
 
+new function(o) {
+	var clone = o.new()
+
+	clone.spec("clone", function() {
+		clone("fail", function() {
+			clone(true).equals(false)
+		})
+
+		clone("pass", function() {
+			clone(true).equals(true)
+		})
+	})
+
+	// Predicate test passing on clone results
+	o.spec("reporting", function() {
+		o("reports per instance", function(done, timeout) {
+			timeout(100) // Waiting on clone
+
+			clone.run(function(results) {
+				o(typeof results).equals("object")
+				o("length" in results).equals(true)
+				o(results.length).equals(2)("Two results")
+
+				o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
+				o(!("error" in results[1]) && "pass" in results[1]).equals(true)("only pass key present in passing result")
+				o(results[0].pass).equals(false)("Test meant to fail has failed")
+				o(results[1].pass).equals(true)("Test meant to pass has passed")
+
+				done()
+			})
+		})
+	})
+}(o)
+
 o.spec("ospec", function() {
 	o.spec("sync", function() {
 		var a = 0, b = 0, illegalAssertionThrows = false

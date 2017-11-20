@@ -2,7 +2,7 @@
 "use strict"
 
 module.exports = new function init(name) {
-	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", reporter, hasOwn = ({}).hasOwnProperty
 
 	if (name != null) spec[name] = ctx = {}
 
@@ -52,9 +52,10 @@ module.exports = new function init(name) {
 	o.cleanStackTrace = function(stack) {
 		return stack.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/gm).pop()
 	}
-	o.run = function() {
+	o.run = function(_reporter) {
 		results = []
 		start = new Date
+		reporter = _reporter
 		test(spec, [], [], report)
 
 		function test(spec, pre, post, finalize) {
@@ -236,6 +237,9 @@ module.exports = new function init(name) {
 
 	function report() {
 		var status = 0
+
+		if (typeof reporter === "function") return reporter(results)
+
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
