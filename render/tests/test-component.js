@@ -30,7 +30,7 @@ o.spec("component", function() {
 					render(root, [node])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("receives arguments", function() {
@@ -44,7 +44,7 @@ o.spec("component", function() {
 					render(root, [node])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("updates", function() {
@@ -57,7 +57,7 @@ o.spec("component", function() {
 					render(root, [{tag: component, attrs: {id: "c"}, text: "d"}])
 
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("c")
+					o(root.firstChild.attributes["id"].value).equals("c")
 					o(root.firstChild.firstChild.nodeValue).equals("d")
 				})
 				o("updates root from null", function() {
@@ -400,7 +400,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls oninit when returning fragment", function() {
@@ -423,7 +423,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls oninit before view", function() {
@@ -479,7 +479,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("does not calls oncreate on redraw", function() {
@@ -520,7 +520,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onupdate", function() {
@@ -546,7 +546,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onupdate when returning fragment", function() {
@@ -572,7 +572,7 @@ o.spec("component", function() {
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].nodeValue).equals("a")
+					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onremove", function() {
@@ -706,97 +706,6 @@ o.spec("component", function() {
 						methods[hook] = o.spy(function() {
 							o(attrs[hook].callCount).equals(methods[hook].callCount)
 						})
-					})
-
-					var component = createComponent(methods)
-
-					o(methods.view.callCount).equals(0)
-					o(methods.oninit.callCount).equals(0)
-					o(methods.oncreate.callCount).equals(0)
-					o(methods.onbeforeupdate.callCount).equals(0)
-					o(methods.onupdate.callCount).equals(0)
-					o(methods.onbeforeremove.callCount).equals(0)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [{tag: component, attrs: attrs}])
-
-					o(methods.view.callCount).equals(1)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(0)
-					o(methods.onupdate.callCount).equals(0)
-					o(methods.onbeforeremove.callCount).equals(0)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [{tag: component, attrs: attrs}])
-
-					o(methods.view.callCount).equals(2)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(1)
-					o(methods.onupdate.callCount).equals(1)
-					o(methods.onbeforeremove.callCount).equals(0)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [])
-
-					o(methods.view.callCount).equals(2)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(1)
-					o(methods.onupdate.callCount).equals(1)
-					o(methods.onbeforeremove.callCount).equals(1)
-					o(methods.onremove.callCount).equals(1)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-				})
-				o("lifecycle timing megatest (for a single component with the state overwritten)", function() {
-					var methods = {
-						view: o.spy(function(vnode) {
-							o(vnode.state).equals(1)
-							return ""
-						})
-					}
-					var attrs = {}
-					var hooks = [
-						"oninit", "oncreate", "onbeforeupdate",
-						"onupdate", "onbeforeremove", "onremove"
-					]
-					hooks.forEach(function(hook) {
-						// the `attrs` hooks are called before  the component ones
-						attrs[hook] = o.spy(function(vnode) {
-							o(vnode.state).equals(1)
-							o(attrs[hook].callCount).equals(methods[hook].callCount + 1)
-						})
-						methods[hook] = o.spy(function(vnode) {
-							o(vnode.state).equals(1)
-							o(attrs[hook].callCount).equals(methods[hook].callCount)
-						})
-					})
-
-					var attrsOninit = attrs.oninit
-					var methodsOninit = methods.oninit
-					attrs.oninit = o.spy(function(vnode){
-						vnode.state = 1
-						return attrsOninit.call(this, vnode)
-					})
-					methods.oninit = o.spy(function(vnode){
-						vnode.state = 1
-						return methodsOninit.call(this, vnode)
 					})
 
 					var component = createComponent(methods)

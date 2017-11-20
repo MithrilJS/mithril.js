@@ -98,7 +98,7 @@ npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-r
 
 Create a `.babelrc` file:
 
-```
+```json
 {
 	"presets": ["es2015"],
 	"plugins": [
@@ -112,10 +112,12 @@ Create a `.babelrc` file:
 Next, create a file called `webpack.config.js`
 
 ```javascript
+const path = require('path')
+
 module.exports = {
 	entry: './src/index.js',
 	output: {
-		path: './bin',
+		path: path.resolve(__dirname, './bin'),
 		filename: 'app.js',
 	},
 	module: {
@@ -127,6 +129,8 @@ module.exports = {
 	}
 }
 ```
+
+For those familiar with Webpack already, please note that adding the Babel options to the `babel-loader` section of your `webpack.config.js` will throw an error, so you need to include them in the separate `.babelrc` file.
 
 This configuration assumes the source code file for the application entry point is in `src/index.js`, and this will output the bundle to `bin/app.js`.
 
@@ -187,7 +191,7 @@ JSX is useful for teams where HTML is primarily written by someone without Javas
 Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
 
 - it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
-- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<div class="button"></div>`
+- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<a class="button"></a>`)
 
 In addition, since hyperscript is plain Javascript, it's often more natural to indent than JSX:
 

@@ -13,15 +13,20 @@ cache:
 # Custom install step so the travis-only stuff doesn't need to be in package.json
 install:
 - npm install
-- npm install @alrra/travis-scripts@^3.0.1 gh-pages@^0.12.0
+# This is to prevent lint-staged/prettier from running on the bundles
+- npm rm husky
 
-# Bundle before running tests so the bundle is always up-to-date
-before_script: npm run build --silent
+# Run danger, build bundles (so they're always up to date)
+before_script:
+- npx danger run
+- npm run build-browser
+# Pass -save so it'll update the readme as well
+- npm run build-min -- -save
 
 # Run tests, lint, and then check for perf regressions
 script:
-- npm test --silent
-- npm run perf --silent
+- npm test
+- npm run perf
 
 # After a successful build commit changes back to repo
 after_success:
@@ -84,7 +89,6 @@ deploy:
     on:
       tags: true
       repo: MithrilJS/mithril.js
-      branch: master
   
   - provider: npm
     skip_cleanup: true
@@ -94,4 +98,3 @@ deploy:
     on:
       tags: true
       repo: MithrilJS/mithril.js
-      branch: master

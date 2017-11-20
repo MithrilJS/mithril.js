@@ -3,6 +3,7 @@
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
 var browserMock = require("../../test-utils/browserMock")
+var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
 var callAsync = require("../../test-utils/callAsync")
@@ -14,17 +15,21 @@ o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var FRAME_BUDGET = Math.floor(1000 / 60)
-				var $window, root, redrawService, route
+				var $window, root, redrawService, route, throttleMock
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
+					throttleMock = throttleMocker()
 
 					root = $window.document.body
 
-					redrawService = apiRedraw($window)
+					redrawService = apiRedraw($window, throttleMock.throttle)
 					route = apiRouter($window, redrawService)
 					route.prefix(prefix)
+				})
+
+				o.afterEach(function() {
+					o(throttleMock.queueLength()).equals(0)
 				})
 
 				o("throws on invalid `root` DOM node", function() {
@@ -50,7 +55,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("routed mount points can redraw synchronously (POJO component)", function() {
+				o("routed mount points only redraw asynchronously (POJO component)", function() {
 					var view = o.spy()
 
 					$window.location.href = prefix + "/"
@@ -60,11 +65,14 @@ o.spec("route", function() {
 
 					redrawService.redraw()
 
-					o(view.callCount).equals(2)
+					o(view.callCount).equals(1)
 
+					throttleMock.fire()
+
+					o(view.callCount).equals(2)
 				})
 
-				o("routed mount points can redraw synchronously (constructible component)", function() {
+				o("routed mount points only redraw asynchronously (constructible component)", function() {
 					var view = o.spy()
 
 					var Cmp = function(){}
@@ -77,11 +85,14 @@ o.spec("route", function() {
 
 					redrawService.redraw()
 
-					o(view.callCount).equals(2)
+					o(view.callCount).equals(1)
 
+					throttleMock.fire()
+
+					o(view.callCount).equals(2)
 				})
 
-				o("routed mount points can redraw synchronously (closure component)", function() {
+				o("routed mount points only redraw asynchronously (closure component)", function() {
 					var view = o.spy()
 
 					function Cmp() {return {view: view}}
@@ -93,8 +104,11 @@ o.spec("route", function() {
 
 					redrawService.redraw()
 
-					o(view.callCount).equals(2)
+					o(view.callCount).equals(1)
 
+					throttleMock.fire()
+
+					o(view.callCount).equals(2)
 				})
 
 				o("default route doesn't break back button", function(done) {
@@ -160,11 +174,12 @@ o.spec("route", function() {
 					o(oninit.callCount).equals(1)
 
 					redrawService.redraw()
+					throttleMock.fire()
 
 					o(onupdate.callCount).equals(1)
 				})
 
-				o("redraws on events", function(done) {
+				o("redraws on events", function() {
 					var onupdate = o.spy()
 					var oninit = o.spy()
 					var onclick = o.spy()
@@ -194,12 +209,9 @@ o.spec("route", function() {
 					o(onclick.args[0].type).equals("click")
 					o(onclick.args[0].target).equals(root.firstChild)
 
-					// Wrapped to give time for the rate-limited redraw to fire
-					callAsync(function() {
-						o(onupdate.callCount).equals(1)
 
-						done()
-					})
+					throttleMock.fire()
+					o(onupdate.callCount).equals(1)
 				})
 
 				o("event handlers can skip redraw", function(done) {
@@ -224,9 +236,11 @@ o.spec("route", function() {
 						}
 					})
 
+					o(oninit.callCount).equals(1)
+
 					root.firstChild.dispatchEvent(e)
 
-					o(oninit.callCount).equals(1)
+					o(e.redraw).notEquals(false)
 
 					// Wrapped to ensure no redraw fired
 					callAsync(function() {
@@ -265,6 +279,36 @@ o.spec("route", function() {
 					root.firstChild.dispatchEvent(e)
 
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
+				})
+
+				o("passes options on route.link", function() {
+					var opts = {}
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					$window.location.href = prefix + "/"
+
+					route(root, "/", {
+						"/" : {
+							view: function() {
+								return m("a", {
+									href: "/test",
+									oncreate: route.link(opts)
+								})
+							}
+						},
+						"/test" : {
+							view : function() {
+								return m("div")
+							}
+						}
+					})
+					route.set = o.spy(route.set)
+
+					root.firstChild.dispatchEvent(e)
+
+					o(route.set.callCount).equals(1)
+					o(route.set.args[2]).equals(opts)
 				})
 
 				o("accepts RouteResolver with onmatch that returns Component", function(done) {
@@ -500,7 +544,10 @@ o.spec("route", function() {
 						o(oninit.callCount).equals(1)
 						route.set("/def")
 						callAsync(function() {
+							throttleMock.fire()
+
 							o(oninit.callCount).equals(2)
+
 							done()
 						})
 					})
@@ -536,23 +583,28 @@ o.spec("route", function() {
 					route(root, "/a", {
 						"/a" : {
 							render: function() {
-								return m("div")
+								return m("div", m("p"))
 							},
 						},
 						"/b" : {
 							render: function() {
-								return m("div")
+								return m("div", m("a"))
 							},
 						},
 					})
 
 					var dom = root.firstChild
+					var child = dom.firstChild
+
 					o(root.firstChild.nodeName).equals("DIV")
 
 					route.set("/b")
 
 					callAsync(function() {
+						throttleMock.fire()
+
 						o(root.firstChild).equals(dom)
+						o(root.firstChild.firstChild).notEquals(child)
 
 						done()
 					})
@@ -586,6 +638,7 @@ o.spec("route", function() {
 						o(renderCount).equals(1)
 
 						redrawService.redraw()
+						throttleMock.fire()
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
@@ -621,6 +674,7 @@ o.spec("route", function() {
 						o(renderCount).equals(1)
 
 						redrawService.redraw()
+						throttleMock.fire()
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
@@ -665,7 +719,7 @@ o.spec("route", function() {
 					route(root, "/a", {
 						"/a" : {
 							onmatch: function() {
-								route.set("/b")
+								route.set("/b", {}, {state: {a: 5}})
 							},
 							render: render
 						},
@@ -684,6 +738,7 @@ o.spec("route", function() {
 							o(view.callCount).equals(1)
 							o(root.childNodes.length).equals(1)
 							o(root.firstChild.nodeName).equals("DIV")
+							o($window.history.state).deepEquals({a: 5})
 
 							done()
 						})
@@ -815,10 +870,14 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						throttleMock.fire()
+
 						route.set("/b")
 						callAsync(function() {
 							callAsync(function() {
 								callAsync(function() {
+									throttleMock.fire()
+
 									o(render.callCount).equals(0)
 									o(component.view.callCount).equals(2)
 
@@ -939,6 +998,7 @@ o.spec("route", function() {
 						o(onmatch.callCount).equals(1)
 
 						redrawService.redraw()
+						throttleMock.fire()
 
 						o(view.callCount).equals(2)
 						o(onmatch.callCount).equals(1)
@@ -1017,6 +1077,8 @@ o.spec("route", function() {
 					})
 
 					callAsync(function() {
+						throttleMock.fire()
+
 						o(onmatch.callCount).equals(1)
 						o(render.callCount).equals(1)
 
@@ -1024,6 +1086,8 @@ o.spec("route", function() {
 
 						callAsync(function() {
 							callAsync(function() {
+								throttleMock.fire()
+
 								o(onmatch.callCount).equals(2)
 								o(render.callCount).equals(2)
 
@@ -1074,9 +1138,15 @@ o.spec("route", function() {
 					route.set("/b")
 
 					callAsync(function() {
+						throttleMock.fire()
+
+						o(root.firstChild.nodeName).equals("B")
+
 						route.set("/a")
 
 						callAsync(function() {
+							throttleMock.fire()
+
 							o(root.firstChild.nodeName).equals("A")
 
 							done()
@@ -1141,7 +1211,9 @@ o.spec("route", function() {
 
 					route.set("/b")
 
+					// setting the route is asynchronous
 					callAsync(function() {
+						throttleMock.fire()
 						o(spy.callCount).equals(1)
 
 						done()
@@ -1181,9 +1253,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("throttles", function(done, timeout) {
-					timeout(200)
-
+				o("throttles", function() {
 					var i = 0
 					$window.location.href = prefix + "/"
 					route(root, "/", {
@@ -1197,12 +1267,11 @@ o.spec("route", function() {
 					redrawService.redraw()
 					var after = i
 
-					setTimeout(function() {
-						o(before).equals(1) // routes synchronously
-						o(after).equals(2) // redraws synchronously
-						o(i).equals(3) // throttles rest
-						done()
-					}, FRAME_BUDGET * 2)
+					throttleMock.fire()
+
+					o(before).equals(1) // routes synchronously
+					o(after).equals(1) // redraws asynchronously
+					o(i).equals(2)
 				})
 
 				o("m.route.param is available outside of route handlers", function(done) {

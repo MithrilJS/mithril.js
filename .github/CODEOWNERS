@@ -1,0 +1,9 @@
+.travis.yml     @tivac
+package.json    @tivac
+.npmignore      @tivac
+.eslintrc.js    @tivac
+.eslintignore   @tivac
+README.md       @tivac
+docs/           @tivac
+performance/    @tivac
+render/         @isiahmeadows @pygy

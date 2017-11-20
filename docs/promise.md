@@ -302,7 +302,7 @@ This example also illustrates another benefit of smaller functions: we reused th
 
 ### Why not callbacks
 
-Callbacks are another mechanism for working with asynchrounous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an `onscroll` event handler).
+Callbacks are another mechanism for working with asynchronous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an `onscroll` event handler).
 
 However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).
 

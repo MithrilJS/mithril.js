@@ -65,7 +65,7 @@ Argument               | Type                                     | Required | D
 
 ##### m.route.set
 
-Redirects to a matching route, or to the default route if no matching routes can be found.
+Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
 `m.route.set(path, data, options)`
 
@@ -104,23 +104,29 @@ Argument          | Type      | Required | Description
 This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
 
 ```JS
-m("a[href=/]", {oncreate: m.route.link})`.
+m("a[href=/]", {oncreate: m.route.link})
 ```
 
-Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of nagivating away from the current page to the URL specified in `href`.
+Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
 
 If the `href` attribute is not static, the `onupdate` hook must also be set:
 
 ```JS
-m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})`
+m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})
 ```
 
-`m.route.link(vnode)`
+`m.route.link` can also set the `options` passed to `m.route.set` when the link is clicked by calling the function in the lifecycle methods:
 
-Argument          | Type        | Required | Description
------------------ | ----------- | -------- | ---
-`vnode`           | `Vnode`     | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
-**returns**       |             |          | Returns `undefined`
+```JS
+m("a[href=/]", {oncreate: m.route.link({replace: true})})
+```
+
+`m.route.link(args)`
+
+Argument          | Type           | Required | Description
+----------------- | ---------------| -------- | ---
+`args`            | `Vnode|Object` | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
+**returns**       | `function`     |          | Returns the onclick handler function for the component
 
 ##### m.route.param
 
@@ -323,7 +329,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.
+For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 
@@ -508,7 +514,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 #### Authentication
 
-The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
+The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
 ```javascript
 var isLoggedIn = false
@@ -568,7 +574,7 @@ var Login = {
 		return m("form", [
 			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
 			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
-			m("button[type=button]", {onclick: Auth.login, "Login")
+			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}
 }
@@ -588,7 +594,7 @@ m.route(document.body, "/secret", {
 
 #### Preloading data
 
-Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
+Typically, a component can load data upon initialization. Loading data this way renders the component twice. The first render pass occurs upon routing, and the second fires after the request completes. Take care to note that `loadUsers()` returns a Promise, but any Promise returned by `oninit` is currently ignored. The second render pass comes from the [`background` option for `m.request`](request.md).
 
 ```javascript
 var state = {

@@ -24,8 +24,8 @@ o.spec("createElement", function() {
 		render(root, [vnode])
 
 		o(vnode.dom.nodeName).equals("DIV")
-		o(vnode.dom.attributes["id"].nodeValue).equals("a")
-		o(vnode.dom.attributes["title"].nodeValue).equals("b")
+		o(vnode.dom.attributes["id"].value).equals("a")
+		o(vnode.dom.attributes["title"].value).equals("b")
 	})
 	o("creates style", function() {
 		var vnode = {tag: "div", attrs: {style: {backgroundColor: "red"}}}
@@ -48,8 +48,8 @@ o.spec("createElement", function() {
 		render(root, [vnode])
 
 		o(vnode.dom.nodeName).equals("DIV")
-		o(vnode.dom.attributes["id"].nodeValue).equals("a")
-		o(vnode.dom.attributes["title"].nodeValue).equals("b")
+		o(vnode.dom.attributes["id"].value).equals("a")
+		o(vnode.dom.attributes["title"].value).equals("b")
 		o(vnode.dom.childNodes.length).equals(2)
 		o(vnode.dom.childNodes[0].nodeName).equals("A")
 		o(vnode.dom.childNodes[1].nodeName).equals("B")
@@ -65,8 +65,8 @@ o.spec("createElement", function() {
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(vnode.dom.firstChild.nodeName).equals("a")
 		o(vnode.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
-		o(vnode.dom.firstChild.attributes["href"].nodeValue).equals("javascript:;")
-		o(vnode.dom.firstChild.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+		o(vnode.dom.firstChild.attributes["xlink:href"].value).equals("javascript:;")
+		o(vnode.dom.firstChild.attributes["xlink:href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		o(vnode.dom.childNodes[1].nodeName).equals("foreignObject")
 		o(vnode.dom.childNodes[1].firstChild.nodeName).equals("body")
 		o(vnode.dom.childNodes[1].firstChild.namespaceURI).equals("http://www.w3.org/1999/xhtml")
@@ -75,7 +75,25 @@ o.spec("createElement", function() {
 		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", attrs: {viewBox: "0 0 100 100"}}
 		render(root, [vnode])
 
-		o(vnode.dom.attributes["viewBox"].nodeValue).equals("0 0 100 100")
+		o(vnode.dom.attributes["viewBox"].value).equals("0 0 100 100")
+	})
+	o("removes xlink:href", function() {
+		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+			{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}}
+		]}
+		render(root, [vnode])
+
+		o(vnode.dom.nodeName).equals("svg")
+		o(vnode.dom.firstChild.attributes["xlink:href"].value).equals("javascript:;")
+		o(vnode.dom.firstChild.attributes["xlink:href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
+		vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+			{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {}}
+		]}
+		render(root, [vnode])
+
+		o(vnode.dom.nodeName).equals("svg")
+		o(vnode.dom.firstChild.attributes["xlink:href"]).equals(undefined)
 	})
 	o("creates mathml", function() {
 		var vnode = {tag: "math", ns: "http://www.w3.org/1998/Math/MathML", children: [{tag: "mrow", ns: "http://www.w3.org/1998/Math/MathML"}]}

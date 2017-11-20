@@ -180,7 +180,7 @@ m("div", [
 
 #### Avoid passing model data directly to components if the model uses `key` as a data property
 
-The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialise, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:
+The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:
 
 ```javascript
 // Data model

@@ -1,8 +1,10 @@
-/* eslint-disable no-bitwise, no-process-exit */
+/* eslint-disable global-require, no-bitwise, no-process-exit */
 "use strict"
 
-module.exports = new function init() {
+module.exports = new function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+
+	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
 		if (predicate === undefined) {
@@ -47,6 +49,9 @@ module.exports = new function init() {
 		spy.callCount = 0
 		return spy
 	}
+	o.cleanStackTrace = function(stack) {
+		return stack.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/gm).pop()
+	}
 	o.run = function() {
 		results = []
 		start = new Date
@@ -82,40 +87,56 @@ module.exports = new function init() {
 				if (cursor === fns.length) return
 
 				var fn = fns[cursor++]
+				var timeout = 0, delay = 200, s = new Date
+				var isDone = false
+
+				function done(err) {
+					if (err) {
+						if (err.message) record(err.message, err)
+						else record(err)
+						subjects.pop()
+						next()
+					}
+					if (timeout !== undefined) {
+						timeout = clearTimeout(timeout)
+						if (delay !== Infinity) record(null)
+						if (!isDone) next()
+						else throw new Error("`" + arg + "()` should only be called once")
+						isDone = true
+					}
+					else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
+				}
+
+				function startTimer() {
+					timeout = setTimeout(function() {
+						timeout = undefined
+						record("async test timed out")
+						next()
+					}, Math.min(delay, 2147483647))
+				}
+
 				if (fn.length > 0) {
-					var timeout = 0, delay = 200, s = new Date
-					var isDone = false
 					var body = fn.toString()
 					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
-						fn(function done() {
-							if (timeout !== undefined) {
-								timeout = clearTimeout(timeout)
-								if (delay !== Infinity) record(null)
-								if (!isDone) next()
-								else throw new Error("`" + arg + "()` should only be called once")
-								isDone = true
-							}
-							else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
-						}, function(t) {delay = t})
+						fn(done, function(t) {delay = t})
 					}
 					catch (e) {
-						record(e.message, e)
-						subjects.pop()
-						next()
+						done(e)
 					}
 					if (timeout === 0) {
-						timeout = setTimeout(function() {
-							timeout = undefined
-							record("async test timed out")
-							next()
-						}, Math.min(delay, 2147483647))
+						startTimer()
 					}
 				}
 				else {
-					fn()
-					nextTickish(next)
+					var p = fn()
+					if (p && p.then) {
+						startTimer()
+						p.then(function() { done() }, done)
+					} else {
+						nextTickish(next)
+					}
 				}
 			}
 		}
@@ -204,6 +225,7 @@ module.exports = new function init() {
 		results.push(result)
 	}
 	function serialize(value) {
+		if (hasProcess) return require("util").inspect(value)
 		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
@@ -216,12 +238,13 @@ module.exports = new function init() {
 		var status = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
-				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
+				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
 				status = 1
 			}
 		}
 		console.log(
+			(name ? name + ": " : "") +
 			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
 		)

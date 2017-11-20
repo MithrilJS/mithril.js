@@ -35,12 +35,12 @@ m.mount(element, {view: function () {return m(Component, attrs)}})
 
 ### Signature
 
-`m.mount(element, component)`
+`m.mount(element, Component)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
 `element`   | `Element`            | Yes      | A DOM element that will be the parent node to the subtree
-`component` | `Component|null`     | Yes      | The [component](components.md) to be rendered. `null` unmounts the tree and cleans up internal state.
+`Component` | `Component|null`     | Yes      | The [component](components.md) to be rendered. `null` unmounts the tree and cleans up internal state.
 **returns** |                      |          | Returns nothing
 
 [How to read signatures](signatures.md)
@@ -49,7 +49,9 @@ Argument    | Type                 | Required | Description
 
 ### How it works
 
-Similar to [`m.render()`](render.md), the `m.mount()` method takes a component and mounts a corresponding DOM tree into `element`. If `element` already has a DOM tree mounted via a previous `m.mount()` call, the component is diffed against the previous vnode tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.
+`m.mount(element, Component)`, when called renders the component into the element and subscribe the `(element, Component)` pair to the redraw subsystem. That tree will be re-rendered when [manual](redraw.md) or [automatic](autoredraw.md) redraws are triggered.
+
+On redraw, the new vDOM tree is compared (or "diffed") with the old one, and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.
 
 #### Replace a component
 
@@ -73,7 +75,7 @@ In contrast, traversing a javascript data structure has a much more predictable 
 
 ### Differences from m.render
 
-A component rendered via `m.mount` automatically auto-redraws in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not.
+A component rendered via `m.mount` [automatically redraws](autoredraw.md) in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not.
 
 `m.mount()` is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril's auto-redrawing facilities.
 

@@ -67,13 +67,15 @@ module.exports = function($window, Promise) {
 
 			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
-			if (args.serialize === JSON.stringify && useBody) {
+			if (args.serialize === JSON.stringify && useBody && !(args.headers && args.headers.hasOwnProperty("Content-Type"))) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (args.deserialize === deserialize) {
+			if (args.deserialize === deserialize && !(args.headers && args.headers.hasOwnProperty("Accept"))) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
+
+			if (args.timeout) xhr.timeout = args.timeout
 
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
@@ -88,12 +90,13 @@ module.exports = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
+						if (args.extract !== extract || (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
 							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
+							error.code = xhr.status
+							error.response = response
 							reject(error)
 						}
 					}

@@ -21,7 +21,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["id"].nodeValue).equals("c")
+		o(updated.dom.attributes["id"].value).equals("c")
 	})
 	o("adds attr", function() {
 		var vnode = {tag: "a", attrs: {id: "b"}}
@@ -32,7 +32,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["title"].nodeValue).equals("d")
+		o(updated.dom.attributes["title"].value).equals("d")
 	})
 	o("adds attr from empty attrs", function() {
 		var vnode = {tag: "a"}
@@ -43,7 +43,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["title"].nodeValue).equals("d")
+		o(updated.dom.attributes["title"].value).equals("d")
 	})
 	o("removes attr", function() {
 		var vnode = {tag: "a", attrs: {id: "b", title: "d"}}
@@ -192,6 +192,19 @@ o.spec("updateElement", function() {
 		o(updated.dom.style.backgroundColor).equals("")
 		o(updated.dom.style.color).equals("gold")
 	})
+	o("does not re-render element styles for equivalent style objects", function() {
+		var style = {color: "gold"}
+		var vnode = {tag: "a", attrs: {style: style}}
+
+		render(root, [vnode])
+
+		root.firstChild.style.color = "red"
+		style = {color: "gold"}
+		var updated = {tag: "a", attrs: {style: style}}
+		render(root, [updated])
+
+		o(updated.dom.style.color).equals("red")
+	})
 	o("replaces el", function() {
 		var vnode = {tag: "a"}
 		var updated = {tag: "b"}
@@ -209,7 +222,7 @@ o.spec("updateElement", function() {
 		render(root, [vnode])
 		render(root, [updated])
 
-		o(updated.dom.attributes["class"].nodeValue).equals("b")
+		o(updated.dom.attributes["class"].value).equals("b")
 	})
 	o("updates svg child", function() {
 		var vnode = {tag: "svg", children: [{
