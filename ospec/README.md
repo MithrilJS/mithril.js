@@ -19,7 +19,7 @@ Noiseless testing framework
 	- `before`/`after`/`beforeEach`/`afterEach` hooks
 	- test exclusivity (i.e. `.only`)
 	- async tests and hooks
-- explicitly disallows test-space configuration to encourage focus on testing, and to provide uniform test suites across projects
+- explicitly regulates test-space configuration to encourage focus on testing, and to provide uniform test suites across projects
 
 ## Usage
 
@@ -437,9 +437,17 @@ The arguments that were passed to the function in the last time it was called
 
 ---
 
-### void o.run()
+### void o.run([Function reporter])
 
-Runs the test suite
+Runs the test suite. By default passing test results are printed using
+`console.log` and failing test results are printed using `console.error`.
+
+If you have custom continuous integration needs then you can use a
+reporter to process [test result data](#result-data) yourself.
+
+If running in Node.js, ospec will call `process.exit` after reporting
+results by default. If you specify a reporter, ospec will not do this
+and allow your reporter to respond to results in its own way.
 
 ---
 
@@ -457,13 +465,81 @@ $o.run()
 
 ---
 
+## Result data
+
+Test results are available by reference for integration purposes. You
+can use custom reporters in `o.run()` to process these results.
+
+```javascript
+o.run(function(results) {
+	// results is an array
+
+	results.forEach(function(result) {
+		// ...
+	})
+})
+```
+
+---
+
+### Boolean result.pass
+
+True if the test passed. **No other keys will exist on the result if this value is true.**
+
+---
+
+### Error result.error
+
+The value of the stack property from the `Error` object explaining the reason behind a failure.
+
+---
+
+### String result.message
+
+If an exception was thrown inside the corresponding test, this will equal that Error's `message`. Otherwise, this will be a preformatted message in [SVO form](https://en.wikipedia.org/wiki/Subject%E2%80%93verb%E2%80%93object). More specifically, `${subject}\n${verb}\n${object}`.
+
+As an example, the following test's result message will be `"false\nshould equal\ntrue"`.
+
+```javascript
+o.spec("message", function() {
+	o(false).equals(true)
+})
+```
+
+If you specify an assertion description, that description will appear two lines above the subject.
+
+```javascript
+o.spec("message", function() {
+	o(false).equals(true)("Candyland") // result.message === "Candyland\n\nfalse\nshould equal\ntrue"
+})
+```
+
+---
+
+### String result.context
+
+A `>`-separated string showing the structure of the test specification.
+In the below example, `result.context` would be `testing > rocks`.
+
+```javascript
+o.spec("testing", function() {
+	o.spec("rocks", function() {
+		o(false).equals(true)
+	})
+})
+```
+
+
+
+---
+
 ## Goals
 
 - Do the most common things that the mocha/chai/sinon triad does without having to install 3 different libraries and several dozen dependencies
 - Disallow configuration in test-space:
 	- Disallow ability to pick between API styles (BDD/TDD/Qunit, assert/should/expect, etc)
-	- Disallow ability to pick between different reporters
 	- Disallow ability to add custom assertion types
+	- Provide a default simple reporter
 - Make assertion code terse, readable and self-descriptive
 - Have as few assertion types as possible for a workable usage pattern
 
