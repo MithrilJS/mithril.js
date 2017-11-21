@@ -214,7 +214,7 @@ module.exports = function($window) {
 				} else if (o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(v), nextSibling)
 				} else {
 					o = old[oldEnd]
 					oFromPool = hasPool && oldEnd >= originalOldLength
@@ -223,7 +223,7 @@ module.exports = function($window) {
 					else if (v == null) start++
 					else if (o.key === v.key) {
 						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, originalOldLength, nextSibling))
+						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(v), getNextSibling(old, oldStart, originalOldLength, nextSibling))
 						oldEnd--, start++
 					}
 					else break
@@ -238,7 +238,7 @@ module.exports = function($window) {
 				else if (v == null) end--
 				else if (o.key === v.key) {
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(v), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
 				} else {
@@ -249,7 +249,7 @@ module.exports = function($window) {
 							o = old[oldIndex]
 							oFromPool = hasPool && oldIndex >= originalOldLength
 							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-							insertNode(parent, toFragment(o), nextSibling)
+							insertNode(parent, toFragment(v), nextSibling)
 							o.skip = true
 							if (o.dom != null) nextSibling = o.dom
 						} else {
