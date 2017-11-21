@@ -178,9 +178,9 @@ module.exports = function($window) {
 				if (isUnkeyed) {
 					for (var i = 0; i < originalOldLength; i++) {
 						if (old[i] === vnodes[i] && !recyclingParent || old[i] == null && vnodes[i] == null) continue
-						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
+						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, originalOldLength, nextSibling))
 						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recyclingParent, ns)
+						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, originalOldLength, nextSibling), recyclingParent, ns)
 					}
 					return
 				}
@@ -200,7 +200,7 @@ module.exports = function($window) {
 				else if (v == null) start++
 				else if (o.key === v.key) {
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), oFromPool || recyclingParent, ns)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
 					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
@@ -210,8 +210,8 @@ module.exports = function($window) {
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
-						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
+						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, originalOldLength, nextSibling))
 						oldEnd--, start++
 					}
 					else break
@@ -225,7 +225,7 @@ module.exports = function($window) {
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
 					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
@@ -237,7 +237,7 @@ module.exports = function($window) {
 						if (oldIndex != null) {
 							o = old[oldIndex]
 							oFromPool = hasPool && oldIndex >= originalOldLength
-							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
+							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
 							insertNode(parent, toFragment(o), nextSibling)
 							o.skip = true
 							if (o.dom != null) nextSibling = o.dom
@@ -402,8 +402,8 @@ module.exports = function($window) {
 		}
 		else return vnode.dom
 	}
-	function getNextSibling(vnodes, i, nextSibling) {
-		for (; i < vnodes.length; i++) {
+	function getNextSibling(vnodes, i, limit, nextSibling) {
+		for (; i < limit; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
