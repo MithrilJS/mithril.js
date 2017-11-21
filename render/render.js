@@ -166,44 +166,56 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			var originalOldLength = old.length, hasPool = false
-			if (originalOldLength === vnodes.length) {
-				var isUnkeyed = false
-				for (var i = 0; i < vnodes.length; i++) {
-					if (vnodes[i] != null && old[i] != null) {
-						isUnkeyed = vnodes[i].key == null && old[i].key == null
-						break
-					}
+			var start = 0, commonLength = Math.min(old.length, vnodes.length), originalOldLength = old.length, hasPool = false, isUnkeyed
+			for(; start < commonLength; start++) {
+				if (old[start] != null) {
+					isUnkeyed = old[start].key == null
+					break
 				}
-				if (isUnkeyed) {
-					for (var i = 0; i < originalOldLength; i++) {
-						if (old[i] === vnodes[i] && !recyclingParent || old[i] == null && vnodes[i] == null) continue
-						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, originalOldLength, nextSibling))
-						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, originalOldLength, nextSibling), recyclingParent, ns)
-					}
-					return
+				if (vnodes[start] != null) {
+					isUnkeyed = vnodes[start].key == null
+					break
 				}
 			}
+			if (isUnkeyed && originalOldLength === vnodes.length) {
+				// treat it as a tuple, no pool here
+				for (; start < originalOldLength; start++) {
+					if (old[start] === vnodes[start] && !recyclingParent || old[start] == null && vnodes[start] == null) continue
+					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, originalOldLength, nextSibling))
+					else if (vnodes[start] == null) removeNodes(old, start, start + 1, null)
+					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, originalOldLength, nextSibling), recyclingParent, ns)
+				}
+				return
+			}
+
 			if (isRecyclable(old, vnodes)) {
 				hasPool = true
 				old = old.concat(old.pool)
 			}
 
-			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
+			var oldStart = start, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
+
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldStart]
 				v = vnodes[start]
 				oFromPool = hasPool && oldStart >= originalOldLength
-				if (o === v && !oFromPool && !recyclingParent) oldStart++, start++
-				else if (o == null) oldStart++
-				else if (v == null) start++
-				else if (o.key === v.key) {
+				if (o === v && !oFromPool && !recyclingParent || o == null && v == null) oldStart++, start++
+				else if (o == null) {
+					if (isUnkeyed) {
+						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, originalOldLength, nextSibling))
+					}
+					oldStart++
+				} else if (v == null) {
+					if (isUnkeyed){
+						removeNodes(old, start, start + 1, vnodes)
+						oldStart++
+					}
+					start++
+				} else if (o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
 					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-				}
-				else {
+				} else {
 					o = old[oldEnd]
 					oFromPool = hasPool && oldEnd >= originalOldLength
 					if (o === v && !oFromPool && !recyclingParent) oldEnd--, start++
@@ -229,8 +241,7 @@ module.exports = function($window) {
 					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
-				}
-				else {
+				} else {
 					if (!map) map = getKeyMap(old, oldEnd)
 					if (v != null) {
 						var oldIndex = map[v.key]
@@ -241,8 +252,7 @@ module.exports = function($window) {
 							insertNode(parent, toFragment(o), nextSibling)
 							o.skip = true
 							if (o.dom != null) nextSibling = o.dom
-						}
-						else {
+						} else {
 							var dom = createNode(parent, v, hooks, ns, nextSibling)
 							nextSibling = dom
 						}
