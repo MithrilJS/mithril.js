@@ -161,12 +161,13 @@ module.exports = function($window) {
 	}
 
 	//update
-	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
-		if (old === vnodes || old == null && vnodes == null) return
+	function updateNodes(parent, old, vnodes, recyclingParent, hooks, nextSibling, ns) {
+		if (old === vnodes && !recyclingParent || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
 		else {
-			if (old.length === vnodes.length) {
+			var originalOldLength = old.length, hasPool = false
+			if (originalOldLength === vnodes.length) {
 				var isUnkeyed = false
 				for (var i = 0; i < vnodes.length; i++) {
 					if (vnodes[i] != null && old[i] != null) {
@@ -175,56 +176,57 @@ module.exports = function($window) {
 					}
 				}
 				if (isUnkeyed) {
-					for (var i = 0; i < old.length; i++) {
-						if (old[i] === vnodes[i]) continue
+					for (var i = 0; i < originalOldLength; i++) {
+						if (old[i] === vnodes[i] && !recyclingParent || old[i] == null && vnodes[i] == null) continue
 						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
 						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
+						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recyclingParent, ns)
 					}
 					return
 				}
 			}
-			recycling = recycling || isRecyclable(old, vnodes)
-			if (recycling && old.pool != null) {
-				var pool = old.pool
+			if (isRecyclable(old, vnodes)) {
+				hasPool = true
 				old = old.concat(old.pool)
 			}
 
-			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
+			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
 			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldStart], v = vnodes[start]
-				if (o === v && !recycling) oldStart++, start++
+				o = old[oldStart]
+				v = vnodes[start]
+				oFromPool = hasPool && oldStart >= originalOldLength
+				if (o === v && !oFromPool && !recyclingParent) oldStart++, start++
 				else if (o == null) oldStart++
 				else if (v == null) start++
 				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldStart >= old.length - pool.length) || ((pool == null) && recycling)
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), shouldRecycle, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), oFromPool || recyclingParent, ns)
+					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 				}
 				else {
-					var o = old[oldEnd]
-					if (o === v && !recycling) oldEnd--, start++
+					o = old[oldEnd]
+					oFromPool = hasPool && oldEnd >= originalOldLength
+					if (o === v && !oFromPool && !recyclingParent) oldEnd--, start++
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
-						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
+						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
 					}
 					else break
 				}
 			}
 			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldEnd], v = vnodes[end]
-				if (o === v && !recycling) oldEnd--, end--
+				o = old[oldEnd]
+				v = vnodes[end]
+				oFromPool = hasPool && oldEnd >= originalOldLength
+				if (o === v && !oFromPool && !recyclingParent) oldEnd--, end--
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
+					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
 				}
@@ -233,12 +235,12 @@ module.exports = function($window) {
 					if (v != null) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
-							var movable = old[oldIndex]
-							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
-							insertNode(parent, toFragment(movable), nextSibling)
-							old[oldIndex].skip = true
-							if (movable.dom != null) nextSibling = movable.dom
+							o = old[oldIndex]
+							oFromPool = hasPool && oldIndex >= originalOldLength
+							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), oFromPool || recyclingParent, ns)
+							insertNode(parent, toFragment(o), nextSibling)
+							o.skip = true
+							if (o.dom != null) nextSibling = o.dom
 						}
 						else {
 							var dom = createNode(parent, v, hooks, ns, nextSibling)
@@ -250,9 +252,9 @@ module.exports = function($window) {
 				if (end < start) break
 			}
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, Math.min(oldEnd + 1, pool == null ? old.length : old.length - pool.length), vnodes)
-			if (pool != null) {
-				var limit = Math.max(oldStart, old.length - pool.length)
+			removeNodes(old, oldStart, Math.min(oldEnd + 1, originalOldLength), vnodes)
+			if (hasPool) {
+				var limit = Math.max(oldStart, originalOldLength)
 				for (; oldEnd >= limit; oldEnd--) {
 					if (old[oldEnd].skip) old[oldEnd].skip = false
 					else addToPool(old[oldEnd], vnodes)
