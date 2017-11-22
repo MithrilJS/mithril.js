@@ -101,6 +101,7 @@ o.spec("onremove", function() {
 		render(root, temp)
 		render(root, updated)
 
+		o(vnodes[0].dom).equals(updated[0].dom)
 		o(remove.callCount).equals(1)
 	})
 	o("does not recycle when there's an onremove", function() {
@@ -132,7 +133,7 @@ o.spec("onremove", function() {
 				})
 				render(root, {tag: comp})
 				render(root, null)
-				
+
 				o(spy.callCount).equals(1)
 			})
 			o("calls onremove on nested component child", function() {
@@ -148,7 +149,7 @@ o.spec("onremove", function() {
 				})
 				render(root, {tag: comp})
 				render(root, null)
-				
+
 				o(spy.callCount).equals(1)
 			})
 			o("doesn't call onremove on children when the corresponding view returns null (after removing the parent)", function() {
@@ -190,6 +191,28 @@ o.spec("onremove", function() {
 
 				o(spy.callCount).equals(0)
 				o(threw).equals(false)
+			})
+			o("onremove doesn't fire on nodes that go from pool to pool (#1990)", function() {
+				var onremove = o.spy();
+
+				render(root, [m("div", m("div")),  m("div", m("div", {onremove: onremove}))]);
+				render(root, [m("div", m("div"))]);
+				render(root, []);
+
+				o(onremove.callCount).equals(1)
+			})
+			o("doesn't fire when removing the children of a node that's brought back from the pool (#1991 part 2)", function() {
+				var onremove = o.spy()
+				var vnode = {tag: "div", key: 1, children: [{tag: "div", attrs: {onremove: onremove}}]}
+				var temp = {tag: "div", key: 2}
+				var updated = {tag: "div", key: 1, children: [{tag: "p"}]}
+
+				render(root, [vnode])
+				render(root, [temp])
+				render(root, [updated])
+
+				o(vnode.dom).equals(updated.dom)
+				o(onremove.callCount).equals(1)
 			})
 		})
 	})
