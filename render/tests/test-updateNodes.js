@@ -870,7 +870,7 @@ o.spec("updateNodes", function() {
 
 		o(onupdate.callCount).equals(0)
 	})
-	o("keyed cached elements are re-initialized when brought back from the pool", function () {
+	o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = {
@@ -886,7 +886,7 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 
-	o("uneyed cached elements are re-initialized when brought back from the pool", function () {
+	o("unkeyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = {
@@ -902,7 +902,7 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 
-	o("keyed cached elements are re-initialized when brought back from nested pools", function () {
+	o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = {
@@ -919,7 +919,7 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 
-	o("unkeyed cached elements are re-initialized when brought back from nested pools", function () {
+	o("unkeyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = {
@@ -982,6 +982,62 @@ o.spec("updateNodes", function() {
 		render(root, updated)
 
 		o(vnode.dom).notEquals(updated.dom)
+	})
+	o("don't add back elements from fragments that are restored from the pool #1991", function() {
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: [{tag: "div"}]}
+		])
+		render(root, [
+			{tag: "[", children: [null]}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+
+		o(root.childNodes.length).equals(0)
+	})
+	o("don't add back elements from fragments that are being removed #1991", function() {
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "p"},
+		])
+		render(root, [
+			{tag: "[", children: [{tag: "div", text: 5}]}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+
+		o(root.childNodes.length).equals(0)
+	})
+	o("handles null values in unkeyed lists of different length (#2003)", function() {
+		var oncreate = o.spy();
+		var onremove = o.spy();
+		var onupdate = o.spy();
+		function attrs() {
+			return {oncreate: oncreate, onremove: onremove, onupdate: onupdate}
+		}
+
+		render(root, [{tag: "div", attrs: attrs()}, null]);
+		render(root, [null, {tag: "div", attrs: attrs()}, null]);
+
+		o(oncreate.callCount).equals(2)
+		o(onremove.callCount).equals(1)
+		o(onupdate.callCount).equals(0)
+	})
+	o("don't fetch the nextSibling from the pool", function() {
+		render(root, [{tag: "[", children: [{tag: "div", key: 1}, {tag: "div", key: 2}]}, {tag: "p"}])
+		render(root, [{tag: "[", children: []}, {tag: "p"}])
+		render(root, [{tag: "[", children: [{tag: "div", key: 2}, {tag: "div", key: 1}]}, {tag: "p"}])
+
+		o([].map.call(root.childNodes, function(el) {return el.nodeName})).deepEquals(["DIV", "DIV", "P"])
 	})
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
