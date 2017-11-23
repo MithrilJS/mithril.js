@@ -42,6 +42,7 @@
 - core: `xlink:href` attributes are now correctly removed
 - render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
 - render: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916)
+- render: fix various updateNodes/removeNodes issues when the pool and fragments are involved [#1990](https://github.com/MithrilJS/mithril.js/issues/1990), [#1991](https://github.com/MithrilJS/mithril.js/issues/1991), [#2003](https://github.com/MithrilJS/mithril.js/issues/2003), [#2021](https://github.com/MithrilJS/mithril.js/pull/2021)
 
 ---
 
