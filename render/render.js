@@ -161,6 +161,124 @@ module.exports = function($window) {
 	}
 
 	//update
+	/**
+	 * @param {Element|Fragment} parent - the parent element
+	 * @param {Vnode[] | null} old - the list of vnodes of the last `render()` call for
+	 *                               this part of the tree
+	 * @param {Vnode[] | null} vnodes - as above, but for the current `render()` call.
+	 * @param {boolean} recyclingParent - was the parent vnode or one of its ancestor
+	 *                                    fetched from the recycling pool?
+	 * @param {Function[]} hooks - an accumulator of post-render hooks (oncreate/onupdate)
+	 * @param {Element | null} nextSibling - the next DOM node if we're dealing with a
+	 *                                       fragment that is not the last item in its
+	 *                                       parent
+	 * @param {'svg' | 'math' | String | null} ns) - the current XML namespace, if any
+	 * @returns void
+	 */
+	// This function diffs and patches lists of vnodes, both keyed and unkeyed.
+	//
+	// We will:
+	//
+	// 1. describe its general structure
+	// 2. focus on the diff algorithm optimizations
+	// 3. describe how the recycling pool meshes into this
+	// 4. discuss DOM node operations.
+
+	// ## Overview:
+	//
+	// The updateNodes() function:
+	// - deals with trivial cases
+	// - determines whether the lists are keyed or unkeyed
+	//   (we take advantage of the fact that mixed diff is not supported and settle on the
+	//   keyedness of the first vnode we find)
+	// - diffs them and patches the DOM if needed (that's the brunt of the code)
+	// - manages the leftovers: after diffing, are there:
+	//   - old nodes left to remove?
+	// 	 - new nodes to insert?
+	//   - nodes left in the recycling pool?
+	// 	 deal with them!
+	//
+	// The lists are only iterated over once, with an exception for the nodes in `old` that
+	// are visited in the fourth part of the diff and in the `removeNodes` loop.
+
+	// ## Diffing
+	//
+	// There's first a simple diff for unkeyed lists of equal length that eschews the pool.
+	//
+	// It is followed by a small section that activates the recycling pool if present, we'll
+	// ignore it for now.
+	//
+	// Then comes the main diff algorithm that is split in four parts (simplifying a bit).
+	//
+	// The first part goes through both lists top-down as long as the nodes at each level have
+	// the same key. This is always true for unkeyed lists that are entirely processed by this
+	// step.
+	//
+	// The second part deals with lists reversals, and traverses one list top-down and the other
+	// bottom-up (as long as the keys match).
+	//
+	// The third part goes through both lists bottom up as long as the keys match.
+	//
+	// The first and third sections allow us to deal efficiently with situations where one or
+	// more contiguous nodes were either inserted into, removed from or re-ordered in an otherwise
+	// sorted list. They may reduce the number of nodes to be processed in the fourth section.
+	//
+	// The fourth section does keyed diff for the situations not covered by the other three. It
+	// builds a {key: oldIndex} dictionary and uses it to find old nodes that match the keys of
+	// new ones.
+	// The nodes from the `old` array that have a match in the new `vnodes` one are marked as
+	// `vnode.skip: true`.
+	//
+	// If there are still nodes in the new `vnodes` array that haven't been matched to old ones,
+	// they are created.
+	// The range of old nodes that wasn't covered by the first three sections is passed to
+	// `removeNodes()`. Those nodes are removed unless marked as `.skip: true`.
+	//
+	// Then some pool business happens.
+	//
+	// It should be noted that the description of the four sections above is not perfect, because those
+	// parts are actually implemented as only two loops, one for the first two parts, and one for
+	// the other two. I'm not sure it wins us anything except maybe a few bytes of file size.
+
+	// ## The pool
+	//
+	// `old.pool` is an optional array that holds the vnodes that have been previously removed
+	// from the DOM at this level (provided they met the pool eligibility criteria).
+	//
+	// If the `old`, `old.pool` and `vnodes` meet some criteria described in `isRecyclable`, the
+	// elements of the pool are appended to the `old` array, which enables the reconciler to find
+	// them.
+	//
+	// While this is optimal for unkeyed diff and map-based keyed diff (the fourth diff part),
+	// that strategy clashes with the second and third parts of the main diff algo, because
+	// the end of the old list is now filled with the nodes of the pool.
+	//
+	// To determine if a vnode was brought back from the pool, we look at its position in the
+	// `old` array (see the various `oFromPool` definitions). That information is important
+	// in three circumstances:
+	// - If the old and the new vnodes are the same object (`===`), diff is not performed unless
+	//   the old node comes from the pool (since it must be recycled/re-created).
+	// - The value of `oFromPool` is passed as the `recycling` parameter of `upateNode()` (whether
+	//   the parent is being recycled is also factred in here)
+	// - It is used in the DOM node insertion logic (see below)
+	//
+	// At the very end of `updateNodes()`, the nodes in the pool that haven't been picked back
+	// are put in the new pool for the next render phase.
+	//
+	// The pool eligibility and `isRecyclable()` criteria are to be updated as part of #1675.
+
+	// ## DOM node operations
+	//
+	// In most cases `updateNode()` and `createNode()` perform the DOM operations. However,
+	// this is not the case if the node moved (second and fourth part of the diff algo), or
+	// if the node was brough back from the pool and both the old and new nodes have the same
+	// `.tag` value (when the `.tag` differ, `updateNode()` does the insertion).
+	//
+	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
+	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
+	// nodes remain together in the new list in a way that isn't covered by parts one and
+	// three of the diff algo.
+
 	function updateNodes(parent, old, vnodes, recyclingParent, hooks, nextSibling, ns) {
 		if (old === vnodes && !recyclingParent || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
@@ -178,7 +296,6 @@ module.exports = function($window) {
 				}
 			}
 			if (isUnkeyed && originalOldLength === vnodes.length) {
-				// treat it as a tuple, no pool here
 				for (; start < originalOldLength; start++) {
 					if (old[start] === vnodes[start] && !recyclingParent || old[start] == null && vnodes[start] == null) continue
 					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, originalOldLength, nextSibling))
@@ -272,6 +389,8 @@ module.exports = function($window) {
 			}
 		}
 	}
+	// when recycling, we're re-using an old DOM node, but firing the oninit/oncreate hooks
+	// instead of onbeforeupdate/onupdate.
 	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
@@ -412,6 +531,8 @@ module.exports = function($window) {
 		}
 		else return vnode.dom
 	}
+	// the vnodes array may hold items that come from the pool (after `limit`) they should
+	// be ignored
 	function getNextSibling(vnodes, i, limit, nextSibling) {
 		for (; i < limit; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
@@ -443,6 +564,8 @@ module.exports = function($window) {
 			}
 		}
 	}
+	// when a node is removed from a parent that's brought back from the pool, its hooks should
+	// not fire.
 	function removeNode(vnode, context, recycling) {
 		var expected = 1, called = 0
 		var original = vnode.state
