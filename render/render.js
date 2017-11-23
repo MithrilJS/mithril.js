@@ -404,7 +404,7 @@ module.exports = function($window) {
 	}
 
 	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
+		if (nextSibling) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 
