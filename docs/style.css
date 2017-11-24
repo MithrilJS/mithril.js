@@ -57,7 +57,7 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 	.hamburger:hover {text-decoration:none;}
 	main section {margin:0;}
 	header section {margin:0 0 20px;position:static;width:auto;}
-	h1 + ul {background:#eee;border:1px solid #ccc;box-sizing:border-box;display:none;height:100%;margin:0;overflow:auto;padding:20px;position:fixed;right:0;top:0;width:100%;}
+	h1 + ul {background:#eee;border:1px solid #ccc;box-sizing:border-box;display:none;height:100%;margin:0;overflow:auto;padding:20px;position:fixed;right:0;top:0;width:100%;z-index:1}
 	h1 + ul + hr {display:block;}
 	.navigating h1 + ul {display:block;}
 	.navigating {overflow:hidden;}
