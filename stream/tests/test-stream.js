@@ -275,6 +275,19 @@ o.spec("stream", function() {
 
 			o(spy.callCount).equals(1)
 		})
+		o("end stream ends depndant streams", function() {
+			var stream = Stream()
+			var child = stream.map(function(v){ return v})
+			var spy = o.spy()
+
+			child.end.map(spy)
+
+			o(spy.callCount).equals(0)
+
+			stream.end(true)
+
+			o(spy.callCount).equals(1)
+		})
 	})
 	o.spec("valueOf", function() {
 		o("works", function() {
