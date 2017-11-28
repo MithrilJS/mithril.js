@@ -21,7 +21,14 @@
 ### v1.1.4
 
 #### Bug fixes:
-- Fix IE bug where active element is null causing render function to throw error. ([1943]
+
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
+- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
+- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
+
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 ---
 
 ### v1.1.3
@@ -29,6 +36,8 @@
 #### Bug fixes:
 
 - move out npm dependencies added by mistake
+
+---
 
 ### v1.1.2
 
@@ -56,6 +65,7 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 
 - Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
+---
 
 ### v1.1.1
 
@@ -64,6 +74,8 @@ Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](http
 - hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
 - hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+---
 
 ### v1.1.0
 

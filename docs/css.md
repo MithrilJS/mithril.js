@@ -87,7 +87,7 @@ Nowadays there are [a lot of CSS-in-JS libraries with various degrees of robustn
 
 The main problem with many of these libraries is that even though they require a non-trivial amount of transpiler tooling and configuration, they also require sacrificing code readability in order to work, e.g. `<a class={classnames(styles.button, styles.danger)}></a>` vs `<a class="button danger"></a>` (or `m("a.button.danger")` if we're using hyperscript).
 
-Often sacrifices also need to be made at time of debugging, when mapping rendered CSS class names back to their source. Often all you get in browser developer tools is a class like `button_fvp6zc2gdj35evhsl73ffzq_0 danger_fgdl0s2a5fmle5g56rbuax71_0` with useless source maps (or worse, entirely criptic class names).
+Often sacrifices also need to be made at time of debugging, when mapping rendered CSS class names back to their source. Often all you get in browser developer tools is a class like `button_fvp6zc2gdj35evhsl73ffzq_0 danger_fgdl0s2a5fmle5g56rbuax71_0` with useless source maps (or worse, entirely cryptic class names).
 
 Another common issue is lack of support for less basic CSS features such as `@keyframes` and `@font-face`.
 

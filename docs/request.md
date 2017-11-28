@@ -329,7 +329,7 @@ function upload(e) {
 		url: "/api/v1/upload",
 		data: data,
 		config: function(xhr) {
-			xhr.addEventListener("progress", function(e) {
+			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
 
 				m.redraw() // tell Mithril that data changed and a re-render is needed
