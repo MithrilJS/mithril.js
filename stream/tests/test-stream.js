@@ -275,7 +275,7 @@ o.spec("stream", function() {
 
 			o(spy.callCount).equals(1)
 		})
-		o("end stream ends depndent streams", function() {
+		o("end stream ends dependent streams", function() {
 			var stream = Stream()
 			var child = stream.map(function(v){ return v})
 			var spy = o.spy()
