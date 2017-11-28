@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<title>Mithril</title>
-		<link href="lib/prism/prism.css" rel="stylesheet" />
-		<link href="style.css" rel="stylesheet" />
+		<link href="lib/prism/prism.css" rel="stylesheet">
+		<link href="style.css" rel="stylesheet">
 	</head>
 	<body>
 		<header>
@@ -15,7 +15,10 @@
 				<a href="mithril.min.zip">Download</a>
 				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
 			</nav>
-		</header>
+		<div class="deprecated">
+    WARNING: This documentation is for an old version of mithril!
+    Please see the <a href="https://mithril.js.org/">current docs</a> for more accurate info.
+</div></header>
 		<main>
 			<section class="content">
 				<div class="container">
@@ -282,7 +285,7 @@ where:
 <li><p><strong>String password</strong> (optional)</p>
 <p>A password for HTTP authentication. Defaults to <code>undefined</code></p>
 </li>
-<li><p><strong>Object<any> data</strong> (optional)</p>
+<li><p><strong>Object<any> data</any></strong> (optional)</p>
 <p>Data to be sent. It&#39;s automatically placed in the appropriate section of the request with the appropriate serialization based on <code>method</code></p>
 </li>
 <li><p><strong>Boolean background</strong> (optional)</p>
@@ -297,10 +300,10 @@ where:
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <p>For example, if the response is <code>{data: [{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]}</code> and the unwrap function is <code>function(response) {return response.data}</code>, then the response will be considered to be <code>[{name: &quot;John&quot;}, {name: &quot;Mary&quot;}]</code> when processing the <code>type</code> parameter</p>
 <ul>
-<li><p><strong>Object<any> | Array<any> data</strong></p>
+<li><p><strong>Object<any> | Array<any> data</any></any></strong></p>
 <p>The data to unwrap</p>
 </li>
-<li><p><strong>returns Object<any> | Array<any> unwrappedData</strong></p>
+<li><p><strong>returns Object<any> | Array<any> unwrappedData</any></any></strong></p>
 <p>The unwrapped data</p>
 </li>
 </ul>
@@ -309,10 +312,10 @@ where:
 <p>A preprocessor function to unwrap the data from an error response in case the response contains metadata wrapping the data.</p>
 <p>The default value (if this parameter is falsy) is the identity function <code>function(value) {return value}</code></p>
 <ul>
-<li><p><strong>Object<any> | Array<any> data</strong></p>
+<li><p><strong>Object<any> | Array<any> data</any></any></strong></p>
 <p>The data to unwrap</p>
 </li>
-<li><p><strong>returns Object<any> | Array<any> unwrappedData</strong></p>
+<li><p><strong>returns Object<any> | Array<any> unwrappedData</any></any></strong></p>
 <p>The unwrapped data</p>
 </li>
 </ul>
@@ -343,7 +346,7 @@ where:
 <p>Method to use to extract the data from the raw XMLHttpRequest. This is useful when the relevant data is either in a response header or the status field.</p>
 <p>If this parameter is falsy, the default value is a function that returns <code>xhr.responseText</code>.</p>
 </li>
-<li><p><strong>void type(Object<any> data)</strong> (optional)</p>
+<li><p><strong>void type(Object<any> data)</any></strong> (optional)</p>
 <p>The response object (or the child items if this object is an Array) will be passed as a parameter to the class constructor defined by <code>type</code></p>
 <p>If this parameter is falsy, the deserialized data will not be wrapped.</p>
 <p>For example, if <code>type</code> is the following class:</p>
@@ -378,7 +381,7 @@ where:
 		<footer>
 			<div class="container">
 				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
-				<br />&copy; 2014 Leo Horie
+				<br>&copy; 2014 Leo Horie
 			</div>
 		</footer>
 		<script src="lib/prism/prism.js"></script>

@@ -2,9 +2,9 @@
 <html>
 	<head>
 		<title>Mithril</title>
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic" rel="stylesheet" />
-		<link href="lib/prism/prism.css" rel="stylesheet" />
-		<link href="style.css" rel="stylesheet" />
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic" rel="stylesheet">
+		<link href="lib/prism/prism.css" rel="stylesheet">
+		<link href="style.css" rel="stylesheet">
 	</head>
 	<body>
 		<header>
@@ -16,7 +16,10 @@
 				<a href="mithril.min.zip">Download</a>
 				<a href="http://github.com/lhorie/mithril.js" target="_blank">Github</a>
 			</nav>
-		</header>
+		<div class="deprecated">
+    WARNING: This documentation is for an old version of mithril!
+    Please see the <a href="https://mithril.js.org/">current docs</a> for more accurate info.
+</div></header>
 		<main>
 			<section class="content">
 				<div class="container">
@@ -147,7 +150,7 @@ where:
 <li><p><strong>String defaultRoute</strong></p>
 <p>The route to redirect to if the current URL does not match any of the defined routes</p>
 </li>
-<li><p><strong>Object<Module> routes</strong></p>
+<li><p><strong>Object<module> routes</module></strong></p>
 <p>A key-value map of possible routes and their respective modules. Keys are expected to be absolute pathnames, but can include dynamic parameters. Dynamic parameters are words preceded by a colon <code>:</code></p>
 <p><code>{&#39;/path/to/page/&#39;: pageModule}</code> - a route with a basic pathname</p>
 <p><code>{&#39;/path/to/page/:id&#39;: pageModule}</code> - a route with a pathname that contains a dynamic parameter called <code>id</code>. This route would be selected if the URL was <code>/path/to/page/1</code>, <code>/path/to/page/test</code>, etc</p>
@@ -257,7 +260,7 @@ m(&quot;a[href=&#39;/dashboard/alicesmith&#39;]&quot;, {config: m.route});</code
 		<footer>
 			<div class="container">
 				Released under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>
-				<br />&copy; 2014 Leo Horie
+				<br>&copy; 2014 Leo Horie
 			</div>
 		</footer>
 		<script src="lib/prism/prism.js"></script>
