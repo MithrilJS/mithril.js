@@ -1,7 +1,9 @@
 /* eslint-disable global-require, no-bitwise, no-process-exit */
 "use strict"
-
-module.exports = new function init(name) {
+;(function(m) {
+if (typeof module !== "undefined") module["exports"] = m()
+else window.o = m()
+})(function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", reporter, hasOwn = ({}).hasOwnProperty
 
 	if (name != null) spec[name] = ctx = {}
@@ -265,4 +267,4 @@ module.exports = new function init(name) {
 	}
 
 	return o
-}
+})
