@@ -230,7 +230,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("deserialize parameter works in POST", function(done) {
@@ -244,7 +244,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("extract parameter works in GET", function(done) {
@@ -258,7 +258,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("extract parameter works in POST", function(done) {
@@ -272,7 +272,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("ignores deserialize if extract is defined", function(done) {
@@ -438,7 +438,7 @@ o.spec("xhr", function() {
 		o("set timeout to xhr instance", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return {status: 200, responseText: ''}
+					return {status: 200, responseText: ""}
 				}
 			})
 			return xhr({
