@@ -8,6 +8,13 @@ else window.o = m()
 
 	if (name != null) spec[name] = ctx = {}
 
+	try {throw new Error} catch (e) {
+		var stackTraceMatcher = new RegExp(
+			"^(?:(?!Error|"
+			+ e.stack.match(/[\/\\](.*?):\d+:\d+/)[1]
+			+ ").)*$", "gm"
+		)
+	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
 			if (results == null) throw new Error("Assertions should not occur outside test definitions")
@@ -52,7 +59,7 @@ else window.o = m()
 		return spy
 	}
 	o.cleanStackTrace = function(stack) {
-		return stack.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/gm).pop()
+		return stack.match(stackTraceMatcher).pop()
 	}
 	o.run = function(_reporter) {
 		results = []
