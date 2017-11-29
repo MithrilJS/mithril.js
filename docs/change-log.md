@@ -29,12 +29,6 @@
 - API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
 - API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
 
-#### Ospec improvements:
-
-- Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
-- Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
-- Error handling for async tests with `done` callbacks supports error as first argument
-- Error messages which include newline characters do not swallow the stack trace ([#1495](https://github.com/MithrilJS/mithril.js/issues/1495))
 
 #### Bug fixes
 
@@ -45,9 +39,23 @@
 - core: `Object.prototype` properties can no longer interfere with event listener calls.
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - core: `xlink:href` attributes are now correctly removed
-- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks
 - render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
 - render: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916)
+
+---
+
+### v1.1.6
+
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
+- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
+
+#### Ospec improvements
+
+- Added support for async functions and promises in tests - ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+- Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
+- Error handling for async tests with `done` callbacks supports error as first argument
+- Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@ RodericDay](https://github.com/RodericDay))
 
 ---
 
@@ -61,9 +69,7 @@
 
 #### Bug fixes:
 
-- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
-- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
-- Fix IE bug where active element is null causing render function to throw error. ([1943](https://github.com/MithrilJS/mithril.js/pull/1943))
+- Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
 
 #### Ospec improvements:
 
