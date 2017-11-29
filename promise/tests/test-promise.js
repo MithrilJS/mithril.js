@@ -131,7 +131,7 @@ o.spec("promise", function() {
 				callAsync(function() {resolve(promise)})
 			})
 
-			promise.then(null, done)
+			promise.then(null, function() { done() })
 		})
 		o("non-function onFulfilled is ignored", function(done) {
 			var promise = Promise.resolve(1)
