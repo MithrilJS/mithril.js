@@ -183,13 +183,13 @@ o.spec("ospec", function() {
 		})
 	})
 
-	o.spec('stack trace cleaner', function() {
-		o('handles line breaks', function() {
+	o.spec("stack trace cleaner", function() {
+		o("handles line breaks", function() {
 			try {
-				throw new Error('line\nbreak')
+				throw new Error("line\nbreak")
 			} catch(error) {
 				var trace = o.cleanStackTrace(error.stack)
-				o(trace).notEquals('break')
+				o(trace).notEquals("break")
 				o(trace.includes("test-ospec.js")).equals(true)
 			}
 		})
