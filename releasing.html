@@ -51,6 +51,11 @@
 </li>
 </ul>
 <p><strong>Note</strong> These steps all assume that <code>MithrilJS/mithril.js</code> is a git remote named <code>mithriljs</code>, adjust accordingly if that doesn&#39;t match your setup.</p>
+<ul>
+<li><a href="#releasing-a-new-mithril-version">Releasing a new Mithril version</a></li>
+<li><a href="#updating-mithriljsorg">Updating mithril.js.org</a></li>
+<li><a href="#releasing-a-new-ospec-version">Releasing a new ospec version</a></li>
+</ul>
 <h2 id="releasing-a-new-mithril-version"><a href="#releasing-a-new-mithril-version">Releasing a new Mithril version</a></h2>
 <h3 id="prepare-the-release"><a href="#prepare-the-release">Prepare the release</a></h3>
 <ol>
@@ -142,6 +147,55 @@ $ git co next -- ./docs
 $ git push mithriljs
 </code></pre>
 <p>After the Travis build completes the updated docs should appear on <a href="https://mithril.js.org">https://mithril.js.org</a> in a few minutes.</p>
+<h2 id="releasing-a-new-ospec-version"><a href="#releasing-a-new-ospec-version">Releasing a new ospec version</a></h2>
+<ol>
+<li>Ensure your local branch is up to date</li>
+</ol>
+<pre><code class="lang-bash">$ git co next
+$ git pull --rebase mithriljs next
+</code></pre>
+<ol>
+<li>Determine patch level of the change</li>
+<li>Update <code>version</code> field in <code>ospec/package.json</code> to match new version being prepared for release</li>
+<li>Commit changes to <code>next</code></li>
+</ol>
+<pre><code>$ git add .
+$ git commit -m &quot;chore(ospec): ospec@&lt;version&gt;&quot;
+
+# Push to your branch
+$ git push
+
+# Push to MithrilJS/mithril.js
+$ git push mithriljs next
+</code></pre><h3 id="merge-from-next-to-master1"><a href="#merge-from-next-to-master1">Merge from <code>next</code> to <code>master</code></a></h3>
+<ol>
+<li>Switch to <code>master</code> and make sure it&#39;s up to date</li>
+</ol>
+<pre><code class="lang-bash">$ git co master
+$ git pull --rebase mithriljs master
+</code></pre>
+<ol>
+<li>merge <code>next</code> on top of it</li>
+</ol>
+<pre><code class="lang-bash">$ git checkout next -- ./ospec
+$ git add .
+$ git commit -m &quot;chore(ospec): ospec@&lt;version&gt;&quot;
+</code></pre>
+<ol>
+<li>Ensure the tests are passing!</li>
+</ol>
+<h3 id="publish-the-release1"><a href="#publish-the-release1">Publish the release</a></h3>
+<ol>
+<li>Push the changes to <code>MithrilJS/mithril.js</code></li>
+</ol>
+<pre><code class="lang-bash">$ git push mithriljs master
+</code></pre>
+<ol>
+<li>Publish the changes to npm <strong>from the <code>/ospec</code> folder</strong>. That bit is important to ensure you don&#39;t accidentally ship a new Mithril release!</li>
+</ol>
+<pre><code class="lang-bash">$ cd ./ospec
+$ npm publish
+</code></pre>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>

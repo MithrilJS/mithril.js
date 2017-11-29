@@ -242,13 +242,16 @@ m.route(document.body, &quot;/home&quot;, {
 </table>
 <h5 id="mroutelink"><a href="#mroutelink">m.route.link</a></h5>
 <p>This function can be used as the <code>oncreate</code> (and <code>onupdate</code>) hook in a <code>m(&quot;a&quot;)</code> vnode:</p>
-<pre><code class="lang-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link})`.
+<pre><code class="lang-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link})
 </code></pre>
-<p>Using <code>m.route.link</code> as a <code>oncreate</code> hook causes the link to behave as a router link (i.e. it navigates to the route specified in <code>href</code>, instead of nagivating away from the current page to the URL specified in <code>href</code>.</p>
+<p>Using <code>m.route.link</code> as a <code>oncreate</code> hook causes the link to behave as a router link (i.e. it navigates to the route specified in <code>href</code>, instead of navigating away from the current page to the URL specified in <code>href</code>.</p>
 <p>If the <code>href</code> attribute is not static, the <code>onupdate</code> hook must also be set:</p>
-<pre><code class="lang-JS">m(&quot;a&quot;, {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})`
+<pre><code class="lang-JS">m(&quot;a&quot;, {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})
 </code></pre>
-<p><code>m.route.link(vnode)</code></p>
+<p><code>m.route.link</code> can also set the <code>options</code> passed to <code>m.route.set</code> when the link is clicked by calling the function in the lifecycle methods:</p>
+<pre><code class="lang-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link({replace: true})})
+</code></pre>
+<p><code>m.route.link(args)</code></p>
 <table>
 <thead>
 <tr>
@@ -260,16 +263,16 @@ m.route(document.body, &quot;/home&quot;, {
 </thead>
 <tbody>
 <tr>
-<td><code>vnode</code></td>
-<td><code>Vnode</code></td>
+<td><code>args</code></td>
+<td><code>Vnode&#124;Object</code></td>
 <td>Yes</td>
 <td>This method is meant to be used as or in conjunction with an <code>&lt;a&gt;</code> <a href="vnodes.html">vnode</a>&#39;s <a href="lifecycle-methods.html"><code>oncreate</code> and <code>onupdate</code> hooks</a></td>
 </tr>
 <tr>
 <td><strong>returns</strong></td>
+<td><code>function</code></td>
 <td></td>
-<td></td>
-<td>Returns <code>undefined</code></td>
+<td>Returns the onclick handler function for the component</td>
 </tr>
 </tbody>
 </table>
@@ -467,7 +470,7 @@ m.route(document.body, &quot;/edit/1&quot;, {
 })
 </code></pre>
 <h4 id="handling-404s"><a href="#handling-404s">Handling 404s</a></h4>
-<p>For isomorphic / universal javascript app, an url param and a variadic route combined is very usefull to display custom 404 error page.</p>
+<p>For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.</p>
 <p>In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can&#39;t know that route.</p>
 <pre><code class="lang-javascript">m.route(document.body, &quot;/&quot;, {
   &quot;/&quot;: homeComponent,
@@ -610,7 +613,7 @@ m.route(document.body, &quot;/&quot;, {
 <p>In example 2, since <code>Layout</code> is the top-level component in both routes, the DOM for the <code>Layout</code> component is diffed (i.e. left intact if it has no changes), and only the change from <code>Home</code> to <code>Form</code> triggers a recreation of that subsection of the DOM.</p>
 <hr>
 <h4 id="authentication"><a href="#authentication">Authentication</a></h4>
-<p>The RouteResolver&#39;s <code>onmatch</code> hook can be used to run logic before the top level component in a route is initializated. The example below shows how to implement a login wall that prevents users from seeing the <code>/secret</code> page unless they login.</p>
+<p>The RouteResolver&#39;s <code>onmatch</code> hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the <code>/secret</code> page unless they login.</p>
 <pre><code class="lang-javascript">var isLoggedIn = false
 
 var Login = {
@@ -664,7 +667,7 @@ var Login = {
         return m(&quot;form&quot;, [
             m(&quot;input[type=text]&quot;, {oninput: m.withAttr(&quot;value&quot;, Auth.setUsername), value: Auth.username}),
             m(&quot;input[type=password]&quot;, {oninput: m.withAttr(&quot;value&quot;, Auth.setPassword), value: Auth.password}),
-            m(&quot;button[type=button]&quot;, {onclick: Auth.login, &quot;Login&quot;)
+            m(&quot;button[type=button]&quot;, {onclick: Auth.login}, &quot;Login&quot;)
         ])
     }
 }
@@ -681,7 +684,7 @@ m.route(document.body, &quot;/secret&quot;, {
 </code></pre>
 <hr>
 <h4 id="preloading-data"><a href="#preloading-data">Preloading data</a></h4>
-<p>Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).</p>
+<p>Typically, a component can load data upon initialization. Loading data this way renders the component twice. The first render pass occurs upon routing, and the second fires after the request completes. Take care to note that <code>loadUsers()</code> returns a Promise, but any Promise returned by <code>oninit</code> is currently ignored. The second render pass comes from the <a href="request.html"><code>background</code> option for <code>m.request</code></a>.</p>
 <pre><code class="lang-javascript">var state = {
     users: [],
     loadUsers: function() {
