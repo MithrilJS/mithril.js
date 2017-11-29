@@ -58,7 +58,7 @@ else window.o = m()
 		results = []
 		start = new Date
 		reporter = _reporter
-		test(spec, [], [], report)
+		test(spec, [], [], function() {setTimeout(report)})
 
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
