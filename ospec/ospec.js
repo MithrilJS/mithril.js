@@ -4,7 +4,7 @@
 if (typeof module !== "undefined") module["exports"] = m()
 else window.o = m()
 })(function init(name) {
-	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", reporter, hasOwn = ({}).hasOwnProperty
+	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
 	if (name != null) spec[name] = ctx = {}
 
@@ -71,11 +71,18 @@ else window.o = m()
 		// now we're in user code
 		return stack[i]
 	}
-	o.run = function(_reporter) {
+	o.run = function(reporter) {
 		results = []
 		start = new Date
-		reporter = _reporter
-		test(spec, [], [], function() {setTimeout(report)})
+		test(spec, [], [], function() {
+			setTimeout(function () {
+				if (typeof reporter === "function") reporter(results)
+				else {
+					var errCount = o.report(results)
+					if (hasProcess && errCount !== 0) process.exit(1)
+				}
+			})
+		})
 
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
@@ -255,16 +262,13 @@ else window.o = m()
 		return hasProcess ? "\x1b[31m" + message + "\x1b[0m" : "%c" + message + "%c "
 	}
 
-	function report() {
-		var status = 0
-
-		if (typeof reporter === "function") return reporter(results)
-
+	o.report = function (results) {
+		var errCount = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
-				status = 1
+				errCount++
 			}
 		}
 		console.log(
@@ -272,10 +276,10 @@ else window.o = m()
 			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
 		)
-		if (hasProcess && status === 1) process.exit(1)
+		return errCount
 	}
 
-	if(hasProcess) {
+	if (hasProcess) {
 		nextTickish = process.nextTick
 	} else {
 		nextTickish = function fakeFastNextTick(next) {
