@@ -9,7 +9,7 @@ else window.o = m()
 	if (name != null) spec[name] = ctx = {}
 
 	try {throw new Error} catch (e) {
-		var ospecFileName = e.stack.match(/[\/\\](.*?):\d+:\d+/)[1]
+		var ospecFileName = e.stack && (/[\/\\](.*?):\d+:\d+/).test(e.stack) ? e.stack.match(/[\/\\](.*?):\d+:\d+/)[1] : null
 	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
@@ -55,6 +55,8 @@ else window.o = m()
 		return spy
 	}
 	o.cleanStackTrace = function(error) {
+		// For IE 10+ in quirks mode, and IE 9- in any mode, errors don't have a stack
+		if (error.stack == null) return ""
 		var i = 0, header = error.message ? error.name + ": " + error.message : error.name, stack
 		// some environments add the name and message to the stack trace
 		if (error.stack.indexOf(header) === 0) {
@@ -63,6 +65,7 @@ else window.o = m()
 		} else {
 			stack = error.stack.split(/\r?\n/)
 		}
+		if (ospecFileName == null) return stack.join("\n")
 		// skip ospec-related entries on the stack
 		while (stack[i].indexOf(ospecFileName) !== -1) i++
 		// now we're in user code
