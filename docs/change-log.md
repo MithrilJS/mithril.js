@@ -56,6 +56,7 @@
 - Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
 - Error handling for async tests with `done` callbacks supports error as first argument
 - Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@ RodericDay](https://github.com/RodericDay))
+- Make Ospec more [Flems](https://flems.io)-friendly (#2034)
 
 ---
 

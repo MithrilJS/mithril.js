@@ -7,7 +7,7 @@ Noiseless testing framework
 
 ## About
 
-- ~180 LOC
+- ~330 LOC including the CLI runner
 - terser and faster test code than with mocha, jasmine or tape
 - test code reads like bullet points
 - assertion code follows [SVO](https://en.wikipedia.org/wiki/Subject–verb–object) structure in present tense for terseness and readability
@@ -311,7 +311,9 @@ ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
 
 Ospec doesn't work when installed globally. Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
 
-To work around this limitation, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
+If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
+
+Otherwise, to work around this limitation, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
 
 ```
 npm install npm-run -g
@@ -449,6 +451,13 @@ If running in Node.js, ospec will call `process.exit` after reporting
 results by default. If you specify a reporter, ospec will not do this
 and allow your reporter to respond to results in its own way.
 
+
+---
+
+### Number o.report(results)
+
+The default reporter used by `o.run()` when none are provided. Returns the number of failures, doesn't exit Node.js by itself. It expects an array of [test result data](#result-data) as argument.
+
 ---
 
 ### Function o.new()
@@ -490,7 +499,7 @@ True if the test passed. **No other keys will exist on the result if this value 
 
 ### Error result.error
 
-The value of the stack property from the `Error` object explaining the reason behind a failure.
+The `Error` object explaining the reason behind a failure.
 
 ---
 
