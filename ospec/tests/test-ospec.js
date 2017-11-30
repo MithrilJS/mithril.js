@@ -49,6 +49,43 @@ new function(o) {
 				done()
 			})
 		})
+		o("o.report() returns the number of failures", function () {
+			var log = console.log, error = console.error
+			console.log = o.spy()
+			console.error = o.spy()
+
+			function makeError(msg) {try{throw msg ? new Error(msg) : new Error} catch(e){return e}}
+			try {
+				var errCount = o.report([{pass: true}, {pass: true}])
+
+				o(errCount).equals(0)
+				o(console.log.callCount).equals(1)
+				o(console.error.callCount).equals(0)
+
+				errCount = o.report([
+					{pass: false, error: makeError("hey"), message: "hey"}
+				])
+
+				o(errCount).equals(1)
+				o(console.log.callCount).equals(2)
+				o(console.error.callCount).equals(1)
+
+				errCount = o.report([
+					{pass: false, error: makeError("hey"), message: "hey"},
+					{pass: true},
+					{pass: false, error: makeError("ho"), message: "ho"}
+				])
+				
+				o(errCount).equals(2)
+				o(console.log.callCount).equals(3)
+				o(console.error.callCount).equals(3)
+			} catch (e) {
+				o(1).equals(0)("Error while testing the reporter")
+			}
+
+			console.log = log
+			console.error = error
+		})
 	})
 }(o)
 
