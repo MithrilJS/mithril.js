@@ -9,11 +9,7 @@ else window.o = m()
 	if (name != null) spec[name] = ctx = {}
 
 	try {throw new Error} catch (e) {
-		var stackTraceMatcher = new RegExp(
-			"^(?:(?!Error|"
-			+ e.stack.match(/[\/\\](.*?):\d+:\d+/)[1]
-			+ ").)*$", "gm"
-		)
+		var ospecFileName = e.stack.match(/[\/\\](.*?):\d+:\d+/)[1]
 	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
@@ -58,8 +54,19 @@ else window.o = m()
 		spy.callCount = 0
 		return spy
 	}
-	o.cleanStackTrace = function(stack) {
-		return stack.match(stackTraceMatcher).pop()
+	o.cleanStackTrace = function(error) {
+		var i = 0, header = error.message ? error.name + ": " + error.message : error.name, stack
+		// some environments add the name and message to the stack trace
+		if (error.stack.indexOf(header) === 0) {
+			stack = error.stack.slice(header.length).split(/\r?\n/)
+			stack.shift() // drop the initial empty string
+		} else {
+			stack = error.stack.split(/\r?\n/)
+		}
+		// skip ospec-related entries on the stack
+		while (stack[i].indexOf(ospecFileName) !== -1) i++
+		// now we're in user code
+		return stack[i]
 	}
 	o.run = function(_reporter) {
 		results = []
@@ -230,7 +237,8 @@ else window.o = m()
 			}
 			result.context = subjects.join(" > ")
 			result.message = message
-			result.error = error.stack
+			result.error = error
+
 		}
 		results.push(result)
 	}

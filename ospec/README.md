@@ -490,7 +490,7 @@ True if the test passed. **No other keys will exist on the result if this value 
 
 ### Error result.error
 
-The value of the stack property from the `Error` object explaining the reason behind a failure.
+The `Error` object explaining the reason behind a failure.
 
 ---
 

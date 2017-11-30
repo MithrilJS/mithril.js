@@ -188,7 +188,7 @@ o.spec("ospec", function() {
 			try {
 				throw new Error("line\nbreak")
 			} catch(error) {
-				var trace = o.cleanStackTrace(error.stack)
+				var trace = o.cleanStackTrace(error)
 				o(trace).notEquals("break")
 				o(trace.includes("test-ospec.js")).equals(true)
 			}
