@@ -611,13 +611,57 @@ o.spec("domMock", function() {
 				o(spy.args[0].type).equals("click")
 				o(spy.args[0].target).equals(div)
 			})
-			o("removeEventListener works", function(done) {
+			o("removeEventListener works (bubbling phase)", function() {
 				div.addEventListener("click", spy, false)
 				div.removeEventListener("click", spy, false)
 				div.dispatchEvent(e)
 
 				o(spy.callCount).equals(0)
-				done()
+			})
+			o("removeEventListener works (capture phase)", function() {
+				div.addEventListener("click", spy, true)
+				div.removeEventListener("click", spy, true)
+				div.dispatchEvent(e)
+
+				o(spy.callCount).equals(0)
+			})
+			o("removeEventListener is selective (bubbling phase)", function() {
+				var other = o.spy()
+				div.addEventListener("click", spy, false)
+				div.addEventListener("click", other, false)
+				div.removeEventListener("click", spy, false)
+				div.dispatchEvent(e)
+
+				o(spy.callCount).equals(0)
+				o(other.callCount).equals(1)
+			})
+			o("removeEventListener is selective (capture phase)", function() {
+				var other = o.spy()
+				div.addEventListener("click", spy, true)
+				div.addEventListener("click", other, true)
+				div.removeEventListener("click", spy, true)
+				div.dispatchEvent(e)
+
+				o(spy.callCount).equals(0)
+				o(other.callCount).equals(1)
+			})
+			o("removeEventListener only removes the handler related to a given phase (1/2)", function() {
+				spy = o.spy(function(e) {o(e.eventPhase).equals(3)})
+				$document.body.addEventListener("click", spy, true)
+				$document.body.addEventListener("click", spy, false)
+				$document.body.removeEventListener("click", spy, true)
+				div.dispatchEvent(e)
+
+				o(spy.callCount).equals(1)
+			})
+			o("removeEventListener only removes the handler related to a given phase (2/2)", function() {
+				spy = o.spy(function(e) {o(e.eventPhase).equals(1)})
+				$document.body.addEventListener("click", spy, true)
+				$document.body.addEventListener("click", spy, false)
+				$document.body.removeEventListener("click", spy, false)
+				div.dispatchEvent(e)
+
+				o(spy.callCount).equals(1)
 			})
 			o("click fires onclick", function() {
 				div.onclick = spy
@@ -653,6 +697,488 @@ o.spec("domMock", function() {
 
 				o(spy.callCount).equals(0)
 				done()
+			})
+		})
+		o.spec("capture and bubbling phases", function() {
+			var div, e
+			o.beforeEach(function() {
+				div = $document.createElement("div")
+				e = $document.createEvent("MouseEvents")
+				e.initEvent("click", true, true)
+
+				$document.body.appendChild(div)
+			})
+			o.afterEach(function() {
+				$document.body.removeChild(div)
+			})
+			o("capture and bubbling events both fire on the target in the order they were defined, regardless of the phase", function () {
+				var sequence = []
+				var capture = o.spy(function(ev){
+					sequence.push("capture")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(2)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals(div)
+				})
+				var bubble = o.spy(function(ev){
+					sequence.push("bubble")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(2)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals(div)
+				})
+
+				div.addEventListener("click", bubble, false)
+				div.addEventListener("click", capture, true)
+				div.dispatchEvent(e)
+
+				o(capture.callCount).equals(1)
+				o(bubble.callCount).equals(1)
+				o(sequence).deepEquals(["bubble", "capture"])
+			})
+			o("capture and bubbling events both fire on the parent", function () {
+				var sequence = []
+				var capture = o.spy(function(ev){
+					sequence.push("capture")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(1)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals($document.body)
+				})
+				var bubble = o.spy(function(ev){
+					sequence.push("bubble")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(3)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals($document.body)
+				})
+
+				$document.body.addEventListener("click", bubble, false)
+				$document.body.addEventListener("click", capture, true)
+				div.dispatchEvent(e)
+
+				o(capture.callCount).equals(1)
+				o(bubble.callCount).equals(1)
+				o(sequence).deepEquals(["capture", "bubble"])
+			})
+			o("useCapture defaults to false", function () {
+				var sequence = []
+				var parent = o.spy(function(ev){
+					sequence.push("parent")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(3)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals($document.body)
+				})
+				var target = o.spy(function(ev){
+					sequence.push("target")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(2)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals(div)
+				})
+
+				$document.body.addEventListener("click", parent)
+				div.addEventListener("click", target)
+				div.dispatchEvent(e)
+
+				o(parent.callCount).equals(1)
+				o(target.callCount).equals(1)
+				o(sequence).deepEquals(["target", "parent"])
+			})
+			o("legacy handlers fire on the bubbling phase", function () {
+				var sequence = []
+				var parent = o.spy(function(ev){
+					sequence.push("parent")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(3)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals($document.body)
+				})
+				var target = o.spy(function(ev){
+					sequence.push("target")
+
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(2)
+					o(ev.target).equals(div)
+					o(ev.currentTarget).equals(div)
+				})
+
+				$document.body.addEventListener("click", parent)
+				$document.body.onclick = parent
+				div.addEventListener("click", target)
+				div.dispatchEvent(e)
+
+				o(parent.callCount).equals(2)
+				o(target.callCount).equals(1)
+				o(sequence).deepEquals(["target", "parent", "parent"])
+			})
+			o("events do not propagate to child nodes", function() {
+				var target = o.spy(function(ev){
+					o(ev).equals(e)
+					o(ev.eventPhase).equals(2)
+					o(ev.target).equals($document.body)
+					o(ev.currentTarget).equals($document.body)
+				})
+				var child = o.spy(function(){
+				})
+
+				$document.body.addEventListener("click", target)
+				div.addEventListener("click", child)
+				$document.body.dispatchEvent(e)
+
+				o(target.callCount).equals(1)
+				o(child.callCount).equals(0)
+			})
+			o("e.stopPropagation 1/6", function () {
+				var capParent = o.spy(function(e){e.stopPropagation()})
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(0)
+				o(bubTarget.callCount).equals(0)
+				o(legacyTarget.callCount).equals(0)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopPropagation 2/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy(function(e){e.stopPropagation()})
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+
+			o("e.stopPropagation 3/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy(function(e){e.stopPropagation()})
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopPropagation 4/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy(function(e){e.stopPropagation()})
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopPropagation 5/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy(function(e){e.stopPropagation()})
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(1)
+				o(legacyParent.callCount).equals(1)
+			})
+			o("e.stopPropagation 6/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy(function(e){e.stopPropagation()})
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(1)
+				o(legacyParent.callCount).equals(1)
+			})
+			o("e.stopImmediatePropagation 1/6", function () {
+				var capParent = o.spy(function(e){e.stopImmediatePropagation()})
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(0)
+				o(bubTarget.callCount).equals(0)
+				o(legacyTarget.callCount).equals(0)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopImmediatePropagation 2/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy(function(e){e.stopImmediatePropagation()})
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(0)
+				o(legacyTarget.callCount).equals(0)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+
+			o("e.stopImmediatePropagation 3/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy(function(e){e.stopImmediatePropagation()})
+				var legacyTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(0)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopImmediatePropagation 4/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy(function(e){e.stopImmediatePropagation()})
+				var bubParent = o.spy()
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(0)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopImmediatePropagation 5/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var bubTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubParent = o.spy(function(e){e.stopImmediatePropagation()})
+				var legacyParent = o.spy()
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(1)
+				o(legacyParent.callCount).equals(0)
+			})
+			o("e.stopImmediatePropagation 6/6", function () {
+				var capParent = o.spy()
+				var capTarget = o.spy()
+				var legacyTarget = o.spy()
+				var bubTarget = o.spy()
+				var bubParent = o.spy()
+				var legacyParent = o.spy(function(e){e.stopImmediatePropagation()})
+
+				$document.body.addEventListener("click", capParent, true)
+				$document.body.addEventListener("click", bubParent, false)
+				$document.body.onclick = legacyParent
+
+				div.addEventListener("click", capTarget, true)
+				div.addEventListener("click", bubTarget, false)
+				div.onclick = legacyTarget
+
+				div.dispatchEvent(e)
+
+				o(capParent.callCount).equals(1)
+				o(capTarget.callCount).equals(1)
+				o(bubTarget.callCount).equals(1)
+				o(legacyTarget.callCount).equals(1)
+				o(bubParent.callCount).equals(1)
+				o(legacyParent.callCount).equals(1)
+			})
+			o("errors thrown in handlers don't interrupt the chain", function(done) {
+				var errMsg = "The presence of these six errors in the log is expected in non-Node.js environments"
+				var handler = o.spy(function(){throw errMsg})
+
+				$document.body.addEventListener("click", handler, true)
+				$document.body.addEventListener("click", handler, false)
+				$document.body.onclick = handler
+
+				div.addEventListener("click", handler, true)
+				div.addEventListener("click", handler, false)
+				div.onclick = handler
+
+				div.dispatchEvent(e)
+
+				o(handler.callCount).equals(6)
+
+				// Swallow the async errors in NodeJS
+				if (typeof process !== "undefined" && typeof process.once === "function"){
+					process.once("uncaughtException", function(e) {
+						if (e !== errMsg) throw e
+						process.once("uncaughtException", function(e) {
+							if (e !== errMsg) throw e
+							process.once("uncaughtException", function(e) {
+								if (e !== errMsg) throw e
+								process.once("uncaughtException", function(e) {
+									if (e !== errMsg) throw e
+									process.once("uncaughtException", function(e) {
+										if (e !== errMsg) throw e
+										process.once("uncaughtException", function(e) {
+											if (e !== errMsg) throw e
+											done()
+										})
+									})
+								})
+							})
+						})
+					})
+				} else {
+					done()
+				}
 			})
 		})
 	})
@@ -730,6 +1256,18 @@ o.spec("domMock", function() {
 				input.dispatchEvent(e)
 
 				o(input.checked).equals(true)
+			})
+			o("doesn't toggle on click when preventDefault() is used", function() {
+				var input = $document.createElement("input")
+				input.setAttribute("type", "checkbox")
+				input.checked = false
+				input.onclick = function(e) {e.preventDefault()}
+
+				var e = $document.createEvent("MouseEvents")
+				e.initEvent("click", true, true)
+				input.dispatchEvent(e)
+
+				o(input.checked).equals(false)
 			})
 		})
 		o.spec("input[value]", function() {
