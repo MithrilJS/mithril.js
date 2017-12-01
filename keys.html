@@ -194,7 +194,7 @@ m(&quot;div&quot;, [
 ])
 </code></pre>
 <h4 id="avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property"><a href="#avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property">Avoid passing model data directly to components if the model uses <code>key</code> as a data property</a></h4>
-<p>The <code>key</code> property may appear in your data model in a way that conflicts with Mithril&#39;s key logic. For example, a component may represent an entity whose <code>key</code> property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the <code>key</code> property, make sure to wrap the data such that Mithril doesn&#39;t misinterpret it as a rendering instruction:</p>
+<p>The <code>key</code> property may appear in your data model in a way that conflicts with Mithril&#39;s key logic. For example, a component may represent an entity whose <code>key</code> property is expected to change over time. This can lead to components receiving the wrong data, re-initialise, or change positions unexpectedly. If your data model uses the <code>key</code> property, make sure to wrap the data such that Mithril doesn&#39;t misinterpret it as a rendering instruction:</p>
 <pre><code class="lang-javascript">// Data model
 var users = [
     {id: 1, name: &quot;John&quot;, key: &#39;a&#39;},

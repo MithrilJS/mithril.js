@@ -57,6 +57,7 @@
 <li>Misc<ul>
 <li><a href="framework-comparison.html">Framework comparison</a></li>
 <li><strong><a href="change-log.html">Change log/Migration</a></strong><ul>
+<li><a href="#v116">v1.1.6</a></li>
 <li><a href="#v115">v1.1.5</a></li>
 <li><a href="#v114">v1.1.4</a></li>
 <li><a href="#v113">v1.1.3</a></li>
@@ -72,28 +73,42 @@
 </li>
 </ul>
 <hr>
-<h3 id="v115"><a href="#v115">v1.1.5</a></h3>
+<h3 id="v116"><a href="#v116">v1.1.6</a></h3>
+<h4 id="bug-fixes"><a href="#bug-fixes">Bug fixes</a></h4>
 <ul>
-<li>API: If a user sets the Content-Type header within a request&#39;s options, that value will be the entire header value rather than being appended to the default value (<a href="https://github.com/MithrilJS/mithril.js/pull/1924">#1924</a>)</li>
+<li>core: render() function can no longer prevent from changing <code>document.activeElement</code> in lifecycle hooks (<a href="https://github.com/MithrilJS/mithril.js/pull/1988">#1988</a>, <a href="https://github.com/purplecode">@purplecode</a>)</li>
+<li>core: don&#39;t call <code>onremove</code> on the children of components that return null from the view <a href="https://github.com/MithrilJS/mithril.js/issues/1921">#1921</a> <a href="https://github.com/octavore">octavore</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1922">#1922</a>)</li>
+<li>hypertext: correct handling of shared attributes object passed to <code>m()</code>. Will copy attributes when it&#39;s necessary <a href="https://github.com/MithrilJS/mithril.js/issues/1941">#1941</a> <a href="https://github.com/s-ilya">s-ilya</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1942">#1942</a>)</li>
+</ul>
+<h4 id="ospec-improvements"><a href="#ospec-improvements">Ospec improvements</a></h4>
+<ul>
+<li>Added support for async functions and promises in tests - (<a href="https://github.com/MithrilJS/mithril.js/pull/1928">#1928</a>)</li>
+<li>Added support for custom reporters (<a href="https://github.com/MithrilJS/mithril.js/pull/2020">#2009</a>)</li>
+<li>Error handling for async tests with <code>done</code> callbacks supports error as first argument</li>
+<li>Error messages which include newline characters do not swallow the stack trace <a href="https://github.com/MithrilJS/mithril.js/issues/1495">#1495</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1984">#1984</a>, <a href="https://github.com/RodericDay">@ RodericDay</a>)</li>
+<li>Make Ospec more <a href="https://flems.io">Flems</a>-friendly (#2034)</li>
+</ul>
+<hr>
+<h3 id="v115"><a href="#v115">v1.1.5</a></h3>
+<h4 id="bug-fixes1"><a href="#bug-fixes1">Bug fixes</a></h4>
+<ul>
+<li>API: If a user sets the Content-Type header within a request&#39;s options, that value will be the entire header value rather than being appended to the default value <a href="https://github.com/MithrilJS/mithril.js/issues/1919">#1919</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1924">#1924</a>, <a href="https://github.com/tskillian">@tskillian</a>)</li>
 </ul>
 <hr>
 <h3 id="v114"><a href="#v114">v1.1.4</a></h3>
-<h4 id="bug-fixes:"><a href="#bug-fixes:">Bug fixes:</a></h4>
+<h4 id="bug-fixes2"><a href="#bug-fixes2">Bug fixes</a></h4>
 <ul>
-<li>core: don&#39;t call <code>onremove</code> on the children of components that return null from the view <a href="https://github.com/MithrilJS/mithril.js/issues/1921">#1921</a> <a href="https://github.com/octavore">octavore</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1922">#1922</a>)</li>
-<li>hypertext: correct handling of shared attributes object passed to <code>m()</code>. Will copy attributes when it&#39;s necessary <a href="https://github.com/MithrilJS/mithril.js/issues/1941">#1941</a> <a href="https://github.com/s-ilya">s-ilya</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1942">#1942</a>)</li>
-<li>Fix IE bug where active element is null causing render function to throw error. (<a href="https://github.com/MithrilJS/mithril.js/pull/1943">1943</a>)</li>
+<li>Fix IE bug where active element is null causing render function to throw error (<a href="https://github.com/MithrilJS/mithril.js/pull/1943">#1943</a>, <a href="https://github.com/JacksonJN">@JacksonJN</a>)</li>
 </ul>
-<h4 id="ospec-improvements:"><a href="#ospec-improvements:">Ospec improvements:</a></h4>
-<h2 id="--log-using-utilinspect-to-show-object-content-instead-of-object-object-,-"><a href="#--log-using-utilinspect-to-show-object-content-instead-of-object-object-,-">- Log using util.inspect to show object content instead of &quot;[object Object]&quot; (<a href="https://github.com/MithrilJS/mithril.js/issues/1661">#1661</a>, <a href="https://github.com/porsager">@porsager</a>)</a></h2>
+<hr>
 <h3 id="v113"><a href="#v113">v1.1.3</a></h3>
-<h4 id="bug-fixes:1"><a href="#bug-fixes:1">Bug fixes:</a></h4>
+<h4 id="bug-fixes3"><a href="#bug-fixes3">Bug fixes</a></h4>
 <ul>
 <li>move out npm dependencies added by mistake</li>
 </ul>
 <hr>
 <h3 id="v112"><a href="#v112">v1.1.2</a></h3>
-<h4 id="bug-fixes:2"><a href="#bug-fixes:2">Bug fixes:</a></h4>
+<h4 id="bug-fixes4"><a href="#bug-fixes4">Bug fixes</a></h4>
 <ul>
 <li>core: Namespace fixes <a href="https://github.com/MithrilJS/mithril.js/issues/1819">#1819</a>, (<a href="https://github.com/MithrilJS/mithril.js/pull/1825">#1825</a> <a href="https://github.com/SamuelTilly">@SamuelTilly</a>), <a href="https://github.com/MithrilJS/mithril.js/issues/1820">#1820</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1864">#1864</a>), <a href="https://github.com/MithrilJS/mithril.js/issues/1872">#1872</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1873">#1873</a>)</li>
 <li>core: Fix select option to allow empty string value <a href="https://github.com/MithrilJS/mithril.js/issues/1814">#1814</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1828">#1828</a> <a href="https://github.com/spacejack">@spacejack</a>)</li>
@@ -104,20 +119,20 @@
 <li>router: Don&#39;t overwrite the options object when redirecting from <code>onmatch with m.route.set()</code> <a href="https://github.com/MithrilJS/mithril.js/issues/1857">#1857</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1889">#1889</a>)</li>
 <li>stream: Move the &quot;use strict&quot; directive inside the IIFE <a href="https://github.com/MithrilJS/mithril.js/issues/1831">#1831</a> (<a href="https://github.com/MithrilJS/mithril.js/pull/1893">#1893</a>)</li>
 </ul>
-<h4 id="ospec-improvements:1"><a href="#ospec-improvements:1">Ospec improvements:</a></h4>
+<h4 id="ospec-improvements1"><a href="#ospec-improvements1">Ospec improvements</a></h4>
 <ul>
 <li>Shell command: Ignore hidden directories and files (<a href="https://github.com/MithrilJS/mithril.js/pull/1855">#1855</a> <a href="https://github.com/pdfernhout">@pdfernhout)</a>)</li>
 <li>Library: Add the possibility to name new test suites (<a href="https://github.com/MithrilJS/mithril.js/pull/1529">#1529</a>)</li>
 </ul>
-<h4 id="docs--repo-maintenance:"><a href="#docs--repo-maintenance:">Docs / Repo maintenance:</a></h4>
+<h4 id="docs--repo-maintenance"><a href="#docs--repo-maintenance">Docs / Repo maintenance</a></h4>
 <p>Our thanks to <a href="https://github.com/0joshuaolson1">@0joshuaolson1</a>, <a href="https://github.com/ACXgit">@ACXgit</a>, <a href="https://github.com/cavemansspa">@cavemansspa</a>, <a href="https://github.com/CreaturesInUnitards">@CreaturesInUnitards</a>, <a href="https://github.com/dlepaux">@dlepaux</a>, <a href="https://github.com/isaaclyman">@isaaclyman</a>, <a href="https://github.com/kevinkace">@kevinkace</a>, <a href="https://github.com/micellius">@micellius</a>, <a href="https://github.com/spacejack">@spacejack</a> and <a href="https://github.com/yurivish">@yurivish</a></p>
-<h4 id="other:"><a href="#other:">Other:</a></h4>
+<h4 id="other"><a href="#other">Other</a></h4>
 <ul>
 <li>Addition of a performance regression test suite (<a href="https://github.com/MithrilJS/mithril.js/issues/1789">#1789</a>)</li>
 </ul>
 <hr>
 <h3 id="v111"><a href="#v111">v1.1.1</a></h3>
-<h4 id="bug-fixes"><a href="#bug-fixes">Bug fixes</a></h4>
+<h4 id="bug-fixes5"><a href="#bug-fixes5">Bug fixes</a></h4>
 <ul>
 <li>hyperscript: Allow <code>0</code> as the second argument to <code>m()</code> - <a href="https://github.com/MithrilJS/mithril.js/issues/1752">#1752</a> / <a href="https://github.com/MithrilJS/mithril.js/pull/1753">#1753</a> (<a href="https://github.com/StephanHoyer">@StephanHoyer</a>)</li>
 <li>hyperscript: restore <code>attrs.class</code> handling to what it was in v1.0.1 - <a href="https://github.com/MithrilJS/mithril.js/issues/1764">#1764</a> / <a href="https://github.com/MithrilJS/mithril.js/pull/1769">#1769</a></li>
@@ -131,7 +146,7 @@
 <li>support for closure components</li>
 <li>improvements in build and release automation</li>
 </ul>
-<h4 id="bug-fixes1"><a href="#bug-fixes1">Bug fixes</a></h4>
+<h4 id="bug-fixes6"><a href="#bug-fixes6">Bug fixes</a></h4>
 <ul>
 <li>fix IE11 input[type] error - <a href="https://github.com/MithrilJS/mithril.js/issues/1610">#1610</a></li>
 <li>apply <a href="https://github.com/MithrilJS/mithril.js/issues/1609">#1609</a> to unkeyed children case</li>
@@ -144,7 +159,7 @@
 <ul>
 <li>performance improvements in IE <a href="https://github.com/MithrilJS/mithril.js/pull/1598">#1598</a></li>
 </ul>
-<h4 id="bug-fixes2"><a href="#bug-fixes2">Bug fixes</a></h4>
+<h4 id="bug-fixes7"><a href="#bug-fixes7">Bug fixes</a></h4>
 <ul>
 <li>prevent infinite loop in non-existent default route - <a href="https://github.com/MithrilJS/mithril.js/issues/1579">#1579</a></li>
 <li>call correct lifecycle methods on children of recycled keyed vnodes - <a href="https://github.com/MithrilJS/mithril.js/issues/1609">#1609</a></li>

@@ -126,7 +126,7 @@ var link = &lt;a href={url}&gt;{greeting + &quot;!&quot;}&lt;/a&gt;
 <pre><code class="lang-bash">npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
 </code></pre>
 <p>Create a <code>.babelrc</code> file:</p>
-<pre><code class="lang-json">{
+<pre><code>{
     &quot;presets&quot;: [&quot;es2015&quot;],
     &quot;plugins&quot;: [
         [&quot;transform-react-jsx&quot;, {
@@ -134,8 +134,7 @@ var link = &lt;a href={url}&gt;{greeting + &quot;!&quot;}&lt;/a&gt;
         }]
     ]
 }
-</code></pre>
-<p>Next, create a file called <code>webpack.config.js</code></p>
+</code></pre><p>Next, create a file called <code>webpack.config.js</code></p>
 <pre><code class="lang-javascript">const path = require(&#39;path&#39;)
 
 module.exports = {
@@ -153,7 +152,6 @@ module.exports = {
     }
 }
 </code></pre>
-<p>For those familiar with Webpack already, please note that adding the Babel options to the <code>babel-loader</code> section of your <code>webpack.config.js</code> will throw an error, so you need to include them in the separate <code>.babelrc</code> file.</p>
 <p>This configuration assumes the source code file for the application entry point is in <code>src/index.js</code>, and this will output the bundle to <code>bin/app.js</code>.</p>
 <p>To run the bundler, setup an npm script. Open <code>package.json</code> and add this entry under <code>&quot;scripts&quot;</code>:</p>
 <pre><code>{
@@ -191,7 +189,7 @@ module.exports = {
 <p>Hyperscript is the compiled representation of JSX. It&#39;s designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:</p>
 <ul>
 <li>it does not require repeating the tag name in closing tags (e.g. <code>m(&quot;div&quot;)</code> vs <code>&lt;div&gt;&lt;/div&gt;</code>)</li>
-<li>static attributes can be written using CSS selector syntax (i.e. <code>m(&quot;a.button&quot;)</code> vs <code>&lt;a class=&quot;button&quot;&gt;&lt;/a&gt;</code>)</li>
+<li>static attributes can be written using CSS selector syntax (i.e. <code>m(&quot;a.button&quot;)</code> vs <code>&lt;div class=&quot;button&quot;&gt;&lt;/div&gt;</code></li>
 </ul>
 <p>In addition, since hyperscript is plain Javascript, it&#39;s often more natural to indent than JSX:</p>
 <pre><code class="lang-jsx">//JSX

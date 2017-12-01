@@ -438,7 +438,7 @@ promise
 <p>This example also illustrates another benefit of smaller functions: we reused the <code>getUserNames</code> function we had created above.</p>
 <hr>
 <h3 id="why-not-callbacks"><a href="#why-not-callbacks">Why not callbacks</a></h3>
-<p>Callbacks are another mechanism for working with asynchronous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an <code>onscroll</code> event handler).</p>
+<p>Callbacks are another mechanism for working with asynchrounous computations, and are indeed more adequate to use if an asynchronous computation may occur more than one time (for example, an <code>onscroll</code> event handler).</p>
 <p>However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).</p>
 <p>In addition, promises can considerably reduce boilerplate related to error handling.</p>
 

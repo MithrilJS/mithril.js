@@ -71,43 +71,26 @@
 <hr>
 <h3 id="npm"><a href="#npm">NPM</a></h3>
 <h4 id="quick-start-with-webpack"><a href="#quick-start-with-webpack">Quick start with Webpack</a></h4>
-<ol>
-<li><p>Initialize the directory as an npm package</p>
-<pre><code class="lang-bash">[body]gt; npm init --yes
-</code></pre>
-</li>
-<li><p>install required tools</p>
-<pre><code class="lang-bash">[body]gt; npm install mithril --save
-[body]gt; npm install webpack --save
-</code></pre>
-</li>
-<li><p>Add a &quot;start&quot; entry to the scripts section in <code>package.json</code></p>
-<pre><code class="lang-js">{
-// ...
-&quot;scripts&quot;: {
- &quot;start&quot;: &quot;webpack src/index.js bin/app.js --watch&quot;
-}
-}
-</code></pre>
-</li>
-<li><p>Create <code>src/index.js</code>
-```js
-import m from &quot;mithril&quot;;</p>
-</li>
-</ol>
-<p>m.render(document.body, &quot;hello world&quot;);</p>
-<pre><code>
-4. create `index.html`
-```html
-&lt;!DOCTYPE html&gt;
+<pre><code class="lang-bash"># 1) install
+npm install mithril --save
 
-&lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;
-</code></pre><ol>
-<li>run bundler<pre><code class="lang-bash">[body]gt; npm start
+npm install webpack --save
+
+# 2) add this line into the scripts section in package.json
+#    &quot;scripts&quot;: {
+#        &quot;start&quot;: &quot;webpack src/index.js bin/app.js --watch&quot;
+#    }
+
+# 3) create an `src/index.js` file
+
+# 4) create an `index.html` file containing `&lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;`
+
+# 5) run bundler
+npm start
+
+# 6) open `index.html` in the (default) browser
+open index.html
 </code></pre>
-</li>
-<li>open <code>index.html</code> in your (default) browser</li>
-</ol>
 <h4 id="step-by-step"><a href="#step-by-step">Step by step</a></h4>
 <p>For production-level projects, the recommended way of installing Mithril is to use NPM.</p>
 <p>NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the Javascript ecosystem. Download and install <a href="https://nodejs.org">Node.js</a>; NPM will be automatically installed as well.</p>

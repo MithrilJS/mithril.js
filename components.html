@@ -104,9 +104,6 @@ m(Example)
     oncreate: function(vnode) {
         console.log(&quot;DOM created&quot;)
     },
-    onbeforeupdate: function(vnode, old) {
-        return true
-    },
     onupdate: function(vnode) {
         console.log(&quot;DOM updated&quot;)
     },
@@ -119,6 +116,9 @@ m(Example)
     },
     onremove: function(vnode) {
         console.log(&quot;removing DOM element&quot;)
+    },
+    onbeforeupdate: function(vnode, old) {
+        return true
     },
     view: function(vnode) {
         return &quot;hello&quot;
@@ -196,7 +196,7 @@ class AnotherES6ClassComponent {
 m.render(document.body, m(closureComponent))
 
 // EXAMPLE: via m.mount
-m.mount(document.body, closureComponent)
+m.mount(document.body, closuresComponent)
 
 // EXAMPLE: via m.route
 m.route(document.body, &quot;/&quot;, {

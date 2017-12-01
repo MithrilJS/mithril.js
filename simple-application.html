@@ -157,8 +157,7 @@ module.exports = {
 </code></pre>
 <p>By default, Mithril views are described using <a href="hyperscript.html">hyperscript</a>. Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply Javascript, it&#39;s possible to leverage a lot of Javascript tooling ecosystem: for example <a href="es6.html">Babel</a>, <a href="jsx.html">JSX</a> (inline-HTML syntax extension), <a href="http://eslint.org/">eslint</a> (linting), <a href="https://github.com/mishoo/UglifyJS2">uglifyjs</a> (minification), <a href="https://github.com/gotwarlost/istanbul">istanbul</a> (code coverage), <a href="https://flowtype.org/">flow</a> (static type analysis), etc.</p>
 <p>Let&#39;s use Mithril hyperscript to create a list of items. Hyperscript is the most idiomatic way of writing Mithril views, but <a href="jsx.html">JSX is another popular alternative that you could explore</a> once you&#39;re more comfortable with the basics:</p>
-<pre><code class="lang-javascript">// src/views/UserList.js
-var m = require(&quot;mithril&quot;)
+<pre><code class="lang-javascript">var m = require(&quot;mithril&quot;)
 var User = require(&quot;../models/User&quot;)
 
 module.exports = {
@@ -477,8 +476,7 @@ module.exports = User
 <hr>
 <p>Currently, we&#39;re only able to navigate back to the user list via the browser back button. Ideally, we would like to have a menu - or more generically, a layout where we can put global UI elements</p>
 <p>Let&#39;s create a file <code>src/views/Layout.js</code>:</p>
-<pre><code class="lang-javascript">// src/views/Layout.js
-var m = require(&quot;mithril&quot;)
+<pre><code class="lang-javascript">var m = require(&quot;mithril&quot;)
 
 module.exports = {
     view: function(vnode) {
