@@ -37,6 +37,30 @@ module.exports = function(options) {
 	function isModernEvent(type) {
 		return type === "transitionstart" || type === "transitionend" || type === "animationstart" || type === "animationend"
 	}
+	function dispatchEvent(e) {
+		var stopped = false
+		e.stopImmediatePropagation = function() {
+			e.stopPropagation()
+			stopped = true
+		}
+		e.currentTarget = this
+		if (this._events[e.type] != null) {
+			for (var i = 0; i < this._events[e.type].handlers.length; i++) {
+				var useCapture = this._events[e.type].options[i].capture
+				if (useCapture && e.eventPhase < 3 || !useCapture && e.eventPhase > 1) {
+					var handler = this._events[e.type].handlers[i]
+					if (typeof handler === "function") try {handler.call(this, e)} catch(e) {setTimeout(function(){throw e})}
+					else try {handler.handleEvent(e)} catch(e) {setTimeout(function(){throw e})}
+					if (stopped) return
+				}
+			}
+		}
+		// this is inaccurate. Normally the event fires in definition order, including legacy events
+		// this would require getters/setters for each of them though and we haven't gotten around to
+		// adding them since it would be at a high perf cost or would entail some heavy refactoring of
+		// the mocks (prototypes instead of closures).
+		if (e.eventPhase > 1 && typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) try {this["on" + e.type](e)} catch(e) {setTimeout(function(){throw e})}
+	}
 	function appendChild(child) {
 		var ancestor = this
 		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
@@ -260,35 +284,99 @@ module.exports = function(options) {
 						else this.setAttribute("class", value)
 					},
 					focus: function() {activeElement = this},
-					addEventListener: function(type, callback) {
-						if (events[type] == null) events[type] = [callback]
-						else events[type].push(callback)
+					addEventListener: function(type, handler, options) {
+						if (arguments.length > 2) {
+							if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
+							else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
+							else options = {capture: options}
+						} else {
+							options = {capture: false}
+						}
+						if (events[type] == null) events[type] = {handlers: [handler], options: [options]}
+						else {
+							var found = false
+							for (var i = 0; i < events[type].handlers.length; i++) {
+								if (events[type].handlers[i] === handler && events[type].options[i].capture === options.capture) {
+									found = true
+									break
+								}
+							}
+							if (!found) {
+								events[type].handlers.push(handler)
+								events[type].options.push(options)
+							}
+						}
 					},
-					removeEventListener: function(type, callback) {
+					removeEventListener: function(type, handler, options) {
+						if (arguments.length > 2) {
+							if (typeof options === "object" && options != null) throw new TypeError("NYI: addEventListener options")
+							else if (typeof options !== "boolean") throw new TypeError("boolean expected for useCapture")
+							else options = {capture: options}
+						} else {
+							options = {capture: false}
+						}
 						if (events[type] != null) {
-							var index = events[type].indexOf(callback)
-							if (index > -1) events[type].splice(index, 1)
+							for (var i = 0; i < events[type].handlers.length; i++) {
+								if (events[type].handlers[i] === handler && events[type].options[i].capture === options.capture) {
+									events[type].handlers.splice(i, 1)
+									events[type].options.splice(i, 1)
+									break;
+								}
+							}
 						}
 					},
 					dispatchEvent: function(e) {
-						if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].value === "checkbox" && e.type === "click") {
-							this.checked = !this.checked
+						var parents = []
+						if (this.parentNode != null) {
+							var parent = this.parentNode
+							do {
+								parents.push(parent)
+								parent = parent.parentNode
+							} while (parent != null)
 						}
-
 						e.target = this
-						if (events[e.type] != null) {
-							for (var i = 0; i < events[e.type].length; i++) {
-								var handler = events[e.type][i]
-								if (typeof handler === "function") handler.call(this, e)
-								else handler.handleEvent(e)
+						var prevented = false
+						e.preventDefault = function() {
+							prevented = true
+						}
+						var stopped = false
+						e.stopPropagation = function() {
+							stopped = true
+						}
+						e.eventPhase = 1
+						try {
+							for (var i = parents.length - 1; 0 <= i; i--) {
+								dispatchEvent.call(parents[i], e)
+								if (stopped) {
+									return
+								}
+							}
+							e.eventPhase = 2
+							dispatchEvent.call(this, e)
+							if (stopped) {
+								return
+							}
+							e.eventPhase = 3
+							for (var i = 0; i < parents.length; i++) {
+								dispatchEvent.call(parents[i], e)
+								if (stopped) {
+									return
+								}
+							}
+						} catch(e) {
+							throw e
+						} finally {
+							e.eventPhase = 0
+							if (!prevented) {
+								if (this.nodeName === "INPUT" && this.attributes["type"] != null && this.attributes["type"].value === "checkbox" && e.type === "click") {
+									this.checked = !this.checked
+								}
 							}
 						}
-						e.preventDefault = function() {
-							// TODO: should this do something?
-						}
-						if (typeof this["on" + e.type] === "function" && !isModernEvent(e.type)) this["on" + e.type](e)
+
 					},
 					onclick: null,
+					_events: events
 				}
 
 				if (element.nodeName === "A") {
@@ -515,7 +603,8 @@ module.exports = function(options) {
 			},
 			createEvent: function() {
 				return {
-					initEvent: function(type) {this.type = type},
+					eventPhase: 0,
+					initEvent: function(type) {this.type = type}
 				}
 			},
 			get activeElement() {return activeElement},
