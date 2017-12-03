@@ -16,13 +16,17 @@ var FullCalendar = {
 		Object.assign(vnode.attrs.parentState, {fullCalendarEl: vnode.dom})
 	},
 
+	// Consider that the lib will modify this parent element in the DOM (e.g. add dependent class attribute and values).
+	// As long as you return the same view results here, mithril will not
+	// overwrite the actual DOM because it's always comparing old and new VDOM
+	// before applying DOM updates. 
 	view: function (vnode) {
 		return m('div')
 	},
 
 	onbeforeremove: function (vnode) {
 		// Run any destroy / cleanup methods here.
-		//$(vnode.state.fullCalendarEl).fullCalendar('destroy')
+		//E.g. $(vnode.state.fullCalendarEl).fullCalendar('destroy')
 	}
 }
 
