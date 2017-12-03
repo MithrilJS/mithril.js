@@ -8,7 +8,7 @@ Integration with third party libraries or vanilla javascript code can be achieve
 var FullCalendar = {
 
 	oncreate: function (vnode) {
-		console.log('FullCalndar::oncreate')
+		console.log('FullCalendar::oncreate')
 		$(vnode.dom).fullCalendar({
 			// put your initial options and callbacks here
 		})
