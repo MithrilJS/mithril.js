@@ -195,7 +195,7 @@ o.spec("onremove", function() {
 			o("onremove doesn't fire on nodes that go from pool to pool (#1990)", function() {
 				var onremove = o.spy();
 
-				render(root, [m("div", m("div")),  m("div", m("div", {onremove: onremove}))]);
+				render(root, [m("div", m("div")), m("div", m("div", {onremove: onremove}))]);
 				render(root, [m("div", m("div"))]);
 				render(root, []);
 

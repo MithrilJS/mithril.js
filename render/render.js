@@ -189,8 +189,9 @@ module.exports = function($window) {
 	// The updateNodes() function:
 	// - deals with trivial cases
 	// - determines whether the lists are keyed or unkeyed
-	//   (we take advantage of the fact that mixed diff is not supported and settle on the
-	//   keyedness of the first vnode we find)
+	//   (Currently we look for the first pair of non-null nodes and deem the lists unkeyed
+	//   if both nodes are unkeyed. TODO (v2) We may later take advantage of the fact that
+	//   mixed diff is not supported and settle on the keyedness of the first vnode we find)
 	// - diffs them and patches the DOM if needed (that's the brunt of the code)
 	// - manages the leftovers: after diffing, are there:
 	//   - old nodes left to remove?
@@ -258,7 +259,7 @@ module.exports = function($window) {
 	// in three circumstances:
 	// - If the old and the new vnodes are the same object (`===`), diff is not performed unless
 	//   the old node comes from the pool (since it must be recycled/re-created).
-	// - The value of `oFromPool` is passed as the `recycling` parameter of `upateNode()` (whether
+	// - The value of `oFromPool` is passed as the `recycling` parameter of `updateNode()` (whether
 	//   the parent is being recycled is also factred in here)
 	// - It is used in the DOM node insertion logic (see below)
 	//
@@ -284,19 +285,15 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes, recyclingParent)
 		else {
-			var start = 0, commonLength = Math.min(old.length, vnodes.length), originalOldLength = old.length, hasPool = false, isUnkeyed
+			var start = 0, commonLength = Math.min(old.length, vnodes.length), originalOldLength = old.length, hasPool = false, isUnkeyed = false
 			for(; start < commonLength; start++) {
-				if (old[start] != null) {
-					isUnkeyed = old[start].key == null
-					break
-				}
-				if (vnodes[start] != null) {
-					isUnkeyed = vnodes[start].key == null
+				if (old[start] != null && vnodes[start] != null) {
+					if (old[start].key == null && vnodes[start].key == null) isUnkeyed = true
 					break
 				}
 			}
 			if (isUnkeyed && originalOldLength === vnodes.length) {
-				for (; start < originalOldLength; start++) {
+				for (start = 0; start < originalOldLength; start++) {
 					if (old[start] === vnodes[start] && !recyclingParent || old[start] == null && vnodes[start] == null) continue
 					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, originalOldLength, nextSibling))
 					else if (vnodes[start] == null) removeNodes(old, start, start + 1, vnodes, recyclingParent)
@@ -310,7 +307,7 @@ module.exports = function($window) {
 				old = old.concat(old.pool)
 			}
 
-			var oldStart = start, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
+			var oldStart = start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
 
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldStart]
@@ -318,12 +315,12 @@ module.exports = function($window) {
 				oFromPool = hasPool && oldStart >= originalOldLength
 				if (o === v && !oFromPool && !recyclingParent || o == null && v == null) oldStart++, start++
 				else if (o == null) {
-					if (isUnkeyed) {
+					if (isUnkeyed || v.key == null) {
 						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, originalOldLength, nextSibling))
 					}
 					oldStart++
 				} else if (v == null) {
-					if (isUnkeyed){
+					if (isUnkeyed || o.key == null) {
 						removeNodes(old, start, start + 1, vnodes, recyclingParent)
 						oldStart++
 					}
@@ -568,8 +565,8 @@ module.exports = function($window) {
 	// not fire.
 	function removeNode(vnode, context, recycling) {
 		var expected = 1, called = 0
-		var original = vnode.state
 		if (!recycling) {
+			var original = vnode.state
 			if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
 				var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 				if (result != null && typeof result.then === "function") {
