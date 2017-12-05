@@ -238,8 +238,8 @@ o.spec("updateElement", function() {
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("restores correctly when recycling", function() {
-		var vnode = {tag: "div", key: 1}
-		var updated = {tag: "div", key: 2}
+		var vnode = {tag: "div", key: 1, reuse: true}
+		var updated = {tag: "div", key: 2, reuse: true}
 
 		render(root, [vnode])
 		var a = vnode.dom
@@ -253,12 +253,12 @@ o.spec("updateElement", function() {
 		o(a).equals(c)
 	})
 	o("restores correctly when recycling via map", function() {
-		var a = {tag: "div", key: 1}
-		var b = {tag: "div", key: 2}
-		var c = {tag: "div", key: 3}
-		var d = {tag: "div", key: 4}
-		var e = {tag: "div", key: 5}
-		var f = {tag: "div", key: 6}
+		var a = {tag: "div", key: 1, reuse: true}
+		var b = {tag: "div", key: 2, reuse: true}
+		var c = {tag: "div", key: 3, reuse: true}
+		var d = {tag: "div", key: 4, reuse: true}
+		var e = {tag: "div", key: 5, reuse: true}
+		var f = {tag: "div", key: 6, reuse: true}
 
 		render(root, [a, b, c])
 		var x = root.childNodes[1]

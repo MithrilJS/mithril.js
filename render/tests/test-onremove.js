@@ -93,8 +93,8 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove on recycle", function() {
 		var remove = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = [{tag: "div", key: 2, attrs: {onremove: remove}}]
+		var vnodes = [{tag: "div", key: 1, reuse: true}]
+		var temp = [{tag: "div", key: 2, reuse: true, attrs: {onremove: remove}}]
 		var updated = [{tag: "div", key: 1}]
 
 		render(root, vnodes)
@@ -203,8 +203,8 @@ o.spec("onremove", function() {
 			})
 			o("doesn't fire when removing the children of a node that's brought back from the pool (#1991 part 2)", function() {
 				var onremove = o.spy()
-				var vnode = {tag: "div", key: 1, children: [{tag: "div", attrs: {onremove: onremove}}]}
-				var temp = {tag: "div", key: 2}
+				var vnode = {tag: "div", key: 1, reuse: true, children: [{tag: "div", attrs: {onremove: onremove}}]}
+				var temp = {tag: "div", key: 2, reuse: true}
 				var updated = {tag: "div", key: 1, children: [{tag: "p"}]}
 
 				render(root, [vnode])

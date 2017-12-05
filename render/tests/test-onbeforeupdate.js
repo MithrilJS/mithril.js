@@ -121,7 +121,7 @@ o.spec("onbeforeupdate", function() {
 
 	o("doesn't fire on recycled nodes", function() {
 		var onbeforeupdate = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
+		var vnodes = [{tag: "div", key: 1, reuse: true}]
 		var temp = []
 		var updated = [{tag: "div", key: 1, attrs: {onbeforeupdate: onbeforeupdate}}]
 
