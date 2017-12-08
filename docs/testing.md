@@ -74,7 +74,9 @@ var m = require("mithril")
 
 module.exports = {
 	view: function() {
-		return m("div", "Hello world")
+		return m("div", 
+		    m("p", "Hello World")
+		)
 	}
 }
 ```
@@ -90,7 +92,7 @@ o.spec("MyComponent", function() {
 		
 		o(vnode.tag).equals("div")
 		o(vnode.children.length).equals(1)
-		o(vnode.children[0].tag).equals("#")
+		o(vnode.children[0].tag).equals("p")
 		o(vnode.children[0].children).equals("Hello world")
 	})
 })

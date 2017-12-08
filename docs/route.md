@@ -104,7 +104,7 @@ Argument          | Type      | Required | Description
 This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
 
 ```JS
-m("a[href=/]", {oncreate: m.route.link})`.
+m("a[href=/]", {oncreate: m.route.link})
 ```
 
 Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
@@ -112,15 +112,21 @@ Using `m.route.link` as a `oncreate` hook causes the link to behave as a router 
 If the `href` attribute is not static, the `onupdate` hook must also be set:
 
 ```JS
-m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})`
+m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})
 ```
 
-`m.route.link(vnode)`
+`m.route.link` can also set the `options` passed to `m.route.set` when the link is clicked by calling the function in the lifecycle methods:
 
-Argument          | Type        | Required | Description
------------------ | ----------- | -------- | ---
-`vnode`           | `Vnode`     | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
-**returns**       |             |          | Returns `undefined`
+```JS
+m("a[href=/]", {oncreate: m.route.link({replace: true})})
+```
+
+`m.route.link(args)`
+
+Argument          | Type           | Required | Description
+----------------- | ---------------| -------- | ---
+`args`            | `Vnode|Object` | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
+**returns**       | `function`     |          | Returns the onclick handler function for the component
 
 ##### m.route.param
 
@@ -588,7 +594,7 @@ m.route(document.body, "/secret", {
 
 #### Preloading data
 
-Typically, a component can load data upon initialization. Loading data this way renders the component twice (once upon routing, and once after the request completes).
+Typically, a component can load data upon initialization. Loading data this way renders the component twice. The first render pass occurs upon routing, and the second fires after the request completes. Take care to note that `loadUsers()` returns a Promise, but any Promise returned by `oninit` is currently ignored. The second render pass comes from the [`background` option for `m.request`](request.md).
 
 ```javascript
 var state = {
