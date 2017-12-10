@@ -65,7 +65,7 @@ var data = m.parseQueryString("?a=hello&b=world")
 Querystrings that contain bracket notation are correctly parsed into deep data structures
 
 ```javascript
-m.parseQueryString("a[0]=hello&a[1]=world")
+m.parseQueryString("a[]=hello&a[]=world")
 
 // data is {a: ["hello", "world"]}
 ```
