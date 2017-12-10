@@ -48,23 +48,19 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a[b][c]=x&a[b][d]=y")
 		o(data).deepEquals({a: {b: {c: "x", d: "y"}}})
 	})
-	o("parses nested array", function() {
+	o("parses object with number key", function() {
 		var data = parseQueryString("a[0]=x&a[1]=y")
-		o(data).deepEquals({a: ["x", "y"]})
+		o(data).deepEquals({a: {"0": "x", "1": "y"}})
 	})
-	o("parses deep nested array", function() {
+	o("parses deep nested object with number key", function() {
 		var data = parseQueryString("a[0][0]=x&a[0][1]=y")
-		o(data).deepEquals({a: [["x", "y"]]})
-	})
-	o("parses deep nested object in array", function() {
-		var data = parseQueryString("a[0][c]=x&a[0][d]=y")
-		o(data).deepEquals({a: [{c: "x", d: "y"}]})
+		o(data).deepEquals({a: {"0": {"0": "x", "1": "y"}}})
 	})
 	o("parses deep nested array in object", function() {
-		var data = parseQueryString("a[b][0]=x&a[b][1]=y")
-		o(data).deepEquals({a: {b: ["x", "y"]}})
+		var data = parseQueryString("a[b][]=x&a[b][]=y&a[c][]=z")
+		o(data).deepEquals({a: {b: ["x", "y"], c: ["z"]}})
 	})
-	o("parses array without index", function() {
+	o("parses array", function() {
 		var data = parseQueryString("a[]=x&a[]=y&b[]=w&b[]=z")
 		o(data).deepEquals({a: ["x", "y"], b: ["w", "z"]})
 	})
