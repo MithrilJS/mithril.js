@@ -13,7 +13,7 @@ module.exports = function(object) {
 	function destructure(key, value) {
 		if (Array.isArray(value)) {
 			for (var i = 0; i < value.length; i++) {
-				destructure(key + "[" + i + "]", value[i])
+				destructure(key + "[]", value[i])
 			}
 		}
 		else if (Object.prototype.toString.call(value) === "[object Object]") {
