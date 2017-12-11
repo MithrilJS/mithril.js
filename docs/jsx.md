@@ -191,7 +191,7 @@ JSX is useful for teams where HTML is primarily written by someone without Javas
 Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
 
 - it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
-- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<div class="button"></div>`
+- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<a class="button"></a>`)
 
 In addition, since hyperscript is plain Javascript, it's often more natural to indent than JSX:
 

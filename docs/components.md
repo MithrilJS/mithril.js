@@ -61,6 +61,9 @@ var ComponentWithHooks = {
 	oncreate: function(vnode) {
 		console.log("DOM created")
 	},
+	onbeforeupdate: function(vnode, old) {
+		return true
+	},
 	onupdate: function(vnode) {
 		console.log("DOM updated")
 	},
@@ -73,9 +76,6 @@ var ComponentWithHooks = {
 	},
 	onremove: function(vnode) {
 		console.log("removing DOM element")
-	},
-	onbeforeupdate: function(vnode, old) {
-		return true
 	},
 	view: function(vnode) {
 		return "hello"
@@ -177,7 +177,7 @@ They can be consumed in the same way regular components can.
 m.render(document.body, m(closureComponent))
 
 // EXAMPLE: via m.mount
-m.mount(document.body, closuresComponent)
+m.mount(document.body, closureComponent)
 
 // EXAMPLE: via m.route
 m.route(document.body, "/", {

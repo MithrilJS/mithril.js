@@ -1,6 +1,6 @@
 "use strict"
 
-var http = require("http")
+var http = require("https")
 var querystring = require("querystring")
 var fs = require("fs")
 
@@ -22,7 +22,6 @@ module.exports = function(input, output, options, done) {
 		var response = ""
 		var req = http.request({
 			method: "POST",
-			protocol: "http:",
 			hostname: "closure-compiler.appspot.com",
 			path: "/compile",
 			headers: {
@@ -33,8 +32,16 @@ module.exports = function(input, output, options, done) {
 			res.on("data", function(chunk) {
 				response += chunk.toString()
 			})
+
 			res.on("end", function() {
-				var results = JSON.parse(response)
+				try {
+					var results = JSON.parse(response)
+				} catch(e) {
+					console.error(response);
+
+					throw e;
+				}
+
 				if (results.errors) {
 					for (var i = 0; i < results.errors.length; i++) console.log(results.errors[i])
 				}

@@ -376,15 +376,15 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("1")
 		})
-		o("null becomes the empty string", function() {
+		o("null becomes 'null'", function() {
 			var a = {tag: "option", attrs: {value: null}}
 			var b = {tag: "option", attrs: {value: "test"}}
 			var c = {tag: "option", attrs: {value: null}}
 
 			render(root, [a]);
 
-			o(a.dom.value).equals("")
-			o(a.dom.getAttribute("value")).equals("")
+			o(a.dom.value).equals("null")
+			o(a.dom.getAttribute("value")).equals("null")
 
 			render(root, [b]);
 
@@ -393,8 +393,8 @@ o.spec("attributes", function() {
 
 			render(root, [c]);
 
-			o(c.dom.value).equals("")
-			o(c.dom.getAttribute("value")).equals("")
+			o(c.dom.value).equals("null")
+			o(c.dom.getAttribute("value")).equals("null")
 		})
 		o("'' and 0 are different values", function() {
 			var a = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}
@@ -462,6 +462,19 @@ o.spec("attributes", function() {
 				{tag:"option", attrs: {value: ""}}
 			]}
 		}
+		/* FIXME
+		   This incomplete test is meant for testing #1916.
+		   However it cannot be completed until #1978 is addressed
+		   which is a lack a working select.selected / option.selected
+		   attribute. Ask isiahmeadows.
+
+		o("render select options", function() {
+			var select = {tag: "select", selectedIndex: 0, children: [
+				{tag:"option", attrs: {value: "1", selected: ""}}
+			]}
+			render(root, select)
+		})
+		*/
 		o("can be set as text", function() {
 			var a = makeSelect()
 			var b = makeSelect("2")

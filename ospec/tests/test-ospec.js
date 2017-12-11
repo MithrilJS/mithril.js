@@ -18,6 +18,77 @@ new function(o) {
 	o.run()
 }(o)
 
+new function(o) {
+	var clone = o.new()
+
+	clone.spec("clone", function() {
+		clone("fail", function() {
+			clone(true).equals(false)
+		})
+
+		clone("pass", function() {
+			clone(true).equals(true)
+		})
+	})
+
+	// Predicate test passing on clone results
+	o.spec("reporting", function() {
+		o("reports per instance", function(done, timeout) {
+			timeout(100) // Waiting on clone
+
+			clone.run(function(results) {
+				o(typeof results).equals("object")
+				o("length" in results).equals(true)
+				o(results.length).equals(2)("Two results")
+
+				o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
+				o(!("error" in results[1]) && "pass" in results[1]).equals(true)("only pass key present in passing result")
+				o(results[0].pass).equals(false)("Test meant to fail has failed")
+				o(results[1].pass).equals(true)("Test meant to pass has passed")
+
+				done()
+			})
+		})
+		o("o.report() returns the number of failures", function () {
+			var log = console.log, error = console.error
+			console.log = o.spy()
+			console.error = o.spy()
+
+			function makeError(msg) {try{throw msg ? new Error(msg) : new Error} catch(e){return e}}
+			try {
+				var errCount = o.report([{pass: true}, {pass: true}])
+
+				o(errCount).equals(0)
+				o(console.log.callCount).equals(1)
+				o(console.error.callCount).equals(0)
+
+				errCount = o.report([
+					{pass: false, error: makeError("hey"), message: "hey"}
+				])
+
+				o(errCount).equals(1)
+				o(console.log.callCount).equals(2)
+				o(console.error.callCount).equals(1)
+
+				errCount = o.report([
+					{pass: false, error: makeError("hey"), message: "hey"},
+					{pass: true},
+					{pass: false, error: makeError("ho"), message: "ho"}
+				])
+				
+				o(errCount).equals(2)
+				o(console.log.callCount).equals(3)
+				o(console.error.callCount).equals(3)
+			} catch (e) {
+				o(1).equals(0)("Error while testing the reporter")
+			}
+
+			console.log = log
+			console.error = error
+		})
+	})
+}(o)
+
 o.spec("ospec", function() {
 	o.spec("sync", function() {
 		var a = 0, b = 0, illegalAssertionThrows = false
@@ -107,7 +178,7 @@ o.spec("ospec", function() {
 			o(output).deepEquals({tag: "div", children: children})
 		})
 	})
-	o.spec("async", function() {
+	o.spec("async callback", function() {
 		var a = 0, b = 0
 
 		o.before(function(done) {
@@ -145,6 +216,65 @@ o.spec("ospec", function() {
 				o(a).equals(1)("a and b should be initialized")
 
 				done()
+			})
+		})
+	})
+
+	o.spec("stack trace cleaner", function() {
+		o("handles line breaks", function() {
+			try {
+				throw new Error("line\nbreak")
+			} catch(error) {
+				var trace = o.cleanStackTrace(error)
+				o(trace).notEquals("break")
+				o(trace.includes("test-ospec.js")).equals(true)
+			}
+		})
+	})
+
+	o.spec("async promise", function() {
+		var a = 0, b = 0
+
+		function wrapPromise(fn) {
+			return new Promise((resolve, reject) => {
+				callAsync(() => {
+					try {
+						fn()
+						resolve()
+					} catch(e) {
+						reject(e)
+					}
+				})
+			})
+		}
+
+		o.before(function() {
+			return wrapPromise(() => {
+				a = 1
+			})
+		})
+
+		o.after(function() {
+			return wrapPromise(function() {
+				a = 0
+			})
+		})
+
+		o.beforeEach(function() {
+			return wrapPromise(function() {
+				b = 1
+			})
+		})
+		o.afterEach(function() {
+			return wrapPromise(function() {
+				b = 0
+			})
+		})
+
+		o("promise functions", function() {
+			return wrapPromise(function() {
+				o(a).equals(b)
+				o(a).equals(1)("a and b should be initialized")
 			})
 		})
 	})
