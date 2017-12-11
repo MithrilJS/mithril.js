@@ -21,11 +21,11 @@ It may seem wasteful to recreate vnodes so frequently, but as it turns out, mode
 
 For that reason, Mithril uses a sophisticated and highly optimized virtual DOM diffing algorithm to minimize the amount of DOM updates. Mithril *also* generates carefully crafted vnode data structures that are compiled by Javascript engines for near-native data structure access performance. In addition, Mithril aggressively optimizes the function that creates vnodes as well.
 
-The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide [retained mode rendering](https://en.wikipedia.org/wiki/Retained_mode), a style of rendering that makes it drastically easier to manage UI complexity.
+The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide a declarative [immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) API, a style of rendering that makes it drastically easier to manage UI complexity.
 
-To illustrate why retained mode is so important, consider the DOM API and HTML. The DOM API is an [immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering system and requires writing out exact instructions to assemble a DOM tree procedurally. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.
+To illustrate why immediate mode is so important, consider the DOM API and HTML. The DOM API is an imperative [retained mode](https://en.wikipedia.org/wiki/Retained_mode) API and requires 1. writing out exact instructions to assemble a DOM tree procedurally, and 2. writing out other instructions to update that tree. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.
 
-In contrast, HTML is a retained mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.
+In contrast, HTML is closer to an immediate mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.
 
 Virtual DOM goes one step further than HTML by allowing you to write *dynamic* DOM trees without having to manually write multiple sets of DOM API calls to efficiently synchronize the UI to arbitrary data changes.
 
