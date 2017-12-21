@@ -2,6 +2,8 @@
 
 - [CDN](#cdn)
 - [NPM](#npm)
+- [Quick start with Webpack](#quick-start-with-webpack)
+- [Typescript](#typescript)
 
 ### CDN
 
@@ -15,8 +17,13 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 ### NPM
 
-#### Quick start with Webpack
+```bash
+$> npm install mithril --save
+```
 
+---
+
+### Quick start with Webpack
 
 1. Initialize the directory as an npm package
 ```bash
@@ -251,3 +258,15 @@ If you don't have the ability to run a bundler script due to company security po
 // if a CommonJS environment is not detected, Mithril will be created in the global scope
 m.render(document.body, "hello world")
 ```
+
+---
+
+### TypeScript
+
+TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
+
+```bash
+$> npm install @types/mithril --save-dev
+```
+
+For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts
