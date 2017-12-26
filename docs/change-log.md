@@ -33,6 +33,7 @@
 
 #### Bug fixes
 
+- API: Invalid escapes in routes are now safely handled.
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
 - core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.

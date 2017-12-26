@@ -42,6 +42,12 @@ o.spec("Router.getPath", function() {
 
 					o(router.getPath()).equals("/ö?ö=ö#ö=ö")
 				})
+				o("gets route w/ invalid escape", function() {
+					$window.location.href = prefix + "/abc%def"
+					router.defineRoutes({"/test": {data: 1}, "/abcdef": {data: 2}}, onRouteChange, onFail)
+
+					o(router.getPath()).equals("/abc%def")
+				})
 			})
 		})
 	})

@@ -55,6 +55,35 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
+				o("renders default route when an invalid escape is in the route", function(done) {
+					$window.location.href = prefix + "/abc%def"
+					route(root, "/", {
+						"/" : {
+							view: function() {
+								return m("div")
+							}
+						},
+						"/abcdef" : {
+							view: function() {
+								return m("span")
+							}
+						},
+						"/abc%def" : {
+							view: function() {
+								return m("p")
+							}
+						}
+					})
+
+					callAsync(function() {
+						throttleMock.fire()
+
+						o(root.firstChild.nodeName).equals("P")
+
+						done()
+					})
+				})
+
 				o("routed mount points only redraw asynchronously (POJO component)", function() {
 					var view = o.spy()
 
