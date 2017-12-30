@@ -104,8 +104,7 @@ function hyperscript(selector) {
 	var normalized = Vnode.normalizeChildren(children)
 
 	if (typeof selector === "string") {
-		var cached = selectorCache[selector] || compileSelector(selector)
-		return execSelector(cached, attrs, normalized)
+		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, normalized)
 	} else {
 		return Vnode(selector, attrs.key, attrs, normalized)
 	}
