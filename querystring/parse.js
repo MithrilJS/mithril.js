@@ -17,15 +17,16 @@ module.exports = function(string) {
 		var cursor = data
 		if (key.indexOf("[") > -1) levels.pop()
 		for (var j = 0; j < levels.length; j++) {
-			var level = levels[j], nextLevel = levels[j + 1]
-			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
-			var isValue = j === levels.length - 1
+			var level = levels[j]
 			if (level === "") {
 				var key = levels.slice(0, j).join()
 				if (counters[key] == null) counters[key] = 0
 				level = counters[key]++
 			}
 			if (cursor[level] == null) {
+				var nextLevel = levels[j + 1]
+				var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
+				var isValue = j === levels.length - 1
 				cursor[level] = isValue ? value : isNumber ? [] : {}
 			}
 			cursor = cursor[level]
