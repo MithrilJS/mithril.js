@@ -25,7 +25,7 @@ module.exports = function(string) {
 			}
 			if (cursor[level] == null) {
 				var nextLevel = levels[j + 1]
-				var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
+				var isNumber = nextLevel === "" || !isNaN(parseInt(nextLevel, 10))
 				var isValue = j === levels.length - 1
 				cursor[level] = isValue ? value : isNumber ? [] : {}
 			}
