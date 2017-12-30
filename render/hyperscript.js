@@ -79,7 +79,6 @@ function execSelector(state, attrs, children) {
 }
 
 function hyperscript(selector) {
-	// Because sloppy mode sucks
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
