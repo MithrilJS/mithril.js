@@ -87,7 +87,7 @@ o.spec("hyperscript", function() {
 			o(m("a.x", {
 				className: null
 			}).attrs).deepEquals({
-				className: "x"
+				className: "x null"
 			})
 			o(m("a.x", {
 				className: undefined
@@ -97,7 +97,7 @@ o.spec("hyperscript", function() {
 			o(m("a.x", {
 				className: false
 			}).attrs).deepEquals({
-				className: "x"
+				className: "x false"
 			})
 			o(m("a.x", {
 				className: true

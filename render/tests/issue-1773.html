@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+<script src="../../mithril.js"></script>
+</head>
+<body>
+</body>
+</html>
+
+<script>
+function test(x) {
+  m.render(document.body, [])
+  m.render(document.body, [])
+  m.render(document.body, x)
+  console.log(document.body.innerHTML)  
+}
+
+console.clear()
+console.log('---- a class ----------------')
+test(m('a', {class: null}))
+test(m('a', {class: undefined}))
+test(m('a', {class: false}))
+test(m('a', {class: true}))
+test(m('a', {class: ""}))
+
+console.log('---- svg class ----------------')
+
+test(m('svg', {class: null}))
+test(m('svg', {class: undefined}))
+test(m('svg', {class: false}))
+test(m('svg', {class: true}))
+test(m('svg', {class: ""}))
+
+console.log('---- a.x class ----------------')
+test(m('a.x', {class: null}))
+test(m('a.x', {class: undefined}))
+test(m('a.x', {class: false}))
+test(m('a.x', {class: true}))
+test(m('a.x', {class: ""}))
+
+console.log('---- a className ----------------')
+test(m('a', {className: null}))
+test(m('a', {className: undefined}))
+test(m('a', {className: false}))
+test(m('a', {className: true}))
+test(m('a', {className: ""}))
+
+console.log('---- svg className ----------------')
+
+test(m('svg', {className: null}))
+test(m('svg', {className: undefined}))
+test(m('svg', {className: false}))
+test(m('svg', {className: true}))
+test(m('svg', {className: ""}))
+
+console.log('---- a.x className ----------------')
+test(m('a.x', {className: null}))
+test(m('a.x', {className: undefined}))
+test(m('a.x', {className: false}))
+test(m('a.x', {className: true}))
+test(m('a.x', {className: ""}))
+
+console.log('---- a vnode attrs.class ---------')
+test({tag:'a', attrs: {class: null}})
+test({tag:'a', attrs: {class: undefined}})
+test({tag:'a', attrs: {class: false}})
+test({tag:'a', attrs: {class: true}})
+test({tag:'a', attrs: {class: ""}})
+
+console.log('---- svg vnode attrs.class ---------')
+test({tag:'svg', attrs: {class: null}})
+test({tag:'svg', attrs: {class: undefined}})
+test({tag:'svg', attrs: {class: false}})
+test({tag:'svg', attrs: {class: true}})
+test({tag:'svg', attrs: {class: ""}})
+
+console.log('---- a vnode attrs.className ---------')
+test({tag:'a', attrs: {className: null}})
+test({tag:'a', attrs: {className: undefined}})
+test({tag:'a', attrs: {className: false}})
+test({tag:'a', attrs: {className: true}})
+test({tag:'a', attrs: {className: ""}})
+
+console.log('---- svg vnode attrs.className ---------')
+test({tag:'svg', attrs: {className: null}})
+test({tag:'svg', attrs: {className: undefined}})
+test({tag:'svg', attrs: {className: false}})
+test({tag:'svg', attrs: {className: true}})
+test({tag:'svg', attrs: {className: ""}})
+</script>

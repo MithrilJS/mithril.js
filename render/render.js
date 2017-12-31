@@ -99,8 +99,8 @@ module.exports = function($window) {
 		ns = getNameSpace(vnode) || ns
 
 		var element = ns ?
-			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
-			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
+			is !== undefined ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
+			is !== undefined ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
 		vnode.dom = element
 
 		if (attrs != null) {
@@ -666,7 +666,7 @@ module.exports = function($window) {
 			element[key] = value
 		}
 		else {
-			if (typeof value === "boolean") {
+			if (typeof value === "boolean" && key !== "class" && ns == null) {
 				if (value) element.setAttribute(key, "")
 				else element.removeAttribute(key)
 			}
