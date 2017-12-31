@@ -31,7 +31,7 @@ function compileSelector(selector) {
 
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
-	var className = attrs.className || attrs.class
+	var className = attrs.className == null && attrs.class !== undefined ? attrs.className || attrs.class : attrs.class || attrs.className
 
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
