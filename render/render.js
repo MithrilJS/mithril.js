@@ -19,12 +19,12 @@ module.exports = function($window) {
 	}
 
 	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
-	// inside an iframe. Catch and swallow this error, and heavy-handidly return document.body.
+	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
 	function activeElement() {
 		try {
 			return $doc.activeElement
 		} catch (e) {
-			return document.body
+			return null
 		}
 	}
 	//create
