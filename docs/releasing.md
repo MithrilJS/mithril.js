@@ -13,7 +13,7 @@
 1. Ensure your local branch is up to date
 
 ```bash
-$ git co next
+$ git checkout next
 $ git pull --rebase mithriljs next
 ```
 
@@ -37,7 +37,7 @@ $ git push mithriljs next
 5. Switch to `master` and make sure it's up to date
 
 ```bash
-$ git co master
+$ git checkout master
 $ git pull --rebase mithriljs master
 ```
 
@@ -74,7 +74,7 @@ This helps to ensure that the `version` field of `package.json` doesn't get out 
 12. Switch to `next` and make sure it's up to date
 
 ```bash
-$ git co next
+$ git checkout next
 $ git pull --rebase mithriljs next
 ```
 
@@ -103,12 +103,12 @@ Fixes to documentation can land whenever, updates to the site are published via 
 # These steps assume that MithrilJS/mithril.js is a git remote named "mithriljs"
 
 # Ensure your next branch is up to date
-$ git co next
+$ git checkout next
 $ git pull mithriljs next
 
 # Splat the docs folder from next onto master
-$ git co master
-$ git co next -- ./docs
+$ git checkout master
+$ git checkout next -- ./docs
 
 # Manually ensure that no new feature docs were added
 
@@ -122,7 +122,7 @@ After the Travis build completes the updated docs should appear on https://mithr
 1. Ensure your local branch is up to date
 
 ```bash
-$ git co next
+$ git checkout next
 $ git pull --rebase mithriljs next
 ```
 
@@ -146,7 +146,7 @@ $ git push mithriljs next
 5. Switch to `master` and make sure it's up to date
 
 ```bash
-$ git co master
+$ git checkout master
 $ git pull --rebase mithriljs master
 ```
 
