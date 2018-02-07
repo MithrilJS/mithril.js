@@ -839,6 +839,10 @@ var coreRenderer = function($window) {
 	}
 	function setAttr(vnode, key2, old, value, ns) {
 		var element = vnode.dom
+		if (typeof value === "undefined" && key2 === "value" && old !== value) {
+			element.value = ""
+			return
+		}
 		if (key2 === "key" || key2 === "is" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
 		var nsLastIndex = key2.indexOf(":")
 		if (nsLastIndex > -1 && key2.substr(0, nsLastIndex) === "xlink") {
