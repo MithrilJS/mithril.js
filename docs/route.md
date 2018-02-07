@@ -323,7 +323,7 @@ It's also possible to have variadic routes, i.e. a route with an argument that c
 
 ```javascript
 m.route(document.body, "/edit/pictures/image.jpg", {
-	"/files/:file...": Edit,
+	"/edit/:file...": Edit,
 })
 ```
 
