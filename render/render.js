@@ -473,6 +473,10 @@ module.exports = function($window) {
 	}
 	function setAttr(vnode, key, old, value, ns) {
 		var element = vnode.dom
+        if (typeof value === "undefined" && key === "value" && old !== value) {
+            element.value = ''
+            return
+        }
 		if (key === "key" || key === "is" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
 		var nsLastIndex = key.indexOf(":")
 		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
