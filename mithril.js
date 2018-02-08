@@ -997,6 +997,10 @@ var coreRenderer = function($window) {
 	function setAttr(vnode, key2, old, value, ns) {
 		if (key2 === "key" || key2 === "is" || isLifecycleMethod(key2)) return
 		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
+		if (typeof value === "undefined" && key2 === "value" && old !== value) {
+			vnode.dom.value = ""
+			return
+		}
 		if ((old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
 		if (key2.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key2, value)
