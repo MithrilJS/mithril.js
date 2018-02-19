@@ -47,6 +47,13 @@
 
 ---
 
+### v1.1.7
+
+- Promise polyfill implementation separated from polyfilling logic.
+- `PromisePolyfill` is now available on the exported/global `m`.
+
+---
+
 ### v1.1.6
 
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
