@@ -15,6 +15,7 @@ o.spec("promise", function() {
 		o("constructor has correct methods", function() {
 			o(typeof Promise.prototype.then).equals("function")
 			o(typeof Promise.prototype.catch).equals("function")
+			o(typeof Promise.prototype.finally).equals("function")
 			o(typeof Promise.resolve).equals("function")
 			o(typeof Promise.reject).equals("function")
 			o(typeof Promise.race).equals("function")
@@ -51,6 +52,24 @@ o.spec("promise", function() {
 
 			promise.catch(function(value) {
 				o(value).equals(1)
+			}).then(done)
+		})
+		o("finally after then returns promise", function(done) {
+			var promise = Promise.resolve(1)
+
+			promise.then(function(value) {
+				o(value).equals(1)
+			}).finally(function(value) {
+				o(value).equals(undefined)
+			}).then(done)
+		})
+		o("finally after catch returns promise", function(done) {
+			var promise = Promise.reject(1)
+
+			promise.catch(function(value) {
+				o(value).equals(1)
+			}).finally(function(value) {
+				o(value).equals(undefined)
 			}).then(done)
 		})
 	})

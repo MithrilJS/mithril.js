@@ -61,6 +61,20 @@ PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
 PromisePolyfill.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
 }
+PromisePolyfill.prototype.finally = function(callback) {
+	return this.then(
+		function(value) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return value
+			})
+		},
+		function(reason) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return PromisePolyfill.reject(reason);
+			})
+		}
+	)
+}
 PromisePolyfill.resolve = function(value) {
 	if (value instanceof PromisePolyfill) return value
 	return new PromisePolyfill(function(resolve) {resolve(value)})
@@ -96,10 +110,18 @@ PromisePolyfill.race = function(list) {
 }
 
 if (typeof window !== "undefined") {
-	if (typeof window.Promise === "undefined") window.Promise = PromisePolyfill
+	if (typeof window.Promise === "undefined") {
+		window.Promise = PromisePolyfill
+	} else if (!window.Promise.prototype.finally) {
+		window.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
 	module.exports = window.Promise
 } else if (typeof global !== "undefined") {
-	if (typeof global.Promise === "undefined") global.Promise = PromisePolyfill
+	if (typeof global.Promise === "undefined") {
+		global.Promise = PromisePolyfill
+	} else if (!global.Promise.prototype.finally) {
+		global.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
 	module.exports = global.Promise
 } else {
 	module.exports = PromisePolyfill
