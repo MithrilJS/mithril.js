@@ -237,7 +237,7 @@ var buildQueryString = function(object) {
 	}
 }
 var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
-var _8 = function($window, Promise) {
+var _9 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
@@ -386,7 +386,7 @@ var _8 = function($window, Promise) {
 	}
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
-var requestService = _8(window, PromisePolyfill)
+var requestService = _9(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
 	var $emptyFragment = $doc.createDocumentFragment()
@@ -1188,7 +1188,7 @@ function throttle(callback) {
 		}
 	}
 }
-var _11 = function($window, throttleMock) {
+var _12 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
 		if (e.redraw === false) e.redraw = undefined
@@ -1214,9 +1214,9 @@ var _11 = function($window, throttleMock) {
 	redraw.sync = sync
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
-var redrawService = _11(window)
+var redrawService = _12(window)
 requestService.setCompletionCallback(redrawService.redraw)
-var _16 = function(redrawService0) {
+var _17 = function(redrawService0) {
 	return function(root, component) {
 		if (component === null) {
 			redrawService0.render(root, [])
@@ -1233,7 +1233,7 @@ var _16 = function(redrawService0) {
 		run0()
 	}
 }
-m.mount = _16(redrawService)
+m.mount = _17(redrawService)
 var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1361,7 +1361,7 @@ var coreRouter = function($window) {
 	}
 	return router
 }
-var _20 = function($window, redrawService0) {
+var _21 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v) {return v}
 	var render1, component, attrs3, currentPath, lastUpdate
@@ -1429,14 +1429,14 @@ var _20 = function($window, redrawService0) {
 	}
 	return route
 }
-m.route = _20(window, redrawService)
+m.route = _21(window, redrawService)
 m.withAttr = function(attrName, callback, context) {
 	return function(e) {
 		callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-var _28 = coreRenderer(window)
-m.render = _28.render
+var _29 = coreRenderer(window)
+m.render = _29.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
@@ -1444,6 +1444,7 @@ m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
 m.version = "1.1.3"
 m.vnode = Vnode
+m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());
