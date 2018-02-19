@@ -26,6 +26,8 @@ A [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/G
 
 A Promise is a mechanism for working with asynchronous computations.
 
+Mithril provides a polyfill when the environment does not support Promises. The polyfill can also be referenced specifically via `m.PromisePolyfill`.
+
 ---
 
 ### Signature
