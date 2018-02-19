@@ -54,30 +54,77 @@ o.spec("promise", function() {
 				o(value).equals(1)
 			}).then(done)
 		})
-		o("finally returns promise", function(done) {
+		o("finally lets a fulfilled value pass though", function(done) {
 			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){return 2})
 
-			promise.finally(function(value) {
-				o(value).equals(undefined)
-			}).finally(done)
-		})
-		o("finally after then returns promise", function(done) {
-			var promise = Promise.resolve(1)
-
-			promise.then(function(value) {
+			promise.finally(spy).then(function(value){
 				o(value).equals(1)
-			}).finally(function(value) {
-				o(value).equals(undefined)
-			}).then(done)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
 		})
-		o("finally after catch returns promise", function(done) {
+		o("finally lets a rejected reason pass though", function(done) {
 			var promise = Promise.reject(1)
+			var spy = o.spy(function(){return 2})
 
-			promise.catch(function(value) {
-				o(value).equals(1)
-			}).finally(function(value) {
-				o(value).equals(undefined)
-			}).then(done)
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(1)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a fulfilled value when it throws", function(done) {
+			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){throw 2})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a fulfilled value when it returns a rejected Promise", function(done) {
+			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){return Promise.reject(2)})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a rejected reason when it throws", function(done) {
+			var promise = Promise.reject(1)
+			var spy = o.spy(function(){throw 2})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a rejected reason when it returns a rejected Promise", function(done) {
+			var promise = Promise.reject(1)
+			var spy = o.spy(function(){return Promise.reject(2)})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
 		})
 	})
 	o.spec("resolve", function() {
