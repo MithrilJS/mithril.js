@@ -13,6 +13,13 @@
 
 ---
 
+### v1.1.7
+
+#### Bug fixes
+
+- core: Workaround for [Internet Explorer bug](https://www.tjvantoll.com/2013/08/30/bugs-with-document-activeelement-in-internet-explorer/) when running in an iframe
+
+
 ### v1.1.6
 
 #### Bug fixes
