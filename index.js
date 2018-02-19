@@ -17,5 +17,6 @@ m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.version = "bleeding-edge"
 m.vnode = require("./render/vnode")
+m.PromisePolyfill = require("./promise/polyfill")
 
 module.exports = m
