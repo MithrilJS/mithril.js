@@ -54,6 +54,13 @@ o.spec("promise", function() {
 				o(value).equals(1)
 			}).then(done)
 		})
+		o("finally returns promise", function(done) {
+			var promise = Promise.resolve(1)
+
+			promise.finally(function(value) {
+				o(value).equals(undefined)
+			}).finally(done)
+		})
 		o("finally after then returns promise", function(done) {
 			var promise = Promise.resolve(1)
 
