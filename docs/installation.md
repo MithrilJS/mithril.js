@@ -3,7 +3,7 @@
 - [CDN](#cdn)
 - [NPM](#npm)
 - [Quick start with Webpack](#quick-start-with-webpack)
-- [Typescript](#typescript)
+- [TypeScript](#typescript)
 
 ### CDN
 
@@ -64,6 +64,9 @@ m.render(document.body, "hello world");
 ```bash
 $> npm start
 ```
+
+**Note:** If you see an error `Error: Can't resolve 'bin/app.js'`, go ahead and create that file.
+
 6. open `index.html` in your (default) browser
 
 #### Step by step
