@@ -65,8 +65,6 @@ m.render(document.body, "hello world");
 $> npm start
 ```
 
-**Note:** If you see an error `Error: Can't resolve 'bin/app.js'`, go ahead and create that file.
-
 6. open `index.html` in your (default) browser
 
 #### Step by step
