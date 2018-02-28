@@ -33,15 +33,15 @@ $> npm init --yes
 2. install required tools
 ```bash
 $> npm install mithril --save
-$> npm install webpack --save
+$> npm install webpack webpack-cli --save-dev
 ```
 
-3. Add a "start" entry to the scripts section in `package.json`
+3. Add a "start" entry to the scripts section in `package.json`.
 ```js
 {
   // ...
   "scripts": {
-    "start": "webpack src/index.js bin/app.js --watch"
+    "start": "webpack src/index.js --output bin/app.js -d --watch"
   }
 }
 ```
@@ -56,8 +56,9 @@ m.render(document.body, "hello world");
 4. create `index.html`
 ```html
 <!DOCTYPE html>
-
-<script src="bin/app.js"></script>
+<body>
+    <script src="bin/app.js"></script>
+</body>
 ```
 
 5. run bundler
@@ -65,7 +66,7 @@ m.render(document.body, "hello world");
 $> npm start
 ```
 
-6. open `index.html` in your (default) browser
+6. open `index.html` in a browser
 
 #### Step by step
 
@@ -106,7 +107,7 @@ Most browser today do not natively support modularization systems (CommonJS or E
 A popular way for creating a bundle is to setup an NPM script for [Webpack](https://webpack.js.org/). To install Webpack, run this from the command line:
 
 ```bash
-npm install webpack --save-dev
+npm install webpack webpack-cli --save-dev
 ```
 
 Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
@@ -115,7 +116,7 @@ Open the `package.json` that you created earlier, and add an entry to the `scrip
 {
 	"name": "my-project",
 	"scripts": {
-		"start": "webpack src/index.js bin/app.js -d --watch"
+		"start": "webpack src/index.js --output bin/app.js -d --watch"
 	}
 }
 ```
@@ -177,8 +178,8 @@ If you open bin/app.js, you'll notice that the Webpack bundle is not minified, s
 {
 	"name": "my-project",
 	"scripts": {
-		"start": "webpack src/index.js bin/app.js -d --watch",
-		"build": "webpack src/index.js bin/app.js -p",
+		"start": "webpack src/index.js --output bin/app.js -d --watch",
+		"build": "webpack src/index.js --output bin/app.js -p",
 	}
 }
 ```
