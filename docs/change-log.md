@@ -29,7 +29,7 @@
 - API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
 - API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
 - API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
-
+- Mocks: add limited support for the DOMParser API
 
 #### Bug fixes
 
