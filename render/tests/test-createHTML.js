@@ -31,7 +31,7 @@ o.spec("createHTML", function() {
 		o(vnode.dom).equals(null)
 		o(vnode.domSize).equals(0)
 	})
-	o("handles multiple children", function() {
+	o("handles multiple children in HTML", function() {
 		var vnode = {tag: "<", children: "<a></a><b></b>"}
 		render(root, [vnode])
 
@@ -50,5 +50,35 @@ o.spec("createHTML", function() {
 
 			o(vnode.dom.nodeName).equals(tag.toUpperCase())
 		})
+	})
+	o("creates SVG", function() {
+		var vnode = {tag: "<", children: "<g></g>"}
+		render(root, [{tag:"svg", children: [vnode]}])
+
+		o(vnode.dom.nodeName).equals("g")
+		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
+	})
+	o("creates text SVG", function() {
+		var vnode = {tag: "<", children: "a"}
+		render(root, [{tag:"svg", children: [vnode]}])
+
+		o(vnode.dom.nodeValue).equals("a")
+	})
+	o("handles empty SVG", function() {
+		var vnode = {tag: "<", children: ""}
+		render(root, [{tag:"svg", children: [vnode]}])
+
+		o(vnode.dom).equals(null)
+		o(vnode.domSize).equals(0)
+	})
+	o("handles multiple children in SVG", function() {
+		var vnode = {tag: "<", children: "<g></g><text></text>"}
+		render(root, [{tag:"svg", children: [vnode]}])
+
+		o(vnode.domSize).equals(2)
+		o(vnode.dom.nodeName).equals("g")
+		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
+		o(vnode.dom.nextSibling.nodeName).equals("text")
+		o(vnode.dom.nextSibling.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 })
