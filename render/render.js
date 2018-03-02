@@ -34,7 +34,7 @@ module.exports = function($window) {
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": return createText(parent, vnode, nextSibling)
-				case "<": return createHTML(parent, vnode, nextSibling)
+				case "<": return createHTML(parent, vnode, ns, nextSibling)
 				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
 				default: return createElement(parent, vnode, hooks, ns, nextSibling)
 			}
@@ -46,12 +46,16 @@ module.exports = function($window) {
 		insertNode(parent, vnode.dom, nextSibling)
 		return vnode.dom
 	}
-	function createHTML(parent, vnode, nextSibling) {
+	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
+	function createHTML(parent, vnode, ns, nextSibling) {
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match[1]] || "div"
-		var temp = $doc.createElement(parent1)
-
-		temp.innerHTML = vnode.children
+		var temp = $doc.createElement(possibleParents[match[1]] || "div")
+		if (ns === "http://www.w3.org/2000/svg") {
+			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
+			temp = temp.firstChild
+		} else {
+			temp.innerHTML = vnode.children
+		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
 		var fragment = $doc.createDocumentFragment()
@@ -388,7 +392,7 @@ module.exports = function($window) {
 				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
-					case "<": updateHTML(parent, old, vnode, nextSibling); break
+					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
 					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
 					default: updateElement(old, vnode, recycling, hooks, ns)
 				}
@@ -406,10 +410,10 @@ module.exports = function($window) {
 		}
 		vnode.dom = old.dom
 	}
-	function updateHTML(parent, old, vnode, nextSibling) {
+	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			createHTML(parent, vnode, nextSibling)
+			createHTML(parent, vnode, ns, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
