@@ -4,9 +4,10 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 
 o.spec("domMock", function() {
-	var $document
+	var $document, $window
 	o.beforeEach(function() {
-		$document = domMock().document
+		$window = domMock()
+		$document = $window.document
 	})
 
 	o.spec("createElement", function() {
@@ -496,6 +497,45 @@ o.spec("domMock", function() {
 			div.innerHTML = "<b></b>"
 
 			o(a.parentNode).equals(null)
+		})
+		o("empty SVG document", function() {
+			var div = $document.createElement("div")
+			div.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>"
+
+			o(typeof div.firstChild).notEquals(undefined)
+			o(div.firstChild.nodeName).equals("svg")
+			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(div.firstChild.childNodes.length).equals(0)
+		})
+		o("text elements", function() {
+			var div = $document.createElement("div")
+			div.innerHTML =
+				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
+					+ "<text>hello</text>"
+					+ "<text> </text>"
+					+ "<text>world</text>"
+				+ "</svg>"
+
+			o(div.firstChild.nodeName).equals("svg")
+			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+
+			var nodes = div.firstChild.childNodes
+			o(nodes.length).equals(3)
+			o(nodes[0].nodeName).equals("text")
+			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[0].childNodes.length).equals(1)
+			o(nodes[0].childNodes[0].nodeName).equals("#text")
+			o(nodes[0].childNodes[0].nodeValue).equals("hello")
+			o(nodes[1].nodeName).equals("text")
+			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[1].childNodes.length).equals(1)
+			o(nodes[1].childNodes[0].nodeName).equals("#text")
+			o(nodes[1].childNodes[0].nodeValue).equals(" ")
+			o(nodes[2].nodeName).equals("text")
+			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[2].childNodes.length).equals(1)
+			o(nodes[2].childNodes[0].nodeName).equals("#text")
+			o(nodes[2].childNodes[0].nodeValue).equals("world")
 		})
 	})
 	o.spec("focus", function() {
@@ -1790,6 +1830,64 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.callCount).equals(1)
 			o(spies.valueSetter.this).equals(textarea)
 			o(spies.valueSetter.args[0]).equals("aaa")
+		})
+	})
+	o.spec("DOMParser for SVG", function(){
+		var $DOMParser
+		o.beforeEach(function() {
+			$DOMParser = $window.DOMParser
+		})
+		o("basics", function(){
+			o(typeof $DOMParser).equals("function")
+
+			var parser = new $DOMParser()
+
+			o(parser instanceof $DOMParser).equals(true)
+			o(typeof parser.parseFromString).equals("function")
+		})
+		o("empty document", function() {
+			var parser = new $DOMParser()
+			var doc = parser.parseFromString(
+				"<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+				"image/svg+xml"
+			)
+
+			o(typeof doc.documentElement).notEquals(undefined)
+			o(doc.documentElement.nodeName).equals("svg")
+			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(doc.documentElement.childNodes.length).equals(0)
+		})
+		o("text elements", function() {
+			var parser = new $DOMParser()
+			var doc = parser.parseFromString(
+				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
+					+ "<text>hello</text>"
+					+ "<text> </text>"
+					+ "<text>world</text>"
+				+ "</svg>",
+				"image/svg+xml"
+			)
+
+			o(doc.documentElement.nodeName).equals("svg")
+			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
+
+			var nodes = doc.documentElement.childNodes
+			o(nodes.length).equals(3)
+			o(nodes[0].nodeName).equals("text")
+			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[0].childNodes.length).equals(1)
+			o(nodes[0].childNodes[0].nodeName).equals("#text")
+			o(nodes[0].childNodes[0].nodeValue).equals("hello")
+			o(nodes[1].nodeName).equals("text")
+			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[1].childNodes.length).equals(1)
+			o(nodes[1].childNodes[0].nodeName).equals("#text")
+			o(nodes[1].childNodes[0].nodeValue).equals(" ")
+			o(nodes[2].nodeName).equals("text")
+			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[2].childNodes.length).equals(1)
+			o(nodes[2].childNodes[0].nodeName).equals("#text")
+			o(nodes[2].childNodes[0].nodeValue).equals("world")
 		})
 	})
 })
