@@ -61,6 +61,20 @@ PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
 PromisePolyfill.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
 }
+PromisePolyfill.prototype.finally = function(callback) {
+	return this.then(
+		function(value) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return value
+			})
+		},
+		function(reason) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return PromisePolyfill.reject(reason);
+			})
+		}
+	)
+}
 PromisePolyfill.resolve = function(value) {
 	if (value instanceof PromisePolyfill) return value
 	return new PromisePolyfill(function(resolve) {resolve(value)})
