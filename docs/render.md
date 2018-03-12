@@ -36,7 +36,7 @@ Argument    | Type                 | Required | Description
 
 ### How it works
 
-The `m.render(element, vnodes)` method takes a virtual DOM tree (typically generated via the [`m()` hyperscript function](hyperscript.md), generates a DOM tree and mounts it on `element`. If `element` already has a DOM tree mounted via a previous `m.render()` call, `vnodes` is diffed against the previous `vnodes` tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all. 
+The `m.render(element, vnodes)` method takes a virtual DOM tree (typically generated via the [`m()` hyperscript function](hyperscript.md)), generates a DOM tree and mounts it on `element`. If `element` already has a DOM tree mounted via a previous `m.render()` call, `vnodes` is diffed against the previous `vnodes` tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all. 
 
 `m.render` is synchronous.
 
