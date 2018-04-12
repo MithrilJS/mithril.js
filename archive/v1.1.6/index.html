@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -46,6 +46,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -219,7 +221,7 @@ m.mount(root, Hello)
 }
 </code></pre>
 <p>As you can see, this component simply renders a link to <code>#!/hello</code>. The <code>#!</code> part is known as a hashbang, and it&#39;s a common convention used in Single Page Applications to indicate that the stuff after it (the <code>/hello</code> part) is a route path.</p>
-<p>Now that we going to have more than one screen, we use <code>m.route</code> instead of <code>m.mount</code>.</p>
+<p>Now that we&#39;re going to have more than one screen, we use <code>m.route</code> instead of <code>m.mount</code>.</p>
 <pre><code class="lang-javascript">m.route(root, &quot;/splash&quot;, {
     &quot;/splash&quot;: Splash,
     &quot;/hello&quot;: Hello,

@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -54,10 +54,10 @@
 <li><a href="#streamfantasy-landof">Stream[&quot;fantasy-land/of&quot;]</a></li>
 </ul>
 </li>
-<li><a href="#static-members">Instance members</a><ul>
+<li><a href="#instance-members">Instance members</a><ul>
 <li><a href="#streammap">stream.map</a></li>
 <li><a href="#streamend">stream.end</a></li>
-<li><a href="#streamfantasy-landof">stream[&quot;fantasy-land/of&quot;]</a></li>
+<li><a href="#streamfantasy-landof-1">stream[&quot;fantasy-land/of&quot;]</a></li>
 <li><a href="#streamfantasy-landmap">stream[&quot;fantasy-land/map&quot;]</a></li>
 <li><a href="#streamfantasy-landap">stream[&quot;fantasy-land/ap&quot;]</a></li>
 </ul>
@@ -308,7 +308,7 @@
 <hr>
 <h5 id="streamfantasy-landof"><a href="#streamfantasy-landof">Stream[&quot;fantasy-land/of&quot;]</a></h5>
 <p>This method is functionally identical to <code>stream</code>. It exists to conform to <a href="https://github.com/fantasyland/fantasy-land">Fantasy Land&#39;s Applicative specification</a>. For more information, see the <a href="#what-is-fantasy-land">What is Fantasy Land</a> section.</p>
-<p><code>stream = stream[&quot;fantasy-land/of&quot;](value)</code></p>
+<p><code>stream = Stream[&quot;fantasy-land/of&quot;](value)</code></p>
 <table>
 <thead>
 <tr>
@@ -399,7 +399,7 @@
 <h5 id="streamfantasy-landmap"><a href="#streamfantasy-landmap">stream[&quot;fantasy-land/map&quot;]</a></h5>
 <p>Creates a dependent stream whose value is set to the result of the callback function. See <a href="#chaining-streams">chaining streams</a></p>
 <p>This method exists to conform to <a href="https://github.com/fantasyland/fantasy-land">Fantasy Land&#39;s Applicative specification</a>. For more information, see the <a href="#what-is-fantasy-land">What is Fantasy Land</a> section.</p>
-<p><code>dependentStream = stream()[&quot;fantasy-land/of&quot;](callback)</code></p>
+<p><code>dependentStream = stream()[&quot;fantasy-land/map&quot;](callback)</code></p>
 <table>
 <thead>
 <tr>
@@ -557,7 +557,7 @@ var added = stream.combine(function(a, b) {
 
 console.log(added()) // logs 12
 </code></pre>
-<p>A stream can depend on any number of streams and it&#39;s guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also bring the performance benefits of not recomputing downstreams unnecessarily.</p>
+<p>A stream can depend on any number of streams and it&#39;s guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also brings the performance benefits of not recomputing downstreams unnecessarily.</p>
 <p>You can prevent dependent streams from being updated by returning the special value <code>stream.HALT</code></p>
 <pre><code class="lang-javascript">var halted = stream.combine(function(stream) {
     return stream.HALT

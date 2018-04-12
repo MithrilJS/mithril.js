@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -58,7 +58,7 @@
 <hr>
 <h3 id="description"><a href="#description">Description</a></h3>
 <p>Updates the DOM after a change in the application data layer.</p>
-<p>You DON&#39;T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using <code>m.request</code>/<code>m.jsonp</code>.</p>
+<p>You DON&#39;T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using <code>m.request</code>/<code>m.jsonp</code>. The <a href="autoredraw.html">autoredraw</a> system, which is built on top of <code>m.redraw()</code> will take care of it.</p>
 <p>You DO need to call it in <code>setTimeout</code>/<code>setInterval</code>/<code>requestAnimationFrame</code> callbacks, or callbacks from 3rd party libraries.</p>
 <p>Typically, <code>m.redraw</code> triggers an asynchronous redraws, but it may trigger synchronously if Mithril detects it&#39;s possible to improve performance by doing so (i.e. if no redraw was requested within the last animation frame). You should write code assuming that it always redraws asynchronously.</p>
 <hr>

@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -37,6 +37,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><strong><a href="testing.html">Testing</a></strong></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -94,7 +96,7 @@ global.document = window.document;
 <h3 id="good-testing-practices"><a href="#good-testing-practices">Good testing practices</a></h3>
 <p>Generally speaking, there are two ways to write tests: upfront and after the fact.</p>
 <p>Writing tests upfront requires specifications to be frozen. Upfront tests are a great way of codifying the rules that a yet-to-be-implemented API must obey. However, writing tests upfront may not be a suitable strategy if you don&#39;t have a reasonable idea of what your project will look like, if the scope of the API is not well known or if it&#39;s likely to change (e.g. based on previous history at the company).</p>
-<p>Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertedly broken and that previously fixed bugs do not get re-introduced by unrelated changes.</p>
+<p>Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertently broken and that previously fixed bugs do not get re-introduced by unrelated changes.</p>
 <hr>
 <h3 id="unit-testing"><a href="#unit-testing">Unit testing</a></h3>
 <p>Unit testing is the practice of isolating a part of an application (typically a single module), and asserting that, given some inputs, it produces the expected outputs.</p>
@@ -104,7 +106,9 @@ var m = require(&quot;mithril&quot;)
 
 module.exports = {
     view: function() {
-        return m(&quot;div&quot;, &quot;Hello world&quot;)
+        return m(&quot;div&quot;, 
+            m(&quot;p&quot;, &quot;Hello World&quot;)
+        )
     }
 }
 </code></pre>
@@ -117,7 +121,7 @@ o.spec(&quot;MyComponent&quot;, function() {
 
         o(vnode.tag).equals(&quot;div&quot;)
         o(vnode.children.length).equals(1)
-        o(vnode.children[0].tag).equals(&quot;#&quot;)
+        o(vnode.children[0].tag).equals(&quot;p&quot;)
         o(vnode.children[0].children).equals(&quot;Hello world&quot;)
     })
 })

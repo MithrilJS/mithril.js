@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -78,7 +78,7 @@ m.mount(document.body, Counter)
 </code></pre>
 <hr>
 <h3 id="signature"><a href="#signature">Signature</a></h3>
-<p><code>m.mount(element, component)</code></p>
+<p><code>m.mount(element, Component)</code></p>
 <table>
 <thead>
 <tr>
@@ -96,7 +96,7 @@ m.mount(document.body, Counter)
 <td>A DOM element that will be the parent node to the subtree</td>
 </tr>
 <tr>
-<td><code>component</code></td>
+<td><code>Component</code></td>
 <td><code>Component&#124;null</code></td>
 <td>Yes</td>
 <td>The <a href="components.html">component</a> to be rendered. <code>null</code> unmounts the tree and cleans up internal state.</td>
@@ -112,7 +112,8 @@ m.mount(document.body, Counter)
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
 <h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
-<p>Similar to <a href="render.html"><code>m.render()</code></a>, the <code>m.mount()</code> method takes a component and mounts a corresponding DOM tree into <code>element</code>. If <code>element</code> already has a DOM tree mounted via a previous <code>m.mount()</code> call, the component is diffed against the previous vnode tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.</p>
+<p><code>m.mount(element, Component)</code>, when called renders the component into the element and subscribe the <code>(element, Component)</code> pair to the redraw subsystem. That tree will be re-rendered when <a href="redraw.html">manual</a> or <a href="autoredraw.html">automatic</a> redraws are triggered.</p>
+<p>On redraw, the new vDOM tree is compared (or &quot;diffed&quot;) with the old one, and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.</p>
 <h4 id="replace-a-component"><a href="#replace-a-component">Replace a component</a></h4>
 <p>Running <code>mount(element, OtherComponent)</code> where <code>element</code> is a current mount point replaces the component previously mounted with <code>OtherComponent</code>.</p>
 <h4 id="unmount"><a href="#unmount">Unmount</a></h4>
@@ -124,7 +125,7 @@ m.mount(document.body, Counter)
 <p>In contrast, traversing a javascript data structure has a much more predictable and sane performance profile, and in addition, a vnode tree is implemented in such a way that enables modern javascript engines to apply aggressive optimizations such as hidden classes for even better performance.</p>
 <hr>
 <h3 id="differences-from-mrender"><a href="#differences-from-mrender">Differences from m.render</a></h3>
-<p>A component rendered via <code>m.mount</code> automatically auto-redraws in response to view events, <code>m.redraw()</code> calls or <code>m.request()</code> calls. Vnodes rendered via <code>m.render()</code> do not.</p>
+<p>A component rendered via <code>m.mount</code> <a href="autoredraw.html">automatically redraws</a> in response to view events, <code>m.redraw()</code> calls or <code>m.request()</code> calls. Vnodes rendered via <code>m.render()</code> do not.</p>
 <p><code>m.mount()</code> is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril&#39;s auto-redrawing facilities.</p>
 <p><code>m.render()</code> is suitable for library authors who wish to manually control rendering (e.g. when hooking to a third party router, or using third party data-layer libraries like Redux).</p>
 

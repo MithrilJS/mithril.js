@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -37,6 +37,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -194,7 +196,7 @@ m(&quot;div&quot;, [
 ])
 </code></pre>
 <h4 id="avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property"><a href="#avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property">Avoid passing model data directly to components if the model uses <code>key</code> as a data property</a></h4>
-<p>The <code>key</code> property may appear in your data model in a way that conflicts with Mithril&#39;s key logic. For example, a component may represent an entity whose <code>key</code> property is expected to change over time. This can lead to components receiving the wrong data, re-initialise, or change positions unexpectedly. If your data model uses the <code>key</code> property, make sure to wrap the data such that Mithril doesn&#39;t misinterpret it as a rendering instruction:</p>
+<p>The <code>key</code> property may appear in your data model in a way that conflicts with Mithril&#39;s key logic. For example, a component may represent an entity whose <code>key</code> property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the <code>key</code> property, make sure to wrap the data such that Mithril doesn&#39;t misinterpret it as a rendering instruction:</p>
 <pre><code class="lang-javascript">// Data model
 var users = [
     {id: 1, name: &quot;John&quot;, key: &#39;a&#39;},

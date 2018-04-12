@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -28,6 +28,8 @@
 <li><strong><a href="installation.html">Installation</a></strong><ul>
 <li><a href="#cdn">CDN</a></li>
 <li><a href="#npm">NPM</a></li>
+<li><a href="#quick-start-with-webpack">Quick start with Webpack</a></li>
+<li><a href="#typescript">TypeScript</a></li>
 </ul>
 </li>
 <li><a href="index.html">Introduction</a></li>
@@ -41,6 +43,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -70,27 +74,50 @@
 </code></pre>
 <hr>
 <h3 id="npm"><a href="#npm">NPM</a></h3>
-<h4 id="quick-start-with-webpack"><a href="#quick-start-with-webpack">Quick start with Webpack</a></h4>
-<pre><code class="lang-bash"># 1) install
-npm install mithril --save
-
-npm install webpack --save
-
-# 2) add this line into the scripts section in package.json
-#    &quot;scripts&quot;: {
-#        &quot;start&quot;: &quot;webpack src/index.js bin/app.js --watch&quot;
-#    }
-
-# 3) create an `src/index.js` file
-
-# 4) create an `index.html` file containing `&lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;`
-
-# 5) run bundler
-npm start
-
-# 6) open `index.html` in the (default) browser
-open index.html
+<pre><code class="lang-bash">[body]gt; npm install mithril --save
 </code></pre>
+<hr>
+<h3 id="quick-start-with-webpack"><a href="#quick-start-with-webpack">Quick start with Webpack</a></h3>
+<ol>
+<li><p>Initialize the directory as an npm package</p>
+<pre><code class="lang-bash">[body]gt; npm init --yes
+</code></pre>
+</li>
+<li><p>install required tools</p>
+<pre><code class="lang-bash">[body]gt; npm install mithril --save
+[body]gt; npm install webpack webpack-cli --save-dev
+</code></pre>
+</li>
+<li><p>Add a &quot;start&quot; entry to the scripts section in <code>package.json</code>.</p>
+<pre><code class="lang-js">{
+// ...
+&quot;scripts&quot;: {
+ &quot;start&quot;: &quot;webpack src/index.js --output bin/app.js -d --watch&quot;
+}
+}
+</code></pre>
+</li>
+<li><p>Create <code>src/index.js</code>
+```js
+import m from &quot;mithril&quot;;</p>
+</li>
+</ol>
+<p>m.render(document.body, &quot;hello world&quot;);</p>
+<pre><code>
+4. create `index.html`
+```html
+&lt;!DOCTYPE html&gt;
+&lt;body&gt;
+    &lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><ol>
+<li><p>run bundler</p>
+<pre><code class="lang-bash">[body]gt; npm start
+</code></pre>
+</li>
+<li><p>open <code>index.html</code> in a browser</p>
+</li>
+</ol>
 <h4 id="step-by-step"><a href="#step-by-step">Step by step</a></h4>
 <p>For production-level projects, the recommended way of installing Mithril is to use NPM.</p>
 <p>NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the Javascript ecosystem. Download and install <a href="https://nodejs.org">Node.js</a>; NPM will be automatically installed as well.</p>
@@ -112,13 +139,13 @@ m.render(document.body, &quot;hello world&quot;)
 <p>CommonJS is a de-facto standard for modularizing Javascript code, and it&#39;s used by Node.js, as well as tools like <a href="http://browserify.org/">Browserify</a> and <a href="https://webpack.js.org/">Webpack</a>. It&#39;s a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like <a href="http://rollupjs.org/">Rollup</a>, <a href="https://babeljs.io/">Babel</a> or <a href="https://github.com/google/traceur-compiler">Traceur</a>.</p>
 <p>Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single Javascript file before running in a client-side application.</p>
 <p>A popular way for creating a bundle is to setup an NPM script for <a href="https://webpack.js.org/">Webpack</a>. To install Webpack, run this from the command line:</p>
-<pre><code class="lang-bash">npm install webpack --save-dev
+<pre><code class="lang-bash">npm install webpack webpack-cli --save-dev
 </code></pre>
 <p>Open the <code>package.json</code> that you created earlier, and add an entry to the <code>scripts</code> section:</p>
 <pre><code>{
     &quot;name&quot;: &quot;my-project&quot;,
     &quot;scripts&quot;: {
-        &quot;start&quot;: &quot;webpack src/index.js bin/app.js -d --watch&quot;
+        &quot;start&quot;: &quot;webpack src/index.js --output bin/app.js -d --watch&quot;
     }
 }
 </code></pre><p>Remember this is a JSON file, so object key names such as <code>&quot;scripts&quot;</code> and <code>&quot;start&quot;</code> must be inside of double quotes.</p>
@@ -157,8 +184,8 @@ m.mount(document.body, MyComponent)
 <pre><code>{
     &quot;name&quot;: &quot;my-project&quot;,
     &quot;scripts&quot;: {
-        &quot;start&quot;: &quot;webpack src/index.js bin/app.js -d --watch&quot;,
-        &quot;build&quot;: &quot;webpack src/index.js bin/app.js -p&quot;,
+        &quot;start&quot;: &quot;webpack src/index.js --output bin/app.js -d --watch&quot;,
+        &quot;build&quot;: &quot;webpack src/index.js --output bin/app.js -p&quot;,
     }
 }
 </code></pre><p>You can use hooks in your production environment to run the production build script automatically. Here&#39;s an example for <a href="https://www.heroku.com/">Heroku</a>:</p>
@@ -215,6 +242,12 @@ npm start
 // if a CommonJS environment is not detected, Mithril will be created in the global scope
 m.render(document.body, &quot;hello world&quot;)
 </code></pre>
+<hr>
+<h3 id="typescript"><a href="#typescript">TypeScript</a></h3>
+<p>TypeScript type definitions are available from DefinitelyTyped. They can be installed with:</p>
+<pre><code class="lang-bash">[body]gt; npm install @types/mithril --save-dev
+</code></pre>
+<p>For example usage, to file issues or to discuss TypeScript related topics visit: <a href="https://github.com/MithrilJS/mithril.d.ts">https://github.com/MithrilJS/mithril.d.ts</a></p>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>

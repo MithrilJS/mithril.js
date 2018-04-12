@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -37,6 +37,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -75,9 +77,9 @@
 <p>Typically, virtual DOM trees are then recreated every render cycle, which normally occurs in response to event handlers or to data changes. Mithril <em>diffs</em> a vnode tree against its previous version and only modifies DOM elements in spots where there are changes.</p>
 <p>It may seem wasteful to recreate vnodes so frequently, but as it turns out, modern Javascript engines can create hundreds of thousands of objects in less than a millisecond. On the other hand, modifying the DOM is several orders of magnitude more expensive than creating vnodes.</p>
 <p>For that reason, Mithril uses a sophisticated and highly optimized virtual DOM diffing algorithm to minimize the amount of DOM updates. Mithril <em>also</em> generates carefully crafted vnode data structures that are compiled by Javascript engines for near-native data structure access performance. In addition, Mithril aggressively optimizes the function that creates vnodes as well.</p>
-<p>The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide <a href="https://en.wikipedia.org/wiki/Retained_mode">retained mode rendering</a>, a style of rendering that makes it drastically easier to manage UI complexity.</p>
-<p>To illustrate why retained mode is so important, consider the DOM API and HTML. The DOM API is an <a href="https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics">immediate mode</a>) rendering system and requires writing out exact instructions to assemble a DOM tree procedurally. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.</p>
-<p>In contrast, HTML is a retained mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.</p>
+<p>The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide a declarative <a href="https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics">immediate mode</a>) API, a style of rendering that makes it drastically easier to manage UI complexity.</p>
+<p>To illustrate why immediate mode is so important, consider the DOM API and HTML. The DOM API is an imperative <a href="https://en.wikipedia.org/wiki/Retained_mode">retained mode</a> API and requires 1. writing out exact instructions to assemble a DOM tree procedurally, and 2. writing out other instructions to update that tree. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.</p>
+<p>In contrast, HTML is closer to an immediate mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.</p>
 <p>Virtual DOM goes one step further than HTML by allowing you to write <em>dynamic</em> DOM trees without having to manually write multiple sets of DOM API calls to efficiently synchronize the UI to arbitrary data changes.</p>
 <hr>
 <h3 id="basics"><a href="#basics">Basics</a></h3>
@@ -152,11 +154,6 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 <td>An object that is persisted between redraws. It is provided by the core engine when needed. In POJO component vnodes, the <code>state</code> inherits prototypically from the component object/class. In class component vnodes it is an instance of the class. In closure components it is the object returned by the closure.</td>
 </tr>
 <tr>
-<td><code>_state</code></td>
-<td><code>Object?</code></td>
-<td>For components, a reference to the original <code>vnode.state</code> object, used to lookup the <code>view</code> and hooks. This property is only used internally by Mithril, do not use or modify it.</td>
-</tr>
-<tr>
 <td><code>events</code></td>
 <td><code>Object?</code></td>
 <td>An object that is persisted between redraws and that stores event handlers so that they can be removed using the DOM API. The <code>events</code> property is <code>undefined</code> if there are no event handlers defined. This property is only used internally by Mithril, do not use or modify it.</td>
@@ -193,7 +190,7 @@ m(ExampleComponent, {style: &quot;color:red;&quot;}, &quot;world&quot;)
 <tr>
 <td>Fragment</td>
 <td><code>{tag: &quot;[&quot;, children: []}</code></td>
-<td>Represents a list of DOM elements whose parent DOM element may also contain other elements that are not in the fragment. When using the <a href="hyperscript.html"><code>m()</code></a> helper function, fragment vnodes can only be created by nesting arrays into the <code>children</code> parameter of <code>m()</code>. <code>m(&quot;[&quot;)</code> does not create a valid vnode. </td>
+<td>Represents a list of DOM elements whose parent DOM element may also contain other elements that are not in the fragment. When using the <a href="hyperscript.html"><code>m()</code></a> helper function, fragment vnodes can only be created by nesting arrays into the <code>children</code> parameter of <code>m()</code>. <code>m(&quot;[&quot;)</code> does not create a valid vnode.</td>
 </tr>
 <tr>
 <td>Text</td>

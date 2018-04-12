@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -141,6 +141,12 @@
 <td>Whether to send cookies to 3rd party domains. Defaults to <code>false</code></td>
 </tr>
 <tr>
+<td><code>options.timeout</code></td>
+<td><code>Number</code></td>
+<td>No</td>
+<td>The amount of milliseconds a request can take before automatically being <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout">terminated</a>.  Defaults to <code>undefined</code>.</td>
+</tr>
+<tr>
 <td><code>options.config</code></td>
 <td><code>xhr = Function(xhr)</code></td>
 <td>No</td>
@@ -174,7 +180,7 @@
 <td><code>options.extract</code></td>
 <td><code>any = Function(xhr, options)</code></td>
 <td>No</td>
-<td>A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns <code>xhr.responseText</code>, which is in turn passed to <code>deserialize</code>. If a custom <code>extract</code> callback is provided, the <code>xhr</code> parameter is the XMLHttpRequest instance used for the request, and <code>options</code> is the object that was passed to the <code>m.request</code> call. Additionally, <code>deserialize</code> will be skipped and the value returned from the extract callback will not automatically be parsed as JSON.</td>
+<td>A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns <code>xhr.responseText</code>, which is in turn passed to <code>deserialize</code>. If a custom <code>extract</code> callback is provided, the <code>xhr</code> parameter is the XMLHttpRequest instance used for the request, and <code>options</code> is the object that was passed to the <code>m.request</code> call. Additionally, <code>deserialize</code> will be skipped and the value returned from the extract callback will be left as-is when the promise resolves. Furthermore, when an extract callback is provided, exceptions are <em>not</em> thrown when the server response status code indicates an error.</td>
 </tr>
 <tr>
 <td><code>options.useBody</code></td>
@@ -210,6 +216,7 @@
 </code></pre>
 <p>A call to <code>m.request</code> returns a <a href="promise.html">promise</a> and triggers a redraw upon completion of its promise chain.</p>
 <p>By default, <code>m.request</code> assumes the response is in JSON format and parses it into a Javascript object (or array).</p>
+<p>If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.</p>
 <hr>
 <h3 id="typical-usage"><a href="#typical-usage">Typical usage</a></h3>
 <p>Here&#39;s an illustrative example of a component that uses <code>m.request</code> to retrieve some data from a server.</p>
@@ -406,7 +413,7 @@ function upload(e) {
         url: &quot;/api/v1/upload&quot;,
         data: data,
         config: function(xhr) {
-            xhr.addEventListener(&quot;progress&quot;, function(e) {
+            xhr.upload.addEventListener(&quot;progress&quot;, function(e) {
                 progress = e.loaded / e.total
 
                 m.redraw() // tell Mithril that data changed and a re-render is needed
@@ -478,7 +485,7 @@ function parseCSV(data) {
 </code></pre>
 <hr>
 <h3 id="retrieving-response-details"><a href="#retrieving-response-details">Retrieving response details</a></h3>
-<p>By default Mithril attempts to parse a response as JSON and returns <code>xhr.responseText</code>. It may be useful to inspect a server response in more detail, this can be accomplished by passing a custom <code>options.extract</code> function:</p>
+<p>By default Mithril attempts to parse <code>xhr.responseText</code> as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom <code>options.extract</code> function:</p>
 <pre><code class="lang-javascript">m.request({
     method: &quot;GET&quot;,
     url: &quot;/api/v1/users&quot;,

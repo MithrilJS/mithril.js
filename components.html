@@ -16,7 +16,7 @@
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
 					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">Github</a>
+					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>
 		</header>
@@ -37,6 +37,8 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
+<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
+<li><a href="learning-mithril.html">Learning Mithril</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -104,6 +106,9 @@ m(Example)
     oncreate: function(vnode) {
         console.log(&quot;DOM created&quot;)
     },
+    onbeforeupdate: function(vnode, old) {
+        return true
+    },
     onupdate: function(vnode) {
         console.log(&quot;DOM updated&quot;)
     },
@@ -116,9 +121,6 @@ m(Example)
     },
     onremove: function(vnode) {
         console.log(&quot;removing DOM element&quot;)
-    },
-    onbeforeupdate: function(vnode, old) {
-        return true
     },
     view: function(vnode) {
         return &quot;hello&quot;
@@ -196,7 +198,7 @@ class AnotherES6ClassComponent {
 m.render(document.body, m(closureComponent))
 
 // EXAMPLE: via m.mount
-m.mount(document.body, closuresComponent)
+m.mount(document.body, closureComponent)
 
 // EXAMPLE: via m.route
 m.route(document.body, &quot;/&quot;, {
