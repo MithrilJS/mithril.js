@@ -9,10 +9,10 @@
 		- [Stream.scanMerge](#streamscanmerge)
 		- [Stream.HALT](#streamhalt)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
-	- [Instance members](#static-members)
+	- [Instance members](#instance-members)
 		- [stream.map](#streammap)
 		- [stream.end](#streamend)
-		- [stream["fantasy-land/of"]](#streamfantasy-landof)
+		- [stream["fantasy-land/of"]](#streamfantasy-landof-1)
 		- [stream["fantasy-land/map"]](#streamfantasy-landmap)
 		- [stream["fantasy-land/ap"]](#streamfantasy-landap)
 - [Basic usage](#basic-usage)
@@ -159,7 +159,7 @@ A special value that can be returned to stream callbacks to halt execution of do
 
 This method is functionally identical to `stream`. It exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
-`stream = stream["fantasy-land/of"](value)`
+`stream = Stream["fantasy-land/of"](value)`
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
@@ -212,7 +212,7 @@ Creates a dependent stream whose value is set to the result of the callback func
 
 This method exists to conform to [Fantasy Land's Applicative specification](https://github.com/fantasyland/fantasy-land). For more information, see the [What is Fantasy Land](#what-is-fantasy-land) section.
 
-`dependentStream = stream()["fantasy-land/of"](callback)`
+`dependentStream = stream()["fantasy-land/map"](callback)`
 
 Argument     | Type                 | Required | Description
 ------------ | -------------------- | -------- | ---
@@ -384,7 +384,7 @@ var added = stream.combine(function(a, b) {
 console.log(added()) // logs 12
 ```
 
-A stream can depend on any number of streams and it's guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also bring the performance benefits of not recomputing downstreams unnecessarily.
+A stream can depend on any number of streams and it's guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also brings the performance benefits of not recomputing downstreams unnecessarily.
 
 You can prevent dependent streams from being updated by returning the special value `stream.HALT`
 

@@ -37,7 +37,7 @@ h2 a:visited,h3 a:visited,h4 a:visited,h5 a:visited {color:#000;text-decoration:
 h2::before,h3::before,h4::before,h5::before {content:"#";position:absolute;left:-20px;visibility:hidden;}
 h2:hover::before,h3:hover::before,h4:hover::before,h5:hover::before {visibility:visible;}
 #signature + p code {padding:3px 10px;}
-h1 + ul {margin:40px 0 0 -270px;padding:0;position:absolute;width:250px;}
+h1 + ul {margin:40px 0 0 -270px;padding:0;position:absolute;width:250px;z-index:1;}
 h1 + ul + hr {display:none;}
 h1 + ul li {list-style:none;margin:0;padding:0;}
 h1 + ul li:last-child {border-bottom:0;}

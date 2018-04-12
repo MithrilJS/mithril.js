@@ -10,7 +10,7 @@
 
 Updates the DOM after a change in the application data layer.
 
-You DON'T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using `m.request`/`m.jsonp`.
+You DON'T need to call it if data is modified within the execution context of an event handler defined in a Mithril view, or after request completion when using `m.request`/`m.jsonp`. The [autoredraw](autoredraw.md) system, which is built on top of `m.redraw()` will take care of it.
 
 You DO need to call it in `setTimeout`/`setInterval`/`requestAnimationFrame` callbacks, or callbacks from 3rd party libraries.
 

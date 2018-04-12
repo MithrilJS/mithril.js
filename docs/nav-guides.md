@@ -9,6 +9,8 @@
 	- [Animation](animation.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
+	- [Integrating with Other Libraries](integrating-libs.md)
+	- [Learning Mithril](learning-mithril.md)
 - Key concepts
 	- [Vnodes](vnodes.md)
 	- [Components](components.md)
