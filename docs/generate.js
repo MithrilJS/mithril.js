@@ -12,9 +12,6 @@ try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
 var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
 var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
 
-var index = fs.readFileSync("docs/index.md", "utf-8")
-fs.writeFileSync("README.md", index.replace(/(\]\()(.+?)\.md(\))/g, "$1http://mithril.js.org/$2.html$3"), "utf-8")
-
 generate("docs")
 
 function generate(pathname) {
