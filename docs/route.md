@@ -475,7 +475,7 @@ m.route(document.body, "/", {
 })
 ```
 
-Note that in this case, if the Layout component the `oninit` and `oncreate` lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).
+Note that in this case, if the Layout component has `oninit` and `oncreate` lifecycle methods, they would only fire on the first route change (assuming all routes use the same layout).
 
 To clarify the difference between the two examples, example 1 is equivalent to this code:
 
