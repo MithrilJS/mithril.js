@@ -776,7 +776,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].childNodes[1].childNodes.length).equals(1)
 		o(root.childNodes[1].childNodes.length).equals(0)
 	})
-	o("recycles", function() {
+	o("doesn't recycle", function() {
 		var vnodes = [{tag: "div", key: 1}]
 		var temp = []
 		var updated = [{tag: "div", key: 1}]
@@ -785,10 +785,10 @@ o.spec("updateNodes", function() {
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
-	o("recycles when not keyed", function() {
+	o("doesn't recycle when not keyed", function() {
 		var vnodes = [{tag: "div"}]
 		var temp = []
 		var updated = [{tag: "div"}]
@@ -798,19 +798,22 @@ o.spec("updateNodes", function() {
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
-	o("recycles deep", function() {
+	o("doesn't recycle deep", function() {
 		var vnodes = [{tag: "div", children: [{tag: "a", key: 1}]}]
 		var temp = [{tag: "div"}]
 		var updated = [{tag: "div", children: [{tag: "a", key: 1}]}]
 
 		render(root, vnodes)
+
+		var oldChild = vnodes[0].dom.firstChild
+
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
+		o(oldChild).notEquals(updated[0].dom.firstChild) // this used to be a recycling pool test
 		o(updated[0].dom.firstChild.nodeName).equals("A")
 	})
 	o("mixed unkeyed tags are not broken by recycle", function() {
