@@ -776,166 +776,220 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].childNodes[1].childNodes.length).equals(1)
 		o(root.childNodes[1].childNodes.length).equals(0)
 	})
-	o("recycles", function() {
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = []
-		var updated = [{tag: "div", key: 1}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(vnodes[0].dom).equals(updated[0].dom)
-		o(updated[0].dom.nodeName).equals("DIV")
+	o.spec("recycles", function () {
+		o("when non-keyed, by default", function() {
+			var vnodes = [{tag: "div"}]
+			var temp = []
+			var updated = [{tag: "div"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).equals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("not when keyed, by default", function() {
+			var vnodes = [{tag: "div", key: "a"}]
+			var temp = []
+			var updated = [{tag: "div", key: "a"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).notEquals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("when forced and non-keyed", function() {
+			var vnodes = [{tag: "div", reuse: true}]
+			var temp = []
+			var updated = [{tag: "div"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).equals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("when forced and keyed", function() {
+			var vnodes = [{tag: "div", key: "a", reuse: true}]
+			var temp = []
+			var updated = [{tag: "div", key: "a"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).equals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("not when prevented and non-keyed", function() {
+			var vnodes = [{tag: "div", reuse: false}]
+			var temp = []
+			var updated = [{tag: "div"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).notEquals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("not when prevented and keyed", function() {
+			var vnodes = [{tag: "div", key: "a", reuse: false}]
+			var temp = []
+			var updated = [{tag: "div", key: "a"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(1)
+			o(vnodes[0].dom).notEquals(updated[0].dom)
+			o(updated[0].dom.nodeName).equals("DIV")
+		})
+		o("recycles deep", function() {
+			var vnodes = [{tag: "div", children: [{tag: "a", key: 1}]}]
+			var temp = [{tag: "div"}]
+			var updated = [{tag: "div", children: [{tag: "a", key: 1}]}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
+			o(updated[0].dom.firstChild.nodeName).equals("A")
+		})
+		o("mixed unkeyed tags are not broken by recycle", function() {
+			var vnodes = [{tag: "a"}, {tag: "b"}]
+			var temp = [{tag: "b"}]
+			var updated = [{tag: "a"}, {tag: "b"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(2)
+			o(root.childNodes[0].nodeName).equals("A")
+			o(root.childNodes[1].nodeName).equals("B")
+		})
+		o("mixed unkeyed vnode types are not broken by recycle", function() {
+			var vnodes = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
+			var temp = [{tag: "b"}]
+			var updated = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
+	
+			render(root, vnodes)
+			render(root, temp)
+			render(root, updated)
+	
+			o(root.childNodes.length).equals(2)
+			o(root.childNodes[0].nodeName).equals("A")
+			o(root.childNodes[1].nodeName).equals("B")
+		})
+		o("onremove doesn't fire from nodes in the pool (#1990)", function () {
+			var onremove = o.spy()
+			render(root, [
+				{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]},
+				{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+			])
+			render(root, [
+				{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+			])
+			render(root,[])
+	
+			o(onremove.callCount).equals(2)
+		})
+		o("cached, non-keyed nodes skip diff", function () {
+			var onupdate = o.spy();
+			var cached = {tag:"a", attrs:{onupdate: onupdate}}
+	
+			render(root, cached)
+			render(root, cached)
+	
+			o(onupdate.callCount).equals(0)
+		})
+		o("cached, keyed nodes skip diff", function () {
+			var onupdate = o.spy()
+			var cached = {tag:"a", key:"a", attrs:{onupdate: onupdate}}
+	
+			render(root, cached)
+			render(root, cached)
+	
+			o(onupdate.callCount).equals(0)
+		})
+		o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
+			var onupdate = o.spy()
+			var oncreate = o.spy()
+			var cached = {
+				tag: "B", key: 1, children: [
+					{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+				]
+			}
+			render(root, [{tag: "div", children: [cached]}])
+			render(root, [])
+			render(root, [{tag: "div", children: [cached]}])
+	
+			o(oncreate.callCount).equals(2)
+			o(onupdate.callCount).equals(0)
+		})
+	
+		o("unkeyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
+			var onupdate = o.spy()
+			var oncreate = o.spy()
+			var cached = {
+				tag: "B", children: [
+					{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+				]
+			}
+			render(root, [{tag: "div", children: [cached]}])
+			render(root, [])
+			render(root, [{tag: "div", children: [cached]}])
+	
+			o(oncreate.callCount).equals(2)
+			o(onupdate.callCount).equals(0)
+		})
+	
+		o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
+			var onupdate = o.spy()
+			var oncreate = o.spy()
+			var cached = {
+				tag: "B", key: 1, children: [
+					{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+				]
+			}
+			render(root, [{tag: "div", children: [cached]}])
+			render(root, [{tag: "div", children: []}])
+			render(root, [])
+			render(root, [{tag: "div", children: [cached]}])
+	
+			o(oncreate.callCount).equals(2)
+			o(onupdate.callCount).equals(0)
+		})
+	
+		o("unkeyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
+			var onupdate = o.spy()
+			var oncreate = o.spy()
+			var cached = {
+				tag: "B", children: [
+					{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+				]
+			}
+			render(root, [{tag: "div", children: [cached]}])
+			render(root, [{tag: "div", children: []}])
+			render(root, [])
+			render(root, [{tag: "div", children: [cached]}])
+	
+			o(oncreate.callCount).equals(2)
+			o(onupdate.callCount).equals(0)
+		})
 	})
-	o("recycles when not keyed", function() {
-		var vnodes = [{tag: "div"}]
-		var temp = []
-		var updated = [{tag: "div"}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom).equals(updated[0].dom)
-		o(updated[0].dom.nodeName).equals("DIV")
-	})
-	o("recycles deep", function() {
-		var vnodes = [{tag: "div", children: [{tag: "a", key: 1}]}]
-		var temp = [{tag: "div"}]
-		var updated = [{tag: "div", children: [{tag: "a", key: 1}]}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
-		o(updated[0].dom.firstChild.nodeName).equals("A")
-	})
-	o("mixed unkeyed tags are not broken by recycle", function() {
-		var vnodes = [{tag: "a"}, {tag: "b"}]
-		var temp = [{tag: "b"}]
-		var updated = [{tag: "a"}, {tag: "b"}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("B")
-	})
-	o("mixed unkeyed vnode types are not broken by recycle", function() {
-		var vnodes = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
-		var temp = [{tag: "b"}]
-		var updated = [{tag: "[", children: [{tag: "a"}]}, {tag: "b"}]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(root.childNodes.length).equals(2)
-		o(root.childNodes[0].nodeName).equals("A")
-		o(root.childNodes[1].nodeName).equals("B")
-	})
-	o("onremove doesn't fire from nodes in the pool (#1990)", function () {
-		var onremove = o.spy()
-		render(root, [
-			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]},
-			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
-		])
-		render(root, [
-			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
-		])
-		render(root,[])
-
-		o(onremove.callCount).equals(2)
-	})
-	o("cached, non-keyed nodes skip diff", function () {
-		var onupdate = o.spy();
-		var cached = {tag:"a", attrs:{onupdate: onupdate}}
-
-		render(root, cached)
-		render(root, cached)
-
-		o(onupdate.callCount).equals(0)
-	})
-	o("cached, keyed nodes skip diff", function () {
-		var onupdate = o.spy()
-		var cached = {tag:"a", key:"a", attrs:{onupdate: onupdate}}
-
-		render(root, cached)
-		render(root, cached)
-
-		o(onupdate.callCount).equals(0)
-	})
-	o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
-		var cached = {
-			tag: "B", key: 1, children: [
-				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
-			]
-		}
-		render(root, [{tag: "div", children: [cached]}])
-		render(root, [])
-		render(root, [{tag: "div", children: [cached]}])
-
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
-	})
-
-	o("unkeyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
-		var cached = {
-			tag: "B", children: [
-				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
-			]
-		}
-		render(root, [{tag: "div", children: [cached]}])
-		render(root, [])
-		render(root, [{tag: "div", children: [cached]}])
-
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
-	})
-
-	o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
-		var cached = {
-			tag: "B", key: 1, children: [
-				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
-			]
-		}
-		render(root, [{tag: "div", children: [cached]}])
-		render(root, [{tag: "div", children: []}])
-		render(root, [])
-		render(root, [{tag: "div", children: [cached]}])
-
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
-	})
-
-	o("unkeyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
-		var cached = {
-			tag: "B", children: [
-				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
-			]
-		}
-		render(root, [{tag: "div", children: [cached]}])
-		render(root, [{tag: "div", children: []}])
-		render(root, [])
-		render(root, [{tag: "div", children: [cached]}])
-
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
-	})
-
 	o("null stays in place", function() {
 		var create = o.spy()
 		var update = o.spy()

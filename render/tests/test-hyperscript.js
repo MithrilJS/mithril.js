@@ -11,6 +11,9 @@ o.spec("hyperscript", function() {
 		o("throws on non-string selector w/o a view property", function(done) {
 			try {m({})} catch(e) {done()}
 		})
+		o("throws on non-string selector with a non-function view property", function(done) {
+			try {m({view: ""})} catch(e) {done()}
+		})
 		o("handles tag in selector", function() {
 			var vnode = m("a")
 
@@ -274,6 +277,18 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs).equals(undefined)
 			o(vnode.key).equals("a")
+		})
+		o("leaves reuse undefined", function(){
+			var unkeyed = m("div")
+			var keyed = m("div", {key: "a"})
+
+			o(unkeyed.tag).equals("div")
+			o(unkeyed.key).equals(undefined)
+			o(unkeyed.reuse).equals(undefined)
+
+			o(keyed.tag).equals("div")
+			o(keyed.key).equals("a")
+			o(keyed.reuse).equals(undefined)
 		})
 		o("handles many attrs", function() {
 			var vnode = m("div", {a: "b", c: "d"})

@@ -671,21 +671,43 @@ o.spec("component", function() {
 					o(called).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
-				o("does not recycle when there's an onupdate", function() {
+				o("does not recycle when onupdate is called", function() {
+					var onupdate = o.spy()
 					var component = createComponent({
-						onupdate: function() {},
+						onupdate: onupdate,
 						view: function() {
 							return {tag: "div"}
 						}
 					})
 					var vnode = {tag: component, key: 1}
+					var updated1 = {tag: component, key: 1}
+					var updated2 = {tag: component, key: 1}
+
+					render(root, [vnode])
+					render(root, [updated1])
+					render(root, [])
+					render(root, [updated2])
+
+					o(onupdate.callCount).equals(1)
+					o(vnode.dom).notEquals(updated2.dom)
+				})
+				o("does recycle when there's onupdate that is not called", function() {
+					var onupdate = o.spy()
+					var component = createComponent({
+						onupdate: onupdate,
+						view: function() {
+							return {tag: "div"}
+						}
+					})
+					var vnode = {tag: component, key: 1, attrs: {oninit: function(vnode) {vnode.reuse = true}}}
 					var updated = {tag: component, key: 1}
 
 					render(root, [vnode])
 					render(root, [])
 					render(root, [updated])
 
-					o(vnode.dom).notEquals(updated.dom)
+					o(onupdate.callCount).equals(0)
+					o(vnode.dom).equals(updated.dom)
 				})
 				o("lifecycle timing megatest (for a single component)", function() {
 					var methods = {

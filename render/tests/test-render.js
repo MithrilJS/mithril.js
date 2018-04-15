@@ -265,6 +265,10 @@ o.spec("render", function() {
 		o(removeA.callCount).equals(1)
 
 		render(root, a())
+
+		o(createA.callCount).equals(2)
+		o(updateA.callCount).equals(1)
+
 		render(root, a())
 
 		o(createA.callCount).equals(2)
