@@ -239,40 +239,47 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length)
 		else {
-			var start = 0, commonLength = Math.min(old.length, vnodes.length), isUnkeyed = false
-			for(; start < commonLength; start++) {
-				if (old[start] != null && vnodes[start] != null) {
-					if (old[start].key == null && vnodes[start].key == null) isUnkeyed = true
+			var start = 0, oldStart = 0, isUnkeyed = false, isOldUnkeyed = false
+			for(; oldStart < old.length; oldStart++) {
+				if (old[oldStart] != null) {
+					isOldUnkeyed = old[oldStart].key == null
 					break
 				}
 			}
-			if (isUnkeyed && old.length === vnodes.length) {
-				for (start = 0; start < vnodes.length; start++) {
+			for(; start < vnodes.length; start++) {
+				if (vnodes[start] != null) {
+					isUnkeyed = vnodes[start].key == null
+					break
+				}
+			}
+			if (isOldUnkeyed !== isUnkeyed) {
+				removeNodes(old, oldStart, old.length)
+				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				return
+			}
+			if (isUnkeyed) {
+				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
+				start = start < oldStart ? start : oldStart
+				for (; start < commonLength; start++) {
 					if (old[start] === vnodes[start] || old[start] == null && vnodes[start] == null) continue
 					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, nextSibling))
 					else if (vnodes[start] == null) removeNodes(old, start, start + 1)
 					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
+				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 				return
 			}
-			var oldStart = start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
+			// keyed diff
+			var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
 
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldStart]
 				v = vnodes[start]
 				if (o === v || o == null && v == null) oldStart++, start++
-				else if (o == null) {
-					if (isUnkeyed || v.key == null) {
-						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, nextSibling))
-					}
-					oldStart++
-				} else if (v == null) {
-					if (isUnkeyed || o.key == null) {
-						removeNodes(old, start, start + 1)
-						oldStart++
-					}
-					start++
-				} else if (o.key === v.key) {
+				else if (o == null) oldStart++
+				else if (v == null) start++
+				else if (o.key === v.key) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
