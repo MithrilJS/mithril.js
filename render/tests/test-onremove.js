@@ -91,7 +91,7 @@ o.spec("onremove", function() {
 		o(vnode.dom.attributes["onremove"]).equals(undefined)
 		o(vnode.events).equals(undefined)
 	})
-	o("calls onremove on recycle", function() {
+	o("calls onremove on keyed nodes", function() {
 		var remove = o.spy()
 		var vnodes = [{tag: "div", key: 1}]
 		var temp = [{tag: "div", key: 2, attrs: {onremove: remove}}]
@@ -101,7 +101,7 @@ o.spec("onremove", function() {
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(remove.callCount).equals(1)
 	})
 	o("does not recycle when there's an onremove", function() {
@@ -211,7 +211,7 @@ o.spec("onremove", function() {
 				render(root, [temp])
 				render(root, [updated])
 
-				o(vnode.dom).equals(updated.dom)
+				o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 				o(onremove.callCount).equals(1)
 			})
 		})
