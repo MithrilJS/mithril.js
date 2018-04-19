@@ -18,7 +18,7 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 ### NPM
 
 ```bash
-$> npm install mithril --save
+$ npm install mithril --save
 ```
 
 ---
@@ -27,33 +27,32 @@ $> npm install mithril --save
 
 1. Initialize the directory as an npm package
 ```bash
-$> npm init --yes
+$ npm init --yes
 ```
 
 2. install required tools
 ```bash
-$> npm install mithril --save
-$> npm install webpack webpack-cli --save-dev
+$ npm install mithril --save
+$ npm install webpack webpack-cli --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
 ```js
 {
-  // ...
-  "scripts": {
-    "start": "webpack src/index.js --output bin/app.js -d --watch"
-  }
+	// ...
+	"scripts": {
+		"start": "webpack src/index.js --output bin/app.js -d --watch"
+	}
 }
 ```
 
-3. Create `src/index.js`
+4. Create `src/index.js` file.
 ```js
 import m from "mithril";
-
 m.render(document.body, "hello world");
 ```
 
-4. create `index.html`
+5. create `index.html`
 ```html
 <!DOCTYPE html>
 <body>
@@ -61,12 +60,12 @@ m.render(document.body, "hello world");
 </body>
 ```
 
-5. run bundler
+6. run bundler
 ```bash
-$> npm start
+$ npm start
 ```
 
-6. open `index.html` in a browser
+7. open `index.html` in a browser
 
 #### Step by step
 
@@ -268,7 +267,7 @@ m.render(document.body, "hello world")
 TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
 
 ```bash
-$> npm install @types/mithril --save-dev
+$ npm install @types/mithril --save-dev
 ```
 
 For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts

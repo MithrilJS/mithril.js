@@ -1,9 +1,9 @@
-# Integrating with Other Libraries
+# 3rd Party Integration
+
 Integration with third party libraries or vanilla javascript code can be achieved via [lifecycle methods](lifecycle-methods.md).
 
-- [Usage](#usage)
+## Example
 
-### Usage
 ```javascript
 var FullCalendar = {
 
@@ -19,7 +19,7 @@ var FullCalendar = {
 	// Consider that the lib will modify this parent element in the DOM (e.g. add dependent class attribute and values).
 	// As long as you return the same view results here, mithril will not
 	// overwrite the actual DOM because it's always comparing old and new VDOM
-	// before applying DOM updates. 
+	// before applying DOM updates.
 	view: function (vnode) {
 		return m('div')
 	},
