@@ -242,6 +242,28 @@ o.spec("domMock", function() {
 			o(a.parentNode).equals(parent)
 			o(b.parentNode).equals(parent)
 		})
+		o("moves existing node forward but not at the end", function() {
+			var parent = $document.createElement("div")
+			var a = $document.createElement("a")
+			var b = $document.createElement("b")
+			var c = $document.createElement("c")
+			parent.appendChild(a)
+			parent.appendChild(b)
+			parent.appendChild(c)
+			parent.insertBefore(a, c)
+
+			o(parent.childNodes.length).equals(3)
+			o(parent.childNodes[0]).equals(b)
+			o(parent.childNodes[1]).equals(a)
+			o(parent.childNodes[2]).equals(c)
+			o(parent.firstChild).equals(b)
+			o(parent.firstChild.nextSibling).equals(a)
+			o(parent.firstChild.nextSibling.nextSibling).equals(c)
+			o(a.parentNode).equals(parent)
+			o(b.parentNode).equals(parent)
+			o(c.parentNode).equals(parent)
+
+		})
 		o("removes from old parent", function() {
 			var parent = $document.createElement("div")
 			var source = $document.createElement("span")

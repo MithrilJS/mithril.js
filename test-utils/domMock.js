@@ -101,6 +101,7 @@ module.exports = function(options) {
 		if (index > -1) this.childNodes.splice(index, 1)
 		if (reference === null) this.appendChild(child)
 		else {
+			if (index !== -1 && refIndex > index) refIndex--
 			if (child.nodeType === 11) {
 				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
 				while (child.firstChild) {
