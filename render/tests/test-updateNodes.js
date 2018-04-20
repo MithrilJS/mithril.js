@@ -1035,6 +1035,32 @@ o.spec("updateNodes", function() {
 		o(onremove.callCount).equals(1)
 		o(onupdate.callCount).equals(0)
 	})
+	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
+		try {
+			render(root, [{tag: "a", key: 2}])
+			render(root, [{tag: "b", key: 1}, {tag: "b", key: 2}])
+
+			o(root.childNodes.length).equals(2)
+			o(root.childNodes[0].nodeName).equals("B")
+			o(root.childNodes[1].nodeName).equals("B")
+		} catch (e) {
+			o(e).equals(null)
+		}
+	})
+	o("supports changing the element of a keyed element in a list when looking up nodes using the map", function() {
+		try {
+			render(root, [{tag: "x", key: 1}, {tag: "y", key: 2}, {tag: "z", key: 3}])
+			render(root, [{tag: "b", key: 2}, {tag: "c", key: 1}, {tag: "d", key: 4}, {tag: "e", key: 3}])
+
+			o(root.childNodes.length).equals(4)
+			o(root.childNodes[0].nodeName).equals("B")
+			o(root.childNodes[1].nodeName).equals("C")
+			o(root.childNodes[2].nodeName).equals("D")
+			o(root.childNodes[3].nodeName).equals("E")
+		} catch (e) {
+			o(e).equals(null)
+		}
+	})
 	o("don't fetch the nextSibling from the pool", function() {
 		render(root, [{tag: "[", children: [{tag: "div", key: 1}, {tag: "div", key: 2}]}, {tag: "p"}])
 		render(root, [{tag: "[", children: []}, {tag: "p"}])
@@ -1077,6 +1103,19 @@ o.spec("updateNodes", function() {
 				o(root.childNodes.length).equals(2)
 				o(root.childNodes[0].nodeName).equals("A")
 				o(root.childNodes[1].nodeName).equals("S")
+			})
+			o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
+				var component = createComponent({
+					view: function() {return {tag: "[", children:[{tag: "a"}, {tag: "b"}]}}
+				})
+				try {
+					render(root, [{tag: component}])
+					render(root, [])
+
+					o(root.childNodes.length).equals(0)
+				} catch (e) {
+					o(e).equals(null)
+				}
 			})
 		})
 	})
