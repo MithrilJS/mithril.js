@@ -24,7 +24,8 @@
 			<section>
 				<h1 id="installation"><a href="#installation">Installation</a></h1>
 <ul>
-<li>Tutorials<ul>
+<li>Getting Started<ul>
+<li><a href="index.html">Introduction</a></li>
 <li><strong><a href="installation.html">Installation</a></strong><ul>
 <li><a href="#cdn">CDN</a></li>
 <li><a href="#npm">NPM</a></li>
@@ -32,8 +33,9 @@
 <li><a href="#typescript">TypeScript</a></li>
 </ul>
 </li>
-<li><a href="index.html">Introduction</a></li>
 <li><a href="simple-application.html">Tutorial</a></li>
+<li><a href="learning-mithril.html">Learning Resources</a></li>
+<li><a href="support.html">Getting Help</a></li>
 </ul>
 </li>
 <li>Resources<ul>
@@ -43,8 +45,7 @@
 <li><a href="animation.html">Animation</a></li>
 <li><a href="testing.html">Testing</a></li>
 <li><a href="examples.html">Examples</a></li>
-<li><a href="integrating-libs.html">Integrating with Other Libraries</a></li>
-<li><a href="learning-mithril.html">Learning Mithril</a></li>
+<li><a href="integrating-libs.html">3rd Party Integration</a></li>
 </ul>
 </li>
 <li>Key concepts<ul>
@@ -74,45 +75,43 @@
 </code></pre>
 <hr>
 <h3 id="npm"><a href="#npm">NPM</a></h3>
-<pre><code class="lang-bash">[body]gt; npm install mithril --save
+<pre><code class="lang-bash">$ npm install mithril --save
 </code></pre>
 <hr>
 <h3 id="quick-start-with-webpack"><a href="#quick-start-with-webpack">Quick start with Webpack</a></h3>
 <ol>
 <li><p>Initialize the directory as an npm package</p>
-<pre><code class="lang-bash">[body]gt; npm init --yes
+<pre><code class="lang-bash">$ npm init --yes
 </code></pre>
 </li>
 <li><p>install required tools</p>
-<pre><code class="lang-bash">[body]gt; npm install mithril --save
-[body]gt; npm install webpack webpack-cli --save-dev
+<pre><code class="lang-bash">$ npm install mithril --save
+$ npm install webpack webpack-cli --save-dev
 </code></pre>
 </li>
 <li><p>Add a &quot;start&quot; entry to the scripts section in <code>package.json</code>.</p>
 <pre><code class="lang-js">{
-// ...
-&quot;scripts&quot;: {
- &quot;start&quot;: &quot;webpack src/index.js --output bin/app.js -d --watch&quot;
-}
+ // ...
+ &quot;scripts&quot;: {
+     &quot;start&quot;: &quot;webpack src/index.js --output bin/app.js -d --watch&quot;
+ }
 }
 </code></pre>
 </li>
-<li><p>Create <code>src/index.js</code>
-```js
-import m from &quot;mithril&quot;;</p>
+<li><p>Create <code>src/index.js</code> file.</p>
+<pre><code class="lang-js">import m from &quot;mithril&quot;;
+m.render(document.body, &quot;hello world&quot;);
+</code></pre>
 </li>
-</ol>
-<p>m.render(document.body, &quot;hello world&quot;);</p>
-<pre><code>
-4. create `index.html`
-```html
-&lt;!DOCTYPE html&gt;
+<li><p>create <code>index.html</code></p>
+<pre><code class="lang-html">&lt;!DOCTYPE html&gt;
 &lt;body&gt;
-    &lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;
+ &lt;script src=&quot;bin/app.js&quot;&gt;&lt;/script&gt;
 &lt;/body&gt;
-</code></pre><ol>
+</code></pre>
+</li>
 <li><p>run bundler</p>
-<pre><code class="lang-bash">[body]gt; npm start
+<pre><code class="lang-bash">$ npm start
 </code></pre>
 </li>
 <li><p>open <code>index.html</code> in a browser</p>
@@ -245,7 +244,7 @@ m.render(document.body, &quot;hello world&quot;)
 <hr>
 <h3 id="typescript"><a href="#typescript">TypeScript</a></h3>
 <p>TypeScript type definitions are available from DefinitelyTyped. They can be installed with:</p>
-<pre><code class="lang-bash">[body]gt; npm install @types/mithril --save-dev
+<pre><code class="lang-bash">$ npm install @types/mithril --save-dev
 </code></pre>
 <p>For example usage, to file issues or to discuss TypeScript related topics visit: <a href="https://github.com/MithrilJS/mithril.d.ts">https://github.com/MithrilJS/mithril.d.ts</a></p>
 

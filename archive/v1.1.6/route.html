@@ -582,7 +582,7 @@ m.route(document.body, &quot;/&quot;, {
     }
 })
 </code></pre>
-<p>Note that in this case, if the Layout component the <code>oninit</code> and <code>oncreate</code> lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).</p>
+<p>Note that in this case, if the Layout component has <code>oninit</code> and <code>oncreate</code> lifecycle methods, they would only fire on the first route change (assuming all routes use the same layout).</p>
 <p>To clarify the difference between the two examples, example 1 is equivalent to this code:</p>
 <pre><code class="lang-javascript">// functionally equivalent to example 1
 var Anon1 = {

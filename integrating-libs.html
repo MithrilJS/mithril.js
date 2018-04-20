@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8" />
-		<title> Integrating with Other Libraries - Mithril.js</title>
+		<title> 3rd Party Integration - Mithril.js</title>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
@@ -22,12 +22,49 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="integrating-with-other-libraries"><a href="#integrating-with-other-libraries">Integrating with Other Libraries</a></h1>
-<p>Integration with third party libraries or vanilla javascript code can be achieved via <a href="lifecycle-methods.html">lifecycle methods</a>.</p>
+				<h1 id="3rd-party-integration"><a href="#3rd-party-integration">3rd Party Integration</a></h1>
 <ul>
-<li><a href="#usage">Usage</a></li>
+<li>Getting Started<ul>
+<li><a href="index.html">Introduction</a></li>
+<li><a href="installation.html">Installation</a></li>
+<li><a href="simple-application.html">Tutorial</a></li>
+<li><a href="learning-mithril.html">Learning Resources</a></li>
+<li><a href="support.html">Getting Help</a></li>
 </ul>
-<h3 id="usage"><a href="#usage">Usage</a></h3>
+</li>
+<li>Resources<ul>
+<li><a href="jsx.html">JSX</a></li>
+<li><a href="es6.html">ES6</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="animation.html">Animation</a></li>
+<li><a href="testing.html">Testing</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><strong><a href="integrating-libs.html">3rd Party Integration</a></strong></li>
+</ul>
+</li>
+<li>Key concepts<ul>
+<li><a href="vnodes.html">Vnodes</a></li>
+<li><a href="components.html">Components</a></li>
+<li><a href="lifecycle-methods.html">Lifecycle methods</a></li>
+<li><a href="keys.html">Keys</a></li>
+<li><a href="autoredraw.html">Autoredraw system</a></li>
+</ul>
+</li>
+<li>Social<ul>
+<li><a href="https://github.com/MithrilJS/mithril.js/wiki/JOBS">Mithril Jobs</a></li>
+<li><a href="contributing.html">How to contribute</a></li>
+<li><a href="credits.html">Credits</a></li>
+<li><a href="code-of-conduct.html">Code of Conduct</a></li>
+</ul>
+</li>
+<li>Misc<ul>
+<li><a href="framework-comparison.html">Framework comparison</a></li>
+<li><a href="change-log.html">Change log/Migration</a></li>
+</ul>
+</li>
+</ul>
+<p>Integration with third party libraries or vanilla javascript code can be achieved via <a href="lifecycle-methods.html">lifecycle methods</a>.</p>
+<h2 id="example"><a href="#example">Example</a></h2>
 <pre><code class="lang-javascript">var FullCalendar = {
 
     oncreate: function (vnode) {
@@ -42,7 +79,7 @@
     // Consider that the lib will modify this parent element in the DOM (e.g. add dependent class attribute and values).
     // As long as you return the same view results here, mithril will not
     // overwrite the actual DOM because it&#39;s always comparing old and new VDOM
-    // before applying DOM updates. 
+    // before applying DOM updates.
     view: function (vnode) {
         return m(&#39;div&#39;)
     },
