@@ -33,11 +33,31 @@ function traverseDirectory(pathname, callback) {
 	})
 }
 
-traverseDirectory(".", function(pathname) {
-	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
-		require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
-	}
-})
+function parseRootPathArgs(args) {
+	var foundCmd // Raw process.argv starts with the ospec command and commands leading up to it (i.e. `node`)
+	var foundOpt // Stop at first sign of a "-" prefixed option flag
+	var rootPathArgs = args.filter(function(arg) {
+		if (!foundCmd) {
+			foundCmd = (/ospec$/).test(arg)
+		}
+		else if (!foundOpt) {
+			foundOpt = (/^-/.test(arg))
+			return !foundOpt
+		}
+		return false
+	})
+	return rootPathArgs.length ? rootPathArgs : null
+}
+
+var rootPaths = parseRootPathArgs(process.argv) || ["."]
+
+Promise.all(rootPaths.map(function(rootPath) {
+	return traverseDirectory(rootPath, function(pathname) {
+		if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
+			require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
+		}
+	})
+}))
 .then(o.run)
 .catch(function(e) {
 	console.log(e.stack)

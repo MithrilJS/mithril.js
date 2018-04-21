@@ -290,15 +290,18 @@ _o.run()
 
 ### Running the test suite from the command-line
 
-ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
+ospec will automatically evaluate all `*.js` files in any sub-folder named `/tests`.
 
-`o.run()` is automatically called by the cli - no need to call it in your test code.
+To only look for `/tests` folders within certain sub-folders, pass their names as arguments to the `ospec` command.
+
+NOTE: `o.run()` is automatically called by the cli - no need to call it in your test code.
 
 #### Create an npm script in your package:
 ```
 	"scripts": {
 		...
 		"test": "ospec",
+		"test-partial": "ospec path/to/module1 path-to/module2"
 		...
 	}
 ```
