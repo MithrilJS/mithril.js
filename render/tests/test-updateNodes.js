@@ -614,6 +614,38 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
+	o("cached keyed nodes move when the list is reversed", function(){
+		var a = {tag: "a", key: "a"}
+		var b = {tag: "b", key: "b"}
+		var c = {tag: "c", key: "c"}
+		var d = {tag: "d", key: "d"}
+
+		render(root, [a, b, c, d])
+		render(root, [d, c, b, a])
+
+		o(root.childNodes.length).equals(4)
+		o(root.childNodes[0].nodeName).equals("D")
+		o(root.childNodes[1].nodeName).equals("C")
+		o(root.childNodes[2].nodeName).equals("B")
+		o(root.childNodes[3].nodeName).equals("A")
+	})
+	o("cached keyed nodes move when diffed via the map", function() {
+		var onupdate = o.spy()
+		var a = {tag: "a", key: "a", attrs: {onupdate: onupdate}}
+		var b = {tag: "b", key: "b", attrs: {onupdate: onupdate}}
+		var c = {tag: "c", key: "c", attrs: {onupdate: onupdate}}
+		var d = {tag: "d", key: "d", attrs: {onupdate: onupdate}}
+
+		render(root, [a, b, c, d])
+		render(root, [b, d, a, c])
+
+		o(root.childNodes.length).equals(4)
+		o(root.childNodes[0].nodeName).equals("B")
+		o(root.childNodes[1].nodeName).equals("D")
+		o(root.childNodes[2].nodeName).equals("A")
+		o(root.childNodes[3].nodeName).equals("C")
+		o(onupdate.callCount).equals(0)
+	})
 	o("removes then create different bigger", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
