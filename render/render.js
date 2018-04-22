@@ -260,11 +260,10 @@ module.exports = function($window) {
 
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null) removeNodes(old, 0, old.length)
+		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
+		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
 		else {
-			// default to keyed because, when either list is full of null nodes, it has fewer branches
-			var start = 0, oldStart = 0, isOldKeyed = true, isKeyed = true
+			var start = 0, oldStart = 0, isOldKeyed = null, isKeyed = null
 			for (; oldStart < old.length; oldStart++) {
 				if (old[oldStart] != null) {
 					isOldKeyed = old[oldStart].key != null
@@ -277,12 +276,11 @@ module.exports = function($window) {
 					break
 				}
 			}
+			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed) {
 				removeNodes(old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
-				return
-			}
-			if (!isKeyed) {
+			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
 				// Rewind if necessary to the first non-null index on either side.
@@ -299,72 +297,120 @@ module.exports = function($window) {
 				}
 				if (old.length > commonLength) removeNodes(old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
-				return
-			}
-			// keyed diff
-			var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
+			} else {
+				// keyed diff
+				var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oe, ve, topSibling
 
-			while (oldEnd >= oldStart && end >= start) {
-				// both top-down
-				o = old[oldStart]
-				v = vnodes[start]
-				if (o == null) oldStart++
-				else if (v == null) start++
-				else if (o.key === v.key) {
-					oldStart++, start++
-					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
-				} else {
-					// reversal: old top-down, new bottom-up
-					v = vnodes[end]
-					if (o == null) oldStart++
-					else if (v == null) end--
-					else if (o.key === v.key) {
-						oldStart++
-						if (start < end--) insertNode(parent, toFragment(o), nextSibling)
-						if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
-						if (v.dom != null) nextSibling = v.dom
+				while (oldEnd >= oldStart && end >= start) {
+					oe = old[oldEnd]
+					ve = vnodes[end]
+					if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (oe.key === ve.key) {
+						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldEnd--, end--
+					} else {
+						break
 					}
-					else break
 				}
-			}
-			while (oldEnd >= oldStart && end >= start) {
-				// both bottom-up
-				o = old[oldEnd]
-				v = vnodes[end]
-				if (o == null) oldEnd--
-				else if (v == null) end--
-				else if (o.key === v.key) {
-					if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
-					if (v.dom != null) nextSibling = v.dom
-					oldEnd--, end--
-				} else {
-					// old map-based, new bottom-up
-					if (map == null) {
-						// the last node can be left out of the map because it will be caught by the
-						// bottom-up part of the diff loop. If we were to refactor this to use distinct
-						// loops, we'd have to pass `oldEnd + 1` (or change `start < end` to `<=` in getKeyMap).
-						map = getKeyMap(old, oldStart, oldEnd)
+				while (oldEnd >= oldStart && end >= start) {
+					o = old[oldStart]
+					v = vnodes[start]
+					if (o == null) oldStart++
+					else if (v == null) start++
+					else if (o.key === v.key) {
+						oldStart++, start++
+						if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					} else {
+						break
 					}
-					if (v != null) {
-						var oldIndex = map[v.key]
-						if (oldIndex == null) {
-							createNode(parent, v, hooks, ns, nextSibling)
-							if (v.dom != null) nextSibling = v.dom
-						} else {
-							o = old[oldIndex]
-							insertNode(parent, toFragment(o), nextSibling)
-							if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
-							o.skip = true
-							if (v.dom != null) nextSibling = v.dom
+				}
+
+				//swaps and list reversals
+				while (oldEnd >= oldStart && end >= start) {
+					o = old[oldStart]
+					v = vnodes[start]
+					if (o == null) oldStart++
+					else if (v == null) start++
+					else if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (start === end) break
+					else {
+						if (o.key !== ve.key || oe.key !== v.key) break
+						topSibling = getNextSibling(old, oldStart, nextSibling)
+						insertNode(parent, toFragment(oe), topSibling)
+						if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
+						if (++start <= --end) insertNode(parent, toFragment(o), nextSibling)
+						if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldStart++; oldEnd--
+					}
+					oe = old[oldEnd]
+					ve = vnodes[end]
+				}
+				while (oldEnd >= oldStart && end >= start) {
+					if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (oe.key === ve.key) {
+						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldEnd--, end--
+					} else {
+						break
+					}
+					oe = old[oldEnd]
+					ve = vnodes[end]
+				}
+				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
+				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+				else {
+					// inspired by ivi
+					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, map, i, lis
+					var oldIndices = new Array(end - start + 1)
+					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
+					var pos = 2147483647, matched = false
+
+					for (i = end; i >= start; i--) {
+						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
+						v = vnodes[i]
+						if (v != null) {
+							var oldIndex = map[v.key]
+							if (oldIndex != null) {
+								pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
+								oldIndices[i-start] = oldIndex
+								o = old[oldIndex]
+								o.skip = true
+								if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
+								if (v.dom != null) nextSibling = v.dom
+								matched = true
+							}
 						}
 					}
-					end--
+					nextSibling = originalNextSibling
+					removeNodes(old, oldStart, oldEnd + 1)
+					if (!matched) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+					else {
+						if (pos === -1) {
+							lis = makeLis(oldIndices)
+							var lisi = lis.length - 1
+							for (i = end; i >= start; i--) {
+								if (oldIndices[i-start] === -1) createNode(parent, vnodes[i], hooks, ns, nextSibling)
+								else {
+									if (lis[lisi] === i - start) lisi--
+									else insertNode(parent, toFragment(vnodes[i]), nextSibling)
+								}
+								if (vnodes[i].dom != null) nextSibling = vnodes[i].dom
+							}
+						} else {
+							for (i = end; i >= start; i--) {
+								if (oldIndices[i-start] === -1) createNode(parent, vnodes[i], hooks, ns, nextSibling)
+								if (vnodes[i].dom != null) nextSibling = vnodes[i].dom
+							}
+						}
+					}
 				}
-				if (end < start) break
 			}
-			// deal with the leftovers.
-			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, oldEnd + 1)
 		}
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
@@ -475,6 +521,52 @@ module.exports = function($window) {
 		}
 		return map
 	}
+	// Lifted from ivi https://github.com/ivijs/ivi/
+	function makeLis(a) {
+		var p = a.slice()
+		var result = []
+		result.push(0)
+		var u
+		var v
+		for (var i = 0, il = a.length; i < il; ++i) {
+			if (a[i] === -1) {
+				continue
+			}
+			var j = result[result.length - 1]
+			if (a[j] < a[i]) {
+				p[i] = j
+				result.push(i)
+				continue
+			}
+			u = 0
+			v = result.length - 1
+			while (u < v) {
+				/*eslint-disable no-bitwise*/
+				var c = ((u + v) / 2) | 0
+				/*eslint-enable no-bitwise*/
+				if (a[result[c]] < a[i]) {
+					u = c + 1
+				}
+				else {
+					v = c
+				}
+			}
+			if (a[i] < a[result[u]]) {
+				if (u > 0) {
+					p[i] = result[u - 1]
+				}
+				result[u] = i
+			}
+		}
+		u = result.length
+		v = result[u - 1]
+		while (u-- > 0) {
+			result[u] = v
+			v = p[v]
+		}
+		return result
+	}
+
 	function toFragment(vnode) {
 		var count = vnode.domSize
 		if (count != null || vnode.dom == null) {
