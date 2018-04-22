@@ -185,13 +185,14 @@ module.exports = function($window) {
 
 	// ## Diffing
 	//
-	// There's first a simple diff for unkeyed lists of equal length.
+	// If one list is keyed and the other is unkeyed, the old is removed, and the new one is
+	// inserted (since the keys are guaranteed to differ).
 	//
-	// Then comes the main diff algorithm that is split in four parts (simplifying a bit).
+	// Then comes the unkeyed diff algo, and at last, the keyed diff algorithm that is split
+	// in four parts (simplifying a bit).
 	//
 	// The first part goes through both lists top-down as long as the nodes at each level have
-	// the same key. This is always true for unkeyed lists that are entirely processed by this
-	// step.
+	// the same key.
 	//
 	// The second part deals with lists reversals, and traverses one list top-down and the other
 	// bottom-up (as long as the keys match).
@@ -219,15 +220,20 @@ module.exports = function($window) {
 
 	// ## Finding the next sibling.
 	//
-	// `updateNode()` and `createNode()` expect a nextSibling parameter. When the list is being
-	// traversed top-down, the next sibling must be looked for in the old list using
-	// `getNextSibling()`. In the other scenarios (swaps, upwards traversal, map-based diff),
-	// the new vnodes list is traversed upwards, which enables us to fetch the `nextSibling`
-	// parameter on the go (set to the last `v.dom` when present).
+	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
+	// When the list is being traversed top-down, at any index, the DOM nodes up to the previous
+	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
+	// list. The next sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
+  //
+	// In the other scenarios (swaps, upwards traversal, map-based diff),
+	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
+	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
+	// as the next sibling (cached in the `nextSibling` variable).
+
 
 	// ## DOM node moves
 	//
-	// In most cases `updateNode()` and `createNode()` perform the DOM operations. However,
+	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
 	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
@@ -242,32 +248,40 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length)
 		else {
-			var start = 0, oldStart = 0, isUnkeyed = false, isOldUnkeyed = false
-			for(; oldStart < old.length; oldStart++) {
+			// default to keyed because, when either list isfull of null nodes, it has fewer branches
+			var start = 0, oldStart = 0, isOldKeyed = true, isKeyed = true
+			for (; oldStart < old.length; oldStart++) {
 				if (old[oldStart] != null) {
-					isOldUnkeyed = old[oldStart].key == null
+					isOldKeyed = old[oldStart].key != null
 					break
 				}
 			}
-			for(; start < vnodes.length; start++) {
+			for (; start < vnodes.length; start++) {
 				if (vnodes[start] != null) {
-					isUnkeyed = vnodes[start].key == null
+					isKeyed = vnodes[start].key != null
 					break
 				}
 			}
-			if (isOldUnkeyed !== isUnkeyed) {
+			if (isOldKeyed !== isKeyed) {
 				removeNodes(old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 				return
 			}
-			if (isUnkeyed) {
+			if (!isKeyed) {
+				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
+				// Rewind if necessary to the first non-null index on either side.
+				// We could also either create or remove nodes when start !== oldStart
+				// but that would be optimizing for sparse lists which are more rare
+				// than dense ones.
 				start = start < oldStart ? start : oldStart
 				for (; start < commonLength; start++) {
-					if (old[start] === vnodes[start] || old[start] == null && vnodes[start] == null) continue
-					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, nextSibling))
-					else if (vnodes[start] == null) removeNodes(old, start, start + 1)
-					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, nextSibling), ns)
+					o = old[start]
+					v = vnodes[start]
+					if (o === v || o == null && v == null) continue
+					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (v == null) removeNode(o)
+					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
 				if (old.length > commonLength) removeNodes(old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
@@ -277,6 +291,7 @@ module.exports = function($window) {
 			var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
 
 			while (oldEnd >= oldStart && end >= start) {
+				// both top down
 				o = old[oldStart]
 				v = vnodes[start]
 				if (o == null) oldStart++
@@ -285,6 +300,7 @@ module.exports = function($window) {
 					oldStart++, start++
 					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
+					// reversal: old top-down, new bottom-up
 					v = vnodes[end]
 					if (o == null) oldStart++
 					else if (v == null) end--
@@ -292,12 +308,13 @@ module.exports = function($window) {
 						oldStart++
 						if (start < end--) insertNode(parent, toFragment(o), nextSibling)
 						if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
-						if(v.dom != null) nextSibling = v.dom
+						if (v.dom != null) nextSibling = v.dom
 					}
 					else break
 				}
 			}
 			while (oldEnd >= oldStart && end >= start) {
+				// both bottom-up
 				o = old[oldEnd]
 				v = vnodes[end]
 				if (o == null) oldEnd--
@@ -307,17 +324,23 @@ module.exports = function($window) {
 					if (v.dom != null) nextSibling = v.dom
 					oldEnd--, end--
 				} else {
-					if (!map) map = getKeyMap(old, oldEnd)
+					// old map-based, new bottom-up
+					if (map == null) {
+						// the last node can be left out of the map because it will be caught by the
+						// bottom-up part of the diff loop. If we were to refactor this to use distinct
+						// loops, we'd have to pass `oldEnd + 1` (or change `start < end` to `<=` in getKeyMap).
+						map = getKeyMap(old, oldStart, oldEnd)
+					}
 					if (v != null) {
 						var oldIndex = map[v.key]
-						if (oldIndex != null) {
+						if (oldIndex == null) {
+							createNode(parent, v, hooks, ns, nextSibling)
+							if (v.dom != null) nextSibling = v.dom
+						} else {
 							o = old[oldIndex]
 							insertNode(parent, toFragment(o), nextSibling)
 							if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
 							o.skip = true
-							if (v.dom != null) nextSibling = v.dom
-						} else {
-							createNode(parent, v, hooks, ns, nextSibling)
 							if (v.dom != null) nextSibling = v.dom
 						}
 					}
@@ -325,6 +348,7 @@ module.exports = function($window) {
 				}
 				if (end < start) break
 			}
+			// deal with the leftovers.
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 			removeNodes(old, oldStart, oldEnd + 1)
 		}
@@ -427,13 +451,13 @@ module.exports = function($window) {
 			vnode.domSize = old.domSize
 		}
 	}
-	function getKeyMap(vnodes, end) {
-		var map = {}, i = 0
-		for (var i = 0; i < end; i++) {
-			var vnode = vnodes[i]
+	function getKeyMap(vnodes, start, end) {
+		var map = {}
+		for (; start < end; start++) {
+			var vnode = vnodes[start]
 			if (vnode != null) {
 				var key = vnode.key
-				if (key != null) map[key] = i
+				if (key != null) map[key] = start
 			}
 		}
 		return map
