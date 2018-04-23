@@ -170,10 +170,8 @@ module.exports = function($window) {
 	//
 	// The updateNodes() function:
 	// - deals with trivial cases
-	// - determines whether the lists are keyed or unkeyed
-	//   (Currently we look for the first pair of non-null nodes and deem the lists unkeyed
-	//   if both nodes are unkeyed. TODO (v2) We may later take advantage of the fact that
-	//   mixed diff is not supported and settle on the keyedness of the first vnode we find)
+	// - determines whether the lists are keyed or unkeyed based on the first non-null node
+	//   of each list.
 	// - diffs them and patches the DOM if needed (that's the brunt of the code)
 	// - manages the leftovers: after diffing, are there:
 	//   - old nodes left to remove?
@@ -248,7 +246,7 @@ module.exports = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length)
 		else {
-			// default to keyed because, when either list isfull of null nodes, it has fewer branches
+			// default to keyed because, when either list is full of null nodes, it has fewer branches
 			var start = 0, oldStart = 0, isOldKeyed = true, isKeyed = true
 			for (; oldStart < old.length; oldStart++) {
 				if (old[oldStart] != null) {
@@ -271,9 +269,8 @@ module.exports = function($window) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
 				// Rewind if necessary to the first non-null index on either side.
-				// We could also either create or remove nodes when start !== oldStart
-				// but that would be optimizing for sparse lists which are more rare
-				// than dense ones.
+				// We could alternatively either explicitly create or remove nodes when `start !== oldStart`
+				// but that would be optimizing for sparse lists which are more rare than dense ones.
 				start = start < oldStart ? start : oldStart
 				for (; start < commonLength; start++) {
 					o = old[start]
@@ -291,7 +288,7 @@ module.exports = function($window) {
 			var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
 
 			while (oldEnd >= oldStart && end >= start) {
-				// both top down
+				// both top-down
 				o = old[oldStart]
 				v = vnodes[start]
 				if (o == null) oldStart++
