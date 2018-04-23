@@ -452,18 +452,17 @@ var coreRenderer = function($window) {
 			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
-				case "#": return createText(parent, vnode, nextSibling)
-				case "<": return createHTML(parent, vnode, ns, nextSibling)
-				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
-				default: return createElement(parent, vnode, hooks, ns, nextSibling)
+				case "#": createText(parent, vnode, nextSibling); break
+				case "<": createHTML(parent, vnode, ns, nextSibling); break
+				case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
+				default: createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(parent, vnode, hooks, ns, nextSibling)
+		else createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
 	function createText(parent, vnode, nextSibling) {
 		vnode.dom = $doc.createTextNode(vnode.children)
 		insertNode(parent, vnode.dom, nextSibling)
-		return vnode.dom
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode, ns, nextSibling) {
@@ -488,7 +487,6 @@ var coreRenderer = function($window) {
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
@@ -499,7 +497,6 @@ var coreRenderer = function($window) {
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
@@ -528,7 +525,6 @@ var coreRenderer = function($window) {
 				setLateAttrs(vnode)
 			}
 		}
-		return element
 	}
 	function initComponent(vnode, hooks) {
 		var sentinel
@@ -553,15 +549,12 @@ var coreRenderer = function($window) {
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
+			createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
-			insertNode(parent, element, nextSibling)
-			return element
 		}
 		else {
 			vnode.domSize = 0
-			return $emptyFragment
 		}
 	}
 	//update
@@ -588,10 +581,8 @@ var coreRenderer = function($window) {
 	//
 	// The updateNodes() function:
 	// - deals with trivial cases
-	// - determines whether the lists are keyed or unkeyed
-	//   (Currently we look for the first pair of non-null nodes and deem the lists unkeyed
-	//   if both nodes are unkeyed. TODO (v2) We may later take advantage of the fact that
-	//   mixed diff is not supported and settle on the keyedness of the first vnode we find)
+	// - determines whether the lists are keyed or unkeyed based on the first non-null node
+	//   of each list.
 	// - diffs them and patches the DOM if needed (that's the brunt of the code)
 	// - manages the leftovers: after diffing, are there:
 	//   - old nodes left to remove?
@@ -602,13 +593,14 @@ var coreRenderer = function($window) {
 	// are visited in the fourth part of the diff and in the `removeNodes` loop.
 	// ## Diffing
 	//
-	// There's first a simple diff for unkeyed lists of equal length.
+	// If one list is keyed and the other is unkeyed, the old is removed, and the new one is
+	// inserted (since the keys are guaranteed to differ).
 	//
-	// Then comes the main diff algorithm that is split in four parts (simplifying a bit).
+	// Then comes the unkeyed diff algo, and at last0, the keyed diff algorithm that is split
+	// in four parts (simplifying a bit).
 	//
 	// The first part goes through both lists top-down as long as the nodes at each level have
-	// the same key2. This is always true for unkeyed lists that are entirely processed by this
-	// step.
+	// the same key2.
 	//
 	// The second part deals with lists reversals, and traverses one list top-down and the other
 	// bottom-up (as long as the keys match1).
@@ -633,10 +625,23 @@ var coreRenderer = function($window) {
 	// It should be noted that the description of the four sections above is not perfect, because those
 	// parts are actually implemented as only two loops, one for the first two parts, and one for
 	// the other two. I'm1 not sure it wins us anything except maybe a few bytes of file size.
-	// ## DOM node operations
+	// ## Finding the next0 sibling.
 	//
-	// In most cases `updateNode()` and `createNode()` perform the DOM operations. However,
-	// this is not the case if the node moved (second and fourth part of the diff algo).
+	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
+	// When the list is being traversed top-down, at any index0, the DOM nodes up to the previous
+	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
+	// list. The next0 sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
+  //
+	// In the other scenarios (swaps, upwards traversal, map-based diff),
+	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
+	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
+	// as the next0 sibling (cached0 in the `nextSibling` variable).
+	// ## DOM node moves
+	//
+	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
+	// this is not the case if the node moved (second and fourth part of the diff algo). We move
+	// the old DOM nodes before updateNode runs0 because it enables us to use the cached0 `nextSibling`
+	// variable rather than fetching it using `getNextSibling()`.
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
 	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
@@ -647,83 +652,105 @@ var coreRenderer = function($window) {
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null) removeNodes(old, 0, old.length)
 		else {
-			var start = 0, commonLength = Math.min(old.length, vnodes.length), isUnkeyed = false
-			for(; start < commonLength; start++) {
-				if (old[start] != null && vnodes[start] != null) {
-					if (old[start].key == null && vnodes[start].key == null) isUnkeyed = true
+			// default to keyed because, when either list is full of null nodes, it has fewer branches
+			var start = 0, oldStart = 0, isOldKeyed = true, isKeyed = true
+			for (; oldStart < old.length; oldStart++) {
+				if (old[oldStart] != null) {
+					isOldKeyed = old[oldStart].key != null
 					break
 				}
 			}
-			if (isUnkeyed && old.length === vnodes.length) {
-				for (start = 0; start < vnodes.length; start++) {
-					if (old[start] === vnodes[start] || old[start] == null && vnodes[start] == null) continue
-					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, nextSibling))
-					else if (vnodes[start] == null) removeNodes(old, start, start + 1)
-					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, nextSibling), ns)
+			for (; start < vnodes.length; start++) {
+				if (vnodes[start] != null) {
+					isKeyed = vnodes[start].key != null
+					break
 				}
+			}
+			if (isOldKeyed !== isKeyed) {
+				removeNodes(old, oldStart, old.length)
+				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 				return
 			}
-			var oldStart = start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
+			if (!isKeyed) {
+				// Don't index0 past the end of either list (causes deopts).
+				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
+				// Rewind if necessary to the first non-null index0 on either side.
+				// We could alternatively either explicitly create or remove nodes when `start !== oldStart`
+				// but that would be optimizing for sparse lists which are more rare than dense ones.
+				start = start < oldStart ? start : oldStart
+				for (; start < commonLength; start++) {
+					o = old[start]
+					v = vnodes[start]
+					if (o === v || o == null && v == null) continue
+					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (v == null) removeNode(o)
+					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
+				}
+				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				return
+			}
+			// keyed diff
+			var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
 			while (oldEnd >= oldStart && end >= start) {
+				// both top-down
 				o = old[oldStart]
 				v = vnodes[start]
-				if (o === v || o == null && v == null) oldStart++, start++
-				else if (o == null) {
-					if (isUnkeyed || v.key == null) {
-						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, nextSibling))
-					}
-					oldStart++
-				} else if (v == null) {
-					if (isUnkeyed || o.key == null) {
-						removeNodes(old, start, start + 1)
-						oldStart++
-					}
-					start++
-				} else if (o.key === v.key) {
+				if (o == null) oldStart++
+				else if (v == null) start++
+				else if (o.key === v.key) {
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
-					o = old[oldEnd]
-					if (o === v) oldEnd--, start++
-					else if (o == null) oldEnd--
-					else if (v == null) start++
+					// reversal: old top-down, new bottom-up
+					v = vnodes[end]
+					if (o == null) oldStart++
+					else if (v == null) end--
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-						if (start < end) insertNode(parent, toFragment(v), getNextSibling(old, oldStart, nextSibling))
-						oldEnd--, start++
+						oldStart++
+						if (start < end--) insertNode(parent, toFragment(o), nextSibling)
+						if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
+						if (v.dom != null) nextSibling = v.dom
 					}
 					else break
 				}
 			}
 			while (oldEnd >= oldStart && end >= start) {
+				// both bottom-up
 				o = old[oldEnd]
 				v = vnodes[end]
-				if (o === v) oldEnd--, end--
-				else if (o == null) oldEnd--
+				if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-					if (o.dom != null) nextSibling = o.dom
+					if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
+					if (v.dom != null) nextSibling = v.dom
 					oldEnd--, end--
 				} else {
-					if (!map) map = getKeyMap(old, oldEnd)
+					// old map-based, new bottom-up
+					if (map == null) {
+						// the last0 node can be left out of the map because it will be caught by the
+						// bottom-up part of the diff loop. If we were to refactor this to use distinct
+						// loops, we'd have to pass `oldEnd + 1` (or change `start < end` to `<=` in getKeyMap).
+						map = getKeyMap(old, oldStart, oldEnd)
+					}
 					if (v != null) {
 						var oldIndex = map[v.key]
-						if (oldIndex != null) {
-							o = old[oldIndex]
-							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-							insertNode(parent, toFragment(v), nextSibling)
-							o.skip = true
-							if (o.dom != null) nextSibling = o.dom
+						if (oldIndex == null) {
+							createNode(parent, v, hooks, ns, nextSibling)
+							if (v.dom != null) nextSibling = v.dom
 						} else {
-							var dom = createNode(parent, v, hooks, ns, nextSibling)
-							nextSibling = dom
+							o = old[oldIndex]
+							insertNode(parent, toFragment(o), nextSibling)
+							if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
+							o.skip = true
+							if (v.dom != null) nextSibling = v.dom
 						}
 					}
 					end--
 				}
 				if (end < start) break
 			}
+			// deal with the leftovers.
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 			removeNodes(old, oldStart, oldEnd + 1)
 		}
@@ -824,13 +851,13 @@ var coreRenderer = function($window) {
 			vnode.domSize = old.domSize
 		}
 	}
-	function getKeyMap(vnodes, end) {
-		var map = {}, i = 0
-		for (var i = 0; i < end; i++) {
-			var vnode = vnodes[i]
+	function getKeyMap(vnodes, start, end) {
+		var map = {}
+		for (; start < end; start++) {
+			var vnode = vnodes[start]
 			if (vnode != null) {
 				var key2 = vnode.key
-				if (key2 != null) map[key2] = i
+				if (key2 != null) map[key2] = start
 			}
 		}
 		return map
@@ -855,7 +882,7 @@ var coreRenderer = function($window) {
 		return nextSibling
 	}
 	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling) parent.insertBefore(dom, nextSibling)
+		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 	function setContentEditable(vnode) {
