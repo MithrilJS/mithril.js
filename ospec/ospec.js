@@ -119,8 +119,8 @@ else window.o = m()
 
 				function done(err) {
 					if (err) {
-						if (err.message) record(err.message, err)
-						else record(err)
+						if (err instanceof Error) record(err.message, err)
+						else record(String(err))
 						subjects.pop()
 						next()
 					}
