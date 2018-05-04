@@ -21,7 +21,7 @@ _2018-05-xx_
 
 ## 1.4.1
 _2018-05-03_
-- ????
+- Identical to v1.4.0, but with UNIX-style line endings so that BASH is happy.
 
 
 
