@@ -53,16 +53,12 @@ else {
 		let chunk
 		while ((chunk = process.stdin.read()) !== null) fileList += chunk
 
-		try {
-			fileList.toString().split(/\r?\n/).forEach(function(fileName) {
-				if (fileName) {
-					require(path.normalize(process.cwd()) + "/" + fileName) // eslint-disable-line global-require
-				}
-			})
-			o.run()
-		} catch (e) {
-			console.log(e.stack)
-		}
+		fileList.toString().split(/\r?\n/).forEach(function(fileName) {
+			if (fileName) {
+				require(path.normalize(process.cwd()) + "/" + fileName) // eslint-disable-line global-require
+			}
+		})
+		o.run()
 	})
 }
 
