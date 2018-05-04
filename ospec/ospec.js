@@ -101,7 +101,8 @@ module.exports = new function init() {
 						}, function(t) {delay = t})
 					}
 					catch (e) {
-						record(e.message, e)
+						if (e instanceof Error) record(e.message, e)
+						else record(String(e))
 						subjects.pop()
 						next()
 					}
@@ -193,7 +194,7 @@ module.exports = new function init() {
 	function record(message, error) {
 		var result = {pass: message === null}
 		if (result.pass === false) {
-			if (error == null || typeof error === "string") {
+			if (error == null) {
 				error = new Error
 				if (error.stack === undefined) new function() {try {throw error} catch (e) {error = e}}
 			}
