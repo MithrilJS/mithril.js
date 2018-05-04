@@ -11,6 +11,7 @@
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+- [ospec change-log](../ospec/change-log.md)
 
 ---
 
@@ -65,20 +66,6 @@
 - core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [@octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 - hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [@s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
 
-#### Ospec improvements
-
-- ospec v1.4.0
-  - Added support for async functions and promises in tests ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928), [@StephanHoyer](https://github.com/StephanHoyer))
-  - Error handling for async tests with `done` callbacks supports error as first argument ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
-  - Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@RodericDay](https://github.com/RodericDay))
-- ospec v2.0.0 (to be released)
-  - Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
-  - Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
-    - Works either as a global or in CommonJS environments
-    - the o.run() report is always printed asynchronously (it could be synchronous before if none of the tests were async).
-    - Properly point to the assertion location of async errors [#2036](https://github.com/MithrilJS/mithril.js/issues/2036)
-    - expose the default reporter as `o.report(results)`
-    - Don't try to access the stack traces in IE9
 
 ---
 
@@ -94,9 +81,6 @@
 
 - Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
 
-#### Ospec improvements:
-
-- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 ---
 
 ### v1.1.3
@@ -120,10 +104,7 @@
 - router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
 - stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
 
-#### Ospec improvements:
-
-- Shell command: Ignore hidden directories and files ([#1855](https://github.com/MithrilJS/mithril.js/pull/1855) [@pdfernhout)](https://github.com/pdfernhout))
-- Library: Add the possibility to name new test suites ([#1529](https://github.com/MithrilJS/mithril.js/pull/1529))
+---
 
 #### Docs / Repo maintenance:
 
