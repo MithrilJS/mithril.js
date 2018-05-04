@@ -43,7 +43,7 @@ if (process.stdin.isTTY) {
 	})
 		.then(o.run)
 		.catch(function(e) {
-			console.log(e.stack)
+			console.error(e.stack)
 		})
 }
 else {
