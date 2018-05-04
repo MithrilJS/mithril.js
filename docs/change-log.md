@@ -1,5 +1,11 @@
 # Change log
 
+- [v2.0.0](#v200-wip)
+- [v1.1.6](#v116)
+- [v1.1.5](#v115)
+- [v1.1.4](#v114)
+- [v1.1.3](#v113)
+- [v1.1.2](#v112)
 - [v1.1.1](#v111)
 - [v1.1.0](#v110)
 - [v1.0.1](#v101)
@@ -8,13 +14,136 @@
 
 ---
 
+### v2.0.0 (WIP)
+
+#### Breaking changes
+
+- API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Assigning to `vnode.state` (as in `vnode.state = ...`) is no longer supported. Instead, an error is thrown if `vnode.state` changes upon the invocation of a lifecycle hook.
+- API: `m.request` will no longer reject the Promise on server errors (eg. status >= 400) if the caller supplies an `extract` callback. This gives applications more control over handling server responses.
+
+#### News
+
+- API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
+- API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
+- API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
+- Mocks: add limited support for the DOMParser API ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- API: add support for raw SVG in `m.trust()` string ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- Internals: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
+
+#### Bug fixes
+
+- API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- render/attrs: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
+- render/attrs: `xlink:href` attributes are now correctly removed
+- render/attrs: fix element value don't change if new value is undefined [#2082](https://github.com/MithrilJS/mithril.js/issues/2082)
+(https://github.com/MithrilJS/mithril.js/pull/2130)
+- render/core: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916) ([#1918](https://github.com/MithrilJS/mithril.js/pull/1918) [@robinchew](https://github.com/robinchew), [#2052](https://github.com/MithrilJS/mithril.js/pull/2052))
+- render/core: fix various updateNodes/removeNodes issues when the pool and fragments are involved [#1990](https://github.com/MithrilJS/mithril.js/issues/1990), [#1991](https://github.com/MithrilJS/mithril.js/issues/1991), [#2003](https://github.com/MithrilJS/mithril.js/issues/2003), [#2021](https://github.com/MithrilJS/mithril.js/pull/2021)
+- render/core: fix crashes when the keyed vnodes with the same `key` had different `tag` values [#2128](https://github.com/MithrilJS/mithril.js/issues/2128) [@JacksonJN](https://github.com/JacksonJN) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/core: fix cached nodes behavior in some keyed diff scenarios [#2132](https://github.com/MithrilJS/mithril.js/issues/2132) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/events: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
+- render/events: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
+- render/events: `Object.prototype` properties can no longer interfere with event listener calls.
+- render/events: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
+- render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
+- docs: fix typo ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb))
+---
+
+### v1.1.7
+
+- Promise polyfill implementation separated from polyfilling logic.
+- `PromisePolyfill` is now available on the exported/global `m`.
+
+---
+
+### v1.1.6
+
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [@octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
+- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [@s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
+
+#### Ospec improvements
+
+- ospec v1.4.0
+  - Added support for async functions and promises in tests ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928), [@StephanHoyer](https://github.com/StephanHoyer))
+  - Error handling for async tests with `done` callbacks supports error as first argument ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+  - Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@RodericDay](https://github.com/RodericDay))
+- ospec v2.0.0 (to be released)
+  - Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
+  - Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
+    - Works either as a global or in CommonJS environments
+    - the o.run() report is always printed asynchronously (it could be synchronous before if none of the tests were async).
+    - Properly point to the assertion location of async errors [#2036](https://github.com/MithrilJS/mithril.js/issues/2036)
+    - expose the default reporter as `o.report(results)`
+    - Don't try to access the stack traces in IE9
+
+---
+
+### v1.1.5
+
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
+
+---
+
+### v1.1.4
+
+#### Bug fixes:
+
+- Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
+
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
+---
+
+### v1.1.3
+
+#### Bug fixes:
+
+- move out npm dependencies added by mistake
+
+---
+
+### v1.1.2
+
+#### Bug fixes:
+
+- core: Namespace fixes [#1819](https://github.com/MithrilJS/mithril.js/issues/1819), ([#1825](https://github.com/MithrilJS/mithril.js/pull/1825) [@SamuelTilly](https://github.com/SamuelTilly)), [#1820](https://github.com/MithrilJS/mithril.js/issues/1820) ([#1864](https://github.com/MithrilJS/mithril.js/pull/1864)), [#1872](https://github.com/MithrilJS/mithril.js/issues/1872) ([#1873](https://github.com/MithrilJS/mithril.js/pull/1873))
+- core: Fix select option to allow empty string value [#1814](https://github.com/MithrilJS/mithril.js/issues/1814) ([#1828](https://github.com/MithrilJS/mithril.js/pull/1828) [@spacejack](https://github.com/spacejack))
+- core: Reset e.redraw when it was set to `false` [#1850](https://github.com/MithrilJS/mithril.js/issues/1850) ([#1890](https://github.com/MithrilJS/mithril.js/pull/1890))
+- core: differentiate between `{ value: "" }` and `{ value: 0 }` for form elements [#1595 comment](https://github.com/MithrilJS/mithril.js/pull/1595#issuecomment-304071453) ([#1862](https://github.com/MithrilJS/mithril.js/pull/1862))
+- core: Don't reset the cursor of textareas in IE10 when setting an identical `value` [#1870](https://github.com/MithrilJS/mithril.js/issues/1870) ([#1871](https://github.com/MithrilJS/mithril.js/pull/1871))
+- hypertext: Correct handling of `[value=""]` ([#1843](https://github.com/MithrilJS/mithril.js/issues/1843), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards))
+- router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
+- stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
+
+#### Ospec improvements:
+
+- Shell command: Ignore hidden directories and files ([#1855](https://github.com/MithrilJS/mithril.js/pull/1855) [@pdfernhout)](https://github.com/pdfernhout))
+- Library: Add the possibility to name new test suites ([#1529](https://github.com/MithrilJS/mithril.js/pull/1529))
+
+#### Docs / Repo maintenance:
+
+Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](https://github.com/ACXgit), [@cavemansspa](https://github.com/cavemansspa), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards), [@dlepaux](https://github.com/dlepaux), [@isaaclyman](https://github.com/isaaclyman), [@kevinkace](https://github.com/kevinkace), [@micellius](https://github.com/micellius), [@spacejack](https://github.com/spacejack) and [@yurivish](https://github.com/yurivish)
+
+#### Other:
+
+- Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
+
+---
+
 ### v1.1.1
 
 #### Bug fixes
 
-- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/lhorie/mithril.js/issues/1752) / [#1753](https://github.com/lhorie/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
-- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/lhorie/mithril.js/issues/1764) / [#1769](https://github.com/lhorie/mithril.js/pull/1769)
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
 - documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
+
+---
 
 ### v1.1.0
 
@@ -26,10 +155,10 @@
 
 #### Bug fixes
 
-- fix IE11 input[type] error - [#1610](https://github.com/lhorie/mithril.js/issues/1610)
-- apply [#1609](https://github.com/lhorie/mithril.js/issues/1609) to unkeyed children case
-- fix abort detection [#1612](https://github.com/lhorie/mithril.js/issues/1612)
-- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/lhorie/mithril.js/issues/1593)
+- fix IE11 input[type] error - [#1610](https://github.com/MithrilJS/mithril.js/issues/1610)
+- apply [#1609](https://github.com/MithrilJS/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/MithrilJS/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/MithrilJS/mithril.js/issues/1593)
 
 ---
 
@@ -37,12 +166,12 @@
 
 #### News
 
-- performance improvements in IE [#1598](https://github.com/lhorie/mithril.js/pull/1598)
+- performance improvements in IE [#1598](https://github.com/MithrilJS/mithril.js/pull/1598)
 
 #### Bug fixes
 
-- prevent infinite loop in non-existent default route - [#1579](https://github.com/lhorie/mithril.js/issues/1579)
-- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/lhorie/mithril.js/issues/1609)
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/MithrilJS/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/MithrilJS/mithril.js/issues/1609)
 
 ---
 
@@ -155,7 +284,7 @@ m("div", {
     // Called after the node is updated
     onupdate : function(vnode) { /*...*/ },
     // Called before the node is removed, return a Promise that resolves when
-	// ready for the node to be removed from the DOM
+    // ready for the node to be removed from the DOM
     onbeforeremove : function(vnode) { /*...*/ },
     // Called before the node is removed, but after onbeforeremove calls done()
     onremove : function(vnode) { /*...*/ }
@@ -472,9 +601,9 @@ In `v0.2.x` reading route params was entirely handled through `m.route.param()`.
 ```javascript
 m.route(document.body, "/booga", {
     "/:attr" : {
-    	controller : function() {
-			m.route.param("attr") // "booga"
-		},
+        controller : function() {
+            m.route.param("attr") // "booga"
+        },
         view : function() {
             m.route.param("attr") // "booga"
         }
@@ -489,11 +618,11 @@ m.route(document.body, "/booga", {
     "/:attr" : {
         oninit : function(vnode) {
             vnode.attrs.attr // "booga"
-	    	m.route.param("attr") // "booga"
+            m.route.param("attr") // "booga"
         },
         view : function(vnode) {
             vnode.attrs.attr // "booga"
-	    	m.route.param("attr") // "booga"
+            m.route.param("attr") // "booga"
         }
     }
 })
@@ -531,14 +660,14 @@ It is no longer possible to prevent unmounting via `onunload`'s `e.preventDefaul
 
 ```javascript
 var Component = {
-	controller: function() {
-		this.onunload = function(e) {
-			if (condition) e.preventDefault()
-		}
-	},
-	view: function() {
-		return m("a[href=/]", {config: m.route})
-	}
+    controller: function() {
+        this.onunload = function(e) {
+            if (condition) e.preventDefault()
+        }
+    },
+    view: function() {
+        return m("a[href=/]", {config: m.route})
+    }
 }
 ```
 
@@ -546,9 +675,9 @@ var Component = {
 
 ```javascript
 var Component = {
-	view: function() {
-		return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
-	}
+    view: function() {
+        return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
+    }
 }
 ```
 
@@ -562,14 +691,14 @@ Components no longer call `this.onunload` when they are being removed. They now 
 
 ```javascript
 var Component = {
-	controller: function() {
-		this.onunload = function(e) {
-			// ...
-		}
-	},
-	view: function() {
-		// ...
-	}
+    controller: function() {
+        this.onunload = function(e) {
+            // ...
+        }
+    },
+    view: function() {
+        // ...
+    }
 }
 ```
 
@@ -577,12 +706,12 @@ var Component = {
 
 ```javascript
 var Component = {
-	onremove : function() {
-		// ...
-	}
-	view: function() {
-		// ...
-	}
+    onremove : function() {
+        // ...
+    }
+    view: function() {
+        // ...
+    }
 }
 ```
 
@@ -598,13 +727,13 @@ In addition, requests no longer have `m.startComputation`/`m.endComputation` sem
 
 ```javascript
 var data = m.request({
-	method: "GET",
-	url: "https://api.github.com/",
-	initialValue: [],
+    method: "GET",
+    url: "https://api.github.com/",
+    initialValue: [],
 })
 
 setTimeout(function() {
-	console.log(data())
+    console.log(data())
 }, 1000)
 ```
 
@@ -613,15 +742,15 @@ setTimeout(function() {
 ```javascript
 var data = []
 m.request({
-	method: "GET",
-	url: "https://api.github.com/",
+    method: "GET",
+    url: "https://api.github.com/",
 })
 .then(function (responseBody) {
-	data = responseBody
+    data = responseBody
 })
 
 setTimeout(function() {
-	console.log(data) // note: not a getter-setter
+    console.log(data) // note: not a getter-setter
 }, 1000)
 ```
 
@@ -653,11 +782,11 @@ greetAsync()
 
 ```javascript
 var greetAsync = function() {
-	return new Promise(function(resolve){
-	    setTimeout(function() {
-	        resolve("hello")
-	    }, 1000)
-	})
+    return new Promise(function(resolve){
+        setTimeout(function() {
+            resolve("hello")
+        }, 1000)
+    })
 }
 
 greetAsync()
@@ -679,7 +808,7 @@ m.sync([
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
 ])
 .then(function (users) {
-	console.log("Contributors:", users[0].name, "and", users[1].name)
+    console.log("Contributors:", users[0].name, "and", users[1].name)
 })
 ```
 
@@ -691,7 +820,7 @@ Promise.all([
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
 ])
 .then(function (users) {
-	console.log("Contributors:", users[0].name, "and", users[1].name)
+    console.log("Contributors:", users[0].name, "and", users[1].name)
 })
 ```
 
@@ -706,7 +835,7 @@ In `v0.2.x`, the `xlink` namespace was the only supported attribute namespace, a
 ```javascript
 m("svg",
     // the `href` attribute is namespaced automatically
-	m("image[href='image.gif']")
+    m("image[href='image.gif']")
 )
 ```
 
@@ -715,7 +844,7 @@ m("svg",
 ```javascript
 m("svg",
     // User-specified namespace on the `href` attribute
-	m("image[xlink:href='image.gif']")
+    m("image[xlink:href='image.gif']")
 )
 ```
 

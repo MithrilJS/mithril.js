@@ -4,7 +4,7 @@
 
 ## How do I go about contributing ideas or new features?
 
-Create an [issue thread on Github](https://github.com/lhorie/mithril.js/issues/new) to suggest your idea so the community can discuss it.
+Create an [issue thread on GitHub](https://github.com/MithrilJS/mithril.js/issues/new) to suggest your idea so the community can discuss it.
 
 If the consensus is that it's a good idea, the fastest way to get it into a release is to send a pull request. Without a PR, the time to implement the feature will depend on the bandwidth of the development team and its list of priorities.
 
@@ -20,12 +20,14 @@ Ideally, the best way to report bugs is to provide a small snippet of code where
 
 To send a pull request:
 
-- fork the repo (button at the top right in Github)
-- clone the forked repo to your computer (green button in Github)
+- fork the repo (button at the top right in GitHub)
+- clone the forked repo to your computer (green button in GitHub)
+- Switch to the `next` branch (run `git checkout next`)
 - create a feature branch (run `git checkout -b the-feature-branch-name`)
 - make your changes
-- run the tests (run `npm t`)
-- submit a pull request (go to the pull requests tab in Github, click the green button and select your feature branch)
+- run the tests (run `npm test`)
+- push your changes to your fork
+- submit a pull request (go to the pull requests tab in GitHub, click the green button and select your feature branch)
 
 
 

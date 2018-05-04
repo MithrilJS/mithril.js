@@ -1,6 +1,6 @@
 # Testing
 
-Mithril comes with a testing framework called [ospec](https://github.com/lhorie/mithril.js/tree/rewrite/ospec). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
+Mithril comes with a testing framework called [ospec](https://github.com/MithrilJS/mithril.js/tree/master/ospec). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
 
 The easist way to setup the test runner is to create an NPM script for it. Open your project's `package.json` file and edit the `test` line under the `scripts` section:
 
@@ -58,7 +58,7 @@ Generally speaking, there are two ways to write tests: upfront and after the fac
 
 Writing tests upfront requires specifications to be frozen. Upfront tests are a great way of codifying the rules that a yet-to-be-implemented API must obey. However, writing tests upfront may not be a suitable strategy if you don't have a reasonable idea of what your project will look like, if the scope of the API is not well known or if it's likely to change (e.g. based on previous history at the company).
 
-Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertedly broken and that previously fixed bugs do not get re-introduced by unrelated changes.
+Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertently broken and that previously fixed bugs do not get re-introduced by unrelated changes.
 
 ---
 
@@ -74,7 +74,9 @@ var m = require("mithril")
 
 module.exports = {
 	view: function() {
-		return m("div", "Hello world")
+		return m("div", 
+		    m("p", "Hello World")
+		)
 	}
 }
 ```
@@ -90,7 +92,7 @@ o.spec("MyComponent", function() {
 		
 		o(vnode.tag).equals("div")
 		o(vnode.children.length).equals(1)
-		o(vnode.children[0].tag).equals("#")
+		o(vnode.children[0].tag).equals("p")
 		o(vnode.children[0].children).equals("Hello world")
 	})
 })

@@ -21,7 +21,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["id"].nodeValue).equals("c")
+		o(updated.dom.attributes["id"].value).equals("c")
 	})
 	o("adds attr", function() {
 		var vnode = {tag: "a", attrs: {id: "b"}}
@@ -32,7 +32,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["title"].nodeValue).equals("d")
+		o(updated.dom.attributes["title"].value).equals("d")
 	})
 	o("adds attr from empty attrs", function() {
 		var vnode = {tag: "a"}
@@ -43,7 +43,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom).equals(vnode.dom)
 		o(updated.dom).equals(root.firstChild)
-		o(updated.dom.attributes["title"].nodeValue).equals("d")
+		o(updated.dom.attributes["title"].value).equals("d")
 	})
 	o("removes attr", function() {
 		var vnode = {tag: "a", attrs: {id: "b", title: "d"}}
@@ -192,6 +192,19 @@ o.spec("updateElement", function() {
 		o(updated.dom.style.backgroundColor).equals("")
 		o(updated.dom.style.color).equals("gold")
 	})
+	o("does not re-render element styles for equivalent style objects", function() {
+		var style = {color: "gold"}
+		var vnode = {tag: "a", attrs: {style: style}}
+
+		render(root, [vnode])
+
+		root.firstChild.style.color = "red"
+		style = {color: "gold"}
+		var updated = {tag: "a", attrs: {style: style}}
+		render(root, [updated])
+
+		o(updated.dom.style.color).equals("red")
+	})
 	o("replaces el", function() {
 		var vnode = {tag: "a"}
 		var updated = {tag: "b"}
@@ -209,7 +222,7 @@ o.spec("updateElement", function() {
 		render(root, [vnode])
 		render(root, [updated])
 
-		o(updated.dom.attributes["class"].nodeValue).equals("b")
+		o(updated.dom.attributes["class"].value).equals("b")
 	})
 	o("updates svg child", function() {
 		var vnode = {tag: "svg", children: [{
@@ -224,7 +237,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
-	o("restores correctly when recycling", function() {
+	o("doesn't restore since we're not recycling", function() {
 		var vnode = {tag: "div", key: 1}
 		var updated = {tag: "div", key: 2}
 
@@ -237,9 +250,9 @@ o.spec("updateElement", function() {
 		var c = vnode.dom
 
 		o(root.childNodes.length).equals(1)
-		o(a).equals(c)
+		o(a).notEquals(c) // this used to be a recycling pool test
 	})
-	o("restores correctly when recycling via map", function() {
+	o("doesn't restore since we're not recycling (via map)", function() {
 		var a = {tag: "div", key: 1}
 		var b = {tag: "div", key: 2}
 		var c = {tag: "div", key: 3}
@@ -256,6 +269,6 @@ o.spec("updateElement", function() {
 		var y = root.childNodes[1]
 
 		o(root.childNodes.length).equals(3)
-		o(x).equals(y)
+		o(x).notEquals(y) // this used to be a recycling pool test
 	})
 })

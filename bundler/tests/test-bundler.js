@@ -5,7 +5,7 @@ var bundle = require("../bundle")
 
 var fs = require("fs")
 
-var ns = "bundler/tests/"
+var ns = "./"
 function read(filepath) {
 	try {return fs.readFileSync(ns + filepath, "utf8")} catch (e) {/* ignore */}
 }

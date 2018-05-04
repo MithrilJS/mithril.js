@@ -11,7 +11,7 @@
 
 ### Description
 
-Turns an HTML string into unescaped HTML. **Do not use `m.trust` on unsanitized user input.**
+Turns an HTML or SVG string into unescaped HTML or SVG. **Do not use `m.trust` on unsanitized user input.**
 
 Always try to use an [alternative method](#avoid-trusting-html) first, before considering using `m.trust`.
 
@@ -23,7 +23,7 @@ Always try to use an [alternative method](#avoid-trusting-html) first, before co
 
 Argument    | Type                 | Required | Description
 ----------- | -------------------- | -------- | ---
-`html`      | `String`             | Yes      | A string containing HTML text
+`html`      | `String`             | Yes      | A string containing HTML or SVG text
 **returns** | `Vnode`              |          | A trusted HTML [vnode](vnodes.md) that represents the input string
 
 [How to read signatures](signatures.md)

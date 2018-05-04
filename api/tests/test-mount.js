@@ -3,24 +3,27 @@
 var o = require("../../ospec/ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
+var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
-var coreRenderer = require("../../render/render")
 var apiRedraw = require("../../api/redraw")
 var apiMounter = require("../../api/mount")
 
 o.spec("mount", function() {
-	var FRAME_BUDGET = Math.floor(1000 / 60)
-	var $window, root, redrawService, mount, render
+	var $window, root, redrawService, mount, render, throttleMock
 
 	o.beforeEach(function() {
 		$window = domMock()
+		throttleMock = throttleMocker()
 
 		root = $window.document.body
-
-		redrawService = apiRedraw($window)
+		redrawService = apiRedraw($window, throttleMock.throttle)
 		mount = apiMounter(redrawService)
-		render = coreRenderer($window).render
+		render = redrawService.render
+	})
+
+	o.afterEach(function() {
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("throws on invalid component", function() {
@@ -47,7 +50,7 @@ o.spec("mount", function() {
 				o(threw).equals(true)
 			})
 
-			o("renders into `root`", function() {
+			o("renders into `root` synchronoulsy", function() {
 				mount(root, createComponent({
 					view : function() {
 						return m("div")
@@ -69,7 +72,37 @@ o.spec("mount", function() {
 				o(root.childNodes.length).equals(0)
 			})
 
-			o("redraws on events", function(done) {
+			o("Mounting a second root doesn't cause the first one to redraw", function() {
+				var view = o.spy(function() {
+					return m("div")
+				})
+
+				render(root, [
+					m("#child0"),
+					m("#child1")
+				])
+
+				mount(root.childNodes[0], createComponent({
+					view : view
+				}))
+
+				o(root.firstChild.nodeName).equals("DIV")
+				o(view.callCount).equals(1)
+
+				mount(root.childNodes[1], createComponent({
+					view : function() {
+						return m("div")
+					}
+				}))
+
+				o(view.callCount).equals(1)
+
+				throttleMock.fire()
+
+				o(view.callCount).equals(1)
+			})
+
+			o("redraws on events", function() {
 				var onupdate = o.spy()
 				var oninit = o.spy()
 				var onclick = o.spy()
@@ -97,17 +130,12 @@ o.spec("mount", function() {
 				o(onclick.args[0].type).equals("click")
 				o(onclick.args[0].target).equals(root.firstChild)
 
-				// Wrapped to give time for the rate-limited redraw to fire
-				setTimeout(function() {
-					o(onupdate.callCount).equals(1)
+				throttleMock.fire()
 
-					done()
-				}, FRAME_BUDGET)
+				o(onupdate.callCount).equals(1)
 			})
 
-			o("redraws several mount points on events", function(done, timeout) {
-				timeout(60)
-
+			o("redraws several mount points on events", function() {
 				var onupdate0 = o.spy()
 				var oninit0 = o.spy()
 				var onclick0 = o.spy()
@@ -154,26 +182,26 @@ o.spec("mount", function() {
 				o(onclick0.callCount).equals(1)
 				o(onclick0.this).equals(root.childNodes[0].firstChild)
 
-				setTimeout(function() {
-					o(onupdate0.callCount).equals(1)
-					o(onupdate1.callCount).equals(1)
+				throttleMock.fire()
 
-					root.childNodes[1].firstChild.dispatchEvent(e)
-					o(onclick1.callCount).equals(1)
-					o(onclick1.this).equals(root.childNodes[1].firstChild)
+				o(onupdate0.callCount).equals(1)
+				o(onupdate1.callCount).equals(1)
 
-					setTimeout(function() {
-						o(onupdate0.callCount).equals(2)
-						o(onupdate1.callCount).equals(2)
+				root.childNodes[1].firstChild.dispatchEvent(e)
 
-						done()
-					}, FRAME_BUDGET)
-				}, FRAME_BUDGET)
+				o(onclick1.callCount).equals(1)
+				o(onclick1.this).equals(root.childNodes[1].firstChild)
 
+				throttleMock.fire()
+
+				o(onupdate0.callCount).equals(2)
+				o(onupdate1.callCount).equals(2)
 			})
 
-			o("event handlers can skip redraw", function(done) {
-				var onupdate = o.spy()
+			o("event handlers can skip redraw", function() {
+				var onupdate = o.spy(function(){
+					throw new Error("This shouldn't have been called")
+				})
 				var oninit = o.spy()
 				var e = $window.document.createEvent("MouseEvents")
 
@@ -195,15 +223,12 @@ o.spec("mount", function() {
 
 				o(oninit.callCount).equals(1)
 
-				// Wrapped to ensure no redraw fired
-				setTimeout(function() {
-					o(onupdate.callCount).equals(0)
+				throttleMock.fire()
 
-					done()
-				}, FRAME_BUDGET)
+				o(onupdate.callCount).equals(0)
 			})
 
-			o("redraws when the render function is run", function(done) {
+			o("redraws when the render function is run", function() {
 				var onupdate = o.spy()
 				var oninit = o.spy()
 
@@ -221,17 +246,12 @@ o.spec("mount", function() {
 
 				redrawService.redraw()
 
-				// Wrapped to give time for the rate-limited redraw to fire
-				setTimeout(function() {
-					o(onupdate.callCount).equals(1)
+				throttleMock.fire()
 
-					done()
-				}, FRAME_BUDGET)
+				o(onupdate.callCount).equals(1)
 			})
 
-			o("throttles", function(done, timeout) {
-				timeout(200)
-
+			o("throttles", function() {
 				var i = 0
 				mount(root, createComponent({view: function() {i++}}))
 				var before = i
@@ -243,12 +263,11 @@ o.spec("mount", function() {
 
 				var after = i
 
-				setTimeout(function(){
-					o(before).equals(1) // mounts synchronously
-					o(after).equals(1) // throttles rest
-					o(i).equals(2)
-					done()
-				},40)
+				throttleMock.fire()
+
+				o(before).equals(1) // mounts synchronously
+				o(after).equals(1) // throttles rest
+				o(i).equals(2)
 			})
 		})
 	})

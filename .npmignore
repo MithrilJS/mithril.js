@@ -6,3 +6,4 @@
 .gitignore
 .travis.yml
 CONTRIBUTING.md
+yarn.lock

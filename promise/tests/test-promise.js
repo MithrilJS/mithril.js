@@ -2,7 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
-var Promise = require("../../promise/promise")
+var Promise = require("../../promise/polyfill")
 
 o.spec("promise", function() {
 	o.spec("constructor", function() {
@@ -15,6 +15,7 @@ o.spec("promise", function() {
 		o("constructor has correct methods", function() {
 			o(typeof Promise.prototype.then).equals("function")
 			o(typeof Promise.prototype.catch).equals("function")
+			o(typeof Promise.prototype.finally).equals("function")
 			o(typeof Promise.resolve).equals("function")
 			o(typeof Promise.reject).equals("function")
 			o(typeof Promise.race).equals("function")
@@ -52,6 +53,78 @@ o.spec("promise", function() {
 			promise.catch(function(value) {
 				o(value).equals(1)
 			}).then(done)
+		})
+		o("finally lets a fulfilled value pass though", function(done) {
+			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){return 2})
+
+			promise.finally(spy).then(function(value){
+				o(value).equals(1)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally lets a rejected reason pass though", function(done) {
+			var promise = Promise.reject(1)
+			var spy = o.spy(function(){return 2})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(1)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a fulfilled value when it throws", function(done) {
+			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){throw 2})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a fulfilled value when it returns a rejected Promise", function(done) {
+			var promise = Promise.resolve(1)
+			var spy = o.spy(function(){return Promise.reject(2)})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a rejected reason when it throws", function(done) {
+			var promise = Promise.reject(1)
+			var spy = o.spy(function(){throw 2})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
+		})
+		o("finally overrrides a rejected reason when it returns a rejected Promise", function(done) {
+			var promise = Promise.reject(1)
+			var spy = o.spy(function(){return Promise.reject(2)})
+
+			promise.finally(spy).catch(function(reason){
+				o(reason).equals(2)
+				o(spy.callCount).equals(1)
+				o(spy.args.length).equals(0)
+				o(spy.this).equals(undefined)
+				done()
+			})
 		})
 	})
 	o.spec("resolve", function() {
@@ -131,7 +204,7 @@ o.spec("promise", function() {
 				callAsync(function() {resolve(promise)})
 			})
 
-			promise.then(null, done)
+			promise.then(null, () => done())
 		})
 		o("non-function onFulfilled is ignored", function(done) {
 			var promise = Promise.resolve(1)

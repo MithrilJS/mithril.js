@@ -30,6 +30,16 @@ o.spec("form inputs", function() {
 			o($window.document.activeElement).equals(input.dom)
 		})
 
+		o("maintains focus when changed manually in hook", function() {
+			var input = {tag: "input", attrs: {oncreate: function() {
+				input.dom.focus();
+			}}};
+
+			render(root, [input])
+
+			o($window.document.activeElement).equals(input.dom)
+		})
+
 		o("syncs input value if DOM value differs from vdom value", function() {
 			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
 			var updated = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
@@ -47,6 +57,16 @@ o.spec("form inputs", function() {
 			render(root, [updated])
 
 			o(updated.dom.value).equals("aaa")
+		})
+
+		o("clear element value if vdom value is set to undefined (aka removed)", function() {
+			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
+			var updated = {tag: "input", attrs: {value: undefined, oninput: function() {}}}
+
+			render(root, [input])
+			render(root, [updated])
+
+			o(updated.dom.value).equals("")
 		})
 
 		o("syncs input checked attribute if DOM value differs from vdom value", function() {
@@ -78,6 +98,57 @@ o.spec("form inputs", function() {
 
 			o(select.dom.value).equals("a")
 			o(select.dom.selectedIndex).equals(0)
+		})
+
+		o("select option can have empty string value", function() {
+			var select = {tag: "select", children :[
+				{tag: "option", attrs: {value: ""}, text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("")
+		})
+
+		o("option value defaults to textContent unless explicitly set", function() {
+			var select = {tag: "select", children :[
+				{tag: "option", text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("aaa")
+			o(select.dom.value).equals("aaa")
+
+			//test that value changes when content changes
+			select = {tag: "select", children :[
+				{tag: "option", text: "bbb"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("bbb")
+			o(select.dom.value).equals("bbb")
+
+			//test that value can be set to "" in subsequent render
+			select = {tag: "select", children :[
+				{tag: "option", attrs: {value: ""}, text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("")
+			o(select.dom.value).equals("")
+
+			//test that value reverts to textContent when value omitted
+			select = {tag: "select", children :[
+				{tag: "option", text: "aaa"}
+			]}
+
+			render(root, [select])
+
+			o(select.dom.firstChild.value).equals("aaa")
+			o(select.dom.value).equals("aaa")
 		})
 
 		o("select yields invalid value without children", function() {

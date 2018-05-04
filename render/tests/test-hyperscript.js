@@ -218,6 +218,18 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals(true)
 		})
+		o("handles explicit empty string value for input", function() {
+			var vnode = m('input[value=""]')
+
+			o(vnode.tag).equals("input")
+			o(vnode.attrs.value).equals("")
+		})
+		o("handles explicit empty string value for option", function() {
+			var vnode = m('option[value=""]')
+
+			o(vnode.tag).equals("option")
+			o(vnode.attrs.value).equals("")
+		})
 	})
 	o.spec("attrs", function() {
 		o("handles string attr", function() {
@@ -494,6 +506,23 @@ o.spec("hyperscript", function() {
 			o(vnode.attrs).equals(undefined)
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
+		})
+		o("handles shared attrs", function() {
+			var attrs = {a: "b"}
+
+			var nodeA = m(".a", attrs)
+			var nodeB = m(".b", attrs)
+
+			o(nodeA.attrs.className).equals("a")
+			o(nodeA.attrs.a).equals("b")
+
+			o(nodeB.attrs.className).equals("b")
+			o(nodeB.attrs.a).equals("b")
+		})
+		o("doesnt modify passed attributes object", function() {
+			var attrs = {a: "b"}
+			m(".a", attrs)
+			o(attrs).deepEquals({a: "b"})
 		})
 		o("handles fragment children without attr unwrapped", function() {
 			var vnode = m("div", [m("i")], [m("s")])

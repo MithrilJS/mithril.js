@@ -1,6 +1,7 @@
-"use strict"
-
+/* eslint-disable */
 ;(function() {
+"use strict"
+/* eslint-enable */
 
 var guid = 0, HALT = {}
 function createStream() {
@@ -116,7 +117,9 @@ function merge(streams) {
 
 function scan(reducer, seed, stream) {
 	var newStream = combine(function (s) {
-		return seed = reducer(seed, s._state.value)
+		var next = reducer(seed, s._state.value)
+		if (next !== HALT) return seed = next
+		return HALT
 	}, [stream])
 
 	if (newStream._state.state === 0) newStream(seed)

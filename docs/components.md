@@ -61,6 +61,9 @@ var ComponentWithHooks = {
 	oncreate: function(vnode) {
 		console.log("DOM created")
 	},
+	onbeforeupdate: function(vnode, old) {
+		return true
+	},
 	onupdate: function(vnode) {
 		console.log("DOM updated")
 	},
@@ -73,9 +76,6 @@ var ComponentWithHooks = {
 	},
 	onremove: function(vnode) {
 		console.log("removing DOM element")
-	},
-	onbeforeupdate: function(vnode, old) {
-		return true
 	},
 	view: function(vnode) {
 		return "hello"
@@ -177,7 +177,7 @@ They can be consumed in the same way regular components can.
 m.render(document.body, m(closureComponent))
 
 // EXAMPLE: via m.mount
-m.mount(document.body, closuresComponent)
+m.mount(document.body, closureComponent)
 
 // EXAMPLE: via m.route
 m.route(document.body, "/", {
@@ -316,7 +316,7 @@ var Login = {
 
 Normally, in the context of a larger application, a login component like the one above exists alongside components for user registration and password recovery. Imagine that we want to be able to prepopulate the email field when navigating from the login screen to the registration or password recovery screens (or vice versa), so that the user doesn't need to re-type their email if they happened to fill the wrong page (or maybe you want to bump the user to the registration form if a username is not found).
 
-Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its our state, which by definition makes this state difficult to access from outside.
+Right away, we see that sharing the `username` and `password` fields from this component to another is difficult. This is because the fat component encapsulates its state, which by definition makes this state difficult to access from outside.
 
 It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
 

@@ -21,11 +21,11 @@ It may seem wasteful to recreate vnodes so frequently, but as it turns out, mode
 
 For that reason, Mithril uses a sophisticated and highly optimized virtual DOM diffing algorithm to minimize the amount of DOM updates. Mithril *also* generates carefully crafted vnode data structures that are compiled by Javascript engines for near-native data structure access performance. In addition, Mithril aggressively optimizes the function that creates vnodes as well.
 
-The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide [retained mode rendering](https://en.wikipedia.org/wiki/Retained_mode), a style of rendering that makes it drastically easier to manage UI complexity.
+The reason Mithril goes to such great lengths to support a rendering model that recreates the entire virtual DOM tree on every render is to provide a declarative [immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_%28computer_graphics%29) API, a style of rendering that makes it drastically easier to manage UI complexity.
 
-To illustrate why retained mode is so important, consider the DOM API and HTML. The DOM API is an [immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering system and requires writing out exact instructions to assemble a DOM tree procedurally. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.
+To illustrate why immediate mode is so important, consider the DOM API and HTML. The DOM API is an imperative [retained mode](https://en.wikipedia.org/wiki/Retained_mode) API and requires 1. writing out exact instructions to assemble a DOM tree procedurally, and 2. writing out other instructions to update that tree. The imperative nature of the DOM API means you have many opportunities to micro-optimize your code, but it also means that you have more chances of introducing bugs and more chances to make code harder to understand.
 
-In contrast, HTML is a retained mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.
+In contrast, HTML is closer to an immediate mode rendering system. With HTML, you can write a DOM tree in a far more natural and readable way, without worrying about forgetting to append a child to a parent, running into stack overflows when rendering extremely deep trees, etc.
 
 Virtual DOM goes one step further than HTML by allowing you to write *dynamic* DOM trees without having to manually write multiple sets of DOM API calls to efficiently synchronize the UI to arbitrary data changes.
 
@@ -74,7 +74,6 @@ Property   | Type                             | Description
 `dom`      | `Element?`                       | Points to the element that corresponds to the vnode. This property is `undefined` in the `oninit` lifecycle method. In fragments and trusted HTML vnodes, `dom` points to the first element in the range.
 `domSize`  | `Number?`                        | This is only set in fragment and trusted HTML vnodes, and it's `undefined` in all other vnode types. It defines the number of DOM elements that the vnode represents (starting from the element referenced by the `dom` property).
 `state`    | `Object?`                        | An object that is persisted between redraws. It is provided by the core engine when needed. In POJO component vnodes, the `state` inherits prototypically from the component object/class. In class component vnodes it is an instance of the class. In closure components it is the object returned by the closure.
-`_state`   | `Object?`                        | For components, a reference to the original `vnode.state` object, used to lookup the `view` and hooks. This property is only used internally by Mithril, do not use or modify it.
 `events`   | `Object?`                        | An object that is persisted between redraws and that stores event handlers so that they can be removed using the DOM API. The `events` property is `undefined` if there are no event handlers defined. This property is only used internally by Mithril, do not use or modify it.
 `instance` | `Object?`                        | For components, a storage location for the value returned by the `view`. This property is only used internally by Mithril, do not use or modify it.
 `skip`     | `Boolean`                        | This property is only used internally by Mithril when diffing keyed lists, do not use or modify it.
@@ -89,7 +88,7 @@ The `tag` property of a vnode determines its type. There are five vnode types:
 Vnode type   | Example                        | Description
 ------------ | ------------------------------ | ---
 Element      | `{tag: "div"}`                 | Represents a DOM element.
-Fragment     | `{tag: "[", children: []}`     | Represents a list of DOM elements whose parent DOM element may also contain other elements that are not in the fragment. When using the [`m()`](hyperscript.md) helper function, fragment vnodes can only be created by nesting arrays into the `children` parameter of `m()`. `m("[")` does not create a valid vnode. 
+Fragment     | `{tag: "[", children: []}`     | Represents a list of DOM elements whose parent DOM element may also contain other elements that are not in the fragment. When using the [`m()`](hyperscript.md) helper function, fragment vnodes can only be created by nesting arrays into the `children` parameter of `m()`. `m("[")` does not create a valid vnode.
 Text         | `{tag: "#", children: ""}`     | Represents a DOM text node.
 Trusted HTML | `{tag: "<", children: "<br>"}` | Represents a list of DOM elements from an HTML string.
 Component    | `{tag: ExampleComponent}`      | If `tag` is a Javascript object with a `view` method, the vnode represents the DOM generated by rendering the component.

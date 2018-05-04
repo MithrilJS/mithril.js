@@ -199,4 +199,27 @@ o.spec("oninit", function() {
 		o(vnode.dom.oninit).equals(undefined)
 		o(vnode.dom.attributes["oninit"]).equals(undefined)
 	})
+	
+	o("No spurious oninit calls in mapped keyed diff when the pool is involved (#1992)", function () {
+		var oninit1 = o.spy()
+		var oninit2 = o.spy()
+		var oninit3 = o.spy()
+
+		render(root, [
+			{tag: "p", key: 1, attrs: {oninit: oninit1}},
+			{tag: "p", key: 2, attrs: {oninit: oninit2}},
+			{tag: "p", key: 3, attrs: {oninit: oninit3}},
+		])
+		render(root, [
+			{tag: "p", key: 1, attrs: {oninit: oninit1}},
+			{tag: "p", key: 3, attrs: {oninit: oninit3}},
+		])
+		render(root, [
+			{tag: "p", key: 3, attrs: {oninit: oninit3}},
+		])
+
+		o(oninit1.callCount).equals(1)
+		o(oninit2.callCount).equals(1)
+		o(oninit3.callCount).equals(1)
+	})
 })

@@ -6,6 +6,11 @@ var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["
 var selectorCache = {}
 var hasOwn = {}.hasOwnProperty
 
+function isEmpty(object) {
+	for (var key in object) if (hasOwn.call(object, key)) return false
+	return true
+}
+
 function compileSelector(selector) {
 	var match, tag = "div", classes = [], attrs = {}
 	while (match = selectorParser.exec(selector)) {
@@ -17,7 +22,7 @@ function compileSelector(selector) {
 			var attrValue = match[6]
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
 			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue || true
+			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ")
@@ -27,6 +32,18 @@ function compileSelector(selector) {
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
 	var className = attrs.className || attrs.class
+
+	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+		var newAttrs = {}
+
+		for(var key in attrs) {
+			if (hasOwn.call(attrs, key)) {
+				newAttrs[key] = attrs[key]
+			}
+		}
+
+		attrs = newAttrs
+	}
 
 	for (var key in state.attrs) {
 		if (hasOwn.call(state.attrs, key)) {

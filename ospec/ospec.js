@@ -1,9 +1,16 @@
-/* eslint-disable no-bitwise, no-process-exit */
+/* eslint-disable global-require, no-bitwise, no-process-exit */
 "use strict"
-
-module.exports = new function init() {
+;(function(m) {
+if (typeof module !== "undefined") module["exports"] = m()
+else window.o = m()
+})(function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 
+	if (name != null) spec[name] = ctx = {}
+
+	try {throw new Error} catch (e) {
+		var ospecFileName = e.stack && (/[\/\\](.*?):\d+:\d+/).test(e.stack) ? e.stack.match(/[\/\\](.*?):\d+:\d+/)[1] : null
+	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
 			if (results == null) throw new Error("Assertions should not occur outside test definitions")
@@ -47,10 +54,35 @@ module.exports = new function init() {
 		spy.callCount = 0
 		return spy
 	}
-	o.run = function() {
+	o.cleanStackTrace = function(error) {
+		// For IE 10+ in quirks mode, and IE 9- in any mode, errors don't have a stack
+		if (error.stack == null) return ""
+		var i = 0, header = error.message ? error.name + ": " + error.message : error.name, stack
+		// some environments add the name and message to the stack trace
+		if (error.stack.indexOf(header) === 0) {
+			stack = error.stack.slice(header.length).split(/\r?\n/)
+			stack.shift() // drop the initial empty string
+		} else {
+			stack = error.stack.split(/\r?\n/)
+		}
+		if (ospecFileName == null) return stack.join("\n")
+		// skip ospec-related entries on the stack
+		while (stack[i].indexOf(ospecFileName) !== -1) i++
+		// now we're in user code
+		return stack[i]
+	}
+	o.run = function(reporter) {
 		results = []
 		start = new Date
-		test(spec, [], [], report)
+		test(spec, [], [], function() {
+			setTimeout(function () {
+				if (typeof reporter === "function") reporter(results)
+				else {
+					var errCount = o.report(results)
+					if (hasProcess && errCount !== 0) process.exit(1)
+				}
+			})
+		})
 
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
@@ -82,41 +114,56 @@ module.exports = new function init() {
 				if (cursor === fns.length) return
 
 				var fn = fns[cursor++]
+				var timeout = 0, delay = 200, s = new Date
+				var isDone = false
+
+				function done(err) {
+					if (err) {
+						if (err instanceof Error) record(err.message, err)
+						else record(String(err))
+						subjects.pop()
+						next()
+					}
+					if (timeout !== undefined) {
+						timeout = clearTimeout(timeout)
+						if (delay !== Infinity) record(null)
+						if (!isDone) next()
+						else throw new Error("`" + arg + "()` should only be called once")
+						isDone = true
+					}
+					else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
+				}
+
+				function startTimer() {
+					timeout = setTimeout(function() {
+						timeout = undefined
+						record("async test timed out")
+						next()
+					}, Math.min(delay, 2147483647))
+				}
+
 				if (fn.length > 0) {
-					var timeout = 0, delay = 200, s = new Date
-					var isDone = false
 					var body = fn.toString()
 					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
-						fn(function done() {
-							if (timeout !== undefined) {
-								timeout = clearTimeout(timeout)
-								if (delay !== Infinity) record(null)
-								if (!isDone) next()
-								else throw new Error("`" + arg + "()` should only be called once")
-								isDone = true
-							}
-							else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
-						}, function(t) {delay = t})
+						fn(done, function(t) {delay = t})
 					}
 					catch (e) {
-						if (e instanceof Error) record(e.message, e)
-						else record(String(e))
-						subjects.pop()
-						next()
+						done(e)
 					}
 					if (timeout === 0) {
-						timeout = setTimeout(function() {
-							timeout = undefined
-							record("async test timed out")
-							next()
-						}, Math.min(delay, 2147483647))
+						startTimer()
 					}
 				}
 				else {
-					fn()
-					nextTickish(next)
+					var p = fn()
+					if (p && p.then) {
+						startTimer()
+						p.then(function() { done() }, done)
+					} else {
+						nextTickish(next)
+					}
 				}
 			}
 		}
@@ -200,11 +247,13 @@ module.exports = new function init() {
 			}
 			result.context = subjects.join(" > ")
 			result.message = message
-			result.error = error.stack
+			result.error = error
+
 		}
 		results.push(result)
 	}
 	function serialize(value) {
+		if (hasProcess) return require("util").inspect(value)
 		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
@@ -213,23 +262,24 @@ module.exports = new function init() {
 		return hasProcess ? "\x1b[31m" + message + "\x1b[0m" : "%c" + message + "%c "
 	}
 
-	function report() {
-		var status = 0
+	o.report = function (results) {
+		var errCount = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
-				var stackTrace = r.error.match(/^(?:(?!Error|[\/\\]ospec[\/\\]ospec\.js).)*$/m)
+				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
-				status = 1
+				errCount++
 			}
 		}
 		console.log(
+			(name ? name + ": " : "") +
 			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
 		)
-		if (hasProcess && status === 1) process.exit(1)
+		return errCount
 	}
 
-	if(hasProcess) {
+	if (hasProcess) {
 		nextTickish = process.nextTick
 	} else {
 		nextTickish = function fakeFastNextTick(next) {
@@ -239,4 +289,4 @@ module.exports = new function init() {
 	}
 
 	return o
-}
+})
