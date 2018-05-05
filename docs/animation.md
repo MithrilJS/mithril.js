@@ -17,7 +17,7 @@ Mithril does not provide any animation APIs per se, since these other options ar
 
 ### Animation on element creation
 
-Animating an element via CSS when the element created couldn't be simpler. Just add an animation to a CSS class normally:
+Animating an element via CSS when the element is created couldn't be simpler. Just add an animation to a CSS class normally:
 
 ```css
 .fancy {animation:fade-in 0.5s;}
@@ -41,7 +41,7 @@ m.mount(document.body, FancyComponent)
 
 ### Animation on element removal
 
-The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers a [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
+The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers the [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
 
 Let's create an `exit` animation that fades `opacity` from 1 to 0.
 
