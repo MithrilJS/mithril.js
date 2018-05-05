@@ -301,7 +301,7 @@ NOTE: `o.run()` is automatically called by the cli - no need to call it in your 
 	"scripts": {
 		...
 		"test": "ospec",
-		"test-custom": "find module/**/*.test.js | ospec",
+		"test-custom": "find module/*.test.js | ospec",
 		...
 	}
 ```
