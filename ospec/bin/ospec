@@ -33,15 +33,35 @@ function traverseDirectory(pathname, callback) {
 	})
 }
 
-traverseDirectory(".", function(pathname) {
-	if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
-		require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
-	}
-})
-.then(o.run)
-.catch(function(e) {
-	console.log(e.stack)
-})
+
+if (process.stdin.isTTY) {
+	// Normal command-line invocation
+	traverseDirectory(".", function(pathname) {
+		if (pathname.match(/(?:^|\/)tests\/.*\.js$/)) {
+			require(path.normalize(process.cwd()) + "/" + pathname) // eslint-disable-line global-require
+		}
+	})
+		.then(o.run)
+		.catch(function(e) {
+			console.error(e.stack)
+		})
+}
+else {
+	// Filenames piped through stdin
+	process.stdin.on("readable", function() {
+		let fileList = ""
+		let chunk
+		while ((chunk = process.stdin.read()) !== null) fileList += chunk
+
+		fileList.toString().split(/\r?\n/).forEach(function(fileName) {
+			if (fileName) {
+				require(path.normalize(process.cwd()) + "/" + fileName) // eslint-disable-line global-require
+			}
+		})
+		o.run()
+	})
+}
+
 
 process.on("unhandledRejection", function(e) {
 	console.log("Uncaught (in promise) " + e.stack)
