@@ -8,7 +8,7 @@
 
 ## 2.0.0
 _2018-05-xx_
-- Allow piping a custom list of test-files to the `ospec` binary ([#2137](https://github.com/MithrilJS/mithril.js/pull/2137))
+- the CLI runner now accepts globs as arguments ([#2141](https://github.com/MithrilJS/mithril.js/pull/2141), [@maranomynet](https://github.com/maranomynet))
 - Added support for custom reporters ([#2020](https://github.com/MithrilJS/mithril.js/pull/2020))
 - Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
     - Works either as a global or in CommonJS environments
