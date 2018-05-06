@@ -7,7 +7,7 @@ const glob = require("glob")
 
 
 const parseArgs = (argv) => {
-	argv = ["--globs"].concat( argv.slice(2) )
+	argv = ["--globs"].concat(argv.slice(2))
 	const args = {}
 	let name
 	argv.forEach((arg) => {
@@ -16,7 +16,7 @@ const parseArgs = (argv) => {
 			args[name] = []
 		}
 		else {
-			args[name].push( arg )
+			args[name].push(arg)
 		}
 	})
 	return args
@@ -26,21 +26,15 @@ const parseArgs = (argv) => {
 const args = parseArgs(process.argv)
 
 const globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.js"]
-const ignore = ["**/node_modules/**"].concat( args.ignore||[] )
+const ignore = ["**/node_modules/**"].concat(args.ignore||[])
 
-
-let pending = globList.length
 
 globList.forEach((globPattern) => {
-	glob(globPattern, { ignore }, (err, fileNames) => {
-		fileNames.forEach((fileName) => {
+	glob(globPattern, {ignore})
+		.on("match", (fileName) => {
 			require(path.normalize(process.cwd()) + "/" + fileName) // eslint-disable-line global-require
 		})
-		pending -= 1
-		if (!pending) {
-			o.run()
-		}
-	})
+		.on("end", o.run)
 });
 
 
