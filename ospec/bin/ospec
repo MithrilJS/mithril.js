@@ -13,9 +13,8 @@ const parseArgs = (argv) => {
 	argv.forEach((arg) => {
 		if (/^--/.test(arg)) {
 			name = arg.substr(2)
-			args[name] = []
-		}
-		else {
+			args[name] = args[name] || []
+		} else {
 			args[name].push(arg)
 		}
 	})
@@ -24,20 +23,15 @@ const parseArgs = (argv) => {
 
 
 const args = parseArgs(process.argv)
-
 const globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.js"]
 const ignore = ["**/node_modules/**"].concat(args.ignore||[])
-
+const cwd = process.cwd()
 
 globList.forEach((globPattern) => {
 	glob(globPattern, {ignore})
-		.on("match", (fileName) => {
-			require(path.normalize(process.cwd()) + "/" + fileName) // eslint-disable-line global-require
-		})
+		.on("match", (fileName) => { require(path.join(cwd, fileName)) }) // eslint-disable-line global-require
+		.on("error", (e) => console.error(e))
 		.on("end", o.run)
 });
 
-
-process.on("unhandledRejection", (e) => {
-	console.log("Uncaught (in promise) " + e.stack)
-})
+process.on("unhandledRejection", (e) => { console.log("Uncaught (in promise) " + e.stack) })
