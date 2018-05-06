@@ -290,22 +290,48 @@ _o.run()
 
 ### Running the test suite from the command-line
 
-ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
-
-`o.run()` is automatically called by the cli - no need to call it in your test code.
-
-#### Create an npm script in your package:
+Create a script in your package.json:
 ```
 	"scripts": {
-		...
 		"test": "ospec",
 		...
 	}
 ```
+...and run it from the command line:
 
 ```
-	$ npm test
+$ npm test
 ```
+
+ospec will by default evaluate all `*.js` files in any sub-folder named `/tests` - ignoring files inside the `node_modules` folder.
+
+So, running ospec without arguments is thus effectively the same as:
+
+```
+ospec '**/tests/**/*.js'
+```
+
+**NOTE:** `o.run()` is automatically called by the cli - no need to call it in your test code.
+
+ospec accepts a list of file-patterns (globs) giving you full control over which files are evaluated:
+
+```
+ospec '**/tests/**/*.js' '**/*.test.js'
+```
+
+Also, if you wish to skip some files (**in addition to** those under `node_modules`) add a `--ignore` flag with a list of file-patterns to ignore, like so:
+
+```
+ospec --ignore 'folder1/**' 'folder2/**'
+```
+
+...or:
+
+```
+ospec '**/*.test.js' '**/*-test.js' --ignore 'folder1/**' 'folder2/**'
+```
+
+
 
 #### Direct use from the command line
 
