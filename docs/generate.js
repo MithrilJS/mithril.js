@@ -44,8 +44,10 @@ function generate(pathname) {
 			var markedHtml = marked(fixed)
 				.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;") // Fix type signatures containing Array<...>
 			var title = fixed.match(/^#([^\n\r]+)/i) || []
+			var metaDescription = `Mithril.js Documentation` // TODO
 			var html = layout
 				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
+				.replace('"Mithril.js Documentation"', metaDescription)
 				.replace(/\[version\]/g, version) // update version
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
