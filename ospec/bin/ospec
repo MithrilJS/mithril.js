@@ -27,6 +27,10 @@ const globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.
 const ignore = ["**/node_modules/**"].concat(args.ignore||[])
 const cwd = process.cwd()
 
+args.require && args.require.forEach(function(module) {
+	module && require(require.resolve(module, { basedir: cwd }))
+})
+
 let pending = globList.length
 globList.forEach((globPattern) => {
 	glob(globPattern, {ignore})
