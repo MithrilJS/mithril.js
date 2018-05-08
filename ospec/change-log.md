@@ -2,6 +2,8 @@
 
 
 ## Upcoming...
+_2018-05-08_
+- Added `--require` feature to the ospec executable ([#2144](https://github.com/MithrilJS/mithril.js/pull/2144), [@gilbert](https://github.com/gilbert))
 <!-- Add new lines here. Version number will be decided later -->
 - ... 
 
