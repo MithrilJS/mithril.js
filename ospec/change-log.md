@@ -8,9 +8,10 @@
 
 ## 2.0.0
 _2018-05-xx_
+- In Node.js, ospec only uses colors when the output is sent to a terminal ([#2143](https://github.com/MithrilJS/mithril.js/pull/2143))
 - the CLI runner now accepts globs as arguments ([#2141](https://github.com/MithrilJS/mithril.js/pull/2141), [@maranomynet](https://github.com/maranomynet))
 - Added support for custom reporters ([#2020](https://github.com/MithrilJS/mithril.js/pull/2020))
-- Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
+- Make ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
     - Works either as a global or in CommonJS environments
     - the o.run() report is always printed asynchronously (it could be synchronous before if none of the tests were async).
     - Properly point to the assertion location of async errors [#2036](https://github.com/MithrilJS/mithril.js/issues/2036)

@@ -259,7 +259,7 @@ else window.o = m()
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
 	function highlight(message) {
-		return hasProcess ? "\x1b[31m" + message + "\x1b[0m" : "%c" + message + "%c "
+		return hasProcess ? (process.stdout.isTTY ? "\x1b[31m" + message + "\x1b[0m" : message) : "%c" + message + "%c "
 	}
 
 	o.report = function (results) {
