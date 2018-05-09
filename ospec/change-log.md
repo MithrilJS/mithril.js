@@ -2,13 +2,13 @@
 
 
 ## Upcoming...
-_2018-05-08_
+_2018-xx-xx_
 <!-- Add new lines here. Version number will be decided later -->
 - ... 
 
 
 ## 2.0.0
-_2018-05-xx_
+_2018-05-09_
 - Added `--require` feature to the ospec executable ([#2144](https://github.com/MithrilJS/mithril.js/pull/2144), [@gilbert](https://github.com/gilbert))
 - In Node.js, ospec only uses colors when the output is sent to a terminal ([#2143](https://github.com/MithrilJS/mithril.js/pull/2143))
 - the CLI runner now accepts globs as arguments ([#2141](https://github.com/MithrilJS/mithril.js/pull/2141), [@maranomynet](https://github.com/maranomynet))
