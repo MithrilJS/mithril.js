@@ -290,7 +290,18 @@ _o.run()
 
 ## Command Line Interface
 
-ospec comes with an executable named `ospec`. NPM auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec`, but the [pro tips](#cli-pro-tips) section shows better ways to do this.
+Create a script in your package.json:
+```
+	"scripts": {
+		"test": "ospec",
+		...
+	}
+```
+...and run it from the command line:
+
+```
+$ npm test
+```
 
 **NOTE:** `o.run()` is automatically called by the cli - no need to call it in your test code.
 
@@ -322,9 +333,11 @@ Here's an example of mixing them all together:
 ospec '**/*.test.js' --ignore 'folder1/**' --require esm ./my-file.js
 ```
 
-### CLI Pro Tips
+### Run ospec directly from the command line:
 
-Ospec doesn't work when installed globally. Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+ospec comes with an executable named `ospec`. NPM auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec` from your project root, but there are more convenient methods to do so that we will soon describe.
+
+ospec doesn't work when installed globally (`npm install -g`). Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
 
 Here are different ways of running ospec from the command line. This knowledge applies to not just ospec, but any locally installed npm binary.
 
@@ -332,24 +345,9 @@ Here are different ways of running ospec from the command line. This knowledge a
 
 If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
 
-#### npm script
-
-Create a script in your package.json:
-```
-	"scripts": {
-		"test": "ospec",
-		...
-	}
-```
-...and run it from the command line:
-
-```
-$ npm test
-```
-
 #### npm-run
 
-You can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
+If you're using an older NPM version, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages as npx would.
 
 ```
 npm install npm-run -g
@@ -369,7 +367,7 @@ If you understand how your system's PATH works (e.g. for [OSX](https://coolestgu
 export PATH=./node_modules/.bin:$PATH
 ```
 
-...and you'll be able to run `ospec` without npx, npm, etc. This one-time setup will also work with other binaries across all your node projects.
+...and you'll be able to run `ospec` without npx, npm, etc. This one-time setup will also work with other binaries across all your node projects, as long as you run binaries from the root of your projects.
 
 ---
 
