@@ -1,7 +1,7 @@
 ospec [![NPM Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![NPM License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
 =====
 
-[About](#about) | [Usage](#usage) | [API](#api) | [Goals](#goals)
+[About](#about) | [Usage](#usage) | [CLI](#command-line-interface) | [API](#api) | [Goals](#goals)
 
 Noiseless testing framework
 
@@ -288,7 +288,7 @@ _o("a test", function() {
 _o.run()
 ```
 
-### Running the test suite from the command-line
+## Command Line Interface
 
 Create a script in your package.json:
 ```
@@ -303,43 +303,51 @@ Create a script in your package.json:
 $ npm test
 ```
 
-ospec will by default evaluate all `*.js` files in any sub-folder named `/tests` - ignoring files inside the `node_modules` folder.
-
-So, running ospec without arguments is thus effectively the same as:
-
-```
-ospec '**/tests/**/*.js'
-```
-
 **NOTE:** `o.run()` is automatically called by the cli - no need to call it in your test code.
 
-ospec accepts a list of file-patterns (globs) giving you full control over which files are evaluated:
+### CLI Options
+
+Running ospec without arguments is equivalent to running `ospec '**/tests/**/*.js'`. In english, this tells ospec to evaluate all `*.js` files in any sub-folder named `tests/` (the `node_modules` folder is always excluded).
+
+If you wish to change this behavior, just provide one or more glob match patterns:
 
 ```
-ospec '**/tests/**/*.js' '**/*.test.js'
+ospec '**/spec/**/*.js' '**/*.spec.js'
 ```
 
-Also, if you wish to skip some files (**in addition to** those under `node_modules`) add a `--ignore` flag with a list of file-patterns to ignore, like so:
+You can also provide ignore patterns (note: always add `--ignore` AFTER match patterns):
 
 ```
 ospec --ignore 'folder1/**' 'folder2/**'
 ```
 
-...or:
+Finally, you may choose to load files or modules before any tests run (**note:** always add `--require` AFTER match patterns):
 
 ```
-ospec '**/*.test.js' '**/*-test.js' --ignore 'folder1/**' 'folder2/**'
+ospec --require esm
 ```
 
+Here's an example of mixing them all together:
 
+```
+ospec '**/*.test.js' --ignore 'folder1/**' --require esm ./my-file.js
+```
 
-#### Direct use from the command line
+### Run ospec directly from the command line:
 
-Ospec doesn't work when installed globally. Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+ospec comes with an executable named `ospec`. NPM auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec` from your project root, but there are more convenient methods to do so that we will soon describe.
+
+ospec doesn't work when installed globally (`npm install -g`). Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+
+Here are different ways of running ospec from the command line. This knowledge applies to not just ospec, but any locally installed npm binary.
+
+#### npx
 
 If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
 
-Otherwise, to work around this limitation, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
+#### npm-run
+
+If you're using an older NPM version, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages as npx would.
 
 ```
 npm install npm-run -g
@@ -350,6 +358,16 @@ Then, from a project that has ospec installed as a (dev) dependency:
 ```
 npm-run ospec
 ```
+
+#### PATH
+
+If you understand how your system's PATH works (e.g. for [OSX](https://coolestguidesontheplanet.com/add-shell-path-osx/)), then you can add the following to your PATH...
+
+```
+export PATH=./node_modules/.bin:$PATH
+```
+
+...and you'll be able to run `ospec` without npx, npm, etc. This one-time setup will also work with other binaries across all your node projects, as long as you run binaries from the root of your projects.
 
 ---
 
