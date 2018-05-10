@@ -272,6 +272,7 @@ else window.o = m()
 			}
 		}
 		console.log(
+			(hasProcess ? "- - - - -\n" : "") +
 			(name ? name + ": " : "") +
 			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
 			"of which " + results.filter(function(result){return result.error}).length + " failed"
