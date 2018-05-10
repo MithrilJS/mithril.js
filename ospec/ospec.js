@@ -258,8 +258,14 @@ else window.o = m()
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
-	function highlight(message) {
-		return hasProcess ? (process.stdout.isTTY ? "\x1b[31m" + message + "\x1b[0m" : message) : "%c" + message + "%c "
+	const colorCodes = {
+		red: "31m",
+		red2: "31;1m",
+		green: "32m"
+	}
+	function highlight(message, color) {
+		const code = colorCodes[color] || colorCodes.red;
+		return hasProcess ? (process.stdout.isTTY ? "\x1b[" + code + message + "\x1b[0m" : message) : "%c" + message + "%c "
 	}
 
 	o.report = function (results) {
@@ -271,11 +277,15 @@ else window.o = m()
 				errCount++
 			}
 		}
+		const resultSummary = (errCount === 0) ?
+			highlight("All " + results.length + " assertions passed", "green"):
+			highlight(errCount + " out of " + results.length + " assertions failed", "red2")
+		const runningTime = " in " + Math.round(Date.now() - start) + "ms"
+
 		console.log(
 			(hasProcess ? "- - - - -\n" : "") +
-			(name ? name + ": " : "") +
-			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
-			"of which " + results.filter(function(result){return result.error}).length + " failed"
+			(name ? name + ": " : "") + resultSummary + runningTime,
+			hasProcess ? "" : "font-weight:bold;color:"(errCount === 0 ? "green" : "red"), ""
 		)
 		return errCount
 	}
