@@ -310,7 +310,9 @@ m.route(document.body, &quot;/home&quot;, {
 </table>
 <p> Note that in the <code>onmatch</code> function of a RouteResolver, the new route hasn&#39;t yet been fully resolved, and <code>m.route.params()</code> will return the parameters of the previous route, if any. <code>onmatch</code> receives the parameters of the new route as an argument.</p>
 <h4 id="routeresolver"><a href="#routeresolver">RouteResolver</a></h4>
-<p>A RouteResolver is an object that contains an <code>onmatch</code> method and/or a <code>render</code> method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the <code>m.route</code> call, whereas component definitions should be in their own modules.</p>
+<p>A RouteResolver is a non-component object that contains an <code>onmatch</code> method and/or a <code>render</code> method. Both methods are optional, but at least one must be present.</p>
+<p>If an object can be detected as a component (by the presence of a <code>view</code> method or by being a <code>function</code>/<code>class</code>), it will be treated as such even if it has <code>onmatch</code> or <code>render</code> methods. Since a RouteResolver is not a component, it does not have lifecycle methods.</p>
+<p>As a rule of thumb, RouteResolvers should be in the same file as the <code>m.route</code> call, whereas component definitions should be in their own modules.</p>
 <p><code>routeResolver = {onmatch, render}</code></p>
 <h5 id="routeresolveronmatch"><a href="#routeresolveronmatch">routeResolver.onmatch</a></h5>
 <p>The <code>onmatch</code> hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)</p>
