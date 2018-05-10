@@ -231,7 +231,7 @@ else window.o = m()
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
 			if (compare(this.value, value)) record(null)
-			else record(serialize(this.value) + "\n" + verb + "\n" + serialize(value))
+			else record(serialize(this.value) + "\n  " + verb + "\n" + serialize(value))
 			return function(message) {
 				var result = results[results.length - 1]
 				result.message = message + "\n\n" + result.message
@@ -261,7 +261,8 @@ else window.o = m()
 	const colorCodes = {
 		red: "31m",
 		red2: "31;1m",
-		green: "32m"
+		green: "32m",
+		cyan: "36m"
 	}
 	function highlight(message, color) {
 		const code = colorCodes[color] || colorCodes.red;
@@ -273,7 +274,11 @@ else window.o = m()
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
-				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+				console.error(
+					r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n" + highlight(stackTrace, "cyan") + "\n" : ""),
+					hasProcess ? "" : "color:red;font-weight:bold", "",
+					hasProcess ? "" : "color:black", ""
+				)
 				errCount++
 			}
 		}
