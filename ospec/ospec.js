@@ -261,8 +261,7 @@ else window.o = m()
 	var colorCodes = {
 		red: "31m",
 		red2: "31;1m",
-		green: "32;1m",
-		cyan: "36m"
+		green: "32;1m"
 	}
 	function highlight(message, color) {
 		var code = colorCodes[color] || colorCodes.red;
@@ -278,9 +277,13 @@ else window.o = m()
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(
-					r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n" + highlight(stackTrace, "cyan") + "\n" : ""),
-					cStyle("red", true), "",
-					cStyle("black"), ""
+					(hasProcess ? "\n" : "") +
+					highlight(r.context + ":", "red2") + "\n" +
+					highlight(r.message, "red") +
+					(stackTrace ? "\n" + stackTrace + "\n" : ""),
+
+					cStyle("black", true), "", // reset to default
+					cStyle("red"), cStyle("black")
 				)
 				errCount++
 			}
