@@ -261,7 +261,7 @@ else window.o = m()
 	var colorCodes = {
 		red: "31m",
 		red2: "31;1m",
-		green: "32m",
+		green: "32;1m",
 		cyan: "36m"
 	}
 	function highlight(message, color) {
