@@ -292,7 +292,7 @@ else window.o = m()
 		var runningTime = " in " + Math.round(Date.now() - start) + "ms"
 
 		console.log(
-			(hasProcess ? "- - - - -\n" : "") +
+			(hasProcess ? "––––––\n" : "") +
 			(name ? name + ": " : "") + resultSummary + runningTime,
 			cStyle((errCount === 0 ? "green" : "red"), true), ""
 		)
