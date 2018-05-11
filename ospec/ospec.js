@@ -268,6 +268,9 @@ else window.o = m()
 		var code = colorCodes[color] || colorCodes.red;
 		return hasProcess ? (process.stdout.isTTY ? "\x1b[" + code + message + "\x1b[0m" : message) : "%c" + message + "%c "
 	}
+	function cStyle(color, bold) {
+		return hasProcess||!color ? "" : "color:"+color+(bold ? ";font-weight:bold" : "")
+	}
 
 	o.report = function (results) {
 		var errCount = 0
@@ -276,8 +279,8 @@ else window.o = m()
 				var stackTrace = o.cleanStackTrace(r.error)
 				console.error(
 					r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n" + highlight(stackTrace, "cyan") + "\n" : ""),
-					hasProcess ? "" : "color:red;font-weight:bold", "",
-					hasProcess ? "" : "color:black", ""
+					cStyle("red", true), "",
+					cStyle("black"), ""
 				)
 				errCount++
 			}
@@ -291,7 +294,7 @@ else window.o = m()
 		console.log(
 			(hasProcess ? "- - - - -\n" : "") +
 			(name ? name + ": " : "") + resultSummary + runningTime,
-			hasProcess ? "" : "font-weight:bold;color:"(errCount === 0 ? "green" : "red"), ""
+			cStyle((errCount === 0 ? "green" : "red"), true), ""
 		)
 		return errCount
 	}
