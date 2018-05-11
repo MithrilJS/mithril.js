@@ -282,9 +282,10 @@ else window.o = m()
 				errCount++
 			}
 		}
+		const pl = results.length === 1 ? "" : "s"
 		const resultSummary = (errCount === 0) ?
-			highlight("All " + results.length + " assertions passed", "green"):
-			highlight(errCount + " out of " + results.length + " assertions failed", "red2")
+			highlight((pl ? "All " : "") + results.length + " assertion" + pl + " passed", "green"):
+			highlight(errCount + " out of " + results.length + " assertion" + pl + " failed", "red2")
 		const runningTime = " in " + Math.round(Date.now() - start) + "ms"
 
 		console.log(
