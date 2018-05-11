@@ -258,14 +258,14 @@ else window.o = m()
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
-	const colorCodes = {
+	var colorCodes = {
 		red: "31m",
 		red2: "31;1m",
 		green: "32m",
 		cyan: "36m"
 	}
 	function highlight(message, color) {
-		const code = colorCodes[color] || colorCodes.red;
+		var code = colorCodes[color] || colorCodes.red;
 		return hasProcess ? (process.stdout.isTTY ? "\x1b[" + code + message + "\x1b[0m" : message) : "%c" + message + "%c "
 	}
 
@@ -282,11 +282,11 @@ else window.o = m()
 				errCount++
 			}
 		}
-		const pl = results.length === 1 ? "" : "s"
-		const resultSummary = (errCount === 0) ?
+		var pl = results.length === 1 ? "" : "s"
+		var resultSummary = (errCount === 0) ?
 			highlight((pl ? "All " : "") + results.length + " assertion" + pl + " passed", "green"):
 			highlight(errCount + " out of " + results.length + " assertion" + pl + " failed", "red2")
-		const runningTime = " in " + Math.round(Date.now() - start) + "ms"
+		var runningTime = " in " + Math.round(Date.now() - start) + "ms"
 
 		console.log(
 			(hasProcess ? "- - - - -\n" : "") +
