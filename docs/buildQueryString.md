@@ -50,3 +50,5 @@ var querystring = m.buildQueryString({a: ["hello", "world"]})
 // querystring is "a[0]=hello&a[1]=world"
 ```
 
+#### meta-description
+API for buildQueryString() in Mithril.js.

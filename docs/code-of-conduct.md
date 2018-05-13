@@ -72,3 +72,6 @@ available at [http://contributor-covenant.org/version/1/4][version]
 
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
+
+#### meta-description
+Code of Conduct Covenant for contributors to the Mithril.js project

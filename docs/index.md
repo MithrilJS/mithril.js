@@ -297,3 +297,6 @@ Clicking the button should now update the count.
 We covered how to create and update HTML, how to create components, routes for a Single Page Application, and interacted with a server via XHR.
 
 This should be enough to get you started writing the frontend for a real application. Now that you are comfortable with the basics of the Mithril API, [be sure to check out the simple application tutorial](simple-application.md), which walks you through building a realistic application.
+
+#### meta-description
+Mithril is a modern client-side Javascript framework for building Single Page Applications. It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box. This page covers how to create and update HTML, how to create components, routes for a Single Page Application, and interacted with a server via XHR. This should be enough to get you started writing the frontend for a real application.

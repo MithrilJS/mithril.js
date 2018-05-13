@@ -24,6 +24,9 @@ function generate(pathname) {
 		if (pathname.match(/\.md$/)) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
+			var splitDescription = markdown.split('#### meta-description') // grabs all from here to bottom of page, so must be last
+			markdown = splitDescription[0]
+			var metaDescription = splitDescription[1] || '"Mithril.js Documentation"'
 			var anchors = {}
 			var fixed = markdown
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
@@ -44,7 +47,6 @@ function generate(pathname) {
 			var markedHtml = marked(fixed)
 				.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;") // Fix type signatures containing Array<...>
 			var title = fixed.match(/^#([^\n\r]+)/i) || []
-			var metaDescription = `Mithril.js Documentation` // TODO
 			var html = layout
 				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
 				.replace('"Mithril.js Documentation"', metaDescription)

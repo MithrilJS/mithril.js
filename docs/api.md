@@ -171,3 +171,6 @@ var Counter = {
 
 m.mount(document.body, Counter)
 ```
+
+#### meta-description
+An API cheatsheet for Mithril.js.
