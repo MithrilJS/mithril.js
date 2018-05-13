@@ -26,7 +26,7 @@ function generate(pathname) {
 			var markdown = fs.readFileSync(pathname, "utf-8")
 			var splitDescription = markdown.split('#### meta-description') // grabs all from here to bottom of page, so must be last
 			markdown = splitDescription[0]
-			var metaDescription = splitDescription[1] || '"Mithril.js Documentation"'
+			var metaDescription = splitDescription[1] ? '<meta name="description" content="' + splitDescription[1] + '">' : '<meta name="nosnippets">'
 			var anchors = {}
 			var fixed = markdown
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
@@ -49,7 +49,7 @@ function generate(pathname) {
 			var title = fixed.match(/^#([^\n\r]+)/i) || []
 			var html = layout
 				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
-				.replace('"Mithril.js Documentation"', metaDescription)
+				.replace('<meta name="description" content="Mithril.js Documentation">', metaDescription)
 				.replace(/\[version\]/g, version) // update version
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
