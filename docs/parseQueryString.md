@@ -69,3 +69,6 @@ m.parseQueryString("a[0]=hello&a[1]=world")
 
 // data is {a: ["hello", "world"]}
 ```
+
+#### meta-description
+How to turn a query string into an object using Mithril's built-in m.parseQueryString().

@@ -182,3 +182,6 @@ Unicode characters for accented characters can be typed using a keyboard layout 
 All characters that are representable as HTML entities have unicode counterparts, including non-visible characters such as `&nbsp;` and `&shy;`.
 
 To avoid encoding issues, you should set the file encoding to UTF-8 on the Javascript file, as well as add the `<meta charset="utf-8">` meta tag in the host HTML file.
+
+#### meta-description
+An explanation of how (and when) to use m.trust(), a utility for escaping HTML-encoded text within Mithril.

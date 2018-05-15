@@ -80,3 +80,6 @@ A component rendered via `m.mount` [automatically redraws](autoredraw.md) in res
 `m.mount()` is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril's auto-redrawing facilities.
 
 `m.render()` is suitable for library authors who wish to manually control rendering (e.g. when hooking to a third party router, or using third party data-layer libraries like Redux).
+
+#### meta-description
+Detailed documentation of the m.mount() method.

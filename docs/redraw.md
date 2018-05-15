@@ -53,3 +53,6 @@ To trigger a redraw, call `m.redraw()`. Note that `m.redraw` only works if you u
 - It is not throttled. One call to `m.redraw.sync()` causes immediately one `m.render()` call per root registered with [`m.mount()`](mount.md) or [`m.route()`](route.md).
 
 `m.redraw()` doesn't have any of those issues, you can call it from wherever you like.
+
+#### meta-description
+Understanding Mithril's m.redraw() method, and how to use it.

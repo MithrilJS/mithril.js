@@ -133,3 +133,6 @@ You can use hooks in your production environment to run the production build scr
 	}
 }
 ```
+
+#### meta-description
+Approaches you can use to integrate ES6 into your Mithril-based apps, including technology and usability suggestions.

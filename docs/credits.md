@@ -24,3 +24,6 @@ Other people who also deserve recognition:
 - Arthur Clemens - creator of [Polythene](https://github.com/ArthurClemens/Polythene) and the [HTML-to-Mithril converter](http://arthurclemens.github.io/mithril-template-converter/index.html)
 - Stephan Hoyer - creator of [mithril-node-render](https://github.com/StephanHoyer/mithril-node-render), [mithril-query](https://github.com/StephanHoyer/mithril-query) and [mithril-source-hint](https://github.com/StephanHoyer/mithril-source-hint)
 - the countless people who have reported and fixed bugs, participated in discussions, and helped promote Mithril
+
+#### meta-description
+List of especially notable contributors to Mithril.js

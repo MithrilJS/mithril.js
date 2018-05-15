@@ -551,4 +551,4 @@ m.mount(document.body, {
 ```
 
 #### meta-description
-Understanding the structure, lifecycle methods, state management, and syntactic variants of components in Mithril.js, along with anti-patterns
+Understanding the structure, lifecycle methods, state management, and syntactic variants of components in Mithril.js.

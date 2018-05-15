@@ -53,3 +53,6 @@ For example, `parseFloat` has the signature `String -> Number`, i.e. it takes a 
 
 Functions with multiple arguments are denoted with parenthesis: `(String, Array) -> Number`
 
+
+#### meta-description
+Helpful information for reading the signatures in Mithril's documentation.

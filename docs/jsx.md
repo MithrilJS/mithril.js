@@ -250,3 +250,6 @@ Needless to say, since hyperscript is pure Javascript, there's no need to run a 
 In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
 
 When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
+
+#### meta-description
+Explanation, examples, and build notes on using JSX in your Mithril apps.

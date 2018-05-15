@@ -134,3 +134,6 @@ var state = {
 }
 m("input[type=checkbox]", {onclick: m.withAttr("checked", state.setSelected)})
 ```
+
+#### meta-description
+Explanations and examples of Mithril's m.withAttr() method.

@@ -207,3 +207,6 @@ If a design-based solution is not feasible, and you must optimize a UI with a la
 Avoid applying the optimization to other areas of your application "just-in-case". Remember that, generally speaking, more code incurs a higher maintenance cost than less code, and `onbeforeupdate` related bugs can be especially difficult to troubleshoot if you rely on object identity for its conditional checks.
 
 Again, **the `onbeforeupdate` hook should only be used as a last resort.**
+
+#### meta-description
+Understanding and using lifecycle methods / "hooks" in Mithril

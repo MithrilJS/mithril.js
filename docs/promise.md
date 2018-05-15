@@ -309,3 +309,6 @@ Callbacks are another mechanism for working with asynchronous computations, and 
 However, for asynchronous computations that only occur once in response to an action, promises can be refactored more effectively, reducing code smells known as pyramids of doom (deeply nested series of callbacks with unmanaged state being used across several closure levels).
 
 In addition, promises can considerably reduce boilerplate related to error handling.
+
+#### meta-description
+Detailed documentation on using promises, for which Mithril includes a polyfill.

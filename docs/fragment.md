@@ -70,3 +70,6 @@ m("ul", [
 However, Javascript arrays cannot be keyed or hold lifecycle methods. One option would be to create a wrapper element to host the key or lifecycle method, but sometimes it is not desirable to have an extra element (for example in complex table structures). In those cases, a fragment vnode can be used instead.
 
 There are a few benefits that come from using `m.fragment` instead of handwriting a vnode object structure: m.fragment creates [monomorphic objects](vnodes.md#monomorphic-class), which have better performance characteristics than creating objects dynamically. In addition, using `m.fragment` makes your intentions clear to other developers, and it makes it less likely that you'll mistakenly set attributes on the vnode object itself rather than on its `attrs` map.
+
+#### meta-description
+Documentation of m.fragment, a utility for advanced use cases involving keys or lifecycle methods, often for performance reasons.

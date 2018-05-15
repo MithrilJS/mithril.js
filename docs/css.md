@@ -92,3 +92,6 @@ Often sacrifices also need to be made at time of debugging, when mapping rendere
 Another common issue is lack of support for less basic CSS features such as `@keyframes` and `@font-face`.
 
 If you are adamant about using a CSS-in-JS library, consider using [J2C](https://github.com/j2css/j2c), which works without configuration and implements `@keyframes` and `@font-face`.
+
+#### meta-description
+Approaches you can use to style your Mithril-based apps, including technology and usability suggestions.

@@ -12,6 +12,18 @@ try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
 var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
 var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
 
+const encodeHTML = function(str) {
+    const charsToEncode = /[&"'<>]/g
+    const encodeTo = {
+        "&": '&amp;',
+        "\"": '&quot;',
+        "'": '&#39;',
+        "<": '&lt;',
+        ">": '&gt;',
+    }
+    return str.replace(charsToEncode, function(char) { return encodeTo[char] })
+}
+
 generate("docs")
 
 function generate(pathname) {
@@ -26,7 +38,7 @@ function generate(pathname) {
 			var markdown = fs.readFileSync(pathname, "utf-8")
 			var splitDescription = markdown.split('#### meta-description') // grabs all from here to bottom of page, so must be last
 			markdown = splitDescription[0]
-			var metaDescription = splitDescription[1] ? '<meta name="description" content="' + splitDescription[1] + '">' : '<meta name="nosnippets">'
+			var metaDescription = splitDescription[1] ? '<meta name="description" content="' + encodeHTML(splitDescription[1]) + '">' : '<meta name="nosnippets">'
 			var anchors = {}
 			var fixed = markdown
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags

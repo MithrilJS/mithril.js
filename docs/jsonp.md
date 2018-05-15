@@ -88,3 +88,5 @@ m.jsonp({
 })
 ```
 
+#### meta-description
+Documentation and examples showing how to use Mithril's JSONP functionality.

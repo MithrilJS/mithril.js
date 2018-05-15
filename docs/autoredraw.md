@@ -122,4 +122,4 @@ m.mount(document.body, MyComponent)
 Mithril may also avoid auto-redrawing if the frequency of requested redraws is higher than one animation frame (typically around 16ms). This means, for example, that when using fast-firing events like `onresize` or `onscroll`, Mithril will automatically throttle the number of redraws to avoid lag.
 
 #### meta-description
-The auto-redraw system simply consists of triggering a re-render function behind the scenes after certain functions complete. This page documents idiomatic Mithril to trigger those redraws.
+The Mithril auto-redraw system re-renders your app after some functions complete. Here, we describe the idiomatic Mithril patterns that trigger those redraws.

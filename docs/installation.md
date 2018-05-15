@@ -224,7 +224,7 @@ The source file `index.js` will be compiled (bundled) and a browser window opens
 
 #### Mithril bundler
 
-Mithril comes with a bundler tool of its own. It is sufficient for ES5-based projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet.
+Mithril comes with a bundler tool of its own. It is sufficient for ES5-based projects that have no other dependencies other than Mithril, but it's currently considered experimental for projects that require other NPM dependencies. It produces smaller bundles than webpack, but you should not use it in production yet--it is designed primarily as an internal build tool.
 
 If you want to try it and give feedback, you can open `package.json` and change the npm script for webpack to this:
 
@@ -271,3 +271,6 @@ $ npm install @types/mithril --save-dev
 ```
 
 For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts
+
+#### meta-description
+Various installation options for Mithril.js, from a CDN link to production Webpack setups.

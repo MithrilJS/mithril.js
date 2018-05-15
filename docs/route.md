@@ -703,3 +703,6 @@ m.route(document.body, "/", {
 	},
 })
 ```
+
+#### meta-description
+Using and understanding Mithril's client-side router, m.route()

@@ -503,3 +503,6 @@ m.request("/api/v1/users").then(function(users) {
 	console.log("list of users:", users)
 })
 ```
+
+#### meta-description
+A thorough explanation of how the XHR/AJAX utility m.request() works within Mithril.

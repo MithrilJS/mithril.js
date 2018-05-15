@@ -548,3 +548,6 @@ Now this method works with any Fantasy Land compliant [Functor](https://github.c
 This example may seem convoluted, but it's a trade-off in complexity: the naive `plusOne` implementation makes sense if you have a simple system and only ever increment numbers, but the Fantasy Land implementation becomes more powerful if you have a large system with many wrapper abstractions and reused algorithms.
 
 When deciding whether you should adopt Fantasy Land, you should consider your team's familiarity with functional programming, and be realistic regarding the level of discipline that your team can commit to maintaining code quality (vs the pressure of writing new features and meeting deadlines). Functional style programming heavily depends on compiling, curating and mastering a large set of small, precisely defined functions, and therefore it's not suitable for teams who do not have solid documentation practices, and/or lack experience in functional oriented languages.
+
+#### meta-description
+Helpful info on using m.stream(), a reactive data structure provided optionally within Mithril.

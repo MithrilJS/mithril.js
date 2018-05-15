@@ -204,3 +204,6 @@ users.map(function(user){
 	return m(UserComponent, {key: user.id, model: user})
 })
 ```
+
+#### meta-description
+Understanding and using 'keys' in Mithril to get higher performance.

@@ -51,4 +51,4 @@ var querystring = m.buildQueryString({a: ["hello", "world"]})
 ```
 
 #### meta-description
-API for buildQueryString() in Mithril.js.
+Turns an object like {a: "1", b: "2"} into a string of form "a=1&b=2".

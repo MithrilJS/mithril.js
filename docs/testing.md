@@ -101,3 +101,6 @@ o.spec("MyComponent", function() {
 Typically, you wouldn't test the structure of the vnode tree so granularly, and you would instead only test non-trivial, dynamic aspects of the view. A tool that can help making testing easier with deep vnode trees is [Mithril Query](https://github.com/StephanHoyer/mithril-query).
 
 Sometimes, you need to mock the dependencies of a module in order to test the module in isolation. [Mockery](https://github.com/mfncooper/mockery) is one tool that allows you to do that.
+
+#### meta-description
+Approaches you can use to testing your Mithril-based apps, including technology and usability suggestions.
