@@ -28,7 +28,6 @@
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "benchmark": "^2.1.4",
-    "danger": "^1.2.0",
     "dedent": "^0.7.0",
     "eslint": "^3.19.0",
     "gh-pages": "^0.12.0",
