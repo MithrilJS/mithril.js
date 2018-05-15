@@ -276,31 +276,6 @@ o.spec("stream", function() {
 			o(spy.callCount).equals(1)
 		})
 	})
-	o.spec("valueOf", function() {
-		o("works", function() {
-			o(Stream(1).valueOf()).equals(1)
-			o(Stream("a").valueOf()).equals("a")
-			o(Stream(true).valueOf()).equals(true)
-			o(Stream(null).valueOf()).equals(null)
-			o(Stream(undefined).valueOf()).equals(undefined)
-			o(Stream({a: 1}).valueOf()).deepEquals({a: 1})
-			o(Stream([1, 2, 3]).valueOf()).deepEquals([1, 2, 3])
-			o(Stream().valueOf()).equals(undefined)
-		})
-		o("allows implicit value access in mathematical operations", function() {
-			o(Stream(1) + Stream(1)).equals(2)
-		})
-	})
-	o.spec("toString", function() {
-		o("aliases valueOf", function() {
-			var stream = Stream(1)
-
-			o(stream.toString).equals(stream.valueOf)
-		})
-		o("allows implicit value access in string operations", function() {
-			o(Stream("a") + Stream("b")).equals("ab")
-		})
-	})
 	o.spec("toJSON", function() {
 		o("works", function() {
 			o(Stream(1).toJSON()).equals(1)
