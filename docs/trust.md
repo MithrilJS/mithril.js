@@ -184,4 +184,4 @@ All characters that are representable as HTML entities have unicode counterparts
 To avoid encoding issues, you should set the file encoding to UTF-8 on the Javascript file, as well as add the `<meta charset="utf-8">` meta tag in the host HTML file.
 
 #### meta-description
-An explanation of how (and when) to use m.trust(), a utility for escaping HTML-encoded text within Mithril.
+An explanation of how (and when) to use m.trust(), a utility for unescaping HTML & SVG within Mithril.
