@@ -55,7 +55,7 @@
 
 ### v1.1.7
 
-- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150)
+- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150), breaking change: `mithril-stream@2.0.0`)
 - Promise polyfill implementation separated from polyfilling logic.
 - `PromisePolyfill` is now available on the exported/global `m`.
 
