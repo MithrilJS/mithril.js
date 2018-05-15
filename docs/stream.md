@@ -504,13 +504,6 @@ var serialized = JSON.stringify(value)
 console.log(serialized) // logs 123
 ```
 
-Streams also implement a `valueOf` method that returns the value of the stream.
-
-```javascript
-var value = stream(123)
-console.log("test " + value) // logs "test 123"
-```
-
 ---
 
 ### Streams do not trigger rendering
