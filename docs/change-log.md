@@ -840,3 +840,4 @@ Arrays now represent [fragments](fragment.md), which are structurally significan
 ## `vnode` equality checks
 
 If a vnode is strictly equal to the vnode occupying its place in the last draw, v1.x will skip that part of the tree without checking for mutations or triggering any lifecycle methods in the subtree. The component documentation contains [more detail on this issue](components.md#avoid-creating-component-instances-outside-views).
+
