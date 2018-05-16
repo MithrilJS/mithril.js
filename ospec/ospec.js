@@ -290,7 +290,7 @@ else window.o = m()
 		}
 		var pl = results.length === 1 ? "" : "s"
 		var resultSummary = (errCount === 0) ?
-			highlight((pl ? "All " : "") + results.length + " assertion" + pl + " passed", "green"):
+			highlight((pl ? "All " : "The ") + results.length + " assertion" + pl + " passed", "green"):
 			highlight(errCount + " out of " + results.length + " assertion" + pl + " failed", "red2")
 		var runningTime = " in " + Math.round(Date.now() - start) + "ms"
 
