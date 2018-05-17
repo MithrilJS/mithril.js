@@ -72,7 +72,7 @@ else window.o = m()
 		}
 		if (ospecFileName == null) return stack.join("\n")
 		// skip ospec-related entries on the stack
-		while (stack[i].indexOf(ospecFileName) !== -1) i++
+		while (stack[i] && stack[i].indexOf(ospecFileName) !== -1) i++
 		// now we're in user code
 		return stack[i]
 	}
