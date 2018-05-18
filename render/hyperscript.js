@@ -105,12 +105,10 @@ function hyperscript(selector) {
 		while (start < arguments.length) children.push(arguments[start++])
 	}
 
-	var normalized = Vnode.normalizeChildren(children)
-
 	if (typeof selector === "string") {
-		return execSelector(cached, attrs, normalized)
+		return execSelector(cached, attrs, Vnode.normalizeChildren(children))
 	} else {
-		return Vnode(selector, attrs.key, attrs, normalized)
+		return Vnode(selector, attrs.key, attrs, children)
 	}
 }
 
