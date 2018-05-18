@@ -134,17 +134,17 @@ o.spec("updateNodes", function() {
 	o("reverses els w/ odd count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
 		var updated = [{tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
-
+		var expectedTags = updated.map(function(vn) {return vn.tag})
 		render(root, vnodes)
 		render(root, updated)
 
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("I")
-		o(updated[0].dom).equals(root.childNodes[0])
 		o(updated[1].dom.nodeName).equals("B")
-		o(updated[1].dom).equals(root.childNodes[1])
 		o(updated[2].dom.nodeName).equals("A")
-		o(updated[2].dom).equals(root.childNodes[2])
+		o(tagNames).deepEquals(expectedTags)
 	})
 	o("creates el at start", function() {
 		var vnodes = [{tag: "a", key: 1}]
@@ -1100,6 +1100,149 @@ o.spec("updateNodes", function() {
 
 		o([].map.call(root.childNodes, function(el) {return el.nodeName})).deepEquals(["DIV", "DIV", "P"])
 	})
+	o("minimizes DOM operations when scrambling a keyed lists", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}]
+		var updated = [{tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an odd number of items", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}]
+		var updated = [{tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(3)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an even number of items", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}]
+		var updated = [{tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when scrambling a keyed lists with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an odd number of items with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(3)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an even number of items with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("scrambling sample 1", function() {
+		function vnodify(str) {
+			return str.split(",").map(function(k) {return {tag: k, key: k}})
+		}
+		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
+		var updated = vnodify("k4,k1,k2,k9,k0,k3,k6,k5,k8,k7")
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("scrambling sample 2", function() {
+		function vnodify(str) {
+			return str.split(",").map(function(k) {return {tag: k, key: k}})
+		}
+		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
+		var updated = vnodify("b,d,k1,k0,k2,k3,k4,a,c,k5,k6,k7,k8,k9")
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
