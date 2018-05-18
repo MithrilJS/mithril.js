@@ -564,7 +564,7 @@ o.spec("hyperscript", function() {
 			var component = o.spy()
 			component.prototype.view = function() {}
 
-			var vnode = m(component, { id: "a" }, "b")
+			var vnode = m(component, {id: "a"}, "b")
 
 			o(component.callCount).equals(0)
 
@@ -576,7 +576,7 @@ o.spec("hyperscript", function() {
 		o("works with closures", function () {
 			var component = o.spy()
 
-			var vnode = m(component, { id: "a" }, "b")
+			var vnode = m(component, {id: "a"}, "b")
 
 			o(component.callCount).equals(0)
 
