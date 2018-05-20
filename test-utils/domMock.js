@@ -71,7 +71,7 @@ module.exports = function(options) {
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) this.childNodes.splice(index, 1)
 		if (child.nodeType === 11) {
-			while (child.firstChild != null) this.appendChild(child.firstChild)
+			while (child.firstChild != null) appendChild.call(this, child.firstChild)
 			child.childNodes = []
 		}
 		else {
@@ -99,7 +99,7 @@ module.exports = function(options) {
 		var index = this.childNodes.indexOf(child)
 		if (reference !== null && refIndex < 0) throw new TypeError("Invalid argument")
 		if (index > -1) this.childNodes.splice(index, 1)
-		if (reference === null) this.appendChild(child)
+		if (reference === null) appendChild.call(this, child)
 		else {
 			if (index !== -1 && refIndex > index) refIndex--
 			if (child.nodeType === 11) {
@@ -276,7 +276,7 @@ module.exports = function(options) {
 					},
 					set textContent(value) {
 						this.childNodes = []
-						if (value !== "") this.appendChild($window.document.createTextNode(value))
+						if (value !== "") appendChild.call(this, $window.document.createTextNode(value))
 					},
 					set innerHTML(value) {
 						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
@@ -286,7 +286,7 @@ module.exports = function(options) {
 							var value = match[1]
 							root = $window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
 							ns = "http://www.w3.org/2000/svg"
-							this.appendChild(root)
+							appendChild.call(this, root)
 						} else {
 							root = this
 						}
