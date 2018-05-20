@@ -3,6 +3,7 @@
 
 ## Upcoming...
 <!-- Add new lines here. Version number will be decided later -->
+- Pinpoint the `o.only()` call site
 - Improved wording, spacing and color-coding of report messages and errors ([#2147](https://github.com/MithrilJS/mithril.js/pull/2147), [@maranomynet](https://github.com/maranomynet))
 
 
