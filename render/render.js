@@ -221,13 +221,13 @@ module.exports = function($window) {
 	// The fourth section does keyed diff for the situations not covered by the other three. It
 	// builds a {key: oldIndex} dictionary and uses it to find old nodes that match the keys of
 	// new ones.
-	// The nodes from the `old` array that have a match in the new `vnodes` one are marked as
-	// `vnode.skip: true`.
+	// The nodes from the `old` array that have a match in the new `vnodes` one are removed from
+	// the old list (set to `null`).
 	//
 	// If there are still nodes in the new `vnodes` array that haven't been matched to old ones,
 	// they are created.
 	// The range of old nodes that wasn't covered by the first three sections is passed to
-	// `removeNodes()`. Those nodes are removed unless marked as `.skip: true`.
+	// `removeNodes()`. The nodes that remain in the list are removed  from the DOM.
 	//
 	// It should be noted that the description of the four sections above is not perfect, because those
 	// parts are actually implemented as only two loops, one for the first two parts, and one for
@@ -380,7 +380,7 @@ module.exports = function($window) {
 								pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
 								oldIndices[i-start] = oldIndex
 								o = old[oldIndex]
-								o.skip = true
+								old[oldIndex] = null
 								if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
 								if (v.dom != null) nextSibling = v.dom
 								matched = true
@@ -605,10 +605,7 @@ module.exports = function($window) {
 	function removeNodes(vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
-			if (vnode != null) {
-				if (vnode.skip) vnode.skip = false
-				else removeNode(vnode)
-			}
+			if (vnode != null) removeNode(vnode)
 		}
 	}
 	function removeNode(vnode) {
