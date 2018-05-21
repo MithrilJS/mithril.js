@@ -78,14 +78,10 @@ function execSelector(state, attrs, children) {
 	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
 }
 function hyperscript(selector) {
-	// Because sloppy mode sucks
-	var attrs = arguments[1], start = 2, children
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	if (typeof selector === "string") {
-		var cached = selectorCache[selector] || compileSelector(selector)
-	}
+	var attrs = arguments[1], start = 2, children
 	if (attrs == null) {
 		attrs = {}
 	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
@@ -101,7 +97,7 @@ function hyperscript(selector) {
 	}
 	var normalized = Vnode.normalizeChildren(children)
 	if (typeof selector === "string") {
-		return execSelector(cached, attrs, normalized)
+		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, normalized)
 	} else {
 		return Vnode(selector, attrs.key, attrs, normalized)
 	}
@@ -635,12 +631,12 @@ var coreRenderer = function($window) {
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
 	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
 	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
-	// as the next0 sibling (cached0 in the `nextSibling` variable).
+	// as the next0 sibling (cached in the `nextSibling` variable).
 	// ## DOM node moves
 	//
 	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
-	// the old DOM nodes before updateNode runs0 because it enables us to use the cached0 `nextSibling`
+	// the old DOM nodes before updateNode runs0 because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues

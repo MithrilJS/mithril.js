@@ -79,16 +79,11 @@ function execSelector(state, attrs, children) {
 }
 
 function hyperscript(selector) {
-	// Because sloppy mode sucks
-	var attrs = arguments[1], start = 2, children
-
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
 
-	if (typeof selector === "string") {
-		var cached = selectorCache[selector] || compileSelector(selector)
-	}
+	var attrs = arguments[1], start = 2, children
 
 	if (attrs == null) {
 		attrs = {}
@@ -106,7 +101,7 @@ function hyperscript(selector) {
 	}
 
 	if (typeof selector === "string") {
-		return execSelector(cached, attrs, Vnode.normalizeChildren(children))
+		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, Vnode.normalizeChildren(children))
 	} else {
 		return Vnode(selector, attrs.key, attrs, children)
 	}
