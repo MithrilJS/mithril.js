@@ -3,7 +3,7 @@
 var callAsync = require("../../test-utils/callAsync")
 var o = require("../ospec")
 
-new function(o) {
+void function(o) {
 	o = o.new()
 
 	o.spec("ospec", function() {
@@ -18,7 +18,7 @@ new function(o) {
 	o.run()
 }(o)
 
-new function(o) {
+void function(o) {
 	var clone = o.new()
 
 	clone.spec("clone", function() {
@@ -75,7 +75,7 @@ new function(o) {
 					{pass: true},
 					{pass: false, error: makeError("ho"), message: "ho"}
 				])
-				
+
 				o(errCount).equals(2)
 				o(console.log.callCount).equals(3)
 				o(console.error.callCount).equals(3)
@@ -178,47 +178,6 @@ o.spec("ospec", function() {
 			o(output).deepEquals({tag: "div", children: children})
 		})
 	})
-	o.spec("async callback", function() {
-		var a = 0, b = 0
-
-		o.before(function(done) {
-			callAsync(function() {
-				a = 1
-				done()
-			})
-		})
-		o.after(function(done) {
-			callAsync(function() {
-				a = 0
-				done()
-			})
-		})
-
-		o.beforeEach(function(done) {
-			callAsync(function() {
-				b = 1
-				done()
-			})
-		})
-		o.afterEach(function(done) {
-			callAsync(function() {
-				b = 0
-				done()
-			})
-		})
-
-		o("async hooks", function(done) {
-			callAsync(function() {
-				var spy = o.spy()
-				spy(a)
-
-				o(a).equals(b)
-				o(a).equals(1)("a and b should be initialized")
-
-				done()
-			})
-		})
-	})
 
 	o.spec("stack trace cleaner", function() {
 		o("handles line breaks", function() {
@@ -232,49 +191,51 @@ o.spec("ospec", function() {
 		})
 	})
 
-	o.spec("async promise", function() {
-		var a = 0, b = 0
+	o.spec("async 'done' argument", function () {
+		o("in test callback", function (done) {
+			var a = 0
 
-		function wrapPromise(fn) {
-			return new Promise((resolve, reject) => {
-				callAsync(() => {
-					try {
-						fn()
-						resolve()
-					} catch(e) {
-						reject(e)
-					}
+			callAsync(function () {
+				a = 1
+
+				o(a).equals(1)("defer test resolution")
+
+				done()
+			})
+		});
+
+		o.spec("in hooks", function () {
+			var a = 0, b = 0
+
+			o.before(function (done) {
+				callAsync(function () {
+					a = 1
+					done()
 				})
 			})
-		}
-
-		o.before(function() {
-			return wrapPromise(() => {
-				a = 1
+			o.after(function (done) {
+				callAsync(function () {
+					a = 0
+					done()
+				})
 			})
-		})
 
-		o.after(function() {
-			return wrapPromise(function() {
-				a = 0
+			o.beforeEach(function (done) {
+				callAsync(function () {
+					b = 1
+					done()
+				})
 			})
-		})
+			o.afterEach(function (done) {
+				callAsync(function () {
+					b = 0
+					done()
+				})
+			})
 
-		o.beforeEach(function() {
-			return wrapPromise(function() {
-				b = 1
-			})
-		})
-		o.afterEach(function() {
-			return wrapPromise(function() {
-				b = 0
-			})
-		})
-
-		o("promise functions", function() {
-			return wrapPromise(function() {
+			o("defer test execution", function () {
 				o(a).equals(b)
-				o(a).equals(1)("a and b should be initialized")
+				o(a).equals(1)
 			})
 		})
 	})
