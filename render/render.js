@@ -200,39 +200,47 @@ module.exports = function($window) {
 
 	// ## Diffing
 	//
-	// If one list is keyed and the other is unkeyed, the old is removed, and the new one is
-	// inserted (since the keys are guaranteed to differ).
+	// Reading https://github.com/localvoid/ivi/blob/ddc09d06abaef45248e6133f7040d00d3c6be853/packages/ivi/src/vdom/implementation.ts#L617-L837
+	// may be good for context on longest increasing subsequence-based logic for moving nodes.
 	//
-	// Then comes the unkeyed diff algo, and at last, the keyed diff algorithm that is split
-	// in four parts (simplifying a bit).
+	// In order to diff keyed lists, one has to
 	//
-	// The first part goes through both lists top-down as long as the nodes at each level have
-	// the same key.
+	// 1) match nodes in both lists, per key, and update them accordingly
+	// 2) create the nodes present in the new list, but absent in the old one
+	// 3) remove the nodes present in the old list, but absent in the new one
+	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
 	//
-	// The second part deals with lists reversals, and traverses one list top-down and the other
-	// bottom-up (as long as the keys match).
+	// To achieve 1) one can create a dictionary of keys => index (for the old list), then iterate
+	// over the new list and for each new vnode, find the corresponding vnode in the old list using
+	// the map.
+	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
+	// and must be created.
+	// For the removals, we actually remove the nodes that have been updated from the old list.
+	// The nodes that remain in that list after 1) and 2) have been performed can be safely removed.
+	// The fourth step is a bit more complex and relies on the longest increasing subsequence (LIS)
+	// algorithm.
 	//
-	// The third part goes through both lists bottom up as long as the keys match.
+	// the longest increasing subsequence is the list of nodes that can remain in place. Imagine going
+	// from `1,2,3,4,5` to `4,5,1,2,3` where the numbers are not necessarily the keys, but the indices
+	// corresponding to the keyed nodes in the old list (keyed nodes `e,d,c,b,a` => `b,a,e,d,c` would
+	//  match the above lists, for example).
 	//
-	// The first and third sections allow us to deal efficiently with situations where one or
-	// more contiguous nodes were either inserted into, removed from or re-ordered in an otherwise
-	// sorted list. They may reduce the number of nodes to be processed in the fourth section.
+	// In there are two increasing subsequences: `4,5` and `1,2,3`, the latter being the longest. We
+	// can update those nodes without moving them, and only call `insertNode` on `4` and `5`.
 	//
-	// The fourth section does keyed diff for the situations not covered by the other three. It
-	// builds a {key: oldIndex} dictionary and uses it to find old nodes that match the keys of
-	// new ones.
-	// The nodes from the `old` array that have a match in the new `vnodes` one are removed from
-	// the old list (set to `null`).
+	// @localvoid adapted the algo to also support node deletions and insertions (the `lis` is actually
+	// the longest increasing subsequence *of old nodes still present in the new list*).
 	//
-	// If there are still nodes in the new `vnodes` array that haven't been matched to old ones,
-	// they are created.
-	// The range of old nodes that wasn't covered by the first three sections is passed to
-	// `removeNodes()`. The nodes that remain in the list are removed  from the DOM.
+	// It is a general algorithm that is fireproof in all circumstances, but it requires the allocation
+	// and the construction of a `key => oldIndex` map, and three arrays (one with `newIndex => oldIndex`,
+	// the `LIS` and a temporary one to create the LIS).
 	//
-	// It should be noted that the description of the four sections above is not perfect, because those
-	// parts are actually implemented as only two loops, one for the first two parts, and one for
-	// the other two. I'm not sure it wins us anything except maybe a few bytes of file size.
-
+	// So we cheat where we can: if the tails of the lists are identical, they are guaranteed to be part of
+	// the LIS and can be updated without moving them.
+	//
+	// If two nodes are swapped, they are guaranteed not to be part of the LIS, and must be moved (with
+	// the exception of the last node if the list is fully reversed).
+	//
 	// ## Finding the next sibling.
 	//
 	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
@@ -301,6 +309,7 @@ module.exports = function($window) {
 				// keyed diff
 				var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oe, ve, topSibling
 
+				// bottom-up
 				while (oldEnd >= oldStart && end >= start) {
 					oe = old[oldEnd]
 					ve = vnodes[end]
@@ -314,6 +323,7 @@ module.exports = function($window) {
 						break
 					}
 				}
+				// top-down
 				while (oldEnd >= oldStart && end >= start) {
 					o = old[oldStart]
 					v = vnodes[start]
@@ -326,11 +336,8 @@ module.exports = function($window) {
 						break
 					}
 				}
-
-				//swaps and list reversals
+				// swaps and list reversals
 				while (oldEnd >= oldStart && end >= start) {
-					o = old[oldStart]
-					v = vnodes[start]
 					if (o == null) oldStart++
 					else if (v == null) start++
 					else if (oe == null) oldEnd--
@@ -348,7 +355,10 @@ module.exports = function($window) {
 					}
 					oe = old[oldEnd]
 					ve = vnodes[end]
+					o = old[oldStart]
+					v = vnodes[start]
 				}
+				// bottom up once again
 				while (oldEnd >= oldStart && end >= start) {
 					if (oe == null) oldEnd--
 					else if (ve == null) end--
@@ -365,47 +375,48 @@ module.exports = function($window) {
 				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
 				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
-					// inspired by ivi
-					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, map, i, lis
-					var oldIndices = new Array(end - start + 1)
+					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
+					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
 					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
-					var pos = 2147483647, matched = false
-
 					for (i = end; i >= start; i--) {
 						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
-						v = vnodes[i]
-						if (v != null) {
-							var oldIndex = map[v.key]
+						ve = vnodes[i]
+						if (ve != null) {
+							var oldIndex = map[ve.key]
 							if (oldIndex != null) {
 								pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
 								oldIndices[i-start] = oldIndex
-								o = old[oldIndex]
+								oe = old[oldIndex]
 								old[oldIndex] = null
-								if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
-								if (v.dom != null) nextSibling = v.dom
-								matched = true
+								if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+								if (ve.dom != null) nextSibling = ve.dom
+								matched++
 							}
 						}
 					}
 					nextSibling = originalNextSibling
-					removeNodes(old, oldStart, oldEnd + 1)
-					if (!matched) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
+					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 					else {
 						if (pos === -1) {
-							lis = makeLis(oldIndices)
-							var lisi = lis.length - 1
+							// the indices of the indices of the items that are part of the
+							// longest increasing subsequence in the oldIndices list
+							lisIndices = makeLisIndices(oldIndices)
+							li = lisIndices.length - 1
 							for (i = end; i >= start; i--) {
-								if (oldIndices[i-start] === -1) createNode(parent, vnodes[i], hooks, ns, nextSibling)
+								v = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
-									if (lis[lisi] === i - start) lisi--
-									else insertNode(parent, toFragment(vnodes[i]), nextSibling)
+									if (lisIndices[li] === i - start) li--
+									else insertNode(parent, toFragment(v), nextSibling)
 								}
-								if (vnodes[i].dom != null) nextSibling = vnodes[i].dom
+								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
 						} else {
 							for (i = end; i >= start; i--) {
-								if (oldIndices[i-start] === -1) createNode(parent, vnodes[i], hooks, ns, nextSibling)
-								if (vnodes[i].dom != null) nextSibling = vnodes[i].dom
+								v = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
+								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
 						}
 					}
@@ -522,7 +533,11 @@ module.exports = function($window) {
 		return map
 	}
 	// Lifted from ivi https://github.com/ivijs/ivi/
-	function makeLis(a) {
+	// takes a list of unique numbers (-1 is special and can
+	// occur multiple times) and returns an array with the indices
+	// of the items that are part of the longest increasing
+	// subsequece
+	function makeLisIndices(a) {
 		var p = a.slice()
 		var result = []
 		result.push(0)
