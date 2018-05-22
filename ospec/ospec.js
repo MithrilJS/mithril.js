@@ -114,7 +114,7 @@ else window.o = m()
 				if (cursor === fns.length) return
 
 				var fn = fns[cursor++]
-				var timeout = 0, delay = 200, s = new Date
+				var timeout = 0, delay = 20, s = new Date
 				var isDone = false
 
 				function done(err) {

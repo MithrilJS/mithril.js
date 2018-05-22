@@ -238,5 +238,17 @@ o.spec("ospec", function() {
 				o(a).equals(1)
 			})
 		})
+
+		o.spec("won't timeout", function (done) {
+			o("by default, before 200ms", function (done) {
+				setTimeout(done, 20)
+			})
+
+			o("or longer, if specified", function (done, timeout) {
+				timeout(21)
+
+				setTimeout(done, 21)
+			})
+		})
 	})
 })
