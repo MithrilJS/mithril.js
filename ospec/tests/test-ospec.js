@@ -157,13 +157,35 @@ o.spec("ospec", function() {
 
 		o.spec("won't timeout", function () {
 			o("by default, before 20ms", function (done) {
-				setTimeout(done, 20)
+				setTimeout(done, 10)
 			})
 
-			o("or longer, if specified", function (done, timeout) {
-				timeout(21)
+			o("if it is resolves before the specified timeout", function (done, timeout) {
+				timeout(40)
 
-				setTimeout(done, 21)
+				setTimeout(done, 30)
+			})
+		})
+
+		o("will timeout", function (done, timeout) {
+			timeout(100)
+
+			var clone = o.new()
+
+			clone("by default, after 20ms", function (done) {
+				setTimeout(done, 30)
+			})
+
+			clone("if it is resolves after the specified timeout", function (done, timeout) {
+				timeout(40)
+
+				setTimeout(done, 50)
+			})
+
+			clone.run(function(results){
+				o(results.every(function(report){return report.pass === true}))
+
+				done()
 			})
 		})
 	})
@@ -194,6 +216,7 @@ o.spec("ospec", function() {
 				o(results[1].pass).equals(true)("Test meant to pass has passed")
 			})
 		})
+
 		o("o.report() returns the number of failures", function () {
 			var log = console.log, error = console.error
 			console.log = o.spy()
