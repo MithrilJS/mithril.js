@@ -1007,7 +1007,9 @@ o.spec("route", function() {
 					})
 				})
 
-				o("when two async routes are racing, the last one set cancels the finalization of the first", function(done) {
+				o("when two async routes are racing, the last one set cancels the finalization of the first", function(done, timeout) {
+					timeout(30)
+
 					var renderA = o.spy()
 					var renderB = o.spy()
 					var onmatchA = o.spy(function(){
