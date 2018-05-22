@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
+  "scripts": {
+    "test": "node ./bin/ospec"
+  },
   "directories": {
     "test": "tests"
   },
