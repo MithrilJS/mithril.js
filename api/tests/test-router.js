@@ -1014,7 +1014,7 @@ o.spec("route", function() {
 						return new Promise(function(fulfill) {
 							setTimeout(function(){
 								fulfill()
-							}, 10)
+							}, 5)
 						})
 					})
 
@@ -1045,7 +1045,7 @@ o.spec("route", function() {
 
 											done()
 										})
-									}, 20)
+									}, 10)
 								})
 								return p
 							},
