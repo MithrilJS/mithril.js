@@ -67,7 +67,7 @@ else window.o = m()
 		}
 		if (ospecFileName == null) return stack.join("\n")
 		// skip ospec-related entries on the stack
-		while (stack[i].indexOf(ospecFileName) !== -1) i++
+		while (stack[i+1] && stack[i].indexOf(ospecFileName) !== -1) i++
 		// now we're in user code
 		return stack[i]
 	}
@@ -128,7 +128,7 @@ else window.o = m()
 						timeout = clearTimeout(timeout)
 						if (delay !== Infinity) record(null)
 						if (!isDone) next()
-						else throw new Error("`" + arg + "()` should only be called once")
+						else throw new Error("test has already resolved")
 						isDone = true
 					}
 					else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
@@ -143,9 +143,6 @@ else window.o = m()
 				}
 
 				if (fn.length > 0) {
-					var body = fn.toString()
-					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
-					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
 						fn(done, function(t) {delay = t})
 					}
