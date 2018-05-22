@@ -231,7 +231,7 @@ else window.o = m()
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
 			if (compare(this.value, value)) record(null)
-			else record(serialize(this.value) + "\n" + verb + "\n" + serialize(value))
+			else record(serialize(this.value) + "\n  " + verb + "\n" + serialize(value))
 			return function(message) {
 				var result = results[results.length - 1]
 				result.message = message + "\n\n" + result.message
@@ -258,8 +258,17 @@ else window.o = m()
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
-	function highlight(message) {
-		return hasProcess ? (process.stdout.isTTY ? "\x1b[31m" + message + "\x1b[0m" : message) : "%c" + message + "%c "
+	var colorCodes = {
+		red: "31m",
+		red2: "31;1m",
+		green: "32;1m"
+	}
+	function highlight(message, color) {
+		var code = colorCodes[color] || colorCodes.red;
+		return hasProcess ? (process.stdout.isTTY ? "\x1b[" + code + message + "\x1b[0m" : message) : "%c" + message + "%c "
+	}
+	function cStyle(color, bold) {
+		return hasProcess||!color ? "" : "color:"+color+(bold ? ";font-weight:bold" : "")
 	}
 
 	o.report = function (results) {
@@ -267,14 +276,28 @@ else window.o = m()
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
-				console.error(r.context + ":\n" + highlight(r.message) + (stackTrace ? "\n\n" + stackTrace + "\n\n" : ""), hasProcess ? "" : "color:red", hasProcess ? "" : "color:black")
+				console.error(
+					(hasProcess ? "\n" : "") +
+					highlight(r.context + ":", "red2") + "\n" +
+					highlight(r.message, "red") +
+					(stackTrace ? "\n" + stackTrace + "\n" : ""),
+
+					cStyle("black", true), "", // reset to default
+					cStyle("red"), cStyle("black")
+				)
 				errCount++
 			}
 		}
+		var pl = results.length === 1 ? "" : "s"
+		var resultSummary = (errCount === 0) ?
+			highlight((pl ? "All " : "The ") + results.length + " assertion" + pl + " passed", "green"):
+			highlight(errCount + " out of " + results.length + " assertion" + pl + " failed", "red2")
+		var runningTime = " in " + Math.round(Date.now() - start) + "ms"
+
 		console.log(
-			(name ? name + ": " : "") +
-			results.length + " assertions completed in " + Math.round(new Date - start) + "ms, " +
-			"of which " + results.filter(function(result){return result.error}).length + " failed"
+			(hasProcess ? "––––––\n" : "") +
+			(name ? name + ": " : "") + resultSummary + runningTime,
+			cStyle((errCount === 0 ? "green" : "red"), true), ""
 		)
 		return errCount
 	}

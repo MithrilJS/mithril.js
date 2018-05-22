@@ -2,9 +2,8 @@
 
 
 ## Upcoming...
-_2018-xx-xx_
 <!-- Add new lines here. Version number will be decided later -->
-- ... 
+- Improved wording, spacing and color-coding of report messages and errors ([#2147](https://github.com/MithrilJS/mithril.js/pull/2147), [@maranomynet](https://github.com/maranomynet))
 
 
 ## 2.0.0
