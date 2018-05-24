@@ -17,7 +17,7 @@ else window.o = m()
 			return new Assert(subject)
 		}
 		else if (results == null) {
-			ctx[unique(subject)] = predicate
+			ctx[unique(subject)] = new Task(predicate, ensureStackTrace(new Error))
 		} else {
 			throw new Error("Test definition shouldn't be nested. To group tests use `o.spec()`")
 		}
@@ -37,7 +37,7 @@ else window.o = m()
 		if (!silent) {
 			console.log(highlight("/!\\ WARNING /!\\ o.only() mode"))
 			try {throw new Error} catch (e) {
-				console.log(this.cleanStackTrace(e) + "\n")
+				console.log(o.cleanStackTrace(e) + "\n")
 			}
 		}
 		o(subject, only = predicate)
@@ -79,7 +79,7 @@ else window.o = m()
 	o.run = function(reporter) {
 		results = []
 		start = new Date
-		test(spec, [], [], function() {
+		test(spec, [], [], new Task(function() {
 			setTimeout(function () {
 				if (typeof reporter === "function") reporter(results)
 				else {
@@ -87,38 +87,39 @@ else window.o = m()
 					if (hasProcess && errCount !== 0) process.exit(1)
 				}
 			})
-		})
+		}, null))
 
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
 			post = [].concat(spec["__afterEach"] || [], post)
 			series([].concat(spec["__before"] || [], Object.keys(spec).map(function(key) {
-				return function(done, timeout) {
+				return new Task(function(done, timeout) {
 					timeout(Infinity)
-
 					if (key.slice(0, 2) === "__") return done()
-					if (only !== null && spec[key] !== only && typeof only === typeof spec[key]) return done()
-					subjects.push(key)
-					var type = typeof spec[key]
-					if (type === "object") test(spec[key], pre, post, pop)
-					if (type === "function") series([].concat(pre, spec[key], post, pop))
+					if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
 
-					function pop() {
+					subjects.push(key)
+					var pop = new Task(function pop() {
 						subjects.pop()
 						done()
-					}
-				}
+					}, null)
+
+					if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop))
+					else test(spec[key], pre, post, pop)
+
+				}, null)
 			}), spec["__after"] || [], finalize))
 		}
 
-		function series(fns) {
+		function series(tasks) {
 			var cursor = 0
 			next()
 
 			function next() {
-				if (cursor === fns.length) return
+				if (cursor === tasks.length) return
 
-				var fn = fns[cursor++]
+				var task = tasks[cursor++]
+				var fn = task.fn
 				var timeout = 0, delay = 200, s = new Date
 				var isDone = false
 
@@ -142,7 +143,7 @@ else window.o = m()
 				function startTimer() {
 					timeout = setTimeout(function() {
 						timeout = undefined
-						record("async test timed out")
+						record("async test timed out", task.err)
 						next()
 					}, Math.min(delay, 2147483647))
 				}
@@ -183,7 +184,7 @@ else window.o = m()
 	function hook(name) {
 		return function(predicate) {
 			if (ctx[name]) throw new Error("This hook should be defined outside of a loop or inside a nested test group:\n" + predicate)
-			ctx[name] = predicate
+			ctx[name] = new Task(predicate, ensureStackTrace(new Error))
 		}
 	}
 
@@ -233,6 +234,7 @@ else window.o = m()
 	}
 
 	function Assert(value) {this.value = value}
+	function Task(fn, err) {this.fn = fn, this.err = err}
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
 			if (compare(this.value, value)) record(null)
@@ -246,10 +248,7 @@ else window.o = m()
 	function record(message, error) {
 		var result = {pass: message === null}
 		if (result.pass === false) {
-			if (error == null) {
-				error = new Error
-				if (error.stack === undefined) new function() {try {throw error} catch (e) {error = e}}
-			}
+			if (error == null) error = ensureStackTrace(new Error)
 			result.context = subjects.join(" > ")
 			result.message = message
 			result.error = error
@@ -275,7 +274,11 @@ else window.o = m()
 	function cStyle(color, bold) {
 		return hasProcess||!color ? "" : "color:"+color+(bold ? ";font-weight:bold" : "")
 	}
-
+	function ensureStackTrace(error) {
+		// mandatory to get a stack in IE 10 and 11 (and maybe other envs?)
+		if (error.stack === undefined) try { throw error } catch(e) {return e}
+		else return error
+	}
 	o.report = function (results) {
 		var errCount = 0
 		for (var i = 0, r; r = results[i]; i++) {
