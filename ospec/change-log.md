@@ -3,8 +3,13 @@
 
 ## Upcoming...
 <!-- Add new lines here. Version number will be decided later -->
-- Pinpoint the `o.only()` call site
+### Features
+>>>>>>> [ospec/bin] Back to ES5 (and complimentary cleanup), fix #2160
+- Pinpoint the `o.only()` call site ([#2157](https://github.com/MithrilJS/mithril.js/pull/2157))
 - Improved wording, spacing and color-coding of report messages and errors ([#2147](https://github.com/MithrilJS/mithril.js/pull/2147), [@maranomynet](https://github.com/maranomynet))
+
+### Bug fixes
+- Convert the exectuable back to plain ES5 [#2160](https://github.com/MithrilJS/mithril.js/issues/2160) ([#2161](https://github.com/MithrilJS/mithril.js/pull/2161))
 
 
 ## 2.0.0

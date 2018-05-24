@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 "use strict"
 
-const o = require("../ospec")
-const path = require("path")
-const glob = require("glob")
+var o = require("../ospec")
+var path = require("path")
+var glob = require("glob")
 
 
-const parseArgs = (argv) => {
+function parseArgs(argv) {
 	argv = ["--globs"].concat(argv.slice(2))
-	const args = {}
-	let name
-	argv.forEach((arg) => {
+	var args = {}
+	var name
+	argv.forEach(function(arg) {
 		if (/^--/.test(arg)) {
 			name = arg.substr(2)
 			args[name] = args[name] || []
@@ -22,26 +22,21 @@ const parseArgs = (argv) => {
 }
 
 
-const args = parseArgs(process.argv)
-const globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.js"]
-const ignore = ["**/node_modules/**"].concat(args.ignore||[])
-const cwd = process.cwd()
+var args = parseArgs(process.argv)
+var globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.js"]
+var ignore = ["**/node_modules/**"].concat(args.ignore||[])
+var cwd = process.cwd()
 
 args.require && args.require.forEach(function(module) {
 	module && require(require.resolve(module, { basedir: cwd }))
 })
 
-let pending = globList.length
-globList.forEach((globPattern) => {
-	glob(globPattern, {ignore})
-		.on("match", (fileName) => { require(path.join(cwd, fileName)) }) // eslint-disable-line global-require
-		.on("error", (e) => console.error(e))
-		.on("end", () => {
-			pending--
-			if (pending === 0) {
-				o.run()
-			}
-		})
+var pending = globList.length
+globList.forEach(function(globPattern) {
+	glob(globPattern, {ignore: ignore})
+		.on("match", function(fileName) { require(path.join(cwd, fileName)) }) // eslint-disable-line global-require
+		.on("error", function(e) { console.error(e) })
+		.on("end", function() { if (--pending === 0) o.run()})
 });
 
-process.on("unhandledRejection", (e) => { console.log("Uncaught (in promise) " + e.stack) })
+process.on("unhandledRejection", function(e) { console.error("Uncaught (in promise) " + e.stack) })
