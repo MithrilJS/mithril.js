@@ -2,6 +2,14 @@
 
 
 ## Upcoming...
+_2018-xx-yy_
+### Features
+- Give async timeout a stack trace that points to the problematic test ([#2154(https://github.com/MithrilJS/mithril.js/pull/2154) [@gilbert](github.com/gilbert), [#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+- add `o.timeout()` for setting timeout in Promise-based tests ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+
+### Bug fixes
+- Detect duplicate calls to `done()` properly [#2162](https://github.com/MithrilJS/mithril.js/issues/2162) ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+- Don't count `done()` calls as passing tests in the final tally [#2166](https://github.com/MithrilJS/mithril.js/issues/2166) ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
 <!-- Add new lines here. Version number will be decided later -->
 
 ## 2.1.0
