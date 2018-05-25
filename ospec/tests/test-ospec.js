@@ -180,41 +180,222 @@ o.spec("ospec", function() {
 	})
 	o.spec("async callback", function() {
 		var a = 0, b = 0
+		o.after(function() {
+			o(a).equals(0)
+			o(b).equals(0)
+		})
+		o.spec("", function(){
+			o.before(function(done) {
+				callAsync(function() {
+					a = 1
+					done()
+				})
+			})
+			o.after(function(done) {
+				callAsync(function() {
+					a = 0
+					done()
+				})
+			})
+	
+			o.beforeEach(function(done) {
+				o(b).equals(0)
+				callAsync(function() {
+					b = 1
+					done()
+				})
+			})
+			o.afterEach(function(done) {
+				callAsync(function() {
+					b = 0
+					done()
+				})
+			})
+	
+			o("hooks work as intended the first time", function(done) {
+				callAsync(function() {
+					var spy = o.spy()
+					spy(a)
+	
+					o(a).equals(1)
+					o(b).equals(1)
+	
+					done()
+				})
+			})
+			o("hooks work as intended the second time", function(done) {
+				callAsync(function() {
+					var spy = o.spy()
+					spy(a)
+	
+					o(a).equals(1)
+					o(b).equals(1)
+	
+					done()
+				})
+			})
+		})
+	})
 
-		o.before(function(done) {
-			callAsync(function() {
-				a = 1
+	o.spec("timeout", function () {
+		o("when using done()", function(done) {
+			var oo = o.new()
+			var err
+			// the success of this test is dependent on having the
+			// oo() call three linew below this one
+			try {throw new Error} catch(e) {err = e}
+			if (err.stack) {
+				var line = Number(err.stack.match(/:(\d+):/)[1])
+				oo("", function(oodone, timeout) {
+					// oodone() keep this line for now
+					timeout(1)
+				})
+				oo.run((function(results) {
+					o(results.length).equals(1)
+					o(results[0].pass).equals(false)
+					// todo test cleaned up results[0].error stack trace for the presence
+					// of the timeout stack entry
+					o(results[0].fallbackError instanceof Error).equals(true)
+					o(o.cleanStackTrace(results[0].fallbackError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
+
+					done()
+				}))
+			} else {
+				done()
+			}
+		})
+		o("when using a thenable", function(done) {
+			var oo = o.new()
+			var err
+			// the success of this test is dependent on having the
+			// oo() call three linew below this one
+			try {throw new Error} catch(e) {err = e}
+			if (err.stack) {
+				var line = Number(err.stack.match(/:(\d+):/)[1])
+				oo("", function() {
+					oo.timeout(1)
+					return {then: function(){}}
+				})
+				oo.run((function(results) {
+					o(results.length).equals(1)
+					o(results[0].pass).equals(false)
+					o(results[0].fallbackError instanceof Error).equals(true)
+					o(o.cleanStackTrace(results[0].fallbackError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
+
+					done()
+				}))
+			} else {
+				done()
+			}
+		})
+	})
+	o.spec("o.timeout", function() {
+		o("throws when called out of test definitions", function(done) {
+			var oo = o.new()
+			var count = 0
+			try { oo.timeout(1) } catch (e) { count++ }
+			oo.spec("a spec", function() {
+				try { oo.timeout(1) } catch (e) { count++ }
+			})
+			oo("", function() {
+				oo.timeout(30)
+				return {then: function(f) {setTimeout(f)}}
+			})
+			oo.run(function(){
+				o(count).equals(2)
+
 				done()
 			})
 		})
-		o.after(function(done) {
-			callAsync(function() {
-				a = 0
+		o("works", function(done) {
+			var oo = o.new()
+			var t = new Date
+			oo("", function() {
+				oo.timeout(10)
+				return {then: function() {}}
+			})
+			oo.run(function(){
+				o(new Date - t >= 10).equals(true)
+				o(200 > new Date - t).equals(true)
+
 				done()
 			})
 		})
-
-		o.beforeEach(function(done) {
-			callAsync(function() {
-				b = 1
+	})
+	o.spec("calling done() twice throws", function () {
+		o("two successes", function(done) {
+			var oo = o.new()
+			var err = null
+			oo("foo", function(oodone) {
+				try {
+					oodone()
+					oodone()
+				} catch (e) {
+					err = e
+				}
+				o(err instanceof Error).equals(true)
+				o(err.message).equals("`oodone()` should only be called once")
+			})
+			oo.run(function(results) {
+				o(results.length).equals(0)
 				done()
 			})
 		})
-		o.afterEach(function(done) {
-			callAsync(function() {
-				b = 0
+		o("a success followed by an error", function(done) {
+			var oo = o.new()
+			var err = null
+			oo("foo", function(oodone) {
+				try {
+					oodone()
+					oodone("error")
+				} catch (e) {
+					err = e
+				}
+				o(err instanceof Error).equals(true)
+				o(err.message).equals("`oodone()` should only be called once")
+			})
+			oo.run(function(results) {
+				o(results.length).equals(0)
 				done()
 			})
 		})
-
-		o("async hooks", function(done) {
-			callAsync(function() {
-				var spy = o.spy()
-				spy(a)
-
-				o(a).equals(b)
-				o(a).equals(1)("a and b should be initialized")
-
+		o("two errors", function(done) {
+			var oo = o.new()
+			var err = null
+			oo("foo", function(oodone) {
+				try {
+					oodone("bar")
+					oodone("baz")
+				} catch (e) {
+					err = e
+				}
+				o(err instanceof Error).equals(true)
+				o(err.message).equals("`oodone()` should only be called once")
+			})
+			oo.run(function(results) {
+				o(results.length).equals(1)
+				o(results[0].pass).equals(false)
+				o(results[0].message).equals("bar")
+				done()
+			})
+		})
+		o("an error followed by a success", function(done) {
+			var oo = o.new()
+			var err = null
+			oo("foo", function(oodone) {
+				try {
+					oodone("bar")
+					oodone()
+				} catch (e) {
+					err = e
+				}
+				o(err instanceof Error).equals(true)
+				o(err.message).equals("`oodone()` should only be called once")
+			})
+			oo.run(function(results) {
+				o(results.length).equals(1)
+				o(results[0].pass).equals(false)
+				o(results[0].message).equals("bar")
 				done()
 			})
 		})
