@@ -5,12 +5,10 @@ if (typeof module !== "undefined") module["exports"] = m()
 else window.o = m()
 })(function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 
 	if (name != null) spec[name] = ctx = {}
 
-	try {throw new Error} catch (e) {
-		var ospecFileName = e.stack && (/[\/\\](.*?):\d+:\d+/).test(e.stack) ? e.stack.match(/[\/\\](.*?):\d+:\d+/)[1] : null
-	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
 			if (results == null) throw new Error("Assertions should not occur outside test definitions")
@@ -72,8 +70,8 @@ else window.o = m()
 		}
 		if (ospecFileName == null) return stack.join("\n")
 		// skip ospec-related entries on the stack
-		while (stack[i] && stack[i].indexOf(ospecFileName) !== -1) i++
-		// now we're in user code
+		while (stack[i] != null && stack[i].indexOf(ospecFileName) !== -1) i++
+		// now we're in user code (or past the stack end)
 		return stack[i]
 	}
 	o.run = function(reporter) {
@@ -81,6 +79,7 @@ else window.o = m()
 		start = new Date
 		test(spec, [], [], new Task(function() {
 			setTimeout(function () {
+				timeoutStackName = getStackName({stack: o.cleanStackTrace(ensureStackTrace(new Error))}, /([\w \.]+?:\d+:\d+)/)
 				if (typeof reporter === "function") reporter(results)
 				else {
 					var errCount = o.report(results)
@@ -119,50 +118,54 @@ else window.o = m()
 				if (cursor === tasks.length) return
 
 				var task = tasks[cursor++]
+				var current = cursor
 				var fn = task.fn
 				var timeout = 0, delay = 200, s = new Date
-				var isDone = false
+				var arg
 
+				var isDone = false
+				// public API, may only be called once from use code (or after returned Promise resolution)
 				function done(err) {
+					if (!isDone) isDone = true
+					else throw new Error("`" + arg + "()` should only be called once")
+
+					if (timeout === undefined) console.warn("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms\n" + o.cleanStackTrace(task.err))
+					finalizeAsync(err)
+				}
+				// for internal use only
+				function finalizeAsync(err) {
 					if (err) {
-						if (err instanceof Error) record(err.message, err)
-						else record(String(err))
-						subjects.pop()
-						next()
+						if (err instanceof Error) record(err.message, err, task.err)
+						else record(String(err), null, task.err)
 					}
 					if (timeout !== undefined) {
 						timeout = clearTimeout(timeout)
 						if (delay !== Infinity) record(null)
-						if (!isDone) next()
-						else throw new Error("`" + arg + "()` should only be called once")
-						isDone = true
 					}
-					else console.log("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms")
+					if (current === cursor) next()
 				}
 
 				function startTimer() {
 					timeout = setTimeout(function() {
 						timeout = undefined
-						record("async test timed out", task.err)
-						next()
+						finalizeAsync("async test timed out")
 					}, Math.min(delay, 2147483647))
 				}
 
 				if (fn.length > 0) {
 					var body = fn.toString()
-					var arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
+					arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
 						fn(done, function(t) {delay = t})
 					}
 					catch (e) {
-						done(e)
+						finalizeAsync(e)
 					}
 					if (timeout === 0) {
 						startTimer()
 					}
-				}
-				else {
+				} else {
 					var p = fn()
 					if (p && p.then) {
 						startTimer()
@@ -245,14 +248,13 @@ else window.o = m()
 			}
 		}
 	}
-	function record(message, error) {
+	function record(message, error, fallbackError) {
 		var result = {pass: message === null}
 		if (result.pass === false) {
-			if (error == null) error = ensureStackTrace(new Error)
 			result.context = subjects.join(" > ")
 			result.message = message
-			result.error = error
-
+			result.error = error != null ? error : ensureStackTrace(new Error)
+			result.fallbackError = fallbackError
 		}
 		results.push(result)
 	}
@@ -279,11 +281,17 @@ else window.o = m()
 		if (error.stack === undefined) try { throw error } catch(e) {return e}
 		else return error
 	}
+	function getStackName(e, exp) {
+		return e.stack && exp.test(e.stack) ? e.stack.match(exp)[1] : null
+	}
+
 	o.report = function (results) {
 		var errCount = 0
 		for (var i = 0, r; r = results[i]; i++) {
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
+				var couldHaveABetterStackTrace = !stackTrace || timeoutStackName != null && stackTrace.indexOf(timeoutStackName) !== -1
+				if (couldHaveABetterStackTrace) stackTrace = r.fallbackError != null ? o.cleanStackTrace(r.fallbackError) : r.error.stack || ""
 				console.error(
 					(hasProcess ? "\n" : "") +
 					highlight(r.context + ":", "red2") + "\n" +
