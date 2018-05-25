@@ -32,12 +32,11 @@ else window.o = m()
 		ctx = parent
 	}
 	o.only = function(subject, predicate, silent) {
-		if (!silent) {
-			console.log(highlight("/!\\ WARNING /!\\ o.only() mode"))
-			try {throw new Error} catch (e) {
-				console.log(o.cleanStackTrace(e) + "\n")
-			}
-		}
+		if (!silent) console.log(
+			highlight("/!\\ WARNING /!\\ o.only() mode") + "\n" + o.cleanStackTrace(ensureStackTrace(new Error)) + "\n",
+			cStyle("red"), ""
+		)
+
 		o(subject, only = predicate)
 	}
 	o.spy = function(fn) {
