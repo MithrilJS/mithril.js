@@ -6,7 +6,7 @@ else window.o = m()
 })(function init(name) {
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
-
+	var globalTimeout = noTimeoutRightNow
 	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
@@ -74,6 +74,9 @@ else window.o = m()
 		// now we're in user code (or past the stack end)
 		return stack[i]
 	}
+	o.timeout = function(n) {
+		globalTimeout(n)
+	}
 	o.run = function(reporter) {
 		results = []
 		start = new Date
@@ -123,6 +126,8 @@ else window.o = m()
 				var timeout = 0, delay = 200, s = new Date
 				var arg
 
+				globalTimeout = setDelay
+
 				var isDone = false
 				// public API, may only be called once from use code (or after returned Promise resolution)
 				function done(err) {
@@ -141,7 +146,6 @@ else window.o = m()
 					if (timeout !== undefined) timeout = clearTimeout(timeout)
 					if (current === cursor) next()
 				}
-
 				function startTimer() {
 					timeout = setTimeout(function() {
 						timeout = undefined
@@ -149,12 +153,14 @@ else window.o = m()
 					}, Math.min(delay, 2147483647))
 				}
 
+				function setDelay (t) {delay = t}
+
 				if (fn.length > 0) {
 					var body = fn.toString()
 					arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
 					try {
-						fn(done, function(t) {delay = t})
+						fn(done, setDelay)
 					}
 					catch (e) {
 						finalizeAsync(e)
@@ -171,6 +177,7 @@ else window.o = m()
 						nextTickish(next)
 					}
 				}
+				globalTimeout = noTimeoutRightNow
 			}
 		}
 	}
@@ -260,6 +267,9 @@ else window.o = m()
 		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
+	}
+	function noTimeoutRightNow() {
+		throw new Error("o.timeout must be called snchronously from within a test definition or a hook")
 	}
 	var colorCodes = {
 		red: "31m",
