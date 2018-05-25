@@ -138,10 +138,7 @@ else window.o = m()
 						if (err instanceof Error) record(err.message, err, task.err)
 						else record(String(err), null, task.err)
 					}
-					if (timeout !== undefined) {
-						timeout = clearTimeout(timeout)
-						if (delay !== Infinity) record(null)
-					}
+					if (timeout !== undefined) timeout = clearTimeout(timeout)
 					if (current === cursor) next()
 				}
 
