@@ -327,6 +327,120 @@ o.spec("ospec", function() {
 			})
 		})
 	})
+	o.spec("o.defaultTimeout", function() {
+		o("throws when called inside of test definitions", function(done) {
+			var err
+			var oo = o.new()
+			oo("", function() {
+				try { oo.defaultTimeout(5) } catch (e) {err = e}
+				return {then: function(f) {setTimeout(f)}}
+			})
+			oo.run(function(){
+				o(err instanceof Error).equals(true)
+
+				done()
+			})
+		})
+		o("works", function(done) {
+			var oo = o.new()
+			var t
+
+			oo.defaultTimeout(10)
+			oo.beforeEach(function () {
+				t = new Date
+			})
+			oo.afterEach(function () {
+				var diff = new Date - t
+				o(diff >= 10).equals(true)
+				o(diff < 200).equals(true)
+			})
+
+			oo("", function() {
+				oo(true).equals(true)
+
+				return {then: function() {}}
+			})
+
+			oo.run(function(results) {
+				o(results.length).equals(2)
+				o(results[0].pass).equals(true)
+				o(results[1].pass).equals(false)
+				done()
+			})
+		})
+		o("scoped when nested", function(done) {
+			var oo = o.new()
+			var t
+
+			oo.defaultTimeout(10)
+			oo.beforeEach(function () {
+				t = new Date
+			})
+			oo.afterEach(function () {
+				var diff = new Date - t
+				o(diff >= 10).equals(true)
+				o(diff < 200).equals(true)
+			})
+
+			oo.spec("nested 1", function () {
+				var t
+
+				oo.defaultTimeout(30)
+				oo.beforeEach(function () {
+					t = new Date
+				})
+				oo.afterEach(function () {
+					var diff = new Date - t
+					o(diff >= 30).equals(true)
+					o(diff < 200).equals(true)
+				})
+	
+				oo("", function() {
+					oo(true).equals(true)
+	
+					return {then: function() {}}
+				})
+			})
+
+			oo("", function() {
+				oo(true).equals(true)
+
+				return {then: function() {}}
+			})
+
+			oo.spec("nested 2", function () {
+				oo.spec("deeply", function() {
+					var t
+
+					oo.defaultTimeout(20)
+					oo.beforeEach(function () {
+						t = new Date
+					})
+					oo.afterEach(function () {
+						var diff = new Date - t
+						o(diff >= 20).equals(true)
+						o(diff < 200).equals(true)
+					})
+		
+					oo("", function() {
+						oo(true).equals(true)
+		
+						return {then: function() {}}
+					})
+				})
+			})
+			oo.run(function(results) {
+				o(results.length).equals(6)
+				o(results[0].pass).equals(true)
+				o(results[1].pass).equals(false)
+				o(results[2].pass).equals(true)
+				o(results[3].pass).equals(false)
+				o(results[4].pass).equals(true)
+				o(results[5].pass).equals(false)
+				done()
+			})
+		})
+	})
 	o.spec("calling done() twice throws", function () {
 		o("two successes", function(done) {
 			var oo = o.new()
