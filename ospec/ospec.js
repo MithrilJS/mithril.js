@@ -8,7 +8,7 @@ else window.o = m()
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
 	var currentTestError = null
-	var hooks = {
+	var reservedNames = {
 		__before: true,
 		__beforeEach: true,
 		__after: true,
@@ -24,7 +24,7 @@ else window.o = m()
 		} else {
 			if (isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
 			subject = String(subject)
-			if (hasOwn.call(hooks, subject)) throw new Error("'" + subject + "' is a reserved test name")
+			if (hasOwn.call(reservedNames, subject)) throw new Error("'" + subject + "' is a reserved test name")
 			if (subject.slice(0, 2) === "__") console.warn("test names starting with '__' are reserved for internal use\n" + o.cleanStackTrace(ensureStackTrace(new Error)))
 			ctx[unique(subject)] = new Task(predicate, ensureStackTrace(new Error))
 		}
@@ -109,7 +109,7 @@ else window.o = m()
 			pre = [].concat(pre, spec["__beforeEach"] || [])
 			post = [].concat(spec["__afterEach"] || [], post)
 			series([].concat(spec["__before"] || [], Object.keys(spec).reduce(function(tasks, key) {
-				if (!hasOwn.call(hooks, key)) {
+				if (!hasOwn.call(reservedNames, key)) {
 					tasks.push(new Task(function(done, timeout) {
 						timeout(Infinity)
 						if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
