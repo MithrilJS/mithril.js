@@ -11,7 +11,8 @@ else window.o = m()
 		__before: true,
 		__beforeEach: true,
 		__after: true,
-		__afterEach: true
+		__afterEach: true,
+		__defaultTimeout: true
 	}
 	if (name != null) spec[name] = ctx = {}
 
@@ -28,6 +29,12 @@ else window.o = m()
 	o.after = hook("__after")
 	o.beforeEach = hook("__beforeEach")
 	o.afterEach = hook("__afterEach")
+	o.defaultTimeout = function (t) {
+		if (isRunning()) throw new Error("o.defaultTimeout() can only be called before o.run()")
+		if (hasOwn.call(ctx, "__defaultTimeout")) throw new Error("A default timeout has already been defined in this context")
+		if (typeof t !== "number") throw new Error("o.defaultTimeout() expects a number as argument")
+		ctx.__defaultTimeout = t
+	}
 	o.new = init
 	o.spec = function(subject, predicate) {
 		var parent = ctx
@@ -91,9 +98,10 @@ else window.o = m()
 					if (hasProcess && errCount !== 0) process.exit(1)
 				}
 			})
-		}, null))
+		}, null), 200 /*default timeout delay*/)
 
-		function test(spec, pre, post, finalize) {
+		function test(spec, pre, post, finalize, defaultDelay) {
+			if (hasOwn.call(spec, "__defaultTimeout")) defaultDelay = spec.__defaultTimeout
 			pre = [].concat(pre, spec["__beforeEach"] || [])
 			post = [].concat(spec["__afterEach"] || [], post)
 			series([].concat(spec["__before"] || [], Object.keys(spec).reduce(function(tasks, key) {
@@ -108,16 +116,16 @@ else window.o = m()
 							done()
 						}, null)
 
-						if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop))
-						else test(spec[key], pre, post, pop)
+						if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop), defaultDelay)
+						else test(spec[key], pre, post, pop, defaultDelay)
 
 					}, null))
 				}
 				return tasks
-			}, []), spec["__after"] || [], finalize))
+			}, []), spec["__after"] || [], finalize), defaultDelay)
 		}
 
-		function series(tasks) {
+		function series(tasks, defaultDelay) {
 			var cursor = 0
 			next()
 
@@ -127,7 +135,7 @@ else window.o = m()
 				var task = tasks[cursor++]
 				var current = cursor
 				var fn = task.fn
-				var timeout = 0, delay = 200, s = new Date
+				var timeout = 0, delay = defaultDelay, s = new Date
 				var arg
 
 				globalTimeout = setDelay
@@ -137,7 +145,6 @@ else window.o = m()
 				function done(err) {
 					if (!isDone) isDone = true
 					else throw new Error("`" + arg + "()` should only be called once")
-
 					if (timeout === undefined) console.warn("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms\n" + o.cleanStackTrace(task.err))
 					finalizeAsync(err)
 				}
@@ -153,12 +160,13 @@ else window.o = m()
 				function startTimer() {
 					timeout = setTimeout(function() {
 						timeout = undefined
-						finalizeAsync("async test timed out")
+						finalizeAsync("async test timed out after " + delay + "ms")
 					}, Math.min(delay, 2147483647))
 				}
-
-				function setDelay (t) {delay = t}
-
+				function setDelay (t) {
+					if (typeof t !== "number") throw new Error("timeout() and o.timeout() expect a number as argument")
+					delay = t
+				}
 				if (fn.length > 0) {
 					var body = fn.toString()
 					arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
@@ -168,6 +176,7 @@ else window.o = m()
 					}
 					catch (e) {
 						if (task.err != null) finalizeAsync(e)
+						// The errors of internal tasks (which don't have an Err) are ospec bugs and must be rethrown.
 						else throw e
 					}
 					if (timeout === 0) {
@@ -251,6 +260,7 @@ else window.o = m()
 		this.value = value
 	}
 	function Task(fn, err) {
+		// Tasks defined internally don't have an `err`, and may be created at run-time.
 		if (err != null && isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
 		this.fn = fn
 		this.err = err
