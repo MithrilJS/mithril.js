@@ -3,6 +3,37 @@
 var callAsync = require("../../test-utils/callAsync")
 var o = require("../ospec")
 
+
+// this throws an async error that can't be caught in browsers
+if (typeof process !== "undefined") {
+	o("incomplete assertion", function(done) {
+		var stackMatcher = /([\w\.\\\/\-]+):(\d+):/
+		// /!\ this test relies on the `new Error` expression being six lines
+		// above the `oo("test", function(){...})` call.
+		var matches = (new Error).stack.match(stackMatcher)
+		if (matches != null) {
+			var name = matches[1]
+			var num = Number(matches[2])
+		}
+		var oo = o.new()
+		oo("test", function() {
+			oo("incomplete")
+		})
+		oo.run(function(results) {
+			o(results.length).equals(1)
+			o(results[0].message).equals("Incomplete assertion in the test definition starting at...")
+			o(results[0].pass).equals(null)
+			var stack = o.cleanStackTrace(results[0].testError)
+			var matches2 = stack && stack.match(stackMatcher)
+			if (matches != null && matches2 != null) {
+				o(matches[1]).equals(name)
+				o(Number(matches2[2])).equals(num + 6)
+			}
+			done()
+		})
+	})
+}
+
 o("o.only", function(done) {
 	var oo = o.new()
 
@@ -47,7 +78,6 @@ o.spec("reporting", function() {
 			o(results.length).equals(2)("Two results")
 
 			o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
-			o(!("error" in results[1]) && "pass" in results[1]).equals(true)("only pass key present in passing result")
 			o(results[0].pass).equals(false)("Test meant to fail has failed")
 			o(results[1].pass).equals(true)("Test meant to pass has passed")
 
@@ -260,8 +290,8 @@ o.spec("ospec", function() {
 					o(results[0].pass).equals(false)
 					// todo test cleaned up results[0].error stack trace for the presence
 					// of the timeout stack entry
-					o(results[0].fallbackError instanceof Error).equals(true)
-					o(o.cleanStackTrace(results[0].fallbackError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
+					o(results[0].testError instanceof Error).equals(true)
+					o(o.cleanStackTrace(results[0].testError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
 
 					done()
 				}))
@@ -284,8 +314,8 @@ o.spec("ospec", function() {
 				oo.run((function(results) {
 					o(results.length).equals(1)
 					o(results[0].pass).equals(false)
-					o(results[0].fallbackError instanceof Error).equals(true)
-					o(o.cleanStackTrace(results[0].fallbackError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
+					o(results[0].testError instanceof Error).equals(true)
+					o(o.cleanStackTrace(results[0].testError).indexOf("test-ospec.js:" + (line + 3) + ":")).notEquals(-1)
 
 					done()
 				}))
