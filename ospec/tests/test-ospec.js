@@ -527,7 +527,7 @@ o.spec("ospec", function() {
 			} catch(error) {
 				var trace = o.cleanStackTrace(error)
 				o(trace).notEquals("break")
-				o(trace.includes("test-ospec.js")).equals(true)
+				o(trace.indexOf("test-ospec.js") !== -1).equals(true)
 			}
 		})
 	})
