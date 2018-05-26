@@ -7,6 +7,7 @@ else window.o = m()
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
+	var currentTestError = null
 	var hooks = {
 		__before: true,
 		__beforeEach: true,
@@ -17,8 +18,11 @@ else window.o = m()
 	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
-		if (predicate === undefined) return new Assert(subject)
-		else {
+		if (predicate === undefined) {
+			if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
+			return new Assert(subject)
+		} else {
+			if (isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
 			subject = String(subject)
 			if (hasOwn.call(hooks, subject)) throw new Error("'" + subject + "' is a reserved test name")
 			if (subject.slice(0, 2) === "__") console.warn("test names starting with '__' are reserved for internal use\n" + o.cleanStackTrace(ensureStackTrace(new Error)))
@@ -133,9 +137,10 @@ else window.o = m()
 				if (cursor === tasks.length) return
 
 				var task = tasks[cursor++]
-				var current = cursor
 				var fn = task.fn
+				currentTestError = task.err
 				var timeout = 0, delay = defaultDelay, s = new Date
+				var current = cursor
 				var arg
 
 				globalTimeout = setDelay
@@ -150,9 +155,9 @@ else window.o = m()
 				}
 				// for internal use only
 				function finalizeAsync(err) {
-					if (err) {
-						if (err instanceof Error) record(err.message, err, task.err)
-						else record(String(err), null, task.err)
+					if (err != null) {
+						if (err instanceof Error) fail(new Assert, err.message, err)
+						else fail(new Assert, String(err), null)
 					}
 					if (timeout !== undefined) timeout = clearTimeout(timeout)
 					if (current === cursor) next()
@@ -256,34 +261,32 @@ else window.o = m()
 
 	function isRunning() {return results != null}
 	function Assert(value) {
-		if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
 		this.value = value
+		this.i = results.length
+		results.push({pass: null, context: "", message: "Incomplete assertion in the test definition starting at...", error: currentTestError, testError: currentTestError})
 	}
 	function Task(fn, err) {
-		// Tasks defined internally don't have an `err`, and may be created at run-time.
-		if (err != null && isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
 		this.fn = fn
 		this.err = err
 	}
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
-			if (compare(this.value, value)) record(null)
-			else record(serialize(this.value) + "\n  " + verb + "\n" + serialize(value))
+			if (compare(this.value, value)) succeed(this)
+			else fail(this, serialize(this.value) + "\n  " + verb + "\n" + serialize(value))
+			var self = this
 			return function(message) {
-				var result = results[results.length - 1]
-				result.message = message + "\n\n" + result.message
+				if (!self.pass) self.message = message + "\n\n" + self.message
 			}
 		}
 	}
-	function record(message, error, fallbackError) {
-		var result = {pass: message === null}
-		if (result.pass === false) {
-			result.context = subjects.join(" > ")
-			result.message = message
-			result.error = error != null ? error : ensureStackTrace(new Error)
-			result.fallbackError = fallbackError
-		}
-		results.push(result)
+	function succeed(assertion) {
+		results[assertion.i].pass = true
+	}
+	function fail(assertion, message, error) {
+		results[assertion.i].pass = false
+		results[assertion.i].context = subjects.join(" > ")
+		results[assertion.i].message = message
+		results[assertion.i].error = error != null ? error : ensureStackTrace(new Error)
 	}
 	function serialize(value) {
 		if (hasProcess) return require("util").inspect(value)
@@ -318,10 +321,15 @@ else window.o = m()
 	o.report = function (results) {
 		var errCount = 0
 		for (var i = 0, r; r = results[i]; i++) {
+			if (r.pass == null) {
+				r.testError.stack = r.message + "\n" + o.cleanStackTrace(r.testError)
+				r.testError.message = r.message
+				throw r.testError
+			}
 			if (!r.pass) {
 				var stackTrace = o.cleanStackTrace(r.error)
 				var couldHaveABetterStackTrace = !stackTrace || timeoutStackName != null && stackTrace.indexOf(timeoutStackName) !== -1
-				if (couldHaveABetterStackTrace) stackTrace = r.fallbackError != null ? o.cleanStackTrace(r.fallbackError) : r.error.stack || ""
+				if (couldHaveABetterStackTrace) stackTrace = r.testError != null ? o.cleanStackTrace(r.testError) : r.error.stack || ""
 				console.error(
 					(hasProcess ? "\n" : "") +
 					highlight(r.context + ":", "red2") + "\n" +
