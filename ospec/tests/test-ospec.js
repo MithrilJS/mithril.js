@@ -3,91 +3,96 @@
 var callAsync = require("../../test-utils/callAsync")
 var o = require("../ospec")
 
-new function(o) {
-	o = o.new()
+o("o.only", function(done) {
+	var oo = o.new()
 
-	o.spec("ospec", function() {
-		o("skipped", function() {
-			o(true).equals(false)
+	oo.spec("ospec", function() {
+		oo("skipped", function() {
+			oo(true).equals(false)
 		})
-		o.only(".only()", function() {
-			o(2).equals(2)
+		oo.only(".only()", function() {
+			oo(2).equals(2)
 		}, true)
 	})
 
-	o.run()
-}(o)
-
-new function(o) {
-	var clone = o.new()
-
-	clone.spec("clone", function() {
-		clone("fail", function() {
-			clone(true).equals(false)
-		})
-
-		clone("pass", function() {
-			clone(true).equals(true)
-		})
+	oo.run(function(results){
+		o(results.length).equals(1)
+		o(results[0].pass).equals(true)
+		done()
 	})
+})
 
-	// Predicate test passing on clone results
-	o.spec("reporting", function() {
-		o("reports per instance", function(done, timeout) {
-			timeout(100) // Waiting on clone
+// Predicate test passing on clone results
+o.spec("reporting", function() {
+	var oo
+	o.beforeEach(function(){
+		oo = o.new()
 
-			clone.run(function(results) {
-				o(typeof results).equals("object")
-				o("length" in results).equals(true)
-				o(results.length).equals(2)("Two results")
+		oo.spec("clone", function() {
+			oo("fail", function() {
+				oo(true).equals(false)
+			})
 
-				o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
-				o(!("error" in results[1]) && "pass" in results[1]).equals(true)("only pass key present in passing result")
-				o(results[0].pass).equals(false)("Test meant to fail has failed")
-				o(results[1].pass).equals(true)("Test meant to pass has passed")
-
-				done()
+			oo("pass", function() {
+				oo(true).equals(true)
 			})
 		})
-		o("o.report() returns the number of failures", function () {
-			var log = console.log, error = console.error
-			console.log = o.spy()
-			console.error = o.spy()
+	})
+	o("reports per instance", function(done, timeout) {
+		timeout(100) // Waiting on clone
 
-			function makeError(msg) {try{throw msg ? new Error(msg) : new Error} catch(e){return e}}
-			try {
-				var errCount = o.report([{pass: true}, {pass: true}])
+		oo.run(function(results) {
+			o(typeof results).equals("object")
+			o("length" in results).equals(true)
+			o(results.length).equals(2)("Two results")
 
-				o(errCount).equals(0)
-				o(console.log.callCount).equals(1)
-				o(console.error.callCount).equals(0)
+			o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
+			o(!("error" in results[1]) && "pass" in results[1]).equals(true)("only pass key present in passing result")
+			o(results[0].pass).equals(false)("Test meant to fail has failed")
+			o(results[1].pass).equals(true)("Test meant to pass has passed")
 
-				errCount = o.report([
-					{pass: false, error: makeError("hey"), message: "hey"}
-				])
-
-				o(errCount).equals(1)
-				o(console.log.callCount).equals(2)
-				o(console.error.callCount).equals(1)
-
-				errCount = o.report([
-					{pass: false, error: makeError("hey"), message: "hey"},
-					{pass: true},
-					{pass: false, error: makeError("ho"), message: "ho"}
-				])
-				
-				o(errCount).equals(2)
-				o(console.log.callCount).equals(3)
-				o(console.error.callCount).equals(3)
-			} catch (e) {
-				o(1).equals(0)("Error while testing the reporter")
-			}
-
-			console.log = log
-			console.error = error
+			done()
 		})
 	})
-}(o)
+	o("o.report() returns the number of failures", function () {
+		var log = console.log, error = console.error
+		console.log = o.spy()
+		console.error = o.spy()
+
+		function makeError(msg) {try{throw msg ? new Error(msg) : new Error} catch(e){return e}}
+		try {
+			var errCount = o.report([{pass: true}, {pass: true}])
+
+			o(errCount).equals(0)
+			o(console.log.callCount).equals(1)
+			o(console.error.callCount).equals(0)
+
+			errCount = o.report([
+				{pass: false, error: makeError("hey"), message: "hey"}
+			])
+
+			o(errCount).equals(1)
+			o(console.log.callCount).equals(2)
+			o(console.error.callCount).equals(1)
+
+			errCount = o.report([
+				{pass: false, error: makeError("hey"), message: "hey"},
+				{pass: true},
+				{pass: false, error: makeError("ho"), message: "ho"}
+			])
+
+			o(errCount).equals(2)
+			o(console.log.callCount).equals(3)
+			o(console.error.callCount).equals(3)
+		} catch (e) {
+			o(1).equals(0)("Error while testing the reporter")
+		}
+
+		console.log = log
+		console.error = error
+	})
+})
+
 
 o.spec("ospec", function() {
 	o.spec("sync", function() {
@@ -197,7 +202,7 @@ o.spec("ospec", function() {
 					done()
 				})
 			})
-	
+
 			o.beforeEach(function(done) {
 				o(b).equals(0)
 				callAsync(function() {
@@ -211,15 +216,15 @@ o.spec("ospec", function() {
 					done()
 				})
 			})
-	
+
 			o("hooks work as intended the first time", function(done) {
 				callAsync(function() {
 					var spy = o.spy()
 					spy(a)
-	
+
 					o(a).equals(1)
 					o(b).equals(1)
-	
+
 					done()
 				})
 			})
@@ -227,10 +232,10 @@ o.spec("ospec", function() {
 				callAsync(function() {
 					var spy = o.spy()
 					spy(a)
-	
+
 					o(a).equals(1)
 					o(b).equals(1)
-	
+
 					done()
 				})
 			})

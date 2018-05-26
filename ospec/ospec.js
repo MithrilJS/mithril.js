@@ -7,17 +7,21 @@ else window.o = m()
 	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
+	var hooks = {
+		__before: true,
+		__beforeEach: true,
+		__after: true,
+		__afterEach: true
+	}
 	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
-		if (predicate === undefined) {
-			if (results == null) throw new Error("Assertions should not occur outside test definitions")
-			return new Assert(subject)
-		}
-		else if (results == null) {
+		if (predicate === undefined) return new Assert(subject)
+		else {
+			subject = String(subject)
+			if (hasOwn.call(hooks, subject)) throw new Error("'" + subject + "' is a reserved test name")
+			if (subject.slice(0, 2) === "__") console.warn("test names starting with '__' are reserved for internal use\n" + o.cleanStackTrace(ensureStackTrace(new Error)))
 			ctx[unique(subject)] = new Task(predicate, ensureStackTrace(new Error))
-		} else {
-			throw new Error("Test definition shouldn't be nested. To group tests use `o.spec()`")
 		}
 	}
 	o.before = hook("__before")
@@ -36,7 +40,6 @@ else window.o = m()
 			highlight("/!\\ WARNING /!\\ o.only() mode") + "\n" + o.cleanStackTrace(ensureStackTrace(new Error)) + "\n",
 			cStyle("red"), ""
 		)
-
 		o(subject, only = predicate)
 	}
 	o.spy = function(fn) {
@@ -93,23 +96,25 @@ else window.o = m()
 		function test(spec, pre, post, finalize) {
 			pre = [].concat(pre, spec["__beforeEach"] || [])
 			post = [].concat(spec["__afterEach"] || [], post)
-			series([].concat(spec["__before"] || [], Object.keys(spec).map(function(key) {
-				return new Task(function(done, timeout) {
-					timeout(Infinity)
-					if (key.slice(0, 2) === "__") return done()
-					if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
+			series([].concat(spec["__before"] || [], Object.keys(spec).reduce(function(tasks, key) {
+				if (!hasOwn.call(hooks, key)) {
+					tasks.push(new Task(function(done, timeout) {
+						timeout(Infinity)
+						if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
 
-					subjects.push(key)
-					var pop = new Task(function pop() {
-						subjects.pop()
-						done()
-					}, null)
+						subjects.push(key)
+						var pop = new Task(function pop() {
+							subjects.pop()
+							done()
+						}, null)
 
-					if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop))
-					else test(spec[key], pre, post, pop)
+						if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop))
+						else test(spec[key], pre, post, pop)
 
-				}, null)
-			}), spec["__after"] || [], finalize))
+					}, null))
+				}
+				return tasks
+			}, []), spec["__after"] || [], finalize))
 		}
 
 		function series(tasks) {
@@ -162,7 +167,8 @@ else window.o = m()
 						fn(done, setDelay)
 					}
 					catch (e) {
-						finalizeAsync(e)
+						if (task.err != null) finalizeAsync(e)
+						else throw e
 					}
 					if (timeout === 0) {
 						startTimer()
@@ -239,8 +245,16 @@ else window.o = m()
 		return false
 	}
 
-	function Assert(value) {this.value = value}
-	function Task(fn, err) {this.fn = fn, this.err = err}
+	function isRunning() {return results != null}
+	function Assert(value) {
+		if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
+		this.value = value
+	}
+	function Task(fn, err) {
+		if (err != null && isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
+		this.fn = fn
+		this.err = err
+	}
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
 			if (compare(this.value, value)) record(null)
