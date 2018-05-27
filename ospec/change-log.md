@@ -11,7 +11,7 @@ _2018-xx-yy_
 
 ### Features
 - Give async timeout a stack trace that points to the problematic test ([#2154](https://github.com/MithrilJS/mithril.js/pull/2154) [@gilbert](github.com/gilbert), [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
-- add `o.timeout()` for setting the timeout delay in Promise-based tests ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
+- deprecate the `timeout` parameter in async tests in favour of `o.timeout()` for setting the timeout delay. The `timeout` parameter still works for v3, and will be removed in v4 ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - add `o.defaultTimeout()` for setting the the timeout delay for the current spec and its children ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 
 ### Bug fixes
