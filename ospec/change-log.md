@@ -16,7 +16,6 @@ _2018-xx-yy_
 
 ### Bug fixes
 - Detect duplicate calls to `done()` properly [#2162](https://github.com/MithrilJS/mithril.js/issues/2162) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
-- Don't count `done()` calls as passing tests in the final tally [#2166](https://github.com/MithrilJS/mithril.js/issues/2166) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't try to report internal errors as assertion failures, throw them instead ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't ignore, silently, tests whose name start with the test suite meta-information sequence (was `"__"` up to this version) ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
 - Fix the `done()` call detection logic [#2158](https://github.com/MithrilJS/mithril.js/issues/2158) and assorted fixes (accept non-English names, tolerate comments; [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))

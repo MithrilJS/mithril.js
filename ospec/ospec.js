@@ -147,7 +147,9 @@ else window.o = m()
 				}
 				// for internal use only
 				function finalizeAsync(err) {
-					if (err != null) {
+					if (err == null) {
+						if (task.err != null) succeed(new Assert)
+					} else {
 						if (err instanceof Error) fail(new Assert, err.message, err)
 						else fail(new Assert, String(err), null)
 					}
