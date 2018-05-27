@@ -612,3 +612,79 @@ o.spec("ospec", function() {
 		})
 	})
 })
+o.spec("the done parser", function() {
+	o("accepts non-English names", function() {
+		var oo = o.new()
+		var threw = false
+		oo("test", function(完了) {
+			oo(true).equals(true)
+			完了()
+		})
+		try {oo.run(function(){})} catch(e) {threw = true}
+		o(threw).equals(false)
+	})
+	o("tolerates comments", function() {
+		var oo = o.new()
+		var threw = false
+		oo("test", function(/*hey
+			*/ /**/ //ho
+			done  /*hey
+			*/ /**/ //huuu
+			, timeout
+		) {
+			timeout(5)
+			oo(true).equals(true)
+			done()
+		})
+		try {oo.run(function(){})} catch(e) {threw = true}
+		o(threw).equals(false)
+	})
+	/*eslint-disable no-eval*/
+	try {eval("(()=>{})()"); o.spec("with ES6 arrow functions", function() {
+		function getCommentContent(f) {
+			f = f.toString()
+			return f.slice(f.indexOf("/*") + 2, f.lastIndexOf("*/"))
+		}
+		o("has no false positives 1", function(){
+			var oo = o.new()
+			var threw = false
+			eval(getCommentContent(function(){/*
+				oo(
+					'Async test parser mistakenly identified 1st token after a parens to be `done` reference',
+					done => {
+						oo(threw).equals(false)
+						done()
+					}
+				)
+			*/}))
+			try {oo.run(function(){})} catch(e) {threw = true}
+			o(threw).equals(false)
+		})
+		o("has no false negatives", function(){
+			var oo = o.new()
+			var threw = false
+			eval(getCommentContent(function(){/*
+				oo(
+					"Multiple references to the wrong thing doesn't fool the checker",
+					done => {
+						oo(threw).equals(false)
+						oo(threw).equals(false)
+					}
+				)
+			*/}))
+			try {oo.run(function(){})} catch(e) {threw = true}
+			o(threw).equals(true)
+		})
+		o("isn't fooled by comments", function(){
+			var oo = o.new()
+			var threw = false
+			oo(
+				"comments won't throw the parser off",
+				eval("done /*hey*/ /**/ => {oo(threw).equals(false);done()}")
+			)
+			try {oo.run(function(){})} catch(e) {threw = true}
+			o(threw).equals(false)
+		})
+	})} catch (e) {/*ES5 env, or no eval, ignore*/}
+	/*eslint-enable no-eval*/
+})
