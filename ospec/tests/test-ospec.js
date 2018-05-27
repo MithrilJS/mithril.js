@@ -360,12 +360,12 @@ o.spec("ospec", function() {
 			})
 		})
 	})
-	o.spec("o.defaultTimeout", function() {
+	o.spec("o.specTimeout", function() {
 		o("throws when called inside of test definitions", function(done) {
 			var err
 			var oo = o.new()
 			oo("", function() {
-				try { oo.defaultTimeout(5) } catch (e) {err = e}
+				try { oo.specTimeout(5) } catch (e) {err = e}
 				return {then: function(f) {setTimeout(f)}}
 			})
 			oo.run(function(){
@@ -378,7 +378,7 @@ o.spec("ospec", function() {
 			var oo = o.new()
 			var t
 
-			oo.defaultTimeout(10)
+			oo.specTimeout(10)
 			oo.beforeEach(function () {
 				t = new Date
 			})
@@ -405,7 +405,7 @@ o.spec("ospec", function() {
 			var oo = o.new()
 			var t
 
-			oo.defaultTimeout(10)
+			oo.specTimeout(10)
 			oo.beforeEach(function () {
 				t = new Date
 			})
@@ -418,7 +418,7 @@ o.spec("ospec", function() {
 			oo.spec("nested 1", function () {
 				var t
 
-				oo.defaultTimeout(30)
+				oo.specTimeout(30)
 				oo.beforeEach(function () {
 					t = new Date
 				})
@@ -445,7 +445,7 @@ o.spec("ospec", function() {
 				oo.spec("deeply", function() {
 					var t
 
-					oo.defaultTimeout(20)
+					oo.specTimeout(20)
 					oo.beforeEach(function () {
 						t = new Date
 					})
@@ -489,7 +489,8 @@ o.spec("ospec", function() {
 				o(err.message).equals("`oodone()` should only be called once")
 			})
 			oo.run(function(results) {
-				o(results.length).equals(0)
+				o(results.length).equals(1)
+				o(results[0].pass).equals(true)
 				done()
 			})
 		})
@@ -507,7 +508,8 @@ o.spec("ospec", function() {
 				o(err.message).equals("`oodone()` should only be called once")
 			})
 			oo.run(function(results) {
-				o(results.length).equals(0)
+				o(results.length).equals(1)
+				o(results[0].pass).equals(true)
 				done()
 			})
 		})
