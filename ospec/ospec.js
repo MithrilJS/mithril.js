@@ -8,13 +8,6 @@ else window.o = m()
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
 	var currentTestError = null
-	var reservedNames = {
-		__before: true,
-		__beforeEach: true,
-		__after: true,
-		__afterEach: true,
-		__defaultTimeout: true
-	}
 	if (name != null) spec[name] = ctx = {}
 
 	function o(subject, predicate) {
@@ -24,20 +17,19 @@ else window.o = m()
 		} else {
 			if (isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
 			subject = String(subject)
-			if (hasOwn.call(reservedNames, subject)) throw new Error("'" + subject + "' is a reserved test name")
-			if (subject.slice(0, 2) === "__") console.warn("test names starting with '__' are reserved for internal use\n" + o.cleanStackTrace(ensureStackTrace(new Error)))
+			if (subject.charCodeAt(0) === 1) throw new Error("test names starting with '\\x01' are reserved for internal use")
 			ctx[unique(subject)] = new Task(predicate, ensureStackTrace(new Error))
 		}
 	}
-	o.before = hook("__before")
-	o.after = hook("__after")
-	o.beforeEach = hook("__beforeEach")
-	o.afterEach = hook("__afterEach")
+	o.before = hook("\x01before")
+	o.after = hook("\x01after")
+	o.beforeEach = hook("\x01beforeEach")
+	o.afterEach = hook("\x01afterEach")
 	o.defaultTimeout = function (t) {
 		if (isRunning()) throw new Error("o.defaultTimeout() can only be called before o.run()")
-		if (hasOwn.call(ctx, "__defaultTimeout")) throw new Error("A default timeout has already been defined in this context")
+		if (hasOwn.call(ctx, "\x01defaultTimeout")) throw new Error("A default timeout has already been defined in this context")
 		if (typeof t !== "number") throw new Error("o.defaultTimeout() expects a number as argument")
-		ctx.__defaultTimeout = t
+		ctx["\x01defaultTimeout"] = t
 	}
 	o.new = init
 	o.spec = function(subject, predicate) {
@@ -105,11 +97,11 @@ else window.o = m()
 		}, null), 200 /*default timeout delay*/)
 
 		function test(spec, pre, post, finalize, defaultDelay) {
-			if (hasOwn.call(spec, "__defaultTimeout")) defaultDelay = spec.__defaultTimeout
-			pre = [].concat(pre, spec["__beforeEach"] || [])
-			post = [].concat(spec["__afterEach"] || [], post)
-			series([].concat(spec["__before"] || [], Object.keys(spec).reduce(function(tasks, key) {
-				if (!hasOwn.call(reservedNames, key)) {
+			if (hasOwn.call(spec, "\x01defaultTimeout")) defaultDelay = spec["\x01defaultTimeout"]
+			pre = [].concat(pre, spec["\x01beforeEach"] || [])
+			post = [].concat(spec["\x01afterEach"] || [], post)
+			series([].concat(spec["\x01before"] || [], Object.keys(spec).reduce(function(tasks, key) {
+				if (key.charCodeAt(0) !== 1) {
 					tasks.push(new Task(function(done, timeout) {
 						timeout(Infinity)
 						if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
@@ -126,7 +118,7 @@ else window.o = m()
 					}, null))
 				}
 				return tasks
-			}, []), spec["__after"] || [], finalize), defaultDelay)
+			}, []), spec["\x01after"] || [], finalize), defaultDelay)
 		}
 
 		function series(tasks, defaultDelay) {
