@@ -166,8 +166,12 @@ else window.o = m()
 				}
 				if (fn.length > 0) {
 					var body = fn.toString()
-					arg = (body.match(/\(([\w$]+)/) || body.match(/([\w$]+)\s*=>/) || []).pop()
-					if (body.indexOf(arg) === body.lastIndexOf(arg)) throw new Error("`" + arg + "()` should be called at least once")
+					arg = (body.match(/^(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*=>/) || body.match(/\((?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*[,\)]/) || []).pop()
+					if (body.indexOf(arg) === body.lastIndexOf(arg)) {
+						var e = new Error
+						e.stack = "`" + arg + "()` should be called at least once\n" + o.cleanStackTrace(task.err)
+						throw e
+					}
 					try {
 						fn(done, setDelay)
 					}

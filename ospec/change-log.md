@@ -6,6 +6,8 @@ _2018-xx-yy_
 <!-- Add new lines here. Version number will be decided later -->
 ### Breaking
 - Better input checking to prevent misuses of the library. This may uncover bugs in your test suites. Since it is potentially a disruptive update this change triggers a semver major bump. ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+- Change the reserved character for hooks and test suite meta-information from `"__"` to `"\x01"`. Tests whose name start with `"\0x01"` will be rejected ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+- Misues of the library will now throw errors, rather than report failures. ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
 
 ### Features
 - Give async timeout a stack trace that points to the problematic test ([#2154](https://github.com/MithrilJS/mithril.js/pull/2154) [@gilbert](github.com/gilbert), [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
@@ -16,6 +18,8 @@ _2018-xx-yy_
 - Detect duplicate calls to `done()` properly [#2162](https://github.com/MithrilJS/mithril.js/issues/2162) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't count `done()` calls as passing tests in the final tally [#2166](https://github.com/MithrilJS/mithril.js/issues/2166) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't try to report internal errors as assertion failures, throw them instead ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
+- Don't ignore, silently, tests whose name start with the test suite meta-information sequence (was `"__"` up to this version) ([#2167(https://github.com/MithrilJS/mithril.js/pull/2167))
+- Fix the `done()` call detection logic [#2158](https://github.com/MithrilJS/mithril.js/issues/2158) and assorted fixes (accept non-English names, tolerate comments; [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 
 ## 2.1.0
 _2018-05-25_
