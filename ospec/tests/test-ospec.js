@@ -127,6 +127,7 @@ o.spec("reporting", function() {
 o.spec("ospec", function() {
 	o.spec("sync", function() {
 		var a = 0, b = 0, illegalAssertionThrows = false
+		var reservedTestNameTrows = false
 
 		o.before(function() {a = 1})
 		o.after(function() {a = 0})
@@ -135,6 +136,7 @@ o.spec("ospec", function() {
 		o.afterEach(function() {b = 0})
 
 		try {o("illegal assertion")} catch (e) {illegalAssertionThrows = true}
+		try {o("\x01reserved test name", function(){})} catch (e) {reservedTestNameTrows = true}
 
 		o("assertions", function() {
 			var nestedTestDeclarationThrows = false
@@ -142,6 +144,7 @@ o.spec("ospec", function() {
 
 			o(illegalAssertionThrows).equals(true)
 			o(nestedTestDeclarationThrows).equals(true)
+			o(reservedTestNameTrows).equals(true)
 
 			var spy = o.spy()
 			spy(a)
