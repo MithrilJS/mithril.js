@@ -25,11 +25,11 @@ else window.o = m()
 	o.after = hook("\x01after")
 	o.beforeEach = hook("\x01beforeEach")
 	o.afterEach = hook("\x01afterEach")
-	o.defaultTimeout = function (t) {
-		if (isRunning()) throw new Error("o.defaultTimeout() can only be called before o.run()")
-		if (hasOwn.call(ctx, "\x01defaultTimeout")) throw new Error("A default timeout has already been defined in this context")
-		if (typeof t !== "number") throw new Error("o.defaultTimeout() expects a number as argument")
-		ctx["\x01defaultTimeout"] = t
+	o.specTimeout = function (t) {
+		if (isRunning()) throw new Error("o.specTimeout() can only be called before o.run()")
+		if (hasOwn.call(ctx, "\x01specTimeout")) throw new Error("A default timeout has already been defined in this context")
+		if (typeof t !== "number") throw new Error("o.specTimeout() expects a number as argument")
+		ctx["\x01specTimeout"] = t
 	}
 	o.new = init
 	o.spec = function(subject, predicate) {
@@ -97,7 +97,7 @@ else window.o = m()
 		}, null), 200 /*default timeout delay*/)
 
 		function test(spec, pre, post, finalize, defaultDelay) {
-			if (hasOwn.call(spec, "\x01defaultTimeout")) defaultDelay = spec["\x01defaultTimeout"]
+			if (hasOwn.call(spec, "\x01specTimeout")) defaultDelay = spec["\x01specTimeout"]
 			pre = [].concat(pre, spec["\x01beforeEach"] || [])
 			post = [].concat(spec["\x01afterEach"] || [], post)
 			series([].concat(spec["\x01before"] || [], Object.keys(spec).reduce(function(tasks, key) {

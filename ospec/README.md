@@ -164,30 +164,54 @@ o("promise test", async function() {
 })
 ```
 
-By default, asynchronous tests time out after 20ms. This can be changed on a per-test basis using the `timeout` argument:
+#### Timeout delays
+
+By default, asynchronous tests time out after 200ms. You can change that default for the current test suite and
+its children by using the `o.specTimeout(delay)` function.
+
+```javascript
+o.spec("a spec that must timeout quickly", function(done, timeout) {
+	// wait 20ms before bailing out of the tests of this suite and
+	// its descendants
+	o.specTimeout(20)
+	o("some test", function(done) {
+		setTimeout(done, 10) // this will pass
+	})
+
+	o.spec("a child suite where the delay also applies", function () {
+		o("some test", function(done) {
+			setTimeout(done, 30) // this will time out.
+		})
+	})
+})
+o.spec("a spec that uses the default delay", function() {
+	// ...
+})
+```
+
+This can also be changed on a per-test basis using the `o.timeout(delay)` function from within a test:
 
 ```javascript
 o("setTimeout calls callback", function(done, timeout) {
-	timeout(50) //wait 50ms before bailing out of the test
+	o.timeout(500) //wait 50ms before bailing out of the test
 
-	setTimeout(done, 30)
+	setTimeout(done, 300)
 })
 ```
 
-Note that the `timeout` function call must be the first statement in its test.	This currently does not work for promise tests. You can combine both methods to do this:
+Note that the `o.timeout` function call must be the first statement in its test. It also works with Promise-returning tests:
 
 ```javascript
-o("promise test", function(done, timeout) {
-	timeout(1000)
-	someOtherAsyncFunctionThatTakes900ms().then(done)
+o("promise test", function() {
+	o.timeout(1000)
+	return someOtherAsyncFunctionThatTakes900ms()
 })
 ```
 
 ```javascript
-o("promise test", async function(done, timeout) {
-	timeout(1000)
+o("promise test", async function() {
+	o.timeout(1000)
 	await someOtherAsyncFunctionThatTakes900ms()
-	done()
 })
 ```
 
