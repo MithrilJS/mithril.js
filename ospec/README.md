@@ -559,15 +559,23 @@ o.run(function(results) {
 
 ---
 
-### Boolean result.pass
+### Boolean|Null result.pass
 
-True if the test passed. **No other keys will exist on the result if this value is true.**
+- `true` if the assertion passed.
+- `false` if the assertion failed.
+- `null` if the assertion was incomplete (`o("partial assertion) // and that's it`).
 
 ---
 
 ### Error result.error
 
-The `Error` object explaining the reason behind a failure.
+The `Error` object explaining the reason behind a failure. If the assertion failed, the stack will point to the actuall error. If the assertion did pass or was incomplete, this field is identical to `result.testError`.
+
+---
+
+### Error result.testError
+
+An `Error` object whose stack points to the test definition that wraps the assertion. Useful as a fallback because in some async cases the main may not point to test code.
 
 ---
 
@@ -595,7 +603,7 @@ o.spec("message", function() {
 
 ### String result.context
 
-A `>`-separated string showing the structure of the test specification.
+In case of failure, a `>`-separated string showing the structure of the test specification.
 In the below example, `result.context` would be `testing > rocks`.
 
 ```javascript
