@@ -8,9 +8,10 @@ Vnode.normalize = function(node) {
 	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
 	return node
 }
-Vnode.normalizeChildren = function normalizeChildren(children) {
-	for (var i = 0; i < children.length; i++) {
-		children[i] = Vnode.normalize(children[i])
+Vnode.normalizeChildren = function normalizeChildren(input) {
+	var children = []
+	for (var i = 0; i < input.length; i++) {
+		children[i] = Vnode.normalize(input[i])
 	}
 	return children
 }
@@ -95,19 +96,18 @@ function hyperscript(selector) {
 		children = []
 		while (start < arguments.length) children.push(arguments[start++])
 	}
-	var normalized = Vnode.normalizeChildren(children)
 	if (typeof selector === "string") {
-		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, normalized)
+		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, Vnode.normalizeChildren(children))
 	} else {
-		return Vnode(selector, attrs.key, attrs, normalized)
+		return Vnode(selector, attrs.key, attrs, children)
 	}
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
 	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
-hyperscript.fragment = function(attrs1, children) {
-	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children), undefined, undefined)
+hyperscript.fragment = function(attrs1, children0) {
+	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
 }
 var m = hyperscript
 /** @constructor */
@@ -487,8 +487,8 @@ var coreRenderer = function($window) {
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
-			var children = vnode.children
-			createNodes(fragment, children, 0, children.length, hooks, null, ns)
+			var children1 = vnode.children
+			createNodes(fragment, children1, 0, children1.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
@@ -516,8 +516,8 @@ var coreRenderer = function($window) {
 				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 			}
 			if (vnode.children != null) {
-				var children = vnode.children
-				createNodes(element, children, 0, children.length, hooks, null, ns)
+				var children1 = vnode.children
+				createNodes(element, children1, 0, children1.length, hooks, null, ns)
 				setLateAttrs(vnode)
 			}
 		}
@@ -790,11 +790,11 @@ var coreRenderer = function($window) {
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
-		var domSize = 0, children = vnode.children
+		var domSize = 0, children1 = vnode.children
 		vnode.dom = null
-		if (children != null) {
-			for (var i = 0; i < children.length; i++) {
-				var child = children[i]
+		if (children1 != null) {
+			for (var i = 0; i < children1.length; i++) {
+				var child = children1[i]
 				if (child != null && child.dom != null) {
 					if (vnode.dom == null) vnode.dom = child.dom
 					domSize += child.domSize || 1
@@ -809,7 +809,7 @@ var coreRenderer = function($window) {
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
-				vnode.attrs.value = vnode.text //FIXME handle0 multiple children
+				vnode.attrs.value = vnode.text //FIXME handle0 multiple children1
 				vnode.text = undefined
 			}
 		}
@@ -882,12 +882,12 @@ var coreRenderer = function($window) {
 		else parent.appendChild(dom)
 	}
 	function setContentEditable(vnode) {
-		var children = vnode.children
-		if (children != null && children.length === 1 && children[0].tag === "<") {
-			var content = children[0].children
+		var children1 = vnode.children
+		if (children1 != null && children1.length === 1 && children1[0].tag === "<") {
+			var content = children1[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children1 != null && children1.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
 	}
 	//remove
 	function removeNodes(vnodes, start, end) {
@@ -944,10 +944,10 @@ var coreRenderer = function($window) {
 			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
-			var children = vnode.children
-			if (Array.isArray(children)) {
-				for (var i = 0; i < children.length; i++) {
-					var child = children[i]
+			var children1 = vnode.children
+			if (Array.isArray(children1)) {
+				for (var i = 0; i < children1.length; i++) {
+					var child = children1[i]
 					if (child != null) onremove(child)
 				}
 			}
@@ -972,19 +972,19 @@ var coreRenderer = function($window) {
 		else if (key2 === "style") updateStyle(element, old, value)
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
 			if (key2 === "value") {
-				var normalized0 = "" + value // eslint-disable-line no-implicit-coercion
+				var normalized = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select") {
 					if (value === null) {
 						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
 					} else {
-						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+						if (old !== null && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
 					}
 				}
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized0) return
+				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized) return
 			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
