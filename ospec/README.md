@@ -193,7 +193,7 @@ This can also be changed on a per-test basis using the `o.timeout(delay)` functi
 
 ```javascript
 o("setTimeout calls callback", function(done, timeout) {
-	o.timeout(500) //wait 50ms before bailing out of the test
+	o.timeout(500) //wait 500ms before bailing out of the test
 
 	setTimeout(done, 300)
 })
