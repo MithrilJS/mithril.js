@@ -618,6 +618,7 @@ o.spec("domMock", function() {
 
 			o(div.style.backgroundColor).equals("red")
 			o(div.style.borderBottom).equals("1px solid red")
+			o(div.attributes.style.value).equals("background-color: red; border-bottom: 1px solid red;")
 		})
 		o("removing via setting style.cssText string works", function() {
 			var div = $document.createElement("div")
@@ -625,6 +626,7 @@ o.spec("domMock", function() {
 			div.style.cssText = ""
 
 			o(div.style.background).equals("")
+			o(div.attributes.style.value).equals("")
 		})
 		o("the final semicolon is optional when setting style.cssText", function() {
 			var div = $document.createElement("div")
@@ -632,6 +634,7 @@ o.spec("domMock", function() {
 
 			o(div.style.background).equals("red")
 			o(div.style.cssText).equals("background: red;")
+			o(div.attributes.style.value).equals("background: red;")
 		})
 		o("'cssText' as a property name is ignored when setting style.cssText", function(){
 			var div = $document.createElement("div")
