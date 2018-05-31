@@ -18,6 +18,9 @@ module.exports = function(options) {
 	options = options || {}
 	var spy = options.spy || function(f){return f}
 	var spymap = []
+
+	var hasOwn = ({}.hasOwnProperty)
+
 	function registerSpies(element, spies) {
 		if(options.spy) {
 			var i = spymap.indexOf(element)
@@ -127,9 +130,8 @@ module.exports = function(options) {
 		// this is the correct kind of conversion, passing a Symbol throws in browsers too.
 		var nodeValue = "" + value
 		/*eslint-enable no-implicit-coercion*/
-
 		this.attributes[name] = {
-			namespaceURI: null,
+			namespaceURI: hasOwn.call(this.attributes, name) ? this.attributes[name].namespaceURI : null,
 			get value() {return nodeValue},
 			set value(value) {
 				/*eslint-disable no-implicit-coercion*/
@@ -404,8 +406,16 @@ module.exports = function(options) {
 
 				if (element.nodeName === "A") {
 					Object.defineProperty(element, "href", {
-						get: function() {return this.attributes["href"] === undefined ? "" : "[FIXME implement]"},
-						set: function(value) {this.setAttribute("href", value)},
+						get: function() {
+							if (this.namespaceURI === "http://www.w3.org/2000/svg") {
+								var val = this.hasAttribute("href") ? this.attributes.href.value : ""
+								return {baseVal: val, animVal: val}
+							} else return this.attributes["href"] === undefined ? "" : "[FIXME implement]"
+						},
+						set: function(value) {
+							// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL
+							if (this.namespaceURI !== "http://www.w3.org/2000/svg") this.setAttribute("href", value)
+						},
 						enumerable: true,
 					})
 				}
