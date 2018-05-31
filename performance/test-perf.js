@@ -233,7 +233,7 @@ suite.add({
 		var counter = 0
 		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
 		var get = function (obj, i) { return obj[i%obj.length] }
-		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga"]
+		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga", null, null, undefined]
 		var styles = []
 		var multivalue = ["0 1px", "0 0 1px 0", "0", "1px", "20px 10px", "7em 5px", "1px 0 5em 2px"]
 		var stylekeys = [
