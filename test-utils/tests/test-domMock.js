@@ -364,6 +364,12 @@ o.spec("domMock", function() {
 
 			o(div.getAttribute("id")).equals("aaa")
 		})
+		o("works for attributes with a namespace", function() {
+			var div = $document.createElement("div")
+			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
+
+			o(div.getAttribute("href")).equals("aaa")
+		})
 	})
 
 	o.spec("setAttribute", function() {
@@ -429,18 +435,40 @@ o.spec("domMock", function() {
 
 	o.spec("setAttributeNS", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
-			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
 
-			o(div.attributes["href"].value).equals("aaa")
-			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+			o(a.href).deepEquals({baseVal: "/aaa", animVal: "/aaa"})
+			o(a.attributes["href"].value).equals("/aaa")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 		o("works w/ number", function() {
-			var div = $document.createElement("div")
-			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
 
-			o(div.attributes["href"].value).equals("123")
-			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+			o(a.href).deepEquals({baseVal: "123", animVal: "123"})
+			o(a.attributes["href"].value).equals("123")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+		})
+		o("attributes with a namespace can be querried, updated and removed with non-NS functions", function() {
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
+
+			o(a.hasAttribute("href")).equals(true)
+			o(a.getAttribute("href")).equals("/aaa")
+
+			a.setAttribute("href", "/bbb")
+
+			o(a.href).deepEquals({baseVal: "/bbb", animVal: "/bbb"})
+			o(a.getAttribute("href")).equals("/bbb")
+			o(a.attributes["href"].value).equals("/bbb")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
+			a.removeAttribute("href")
+
+			o(a.hasAttribute("href")).equals(false)
+			o(a.getAttribute("href")).equals(null)
+			o("href" in a.attributes).equals(false)
 		})
 	})
 
@@ -1265,6 +1293,13 @@ o.spec("domMock", function() {
 
 				o(a.href).notEquals("")
 				o(a.attributes["href"].value).equals("")
+			})
+			o("property is read-only for SVG elements", function() {
+				var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+				a.href = "/foo"
+
+				o(a.href).deepEquals({baseVal: "", animVal: ""})
+				o("href" in a.attributes).equals(false)
 			})
 		})
 		o.spec("input[checked]", function() {
