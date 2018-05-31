@@ -685,9 +685,8 @@ module.exports = function($window) {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
-		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
-		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value == null) return
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
 		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
@@ -751,10 +750,11 @@ module.exports = function($window) {
 				setAttr(vnode, key, old && old[key], attrs[key], ns)
 			}
 		}
+		var val
 		if (old != null) {
 			for (var key in old) {
-				if (attrs == null || attrs[key] == null) {
-					removeAttr(vnode, key, old[key], ns)
+				if (((val = old[key]) != null) && (attrs == null || attrs[key] == null)) {
+					removeAttr(vnode, key, val, ns)
 				}
 			}
 		}
