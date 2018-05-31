@@ -205,6 +205,72 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.style.color).equals("red")
 	})
+	o("setting style to `null` removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {style: null}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
+	o("setting style to `undefined` removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {style: undefined}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
+	o("not setting style removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
 	o("replaces el", function() {
 		var vnode = {tag: "a"}
 		var updated = {tag: "b"}
