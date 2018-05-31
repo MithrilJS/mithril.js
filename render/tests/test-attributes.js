@@ -357,24 +357,27 @@ o.spec("attributes", function() {
 
 			o(a.dom.attributes["class"].value).equals("test")
 		})
-		o("removes xlink:href", function() {
+		/* eslint-disable no-script-url */
+		o("handles xlink:href", function() {
 			var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
 				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}}
 			]}
 			render(root, [vnode])
-	
+
 			o(vnode.dom.nodeName).equals("svg")
-			o(vnode.dom.firstChild.attributes["xlink:href"].value).equals("javascript:;")
-			o(vnode.dom.firstChild.attributes["xlink:href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
-	
+			o(vnode.dom.firstChild.attributes["href"].value).equals("javascript:;")
+			o(vnode.dom.firstChild.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
 			vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
 				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {}}
 			]}
 			render(root, [vnode])
-	
+
 			o(vnode.dom.nodeName).equals("svg")
-			o(vnode.dom.firstChild.attributes["xlink:href"]).equals(undefined)
+			o("href" in vnode.dom.firstChild.attributes).equals(false)
 		})
+		/* eslint-enable no-script-url */
+
 	})
 
 	o.spec("option.value", function() {
