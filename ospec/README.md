@@ -271,19 +271,30 @@ o.spec("math", function() {
 })
 ```
 
-### Running only one test
+### Running only some tests
 
-A test can be temporarily made to run exclusively by calling `o.only()` instead of `o`. This is useful when troubleshooting regressions, to zero-in on a failing test, and to avoid saturating console log w/ irrelevant debug information.
+One or more tests can be temporarily made to run exclusively by calling `o.only()` instead of `o`. This is useful when troubleshooting regressions, to zero-in on a failing test, and to avoid saturating console log w/ irrelevant debug information.
 
 ```javascript
 o.spec("math", function() {
+	// will not run
 	o("addition", function() {
 		o(1 + 1).equals(2)
 	})
 
-	//only this test will be run, regardless of how many groups there are
+	// this test will be run, regardless of how many groups there are
 	o.only("subtraction", function() {
 		o(1 - 1).notEquals(2)
+	})
+
+	// will not run
+	o("multiplication", function() {
+		o(2 * 2).equals(4)
+	})
+
+	// this test will be run, regardless of how many groups there are
+	o.only("division", function() {
+		o(6 / 2).notEquals(2)
 	})
 })
 ```

@@ -12,12 +12,15 @@ _2018-xx-yy_
 - Give async timeout a stack trace that points to the problematic test ([#2154](https://github.com/MithrilJS/mithril.js/pull/2154) [@gilbert](github.com/gilbert), [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - deprecate the `timeout` parameter in async tests in favour of `o.timeout()` for setting the timeout delay. The `timeout` parameter still works for v3, and will be removed in v4 ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - add `o.defaultTimeout()` for setting the the timeout delay for the current spec and its children ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
+- adds the possibility select more than one test with o.only ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
 
 ### Bug fixes
 - Detect duplicate calls to `done()` properly [#2162](https://github.com/MithrilJS/mithril.js/issues/2162) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't try to report internal errors as assertion failures, throw them instead ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Don't ignore, silently, tests whose name start with the test suite meta-information sequence (was `"__"` up to this version) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Fix the `done()` call detection logic [#2158](https://github.com/MithrilJS/mithril.js/issues/2158) and assorted fixes (accept non-English names, tolerate comments) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
+- Catch exceptions thrown in synchronous tests and report them as assertion failures ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
+- Fix a stack overflow when using `o.only()` with a large test suite ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
 
 ## 2.1.0
 _2018-05-25_
