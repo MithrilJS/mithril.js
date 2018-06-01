@@ -101,20 +101,13 @@ else window.o = m()
 			pre = [].concat(pre, spec["\x01beforeEach"] || [])
 			post = [].concat(spec["\x01afterEach"] || [], post)
 			series([].concat(spec["\x01before"] || [], Object.keys(spec).reduce(function(tasks, key) {
-				if (key.charCodeAt(0) !== 1) {
-					tasks.push(new Task(function(done, timeout) {
-						timeout(Infinity)
-						if (only !== null && spec[key].fn !== only && spec[key] instanceof Task) return done()
-
+				if (key.charCodeAt(0) !== 1 && (only === null || spec[key].fn === only || !(spec[key] instanceof Task))) {
+					tasks.push(new Task(function(done) {
+						o.timeout(Infinity)
 						subjects.push(key)
-						var pop = new Task(function pop() {
-							subjects.pop()
-							done()
-						}, null)
-
+						var pop = new Task(function pop() {subjects.pop(), done()}, null)
 						if (spec[key] instanceof Task) series([].concat(pre, spec[key], post, pop), defaultDelay)
 						else test(spec[key], pre, post, pop, defaultDelay)
-
 					}, null))
 				}
 				return tasks

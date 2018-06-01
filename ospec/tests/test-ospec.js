@@ -37,8 +37,14 @@ if (typeof process !== "undefined") {
 o("o.only", function(done) {
 	var oo = o.new()
 
+	oo.spec("won't run", function() {
+		oo("nope, skipped", function() {
+			o(true).equals(false)
+		})
+	})
+
 	oo.spec("ospec", function() {
-		oo("skipped", function() {
+		oo("skipped as well", function() {
 			oo(true).equals(false)
 		})
 		oo.only(".only()", function() {
