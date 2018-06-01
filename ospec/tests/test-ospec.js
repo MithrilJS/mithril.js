@@ -281,6 +281,26 @@ o.spec("ospec", function() {
 		})
 	})
 
+	o.spec("throwing in test context is recoreded as a failure", function() {
+		var oo
+		o.beforeEach(function(){oo = o.new()})
+		o.afterEach(function() {
+			oo.run(function(results) {
+				o(results.length).equals(1)
+				o(results[0].pass).equals(false)
+			})
+		})
+		o("sync test", function() {
+			oo("throw in sync test", function() {throw new Error})
+		})
+		o("async test", function() {
+			oo("throw in async test", function(done) {
+				throw new Error
+				done() // eslint-disable-line no-unreachable
+			})
+		})
+	})
+
 	o.spec("timeout", function () {
 		o("when using done()", function(done) {
 			var oo = o.new()

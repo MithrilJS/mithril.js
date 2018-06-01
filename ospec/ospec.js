@@ -179,12 +179,18 @@ else window.o = m()
 						startTimer()
 					}
 				} else {
-					var p = fn()
-					if (p && p.then) {
-						startTimer()
-						p.then(function() { done() }, done)
-					} else {
-						nextTickish(next)
+					try{
+						var p = fn()
+						if (p && p.then) {
+							startTimer()
+							p.then(function() { done() }, done)
+						} else {
+							nextTickish(next)
+						}
+					} catch (e) {
+						if (task.err != null) finalizeAsync(e)
+						// The errors of internal tasks (which don't have an Err) are ospec bugs and must be rethrown.
+						else throw e
 					}
 				}
 				globalTimeout = noTimeoutRightNow
