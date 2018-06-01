@@ -507,7 +507,7 @@ var coreRenderer = function($window) {
 			setAttrs(vnode, attrs2, ns)
 		}
 		insertNode(parent, element, nextSibling)
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
+		if (attrs2 != null && attrs2.contenteditable != null) {
 			setContentEditable(vnode)
 		}
 		else {
@@ -518,7 +518,7 @@ var coreRenderer = function($window) {
 			if (vnode.children != null) {
 				var children1 = vnode.children
 				createNodes(element, children1, 0, children1.length, hooks, null, ns)
-				setLateAttrs(vnode)
+				if (vnode.tag === "select" && attrs2 != null) setLateSelectAttrs(vnode, attrs2)
 			}
 		}
 	}
@@ -940,9 +940,7 @@ var coreRenderer = function($window) {
 			u = 0
 			v = result.length - 1
 			while (u < v) {
-				/*eslint-disable no-bitwise*/
-				var c = ((u + v) / 2) | 0
-				/*eslint-enable no-bitwise*/
+				var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
 				if (a[result[c]] < a[i]) {
 					u = c + 1
 				}
@@ -1064,53 +1062,62 @@ var coreRenderer = function($window) {
 		}
 	}
 	function setAttr(vnode, key2, old, value, ns) {
-		if (key2 === "key" || key2 === "is" || isLifecycleMethod(key2)) return
+		if (key2 === "key" || key2 === "is" || value == null || isLifecycleMethod(key2) || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object") return
 		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
-		if (typeof value === "undefined" && key2 === "value" && old !== value) {
-			vnode.dom.value = ""
-			return
-		}
-		if ((old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || value === undefined) return
-		var element = vnode.dom
-		if (key2.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key2, value)
-		else if (key2 === "style") updateStyle(element, old, value)
-		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
+		if (key2.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
+		else if (key2 === "style") updateStyle(vnode.dom, old, value)
+		else if (key2 in vnode.dom && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
 			if (key2 === "value") {
 				var normalized = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select") {
-					if (value === null) {
-						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
-					} else {
-						if (old !== null && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
-					}
-				}
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === normalized) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === normalized) return
 			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
-			if (vnode.tag === "input" && key2 === "type") {
-				element.setAttribute(key2, value)
-				return
-			}
-			element[key2] = value
-		}
-		else {
+			if (vnode.tag === "input" && key2 === "type") vnode.dom.setAttribute(key2, value)
+			else vnode.dom[key2] = value
+		} else {
 			if (typeof value === "boolean") {
-				if (value) element.setAttribute(key2, "")
-				else element.removeAttribute(key2)
+				if (value) vnode.dom.setAttribute(key2, "")
+				else vnode.dom.removeAttribute(key2)
 			}
-			else element.setAttribute(key2 === "className" ? "class" : key2, value)
+			else vnode.dom.setAttribute(key2 === "className" ? "class" : key2, value)
 		}
 	}
-	function setLateAttrs(vnode) {
-		var attrs2 = vnode.attrs
-		if (vnode.tag === "select" && attrs2 != null) {
-			if ("value" in attrs2) setAttr(vnode, "value", null, attrs2.value, undefined)
-			if ("selectedIndex" in attrs2) setAttr(vnode, "selectedIndex", null, attrs2.selectedIndex, undefined)
+	function removeAttr(vnode, key2, old, ns) {
+		if (key2 === "key" || key2 === "is" || old == null || isLifecycleMethod(key2)) return
+		if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
+		else if (key2 === "style") updateStyle(vnode.dom, old, null)
+		else if (
+			key2 in vnode.dom && !isAttribute(key2)
+			&& key2 !== "className"
+			&& !(vnode.tag === "option" && key2 === "value")
+			&& !(vnode.tag === "input" && key2 === "type")
+			&& ns === undefined
+			&& !isCustomElement(vnode.tag, vnode.attrs || {})
+		) {
+			vnode.dom[key2] = null
+		} else {
+			var nsLastIndex = key2.indexOf(":")
+			if (nsLastIndex !== -1) key2 = key2.slice(nsLastIndex + 1)
+			if (old !== false) vnode.dom.removeAttribute(key2 === "className" ? "class" : key2)
 		}
+	}
+	function setLateSelectAttrs(vnode, attrs2) {
+		if ("value" in attrs2) {
+			if(attrs2.value === null) {
+				if (vnode.dom.selectedIndex !== -1) vnode.dom.value = null
+			} else {
+				var normalized = "" + attrs2.value // eslint-disable-line no-implicit-coercion
+				if (vnode.dom.value !== normalized || vnode.dom.selectedIndex === -1) {
+					vnode.dom.value = normalized
+				}
+			}
+		}
+		if ("selectedIndex" in attrs2) setAttr(vnode, "selectedIndex", null, attrs2.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs2, ns) {
 		if (attrs2 != null) {
@@ -1118,12 +1125,11 @@ var coreRenderer = function($window) {
 				setAttr(vnode, key2, old && old[key2], attrs2[key2], ns)
 			}
 		}
+		var val
 		if (old != null) {
 			for (var key2 in old) {
-				if (attrs2 == null || !(key2 in attrs2)) {
-					if (key2 === "className") key2 = "class"
-					if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
-					else if (key2 !== "key") vnode.dom.removeAttribute(key2)
+				if (((val = old[key2]) != null) && (attrs2 == null || attrs2[key2] == null)) {
+					removeAttr(vnode, key2, val, ns)
 				}
 			}
 		}
@@ -1137,8 +1143,8 @@ var coreRenderer = function($window) {
 	function isAttribute(attr) {
 		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
 	}
-	function isCustomElement(vnode){
-		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
+	function isCustomElement(tag, attrs2){
+		return attrs2.is || tag.indexOf("-") > -1
 	}
 	//style
 	function updateStyle(element, old, style) {
