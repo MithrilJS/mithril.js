@@ -1,4 +1,3 @@
-/* eslint-disable global-require, no-bitwise, no-process-exit */
 "use strict"
 ;(function(m) {
 if (typeof module !== "undefined") module["exports"] = m()
@@ -92,7 +91,7 @@ else window.o = m()
 				if (typeof reporter === "function") reporter(results)
 				else {
 					var errCount = o.report(results)
-					if (hasProcess && errCount !== 0) process.exit(1)
+					if (hasProcess && errCount !== 0) process.exit(1) // eslint-disable-line no-process-exit
 				}
 			})
 		}, null), 200 /*default timeout delay*/)
@@ -225,7 +224,7 @@ else window.o = m()
 	}
 	function deepEqual(a, b) {
 		if (a === b) return true
-		if (a === null ^ b === null || a === undefined ^ b === undefined) return false
+		if (a === null ^ b === null || a === undefined ^ b === undefined) return false // eslint-disable-line no-bitwise
 		if (typeof a === "object" && typeof b === "object") {
 			var aIsArgs = isArguments(a), bIsArgs = isArguments(b)
 			if (a.constructor === Object && b.constructor === Object && !aIsArgs && !bIsArgs) {
@@ -287,7 +286,7 @@ else window.o = m()
 		results[assertion.i].error = error != null ? error : ensureStackTrace(new Error)
 	}
 	function serialize(value) {
-		if (hasProcess) return require("util").inspect(value)
+		if (hasProcess) return require("util").inspect(value) // eslint-disable-line global-require
 		if (value === null || (typeof value === "object" && !(value instanceof Array)) || typeof value === "number") return String(value)
 		else if (typeof value === "function") return value.name || "<anonymous function>"
 		try {return JSON.stringify(value)} catch (e) {return String(value)}

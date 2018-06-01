@@ -101,12 +101,14 @@ function ensureLinkIsValid(file, data) {
 }
 
 function initMocks() {
-	global.window = require("../test-utils/browserMock")() // eslint-disable-line global-require
+	/* eslint-disable global-require */
+	global.window = require("../test-utils/browserMock")()
 	global.document = window.document
-	global.m = require("../index") // eslint-disable-line global-require
-	global.o = require("../ospec/ospec") // eslint-disable-line global-require
-	global.stream = require("../stream") // eslint-disable-line global-require
+	global.m = require("../index")
+	global.o = require("../ospec/ospec")
+	global.stream = require("../stream")
 	global.alert = function() {}
+	/* eslint-enable global-require */
 
 	//routes consumed by request.md
 	global.window.$defineRoutes({
