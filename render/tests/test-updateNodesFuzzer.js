@@ -61,9 +61,7 @@ function longestIncreasingSubsequence(a) {
 		v = result.length - 1
 
 		while (u < v) {
-			/*eslint-disable no-bitwise*/
-			var c = ((u + v) / 2) | 0
-			/*eslint-enable no-bitwise*/
+			var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
 			if (a[result[c]] < a[i]) {
 				u = c + 1
 			} else {

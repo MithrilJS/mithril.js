@@ -539,9 +539,7 @@ module.exports = function($window) {
 			u = 0
 			v = result.length - 1
 			while (u < v) {
-				/*eslint-disable no-bitwise*/
-				var c = ((u + v) / 2) | 0
-				/*eslint-enable no-bitwise*/
+				var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
 				if (a[result[c]] < a[i]) {
 					u = c + 1
 				}
@@ -717,9 +715,7 @@ module.exports = function($window) {
 			if(attrs.value === null) {
 				if (vnode.dom.selectedIndex !== -1) vnode.dom.value = null
 			} else {
-				/*eslint-disable no-implicit-coercion*/
-				var normalized = "" + attrs.value
-				/*eslint-enable no-implicit-coercion*/
+				var normalized = "" + attrs.value // eslint-disable-line no-implicit-coercion
 				if (vnode.dom.value !== normalized || vnode.dom.selectedIndex === -1) {
 					vnode.dom.value = normalized
 				}
