@@ -377,9 +377,7 @@ o.spec("attributes", function() {
 			o("href" in vnode.dom.firstChild.attributes).equals(false)
 		})
 		/* eslint-enable no-script-url */
-
 	})
-
 	o.spec("option.value", function() {
 		o("can be set as text", function() {
 			var a = {tag: "option", attrs: {value: "test"}}
