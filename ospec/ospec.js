@@ -4,7 +4,7 @@
 if (typeof module !== "undefined") module["exports"] = m()
 else window.o = m()
 })(function init(name) {
-	var spec = {}, subjects = [], results, only = null, ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
+	var spec = {}, subjects = [], results, only = [], ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
 	var currentTestError = null
@@ -43,7 +43,8 @@ else window.o = m()
 			highlight("/!\\ WARNING /!\\ o.only() mode") + "\n" + o.cleanStackTrace(ensureStackTrace(new Error)) + "\n",
 			cStyle("red"), ""
 		)
-		o(subject, only = predicate)
+		only.push(predicate)
+		o(subject, predicate)
 	}
 	o.spy = function(fn) {
 		var spy = function() {
@@ -101,7 +102,7 @@ else window.o = m()
 			pre = [].concat(pre, spec["\x01beforeEach"] || [])
 			post = [].concat(spec["\x01afterEach"] || [], post)
 			series([].concat(spec["\x01before"] || [], Object.keys(spec).reduce(function(tasks, key) {
-				if (key.charCodeAt(0) !== 1 && (only === null || spec[key].fn === only || !(spec[key] instanceof Task))) {
+				if (key.charCodeAt(0) !== 1 && (only.length === 0 || only.indexOf(spec[key].fn) !== -1 || !(spec[key] instanceof Task))) {
 					tasks.push(new Task(function(done) {
 						o.timeout(Infinity)
 						subjects.push(key)

@@ -50,11 +50,16 @@ o("o.only", function(done) {
 		oo.only(".only()", function() {
 			oo(2).equals(2)
 		}, true)
+		oo.only("another .only()", function(done) {
+			done("that fails")
+		}, true)
 	})
 
 	oo.run(function(results){
-		o(results.length).equals(1)
+		o(results.length).equals(2)
 		o(results[0].pass).equals(true)
+		o(results[1].pass).equals(false)
+
 		done()
 	})
 })
