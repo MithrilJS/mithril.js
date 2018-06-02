@@ -52,6 +52,7 @@ scratch = doc.createElement("div");
 
 // Initialize benchmark suite
 var suite = new B.Suite("mithril perf")
+var xuite = {add: function(options) {console.log("skipping " + options.name)}} // eslint-disable-line no-unused-vars
 
 suite.on("start", function() {
 	this.start = Date.now();
@@ -228,7 +229,7 @@ suite.add({
 
 suite.add({
 	name : "mutate styles/properties",
-
+	// minSamples: 100,
 	onStart : function () {
 		var counter = 0
 		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
@@ -259,19 +260,19 @@ suite.add({
 
 		this.count = 0
 		this.app = function (index) {
-			return m("div",
+			return m("div.booga",
 				{
 					class: get(classes, index),
 					"data-index": index,
 					title: index.toString(36)
 				},
-				m("input", {type: "checkbox", checked: index % 3 == 0}),
+				m("input.dooga", {type: "checkbox", checked: index % 3 == 0}),
 				m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
 				m("div", {class: get(classes, index * 11)},
 					m("p", {style: get(styles, index)}, "p1"),
 					m("p", {style: get(styles, index + 1)}, "p2"),
 					m("p", {style: get(styles, index * 2)}, "p3"),
-					m("p", {style: get(styles, index * 3 + 1)}, "p4")
+					m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
 				)
 			)
 		}
