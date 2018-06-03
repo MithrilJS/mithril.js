@@ -88,4 +88,10 @@ background-size: 20px 20px;
 @-webkit-keyframes logo {
 	from {opacity:0;-webkit-transform:scale(2) rotate(359deg);}
 	to {opacity:1;-webkit-transform:scale(1) rotate(0deg);}
+}.deprecated {
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: bold;
+    background: #F00;
+    color: #FFF;
 }
