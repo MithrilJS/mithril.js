@@ -97,3 +97,9 @@ background-size: 20px 20px;
     background: #F00;
     color: #FFF;
 }
+.deprecated a {
+	padding: 5px;
+	background: #800;
+	color: #FFF;
+	border-radius: 5px;
+}
