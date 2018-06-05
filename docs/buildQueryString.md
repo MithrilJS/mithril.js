@@ -47,6 +47,5 @@ Deep data structures are serialized in a way that is understood by popular web a
 ```javascript
 var querystring = m.buildQueryString({a: ["hello", "world"]})
 
-// querystring is "a[0]=hello&a[1]=world"
+// querystring is "a[]=hello&a[]=world"
 ```
-

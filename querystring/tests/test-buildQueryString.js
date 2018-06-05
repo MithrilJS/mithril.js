@@ -32,27 +32,22 @@ o.spec("buildQueryString", function() {
 	o("handles nested array", function() {
 		var string = buildQueryString({a: ["x", "y"]})
 
-		o(string).equals("a%5B0%5D=x&a%5B1%5D=y")
+		o(string).equals("a%5B%5D=x&a%5B%5D=y")
 	})
 	o("handles array w/ dupe values", function() {
 		var string = buildQueryString({a: ["x", "x"]})
 
-		o(string).equals("a%5B0%5D=x&a%5B1%5D=x")
-	})
-	o("handles deep nested array", function() {
-		var string = buildQueryString({a: [["x", "y"]]})
-
-		o(string).equals("a%5B0%5D%5B0%5D=x&a%5B0%5D%5B1%5D=y")
+		o(string).equals("a%5B%5D=x&a%5B%5D=x")
 	})
 	o("handles deep nested array in object", function() {
 		var string = buildQueryString({a: {b: ["x", "y"]}})
 
-		o(string).equals("a%5Bb%5D%5B0%5D=x&a%5Bb%5D%5B1%5D=y")
+		o(string).equals("a%5Bb%5D%5B%5D=x&a%5Bb%5D%5B%5D=y")
 	})
 	o("handles deep nested object in array", function() {
 		var string = buildQueryString({a: [{b: 1, c: 2}]})
 
-		o(string).equals("a%5B0%5D%5Bb%5D=1&a%5B0%5D%5Bc%5D=2")
+		o(string).equals("a%5B%5D%5Bb%5D=1&a%5B%5D%5Bc%5D=2")
 	})
 	o("handles date", function() {
 		var string = buildQueryString({a: new Date(0)})
