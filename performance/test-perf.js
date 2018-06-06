@@ -31,7 +31,7 @@ var browserMock = require("../test-utils/browserMock")
 // Do this silly dance so browser testing works
 var B = typeof Benchmark === "undefined" ? require("benchmark") : Benchmark
 
-var m, scratch;
+var scratch;
 
 // set up browser env on before running tests
 var doc = typeof document !== "undefined" ? document : null
@@ -43,12 +43,16 @@ if(!doc) {
 	doc = mock.document
 }
 
-// Have to include mithril AFTER browser polyfill is set up
-m = require("../mithril") // eslint-disable-line global-require
+var m = require("../render/hyperscript")
+m.render = require("../render/render")(window).render
 
-scratch = doc.createElement("div");
 
-(doc.body || doc.documentElement).appendChild(scratch)
+function resetScratch() {
+	doc.documentElement.innerHTML = "<div></div>"
+	scratch = doc.documentElement.firstChild
+}
+
+resetScratch()
 
 // Initialize benchmark suite
 var suite = new B.Suite("mithril perf")
@@ -61,7 +65,7 @@ suite.on("start", function() {
 suite.on("cycle", function(e) {
 	console.log(e.target.toString())
 
-	scratch.innerHTML = ""
+	resetScratch()
 })
 
 suite.on("complete", function() {
@@ -260,21 +264,26 @@ suite.add({
 
 		this.count = 0
 		this.app = function (index) {
-			return m("div.booga",
-				{
-					class: get(classes, index),
-					"data-index": index,
-					title: index.toString(36)
-				},
-				m("input.dooga", {type: "checkbox", checked: index % 3 == 0}),
-				m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
-				m("div", {class: get(classes, index * 11)},
-					m("p", {style: get(styles, index)}, "p1"),
-					m("p", {style: get(styles, index + 1)}, "p2"),
-					m("p", {style: get(styles, index * 2)}, "p3"),
-					m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
+			var last = index + 300
+			var vnodes = []
+			for (; index < last; index++) vnodes.push(
+				m("div.booga",
+					{
+						class: get(classes, index),
+						"data-index": index,
+						title: index.toString(36)
+					},
+					m("input.dooga", {type: "checkbox", checked: index % 3 == 0}),
+					m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
+					m("div", {class: get(classes, index * 11)},
+						m("p", {style: get(styles, index)}, "p1"),
+						m("p", {style: get(styles, index + 1)}, "p2"),
+						m("p", {style: get(styles, index * 2)}, "p3"),
+						m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
+					)
 				)
 			)
+			return vnodes
 		}
 	},
 
