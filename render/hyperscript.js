@@ -51,14 +51,16 @@ function execSelector(state, attrs, children) {
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className || state.attrs.className) attrs[classAttr] =
-		className
-			? state.attrs.className
+	if (className != null || state.attrs.className != null) attrs.className =
+		className != null
+			? state.attrs.className != null
 				? state.attrs.className + " " + className
 				: className
-			: state.attrs.className
+			: state.attrs.className != null
 				? state.attrs.className
 				: null
+
+	if (classAttr === "class") attrs.class = null
 
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
