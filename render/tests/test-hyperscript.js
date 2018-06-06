@@ -25,37 +25,43 @@ o.spec("hyperscript", function() {
 			o(m("a", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: undefined
+				class: null
 			})
 			o(m("a", {
 				class: false
 			}).attrs).deepEquals({
-				class: false
+				class: null,
+				className: false
 			})
 			o(m("a", {
 				class: true
 			}).attrs).deepEquals({
-				class: true
+				class: null,
+				className: true
 			})
 			o(m("a.x", {
 				class: null
 			}).attrs).deepEquals({
-				class: "x"
+				class: null,
+				className: "x"
 			})
 			o(m("a.x", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: "x"
+				class: null,
+				className: "x"
 			})
 			o(m("a.x", {
 				class: false
 			}).attrs).deepEquals({
-				class: "x"
+				class: null,
+				className: "x false"
 			})
 			o(m("a.x", {
 				class: true
 			}).attrs).deepEquals({
-				class: "x true"
+				class: null,
+				className: "x true"
 			})
 			o(m("a", {
 				className: null
@@ -90,7 +96,7 @@ o.spec("hyperscript", function() {
 			o(m("a.x", {
 				className: false
 			}).attrs).deepEquals({
-				className: "x"
+				className: "x false"
 			})
 			o(m("a.x", {
 				className: true
@@ -288,7 +294,7 @@ o.spec("hyperscript", function() {
 		o("handles merging classes w/ class property", function() {
 			var vnode = m(".a", {class: "b"})
 
-			o(vnode.attrs.class).equals("a b")
+			o(vnode.attrs.className).equals("a b")
 		})
 		o("handles merging classes w/ className property", function() {
 			var vnode = m(".a", {className: "b"})
