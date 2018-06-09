@@ -71,6 +71,7 @@ module.exports = function($window, redrawService) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
 		return attrs
 	}
+	route.core = routeService
 
 	return route
 }

@@ -12,6 +12,35 @@ var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
+	o.spec("prefix API", function() {
+		var $window, redrawService, route
+		o.beforeEach(function() {
+			$window = browserMock({})
+			redrawService = apiRedraw($window)
+			route = apiRouter($window, redrawService)
+		})
+		o("works without options", function() {
+			o(route.core.usePushState).equals(true)
+
+			route.prefix("#")
+
+			o(route.core.usePushState).equals(true)
+		})
+		o("works with onhashchange: false", function() {
+			o(route.core.usePushState).equals(true)
+
+			route.prefix("#", {onhashchange : false})
+
+			o(route.core.usePushState).equals(true)
+		})
+		o("works with onhashchange: true", function() {
+			o(route.core.usePushState).equals(true)
+
+			route.prefix("#", {onhashchange : true})
+
+			o(route.core.usePushState).equals(false)
+		})
+	})
 	void ["pushState", "onhashchange"].forEach(function(mode) {
 		void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 			void (mode === "pushState" ? ["#", "?", "", "#!", "?!", "/foo"] : ["#", "#!"]).forEach(function(prefix) {
