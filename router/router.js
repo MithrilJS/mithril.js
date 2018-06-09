@@ -4,7 +4,7 @@ var buildQueryString = require("../querystring/build")
 var parseQueryString = require("../querystring/parse")
 
 module.exports = function($window) {
-	var supportsPushState = typeof $window.history.pushState === "function"
+	var supportsPushState = $window.history.pushState != null
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
 	function normalize(fragment) {
@@ -40,7 +40,7 @@ module.exports = function($window) {
 		return path.slice(0, pathEnd)
 	}
 
-	var router = {prefix: "#!"}
+	var router = {prefix: "#!", usePushState: true}
 	router.getPath = function() {
 		var type = router.prefix.charAt(0)
 		switch (type) {
@@ -66,7 +66,7 @@ module.exports = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 
-		if (supportsPushState) {
+		if (router.usePushState && supportsPushState) {
 			var state = options ? options.state : null
 			var title = options ? options.title : null
 			$window.onpopstate()
@@ -108,8 +108,8 @@ module.exports = function($window) {
 			reject(path, params)
 		}
 
-		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
-		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
+		if (router.usePushState && supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
+		else $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
 
