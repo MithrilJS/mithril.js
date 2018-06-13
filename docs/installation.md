@@ -23,17 +23,17 @@ $ npm install mithril --save
 
 ---
 
-### Quick start with Webpack
+### Quick start with [Parcel](https://parceljs.org/)
 
 1. Initialize the directory as an npm package
 ```bash
 $ npm init --yes
 ```
 
-2. install required tools
+2. Install the required tools.
 ```bash
 $ npm install mithril --save
-$ npm install webpack webpack-cli --save-dev
+$ npm install parcel-bundler --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
@@ -41,7 +41,7 @@ $ npm install webpack webpack-cli --save-dev
 {
 	// ...
 	"scripts": {
-		"start": "webpack src/index.js --output bin/app.js -d --watch"
+		"start": "parcel src/index.html"
 	}
 }
 ```
@@ -52,20 +52,20 @@ import m from "mithril";
 m.render(document.body, "hello world");
 ```
 
-5. create `index.html`
+5. Create `index.html`.
 ```html
 <!DOCTYPE html>
 <body>
-    <script src="bin/app.js"></script>
+    <script src="./index.js"></script>
 </body>
 ```
 
-6. run bundler
+6. Run the bundler.
 ```bash
 $ npm start
 ```
 
-7. open `index.html` in a browser
+7. Click the shown link to open it in the browser.
 
 #### Step by step
 
