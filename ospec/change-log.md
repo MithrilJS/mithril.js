@@ -4,6 +4,9 @@
 ## Upcoming...
 _2018-xx-yy_
 <!-- Add new lines here. Version number will be decided later -->
+
+## 3.0.0
+_2018-06-20_
 ### Breaking
 - Better input checking to prevent misuses of the library. Misues of the library will now throw errors, rather than report failures. This may uncover bugs in your test suites. Since it is potentially a disruptive update this change triggers a semver major bump. ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - Change the reserved character for hooks and test suite meta-information from `"__"` to `"\x01"`. Tests whose name start with `"\0x01"` will be rejected ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
@@ -12,7 +15,7 @@ _2018-xx-yy_
 - Give async timeout a stack trace that points to the problematic test ([#2154](https://github.com/MithrilJS/mithril.js/pull/2154) [@gilbert](github.com/gilbert), [#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - deprecate the `timeout` parameter in async tests in favour of `o.timeout()` for setting the timeout delay. The `timeout` parameter still works for v3, and will be removed in v4 ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
 - add `o.defaultTimeout()` for setting the the timeout delay for the current spec and its children ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
-- adds the possibility select more than one test with o.only ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
+- adds the possibility to select more than one test with o.only ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
 
 ### Bug fixes
 - Detect duplicate calls to `done()` properly [#2162](https://github.com/MithrilJS/mithril.js/issues/2162) ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
