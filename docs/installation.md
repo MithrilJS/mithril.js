@@ -2,7 +2,7 @@
 
 - [CDN](#cdn)
 - [NPM](#npm)
-- [Quick start with Webpack](#quick-start-with-webpack)
+- [Quick start with Parcel](#quick-start-with-parcel)
 - [TypeScript](#typescript)
 
 ### CDN
