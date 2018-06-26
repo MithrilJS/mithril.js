@@ -10,7 +10,7 @@ We could create the entire application in a single Javascript file, but doing so
 
 There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern Javascript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, install Mithril and create the project skeleton.
 
-To install Mithril, follow the instructions in the [installation](installation.md) page. Once you have completed the seven steps outlined in [Quick Start with Webpack](https://mithril.js.org/installation.html#quick-start-with-webpack), we are ready to build upon the project skeleton that you have created.
+To install Mithril, follow the instructions in the [installation](installation.md) page. Once you have completed the seven steps outlined in [Quick Start with Parcel](https://mithril.js.org/installation.html#quick-start-with-parcel), we are ready to build upon the project skeleton that you have created.
 
 First let's edit the `index.html` that you have created during installation. Change it to the following:
 
