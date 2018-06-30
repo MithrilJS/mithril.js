@@ -5,6 +5,12 @@
 _2018-xx-yy_
 <!-- Add new lines here. Version number will be decided later -->
 
+## 3.0.1
+_2018-06-30_
+
+### Bug fix
+- Move `glob` from `devDependencies` to `dependencies`, fix the test runner ([#2186](https://github.com/MithrilJS/mithril.js/pull/2186) [@porsager](https://github.com/porsager)
+
 ## 3.0.0
 _2018-06-20_
 ### Breaking
