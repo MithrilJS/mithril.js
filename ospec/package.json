@@ -13,7 +13,7 @@
     "ospec": "./bin/ospec"
   },
   "repository": "MithrilJS/mithril.js",
-  "devDependencies": {
+  "dependencies": {
     "glob": "^7.1.2"
   }
 }
