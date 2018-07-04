@@ -2,7 +2,7 @@
 
 /*
 Known limitations:
-
+- the innerHTML setter and the DOMParser only support a small subset of the true HTML/XML syntax.
 - `option.selected` can't be set/read when the option doesn't have a `select` parent
 - `element.attributes` is just a map of attribute names => Attr objects stubs
 - ...
@@ -18,6 +18,9 @@ module.exports = function(options) {
 	options = options || {}
 	var spy = options.spy || function(f){return f}
 	var spymap = []
+
+	var hasOwn = ({}.hasOwnProperty)
+
 	function registerSpies(element, spies) {
 		if(options.spy) {
 			var i = spymap.indexOf(element)
@@ -71,7 +74,7 @@ module.exports = function(options) {
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) this.childNodes.splice(index, 1)
 		if (child.nodeType === 11) {
-			while (child.firstChild != null) this.appendChild(child.firstChild)
+			while (child.firstChild != null) appendChild.call(this, child.firstChild)
 			child.childNodes = []
 		}
 		else {
@@ -99,8 +102,9 @@ module.exports = function(options) {
 		var index = this.childNodes.indexOf(child)
 		if (reference !== null && refIndex < 0) throw new TypeError("Invalid argument")
 		if (index > -1) this.childNodes.splice(index, 1)
-		if (reference === null) this.appendChild(child)
+		if (reference === null) appendChild.call(this, child)
 		else {
+			if (index !== -1 && refIndex > index) refIndex--
 			if (child.nodeType === 11) {
 				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
 				while (child.firstChild) {
@@ -126,9 +130,8 @@ module.exports = function(options) {
 		// this is the correct kind of conversion, passing a Symbol throws in browsers too.
 		var nodeValue = "" + value
 		/*eslint-enable no-implicit-coercion*/
-
 		this.attributes[name] = {
-			namespaceURI: null,
+			namespaceURI: hasOwn.call(this.attributes, name) ? this.attributes[name].namespaceURI : null,
 			get value() {return nodeValue},
 			set value(value) {
 				/*eslint-disable no-implicit-coercion*/
@@ -183,9 +186,43 @@ module.exports = function(options) {
 		res.unshift(declList)
 		return res
 	}
-
+	function parseMarkup(value, root, voidElements, xmlns) {
+		var depth = 0, stack = [root]
+		value.replace(/<([a-z0-9\-]+?)((?:\s+?[^=]+?=(?:"[^"]*?"|'[^']*?'|[^\s>]*))*?)(\s*\/)?>|<\/([a-z0-9\-]+?)>|([^<]+)/g, function(match, startTag, attrs, selfClosed, endTag, text) {
+			if (startTag) {
+				var element = xmlns == null ? $window.document.createElement(startTag) : $window.document.createElementNS(xmlns, startTag)
+				attrs.replace(/\s+?([^=]+?)=(?:"([^"]*?)"|'([^']*?)'|([^\s>]*))/g, function(match, key, doubleQuoted, singleQuoted, unquoted) {
+					var keyParts = key.split(":")
+					var name = keyParts.pop()
+					var ns = keyParts[0]
+					var value = doubleQuoted || singleQuoted || unquoted || ""
+					if (ns != null) element.setAttributeNS(ns, name, value)
+					else element.setAttribute(name, value)
+				})
+				stack[depth].appendChild(element)
+				if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
+			}
+			else if (endTag) {
+				depth--
+			}
+			else if (text) {
+				stack[depth].appendChild($window.document.createTextNode(text)) // FIXME handle html entities
+			}
+		})
+	}
+	function DOMParser() {}
+	DOMParser.prototype.parseFromString = function(src, mime) {
+		if (mime !== "image/svg+xml") throw new Error("The DOMParser mock only supports the \"image/svg+xml\" MIME type")
+		var match = src.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/)
+		if (!match) throw new Error("Please provide a bare SVG tag with the xmlns as only attribute")
+		var value = match[1]
+		var root = $window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
+		parseMarkup(value, root, [], "http://www.w3.org/2000/svg")
+		return {documentElement: root}
+	}
 	var activeElement
 	var $window = {
+		DOMParser: DOMParser,
 		document: {
 			createElement: function(tag) {
 				var cssText = ""
@@ -210,7 +247,7 @@ module.exports = function(options) {
 									}
 								}
 							}
-							cssText = buf.join(" ")
+							element.setAttribute("style", cssText = buf.join(" "))
 						}
 					}
 				})
@@ -241,33 +278,21 @@ module.exports = function(options) {
 					},
 					set textContent(value) {
 						this.childNodes = []
-						if (value !== "") this.appendChild($window.document.createTextNode(value))
+						if (value !== "") appendChild.call(this, $window.document.createTextNode(value))
 					},
 					set innerHTML(value) {
+						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 						while (this.firstChild) this.removeChild(this.firstChild)
-
-						var stack = [this], depth = 0, voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-						value.replace(/<([a-z0-9\-]+?)((?:\s+?[^=]+?=(?:"[^"]*?"|'[^']*?'|[^\s>]*))*?)(\s*\/)?>|<\/([a-z0-9\-]+?)>|([^<]+)/g, function(match, startTag, attrs, selfClosed, endTag, text) {
-							if (startTag) {
-								var element = $window.document.createElement(startTag)
-								attrs.replace(/\s+?([^=]+?)=(?:"([^"]*?)"|'([^']*?)'|([^\s>]*))/g, function(match, key, doubleQuoted, singleQuoted, unquoted) {
-									var keyParts = key.split(":")
-									var name = keyParts.pop()
-									var ns = keyParts[0]
-									var value = doubleQuoted || singleQuoted || unquoted || ""
-									if (ns != null) element.setAttributeNS(ns, name, value)
-									else element.setAttribute(name, value)
-								})
-								stack[depth].appendChild(element)
-								if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
-							}
-							else if (endTag) {
-								depth--
-							}
-							else if (text) {
-								stack[depth].appendChild($window.document.createTextNode(text)) // FIXME handle html entities
-							}
-						})
+						var match = value.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/), root, ns
+						if (match) {
+							var value = match[1]
+							root = $window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
+							ns = "http://www.w3.org/2000/svg"
+							appendChild.call(this, root)
+						} else {
+							root = this
+						}
+						parseMarkup(value, root, voidElements, ns)
 					},
 					get style() {
 						return style
@@ -381,8 +406,16 @@ module.exports = function(options) {
 
 				if (element.nodeName === "A") {
 					Object.defineProperty(element, "href", {
-						get: function() {return this.attributes["href"] === undefined ? "" : "[FIXME implement]"},
-						set: function(value) {this.setAttribute("href", value)},
+						get: function() {
+							if (this.namespaceURI === "http://www.w3.org/2000/svg") {
+								var val = this.hasAttribute("href") ? this.attributes.href.value : ""
+								return {baseVal: val, animVal: val}
+							} else return this.attributes["href"] === undefined ? "" : "[FIXME implement]"
+						},
+						set: function(value) {
+							// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL
+							if (this.namespaceURI !== "http://www.w3.org/2000/svg") this.setAttribute("href", value)
+						},
 						enumerable: true,
 					})
 				}

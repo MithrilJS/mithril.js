@@ -19,7 +19,7 @@ function initStream(stream) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined, unregister: undefined}
 	stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
-	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
+	stream.toJSON = toJSON
 
 	Object.defineProperties(stream, {
 		end: {get: function() {
@@ -101,7 +101,6 @@ function unregisterStream(stream) {
 
 function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
 function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
-function valueOf() {return this._state.value}
 function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
 
 function valid(stream) {return stream._state }
@@ -117,7 +116,9 @@ function merge(streams) {
 
 function scan(reducer, seed, stream) {
 	var newStream = combine(function (s) {
-		return seed = reducer(seed, s._state.value)
+		var next = reducer(seed, s._state.value)
+		if (next !== HALT) return seed = next
+		return HALT
 	}, [stream])
 
 	if (newStream._state.state === 0) newStream(seed)

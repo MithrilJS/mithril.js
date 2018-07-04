@@ -1,4 +1,4 @@
-# Learning Mithril
+# Learning Resources
 
 Links to Mithril learning content:
 

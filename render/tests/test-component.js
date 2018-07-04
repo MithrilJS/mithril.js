@@ -808,7 +808,7 @@ o.spec("component", function() {
 						o(methods[hook].args.length).equals(attrs[hook].args.length)(hook)
 					})
 				})
-				o("recycled components get a fresh state", function() {
+				o("no recycling occurs (was: recycled components get a fresh state)", function() {
 					var step = 0
 					var firstState
 					var view = o.spy(function(vnode) {
@@ -827,7 +827,7 @@ o.spec("component", function() {
 					step = 1
 					render(root, [{tag: "div", children: [{tag: component, key: 1}]}])
 
-					o(child).equals(root.firstChild.firstChild)
+					o(child).notEquals(root.firstChild.firstChild) // this used to be a recycling pool test
 					o(view.callCount).equals(2)
 				})
 			})

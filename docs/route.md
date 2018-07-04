@@ -147,7 +147,11 @@ Argument          | Type            | Required | Description
 
 #### RouteResolver
 
-A RouteResolver is an object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present. A RouteResolver is not a component, and therefore it does NOT have lifecycle methods. As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
+A RouteResolver is a non-component object that contains an `onmatch` method and/or a `render` method. Both methods are optional, but at least one must be present.
+
+If an object can be detected as a component (by the presence of a `view` method or by being a `function`/`class`), it will be treated as such even if it has `onmatch` or `render` methods. Since a RouteResolver is not a component, it does not have lifecycle methods.
+
+As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
 
 `routeResolver = {onmatch, render}`
 
@@ -323,7 +327,7 @@ It's also possible to have variadic routes, i.e. a route with an argument that c
 
 ```javascript
 m.route(document.body, "/edit/pictures/image.jpg", {
-	"/files/:file...": Edit,
+	"/edit/:file...": Edit,
 })
 ```
 
@@ -475,7 +479,7 @@ m.route(document.body, "/", {
 })
 ```
 
-Note that in this case, if the Layout component the `oninit` and `oncreate` lifecycle methods would only fire on the Layout component on the first route change (assuming all routes use the same layout).
+Note that in this case, if the Layout component has `oninit` and `oncreate` lifecycle methods, they would only fire on the first route change (assuming all routes use the same layout).
 
 To clarify the difference between the two examples, example 1 is equivalent to this code:
 
