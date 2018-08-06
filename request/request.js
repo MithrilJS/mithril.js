@@ -162,7 +162,7 @@ module.exports = function($window, Promise) {
 
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 
 	function extract(xhr) {return xhr.responseText}
