@@ -86,10 +86,13 @@ function registerDependency(stream, parents) {
 	}
 }
 function unregisterStream(stream) {
-	for (var i = 0; i < stream._state.parents.length; i++) {
+	var i = stream._state.parents.length
+	while (i--) {
 		var parent = stream._state.parents[i]
 		delete parent._state.deps[stream._state.id]
+		stream._state.parents.splice(i, 1)
 	}
+
 	for (var id in stream._state.deps) {
 		var dependent = stream._state.deps[id]
 		var index = dependent._state.parents.indexOf(stream)
