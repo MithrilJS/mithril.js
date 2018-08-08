@@ -44,11 +44,10 @@ o.spec("attributes", function() {
 			o(b.dom.hasAttribute("id")).equals(true)
 			o(b.dom.getAttribute("id")).equals("test")
 
+			// #1804
 			render(root, [c]);
 
-			// #1804
-			// TODO: uncomment
-			// o(c.dom.hasAttribute("id")).equals(false)
+			o(c.dom.hasAttribute("id")).equals(false)
 		})
 	})
 	o.spec("customElements", function(){
@@ -147,7 +146,7 @@ o.spec("attributes", function() {
 		o("a lack of attribute removes `value`", function() {
 			var a = {tag: "input", attrs: {}}
 			var b = {tag: "input", attrs: {value: "test"}}
-			// var c = {tag: "input", attrs: {}}
+			var c = {tag: "input", attrs: {}}
 
 			render(root, [a])
 
@@ -158,10 +157,9 @@ o.spec("attributes", function() {
 			o(a.dom.value).equals("test")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [c])
+			render(root, [c])
 
-			// o(a.dom.value).equals("")
+			o(a.dom.value).equals("")
 		})
 		o("can be set as number", function() {
 			var a = {tag: "input", attrs: {value: 1}}
@@ -276,17 +274,16 @@ o.spec("attributes", function() {
 	o.spec("textarea.value", function() {
 		o("can be removed by not passing a value", function() {
 			var a = {tag: "textarea", attrs: {value:"x"}}
-			// var b = {tag: "textarea", attrs: {}}
+			var b = {tag: "textarea", attrs: {}}
 
 			render(root, [a])
 
 			o(a.dom.value).equals("x")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [b])
+			render(root, [b])
 
-			// o(b.dom.value).equals("")
+			o(b.dom.value).equals("")
 		})
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
@@ -352,7 +349,7 @@ o.spec("attributes", function() {
 			o(canvas.dom.width).equals(100)
 		})
 	})
-	o.spec("svg class", function() {
+	o.spec("svg", function() {
 		o("when className is specified then it should be added as a class", function() {
 			var a = {tag: "svg", attrs: {className: "test"}}
 
@@ -360,6 +357,26 @@ o.spec("attributes", function() {
 
 			o(a.dom.attributes["class"].value).equals("test")
 		})
+		/* eslint-disable no-script-url */
+		o("handles xlink:href", function() {
+			var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}}
+			]}
+			render(root, [vnode])
+
+			o(vnode.dom.nodeName).equals("svg")
+			o(vnode.dom.firstChild.attributes["href"].value).equals("javascript:;")
+			o(vnode.dom.firstChild.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
+			vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {}}
+			]}
+			render(root, [vnode])
+
+			o(vnode.dom.nodeName).equals("svg")
+			o("href" in vnode.dom.firstChild.attributes).equals(false)
+		})
+		/* eslint-enable no-script-url */
 	})
 	o.spec("option.value", function() {
 		o("can be set as text", function() {
@@ -376,15 +393,15 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("1")
 		})
-		o("null becomes 'null'", function() {
+		o("null removes the attribute", function() {
 			var a = {tag: "option", attrs: {value: null}}
 			var b = {tag: "option", attrs: {value: "test"}}
 			var c = {tag: "option", attrs: {value: null}}
 
 			render(root, [a]);
 
-			o(a.dom.value).equals("null")
-			o(a.dom.getAttribute("value")).equals("null")
+			o(a.dom.value).equals("")
+			o(a.dom.hasAttribute("value")).equals(false)
 
 			render(root, [b]);
 
@@ -393,8 +410,8 @@ o.spec("attributes", function() {
 
 			render(root, [c]);
 
-			o(c.dom.value).equals("null")
-			o(c.dom.getAttribute("value")).equals("null")
+			o(c.dom.value).equals("")
+			o(c.dom.hasAttribute("value")).equals(false)
 		})
 		o("'' and 0 are different values", function() {
 			var a = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}

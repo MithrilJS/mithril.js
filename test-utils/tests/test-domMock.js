@@ -4,9 +4,10 @@ var o = require("../../ospec/ospec")
 var domMock = require("../../test-utils/domMock")
 
 o.spec("domMock", function() {
-	var $document
+	var $document, $window
 	o.beforeEach(function() {
-		$document = domMock().document
+		$window = domMock()
+		$document = $window.document
 	})
 
 	o.spec("createElement", function() {
@@ -241,6 +242,28 @@ o.spec("domMock", function() {
 			o(a.parentNode).equals(parent)
 			o(b.parentNode).equals(parent)
 		})
+		o("moves existing node forward but not at the end", function() {
+			var parent = $document.createElement("div")
+			var a = $document.createElement("a")
+			var b = $document.createElement("b")
+			var c = $document.createElement("c")
+			parent.appendChild(a)
+			parent.appendChild(b)
+			parent.appendChild(c)
+			parent.insertBefore(a, c)
+
+			o(parent.childNodes.length).equals(3)
+			o(parent.childNodes[0]).equals(b)
+			o(parent.childNodes[1]).equals(a)
+			o(parent.childNodes[2]).equals(c)
+			o(parent.firstChild).equals(b)
+			o(parent.firstChild.nextSibling).equals(a)
+			o(parent.firstChild.nextSibling.nextSibling).equals(c)
+			o(a.parentNode).equals(parent)
+			o(b.parentNode).equals(parent)
+			o(c.parentNode).equals(parent)
+
+		})
 		o("removes from old parent", function() {
 			var parent = $document.createElement("div")
 			var source = $document.createElement("span")
@@ -341,6 +364,12 @@ o.spec("domMock", function() {
 
 			o(div.getAttribute("id")).equals("aaa")
 		})
+		o("works for attributes with a namespace", function() {
+			var div = $document.createElement("div")
+			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
+
+			o(div.getAttribute("href")).equals("aaa")
+		})
 	})
 
 	o.spec("setAttribute", function() {
@@ -406,18 +435,40 @@ o.spec("domMock", function() {
 
 	o.spec("setAttributeNS", function() {
 		o("works", function() {
-			var div = $document.createElement("div")
-			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", "aaa")
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
 
-			o(div.attributes["href"].value).equals("aaa")
-			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+			o(a.href).deepEquals({baseVal: "/aaa", animVal: "/aaa"})
+			o(a.attributes["href"].value).equals("/aaa")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
 		})
 		o("works w/ number", function() {
-			var div = $document.createElement("div")
-			div.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", 123)
 
-			o(div.attributes["href"].value).equals("123")
-			o(div.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+			o(a.href).deepEquals({baseVal: "123", animVal: "123"})
+			o(a.attributes["href"].value).equals("123")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+		})
+		o("attributes with a namespace can be querried, updated and removed with non-NS functions", function() {
+			var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+			a.setAttributeNS("http://www.w3.org/1999/xlink", "href", "/aaa")
+
+			o(a.hasAttribute("href")).equals(true)
+			o(a.getAttribute("href")).equals("/aaa")
+
+			a.setAttribute("href", "/bbb")
+
+			o(a.href).deepEquals({baseVal: "/bbb", animVal: "/bbb"})
+			o(a.getAttribute("href")).equals("/bbb")
+			o(a.attributes["href"].value).equals("/bbb")
+			o(a.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
+			a.removeAttribute("href")
+
+			o(a.hasAttribute("href")).equals(false)
+			o(a.getAttribute("href")).equals(null)
+			o("href" in a.attributes).equals(false)
 		})
 	})
 
@@ -497,6 +548,45 @@ o.spec("domMock", function() {
 
 			o(a.parentNode).equals(null)
 		})
+		o("empty SVG document", function() {
+			var div = $document.createElement("div")
+			div.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>"
+
+			o(typeof div.firstChild).notEquals(undefined)
+			o(div.firstChild.nodeName).equals("svg")
+			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(div.firstChild.childNodes.length).equals(0)
+		})
+		o("text elements", function() {
+			var div = $document.createElement("div")
+			div.innerHTML =
+				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
+					+ "<text>hello</text>"
+					+ "<text> </text>"
+					+ "<text>world</text>"
+				+ "</svg>"
+
+			o(div.firstChild.nodeName).equals("svg")
+			o(div.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
+
+			var nodes = div.firstChild.childNodes
+			o(nodes.length).equals(3)
+			o(nodes[0].nodeName).equals("text")
+			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[0].childNodes.length).equals(1)
+			o(nodes[0].childNodes[0].nodeName).equals("#text")
+			o(nodes[0].childNodes[0].nodeValue).equals("hello")
+			o(nodes[1].nodeName).equals("text")
+			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[1].childNodes.length).equals(1)
+			o(nodes[1].childNodes[0].nodeName).equals("#text")
+			o(nodes[1].childNodes[0].nodeValue).equals(" ")
+			o(nodes[2].nodeName).equals("text")
+			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[2].childNodes.length).equals(1)
+			o(nodes[2].childNodes[0].nodeName).equals("#text")
+			o(nodes[2].childNodes[0].nodeValue).equals("world")
+		})
 	})
 	o.spec("focus", function() {
 		o("body is active by default", function() {
@@ -528,6 +618,7 @@ o.spec("domMock", function() {
 
 			o(div.style.backgroundColor).equals("red")
 			o(div.style.borderBottom).equals("1px solid red")
+			o(div.attributes.style.value).equals("background-color: red; border-bottom: 1px solid red;")
 		})
 		o("removing via setting style.cssText string works", function() {
 			var div = $document.createElement("div")
@@ -535,6 +626,7 @@ o.spec("domMock", function() {
 			div.style.cssText = ""
 
 			o(div.style.background).equals("")
+			o(div.attributes.style.value).equals("")
 		})
 		o("the final semicolon is optional when setting style.cssText", function() {
 			var div = $document.createElement("div")
@@ -542,6 +634,7 @@ o.spec("domMock", function() {
 
 			o(div.style.background).equals("red")
 			o(div.style.cssText).equals("background: red;")
+			o(div.attributes.style.value).equals("background: red;")
 		})
 		o("'cssText' as a property name is ignored when setting style.cssText", function(){
 			var div = $document.createElement("div")
@@ -1204,6 +1297,13 @@ o.spec("domMock", function() {
 				o(a.href).notEquals("")
 				o(a.attributes["href"].value).equals("")
 			})
+			o("property is read-only for SVG elements", function() {
+				var a = $document.createElementNS("http://www.w3.org/2000/svg", "a")
+				a.href = "/foo"
+
+				o(a.href).deepEquals({baseVal: "", animVal: ""})
+				o("href" in a.attributes).equals(false)
+			})
 		})
 		o.spec("input[checked]", function() {
 			o("only exists in input elements", function() {
@@ -1790,6 +1890,64 @@ o.spec("domMock", function() {
 			o(spies.valueSetter.callCount).equals(1)
 			o(spies.valueSetter.this).equals(textarea)
 			o(spies.valueSetter.args[0]).equals("aaa")
+		})
+	})
+	o.spec("DOMParser for SVG", function(){
+		var $DOMParser
+		o.beforeEach(function() {
+			$DOMParser = $window.DOMParser
+		})
+		o("basics", function(){
+			o(typeof $DOMParser).equals("function")
+
+			var parser = new $DOMParser()
+
+			o(parser instanceof $DOMParser).equals(true)
+			o(typeof parser.parseFromString).equals("function")
+		})
+		o("empty document", function() {
+			var parser = new $DOMParser()
+			var doc = parser.parseFromString(
+				"<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+				"image/svg+xml"
+			)
+
+			o(typeof doc.documentElement).notEquals(undefined)
+			o(doc.documentElement.nodeName).equals("svg")
+			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(doc.documentElement.childNodes.length).equals(0)
+		})
+		o("text elements", function() {
+			var parser = new $DOMParser()
+			var doc = parser.parseFromString(
+				"<svg xmlns=\"http://www.w3.org/2000/svg\">"
+					+ "<text>hello</text>"
+					+ "<text> </text>"
+					+ "<text>world</text>"
+				+ "</svg>",
+				"image/svg+xml"
+			)
+
+			o(doc.documentElement.nodeName).equals("svg")
+			o(doc.documentElement.namespaceURI).equals("http://www.w3.org/2000/svg")
+
+			var nodes = doc.documentElement.childNodes
+			o(nodes.length).equals(3)
+			o(nodes[0].nodeName).equals("text")
+			o(nodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[0].childNodes.length).equals(1)
+			o(nodes[0].childNodes[0].nodeName).equals("#text")
+			o(nodes[0].childNodes[0].nodeValue).equals("hello")
+			o(nodes[1].nodeName).equals("text")
+			o(nodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[1].childNodes.length).equals(1)
+			o(nodes[1].childNodes[0].nodeName).equals("#text")
+			o(nodes[1].childNodes[0].nodeValue).equals(" ")
+			o(nodes[2].nodeName).equals("text")
+			o(nodes[2].namespaceURI).equals("http://www.w3.org/2000/svg")
+			o(nodes[2].childNodes.length).equals(1)
+			o(nodes[2].childNodes[0].nodeName).equals("#text")
+			o(nodes[2].childNodes[0].nodeValue).equals("world")
 		})
 	})
 })

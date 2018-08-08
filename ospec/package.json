@@ -1,6 +1,6 @@
 {
   "name": "ospec",
-  "version": "1.4.0",
+  "version": "3.0.1",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
   "directories": {
@@ -12,5 +12,8 @@
   "bin": {
     "ospec": "./bin/ospec"
   },
-  "repository": "MithrilJS/mithril.js"
+  "repository": "MithrilJS/mithril.js",
+  "dependencies": {
+    "glob": "^7.1.2"
+  }
 }

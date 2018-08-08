@@ -11,6 +11,7 @@
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
+- [ospec change-log](../ospec/change-log.md)
 
 ---
 
@@ -18,32 +19,50 @@
 
 #### Breaking changes
 
+- API: Component vnode `children` are not normalized into vnodes on ingestion; normalization only happens if and when they are ingested by the view ([#2155](https://github.com/MithrilJS/mithril.js/pull/2155/) (thanks to [@magikstm](https://github.com/magikstm) for related optimization [#2064](https://github.com/MithrilJS/mithril.js/pull/2064)))
 - API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Assigning to `vnode.state` (as in `vnode.state = ...`) is no longer supported. Instead, an error is thrown if `vnode.state` changes upon the invocation of a lifecycle hook.
 - API: `m.request` will no longer reject the Promise on server errors (eg. status >= 400) if the caller supplies an `extract` callback. This gives applications more control over handling server responses.
+- hyperscript: when attributes have a `null` or `undefined` value, they are treated as if they were absent. [#1773](https://github.com/MithrilJS/mithril.js/issues/1773) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
+- hyperscript: when an attribute is defined on both the first and second argument (as a CSS selector and an `attrs` field, respectively), the latter takes precedence, except for `class` attributes that are still added together. [#2172](https://github.com/MithrilJS/mithril.js/issues/2172) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
+- stream: when a stream conditionally returns HALT, dependant stream will also end ([#2200](https://github.com/MithrilJS/mithril.js/pull/2200))
 
 #### News
 
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
 - API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
+- API: `m.request` better error message on JSON parse error - ([#2195](https://github.com/MithrilJS/mithril.js/pull/2195), [@codeclown](https://github.com/codeclown))
 - API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
 - stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
-
+- Mocks: add limited support for the DOMParser API ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- API: add support for raw SVG in `m.trust()` string ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- render/core: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
+- render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
 
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
-- API: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
-- core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
-- core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
-- core: `Object.prototype` properties can no longer interfere with event listener calls.
-- API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
-- core: `xlink:href` attributes are now correctly removed
-- render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
-- render: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916) ([#1918](https://github.com/MithrilJS/mithril.js/pull/1918) [@robinchew](https://github.com/robinchew), [#2052](https://github.com/MithrilJS/mithril.js/pull/2052))
-- render: fix various updateNodes/removeNodes issues when the pool and fragments are involved [#1990](https://github.com/MithrilJS/mithril.js/issues/1990), [#1991](https://github.com/MithrilJS/mithril.js/issues/1991), [#2003](https://github.com/MithrilJS/mithril.js/issues/2003), [#2021](https://github.com/MithrilJS/mithril.js/pull/2021)
+- render/attrs: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
+- render/attrs All vnodes attributes are properly removed when absent or set to `null` or `undefined` [#1804](https://github.com/MithrilJS/mithril.js/issues/1804) [#2082](https://github.com/MithrilJS/mithril.js/issues/2082) ([#1865](https://github.com/MithrilJS/mithril.js/pull/1865), [#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/core: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916) ([#1918](https://github.com/MithrilJS/mithril.js/pull/1918) [@robinchew](https://github.com/robinchew), [#2052](https://github.com/MithrilJS/mithril.js/pull/2052))
+- render/core: fix various updateNodes/removeNodes issues when the pool and fragments are involved [#1990](https://github.com/MithrilJS/mithril.js/issues/1990), [#1991](https://github.com/MithrilJS/mithril.js/issues/1991), [#2003](https://github.com/MithrilJS/mithril.js/issues/2003), [#2021](https://github.com/MithrilJS/mithril.js/pull/2021)
+- render/core: fix crashes when the keyed vnodes with the same `key` had different `tag` values [#2128](https://github.com/MithrilJS/mithril.js/issues/2128) [@JacksonJN](https://github.com/JacksonJN) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/core: fix cached nodes behavior in some keyed diff scenarios [#2132](https://github.com/MithrilJS/mithril.js/issues/2132) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/events: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
+- render/events: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
+- render/events: `Object.prototype` properties can no longer interfere with event listener calls.
+- render/events: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
+- render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
+- docs: fix typo ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb))
+---
+
+### v1.1.7
+
+- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150), breaking change: `mithril-stream@2.0.0`)
+- Promise polyfill implementation separated from polyfilling logic.
+- `PromisePolyfill` is now available on the exported/global `m`.
 
 ---
 
@@ -53,20 +72,6 @@
 - core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [@octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
 - hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [@s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
 
-#### Ospec improvements
-
-- ospec v1.4.0
-  - Added support for async functions and promises in tests ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928), [@StephanHoyer](https://github.com/StephanHoyer))
-  - Error handling for async tests with `done` callbacks supports error as first argument ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
-  - Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@RodericDay](https://github.com/RodericDay))
-- ospec v2.0.0 (to be released)
-  - Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
-  - Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
-    - Works either as a global or in CommonJS environments
-    - the o.run() report is always printed asynchronously (it could be synchronous before if none of the tests were async).
-    - Properly point to the assertion location of async errors [#2036](https://github.com/MithrilJS/mithril.js/issues/2036)
-    - expose the default reporter as `o.report(results)`
-    - Don't try to access the stack traces in IE9
 
 ---
 
@@ -109,10 +114,7 @@
 - router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
 - stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
 
-#### Ospec improvements:
-
-- Shell command: Ignore hidden directories and files ([#1855](https://github.com/MithrilJS/mithril.js/pull/1855) [@pdfernhout)](https://github.com/pdfernhout))
-- Library: Add the possibility to name new test suites ([#1529](https://github.com/MithrilJS/mithril.js/pull/1529))
+---
 
 #### Docs / Repo maintenance:
 

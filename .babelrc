@@ -1,3 +1,0 @@
-// This is solely to avoid https://github.com/danger/danger-js/issues/261
-// and should be fine to remove before much longer
-{}
