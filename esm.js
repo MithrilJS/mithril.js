@@ -20,7 +20,6 @@ fs.writeFileSync("mithril.esm.js",
 		mithril.lastIndexOf("if (typeof module")
 	)
 	+ "\nexport default m"
-	+ "\nexport { default as stream } from \"./stream/stream.esm.js\""
 )
 
 var mithrilMin = fs.readFileSync("mithril.min.js", "utf8")
@@ -30,7 +29,7 @@ fs.writeFileSync("mithril.min.esm.js",
 		12,
 		mithrilMin.lastIndexOf("\"undefined\"!==typeof module")
 	)
-	+ "export default " + mName + ";export{default as stream}from\"./stream/stream.esm.js\""
+	+ "export default " + mName + ";"
 )
 
 var stream = fs.readFileSync("stream/stream.js", "utf8")

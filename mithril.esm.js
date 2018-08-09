@@ -387,7 +387,7 @@ var _9 = function($window, Promise) {
 	}
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 	function extract(xhr) {return xhr.responseText}
 	function cast(type0, data) {
@@ -1518,4 +1518,3 @@ m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 
 export default m
-export { default as stream } from "./stream/stream.esm.js"
