@@ -17,7 +17,7 @@ Mithril does not provide any animation APIs per se, since these other options ar
 
 ### Animation on element creation
 
-Animating an element via CSS when the element created couldn't be simpler. Just add an animation to a CSS class normally:
+Animating an element via CSS when the element is created couldn't be simpler. Just add an animation to a CSS class normally:
 
 ```css
 .fancy {animation:fade-in 0.5s;}
@@ -41,7 +41,7 @@ m.mount(document.body, FancyComponent)
 
 ### Animation on element removal
 
-The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers a [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
+The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers the [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
 
 Let's create an `exit` animation that fades `opacity` from 1 to 0.
 
@@ -75,7 +75,7 @@ var FancyComponent = {
 	onbeforeremove: function(vnode) {
 		vnode.dom.classList.add("exit")
 		return new Promise(function(resolve) {
-			setTimeout(resolve, 500)
+			vnode.dom.addEventListener("animationend", resolve)
 		})
 	},
 	view: function() {
@@ -86,7 +86,7 @@ var FancyComponent = {
 
 `vnode.dom` points to the root DOM element of the component (`<div class="fancy">`). We use the classList API here to add an `exit` class to `<div class="fancy">`.
 
-Then we return a [Promise](promise.md) that resolves after half a second. When we return a promise from `onbeforeremove`, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits half a second, giving the exit animation the exact time it needs to complete.
+Then we return a [Promise](promise.md) that resolves when the `animationend` event fires. When we return a promise from `onbeforeremove`, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits for the exit animation to finish.
 
 We can verify that both the enter and exit animations work by mounting the `Toggler` component:
 

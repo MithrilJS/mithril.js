@@ -2,6 +2,8 @@
 
 - [CDN](#cdn)
 - [NPM](#npm)
+- [Quick start with Parcel](#quick-start-with-parcel)
+- [TypeScript](#typescript)
 
 ### CDN
 
@@ -15,49 +17,55 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 
 ### NPM
 
-#### Quick start with Webpack
+```bash
+$ npm install mithril --save
+```
 
+---
+
+### Quick start with [Parcel](https://parceljs.org/)
 
 1. Initialize the directory as an npm package
 ```bash
-$> npm init --yes
+$ npm init --yes
 ```
 
-2. install required tools
+2. Install the required tools.
 ```bash
-$> npm install mithril --save
-$> npm install webpack --save
+$ npm install mithril --save
+$ npm install parcel-bundler --save-dev
 ```
 
-3. Add a "start" entry to the scripts section in `package.json`
+3. Add a "start" entry to the scripts section in `package.json`.
 ```js
 {
-  // ...
-  "scripts": {
-    "start": "webpack src/index.js bin/app.js --watch"
-  }
+	// ...
+	"scripts": {
+		"start": "parcel src/index.html"
+	}
 }
 ```
 
-3. Create `src/index.js`
+4. Create `src/index.js` file.
 ```js
 import m from "mithril";
-
 m.render(document.body, "hello world");
 ```
 
-4. create `index.html`
+5. Create `index.html`.
 ```html
 <!DOCTYPE html>
-
-<script src="bin/app.js"></script>
+<body>
+    <script src="./index.js"></script>
+</body>
 ```
 
-5. run bundler
+6. Run the bundler.
 ```bash
-$> npm start
+$ npm start
 ```
-6. open `index.html` in your (default) browser
+
+7. Click the shown link to open it in the browser.
 
 #### Step by step
 
@@ -98,7 +106,7 @@ Most browser today do not natively support modularization systems (CommonJS or E
 A popular way for creating a bundle is to setup an NPM script for [Webpack](https://webpack.js.org/). To install Webpack, run this from the command line:
 
 ```bash
-npm install webpack --save-dev
+npm install webpack webpack-cli --save-dev
 ```
 
 Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
@@ -107,7 +115,7 @@ Open the `package.json` that you created earlier, and add an entry to the `scrip
 {
 	"name": "my-project",
 	"scripts": {
-		"start": "webpack src/index.js bin/app.js -d --watch"
+		"start": "webpack src/index.js --output bin/app.js -d --watch"
 	}
 }
 ```
@@ -169,8 +177,8 @@ If you open bin/app.js, you'll notice that the Webpack bundle is not minified, s
 {
 	"name": "my-project",
 	"scripts": {
-		"start": "webpack src/index.js bin/app.js -d --watch",
-		"build": "webpack src/index.js bin/app.js -p",
+		"start": "webpack src/index.js --output bin/app.js -d --watch",
+		"build": "webpack src/index.js --output bin/app.js -p",
 	}
 }
 ```
@@ -251,3 +259,15 @@ If you don't have the ability to run a bundler script due to company security po
 // if a CommonJS environment is not detected, Mithril will be created in the global scope
 m.render(document.body, "hello world")
 ```
+
+---
+
+### TypeScript
+
+TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
+
+```bash
+$ npm install @types/mithril --save-dev
+```
+
+For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts

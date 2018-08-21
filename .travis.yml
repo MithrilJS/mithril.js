@@ -16,9 +16,8 @@ install:
 # This is to prevent lint-staged/prettier from running on the bundles
 - npm rm husky
 
-# Run danger, build bundles (so they're always up to date)
+# Build bundles (so they're always up to date)
 before_script:
-- npx danger run
 - npm run build-browser
 # Pass -save so it'll update the readme as well
 - npm run build-min -- -save

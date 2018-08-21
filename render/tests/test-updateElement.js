@@ -205,6 +205,72 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.style.color).equals("red")
 	})
+	o("setting style to `null` removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {style: null}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
+	o("setting style to `undefined` removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {style: undefined}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
+	o("not setting style removes all styles", function() {
+		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
+		var updated = {"tag": "p", attrs: {}}
+
+		render(root, [vnode])
+
+		o("style" in vnode.dom.attributes).equals(true)
+		o(vnode.dom.attributes.style.value).equals("background-color: red;")
+
+		render(root, [updated])
+
+		//browsers disagree here
+		try {
+
+			o(updated.dom.attributes.style.value).equals("")
+
+		} catch (e) {
+
+			o("style" in updated.dom.attributes).equals(false)
+
+		}
+	})
 	o("replaces el", function() {
 		var vnode = {tag: "a"}
 		var updated = {tag: "b"}
@@ -237,7 +303,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
-	o("restores correctly when recycling", function() {
+	o("doesn't restore since we're not recycling", function() {
 		var vnode = {tag: "div", key: 1}
 		var updated = {tag: "div", key: 2}
 
@@ -250,9 +316,9 @@ o.spec("updateElement", function() {
 		var c = vnode.dom
 
 		o(root.childNodes.length).equals(1)
-		o(a).equals(c)
+		o(a).notEquals(c) // this used to be a recycling pool test
 	})
-	o("restores correctly when recycling via map", function() {
+	o("doesn't restore since we're not recycling (via map)", function() {
 		var a = {tag: "div", key: 1}
 		var b = {tag: "div", key: 2}
 		var c = {tag: "div", key: 3}
@@ -269,6 +335,6 @@ o.spec("updateElement", function() {
 		var y = root.childNodes[1]
 
 		o(root.childNodes.length).equals(3)
-		o(x).equals(y)
+		o(x).notEquals(y) // this used to be a recycling pool test
 	})
 })

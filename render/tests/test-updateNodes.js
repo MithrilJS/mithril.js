@@ -134,17 +134,17 @@ o.spec("updateNodes", function() {
 	o("reverses els w/ odd count", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}]
 		var updated = [{tag: "i", key: 3}, {tag: "b", key: 2}, {tag: "a", key: 1}]
-
+		var expectedTags = updated.map(function(vn) {return vn.tag})
 		render(root, vnodes)
 		render(root, updated)
 
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("I")
-		o(updated[0].dom).equals(root.childNodes[0])
 		o(updated[1].dom.nodeName).equals("B")
-		o(updated[1].dom).equals(root.childNodes[1])
 		o(updated[2].dom.nodeName).equals("A")
-		o(updated[2].dom).equals(root.childNodes[2])
+		o(tagNames).deepEquals(expectedTags)
 	})
 	o("creates el at start", function() {
 		var vnodes = [{tag: "a", key: 1}]
@@ -614,6 +614,38 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
+	o("cached keyed nodes move when the list is reversed", function(){
+		var a = {tag: "a", key: "a"}
+		var b = {tag: "b", key: "b"}
+		var c = {tag: "c", key: "c"}
+		var d = {tag: "d", key: "d"}
+
+		render(root, [a, b, c, d])
+		render(root, [d, c, b, a])
+
+		o(root.childNodes.length).equals(4)
+		o(root.childNodes[0].nodeName).equals("D")
+		o(root.childNodes[1].nodeName).equals("C")
+		o(root.childNodes[2].nodeName).equals("B")
+		o(root.childNodes[3].nodeName).equals("A")
+	})
+	o("cached keyed nodes move when diffed via the map", function() {
+		var onupdate = o.spy()
+		var a = {tag: "a", key: "a", attrs: {onupdate: onupdate}}
+		var b = {tag: "b", key: "b", attrs: {onupdate: onupdate}}
+		var c = {tag: "c", key: "c", attrs: {onupdate: onupdate}}
+		var d = {tag: "d", key: "d", attrs: {onupdate: onupdate}}
+
+		render(root, [a, b, c, d])
+		render(root, [b, d, a, c])
+
+		o(root.childNodes.length).equals(4)
+		o(root.childNodes[0].nodeName).equals("B")
+		o(root.childNodes[1].nodeName).equals("D")
+		o(root.childNodes[2].nodeName).equals("A")
+		o(root.childNodes[3].nodeName).equals("C")
+		o(onupdate.callCount).equals(0)
+	})
 	o("removes then create different bigger", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}]
 		var temp = []
@@ -776,7 +808,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].childNodes[1].childNodes.length).equals(1)
 		o(root.childNodes[1].childNodes.length).equals(0)
 	})
-	o("recycles", function() {
+	o("doesn't recycle", function() {
 		var vnodes = [{tag: "div", key: 1}]
 		var temp = []
 		var updated = [{tag: "div", key: 1}]
@@ -785,10 +817,10 @@ o.spec("updateNodes", function() {
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
-	o("recycles when not keyed", function() {
+	o("doesn't recycle when not keyed", function() {
 		var vnodes = [{tag: "div"}]
 		var temp = []
 		var updated = [{tag: "div"}]
@@ -798,19 +830,22 @@ o.spec("updateNodes", function() {
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
-	o("recycles deep", function() {
+	o("doesn't recycle deep", function() {
 		var vnodes = [{tag: "div", children: [{tag: "a", key: 1}]}]
 		var temp = [{tag: "div"}]
 		var updated = [{tag: "div", children: [{tag: "a", key: 1}]}]
 
 		render(root, vnodes)
+
+		var oldChild = vnodes[0].dom.firstChild
+
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom.firstChild).equals(updated[0].dom.firstChild)
+		o(oldChild).notEquals(updated[0].dom.firstChild) // this used to be a recycling pool test
 		o(updated[0].dom.firstChild.nodeName).equals("A")
 	})
 	o("mixed unkeyed tags are not broken by recycle", function() {
@@ -839,6 +874,19 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].nodeName).equals("A")
 		o(root.childNodes[1].nodeName).equals("B")
 	})
+	o("onremove doesn't fire from nodes in the pool (#1990)", function () {
+		var onremove = o.spy()
+		render(root, [
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]},
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+		])
+		render(root, [
+			{tag: "div", children: [{tag: "div", attrs: {onremove: onremove}}]}
+		])
+		render(root,[])
+
+		o(onremove.callCount).equals(2)
+	})
 	o("cached, non-keyed nodes skip diff", function () {
 		var onupdate = o.spy();
 		var cached = {tag:"a", attrs:{onupdate: onupdate}}
@@ -857,6 +905,72 @@ o.spec("updateNodes", function() {
 
 		o(onupdate.callCount).equals(0)
 	})
+	o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", key: 1, children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("unkeyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", key: 1, children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [{tag: "div", children: []}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
+	o("unkeyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
+		var onupdate = o.spy()
+		var oncreate = o.spy()
+		var cached = {
+			tag: "B", children: [
+				{tag: "A", attrs: {oncreate: oncreate, onupdate: onupdate}, text: "A"}
+			]
+		}
+		render(root, [{tag: "div", children: [cached]}])
+		render(root, [{tag: "div", children: []}])
+		render(root, [])
+		render(root, [{tag: "div", children: [cached]}])
+
+		o(oncreate.callCount).equals(2)
+		o(onupdate.callCount).equals(0)
+	})
+
 	o("null stays in place", function() {
 		var create = o.spy()
 		var update = o.spy()
@@ -904,6 +1018,231 @@ o.spec("updateNodes", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
+	o("don't add back elements from fragments that are restored from the pool #1991", function() {
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: [{tag: "div"}]}
+		])
+		render(root, [
+			{tag: "[", children: [null]}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+
+		o(root.childNodes.length).equals(0)
+	})
+	o("don't add back elements from fragments that are being removed #1991", function() {
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "p"},
+		])
+		render(root, [
+			{tag: "[", children: [{tag: "div", text: 5}]}
+		])
+		render(root, [
+			{tag: "[", children: []},
+			{tag: "[", children: []}
+		])
+
+		o(root.childNodes.length).equals(0)
+	})
+	o("handles null values in unkeyed lists of different length (#2003)", function() {
+		var oncreate = o.spy();
+		var onremove = o.spy();
+		var onupdate = o.spy();
+		function attrs() {
+			return {oncreate: oncreate, onremove: onremove, onupdate: onupdate}
+		}
+
+		render(root, [{tag: "div", attrs: attrs()}, null]);
+		render(root, [null, {tag: "div", attrs: attrs()}, null]);
+
+		o(oncreate.callCount).equals(2)
+		o(onremove.callCount).equals(1)
+		o(onupdate.callCount).equals(0)
+	})
+	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
+		try {
+			render(root, [{tag: "a", key: 2}])
+			render(root, [{tag: "b", key: 1}, {tag: "b", key: 2}])
+
+			o(root.childNodes.length).equals(2)
+			o(root.childNodes[0].nodeName).equals("B")
+			o(root.childNodes[1].nodeName).equals("B")
+		} catch (e) {
+			o(e).equals(null)
+		}
+	})
+	o("supports changing the element of a keyed element in a list when looking up nodes using the map", function() {
+		try {
+			render(root, [{tag: "x", key: 1}, {tag: "y", key: 2}, {tag: "z", key: 3}])
+			render(root, [{tag: "b", key: 2}, {tag: "c", key: 1}, {tag: "d", key: 4}, {tag: "e", key: 3}])
+
+			o(root.childNodes.length).equals(4)
+			o(root.childNodes[0].nodeName).equals("B")
+			o(root.childNodes[1].nodeName).equals("C")
+			o(root.childNodes[2].nodeName).equals("D")
+			o(root.childNodes[3].nodeName).equals("E")
+		} catch (e) {
+			o(e).equals(null)
+		}
+	})
+	o("don't fetch the nextSibling from the pool", function() {
+		render(root, [{tag: "[", children: [{tag: "div", key: 1}, {tag: "div", key: 2}]}, {tag: "p"}])
+		render(root, [{tag: "[", children: []}, {tag: "p"}])
+		render(root, [{tag: "[", children: [{tag: "div", key: 2}, {tag: "div", key: 1}]}, {tag: "p"}])
+
+		o([].map.call(root.childNodes, function(el) {return el.nodeName})).deepEquals(["DIV", "DIV", "P"])
+	})
+	o("minimizes DOM operations when scrambling a keyed lists", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}]
+		var updated = [{tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an odd number of items", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}]
+		var updated = [{tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(3)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an even number of items", function() {
+		var vnodes = [{tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}]
+		var updated = [{tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when scrambling a keyed lists with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an odd number of items with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "d", key: "d"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "d", key: "d"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(3)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("minimizes DOM operations when reversing a keyed lists with an even number of items with prefixes and suffixes", function() {
+		var vnodes = [{tag: "i", key: "i"}, {tag: "a", key: "a"}, {tag: "b", key: "b"}, {tag: "c", key: "c"}, {tag: "j", key: "j"}]
+		var updated = [{tag: "i", key: "i"}, {tag: "c", key: "c"}, {tag: "b", key: "b"}, {tag: "a", key: "a"}, {tag: "j", key: "j"}]
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(2)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("scrambling sample 1", function() {
+		function vnodify(str) {
+			return str.split(",").map(function(k) {return {tag: k, key: k}})
+		}
+		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
+		var updated = vnodify("k4,k1,k2,k9,k0,k3,k6,k5,k8,k7")
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	o("scrambling sample 2", function() {
+		function vnodify(str) {
+			return str.split(",").map(function(k) {return {tag: k, key: k}})
+		}
+		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
+		var updated = vnodify("b,d,k1,k0,k2,k3,k4,a,c,k5,k6,k7,k8,k9")
+		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+
+		render(root, vnodes)
+
+		root.appendChild = o.spy(root.appendChild)
+		root.insertBefore = o.spy(root.insertBefore)
+
+		render(root, updated)
+
+		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
+
+		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
+		o(tagNames).deepEquals(expectedTagNames)
+	})
+	
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
@@ -939,6 +1278,19 @@ o.spec("updateNodes", function() {
 				o(root.childNodes.length).equals(2)
 				o(root.childNodes[0].nodeName).equals("A")
 				o(root.childNodes[1].nodeName).equals("S")
+			})
+			o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
+				var component = createComponent({
+					view: function() {return {tag: "[", children:[{tag: "a"}, {tag: "b"}]}}
+				})
+				try {
+					render(root, [{tag: component}])
+					render(root, [])
+
+					o(root.childNodes.length).equals(0)
+				} catch (e) {
+					o(e).equals(null)
+				}
 			})
 		})
 	})

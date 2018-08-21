@@ -129,7 +129,7 @@ o.spec("onbeforeupdate", function() {
 		render(root, temp)
 		render(root, updated)
 
-		o(vnodes[0].dom).equals(updated[0].dom)
+		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
 		o(updated[0].dom.nodeName).equals("DIV")
 		o(onbeforeupdate.callCount).equals(0)
 	})

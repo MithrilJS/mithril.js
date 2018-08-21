@@ -59,6 +59,16 @@ o.spec("form inputs", function() {
 			o(updated.dom.value).equals("aaa")
 		})
 
+		o("clear element value if vdom value is set to undefined (aka removed)", function() {
+			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
+			var updated = {tag: "input", attrs: {value: undefined, oninput: function() {}}}
+
+			render(root, [input])
+			render(root, [updated])
+
+			o(updated.dom.value).equals("")
+		})
+
 		o("syncs input checked attribute if DOM value differs from vdom value", function() {
 			var input = {tag: "input", attrs: {type: "checkbox", checked: true, onclick: function() {}}}
 			var updated = {tag: "input", attrs: {type: "checkbox", checked: true, onclick: function() {}}}

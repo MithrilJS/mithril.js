@@ -5,6 +5,7 @@
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
+- [Attributes passed as the second argument](attributes-passed-as-the-second-argument)
 - [DOM attributes](#dom-attributes)
 - [Style attribute](#style-attribute)
 - [Events](#events)
@@ -144,7 +145,23 @@ m("a.link[href=/]", {
 // <a href="/" class="link selected">Home</a>
 ```
 
-If there are class names in both first and second arguments of `m()`, they are merged together as you would expect.
+### Attributes passed as the second argument
+
+You can pass attributes, properties, events and lifecycle hooks in the second, optional argument (see the next sections for details).
+
+```JS
+m("button", {
+	class: "my-button",
+	onclick: function() {/* ... */},
+	oncreate: function() {/* ... */}
+})
+```
+
+If the value of such an attribute is `null` or `undefined`, it is treated as if the attribute was absent.
+
+If there are class names in both first and second arguments of `m()`, they are merged together as you would expect. If the value of the class in the second argument is `null`or `undefined`, it is ignored.
+
+If another attribute is present in both the first and the second argument, the second one takes precedence even if it is  is `null` or `undefined`.
 
 ---
 
