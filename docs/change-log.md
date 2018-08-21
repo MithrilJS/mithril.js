@@ -55,7 +55,7 @@
 - render/events: `Object.prototype` properties can no longer interfere with event listener calls.
 - render/events: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
-- docs: fix typo ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb))
+- docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa))
 ---
 
 ### v1.1.7
