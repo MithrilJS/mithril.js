@@ -255,6 +255,17 @@ o.spec("stream", function() {
 
 			o(doubled()).equals(undefined)
 		})
+		o("end stops all dependant streams", function() {
+			var stream = Stream()
+			var stream2 = stream.map(function(v) { return v })
+			var stream3 = stream2.map(function(v) { return v })
+
+			stream3.end(true)
+
+			stream(3)
+
+			o(stream3()).equals(undefined)
+		})
 		o("end stream works with default value", function() {
 			var stream = Stream(2)
 			var doubled = Stream.combine(function(stream) {return stream() * 2}, [stream])
