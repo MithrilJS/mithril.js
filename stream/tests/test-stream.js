@@ -111,8 +111,9 @@ o.spec("stream", function() {
 			a(3)
 			b(5)
 
-			o(streams.length).equals(1)
-			o(streams[0]).equals(b)
+			o(streams.length).equals(2)
+			o(streams[0]).equals(a)
+			o(streams[1]).equals(b)
 		})
 		o("combine lists only changed upstreams in last arg with default value", function() {
 			var streams = []

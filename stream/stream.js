@@ -2,161 +2,138 @@
 ;(function() {
 "use strict"
 /* eslint-enable */
+Stream.HALT = {}
+Stream.scan = scan
+Stream.merge = merge
+Stream.combine = combine
+Stream.scanMerge = scanMerge
 
-var guid = 0, HALT = {}
-function createStream() {
-	function stream() {
-		if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0])
-		return stream._state.value
+function Stream(value) {
+	var dependentStreams = []
+	var dependentFns = []
+
+	function stream(v) {
+		if (arguments.length && v !== Stream.HALT && open(stream)) {
+			value = v
+			stream.changing()
+			stream.state = "active"
+			dependentStreams.forEach(function(s, i) { s(dependentFns[i](value)) })
+		}
+
+		return value
 	}
-	initStream(stream)
 
-	if (arguments.length > 0 && arguments[0] !== HALT) updateStream(stream, arguments[0])
+	stream.changing = function() {
+		open(stream) && (stream.state = "changing")
+		dependentStreams.forEach(function(s) {
+			s.dependent && s.dependent.changing()
+			s.changing()
+		})
+	}
+
+	stream.state = arguments.length && value !== Stream.HALT ? "active" : "pending"
+
+	stream.map = function(fn, ignoreInitial) {
+		var target = stream.state === "active" && ignoreInitial !== Stream.HALT
+			? Stream(fn(value))
+			: Stream()
+
+		dependentStreams.push(target)
+		dependentFns.push(fn)
+		return target
+	}
+
+	let end
+	function createEnd() {
+		end = Stream()
+		end.map(function(value) {
+			if (value === true) {
+				stream.state = "ended"
+				dependentStreams.length = dependentFns.length = 0
+			}
+			return value
+		})
+		return end
+	}
+
+	stream.toJSON = function() { return value != null && typeof value.toJSON === "function" ? value.toJSON() : value }
+	stream.toString = function() { return value }
+	stream.valueOf = function() { value }
+
+	stream["fantasy-land/map"] = stream.map
+	stream["fantasy-land/ap"] = function(x) { return combine(function(s1, s2) { return s1()(s2()) }, [x, stream]) }
+	stream["fantasy-land/of"] = Stream
+
+	Object.defineProperty(stream, "end", {
+		get: function() { return end || createEnd() }
+	})
 
 	return stream
 }
-function initStream(stream) {
-	stream.constructor = createStream
-	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined, unregister: undefined}
-	stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
-	stream.toJSON = toJSON
-
-	Object.defineProperties(stream, {
-		end: {get: function() {
-			if (!stream._state.endStream) {
-				var endStream = createStream()
-				endStream.map(function(value) {
-					if (value === true) {
-						unregisterStream(stream)
-						endStream._state.unregister = function(){unregisterStream(endStream)}
-					}
-					return value
-				})
-				stream._state.endStream = endStream
-			}
-			return stream._state.endStream
-		}}
-	})
-}
-function updateStream(stream, value) {
-	updateState(stream, value)
-	for (var id in stream._state.deps) updateDependency(stream._state.deps[id], false)
-	if (stream._state.unregister != null) stream._state.unregister()
-	finalize(stream)
-}
-function updateState(stream, value) {
-	stream._state.value = value
-	stream._state.changed = true
-	if (stream._state.state !== 2) stream._state.state = 1
-}
-function updateDependency(stream, mustSync) {
-	var state = stream._state, parents = state.parents
-	if (parents.length > 0 && parents.every(active) && (mustSync || parents.some(changed))) {
-		var value = stream._state.derive()
-		if (value === HALT) return unregisterStream(stream)
-		updateState(stream, value)
-	}
-}
-function finalize(stream) {
-	stream._state.changed = false
-	for (var id in stream._state.deps) stream._state.deps[id]._state.changed = false
-}
 
 function combine(fn, streams) {
-	if (!streams.every(valid)) throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
-	return initDependency(createStream(), streams, function() {
-		return fn.apply(this, streams.concat([streams.filter(changed)]))
+	var ready = streams.every(function(s) {
+		if (s["fantasy-land/of"] !== Stream)
+			throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
+		return s.state === "active"
 	})
+	var stream = ready
+		? Stream(fn.apply(null, streams.concat([streams])))
+		: Stream()
+
+	let changed = []
+
+	streams.forEach(function(s) {
+		s.map(function(value) {
+			changed.push(s)
+			if (streams.every(function(s) { return s.state === "active" })) {
+				stream(fn.apply(null, streams.concat([changed])))
+				changed = []
+			}
+			return value
+		}, Stream.HALT).parent = stream
+	})
+
+	return stream
 }
-
-function initDependency(dep, streams, derive) {
-	var state = dep._state
-	state.derive = derive
-	state.parents = streams.filter(notEnded)
-
-	registerDependency(dep, state.parents)
-	updateDependency(dep, true)
-
-	return dep
-}
-function registerDependency(stream, parents) {
-	for (var i = 0; i < parents.length; i++) {
-		parents[i]._state.deps[stream._state.id] = stream
-		registerDependency(stream, parents[i]._state.parents)
-	}
-}
-function unregisterStream(stream) {
-	for (var i = 0; i < stream._state.parents.length; i++) {
-		var parent = stream._state.parents[i]
-		delete parent._state.deps[stream._state.id]
-	}
-	for (var id in stream._state.deps) {
-		var dependent = stream._state.deps[id]
-		var index = dependent._state.parents.indexOf(stream)
-		if (index > -1) dependent._state.parents.splice(index, 1)
-	}
-	stream._state.state = 2 //ended
-	stream._state.deps = {}
-}
-
-function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
-function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
-function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
-
-function valid(stream) {return stream._state }
-function active(stream) {return stream._state.state === 1}
-function changed(stream) {return stream._state.changed}
-function notEnded(stream) {return stream._state.state !== 2}
 
 function merge(streams) {
-	return combine(function() {
-		return streams.map(function(s) {return s()})
-	}, streams)
+	return combine(function() { return streams.map(function(s) { return s() }) }, streams)
 }
 
-function scan(reducer, seed, stream) {
-	var newStream = combine(function (s) {
-		var next = reducer(seed, s._state.value)
-		if (next !== HALT) return seed = next
-		return HALT
-	}, [stream])
-
-	if (newStream._state.state === 0) newStream(seed)
-
-	return newStream
+function scan(fn, acc, origin) {
+	var stream = origin.map(function(v) {
+		acc = fn(acc, v)
+		return acc
+	})
+	stream(acc)
+	return stream
 }
 
 function scanMerge(tuples, seed) {
-	var streams = tuples.map(function(tuple) {
-		var stream = tuple[0]
-		if (stream._state.state === 0) stream(undefined)
-		return stream
-	})
+	var streams = tuples.map(function(tuple) { return tuple[0] })
 
-	var newStream = combine(function() {
+	var stream = combine(function() {
 		var changed = arguments[arguments.length - 1]
-
-		streams.forEach(function(stream, idx) {
-			if (changed.indexOf(stream) > -1) {
-				seed = tuples[idx][1](seed, stream._state.value)
-			}
+		streams.forEach(function(stream, i) {
+			if (changed.indexOf(stream) > -1)
+				seed = tuples[i][1](seed, stream())
 		})
 
 		return seed
 	}, streams)
 
-	return newStream
+	stream(seed)
+
+	return stream
 }
 
-createStream["fantasy-land/of"] = createStream
-createStream.merge = merge
-createStream.combine = combine
-createStream.scan = scan
-createStream.scanMerge = scanMerge
-createStream.HALT = HALT
+function open(s) {
+	return s.state === "pending" || s.state === "active" || s.state === "changing"
+}
 
-if (typeof module !== "undefined") module["exports"] = createStream
-else if (typeof window.m === "function" && !("stream" in window.m)) window.m.stream = createStream
-else window.m = {stream : createStream}
+if (typeof module !== "undefined") module["exports"] = Stream
+else if (typeof window.m === "function" && !("stream" in window.m)) window.m.stream = Stream
+else window.m = {stream : Stream}
 
 }());
