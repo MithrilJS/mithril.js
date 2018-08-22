@@ -2,7 +2,7 @@
 ;(function() {
 "use strict"
 /* eslint-enable */
-Stream.HALT = {}
+Stream.SKIP = {}
 Stream.scan = scan
 Stream.merge = merge
 Stream.combine = combine
@@ -13,7 +13,7 @@ function Stream(value) {
 	var dependentFns = []
 
 	function stream(v) {
-		if (arguments.length && v !== Stream.HALT && open(stream)) {
+		if (arguments.length && v !== Stream.SKIP && open(stream)) {
 			value = v
 			stream.changing()
 			stream.state = "active"
@@ -31,10 +31,10 @@ function Stream(value) {
 		})
 	}
 
-	stream.state = arguments.length && value !== Stream.HALT ? "active" : "pending"
+	stream.state = arguments.length && value !== Stream.SKIP ? "active" : "pending"
 
 	stream.map = function(fn, ignoreInitial) {
-		var target = stream.state === "active" && ignoreInitial !== Stream.HALT
+		var target = stream.state === "active" && ignoreInitial !== Stream.SKIP
 			? Stream(fn(value))
 			: Stream()
 
@@ -91,7 +91,7 @@ function combine(fn, streams) {
 				changed = []
 			}
 			return value
-		}, Stream.HALT).parent = stream
+		}, Stream.SKIP).parent = stream
 	})
 
 	return stream
