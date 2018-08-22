@@ -156,7 +156,7 @@ o.spec("stream", function() {
 			var count = 0
 			var a = Stream(1)
 			var b = Stream.combine(function() {
-				return Stream.HALT
+				return Stream.SKIP
 			}, [a])["fantasy-land/map"](function() {
 				count++
 				return 1
@@ -171,7 +171,7 @@ o.spec("stream", function() {
 			var a = Stream(1)
 			var b = Stream.combine(function(a) {
 				if (halt) {
-					return Stream.HALT
+					return Stream.SKIP
 				}
 				return a()
 			}, [a])["fantasy-land/map"](function(a) {
