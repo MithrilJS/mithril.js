@@ -57,8 +57,6 @@ function Stream(value) {
 	}
 
 	stream.toJSON = function() { return value != null && typeof value.toJSON === "function" ? value.toJSON() : value }
-	stream.toString = function() { return value }
-	stream.valueOf = function() { value }
 
 	stream["fantasy-land/map"] = stream.map
 	stream["fantasy-land/ap"] = function(x) { return combine(function(s1, s2) { return s1()(s2()) }, [x, stream]) }
