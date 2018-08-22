@@ -152,7 +152,7 @@ o.spec("stream", function() {
 
 			o(b()()).equals(undefined)
 		})
-		o("combine can halt", function() {
+		o("combine can skip", function() {
 			var count = 0
 			var a = Stream(1)
 			var b = Stream.combine(function() {
@@ -165,12 +165,12 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 			o(count).equals(0)
 		})
-		o("combine can conditionaly halt", function() {
+		o("combine can conditionaly skip", function() {
 			var count = 0
-			var halt = false
+			var skip = false
 			var a = Stream(1)
 			var b = Stream.combine(function(a) {
-				if (halt) {
+				if (skip) {
 					return Stream.SKIP
 				}
 				return a()
@@ -180,7 +180,7 @@ o.spec("stream", function() {
 			})
 			o(b()).equals(1)
 			o(count).equals(1)
-			halt = true
+			skip = true
 			count = 0
 			a(2)
 			o(b()).equals(1)
