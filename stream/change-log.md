@@ -1,6 +1,8 @@
 # Change log for stream
 
 ## 2.0.0
+- renamed HALT to SKIP
+- rewrote stream
 - stream: Removed `valueOf` & `toString` methods ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150)
 
 ## 1.1.0
