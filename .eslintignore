@@ -3,5 +3,8 @@ coverage/
 docs/lib/
 examples/
 /mithril.js
+/mithril.esm.js
 /mithril.min.js
+/mithril.esm.min.js
+/stream/stream.esm.js
 node_modules/
