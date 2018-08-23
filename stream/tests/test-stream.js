@@ -87,6 +87,7 @@ o.spec("stream", function() {
 			o(d()).equals(15)
 			o(count).equals(1)
 		})
+
 		o("combines default value atomically", function() {
 			var count = 0
 			var a = Stream(3)
@@ -98,6 +99,21 @@ o.spec("stream", function() {
 			}, [b, c])
 
 			o(d()).equals(15)
+			o(count).equals(1)
+		})
+		o("combines and maps nested streams atomically", function() {
+			var count = 0
+			var a = Stream(3)
+			var b = Stream.combine(function(a) {return a() * 2}, [a])
+			var c = Stream.combine(function(a) {return a() * a()}, [a])
+			var d = c.map(function(x){return x})
+			var e = Stream.combine(function(x) {return x()}, [d])
+			var f = Stream.combine(function(b, e) {
+				count++
+				return b() + e()
+			}, [b, e])
+
+			o(f()).equals(15)
 			o(count).equals(1)
 		})
 		o("combine lists only changed upstreams in last arg", function() {
