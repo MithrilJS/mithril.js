@@ -312,6 +312,8 @@ var _9 = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
+			
+			if (args.responseType) xhr.responseType = args.responseType
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
 			}

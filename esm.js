@@ -24,7 +24,7 @@ fs.writeFileSync("mithril.esm.js",
 
 var mithrilMin = fs.readFileSync("mithril.min.js", "utf8")
 var mName = mithrilMin.match(/window\.m=([a-z])}/)[1]
-fs.writeFileSync("mithril.min.esm.js",
+fs.writeFileSync("mithril.esm.min.js",
 	mithrilMin.slice(
 		12,
 		mithrilMin.lastIndexOf("\"undefined\"!==typeof module")
