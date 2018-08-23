@@ -449,6 +449,20 @@ o.spec("xhr", function() {
 				}
 			})
 		})
+		o("set responseType to xhr instance", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: ""}
+				}
+			})
+			return xhr({
+				method: "GET", url: "/item",
+				responseType: "blob",
+				config: function(xhr) {
+					o(xhr.responseType).equals("blob")
+				}
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
