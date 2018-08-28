@@ -53,7 +53,7 @@ function updateDependency(stream, mustSync) {
 	var state = stream._state, parents = state.parents
 	if (parents.length > 0 && parents.every(active) && (mustSync || parents.some(changed))) {
 		var value = stream._state.derive()
-		if (value === HALT) return false
+		if (value === HALT) return unregisterStream(stream)
 		updateState(stream, value)
 	}
 }
