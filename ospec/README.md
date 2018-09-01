@@ -111,6 +111,7 @@ o.spec("call()", function() {
 
 		o(spy.callCount).equals(1)
 		o(spy.args[0]).equals(1)
+		o(spy.calls[0]).deepEquals([1])
 	})
 })
 ```
