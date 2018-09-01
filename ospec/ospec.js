@@ -49,6 +49,7 @@ else window.o = m()
 		var spy = function() {
 			spy.this = this
 			spy.args = [].slice.call(arguments)
+			spy.calls.push({this: this, args: spy.args})
 			spy.callCount++
 
 			if (fn) return fn.apply(this, arguments)
@@ -59,6 +60,7 @@ else window.o = m()
 				name: {value: fn.name}
 			})
 		spy.args = []
+		spy.calls = []
 		spy.callCount = 0
 		return spy
 	}

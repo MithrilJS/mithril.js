@@ -206,6 +206,8 @@ o.spec("ospec", function() {
 			o(spy.callCount).equals(1)
 			o(spy.args.length).equals(1)
 			o(spy.args[0]).equals(1)
+			o(spy.calls.length).equals(1)
+			o(spy.calls[0]).deepEquals({this: undefined, args: [1]})
 		})
 		o("spy wrapping", function() {
 			var spy = o.spy(function view(vnode){
@@ -223,6 +225,8 @@ o.spec("ospec", function() {
 			o(spy.callCount).equals(1)
 			o(spy.args.length).equals(1)
 			o(spy.args[0]).deepEquals({children: children})
+			o(spy.calls.length).equals(1)
+			o(spy.calls[0]).deepEquals({this: state, args: [{children: children}]})
 			o(state).deepEquals({drawn: true})
 			o(output).deepEquals({tag: "div", children: children})
 		})
@@ -461,7 +465,7 @@ o.spec("ospec", function() {
 			oo.spec("nested 3", function () {
 				oo("", function() {
 					oo(true).equals(true)
-	
+
 					return {then: function() {}}
 				})
 			})
@@ -490,10 +494,10 @@ o.spec("ospec", function() {
 						o(diff >= 50).equals(true)
 						o(diff < 80).equals(true)
 					})
-		
+
 					oo("", function() {
 						oo(true).equals(true)
-		
+
 						return {then: function() {}}
 					})
 				})
