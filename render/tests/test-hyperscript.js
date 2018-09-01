@@ -302,6 +302,63 @@ o.spec("hyperscript", function() {
 			o(vnode.attrs.className).equals("a b")
 		})
 	})
+	o.spec("custom element attrs", function() {
+		o("handles string attr", function() {
+			var vnode = m("custom-element", {a: "b"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("b")
+		})
+		o("handles falsy string attr", function() {
+			var vnode = m("custom-element", {a: ""})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("")
+		})
+		o("handles number attr", function() {
+			var vnode = m("custom-element", {a: 1})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(1)
+		})
+		o("handles falsy number attr", function() {
+			var vnode = m("custom-element", {a: 0})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(0)
+		})
+		o("handles boolean attr", function() {
+			var vnode = m("custom-element", {a: true})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(true)
+		})
+		o("handles falsy boolean attr", function() {
+			var vnode = m("custom-element", {a: false})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(false)
+		})
+		o("handles only key in attrs", function() {
+			var vnode = m("custom-element", {key:"a"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs).equals(null)
+			o(vnode.key).equals("a")
+		})
+		o("handles many attrs", function() {
+			var vnode = m("custom-element", {a: "b", c: "d"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("b")
+			o(vnode.attrs.c).equals("d")
+		})
+		o("handles className attrs property", function() {
+			var vnode = m("custom-element", {className: "a"})
+
+			o(vnode.attrs.className).equals("a")
+		})
+	})
 	o.spec("children", function() {
 		o("handles string single child", function() {
 			var vnode = m("div", {}, ["a"])

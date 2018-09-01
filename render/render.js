@@ -686,15 +686,17 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
+		else if (hasPropertyKey(vnode, key, ns)) {
 			if (key === "value") {
-				var normalized = "" + value // eslint-disable-line no-implicit-coercion
+				// Only do the coercion if we're actually going to check the value.
+				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
+				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
@@ -712,12 +714,10 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
-			key in vnode.dom && !isAttribute(key)
+			hasPropertyKey(vnode, key, ns)
 			&& key !== "className"
 			&& !(vnode.tag === "option" && key === "value")
 			&& !(vnode.tag === "input" && key === "type")
-			&& ns === undefined
-			&& !isCustomElement(vnode.tag, vnode.attrs || {})
 		) {
 			vnode.dom[key] = null
 		} else {
@@ -760,11 +760,15 @@ module.exports = function($window) {
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function isAttribute(attr) {
-		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
-	}
-	function isCustomElement(tag, attrs){
-		return attrs.is || tag.indexOf("-") > -1
+	function hasPropertyKey(vnode, key, ns) {
+		// Filter out namespaced keys
+		return ns === undefined && (
+			// If it's a custom element, just keep it.
+			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			// If it's a normal element, let's try to avoid a few browser bugs.
+			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
+			// Defer the property check until *after* we check everything.
+		) && key in vnode.dom
 	}
 
 	//style
