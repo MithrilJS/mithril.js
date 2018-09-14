@@ -30,6 +30,18 @@ o.spec("stream", function() {
 
 			o(stream()()).equals(1)
 		})
+		o("can SKIP", function() {
+			var a = Stream(2)
+			var b = a.map(function(value) {
+				return value === 5
+					? Stream.SKIP
+					: value
+			})
+
+			a(5)
+
+			o(b()).equals(2)
+		})
 	})
 	o.spec("combine", function() {
 		o("transforms value", function() {
