@@ -8,6 +8,15 @@ Stream.merge = merge
 Stream.combine = combine
 Stream.scanMerge = scanMerge
 
+let warnedHalt = false
+Object.defineProperty(Stream, "HALT", {
+	get: () => {
+		warnedHalt && console.log("HALT is deprecated and has been renamed to SKIP");
+		warnedHalt = true
+		return Stream.SKIP
+	}
+})
+
 function Stream(value) {
 	var dependentStreams = []
 	var dependentFns = []

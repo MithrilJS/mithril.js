@@ -42,6 +42,31 @@ o.spec("stream", function() {
 
 			o(b()).equals(2)
 		})
+		o("can HALT", function() {
+			var a = Stream(2)
+			var b = a.map(function(value) {
+				return value === 5
+					? Stream.HALT
+					: value
+			})
+
+			a(5)
+
+			o(b()).equals(2)
+		})
+		o("warns HALT deprecated", function() {
+			var log = console.log
+			var warning = ""
+			console.log = function(a) {
+				warning = a
+			}
+
+			Stream.HALT
+
+			console.log = log
+
+			o(warning).equals("HALT is deprecated and has been renamed to SKIP")
+		})
 	})
 	o.spec("combine", function() {
 		o("transforms value", function() {
