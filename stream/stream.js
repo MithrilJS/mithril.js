@@ -11,7 +11,7 @@ Stream["fantasy-land/of"] = Stream
 
 let warnedHalt = false
 Object.defineProperty(Stream, "HALT", {
-	get: () => {
+	get: function() {
 		warnedHalt && console.log("HALT is deprecated and has been renamed to SKIP");
 		warnedHalt = true
 		return Stream.SKIP
