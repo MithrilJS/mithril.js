@@ -500,7 +500,7 @@ o.spec("stream", function() {
 		})
 		o.spec("applicative", function() {
 			o("identity", function() {
-				var a = Stream()["fantasy-land/of"](function(value) {return value})
+				var a = Stream["fantasy-land/of"](function(value) {return value})
 				var v = Stream(5)
 
 				o(v["fantasy-land/ap"](a)()).equals(5)
@@ -511,16 +511,16 @@ o.spec("stream", function() {
 				var f = function(value) {return value * 2}
 				var x = 3
 
-				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(6)
-				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(a["fantasy-land/of"](f(x))())
+				o(a.constructor["fantasy-land/of"](x)["fantasy-land/ap"](a.constructor["fantasy-land/of"](f))()).equals(6)
+				o(a.constructor["fantasy-land/of"](x)["fantasy-land/ap"](a.constructor["fantasy-land/of"](f))()).equals(a.constructor["fantasy-land/of"](f(x))())
 			})
 			o("interchange", function() {
 				var u = Stream(function(value) {return value * 2})
 				var a = Stream()
 				var y = 3
 
-				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(6)
-				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(u["fantasy-land/ap"](a["fantasy-land/of"](function(f) {return f(y)}))())
+				o(a.constructor["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(6)
+				o(a.constructor["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(u["fantasy-land/ap"](a.constructor["fantasy-land/of"](function(f) {return f(y)}))())
 			})
 		})
 	})

@@ -7,6 +7,7 @@ Stream.scan = scan
 Stream.merge = merge
 Stream.combine = combine
 Stream.scanMerge = scanMerge
+Stream["fantasy-land/of"] = Stream
 
 let warnedHalt = false
 Object.defineProperty(Stream, "HALT", {
@@ -32,6 +33,9 @@ function Stream(value) {
 		return value
 	}
 
+	stream.constructor = Stream
+	stream.state = arguments.length && value !== Stream.SKIP ? "active" : "pending"
+
 	stream.changing = function() {
 		open(stream) && (stream.state = "changing")
 		dependentStreams.forEach(function(s) {
@@ -39,8 +43,6 @@ function Stream(value) {
 			s.changing()
 		})
 	}
-
-	stream.state = arguments.length && value !== Stream.SKIP ? "active" : "pending"
 
 	stream.map = function(fn, ignoreInitial) {
 		var target = stream.state === "active" && ignoreInitial !== Stream.SKIP
@@ -69,7 +71,6 @@ function Stream(value) {
 
 	stream["fantasy-land/map"] = stream.map
 	stream["fantasy-land/ap"] = function(x) { return combine(function(s1, s2) { return s1()(s2()) }, [x, stream]) }
-	stream["fantasy-land/of"] = Stream
 
 	Object.defineProperty(stream, "end", {
 		get: function() { return end || createEnd() }
@@ -80,7 +81,7 @@ function Stream(value) {
 
 function combine(fn, streams) {
 	var ready = streams.every(function(s) {
-		if (s["fantasy-land/of"] !== Stream)
+		if (s.constructor !== Stream)
 			throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
 		return s.state === "active"
 	})
