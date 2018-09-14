@@ -93,7 +93,8 @@ function combine(fn, streams) {
 	streams.forEach(function(s) {
 		s.map(function(value) {
 			changed.push(s)
-			if (streams.every(function(s) { return s.state === "active" })) {
+			if (ready || streams.every(function(s) { return s.state !== "pending" })) {
+				ready = true
 				stream(fn.apply(null, streams.concat([changed])))
 				changed = []
 			}

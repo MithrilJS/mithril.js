@@ -168,6 +168,19 @@ o.spec("stream", function() {
 			o(streams[0]).equals(a)
 			o(streams[1]).equals(b)
 		})
+		o("combine continues with ended streams", function() {
+			var a = Stream()
+			var b = Stream()
+			var combined = Stream.combine(function(a, b) {
+				return a() + b()
+			}, [a, b])
+
+			a(3)
+			a.end(true)
+			b(5)
+
+			o(combined()).equals(8)
+		})
 		o("combine lists only changed upstreams in last arg with default value", function() {
 			var streams = []
 			var a = Stream(3)
