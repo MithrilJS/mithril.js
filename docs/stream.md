@@ -126,7 +126,7 @@ Note that you can prevent dependent streams from being updated by returning the 
 
 Argument      | Type                             | Required | Description
 ------------- | -------------------------------- | -------- | ---
-`fn`          | `(accumulator, value) -> result \| SKIP` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`fn`          | `(accumulator, value) -> result \| SKIP` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value of the same type
 `accumulator` | `any`                            | Yes      | The starting value for the accumulator
 `stream`      | `Stream`                         | Yes      | Stream containing the values
 **returns**   | `Stream`                         |          | Returns a new stream containing the result
