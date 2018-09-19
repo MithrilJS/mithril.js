@@ -801,13 +801,20 @@ module.exports = function($window) {
 	// 4. The event name is remapped to the handler before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
+	// 6. In function-based event handlers, `return false` prevents the default
+	//    action and stops event propagation. We replicate that below.
 	function EventDict() {}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler = this["on" + ev.type]
-		if (typeof handler === "function") handler.call(ev.target, ev)
+		var result
+		if (typeof handler === "function") result = handler.call(ev.target, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
+		}
 	}
 
 	//event

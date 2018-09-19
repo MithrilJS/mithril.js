@@ -1181,13 +1181,20 @@ var coreRenderer = function($window) {
 	// 4. The event name is remapped to the handler0 before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
+	// 6. In function-based event handlers, `return false` prevents the default
+	//    action and stops event propagation. We replicate that below.
 	function EventDict() {}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler0 = this["on" + ev.type]
-		if (typeof handler0 === "function") handler0.call(ev.target, ev)
+		var result
+		if (typeof handler0 === "function") result = handler0.call(ev.target, ev)
 		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
 		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
+		}
 	}
 	//event
 	function updateEvent(vnode, key2, value) {
