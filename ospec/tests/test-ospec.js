@@ -89,6 +89,8 @@ o.spec("reporting", function() {
 			o(results.length).equals(2)("Two results")
 
 			o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
+			o("message" in results[0] && "context" in results[0]).equals(true)("message and context keys present in failing result")
+			o("message" in results[1] && "context" in results[1]).equals(true)("message and context keys present in passing result")
 			o(results[0].pass).equals(false)("Test meant to fail has failed")
 			o(results[1].pass).equals(true)("Test meant to pass has passed")
 
