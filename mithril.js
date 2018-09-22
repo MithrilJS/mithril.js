@@ -1026,21 +1026,13 @@ var coreRenderer = function($window) {
 				checkState(vnode, original)
 				onremove(vnode)
 				if (vnode.dom) {
+					var parent = vnode.dom.parentNode
 					var count0 = vnode.domSize || 1
-					if (count0 > 1) {
-						var dom = vnode.dom
-						while (--count0) {
-							removeNodeFromDOM(dom.nextSibling)
-						}
-					}
-					removeNodeFromDOM(vnode.dom)
+					while (--count0) parent.removeChild(vnode.dom.nextSibling)
+					parent.removeChild(vnode.dom)
 				}
 			}
 		}
-	}
-	function removeNodeFromDOM(node) {
-		var parent = node.parentNode
-		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
