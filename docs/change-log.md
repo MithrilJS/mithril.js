@@ -1,5 +1,6 @@
 # Change log
 
+- [v1.2.0](#v120)
 - [v1.1.6](#v116)
 - [v1.1.5](#v115)
 - [v1.1.4](#v114)
@@ -12,6 +13,12 @@
 - [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
 
 ---
+
+### v1.2.0
+
+#### News
+
+- API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
 
 ### v1.1.6
 
