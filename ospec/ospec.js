@@ -268,13 +268,14 @@ else window.o = m()
 	}
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
-			var message = serialize(this.value) + "\n  " + verb + "\n" + serialize(value)
-			if (compare(this.value, value)) succeed(this, message)
-			else fail(this, message)
 			var self = this
-			return function(message) {
-				if (!self.pass) self.message = message + "\n\n" + self.message
-			}
+			var message = serialize(self.value) + "\n  " + verb + "\n" + serialize(value)
+			if (compare(self.value, value)){
+				succeed(self, message)
+				return function(message) {
+					if (!self.pass) self.message = message + "\n\n" + self.message
+				}
+			}else fail(self, message)
 		}
 	}
 	function succeed(assertion, message) {
