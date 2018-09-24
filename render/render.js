@@ -472,13 +472,11 @@ module.exports = function($window) {
 		}
 	}
 	function setAttr(vnode, key, old, value, ns) {
+		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
+		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
+		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
-		if (key === "key" || key === "is" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key)) return
-		var nsLastIndex = key.indexOf(":")
-		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1), value)
-		}
-		else if (key[0] === "o" && key[1] === "n" && typeof value === "function") updateEvent(vnode, key, value)
+		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(element, old, value)
 		else if (key in element && !isAttribute(key) && ns === undefined && !isCustomElement(vnode)) {
 			if (key === "value") {
@@ -568,24 +566,39 @@ module.exports = function($window) {
 		}
 	}
 
+	// Here's an explanation of how this works:
+	// 1. The event names are always (by design) prefixed by `on`.
+	// 2. The EventListener interface accepts either a function or an object
+	//    with a `handleEvent` method.
+	// 3. The object does not inherit from `Object.prototype`, to avoid
+	//    any potential interference with that (e.g. setters).
+	// 4. The event name is remapped to the handler before calling it.
+	// 5. In function-based event handlers, `ev.target === this`. We replicate
+	//    that below.
+	function EventDict() {}
+	EventDict.prototype = Object.create(null)
+	EventDict.prototype.handleEvent = function (ev) {
+		var handler = this["on" + ev.type]
+		if (typeof handler === "function") handler.call(ev.target, ev)
+		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
+		if (typeof onevent === "function") onevent.call(ev.target, ev)
+	}
+
 	//event
 	function updateEvent(vnode, key, value) {
-		var element = vnode.dom
-		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
-			onevent.call(element, e)
-			return result
-		}
-		if (key in element) element[key] = typeof value === "function" ? callback : null
-		else {
-			var eventName = key.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key] === callback) return
-			if (vnode.events[key] != null) element.removeEventListener(eventName, vnode.events[key], false)
-			if (typeof value === "function") {
-				vnode.events[key] = callback
-				element.addEventListener(eventName, vnode.events[key], false)
+		if (vnode.events != null) {
+			if (vnode.events[key] === value) return
+			if (value != null && (typeof value === "function" || typeof value === "object")) {
+				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = value
+			} else {
+				if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = undefined
 			}
+		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
+			vnode.events = new EventDict()
+			vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+			vnode.events[key] = value
 		}
 	}
 

@@ -19,6 +19,14 @@
 #### News
 
 - API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
+- API: Event handlers may also be objects with `handleEvent` methods ([#1939](https://github.com/MithrilJS/mithril.js/issues/1939)).
+
+#### Bug fixes
+
+- core: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
+- core: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
+- core: `Object.prototype` properties can no longer interfere with event listener calls.
+- API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 
 ### v1.1.6
 
