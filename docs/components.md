@@ -380,13 +380,13 @@ var RestrictiveComponent = {
 }
 ```
 
-If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node.
+If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node, using [`m.censor`](censor.md) to strip out the lifecycle methods.
 
 ```javascript
 // PREFER
 var FlexibleComponent = {
 	view: function(vnode) {
-		return m("button", vnode.attrs, [
+		return m("button", m.censor(vnode.attrs), [
 			"Click to ", vnode.children
 		])
 	}

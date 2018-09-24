@@ -30,6 +30,7 @@
 - render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
+- API: Introduction of `m.censor()` ([#2219](https://github.com/MithrilJS/mithril.js/pull/2219))
 
 #### News
 
