@@ -435,6 +435,20 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
+		o("set timeout to xhr instance", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: ''}
+				}
+			})
+			return xhr({
+				method: "GET", url: "/item",
+				timeout: 42,
+				config: function(xhr) {
+					o(xhr.timeout).equals(42)
+				}
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
