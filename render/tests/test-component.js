@@ -157,6 +157,61 @@ o.spec("component", function() {
 
 					o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 				})
+				o("ignores keys in proxied element attrs", function() {
+					var toggle = true
+					var remove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return [
+								toggle ?
+									{tag: "div", key: 1, attrs: {onremove: remove}, text: "b"} :
+									{tag: "div", key: 1, attrs: vnode.attrs, text: "b"}
+							]
+						}
+					})
+
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					toggle = false
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					o(remove.callCount).equals(1)
+				})
+				o("ignores keys in proxied fragment attrs", function() {
+					var toggle = true
+					var remove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return [
+								toggle ?
+									{tag: "[", key: 1, attrs: {onremove: remove}, children: []} :
+									{tag: "[", key: 1, attrs: vnode.attrs, children: []}
+							]
+						}
+					})
+
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					toggle = false
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					o(remove.callCount).equals(1)
+				})
+				o("ignores keys in proxied component attrs", function() {
+					var toggle = true
+					var remove = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return [
+								toggle ?
+									{tag: child, key: 1, attrs: {onremove: remove}, children: []} :
+									{tag: child, key: 1, attrs: vnode.attrs, children: []}
+							]
+						}
+					})
+
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					toggle = false
+					render(root, [{tag: component, key: 1, attrs: {}}])
+					o(remove.callCount).equals(1)
+				})
 			})
 			o.spec("return value", function() {
 				o("can return fragments", function() {
@@ -403,6 +458,43 @@ o.spec("component", function() {
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
+				o("does not call oninit in proxied element attrs", function() {
+					var init = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+					var node = {tag: component, attrs: {oninit: init}}
+
+					render(root, [node])
+					o(init.callCount).equals(1)
+				})
+				o("does not call oninit in proxied fragment attrs", function() {
+					var init = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+					var node = {tag: component, attrs: {oninit: init}}
+
+					render(root, [node])
+					o(init.callCount).equals(1)
+				})
+				o("does not call oninit in proxied component attrs", function() {
+					var init = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+					var node = {tag: component, attrs: {oninit: init}}
+
+					render(root, [node])
+					o(init.callCount).equals(1)
+				})
 				o("calls oninit when returning fragment", function() {
 					var called = 0
 					var component = createComponent({
@@ -482,6 +574,43 @@ o.spec("component", function() {
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
+				o("does not call oncreate in proxied element attrs", function() {
+					var create = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+					var node = {tag: component, attrs: {oncreate: create}}
+
+					render(root, [node])
+					o(create.callCount).equals(1)
+				})
+				o("does not call oncreate in proxied fragment attrs", function() {
+					var create = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+					var node = {tag: component, attrs: {oncreate: create}}
+
+					render(root, [node])
+					o(create.callCount).equals(1)
+				})
+				o("does not call oncreate in proxied component attrs", function() {
+					var create = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+					var node = {tag: component, attrs: {oncreate: create}}
+
+					render(root, [node])
+					o(create.callCount).equals(1)
+				})
 				o("does not calls oncreate on redraw", function() {
 					var create = o.spy()
 					var component = createComponent({
@@ -549,6 +678,46 @@ o.spec("component", function() {
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
+				o("does not call onupdate in proxied element attrs", function() {
+					var update = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(1)
+				})
+				o("does not call onupdate in proxied fragment attrs", function() {
+					var update = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(1)
+				})
+				o("does not call onupdate in proxied component attrs", function() {
+					var update = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onupdate: update}}])
+					o(update.callCount).equals(1)
+				})
 				o("calls onupdate when returning fragment", function() {
 					var called = 0
 					var component = createComponent({
@@ -599,6 +768,46 @@ o.spec("component", function() {
 					o(called).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
+				o("does not call onremove in proxied element attrs", function() {
+					var remove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onremove: remove}}])
+					o(remove.callCount).equals(0)
+					render(root, [])
+					o(remove.callCount).equals(1)
+				})
+				o("does not call onremove in proxied fragment attrs", function() {
+					var remove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onremove: remove}}])
+					o(remove.callCount).equals(0)
+					render(root, [])
+					o(remove.callCount).equals(1)
+				})
+				o("does not call onremove in proxied component attrs", function() {
+					var remove = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onremove: remove}}])
+					o(remove.callCount).equals(0)
+					render(root, [])
+					o(remove.callCount).equals(1)
+				})
 				o("calls onremove when returning fragment", function() {
 					var called = 0
 					var component = createComponent({
@@ -647,6 +856,46 @@ o.spec("component", function() {
 					o(called).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
+				o("does not call onbeforeremove in proxied element attrs", function() {
+					var beforeremove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeremove: beforeremove}}])
+					o(beforeremove.callCount).equals(0)
+					render(root, [])
+					o(beforeremove.callCount).equals(1)
+				})
+				o("does not call onbeforeremove in proxied fragment attrs", function() {
+					var beforeremove = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeremove: beforeremove}}])
+					o(beforeremove.callCount).equals(0)
+					render(root, [])
+					o(beforeremove.callCount).equals(1)
+				})
+				o("does not call onbeforeremove in proxied component attrs", function() {
+					var beforeremove = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeremove: beforeremove}}])
+					o(beforeremove.callCount).equals(0)
+					render(root, [])
+					o(beforeremove.callCount).equals(1)
+				})
 				o("calls onbeforeremove when returning fragment", function() {
 					var called = 0
 					var component = createComponent({
@@ -686,6 +935,46 @@ o.spec("component", function() {
 					render(root, [updated])
 
 					o(vnode.dom).notEquals(updated.dom)
+				})
+				o("does not call onbeforeupdate in proxied element attrs", function() {
+					var beforeupdate = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "div", attrs: vnode.attrs, text: "b"}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(1)
+				})
+				o("does not call onbeforeupdate in proxied fragment attrs", function() {
+					var beforeupdate = o.spy()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: "[", attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(1)
+				})
+				o("does not call onbeforeupdate in proxied component attrs", function() {
+					var beforeupdate = o.spy()
+					var child = createComponent()
+					var component = createComponent({
+						view: function(vnode) {
+							return {tag: child, attrs: vnode.attrs, children: []}
+						}
+					})
+
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(0)
+					render(root, [{tag: component, attrs: {onbeforeupdate: beforeupdate}}])
+					o(beforeupdate.callCount).equals(1)
 				})
 				o("lifecycle timing megatest (for a single component)", function() {
 					var methods = {

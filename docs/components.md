@@ -380,15 +380,34 @@ var RestrictiveComponent = {
 }
 ```
 
-If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node, using [`m.censor`](censor.md) to strip out the lifecycle methods.
+If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node, using the same `vnode.attrs` you received.
 
 ```javascript
 // PREFER
 var FlexibleComponent = {
 	view: function(vnode) {
-		return m("button", m.censor(vnode.attrs), [
+		return m("button", vnode.attrs, [
 			"Click to ", vnode.children
 		])
+	}
+}
+```
+
+Do note that when you proxy vnode attributes like this, keys and all lifecycle hooks on it are ignored when Mithril renders the component's view template, to not interfere with the expected layout. This is unlike normal behavior, but it's so you don't have to censor them yourself to avoid weird things like duplicate calls.
+
+If you're passing them via an attribute callback that's not within the immediate template (like a `view` attribute), you'll instead need to use [`m.censor`](censor.md) to strip out the lifecycle methods, since Mithril doesn't know to follow that through.
+
+```javascript
+// PREFER
+var FlexibleComponent = {
+	view: function(vnode) {
+		return m(SomeComponent, {
+			view: function () {
+				return m("button", m.censor(vnode.attrs), [
+					"Click to ", vnode.children
+				])
+			}
+		})
 	}
 }
 ```

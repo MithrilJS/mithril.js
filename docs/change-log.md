@@ -31,6 +31,7 @@
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - API: Introduction of `m.censor()` ([#2219](https://github.com/MithrilJS/mithril.js/pull/2219))
+- API: When you use a component's `vnode.attrs` directly as a child vnode's attrs in the children returned from the component's `view` method, `key` and lifecycle methods within its attrs are not applied to those instances. This does not carry into child components' own trees, which could come up in cases like `m(SomeComponent, {view() { ... }})` ([#2219](https://github.com/MithrilJS/mithril.js/pull/2219))
 
 #### News
 
