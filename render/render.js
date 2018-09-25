@@ -622,6 +622,10 @@ module.exports = function($window) {
 	function setAttr(vnode, key, old, value, ns) {
 		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
+		if (typeof value === "undefined" && key === "value" && old !== value) {
+			vnode.dom.value = ""
+			return
+		}
 		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value === undefined) return
 		var element = vnode.dom
 		if (key.slice(0, 6) === "xlink:") element.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
