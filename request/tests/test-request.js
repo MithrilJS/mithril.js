@@ -415,9 +415,9 @@ o.spec("xhr", function() {
 			xhr({method: "GET", url: "/item", config: handleAbort}).catch(function() {
 				failed = true
 			})
-			.then(function() {
-				resolved = true
-			})
+				.then(function() {
+					resolved = true
+				})
 		})
 		o("doesn't fail on file:// status 0", function(done) {
 			mock.$defineRoutes({
@@ -438,7 +438,7 @@ o.spec("xhr", function() {
 		o("set timeout to xhr instance", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return {status: 200, responseText: ''}
+					return {status: 200, responseText: ""}
 				}
 			})
 			return xhr({
