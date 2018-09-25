@@ -147,7 +147,7 @@ module.exports = function($window) {
 	function updateNodes(parent, old, vnodes, recyclingParent, hooks, nextSibling, ns) {
 		if (old === vnodes && !recyclingParent || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
+		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes, recyclingParent)
 		else {
 			var start = 0, commonLength = Math.min(old.length, vnodes.length), originalOldLength = old.length, hasPool = false, isUnkeyed
 			for(; start < commonLength; start++) {
@@ -165,7 +165,7 @@ module.exports = function($window) {
 				for (; start < originalOldLength; start++) {
 					if (old[start] === vnodes[start] && !recyclingParent || old[start] == null && vnodes[start] == null) continue
 					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, originalOldLength, nextSibling))
-					else if (vnodes[start] == null) removeNodes(old, start, start + 1, null)
+					else if (vnodes[start] == null) removeNodes(old, start, start + 1, vnodes, recyclingParent)
 					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, originalOldLength, nextSibling), recyclingParent, ns)
 				}
 				return
@@ -190,7 +190,7 @@ module.exports = function($window) {
 					oldStart++
 				} else if (v == null) {
 					if (isUnkeyed){
-						removeNodes(old, start, start + 1, vnodes)
+						removeNodes(old, start, start + 1, vnodes, recyclingParent)
 						oldStart++
 					}
 					start++
@@ -245,7 +245,7 @@ module.exports = function($window) {
 				if (end < start) break
 			}
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, Math.min(oldEnd + 1, originalOldLength), vnodes)
+			removeNodes(old, oldStart, Math.min(oldEnd + 1, originalOldLength), vnodes, recyclingParent)
 			if (hasPool) {
 				var limit = Math.max(oldStart, originalOldLength)
 				for (; oldEnd >= limit; oldEnd--) {
@@ -280,7 +280,7 @@ module.exports = function($window) {
 			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
 		}
 		else {
-			removeNode(old, null)
+			removeNode(old, null, recycling)
 			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
@@ -352,7 +352,7 @@ module.exports = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance, null)
+			removeNode(old.instance, null, recycling)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -418,35 +418,41 @@ module.exports = function($window) {
 	}
 
 	//remove
-	function removeNodes(vnodes, start, end, context) {
+	function removeNodes(vnodes, start, end, context, recycling) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				if (vnode.skip) vnode.skip = false
-				else removeNode(vnode, context)
+				else removeNode(vnode, context, recycling)
 			}
 		}
 	}
-	function removeNode(vnode, context) {
+	function removeNode(vnode, context, recycling) {
 		var expected = 1, called = 0
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
-			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+		var original = vnode.state
+		if (!recycling) {
+			if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+				var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+				if (result != null && typeof result.then === "function") {
+					expected++
+					result.then(continuation, continuation)
+				}
 			}
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
-			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
-			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+				var result = callHook.call(vnode.state.onbeforeremove, vnode)
+				if (result != null && typeof result.then === "function") {
+					expected++
+					result.then(continuation, continuation)
+				}
 			}
 		}
 		continuation()
 		function continuation() {
 			if (++called === expected) {
-				onremove(vnode)
+				if (!recycling) {
+					checkState(vnode, original)
+					onremove(vnode)
+				}
 				if (vnode.dom) {
 					var count = vnode.domSize || 1
 					if (count > 1) {
