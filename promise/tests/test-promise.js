@@ -2,7 +2,7 @@
 
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
-var Promise = require("../../promise/promise")
+var Promise = require("../../promise/polyfill")
 
 o.spec("promise", function() {
 	o.spec("constructor", function() {
