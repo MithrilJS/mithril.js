@@ -671,7 +671,7 @@ module.exports = function($window) {
 		if (key === "key" || key === "is" || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if ((old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || value == null) return
-		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key, value)
+		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
 		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
 			if (key === "value") {
@@ -696,11 +696,7 @@ module.exports = function($window) {
 	}
 	function removeAttr(vnode, key, old, ns) {
 		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
-		var nsLastIndex = key.indexOf(":")
-		if (nsLastIndex > -1 && key.substr(0, nsLastIndex) === "xlink") {
-			vnode.dom.removeAttributeNS("http://www.w3.org/1999/xlink", key.slice(nsLastIndex + 1))
-		}
-		else if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
+		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
 			key in vnode.dom && !isAttribute(key)
@@ -712,6 +708,8 @@ module.exports = function($window) {
 		) {
 			vnode.dom[key] = null
 		} else {
+			var nsLastIndex = key.indexOf(":")
+			if (nsLastIndex !== -1) key = key.slice(nsLastIndex + 1)
 			if (old !== false) vnode.dom.removeAttribute(key === "className" ? "class" : key)
 		}
 	}
