@@ -38,6 +38,7 @@
 - render: fix element value don't change if new valor is undefined [#2082](https://github.com/MithrilJS/mithril.js/issues/2082)
 - Promise polyfill implementation separated from polyfilling logic.
 - `PromisePolyfill` is now available on the exported/global `m`.
+- render/core: fix crashes when the keyed vnodes with the same `key` had different `tag` values [#2128](https://github.com/MithrilJS/mithril.js/issues/2128) [@JacksonJN](https://github.com/JacksonJN) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
 
 ---
 

@@ -33,18 +33,17 @@ module.exports = function($window) {
 			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
-				case "#": return createText(parent, vnode, nextSibling)
-				case "<": return createHTML(parent, vnode, ns, nextSibling)
-				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
-				default: return createElement(parent, vnode, hooks, ns, nextSibling)
+				case "#": createText(parent, vnode, nextSibling); break
+				case "<": createHTML(parent, vnode, ns, nextSibling); break
+				case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
+				default: createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(parent, vnode, hooks, ns, nextSibling)
+		else createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
 	function createText(parent, vnode, nextSibling) {
 		vnode.dom = $doc.createTextNode(vnode.children)
 		insertNode(parent, vnode.dom, nextSibling)
-		return vnode.dom
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode, ns, nextSibling) {
@@ -69,7 +68,6 @@ module.exports = function($window) {
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
@@ -80,7 +78,6 @@ module.exports = function($window) {
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
@@ -114,7 +111,6 @@ module.exports = function($window) {
 				setLateAttrs(vnode)
 			}
 		}
-		return element
 	}
 	function initComponent(vnode, hooks) {
 		var sentinel
@@ -140,15 +136,12 @@ module.exports = function($window) {
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
+			createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
-			insertNode(parent, element, nextSibling)
-			return element
 		}
 		else {
 			vnode.domSize = 0
-			return $emptyFragment
 		}
 	}
 
@@ -224,10 +217,20 @@ module.exports = function($window) {
 	// parts are actually implemented as only two loops, one for the first two parts, and one for
 	// the other two. I'm not sure it wins us anything except maybe a few bytes of file size.
 
-	// ## DOM node operations
+	// ## Finding the next sibling.
+	//
+	// `updateNode()` and `createNode()` expect a nextSibling parameter. When the list is being
+	// traversed top-down, the next sibling must be looked for in the old list using
+	// `getNextSibling()`. In the other scenarios (swaps, upwards traversal, map-based diff),
+	// the new vnodes list is traversed upwards, which enables us to fetch the `nextSibling`
+	// parameter on the go (set to the last `v.dom` when present).
+
+	// ## DOM node moves
 	//
 	// In most cases `updateNode()` and `createNode()` perform the DOM operations. However,
-	// this is not the case if the node moved (second and fourth part of the diff algo).
+	// this is not the case if the node moved (second and fourth part of the diff algo). We move
+	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
+	// variable rather than fetching it using `getNextSibling()`.
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
 	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
@@ -283,14 +286,15 @@ module.exports = function($window) {
 					oldStart++, start++
 					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
-					o = old[oldEnd]
-					if (o === v) oldEnd--, start++
-					else if (o == null) oldEnd--
-					else if (v == null) start++
+					v = vnodes[end]
+					if (o === v) oldStart++, end--
+					else if (o == null) oldStart++
+					else if (v == null) end--
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-						if (start < end) insertNode(parent, toFragment(v), getNextSibling(old, oldStart, nextSibling))
-						oldEnd--, start++
+						oldStart++
+						if (start < end--) insertNode(parent, toFragment(o), nextSibling)
+						updateNode(parent, o, v, hooks, nextSibling, ns)
+						if(v.dom != null) nextSibling = v.dom
 					}
 					else break
 				}
@@ -302,8 +306,8 @@ module.exports = function($window) {
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-					if (o.dom != null) nextSibling = o.dom
+					updateNode(parent, o, v, hooks, nextSibling, ns)
+					if (v.dom != null) nextSibling = v.dom
 					oldEnd--, end--
 				} else {
 					if (!map) map = getKeyMap(old, oldEnd)
@@ -311,13 +315,13 @@ module.exports = function($window) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
 							o = old[oldIndex]
-							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
-							insertNode(parent, toFragment(v), nextSibling)
+							insertNode(parent, toFragment(o), nextSibling)
+							updateNode(parent, o, v, hooks, nextSibling, ns)
 							o.skip = true
-							if (o.dom != null) nextSibling = o.dom
+							if (v.dom != null) nextSibling = v.dom
 						} else {
-							var dom = createNode(parent, v, hooks, ns, nextSibling)
-							nextSibling = dom
+							createNode(parent, v, hooks, ns, nextSibling)
+							if (v.dom != null) nextSibling = v.dom
 						}
 					}
 					end--
@@ -458,7 +462,7 @@ module.exports = function($window) {
 	}
 
 	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling) parent.insertBefore(dom, nextSibling)
+		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 
