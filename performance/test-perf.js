@@ -358,16 +358,9 @@ var Root = {
 	}
 }
 
-suite.add({
-	name : "repeated trees (recycling)",
-	fn : function () {
-		m.render(scratch, [m(Root)])
-		m.render(scratch, [])
-	}
-})
 
 suite.add({
-	name : "repeated trees (no recycling)",
+	name : "repeated trees",
 	fn : function () {
 		m.render(scratch, [m(Root)])
 		m.render(scratch, [])

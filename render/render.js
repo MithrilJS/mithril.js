@@ -158,8 +158,6 @@ module.exports = function($window) {
 	 * @param {Vnode[] | null} old - the list of vnodes of the last `render()` call for
 	 *                               this part of the tree
 	 * @param {Vnode[] | null} vnodes - as above, but for the current `render()` call.
-	 * @param {boolean} recyclingParent - was the parent vnode or one of its ancestor
-	 *                                    fetched from the recycling pool?
 	 * @param {Function[]} hooks - an accumulator of post-render hooks (oncreate/onupdate)
 	 * @param {Element | null} nextSibling - the next DOM node if we're dealing with a
 	 *                                       fragment that is not the last item in its
@@ -173,8 +171,7 @@ module.exports = function($window) {
 	//
 	// 1. describe its general structure
 	// 2. focus on the diff algorithm optimizations
-	// 3. describe how the recycling pool meshes into this
-	// 4. discuss DOM node operations.
+	// 3. discuss DOM node operations.
 
 	// ## Overview:
 	//
@@ -188,7 +185,6 @@ module.exports = function($window) {
 	// - manages the leftovers: after diffing, are there:
 	//   - old nodes left to remove?
 	// 	 - new nodes to insert?
-	//   - nodes left in the recycling pool?
 	// 	 deal with them!
 	//
 	// The lists are only iterated over once, with an exception for the nodes in `old` that
@@ -196,10 +192,7 @@ module.exports = function($window) {
 
 	// ## Diffing
 	//
-	// There's first a simple diff for unkeyed lists of equal length that eschews the pool.
-	//
-	// It is followed by a small section that activates the recycling pool if present, we'll
-	// ignore it for now.
+	// There's first a simple diff for unkeyed lists of equal length.
 	//
 	// Then comes the main diff algorithm that is split in four parts (simplifying a bit).
 	//
@@ -227,109 +220,69 @@ module.exports = function($window) {
 	// The range of old nodes that wasn't covered by the first three sections is passed to
 	// `removeNodes()`. Those nodes are removed unless marked as `.skip: true`.
 	//
-	// Then some pool business happens.
-	//
 	// It should be noted that the description of the four sections above is not perfect, because those
 	// parts are actually implemented as only two loops, one for the first two parts, and one for
 	// the other two. I'm not sure it wins us anything except maybe a few bytes of file size.
 
-	// ## The pool
-	//
-	// `old.pool` is an optional array that holds the vnodes that have been previously removed
-	// from the DOM at this level (provided they met the pool eligibility criteria).
-	//
-	// If the `old`, `old.pool` and `vnodes` meet some criteria described in `isRecyclable`, the
-	// elements of the pool are appended to the `old` array, which enables the reconciler to find
-	// them.
-	//
-	// While this is optimal for unkeyed diff and map-based keyed diff (the fourth diff part),
-	// that strategy clashes with the second and third parts of the main diff algo, because
-	// the end of the old list is now filled with the nodes of the pool.
-	//
-	// To determine if a vnode was brought back from the pool, we look at its position in the
-	// `old` array (see the various `oFromPool` definitions). That information is important
-	// in three circumstances:
-	// - If the old and the new vnodes are the same object (`===`), diff is not performed unless
-	//   the old node comes from the pool (since it must be recycled/re-created).
-	// - The value of `oFromPool` is passed as the `recycling` parameter of `updateNode()` (whether
-	//   the parent is being recycled is also factred in here)
-	// - It is used in the DOM node insertion logic (see below)
-	//
-	// At the very end of `updateNodes()`, the nodes in the pool that haven't been picked back
-	// are put in the new pool for the next render phase.
-	//
-	// The pool eligibility and `isRecyclable()` criteria are to be updated as part of #1675.
-
 	// ## DOM node operations
 	//
 	// In most cases `updateNode()` and `createNode()` perform the DOM operations. However,
-	// this is not the case if the node moved (second and fourth part of the diff algo), or
-	// if the node was brough back from the pool and both the old and new nodes have the same
-	// `.tag` value (when the `.tag` differ, `updateNode()` does the insertion).
+	// this is not the case if the node moved (second and fourth part of the diff algo).
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
 	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
 	// nodes remain together in the new list in a way that isn't covered by parts one and
 	// three of the diff algo.
 
-	function updateNodes(parent, old, vnodes, recyclingParent, hooks, nextSibling, ns) {
-		if (old === vnodes && !recyclingParent || old == null && vnodes == null) return
+	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
+		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes, recyclingParent)
+		else if (vnodes == null) removeNodes(old, 0, old.length)
 		else {
-			var start = 0, commonLength = Math.min(old.length, vnodes.length), originalOldLength = old.length, hasPool = false, isUnkeyed = false
+			var start = 0, commonLength = Math.min(old.length, vnodes.length), isUnkeyed = false
 			for(; start < commonLength; start++) {
 				if (old[start] != null && vnodes[start] != null) {
 					if (old[start].key == null && vnodes[start].key == null) isUnkeyed = true
 					break
 				}
 			}
-			if (isUnkeyed && originalOldLength === vnodes.length) {
-				for (start = 0; start < originalOldLength; start++) {
-					if (old[start] === vnodes[start] && !recyclingParent || old[start] == null && vnodes[start] == null) continue
-					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, originalOldLength, nextSibling))
-					else if (vnodes[start] == null) removeNodes(old, start, start + 1, vnodes, recyclingParent)
-					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, originalOldLength, nextSibling), recyclingParent, ns)
+			if (isUnkeyed && old.length === vnodes.length) {
+				for (start = 0; start < vnodes.length; start++) {
+					if (old[start] === vnodes[start] || old[start] == null && vnodes[start] == null) continue
+					else if (old[start] == null) createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (vnodes[start] == null) removeNodes(old, start, start + 1)
+					else updateNode(parent, old[start], vnodes[start], hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
 				return
 			}
-
-			if (isRecyclable(old, vnodes)) {
-				hasPool = true
-				old = old.concat(old.pool)
-			}
-
-			var oldStart = start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oFromPool
+			var oldStart = start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v
 
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldStart]
 				v = vnodes[start]
-				oFromPool = hasPool && oldStart >= originalOldLength
-				if (o === v && !oFromPool && !recyclingParent || o == null && v == null) oldStart++, start++
+				if (o === v || o == null && v == null) oldStart++, start++
 				else if (o == null) {
 					if (isUnkeyed || v.key == null) {
-						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, originalOldLength, nextSibling))
+						createNode(parent, vnodes[start], hooks, ns, getNextSibling(old, ++start, nextSibling))
 					}
 					oldStart++
 				} else if (v == null) {
 					if (isUnkeyed || o.key == null) {
-						removeNodes(old, start, start + 1, vnodes, recyclingParent)
+						removeNodes(old, start, start + 1)
 						oldStart++
 					}
 					start++
 				} else if (o.key === v.key) {
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(v), nextSibling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
 					o = old[oldEnd]
-					oFromPool = hasPool && oldEnd >= originalOldLength
-					if (o === v && !oFromPool && !recyclingParent) oldEnd--, start++
+					if (o === v) oldEnd--, start++
 					else if (o == null) oldEnd--
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-						if (oFromPool && o.tag === v.tag || start < end) insertNode(parent, toFragment(v), getNextSibling(old, oldStart, originalOldLength, nextSibling))
+						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
+						if (start < end) insertNode(parent, toFragment(v), getNextSibling(old, oldStart, nextSibling))
 						oldEnd--, start++
 					}
 					else break
@@ -338,13 +291,11 @@ module.exports = function($window) {
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldEnd]
 				v = vnodes[end]
-				oFromPool = hasPool && oldEnd >= originalOldLength
-				if (o === v && !oFromPool && !recyclingParent) oldEnd--, end--
+				if (o === v) oldEnd--, end--
 				else if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
-					if (oFromPool && o.tag === v.tag) insertNode(parent, toFragment(v), nextSibling)
+					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
 					if (o.dom != null) nextSibling = o.dom
 					oldEnd--, end--
 				} else {
@@ -353,8 +304,7 @@ module.exports = function($window) {
 						var oldIndex = map[v.key]
 						if (oldIndex != null) {
 							o = old[oldIndex]
-							oFromPool = hasPool && oldIndex >= originalOldLength
-							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, originalOldLength, nextSibling), oFromPool || recyclingParent, ns)
+							updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), ns)
 							insertNode(parent, toFragment(v), nextSibling)
 							o.skip = true
 							if (o.dom != null) nextSibling = o.dom
@@ -368,44 +318,31 @@ module.exports = function($window) {
 				if (end < start) break
 			}
 			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, Math.min(oldEnd + 1, originalOldLength), vnodes, recyclingParent)
-			if (hasPool) {
-				var limit = Math.max(oldStart, originalOldLength)
-				for (; oldEnd >= limit; oldEnd--) {
-					if (old[oldEnd].skip) old[oldEnd].skip = false
-					else addToPool(old[oldEnd], vnodes)
-				}
-			}
+			removeNodes(old, oldStart, oldEnd + 1)
 		}
 	}
-	// when recycling, we're re-using an old DOM node, but firing the oninit/oncreate hooks
-	// instead of onbeforeupdate/onupdate.
-	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
+	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
 			vnode._state = old._state
 			vnode.events = old.events
-			if (!recycling && shouldNotUpdate(vnode, old)) return
+			if (shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
 				if (vnode.attrs != null) {
-					if (recycling) {
-						vnode.state = {}
-						initLifecycle(vnode.attrs, vnode, hooks)
-					}
-					else updateLifecycle(vnode.attrs, vnode, hooks)
+					updateLifecycle(vnode.attrs, vnode, hooks)
 				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
 					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, recycling, hooks, ns)
+					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, hooks, ns)
 				}
 			}
-			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
+			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 		}
 		else {
-			removeNode(old, null, recycling)
+			removeNode(old)
 			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
@@ -422,8 +359,8 @@ module.exports = function($window) {
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, recycling, hooks, nextSibling, ns)
+	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
 		if (children != null) {
@@ -437,7 +374,7 @@ module.exports = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, recycling, hooks, ns) {
+	function updateElement(old, vnode, hooks, ns) {
 		var element = vnode.dom = old.dom
 		ns = getNameSpace(vnode) || ns
 
@@ -458,26 +395,22 @@ module.exports = function($window) {
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, recycling, hooks, null, ns)
+			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
-	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		if (recycling) {
-			initComponent(vnode, hooks)
-		} else {
-			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
-			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-			updateLifecycle(vnode._state, vnode, hooks)
-		}
+	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
+		updateLifecycle(vnode.state, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
+			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance, null, recycling)
+			removeNode(old.instance)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -485,17 +418,6 @@ module.exports = function($window) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
 		}
-	}
-	function isRecyclable(old, vnodes) {
-		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
-			var oldChildrenLength = old[0] && old[0].children && old[0].children.length || 0
-			var poolChildrenLength = old.pool[0] && old.pool[0].children && old.pool[0].children.length || 0
-			var vnodesChildrenLength = vnodes[0] && vnodes[0].children && vnodes[0].children.length || 0
-			if (Math.abs(poolChildrenLength - vnodesChildrenLength) <= Math.abs(oldChildrenLength - vnodesChildrenLength)) {
-				return true
-			}
-		}
-		return false
 	}
 	function getKeyMap(vnodes, end) {
 		var map = {}, i = 0
@@ -521,10 +443,8 @@ module.exports = function($window) {
 		}
 		else return vnode.dom
 	}
-	// the vnodes array may hold items that come from the pool (after `limit`) they should
-	// be ignored
-	function getNextSibling(vnodes, i, limit, nextSibling) {
-		for (; i < limit; i++) {
+	function getNextSibling(vnodes, i, nextSibling) {
+		for (; i < vnodes.length; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
@@ -545,43 +465,37 @@ module.exports = function($window) {
 	}
 
 	//remove
-	function removeNodes(vnodes, start, end, context, recycling) {
+	function removeNodes(vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
 				if (vnode.skip) vnode.skip = false
-				else removeNode(vnode, context, recycling)
+				else removeNode(vnode)
 			}
 		}
 	}
-	// when a node is removed from a parent that's brought back from the pool, its hooks should
-	// not fire.
-	function removeNode(vnode, context, recycling) {
+	function removeNode(vnode) {
 		var expected = 1, called = 0
-		if (!recycling) {
-			var original = vnode.state
-			if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-				var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
-				if (result != null && typeof result.then === "function") {
-					expected++
-					result.then(continuation, continuation)
-				}
+		var original = vnode.state
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
 			}
-			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-				var result = callHook.call(vnode.state.onbeforeremove, vnode)
-				if (result != null && typeof result.then === "function") {
-					expected++
-					result.then(continuation, continuation)
-				}
+		}
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
+			if (result != null && typeof result.then === "function") {
+				expected++
+				result.then(continuation, continuation)
 			}
 		}
 		continuation()
 		function continuation() {
 			if (++called === expected) {
-				if (!recycling) {
-					checkState(vnode, original)
-					onremove(vnode)
-				}
+				checkState(vnode, original)
+				onremove(vnode)
 				if (vnode.dom) {
 					var count = vnode.domSize || 1
 					if (count > 1) {
@@ -591,7 +505,6 @@ module.exports = function($window) {
 						}
 					}
 					removeNodeFromDOM(vnode.dom)
-					addToPool(vnode, context)
 				}
 			}
 		}
@@ -599,12 +512,6 @@ module.exports = function($window) {
 	function removeNodeFromDOM(node) {
 		var parent = node.parentNode
 		if (parent != null) parent.removeChild(node)
-	}
-	function addToPool(vnode, context) {
-		if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
-			if (!context.pool) context.pool = [vnode]
-			else context.pool.push(vnode)
-		}
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
@@ -705,9 +612,6 @@ module.exports = function($window) {
 	function isCustomElement(vnode){
 		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
 	}
-	function hasIntegrationMethods(source) {
-		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
-	}
 
 	//style
 	function updateStyle(element, old, style) {
@@ -794,7 +698,7 @@ module.exports = function($window) {
 		if (dom.vnodes == null) dom.textContent = ""
 
 		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
 		if (active != null && $doc.activeElement !== active) active.focus()

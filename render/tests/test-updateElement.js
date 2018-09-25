@@ -224,7 +224,7 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
-	o("restores correctly when recycling", function() {
+	o("doesn't restore since we're not recycling", function() {
 		var vnode = {tag: "div", key: 1}
 		var updated = {tag: "div", key: 2}
 
@@ -237,9 +237,9 @@ o.spec("updateElement", function() {
 		var c = vnode.dom
 
 		o(root.childNodes.length).equals(1)
-		o(a).equals(c)
+		o(a).notEquals(c) // this used to be a recycling pool test
 	})
-	o("restores correctly when recycling via map", function() {
+	o("doesn't restore since we're not recycling (via map)", function() {
 		var a = {tag: "div", key: 1}
 		var b = {tag: "div", key: 2}
 		var c = {tag: "div", key: 3}
@@ -256,6 +256,6 @@ o.spec("updateElement", function() {
 		var y = root.childNodes[1]
 
 		o(root.childNodes.length).equals(3)
-		o(x).equals(y)
+		o(x).notEquals(y) // this used to be a recycling pool test
 	})
 })
