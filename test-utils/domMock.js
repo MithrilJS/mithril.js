@@ -246,7 +246,7 @@ module.exports = function(options) {
 									}
 								}
 							}
-							cssText = buf.join(" ")
+							element.setAttribute("style", cssText = buf.join(" "))
 						}
 					}
 				})
