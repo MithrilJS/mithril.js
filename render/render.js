@@ -279,21 +279,19 @@ module.exports = function($window) {
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldStart]
 				v = vnodes[start]
-				if (o === v || o == null && v == null) oldStart++, start++
-				else if (o == null) oldStart++
+				if (o == null) oldStart++
 				else if (v == null) start++
 				else if (o.key === v.key) {
 					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				} else {
 					v = vnodes[end]
-					if (o === v) oldStart++, end--
-					else if (o == null) oldStart++
+					if (o == null) oldStart++
 					else if (v == null) end--
 					else if (o.key === v.key) {
 						oldStart++
 						if (start < end--) insertNode(parent, toFragment(o), nextSibling)
-						updateNode(parent, o, v, hooks, nextSibling, ns)
+						if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
 						if(v.dom != null) nextSibling = v.dom
 					}
 					else break
@@ -302,11 +300,10 @@ module.exports = function($window) {
 			while (oldEnd >= oldStart && end >= start) {
 				o = old[oldEnd]
 				v = vnodes[end]
-				if (o === v) oldEnd--, end--
-				else if (o == null) oldEnd--
+				if (o == null) oldEnd--
 				else if (v == null) end--
 				else if (o.key === v.key) {
-					updateNode(parent, o, v, hooks, nextSibling, ns)
+					if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
 					if (v.dom != null) nextSibling = v.dom
 					oldEnd--, end--
 				} else {
@@ -316,7 +313,7 @@ module.exports = function($window) {
 						if (oldIndex != null) {
 							o = old[oldIndex]
 							insertNode(parent, toFragment(o), nextSibling)
-							updateNode(parent, o, v, hooks, nextSibling, ns)
+							if (o !== v) updateNode(parent, o, v, hooks, nextSibling, ns)
 							o.skip = true
 							if (v.dom != null) nextSibling = v.dom
 						} else {
