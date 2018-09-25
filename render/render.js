@@ -4,7 +4,6 @@ var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
 	var $doc = $window.document
-	var $emptyFragment = $doc.createDocumentFragment()
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -117,12 +116,12 @@ module.exports = function($window) {
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
 			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 		} else {
 			vnode.state = void 0
 			sentinel = vnode.tag
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
