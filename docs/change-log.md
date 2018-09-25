@@ -29,6 +29,7 @@
 - core: `Object.prototype` properties can no longer interfere with event listener calls.
 - API: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - core: `xlink:href` attributes are now correctly removed
+- render: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
 
 ### v1.1.6
 
