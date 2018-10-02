@@ -151,5 +151,30 @@ o.spec("xhrMock", function() {
 				done()
 			}
 		})
+		o("sould referenced routes set in another instance", function(done) {
+			var anotherInstance = xhrMock()
+
+			$window.$defineRoutes({
+				"GET /test": function() {
+					return {status: 400, responseText: "NG"}
+				}
+			})
+			anotherInstance.$defineRoutes({
+				"GET /test": function() {
+					return {status: 200, responseText: "OK"}
+				}
+			});
+
+			var xhr = new $window.XMLHttpRequest();
+			xhr.open("GET", "/test")
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					o(xhr.status).equals(200)
+					o(xhr.responseText).equals("OK")
+					done()
+				}
+			}
+			xhr.send()
+		})
 	})
 })
