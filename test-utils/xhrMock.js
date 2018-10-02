@@ -3,9 +3,10 @@
 var callAsync = require("../test-utils/callAsync")
 var parseURL = require("../test-utils/parseURL")
 var parseQueryString = require("../querystring/parse")
+var routes = {}
 
 module.exports = function() {
-	var routes = {}
+	routes = {}
 	// var callback = "callback"
 	var serverErrorHandler = function(url) {
 		return {status: 500, responseText: "server error, most likely the URL was not defined " + url}
