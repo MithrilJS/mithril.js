@@ -1,3 +1,4 @@
+//
 ;(function() {
 "use strict"
 function Vnode(tag, key, attrs0, children, text, dom) {
