@@ -56,6 +56,6 @@ There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the mi
 
 ---
 
-Thanks for reading!
+Thanks for reading this file!
 
 🎁
