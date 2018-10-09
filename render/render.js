@@ -133,7 +133,11 @@ module.exports = function($window) {
 		vnode._state = vnode.state
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode._state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		try {
+			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		} catch (err) {
+			console.error(err)
+		}
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
@@ -330,7 +334,11 @@ module.exports = function($window) {
 		if (recycling) {
 			initComponent(vnode, hooks)
 		} else {
-			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			try {
+				vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			} catch (err) {
+				console.error(err)
+			}
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 			updateLifecycle(vnode._state, vnode, hooks)
