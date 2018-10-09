@@ -17,7 +17,6 @@ function parse(file) {
 
 var error
 function run(input, output) {
-	try {
 		var modules = {}
 		var bindings = {}
 		var declaration = /^\s*(?:var|let|const|function)[\t ]+([\w_$]+)/gm
@@ -25,10 +24,10 @@ function run(input, output) {
 		var uuid = 0
 		var process = function(filepath, data) {
 			data.replace(declaration, function(match, binding) {bindings[binding] = 0})
-			
+
 			return data.replace(include, function(match, def, variable, eq, dep, rest) {
 				var filename = new Function("return " + dep).call(), pre = ""
-				
+
 				def = def || "", variable = variable || "", eq = eq || "", rest = rest || ""
 				if (def[0] === ",") def = "\nvar ", pre = "\n"
 				var dependency = resolve(filepath, filename)
@@ -39,7 +38,7 @@ function run(input, output) {
 				return code + rest
 			})
 		}
-		
+
 		var resolve = function(filepath, filename) {
 			if (filename[0] !== ".") {
 				// resolve as npm dependency
@@ -53,7 +52,7 @@ function run(input, output) {
 				return path.resolve(path.dirname(filepath), filename + ".js")
 			}
 		}
-		
+
 		var exportCode = function(filename, filepath, def, variable, eq, rest, uuid) {
 			var code = read(filepath)
 			// if there's a syntax error, report w/ proper stack trace
@@ -65,7 +64,7 @@ function run(input, output) {
 					}
 				})
 			}
-			
+
 			// disambiguate collisions
 			var ignored = {}
 			code.replace(include, function(match, def, variable, eq, dep) {
@@ -81,7 +80,7 @@ function run(input, output) {
 					if (before !== code) bindings[binding]++
 				}
 			}
-			
+
 			// fix strings that got mangled by collision disambiguation
 			var string = /(["'])((?:\\\1|.)*?)(\1)/g
 			var candidates = Object.keys(bindings).map(function(binding) {return binding + (bindings[binding] - 1)}).join("|")
@@ -92,20 +91,20 @@ function run(input, output) {
 				})
 				return open + fixed + close
 			})
-			
+
 			//fix props
 			var props = new RegExp("(\\.\\s*)(" + candidates + ")|([\\{,]\\s*)(" + candidates + ")(\\s*:)", "gm")
 			code = code.replace(props, function(match, dot, a, pre, b, post) {
 				if (dot) return dot + a.replace(/\d+$/, "")
 				else return pre + b.replace(/\d+$/, "") + post
 			})
-			
+
 			return code
 				.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
 				.replace(/module\.exports\s*=\s*/gm, rest ? "var _" + uuid + eq : def + (rest ? "_" : "") + variable + eq) // export
 				+ (rest ? "\n" + def + variable + eq + "_" + uuid : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
 		}
-		
+
 		var versionTag = "bleeding-edge"
 		var packageFile = __dirname + "/../package.json"
 		var code = process(path.resolve(input), read(input))
@@ -113,18 +112,14 @@ function run(input, output) {
 			.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
 			.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
 			.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
-		
+
 		code = ";(function() {\n" + code + "\n}());"
-		
+
 		if (!isFile(output) || code !== read(output)) {
 			//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
 			error = null
 			fs.writeFileSync(output, code, "utf8")
 		}
-	}
-	catch (e) {
-		console.error(e.message)
-	}
 }
 
 module.exports = function(input, output, options) {
