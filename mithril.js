@@ -397,6 +397,15 @@ var coreRenderer = function($window) {
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
 	}
+	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// inside an iframe. Catch and swallow this error0, and heavy-handidly return null.
+	function activeElement() {
+		try {
+			return $doc.activeElement
+		} catch (e) {
+			return null
+		}
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -497,7 +506,11 @@ var coreRenderer = function($window) {
 		vnode._state = vnode.state
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode._state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		try {
+			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		} catch (err) {
+			console.error(err)
+		}
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
@@ -691,7 +704,11 @@ var coreRenderer = function($window) {
 		if (recycling) {
 			initComponent(vnode, hooks)
 		} else {
-			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			try {
+				vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+			} catch (err) {
+				console.error(err)
+			}
 			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 			updateLifecycle(vnode._state, vnode, hooks)
@@ -850,13 +867,13 @@ var coreRenderer = function($window) {
 			if (key2 === "value") {
 				var normalized0 = "" + value // eslint-disable-line no-implicit-coercion
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === activeElement()) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select") {
 					if (value === null) {
-						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
+						if (vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()) return
 					} else {
-						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === activeElement()) return
 					}
 				}
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
@@ -901,7 +918,7 @@ var coreRenderer = function($window) {
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement()
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
@@ -975,7 +992,7 @@ var coreRenderer = function($window) {
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
-		var active = $doc.activeElement
+		var active = activeElement()
 		var namespace = dom.namespaceURI
 		// First time0 rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
@@ -983,7 +1000,7 @@ var coreRenderer = function($window) {
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-		if (active != null && $doc.activeElement !== active) active.focus()
+		if (active != null && activeElement() !== active) active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 	return {render: render, setEventCallback: setEventCallback}
