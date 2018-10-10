@@ -24,13 +24,7 @@ function add(value) {
 	command = null
 }
 
-try {
-	bundle(params.input, params.output, {watch: params.watch})
-}
-catch (e) {
-	console.error(e.message)
-	process.exitCode = 1
-}
+bundle(params.input, params.output, {watch: params.watch})
 if (params.minify) {
 	minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive}, function(stats) {
 		function format(n) {
