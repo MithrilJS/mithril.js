@@ -693,19 +693,16 @@ o.spec("component", function() {
 							return ""
 						})
 					}
+					// the `attrs` hooks should never be called
+					var attrSpy = o.spy()
 					var attrs = {}
 					var hooks = [
 						"oninit", "oncreate", "onbeforeupdate",
 						"onupdate", "onbeforeremove", "onremove"
 					]
 					hooks.forEach(function(hook) {
-						// the `attrs` hooks are called before  the component ones
-						attrs[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount + 1)
-						})
-						methods[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount)
-						})
+						attrs[hook] = attrSpy
+						methods[hook] = o.spy()
 					})
 
 					var component = createComponent(methods)
@@ -717,10 +714,7 @@ o.spec("component", function() {
 					o(methods.onupdate.callCount).equals(0)
 					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
+					o(attrSpy.callCount).equals(0)
 
 					render(root, [{tag: component, attrs: attrs}])
 
@@ -731,10 +725,7 @@ o.spec("component", function() {
 					o(methods.onupdate.callCount).equals(0)
 					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
+					o(attrSpy.callCount).equals(0)
 
 					render(root, [{tag: component, attrs: attrs}])
 
@@ -745,10 +736,7 @@ o.spec("component", function() {
 					o(methods.onupdate.callCount).equals(1)
 					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
+					o(attrSpy.callCount).equals(0)
 
 					render(root, [])
 
@@ -759,10 +747,7 @@ o.spec("component", function() {
 					o(methods.onupdate.callCount).equals(1)
 					o(methods.onbeforeremove.callCount).equals(1)
 					o(methods.onremove.callCount).equals(1)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
+					o(attrSpy.callCount).equals(0)
 				})
 				o("hook state and arguments validation", function(){
 					var methods = {
@@ -771,15 +756,15 @@ o.spec("component", function() {
 							return ""
 						})
 					}
+					// the `attrs` hooks should never be called
+					var attrSpy = o.spy()
 					var attrs = {}
 					var hooks = [
 						"oninit", "oncreate", "onbeforeupdate",
 						"onupdate", "onbeforeremove", "onremove"
 					]
 					hooks.forEach(function(hook) {
-						attrs[hook] = o.spy(function(vnode){
-							o(this).equals(vnode.state)(hook)
-						})
+						attrs[hook] = attrSpy
 						methods[hook] = o.spy(function(vnode){
 							o(this).equals(vnode.state)
 						})
@@ -792,7 +777,6 @@ o.spec("component", function() {
 					render(root, [])
 
 					hooks.forEach(function(hook) {
-						o(attrs[hook].this).equals(methods.view.this)(hook)
 						o(methods[hook].this).equals(methods.view.this)(hook)
 					})
 
@@ -803,10 +787,7 @@ o.spec("component", function() {
 					o(methods.onupdate.args.length).equals(1)
 					o(methods.onbeforeremove.args.length).equals(1)
 					o(methods.onremove.args.length).equals(1)
-
-					hooks.forEach(function(hook) {
-						o(methods[hook].args.length).equals(attrs[hook].args.length)(hook)
-					})
+					o(attrSpy.callCount).equals(0)
 				})
 				o("no recycling occurs (was: recycled components get a fresh state)", function() {
 					var step = 0
@@ -904,12 +885,12 @@ o.spec("component", function() {
 				component.prototype.view = view
 				component.prototype.oninit = oninit
 
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [{tag: component}])
+				render(root, [{tag: component}])
 				render(root, [])
 
 				o(component.callCount).equals(1)
-				o(oninit.callCount).equals(2)
+				o(oninit.callCount).equals(1)
 				o(view.callCount).equals(2)
 			})
 			o("Closure", function() {
@@ -923,12 +904,13 @@ o.spec("component", function() {
 					o(vnode.state).equals(undefined)
 					o(oninit.callCount).equals(0)
 					return state = {
+						oninit: oninit,
 						view: view
 					}
 				})
 
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [{tag: component}])
+				render(root, [{tag: component}])
 				render(root, [])
 
 				o(component.callCount).equals(1)

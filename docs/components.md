@@ -83,9 +83,10 @@ var ComponentWithHooks = {
 }
 ```
 
-Like other types of virtual DOM nodes, components may have additional lifecycle methods defined when consumed as vnode types.
+Unlike other types of virtual DOM nodes, lifecycle methods are not called on component vnodes.
 
 ```javascript
+// This never gets called
 function initialize() {
 	console.log("initialized as vnode")
 }
@@ -93,9 +94,28 @@ function initialize() {
 m(ComponentWithHooks, {oninit: initialize})
 ```
 
-Lifecycle methods in vnodes do not override component methods, nor vice versa. Component lifecycle methods are always run after the vnode's corresponding method.
+There are two reasons for this:
 
-Take care not to use lifecycle method names for your own callback function names in vnodes.
+1. A smaller component that delegates to a DOM vnode might want to expose the lifecycle methods of a child vnode, like with a hypothetical `FormField` shown below. In this case, `onbeforeremove` would otherwise [animate](animation.md) *twice* before finally disappearing, which you usually don't want nor expect.
+
+	```javascript
+	var FormField = {
+		view: function (vnode) {
+			return m("label", [
+				vnode.attrs.label,
+				m("input", vnode.attrs)
+			])
+		}
+	}
+
+	// Suppose you have a dynamic form builder, and you want to animate its
+	// removal within the editor.
+	m(FormField, {name: "firstName", label: "First Name:", onbeforeremove: animate})
+	```
+
+1. For some components, a lifecycle name might be the ideal attribute name for something completely different, like with a hypothetical `m(TodoList, {onremove: updateModel})` where `onremove` is called when a single entry is removed (and not the whole component subtree).
+
+If you really want to expose that functionality to attributes within your component, you can call the lifecycle methods directly within your component's lifecycle methods. Just keep in mind it's usually unnecessary unless you plan to expose the underlying DOM node, since you could just do `m.fragment({onremove: function () { ... }}, children)` and similar even if the component doesn't do it for you.
 
 To learn more about lifecycle methods, [see the lifecycle methods page](lifecycle-methods.md).
 

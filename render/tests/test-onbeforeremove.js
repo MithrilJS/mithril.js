@@ -170,7 +170,7 @@ o.spec("onbeforeremove", function() {
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
-			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
+			o("finalizes the remove phase asynchronously when promise is returned synchronously from tag.onbeforeremove", function(done) {
 				var onremove = o.spy()
 				var onbeforeremove = function(){return Promise.resolve()}
 				var component = createComponent({
@@ -178,10 +178,11 @@ o.spec("onbeforeremove", function() {
 					onremove: onremove,
 					view: function() {},
 				})
-				render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
+				render(root, [{tag: component}])
 				render(root, [])
+				o(onremove.callCount).equals(0) // once for `tag`, once for `attrs`
 				callAsync(function() {
-					o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
+					o(onremove.callCount).equals(1) // once for `tag`, once for `attrs`
 					done()
 				})
 			})

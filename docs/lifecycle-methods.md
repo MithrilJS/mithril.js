@@ -35,9 +35,9 @@ function initializeVnode() {
 m(ComponentWithHook, {oninit: initializeVnode})
 ```
 
-All lifecyle methods receive the vnode as their first arguments, and have their `this` keyword bound to `vnode.state`.
+All lifecycle methods receive the vnode as their first arguments, and have their `this` keyword bound to `vnode.state`.
 
-Lifecycle methods are only called as a side effect of a [`m.render()`](render.md) call. They are not called if the DOM is modified outside of Mithril.
+Lifecycle methods are only called as a side effect of a [`m.render()`](render.md) call. They are not called if the DOM is modified outside of Mithril. They are also not called on component vnodes, just DOM vnodes and fragments.
 
 ---
 

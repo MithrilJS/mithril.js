@@ -47,7 +47,7 @@ Argument    | Type                                                | Required | D
 
 ### How it works
 
-`m.fragment()` creates a [fragment vnode](vnodes.md) with attributes. It is meant for advanced use cases involving [keys](keys.md) or [lifecyle methods](lifecycle-methods.md).
+`m.fragment()` creates a [fragment vnode](vnodes.md) with attributes. It is meant for advanced use cases involving [keys](keys.md) or [lifecycle methods](lifecycle-methods.md).
 
 A fragment vnode represents a list of DOM elements. If you want a regular element vnode that represents only one DOM element, you should use [`m()`](hyperscript.md) instead.
 

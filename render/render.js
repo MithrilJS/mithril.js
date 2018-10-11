@@ -34,6 +34,15 @@ module.exports = function($window) {
 			checkState(vnode, original)
 		}
 	}
+	function tryCallHook(vnode) {
+		var hook
+		if (typeof vnode.tag !== "string") {
+			hook = vnode.state[this]
+		} else if (vnode.attrs != null) {
+			hook = vnode.attrs[this]
+		}
+		if (typeof hook === "function") return callHook.apply(hook, arguments)
+	}
 
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
@@ -143,7 +152,6 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
@@ -502,7 +510,6 @@ module.exports = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		updateLifecycle(vnode.state, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -621,49 +628,47 @@ module.exports = function($window) {
 		}
 	}
 	function removeNode(vnode) {
-		var expected = 1, called = 0
-		var original = vnode.state
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
-			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
-			}
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
-			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
-			}
-		}
-		continuation()
-		function continuation() {
-			if (++called === expected) {
-				checkState(vnode, original)
-				onremove(vnode)
-				if (vnode.dom) {
-					var parent = vnode.dom.parentNode
-					var count = vnode.domSize || 1
-					while (--count) parent.removeChild(vnode.dom.nextSibling)
-					parent.removeChild(vnode.dom)
+		removeNodeAwait(vnode, tryCallHook.call("onbeforeremove", vnode))
+	}
+	// Do the right thing here and recursively await promises. (They aren't
+	// always well-behaved, and we shouldn't assume they are if we're not using
+	// `Promise.resolve()` directly)
+	function removeNodeAwait(vnode, result) {
+		if (result != null && typeof result.then === "function") {
+			var state = vnode.state
+			var continuation = function (next) {
+				var original = state
+				state = null
+				if (original) {
+					try {
+						checkState(vnode, original)
+						removeNodeAwait(vnode, next)
+					} catch (e) {
+						console.error(e)
+					}
 				}
+			}
+			result.then(continuation, continuation.bind(null, null))
+		} else {
+			onremove(vnode)
+			if (vnode.dom) {
+				var parent = vnode.dom.parentNode
+				var count = vnode.domSize || 1
+				while (--count) parent.removeChild(vnode.dom.nextSibling)
+				parent.removeChild(vnode.dom)
 			}
 		}
 	}
 	function onremove(vnode) {
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
-		if (typeof vnode.tag !== "string") {
-			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
-			if (vnode.instance != null) onremove(vnode.instance)
-		} else {
-			var children = vnode.children
-			if (Array.isArray(children)) {
-				for (var i = 0; i < children.length; i++) {
-					var child = children[i]
-					if (child != null) onremove(child)
+		tryCallHook.call("onremove", vnode)
+		if (typeof vnode.tag === "string") {
+			if (Array.isArray(vnode.children)) {
+				for (var i = 0; i < vnode.children.length; i++) {
+					if (vnode.children[i] != null) onremove(vnode.children[i])
 				}
 			}
+		} else {
+			if (vnode.instance != null) onremove(vnode.instance)
 		}
 	}
 
@@ -840,20 +845,12 @@ module.exports = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-		}
-		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-			vnode.instance = old.instance
-			return true
-		}
-		return false
+		var result = tryCallHook.call("onbeforeupdate", vnode, old)
+		if (result === undefined || result) return false
+		vnode.dom = old.dom
+		vnode.domSize = old.domSize
+		vnode.instance = old.instance
+		return true
 	}
 
 	function render(dom, vnodes) {
