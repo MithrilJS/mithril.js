@@ -487,7 +487,7 @@ module.exports = function($window) {
 		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-		updateLifecycle(vnode.state, vnode, hooks)
+		updateLifecycle(vnode._state, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
@@ -613,7 +613,7 @@ module.exports = function($window) {
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
 			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++

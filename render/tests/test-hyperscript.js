@@ -344,7 +344,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("custom-element", {key:"a"})
 
 			o(vnode.tag).equals("custom-element")
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).equals(undefined)
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {

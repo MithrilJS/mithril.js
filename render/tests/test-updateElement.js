@@ -192,7 +192,7 @@ o.spec("updateElement", function() {
 		o(updated.dom.style.backgroundColor).equals("")
 		o(updated.dom.style.color).equals("gold")
 	})
-	o("does not re-render element styles for equivalent style objects", function() {
+	o("re-renders element styles for equivalent style objects", function() {
 		var style = {color: "gold"}
 		var vnode = {tag: "a", attrs: {style: style}}
 
@@ -203,7 +203,7 @@ o.spec("updateElement", function() {
 		var updated = {tag: "a", attrs: {style: style}}
 		render(root, [updated])
 
-		o(updated.dom.style.color).equals("red")
+		o(updated.dom.style.color).equals("gold")
 	})
 	o("setting style to `null` removes all styles", function() {
 		var vnode = {"tag": "p", attrs: {style: "background-color: red"}}
