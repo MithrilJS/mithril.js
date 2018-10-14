@@ -1140,7 +1140,7 @@ var coreRenderer = function($window) {
 			// If it's a custom element, just keep it.
 			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
-			key !== "href" && key2 !== "list" && key2 !== "form" && key2 !== "width" && key2 !== "height"// && key2 !== "type"
+			key2 !== "href" && key2 !== "list" && key2 !== "form" && key2 !== "width" && key2 !== "height"// && key2 !== "type"
 			// Defer the property check until *after* we check everything.
 		) && key2 in vnode.dom
 	}
