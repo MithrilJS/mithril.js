@@ -472,7 +472,7 @@ var coreRenderer = function($window) {
 		// --> "ij", no <td> in sight.
 		var temp = $doc.createElement(possibleParents[match1[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
-			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children1 + "</svg>"
+			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
 			temp = temp.firstChild
 		} else {
 			temp.innerHTML = vnode.children
