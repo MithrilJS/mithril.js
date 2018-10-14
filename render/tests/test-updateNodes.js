@@ -264,6 +264,21 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom.nodeName).equals("S")
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
+	o("creates, deletes, reverses els at same time with '__proto__' key", function() {
+		var vnodes = [{tag: "a", key: "__proto__"}, {tag: "i", key: 3}, {tag: "b", key: 2}]
+		var updated = [{tag: "b", key: 2}, {tag: "a", key: "__proto__"}, {tag: "s", key: 4}]
+
+		render(root, vnodes)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(3)
+		o(updated[0].dom.nodeName).equals("B")
+		o(updated[0].dom).equals(root.childNodes[0])
+		o(updated[1].dom.nodeName).equals("A")
+		o(updated[1].dom).equals(root.childNodes[1])
+		o(updated[2].dom.nodeName).equals("S")
+		o(updated[2].dom).equals(root.childNodes[2])
+	})
 	o("adds to empty array followed by el", function() {
 		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "b", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}]}, {tag: "b", key: 2}]
@@ -1242,7 +1257,7 @@ o.spec("updateNodes", function() {
 		o(root.appendChild.callCount + root.insertBefore.callCount).equals(5)
 		o(tagNames).deepEquals(expectedTagNames)
 	})
-	
+
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
