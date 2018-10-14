@@ -93,9 +93,10 @@ function run(input, output) {
 		})
 
 		//fix props
-		var props = new RegExp("(\\.\\s*)(" + candidates + ")|([\\{,]\\s*)(" + candidates + ")(\\s*:)", "gm")
+		var props = new RegExp("((?:\\/\\/.*)?\\.\\s*)(" + candidates + ")|([\\{,]\\s*)(" + candidates + ")(\\s*:)", "gm")
 		code = code.replace(props, function(match, dot, a, pre, b, post) {
-			if (dot) return dot + a.replace(/\d+$/, "")
+			if (dot && dot.indexOf("//") === 0) return match // Don't do anything because dot was matched in a comment
+			else if (dot) return dot + a.replace(/\d+$/, "")
 			else return pre + b.replace(/\d+$/, "") + post
 		})
 
