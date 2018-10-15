@@ -521,7 +521,7 @@ module.exports = function($window) {
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
-		var map = {}
+		var map = Object.create(null)
 		for (; start < end; start++) {
 			var vnode = vnodes[start]
 			if (vnode != null) {
