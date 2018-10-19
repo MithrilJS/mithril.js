@@ -427,7 +427,7 @@ If an argument is defined for the `assertions` function, the test is deemed to b
 
 ### Assertion o(any value)
 
-Starts an assertion. There are four types of assertion: `equals`, `notEquals`, `deepEquals` and `notDeepEquals`.
+Starts an assertion. There are six types of assertion: `equals`, `notEquals`, `deepEquals`, `notDeepEquals`, `throws`, `notThrows`.
 
 Assertions have this form:
 
@@ -464,6 +464,14 @@ Asserts that two values are recursively equal
 #### Function(String description) o(any value).notDeepEquals(any value)
 
 Asserts that two values are not recursively equal
+
+#### Function(String description) o(Function fn).throws(Object constructor)
+
+Asserts that a function throws an Error of the provided constructor
+
+#### Function(String description) o(Function fn).notThrows(Object constructor)
+
+Asserts that a function does not throw an Error of the provided constructor
 
 ---
 
