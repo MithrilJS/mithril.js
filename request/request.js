@@ -31,7 +31,7 @@ module.exports = function($window, Promise) {
 	function normalize(args, extra) {
 		if (typeof args === "string") {
 			var url = args
-			args = extra || {}
+			args = extra ? Object.assign(extra, {}} : {}
 			if (args.url == null) args.url = url
 		}
 		return args
