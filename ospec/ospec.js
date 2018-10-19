@@ -263,7 +263,11 @@ else window.o = m()
 		try{
 			a()
 		}catch(e){
-			return (e instanceof b)
+			if(typeof b === "string"){
+				return (e.message === b)
+			}else{
+				return (e instanceof b)
+			}
 		}
 		return false
 	}

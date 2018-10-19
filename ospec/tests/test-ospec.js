@@ -170,6 +170,8 @@ o.spec("ospec", function() {
 			o(function(){decodeURIComponent("%")}).throws(URIError)
 
 			o(function(){"ayy".foo()}).notThrows(SyntaxError)
+			o(function(){throw new Error("foo")}).throws("foo")
+			o(function(){throw new Error("foo")}).notThrows("bar")
 
 			var undef1 = {undef: void 0}
 			var undef2 = {UNDEF: void 0}
