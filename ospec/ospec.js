@@ -217,6 +217,8 @@ else window.o = m()
 	define("notEquals", "should not equal", function(a, b) {return a !== b})
 	define("deepEquals", "should deep equal", deepEqual)
 	define("notDeepEquals", "should not deep equal", function(a, b) {return !deepEqual(a, b)})
+	define("throws", "should throw a", throws)
+	define("notThrows", "should not throw a", function(a, b) {return !throws(a, b)})
 
 	function isArguments(a) {
 		if ("callee" in a) {
@@ -254,6 +256,14 @@ else window.o = m()
 				return true
 			}
 			if (a.valueOf() === b.valueOf()) return true
+		}
+		return false
+	}
+	function throws(a, b){
+		try{
+			a()
+		}catch(e){
+			return (e instanceof b)
 		}
 		return false
 	}

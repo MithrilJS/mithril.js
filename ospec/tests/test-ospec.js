@@ -164,6 +164,14 @@ o.spec("ospec", function() {
 			o(a).notEquals(2)
 			o({a: [1, 2], b: 3}).deepEquals({a: [1, 2], b: 3})
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
+			o(function(){throw new Error()}).throws(Error)
+			o(function(){'ayy'.foo()}).throws(TypeError)
+			o(function(){Math.PI.toFixed(Math.pow(10,20))}).throws(RangeError)
+			o(function(){foo.bar()}).throws(ReferenceError)
+			o(function(){eval('foo bar')}).throws(SyntaxError)
+			o(function(){decodeURIComponent('%')}).throws(URIError)
+
+			o(function(){'ayy'.foo()}).notThrows(SyntaxError)
 
 			var undef1 = {undef: void 0}
 			var undef2 = {UNDEF: void 0}
