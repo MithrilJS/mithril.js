@@ -28,14 +28,23 @@ module.exports = function($window, Promise) {
 			return promise
 		}
 	}
-	function normalize(args, extra) {
+	
+    	function normalize(args, extra) {
 		if (typeof args === "string") {
-			var url = args
-			args = extra ? Object.assign(extra, {}} : {}
-			if (args.url == null) args.url = url
+		    var url = args;
+
+		    args = extra || {};
+
+		    for(var key in extra) {
+			if (hasOwn.call(extra, key)) {
+			    args[key] = extra[key]
+			}
+		    }
+
+		    args.url = url;
 		}
 		return args
-	}
+    	}
 
 	function request(args, extra) {
 		var finalize = finalizer()
