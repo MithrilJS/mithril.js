@@ -467,11 +467,11 @@ Asserts that two values are not recursively equal
 
 #### Function(String description) o(Function fn).throws(Object constructor)
 
-Asserts that a function throws an Error of the provided constructor
+Asserts that a function throws an instance of the provided constructo
 
 #### Function(String description) o(Function fn).notThrows(Object constructor)
 
-Asserts that a function does not throw an Error of the provided constructor
+Asserts that a function does not throw an instance of the provided constructor
 
 ---
 
