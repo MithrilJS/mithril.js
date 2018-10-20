@@ -3,6 +3,7 @@
 
 ## Upcoming...
 _2018-xx-yy_
+- ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)
 <!-- Add new lines here. Version number will be decided later -->
 
 ## 3.0.1
