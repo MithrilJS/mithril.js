@@ -687,7 +687,7 @@ module.exports = function() {
 				var isFileInput = vnode.tag === "input" && vnode.attrs.type === "file"
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(vnode.dom))) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
