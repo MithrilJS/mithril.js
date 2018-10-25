@@ -44,47 +44,92 @@ o.spec("attributes", function() {
 			o(b.dom.hasAttribute("id")).equals(true)
 			o(b.dom.getAttribute("id")).equals("test")
 
+			// #1804
 			render(root, [c]);
 
-			// #1804
-			// TODO: uncomment
-			// o(c.dom.hasAttribute("id")).equals(false)
+			o(c.dom.hasAttribute("id")).equals(false)
 		})
 	})
 	o.spec("customElements", function(){
 
-		o("when vnode is customElement, custom setAttribute called", function(){
-
-			var normal = [
-				{tag: "input", attrs: {value: "hello"}},
-				{tag: "input", attrs: {value: "hello"}},
-				{tag: "input", attrs: {value: "hello"}}
-			]
-
-			var custom = [
-				{tag: "custom-element", attrs: {custom: "x"}},
-				{tag: "input", attrs: {is: "something-special", custom: "x"}},
-				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
-			]
-
-			var view = normal.concat(custom)
-
+		o("when vnode is customElement without property, custom setAttribute called", function(){
 			var f = $window.document.createElement
-			var spy
+			var spies = []
 
 			$window.document.createElement = function(tag, is){
 				var el = f(tag, is)
-				if(!spy){
-					spy = o.spy(el.setAttribute)
-				}
+				var spy = o.spy(el.setAttribute)
 				el.setAttribute = spy
-
+				spies.push(spy)
+				spy.elem = el
 				return el
 			}
 
-			render(root, view)
+			render(root, [
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "custom-element", attrs: {custom: "x"}},
+				{tag: "input", attrs: {is: "something-special", custom: "x"}},
+				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
+			])
 
-			o(spy.callCount).equals(custom.length)
+			o(spies[0].callCount).equals(0)
+			o(spies[1].callCount).equals(0)
+			o(spies[2].callCount).equals(0)
+			o(spies[3].calls).deepEquals([{this: spies[3].elem, args: ["custom", "x"]}])
+			o(spies[4].calls).deepEquals([{this: spies[4].elem, args: ["custom", "x"]}])
+			o(spies[5].calls).deepEquals([{this: spies[5].elem, args: ["custom", "x"]}])
+		})
+
+		o("when vnode is customElement with property, custom setAttribute not called", function(){
+			var f = $window.document.createElement
+			var spies = []
+			var getters = []
+			var setters = []
+
+			$window.document.createElement = function(tag, is){
+				var el = f(tag, is)
+				var spy = o.spy(el.setAttribute)
+				el.setAttribute = spy
+				spies.push(spy)
+				spy.elem = el
+				if (tag === "custom-element" || is && is.is === "something-special") {
+					var custom = "foo"
+					var getter, setter
+					Object.defineProperty(el, "custom", {
+						configurable: true,
+						enumerable: true,
+						get: getter = o.spy(function () { return custom }),
+						set: setter = o.spy(function (value) { custom = value })
+					})
+					getters.push(getter)
+					setters.push(setter)
+				}
+				return el
+			}
+
+			render(root, [
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "custom-element", attrs: {custom: "x"}},
+				{tag: "input", attrs: {is: "something-special", custom: "x"}},
+				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
+			])
+
+			o(spies[0].callCount).equals(0)
+			o(spies[1].callCount).equals(0)
+			o(spies[2].callCount).equals(0)
+			o(spies[3].callCount).equals(0)
+			o(spies[4].callCount).equals(0)
+			o(spies[5].callCount).equals(0)
+			o(getters[0].callCount).equals(0)
+			o(getters[1].callCount).equals(0)
+			o(getters[2].callCount).equals(0)
+			o(setters[0].calls).deepEquals([{this: spies[3].elem, args: ["x"]}])
+			o(setters[1].calls).deepEquals([{this: spies[4].elem, args: ["x"]}])
+			o(setters[2].calls).deepEquals([{this: spies[5].elem, args: ["x"]}])
 		})
 
 	})
@@ -147,7 +192,7 @@ o.spec("attributes", function() {
 		o("a lack of attribute removes `value`", function() {
 			var a = {tag: "input", attrs: {}}
 			var b = {tag: "input", attrs: {value: "test"}}
-			// var c = {tag: "input", attrs: {}}
+			var c = {tag: "input", attrs: {}}
 
 			render(root, [a])
 
@@ -158,10 +203,9 @@ o.spec("attributes", function() {
 			o(a.dom.value).equals("test")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [c])
+			render(root, [c])
 
-			// o(a.dom.value).equals("")
+			o(a.dom.value).equals("")
 		})
 		o("can be set as number", function() {
 			var a = {tag: "input", attrs: {value: 1}}
@@ -276,17 +320,16 @@ o.spec("attributes", function() {
 	o.spec("textarea.value", function() {
 		o("can be removed by not passing a value", function() {
 			var a = {tag: "textarea", attrs: {value:"x"}}
-			// var b = {tag: "textarea", attrs: {}}
+			var b = {tag: "textarea", attrs: {}}
 
 			render(root, [a])
 
 			o(a.dom.value).equals("x")
 
 			// https://github.com/MithrilJS/mithril.js/issues/1804#issuecomment-304521235
-			// TODO: Uncomment
-			// render(root, [b])
+			render(root, [b])
 
-			// o(b.dom.value).equals("")
+			o(b.dom.value).equals("")
 		})
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
@@ -352,7 +395,7 @@ o.spec("attributes", function() {
 			o(canvas.dom.width).equals(100)
 		})
 	})
-	o.spec("svg class", function() {
+	o.spec("svg", function() {
 		o("when className is specified then it should be added as a class", function() {
 			var a = {tag: "svg", attrs: {className: "test"}}
 
@@ -360,6 +403,26 @@ o.spec("attributes", function() {
 
 			o(a.dom.attributes["class"].value).equals("test")
 		})
+		/* eslint-disable no-script-url */
+		o("handles xlink:href", function() {
+			var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}}
+			]}
+			render(root, [vnode])
+
+			o(vnode.dom.nodeName).equals("svg")
+			o(vnode.dom.firstChild.attributes["href"].value).equals("javascript:;")
+			o(vnode.dom.firstChild.attributes["href"].namespaceURI).equals("http://www.w3.org/1999/xlink")
+
+			vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
+				{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {}}
+			]}
+			render(root, [vnode])
+
+			o(vnode.dom.nodeName).equals("svg")
+			o("href" in vnode.dom.firstChild.attributes).equals(false)
+		})
+		/* eslint-enable no-script-url */
 	})
 	o.spec("option.value", function() {
 		o("can be set as text", function() {
@@ -376,7 +439,7 @@ o.spec("attributes", function() {
 
 			o(a.dom.value).equals("1")
 		})
-		o("null becomes the empty string", function() {
+		o("null removes the attribute", function() {
 			var a = {tag: "option", attrs: {value: null}}
 			var b = {tag: "option", attrs: {value: "test"}}
 			var c = {tag: "option", attrs: {value: null}}
@@ -384,7 +447,7 @@ o.spec("attributes", function() {
 			render(root, [a]);
 
 			o(a.dom.value).equals("")
-			o(a.dom.getAttribute("value")).equals("")
+			o(a.dom.hasAttribute("value")).equals(false)
 
 			render(root, [b]);
 
@@ -394,7 +457,7 @@ o.spec("attributes", function() {
 			render(root, [c]);
 
 			o(c.dom.value).equals("")
-			o(c.dom.getAttribute("value")).equals("")
+			o(c.dom.hasAttribute("value")).equals(false)
 		})
 		o("'' and 0 are different values", function() {
 			var a = {tag: "option", attrs: {value: 0}, children:[{tag:"#", children:""}]}
@@ -462,6 +525,19 @@ o.spec("attributes", function() {
 				{tag:"option", attrs: {value: ""}}
 			]}
 		}
+		/* FIXME
+		   This incomplete test is meant for testing #1916.
+		   However it cannot be completed until #1978 is addressed
+		   which is a lack a working select.selected / option.selected
+		   attribute. Ask isiahmeadows.
+
+		o("render select options", function() {
+			var select = {tag: "select", selectedIndex: 0, children: [
+				{tag:"option", attrs: {value: "1", selected: ""}}
+			]}
+			render(root, select)
+		})
+		*/
 		o("can be set as text", function() {
 			var a = makeSelect()
 			var b = makeSelect("2")

@@ -56,7 +56,7 @@ Let's create an HTML file to follow along:
 
 ```markup
 <body>
-	<script src="//unpkg.com/mithril/mithril.js"></script>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script>
 	var root = document.body
 

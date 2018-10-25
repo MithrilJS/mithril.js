@@ -1,13 +1,13 @@
 ospec [![NPM Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![NPM License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
 =====
 
-[About](#about) | [Usage](#usage) | [API](#api) | [Goals](#goals)
+[About](#about) | [Usage](#usage) | [CLI](#command-line-interface) | [API](#api) | [Goals](#goals)
 
 Noiseless testing framework
 
 ## About
 
-- ~330 LOC including the CLI runner
+- ~360 LOC including the CLI runner
 - terser and faster test code than with mocha, jasmine or tape
 - test code reads like bullet points
 - assertion code follows [SVO](https://en.wikipedia.org/wiki/Subject–verb–object) structure in present tense for terseness and readability
@@ -111,6 +111,7 @@ o.spec("call()", function() {
 
 		o(spy.callCount).equals(1)
 		o(spy.args[0]).equals(1)
+		o(spy.calls[0]).deepEquals([1])
 	})
 })
 ```
@@ -164,30 +165,54 @@ o("promise test", async function() {
 })
 ```
 
-By default, asynchronous tests time out after 20ms. This can be changed on a per-test basis using the `timeout` argument:
+#### Timeout delays
+
+By default, asynchronous tests time out after 200ms. You can change that default for the current test suite and
+its children by using the `o.specTimeout(delay)` function.
+
+```javascript
+o.spec("a spec that must timeout quickly", function(done, timeout) {
+	// wait 20ms before bailing out of the tests of this suite and
+	// its descendants
+	o.specTimeout(20)
+	o("some test", function(done) {
+		setTimeout(done, 10) // this will pass
+	})
+
+	o.spec("a child suite where the delay also applies", function () {
+		o("some test", function(done) {
+			setTimeout(done, 30) // this will time out.
+		})
+	})
+})
+o.spec("a spec that uses the default delay", function() {
+	// ...
+})
+```
+
+This can also be changed on a per-test basis using the `o.timeout(delay)` function from within a test:
 
 ```javascript
 o("setTimeout calls callback", function(done, timeout) {
-	timeout(50) //wait 50ms before bailing out of the test
+	o.timeout(500) //wait 500ms before bailing out of the test
 
-	setTimeout(done, 30)
+	setTimeout(done, 300)
 })
 ```
 
-Note that the `timeout` function call must be the first statement in its test.	This currently does not work for promise tests. You can combine both methods to do this:
+Note that the `o.timeout` function call must be the first statement in its test. It also works with Promise-returning tests:
 
 ```javascript
-o("promise test", function(done, timeout) {
-	timeout(1000)
-	someOtherAsyncFunctionThatTakes900ms().then(done)
+o("promise test", function() {
+	o.timeout(1000)
+	return someOtherAsyncFunctionThatTakes900ms()
 })
 ```
 
 ```javascript
-o("promise test", async function(done, timeout) {
-	timeout(1000)
+o("promise test", async function() {
+	o.timeout(1000)
 	await someOtherAsyncFunctionThatTakes900ms()
-	done()
 })
 ```
 
@@ -247,19 +272,30 @@ o.spec("math", function() {
 })
 ```
 
-### Running only one test
+### Running only some tests
 
-A test can be temporarily made to run exclusively by calling `o.only()` instead of `o`. This is useful when troubleshooting regressions, to zero-in on a failing test, and to avoid saturating console log w/ irrelevant debug information.
+One or more tests can be temporarily made to run exclusively by calling `o.only()` instead of `o`. This is useful when troubleshooting regressions, to zero-in on a failing test, and to avoid saturating console log w/ irrelevant debug information.
 
 ```javascript
 o.spec("math", function() {
+	// will not run
 	o("addition", function() {
 		o(1 + 1).equals(2)
 	})
 
-	//only this test will be run, regardless of how many groups there are
+	// this test will be run, regardless of how many groups there are
 	o.only("subtraction", function() {
 		o(1 - 1).notEquals(2)
+	})
+
+	// will not run
+	o("multiplication", function() {
+		o(2 * 2).equals(4)
+	})
+
+	// this test will be run, regardless of how many groups there are
+	o.only("division", function() {
+		o(6 / 2).notEquals(2)
 	})
 })
 ```
@@ -288,28 +324,64 @@ _o("a test", function() {
 _o.run()
 ```
 
-### Running the test suite from the command-line
+## Command Line Interface
 
-ospec will automatically evaluate all `*.js` files in any folder named `/tests`.
-
-`o.run()` is automatically called by the cli - no need to call it in your test code.
-
-#### Create an npm script in your package:
+Create a script in your package.json:
 ```
 	"scripts": {
-		...
 		"test": "ospec",
 		...
 	}
 ```
+...and run it from the command line:
 
 ```
-	$ npm test
+$ npm test
 ```
 
-#### Direct use from the command line
+**NOTE:** `o.run()` is automatically called by the cli - no need to call it in your test code.
 
-Ospec doesn't work when installed globally. Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+### CLI Options
+
+Running ospec without arguments is equivalent to running `ospec '**/tests/**/*.js'`. In english, this tells ospec to evaluate all `*.js` files in any sub-folder named `tests/` (the `node_modules` folder is always excluded).
+
+If you wish to change this behavior, just provide one or more glob match patterns:
+
+```
+ospec '**/spec/**/*.js' '**/*.spec.js'
+```
+
+You can also provide ignore patterns (note: always add `--ignore` AFTER match patterns):
+
+```
+ospec --ignore 'folder1/**' 'folder2/**'
+```
+
+Finally, you may choose to load files or modules before any tests run (**note:** always add `--require` AFTER match patterns):
+
+```
+ospec --require esm
+```
+
+Here's an example of mixing them all together:
+
+```
+ospec '**/*.test.js' --ignore 'folder1/**' --require esm ./my-file.js
+```
+
+### Run ospec directly from the command line:
+
+ospec comes with an executable named `ospec`. NPM auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec` from your project root, but there are more convenient methods to do so that we will soon describe.
+
+ospec doesn't work when installed globally (`npm install -g`). Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
+
+Here are different ways of running ospec from the command line. This knowledge applies to not just ospec, but any locally installed npm binary.
+
+#### npx
+
+If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
+
+#### npm-run
 
 If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
 
@@ -324,6 +396,16 @@ Then, from a project that has ospec installed as a (dev) dependency:
 ```
 npm-run ospec
 ```
+
+#### PATH
+
+If you understand how your system's PATH works (e.g. for [OSX](https://coolestguidesontheplanet.com/add-shell-path-osx/)), then you can add the following to your PATH...
+
+```
+export PATH=./node_modules/.bin:$PATH
+```
+
+...and you'll be able to run `ospec` without npx, npm, etc. This one-time setup will also work with other binaries across all your node projects, as long as you run binaries from the root of your projects.
 
 ---
 
@@ -491,15 +573,23 @@ o.run(function(results) {
 
 ---
 
-### Boolean result.pass
+### Boolean|Null result.pass
 
-True if the test passed. **No other keys will exist on the result if this value is true.**
+- `true` if the assertion passed.
+- `false` if the assertion failed.
+- `null` if the assertion was incomplete (`o("partial assertion) // and that's it`).
 
 ---
 
 ### Error result.error
 
-The `Error` object explaining the reason behind a failure.
+The `Error` object explaining the reason behind a failure. If the assertion failed, the stack will point to the actuall error. If the assertion did pass or was incomplete, this field is identical to `result.testError`.
+
+---
+
+### Error result.testError
+
+An `Error` object whose stack points to the test definition that wraps the assertion. Useful as a fallback because in some async cases the main may not point to test code.
 
 ---
 
@@ -527,7 +617,7 @@ o.spec("message", function() {
 
 ### String result.context
 
-A `>`-separated string showing the structure of the test specification.
+In case of failure, a `>`-separated string showing the structure of the test specification.
 In the below example, `result.context` would be `testing > rocks`.
 
 ```javascript

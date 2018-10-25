@@ -75,6 +75,10 @@ module.exports = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 
+			if (args.timeout) xhr.timeout = args.timeout
+			
+			if (args.responseType) xhr.responseType = args.responseType
+
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
 			}
@@ -88,12 +92,13 @@ module.exports = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
+						if (args.extract !== extract || (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
 							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
+							error.code = xhr.status
+							error.response = response
 							reject(error)
 						}
 					}
@@ -159,7 +164,7 @@ module.exports = function($window, Promise) {
 
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 
 	function extract(xhr) {return xhr.responseText}

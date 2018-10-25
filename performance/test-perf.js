@@ -31,7 +31,7 @@ var browserMock = require("../test-utils/browserMock")
 // Do this silly dance so browser testing works
 var B = typeof Benchmark === "undefined" ? require("benchmark") : Benchmark
 
-var m, scratch;
+var scratch;
 
 // set up browser env on before running tests
 var doc = typeof document !== "undefined" ? document : null
@@ -43,15 +43,20 @@ if(!doc) {
 	doc = mock.document
 }
 
-// Have to include mithril AFTER browser polyfill is set up
-m = require("../mithril") // eslint-disable-line global-require
+var m = require("../render/hyperscript")
+m.render = require("../render/render")(window).render
 
-scratch = doc.createElement("div");
 
-(doc.body || doc.documentElement).appendChild(scratch)
+function resetScratch() {
+	doc.documentElement.innerHTML = "<div></div>"
+	scratch = doc.documentElement.firstChild
+}
+
+resetScratch()
 
 // Initialize benchmark suite
 var suite = new B.Suite("mithril perf")
+var xuite = {add: function(options) {console.log("skipping " + options.name)}} // eslint-disable-line no-unused-vars
 
 suite.on("start", function() {
 	this.start = Date.now();
@@ -60,7 +65,7 @@ suite.on("start", function() {
 suite.on("cycle", function(e) {
 	console.log(e.target.toString())
 
-	scratch.innerHTML = ""
+	resetScratch()
 })
 
 suite.on("complete", function() {
@@ -70,7 +75,7 @@ suite.on("complete", function() {
 suite.on("error", console.error.bind(console))
 
 suite.add({
-	name : "rerender without changes",
+	name : "rerender identical vnode",
 	onStart : function() {
 		this.vdom = m("div", {class: "foo bar", "data-foo": "bar", p: 2},
 			m("header",
@@ -116,6 +121,53 @@ suite.add({
 	},
 	fn : function() {
 		m.render(scratch, this.vdom)
+	}
+})
+
+suite.add({
+	name : "rerender same tree",
+	fn : function() {
+		m.render(scratch, m("div", {class: "foo bar", "data-foo": "bar", p: 2},
+			m("header",
+				m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
+				m("nav",
+					m("a", {href: "/foo"}, "Foo"),
+					m("a", {href: "/bar"}, "Bar")
+				)
+			),
+			m("main",
+				m("form", {onSubmit: function onSubmit() {}},
+					m("input", {type: "checkbox", checked: true}),
+					m("input", {type: "checkbox", checked: false}),
+					m("fieldset",
+						m("label",
+							m("input", {type: "radio", checked: true})
+						),
+						m("label",
+							m("input", {type: "radio"})
+						)
+					),
+					m("button-bar",
+						m("button",
+							{style: "width:10px; height:10px; border:1px solid #FFF;"},
+							"Normal CSS"
+						),
+						m("button",
+							{style: "top:0 ; right: 20"},
+							"Poor CSS"
+						),
+						m("button",
+							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+							"Poorer CSS"
+						),
+						m("button",
+							{style: {margin: 0, padding: "10px", overflow: "visible"}},
+							"Object CSS"
+						)
+					)
+				)
+			)
+		))
 	}
 })
 
@@ -181,12 +233,12 @@ suite.add({
 
 suite.add({
 	name : "mutate styles/properties",
-
+	// minSamples: 100,
 	onStart : function () {
 		var counter = 0
 		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
 		var get = function (obj, i) { return obj[i%obj.length] }
-		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga"]
+		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga", null, null, undefined]
 		var styles = []
 		var multivalue = ["0 1px", "0 0 1px 0", "0", "1px", "20px 10px", "7em 5px", "1px 0 5em 2px"]
 		var stylekeys = [
@@ -212,21 +264,26 @@ suite.add({
 
 		this.count = 0
 		this.app = function (index) {
-			return m("div",
-				{
-					class: get(classes, index),
-					"data-index": index,
-					title: index.toString(36)
-				},
-				m("input", {type: "checkbox", checked: index % 3 == 0}),
-				m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
-				m("div", {class: get(classes, index * 11)},
-					m("p", {style: get(styles, index)}, "p1"),
-					m("p", {style: get(styles, index + 1)}, "p2"),
-					m("p", {style: get(styles, index * 2)}, "p3"),
-					m("p", {style: get(styles, index * 3 + 1)}, "p4")
+			var last = index + 300
+			var vnodes = []
+			for (; index < last; index++) vnodes.push(
+				m("div.booga",
+					{
+						class: get(classes, index),
+						"data-index": index,
+						title: index.toString(36)
+					},
+					m("input.dooga", {type: "checkbox", checked: index % 3 == 0}),
+					m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
+					m("div", {class: get(classes, index * 11)},
+						m("p", {style: get(styles, index)}, "p1"),
+						m("p", {style: get(styles, index + 1)}, "p2"),
+						m("p", {style: get(styles, index * 2)}, "p3"),
+						m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
+					)
 				)
 			)
+			return vnodes
 		}
 	},
 
@@ -311,16 +368,9 @@ var Root = {
 	}
 }
 
-suite.add({
-	name : "repeated trees (recycling)",
-	fn : function () {
-		m.render(scratch, [m(Root)])
-		m.render(scratch, [])
-	}
-})
 
 suite.add({
-	name : "repeated trees (no recycling)",
+	name : "repeated trees",
 	fn : function () {
 		m.render(scratch, [m(Root)])
 		m.render(scratch, [])

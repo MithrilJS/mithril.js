@@ -1,4 +1,3 @@
-/* eslint-disable no-script-url */
 "use strict"
 
 var o = require("../../ospec/ospec")
@@ -54,6 +53,7 @@ o.spec("createElement", function() {
 		o(vnode.dom.childNodes[0].nodeName).equals("A")
 		o(vnode.dom.childNodes[1].nodeName).equals("B")
 	})
+	/* eslint-disable no-script-url */
 	o("creates svg", function() {
 		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
 			{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}},
@@ -71,6 +71,7 @@ o.spec("createElement", function() {
 		o(vnode.dom.childNodes[1].firstChild.nodeName).equals("body")
 		o(vnode.dom.childNodes[1].firstChild.namespaceURI).equals("http://www.w3.org/1999/xhtml")
 	})
+	/* eslint-enable no-script-url */
 	o("sets attributes correctly for svg", function() {
 		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", attrs: {viewBox: "0 0 100 100"}}
 		render(root, [vnode])

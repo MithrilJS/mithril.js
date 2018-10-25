@@ -7,10 +7,11 @@
   "main": "mithril.js",
   "repository": "MithrilJS/mithril.js",
   "scripts": {
-    "dev": "node bundler/cli browser.js -o mithril.js -w",
+    "dev": "node bundler/cli browser.js -output mithril.js -watch",
     "build": "npm run build-browser & npm run build-min",
-    "build-browser": "node bundler/cli browser.js -o mithril.js",
-    "build-min": "node bundler/cli browser.js -o mithril.min.js -m",
+    "build-browser": "node bundler/cli browser.js -output mithril.js",
+    "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
+    "precommit": "lint-staged",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
     "lint": "eslint . || true",
@@ -27,14 +28,24 @@
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "benchmark": "^2.1.4",
+    "dedent": "^0.7.0",
     "eslint": "^3.19.0",
     "gh-pages": "^0.12.0",
+    "glob": "^7.1.2",
     "istanbul": "^0.4.5",
-    "marked": "^0.3.6"
+    "lint-staged": "^4.0.4",
+    "locater": "^1.3.0",
+    "marked": "^0.3.19",
+    "pinpoint": "^1.1.0"
   },
   "bin": {
-    "ospec": "./ospec/bin/ospec",
-    "bundle": "./bundler/bin/bundle"
+    "ospec": "./ospec/bin/ospec"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint . --fix",
+      "git add"
+    ]
   },
   "dependencies": {}
 }

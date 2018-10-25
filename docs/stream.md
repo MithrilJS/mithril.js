@@ -120,11 +120,13 @@ Argument     | Type                 | Required | Description
 
 Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.
 
+Note that you can prevent dependent streams from being updated by returning the special value `stream.HALT` inside the accumulator function.
+
 `stream = Stream.scan(fn, accumulator, stream)`
 
 Argument      | Type                             | Required | Description
 ------------- | -------------------------------- | -------- | ---
-`fn`          | `(accumulator, value) -> result` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`fn`          | `(accumulator, value) -> result \| HALT` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
 `accumulator` | `any`                            | Yes      | The starting value for the accumulator
 `stream`      | `Stream`                         | Yes      | Stream containing the values
 **returns**   | `Stream`                         |          | Returns a new stream containing the result
@@ -500,13 +502,6 @@ Streams implement a `.toJSON()` method. When a stream is passed as the argument 
 var value = stream(123)
 var serialized = JSON.stringify(value)
 console.log(serialized) // logs 123
-```
-
-Streams also implement a `valueOf` method that returns the value of the stream.
-
-```javascript
-var value = stream(123)
-console.log("test " + value) // logs "test 123"
 ```
 
 ---

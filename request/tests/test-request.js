@@ -230,7 +230,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("deserialize parameter works in POST", function(done) {
@@ -244,7 +244,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("extract parameter works in GET", function(done) {
@@ -258,7 +258,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("extract parameter works in POST", function(done) {
@@ -272,7 +272,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals('{"test":123}')
+				o(data).equals("{\"test\":123}")
 			}).then(done)
 		})
 		o("ignores deserialize if extract is defined", function(done) {
@@ -435,6 +435,34 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
+		o("set timeout to xhr instance", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: ""}
+				}
+			})
+			return xhr({
+				method: "GET", url: "/item",
+				timeout: 42,
+				config: function(xhr) {
+					o(xhr.timeout).equals(42)
+				}
+			})
+		})
+		o("set responseType to xhr instance", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: ""}
+				}
+			})
+			return xhr({
+				method: "GET", url: "/item",
+				responseType: "blob",
+				config: function(xhr) {
+					o(xhr.responseType).equals("blob")
+				}
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
@@ -458,9 +486,10 @@ o.spec("xhr", function() {
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 				o(e.message).equals(JSON.stringify({error: "error"}))
+				o(e.code).equals(500)
 			}).then(done)
 		})
-		o("extends Error with JSON response", function(done) {
+		o("adds response to Error", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({message: "error", stack: "error on line 1"})}
@@ -468,8 +497,8 @@ o.spec("xhr", function() {
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
-				o(e.message).equals("error")
-				o(e.stack).equals("error on line 1")
+				o(e.response.message).equals("error")
+				o(e.response.stack).equals("error on line 1")
 			}).then(done)
 		})
 		o("rejects on non-JSON server error", function(done) {
@@ -479,7 +508,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
-				o(e.message).equals("error")
+				o(e.message).equals("Invalid JSON: error")
 			}).then(done)
 		})
 		o("triggers all branched catches upon rejection", function(done) {
@@ -517,6 +546,36 @@ o.spec("xhr", function() {
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 			}).then(done)
+		})
+		o("does not reject on status error code when extract provided", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 500, responseText: JSON.stringify({message: "error"})}
+				}
+			})
+			xhr({
+				method: "GET", url: "/item",
+				extract: function(xhr) {return JSON.parse(xhr.responseText)}
+			}).then(function(data) {
+				o(data.message).equals("error")
+				done()
+			})
+		})
+		o("rejects on error in extract", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			xhr({
+				method: "GET", url: "/item",
+				extract: function() {throw new Error("error")}
+			}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("error")
+			}).then(function() {
+				done()
+			})
 		})
 	})
 })

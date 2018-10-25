@@ -16,6 +16,6 @@ module.exports = function(redrawService) {
 			redrawService.render(root, Vnode(component))
 		}
 		redrawService.subscribe(root, run)
-		redrawService.redraw()
+		run()
 	}
 }
