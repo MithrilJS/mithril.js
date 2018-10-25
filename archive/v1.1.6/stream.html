@@ -229,7 +229,6 @@
 <hr>
 <h5 id="streamscan"><a href="#streamscan">Stream.scan</a></h5>
 <p>Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.</p>
-<p>Note that you can prevent dependent streams from being updated by returning the special value <code>stream.HALT</code> inside the accumulator function.</p>
 <p><code>stream = Stream.scan(fn, accumulator, stream)</code></p>
 <table>
 <thead>
@@ -243,8 +242,7 @@
 <tbody>
 <tr>
 <td><code>fn</code></td>
-<td>`(accumulator, value) -&gt; result \</td>
-<td>HALT`</td>
+<td><code>(accumulator, value) -&gt; result</code></td>
 <td>Yes</td>
 <td>A function that takes an accumulator and value parameter and returns a new accumulator value</td>
 </tr>
@@ -637,6 +635,10 @@ console.log(value()) // logs 2
 <pre><code class="lang-javascript">var value = stream(123)
 var serialized = JSON.stringify(value)
 console.log(serialized) // logs 123
+</code></pre>
+<p>Streams also implement a <code>valueOf</code> method that returns the value of the stream.</p>
+<pre><code class="lang-javascript">var value = stream(123)
+console.log(&quot;test &quot; + value) // logs &quot;test 123&quot;
 </code></pre>
 <hr>
 <h3 id="streams-do-not-trigger-rendering"><a href="#streams-do-not-trigger-rendering">Streams do not trigger rendering</a></h3>

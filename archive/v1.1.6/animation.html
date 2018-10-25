@@ -75,7 +75,7 @@
 <p>Mithril does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril does, however, offer hooks to make life easier in some specific cases where it&#39;s traditionally difficult to make animations work.</p>
 <hr>
 <h3 id="animation-on-element-creation"><a href="#animation-on-element-creation">Animation on element creation</a></h3>
-<p>Animating an element via CSS when the element is created couldn&#39;t be simpler. Just add an animation to a CSS class normally:</p>
+<p>Animating an element via CSS when the element created couldn&#39;t be simpler. Just add an animation to a CSS class normally:</p>
 <pre><code class="lang-css">.fancy {animation:fade-in 0.5s;}
 @keyframes fade-in {
     from {opacity:0;}
@@ -92,7 +92,7 @@ m.mount(document.body, FancyComponent)
 </code></pre>
 <hr>
 <h3 id="animation-on-element-removal"><a href="#animation-on-element-removal">Animation on element removal</a></h3>
-<p>The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers the <a href="lifecycle-methods.html#onbeforeremove"><code>onbeforeremove</code></a> hook that allows us to defer the removal of an element.</p>
+<p>The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers a <a href="lifecycle-methods.html#onbeforeremove"><code>onbeforeremove</code></a> hook that allows us to defer the removal of an element.</p>
 <p>Let&#39;s create an <code>exit</code> animation that fades <code>opacity</code> from 1 to 0.</p>
 <pre><code class="lang-css">.exit {animation:fade-out 0.5s;}
 @keyframes fade-out {
@@ -117,7 +117,7 @@ var Toggler = {
     onbeforeremove: function(vnode) {
         vnode.dom.classList.add(&quot;exit&quot;)
         return new Promise(function(resolve) {
-            vnode.dom.addEventListener(&quot;animationend&quot;, resolve)
+            setTimeout(resolve, 500)
         })
     },
     view: function() {
@@ -126,7 +126,7 @@ var Toggler = {
 }
 </code></pre>
 <p><code>vnode.dom</code> points to the root DOM element of the component (<code>&lt;div class=&quot;fancy&quot;&gt;</code>). We use the classList API here to add an <code>exit</code> class to <code>&lt;div class=&quot;fancy&quot;&gt;</code>.</p>
-<p>Then we return a <a href="promise.html">Promise</a> that resolves when the <code>animationend</code> event fires. When we return a promise from <code>onbeforeremove</code>, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits for the exit animation to finish.</p>
+<p>Then we return a <a href="promise.html">Promise</a> that resolves after half a second. When we return a promise from <code>onbeforeremove</code>, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits half a second, giving the exit animation the exact time it needs to complete.</p>
 <p>We can verify that both the enter and exit animations work by mounting the <code>Toggler</code> component:</p>
 <pre><code class="lang-javascript">m.mount(document.body, Toggler)
 </code></pre>
