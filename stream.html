@@ -11,7 +11,7 @@
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>1.1.6</small></h1>
+				<h1><img src="logo.svg"> Mithril <small>2.0.0-rc.0</small></h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
@@ -229,6 +229,7 @@
 <hr>
 <h5 id="streamscan"><a href="#streamscan">Stream.scan</a></h5>
 <p>Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.</p>
+<p>Note that you can prevent dependent streams from being updated by returning the special value <code>stream.HALT</code> inside the accumulator function.</p>
 <p><code>stream = Stream.scan(fn, accumulator, stream)</code></p>
 <table>
 <thead>
@@ -242,7 +243,8 @@
 <tbody>
 <tr>
 <td><code>fn</code></td>
-<td><code>(accumulator, value) -&gt; result</code></td>
+<td>`(accumulator, value) -&gt; result \</td>
+<td>HALT`</td>
 <td>Yes</td>
 <td>A function that takes an accumulator and value parameter and returns a new accumulator value</td>
 </tr>
@@ -636,10 +638,6 @@ console.log(value()) // logs 2
 var serialized = JSON.stringify(value)
 console.log(serialized) // logs 123
 </code></pre>
-<p>Streams also implement a <code>valueOf</code> method that returns the value of the stream.</p>
-<pre><code class="lang-javascript">var value = stream(123)
-console.log(&quot;test &quot; + value) // logs &quot;test 123&quot;
-</code></pre>
 <hr>
 <h3 id="streams-do-not-trigger-rendering"><a href="#streams-do-not-trigger-rendering">Streams do not trigger rendering</a></h3>
 <p>Unlike libraries like Knockout, Mithril streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril component views, route changes, or after <a href="request.html"><code>m.request</code></a> calls resolve.</p>
@@ -670,7 +668,7 @@ function plusOne(a) {
 		</main>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
-		<script src="https://unpkg.com/mithril@1.1.6/mithril.js" async></script>
+		<script src="https://unpkg.com/mithril@2.0.0-rc.0/mithril.js" async></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

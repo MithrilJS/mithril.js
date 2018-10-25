@@ -11,7 +11,7 @@
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>1.1.6</small></h1>
+				<h1><img src="logo.svg"> Mithril <small>2.0.0-rc.0</small></h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
@@ -31,6 +31,7 @@
 <li><a href="#how-it-works">How it works</a></li>
 <li><a href="#flexibility">Flexibility</a></li>
 <li><a href="#css-selectors">CSS selectors</a></li>
+<li><a href="attributes-passed-as-the-second-argument">Attributes passed as the second argument</a></li>
 <li><a href="#dom-attributes">DOM attributes</a></li>
 <li><a href="#style-attribute">Style attribute</a></li>
 <li><a href="#events">Events</a></li>
@@ -184,7 +185,17 @@ m(&quot;a.link[href=/]&quot;, {
 // equivalent HTML:
 // &lt;a href=&quot;/&quot; class=&quot;link selected&quot;&gt;Home&lt;/a&gt;
 </code></pre>
-<p>If there are class names in both first and second arguments of <code>m()</code>, they are merged together as you would expect.</p>
+<h3 id="attributes-passed-as-the-second-argument"><a href="#attributes-passed-as-the-second-argument">Attributes passed as the second argument</a></h3>
+<p>You can pass attributes, properties, events and lifecycle hooks in the second, optional argument (see the next sections for details).</p>
+<pre><code class="lang-JS">m(&quot;button&quot;, {
+    class: &quot;my-button&quot;,
+    onclick: function() {/* ... */},
+    oncreate: function() {/* ... */}
+})
+</code></pre>
+<p>If the value of such an attribute is <code>null</code> or <code>undefined</code>, it is treated as if the attribute was absent.</p>
+<p>If there are class names in both first and second arguments of <code>m()</code>, they are merged together as you would expect. If the value of the class in the second argument is <code>null</code>or <code>undefined</code>, it is ignored.</p>
+<p>If another attribute is present in both the first and the second argument, the second one takes precedence even if it is  is <code>null</code> or <code>undefined</code>.</p>
 <hr>
 <h3 id="dom-attributes"><a href="#dom-attributes">DOM attributes</a></h3>
 <p>Mithril uses both the Javascript API and the DOM API (<code>setAttribute</code>) to resolve attributes. This means you can use both syntaxes to refer to attributes.</p>
@@ -194,6 +205,63 @@ m(&quot;input&quot;, {readOnly: true}) // uppercase
 m(&quot;input[readonly]&quot;)
 m(&quot;input[readOnly]&quot;)
 </code></pre>
+<p>This even includes custom elements. For example, you can use <a href="https://aframe.io/docs/0.8.0/introduction/">A-Frame</a> within Mithril, no problem!</p>
+<pre><code class="lang-javascript">m(&quot;a-scene&quot;, [
+    m(&quot;a-box&quot;, {
+        position: &quot;-1 0.5 -3&quot;,
+        rotation: &quot;0 45 0&quot;,
+        color: &quot;#4CC3D9&quot;,
+    }),
+
+    m(&quot;a-sphere&quot;, {
+        position: &quot;0 1.25 -5&quot;,
+        radius: &quot;1.25&quot;,
+        color: &quot;#EF2D5E&quot;,
+    }),
+
+    m(&quot;a-cylinder&quot;, {
+        position: &quot;1 0.75 -3&quot;,
+        radius: &quot;0.5&quot;,
+        height: &quot;1.5&quot;,
+        color: &quot;#FFC65D&quot;,
+    }),
+
+    m(&quot;a-plane&quot;, {
+        position: &quot;0 0 -4&quot;,
+        rotation: &quot;-90 0 0&quot;,
+        width: &quot;4&quot;,
+        height: &quot;4&quot;,
+        color: &quot;#7BC8A4&quot;,
+    }),
+
+    m(&quot;a-sky&quot;, {
+        color: &quot;#ECECEC&quot;,
+    }),
+])
+</code></pre>
+<p>And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using <a href="http://brick.mozilla.io/docs/brick-deck">Brick&#39;s <code>brick-deck</code></a> as an example, they have a <code>selected-index</code> attribute with a corresponding <code>selectedIndex</code> getter/setter property.</p>
+<pre><code class="lang-javascript">m(&quot;brick-deck[selected-index=0]&quot;, [/* ... */]) // lowercase
+m(&quot;brick-deck[selectedIndex=0]&quot;, [/* ... */]) // uppercase
+// I know these look odd, but `brick-deck`&#39;s `selectedIndex` property is a
+// string, not a number.
+m(&quot;brick-deck&quot;, {&quot;selected-index&quot;: &quot;0&quot;}, [/* ... */])
+m(&quot;brick-deck&quot;, {&quot;selectedIndex&quot;: &quot;0&quot;}, [/* ... */])
+</code></pre>
+<p>For custom elements, it doesn&#39;t auto-stringify properties, in case they are objects, numbers, or some other non-string value. So assuming you had some custom element <code>my-special-element</code> that has an <code>elem.whitelist</code> array getter/setter property, you could do this, and it&#39;d work as you&#39;d expect:</p>
+<pre><code class="lang-javascript">m(&quot;my-special-element&quot;, {
+    whitelist: [
+        &quot;https://example.com&quot;,
+        &quot;http://neverssl.com&quot;,
+        &quot;https://google.com&quot;,
+    ],
+})
+</code></pre>
+<p>If you have classes or IDs for those elements, the shorthands still work as you would expect. To pull another A-Frame example:</p>
+<pre><code class="lang-javascript">// These two are equivalent
+m(&quot;a-entity#player&quot;)
+m(&quot;a-entity&quot;, {id: &quot;player&quot;})
+</code></pre>
+<p>Do note that all the properties with magic semantics, like lifecycle attributes, <code>onevent</code> handlers, <code>key</code>s, <code>class</code>, and <code>style</code>, those are still treated the same way they are for normal HTML elements.</p>
 <hr>
 <h3 id="style-attribute"><a href="#style-attribute">Style attribute</a></h3>
 <p>Mithril supports both strings and objects as valid <code>style</code> values. In other words, all of the following are supported:</p>
@@ -202,7 +270,7 @@ m(&quot;div&quot;, {style: {background: &quot;red&quot;}})
 m(&quot;div[style=background:red]&quot;)
 </code></pre>
 <p>Using a string as a <code>style</code> would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.</p>
-<p>Mithril does not attempt to add units to number values.</p>
+<p>Mithril does not attempt to add units to number values. It simply stringifies them.</p>
 <hr>
 <h3 id="events"><a href="#events">Events</a></h3>
 <p>Mithril supports event handler binding for all DOM events, including events whose specs do not define an <code>on${event}</code> property, such as <code>touchstart</code></p>
@@ -424,7 +492,7 @@ var BetterListComponent = {
 		</main>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
-		<script src="https://unpkg.com/mithril@1.1.6/mithril.js" async></script>
+		<script src="https://unpkg.com/mithril@2.0.0-rc.0/mithril.js" async></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

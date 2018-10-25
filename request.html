@@ -11,7 +11,7 @@
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>1.1.6</small></h1>
+				<h1><img src="logo.svg"> Mithril <small>2.0.0-rc.0</small></h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
@@ -145,6 +145,12 @@
 <td><code>Number</code></td>
 <td>No</td>
 <td>The amount of milliseconds a request can take before automatically being <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout">terminated</a>.  Defaults to <code>undefined</code>.</td>
+</tr>
+<tr>
+<td><code>options.responseType</code></td>
+<td><code>String</code></td>
+<td>No</td>
+<td>The expected <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType">type</a> of the response. Defaults to <code>undefined</code>.</td>
 </tr>
 <tr>
 <td><code>options.config</code></td>
@@ -543,7 +549,7 @@ m.request(&quot;/api/v1/users&quot;).then(function(users) {
 		</main>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
-		<script src="https://unpkg.com/mithril@1.1.6/mithril.js" async></script>
+		<script src="https://unpkg.com/mithril@2.0.0-rc.0/mithril.js" async></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"

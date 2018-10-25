@@ -11,7 +11,7 @@
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>1.1.6</small></h1>
+				<h1><img src="logo.svg"> Mithril <small>2.0.0-rc.0</small></h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
@@ -127,7 +127,7 @@ m.route(document.body, &quot;/home&quot;, {
 </tr>
 <tr>
 <td><code>routes</code></td>
-<td><code>Object<String,Component&#124;RouteResolver></code></td>
+<td><code>Object&lt;String,Component&#124;RouteResolver&gt;</code></td>
 <td>Yes</td>
 <td>An object whose keys are route strings and values are either components or a <a href="#routeresolver">RouteResolver</a></td>
 </tr>
@@ -783,7 +783,7 @@ m.route(document.body, &quot;/&quot;, {
 		</main>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
-		<script src="https://unpkg.com/mithril@1.1.6/mithril.js" async></script>
+		<script src="https://unpkg.com/mithril@2.0.0-rc.0/mithril.js" async></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"
