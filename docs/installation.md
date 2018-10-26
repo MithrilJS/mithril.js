@@ -232,7 +232,7 @@ If you want to try it and give feedback, you can open `package.json` and change 
 {
 	"name": "my-project",
 	"scripts": {
-		"build": "bundle index.js --output app.js --watch"
+		"build": "bundle src/index.js --output bin/app.js --watch"
 	}
 }
 ```
