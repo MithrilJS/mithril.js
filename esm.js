@@ -13,6 +13,23 @@ from the already compiled versions of:
 
 var fs = require("fs")
 
+var namedExports = [
+	"trust",
+	"fragment",
+	"mount",
+	"route",
+	"withAttr",
+	"render",
+	"redraw",
+	"request",
+	"jsonp",
+	"parseQueryString",
+	"buildQueryString",
+	"version",
+	"vnode",
+	"PromisePolyfill"
+]
+
 var mithril = fs.readFileSync("mithril.js", "utf8")
 fs.writeFileSync("mithril.esm.js",
 	mithril.slice(
@@ -20,6 +37,7 @@ fs.writeFileSync("mithril.esm.js",
 		mithril.lastIndexOf("if (typeof module")
 	)
 	+ "\nexport default m"
+	+ "\nexport var " + namedExports.map(function(n) { return n + " = m." + n }).join(",")
 )
 
 var mithrilMin = fs.readFileSync("mithril.min.js", "utf8")
@@ -30,6 +48,7 @@ fs.writeFileSync("mithril.esm.min.js",
 		mithrilMin.lastIndexOf("\"undefined\"!==typeof module")
 	)
 	+ "export default " + mName + ";"
+	+ "export var " + namedExports.map(function(n) { return n + " = " + mName + "." + n }).join(",") + ";"
 )
 
 var stream = fs.readFileSync("stream/stream.js", "utf8")
