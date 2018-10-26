@@ -108,7 +108,10 @@ hyperscript.trust = function(html) {
 hyperscript.fragment = function(attrs1, children0) {
 	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
 }
-var m = hyperscript
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
 /** @constructor */
 var PromisePolyfill = function(executor) {
 	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
@@ -1520,3 +1523,4 @@ m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 
 export default m
+export var m = m.m,trust = m.trust,fragment = m.fragment,mount = m.mount,route = m.route,withAttr = m.withAttr,render = m.render,redraw = m.redraw,request = m.request,jsonp = m.jsonp,parseQueryString = m.parseQueryString,buildQueryString = m.buildQueryString,version = m.version,vnode = m.vnode,PromisePolyfill = m.PromisePolyfill
