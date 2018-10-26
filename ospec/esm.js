@@ -12,7 +12,7 @@ from the already compiled version of:
 var fs = require("fs")
 
 var ospec = fs.readFileSync("ospec.js", "utf8")
-fs.writeFileSync("ospec.esm.js",
+fs.writeFileSync("ospec.mjs",
 	"export default "
 	+ ospec.slice(ospec.indexOf("})") + 2)
 	+ "()"

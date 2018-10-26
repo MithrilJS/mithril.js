@@ -32,7 +32,7 @@ var namedExports = [
 ]
 
 var mithril = fs.readFileSync("mithril.js", "utf8")
-fs.writeFileSync("mithril.esm.js",
+fs.writeFileSync("mithril.mjs",
 	mithril.slice(
 		mithril.indexOf("\"use strict\"") + 13,
 		mithril.lastIndexOf("if (typeof module")
@@ -43,7 +43,7 @@ fs.writeFileSync("mithril.esm.js",
 
 var mithrilMin = fs.readFileSync("mithril.min.js", "utf8")
 var mName = mithrilMin.match(/window\.m=([a-z])}/)[1]
-fs.writeFileSync("mithril.esm.min.js",
+fs.writeFileSync("mithril.min.mjs",
 	mithrilMin.slice(
 		12,
 		mithrilMin.lastIndexOf("\"undefined\"!==typeof module")
@@ -53,7 +53,7 @@ fs.writeFileSync("mithril.esm.min.js",
 )
 
 var stream = fs.readFileSync("stream/stream.js", "utf8")
-fs.writeFileSync("stream/stream.esm.js",
+fs.writeFileSync("stream/stream.mjs",
 	stream.slice(
 		stream.indexOf("\"use strict\"") + 13,
 		stream.lastIndexOf("if (typeof module")
