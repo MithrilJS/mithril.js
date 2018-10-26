@@ -14,6 +14,7 @@ from the already compiled versions of:
 var fs = require("fs")
 
 var namedExports = [
+	"m",
 	"trust",
 	"fragment",
 	"mount",
