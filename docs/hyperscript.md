@@ -278,7 +278,7 @@ function doSomething(e) {
 m("div", {onclick: doSomething})
 ```
 
-Mithril accepts functions or[EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) objects. So this will also work:
+Mithril accepts functions and [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) objects. So this will also work:
 
 ```javascript
 var clickListener = {
