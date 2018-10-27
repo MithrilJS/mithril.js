@@ -278,6 +278,29 @@ function doSomething(e) {
 m("div", {onclick: doSomething})
 ```
 
+Mithril adds event listeners to the DOM using [EventTarget#addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). This means you can provide a function (as above) or an [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) object. For example:
+
+```javascript
+var clickListener = {
+	handleEvent: function(e) {
+		console.log(e)
+	}
+}
+
+m("div", {onclick: clickListener})
+```
+
+By default, when an event attached with hyperscript fires, this will trigger Mithril's auto-redraw after your event callback returns (assuming you are using `m.mount` or `m.route` instead of `m.render` directly.) You can disable auto-rerdraw specifically for this event by adding a `redraw` property to the event with the value `false`:
+
+```javascript
+m("div" {
+	onclick: function(e) {
+		// Prevent auto-redraw
+		e.redraw = false
+	}
+})
+```
+
 ---
 
 ### Properties
