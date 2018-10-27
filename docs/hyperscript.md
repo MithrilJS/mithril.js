@@ -278,7 +278,7 @@ function doSomething(e) {
 m("div", {onclick: doSomething})
 ```
 
-Mithril adds event listeners to the DOM using [EventTarget#addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). This means you can provide a function (as above) or an [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) object. For example:
+Mithril accepts functions or[EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) objects. So this will also work:
 
 ```javascript
 var clickListener = {
