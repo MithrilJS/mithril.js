@@ -293,7 +293,7 @@ m("div", {onclick: clickListener})
 By default, when an event attached with hyperscript fires, this will trigger Mithril's auto-redraw after your event callback returns (assuming you are using `m.mount` or `m.route` instead of `m.render` directly.) You can disable auto-rerdraw specifically for this event by adding a `redraw` property to the event with the value `false`:
 
 ```javascript
-m("div" {
+m("div", {
 	onclick: function(e) {
 		// Prevent auto-redraw
 		e.redraw = false
