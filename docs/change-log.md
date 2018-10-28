@@ -60,6 +60,7 @@
 - render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
 - docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa))
 - render/core: avoid touching `Object.prototype.__proto__` setter with `key: "__proto__"` in certain situations ([#2251](https://github.com/MithrilJS/mithril.js/pull/2251))
+- render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
 
 ---
 
