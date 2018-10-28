@@ -865,8 +865,8 @@ module.exports = function($window) {
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 
-		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
 		if (active != null && $doc.activeElement !== active && typeof active.focus === "function") active.focus()
