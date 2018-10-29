@@ -101,7 +101,7 @@ function run(input, output) {
 		})
 
 		return code
-			.replace(/("|')use strict\1;?/gm, "") // remove extraneous "use strict"
+			.replace(/("|')use strict\1(;|\r?\n)/gm, "") // remove extraneous "use strict"
 			.replace(/module\.exports\s*=\s*/gm, rest ? "var _" + uuid + eq : def + (rest ? "_" : "") + variable + eq) // export
 			+ (rest ? "\n" + def + variable + eq + "_" + uuid : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
 	}
@@ -109,12 +109,13 @@ function run(input, output) {
 	var versionTag = "bleeding-edge"
 	var packageFile = __dirname + "/../package.json"
 	var code = process(path.resolve(input), read(input))
+		.replace(/("|')use strict\1(;|\r?\n)/gm, "") // remove extraneous "use strict"
 		.replace(/^\s*((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)(\2)(?=[\s]+(\w)|;|$)/gm, "") // remove assignments to self
 		.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
 		.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
 		.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 
-	code = ";(function() {\n" + code + "\n}());"
+	code = ";(function() {'use strict'\n" + code + "\n}());"
 
 	if (!isFile(output) || code !== read(output)) {
 		//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
