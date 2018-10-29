@@ -9,6 +9,7 @@ requestService.setCompletionCallback(redrawService.redraw)
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")
+m.prop = require("./util/prop")
 m.render = require("./render").render
 m.redraw = redrawService.redraw
 m.request = requestService.request
