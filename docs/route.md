@@ -353,24 +353,32 @@ For example, you could create a form like this:
 
 ```javascript
 var state = {
-	term: "",
+	term: m.prop(""),
 	search: function() {
-		// save the state for this route
-		// this is equivalent to `history.replaceState({term: state.term}, null, location.href)`
-		m.route.set(m.route.get(), null, {replace: true, state: {term: state.term}})
+		// Save the state for this route. This is equivalent to
+		// `history.replaceState({term: state.term.get()}, null, location.href)`
+		m.route.set(m.route.get(), null, {
+			replace: true,
+			state: {term: state.term.get()},
+		})
 
 		// navigate away
-		location.href = "https://google.com/?q=" + state.term
+		location.href = "https://google.com/?q=" + state.term.get()
 	}
 }
 
 var Form = {
 	oninit: function(vnode) {
-		state.term = vnode.attrs.term || "" // populated from the `history.state` property if the user presses the back button
+		// populated from the `history.state` property if the user presses the
+		// back button
+		state.term.set(vnode.attrs.term || "")
 	},
 	view: function() {
 		return m("form", [
-			m("input[placeholder='Search']", {oninput: m.withAttr("value", function(v) {state.term = v}), value: state.term}),
+			m("input[placeholder='Search']", {
+				oninput: m.withAttr("value", state.term.set),
+				value: state.term.get(),
+			}),
 			m("button", {onclick: state.search}, "Search")
 		])
 	}
@@ -553,15 +561,9 @@ For the sake of simplicity, in the example above, the user's logged in status is
 
 ```javascript
 var Auth = {
-	username: "",
-	password: "",
+	username: m.prop(""),
+	password: m.prop(""),
 
-	setUsername: function(value) {
-		Auth.username = value
-	},
-	setPassword: function(value) {
-		Auth.password = value
-	},
 	login: function() {
 		m.request({
 			url: "/api/v1/auth",
@@ -576,8 +578,14 @@ var Auth = {
 var Login = {
 	view: function() {
 		return m("form", [
-			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("input[type=text]", {
+				oninput: m.withAttr("value", Auth.username.set),
+				value: Auth.username.get()
+			}),
+			m("input[type=password]", {
+				oninput: m.withAttr("value", Auth.password.set),
+				value: Auth.password.get()
+			}),
 			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}

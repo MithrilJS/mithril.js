@@ -292,23 +292,26 @@ Consider this fat component:
 // views/Login.js
 // AVOID
 var Login = {
-	username: "",
-	password: "",
-	setUsername: function(value) {
-		this.username = value
-	},
-	setPassword: function(value) {
-		this.password = value
-	},
+	username: m.prop(""),
+	password: m.prop(""),
 	canSubmit: function() {
-		return this.username !== "" && this.password !== ""
+		return this.username.get() !== "" && this.password.get() !== ""
 	},
 	login: function() {/*...*/},
 	view: function() {
 		return m(".login", [
-			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), value: this.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), value: this.password}),
-			m("button", {disabled: !this.canSubmit(), onclick: this.login}, "Login"),
+			m("input[type=text]", {
+				oninput: m.withAttr("value", this.username.set),
+				value: this.username.get(),
+			}),
+			m("input[type=password]", {
+				oninput: m.withAttr("value", this.password.set),
+				value: this.password.get(),
+			}),
+			m("button", {
+				disabled: !this.canSubmit(),
+				onclick: this.login,
+			}, "Login"),
 		])
 	}
 }
@@ -324,16 +327,10 @@ It makes more sense to refactor this component and pull the state code out of th
 // models/Auth.js
 // PREFER
 var Auth = {
-	username: "",
-	password: "",
-	setUsername: function(value) {
-		Auth.username = value
-	},
-	setPassword: function(value) {
-		Auth.password = value
-	},
+	username: m.prop(""),
+	password: m.prop(""),
 	canSubmit: function() {
-		return Auth.username !== "" && Auth.password !== ""
+		return Auth.username.get() !== "" && Auth.password.get() !== ""
 	},
 	login: function() {/*...*/},
 }
@@ -351,9 +348,18 @@ var Auth = require("../models/Auth")
 var Login = {
 	view: function() {
 		return m(".login", [
-			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
-			m("button", {disabled: !Auth.canSubmit(), onclick: Auth.login}, "Login"),
+			m("input[type=text]", {
+				oninput: m.withAttr("value", Auth.username.set),
+				value: Auth.username.get(),
+			}),
+			m("input[type=password]", {
+				oninput: m.withAttr("value", Auth.password.set),
+				value: Auth.password.get(),
+			}),
+			m("button", {
+				disabled: !Auth.canSubmit(),
+				onclick: Auth.login,
+			}, "Login"),
 		])
 	}
 }

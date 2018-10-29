@@ -16,22 +16,17 @@ h1,h2,h3,h4,h5,h6,p {margin:0 0 10px;}
 		<script src="../../mithril.js"></script>
 		<script>
 //model
-var state = {
-	text: "# Markdown Editor\n\nType on the left panel and see the result on the right panel",
-	update: function(value) {
-		state.text = value
-	}
-}
+var state = m.prop("# Markdown Editor\n\nType on the left panel and see the result on the right panel")
 
 //view
 var Editor = {
 	view: function() {
 		return [
 			m("textarea.input", {
-				oninput: m.withAttr("value", state.update),
-				value: state.text
+				oninput: m.withAttr("value", state.set),
+				value: state.get()
 			}),
-			m(".preview", m.trust(marked(state.text))),
+			m(".preview", m.trust(marked(state.get()))),
 		]
 	}
 }

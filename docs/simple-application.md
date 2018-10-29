@@ -2,7 +2,7 @@
 
 Let's develop a simple application that covers some of the major aspects of Single Page Applications
 
-An interactive running example can be seen here [flems: Simple Application](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcICGAHLA6AVmCADQgBmAljEagNqgB2GAthGiAKqQBOAsgPZJoBIqVj8GiSewBuGbgAIuERQF4FwADoMFuhVAph4qBbQC6xbXv38MSADKHjCsgFcGCChIAUASg1W1nrcEPCu3DrMuCEAjq4QRt5aOkGprPAAFoImmiAA4gCiACq5limp1uFQOSAZ8PBYYKgA9M0hzAC0IUYd2BS4GSr8ANau2HjizM19za48YKWBFXoA7hSZAMIhQpIUGFBNCvDc8WXLAL6+S0G4mRAM3m4e8F4P3a5Q8P7Jy9bK3LgDEYFOp3p9cEgMPAMNdrJdrucytdYOEQpITMBEdcoLYkCYnp4fBQkN9YcFQuFItEIHEEvAkmS0qEsniFLlCiUSIyglUanUGk1Wu0unTelh+oNuCMxjhcJNpuLZvNmrkFABqBTEs6-XRrTbbe4vfaHY6nbnw8o3O4PAkvHxgr4BS3Lf5y1GGkEKB3mq6WrEMa5gDAyCD49yEh6k53ksIRBRRWLxRI-HXx5nZNkgAAKHE52p1vMz-MaLTaEE63XgYolQ1G4zl-CmMzmKjAKpA6qUPDd3DR8FwWu51kh0JMrpRvcN+d+eoyW2Qhr2BxMpog07hvrh2nOIERjBYbHQ-0cRhEJBA4kkhtk8i7KhP8E9Kd0EgoDHWY+7OLsD+nMgoEArGGzyvH4TrLCEsaRN4uS4C23AdEC8ClHeAJIbgzDYI84Z2g88FRqmXoUnGzAwZgcE8IhTgdOs5YocAGQhGQNTNMg6ztp28EDkgxAKBIsAhFCobxtE-CuIggJvsMiIKFxlDcEYAByB6dqqqoalxUAYEpB6bhUlx6bo5zbruxD7qw7D-AAYvw3BRIQ56XlI8A3oo1m2cwT7XK+77OLaoEyAwggQN8rrfkg3iBcFuBQscYDcb4-rWP+gHARGYHPkEkGUvGZFkB59FDhUEhgK4ABGzAfi4OGgSF4GERUEC4FgIQhpIAAiEBkBgHz0oZDV-N2QYhn4RWpMZ0bjbxtBjbluRaWVwgLdAKG5FZFAKY+TCsLkvjrhUpG5G+WDiQODAnfAtDwAAnlgECqIgAAe8BmLQWBabAEBZFAQjcKo62bQo20QGYhWTb8PkXSYUSzgAgvU3BkXIUDxCh-k+Mj8Shd2E59rg8k6awnqYxAlz7TqJOfioPZ4wT8DKTt4MbuTQSHSAy1QICGCLVAq0gPY2lbQeu0s9YbPHadEuXe9GCfd9v2qALwLA6DJD1QNkPidDuBwwjSP7Kjavow8JPY9TuOGlzhMQMTBuk3ts3JXbVMAhbkhW-TwtM3oZOzWzZXifAEi4AH9QSFdt33aVFXrKrvG5AAysGEAi9yZj9RNO57iAwPsAL11if2DliBIzmuQo+eF15lopUB1UgRjQVCARFTZSRZGYW+XMF+JKEzd7uhs0wMgYfcrh947ehszCauZQNjFdSYADkzRIUvosQx4gmINrUriU1BgMMMk9GfHnDzLts3pxvg9kZAEYoVFQhyhkVBIGi-XWOnCImdnufoPWYuF5S7XnQAmQuTUWpdQoI9bwS8ADES9fTgP3t4JA-AUSsHdmVQQ10z6rycGDawuQCFGFyBibkaJfppVwhlWabdoKV3ErxUix4nC+E-j7BE04SFsXgM0VAxJyHqyyvcah9d0pPzqnPVuxFGEYB7vAFh3h3J2V4lImKCMwAcPNNw7cvhTLmUPCAOUYBRDAKvNIdAOCkB4LOhdYgIdA4SA0PldEQU7L7AUAARgAGxYEegoAAaioSETAADcmFuAAHM3wmAAEwAAYAkTW0N3KuwAomxIYKgbxyTAk9SDpEjAj0OhrCQJkXJiTqkBPCRNUeDBXAaCyXExJCg2kAGZ8l1O0Gk+CVFgTACQh0Iw10YCoCCgwCAxSYmtPaT47pWA7BIDfNE1AiSekMAoioAZVZaKeWAGVWWwxol7wYHieB3UrkYHCTg7g1DvEBIUGAfgBgkAKHgUgL54TxA4m4KgeBHSgXhJWWAGW11UBlRxLAYYMzsnrPmY8x64SllfNWagAAHE87xABWWpT0qxCHENwKErwJkSGmfU-pwz9moCyCGRQwACUdCJbZUlEhUDuF+ofSlvStkcw0KC8FkLoWwpaTktpbS8XIvqVLDQdyHlPJeW8j5XykC3Nsr9LodgKBzFQB02pODSlgAoAAL3RQqnZRqQWGGFVCjBYr5DwslQs2pqKVkMDWXk7F0rwnlMqXkxJABSTZTiw46EOcc05YlzkAogPGjV9yVC5KVa84kqrvmWoQiSlZeqDXIt+bZAFQKOk2rBVpCFb4eUdHtTCuFcy2neuRe69FTafG+uZaykluFyVTNDaHIOOT6UqHlVGs5FyIAYsnZOupu4LDsykjQegOcDzsEqpkbgVBzxVHYMWQUsxzonIbFMddjEqAAAFvG4Cvb45op7N2cyATdO67AHLnDMOcIAA)
+An interactive running example [can be seen here](https://flems.io/#0=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)
 
 First let's create an entry point for the application. Create a file `index.html`:
 
@@ -399,7 +399,11 @@ var User = {
 			withCredentials: true,
 		})
 		.then(function(result) {
-			User.current = result
+			User.current = {
+				id: result.id,
+				firstName: m.prop(result.firstName),
+				lastName: m.prop(result.lastName),
+			}
 		})
 	}
 }
@@ -415,13 +419,19 @@ var m = require("mithril")
 var User = require("../models/User")
 
 module.exports = {
-	oninit: function(vnode) {User.load(vnode.attrs.id)},
+	oninit: function(vnode) {
+		User.load(vnode.attrs.id)
+	},
 	view: function() {
 		return m("form", [
 			m("label.label", "First name"),
-			m("input.input[type=text][placeholder=First name]", {value: User.current.firstName}),
+			m("input.input[type=text][placeholder=First name]", {
+				value: User.current.firstName.get(),
+			}),
 			m("label.label", "Last name"),
-			m("input.input[placeholder=Last name]", {value: User.current.lastName}),
+			m("input.input[placeholder=Last name]", {
+				value: User.current.lastName.get(),
+			}),
 			m("button.button[type=button]", "Save"),
 		])
 	}
@@ -461,23 +471,25 @@ var m = require("mithril")
 var User = require("../models/User")
 
 module.exports = {
-	oninit: function(vnode) {User.load(vnode.attrs.id)},
+	oninit: function(vnode) {
+		User.load(vnode.attrs.id)
+	},
 	view: function() {
 		return m("form", {
-				onsubmit: function(e) {
-					e.preventDefault()
-					User.save()
-				}
-			}, [
+			onsubmit: function(e) {
+				e.preventDefault()
+				User.save()
+			}
+		}, [
 			m("label.label", "First name"),
 			m("input.input[type=text][placeholder=First name]", {
-				oninput: m.withAttr("value", function(value) {User.current.firstName = value}),
-				value: User.current.firstName
+				oninput: m.withAttr("value", User.current.firstName.set),
+				value: User.current.firstName.get(),
 			}),
 			m("label.label", "Last name"),
 			m("input.input[placeholder=Last name]", {
-				oninput: m.withAttr("value", function(value) {User.current.lastName = value}),
-				value: User.current.lastName
+				oninput: m.withAttr("value", User.current.lastName.set),
+				value: User.current.lastName.get(),
 			}),
 			m("button.button[type=submit]", "Save"),
 		])
@@ -514,7 +526,11 @@ var User = {
 			withCredentials: true,
 		})
 		.then(function(result) {
-			User.current = result
+			User.current = {
+				id: result.id,
+				firstName: m.prop(result.firstName),
+				lastName: m.prop(result.lastName),
+			}
 		})
 	},
 
