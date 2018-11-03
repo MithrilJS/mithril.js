@@ -74,29 +74,6 @@
 
 ### v1.1.6
 
-- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
-- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [@octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
-- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [@s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
-
-
----
-
-### v1.1.5
-
-- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924))
-
----
-
-### v1.1.4
-
-#### Bug fixes:
-
-- Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
-
----
-
-### v1.1.6
-
 #### Bug fixes
 
 - core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
