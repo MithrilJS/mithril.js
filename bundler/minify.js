@@ -1,66 +1,41 @@
 "use strict"
 
-var http = require("https")
-var querystring = require("querystring")
 var fs = require("fs")
+var zlib = require("zlib")
+var UglifyES = require("uglify-es")
 
 module.exports = function(input, output, options, done) {
 	function minify(input, output) {
 		var code = fs.readFileSync(input, "utf8")
 
-		var data = {
-			output_format: "json",
-			output_info: ["compiled_code", "warnings", "errors", "statistics"],
-			compilation_level: options.advanced ? "ADVANCED_OPTIMIZATIONS" : "SIMPLE_OPTIMIZATIONS",
-			warning_level: "default",
-			output_file_name: "default.js",
-			js_code: code,
-		}
+		try {
+			var uglified = UglifyES.minify(code)
+			var minifiedCode = uglified.code
 
-		var body = querystring.stringify(data)
+			if (minifiedCode) {
+				fs.writeFileSync(output, minifiedCode, "utf8")
+				console.log("done")
 
-		var response = ""
-		var req = http.request({
-			method: "POST",
-			hostname: "closure-compiler.appspot.com",
-			path: "/compile",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-				"Content-Length": body.length
+				if (typeof done === "function") {
+					var originalGzip = zlib.gzipSync(code),
+						compressedGzip = zlib.gzipSync(minifiedCode)
+
+					// CLI expects these 4 props
+					done({
+						originalSize: code.length,
+						compressedSize: fs.statSync(output).size,
+						originalGzipSize: originalGzip.byteLength,
+						compressedGzipSize: compressedGzip.byteLength,
+					})
+				}
 			}
-		}, function(res) {
-			res.on("data", function(chunk) {
-				response += chunk.toString()
-			})
-
-			res.on("end", function() {
-				try {
-					var results = JSON.parse(response)
-				} catch(e) {
-					console.error(response);
-
-					throw e;
-				}
-
-				if (results.errors) {
-					for (var i = 0; i < results.errors.length; i++) console.log(results.errors[i])
-				}
-				else {
-					fs.writeFileSync(output, results.compiledCode, "utf8")
-
-					console.log("done")
-
-					if(typeof done === "function") done(results.statistics)
-				}
-			})
-		})
-
-
-		req.write(body)
-		req.end()
-		console.log("minifying...")
+			else if (uglified.error) console.log(uglified.error)
+		} catch (e) {
+			console.error(e)
+		}
 	}
 	function run() {
+		console.log("minifying...")
 		minify(input, output)
 	}
 	run()
