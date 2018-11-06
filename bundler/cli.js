@@ -1,6 +1,7 @@
 "use strict"
 
 var fs = require("fs");
+var zlib = require("zlib")
 
 var bundle = require("./bundle")
 var minify = require("./minify")
@@ -24,19 +25,27 @@ function add(value) {
 	command = null
 }
 
+function format(n) {
+	return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+}
+
 bundle(params.input, params.output, {watch: params.watch})
 if (params.minify) {
-	minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive}, function(stats) {
-		function format(n) {
-			return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
-		}
+	// mFiles = { original: String(mithril.js), compressed: String(mithril.min.js) }
+	var mFiles = minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive})
 
-		console.log("Original size: " + format(stats.originalGzipSize) + " bytes gzipped (" + format(stats.originalSize) + " bytes uncompressed)")
-		console.log("Compiled size: " + format(stats.compressedGzipSize) + " bytes gzipped (" + format(stats.compressedSize) + " bytes uncompressed)")
+	if (mFiles !== null) {
+		var originalSize = mFiles.original.length
+		var compressedSize = mFiles.compressed.length
+		var originalGzipSize = zlib.gzipSync(mFiles.original).byteLength
+		var compressedGzipSize = zlib.gzipSync(mFiles.compressed).byteLength
+	
+		console.log("Original size: " + format(originalGzipSize) + " bytes gzipped (" + format(originalSize) + " bytes uncompressed)")
+		console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")
 
 		if (params.save) {
 			var readme = fs.readFileSync("./README.md", "utf8")
-			var kb = stats.compressedGzipSize / 1000
+			var kb = compressedGzipSize / 1000
 
 			fs.writeFileSync("./README.md",
 				readme.replace(
@@ -45,5 +54,5 @@ if (params.minify) {
 				)
 			)
 		}
-	})
+	}
 }
