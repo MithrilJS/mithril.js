@@ -33,7 +33,7 @@ bundle(params.input, params.output, {watch: params.watch})
 if (params.minify) {
 	try {
 		// mFiles = { original: String(mithril.js), compressed: String(mithril.min.js) }
-		var mFiles = minify(params.output, params.output, {watch: params.watch})
+		var mFiles = minify(params.output, {watch: params.watch})
 
 		if (mFiles !== null) {
 			var originalSize = mFiles.original.length

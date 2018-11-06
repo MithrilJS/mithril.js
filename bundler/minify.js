@@ -3,14 +3,14 @@
 var fs = require("fs")
 var UglifyES = require("uglify-es")
 
-module.exports = function(inputPath, outputPath, options) {
-	function minify(inputPath, outputPath) {
-		var original = fs.readFileSync(inputPath, "utf8"),
+module.exports = function(filePath, options) {
+	function minify(filePath) {
+		var original = fs.readFileSync(filePath, "utf8"),
 			uglified = UglifyES.minify(original),
 			compressed = uglified.code
 
 		if (compressed) {
-			fs.writeFileSync(outputPath, compressed, "utf8")
+			fs.writeFileSync(filePath, compressed, "utf8")
 			return {original: original, compressed: compressed}
 		}
 		else if (uglified.error) {
@@ -24,10 +24,10 @@ module.exports = function(inputPath, outputPath, options) {
 
 	function run() {
 		console.log("minifying...")
-		return minify(inputPath, outputPath)
+		return minify(filePath)
 	}
 
-	if (options && options.watch) fs.watchFile(inputPath, run)
+	if (options && options.watch) fs.watchFile(filePath, run)
 
 	return run()
 }
