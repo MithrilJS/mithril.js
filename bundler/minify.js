@@ -13,7 +13,13 @@ module.exports = function(inputPath, outputPath, options) {
 			fs.writeFileSync(outputPath, compressed, "utf8")
 			return {original: original, compressed: compressed}
 		}
-		else if (uglified.error) console.log(uglified.error)
+		else if (uglified.error) {
+			var msg = ""
+			Object.keys(uglified.error).forEach(function(key){
+				msg += "\n  " + key + ": " + uglified.error[key]
+			})
+			throw new Error(msg)
+		}
 	}
 
 	function run() {
@@ -23,5 +29,5 @@ module.exports = function(inputPath, outputPath, options) {
 
 	if (options && options.watch) fs.watchFile(inputPath, run)
 
-	return run() || null
+	return run()
 }

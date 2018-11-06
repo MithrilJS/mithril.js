@@ -6,7 +6,7 @@ var zlib = require("zlib")
 var bundle = require("./bundle")
 var minify = require("./minify")
 
-var aliases = {o: "output", m: "minify", w: "watch", a: "aggressive", s: "save"}
+var aliases = {o: "output", m: "minify", w: "watch", s: "save"}
 var params = {}
 var args = process.argv.slice(2), command = null
 for (var i = 0; i < args.length; i++) {
@@ -31,28 +31,30 @@ function format(n) {
 
 bundle(params.input, params.output, {watch: params.watch})
 if (params.minify) {
-	// mFiles = { original: String(mithril.js), compressed: String(mithril.min.js) }
-	var mFiles = minify(params.output, params.output, {watch: params.watch, advanced: params.aggressive})
+	try {
+		// mFiles = { original: String(mithril.js), compressed: String(mithril.min.js) }
+		var mFiles = minify(params.output, params.output, {watch: params.watch})
 
-	if (mFiles !== null) {
-		var originalSize = mFiles.original.length
-		var compressedSize = mFiles.compressed.length
-		var originalGzipSize = zlib.gzipSync(mFiles.original).byteLength
-		var compressedGzipSize = zlib.gzipSync(mFiles.compressed).byteLength
-	
-		console.log("Original size: " + format(originalGzipSize) + " bytes gzipped (" + format(originalSize) + " bytes uncompressed)")
-		console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")
+		if (mFiles !== null) {
+			var originalSize = mFiles.original.length
+			var compressedSize = mFiles.compressed.length
+			var originalGzipSize = zlib.gzipSync(mFiles.original).byteLength
+			var compressedGzipSize = zlib.gzipSync(mFiles.compressed).byteLength
+		
+			console.log("Original size: " + format(originalGzipSize) + " bytes gzipped (" + format(originalSize) + " bytes uncompressed)")
+			console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")
 
-		if (params.save) {
-			var readme = fs.readFileSync("./README.md", "utf8")
-			var kb = compressedGzipSize / 1000
+			if (params.save) {
+				var readme = fs.readFileSync("./README.md", "utf8")
+				var kb = compressedGzipSize / 1000
 
-			fs.writeFileSync("./README.md",
-				readme.replace(
-					/(<!-- size -->)(.+?)(<!-- \/size -->)/,
-					"$1" + (kb % 1 ? kb.toFixed(2) : kb) + " KB$3"
+				fs.writeFileSync("./README.md",
+					readme.replace(
+						/(<!-- size -->)(.+?)(<!-- \/size -->)/,
+						"$1" + (kb % 1 ? kb.toFixed(2) : kb) + " KB$3"
+					)
 				)
-			)
+			}
 		}
-	}
+	} catch(e) { console.error(e) }
 }
