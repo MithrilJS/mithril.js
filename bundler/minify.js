@@ -8,18 +8,11 @@ module.exports = function(filePath, options) {
 		var original = fs.readFileSync(filePath, "utf8"),
 			uglified = UglifyES.minify(original),
 			compressed = uglified.code
+		
+		if (uglified.error) throw new Error(uglified.error)
 
-		if (compressed) {
-			fs.writeFileSync(filePath, compressed, "utf8")
-			return {original: original, compressed: compressed}
-		}
-		else if (uglified.error) {
-			var msg = ""
-			Object.keys(uglified.error).forEach(function(key){
-				msg += "\n  " + key + ": " + uglified.error[key]
-			})
-			throw new Error(msg)
-		}
+		fs.writeFileSync(filePath, compressed, "utf8")
+		return {original: original, compressed: compressed}
 	}
 
 	function run() {
