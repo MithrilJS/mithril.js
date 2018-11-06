@@ -1,69 +1,27 @@
 "use strict"
 
-var http = require("https")
-var querystring = require("querystring")
 var fs = require("fs")
+var UglifyES = require("uglify-es")
 
-module.exports = function(input, output, options, done) {
+module.exports = function(input, output, options) {
 	function minify(input, output) {
-		var code = fs.readFileSync(input, "utf8")
+		var original = fs.readFileSync(input, "utf8"),
+			uglified = UglifyES.minify(original),
+			compressed = uglified.code
 
-		var data = {
-			output_format: "json",
-			output_info: ["compiled_code", "warnings", "errors", "statistics"],
-			compilation_level: options.advanced ? "ADVANCED_OPTIMIZATIONS" : "SIMPLE_OPTIMIZATIONS",
-			warning_level: "default",
-			output_file_name: "default.js",
-			js_code: code,
+		if (compressed) {
+			fs.writeFileSync(output, compressed, "utf8")
+			return {original: original, compressed: compressed}
 		}
-
-		var body = querystring.stringify(data)
-
-		var response = ""
-		var req = http.request({
-			method: "POST",
-			hostname: "closure-compiler.appspot.com",
-			path: "/compile",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-				"Content-Length": body.length
-			}
-		}, function(res) {
-			res.on("data", function(chunk) {
-				response += chunk.toString()
-			})
-
-			res.on("end", function() {
-				try {
-					var results = JSON.parse(response)
-				} catch(e) {
-					console.error(response);
-
-					throw e;
-				}
-
-				if (results.errors) {
-					for (var i = 0; i < results.errors.length; i++) console.log(results.errors[i])
-				}
-				else {
-					fs.writeFileSync(output, results.compiledCode, "utf8")
-
-					console.log("done")
-
-					if(typeof done === "function") done(results.statistics)
-				}
-			})
-		})
-
-
-		req.write(body)
-		req.end()
-		console.log("minifying...")
+		else if (uglified.error) console.log(uglified.error)
 	}
+
 	function run() {
-		minify(input, output)
+		console.log("minifying...")
+		return minify(input, output)
 	}
-	run()
 
 	if (options && options.watch) fs.watchFile(input, run)
+
+	return run() || null
 }
