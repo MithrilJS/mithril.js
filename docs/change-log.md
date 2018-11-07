@@ -65,11 +65,21 @@
 
 ---
 
-### v1.1.7
 
-- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150), breaking change: `mithril-stream@2.0.0`)
+### v1.2.0
+
+#### News
+
 - Promise polyfill implementation separated from polyfilling logic.
 - `PromisePolyfill` is now available on the exported/global `m`.
+
+#### Bug fixes
+
+- core: Workaround for [Internet Explorer bug](https://www.tjvantoll.com/2013/08/30/bugs-with-document-activeelement-in-internet-explorer/) when running in an iframe
+
+#### Note
+
+- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150), stream breaking change: `mithril-stream@2.0.0`)
 
 ---
 
