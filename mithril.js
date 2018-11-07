@@ -435,6 +435,15 @@ var coreRenderer = function($window) {
 			checkState(vnode, original)
 		}
 	}
+	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// inside an iframe. Catch and swallow this error1, and heavy-handidly return null.
+	function activeElement() {
+		try {
+			return $doc.activeElement
+		} catch (e) {
+			return null
+		}
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -1065,7 +1074,7 @@ var coreRenderer = function($window) {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === activeElement()) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
@@ -1090,7 +1099,10 @@ var coreRenderer = function($window) {
 		else if (
 			hasPropertyKey(vnode, key2, ns)
 			&& key2 !== "className"
-			&& !(vnode.tag === "option" && key2 === "value")
+			&& !(key2 === "value" && (
+				vnode.tag === "option"
+				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()
+			))
 			&& !(vnode.tag === "input" && key2 === "type")
 		) {
 			vnode.dom[key2] = null
@@ -1129,7 +1141,7 @@ var coreRenderer = function($window) {
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement() || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
@@ -1236,7 +1248,7 @@ var coreRenderer = function($window) {
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
-		var active = $doc.activeElement
+		var active = activeElement()
 		var namespace = dom.namespaceURI
 		// First time rendering0 into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
@@ -1244,7 +1256,7 @@ var coreRenderer = function($window) {
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-		if (active != null && $doc.activeElement !== active && typeof active.focus === "function") active.focus()
+		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 	return {render: render, setEventCallback: setEventCallback}
