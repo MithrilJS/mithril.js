@@ -75,7 +75,7 @@ var FancyComponent = {
 	onbeforeremove: function(vnode) {
 		vnode.dom.classList.add("exit")
 		return new Promise(function(resolve) {
-			setTimeout(resolve, 500)
+			vnode.dom.addEventListener("animationend", resolve)
 		})
 	},
 	view: function() {
@@ -86,7 +86,7 @@ var FancyComponent = {
 
 `vnode.dom` points to the root DOM element of the component (`<div class="fancy">`). We use the classList API here to add an `exit` class to `<div class="fancy">`.
 
-Then we return a [Promise](promise.md) that resolves after half a second. When we return a promise from `onbeforeremove`, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits half a second, giving the exit animation the exact time it needs to complete.
+Then we return a [Promise](promise.md) that resolves when the `animationend` event fires. When we return a promise from `onbeforeremove`, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits for the exit animation to finish.
 
 We can verify that both the enter and exit animations work by mounting the `Toggler` component:
 

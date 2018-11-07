@@ -1,6 +1,6 @@
 {
   "name": "mithril",
-  "version": "1.1.3",
+  "version": "2.0.0-rc.1",
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
@@ -36,7 +36,8 @@
     "lint-staged": "^4.0.4",
     "locater": "^1.3.0",
     "marked": "^0.3.19",
-    "pinpoint": "^1.1.0"
+    "pinpoint": "^1.1.0",
+    "uglify-es": "^3.3.9"
   },
   "bin": {
     "ospec": "./ospec/bin/ospec"

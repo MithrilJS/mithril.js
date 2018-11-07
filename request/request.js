@@ -76,6 +76,8 @@ module.exports = function($window, Promise) {
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 
 			if (args.timeout) xhr.timeout = args.timeout
+			
+			if (args.responseType) xhr.responseType = args.responseType
 
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
@@ -162,7 +164,7 @@ module.exports = function($window, Promise) {
 
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 
 	function extract(xhr) {return xhr.responseText}

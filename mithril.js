@@ -8,7 +8,7 @@ Vnode.normalize = function(node) {
 	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
 	return node
 }
-Vnode.normalizeChildren = function normalizeChildren(input) {
+Vnode.normalizeChildren = function(input) {
 	var children = []
 	for (var i = 0; i < input.length; i++) {
 		children[i] = Vnode.normalize(input[i])
@@ -41,7 +41,8 @@ function compileSelector(selector) {
 }
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
-	var className = attrs.className || attrs.class
+	var classAttr = hasOwn.call(attrs, "class") ? "class" : "className"
+	var className = attrs[classAttr]
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
 		for(var key in attrs) {
@@ -52,19 +53,19 @@ function execSelector(state, attrs, children) {
 		attrs = newAttrs
 	}
 	for (var key in state.attrs) {
-		if (hasOwn.call(state.attrs, key)) {
+		if (hasOwn.call(state.attrs, key) && key !== "className" && !hasOwn.call(attrs, key)){
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className !== undefined) {
-		if (attrs.class !== undefined) {
-			attrs.class = undefined
-			attrs.className = className
-		}
-		if (state.attrs.className != null) {
-			attrs.className = state.attrs.className + " " + className
-		}
-	}
+	if (className != null || state.attrs.className != null) attrs.className =
+		className != null
+			? state.attrs.className != null
+				? state.attrs.className + " " + className
+				: className
+			: state.attrs.className != null
+				? state.attrs.className
+				: null
+	if (classAttr === "class") attrs.class = null
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
 			hasAttrs = true
@@ -76,7 +77,7 @@ function execSelector(state, attrs, children) {
 	} else {
 		childList = children
 	}
-	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
+	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : null, childList, text)
 }
 function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
@@ -313,6 +314,8 @@ var _9 = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
+			
+			if (args.responseType) xhr.responseType = args.responseType
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
 			}
@@ -388,7 +391,7 @@ var _9 = function($window, Promise) {
 	}
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 	function extract(xhr) {return xhr.responseText}
 	function cast(type0, data) {
@@ -407,7 +410,6 @@ var _9 = function($window, Promise) {
 var requestService = _9(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
-	var $emptyFragment = $doc.createDocumentFragment()
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
@@ -527,12 +529,12 @@ var coreRenderer = function($window) {
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
 			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 		} else {
 			vnode.state = void 0
 			sentinel = vnode.tag
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
@@ -906,7 +908,7 @@ var coreRenderer = function($window) {
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
-		var map = {}
+		var map = Object.create(null)
 		for (; start < end; start++) {
 			var vnode = vnodes[start]
 			if (vnode != null) {
@@ -1024,21 +1026,13 @@ var coreRenderer = function($window) {
 				checkState(vnode, original)
 				onremove(vnode)
 				if (vnode.dom) {
+					var parent = vnode.dom.parentNode
 					var count0 = vnode.domSize || 1
-					if (count0 > 1) {
-						var dom = vnode.dom
-						while (--count0) {
-							removeNodeFromDOM(dom.nextSibling)
-						}
-					}
-					removeNodeFromDOM(vnode.dom)
+					while (--count0) parent.removeChild(vnode.dom.nextSibling)
+					parent.removeChild(vnode.dom)
 				}
 			}
 		}
-	}
-	function removeNodeFromDOM(node) {
-		var parent = node.parentNode
-		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
@@ -1066,15 +1060,17 @@ var coreRenderer = function($window) {
 		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
 		if (key2.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
 		else if (key2 === "style") updateStyle(vnode.dom, old, value)
-		else if (key2 in vnode.dom && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
+		else if (hasPropertyKey(vnode, key2, ns)) {
 			if (key2 === "value") {
-				var normalized = "" + value // eslint-disable-line no-implicit-coercion
+				// Only do the coercion if we're actually going to check the value.
+				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
+				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
 			if (vnode.tag === "input" && key2 === "type") vnode.dom.setAttribute(key2, value)
@@ -1092,12 +1088,10 @@ var coreRenderer = function($window) {
 		if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
 		else if (key2 === "style") updateStyle(vnode.dom, old, null)
 		else if (
-			key2 in vnode.dom && !isAttribute(key2)
+			hasPropertyKey(vnode, key2, ns)
 			&& key2 !== "className"
 			&& !(vnode.tag === "option" && key2 === "value")
 			&& !(vnode.tag === "input" && key2 === "type")
-			&& ns === undefined
-			&& !isCustomElement(vnode.tag, vnode.attrs || {})
 		) {
 			vnode.dom[key2] = null
 		} else {
@@ -1140,11 +1134,15 @@ var coreRenderer = function($window) {
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function isAttribute(attr) {
-		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
-	}
-	function isCustomElement(tag, attrs2){
-		return attrs2.is || tag.indexOf("-") > -1
+	function hasPropertyKey(vnode, key2, ns) {
+		// Filter out namespaced keys
+		return ns === undefined && (
+			// If it's a custom element, just keep it.
+			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			// If it's a normal element, let's try to avoid a few browser bugs.
+			key2 !== "href" && key2 !== "list" && key2 !== "form" && key2 !== "width" && key2 !== "height"// && key2 !== "type"
+			// Defer the property check until *after* we check everything.
+		) && key2 in vnode.dom
 	}
 	//style
 	function updateStyle(element, old, style) {
@@ -1179,13 +1177,20 @@ var coreRenderer = function($window) {
 	// 4. The event name is remapped to the handler0 before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
+	// 6. In function-based event handlers, `return false` prevents the default
+	//    action and stops event propagation. We replicate that below.
 	function EventDict() {}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler0 = this["on" + ev.type]
-		if (typeof handler0 === "function") handler0.call(ev.target, ev)
+		var result
+		if (typeof handler0 === "function") result = handler0.call(ev.target, ev)
 		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
 		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
+		}
 	}
 	//event
 	function updateEvent(vnode, key2, value) {
@@ -1235,11 +1240,11 @@ var coreRenderer = function($window) {
 		var namespace = dom.namespaceURI
 		// First time rendering0 into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
-		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-		if (active != null && $doc.activeElement !== active) active.focus()
+		if (active != null && $doc.activeElement !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 	return {render: render, setEventCallback: setEventCallback}
@@ -1507,14 +1512,21 @@ m.withAttr = function(attrName, callback, context) {
 		callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-var _29 = coreRenderer(window)
-m.render = _29.render
+m.prop = function (store) {
+	return {
+		get: function() { return store },
+		toJSON: function() { return store },
+		set: function(value0) { return store = value0 }
+	}
+}
+var _30 = coreRenderer(window)
+m.render = _30.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.1.3"
+m.version = "2.0.0-rc.1"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m

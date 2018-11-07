@@ -3,6 +3,7 @@
 Here are some examples of Mithril in action
 
 - [Animation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/animation/mosaic.html)
+- [Community Added Examples](https://how-to-mithril.js.org)
 - [DBMonster](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html)
 - [Markdown Editor](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/editor/index.html)
 - SVG: [Clock](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/clock.html), [Ring](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/ring.html), [Tiger](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/tiger.html)

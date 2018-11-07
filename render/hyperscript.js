@@ -31,7 +31,8 @@ function compileSelector(selector) {
 
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
-	var className = attrs.className || attrs.class
+	var classAttr = hasOwn.call(attrs, "class") ? "class" : "className"
+	var className = attrs[classAttr]
 
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
@@ -46,21 +47,20 @@ function execSelector(state, attrs, children) {
 	}
 
 	for (var key in state.attrs) {
-		if (hasOwn.call(state.attrs, key)) {
+		if (hasOwn.call(state.attrs, key) && key !== "className" && !hasOwn.call(attrs, key)){
 			attrs[key] = state.attrs[key]
 		}
 	}
+	if (className != null || state.attrs.className != null) attrs.className =
+		className != null
+			? state.attrs.className != null
+				? state.attrs.className + " " + className
+				: className
+			: state.attrs.className != null
+				? state.attrs.className
+				: null
 
-	if (className !== undefined) {
-		if (attrs.class !== undefined) {
-			attrs.class = undefined
-			attrs.className = className
-		}
-
-		if (state.attrs.className != null) {
-			attrs.className = state.attrs.className + " " + className
-		}
-	}
+	if (classAttr === "class") attrs.class = null
 
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
@@ -75,7 +75,7 @@ function execSelector(state, attrs, children) {
 		childList = children
 	}
 
-	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
+	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : null, childList, text)
 }
 
 function hyperscript(selector) {

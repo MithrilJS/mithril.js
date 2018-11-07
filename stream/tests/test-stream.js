@@ -164,6 +164,27 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 			o(count).equals(0)
 		})
+		o("combine can conditionaly halt", function() {
+			var count = 0
+			var halt = false
+			var a = Stream(1)
+			var b = Stream.combine(function(a) {
+				if (halt) {
+					return Stream.HALT
+				}
+				return a()
+			}, [a])["fantasy-land/map"](function(a) {
+				count++
+				return a
+			})
+			o(b()).equals(1)
+			o(count).equals(1)
+			halt = true
+			count = 0
+			a(2)
+			o(b()).equals(1)
+			o(count).equals(0)
+		})
 		o("combine will throw with a helpful error if given non-stream values", function () {
 			var spy = o.spy()
 			var a = Stream(1)

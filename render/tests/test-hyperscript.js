@@ -16,52 +16,51 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals("a")
 		})
-		o("v1.0.1 bug-for-bug regression suite", function(){
+		o("class and className normalization", function(){
 			o(m("a", {
 				class: null
 			}).attrs).deepEquals({
-				class: undefined,
-				className: null
+				class: null
 			})
 			o(m("a", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null
 			})
 			o(m("a", {
 				class: false
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null,
 				className: false
 			})
 			o(m("a", {
 				class: true
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null,
 				className: true
 			})
 			o(m("a.x", {
 				class: null
 			}).attrs).deepEquals({
-				class: undefined,
-				className: "x null"
+				class: null,
+				className: "x"
 			})
 			o(m("a.x", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null,
 				className: "x"
 			})
 			o(m("a.x", {
 				class: false
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null,
 				className: "x false"
 			})
 			o(m("a.x", {
 				class: true
 			}).attrs).deepEquals({
-				class: undefined,
+				class: null,
 				className: "x true"
 			})
 			o(m("a", {
@@ -97,7 +96,7 @@ o.spec("hyperscript", function() {
 			o(m("a.x", {
 				className: false
 			}).attrs).deepEquals({
-				className: "x"
+				className: "x false"
 			})
 			o(m("a.x", {
 				className: true
@@ -272,7 +271,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {key:"a"})
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs).equals(undefined)
+			o(vnode.attrs).equals(null)
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -301,6 +300,63 @@ o.spec("hyperscript", function() {
 			var vnode = m(".a", {className: "b"})
 
 			o(vnode.attrs.className).equals("a b")
+		})
+	})
+	o.spec("custom element attrs", function() {
+		o("handles string attr", function() {
+			var vnode = m("custom-element", {a: "b"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("b")
+		})
+		o("handles falsy string attr", function() {
+			var vnode = m("custom-element", {a: ""})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("")
+		})
+		o("handles number attr", function() {
+			var vnode = m("custom-element", {a: 1})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(1)
+		})
+		o("handles falsy number attr", function() {
+			var vnode = m("custom-element", {a: 0})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(0)
+		})
+		o("handles boolean attr", function() {
+			var vnode = m("custom-element", {a: true})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(true)
+		})
+		o("handles falsy boolean attr", function() {
+			var vnode = m("custom-element", {a: false})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals(false)
+		})
+		o("handles only key in attrs", function() {
+			var vnode = m("custom-element", {key:"a"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs).equals(null)
+			o(vnode.key).equals("a")
+		})
+		o("handles many attrs", function() {
+			var vnode = m("custom-element", {a: "b", c: "d"})
+
+			o(vnode.tag).equals("custom-element")
+			o(vnode.attrs.a).equals("b")
+			o(vnode.attrs.c).equals("d")
+		})
+		o("handles className attrs property", function() {
+			var vnode = m("custom-element", {className: "a"})
+
+			o(vnode.attrs.className).equals("a")
 		})
 	})
 	o.spec("children", function() {
@@ -490,20 +546,20 @@ o.spec("hyperscript", function() {
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])
 
-			o(vnode.attrs).equals(undefined)
+			o(vnode.attrs).equals(null)
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
 		o("handles child without attr unwrapped", function() {
 			var vnode = m("div", m("i"))
 
-			o(vnode.attrs).equals(undefined)
+			o(vnode.attrs).equals(null)
 			o(vnode.children[0].tag).equals("i")
 		})
 		o("handles children without attr unwrapped", function() {
 			var vnode = m("div", m("i"), m("s"))
 
-			o(vnode.attrs).equals(undefined)
+			o(vnode.attrs).equals(null)
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
@@ -523,6 +579,15 @@ o.spec("hyperscript", function() {
 			var attrs = {a: "b"}
 			m(".a", attrs)
 			o(attrs).deepEquals({a: "b"})
+		})
+		o("non-nullish attr takes precedence over selector", function() {
+			o(m("[a=b]", {a: "c"}).attrs).deepEquals({a: "c"})
+		})
+		o("null attr takes precedence over selector", function() {
+			o(m("[a=b]", {a: null}).attrs).deepEquals({a: null})
+		})
+		o("undefined attr takes precedence over selector", function() {
+			o(m("[a=b]", {a: undefined}).attrs).deepEquals({a: undefined})
 		})
 		o("handles fragment children without attr unwrapped", function() {
 			var vnode = m("div", [m("i")], [m("s")])

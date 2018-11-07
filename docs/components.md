@@ -363,36 +363,6 @@ This way, the `Auth` module is now the source of truth for auth-related state, a
 
 As a bonus, notice that we no longer need to use `.bind` to keep a reference to the state for the component's event handlers.
 
-#### Avoid restrictive interfaces
-
-Try to keep component interfaces generic - using `attrs` and `children` directly - unless the component requires special logic to operate on input.
-
-In the example below, the `button` configuration is severely limited: it does not support any events other than `onclick`, it's not styleable and it only accepts text as children (but not elements, fragments or trusted HTML).
-
-```javascript
-// AVOID
-var RestrictiveComponent = {
-	view: function(vnode) {
-		return m("button", {onclick: vnode.attrs.onclick}, [
-			"Click to " + vnode.attrs.text
-		])
-	}
-}
-```
-
-If the required attributes are equivalent to generic DOM attributes, it's preferable to allow passing through parameters to a component's root node.
-
-```javascript
-// PREFER
-var FlexibleComponent = {
-	view: function(vnode) {
-		return m("button", vnode.attrs, [
-			"Click to ", vnode.children
-		])
-	}
-}
-```
-
 #### Don't manipulate `children`
 
 If a component is opinionated in how it applies attributes or children, you should switch to using custom attributes.

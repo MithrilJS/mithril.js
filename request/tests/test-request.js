@@ -449,6 +449,20 @@ o.spec("xhr", function() {
 				}
 			})
 		})
+		o("set responseType to xhr instance", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: ""}
+				}
+			})
+			return xhr({
+				method: "GET", url: "/item",
+				responseType: "blob",
+				config: function(xhr) {
+					o(xhr.responseType).equals("blob")
+				}
+			})
+		})
 		/*o("data maintains after interpolate", function() {
 			mock.$defineRoutes({
 				"PUT /items/:x": function() {
@@ -494,7 +508,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
-				o(e.message).equals("error")
+				o(e.message).equals("Invalid JSON: error")
 			}).then(done)
 		})
 		o("triggers all branched catches upon rejection", function(done) {
