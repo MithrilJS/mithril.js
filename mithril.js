@@ -1526,7 +1526,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "2.0.0-rc.0"
+m.version = "2.0.0-rc.1"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m
