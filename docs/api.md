@@ -143,6 +143,26 @@ m.mount(document.body, Component)
 
 ---
 
+#### m.prop(initial) - [docs](prop.md)
+
+```javascript
+var Component = {
+	oninit: function(vnode) {
+		vnode.state.current = m.prop("")
+	},
+	view: function(vnode) {
+		return m("input", {
+			oninput: function(ev) { vnode.state.current.set(ev.target.value) },
+			value: vnode.state.current.get(),
+		})
+	}
+}
+
+m.mount(document.body, Component)
+```
+
+---
+
 #### m.trust(htmlString) - [docs](trust.md)
 
 ```javascript
