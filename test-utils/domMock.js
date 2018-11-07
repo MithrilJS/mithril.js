@@ -87,6 +87,13 @@ module.exports = function(options) {
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) {
 			this.childNodes.splice(index, 1)
+			// Yes, *this* is the behavior Chrome has and what FF is considering in
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=559561
+			if (activeElement === child) {
+				var blur = $window.document.createEvent()
+				blur.initEvent("blur")
+				child.dispatchEvent(blur)
+			}
 			child.parentNode = null
 		}
 		else throw new TypeError("Failed to execute 'removeChild'")

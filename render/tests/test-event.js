@@ -324,4 +324,16 @@ o.spec("event", function() {
 		o(onevent.args[0].type).equals("transitionend")
 		o(onevent.args[0].target).equals(div.dom)
 	})
+
+	o("doesn't fire blur on removed nodes", function() {
+		var spy = o.spy()
+		var div = {tag: "div", attrs: {onblur: spy}}
+
+		render(root, [div])
+		div.dom.focus()
+		render(root, [])
+
+		o(spy.callCount).equals(0)
+		o(onevent.callCount).equals(0)
+	})
 })

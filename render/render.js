@@ -673,6 +673,13 @@ module.exports = function($window) {
 					if (child != null) onremove(child)
 				}
 			}
+			// Chrome emits a `blur` event on children when they are removed,
+			// but *before* they dereference their parent...
+			// https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node#22934552
+			// https://github.com/MithrilJS/mithril.js/issues/1771
+			if (vnode.events != null && vnode.events.onblur != null) {
+				vnode.dom.removeEventListener("blur", vnode.events, false)
+			}
 		}
 	}
 

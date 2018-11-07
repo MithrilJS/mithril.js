@@ -62,6 +62,7 @@
 - docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa), [#2265](https://github.com/MithrilJS/mithril.js/pull/2265), [@isiahmeadows](https://github.com/isiahmeadows))
 - render/core: avoid touching `Object.prototype.__proto__` setter with `key: "__proto__"` in certain situations ([#2251](https://github.com/MithrilJS/mithril.js/pull/2251))
 - render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
+- render/core: `blur` handlers are now removed before removing the DOM vnodes, but after firing hooks ([#2286](https://github.com/MithrilJS/mithril.js/pull/2286))
 
 ---
 
