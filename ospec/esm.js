@@ -5,7 +5,7 @@
 This script will create an esm compatible script
 from the already compiled version of:
 
-- ospec.js > ospec.esm.js
+- ospec.js > ospec.mjs
 
 */
 

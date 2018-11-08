@@ -3,7 +3,7 @@
   "version": "3.0.1",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
-  "module": "ospec.esm.js",
+  "module": "ospec.mjs",
   "directories": {
     "test": "tests"
   },

@@ -5,9 +5,9 @@
 This script will create esm compatible scripts
 from the already compiled versions of:
 
-- mithril.js > mithril.esm.js
-- mithril.min.js > mithril.min.esm.js
-- /stream/stream.js > stream.esm.js
+- mithril.js > mithril.mjs
+- mithril.min.js > mithril.min.mjs
+- /stream/stream.js > stream.mjs
 
 */
 
