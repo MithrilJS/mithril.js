@@ -1,14 +1,14 @@
 "use strict"
 
 var fs = require("fs")
-var UglifyES = require("uglify-es")
+var Terser = require("terser")
 
 module.exports = function(filePath, options) {
 	function minify(filePath) {
 		var original = fs.readFileSync(filePath, "utf8"),
-			uglified = UglifyES.minify(original),
+			uglified = Terser.minify(original),
 			compressed = uglified.code
-		
+
 		if (uglified.error) throw new Error(uglified.error)
 
 		fs.writeFileSync(filePath, compressed, "utf8")
