@@ -1,10 +1,12 @@
 "use strict"
 
-var fs = require("fs");
+var fs = require("fs")
+var path = require("path")
 var zlib = require("zlib")
+var chokidar = require("chokidar")
+var Terser = require("terser")
 
 var bundle = require("./bundle")
-var minify = require("./minify")
 
 var aliases = {o: "output", m: "minify", w: "watch", s: "save"}
 var params = {}
@@ -29,14 +31,20 @@ function format(n) {
 	return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
 }
 
-bundle(params.input, params.output, {watch: params.watch})
-if (params.minify) {
-	// mFiles = { original: String(mithril.js), compressed: String(mithril.min.js) }
-	var mFiles = minify(params.output, {watch: params.watch})
-	var originalSize = mFiles.original.length
-	var compressedSize = mFiles.compressed.length
-	var originalGzipSize = zlib.gzipSync(mFiles.original).byteLength
-	var compressedGzipSize = zlib.gzipSync(mFiles.compressed).byteLength
+function build() {
+	var original = bundle(params.input)
+	if (!params.minify) {
+		fs.writeFileSync(params.output, original, "utf-8")
+		return
+	}
+	console.log("minifying...")
+	var minified = Terser.minify(original)
+	if (minified.error) throw new Error(minified.error)
+	fs.writeFileSync(params.output, minified.code, "utf-8")
+	var originalSize = original.length
+	var compressedSize = minified.code.length
+	var originalGzipSize = zlib.gzipSync(original).byteLength
+	var compressedGzipSize = zlib.gzipSync(minified.code).byteLength
 
 	console.log("Original size: " + format(originalGzipSize) + " bytes gzipped (" + format(originalSize) + " bytes uncompressed)")
 	console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")
@@ -53,3 +61,6 @@ if (params.minify) {
 		)
 	}
 }
+
+build()
+if (params.watch) chokidar.watch(".", {ignored: params.output}).on("all", build)

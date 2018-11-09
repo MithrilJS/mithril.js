@@ -16,7 +16,7 @@ function parse(file) {
 }
 
 var error
-function run(input, output) {
+module.exports = function (input) {
 	var modules = {}
 	var bindings = {}
 	var declaration = /^\s*(?:var|let|const|function)[\t ]+([\w_$]+)/gm
@@ -115,19 +115,7 @@ function run(input, output) {
 		.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 
 	code = ";(function() {\n" + code + "\n}());"
-
-	if (!isFile(output) || code !== read(output)) {
-		//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
-		error = null
-		fs.writeFileSync(output, code, "utf8")
-	}
-}
-
-module.exports = function(input, output, options) {
-	run(input, output)
-	if (options && options.watch) {
-		fs.watch(process.cwd(), {recursive: true}, function(file) {
-			if (typeof file === "string" && path.resolve(output) !== path.resolve(file)) run(input, output)
-		})
-	}
+	//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}
+	error = null
+	return code
 }
