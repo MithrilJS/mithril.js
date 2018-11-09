@@ -11,7 +11,9 @@ module.exports = function() {
 		return {status: 500, responseText: "server error, most likely the URL was not defined " + url}
 	}
 
+	function FormData() {}
 	var $window = {
+		FormData: FormData,
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
 			var headers = {}
