@@ -5,8 +5,10 @@ module.exports = {
         "es6": true,
         "node": true
 	},
+    "plugins": ["mithril-rules"],
     "extends": "eslint:recommended",
     "rules": {
+        "mithril-rules/no-es6": "error",
         "accessor-pairs": "error",
         "array-bracket-spacing": [
             "error",

@@ -1,3 +1,4 @@
+/* eslint-disable mithril-rules/no-es6 */
 "use strict"
 
 var fs = require("fs")

@@ -607,8 +607,8 @@ o.spec("ospec", function() {
 		var a = 0, b = 0
 
 		function wrapPromise(fn) {
-			return new Promise((resolve, reject) => {
-				callAsync(() => {
+			return new Promise(function (resolve, reject) {
+				callAsync(function () {
 					try {
 						fn()
 						resolve()
@@ -620,7 +620,7 @@ o.spec("ospec", function() {
 		}
 
 		o.before(function() {
-			return wrapPromise(() => {
+			return wrapPromise(function () {
 				a = 1
 			})
 		})
