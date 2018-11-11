@@ -54,15 +54,15 @@ The `m.prop` method creates a prop, a getter/setter object wrapping a single mut
 In conjunction with [`m.withAttr`](withAttr.md), you can emulate two-way binding pretty easily.
 
 ```javascript
-var Component = {
-	oninit: function(vnode) {
-		vnode.state.current = m.prop("")
-	},
-	view: function(vnode) {
-		return m("input", {
-			oninput: m.withAttr("value", vnode.state.current.set),
-			value: vnode.state.current.get(),
-		})
+function Component() {
+	var current = m.prop("")
+	return {
+		view: function(vnode) {
+			return m("input", {
+				oninput: m.withAttr("value", current.set),
+				value: current.get(),
+			})
+		}
 	}
 }
 ```
