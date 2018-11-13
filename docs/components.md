@@ -4,10 +4,10 @@
 - [Lifecycle methods](#lifecycle-methods)
 - [Passing data to components](#passing-data-to-components)
 - [State](#state)
-	- [Closure state](#closure-component-state)
-	- [POJO state](#pojo-component-state)
+	- [Closure component state](#closure-component-state)
+	- [POJO component state](#pojo-component-state)
 - [ES6 Classes](#es6-classes)
-	- [Class state](#class-component-state)
+	- [Class component state](#class-component-state)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
