@@ -43,7 +43,7 @@ var ComponentWithHooks = {
 	oncreate: function(vnode) {
 		console.log("DOM created")
 	},
-	onbeforeupdate: function(new_vnode, old_vnode) {
+	onbeforeupdate: function(newVnode, oldVnode) {
 		return true
 	},
 	onupdate: function(vnode) {
