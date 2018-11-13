@@ -251,7 +251,7 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 ### ES6 classes
 
-If it suits your needs (f.e. in object-oriented projects), components can also be written using ES6 class syntax:
+If it suits your needs (like in object-oriented projects), components can also be written using ES6 class syntax:
 
 ```javascript
 class ES6ClassComponent {
