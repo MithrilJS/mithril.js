@@ -539,7 +539,7 @@ Instead, prefer using Javascript expressions such as the ternary operator and Ar
 ```javascript
 // PREFER
 var BetterListComponent = {
-	view: function() {
+	view: function(vnode) {
 		return m("ul", vnode.attrs.items.map(function(item) {
 			return m("li", item)
 		}))
