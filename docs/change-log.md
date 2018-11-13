@@ -45,6 +45,7 @@
 - render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
 - API: Introduction of `m.prop()` ([#2268](https://github.com/MithrilJS/mithril.js/pull/2268))
 - docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
+- stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
 
 #### Bug fixes
 
@@ -122,6 +123,10 @@
 #### Bug fixes
 
 - Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
+
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 
 ---
 
