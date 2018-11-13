@@ -43,7 +43,7 @@ after_success:
       --commands "echo committing" \
       --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
       --branch "next"
-    
+
     # Only want to commit docs when building pushes on master &
     # this doesn't have the built-in branch protection like commit-changes
     if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
@@ -52,7 +52,7 @@ after_success:
     then
       # Generate docs
       npm run gendocs
-      
+
       # Set up git env
       git config --global user.email "$GH_USER_EMAIL"
       git config --global user.name "$GH_USER_NAME"
@@ -88,12 +88,13 @@ deploy:
     on:
       tags: true
       repo: MithrilJS/mithril.js
-  
+
   - provider: npm
     skip_cleanup: true
-    email: npm@patcavit.com
+    email: me@isiahmeadows.com
     api_key:
-      secure: ADElvD1oxn9GfEG7dDOggX96b36A/cGEybovAc0221CCKzv5kWCavMrtxneiJYI6N/n24abSlbM90vMfU84FEzH0Ev28dGVokRP4ad6VRkISszKlYVEP8Lds4QxfKh78jZlUxmxM0B3vmQ1kYJbTBqp3ICtaJ5ptEQHWhrLtxnc=
+      secure: "uPLbeJTalA/b38srb1VuWnD3eOgeKTkXf8VVUasUXIqc2xub4DSkFm1IVKSVd/rzP7EeO7+gRUs2UteNKlpZJl226IS5mFPSVtC7ViW46WSpYT0wlMsc7hrubMBGTx3/XYpPwtmMlTIGs5ICT7YkGAuju/6i79LDAB+gbnEY8Bc="
     on:
       tags: true
       repo: MithrilJS/mithril.js
+      condition: "$TRAVIS_TAG != *-*"

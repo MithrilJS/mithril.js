@@ -96,13 +96,17 @@ Mithril also does not redraw after lifecycle methods. Parts of the UI may be red
 If you need to explicitly trigger a redraw within a lifecycle method, you should call `m.redraw()`, which will trigger an asynchronous redraw.
 
 ```javascript
-var StableComponent = {
-	oncreate: function(vnode) {
-		vnode.state.height = vnode.dom.offsetHeight
-		m.redraw()
-	},
-	view: function() {
-		return m("div", "This component is " + vnode.state.height + "px tall")
+function StableComponent() {
+	var height = 0
+
+	return {
+		oncreate: function(vnode) {
+			height = vnode.dom.offsetHeight
+			m.redraw()
+		},
+		view: function() {
+			return m("div", "This component is " + height + "px tall")
+		}
 	}
 }
 ```

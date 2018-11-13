@@ -32,6 +32,29 @@ o.spec("event", function() {
 		o(onevent.this).equals(div.dom)
 		o(onevent.args[0].type).equals("click")
 		o(onevent.args[0].target).equals(div.dom)
+		o(e.$defaultPrevented).equals(false)
+		o(e.$propagationStopped).equals(false)
+	})
+
+	o("handles onclick returning false", function() {
+		var spy = o.spy(function () { return false })
+		var div = {tag: "div", attrs: {onclick: spy}}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [div])
+		div.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(1)
+		o(spy.this).equals(div.dom)
+		o(spy.args[0].type).equals("click")
+		o(spy.args[0].target).equals(div.dom)
+		o(onevent.callCount).equals(1)
+		o(onevent.this).equals(div.dom)
+		o(onevent.args[0].type).equals("click")
+		o(onevent.args[0].target).equals(div.dom)
+		o(e.$defaultPrevented).equals(true)
+		o(e.$propagationStopped).equals(true)
 	})
 
 	o("handles click EventListener object", function() {
@@ -52,6 +75,30 @@ o.spec("event", function() {
 		o(onevent.this).equals(div.dom)
 		o(onevent.args[0].type).equals("click")
 		o(onevent.args[0].target).equals(div.dom)
+		o(e.$defaultPrevented).equals(false)
+		o(e.$propagationStopped).equals(false)
+	})
+
+	o("handles click EventListener object returning false", function() {
+		var spy = o.spy(function () { return false })
+		var listener = {handleEvent: spy}
+		var div = {tag: "div", attrs: {onclick: listener}}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [div])
+		div.dom.dispatchEvent(e)
+
+		o(spy.callCount).equals(1)
+		o(spy.this).equals(listener)
+		o(spy.args[0].type).equals("click")
+		o(spy.args[0].target).equals(div.dom)
+		o(onevent.callCount).equals(1)
+		o(onevent.this).equals(div.dom)
+		o(onevent.args[0].type).equals("click")
+		o(onevent.args[0].target).equals(div.dom)
+		o(e.$defaultPrevented).equals(false)
+		o(e.$propagationStopped).equals(false)
 	})
 
 	o("removes event", function() {

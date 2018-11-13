@@ -12,6 +12,32 @@ o.spec("render", function() {
 		render = vdom($window).render
 	})
 
+	o("renders plain text", function() {
+		render(root, "a")
+		o(root.childNodes.length).equals(1)
+		o(root.childNodes[0].nodeValue).equals("a")
+	})
+
+	o("updates plain text", function() {
+		render(root, "a")
+		render(root, "b")
+		o(root.childNodes.length).equals(1)
+		o(root.childNodes[0].nodeValue).equals("b")
+	})
+
+	o("renders a number", function() {
+		render(root, 1)
+		o(root.childNodes.length).equals(1)
+		o(root.childNodes[0].nodeValue).equals("1")
+	})
+
+	o("updates a number", function() {
+		render(root, 1)
+		render(root, 2)
+		o(root.childNodes.length).equals(1)
+		o(root.childNodes[0].nodeValue).equals("2")
+	})
+
 	o("overwrites existing content", function() {
 		var vnodes = []
 

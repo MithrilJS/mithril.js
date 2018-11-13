@@ -78,6 +78,19 @@ Argument          | Type      | Required | Description
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
+Remember that when using `.set` with params you also need to define the route:
+```javascript
+var Article = {
+	view: function(vnode) {
+		return "This is article " + vnode.attrs.articleid
+	}
+}
+
+m.route(document.body, {
+	'/article/:articleid': Article
+})
+m.route.set('/article/:articleid', {articleid: 1})
+```
 ##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).

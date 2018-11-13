@@ -4,6 +4,7 @@
 ## Upcoming...
 _2018-xx-yy_
 <!-- Add new lines here. Version number will be decided later -->
+- Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call.
 
 ## 3.0.1
 _2018-06-30_
@@ -70,10 +71,7 @@ _2017-12-01_
 
 
 
-## 1.3 and earlier 
+## 1.3 and earlier
 - Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 - Shell command: Ignore hidden directories and files ([#1855](https://github.com/MithrilJS/mithril.js/pull/1855) [@pdfernhout)](https://github.com/pdfernhout))
 - Library: Add the possibility to name new test suites ([#1529](https://github.com/MithrilJS/mithril.js/pull/1529))
-
-
-
