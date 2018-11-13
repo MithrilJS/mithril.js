@@ -29,7 +29,7 @@ m(Example)
 
 ### Lifecycle methods
 
-Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes:
+Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes. Note that `vnode` is passed as an argument to each lifecycle method, as well as to `view` (with the _previous_ vnode passed additionally to `onbeforeupdate`):
 
 ```javascript
 var ComponentWithHooks = {
