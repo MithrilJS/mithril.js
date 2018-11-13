@@ -2,8 +2,12 @@
 
 - [Structure](#structure)
 - [Lifecycle methods](#lifecycle-methods)
-- [Syntactic variants](#syntactic-variants)
+- [Passing data to components](#passing-data-to-components)
 - [State](#state)
+	- [Closure state](#closure-component-state)
+	- [POJO state](#pojo-component-state)
+- [ES6 Classes](#es6-classes)
+	- [Class state](#class-component-state)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
@@ -105,7 +109,7 @@ NOTE: Lifecycle methods can also be provided via the `attrs` object, so you shou
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
 
-Note that unlike many other frameworks, component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
+Note that unlike many other frameworks, mutating component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
 
 If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
 
@@ -117,10 +121,11 @@ With a closure component, state can simply be maintained by variables that are d
 
 ```javascript
 function ComponentWithState(initialVnode) {
-	// Component state variable
+	// Component state variable, unique to each instance
 	var count = 0
 
-	// POJO component instance
+	// POJO component instance: any object with a 
+	// view function which returns a vnode
 	return {
 		oninit: function(vnode){
 			console.log("init a closure component")
@@ -171,51 +176,20 @@ function ComponentWithState(initialVnode) {
 
 Closure components are consumed in the same way as POJOs, e.g. `m(ComponentWithState, { passedData: ... })`.
 
-#### Class Component State
+A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
 
-Another approach to handling component state, especially in object-oriented projects, is to use a **_class component_** (ES6+ only), which is (as you might expect) a class which returns a POJO component instance.
-
-With classes, state can be managed by class instance properties and methods, and accessed via `this`:
-
-```javascript
-class ComponentWithState {
-	constructor(vnode) {
-		this.count = 0
-	}
-	increment() {
-		this.count += 1
-	}
-	decrement() {
-		this.count -= 1
-	}
-	view() {
-		return m("div",
-			m("p", "Count: " + count),
-			m("button", {
-				onclick: () => {this.increment()}
-			}, "Increment"),
-			m("button", {
-				onclick: () => {this.decrement()}
-			}, "Decrement")
-		)
-	}
-}
-```
-
-Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
 
 ---
-### Advanced Usage
 
 #### POJO Component State
 
-For POJO components the state of a component can be accessed three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
+It is generally accepted that a component with state that must be managed is best expressed as a closure. If, however, you have reason to manage state in a POJO, the state of a component can be accessed in three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
 
 #### At initialization
 
-For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
+For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple "blueprint" state initialization.
 
-In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
+In the example below, `data` becomes a property of the `ComponentWithInitialState` component's `vnode.state` object.
 
 ```javascript
 var ComponentWithInitialState = {
@@ -233,7 +207,7 @@ m(ComponentWithInitialState)
 
 #### Via vnode.state
 
-State can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
+As you can see, state can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
 
 ```javascript
 var ComponentWithDynamicState = {
@@ -273,68 +247,11 @@ m(ComponentUsingThis, {text: "Hello"})
 
 Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
 
-
-
-
 ---
 
-### Syntactic variants
+### ES6 classes
 
-#### Closure components
-
-One of the easiest ways to manage state in a component is with a closure. A "closure component" is one that returns an object with a view function and optionally other lifecycle hooks. It has the ability to manage instance state within the body of the outer function.
-
-```javascript
-function ClosureComponent(initialVnode) {
-	// Each instance of this component has its own instance of `kind`
-	var kind = "closure component"
-
-	return {
-		view: function(vnode) {
-			return m("div", "Hello from a " + kind)
-		},
-		oncreate: function(vnode) {
-			console.log("We've created a " + kind)
-		}
-	}
-}
-```
-
-The returned object must hold a `view` function, used to get the tree to render.
-
-They can be consumed in the same way regular components can.
-
-```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ClosureComponent))
-
-// EXAMPLE: via m.mount
-m.mount(document.body, ClosureComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ClosureComponent
-})
-
-// EXAMPLE: component composition
-function AnotherClosureComponent() {
-	return {
-		view: function() {
-			return m("main",
-				m(ClosureComponent)
-			)
-		}
-	}
-}
-```
-A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
-
-
-If a component does *not* have state then you should opt for the simpler POJO component to avoid the additional overhead and boilerplate of the closure.
-
-#### ES6 classes
-
-Components can also be written using ES6 class syntax:
+If it suits your needs (f.e. in object-oriented projects), components can also be written using ES6 class syntax:
 
 ```javascript
 class ES6ClassComponent {
@@ -376,7 +293,40 @@ class AnotherES6ClassComponent {
 }
 ```
 
-#### Mixing component kinds
+#### Class Component State
+
+With classes, state can be managed by class instance properties and methods, and accessed via `this`:
+
+```javascript
+class ComponentWithState {
+	constructor(vnode) {
+		this.count = 0
+	}
+	increment() {
+		this.count += 1
+	}
+	decrement() {
+		this.count -= 1
+	}
+	view() {
+		return m("div",
+			m("p", "Count: " + count),
+			m("button", {
+				onclick: () => {this.increment()}
+			}, "Increment"),
+			m("button", {
+				onclick: () => {this.decrement()}
+			}, "Decrement")
+		)
+	}
+}
+```
+
+Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
+
+---
+
+### Mixing component kinds
 
 Components can be freely mixed. A class component can have closure or POJO components as children, etc...
 
