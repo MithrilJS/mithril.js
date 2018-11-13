@@ -98,6 +98,7 @@ If you need to explicitly trigger a redraw within a lifecycle method, you should
 ```javascript
 function StableComponent() {
 	var height = 0
+
 	return {
 		oncreate: function(vnode) {
 			height = vnode.dom.offsetHeight

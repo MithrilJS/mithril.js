@@ -143,9 +143,9 @@ m.route(document.body, "/", {
 function AnotherClosureComponent() {
 	return {
 		view: function() {
-			return m("main", [
+			return m("main",
 				m(ClosureComponent)
-			])
+			)
 		}
 	}
 }
@@ -207,7 +207,7 @@ Components can be freely mixed. A class component can have closure or POJO compo
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
 
-Note that unlike many other frameworks, component state does *not* trigger redraws or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
+Note that unlike many other frameworks, component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
 
 If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
 
@@ -267,9 +267,40 @@ function ComponentWithState() {
 
 A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
 
-#### POJO and Class Component State
+#### Class Component State
 
-For POJO or class components the state of a component can be accessed three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
+With classes, state can be managed by class instance properties and methods. For example:
+
+```javascript
+class ComponentWithState() {
+	constructor() {
+		this.count = 0
+	}
+	increment() {
+		this.count += 1
+	}
+	decrement() {
+		this.count -= 1
+	}
+	view() {
+		return m("div",
+			m("p", "Count: " + count),
+			m("button", {
+				onclick: () => {this.increment()}
+			}, "Increment"),
+			m("button", {
+				onclick: () => {this.decrement()}
+			}, "Decrement")
+		)
+	}
+}
+```
+
+Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
+
+#### POJO Component State
+
+For POJO components the state of a component can be accessed three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
 
 #### At initialization
 
@@ -290,8 +321,6 @@ m(ComponentWithInitialState)
 // Equivalent HTML
 // <div>Initial content</div>
 ```
-
-For class components, the state is an instance of the class, set right after the constructor is called.
 
 #### Via vnode.state
 
