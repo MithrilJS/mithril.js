@@ -10,11 +10,11 @@
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any Javascript object that has a view method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
+Any Javascript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
 ```javascript
 var Example = {
-	view: function() {
+	view: function(vnode) {
 		return m("div", "Hello")
 	}
 }
@@ -24,6 +24,58 @@ m(Example)
 // equivalent HTML
 // <div>Hello</div>
 ```
+
+---
+
+### Lifecycle methods
+
+Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes:
+
+```javascript
+var ComponentWithHooks = {
+	oninit: function(vnode) {
+		console.log("initialized")
+	},
+	oncreate: function(vnode) {
+		console.log("DOM created")
+	},
+	onbeforeupdate: function(new_vnode, old_vnode) {
+		return true
+	},
+	onupdate: function(vnode) {
+		console.log("DOM updated")
+	},
+	onbeforeremove: function(vnode) {
+		console.log("exit animation can start")
+		return new Promise(function(resolve) {
+			// call after animation completes
+			resolve()
+		})
+	},
+	onremove: function(vnode) {
+		console.log("removing DOM element")
+	},
+	view: function(vnode) {
+		return "hello"
+	}
+}
+```
+
+Like other types of virtual DOM nodes, components may have additional lifecycle methods defined when consumed as vnode types.
+
+```javascript
+function initialize(vnode) {
+	console.log("initialized as vnode")
+}
+
+m(ComponentWithHooks, {oninit: initialize})
+```
+
+Lifecycle methods in vnodes do not override component methods, nor vice versa. Component lifecycle methods are always run after the vnode's corresponding method.
+
+Take care not to use lifecycle method names for your own callback function names in vnodes.
+
+To learn more about lifecycle methods, [see the lifecycle methods page](lifecycle-methods.md).
 
 ---
 
@@ -49,160 +101,6 @@ NOTE: Lifecycle methods can also be provided via the `attrs` object, so you shou
 
 ---
 
-### Lifecycle methods
-
-Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove` and `onbeforeupdate`.
-
-```javascript
-var ComponentWithHooks = {
-	oninit: function(vnode) {
-		console.log("initialized")
-	},
-	oncreate: function(vnode) {
-		console.log("DOM created")
-	},
-	onbeforeupdate: function(vnode, old) {
-		return true
-	},
-	onupdate: function(vnode) {
-		console.log("DOM updated")
-	},
-	onbeforeremove: function(vnode) {
-		console.log("exit animation can start")
-		return new Promise(function(resolve) {
-			// call after animation completes
-			resolve()
-		})
-	},
-	onremove: function(vnode) {
-		console.log("removing DOM element")
-	},
-	view: function(vnode) {
-		return "hello"
-	}
-}
-```
-
-Like other types of virtual DOM nodes, components may have additional lifecycle methods defined when consumed as vnode types.
-
-```javascript
-function initialize() {
-	console.log("initialized as vnode")
-}
-
-m(ComponentWithHooks, {oninit: initialize})
-```
-
-Lifecycle methods in vnodes do not override component methods, nor vice versa. Component lifecycle methods are always run after the vnode's corresponding method.
-
-Take care not to use lifecycle method names for your own callback function names in vnodes.
-
-To learn more about lifecycle methods, [see the lifecycle methods page](lifecycle-methods.md).
-
----
-
-### Syntactic variants
-
-#### Closure components
-
-One of the easiest ways to manage state in a component is with a closure. A "closure component" is one that returns an object with a view function and optionally other lifecycle hooks. It has the ability to manage instance state within the body of the outer function.
-
-```javascript
-function ClosureComponent(initialVnode) {
-	// Each instance of this component has its own instance of `kind`
-	var kind = "closure component"
-
-	return {
-		view: function(vnode) {
-			return m("div", "Hello from a " + kind)
-		},
-		oncreate: function(vnode) {
-			console.log("We've created a " + kind)
-		}
-	}
-}
-```
-
-The returned object must hold a `view` function, used to get the tree to render.
-
-They can be consumed in the same way regular components can.
-
-```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ClosureComponent))
-
-// EXAMPLE: via m.mount
-m.mount(document.body, ClosureComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ClosureComponent
-})
-
-// EXAMPLE: component composition
-function AnotherClosureComponent() {
-	return {
-		view: function() {
-			return m("main",
-				m(ClosureComponent)
-			)
-		}
-	}
-}
-```
-
-If a component does *not* have state then you should opt for the simpler POJO component to avoid the additional overhead and boilerplate of the closure.
-
-#### ES6 classes
-
-Components can also be written using ES6 class syntax:
-
-```javascript
-class ES6ClassComponent {
-	constructor(vnode) {
-		this.kind = "ES6 class"
-	}
-	view() {
-		return m("div", `Hello from an ${this.kind}`)
-	}
-	oncreate() {
-		console.log(`A ${this.kind} component was created`)
-	}
-}
-```
-
-Component classes must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
-
-They can be consumed in the same way regular components can.
-
-```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ES6ClassComponent))
-
-// EXAMPLE: via m.mount
-m.mount(document.body, ES6ClassComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ES6ClassComponent
-})
-
-// EXAMPLE: component composition
-class AnotherES6ClassComponent {
-	view() {
-		return m("main", [
-			m(ES6ClassComponent)
-		])
-	}
-}
-```
-
-#### Mixing component kinds
-
-Components can be freely mixed. A class component can have closure or POJO components as children, etc...
-
----
-
 ### State
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
@@ -213,15 +111,21 @@ If a state change occurs that is not as a result of any of the above conditions 
 
 #### Closure Component State
 
-With a closure component state can simply be maintained by variables that are declared within the outer function. For example:
+In the above examples, each component is defined as a POJO (Plain Old Javascript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
+
+With a closure component, state can simply be maintained by variables that are declared within the outer function:
 
 ```javascript
-function ComponentWithState() {
-	// Variables that hold component state
+function ComponentWithState(initialVnode) {
+	// Component state variable
 	var count = 0
 
+	// POJO component instance
 	return {
-		view: function() {
+		oninit: function(vnode){
+			console.log("init a closure component")
+		},
+		view: function(vnode) {
 			return m("div",
 				m("p", "Count: " + count),
 				m("button", {
@@ -238,7 +142,7 @@ function ComponentWithState() {
 Any functions declared within the closure also have access to its state variables.
 
 ```javascript
-function ComponentWithState() {
+function ComponentWithState(initialVnode) {
 	var count = 0
 
 	function increment() {
@@ -250,7 +154,7 @@ function ComponentWithState() {
 	}
 
 	return {
-		view: function() {
+		view: function(vnode) {
 			return m("div",
 				m("p", "Count: " + count),
 				m("button", {
@@ -265,15 +169,17 @@ function ComponentWithState() {
 }
 ```
 
-A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
+Closure components are consumed in the same way as POJOs, e.g. `m(ComponentWithState, { passedData: ... })`.
 
 #### Class Component State
 
-With classes, state can be managed by class instance properties and methods. For example:
+Another approach to handling component state, especially in object-oriented projects, is to use a **_class component_** (ES6+ only), which is (as you might expect) a class which returns a POJO component instance.
+
+With classes, state can be managed by class instance properties and methods, and accessed via `this`:
 
 ```javascript
-class ComponentWithState() {
-	constructor() {
+class ComponentWithState {
+	constructor(vnode) {
 		this.count = 0
 	}
 	increment() {
@@ -297,6 +203,9 @@ class ComponentWithState() {
 ```
 
 Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
+
+---
+### Advanced Usage
 
 #### POJO Component State
 
@@ -363,6 +272,114 @@ m(ComponentUsingThis, {text: "Hello"})
 ```
 
 Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
+
+
+
+
+---
+
+### Syntactic variants
+
+#### Closure components
+
+One of the easiest ways to manage state in a component is with a closure. A "closure component" is one that returns an object with a view function and optionally other lifecycle hooks. It has the ability to manage instance state within the body of the outer function.
+
+```javascript
+function ClosureComponent(initialVnode) {
+	// Each instance of this component has its own instance of `kind`
+	var kind = "closure component"
+
+	return {
+		view: function(vnode) {
+			return m("div", "Hello from a " + kind)
+		},
+		oncreate: function(vnode) {
+			console.log("We've created a " + kind)
+		}
+	}
+}
+```
+
+The returned object must hold a `view` function, used to get the tree to render.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(ClosureComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, ClosureComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": ClosureComponent
+})
+
+// EXAMPLE: component composition
+function AnotherClosureComponent() {
+	return {
+		view: function() {
+			return m("main",
+				m(ClosureComponent)
+			)
+		}
+	}
+}
+```
+A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
+
+
+If a component does *not* have state then you should opt for the simpler POJO component to avoid the additional overhead and boilerplate of the closure.
+
+#### ES6 classes
+
+Components can also be written using ES6 class syntax:
+
+```javascript
+class ES6ClassComponent {
+	constructor(vnode) {
+		this.kind = "ES6 class"
+	}
+	view() {
+		return m("div", `Hello from an ${this.kind}`)
+	}
+	oncreate() {
+		console.log(`A ${this.kind} component was created`)
+	}
+}
+```
+
+Component classes must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
+
+They can be consumed in the same way regular components can.
+
+```javascript
+// EXAMPLE: via m.render
+m.render(document.body, m(ES6ClassComponent))
+
+// EXAMPLE: via m.mount
+m.mount(document.body, ES6ClassComponent)
+
+// EXAMPLE: via m.route
+m.route(document.body, "/", {
+	"/": ES6ClassComponent
+})
+
+// EXAMPLE: component composition
+class AnotherES6ClassComponent {
+	view() {
+		return m("main", [
+			m(ES6ClassComponent)
+		])
+	}
+}
+```
+
+#### Mixing component kinds
+
+Components can be freely mixed. A class component can have closure or POJO components as children, etc...
+
 
 ---
 
