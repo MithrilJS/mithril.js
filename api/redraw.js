@@ -3,18 +3,13 @@
 var coreRenderer = require("../render/render")
 
 function throttle(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var delay = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	var pending = null
 	return function() {
-		var elapsed = Date.now() - last
 		if (pending === null) {
-			pending = timeout(function() {
+			pending = requestAnimationFrame(function() {
 				pending = null
 				callback()
-				last = Date.now()
-			}, delay - elapsed)
+			})
 		}
 	}
 }

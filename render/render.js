@@ -35,7 +35,7 @@ module.exports = function($window) {
 		}
 	}
 
-	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
 	function activeElement() {
 		try {
@@ -255,7 +255,7 @@ module.exports = function($window) {
 	// When the list is being traversed top-down, at any index, the DOM nodes up to the previous
 	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
-  //
+	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
 	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
 	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
@@ -880,7 +880,7 @@ module.exports = function($window) {
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
-		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}

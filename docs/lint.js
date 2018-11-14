@@ -183,4 +183,4 @@ traverseDirectory("./docs", function(pathname) {
 		})
 	}
 })
-.then(process.exit)
+	.then(process.exit)

@@ -666,7 +666,7 @@ o.spec("the done parser", function() {
 		var threw = false
 		oo("test", function(/*hey
 			*/ /**/ //ho
-			done  /*hey
+			done /*hey
 			*/ /**/ //huuu
 			, timeout
 		) {

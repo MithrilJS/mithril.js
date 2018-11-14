@@ -218,11 +218,11 @@ The routing strategy dictates how a library might actually implement routing. Th
 - Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
 - Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
 
-Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState` (namely, Internet Explorer 9), because it can fall back to using `onhashchange`. Use this strategy if you want to support IE9.
+Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState`, because it can fall back to using `onhashchange`. Use this strategy if you want to keep the hashes purely local.
 
-The querystring strategy also technically works in IE9, but it falls back to reloading the page. Use this strategy if you want to support anchored links and you are not able to make the server-side necessary to support the pathname strategy.
+The querystring strategy allows server-side detection, but it doesn't appear as a normal path. Use this strategy if you want to support and potentially detect anchored links server-side and you are not able to make the changes necessary to support the pathname strategy (like if you're using Apache and can't modify your .htaccess).
 
-The pathname strategy produces the cleanest looking URLs, but does not work in IE9 *and* requires setting up the server to serve the single page application code from every URL that the application can route to. Use this strategy if you want cleaner-looking URLs and do not need to support IE9.
+The pathname strategy produces the cleanest looking URLs, but requires setting up the server to serve the single page application code from every URL that the application can route to. Use this strategy if you want cleaner-looking URLs.
 
 Single page applications that use the hash strategy often use the convention of having an exclamation mark after the hash to indicate that they're using the hash as a routing mechanism and not for the purposes of linking to anchors. The `#!` string is known as a *hashbang*.
 
