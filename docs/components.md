@@ -101,7 +101,7 @@ var Example = {
 }
 ```
 
-NOTE: Lifecycle methods can also be provided via the `attrs` object, so you should avoid using the lifecycle method names for your own callbacks as they would also be invoked by Mithril. Use lifecycle methods in `attrs` only when you specifically wish to create lifecycle hooks.
+NOTE: Lifecycle methods can also be defined in the `attrs` object, so you should avoid using their names for your own callbacks as they would also be invoked by Mithril itself. Use them in `attrs` only when you specifically wish to use them as lifecycle methods.
 
 ---
 
