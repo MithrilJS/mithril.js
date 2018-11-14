@@ -4,7 +4,6 @@ var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
 	var $doc = $window.document
-	var $emptyFragment = $doc.createDocumentFragment()
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -36,6 +35,15 @@ module.exports = function($window) {
 		}
 	}
 
+	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
+	function activeElement() {
+		try {
+			return $doc.activeElement
+		} catch (e) {
+			return null
+		}
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -135,12 +143,12 @@ module.exports = function($window) {
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
 			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 		} else {
 			vnode.state = void 0
 			sentinel = vnode.tag
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
@@ -522,7 +530,7 @@ module.exports = function($window) {
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
-		var map = {}
+		var map = Object.create(null)
 		for (; start < end; start++) {
 			var vnode = vnodes[start]
 			if (vnode != null) {
@@ -644,21 +652,13 @@ module.exports = function($window) {
 				checkState(vnode, original)
 				onremove(vnode)
 				if (vnode.dom) {
+					var parent = vnode.dom.parentNode
 					var count = vnode.domSize || 1
-					if (count > 1) {
-						var dom = vnode.dom
-						while (--count) {
-							removeNodeFromDOM(dom.nextSibling)
-						}
-					}
-					removeNodeFromDOM(vnode.dom)
+					while (--count) parent.removeChild(vnode.dom.nextSibling)
+					parent.removeChild(vnode.dom)
 				}
 			}
 		}
-	}
-	function removeNodeFromDOM(node) {
-		var parent = node.parentNode
-		if (parent != null) parent.removeChild(node)
 	}
 	function onremove(vnode) {
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
@@ -687,15 +687,17 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (key in vnode.dom && !isAttribute(key) && ns === undefined && !isCustomElement(vnode.tag, vnode.attrs)) {
+		else if (hasPropertyKey(vnode, key, ns)) {
 			if (key === "value") {
-				var normalized = "" + value // eslint-disable-line no-implicit-coercion
+				// Only do the coercion if we're actually going to check the value.
+				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === activeElement()) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old !== null && vnode.dom.value === normalized) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
+				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
@@ -713,12 +715,13 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
-			key in vnode.dom && !isAttribute(key)
+			hasPropertyKey(vnode, key, ns)
 			&& key !== "className"
-			&& !(vnode.tag === "option" && key === "value")
+			&& !(key === "value" && (
+				vnode.tag === "option"
+				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()
+			))
 			&& !(vnode.tag === "input" && key === "type")
-			&& ns === undefined
-			&& !isCustomElement(vnode.tag, vnode.attrs || {})
 		) {
 			vnode.dom[key] = null
 		} else {
@@ -756,16 +759,20 @@ module.exports = function($window) {
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement() || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function isAttribute(attr) {
-		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
-	}
-	function isCustomElement(tag, attrs){
-		return attrs.is || tag.indexOf("-") > -1
+	function hasPropertyKey(vnode, key, ns) {
+		// Filter out namespaced keys
+		return ns === undefined && (
+			// If it's a custom element, just keep it.
+			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			// If it's a normal element, let's try to avoid a few browser bugs.
+			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
+			// Defer the property check until *after* we check everything.
+		) && key in vnode.dom
 	}
 
 	//style
@@ -802,13 +809,20 @@ module.exports = function($window) {
 	// 4. The event name is remapped to the handler before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
+	// 6. In function-based event handlers, `return false` prevents the default
+	//    action and stops event propagation. We replicate that below.
 	function EventDict() {}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler = this["on" + ev.type]
-		if (typeof handler === "function") handler.call(ev.target, ev)
+		var result
+		if (typeof handler === "function") result = handler.call(ev.target, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
+		}
 	}
 
 	//event
@@ -857,17 +871,17 @@ module.exports = function($window) {
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
-		var active = $doc.activeElement
+		var active = activeElement()
 		var namespace = dom.namespaceURI
 
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 
-		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-		if (active != null && $doc.activeElement !== active && typeof active.focus === "function") active.focus()
+		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 

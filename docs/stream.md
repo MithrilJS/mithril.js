@@ -7,6 +7,7 @@
 		- [Stream.merge](#streammerge)
 		- [Stream.scan](#streamscan)
 		- [Stream.scanMerge](#streamscanmerge)
+		- [Stream.lift](#streamlift)
 		- [Stream.HALT](#streamhalt)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#instance-members)
@@ -146,6 +147,37 @@ Argument      | Type                                             | Required | De
 `pairs`       | `Array<[Stream, (accumulator, value) -> value]>` | Yes      | An array of tuples of stream and scan functions
 `accumulator` | `any`                                            | Yes      | The starting value for the accumulator
 **returns**   | `Stream`                                         |          | Returns a new stream containing the result
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.lift
+
+Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams). Unlike `combine`, the input streams are a variable number of arguments (instead of an array) and the callback receives the stream values instead of streams. There is no `changed` parameter. This is generally a more user-friendly function for applications than `combine`.
+
+`stream = Stream.lift(lifter, stream1, stream2, ...)`
+
+Argument     | Type                        | Required | Description
+------------ | --------------------------- | -------- | ---
+`lifter`     | `(any...) -> any` | Yes     | See [lifter](#lifter) argument
+`streams...` | list of `Streams`           | Yes      | Streams to be lifted
+**returns**  | `Stream`                    |          | Returns a stream
+
+[How to read signatures](signatures.md)
+
+---
+
+###### lifter
+
+Specifies how the value of a computed stream is generated. See [combining streams](#combining-streams)
+
+`any = lifter(streams...)`
+
+Argument     | Type                 | Required | Description
+------------ | -------------------- | -------- | ---
+`streams...` | splat of `Streams`   | No       | Splat of zero or more streams that correspond to the streams passed to [`stream.lift`](#stream-lift)
+**returns**  | `any`                |          | Returns a computed value
 
 [How to read signatures](signatures.md)
 
@@ -372,6 +404,18 @@ var greeting = stream.merge([a, b]).map(function(values) {
 console.log(greeting()) // logs "hello world"
 ```
 
+Or you can use the helper function `stream.lift()`
+
+```javascript
+var a = stream("hello")
+var b = stream("world")
+
+var greeting = stream.lift(function(_a, _b) {
+	return _a + " " + _b
+}, a, b)
+
+console.log(greeting()) // logs "hello world"
+```
 
 There's also a lower level method called `stream.combine()` that exposes the stream themselves in the reactive computations for more advanced use cases
 

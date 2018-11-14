@@ -63,7 +63,7 @@ function finalize(stream) {
 }
 
 function combine(fn, streams) {
-	if (!streams.every(valid)) throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
+	if (!streams.every(valid)) throw new Error("Ensure that each item passed to stream.combine/merge/lift is a stream")
 	return initDependency(createStream(), streams, function() {
 		return fn.apply(this, streams.concat([streams.filter(changed)]))
 	})
@@ -148,11 +148,20 @@ function scanMerge(tuples, seed) {
 	return newStream
 }
 
+function lift() {
+	var fn = arguments[0]
+	var streams = Array.prototype.slice.call(arguments, 1)
+	return merge(streams).map(function(streams) {
+		return fn.apply(undefined, streams)
+	})
+}
+
 createStream["fantasy-land/of"] = createStream
 createStream.merge = merge
 createStream.combine = combine
 createStream.scan = scan
 createStream.scanMerge = scanMerge
+createStream.lift = lift
 createStream.HALT = HALT
 
 if (typeof module !== "undefined") module["exports"] = createStream

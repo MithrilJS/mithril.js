@@ -111,6 +111,7 @@ o.spec("call()", function() {
 
 		o(spy.callCount).equals(1)
 		o(spy.args[0]).equals(1)
+		o(spy.calls[0]).deepEquals([1])
 	})
 })
 ```
@@ -382,7 +383,9 @@ If you're using a recent version of npm (v5+), you can use run `npx ospec` from 
 
 #### npm-run
 
-If you're using an older NPM version, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages as npx would.
+If you're using a recent version of npm (v5+), you can use run `npx ospec` from your project folder.
+
+Otherwise, to work around this limitation, you can use [`npm-run`](https://www.npmjs.com/package/npm-run) which enables one to run the binaries of locally installed packages.
 
 ```
 npm install npm-run -g

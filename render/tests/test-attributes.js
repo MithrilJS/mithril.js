@@ -52,38 +52,84 @@ o.spec("attributes", function() {
 	})
 	o.spec("customElements", function(){
 
-		o("when vnode is customElement, custom setAttribute called", function(){
-
-			var normal = [
-				{tag: "input", attrs: {value: "hello"}},
-				{tag: "input", attrs: {value: "hello"}},
-				{tag: "input", attrs: {value: "hello"}}
-			]
-
-			var custom = [
-				{tag: "custom-element", attrs: {custom: "x"}},
-				{tag: "input", attrs: {is: "something-special", custom: "x"}},
-				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
-			]
-
-			var view = normal.concat(custom)
-
+		o("when vnode is customElement without property, custom setAttribute called", function(){
 			var f = $window.document.createElement
-			var spy
+			var spies = []
 
 			$window.document.createElement = function(tag, is){
 				var el = f(tag, is)
-				if(!spy){
-					spy = o.spy(el.setAttribute)
-				}
+				var spy = o.spy(el.setAttribute)
 				el.setAttribute = spy
-
+				spies.push(spy)
+				spy.elem = el
 				return el
 			}
 
-			render(root, view)
+			render(root, [
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "custom-element", attrs: {custom: "x"}},
+				{tag: "input", attrs: {is: "something-special", custom: "x"}},
+				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
+			])
 
-			o(spy.callCount).equals(custom.length)
+			o(spies[0].callCount).equals(0)
+			o(spies[1].callCount).equals(0)
+			o(spies[2].callCount).equals(0)
+			o(spies[3].calls).deepEquals([{this: spies[3].elem, args: ["custom", "x"]}])
+			o(spies[4].calls).deepEquals([{this: spies[4].elem, args: ["custom", "x"]}])
+			o(spies[5].calls).deepEquals([{this: spies[5].elem, args: ["custom", "x"]}])
+		})
+
+		o("when vnode is customElement with property, custom setAttribute not called", function(){
+			var f = $window.document.createElement
+			var spies = []
+			var getters = []
+			var setters = []
+
+			$window.document.createElement = function(tag, is){
+				var el = f(tag, is)
+				var spy = o.spy(el.setAttribute)
+				el.setAttribute = spy
+				spies.push(spy)
+				spy.elem = el
+				if (tag === "custom-element" || is && is.is === "something-special") {
+					var custom = "foo"
+					var getter, setter
+					Object.defineProperty(el, "custom", {
+						configurable: true,
+						enumerable: true,
+						get: getter = o.spy(function () { return custom }),
+						set: setter = o.spy(function (value) { custom = value })
+					})
+					getters.push(getter)
+					setters.push(setter)
+				}
+				return el
+			}
+
+			render(root, [
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "input", attrs: {value: "hello"}},
+				{tag: "custom-element", attrs: {custom: "x"}},
+				{tag: "input", attrs: {is: "something-special", custom: "x"}},
+				{tag: "custom-element", attrs: {is: "something-special", custom: "x"}}
+			])
+
+			o(spies[0].callCount).equals(0)
+			o(spies[1].callCount).equals(0)
+			o(spies[2].callCount).equals(0)
+			o(spies[3].callCount).equals(0)
+			o(spies[4].callCount).equals(0)
+			o(spies[5].callCount).equals(0)
+			o(getters[0].callCount).equals(0)
+			o(getters[1].callCount).equals(0)
+			o(getters[2].callCount).equals(0)
+			o(setters[0].calls).deepEquals([{this: spies[3].elem, args: ["x"]}])
+			o(setters[1].calls).deepEquals([{this: spies[4].elem, args: ["x"]}])
+			o(setters[2].calls).deepEquals([{this: spies[5].elem, args: ["x"]}])
 		})
 
 	})

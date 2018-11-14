@@ -8,7 +8,7 @@ Vnode.normalize = function(node) {
 	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
 	return node
 }
-Vnode.normalizeChildren = function normalizeChildren(input) {
+Vnode.normalizeChildren = function(input) {
 	var children = []
 	for (var i = 0; i < input.length; i++) {
 		children[i] = Vnode.normalize(input[i])
