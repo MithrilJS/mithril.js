@@ -38,7 +38,10 @@ fs.writeFileSync("mithril.mjs",
 		mithril.lastIndexOf("if (typeof module")
 	)
 	+ "\nexport default m"
-	+ "\nexport var " + namedExports.map(function(n) { return n + " = m." + n }).join(",")
+	// The exports are declared with prefixed underscores to avoid overwriting previously
+	// declared variables with the same name
+	+ "\nvar " + namedExports.map(function(n) { return "_" + n + " = m." + n }).join(",")
+	+ "\nexport {" + namedExports.map(function(n) { return "_" + n + " as " + n }).join(",") + "}"
 )
 
 var mithrilMin = fs.readFileSync("mithril.min.js", "utf8")
@@ -49,7 +52,10 @@ fs.writeFileSync("mithril.min.mjs",
 		mithrilMin.lastIndexOf("\"undefined\"!==typeof module")
 	)
 	+ "export default " + mName + ";"
-	+ "export var " + namedExports.map(function(n) { return n + " = " + mName + "." + n }).join(",") + ";"
+	// The exports are declared with prefixed underscores to avoid overwriting previously
+	// declared variables with the same name
+	+ "var " + namedExports.map(function(n) { return "_" + n + "=m." + n }).join(",") + ";"
+	+ "export {" + namedExports.map(function(n) { return "_" + n + " as " + n }).join(",") + "};"
 )
 
 var stream = fs.readFileSync("stream/stream.js", "utf8")
