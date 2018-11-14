@@ -185,7 +185,7 @@ A big advantage of closure components is that we don't need to worry about bindi
 
 #### POJO Component State
 
-It is generally accepted that a component with state that must be managed is best expressed as a closure. If, however, you have reason to manage state in a POJO, the state of a component can be accessed in three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
+It is generally recommended that you use closures for managing component state. If, however, you have reason to manage state in a POJO, the state of a component can be accessed in three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
 
 #### At initialization
 
