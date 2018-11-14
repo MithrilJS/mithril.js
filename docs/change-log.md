@@ -46,6 +46,10 @@
 - API: Introduction of `m.prop()` ([#2268](https://github.com/MithrilJS/mithril.js/pull/2268))
 - docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
 - stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
+- API: ES module bundles are now available for `mithril` and `mithril/stream` ([#2194](https://github.com/MithrilJS/mithril.js/pull/2194) [@porsager](https://github.com/porsager)).
+    - All of the `m.*` properties from `mithril` are re-exported as named exports in addition to being attached to `m`.
+    - `m()` itself from `mithril` is exported as the default export.
+    - `mithril/stream`'s primary export is exported as the default export.
 
 #### Bug fixes
 
