@@ -208,19 +208,6 @@ o.spec("domMock", function() {
 			try {parent.removeChild(child)}
 			catch (e) {done()}
 		})
-		o("invokes blur on child if focused", function() {
-			var parent = $document.createElement("div")
-			var child = $document.createElement("a")
-			var spy = o.spy()
-			parent.appendChild(child)
-			child.addEventListener("blur", spy, false)
-			child.focus()
-			parent.removeChild(child)
-
-			o(spy.callCount).equals(1)
-			o(spy.args[0].type).equals("blur")
-			o(spy.args[0].target).equals(child)
-		})
 	})
 
 	o.spec("insertBefore", function() {
