@@ -33,9 +33,14 @@ Browsers all the way back to IE9 are supported, no polyfills required 👌.
 ```
 
 ### npm
-
+For global installation
 ```bash
-$ npm install mithril
+$ npm install mithril -g
+```
+
+For local installation
+```bash
+$ npm install mithril --save
 ```
 
 The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.
