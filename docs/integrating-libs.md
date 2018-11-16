@@ -2,7 +2,69 @@
 
 Integration with third party libraries or vanilla javascript code can be achieved via [lifecycle methods](lifecycle-methods.md).
 
-## Example
+## noUiSlider Example
+
+```javascript
+/** NoUiSlider wrapper component */
+function Slider() {
+	var slider
+
+	return {
+		oncreate: function(vnode) {
+			slider = noUiSlider.create(vnode.dom, {
+				start: 0,
+				range: {min: 0, max: 100}
+			})
+			slider.on('update', function(values) {
+				vnode.attrs.onChange(values[0])
+				m.redraw()
+			})
+		},
+		onremove: function() {
+			slider.destroy()
+		},
+		view: function() {
+			return m('div')
+		}
+	}
+}
+
+/** Demo app component */
+function Demo() {
+	var showSlider = false
+	var value = 0
+
+	return {
+		view: function() {
+			return m('.app',
+				m('p',
+					m('button',
+						{
+							type: 'button',
+							onclick: function() {
+								showSlider = !showSlider
+							}
+						},
+						showSlider ? "Destroy Slider" : "Create Slider"
+					)
+				),
+				showSlider && m(Slider, {
+					onChange: function(v) {
+						value = v
+					}
+				}),
+				m('p', value)
+			)
+		}
+	}
+}
+
+m.mount(document.body, Demo)
+```
+
+[flems demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4A9ACoJAAgBytAKoQAylAgATGACdpAdy0YADoe3S6WQ-RHSJYgDpowAVzTViEetNUbtACgCU0sAO0tIAbhg6cGqaWg4h0lowxE5aaEEJofTUSRiMiNLOru70vmFotJqBwemhddE+OgC80hVK3rH4OTB5MGUVmvjqtFgUGbV19cSRxAUADBSZk4kYaADmMAXAWBBo82NYGAAeBQCMc3OsS6Gs-tfSDZ2lAOROhuq9z2NFbh5oZRgoE54NV7qFypUYPg8sQtHB8PQAMKEVYbAFA+DIOYAXTuE2WWHwSXUBl0AXutyW7CW9CSWFoYU2hRcv1KoPxoUe2iG8FhtAAnuT8dT8WEIDBdAUfiV-uzlolkql0lhfM91BAws88ZMrrVdbqHJIZAARGD06RGQxmEaWNDWWwOaV-aSm+kBcahWDEB6EWi6DqmFpgQFwGAJL3hQHA6QtObxWpJFJpD11MUSqUsmXumryxNK6Qq57Q4xfMEF1WGUscgmqgBGTmIxHoVfl8pzrflxH5JgKz3rjebi2rHeyamoAGsM8U-tmyx24L7-TFA9IAIQLv0BuLD1u6js6of7+qLrfSAD80jsIFNcD5-K8y7iIGkBSviNyjAfjSvc+k2tb-iHq2G5Lo00gAGTgeWW5jO2I5oMiqJMk6pRhHKR6RhiMbhL+e67oBZaFpWYwRBi-6TOR0h4fq8aEvSLjEL4wzUE4OAMPgtaVPyYyurQeKUCAoawKyaAIDwADMACsiAAEwAJxsBwICYDgeBdHAAg0PQjDMDwbDYlQahoOOYmoMpXB4BUTgQFyWgCak5A8CQxCGHAiBiGILiGOOaxdCMYhWTZj4AAKnDJ+CnPgcxiOqt5aBA-YwAFtDWbZ+D8AJXYmHgcA5BAhiiOwnCqTwgVpdQGn2VojkgM5rnuZ5aDeb55jJalIVhRFUUxTZsIJQ2SVlY+6maVl3CCV2sCKcV407MQhDxeQVAOXgdVuR5Xk+X5WBiHNC3QKFXUAGy7RA82Lelo3duNuXxQV+msEAA)
+
+## Bootstrap FullCalandar Example
 
 ```javascript
 var FullCalendar = {
@@ -24,9 +86,9 @@ var FullCalendar = {
 		return m('div')
 	},
 
-	onbeforeremove: function (vnode) {
+	onremove: function (vnode) {
 		// Run any destroy / cleanup methods here.
-		//E.g. $(vnode.state.fullCalendarEl).fullCalendar('destroy')
+		//E.g. $(vnode.dom).fullCalendar('destroy')
 	}
 }
 
