@@ -5,7 +5,7 @@
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
-- [Attributes passed as the second argument](attributes-passed-as-the-second-argument)
+- [Attributes passed as the second argument](#attributes-passed-as-the-second-argument)
 - [DOM attributes](#dom-attributes)
 - [Style attribute](#style-attribute)
 - [Events](#events)
