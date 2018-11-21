@@ -633,7 +633,7 @@ o.spec("message", function() {
 
 ### String result.context
 
-In case of failure, a `>`-separated string showing the structure of the test specification.
+A `>`-separated string showing the structure of the test specification.
 In the below example, `result.context` would be `testing > rocks`.
 
 ```javascript
