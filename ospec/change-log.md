@@ -5,6 +5,7 @@
 _2018-xx-yy_
 <!-- Add new lines here. Version number will be decided later -->
 - Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call.
+- Added `.throws` and `.notThrows` assertions to ospec. (#2255 @robertakarobin)
 
 ## 3.0.1
 _2018-06-30_
