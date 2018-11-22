@@ -228,40 +228,40 @@ module.exports = function(options) {
 				var cssText = ""
 				var style = {}
 				Object.defineProperties(style, {
-          cssText: {
-            get: function() {return cssText},
-            set: function (value) {
-              var buf = []
-              if (typeof value === "string") {
-                for (var key in style) style[key] = ""
-                var rules = splitDeclList(value)
-                for (var i = 0; i < rules.length; i++) {
-                  var rule = rules[i]
-                  var colonIndex = rule.indexOf(":")
-                  if (colonIndex > -1) {
-                    var rawKey = rule.slice(0, colonIndex).trim()
-                    var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
-                    var value = rule.slice(colonIndex + 1).trim()
-                    if (key !== "cssText") {
-                      style[key] = value
-                      buf.push(rawKey + ": " + value + ";")
-                    }
-                  }
-                }
-                element.setAttribute("style", cssText = buf.join(" "))
-              }
-            }
-          },
-          getPropertyValue: {value: function(key){
-            return style[key]
-          }},
-          removeProperty: {value: function(key){
-            delete style[key]
-          }},
-          setProperty: {value: function(key, value){
-            style[key] = value
-          }}
-        })
+					cssText: {
+						get: function() {return cssText},
+						set: function (value) {
+							var buf = []
+							if (typeof value === "string") {
+								for (var key in style) style[key] = ""
+								var rules = splitDeclList(value)
+								for (var i = 0; i < rules.length; i++) {
+									var rule = rules[i]
+									var colonIndex = rule.indexOf(":")
+									if (colonIndex > -1) {
+										var rawKey = rule.slice(0, colonIndex).trim()
+										var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
+										var value = rule.slice(colonIndex + 1).trim()
+										if (key !== "cssText") {
+											style[key] = value
+											buf.push(rawKey + ": " + value + ";")
+										}
+									}
+								}
+								element.setAttribute("style", cssText = buf.join(" "))
+							}
+						}
+					},
+					getPropertyValue: {value: function(key){
+						return style[key]
+					}},
+					removeProperty: {value: function(key){
+						style[key] = ""
+					}},
+					setProperty: {value: function(key, value){
+						style[key] = value
+					}}
+				})
 				var events = {}
 				var element = {
 					nodeType: 1,

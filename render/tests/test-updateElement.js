@@ -179,19 +179,6 @@ o.spec("updateElement", function() {
 		o(updated.dom.style.backgroundColor).equals("red")
 		o(updated.dom.style.border).equals("")
 	})
-	o("updates style when it's same object but mutated", function() {
-		var style = {backgroundColor: "red", color: "gold"}
-		var vnode = {tag: "a", attrs: {style: style}}
-
-		render(root, [vnode])
-
-		delete style.backgroundColor
-		var updated = {tag: "a", attrs: {style: style}}
-		render(root, [updated])
-
-		o(updated.dom.style.backgroundColor).equals("")
-		o(updated.dom.style.color).equals("gold")
-	})
 	o("does not re-render element styles for equivalent style objects", function() {
 		var style = {color: "gold"}
 		var vnode = {tag: "a", attrs: {style: style}}

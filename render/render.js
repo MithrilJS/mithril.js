@@ -777,17 +777,17 @@ module.exports = function($window) {
 
 	//style
 	function updateStyle(element, old, input) {
-    if(typeof input === "object") {
-      var style = {}
-      for(var key in input) {
-        style[key] = input[key].replace(/[A-Z]/g, function(capital){
-          return '-' + capital.toLowerCase()
-        })
-      }
-    }
-    else {
-      var style = input
-    }
+		if(typeof input === "object") {
+			var style = {}
+			for(var key in input) {
+				style[key] = input[key].replace(/[A-Z]/g, function(capital){
+					return "-" + capital.toLowerCase()
+				})
+			}
+		}
+		else {
+			var style = input
+		}
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
