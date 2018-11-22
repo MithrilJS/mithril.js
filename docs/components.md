@@ -463,7 +463,7 @@ function Modal(vnode) {
 			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs, [
 			//             forwarding `vnode.attrs` here ^
 				m(".modal-dialog[role=document]", {
-					class: vnode.attrs.centered ? "modal-dialog-centered" : "",
+					class: vnode.attrs.centered ? "modal-dialog-centered" : ""
 				}, [
 					m(".modal-content", vnode.children)
 				])
@@ -476,7 +476,7 @@ Modal.Dismiss = {
 	view: function(vnode) {
 		var tag = vnode.attrs.tag || "button[type=button].close"
 		tag += "[data-dismiss=modal][aria-label=Close]"
-		return m(tag, vnode.attrs, vnode.children),
+		return m(tag, vnode.attrs, vnode.children)
 		//            ^ forwarding `vnode.attrs` here
 	}
 }
@@ -486,8 +486,8 @@ Modal.Header = {
 		return m(".modal-header", [
 			m(".modal-title", vnode.attrs, vnode.attrs.title),
 			//                ^ forwarding `vnode.attrs` here
-			vnode.children,
-		]),
+			vnode.children
+		])
 	}
 }
 
@@ -519,7 +519,7 @@ m(Modal, [
 
 	m(Modal.Footer, [
 		m(Modal.Dismiss, {class: "btn btn-secondary"}, "Close"),
-		m("button[type=button].btn.btn-primary", "Save changes"),
+		m("button[type=button].btn.btn-primary", "Save changes")
 	])
 ])
 ```
@@ -593,14 +593,14 @@ function Modal(vnode) {
 			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.modalAttrs, [
 				//         forwarding `modalAttrs:` here ^
 				m(".modal-dialog[role=document]", {
-					class: vnode.attrs.centered ? "modal-dialog-centered" : "",
+					class: vnode.attrs.centered ? "modal-dialog-centered" : ""
 				}, [
 					m(".modal-content", [
 						m(".modal-header", vnode.attrs.headerAttrs, [
 						// forwarding `headerAttrs:` here ^
 							m(".modal-title", vnode.attrs.titleAttrs, vnode.attrs.title),
 							// forwarding `titleAttrs:` here ^
-							vnode.attrs.header,
+							vnode.attrs.header
 						]),
 						m(".modal-body", vnode.attrs.bodyAttrs, vnode.attrs.body),
 						// forwarding `bodyAttrs:` here ^
@@ -617,7 +617,7 @@ Modal.Dismiss = {
 	view: function(vnode) {
 		var tag = vnode.attrs.tag || "button[type=button].close"
 		tag += "[data-dismiss=modal][aria-label=Close]"
-		return m(tag, vnode.attrs.attrs, vnode.children),
+		return m(tag, vnode.attrs.attrs, vnode.children)
 		//            ^ forwarding `attrs:` here
 	}
 }
@@ -635,7 +635,7 @@ m(Modal, {
 
 	footer: [
 		m(Modal.Dismiss, {attrs: {class: "btn btn-secondary"}}, "Close"),
-		m("button[type=button].btn.btn-primary", "Save changes"),
+		m("button[type=button].btn.btn-primary", "Save changes")
 	]
 })
 
