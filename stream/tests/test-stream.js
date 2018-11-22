@@ -267,6 +267,127 @@ o.spec("stream", function() {
 			o(spy.callCount).equals(0)
 		})
 	})
+	o.spec("lift", function() {
+		o("transforms value", function() {
+			var stream = Stream()
+			var doubled = Stream.lift(function(s) {return s * 2}, stream)
+
+			stream(2)
+
+			o(doubled()).equals(4)
+		})
+		o("transforms default value", function() {
+			var stream = Stream(2)
+			var doubled = Stream.lift(function(s) {return s * 2}, stream)
+
+			o(doubled()).equals(4)
+		})
+		o("transforms multiple values", function() {
+			var s1 = Stream()
+			var s2 = Stream()
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			s1(2)
+			s2(3)
+
+			o(added()).equals(5)
+		})
+		o("transforms multiple default values", function() {
+			var s1 = Stream(2)
+			var s2 = Stream(3)
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			o(added()).equals(5)
+		})
+		o("transforms mixed default and late-bound values", function() {
+			var s1 = Stream(2)
+			var s2 = Stream()
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			s2(3)
+
+			o(added()).equals(5)
+		})
+		o("lifts atomically", function() {
+			var count = 0
+			var a = Stream()
+			var b = Stream.lift(function(a) {return a * 2}, a)
+			var c = Stream.lift(function(a) {return a * a}, a)
+			var d = Stream.lift(function(b, c) {
+				count++
+				return b + c
+			}, b, c)
+
+			a(3)
+
+			o(d()).equals(15)
+			o(count).equals(1)
+		})
+		o("lifts default value atomically", function() {
+			var count = 0
+			var a = Stream(3)
+			var b = Stream.lift(function(a) {return a * 2}, a)
+			var c = Stream.lift(function(a) {return a * a}, a)
+			var d = Stream.lift(function(b, c) {
+				count++
+				return b + c
+			}, b, c)
+
+			o(d()).equals(15)
+			o(count).equals(1)
+		})
+		o("lift can return undefined", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return undefined
+			}, a)
+
+			o(b()).equals(undefined)
+		})
+		o("lift can return stream", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream(2)
+			}, a)
+
+			o(b()()).equals(2)
+		})
+		o("lift can return pending stream", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream()
+			}, a)
+
+			o(b()()).equals(undefined)
+		})
+		o("lift can halt", function() {
+			var count = 0
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream.HALT
+			}, a)["fantasy-land/map"](function() {
+				count++
+				return 1
+			})
+
+			o(b()).equals(undefined)
+			o(count).equals(0)
+		})
+		o("lift will throw with a helpful error if given non-stream values", function () {
+			var spy = o.spy()
+			var a = Stream(1)
+			var thrown = null;
+			try {
+				Stream.lift(spy, a, "")
+			} catch (e) {
+				thrown = e
+			}
+
+			o(thrown).notEquals(null)
+			o(thrown.constructor === TypeError).equals(false)
+			o(spy.callCount).equals(0)
+		})
+	})
 	o.spec("merge", function() {
 		o("transforms an array of streams to an array of values", function() {
 			var all = Stream.merge([

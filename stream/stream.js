@@ -3,6 +3,7 @@
 "use strict"
 /* eslint-enable */
 Stream.SKIP = {}
+Stream.lift = lift
 Stream.scan = scan
 Stream.merge = merge
 Stream.combine = combine
@@ -82,7 +83,7 @@ function Stream(value) {
 function combine(fn, streams) {
 	var ready = streams.every(function(s) {
 		if (s.constructor !== Stream)
-			throw new Error("Ensure that each item passed to stream.combine/stream.merge is a stream")
+			throw new Error("Ensure that each item passed to stream.combine/stream.merge/lift is a stream")
 		return s.state === "active"
 	})
 	var stream = ready
@@ -135,6 +136,14 @@ function scanMerge(tuples, seed) {
 	stream(seed)
 
 	return stream
+}
+
+function lift() {
+	var fn = arguments[0]
+	var streams = Array.prototype.slice.call(arguments, 1)
+	return merge(streams).map(function(streams) {
+		return fn.apply(undefined, streams)
+	})
 }
 
 function open(s) {

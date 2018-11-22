@@ -1,17 +1,10 @@
-"use strict"
-;(function(m) {
-if (typeof module !== "undefined") module["exports"] = m()
-else window.o = m()
-})(function init(name) {
+export default (function init(name) {
 	var spec = {}, subjects = [], results, only = [], ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
 	var currentTestError = null
 	if (name != null) spec[name] = ctx = {}
 
-	try {throw new Error} catch (e) {
-		var ospecFileName = e.stack && (/[\/\\](.*?):\d+:\d+/).test(e.stack) ? e.stack.match(/[\/\\](.*?):\d+:\d+/)[1] : null
-	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
 			if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
@@ -52,7 +45,6 @@ else window.o = m()
 		var spy = function() {
 			spy.this = this
 			spy.args = [].slice.call(arguments)
-			spy.calls.push({this: this, args: spy.args})
 			spy.callCount++
 
 			if (fn) return fn.apply(this, arguments)
@@ -63,7 +55,6 @@ else window.o = m()
 				name: {value: fn.name}
 			})
 		spy.args = []
-		spy.calls = []
 		spy.callCount = 0
 		return spy
 	}
@@ -369,3 +360,4 @@ else window.o = m()
 
 	return o
 })
+()

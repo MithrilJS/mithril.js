@@ -1,6 +1,11 @@
 "use strict"
 
-var m = require("./hyperscript")
+var hyperscript = require("./hyperscript")
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
+
 var requestService = require("./request")
 var redrawService = require("./redraw")
 
@@ -9,6 +14,7 @@ requestService.setCompletionCallback(redrawService.redraw)
 m.mount = require("./mount")
 m.route = require("./route")
 m.withAttr = require("./util/withAttr")
+m.prop = require("./util/prop")
 m.render = require("./render").render
 m.redraw = redrawService.redraw
 m.request = requestService.request

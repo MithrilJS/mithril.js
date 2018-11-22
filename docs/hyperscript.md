@@ -5,7 +5,7 @@
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
-- [Attributes passed as the second argument](attributes-passed-as-the-second-argument)
+- [Attributes passed as the second argument](#attributes-passed-as-the-second-argument)
 - [DOM attributes](#dom-attributes)
 - [Style attribute](#style-attribute)
 - [Events](#events)
@@ -178,6 +178,76 @@ m("input[readonly]")
 m("input[readOnly]")
 ```
 
+This even includes custom elements. For example, you can use [A-Frame](https://aframe.io/docs/0.8.0/introduction/) within Mithril, no problem!
+
+```javascript
+m("a-scene", [
+	m("a-box", {
+		position: "-1 0.5 -3",
+		rotation: "0 45 0",
+		color: "#4CC3D9",
+	}),
+
+	m("a-sphere", {
+		position: "0 1.25 -5",
+		radius: "1.25",
+		color: "#EF2D5E",
+	}),
+
+	m("a-cylinder", {
+		position: "1 0.75 -3",
+		radius: "0.5",
+		height: "1.5",
+		color: "#FFC65D",
+	}),
+
+	m("a-plane", {
+		position: "0 0 -4",
+		rotation: "-90 0 0",
+		width: "4",
+		height: "4",
+		color: "#7BC8A4",
+	}),
+
+	m("a-sky", {
+		color: "#ECECEC",
+	}),
+])
+```
+
+And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](http://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
+
+```javascript
+m("brick-deck[selected-index=0]", [/* ... */]) // lowercase
+m("brick-deck[selectedIndex=0]", [/* ... */]) // uppercase
+// I know these look odd, but `brick-deck`'s `selectedIndex` property is a
+// string, not a number.
+m("brick-deck", {"selected-index": "0"}, [/* ... */])
+m("brick-deck", {"selectedIndex": "0"}, [/* ... */])
+```
+
+For custom elements, it doesn't auto-stringify properties, in case they are objects, numbers, or some other non-string value. So assuming you had some custom element `my-special-element` that has an `elem.whitelist` array getter/setter property, you could do this, and it'd work as you'd expect:
+
+```javascript
+m("my-special-element", {
+	whitelist: [
+		"https://example.com",
+		"http://neverssl.com",
+		"https://google.com",
+	],
+})
+```
+
+If you have classes or IDs for those elements, the shorthands still work as you would expect. To pull another A-Frame example:
+
+```javascript
+// These two are equivalent
+m("a-entity#player")
+m("a-entity", {id: "player"})
+```
+
+Do note that all the properties with magic semantics, like lifecycle attributes, `onevent` handlers, `key`s, `class`, and `style`, those are still treated the same way they are for normal HTML elements.
+
 ---
 
 ### Style attribute
@@ -192,7 +262,7 @@ m("div[style=background:red]")
 
 Using a string as a `style` would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.
 
-Mithril does not attempt to add units to number values.
+Mithril does not attempt to add units to number values. It simply stringifies them.
 
 ---
 
@@ -206,6 +276,29 @@ function doSomething(e) {
 }
 
 m("div", {onclick: doSomething})
+```
+
+Mithril accepts functions and [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) objects. So this will also work:
+
+```javascript
+var clickListener = {
+	handleEvent: function(e) {
+		console.log(e)
+	}
+}
+
+m("div", {onclick: clickListener})
+```
+
+By default, when an event attached with hyperscript fires, this will trigger Mithril's auto-redraw after your event callback returns (assuming you are using `m.mount` or `m.route` instead of `m.render` directly). You can disable auto-redraw specifically for a single event by setting `e.redraw = false` on it:
+
+```javascript
+m("div", {
+	onclick: function(e) {
+		// Prevent auto-redraw
+		e.redraw = false
+	}
+})
 ```
 
 ---
@@ -446,7 +539,7 @@ Instead, prefer using Javascript expressions such as the ternary operator and Ar
 ```javascript
 // PREFER
 var BetterListComponent = {
-	view: function() {
+	view: function(vnode) {
 		return m("ul", vnode.attrs.items.map(function(item) {
 			return m("li", item)
 		}))
