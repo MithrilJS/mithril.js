@@ -783,8 +783,8 @@ module.exports = function($window) {
         style[key] = String(input[key]).replace(/[A-Z]/g, function(capital){
           return "-" + capital.toLowerCase()
         })
-			}
-		}
+      }
+    }
 		else {
 			var style = input
 		}
