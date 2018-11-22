@@ -252,15 +252,15 @@ module.exports = function(options) {
               }
             }
           },
-          getPropertyValue: function(key){
+          getPropertyValue: {value: function(key){
             return style[key]
-          },
-          removeProperty: function(key){
+          }},
+          removeProperty: {value: function(key){
             delete style[key]
-          },
-          setProperty: function(key, value){
+          }},
+          setProperty: {value: function(key, value){
             style[key] = value
-          }
+          }}
         })
 				var events = {}
 				var element = {
