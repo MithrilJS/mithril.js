@@ -126,7 +126,7 @@ function ComponentWithState(initialVnode) {
 	// Component state variable, unique to each instance
 	var count = 0
 
-	// POJO component instance: any object with a 
+	// POJO component instance: any object with a
 	// view function which returns a vnode
 	return {
 		oninit: function(vnode){
@@ -535,14 +535,14 @@ var Stats = {
 }
 
 var MyModal = {
-	view: function () {
+	view: function() {
 		return m(Modal, {
 			// This hook is called for both the component and the modal element
 			// itself, causing two event listeners to be registered onto the
 			// DOM element. This means your stat counter is now twice what it
 			// should be.
-			oncreate: function (vnode) {
-				$(vnode.dom).on("show.bs.modal", function () {
+			oncreate: function(vnode) {
+				$(vnode.dom).on("show.bs.modal", function() {
 					Stats.send("modal open", "MyModal")
 				})
 			}
@@ -648,13 +648,13 @@ var Stats = {
 }
 
 var MyModal = {
-	view: function () {
+	view: function() {
 		return m(Modal, {
 			modalAttrs: {
 				// This hook is called only once and thus only one event
 				// listener attached, so your stat counter works.
-				oncreate: function (vnode) {
-					$(vnode.dom).on("show.bs.modal", function () {
+				oncreate: function(vnode) {
+					$(vnode.dom).on("show.bs.modal", function() {
 						Stats.send("modal open", "MyModal")
 					})
 				}
@@ -676,12 +676,12 @@ Of course, the `MyModal` example is better written as this:
 ```js
 // This uses the preferred `Modal` version.
 var BetterMyModal = {
-	view: function () {
+	view: function() {
 		return m(Modal, {
 			modalAttrs: {
 				// Only one event listener is attached here, so your stat
 				// counter works.
-				"onshow.bs.modal": function () {
+				"onshow.bs.modal": function() {
 					Stats.send("modal open", "MyModal")
 				}
 			},
@@ -697,7 +697,7 @@ But, this only works with DOM events. Also, you won't notice bugs initially when
 // This is broken if you're using the original `Modal`, but it certainly doesn't
 // look like it's broken!
 m(Modal, {
-	onupdate: function (vnode) {
+	onupdate: function(vnode) {
 		$(vnode.dom).modal("toggle")
 	}
 }, [
