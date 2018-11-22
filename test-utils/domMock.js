@@ -227,30 +227,41 @@ module.exports = function(options) {
 			createElement: function(tag) {
 				var cssText = ""
 				var style = {}
-				Object.defineProperty(style, "cssText", {
-					get: function() {return cssText},
-					set: function (value) {
-						var buf = []
-						if (typeof value === "string") {
-							for (var key in style) style[key] = ""
-							var rules = splitDeclList(value)
-							for (var i = 0; i < rules.length; i++) {
-								var rule = rules[i]
-								var colonIndex = rule.indexOf(":")
-								if (colonIndex > -1) {
-									var rawKey = rule.slice(0, colonIndex).trim()
-									var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
-									var value = rule.slice(colonIndex + 1).trim()
-									if (key !== "cssText") {
-										style[key] = value
-										buf.push(rawKey + ": " + value + ";")
-									}
-								}
-							}
-							element.setAttribute("style", cssText = buf.join(" "))
-						}
-					}
-				})
+				Object.defineProperties(style, {
+          cssText: {
+            get: function() {return cssText},
+            set: function (value) {
+              var buf = []
+              if (typeof value === "string") {
+                for (var key in style) style[key] = ""
+                var rules = splitDeclList(value)
+                for (var i = 0; i < rules.length; i++) {
+                  var rule = rules[i]
+                  var colonIndex = rule.indexOf(":")
+                  if (colonIndex > -1) {
+                    var rawKey = rule.slice(0, colonIndex).trim()
+                    var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
+                    var value = rule.slice(colonIndex + 1).trim()
+                    if (key !== "cssText") {
+                      style[key] = value
+                      buf.push(rawKey + ": " + value + ";")
+                    }
+                  }
+                }
+                element.setAttribute("style", cssText = buf.join(" "))
+              }
+            }
+          },
+          getPropertyValue: function(key){
+            return style[key]
+          },
+          removeProperty: function(key){
+            delete style[key]
+          },
+          setProperty: function(key, value){
+            style[key] = value
+          }
+        })
 				var events = {}
 				var element = {
 					nodeType: 1,

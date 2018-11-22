@@ -781,11 +781,11 @@ module.exports = function($window) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key in style) {
-				if (style[key] !== old[key]) element.style[key] = style[key]
+				if (style[key] !== old[key]) element.style.setProperty(key, style[key])
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
-				if (!(key in style)) element.style[key] = ""
+				if (!(key in style)) element.style.removeProperty(key)
 			}
 			return
 		}
@@ -795,7 +795,7 @@ module.exports = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key in style) {
-				element.style[key] = style[key]
+				element.style.setProperty(key, style[key])
 			}
 		}
 	}
