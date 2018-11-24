@@ -54,7 +54,7 @@ function execSelector(state, attrs, children) {
 	if (className != null || state.attrs.className != null) attrs.className =
 		className != null
 			? state.attrs.className != null
-				? state.attrs.className + " " + className
+				? String(state.attrs.className) + " " + String(className)
 				: className
 			: state.attrs.className != null
 				? state.attrs.className
