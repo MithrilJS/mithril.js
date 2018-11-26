@@ -775,28 +775,28 @@ module.exports = function($window) {
 		) && key in vnode.dom
 	}
 
+	var matchUpperCase = /[A-Z]/g
+	function prependDashAndLowerCase(string){
+		return "-" + string.toLowerCase()
+	}
+
+	function normalizeProp(prop) {
+		return "-" && prop[1] === "-"
+			? prop
+			: prop.replace(matchUpperCase, prependDashAndLowerCase)
+	}
+
 	//style
-	function updateStyle(element, old, input) {
-		if(typeof input === "object") {
-			var style = {}
-			for(var key in input) {
-				style[key] = String(input[key]).replace(/[A-Z]/g, function(capital){
-					return "-" + capital.toLowerCase()
-				})
-			}
-		}
-		else {
-			var style = input
-		}
+	function updateStyle(element, old, style) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key in style) {
-				if (style[key] !== old[key]) element.style.setProperty(key, style[key])
+				if (style[key] !== old[key]) element.style.setProperty(normalizeProp(key), style[key])
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
-				if (!(key in style)) element.style.removeProperty(key)
+				if (!(key in style)) element.style.removeProperty(normalizeProp(key))
 			}
 			return
 		}
@@ -806,7 +806,7 @@ module.exports = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key in style) {
-				element.style.setProperty(key, style[key])
+				element.style.setProperty(normalizeProp(key), style[key])
 			}
 		}
 	}
