@@ -1159,28 +1159,26 @@ var coreRenderer = function($window) {
 			// Defer the property check until *after* we check everything.
 		) && key2 in vnode.dom
 	}
+	var matchUpperCase = /[A-Z]/g
+	function prependDashAndLowerCase(string){
+		return "-" + string.toLowerCase()
+	}
+	function normalizeProp(prop) {
+		return "-" && prop[1] === "-"
+			? prop
+			: prop.replace(matchUpperCase, prependDashAndLowerCase)
+	}
 	//style
-	function updateStyle(element, old, input) {
-		if(typeof input === "object") {
-			var style = {}
-			for(var key2 in input) {
-				style[key2] = String(input[key2]).replace(/[A-Z]/g, function(capital){
-					return "-" + capital.toLowerCase()
-				})
-			}
-		}
-		else {
-			var style = input
-		}
+	function updateStyle(element, old, style) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key2 in style) {
-				if (style[key2] !== old[key2]) element.style.setProperty(key2, style[key2])
+				if (style[key2] !== old[key2]) element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 			// Remove style properties that no longer exist
 			for (var key2 in old) {
-				if (!(key2 in style)) element.style.removeProperty(key2)
+				if (!(key2 in style)) element.style.removeProperty(normalizeProp(key2))
 			}
 			return
 		}
@@ -1190,7 +1188,7 @@ var coreRenderer = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
-				element.style.setProperty(key2, style[key2])
+				element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 		}
 	}
