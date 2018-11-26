@@ -776,16 +776,27 @@ module.exports = function($window) {
 	}
 
 	//style
-	function updateStyle(element, old, style) {
+	function updateStyle(element, old, input) {
+		if(typeof input === "object") {
+			var style = {}
+			for(var key in input) {
+				style[key] = String(input[key]).replace(/[A-Z]/g, function(capital){
+					return "-" + capital.toLowerCase()
+				})
+			}
+		}
+		else {
+			var style = input
+		}
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key in style) {
-				if (style[key] !== old[key]) element.style[key] = style[key]
+				if (style[key] !== old[key]) element.style.setProperty(key, style[key])
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
-				if (!(key in style)) element.style[key] = ""
+				if (!(key in style)) element.style.removeProperty(key)
 			}
 			return
 		}
@@ -795,7 +806,7 @@ module.exports = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key in style) {
-				element.style[key] = style[key]
+				element.style.setProperty(key, style[key])
 			}
 		}
 	}
