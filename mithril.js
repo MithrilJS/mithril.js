@@ -1160,16 +1160,27 @@ var coreRenderer = function($window) {
 		) && key2 in vnode.dom
 	}
 	//style
-	function updateStyle(element, old, style) {
+	function updateStyle(element, old, input) {
+		if(typeof input === "object") {
+			var style = {}
+			for(var key2 in input) {
+				style[key2] = String(input[key2]).replace(/[A-Z]/g, function(capital){
+					return "-" + capital.toLowerCase()
+				})
+			}
+		}
+		else {
+			var style = input
+		}
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key2 in style) {
-				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+				if (style[key2] !== old[key2]) element.style.setProperty(key2, style[key2])
 			}
 			// Remove style properties that no longer exist
 			for (var key2 in old) {
-				if (!(key2 in style)) element.style[key2] = ""
+				if (!(key2 in style)) element.style.removeProperty(key2)
 			}
 			return
 		}
@@ -1179,7 +1190,7 @@ var coreRenderer = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
-				element.style[key2] = style[key2]
+				element.style.setProperty(key2, style[key2])
 			}
 		}
 	}
