@@ -775,6 +775,7 @@ module.exports = function($window) {
 		) && key in vnode.dom
 	}
 
+	var matchUpperCase = /[A-Z]/g
 	function prependDashAndLowerCase(string){
 		return "-" + string.toLowerCase()
 	}
@@ -786,7 +787,7 @@ module.exports = function($window) {
 			for(var key in input) {
 				style[key] = key[0] === "-" && key[1] === "-"
 					? String(input[key])
-					: String(input[key]).replace(/[A-Z]/g, prependDashAndLowerCase)
+					: String(input[key]).replace(matchUpperCase, prependDashAndLowerCase)
 			}
 		}
 		else {
