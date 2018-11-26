@@ -780,9 +780,9 @@ module.exports = function($window) {
 		if(typeof input === "object") {
 			var style = {}
 			for(var key in input) {
-				style[key] = String(input[key]).replace(/[A-Z]/g, function(capital){
-					return "-" + capital.toLowerCase()
-				})
+				style[key] = key.charAt(0) === "-" && key.charAt(1) === "-"
+					? String(input[key])
+					: String(input[key]).replace(/[A-Z]/g, function(capital){ return "-" + capital.toLowerCase() })
 			}
 		}
 		else {

@@ -33,6 +33,18 @@ o.spec("createElement", function() {
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.style.backgroundColor).equals("red")
 	})
+	o("allows css vars in style", function() {
+		var vnode = {tag: "div", attrs: {style: {"--css-var": "red"}}}
+		render(root, [vnode])
+
+		o(vnode.dom.style["--css-var"]).equals("red")
+	})
+	o("allows css vars in style with uppercase letters", function() {
+		var vnode = {tag: "div", attrs: {style: {"--cssVar": "red"}}}
+		render(root, [vnode])
+
+		o(vnode.dom.style["--cssVar"]).equals("red")
+	})
 	o("creates children", function() {
 		var vnode = {tag: "div", children: [{tag: "a"}, {tag: "b"}]}
 		render(root, [vnode])
