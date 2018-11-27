@@ -474,10 +474,10 @@ function Modal(vnode) {
 
 Modal.Dismiss = {
 	view: function(vnode) {
-		var tag = vnode.attrs.tag || "button[type=button].close"
-		tag += "[data-dismiss=modal][aria-label=Close]"
-		return m(tag, vnode.attrs, vnode.children)
-		//            ^ forwarding `vnode.attrs` here
+		return m(
+			"button[type=button].close[data-dismiss=modal][aria-label=Close]", vnode.attrs, vnode.children
+			// ^ forwarding `vnode.attrs` here
+		)
 	}
 }
 
@@ -493,15 +493,13 @@ Modal.Header = {
 
 Modal.Body = {
 	view: function(vnode) {
-		return m(".modal-body", vnode.attrs, vnode.children)
-		//                      ^ forwarding `vnode.attrs` here
+		return m(".modal-body", vnode.children)
 	}
 }
 
 Modal.Footer = {
 	view: function(vnode) {
-		return m(".modal-footer", vnode.attrs, vnode.children)
-		//                      ^ forwarding `vnode.attrs` here
+		return m(".modal-footer", vnode.children)
 	}
 }
 
@@ -590,22 +588,19 @@ function Modal(vnode) {
 		},
 
 		view: function(vnode) {
-			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.modalAttrs, [
-				//         forwarding `modalAttrs:` here ^
+			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.attrs, [
+				//         forwarding `attrs:` here ^
 				m(".modal-dialog[role=document]", {
 					class: vnode.attrs.centered ? "modal-dialog-centered" : ""
 				}, [
 					m(".modal-content", [
 						m(".modal-header", vnode.attrs.headerAttrs, [
-						// forwarding `headerAttrs:` here ^
-							m(".modal-title", vnode.attrs.titleAttrs, vnode.attrs.title),
-							// forwarding `titleAttrs:` here ^
+							// forwarding `headerAttrs:` here ^
+							m(".modal-title", vnode.attrs.title),
 							vnode.attrs.header
 						]),
-						m(".modal-body", vnode.attrs.bodyAttrs, vnode.attrs.body),
-						// forwarding `bodyAttrs:` here ^
-						m(".modal-footer", vnode.attrs.footerAttrs, vnode.attrs.footer)
-						// forwarding `footerAttrs:` here ^
+						m(".modal-body", vnode.attrs.body),
+						m(".modal-footer", vnode.attrs.footer)
 					])
 				])
 			])
@@ -650,7 +645,7 @@ var Stats = {
 var MyModal = {
 	view: function() {
 		return m(Modal, {
-			modalAttrs: {
+			attrs: {
 				// This hook is called only once and thus only one event
 				// listener attached, so your stat counter works.
 				oncreate: function(vnode) {
@@ -663,12 +658,6 @@ var MyModal = {
 		})
 	}
 }
-
-// You can also finally attach IDs to your header itself
-m(Modal, {
-	headerAttrs: {id: "my-modal-header"},
-	// ...
-})
 ```
 
 Of course, the `MyModal` example is better written as this:
@@ -678,7 +667,7 @@ Of course, the `MyModal` example is better written as this:
 var BetterMyModal = {
 	view: function() {
 		return m(Modal, {
-			modalAttrs: {
+			attrs: {
 				// Only one event listener is attached here, so your stat
 				// counter works.
 				"onshow.bs.modal": function() {
