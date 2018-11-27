@@ -1,3 +1,6 @@
+<!--meta-description
+Official change log for Mithril.js
+-->
 # Change log
 
 - [v2.0.4](#v204)

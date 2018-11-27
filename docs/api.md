@@ -1,3 +1,7 @@
+<!--meta-description
+An API cheatsheet for Mithril.js
+-->
+
 # API
 
 ### Cheatsheet

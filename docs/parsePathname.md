@@ -1,3 +1,6 @@
+<!--meta-description
+Documentation on m.parsePathname(), which parses URLs to path and query object
+-->
 # parsePathname(string)
 
 - [Description](#description)
@@ -23,7 +26,7 @@ var object = m.parsePathname("/path/user?a=1&b=2")
 
 Argument     | Type     | Required | Description
 ------------ | -------- | -------- | ---
-`string`     | `String` | Yes      | A URL
+`url`        | `String` | Yes      | A URL
 **returns**  | `Object` |          | A `{path, params}` pair where `path` is the [normalized path](paths.md#path-normalization) and `params` is the [parsed parameters](paths.md#parameter-normalization).
 
 [How to read signatures](signatures.md)

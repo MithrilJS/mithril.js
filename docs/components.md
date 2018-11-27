@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on the structure, lifecycle methods, state management, and syntactic variants of components in Mithril.js
+-->
+
 # Components
 
 - [Structure](#structure)

@@ -1,3 +1,6 @@
+<!--meta-description
+Approaches you can use to integrate ES6 into your Mithril.js-based apps, including technology and usability suggestions
+-->
 # ES6+ on legacy browsers
 
 - [Setup](#setup)

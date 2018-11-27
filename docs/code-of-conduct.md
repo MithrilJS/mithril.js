@@ -1,3 +1,7 @@
+<!--meta-description
+Code of Conduct Covenant for contributors to the Mithril.js project
+-->
+
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

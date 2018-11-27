@@ -1,3 +1,6 @@
+<!--meta-description
+Contribution guide for Mithril.js
+-->
 # Contributing FAQs
 
 - [How do I go about contributing ideas or new features?](#how-do-i-go-about-contributing-ideas-or-new-features?)

@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.fragment(), which allows attaching lifecycle methods and keys to a fragment vnode
+-->
+
 # fragment(attrs, children)
 
 - [Description](#description)

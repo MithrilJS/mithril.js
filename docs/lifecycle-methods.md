@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on Mithril.js' lifecycle methods/"hooks"
+-->
+
 # Lifecycle methods
 
 - [Usage](#usage)

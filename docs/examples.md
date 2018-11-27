@@ -1,3 +1,7 @@
+<!--meta-description
+Some examples on how you can use MithrilJS
+-->
+
 # Examples
 
 Here are some examples of Mithril in action

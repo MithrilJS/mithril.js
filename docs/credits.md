@@ -1,3 +1,7 @@
+<!--meta-description
+List of especially notable contributors to Mithril.js
+-->
+
 # Credits
 
 Mithril was originally written by Leo Horie, but it is where it is today thanks to the hard work and great ideas of many people.

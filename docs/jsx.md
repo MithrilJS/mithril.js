@@ -1,3 +1,7 @@
+<!--meta-description
+Explanation, examples, and build notes on how to use JSX in your MithrilJS-apps
+-->
+
 # JSX
 
 - [Description](#description)

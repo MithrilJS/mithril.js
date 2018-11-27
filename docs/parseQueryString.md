@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.parseQueryString(), which converts a string like "a=1&b=2" into an object like {a: "1", b: "2"}
+-->
+
 # parseQueryString(string)
 
 - [Description](#description)

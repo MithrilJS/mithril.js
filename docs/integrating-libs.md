@@ -1,3 +1,7 @@
+<!--meta-description
+How you can integrate a third party library into a Mithril.js application, using lifecycle methods.
+-->
+
 # 3rd Party Integration
 
 Integration with third party libraries or vanilla JavaScript code can be achieved via [lifecycle methods](lifecycle-methods.md).

@@ -1,3 +1,6 @@
+<!--meta-description
+Documentation on how to work with paths in Mithril.js
+-->
 # Path Handling
 
 - [Path types](#path-types)

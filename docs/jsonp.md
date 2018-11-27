@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.jsonp(), a utility to fetch data from JSONP APIs
+-->
+
 # jsonp(options)
 
 - [Description](#description)

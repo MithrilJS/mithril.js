@@ -1,3 +1,7 @@
+<!--meta-description
+Approaches you can use to animate your Mithril.js-based apps, including technology and performance suggestions
+-->
+
 # Animations
 
 - [Technology choices](#technology-choices)
