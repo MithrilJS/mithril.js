@@ -152,8 +152,8 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
@@ -255,7 +255,7 @@ module.exports = function($window) {
 	// When the list is being traversed top-down, at any index, the DOM nodes up to the previous
 	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
-  //
+	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
 	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
 	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
@@ -511,8 +511,8 @@ module.exports = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		updateLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
@@ -632,15 +632,15 @@ module.exports = function($window) {
 	function removeNode(vnode) {
 		var expected = 1, called = 0
 		var original = vnode.state
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -661,9 +661,9 @@ module.exports = function($window) {
 		}
 	}
 	function onremove(vnode) {
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
-			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
 			var children = vnode.children
@@ -863,20 +863,21 @@ module.exports = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-		}
-		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-			vnode.instance = old.instance
-			return true
-		}
-		return false
+		do {
+			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			return false
+		} while (false); // eslint-disable-line no-constant-condition
+		vnode.dom = old.dom
+		vnode.domSize = old.domSize
+		vnode.instance = old.instance
+		return true
 	}
 
 	function render(dom, vnodes) {

@@ -32,6 +32,7 @@
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
+- render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 
 #### News
 
