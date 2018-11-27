@@ -9,7 +9,6 @@
 		- [Stream.scanMerge](#streamscanmerge)
 		- [Stream.lift](#streamlift)
 		- [Stream.SKIP](#streamskip)
->>>>>>> MithrilJS/next
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#instance-members)
 		- [stream.map](#streammap)
