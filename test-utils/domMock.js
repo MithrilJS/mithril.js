@@ -473,9 +473,9 @@ module.exports = function(options) {
 							if (!this.hasAttribute("type")) return "text"
 							var type = this.getAttribute("type")
 							return (/^(?:radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image)$/)
-							.test(type)
-							? type
-							: "text"
+								.test(type)
+								? type
+								: "text"
 						},
 						set: typeSetter,
 						enumerable: true,

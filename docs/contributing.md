@@ -79,17 +79,15 @@ This simplifies the workflow for bug fixes, which means they can be fixed faster
 
 
 
-## Why doesn't the Mithril codebase use ES6 via Babel? Would a PR to upgrade be welcome?
+## Why doesn't the Mithril codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?
 
-Being able to run Mithril raw source code in IE is a requirement for all browser-related modules in this repo.
-
-In addition, ES6 features are usually less performant than equivalent ES5 code, and transpiled code is bulkier.
+Being able to run Mithril's raw source code in all supported browsers is a requirement for all browser-related modules in this repo. In addition, transpiled code is generally much bulkier.
 
 
 
 ## Why doesn't the Mithril codebase use trailing semi-colons? Would a PR to add them be welcome?
 
-I don't use them. Adding them means the semi-colon usage in the codebase will eventually become inconsistent.
+I don't use them. Adding them means the semi-colon usage in the codebase will eventually become inconsistent. Besides, [we aren't the only one who've decided to drop the semicolon](https://standardjs.com/#who-uses-javascript-standard-style). (We don't use Standard, though.)
 
 
 

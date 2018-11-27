@@ -22,7 +22,7 @@ A modern client-side Javascript framework for building Single Page Applications.
 
 Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
-Browsers all the way back to IE9 are supported, no polyfills required 👌.
+Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
 ## Installation
 
