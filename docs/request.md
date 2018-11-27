@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.request(), a utility for making XHR/AJAX requests
+-->
+
 # request(options)
 
 - [Description](#description)

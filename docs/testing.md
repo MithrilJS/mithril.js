@@ -1,3 +1,7 @@
+<!--meta-description
+Approaches you can use to testing your Mithril.js-based apps, including technology and usability suggestions
+-->
+
 # Testing
 
 - [Setup](#setup)

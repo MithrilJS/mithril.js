@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.render(), which Mithril.js uses to efficiently patch real DOM trees with virtual DOM nodes
+-->
+
 # render(element, vnodes)
 
 - [Description](#description)

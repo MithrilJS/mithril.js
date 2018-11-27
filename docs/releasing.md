@@ -1,3 +1,7 @@
+<!--meta-description
+Describes how we do releases of Mithril.js
+-->
+
 # Mithril Release Processes
 
 **Note** These steps all assume that `MithrilJS/mithril.js` is a git remote named `mithriljs`, adjust accordingly if that doesn't match your setup.

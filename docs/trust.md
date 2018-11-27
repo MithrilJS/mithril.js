@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.trust(), a utility for rendering raw HTML and SVG within Mithril, along with tips on when to (and not to) use it
+-->
+
 # trust(html)
 
 - [Description](#description)

@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.censor(), which helps cloning vnodes
+-->
+
 # censor(object, extra)
 
 - [Description](#description)

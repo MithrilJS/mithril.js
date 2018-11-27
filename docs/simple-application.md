@@ -1,3 +1,7 @@
+<!--meta-description
+A complete walkthrough tutorial for building your first simple application in Mithril, from beginning to end
+-->
+
 # Simple application
 
 Let's develop a simple application that shows off how to do most of the major things you would need to deal with while using Mithril.

@@ -1,3 +1,7 @@
+<!--meta-description
+Describes, how to read the signatures in Mithril.js' documentation.
+-->
+
 # How to read signatures
 
 Signature sections typically look like this:

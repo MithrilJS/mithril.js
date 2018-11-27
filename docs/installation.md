@@ -1,3 +1,7 @@
+<!--meta-description
+Instructions on how to install Mithril.js
+-->
+
 # Installation
 
 - [CDN](#cdn)

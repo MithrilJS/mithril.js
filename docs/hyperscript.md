@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m(), Mithril.js' hyperscript DSL, which you can use to define the views of your app
+-->
+
 # m(selector, attributes, children)
 
 - [Description](#description)

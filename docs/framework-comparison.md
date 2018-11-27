@@ -1,3 +1,7 @@
+<!--meta-description
+Detailed comparison between Mithril.js and other popular frameworks
+-->
+
 # Framework comparison
 
 - [Why not X?](#why-not-insert-favorite-framework-here?)

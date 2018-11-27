@@ -1,3 +1,7 @@
+<!--meta-description
+Links to Mithril.js learning content
+-->
+
 # Learning Resources
 
 Links to Mithril learning content:

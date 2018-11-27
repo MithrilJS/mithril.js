@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on Mithril.js' Promise polyfill
+-->
+
 # Promise(executor)
 
 - [Description](#description)

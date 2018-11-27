@@ -12,6 +12,7 @@ const upstream = require("./_upstream")
 const version = require("../package.json").version
 
 const r = (file) => path.resolve(__dirname, "..", file)
+const metaDescriptionRegExp = /<!--meta-description\n([\s\S]+?)\n-->/m
 
 // Minify our docs.
 const htmlMinifierConfig = {
@@ -96,6 +97,26 @@ async function archiveDocsSelect() {
 		.join("")
 	return `<select id="archive-docs" onchange="location.href='archive/' + this.value + '/index.html'">${options}</select>`
 }
+
+function encodeHTML (str) {
+	const charsToEncode = /[&"'<>]/g
+	const encodeTo = {
+		"&": "&amp;",
+		"\"": "&quot;",
+		"'": "&#39;",
+		"<": "&lt;",
+		">": "&gt;",
+	}
+	return str.replace(charsToEncode, function(char) { return encodeTo[char] })
+}
+
+function extractMetaDescription(markdown) {
+	var match = markdown.match(metaDescriptionRegExp)
+	if (match) {
+		return encodeHTML(match[1])
+	}
+	return "Mithril.js Documentation"
+}
 class Generator {
 	constructor(opts) {
 		this._version = opts.version
@@ -110,7 +131,8 @@ class Generator {
 			`([ \t]*)(- )(\\[.+?\\]\\(${escapeRegExp(file)}\\))`
 		)
 		const src = link.test(this._guides) ? this._guides : this._methods
-		let body = markdown
+		const metaDescription = extractMetaDescription(markdown)
+		let body = markdown.replace(metaDescriptionRegExp, "")
 
 		// fix pipes in code tags
 		body = body.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim,
@@ -154,6 +176,9 @@ class Generator {
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
+		
+		// insert meta description
+		result = result.replace(/\[metaDescription\]/, metaDescription)
 
 		// fix anchors
 		const anchorIds = new Map()

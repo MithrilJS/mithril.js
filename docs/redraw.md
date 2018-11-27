@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.redraw(), which schedules an update of all components mounted via m.mount()
+-->
+
 # redraw()
 
 - [Description](#description)
