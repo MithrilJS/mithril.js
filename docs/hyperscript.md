@@ -262,6 +262,8 @@ m("div[style=background:red]")
 
 Using a string as a `style` would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.
 
+You can use both hyphenated CSS property names (like `background-color`) and camel cased DOM `style` property names (like `backgroundColor`). You can also define [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables), if your browser supports them.
+
 Mithril does not attempt to add units to number values. It simply stringifies them.
 
 ---
