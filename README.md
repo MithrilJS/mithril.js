@@ -30,6 +30,8 @@ Browsers all the way back to IE9 are supported, no polyfills required 👌.
 
 ```html
 <script src="https://unpkg.com/mithril"></script>
+<!-- or -->
+<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.js"></script>
 ```
 
 ### npm
