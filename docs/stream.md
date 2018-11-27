@@ -8,7 +8,7 @@
 		- [Stream.scan](#streamscan)
 		- [Stream.scanMerge](#streamscanmerge)
 		- [Stream.lift](#streamlift)
-		- [Stream.HALT](#streamhalt)
+		- [Stream.SKIP](#streamskip)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#instance-members)
 		- [stream.map](#streammap)
@@ -121,13 +121,13 @@ Argument     | Type                 | Required | Description
 
 Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.
 
-Note that you can prevent dependent streams from being updated by returning the special value `stream.HALT` inside the accumulator function.
+Note that you can prevent dependent streams from being updated by returning the special value `stream.SKIP` inside the accumulator function.
 
 `stream = Stream.scan(fn, accumulator, stream)`
 
 Argument      | Type                             | Required | Description
 ------------- | -------------------------------- | -------- | ---
-`fn`          | `(accumulator, value) -> result \| HALT` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`fn`          | `(accumulator, value) -> result \| SKIP` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value of the same type
 `accumulator` | `any`                            | Yes      | The starting value for the accumulator
 `stream`      | `Stream`                         | Yes      | Stream containing the values
 **returns**   | `Stream`                         |          | Returns a new stream containing the result
@@ -183,9 +183,9 @@ Argument     | Type                 | Required | Description
 
 ---
 
-##### Stream.HALT
+##### Stream.SKIP
 
-A special value that can be returned to stream callbacks to halt execution of downstreams
+A special value that can be returned to stream callbacks to skip execution of downstreams
 
 ---
 
@@ -375,14 +375,14 @@ console.log(doubled()) // logs 2
 
 Dependent streams are *reactive*: their values are updated any time the value of their parent stream is updated. This happens regardless of whether the dependent stream was created before or after the value of the parent stream was set.
 
-You can prevent dependent streams from being updated by returning the special value `stream.HALT`
+You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
 ```javascript
-var halted = stream(1).map(function(value) {
-	return stream.HALT
+var skipped = stream(1).map(function(value) {
+	return stream.SKIP
 })
 
-halted.map(function() {
+skipped.map(function() {
 	// never runs
 })
 ```
@@ -432,14 +432,14 @@ console.log(added()) // logs 12
 
 A stream can depend on any number of streams and it's guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also brings the performance benefits of not recomputing downstreams unnecessarily.
 
-You can prevent dependent streams from being updated by returning the special value `stream.HALT`
+You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
 ```javascript
-var halted = stream.combine(function(stream) {
-	return stream.HALT
+var skipped = stream.combine(function(stream) {
+	return stream.SKIP
 }, [stream(1)])
 
-halted.map(function() {
+skipped.map(function() {
 	// never runs
 })
 ```
