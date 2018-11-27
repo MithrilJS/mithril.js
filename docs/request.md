@@ -4,6 +4,7 @@
 - [Signature](#signature)
 - [How it works](#how-it-works)
 - [Typical usage](#typical-usage)
+- [Error handling](#error-handling)
 - [Loading icons and error messages](#loading-icons-and-error-messages)
 - [Dynamic URLs](#dynamic-urls)
 - [Aborting requests](#aborting-requests)
@@ -124,6 +125,18 @@ m.route(document.body, "/", {
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
 When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+
+---
+
+### Error handling
+
+When a non-`file:` request returns with any status other than 2xx or 304, it rejects with an error. This error is a normal [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) instance, but with a few special properties.
+
+- `error.message` is set to the raw response text.
+- `error.code` is set to the status code itself.
+- `error.response` is set to the parsed response, using `options.extract` and `options.deserialize` as is done with normal responses.
+
+This is useful in many cases where errors are themselves things you can account for. If you want to detect if a session expired - you can do `if (error.code === 401) return promptForAuth().then(retry)`. If you hit an API's throttling mechanism and it returned an error with a `"timeout": 1000`, you could do a `setTimeout(retry, error.response.timeout)`.
 
 ---
 
