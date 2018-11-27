@@ -437,112 +437,26 @@ Sometimes, you might want to keep an interface flexible and your implementation 
 
 ```javascript
 // AVOID
-function Modal(vnode) {
-	var showing = !!vnode.attrs.show
-
-	return {
-		oncreate: function(vnode) {
-			$(vnode.dom).modal(vnode.attrs)
-			if (showing) $(vnode.dom).modal("show")
-			else $(vnode.dom).modal("hide")
-		},
-
-		onupdate: function(vnode) {
-			var next = !!vnode.attrs.show
-			if (showing !== next) {
-				showing = next
-				$(vnode.dom).modal("toggle")
-			}
-		},
-
-		onremove: function(vnode) {
-			$(vnode.dom).modal("dispose")
-		},
-
-		view: function(vnode) {
-			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs, [
-			//             forwarding `vnode.attrs` here ^
-				m(".modal-dialog[role=document]", {
-					class: vnode.attrs.centered ? "modal-dialog-centered" : ""
-				}, [
-					m(".modal-content", vnode.children)
-				])
-			])
-		}
-	}
-}
-
-Modal.Dismiss = {
+var Modal = {
+	// ...
 	view: function(vnode) {
-		return m(
-			"button[type=button].close[data-dismiss=modal][aria-label=Close]", vnode.attrs, vnode.children
-			// ^ forwarding `vnode.attrs` here
-		)
-	}
-}
-
-Modal.Header = {
-	view: function(vnode) {
-		return m(".modal-header", [
-			m(".modal-title", vnode.attrs, vnode.attrs.title),
-			//                ^ forwarding `vnode.attrs` here
-			vnode.children
+		return m(".modal[tabindex=-1][role=dialog]", vnode.attrs, [
+			//         forwarding `vnode.attrs` here ^
+			// ...
 		])
 	}
 }
-
-Modal.Body = {
-	view: function(vnode) {
-		return m(".modal-body", vnode.children)
-	}
-}
-
-Modal.Footer = {
-	view: function(vnode) {
-		return m(".modal-footer", vnode.children)
-	}
-}
-
-// Usage
-m(Modal, [
-	m(Modal.Header, {title: "Modal title"}, [
-		m(Modal.Dismiss, [
-			m("span[aria-hidden=true]", m.trust("&times;"))
-		])
-	]),
-
-	m(Modal.Body, [
-		m("p", "Modal body text")
-	]),
-
-	m(Modal.Footer, [
-		m(Modal.Dismiss, {class: "btn btn-secondary"}, "Close"),
-		m("button[type=button].btn.btn-primary", "Save changes")
-	])
-])
 ```
 
-If you do it like above, you could run into a few issues when using it:
+If you do it like above, you could run into issues when using it:
 
 ```js
-// In your model, for various analytics stat trackers
-var Stats = {
-	send: function(key, value) {
-		// ...
-	}
-}
-
 var MyModal = {
 	view: function() {
 		return m(Modal, {
-			// This hook is called for both the component and the modal element
-			// itself, causing two event listeners to be registered onto the
-			// DOM element. This means your stat counter is now twice what it
-			// should be.
-			oncreate: function(vnode) {
-				$(vnode.dom).on("show.bs.modal", function() {
-					Stats.send("modal open", "MyModal")
-				})
+			// This toggles it twice, so it doesn't show
+			onupdate: function(vnode) {
+				if (toggle) $(vnode.dom).modal("toggle")
 			}
 		}, [
 			// ...
@@ -551,147 +465,34 @@ var MyModal = {
 }
 ```
 
-It's also less flexible. For example, you can't assign custom classes to your `.modal-header` element itself:
-
-```js
-// #my-modal-header references the *title* element, not the modal header itself!
-m(Modal.Header, {id: "my-modal-header"}, [
-	// ...
-])
-```
-
 Instead, you should forward *single* attributes into vnodes:
 
 ```js
-// This is also considerably more flexible.
 // PREFER
-function Modal(vnode) {
-	var showing = !!vnode.attrs.show
-
-	return {
-		oncreate: function(vnode) {
-			$(vnode.dom).modal(vnode.attrs.options)
-			if (showing) $(vnode.dom).modal("show")
-			else $(vnode.dom).modal("hide")
-		},
-
-		onupdate: function(vnode) {
-			var next = !!vnode.attrs.show
-			if (showing !== next) {
-				showing = next
-				$(vnode.dom).modal("toggle")
-			}
-		},
-
-		onremove: function(vnode) {
-			$(vnode.dom).modal("dispose")
-		},
-
-		view: function(vnode) {
-			return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.attrs, [
-				//         forwarding `attrs:` here ^
-				m(".modal-dialog[role=document]", {
-					class: vnode.attrs.centered ? "modal-dialog-centered" : ""
-				}, [
-					m(".modal-content", [
-						m(".modal-header", vnode.attrs.headerAttrs, [
-							// forwarding `headerAttrs:` here ^
-							m(".modal-title", vnode.attrs.title),
-							vnode.attrs.header
-						]),
-						m(".modal-body", vnode.attrs.body),
-						m(".modal-footer", vnode.attrs.footer)
-					])
-				])
-			])
-		}
-	}
-}
-
-Modal.Dismiss = {
+var Modal = {
+	// ...
 	view: function(vnode) {
-		var tag = vnode.attrs.tag || "button[type=button].close"
-		tag += "[data-dismiss=modal][aria-label=Close]"
-		return m(tag, vnode.attrs.attrs, vnode.children)
-		//            ^ forwarding `attrs:` here
-	}
-}
-
-// Usage
-m(Modal, {
-	headerAttrs: {title: "Modal title"},
-	header: [
-		m(Modal.Dismiss, [
-			m("span[aria-hidden=true]", m.trust("&times;"))
+		return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.attrs, [
+			//              forwarding `attrs:` here ^
+			// ...
 		])
-	],
-
-	body: m("p", "Modal body text"),
-
-	footer: [
-		m(Modal.Dismiss, {attrs: {class: "btn btn-secondary"}}, "Close"),
-		m("button[type=button].btn.btn-primary", "Save changes")
-	]
-})
-
-// Stats example
-// In your model, for various analytics stat trackers
-var Stats = {
-	send: function(key, value) {
-		// ...
 	}
 }
 
+// Example
 var MyModal = {
 	view: function() {
 		return m(Modal, {
 			attrs: {
-				// This hook is called only once and thus only one event
-				// listener attached, so your stat counter works.
-				oncreate: function(vnode) {
-					$(vnode.dom).on("show.bs.modal", function() {
-						Stats.send("modal open", "MyModal")
-					})
+				// This toggles it once
+				onupdate: function(vnode) {
+					if (toggle) $(vnode.dom).modal("toggle")
 				}
 			},
 			// ...
 		})
 	}
 }
-```
-
-Of course, the `MyModal` example is better written as this:
-
-```js
-// This uses the preferred `Modal` version.
-var BetterMyModal = {
-	view: function() {
-		return m(Modal, {
-			attrs: {
-				// Only one event listener is attached here, so your stat
-				// counter works.
-				"onshow.bs.modal": function() {
-					Stats.send("modal open", "MyModal")
-				}
-			},
-			// ...
-		})
-	}
-}
-```
-
-But, this only works with DOM events. Also, you won't notice bugs initially when you do idempotent things like `.modal("hide")` - it only appears with things like `.modal("toggle")`. *That's* when forwarding `vnode.attrs` itself creates very subtle, hard-to-recognize bugs in your code.
-
-```js
-// This is broken if you're using the original `Modal`, but it certainly doesn't
-// look like it's broken!
-m(Modal, {
-	onupdate: function(vnode) {
-		$(vnode.dom).modal("toggle")
-	}
-}, [
-	// ...
-])
 ```
 
 #### Don't manipulate `children`
