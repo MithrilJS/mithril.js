@@ -785,14 +785,16 @@ module.exports = function($window) {
 	}
 	function updateStyle(element, old, style) {
 		if (old === style) {
-			// Do nothing.
+			// Styles are equivalent, do nothing.
 		} else if (style == null) {
+			// New style is missing, just clear it.
 			element.style.cssText = ""
 		} else if (typeof style !== "object") {
+			// New style is a string, let engine deal with patching.
 			element.style.cssText = style
 		} else if (old == null || typeof old !== "object") {
-			element.style.cssText = ""
 			// `old` is missing or a string, `style` is an object.
+			element.style.cssText = ""
 			// Add new style properties
 			for (var key in style) {
 				var value = style[key]
