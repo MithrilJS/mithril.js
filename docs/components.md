@@ -2,23 +2,29 @@
 
 - [Structure](#structure)
 - [Lifecycle methods](#lifecycle-methods)
-- [Syntactic variants](#syntactic-variants)
+- [Passing data to components](#passing-data-to-components)
 - [State](#state)
+	- [Closure component state](#closure-component-state)
+	- [POJO component state](#pojo-component-state)
+- [ES6 Classes](#es6-classes)
+	- [Class component state](#class-component-state)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any Javascript object that has a view method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
+Any Javascript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
 ```javascript
+// define your component
 var Example = {
-	view: function() {
+	view: function(vnode) {
 		return m("div", "Hello")
 	}
 }
 
+// consume your component
 m(Example)
 
 // equivalent HTML
@@ -27,31 +33,9 @@ m(Example)
 
 ---
 
-### Passing data to components
-
-Data can be passed to component instances by passing an `attrs` object as the second parameter in the hyperscript function:
-
-```javascript
-m(Example, {name: "Floyd"})
-```
-
-This data can be accessed in the component's view or lifecycle methods via the `vnode.attrs`:
-
-```javascript
-var Example = {
-	view: function (vnode) {
-		return m("div", "Hello, " + vnode.attrs.name)
-	}
-}
-```
-
-NOTE: Lifecycle methods can also be provided via the `attrs` object, so you should avoid using the lifecycle method names for your own callbacks as they would also be invoked by Mithril. Use lifecycle methods in `attrs` only when you specifically wish to create lifecycle hooks.
-
----
-
 ### Lifecycle methods
 
-Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes: `oninit`, `oncreate`, `onupdate`, `onbeforeremove`, `onremove` and `onbeforeupdate`.
+Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes. Note that `vnode` is passed as an argument to each lifecycle method, as well as to `view` (with the _previous_ vnode passed additionally to `onbeforeupdate`):
 
 ```javascript
 var ComponentWithHooks = {
@@ -61,7 +45,7 @@ var ComponentWithHooks = {
 	oncreate: function(vnode) {
 		console.log("DOM created")
 	},
-	onbeforeupdate: function(vnode, old) {
+	onbeforeupdate: function(newVnode, oldVnode) {
 		return true
 	},
 	onupdate: function(vnode) {
@@ -86,7 +70,7 @@ var ComponentWithHooks = {
 Like other types of virtual DOM nodes, components may have additional lifecycle methods defined when consumed as vnode types.
 
 ```javascript
-function initialize() {
+function initialize(vnode) {
 	console.log("initialized as vnode")
 }
 
@@ -101,61 +85,175 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 ---
 
-### Syntactic variants
+### Passing data to components
 
-#### Closure components
-
-One of the easiest ways to manage state in a component is with a closure. A "closure component" is one that returns an object with a view function and optionally other lifecycle hooks. It has the ability to manage instance state within the body of the outer function.
+Data can be passed to component instances by passing an `attrs` object as the second parameter in the hyperscript function:
 
 ```javascript
-function ClosureComponent(initialVnode) {
-	// Each instance of this component has its own instance of `kind`
-	var kind = "closure component"
+m(Example, {name: "Floyd"})
+```
 
-	return {
-		view: function(vnode) {
-			return m("div", "Hello from a " + kind)
-		},
-		oncreate: function(vnode) {
-			console.log("We've created a " + kind)
-		}
+This data can be accessed in the component's view or lifecycle methods via the `vnode.attrs`:
+
+```javascript
+var Example = {
+	view: function (vnode) {
+		return m("div", "Hello, " + vnode.attrs.name)
 	}
 }
 ```
 
-The returned object must hold a `view` function, used to get the tree to render.
+NOTE: Lifecycle methods can also be defined in the `attrs` object, so you should avoid using their names for your own callbacks as they would also be invoked by Mithril itself. Use them in `attrs` only when you specifically wish to use them as lifecycle methods.
 
-They can be consumed in the same way regular components can.
+---
+
+### State
+
+Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
+
+Note that unlike many other frameworks, mutating component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
+
+If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
+
+#### Closure Component State
+
+In the above examples, each component is defined as a POJO (Plain Old Javascript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
+
+With a closure component, state can simply be maintained by variables that are declared within the outer function:
 
 ```javascript
-// EXAMPLE: via m.render
-m.render(document.body, m(ClosureComponent))
+function ComponentWithState(initialVnode) {
+	// Component state variable, unique to each instance
+	var count = 0
 
-// EXAMPLE: via m.mount
-m.mount(document.body, ClosureComponent)
-
-// EXAMPLE: via m.route
-m.route(document.body, "/", {
-	"/": ClosureComponent
-})
-
-// EXAMPLE: component composition
-function AnotherClosureComponent() {
+	// POJO component instance: any object with a 
+	// view function which returns a vnode
 	return {
-		view: function() {
-			return m("main",
-				m(ClosureComponent)
+		oninit: function(vnode){
+			console.log("init a closure component")
+		},
+		view: function(vnode) {
+			return m("div",
+				m("p", "Count: " + count),
+				m("button", {
+					onclick: function() {
+						count += 1
+					}
+				}, "Increment count")
 			)
 		}
 	}
 }
 ```
 
-If a component does *not* have state then you should opt for the simpler POJO component to avoid the additional overhead and boilerplate of the closure.
+Any functions declared within the closure also have access to its state variables.
 
-#### ES6 classes
+```javascript
+function ComponentWithState(initialVnode) {
+	var count = 0
 
-Components can also be written using ES6 class syntax:
+	function increment() {
+		count += 1
+	}
+
+	function decrement() {
+		count -= 1
+	}
+
+	return {
+		view: function(vnode) {
+			return m("div",
+				m("p", "Count: " + count),
+				m("button", {
+					onclick: increment
+				}, "Increment"),
+				m("button", {
+					onclick: decrement
+				}, "Decrement")
+			)
+		}
+	}
+}
+```
+
+Closure components are consumed in the same way as POJOs, e.g. `m(ComponentWithState, { passedData: ... })`.
+
+A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
+
+
+---
+
+#### POJO Component State
+
+It is generally recommended that you use closures for managing component state. If, however, you have reason to manage state in a POJO, the state of a component can be accessed in three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
+
+#### At initialization
+
+For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple "blueprint" state initialization.
+
+In the example below, `data` becomes a property of the `ComponentWithInitialState` component's `vnode.state` object.
+
+```javascript
+var ComponentWithInitialState = {
+	data: "Initial content",
+	view: function(vnode) {
+		return m("div", vnode.state.data)
+	}
+}
+
+m(ComponentWithInitialState)
+
+// Equivalent HTML
+// <div>Initial content</div>
+```
+
+#### Via vnode.state
+
+As you can see, state can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
+
+```javascript
+var ComponentWithDynamicState = {
+	oninit: function(vnode) {
+		vnode.state.data = vnode.attrs.text
+	},
+	view: function(vnode) {
+		return m("div", vnode.state.data)
+	}
+}
+
+m(ComponentWithDynamicState, {text: "Hello"})
+
+// Equivalent HTML
+// <div>Hello</div>
+```
+
+#### Via the this keyword
+
+State can also be accessed via the `this` keyword, which is available to all lifecycle methods as well as the `view` method of a component.
+
+```javascript
+var ComponentUsingThis = {
+	oninit: function(vnode) {
+		this.data = vnode.attrs.text
+	},
+	view: function(vnode) {
+		return m("div", this.data)
+	}
+}
+
+m(ComponentUsingThis, {text: "Hello"})
+
+// Equivalent HTML
+// <div>Hello</div>
+```
+
+Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
+
+---
+
+### ES6 classes
+
+If it suits your needs (like in object-oriented projects), components can also be written using ES6 class syntax:
 
 ```javascript
 class ES6ClassComponent {
@@ -197,83 +295,13 @@ class AnotherES6ClassComponent {
 }
 ```
 
-#### Mixing component kinds
-
-Components can be freely mixed. A class component can have closure or POJO components as children, etc...
-
----
-
-### State
-
-Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
-
-Note that unlike many other frameworks, component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
-
-If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
-
-#### Closure Component State
-
-With a closure component state can simply be maintained by variables that are declared within the outer function. For example:
-
-```javascript
-function ComponentWithState() {
-	// Variables that hold component state
-	var count = 0
-
-	return {
-		view: function() {
-			return m("div",
-				m("p", "Count: " + count),
-				m("button", {
-					onclick: function() {
-						count += 1
-					}
-				}, "Increment count")
-			)
-		}
-	}
-}
-```
-
-Any functions declared within the closure also have access to its state variables.
-
-```javascript
-function ComponentWithState() {
-	var count = 0
-
-	function increment() {
-		count += 1
-	}
-
-	function decrement() {
-		count -= 1
-	}
-
-	return {
-		view: function() {
-			return m("div",
-				m("p", "Count: " + count),
-				m("button", {
-					onclick: increment
-				}, "Increment"),
-				m("button", {
-					onclick: decrement
-				}, "Decrement")
-			)
-		}
-	}
-}
-```
-
-A big advantage of closure components is that we don't need to worry about binding `this` when attaching event handler callbacks. In fact `this` is never used at all and we never have to think about `this` context ambiguities.
-
 #### Class Component State
 
-With classes, state can be managed by class instance properties and methods. For example:
+With classes, state can be managed by class instance properties and methods, and accessed via `this`:
 
 ```javascript
-class ComponentWithState() {
-	constructor() {
+class ComponentWithState {
+	constructor(vnode) {
 		this.count = 0
 	}
 	increment() {
@@ -298,71 +326,12 @@ class ComponentWithState() {
 
 Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
 
-#### POJO Component State
+---
 
-For POJO components the state of a component can be accessed three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
+### Mixing component kinds
 
-#### At initialization
+Components can be freely mixed. A class component can have closure or POJO components as children, etc...
 
-For POJO components, the component object is the prototype of each component instance, so any property defined on the component object will be accessible as a property of `vnode.state`. This allows simple state initialization.
-
-In the example below, `data` is a property of the `ComponentWithInitialState` component's state object.
-
-```javascript
-var ComponentWithInitialState = {
-	data: "Initial content",
-	view: function(vnode) {
-		return m("div", vnode.state.data)
-	}
-}
-
-m(ComponentWithInitialState)
-
-// Equivalent HTML
-// <div>Initial content</div>
-```
-
-#### Via vnode.state
-
-State can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
-
-```javascript
-var ComponentWithDynamicState = {
-	oninit: function(vnode) {
-		vnode.state.data = vnode.attrs.text
-	},
-	view: function(vnode) {
-		return m("div", vnode.state.data)
-	}
-}
-
-m(ComponentWithDynamicState, {text: "Hello"})
-
-// Equivalent HTML
-// <div>Hello</div>
-```
-
-#### Via the this keyword
-
-State can also be accessed via the `this` keyword, which is available to all lifecycle methods as well as the `view` method of a component.
-
-```javascript
-var ComponentUsingThis = {
-	oninit: function(vnode) {
-		this.data = vnode.attrs.text
-	},
-	view: function(vnode) {
-		return m("div", this.data)
-	}
-}
-
-m(ComponentUsingThis, {text: "Hello"})
-
-// Equivalent HTML
-// <div>Hello</div>
-```
-
-Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
 
 ---
 

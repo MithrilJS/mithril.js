@@ -358,6 +358,15 @@ o.spec("hyperscript", function() {
 
 			o(vnode.attrs.className).equals("a")
 		})
+		o("casts className using toString like browsers", function() {
+			const className = {
+				valueOf: () => ".valueOf",
+				toString: () => "toString"
+			}
+			var vnode = m("custom-element" + className, {className: className})
+
+			o(vnode.attrs.className).equals("valueOf toString")
+		})
 	})
 	o.spec("children", function() {
 		o("handles string single child", function() {

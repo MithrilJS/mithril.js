@@ -60,7 +60,7 @@ function execSelector(state, attrs, children) {
 	if (className != null || state.attrs.className != null) attrs.className =
 		className != null
 			? state.attrs.className != null
-				? state.attrs.className + " " + className
+				? String(state.attrs.className) + " " + String(className)
 				: className
 			: state.attrs.className != null
 				? state.attrs.className
@@ -110,7 +110,10 @@ hyperscript.trust = function(html) {
 hyperscript.fragment = function(attrs1, children0) {
 	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
 }
-var m = hyperscript
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
 /** @constructor */
 var PromisePolyfill = function(executor) {
 	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
@@ -1156,17 +1159,26 @@ var coreRenderer = function($window) {
 			// Defer the property check until *after* we check everything.
 		) && key2 in vnode.dom
 	}
+	var matchUpperCase = /[A-Z]/g
+	function prependDashAndLowerCase(string){
+		return "-" + string.toLowerCase()
+	}
+	function normalizeProp(prop) {
+		return "-" && prop[1] === "-"
+			? prop
+			: prop.replace(matchUpperCase, prependDashAndLowerCase)
+	}
 	//style
 	function updateStyle(element, old, style) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key2 in style) {
-				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+				if (style[key2] !== old[key2]) element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 			// Remove style properties that no longer exist
 			for (var key2 in old) {
-				if (!(key2 in style)) element.style[key2] = ""
+				if (!(key2 in style)) element.style.removeProperty(normalizeProp(key2))
 			}
 			return
 		}
@@ -1176,7 +1188,7 @@ var coreRenderer = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
-				element.style[key2] = style[key2]
+				element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 		}
 	}

@@ -1,6 +1,11 @@
 "use strict"
 
-var m = require("./hyperscript")
+var hyperscript = require("./hyperscript")
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
+
 var requestService = require("./request")
 var redrawService = require("./redraw")
 
