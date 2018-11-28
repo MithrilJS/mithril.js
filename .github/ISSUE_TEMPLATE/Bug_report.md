@@ -5,7 +5,7 @@ about: Report a bug in MithrilJS
 
 ### Mithril Version: x.x.x
 
-<!--- Provide the exact version of React-Proto in which you see the bug.  -->
+<!--- Provide the exact version of MithrilJS in which you see the bug.  -->
 
 
 <!--- Provide a general summary of the issue in the Title above -->
