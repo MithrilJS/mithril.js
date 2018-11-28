@@ -126,7 +126,7 @@ function ComponentWithState(initialVnode) {
 	// Component state variable, unique to each instance
 	var count = 0
 
-	// POJO component instance: any object with a 
+	// POJO component instance: any object with a
 	// view function which returns a vnode
 	return {
 		oninit: function(vnode){
@@ -430,6 +430,70 @@ var Login = {
 This way, the `Auth` module is now the source of truth for auth-related state, and a `Register` component can easily access this data, and even reuse methods like `canSubmit`, if needed. In addition, if validation code is required (for example, for the email field), you only need to modify `setEmail`, and that change will do email validation for any component that modifies an email field.
 
 As a bonus, notice that we no longer need to use `.bind` to keep a reference to the state for the component's event handlers.
+
+#### Don't forward `vnode.attrs` itself to other vnodes
+
+Sometimes, you might want to keep an interface flexible and your implementation simpler by forwarding attributes to a particular child component or element, in this case [Bootstrap's modal](https://getbootstrap.com/docs/4.1/components/modal/). It might be tempting to forward a vnode's attributes like this:
+
+```javascript
+// AVOID
+var Modal = {
+	// ...
+	view: function(vnode) {
+		return m(".modal[tabindex=-1][role=dialog]", vnode.attrs, [
+			//         forwarding `vnode.attrs` here ^
+			// ...
+		])
+	}
+}
+```
+
+If you do it like above, you could run into issues when using it:
+
+```js
+var MyModal = {
+	view: function() {
+		return m(Modal, {
+			// This toggles it twice, so it doesn't show
+			onupdate: function(vnode) {
+				if (toggle) $(vnode.dom).modal("toggle")
+			}
+		}, [
+			// ...
+		])
+	}
+}
+```
+
+Instead, you should forward *single* attributes into vnodes:
+
+```js
+// PREFER
+var Modal = {
+	// ...
+	view: function(vnode) {
+		return m(".modal[tabindex=-1][role=dialog]", vnode.attrs.attrs, [
+			//              forwarding `attrs:` here ^
+			// ...
+		])
+	}
+}
+
+// Example
+var MyModal = {
+	view: function() {
+		return m(Modal, {
+			attrs: {
+				// This toggles it once
+				onupdate: function(vnode) {
+					if (toggle) $(vnode.dom).modal("toggle")
+				}
+			},
+			// ...
+		})
+	}
+}
+```
 
 #### Don't manipulate `children`
 
