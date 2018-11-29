@@ -24,7 +24,7 @@ o.spec("api", function() {
 		o("works", function() {
 			o(typeof m.version).equals("string")
 			o(m.version.indexOf(".") > -1).equals(true)
-			o(/\d/.test(m.version)).equals(true)
+			o((/\d/).test(m.version)).equals(true)
 		})
 	})
 	o.spec("m.trust", function() {

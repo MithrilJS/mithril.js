@@ -220,6 +220,9 @@ module.exports = function(options) {
 		parseMarkup(value, root, [], "http://www.w3.org/2000/svg")
 		return {documentElement: root}
 	}
+	function camelCase(string) {
+		return string.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
+	}
 	var activeElement
 	var $window = {
 		DOMParser: DOMParser,
@@ -227,29 +230,40 @@ module.exports = function(options) {
 			createElement: function(tag) {
 				var cssText = ""
 				var style = {}
-				Object.defineProperty(style, "cssText", {
-					get: function() {return cssText},
-					set: function (value) {
-						var buf = []
-						if (typeof value === "string") {
-							for (var key in style) style[key] = ""
-							var rules = splitDeclList(value)
-							for (var i = 0; i < rules.length; i++) {
-								var rule = rules[i]
-								var colonIndex = rule.indexOf(":")
-								if (colonIndex > -1) {
-									var rawKey = rule.slice(0, colonIndex).trim()
-									var key = rawKey.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
-									var value = rule.slice(colonIndex + 1).trim()
-									if (key !== "cssText") {
-										style[key] = value
-										buf.push(rawKey + ": " + value + ";")
+				Object.defineProperties(style, {
+					cssText: {
+						get: function() {return cssText},
+						set: function (value) {
+							var buf = []
+							if (typeof value === "string") {
+								for (var key in style) style[key] = ""
+								var rules = splitDeclList(value)
+								for (var i = 0; i < rules.length; i++) {
+									var rule = rules[i]
+									var colonIndex = rule.indexOf(":")
+									if (colonIndex > -1) {
+										var rawKey = rule.slice(0, colonIndex).trim()
+										var key = camelCase(rawKey)
+										var value = rule.slice(colonIndex + 1).trim()
+										if (key !== "cssText") {
+											style[key] = style[rawKey] = value
+											buf.push(rawKey + ": " + value + ";")
+										}
 									}
 								}
+								element.setAttribute("style", cssText = buf.join(" "))
 							}
-							element.setAttribute("style", cssText = buf.join(" "))
 						}
-					}
+					},
+					getPropertyValue: {value: function(key){
+						return style[key]
+					}},
+					removeProperty: {value: function(key){
+						style[key] = style[camelCase(key)] = ""
+					}},
+					setProperty: {value: function(key, value){
+						style[key] = style[camelCase(key)] = value
+					}}
 				})
 				var events = {}
 				var element = {
@@ -459,9 +473,9 @@ module.exports = function(options) {
 							if (!this.hasAttribute("type")) return "text"
 							var type = this.getAttribute("type")
 							return (/^(?:radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image)$/)
-							.test(type)
-							? type
-							: "text"
+								.test(type)
+								? type
+								: "text"
 						},
 						set: typeSetter,
 						enumerable: true,

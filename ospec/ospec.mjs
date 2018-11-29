@@ -1,17 +1,10 @@
-"use strict"
-;(function(m) {
-if (typeof module !== "undefined") module["exports"] = m()
-else window.o = m()
-})(function init(name) {
+export default (function init(name) {
 	var spec = {}, subjects = [], results, only = [], ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow
 	var currentTestError = null
 	if (name != null) spec[name] = ctx = {}
 
-	try {throw new Error} catch (e) {
-		var ospecFileName = e.stack && (/[\/\\](.*?):\d+:\d+/).test(e.stack) ? e.stack.match(/[\/\\](.*?):\d+:\d+/)[1] : null
-	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
 			if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
@@ -52,7 +45,6 @@ else window.o = m()
 		var spy = function() {
 			spy.this = this
 			spy.args = [].slice.call(arguments)
-			spy.calls.push({this: this, args: spy.args})
 			spy.callCount++
 
 			if (fn) return fn.apply(this, arguments)
@@ -63,7 +55,6 @@ else window.o = m()
 				name: {value: fn.name}
 			})
 		spy.args = []
-		spy.calls = []
 		spy.callCount = 0
 		return spy
 	}
@@ -220,8 +211,6 @@ else window.o = m()
 	define("notEquals", "should not equal", function(a, b) {return a !== b})
 	define("deepEquals", "should deep equal", deepEqual)
 	define("notDeepEquals", "should not deep equal", function(a, b) {return !deepEqual(a, b)})
-	define("throws", "should throw a", throws)
-	define("notThrows", "should not throw a", function(a, b) {return !throws(a, b)})
 
 	function isArguments(a) {
 		if ("callee" in a) {
@@ -262,18 +251,6 @@ else window.o = m()
 		}
 		return false
 	}
-	function throws(a, b){
-		try{
-			a()
-		}catch(e){
-			if(typeof b === "string"){
-				return (e.message === b)
-			}else{
-				return (e instanceof b)
-			}
-		}
-		return false
-	}
 
 	function isRunning() {return results != null}
 	function Assert(value) {
@@ -287,20 +264,16 @@ else window.o = m()
 	}
 	function define(name, verb, compare) {
 		Assert.prototype[name] = function assert(value) {
+			if (compare(this.value, value)) succeed(this)
+			else fail(this, serialize(this.value) + "\n  " + verb + "\n" + serialize(value))
 			var self = this
-			var message = serialize(self.value) + "\n  " + verb + "\n" + serialize(value)
-			if (compare(self.value, value)){
-				succeed(self, message)
-				return function(message) {
-					if (!self.pass) self.message = message + "\n\n" + self.message
-				}
-			}else fail(self, message)
+			return function(message) {
+				if (!self.pass) self.message = message + "\n\n" + self.message
+			}
 		}
 	}
-	function succeed(assertion, message) {
+	function succeed(assertion) {
 		results[assertion.i].pass = true
-		results[assertion.i].context = subjects.join(" > ")
-		results[assertion.i].message = message
 	}
 	function fail(assertion, message, error) {
 		results[assertion.i].pass = false
@@ -387,3 +360,4 @@ else window.o = m()
 
 	return o
 })
+()

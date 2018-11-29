@@ -5,12 +5,14 @@
   "author": "Leo Horie",
   "license": "MIT",
   "main": "mithril.js",
+  "module": "mithril.mjs",
   "repository": "MithrilJS/mithril.js",
   "scripts": {
     "dev": "node bundler/cli browser.js -output mithril.js -watch",
-    "build": "npm run build-browser & npm run build-min",
+    "build": "npm run build-browser & npm run build-min && npm run build-esm",
     "build-browser": "node bundler/cli browser.js -output mithril.js",
     "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
+    "build-esm": "node esm.js",
     "precommit": "lint-staged",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "benchmark": "^2.1.4",
+    "chokidar": "^2.0.4",
     "dedent": "^0.7.0",
     "eslint": "^3.19.0",
     "gh-pages": "^0.12.0",

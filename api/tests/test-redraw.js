@@ -5,6 +5,19 @@ var domMock = require("../../test-utils/domMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 var apiRedraw = require("../../api/redraw")
 
+// Because Node doesn't have this.
+if (typeof requestAnimationFrame !== "function") {
+	global.requestAnimationFrame = (function (delay, last) {
+		return function(callback) {
+			var elapsed = Date.now() - last
+			return setTimeout(function() {
+				callback()
+				last = Date.now()
+			}, delay - elapsed)
+		}
+	})(16, 0)
+}
+
 o.spec("redrawService", function() {
 	var root, redrawService, $document
 	o.beforeEach(function() {

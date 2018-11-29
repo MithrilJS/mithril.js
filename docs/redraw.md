@@ -44,7 +44,7 @@ When callbacks outside of Mithril run, you need to notify Mithril's rendering en
 
 To trigger a redraw, call `m.redraw()`. Note that `m.redraw` only works if you used `m.mount` or `m.route`. If you rendered via `m.render`, you should use `m.render` to redraw.
 
-`m.redraw()` always triggers an asynchronous redraws, whereas `m.redraw.sync()` triggers a synchronous one. `m.redraw()` is tied to `window.requestAnimationFrame()` (we provide a fallback for IE9). It will thus typically fire at most 60 times per second. It may fire faster if your monitor has a higher refresh rate.
+`m.redraw()` always triggers an asynchronous redraws, whereas `m.redraw.sync()` triggers a synchronous one. `m.redraw()` is tied to `window.requestAnimationFrame()`. It will thus typically fire at most 60 times per second. It may fire faster if your monitor has a higher refresh rate.
 
 `m.redraw.sync()` is mostly intended to make videos play work in iOS. That only works in response to user-triggered events. It comes with several caveat:
 

@@ -2,56 +2,123 @@
 
 Integration with third party libraries or vanilla javascript code can be achieved via [lifecycle methods](lifecycle-methods.md).
 
-## Example
+## noUiSlider Example
 
 ```javascript
-var FullCalendar = {
+/** NoUiSlider wrapper component */
+function Slider() {
+	var slider
 
-	oncreate: function (vnode) {
-		console.log('FullCalendar::oncreate')
-		$(vnode.dom).fullCalendar({
-			// put your initial options and callbacks here
-		})
-
-		Object.assign(vnode.attrs.parentState, {fullCalendarEl: vnode.dom})
-	},
-
-	// Consider that the lib will modify this parent element in the DOM (e.g. add dependent class attribute and values).
-	// As long as you return the same view results here, mithril will not
-	// overwrite the actual DOM because it's always comparing old and new VDOM
-	// before applying DOM updates.
-	view: function (vnode) {
-		return m('div')
-	},
-
-	onbeforeremove: function (vnode) {
-		// Run any destroy / cleanup methods here.
-		//E.g. $(vnode.state.fullCalendarEl).fullCalendar('destroy')
+	return {
+		oncreate: function(vnode) {
+			// Initialize 3rd party lib here
+			slider = noUiSlider.create(vnode.dom, {
+				start: 0,
+				range: {min: 0, max: 100}
+			})
+			slider.on('update', function(values) {
+				vnode.attrs.onChange(values[0])
+				m.redraw()
+			})
+		},
+		onremove: function() {
+			// Cleanup 3rd party lib on removal
+			slider.destroy()
+		},
+		view: function() {
+			return m('div')
+		}
 	}
 }
 
-m.mount(document.body, {
-	view: function (vnode) {
-		return [
-			m('h1', 'Calendar'),
-			m(FullCalendar, {parentState: vnode.state}),
-			m('button', {onclick: prev}, 'Mithril Button -'),
-			m('button', {onclick: next}, 'Mithril Button +')
+/** Demo app component */
+function Demo() {
+	var showSlider = false
+	var value = 0
 
-		]
-
-		function next() {
-			$(vnode.state.fullCalendarEl).fullCalendar('next')
+	return {
+		view: function() {
+			return m('.app',
+				m('p',
+					m('button',
+						{
+							type: 'button',
+							onclick: function() {
+								showSlider = !showSlider
+							}
+						},
+						showSlider ? "Destroy Slider" : "Create Slider"
+					)
+				),
+				showSlider && m(Slider, {
+					onChange: function(v) {
+						value = v
+					}
+				}),
+				m('p', value)
+			)
 		}
-
-		function prev() {
-			$(vnode.state.fullCalendarEl).fullCalendar('prev')
-		}
-
 	}
+}
 
-})
-
+m.mount(document.body, Demo)
 ```
 
-Running example [flems: FullCalendar](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvAHigjQGsACAJxigBeADog4xAJ6w4hGDGKjuhfmBEgSxAA5xEAel3UAJmgBWcfNSi0ArobBQM-C7Sy6MJjAA9d7AEZxdMGsoKGoMWDRDR10AZnwAdnwABkDg0PCmKN58LA4LODhRAD4QAF8KdGxcRAIzShp6RmYagDdHbgAxNIBhDMj2wW5gYTQR4WJ6an4MRkRuILRqYgh6bgAKFrRaQxgASiGxhWI6NDhaWHwrAHM1gHIukN6oft5EREnpxlvdw-GAEg2Wx2+EMLl2+CCjz6WTWw1GR3G+m4mmsxG4EhsvG4HAgy3C3FommW9Dg3AwkW4YRCvgw1E4pNk-F+xFKP1G8PGAHlfCYYEt8BgChArmhAdsYALiMReOZNI4mMQAMrEGYwChDSFQJ6ZRwAUSgc024pBLlZh3KY3hLQgMAA7nMFksVmh1kadvs4eNxvxiNZeC6sHdDBAWt9zRRLeN6L4YGBaPx+FhaC0YA7rItiS6xe6DhziEiAErpsloCTcHbiXi0Mu6SmwcnWTTcHDEQjbBkwJzM-QAt0S8SqiE9aF6qDgzXal5B+DS6th+GlEaL9lYHI2BhrUHUaw4Bj4XzbCTqz3Ea12tMZ52uoF7XNe6XyP0u5DM8aB26EACMt3Vt0nWW+CM8zfNYHi1EdeGPOV+AYZVVUNG98AHRhWSA+8QNuXxUQmNAfzvBEjkmdg6TmTR+BaV8WV-ABZXFlGgbgACFsNWABaQDKPfLCpXoPCT3QnDLAgEjuDQGBPAUYCqO4W5aNbXgGOYniXQAannZkAF1IyOR1M1E8TiDWD1KN7RDkIlCcIP1cdhwiGFbjEiT1KOZdmV0q8yJgFojPw+9TONcyhyhOzRxs4KdV4O5PNDNl71chdLVZMoKhATAcDwfIECoE4mmIPAyg0qh2C4BAUEqdKalyeToHqP1yBqDRtD0XR000TgrmcVwqvoqAAAFP3wAaAFZdG6hSoHwOoqEkTRqhAOpynKuak13PKqDqvBGp0fRWvazrRpcBVeoAJkGgBOfBjoO1bJqykAZrmhaUrSx6AEdrE7CRat4er1ClJqdrQNqOroVwTHez7eriU7P10YNxF0cGPt4CRbvqB68Cepa8E1KkIu+36tua3aQZcVIQjxl4oYSZI4YgBHcYgtHpokWbMYQUoNNKIA)
+[Live Demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4A9ACoJAAgBytAKoQAylAgATGACdpAdy0YADoe3S6WQ-RHSJYgDpowAVzTViEetNUbtACgCU0sAO0tIAbhg6cGqaWg4h0lowxE5aaEEJofTUSRiMiNLOru70vmFotJqBwemhdWJi0gCSaBDuGGoAXjDSAMxa6tKGkcQAntJqAEbShNowmXXRPjoAvNIVSt6x+DkweTBlFZr46rRYFBm1dYvEIwUADBQL1wZoAOYwBcBYEGgPF1gMAAPAoARnu91Yz2krH80KW21KAHInIZ1PskRcim4PGgyh0nPBqtDQuVKjB8HliFo4Ph6ABhQgYd4HCJQQlwZD3AC6cKu12kWHwSXUBl0AWhsIW7AW9CSWFoYU+hRcONKxP5oQa0npsGZqL6AyGI3GU2knnlio68Ji2hO8GptFGEv5Mv5YQgMF0BWxJTxGoFiWSqXSWF8SPUEDCSL51yhtXj8YckhkABEYArpEZDGYzpY0NZbA5fbjpOmFQFLqFYMRpHBCLRdFtTGswB04PNajXwgSemt7vFakkUmkq3UPV6faq-ZWaoHhyHBeHKcZMSSl0jDGvNQKw0jJk5iMR6NvA4G52fA2MTAV94fj2hT5eBdk1NQANZT4q42fry-1xtm1WaQAEIAKbW04h3S942fOo3Tg0JwKA6QAH5pDsEB0zgR1xiAzDpAKTD6VyRgvEgzC-2kWMz38J5oLrBsIOWaQADJWKXICLgvS8GSZFkvzVPEwgDRC2UJaQ1jCKjYLPWF6MvPctwucSYBo651JhBJE0HIUFRcYhfFOagnBwBh8EmSpRguctaD5NgOBATAcDwHY4AEGh6EYZgeDYbkqDUNB3wQFBOBcngKicCAEW0SgQFScgeBIYhDDgRAGhcQx3zeHYzjESLosggABUEACZ8FBfB7jESMcK0CAD0YfLaCimKtHwfg4uvbgQDgHIIEMUR2DCnqCratyPISvBktS9KxEy7LcqwZrWuKsqKqqmroupBrDxgFbCuWCautGEw8Bw0ZYAcka8B+YhCHq8gqCmpKj1mjK0CynLzDEO6HugEqNoANl+tp-qgDqPO687+sGvzWCAA)
+
+## Bootstrap FullCalandar Example
+
+```javascript
+/** FullCalendar wrapper component */
+var FullCalendar = {
+	oncreate: function (vnode) {
+		console.log('FullCalndar::oncreate')
+		$(vnode.dom).fullCalendar({
+			// put your initial options and callbacks here
+		})
+	},
+	onremove: function (vnode) {
+		// Run any destroy / cleanup methods here.
+		$(vnode.dom).fullCalendar('destroy')
+	},
+	view: function (vnode) {
+		return m('div')
+	}
+}
+
+/** Demo app component */
+function Demo() {
+	var fullCalendarEl
+
+	function next() {
+		$(fullCalendarEl).fullCalendar('next')
+	}
+
+	function prev() {
+		$(fullCalendarEl).fullCalendar('prev')
+	}
+
+	return {
+		view: function (vnode) {
+			return [
+				m('h1', 'Calendar'),
+				m(FullCalendar, {
+					oncreate: function(vnode) {
+						fullCalendarEl = vnode.dom
+					}
+				}),
+				m('button', {
+					onclick: prev
+				}, 'Mithril Button -'),
+				m('button', {
+					onclick: next
+				}, 'Mithril Button +')
+			]
+		}
+	}
+}
+
+m.mount(document.body, Demo)
+```
+
+[Live Demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvAHigjQGsACAJxigBeADog4xAJ6w4hGDGKjuhfmBEgSxAA5xEAel3UAJmgBWcfNSi0ArobBQM-C7Sy6MJjAA9d7AEZxdMGsoKGoMWDRDR10AZnwAdnwABkDg0PCmKN58LA4LODhRAD4QAF8KdGxcRAIzShp6RmYa3QAqVu4AMTSAYQzIx24Ad14MTU0YXm46LE16JmJuVt1hNAA3Qe6Qvois7kFuYFXhYnpqfgxGRG4gtGpiCHpuAAo1tFpDGABKQ+OFYjoaDgtFg+CsAHNngByLZQHYDXiIRBnC6MKFfP4nAAkr3en3whhcX3wQW2-SyzyOaBONOI+m4mmsiwkNimHAgD3C3Fomge9Dg3AwkWm4Sgvgw1E4Atk-ExxFKGOp8oof3o-CwtDWMGut3ujzQLzeH2+vyVJ3pACVrAahRJuJ9xLxaHbdNNYELrJpuDhiIQPtLJjB8HKcUb8YSsMTSXDyY5oQ7iE6JOi-uU-msIDAhjrrXqnrjjT8qbT+MRrLwDVh4xA1imlaVVg3qWg2h0ACIwDWC8bTFxzNALJYrNC6vkGjsa55F1bcbgbKbRnaZRwAUSgxwNN1zY+4A88xCnptns5xi9jvDXUd65+he+IddnTZnW7uO80-DWh6px+4p+vu1XKArzJADeGhd8YFrRVHw3WdS3LA1v2PDMsxzV99UNPETSQn94IrbhkGfH9ZyrKFCAARihChuChJcEXRFVN2I71nlhOismonDmO5O5UW1F88zQAtPmnJjuNnM9QLXfY5ywgkXCI7im3EhVGPE0jfCZU40Coo9xJ4ywIEla4ILWRSf3KGiAFkOWUaBuAAIS0p4AFoGPM48NOcnTOI8n8znYYzdxgfc-O4SyoRs31eHspziG07gAGo6w8gBdRTlPCxsNywHIbAYZ5CWoawcAYfBfA+CRqInWhFTKCoQEwHA8HyBAqEBJpiDwMpUqodguAQFBKmampcmi6B6nLcgag0bQ9F0a1NE4cFnFcMa7KgAABcj8B2gBWXR1piqB8DqKhJAmPA4HOCBeXq4bqhADVSq6qgprwWadH0RbltWw6XAWTaACZdoATnwIH-pe062pAC7HuumK7vKB68BMABHaxJgkSbeGm9R4rm760CWlaZl0DGsd4CRNriEHyN0QwIHECnMexmH6nhq6buRhqmse6MwlA3H8c++afrJlxUhCIXl14WmEmSRnmbpQXzw586JEumpEdurrSlS0ogA)

@@ -89,6 +89,8 @@ o.spec("reporting", function() {
 			o(results.length).equals(2)("Two results")
 
 			o("error" in results[0] && "pass" in results[0]).equals(true)("error and pass keys present in failing result")
+			o("message" in results[0] && "context" in results[0]).equals(true)("message and context keys present in failing result")
+			o("message" in results[1] && "context" in results[1]).equals(true)("message and context keys present in passing result")
 			o(results[0].pass).equals(false)("Test meant to fail has failed")
 			o(results[1].pass).equals(true)("Test meant to pass has passed")
 
@@ -163,6 +165,14 @@ o.spec("ospec", function() {
 			o(a).notEquals(2)
 			o({a: [1, 2], b: 3}).deepEquals({a: [1, 2], b: 3})
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
+			o(function(){throw new Error()}).throws(Error)
+			o(function(){"ayy".foo()}).throws(TypeError)
+			o(function(){Math.PI.toFixed(Math.pow(10,20))}).throws(RangeError)
+			o(function(){decodeURIComponent("%")}).throws(URIError)
+
+			o(function(){"ayy".foo()}).notThrows(SyntaxError)
+			o(function(){throw new Error("foo")}).throws("foo")
+			o(function(){throw new Error("foo")}).notThrows("bar")
 
 			var undef1 = {undef: void 0}
 			var undef2 = {UNDEF: void 0}
@@ -666,7 +676,7 @@ o.spec("the done parser", function() {
 		var threw = false
 		oo("test", function(/*hey
 			*/ /**/ //ho
-			done  /*hey
+			done /*hey
 			*/ /**/ //huuu
 			, timeout
 		) {

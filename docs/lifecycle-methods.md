@@ -60,19 +60,24 @@ Like in other hooks, the `this` keyword in the `oninit` callback points to `vnod
 The `oninit` hook is useful for initializing component state based on arguments passed via `vnode.attrs` or `vnode.children`.
 
 ```javascript
-var ComponentWithState = {
-	oninit: function(vnode) {
-		this.data = vnode.attrs.data
-	},
-	view: function() {
-		return m("div", this.data) // displays data from initialization time
+function ComponentWithState() {
+	var initialData
+	return {
+		oninit: function(vnode) {
+			initialData = vnode.attrs.data
+		},
+		view: function(vnode) {
+			return [
+				// displays data from initialization time:
+				m("div", "Initial: " + initialData),
+				// displays current data:
+				m("div", "Current: " + vnode.attrs.data)
+			]
+		}
 	}
 }
 
 m(ComponentWithState, {data: "Hello"})
-
-// Equivalent HTML
-// <div>Hello</div>
 ```
 
 You should not modify model data synchronously from this method. Since `oninit` makes no guarantees regarding the status of other elements, model changes created from this method may not be reflected in all parts of the UI until the next render cycle.
@@ -110,17 +115,19 @@ The `onupdate(vnode)` hook is called after a DOM element is updated, while attac
 
 This hook is only called if the element existed in the previous render cycle. It is not called when an element is created or when it is recycled.
 
-Like in other hooks, the `this` keyword in the `onupdate` callback points to `vnode.state`. DOM elements whose vnodes have an `onupdate` hook do not get recycled.
+DOM elements whose vnodes have an `onupdate` hook do not get recycled.
 
 The `onupdate` hook is useful for reading layout values that may trigger a repaint, and for dynamically updating UI-affecting state in third party libraries after model data has been changed.
 
 ```javascript
-var RedrawReporter = {
-	count: 0,
-	onupdate: function(vnode) {
-		console.log("Redraws so far: ", ++vnode.state.count)
-	},
-	view: function() {}
+function RedrawReporter() {
+	var count = 0
+	return {
+		onupdate: function() {
+			console.log("Redraws so far: ", ++count)
+		},
+		view: function() {}
+	}
 }
 
 m(RedrawReporter, {data: "Hello"})
@@ -163,16 +170,17 @@ Like in other hooks, the `this` keyword in the `onremove` callback points to `vn
 The `onremove` hook is useful for running clean up tasks.
 
 ```javascript
-var Timer = {
-	oninit: function(vnode) {
-		this.timeout = setTimeout(function() {
-			console.log("timed out")
-		}, 1000)
-	},
-	onremove: function(vnode) {
-		clearTimeout(this.timeout)
-	},
-	view: function() {}
+function Timer() {
+	var timeout = setTimeout(function() {
+		console.log("timed out")
+	}, 1000)
+
+	return {
+		onremove: function() {
+			clearTimeout(timeout)
+		},
+		view: function() {}
+	}
 }
 ```
 

@@ -16,6 +16,8 @@ window.module = {
 	set exports(value) {require.$$modules[require.$$current()] = value},
 }
 
+window.global = window
+
 function require(name) {
 	var relative = require.$$current()
 	var slashIndex = relative.lastIndexOf("/")

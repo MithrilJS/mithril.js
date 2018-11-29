@@ -5,7 +5,7 @@
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
-- [Attributes passed as the second argument](attributes-passed-as-the-second-argument)
+- [Attributes passed as the second argument](#attributes-passed-as-the-second-argument)
 - [DOM attributes](#dom-attributes)
 - [Style attribute](#style-attribute)
 - [Events](#events)
@@ -539,7 +539,7 @@ Instead, prefer using Javascript expressions such as the ternary operator and Ar
 ```javascript
 // PREFER
 var BetterListComponent = {
-	view: function() {
+	view: function(vnode) {
 		return m("ul", vnode.attrs.items.map(function(item) {
 			return m("li", item)
 		}))

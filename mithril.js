@@ -60,7 +60,7 @@ function execSelector(state, attrs, children) {
 	if (className != null || state.attrs.className != null) attrs.className =
 		className != null
 			? state.attrs.className != null
-				? state.attrs.className + " " + className
+				? String(state.attrs.className) + " " + String(className)
 				: className
 			: state.attrs.className != null
 				? state.attrs.className
@@ -110,7 +110,10 @@ hyperscript.trust = function(html) {
 hyperscript.fragment = function(attrs1, children0) {
 	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
 }
-var m = hyperscript
+var m = function m() { return hyperscript.apply(this, arguments) }
+m.m = hyperscript
+m.trust = hyperscript.trust
+m.fragment = hyperscript.fragment
 /** @constructor */
 var PromisePolyfill = function(executor) {
 	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
@@ -435,7 +438,7 @@ var coreRenderer = function($window) {
 			checkState(vnode, original)
 		}
 	}
-	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 	// inside an iframe. Catch and swallow this error1, and heavy-handidly return null.
 	function activeElement() {
 		try {
@@ -547,8 +550,8 @@ var coreRenderer = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
@@ -567,12 +570,12 @@ var coreRenderer = function($window) {
 	//update
 	/**
 	 * @param {Element|Fragment} parent - the parent element
-	 * @param {Vnode[] | null} old - the list of vnodes of the last0 `render()` call for
+	 * @param {Vnode[] | null} old - the list of vnodes of the last `render()` call for
 	 *                               this part of the tree
 	 * @param {Vnode[] | null} vnodes - as above, but for the current `render()` call.
 	 * @param {Function[]} hooks - an accumulator of post-render hooks (oncreate/onupdate)
 	 * @param {Element | null} nextSibling - the next0 DOM node if we're dealing with a
-	 *                                       fragment that is not the last0 item in its
+	 *                                       fragment that is not the last item in its
 	 *                                       parent
 	 * @param {'svg' | 'math' | String | null} ns) - the current XML namespace, if any
 	 * @returns void
@@ -639,7 +642,7 @@ var coreRenderer = function($window) {
 	// the LIS and can be updated without moving them.
 	//
 	// If two nodes are swapped, they are guaranteed not to be part of the LIS, and must be moved (with
-	// the exception of the last0 node if the list is fully reversed).
+	// the exception of the last node if the list is fully reversed).
 	//
 	// ## Finding the next0 sibling.
 	//
@@ -647,7 +650,7 @@ var coreRenderer = function($window) {
 	// When the list is being traversed top-down, at any index0, the DOM nodes up to the previous
 	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next0 sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
-  //
+	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
 	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
 	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
@@ -898,8 +901,8 @@ var coreRenderer = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		updateLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
@@ -1015,15 +1018,15 @@ var coreRenderer = function($window) {
 	function removeNode(vnode) {
 		var expected = 1, called = 0
 		var original = vnode.state
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -1044,9 +1047,9 @@ var coreRenderer = function($window) {
 		}
 	}
 	function onremove(vnode) {
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
-			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
 			var children1 = vnode.children
@@ -1156,17 +1159,26 @@ var coreRenderer = function($window) {
 			// Defer the property check until *after* we check everything.
 		) && key2 in vnode.dom
 	}
+	var matchUpperCase = /[A-Z]/g
+	function prependDashAndLowerCase(string){
+		return "-" + string.toLowerCase()
+	}
+	function normalizeProp(prop) {
+		return "-" && prop[1] === "-"
+			? prop
+			: prop.replace(matchUpperCase, prependDashAndLowerCase)
+	}
 	//style
 	function updateStyle(element, old, style) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key2 in style) {
-				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+				if (style[key2] !== old[key2]) element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 			// Remove style properties that no longer exist
 			for (var key2 in old) {
-				if (!(key2 in style)) element.style[key2] = ""
+				if (!(key2 in style)) element.style.removeProperty(normalizeProp(key2))
 			}
 			return
 		}
@@ -1176,7 +1188,7 @@ var coreRenderer = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key2 in style) {
-				element.style[key2] = style[key2]
+				element.style.setProperty(normalizeProp(key2), style[key2])
 			}
 		}
 	}
@@ -1230,20 +1242,21 @@ var coreRenderer = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-		}
-		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-			vnode.instance = old.instance
-			return true
-		}
-		return false
+		do {
+			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			return false
+		} while (false); // eslint-disable-line no-constant-condition
+		vnode.dom = old.dom
+		vnode.domSize = old.domSize
+		vnode.instance = old.instance
+		return true
 	}
 	function render(dom, vnodes) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
@@ -1255,25 +1268,20 @@ var coreRenderer = function($window) {
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
-		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
 function throttle(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var delay = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	var pending = null
 	return function() {
-		var elapsed = Date.now() - last
 		if (pending === null) {
-			pending = timeout(function() {
+			pending = requestAnimationFrame(function() {
 				pending = null
 				callback()
-				last = Date.now()
-			}, delay - elapsed)
+			})
 		}
 	}
 }

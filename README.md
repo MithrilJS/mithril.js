@@ -18,11 +18,11 @@ mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://ww
 
 ## What is Mithril?
 
-A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->8.91 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->8.97 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
-Browsers all the way back to IE9 are supported, no polyfills required 👌.
+Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
 ## Installation
 
@@ -30,12 +30,13 @@ Browsers all the way back to IE9 are supported, no polyfills required 👌.
 
 ```html
 <script src="https://unpkg.com/mithril"></script>
+<!-- or -->
+<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.js"></script>
 ```
 
 ### npm
-
 ```bash
-$ npm install mithril
+$ npm install mithril --save
 ```
 
 The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.

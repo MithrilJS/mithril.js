@@ -25,14 +25,18 @@
 - API: Assigning to `vnode.state` (as in `vnode.state = ...`) is no longer supported. Instead, an error is thrown if `vnode.state` changes upon the invocation of a lifecycle hook.
 - API: `m.request` will no longer reject the Promise on server errors (eg. status >= 400) if the caller supplies an `extract` callback. This gives applications more control over handling server responses.
 - hyperscript: when attributes have a `null` or `undefined` value, they are treated as if they were absent. [#1773](https://github.com/MithrilJS/mithril.js/issues/1773) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
+- API: `m.request` errors no longer copy response fields to the error, but instead assign the parsed JSON response to `error.response` and the HTTP status code `error.code`.
 - hyperscript: when an attribute is defined on both the first and second argument (as a CSS selector and an `attrs` field, respectively), the latter takes precedence, except for `class` attributes that are still added together. [#2172](https://github.com/MithrilJS/mithril.js/issues/2172) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
 - stream: when a stream conditionally returns HALT, dependant stream will also end ([#2200](https://github.com/MithrilJS/mithril.js/pull/2200))
 - render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
+- cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
+- render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 
 #### News
 
+- Mithril now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. ([#2296](https://github.com/MithrilJS/mithril.js/pull/2296))
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1949](https://github.com/MithrilJS/mithril.js/pull/1949), [#2222](https://github.com/MithrilJS/mithril.js/pull/2222)).
 - API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
@@ -44,6 +48,12 @@
 - render/core: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
 - render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
 - API: Introduction of `m.prop()` ([#2268](https://github.com/MithrilJS/mithril.js/pull/2268))
+- docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
+- stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
+- API: ES module bundles are now available for `mithril` and `mithril/stream` ([#2194](https://github.com/MithrilJS/mithril.js/pull/2194) [@porsager](https://github.com/porsager)).
+    - All of the `m.*` properties from `mithril` are re-exported as named exports in addition to being attached to `m`.
+    - `m()` itself from `mithril` is exported as the default export.
+    - `mithril/stream`'s primary export is exported as the default export.
 
 #### Bug fixes
 
@@ -59,9 +69,10 @@
 - render/events: `Object.prototype` properties can no longer interfere with event listener calls.
 - render/events: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
 - render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
-- docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa), [#2265](https://github.com/MithrilJS/mithril.js/pull/2265), [@isiahmeadows](https://github.com/isiahmeadows))
+- docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa), [#2250](https://github.com/MithrilJS/mithril.js/pull/2250) [@isiahmeadows](https://github.com/isiahmeadows), [#2265](https://github.com/MithrilJS/mithril.js/pull/2265), [@isiahmeadows](https://github.com/isiahmeadows))
 - render/core: avoid touching `Object.prototype.__proto__` setter with `key: "__proto__"` in certain situations ([#2251](https://github.com/MithrilJS/mithril.js/pull/2251))
 - render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
+- render/core: CSS vars can now be specified in `{style}` attributes [#2192](https://github.com/MithrilJS/mithril.js/pull/2192)
 - request: don't modify params, call `extract`/`serialize`/`deserialize` with correct `this` value ([#2288](https://github.com/MithrilJS/mithril.js/pull/2288))
 
 ---
@@ -122,6 +133,10 @@
 #### Bug fixes
 
 - Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
+
+#### Ospec improvements:
+
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 
 ---
 

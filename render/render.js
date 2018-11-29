@@ -35,7 +35,7 @@ module.exports = function($window) {
 		}
 	}
 
-	// IE9 - IE11 (at least) throw an UnspecifiedError when accessing document.activeElement when
+	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
 	function activeElement() {
 		try {
@@ -152,8 +152,8 @@ module.exports = function($window) {
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		initLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
@@ -255,7 +255,7 @@ module.exports = function($window) {
 	// When the list is being traversed top-down, at any index, the DOM nodes up to the previous
 	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
-  //
+	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
 	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
 	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
@@ -511,8 +511,8 @@ module.exports = function($window) {
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		updateLifecycle(vnode.state, vnode, hooks)
+		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
@@ -632,15 +632,15 @@ module.exports = function($window) {
 	function removeNode(vnode) {
 		var expected = 1, called = 0
 		var original = vnode.state
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -661,9 +661,9 @@ module.exports = function($window) {
 		}
 	}
 	function onremove(vnode) {
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
-			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
 			var children = vnode.children
@@ -775,17 +775,28 @@ module.exports = function($window) {
 		) && key in vnode.dom
 	}
 
+	var matchUpperCase = /[A-Z]/g
+	function prependDashAndLowerCase(string){
+		return "-" + string.toLowerCase()
+	}
+
+	function normalizeProp(prop) {
+		return "-" && prop[1] === "-"
+			? prop
+			: prop.replace(matchUpperCase, prependDashAndLowerCase)
+	}
+
 	//style
 	function updateStyle(element, old, style) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key in style) {
-				if (style[key] !== old[key]) element.style[key] = style[key]
+				if (style[key] !== old[key]) element.style.setProperty(normalizeProp(key), style[key])
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
-				if (!(key in style)) element.style[key] = ""
+				if (!(key in style)) element.style.removeProperty(normalizeProp(key))
 			}
 			return
 		}
@@ -795,7 +806,7 @@ module.exports = function($window) {
 		else {
 			if (typeof old === "string") element.style.cssText = ""
 			for (var key in style) {
-				element.style[key] = style[key]
+				element.style.setProperty(normalizeProp(key), style[key])
 			}
 		}
 	}
@@ -852,20 +863,21 @@ module.exports = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-		}
-		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-			vnode.instance = old.instance
-			return true
-		}
-		return false
+		do {
+			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
+				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+				if (force !== undefined && !force) break
+			}
+			return false
+		} while (false); // eslint-disable-line no-constant-condition
+		vnode.dom = old.dom
+		vnode.domSize = old.domSize
+		vnode.instance = old.instance
+		return true
 	}
 
 	function render(dom, vnodes) {
@@ -880,7 +892,7 @@ module.exports = function($window) {
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
-		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
