@@ -1,7 +1,6 @@
 "use strict"
 
 var fs = require("fs")
-var path = require("path")
 var zlib = require("zlib")
 var chokidar = require("chokidar")
 var Terser = require("terser")
