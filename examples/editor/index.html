@@ -28,7 +28,7 @@ var Editor = {
 	view: function() {
 		return [
 			m("textarea.input", {
-				oninput: m.withAttr("value", state.update),
+				oninput: function (e) { state.update(e.traget.value) },
 				value: state.text
 			}),
 			m(".preview", m.trust(marked(state.text))),

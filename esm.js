@@ -19,7 +19,6 @@ var namedExports = [
 	"fragment",
 	"mount",
 	"route",
-	"withAttr",
 	"render",
 	"redraw",
 	"request",
