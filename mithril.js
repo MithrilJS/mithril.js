@@ -240,67 +240,93 @@ if (typeof window !== "undefined") {
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
-	for (var key0 in object) {
-		destructure(key0, object[key0])
+	for (var key in object) {
+		destructure(key, object[key])
 	}
 	return args.join("&")
-	function destructure(key0, value) {
+	function destructure(key, value) {
 		if (Array.isArray(value)) {
 			for (var i = 0; i < value.length; i++) {
-				destructure(key0 + "[" + i + "]", value[i])
+				destructure(key + "[" + i + "]", value[i])
 			}
 		}
 		else if (Object.prototype.toString.call(value) === "[object Object]") {
 			for (var i in value) {
-				destructure(key0 + "[" + i + "]", value[i])
+				destructure(key + "[" + i + "]", value[i])
 			}
 		}
-		else args.push(encodeURIComponent(key0) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
+		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
 var _9 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
-	function setCompletionCallback(callback) {oncompletion = callback}
-	function finalizer() {
-		var count = 0
-		function complete() {if (--count === 0 && typeof oncompletion === "function") oncompletion()}
-		return function finalize(promise0) {
-			var then0 = promise0.then
-			promise0.then = function() {
-				count++
-				var next = then0.apply(promise0, arguments)
-				next.then(complete, function(e) {
-					complete()
-					if (count === 0) throw e
-				})
-				return finalize(next)
+	function makeRequest(factory) {
+		return function(url, args) {
+			if (typeof url !== "string") { args = url; url = url.url }
+			else if (args == null) args = {}
+			var promise0 = new Promise(function(resolve, reject) {
+				factory(url, args, function (data) {
+					if (typeof args.type === "function") {
+						if (Array.isArray(data)) {
+							for (var i = 0; i < data.length; i++) {
+								data[i] = new args.type(data[i])
+							}
+						}
+						else data = new args.type(data)
+					}
+					resolve(data)
+				}, reject)
+			})
+			if (args.background === true) return promise0
+			var count = 0
+			function complete() {
+				if (--count === 0 && typeof oncompletion === "function") oncompletion()
 			}
-			return promise0
+			return wrap(promise0)
+			function wrap(promise0) {
+				var then0 = promise0.then
+				promise0.then = function() {
+					count++
+					var next = then0.apply(promise0, arguments)
+					next.then(complete, function(e) {
+						complete()
+						if (count === 0) throw e
+					})
+					return wrap(next)
+				}
+				return promise0
+			}
 		}
 	}
-	function normalize(args, extra) {
-		if (typeof args === "string") {
-			var url = args
-			args = extra || {}
-			if (args.url == null) args.url = url
+	function hasHeader(args, name) {
+		for (var key in args.headers) {
+			if ({}.hasOwnProperty.call(args.headers, key) && name.test(key)) return true
 		}
-		return args
+		return false
 	}
-	function request(args, extra) {
-		var finalize = finalizer()
-		args = normalize(args, extra)
-		var promise0 = new Promise(function(resolve, reject) {
-			if (args.method == null) args.method = "GET"
-			args.method = args.method.toUpperCase()
-			var useBody = (args.method === "GET" || args.method === "TRACE") ? false : (typeof args.useBody === "boolean" ? args.useBody : true)
-			if (typeof args.serialize !== "function") args.serialize = typeof FormData !== "undefined" && args.data instanceof FormData ? function(value) {return value} : JSON.stringify
-			if (typeof args.deserialize !== "function") args.deserialize = deserialize
-			if (typeof args.extract !== "function") args.extract = extract
-			args.url = interpolate(args.url, args.data)
-			if (useBody) args.data = args.serialize(args.data)
-			else args.url = assemble(args.url, args.data)
+	function interpolate(url, data, assemble) {
+		if (data == null) return url
+		url = url.replace(/:([^\/]+)/gi, function (m0, key) {
+			return data[key] != null ? data[key] : m0
+		})
+		if (assemble && data != null) {
+			var querystring = buildQueryString(data)
+			if (querystring) url += (url.indexOf("?") < 0 ? "?" : "&") + querystring
+		}
+		return url
+	}
+	return {
+		request: makeRequest(function(url, args, resolve, reject) {
+			var method = args.method != null ? args.method.toUpperCase() : "GET"
+			var useBody = method !== "GET" && method !== "TRACE" &&
+				(typeof args.useBody !== "boolean" || args.useBody)
+			var data = args.data
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(data instanceof $window.FormData)
+			if (useBody) {
+				if (typeof args.serialize === "function") data = args.serialize(data)
+				else if (!(data instanceof $window.FormData)) data = JSON.stringify(data)
+			}
 			var xhr = new $window.XMLHttpRequest(),
 				aborted = false,
 				_abort = xhr.abort
@@ -308,19 +334,20 @@ var _9 = function($window, Promise) {
 				aborted = true
 				_abort.call(xhr)
 			}
-			xhr.open(args.method, args.url, typeof args.async === "boolean" ? args.async : true, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			if (args.serialize === JSON.stringify && useBody && !(args.headers && args.headers.hasOwnProperty("Content-Type"))) {
+			xhr.open(method, interpolate(url, args.data, !useBody), typeof args.async !== "boolean" || args.async, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+			if (assumeJSON && useBody && !hasHeader(args, /^content-type0$/i)) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (args.deserialize === deserialize && !(args.headers && args.headers.hasOwnProperty("Accept"))) {
+			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
-			
 			if (args.responseType) xhr.responseType = args.responseType
-			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
-				xhr.setRequestHeader(key, args.headers[key])
+			for (var key in args.headers) {
+				if ({}.hasOwnProperty.call(args.headers, key)) {
+					xhr.setRequestHeader(key, args.headers[key])
+				}
 			}
 			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
 			xhr.onreadystatechange = function() {
@@ -328,10 +355,18 @@ var _9 = function($window, Promise) {
 				if(aborted) return
 				if (xhr.readyState === 4) {
 					try {
-						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if (args.extract !== extract || (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
-							resolve(cast(args.type, response))
+						var success = (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || (/^file:\/\//i).test(url)
+						var response = xhr.responseText
+						if (typeof args.extract === "function") {
+							response = args.extract(xhr, args)
+							success = true
+						} else if (typeof args.deserialize === "function") {
+							response = args.deserialize(response)
+						} else {
+							try {response = response ? JSON.parse(response) : null}
+							catch (e) {throw new Error("Invalid JSON: " + response)}
 						}
+						if (success) resolve(response)
 						else {
 							var error = new Error(xhr.responseText)
 							error.code = xhr.status
@@ -344,20 +379,15 @@ var _9 = function($window, Promise) {
 					}
 				}
 			}
-			if (useBody && (args.data != null)) xhr.send(args.data)
+			if (useBody && data != null) xhr.send(data)
 			else xhr.send()
-		})
-		return args.background === true ? promise0 : finalize(promise0)
-	}
-	function jsonp(args, extra) {
-		var finalize = finalizer()
-		args = normalize(args, extra)
-		var promise0 = new Promise(function(resolve, reject) {
+		}),
+		jsonp: makeRequest(function(url, args, resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
 			$window[callbackName] = function(data) {
 				script.parentNode.removeChild(script)
-				resolve(cast(args.type, data))
+				resolve(data)
 				delete $window[callbackName]
 			}
 			script.onerror = function() {
@@ -365,50 +395,16 @@ var _9 = function($window, Promise) {
 				reject(new Error("JSONP request failed"))
 				delete $window[callbackName]
 			}
-			if (args.data == null) args.data = {}
-			args.url = interpolate(args.url, args.data)
-			args.data[args.callbackKey || "callback"] = callbackName
-			script.src = assemble(args.url, args.data)
+			url = interpolate(url, args.data, true)
+			script.src = url + (url.indexOf("?") < 0 ? "?" : "&") +
+				encodeURIComponent(args.callbackKey || "callback") + "=" +
+				encodeURIComponent(callbackName)
 			$window.document.documentElement.appendChild(script)
-		})
-		return args.background === true? promise0 : finalize(promise0)
+		}),
+		setCompletionCallback: function(callback) {
+			oncompletion = callback
+		},
 	}
-	function interpolate(url, data) {
-		if (data == null) return url
-		var tokens = url.match(/:[^\/]+/gi) || []
-		for (var i = 0; i < tokens.length; i++) {
-			var key = tokens[i].slice(1)
-			if (data[key] != null) {
-				url = url.replace(tokens[i], data[key])
-			}
-		}
-		return url
-	}
-	function assemble(url, data) {
-		var querystring = buildQueryString(data)
-		if (querystring !== "") {
-			var prefix = url.indexOf("?") < 0 ? "?" : "&"
-			url += prefix + querystring
-		}
-		return url
-	}
-	function deserialize(data) {
-		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error("Invalid JSON: " + data)}
-	}
-	function extract(xhr) {return xhr.responseText}
-	function cast(type0, data) {
-		if (typeof type0 === "function") {
-			if (Array.isArray(data)) {
-				for (var i = 0; i < data.length; i++) {
-					data[i] = new type0(data[i])
-				}
-			}
-			else return new type0(data)
-		}
-		return data
-	}
-	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
 var requestService = _9(window, PromisePolyfill)
 var coreRenderer = function($window) {
@@ -476,13 +472,13 @@ var coreRenderer = function($window) {
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode, ns, nextSibling) {
-		var match1 = vnode.children.match(/^\s*?<(\w+)/im) || []
+		var match0 = vnode.children.match(/^\s*?<(\w+)/im) || []
 		// not using the proper parent makes the child element(s) vanish.
 		//     var div = document.createElement("div")
 		//     div.innerHTML = "<td>i</td><td>j</td>"
 		//     console.log(div.innerHTML)
 		// --> "ij", no <td> in sight.
-		var temp = $doc.createElement(possibleParents[match1[1]] || "div")
+		var temp = $doc.createElement(possibleParents[match0[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
 			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
 			temp = temp.firstChild
@@ -608,7 +604,7 @@ var coreRenderer = function($window) {
 	//
 	// In order to diff keyed lists, one has to
 	//
-	// 1) match1 nodes in both lists, per key2, and update them accordingly
+	// 1) match0 nodes in both lists, per key, and update them accordingly
 	// 2) create the nodes present in the new list, but absent in the old one
 	// 3) remove the nodes present in the old list, but absent in the new one
 	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
@@ -626,7 +622,7 @@ var coreRenderer = function($window) {
 	// the longest increasing subsequence is the list of nodes that can remain in place. Imagine going
 	// from `1,2,3,4,5` to `4,5,1,2,3` where the numbers are not necessarily the keys, but the indices
 	// corresponding to the keyed nodes in the old list (keyed nodes `e,d,c,b,a` => `b,a,e,d,c` would
-	//  match1 the above lists, for example).
+	//  match0 the above lists, for example).
 	//
 	// In there are two increasing subsequences: `4,5` and `1,2,3`, the latter being the longest. We
 	// can update those nodes without moving them, and only call `insertNode` on `4` and `5`.
@@ -635,7 +631,7 @@ var coreRenderer = function($window) {
 	// the longest increasing subsequence *of old nodes still present in the new list*).
 	//
 	// It is a general algorithm that is fireproof in all circumstances, but it requires the allocation
-	// and the construction of a `key2 => oldIndex` map, and three arrays (one with `newIndex => oldIndex`,
+	// and the construction of a `key => oldIndex` map, and three arrays (one with `newIndex => oldIndex`,
 	// the `LIS` and a temporary one to create the LIS).
 	//
 	// So we cheat where we can: if the tails of the lists are identical, they are guaranteed to be part of
@@ -924,8 +920,8 @@ var coreRenderer = function($window) {
 		for (; start < end; start++) {
 			var vnode = vnodes[start]
 			if (vnode != null) {
-				var key2 = vnode.key
-				if (key2 != null) map[key2] = start
+				var key = vnode.key
+				if (key != null) map[key] = start
 			}
 		}
 		return map
@@ -1063,17 +1059,17 @@ var coreRenderer = function($window) {
 	}
 	//attrs2
 	function setAttrs(vnode, attrs2, ns) {
-		for (var key2 in attrs2) {
-			setAttr(vnode, key2, null, attrs2[key2], ns)
+		for (var key in attrs2) {
+			setAttr(vnode, key, null, attrs2[key], ns)
 		}
 	}
-	function setAttr(vnode, key2, old, value, ns) {
-		if (key2 === "key" || key2 === "is" || value == null || isLifecycleMethod(key2) || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object") return
-		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
-		if (key2.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
-		else if (key2 === "style") updateStyle(vnode.dom, old, value)
-		else if (hasPropertyKey(vnode, key2, ns)) {
-			if (key2 === "value") {
+	function setAttr(vnode, key, old, value, ns) {
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
+		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
+		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
+		else if (key === "style") updateStyle(vnode.dom, old, value)
+		else if (hasPropertyKey(vnode, key, ns)) {
+			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
@@ -1085,34 +1081,34 @@ var coreRenderer = function($window) {
 				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
-			if (vnode.tag === "input" && key2 === "type") vnode.dom.setAttribute(key2, value)
-			else vnode.dom[key2] = value
+			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
+			else vnode.dom[key] = value
 		} else {
 			if (typeof value === "boolean") {
-				if (value) vnode.dom.setAttribute(key2, "")
-				else vnode.dom.removeAttribute(key2)
+				if (value) vnode.dom.setAttribute(key, "")
+				else vnode.dom.removeAttribute(key)
 			}
-			else vnode.dom.setAttribute(key2 === "className" ? "class" : key2, value)
+			else vnode.dom.setAttribute(key === "className" ? "class" : key, value)
 		}
 	}
-	function removeAttr(vnode, key2, old, ns) {
-		if (key2 === "key" || key2 === "is" || old == null || isLifecycleMethod(key2)) return
-		if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
-		else if (key2 === "style") updateStyle(vnode.dom, old, null)
+	function removeAttr(vnode, key, old, ns) {
+		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
+		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
-			hasPropertyKey(vnode, key2, ns)
-			&& key2 !== "className"
-			&& !(key2 === "value" && (
+			hasPropertyKey(vnode, key, ns)
+			&& key !== "className"
+			&& !(key === "value" && (
 				vnode.tag === "option"
 				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()
 			))
-			&& !(vnode.tag === "input" && key2 === "type")
+			&& !(vnode.tag === "input" && key === "type")
 		) {
-			vnode.dom[key2] = null
+			vnode.dom[key] = null
 		} else {
-			var nsLastIndex = key2.indexOf(":")
-			if (nsLastIndex !== -1) key2 = key2.slice(nsLastIndex + 1)
-			if (old !== false) vnode.dom.removeAttribute(key2 === "className" ? "class" : key2)
+			var nsLastIndex = key.indexOf(":")
+			if (nsLastIndex !== -1) key = key.slice(nsLastIndex + 1)
+			if (old !== false) vnode.dom.removeAttribute(key === "className" ? "class" : key)
 		}
 	}
 	function setLateSelectAttrs(vnode, attrs2) {
@@ -1130,15 +1126,15 @@ var coreRenderer = function($window) {
 	}
 	function updateAttrs(vnode, old, attrs2, ns) {
 		if (attrs2 != null) {
-			for (var key2 in attrs2) {
-				setAttr(vnode, key2, old && old[key2], attrs2[key2], ns)
+			for (var key in attrs2) {
+				setAttr(vnode, key, old && old[key], attrs2[key], ns)
 			}
 		}
 		var val
 		if (old != null) {
-			for (var key2 in old) {
-				if (((val = old[key2]) != null) && (attrs2 == null || attrs2[key2] == null)) {
-					removeAttr(vnode, key2, val, ns)
+			for (var key in old) {
+				if (((val = old[key]) != null) && (attrs2 == null || attrs2[key] == null)) {
+					removeAttr(vnode, key, val, ns)
 				}
 			}
 		}
@@ -1149,15 +1145,15 @@ var coreRenderer = function($window) {
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function hasPropertyKey(vnode, key2, ns) {
+	function hasPropertyKey(vnode, key, ns) {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
 			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
-			key2 !== "href" && key2 !== "list" && key2 !== "form" && key2 !== "width" && key2 !== "height"// && key2 !== "type"
+			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
 			// Defer the property check until *after* we check everything.
-		) && key2 in vnode.dom
+		) && key in vnode.dom
 	}
 	var matchUpperCase = /[A-Z]/g
 	function prependDashAndLowerCase(string){
@@ -1173,12 +1169,12 @@ var coreRenderer = function($window) {
 		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
-			for (var key2 in style) {
-				if (style[key2] !== old[key2]) element.style.setProperty(normalizeProp(key2), style[key2])
+			for (var key in style) {
+				if (style[key] !== old[key]) element.style.setProperty(normalizeProp(key), style[key])
 			}
 			// Remove style properties that no longer exist
-			for (var key2 in old) {
-				if (!(key2 in style)) element.style.removeProperty(normalizeProp(key2))
+			for (var key in old) {
+				if (!(key in style)) element.style.removeProperty(normalizeProp(key))
 			}
 			return
 		}
@@ -1187,15 +1183,15 @@ var coreRenderer = function($window) {
 		else if (typeof style === "string") element.style.cssText = style
 		else {
 			if (typeof old === "string") element.style.cssText = ""
-			for (var key2 in style) {
-				element.style.setProperty(normalizeProp(key2), style[key2])
+			for (var key in style) {
+				element.style.setProperty(normalizeProp(key), style[key])
 			}
 		}
 	}
 	// Here's an explanation of how this works:
 	// 1. The event names are always (by design) prefixed by `on`.
 	// 2. The EventListener interface accepts either a function or an object
-	//    with a `handleEvent` method.
+	//    with a `handleEvent` method0.
 	// 3. The object does not inherit from `Object.prototype`, to avoid
 	//    any potential interference with that (e.g. setters).
 	// 4. The event name is remapped to the handler0 before calling it.
@@ -1217,20 +1213,20 @@ var coreRenderer = function($window) {
 		}
 	}
 	//event
-	function updateEvent(vnode, key2, value) {
+	function updateEvent(vnode, key, value) {
 		if (vnode.events != null) {
-			if (vnode.events[key2] === value) return
+			if (vnode.events[key] === value) return
 			if (value != null && (typeof value === "function" || typeof value === "object")) {
-				if (vnode.events[key2] == null) vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
-				vnode.events[key2] = value
+				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = value
 			} else {
-				if (vnode.events[key2] != null) vnode.dom.removeEventListener(key2.slice(2), vnode.events, false)
-				vnode.events[key2] = undefined
+				if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
+				vnode.events[key] = undefined
 			}
 		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
 			vnode.events = new EventDict()
-			vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
-			vnode.events[key2] = value
+			vnode.dom.addEventListener(key.slice(2), vnode.events, false)
+			vnode.events[key] = value
 		}
 	}
 	//lifecycle
@@ -1293,12 +1289,12 @@ var _12 = function($window, throttleMock) {
 	})
 	var callbacks = []
 	var rendering = false
-	function subscribe(key1, callback) {
-		unsubscribe(key1)
-		callbacks.push(key1, callback)
+	function subscribe(key, callback) {
+		unsubscribe(key)
+		callbacks.push(key, callback)
 	}
-	function unsubscribe(key1) {
-		var index = callbacks.indexOf(key1)
+	function unsubscribe(key) {
+		var index = callbacks.indexOf(key)
 		if (index > -1) callbacks.splice(index, 2)
 	}
 	function sync() {
@@ -1335,24 +1331,24 @@ var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
-	var entries = string.split("&"), data0 = {}, counters = {}
+	var entries = string.split("&"), data2 = {}, counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key5 = decodeURIComponent(entry[0])
+		var key2 = decodeURIComponent(entry[0])
 		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
 		if (value === "true") value = true
 		else if (value === "false") value = false
-		var levels = key5.split(/\]\[?|\[/)
-		var cursor = data0
-		if (key5.indexOf("[") > -1) levels.pop()
+		var levels = key2.split(/\]\[?|\[/)
+		var cursor = data2
+		if (key2.indexOf("[") > -1) levels.pop()
 		for (var j0 = 0; j0 < levels.length; j0++) {
 			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j0 === levels.length - 1
 			if (level === "") {
-				var key5 = levels.slice(0, j0).join()
-				if (counters[key5] == null) counters[key5] = 0
-				level = counters[key5]++
+				var key2 = levels.slice(0, j0).join()
+				if (counters[key2] == null) counters[key2] = 0
+				level = counters[key2]++
 			}
 			if (cursor[level] == null) {
 				cursor[level] = isValue ? value : isNumber ? [] : {}
@@ -1360,15 +1356,15 @@ var parseQueryString = function(string) {
 			cursor = cursor[level]
 		}
 	}
-	return data0
+	return data2
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
-	function normalize1(fragment0) {
-		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
-		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
-		return data
+	function normalize(fragment0) {
+		var data1 = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		if (fragment0 === "pathname" && data1[0] !== "/") data1 = "/" + data1
+		return data1
 	}
 	var asyncId
 	function debounceAsync(callback) {
@@ -1387,11 +1383,11 @@ var coreRouter = function($window) {
 		if (queryIndex > -1) {
 			var queryEnd = hashIndex > -1 ? hashIndex : path.length
 			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key4 in queryParams) queryData[key4] = queryParams[key4]
+			for (var key1 in queryParams) queryData[key1] = queryParams[key1]
 		}
 		if (hashIndex > -1) {
 			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key4 in hashParams) hashData[key4] = hashParams[key4]
+			for (var key1 in hashParams) hashData[key1] = hashParams[key1]
 		}
 		return path.slice(0, pathEnd)
 	}
@@ -1399,19 +1395,19 @@ var coreRouter = function($window) {
 	router.getPath = function() {
 		var type2 = router.prefix.charAt(0)
 		switch (type2) {
-			case "#": return normalize1("hash").slice(router.prefix.length)
-			case "?": return normalize1("search").slice(router.prefix.length) + normalize1("hash")
-			default: return normalize1("pathname").slice(router.prefix.length) + normalize1("search") + normalize1("hash")
+			case "#": return normalize("hash").slice(router.prefix.length)
+			case "?": return normalize("search").slice(router.prefix.length) + normalize("hash")
+			default: return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
 		}
 	}
-	router.setPath = function(path, data, options) {
+	router.setPath = function(path, data1, options) {
 		var queryData = {}, hashData = {}
 		path = parsePath(path, queryData, hashData)
-		if (data != null) {
-			for (var key4 in data) queryData[key4] = data[key4]
-			path = path.replace(/:([^\/]+)/g, function(match2, token) {
+		if (data1 != null) {
+			for (var key1 in data1) queryData[key1] = data1[key1]
+			path = path.replace(/:([^\/]+)/g, function(match1, token) {
 				delete queryData[token]
-				return data[token]
+				return data1[token]
 			})
 		}
 		var query = buildQueryString(queryData)
@@ -1495,16 +1491,16 @@ var _21 = function($window, redrawService0) {
 			}
 		}, bail)
 	}
-	route.set = function(path, data, options) {
+	route.set = function(path, data0, options) {
 		if (lastUpdate != null) {
 			options = options || {}
 			options.replace = true
 		}
 		lastUpdate = null
-		routeService.setPath(path, data, options)
+		routeService.setPath(path, data0, options)
 	}
 	route.get = function() {return currentPath}
-	route.prefix = function(prefix0) {routeService.prefix = prefix0}
+	route.prefix = function(prefix) {routeService.prefix = prefix}
 	var link = function(options, vnode1) {
 		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
 		vnode1.dom.onclick = function(e) {
@@ -1520,8 +1516,8 @@ var _21 = function($window, redrawService0) {
 		if (args0.tag == null) return link.bind(link, args0)
 		return link({}, args0)
 	}
-	route.param = function(key3) {
-		if(typeof attrs3 !== "undefined" && typeof key3 !== "undefined") return attrs3[key3]
+	route.param = function(key0) {
+		if(typeof attrs3 !== "undefined" && typeof key0 !== "undefined") return attrs3[key0]
 		return attrs3
 	}
 	return route
