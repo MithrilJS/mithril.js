@@ -863,7 +863,7 @@ module.exports = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		do { // eslint-disable-line no-constant-condition
+		do {
 			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
 				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
 				if (force !== undefined && !force) break
@@ -873,7 +873,7 @@ module.exports = function($window) {
 				if (force !== undefined && !force) break
 			}
 			return false
-		} while (false); // ES5 requires a semicolon here.
+		} while (false); // eslint-disable-line no-constant-condition
 		vnode.dom = old.dom
 		vnode.domSize = old.domSize
 		vnode.instance = old.instance
