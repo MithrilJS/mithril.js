@@ -6,9 +6,6 @@ var bundle = require("../bundle")
 var fs = require("fs")
 
 var ns = "./"
-function read(filepath) {
-	try {return fs.readFileSync(ns + filepath, "utf8")} catch (e) {/* ignore */}
-}
 function write(filepath, data) {
 	try {var exists = fs.statSync(ns + filepath).isFile()} catch (e) {/* ignore */}
 	if (exists) throw new Error("Don't call `write('" + filepath + "')`. Cannot overwrite file")
