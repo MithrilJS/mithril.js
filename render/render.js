@@ -10,8 +10,8 @@ module.exports = function($window) {
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
 
-	var onevent
-	function setEventCallback(callback) {return onevent = callback}
+	var redraw
+	function setRedraw(callback) {return redraw = callback}
 
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
@@ -827,9 +827,10 @@ module.exports = function($window) {
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler = this["on" + ev.type]
 		var result
-		if (typeof handler === "function") result = handler.call(ev.target, ev)
+		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (ev.redraw === false) ev.redraw = undefined
+		else if (typeof redraw === "function") redraw()
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
@@ -897,5 +898,5 @@ module.exports = function($window) {
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 
-	return {render: render, setEventCallback: setEventCallback}
+	return {render: render, setRedraw: setRedraw}
 }

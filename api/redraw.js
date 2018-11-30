@@ -17,11 +17,6 @@ function throttle(callback) {
 
 module.exports = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
-	renderService.setEventCallback(function(e) {
-		if (e.redraw === false) e.redraw = undefined
-		else redraw()
-	})
-
 	var callbacks = []
 	var rendering = false
 
@@ -42,5 +37,6 @@ module.exports = function($window, throttleMock) {
 
 	var redraw = (throttleMock || throttle)(sync)
 	redraw.sync = sync
+	renderService.setRedraw(redraw)
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
