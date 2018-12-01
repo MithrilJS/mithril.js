@@ -1523,20 +1523,8 @@ var _21 = function($window, redrawService0) {
 	return route
 }
 m.route = _21(window, redrawService)
-m.withAttr = function(attrName, callback, context) {
-	return function(e) {
-		callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
-	}
-}
-m.prop = function (store) {
-	return {
-		get: function() { return store },
-		toJSON: function() { return store },
-		set: function(value0) { return store = value0 }
-	}
-}
-var _30 = coreRenderer(window)
-m.render = _30.render
+var _28 = coreRenderer(window)
+m.render = _28.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
