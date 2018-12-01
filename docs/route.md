@@ -383,7 +383,10 @@ var Form = {
 	},
 	view: function() {
 		return m("form", [
-			m("input[placeholder='Search']", {oninput: m.withAttr("value", function(v) {state.term = v}), value: state.term}),
+			m("input[placeholder='Search']", {
+				oninput: function (e) { state.term = e.target.value },
+				value: state.term
+			}),
 			m("button", {onclick: state.search}, "Search")
 		])
 	}
@@ -589,8 +592,14 @@ var Auth = {
 var Login = {
 	view: function() {
 		return m("form", [
-			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("input[type=text]", {
+				oninput: function (e) { Auth.setUsername(e.target.value) },
+				value: Auth.username
+			}),
+			m("input[type=password]", {
+				oninput: function (e) { Auth.setPassword(e.target.value) },
+				value: Auth.password
+			}),
 			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}

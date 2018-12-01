@@ -45,16 +45,6 @@ o.spec("api", function() {
 			o(vnode.children[0].tag).equals("div")
 		})
 	})
-	o.spec("m.withAttr", function() {
-		o("works", function() {
-			var spy = o.spy()
-			var handler = m.withAttr("value", spy)
-
-			handler({currentTarget: {value: 10}})
-
-			o(spy.args[0]).equals(10)
-		})
-	})
 	o.spec("m.parseQueryString", function() {
 		o("works", function() {
 			var query = m.parseQueryString("?a=1&b=2")

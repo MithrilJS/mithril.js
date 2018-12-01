@@ -33,6 +33,7 @@
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
 - render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
+- API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
 
 #### News
 
@@ -47,7 +48,6 @@
 - API: add support for raw SVG in `m.trust()` string ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
 - render/core: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
 - render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
-- API: Introduction of `m.prop()` ([#2268](https://github.com/MithrilJS/mithril.js/pull/2268))
 - docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
 - stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
 - API: ES module bundles are now available for `mithril` and `mithril/stream` ([#2194](https://github.com/MithrilJS/mithril.js/pull/2194) [@porsager](https://github.com/porsager)).

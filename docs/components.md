@@ -365,8 +365,14 @@ var Login = {
 	login: function() {/*...*/},
 	view: function() {
 		return m(".login", [
-			m("input[type=text]", {oninput: m.withAttr("value", this.setUsername.bind(this)), value: this.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", this.setPassword.bind(this)), value: this.password}),
+			m("input[type=text]", {
+				oninput: function (e) { this.setUsername(e.target.value) },
+				value: this.username,
+			}),
+			m("input[type=password]", {
+				oninput: function (e) { this.setPassword(e.target.value) },
+				value: this.password,
+			}),
 			m("button", {disabled: !this.canSubmit(), onclick: this.login}, "Login"),
 		])
 	}
@@ -411,11 +417,11 @@ var Login = {
 	view: function() {
 		return m(".login", [
 			m("input[type=text]", {
-				oninput: m.withAttr("value", Auth.setUsername),
+				oninput: function (e) { Auth.setUsername(e.target.value) },
 				value: Auth.username
 			}),
 			m("input[type=password]", {
-				oninput: m.withAttr("value", Auth.setPassword),
+				oninput: function (e) { Auth.setPassword(e.target.value) },
 				value: Auth.password
 			}),
 			m("button", {

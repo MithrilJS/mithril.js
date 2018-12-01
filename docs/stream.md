@@ -306,7 +306,7 @@ In the example above, the `users` stream is populated with the response data whe
 
 #### Bidirectional bindings
 
-Streams can also be populated from other higher order functions, such as [`m.withAttr`](withAttr.md)
+Streams can also be populated from event callbacks and similar.
 
 ```javascript
 // a stream
@@ -314,7 +314,7 @@ var user = stream("")
 
 // a bi-directional binding to the stream
 m("input", {
-	oninput: m.withAttr("value", user),
+	oninput: function (e) { user(e.target.value) },
 	value: user()
 })
 ```
