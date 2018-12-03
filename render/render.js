@@ -4,12 +4,14 @@ var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
 	var $doc = $window.document
+	var VnodeError = 0
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
 
+	var hookErrors, hookThrown
 	var redraw
 	function setRedraw(callback) {return redraw = callback}
 
@@ -17,9 +19,16 @@ module.exports = function($window) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
 	}
 
+	function fail(message) {
+		hookThrown = true
+		hookErrors.push(new Error(message))
+	}
+
 	//sanity check to discourage people from doing `vnode.state = ...`
 	function checkState(vnode, original) {
-		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
+		if (vnode.state !== original) {
+			fail("`vnode.state` must not be modified")
+		}
 	}
 
 	//Note: the hook is passed as the `this` argument to allow proxying the
@@ -30,6 +39,9 @@ module.exports = function($window) {
 		var original = vnode.state
 		try {
 			return this.apply(original, arguments)
+		} catch (e) {
+			hookThrown = true
+			hookErrors.push(e)
 		} finally {
 			checkState(vnode, original)
 		}
@@ -138,8 +150,9 @@ module.exports = function($window) {
 			}
 		}
 	}
-	function initComponent(vnode, hooks) {
-		var sentinel
+	function createComponent(parent, vnode, hooks, ns, nextSibling) {
+		var prevHookThrown = hookThrown, sentinel
+		hookThrown = false
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
 			sentinel = vnode.state.view
@@ -150,24 +163,37 @@ module.exports = function($window) {
 			sentinel = vnode.tag
 			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
-			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
+			try {
+				vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
+			} catch (e) {
+				hookThrown = true
+				hookErrors.push(e)
+			}
 		}
-		initLifecycle(vnode.state, vnode, hooks)
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
-		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		if (!hookThrown) {
+			initLifecycle(vnode.state, vnode, hooks)
+			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
+			if (!hookThrown) {
+				vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+				if (vnode.instance === vnode) fail("A view cannot return the vnode it received as argument")
+				if (!hookThrown) {
+					hookThrown = prevHookThrown
+					sentinel.$$reentrantLock$$ = null
+					if (vnode.instance != null) {
+						createNode(parent, vnode.instance, hooks, ns, nextSibling)
+						vnode.dom = vnode.instance.dom
+						vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+					}
+					else {
+						vnode.domSize = 0
+					}
+					return
+				}
+			}
+		}
 		sentinel.$$reentrantLock$$ = null
-	}
-	function createComponent(parent, vnode, hooks, ns, nextSibling) {
-		initComponent(vnode, hooks)
-		if (vnode.instance != null) {
-			createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
-		}
-		else {
-			vnode.domSize = 0
-		}
+		vnode.domSize = 0
+		vnode.instance = VnodeError
 	}
 
 	//update
@@ -509,25 +535,39 @@ module.exports = function($window) {
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
+		var prevHookThrown = hookThrown
+		hookThrown = false
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
-		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		updateLifecycle(vnode.state, vnode, hooks)
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-		if (vnode.instance != null) {
-			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
-			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.instance.domSize
+		if (vnode.instance === vnode) fail("A view cannot return the vnode it received as argument")
+		if (!hookThrown) {
+			updateLifecycle(vnode.state, vnode, hooks)
+			if (!hookThrown) {
+				if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
+				if (!hookThrown) {
+					hookThrown = prevHookThrown
+					if (vnode.instance != null) {
+						if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
+						else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
+						vnode.dom = vnode.instance.dom
+						vnode.domSize = vnode.instance.domSize
+					}
+					else if (old.instance != null) {
+						removeNode(old.instance)
+						vnode.dom = undefined
+						vnode.domSize = 0
+					}
+					else {
+						vnode.dom = old.dom
+						vnode.domSize = old.domSize
+					}
+					return
+				}
+			}
 		}
-		else if (old.instance != null) {
-			removeNode(old.instance)
-			vnode.dom = undefined
-			vnode.domSize = 0
-		}
-		else {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-		}
+		vnode.dom = undefined
+		vnode.instance = VnodeError
+		// Skip the hooks - it's all busted anyways.
+		removeNodeRaw(old)
 	}
 	function getKeyMap(vnodes, start, end) {
 		var map = Object.create(null)
@@ -619,7 +659,7 @@ module.exports = function($window) {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children != null && children.length !== 0) fail("Child node of a contenteditable must be trusted")
 	}
 
 	//remove
@@ -630,6 +670,7 @@ module.exports = function($window) {
 		}
 	}
 	function removeNode(vnode) {
+		if (vnode.instance === VnodeError) return
 		var expected = 1, called = 0
 		var original = vnode.state
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
@@ -651,13 +692,16 @@ module.exports = function($window) {
 			if (++called === expected) {
 				checkState(vnode, original)
 				onremove(vnode)
-				if (vnode.dom) {
-					var parent = vnode.dom.parentNode
-					var count = vnode.domSize || 1
-					while (--count) parent.removeChild(vnode.dom.nextSibling)
-					parent.removeChild(vnode.dom)
-				}
+				removeNodeRaw(vnode)
 			}
+		}
+	}
+	function removeNodeRaw(vnode) {
+		if (vnode.dom) {
+			var parent = vnode.dom.parentNode
+			var count = vnode.domSize || 1
+			while (--count) parent.removeChild(vnode.dom.nextSibling)
+			parent.removeChild(vnode.dom)
 		}
 	}
 	function onremove(vnode) {
@@ -865,13 +909,14 @@ module.exports = function($window) {
 	}
 	function shouldNotUpdate(vnode, old) {
 		do {
+			if (old.instance === VnodeError) break
 			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
 				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-				if (force !== undefined && !force) break
+				if (hookThrown || force !== undefined && !force) break
 			}
 			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
 				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-				if (force !== undefined && !force) break
+				if (hookThrown || force !== undefined && !force) break
 			}
 			return false
 		} while (false); // eslint-disable-line no-constant-condition
@@ -891,11 +936,26 @@ module.exports = function($window) {
 		if (dom.vnodes == null) dom.textContent = ""
 
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		var prevHookErrors = hookErrors
+		var prevHookThrown = hookThrown
+		hookThrown = false
+		hookErrors = []
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
+		var nextHookThrown = hookThrown
+		var nextHookErrors = hookErrors
+		hookThrown = prevHookThrown
+		hookErrors = prevHookErrors
+		if (nextHookThrown) {
+			var message = "Errors occurred during rendering:"
+			for (var i = 0; i < nextHookErrors.length; i++) message += "\n" + nextHookErrors[i].message
+			var err = new Error(message)
+			err.causes = nextHookErrors
+			throw err
+		}
 	}
 
 	return {render: render, setRedraw: setRedraw}
