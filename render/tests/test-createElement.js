@@ -45,6 +45,13 @@ o.spec("createElement", function() {
 
 		o(vnode.dom.style["--cssVar"]).equals("red")
 	})
+	o("censors cssFloat to float", function() {
+		var vnode = {tag: "a", attrs: {style: {cssFloat: "left"}}}
+
+		render(root, [vnode])
+
+		o(vnode.dom.style.float).equals("left")
+	})
 	o("creates children", function() {
 		var vnode = {tag: "div", children: [{tag: "a"}, {tag: "b"}]}
 		render(root, [vnode])
