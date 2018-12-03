@@ -413,8 +413,8 @@ var coreRenderer = function($window) {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
-	var onevent
-	function setEventCallback(callback) {return onevent = callback}
+	var redraw0
+	function setRedraw(callback) {return redraw0 = callback}
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
 	}
@@ -1204,9 +1204,10 @@ var coreRenderer = function($window) {
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler0 = this["on" + ev.type]
 		var result
-		if (typeof handler0 === "function") result = handler0.call(ev.target, ev)
+		if (typeof handler0 === "function") result = handler0.call(ev.currentTarget, ev)
 		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
-		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (ev.redraw === false) ev.redraw = undefined
+		else if (typeof redraw0 === "function") redraw0()
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
@@ -1268,7 +1269,7 @@ var coreRenderer = function($window) {
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
-	return {render: render, setEventCallback: setEventCallback}
+	return {render: render, setRedraw: setRedraw}
 }
 function throttle(callback) {
 	var pending = null
@@ -1283,10 +1284,6 @@ function throttle(callback) {
 }
 var _12 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
-	renderService.setEventCallback(function(e) {
-		if (e.redraw === false) e.redraw = undefined
-		else redraw()
-	})
 	var callbacks = []
 	var rendering = false
 	function subscribe(key, callback) {
@@ -1305,6 +1302,7 @@ var _12 = function($window, throttleMock) {
 	}
 	var redraw = (throttleMock || throttle)(sync)
 	redraw.sync = sync
+	renderService.setRedraw(redraw)
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
 var redrawService = _12(window)
@@ -1463,9 +1461,9 @@ var _21 = function($window, redrawService0) {
 		function run1() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
-		var redraw2 = function() {
+		var redraw3 = function() {
 			run1()
-			redraw2 = redrawService0.redraw
+			redraw3 = redrawService0.redraw
 		}
 		redrawService0.subscribe(root, run1)
 		var bail = function(path) {
@@ -1478,7 +1476,7 @@ var _21 = function($window, redrawService0) {
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs3 = params, currentPath = path, lastUpdate = null
 				render1 = (routeResolver.render || identity).bind(routeResolver)
-				redraw2()
+				redraw3()
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
