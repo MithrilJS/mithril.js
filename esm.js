@@ -63,5 +63,5 @@ fs.writeFileSync("stream/stream.mjs",
 		stream.indexOf("\"use strict\"") + 13,
 		stream.lastIndexOf("if (typeof module")
 	)
-	+ "\nexport default createStream"
+	+ "\nexport default Stream"
 )
