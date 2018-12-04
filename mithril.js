@@ -1155,36 +1155,45 @@ var coreRenderer = function($window) {
 			// Defer the property check until *after* we check everything.
 		) && key in vnode.dom
 	}
-	var matchUpperCase = /[A-Z]/g
-	function prependDashAndLowerCase(string){
-		return "-" + string.toLowerCase()
-	}
-	function normalizeProp(prop) {
-		return "-" && prop[1] === "-"
-			? prop
-			: prop.replace(matchUpperCase, prependDashAndLowerCase)
-	}
 	//style
+	var uppercaseRegex = /[A-Z]/g
+	function toLowerCase(capital) { return "-" + capital.toLowerCase() }
+	function normalizeKey(key) {
+		return key[0] === "-" && key[1] === "-" ? key :
+			key === "cssFloat" ? "float" :
+				key.replace(uppercaseRegex, toLowerCase)
+	}
 	function updateStyle(element, old, style) {
-		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
+		if (old === style) {
+			// Styles are equivalent, do nothing.
+		} else if (style == null) {
+			// New style is missing, just clear it.
+			element.style.cssText = ""
+		} else if (typeof style !== "object") {
+			// New style is a string, let engine deal with patching.
+			element.style.cssText = style
+		} else if (old == null || typeof old !== "object") {
+			// `old` is missing or a string, `style` is an object.
+			element.style.cssText = ""
+			// Add new style properties
+			for (var key in style) {
+				var value = style[key]
+				if (value != null) element.style.setProperty(normalizeKey(key), String(value))
+			}
+		} else {
 			// Both old & new are (different) objects.
 			// Update style properties that have changed
 			for (var key in style) {
-				if (style[key] !== old[key]) element.style.setProperty(normalizeProp(key), style[key])
+				var value = style[key]
+				if (value != null && (value = String(value)) !== String(old[key])) {
+					element.style.setProperty(normalizeKey(key), value)
+				}
 			}
 			// Remove style properties that no longer exist
 			for (var key in old) {
-				if (!(key in style)) element.style.removeProperty(normalizeProp(key))
-			}
-			return
-		}
-		if (old === style) element.style.cssText = "", old = null
-		if (style == null) element.style.cssText = ""
-		else if (typeof style === "string") element.style.cssText = style
-		else {
-			if (typeof old === "string") element.style.cssText = ""
-			for (var key in style) {
-				element.style.setProperty(normalizeProp(key), style[key])
+				if (old[key] != null && style[key] == null) {
+					element.style.removeProperty(normalizeKey(key))
+				}
 			}
 		}
 	}
@@ -1333,9 +1342,9 @@ var parseQueryString = function(string) {
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key2 = decodeURIComponent(entry[0])
-		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
-		if (value === "true") value = true
-		else if (value === "false") value = false
+		var value0 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		if (value0 === "true") value0 = true
+		else if (value0 === "false") value0 = false
 		var levels = key2.split(/\]\[?|\[/)
 		var cursor = data2
 		if (key2.indexOf("[") > -1) levels.pop()
@@ -1349,7 +1358,7 @@ var parseQueryString = function(string) {
 				level = counters[key2]++
 			}
 			if (cursor[level] == null) {
-				cursor[level] = isValue ? value : isNumber ? [] : {}
+				cursor[level] = isValue ? value0 : isNumber ? [] : {}
 			}
 			cursor = cursor[level]
 		}
