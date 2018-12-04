@@ -148,4 +148,4 @@ function open(s) {
 }
 
 
-export default createStream
+export default Stream
