@@ -9,7 +9,7 @@ module.exports = function() {
 		attrs = {}
 	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
 		attrs = {}
-		start = 1
+		start = 0
 	}
 
 	if (arguments.length === start + 1) {

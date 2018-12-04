@@ -54,5 +54,7 @@ o.spec("fragment", function() {
 
 		o(Array.isArray(frag.children)).equals(true)
 		o(frag.children.length).equals(2)
+		o(frag.children[0].children).equals("A")
+		o(frag.children[1].children).equals("B")
 	})
 })
