@@ -32,4 +32,27 @@ o.spec("fragment", function() {
 
 		o(frag.key).equals(7)
 	})
+	o("attributes are optional", function() {
+		var frag = fragment([])
+		o(frag.tag).equals("[")
+
+		o(Array.isArray(frag.children)).equals(true)
+		o(frag.children.length).equals(0)
+
+		o(frag.attrs).deepEquals({})
+	})
+	o("children are optional", function() {
+		var frag = fragment()
+		o(frag.tag).equals("[")
+
+		o(Array.isArray(frag.children)).equals(true)
+		o(frag.children.length).equals(0)
+	})
+	o("accepts splats", function() {
+		var frag = fragment("A", "B")
+		o(frag.tag).equals("[")
+
+		o(Array.isArray(frag.children)).equals(true)
+		o(frag.children.length).equals(2)
+	})
 })
