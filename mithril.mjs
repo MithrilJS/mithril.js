@@ -1,5 +1,5 @@
-function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
+function Vnode(tag, key, attrs0, children0, text, dom) {
+	return {tag: tag, key: key, attrs: attrs0, children: children0, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -7,11 +7,57 @@ Vnode.normalize = function(node) {
 	return node
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
+	var children0 = []
 	for (var i = 0; i < input.length; i++) {
-		children[i] = Vnode.normalize(input[i])
+		children0[i] = Vnode.normalize(input[i])
 	}
-	return children
+	return children0
+}
+// Call via `hyperscriptVnode0.apply(startOffset, arguments)`
+//
+// The reason I do it this way, forwarding the arguments and passing the start
+// offset in `this`, is so I don't have to create a temporary array in a
+// performance-critical path.
+//
+// In native ES6, I'd instead add a final `...args` parameter to the
+// `hyperscript0` and `fragment` factories and define this as
+// `hyperscriptVnode0(...args)`, since modern engines do optimize that away. But
+// ES5 (what Mithril requires thanks to IE support) doesn't give me that luxury,
+// and engines aren't nearly intelligent enough to do either of these:
+//
+// 1. Elide the allocation for `[].slice.call(arguments, 1)` when it's passed to
+//    another function only to be indexed.
+// 2. Elide an `arguments` allocation when it's passed to any function other
+//    than `Function.prototype.apply` or `Reflect.apply`.
+//
+// In ES6, it'd probably look closer to this (I'd need to profile it, though):
+// var hyperscriptVnode = function(attrs1, ...children1) {
+//     if (attrs1 == null || typeof attrs1 === "object" && attrs1.tag == null && !Array.isArray(attrs1)) {
+//         if (children1.length === 1 && Array.isArray(children1[0])) children1 = children1[0]
+//     } else {
+//         children1 = children1.length === 0 && Array.isArray(attrs1) ? attrs1 : [attrs1, ...children1]
+//         attrs1 = undefined
+//     }
+//
+//     if (attrs1 == null) attrs1 = {}
+//     return Vnode("", attrs1.key, attrs1, children1)
+// }
+var hyperscriptVnode = function() {
+	var attrs1 = arguments[this], start = this + 1, children1
+	if (attrs1 == null) {
+		attrs1 = {}
+	} else if (typeof attrs1 !== "object" || attrs1.tag != null || Array.isArray(attrs1)) {
+		attrs1 = {}
+		start = this
+	}
+	if (arguments.length === start + 1) {
+		children1 = arguments[start]
+		if (!Array.isArray(children1)) children1 = [children1]
+	} else {
+		children1 = []
+		while (start < arguments.length) children1.push(arguments[start++])
+	}
+	return Vnode("", attrs1.key, attrs1, children1)
 }
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
@@ -37,16 +83,18 @@ function compileSelector(selector) {
 	if (classes.length > 0) attrs.className = classes.join(" ")
 	return selectorCache[selector] = {tag: tag, attrs: attrs}
 }
-function execSelector(state, attrs, children) {
-	var hasAttrs = false, childList, text
-	var classAttr = hasOwn.call(attrs, "class") ? "class" : "className"
-	var className = attrs[classAttr]
+function execSelector(state, vnode) {
+	var attrs = vnode.attrs
+	var children = Vnode.normalizeChildren(vnode.children)
+	var hasClass = hasOwn.call(attrs, "class")
+	var className = hasClass ? attrs.class : attrs.className
+	vnode.tag = state.tag
+	vnode.attrs = null
+	vnode.children = undefined
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
-		for(var key in attrs) {
-			if (hasOwn.call(attrs, key)) {
-				newAttrs[key] = attrs[key]
-			}
+		for (var key in attrs) {
+			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
 		}
 		attrs = newAttrs
 	}
@@ -63,50 +111,41 @@ function execSelector(state, attrs, children) {
 			: state.attrs.className != null
 				? state.attrs.className
 				: null
-	if (classAttr === "class") attrs.class = null
+	if (hasClass) attrs.class = null
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
-			hasAttrs = true
+			vnode.attrs = attrs
 			break
 		}
 	}
 	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
-		text = children[0].children
+		vnode.text = children[0].children
 	} else {
-		childList = children
+		vnode.children = children
 	}
-	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : null, childList, text)
+	return vnode
 }
 function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	var attrs = arguments[1], start = 2, children
-	if (attrs == null) {
-		attrs = {}
-	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
-		attrs = {}
-		start = 1
-	}
-	if (arguments.length === start + 1) {
-		children = arguments[start]
-		if (!Array.isArray(children)) children = [children]
-	} else {
-		children = []
-		while (start < arguments.length) children.push(arguments[start++])
-	}
+	var vnode = hyperscriptVnode.apply(1, arguments)
 	if (typeof selector === "string") {
-		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, Vnode.normalizeChildren(children))
+		return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	} else {
-		return Vnode(selector, attrs.key, attrs, children)
+		vnode.tag = selector
+		return vnode
 	}
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
 	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
-hyperscript.fragment = function(attrs1, children0) {
-	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
+hyperscript.fragment = function() {
+	var vnode2 = hyperscriptVnode.apply(0, arguments)
+	vnode2.tag = "["
+	vnode2.children = Vnode.normalizeChildren(vnode2.children)
+	return vnode2
 }
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
@@ -256,7 +295,7 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
-var _9 = function($window, Promise) {
+var _12 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
 	function makeRequest(factory) {
@@ -404,7 +443,7 @@ var _9 = function($window, Promise) {
 		},
 	}
 }
-var requestService = _9(window, PromisePolyfill)
+var requestService = _12(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
 	var nameSpace = {
@@ -413,23 +452,23 @@ var coreRenderer = function($window) {
 	}
 	var redraw0
 	function setRedraw(callback) {return redraw0 = callback}
-	function getNameSpace(vnode) {
-		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	function getNameSpace(vnode3) {
+		return vnode3.attrs && vnode3.attrs.xmlns || nameSpace[vnode3.tag]
 	}
-	//sanity check to discourage people from doing `vnode.state = ...`
-	function checkState(vnode, original) {
-		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
+	//sanity check to discourage people from doing `vnode3.state = ...`
+	function checkState(vnode3, original) {
+		if (vnode3.state !== original) throw new Error("`vnode.state` must not be modified")
 	}
 	//Note: the hook is passed as the `this` argument to allow proxying the
 	//arguments without requiring a full array allocation to do so. It also
-	//takes advantage of the fact the current `vnode` is the first argument in
+	//takes advantage of the fact the current `vnode3` is the first argument in
 	//all lifecycle methods.
-	function callHook(vnode) {
-		var original = vnode.state
+	function callHook(vnode3) {
+		var original = vnode3.state
 		try {
 			return this.apply(original, arguments)
 		} finally {
-			checkState(vnode, original)
+			checkState(vnode3, original)
 		}
 	}
 	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
@@ -444,33 +483,33 @@ var coreRenderer = function($window) {
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
-			var vnode = vnodes[i]
-			if (vnode != null) {
-				createNode(parent, vnode, hooks, ns, nextSibling)
+			var vnode3 = vnodes[i]
+			if (vnode3 != null) {
+				createNode(parent, vnode3, hooks, ns, nextSibling)
 			}
 		}
 	}
-	function createNode(parent, vnode, hooks, ns, nextSibling) {
-		var tag = vnode.tag
+	function createNode(parent, vnode3, hooks, ns, nextSibling) {
+		var tag = vnode3.tag
 		if (typeof tag === "string") {
-			vnode.state = {}
-			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
+			vnode3.state = {}
+			if (vnode3.attrs != null) initLifecycle(vnode3.attrs, vnode3, hooks)
 			switch (tag) {
-				case "#": createText(parent, vnode, nextSibling); break
-				case "<": createHTML(parent, vnode, ns, nextSibling); break
-				case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
-				default: createElement(parent, vnode, hooks, ns, nextSibling)
+				case "#": createText(parent, vnode3, nextSibling); break
+				case "<": createHTML(parent, vnode3, ns, nextSibling); break
+				case "[": createFragment(parent, vnode3, hooks, ns, nextSibling); break
+				default: createElement(parent, vnode3, hooks, ns, nextSibling)
 			}
 		}
-		else createComponent(parent, vnode, hooks, ns, nextSibling)
+		else createComponent(parent, vnode3, hooks, ns, nextSibling)
 	}
-	function createText(parent, vnode, nextSibling) {
-		vnode.dom = $doc.createTextNode(vnode.children)
-		insertNode(parent, vnode.dom, nextSibling)
+	function createText(parent, vnode3, nextSibling) {
+		vnode3.dom = $doc.createTextNode(vnode3.children)
+		insertNode(parent, vnode3.dom, nextSibling)
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
-	function createHTML(parent, vnode, ns, nextSibling) {
-		var match0 = vnode.children.match(/^\s*?<(\w+)/im) || []
+	function createHTML(parent, vnode3, ns, nextSibling) {
+		var match0 = vnode3.children.match(/^\s*?<(\w+)/im) || []
 		// not using the proper parent makes the child element(s) vanish.
 		//     var div = document.createElement("div")
 		//     div.innerHTML = "<td>i</td><td>j</td>"
@@ -478,13 +517,13 @@ var coreRenderer = function($window) {
 		// --> "ij", no <td> in sight.
 		var temp = $doc.createElement(possibleParents[match0[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
-			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
+			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode3.children + "</svg>"
 			temp = temp.firstChild
 		} else {
-			temp.innerHTML = vnode.children
+			temp.innerHTML = vnode3.children
 		}
-		vnode.dom = temp.firstChild
-		vnode.domSize = temp.childNodes.length
+		vnode3.dom = temp.firstChild
+		vnode3.domSize = temp.childNodes.length
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
@@ -492,73 +531,73 @@ var coreRenderer = function($window) {
 		}
 		insertNode(parent, fragment, nextSibling)
 	}
-	function createFragment(parent, vnode, hooks, ns, nextSibling) {
+	function createFragment(parent, vnode3, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
-		if (vnode.children != null) {
-			var children1 = vnode.children
-			createNodes(fragment, children1, 0, children1.length, hooks, null, ns)
+		if (vnode3.children != null) {
+			var children3 = vnode3.children
+			createNodes(fragment, children3, 0, children3.length, hooks, null, ns)
 		}
-		vnode.dom = fragment.firstChild
-		vnode.domSize = fragment.childNodes.length
+		vnode3.dom = fragment.firstChild
+		vnode3.domSize = fragment.childNodes.length
 		insertNode(parent, fragment, nextSibling)
 	}
-	function createElement(parent, vnode, hooks, ns, nextSibling) {
-		var tag = vnode.tag
-		var attrs2 = vnode.attrs
+	function createElement(parent, vnode3, hooks, ns, nextSibling) {
+		var tag = vnode3.tag
+		var attrs2 = vnode3.attrs
 		var is = attrs2 && attrs2.is
-		ns = getNameSpace(vnode) || ns
+		ns = getNameSpace(vnode3) || ns
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
-		vnode.dom = element
+		vnode3.dom = element
 		if (attrs2 != null) {
-			setAttrs(vnode, attrs2, ns)
+			setAttrs(vnode3, attrs2, ns)
 		}
 		insertNode(parent, element, nextSibling)
 		if (attrs2 != null && attrs2.contenteditable != null) {
-			setContentEditable(vnode)
+			setContentEditable(vnode3)
 		}
 		else {
-			if (vnode.text != null) {
-				if (vnode.text !== "") element.textContent = vnode.text
-				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+			if (vnode3.text != null) {
+				if (vnode3.text !== "") element.textContent = vnode3.text
+				else vnode3.children = [Vnode("#", undefined, undefined, vnode3.text, undefined, undefined)]
 			}
-			if (vnode.children != null) {
-				var children1 = vnode.children
-				createNodes(element, children1, 0, children1.length, hooks, null, ns)
-				if (vnode.tag === "select" && attrs2 != null) setLateSelectAttrs(vnode, attrs2)
+			if (vnode3.children != null) {
+				var children3 = vnode3.children
+				createNodes(element, children3, 0, children3.length, hooks, null, ns)
+				if (vnode3.tag === "select" && attrs2 != null) setLateSelectAttrs(vnode3, attrs2)
 			}
 		}
 	}
-	function initComponent(vnode, hooks) {
+	function initComponent(vnode3, hooks) {
 		var sentinel
-		if (typeof vnode.tag.view === "function") {
-			vnode.state = Object.create(vnode.tag)
-			sentinel = vnode.state.view
+		if (typeof vnode3.tag.view === "function") {
+			vnode3.state = Object.create(vnode3.tag)
+			sentinel = vnode3.state.view
 			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 		} else {
-			vnode.state = void 0
-			sentinel = vnode.tag
+			vnode3.state = void 0
+			sentinel = vnode3.tag
 			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
-			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
+			vnode3.state = (vnode3.tag.prototype != null && typeof vnode3.tag.prototype.view === "function") ? new vnode3.tag(vnode3) : vnode3.tag(vnode3)
 		}
-		initLifecycle(vnode.state, vnode, hooks)
-		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
-		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		initLifecycle(vnode3.state, vnode3, hooks)
+		if (vnode3.attrs != null) initLifecycle(vnode3.attrs, vnode3, hooks)
+		vnode3.instance = Vnode.normalize(callHook.call(vnode3.state.view, vnode3))
+		if (vnode3.instance === vnode3) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
-	function createComponent(parent, vnode, hooks, ns, nextSibling) {
-		initComponent(vnode, hooks)
-		if (vnode.instance != null) {
-			createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
+	function createComponent(parent, vnode3, hooks, ns, nextSibling) {
+		initComponent(vnode3, hooks)
+		if (vnode3.instance != null) {
+			createNode(parent, vnode3.instance, hooks, ns, nextSibling)
+			vnode3.dom = vnode3.instance.dom
+			vnode3.domSize = vnode3.dom != null ? vnode3.instance.domSize : 0
 		}
 		else {
-			vnode.domSize = 0
+			vnode3.domSize = 0
 		}
 	}
 	//update
@@ -608,7 +647,7 @@ var coreRenderer = function($window) {
 	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
 	//
 	// To achieve 1) one can create a dictionary of keys => index0 (for the old list), then1 iterate
-	// over the new list and for each new vnode, find the corresponding vnode in the old list using
+	// over the new list and for each new vnode3, find the corresponding vnode3 in the old list using
 	// the map.
 	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
 	// and must be created.
@@ -642,7 +681,7 @@ var coreRenderer = function($window) {
 	//
 	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
 	// When the list is being traversed top-down, at any index0, the DOM nodes up to the previous
-	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
+	// vnode3 reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
 	// list. The next0 sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
 	//
 	// In the other scenarios (swaps, upwards traversal, map-based diff),
@@ -817,108 +856,108 @@ var coreRenderer = function($window) {
 			}
 		}
 	}
-	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
-		var oldTag = old.tag, tag = vnode.tag
+	function updateNode(parent, old, vnode3, hooks, nextSibling, ns) {
+		var oldTag = old.tag, tag = vnode3.tag
 		if (oldTag === tag) {
-			vnode.state = old.state
-			vnode.events = old.events
-			if (shouldNotUpdate(vnode, old)) return
+			vnode3.state = old.state
+			vnode3.events = old.events
+			if (shouldNotUpdate(vnode3, old)) return
 			if (typeof oldTag === "string") {
-				if (vnode.attrs != null) {
-					updateLifecycle(vnode.attrs, vnode, hooks)
+				if (vnode3.attrs != null) {
+					updateLifecycle(vnode3.attrs, vnode3, hooks)
 				}
 				switch (oldTag) {
-					case "#": updateText(old, vnode); break
-					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, hooks, ns)
+					case "#": updateText(old, vnode3); break
+					case "<": updateHTML(parent, old, vnode3, ns, nextSibling); break
+					case "[": updateFragment(parent, old, vnode3, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode3, hooks, ns)
 				}
 			}
-			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
+			else updateComponent(parent, old, vnode3, hooks, nextSibling, ns)
 		}
 		else {
 			removeNode(old)
-			createNode(parent, vnode, hooks, ns, nextSibling)
+			createNode(parent, vnode3, hooks, ns, nextSibling)
 		}
 	}
-	function updateText(old, vnode) {
-		if (old.children.toString() !== vnode.children.toString()) {
-			old.dom.nodeValue = vnode.children
+	function updateText(old, vnode3) {
+		if (old.children.toString() !== vnode3.children.toString()) {
+			old.dom.nodeValue = vnode3.children
 		}
-		vnode.dom = old.dom
+		vnode3.dom = old.dom
 	}
-	function updateHTML(parent, old, vnode, ns, nextSibling) {
-		if (old.children !== vnode.children) {
+	function updateHTML(parent, old, vnode3, ns, nextSibling) {
+		if (old.children !== vnode3.children) {
 			toFragment(old)
-			createHTML(parent, vnode, ns, nextSibling)
+			createHTML(parent, vnode3, ns, nextSibling)
 		}
-		else vnode.dom = old.dom, vnode.domSize = old.domSize
+		else vnode3.dom = old.dom, vnode3.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
-		var domSize = 0, children1 = vnode.children
-		vnode.dom = null
-		if (children1 != null) {
-			for (var i = 0; i < children1.length; i++) {
-				var child = children1[i]
+	function updateFragment(parent, old, vnode3, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode3.children, hooks, nextSibling, ns)
+		var domSize = 0, children3 = vnode3.children
+		vnode3.dom = null
+		if (children3 != null) {
+			for (var i = 0; i < children3.length; i++) {
+				var child = children3[i]
 				if (child != null && child.dom != null) {
-					if (vnode.dom == null) vnode.dom = child.dom
+					if (vnode3.dom == null) vnode3.dom = child.dom
 					domSize += child.domSize || 1
 				}
 			}
-			if (domSize !== 1) vnode.domSize = domSize
+			if (domSize !== 1) vnode3.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, hooks, ns) {
-		var element = vnode.dom = old.dom
-		ns = getNameSpace(vnode) || ns
-		if (vnode.tag === "textarea") {
-			if (vnode.attrs == null) vnode.attrs = {}
-			if (vnode.text != null) {
-				vnode.attrs.value = vnode.text //FIXME handle0 multiple children1
-				vnode.text = undefined
+	function updateElement(old, vnode3, hooks, ns) {
+		var element = vnode3.dom = old.dom
+		ns = getNameSpace(vnode3) || ns
+		if (vnode3.tag === "textarea") {
+			if (vnode3.attrs == null) vnode3.attrs = {}
+			if (vnode3.text != null) {
+				vnode3.attrs.value = vnode3.text //FIXME handle0 multiple children3
+				vnode3.text = undefined
 			}
 		}
-		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
-			setContentEditable(vnode)
+		updateAttrs(vnode3, old.attrs, vnode3.attrs, ns)
+		if (vnode3.attrs != null && vnode3.attrs.contenteditable != null) {
+			setContentEditable(vnode3)
 		}
-		else if (old.text != null && vnode.text != null && vnode.text !== "") {
-			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
+		else if (old.text != null && vnode3.text != null && vnode3.text !== "") {
+			if (old.text.toString() !== vnode3.text.toString()) old.dom.firstChild.nodeValue = vnode3.text
 		}
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			if (vnode3.text != null) vnode3.children = [Vnode("#", undefined, undefined, vnode3.text, undefined, undefined)]
+			updateNodes(element, old.children, vnode3.children, hooks, null, ns)
 		}
 	}
-	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
-		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		updateLifecycle(vnode.state, vnode, hooks)
-		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-		if (vnode.instance != null) {
-			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
-			vnode.dom = vnode.instance.dom
-			vnode.domSize = vnode.instance.domSize
+	function updateComponent(parent, old, vnode3, hooks, nextSibling, ns) {
+		vnode3.instance = Vnode.normalize(callHook.call(vnode3.state.view, vnode3))
+		if (vnode3.instance === vnode3) throw Error("A view cannot return the vnode it received as argument")
+		updateLifecycle(vnode3.state, vnode3, hooks)
+		if (vnode3.attrs != null) updateLifecycle(vnode3.attrs, vnode3, hooks)
+		if (vnode3.instance != null) {
+			if (old.instance == null) createNode(parent, vnode3.instance, hooks, ns, nextSibling)
+			else updateNode(parent, old.instance, vnode3.instance, hooks, nextSibling, ns)
+			vnode3.dom = vnode3.instance.dom
+			vnode3.domSize = vnode3.instance.domSize
 		}
 		else if (old.instance != null) {
 			removeNode(old.instance)
-			vnode.dom = undefined
-			vnode.domSize = 0
+			vnode3.dom = undefined
+			vnode3.domSize = 0
 		}
 		else {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
+			vnode3.dom = old.dom
+			vnode3.domSize = old.domSize
 		}
 	}
 	function getKeyMap(vnodes, start, end) {
 		var map = Object.create(null)
 		for (; start < end; start++) {
-			var vnode = vnodes[start]
-			if (vnode != null) {
-				var key = vnode.key
+			var vnode3 = vnodes[start]
+			if (vnode3 != null) {
+				var key = vnode3.key
 				if (key != null) map[key] = start
 			}
 		}
@@ -971,18 +1010,18 @@ var coreRenderer = function($window) {
 		}
 		return result
 	}
-	function toFragment(vnode) {
-		var count0 = vnode.domSize
-		if (count0 != null || vnode.dom == null) {
+	function toFragment(vnode3) {
+		var count0 = vnode3.domSize
+		if (count0 != null || vnode3.dom == null) {
 			var fragment = $doc.createDocumentFragment()
 			if (count0 > 0) {
-				var dom = vnode.dom
+				var dom = vnode3.dom
 				while (--count0) fragment.appendChild(dom.nextSibling)
 				fragment.insertBefore(dom, fragment.firstChild)
 			}
 			return fragment
 		}
-		else return vnode.dom
+		else return vnode3.dom
 	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
@@ -994,33 +1033,33 @@ var coreRenderer = function($window) {
 		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
-	function setContentEditable(vnode) {
-		var children1 = vnode.children
-		if (children1 != null && children1.length === 1 && children1[0].tag === "<") {
-			var content = children1[0].children
-			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
+	function setContentEditable(vnode3) {
+		var children3 = vnode3.children
+		if (children3 != null && children3.length === 1 && children3[0].tag === "<") {
+			var content = children3[0].children
+			if (vnode3.dom.innerHTML !== content) vnode3.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children1 != null && children1.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode3.text != null || children3 != null && children3.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
 	}
 	//remove
 	function removeNodes(vnodes, start, end) {
 		for (var i = start; i < end; i++) {
-			var vnode = vnodes[i]
-			if (vnode != null) removeNode(vnode)
+			var vnode3 = vnodes[i]
+			if (vnode3 != null) removeNode(vnode3)
 		}
 	}
-	function removeNode(vnode) {
+	function removeNode(vnode3) {
 		var expected = 1, called = 0
-		var original = vnode.state
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode.state.onbeforeremove, vnode)
+		var original = vnode3.state
+		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode3.state.onbeforeremove, vnode3)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
+		if (vnode3.attrs && typeof vnode3.attrs.onbeforeremove === "function") {
+			var result = callHook.call(vnode3.attrs.onbeforeremove, vnode3)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -1029,129 +1068,129 @@ var coreRenderer = function($window) {
 		continuation()
 		function continuation() {
 			if (++called === expected) {
-				checkState(vnode, original)
-				onremove(vnode)
-				if (vnode.dom) {
-					var parent = vnode.dom.parentNode
-					var count0 = vnode.domSize || 1
-					while (--count0) parent.removeChild(vnode.dom.nextSibling)
-					parent.removeChild(vnode.dom)
+				checkState(vnode3, original)
+				onremove(vnode3)
+				if (vnode3.dom) {
+					var parent = vnode3.dom.parentNode
+					var count0 = vnode3.domSize || 1
+					while (--count0) parent.removeChild(vnode3.dom.nextSibling)
+					parent.removeChild(vnode3.dom)
 				}
 			}
 		}
 	}
-	function onremove(vnode) {
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
-		if (typeof vnode.tag !== "string") {
-			if (vnode.instance != null) onremove(vnode.instance)
+	function onremove(vnode3) {
+		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onremove === "function") callHook.call(vnode3.state.onremove, vnode3)
+		if (vnode3.attrs && typeof vnode3.attrs.onremove === "function") callHook.call(vnode3.attrs.onremove, vnode3)
+		if (typeof vnode3.tag !== "string") {
+			if (vnode3.instance != null) onremove(vnode3.instance)
 		} else {
-			var children1 = vnode.children
-			if (Array.isArray(children1)) {
-				for (var i = 0; i < children1.length; i++) {
-					var child = children1[i]
+			var children3 = vnode3.children
+			if (Array.isArray(children3)) {
+				for (var i = 0; i < children3.length; i++) {
+					var child = children3[i]
 					if (child != null) onremove(child)
 				}
 			}
 		}
 	}
 	//attrs2
-	function setAttrs(vnode, attrs2, ns) {
+	function setAttrs(vnode3, attrs2, ns) {
 		for (var key in attrs2) {
-			setAttr(vnode, key, null, attrs2[key], ns)
+			setAttr(vnode3, key, null, attrs2[key], ns)
 		}
 	}
-	function setAttr(vnode, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
-		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
-		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
-		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (hasPropertyKey(vnode, key, ns)) {
+	function setAttr(vnode3, key, old, value, ns) {
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object") return
+		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode3, key, value)
+		if (key.slice(0, 6) === "xlink:") vnode3.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
+		else if (key === "style") updateStyle(vnode3.dom, old, value)
+		else if (hasPropertyKey(vnode3, key, ns)) {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === activeElement()) return
+				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && vnode3.dom === activeElement()) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
+				if (vnode3.tag === "select" && old !== null && vnode3.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
+				if (vnode3.tag === "option" && old !== null && vnode3.dom.value === "" + value) return
 				/* eslint-enable no-implicit-coercion */
 			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
-			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
-			else vnode.dom[key] = value
+			if (vnode3.tag === "input" && key === "type") vnode3.dom.setAttribute(key, value)
+			else vnode3.dom[key] = value
 		} else {
 			if (typeof value === "boolean") {
-				if (value) vnode.dom.setAttribute(key, "")
-				else vnode.dom.removeAttribute(key)
+				if (value) vnode3.dom.setAttribute(key, "")
+				else vnode3.dom.removeAttribute(key)
 			}
-			else vnode.dom.setAttribute(key === "className" ? "class" : key, value)
+			else vnode3.dom.setAttribute(key === "className" ? "class" : key, value)
 		}
 	}
-	function removeAttr(vnode, key, old, ns) {
+	function removeAttr(vnode3, key, old, ns) {
 		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
-		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
-		else if (key === "style") updateStyle(vnode.dom, old, null)
+		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode3, key, undefined)
+		else if (key === "style") updateStyle(vnode3.dom, old, null)
 		else if (
-			hasPropertyKey(vnode, key, ns)
+			hasPropertyKey(vnode3, key, ns)
 			&& key !== "className"
 			&& !(key === "value" && (
-				vnode.tag === "option"
-				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()
+				vnode3.tag === "option"
+				|| vnode3.tag === "select" && vnode3.dom.selectedIndex === -1 && vnode3.dom === activeElement()
 			))
-			&& !(vnode.tag === "input" && key === "type")
+			&& !(vnode3.tag === "input" && key === "type")
 		) {
-			vnode.dom[key] = null
+			vnode3.dom[key] = null
 		} else {
 			var nsLastIndex = key.indexOf(":")
 			if (nsLastIndex !== -1) key = key.slice(nsLastIndex + 1)
-			if (old !== false) vnode.dom.removeAttribute(key === "className" ? "class" : key)
+			if (old !== false) vnode3.dom.removeAttribute(key === "className" ? "class" : key)
 		}
 	}
-	function setLateSelectAttrs(vnode, attrs2) {
+	function setLateSelectAttrs(vnode3, attrs2) {
 		if ("value" in attrs2) {
 			if(attrs2.value === null) {
-				if (vnode.dom.selectedIndex !== -1) vnode.dom.value = null
+				if (vnode3.dom.selectedIndex !== -1) vnode3.dom.value = null
 			} else {
 				var normalized = "" + attrs2.value // eslint-disable-line no-implicit-coercion
-				if (vnode.dom.value !== normalized || vnode.dom.selectedIndex === -1) {
-					vnode.dom.value = normalized
+				if (vnode3.dom.value !== normalized || vnode3.dom.selectedIndex === -1) {
+					vnode3.dom.value = normalized
 				}
 			}
 		}
-		if ("selectedIndex" in attrs2) setAttr(vnode, "selectedIndex", null, attrs2.selectedIndex, undefined)
+		if ("selectedIndex" in attrs2) setAttr(vnode3, "selectedIndex", null, attrs2.selectedIndex, undefined)
 	}
-	function updateAttrs(vnode, old, attrs2, ns) {
+	function updateAttrs(vnode3, old, attrs2, ns) {
 		if (attrs2 != null) {
 			for (var key in attrs2) {
-				setAttr(vnode, key, old && old[key], attrs2[key], ns)
+				setAttr(vnode3, key, old && old[key], attrs2[key], ns)
 			}
 		}
 		var val
 		if (old != null) {
 			for (var key in old) {
 				if (((val = old[key]) != null) && (attrs2 == null || attrs2[key] == null)) {
-					removeAttr(vnode, key, val, ns)
+					removeAttr(vnode3, key, val, ns)
 				}
 			}
 		}
 	}
-	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement() || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
+	function isFormAttribute(vnode3, attr) {
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode3.dom === activeElement() || vnode3.tag === "option" && vnode3.dom.parentNode === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function hasPropertyKey(vnode, key, ns) {
+	function hasPropertyKey(vnode3, key, ns) {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
-			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			vnode3.tag.indexOf("-") > -1 || vnode3.attrs != null && vnode3.attrs.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
 			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
 			// Defer the property check until *after* we check everything.
-		) && key in vnode.dom
+		) && key in vnode3.dom
 	}
 	//style
 	var uppercaseRegex = /[A-Z]/g
@@ -1221,45 +1260,45 @@ var coreRenderer = function($window) {
 		}
 	}
 	//event
-	function updateEvent(vnode, key, value) {
-		if (vnode.events != null) {
-			if (vnode.events[key] === value) return
+	function updateEvent(vnode3, key, value) {
+		if (vnode3.events != null) {
+			if (vnode3.events[key] === value) return
 			if (value != null && (typeof value === "function" || typeof value === "object")) {
-				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
-				vnode.events[key] = value
+				if (vnode3.events[key] == null) vnode3.dom.addEventListener(key.slice(2), vnode3.events, false)
+				vnode3.events[key] = value
 			} else {
-				if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
-				vnode.events[key] = undefined
+				if (vnode3.events[key] != null) vnode3.dom.removeEventListener(key.slice(2), vnode3.events, false)
+				vnode3.events[key] = undefined
 			}
 		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
-			vnode.events = new EventDict()
-			vnode.dom.addEventListener(key.slice(2), vnode.events, false)
-			vnode.events[key] = value
+			vnode3.events = new EventDict()
+			vnode3.dom.addEventListener(key.slice(2), vnode3.events, false)
+			vnode3.events[key] = value
 		}
 	}
 	//lifecycle
-	function initLifecycle(source, vnode, hooks) {
-		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
-		if (typeof source.oncreate === "function") hooks.push(callHook.bind(source.oncreate, vnode))
+	function initLifecycle(source, vnode3, hooks) {
+		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode3)
+		if (typeof source.oncreate === "function") hooks.push(callHook.bind(source.oncreate, vnode3))
 	}
-	function updateLifecycle(source, vnode, hooks) {
-		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
+	function updateLifecycle(source, vnode3, hooks) {
+		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode3))
 	}
-	function shouldNotUpdate(vnode, old) {
+	function shouldNotUpdate(vnode3, old) {
 		do {
-			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+			if (vnode3.attrs != null && typeof vnode3.attrs.onbeforeupdate === "function") {
+				var force = callHook.call(vnode3.attrs.onbeforeupdate, vnode3, old)
 				if (force !== undefined && !force) break
 			}
-			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+			if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeupdate === "function") {
+				var force = callHook.call(vnode3.state.onbeforeupdate, vnode3, old)
 				if (force !== undefined && !force) break
 			}
 			return false
 		} while (false); // eslint-disable-line no-constant-condition
-		vnode.dom = old.dom
-		vnode.domSize = old.domSize
-		vnode.instance = old.instance
+		vnode3.dom = old.dom
+		vnode3.domSize = old.domSize
+		vnode3.instance = old.instance
 		return true
 	}
 	function render(dom, vnodes) {
@@ -1289,7 +1328,7 @@ function throttle(callback) {
 		}
 	}
 }
-var _12 = function($window, throttleMock) {
+var _15 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
 	var callbacks = []
 	var rendering = false
@@ -1312,9 +1351,9 @@ var _12 = function($window, throttleMock) {
 	renderService.setRedraw(redraw)
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
-var redrawService = _12(window)
+var redrawService = _15(window)
 requestService.setCompletionCallback(redrawService.redraw)
-var _17 = function(redrawService0) {
+var _20 = function(redrawService0) {
 	return function(root, component) {
 		if (component === null) {
 			redrawService0.render(root, [])
@@ -1331,7 +1370,7 @@ var _17 = function(redrawService0) {
 		run0()
 	}
 }
-m.mount = _17(redrawService)
+m.mount = _20(redrawService)
 var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1459,7 +1498,7 @@ var coreRouter = function($window) {
 	}
 	return router
 }
-var _21 = function($window, redrawService0) {
+var _24 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v0) {return v0}
 	var render1, component, attrs3, currentPath, lastUpdate
@@ -1506,9 +1545,9 @@ var _21 = function($window, redrawService0) {
 	}
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix) {routeService.prefix = prefix}
-	var link = function(options, vnode1) {
-		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
-		vnode1.dom.onclick = function(e) {
+	var link = function(options, vnode5) {
+		vnode5.dom.setAttribute("href", routeService.prefix + vnode5.attrs.href)
+		vnode5.dom.onclick = function(e) {
 			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
 			e.preventDefault()
 			e.redraw = false
@@ -1527,9 +1566,9 @@ var _21 = function($window, redrawService0) {
 	}
 	return route
 }
-m.route = _21(window, redrawService)
-var _28 = coreRenderer(window)
-m.render = _28.render
+m.route = _24(window, redrawService)
+var _31 = coreRenderer(window)
+m.render = _31.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
