@@ -54,6 +54,7 @@
     - All of the `m.*` properties from `mithril` are re-exported as named exports in addition to being attached to `m`.
     - `m()` itself from `mithril` is exported as the default export.
     - `mithril/stream`'s primary export is exported as the default export.
+- fragments: allow same attrs/children overloading logic as hyperscript ([#2328](https://github.com/MithrilJS/mithril.js/pull/2328))
 
 #### Bug fixes
 
