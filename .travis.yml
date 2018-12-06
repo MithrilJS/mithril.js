@@ -86,6 +86,8 @@ deploy:
     file:
       - "mithril.js"
       - "mithril.min.js"
+      - "mithril.mjs"
+      - "mithril.min.mjs"
     skip_cleanup: true
     on:
       tags: true
