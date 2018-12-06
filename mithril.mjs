@@ -1574,7 +1574,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "2.0.0-rc.2"
+m.version = "2.0.0-rc.3"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 
