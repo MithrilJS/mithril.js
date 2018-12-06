@@ -37,7 +37,7 @@ o.spec("test-utils/components", function() {
 				if (component.kind !== "constructible") {
 					o(cmp2).deepEquals(methods)
 				} else {
-          // deepEquals doesn't search the prototype, do it manually
+					// deepEquals doesn't search the prototype, do it manually
 					o(cmp2 != null).equals(true)
 					o(cmp2.view).equals(methods.view)
 					o(cmp2.oninit).equals(methods.oninit)

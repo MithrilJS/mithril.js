@@ -699,13 +699,23 @@ o.spec("component", function() {
 						"onupdate", "onbeforeremove", "onremove"
 					]
 					hooks.forEach(function(hook) {
-						// the `attrs` hooks are called before  the component ones
-						attrs[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount + 1)
-						})
-						methods[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount)
-						})
+						if (hook === "onbeforeupdate") {
+							// the component's `onbeforeupdate` is called after the `attrs`' one
+							attrs[hook] = o.spy(function() {
+								o(attrs[hook].callCount).equals(methods[hook].callCount + 1)(hook)
+							})
+							methods[hook] = o.spy(function() {
+								o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+							})
+						} else {
+							// the other component hooks are called before the `attrs` ones
+							methods[hook] = o.spy(function() {
+								o(attrs[hook].callCount).equals(methods[hook].callCount - 1)(hook)
+							})
+							attrs[hook] = o.spy(function() {
+								o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+							})
+						}
 					})
 
 					var component = createComponent(methods)

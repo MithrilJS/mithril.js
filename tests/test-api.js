@@ -24,7 +24,7 @@ o.spec("api", function() {
 		o("works", function() {
 			o(typeof m.version).equals("string")
 			o(m.version.indexOf(".") > -1).equals(true)
-			o(/\d/.test(m.version)).equals(true)
+			o((/\d/).test(m.version)).equals(true)
 		})
 	})
 	o.spec("m.trust", function() {
@@ -43,16 +43,6 @@ o.spec("api", function() {
 			o(vnode.key).equals(123)
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0].tag).equals("div")
-		})
-	})
-	o.spec("m.withAttr", function() {
-		o("works", function() {
-			var spy = o.spy()
-			var handler = m.withAttr("value", spy)
-
-			handler({currentTarget: {value: 10}})
-
-			o(spy.args[0]).equals(10)
 		})
 	})
 	o.spec("m.parseQueryString", function() {

@@ -31,7 +31,7 @@ o.spec("scan", function() {
 		o(result[3]).deepEquals({a: 1})
 	})
 
-	o("reducer can return HALT to prevent child updates", function() {
+	o("reducer can return SKIP to prevent child updates", function() {
 		var count = 0
 		var action = stream()
 		var store = stream.scan(function (arr, value) {
@@ -39,7 +39,7 @@ o.spec("scan", function() {
 				case "number":
 					return arr.concat(value)
 				default:
-					return stream.HALT
+					return stream.SKIP
 			}
 		}, [], action)
 		var child = store.map(function (p) {

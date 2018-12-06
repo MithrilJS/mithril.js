@@ -121,48 +121,6 @@ var querystring = m.buildQueryString({a: "1", b: "2"})
 
 ---
 
-#### m.withAttr(attrName, callback) - [docs](withAttr.md)
-
-```javascript
-var state = {
-	value: "",
-	setValue: function(v) {state.value = v}
-}
-
-var Component = {
-	view: function() {
-		return m("input", {
-			oninput: m.withAttr("value", state.setValue),
-			value: state.value,
-		})
-	}
-}
-
-m.mount(document.body, Component)
-```
-
----
-
-#### m.prop(initial) - [docs](prop.md)
-
-```javascript
-var Component = {
-	oninit: function(vnode) {
-		vnode.state.current = m.prop("")
-	},
-	view: function(vnode) {
-		return m("input", {
-			oninput: function(ev) { vnode.state.current.set(ev.target.value) },
-			value: vnode.state.current.get(),
-		})
-	}
-}
-
-m.mount(document.body, Component)
-```
-
----
-
 #### m.trust(htmlString) - [docs](trust.md)
 
 ```javascript

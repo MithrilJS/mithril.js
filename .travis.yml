@@ -21,6 +21,8 @@ before_script:
 - npm run build-browser
 # Pass -save so it'll update the readme as well
 - npm run build-min -- -save
+# must run after build-min in order to generate min.mjs
+- npm run build-esm
 
 # Run tests, lint, and then check for perf regressions
 script:

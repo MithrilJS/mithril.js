@@ -7,7 +7,8 @@
 		- [Stream.merge](#streammerge)
 		- [Stream.scan](#streamscan)
 		- [Stream.scanMerge](#streamscanmerge)
-		- [Stream.HALT](#streamhalt)
+		- [Stream.lift](#streamlift)
+		- [Stream.SKIP](#streamskip)
 		- [Stream["fantasy-land/of"]](#streamfantasy-landof)
 	- [Instance members](#instance-members)
 		- [stream.map](#streammap)
@@ -120,13 +121,13 @@ Argument     | Type                 | Required | Description
 
 Creates a new stream with the results of calling the function on every value in the stream with an accumulator and the incoming value.
 
-Note that you can prevent dependent streams from being updated by returning the special value `stream.HALT` inside the accumulator function.
+Note that you can prevent dependent streams from being updated by returning the special value `stream.SKIP` inside the accumulator function.
 
 `stream = Stream.scan(fn, accumulator, stream)`
 
 Argument      | Type                             | Required | Description
 ------------- | -------------------------------- | -------- | ---
-`fn`          | `(accumulator, value) -> result \| HALT` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value
+`fn`          | `(accumulator, value) -> result \| SKIP` | Yes      | A function that takes an accumulator and value parameter and returns a new accumulator value of the same type
 `accumulator` | `any`                            | Yes      | The starting value for the accumulator
 `stream`      | `Stream`                         | Yes      | Stream containing the values
 **returns**   | `Stream`                         |          | Returns a new stream containing the result
@@ -151,9 +152,40 @@ Argument      | Type                                             | Required | De
 
 ---
 
-##### Stream.HALT
+##### Stream.lift
 
-A special value that can be returned to stream callbacks to halt execution of downstreams
+Creates a computed stream that reactively updates if any of its upstreams are updated. See [combining streams](#combining-streams). Unlike `combine`, the input streams are a variable number of arguments (instead of an array) and the callback receives the stream values instead of streams. There is no `changed` parameter. This is generally a more user-friendly function for applications than `combine`.
+
+`stream = Stream.lift(lifter, stream1, stream2, ...)`
+
+Argument     | Type                        | Required | Description
+------------ | --------------------------- | -------- | ---
+`lifter`     | `(any...) -> any` | Yes     | See [lifter](#lifter) argument
+`streams...` | list of `Streams`           | Yes      | Streams to be lifted
+**returns**  | `Stream`                    |          | Returns a stream
+
+[How to read signatures](signatures.md)
+
+---
+
+###### lifter
+
+Specifies how the value of a computed stream is generated. See [combining streams](#combining-streams)
+
+`any = lifter(streams...)`
+
+Argument     | Type                 | Required | Description
+------------ | -------------------- | -------- | ---
+`streams...` | splat of `Streams`   | No       | Splat of zero or more streams that correspond to the streams passed to [`stream.lift`](#stream-lift)
+**returns**  | `any`                |          | Returns a computed value
+
+[How to read signatures](signatures.md)
+
+---
+
+##### Stream.SKIP
+
+A special value that can be returned to stream callbacks to skip execution of downstreams
 
 ---
 
@@ -274,7 +306,7 @@ In the example above, the `users` stream is populated with the response data whe
 
 #### Bidirectional bindings
 
-Streams can also be populated from other higher order functions, such as [`m.withAttr`](withAttr.md)
+Streams can also be populated from event callbacks and similar.
 
 ```javascript
 // a stream
@@ -282,7 +314,7 @@ var user = stream("")
 
 // a bi-directional binding to the stream
 m("input", {
-	oninput: m.withAttr("value", user),
+	oninput: function (e) { user(e.target.value) },
 	value: user()
 })
 ```
@@ -343,14 +375,14 @@ console.log(doubled()) // logs 2
 
 Dependent streams are *reactive*: their values are updated any time the value of their parent stream is updated. This happens regardless of whether the dependent stream was created before or after the value of the parent stream was set.
 
-You can prevent dependent streams from being updated by returning the special value `stream.HALT`
+You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
 ```javascript
-var halted = stream(1).map(function(value) {
-	return stream.HALT
+var skipped = stream(1).map(function(value) {
+	return stream.SKIP
 })
 
-halted.map(function() {
+skipped.map(function() {
 	// never runs
 })
 ```
@@ -372,6 +404,18 @@ var greeting = stream.merge([a, b]).map(function(values) {
 console.log(greeting()) // logs "hello world"
 ```
 
+Or you can use the helper function `stream.lift()`
+
+```javascript
+var a = stream("hello")
+var b = stream("world")
+
+var greeting = stream.lift(function(_a, _b) {
+	return _a + " " + _b
+}, a, b)
+
+console.log(greeting()) // logs "hello world"
+```
 
 There's also a lower level method called `stream.combine()` that exposes the stream themselves in the reactive computations for more advanced use cases
 
@@ -388,14 +432,14 @@ console.log(added()) // logs 12
 
 A stream can depend on any number of streams and it's guaranteed to update atomically. For example, if a stream A has two dependent streams B and C, and a fourth stream D is dependent on both B and C, the stream D will only update once if the value of A changes. This guarantees that the callback for stream D is never called with unstable values such as when B has a new value but C has the old value. Atomicity also brings the performance benefits of not recomputing downstreams unnecessarily.
 
-You can prevent dependent streams from being updated by returning the special value `stream.HALT`
+You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
 ```javascript
-var halted = stream.combine(function(stream) {
-	return stream.HALT
+var skipped = stream.combine(function(stream) {
+	return stream.SKIP
 }, [stream(1)])
 
-halted.map(function() {
+skipped.map(function() {
 	// never runs
 })
 ```

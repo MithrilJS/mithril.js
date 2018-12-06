@@ -30,6 +30,43 @@ o.spec("stream", function() {
 
 			o(stream()()).equals(1)
 		})
+		o("can SKIP", function() {
+			var a = Stream(2)
+			var b = a.map(function(value) {
+				return value === 5
+					? Stream.SKIP
+					: value
+			})
+
+			a(5)
+
+			o(b()).equals(2)
+		})
+		o("can HALT", function() {
+			var a = Stream(2)
+			var b = a.map(function(value) {
+				return value === 5
+					? Stream.HALT
+					: value
+			})
+
+			a(5)
+
+			o(b()).equals(2)
+		})
+		o("warns HALT deprecated", function() {
+			var log = console.log
+			var warning = ""
+			console.log = function(a) {
+				warning = a
+			}
+
+			Stream.HALT
+
+			console.log = log
+
+			o(warning).equals("HALT is deprecated and has been renamed to SKIP")
+		})
 	})
 	o.spec("combine", function() {
 		o("transforms value", function() {
@@ -87,6 +124,7 @@ o.spec("stream", function() {
 			o(d()).equals(15)
 			o(count).equals(1)
 		})
+
 		o("combines default value atomically", function() {
 			var count = 0
 			var a = Stream(3)
@@ -100,6 +138,21 @@ o.spec("stream", function() {
 			o(d()).equals(15)
 			o(count).equals(1)
 		})
+		o("combines and maps nested streams atomically", function() {
+			var count = 0
+			var a = Stream(3)
+			var b = Stream.combine(function(a) {return a() * 2}, [a])
+			var c = Stream.combine(function(a) {return a() * a()}, [a])
+			var d = c.map(function(x){return x})
+			var e = Stream.combine(function(x) {return x()}, [d])
+			var f = Stream.combine(function(b, e) {
+				count++
+				return b() + e()
+			}, [b, e])
+
+			o(f()).equals(15)
+			o(count).equals(1)
+		})
 		o("combine lists only changed upstreams in last arg", function() {
 			var streams = []
 			var a = Stream()
@@ -111,8 +164,22 @@ o.spec("stream", function() {
 			a(3)
 			b(5)
 
-			o(streams.length).equals(1)
-			o(streams[0]).equals(b)
+			o(streams.length).equals(2)
+			o(streams[0]).equals(a)
+			o(streams[1]).equals(b)
+		})
+		o("combine continues with ended streams", function() {
+			var a = Stream()
+			var b = Stream()
+			var combined = Stream.combine(function(a, b) {
+				return a() + b()
+			}, [a, b])
+
+			a(3)
+			a.end(true)
+			b(5)
+
+			o(combined()).equals(8)
 		})
 		o("combine lists only changed upstreams in last arg with default value", function() {
 			var streams = []
@@ -151,11 +218,11 @@ o.spec("stream", function() {
 
 			o(b()()).equals(undefined)
 		})
-		o("combine can halt", function() {
+		o("combine can skip", function() {
 			var count = 0
 			var a = Stream(1)
 			var b = Stream.combine(function() {
-				return Stream.HALT
+				return Stream.SKIP
 			}, [a])["fantasy-land/map"](function() {
 				count++
 				return 1
@@ -164,13 +231,13 @@ o.spec("stream", function() {
 			o(b()).equals(undefined)
 			o(count).equals(0)
 		})
-		o("combine can conditionaly halt", function() {
+		o("combine can conditionaly skip", function() {
 			var count = 0
-			var halt = false
+			var skip = false
 			var a = Stream(1)
 			var b = Stream.combine(function(a) {
-				if (halt) {
-					return Stream.HALT
+				if (skip) {
+					return Stream.SKIP
 				}
 				return a()
 			}, [a])["fantasy-land/map"](function(a) {
@@ -179,7 +246,7 @@ o.spec("stream", function() {
 			})
 			o(b()).equals(1)
 			o(count).equals(1)
-			halt = true
+			skip = true
 			count = 0
 			a(2)
 			o(b()).equals(1)
@@ -191,6 +258,127 @@ o.spec("stream", function() {
 			var thrown = null;
 			try {
 				Stream.combine(spy, [a, ""])
+			} catch (e) {
+				thrown = e
+			}
+
+			o(thrown).notEquals(null)
+			o(thrown.constructor === TypeError).equals(false)
+			o(spy.callCount).equals(0)
+		})
+	})
+	o.spec("lift", function() {
+		o("transforms value", function() {
+			var stream = Stream()
+			var doubled = Stream.lift(function(s) {return s * 2}, stream)
+
+			stream(2)
+
+			o(doubled()).equals(4)
+		})
+		o("transforms default value", function() {
+			var stream = Stream(2)
+			var doubled = Stream.lift(function(s) {return s * 2}, stream)
+
+			o(doubled()).equals(4)
+		})
+		o("transforms multiple values", function() {
+			var s1 = Stream()
+			var s2 = Stream()
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			s1(2)
+			s2(3)
+
+			o(added()).equals(5)
+		})
+		o("transforms multiple default values", function() {
+			var s1 = Stream(2)
+			var s2 = Stream(3)
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			o(added()).equals(5)
+		})
+		o("transforms mixed default and late-bound values", function() {
+			var s1 = Stream(2)
+			var s2 = Stream()
+			var added = Stream.lift(function(s1, s2) {return s1 + s2}, s1, s2)
+
+			s2(3)
+
+			o(added()).equals(5)
+		})
+		o("lifts atomically", function() {
+			var count = 0
+			var a = Stream()
+			var b = Stream.lift(function(a) {return a * 2}, a)
+			var c = Stream.lift(function(a) {return a * a}, a)
+			var d = Stream.lift(function(b, c) {
+				count++
+				return b + c
+			}, b, c)
+
+			a(3)
+
+			o(d()).equals(15)
+			o(count).equals(1)
+		})
+		o("lifts default value atomically", function() {
+			var count = 0
+			var a = Stream(3)
+			var b = Stream.lift(function(a) {return a * 2}, a)
+			var c = Stream.lift(function(a) {return a * a}, a)
+			var d = Stream.lift(function(b, c) {
+				count++
+				return b + c
+			}, b, c)
+
+			o(d()).equals(15)
+			o(count).equals(1)
+		})
+		o("lift can return undefined", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return undefined
+			}, a)
+
+			o(b()).equals(undefined)
+		})
+		o("lift can return stream", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream(2)
+			}, a)
+
+			o(b()()).equals(2)
+		})
+		o("lift can return pending stream", function() {
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream()
+			}, a)
+
+			o(b()()).equals(undefined)
+		})
+		o("lift can halt", function() {
+			var count = 0
+			var a = Stream(1)
+			var b = Stream.lift(function() {
+				return Stream.HALT
+			}, a)["fantasy-land/map"](function() {
+				count++
+				return 1
+			})
+
+			o(b()).equals(undefined)
+			o(count).equals(0)
+		})
+		o("lift will throw with a helpful error if given non-stream values", function () {
+			var spy = o.spy()
+			var a = Stream(1)
+			var thrown = null;
+			try {
+				Stream.lift(spy, a, "")
 			} catch (e) {
 				thrown = e
 			}
@@ -433,7 +621,7 @@ o.spec("stream", function() {
 		})
 		o.spec("applicative", function() {
 			o("identity", function() {
-				var a = Stream()["fantasy-land/of"](function(value) {return value})
+				var a = Stream["fantasy-land/of"](function(value) {return value})
 				var v = Stream(5)
 
 				o(v["fantasy-land/ap"](a)()).equals(5)
@@ -444,16 +632,16 @@ o.spec("stream", function() {
 				var f = function(value) {return value * 2}
 				var x = 3
 
-				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(6)
-				o(a["fantasy-land/of"](x)["fantasy-land/ap"](a["fantasy-land/of"](f))()).equals(a["fantasy-land/of"](f(x))())
+				o(a.constructor["fantasy-land/of"](x)["fantasy-land/ap"](a.constructor["fantasy-land/of"](f))()).equals(6)
+				o(a.constructor["fantasy-land/of"](x)["fantasy-land/ap"](a.constructor["fantasy-land/of"](f))()).equals(a.constructor["fantasy-land/of"](f(x))())
 			})
 			o("interchange", function() {
 				var u = Stream(function(value) {return value * 2})
 				var a = Stream()
 				var y = 3
 
-				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(6)
-				o(a["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(u["fantasy-land/ap"](a["fantasy-land/of"](function(f) {return f(y)}))())
+				o(a.constructor["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(6)
+				o(a.constructor["fantasy-land/of"](y)["fantasy-land/ap"](u)()).equals(u["fantasy-land/ap"](a.constructor["fantasy-land/of"](function(f) {return f(y)}))())
 			})
 		})
 	})

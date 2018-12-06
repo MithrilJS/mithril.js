@@ -186,7 +186,7 @@ o.spec("onbeforeupdate", function() {
 				o(root.firstChild.attributes["id"].value).equals("b")
 			})
 
-			o("does not prevent update if returning false in component but true in vnode", function() {
+			o("prevents update if returning false in component but true in vnode", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
@@ -199,10 +199,10 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].value).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("a")
 			})
 
-			o("does not prevent update if returning true in component but false in vnode", function() {
+			o("prevents update if returning true in component but false in vnode", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
@@ -215,7 +215,7 @@ o.spec("onbeforeupdate", function() {
 				render(root, [vnode])
 				render(root, [updated])
 
-				o(root.firstChild.attributes["id"].value).equals("b")
+				o(root.firstChild.attributes["id"].value).equals("a")
 			})
 
 			o("does not prevent update if returning true from component", function() {

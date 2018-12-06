@@ -1,6 +1,7 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
+var hyperscriptVnode = require("./hyperscriptVnode")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
@@ -29,18 +30,21 @@ function compileSelector(selector) {
 	return selectorCache[selector] = {tag: tag, attrs: attrs}
 }
 
-function execSelector(state, attrs, children) {
-	var hasAttrs = false, childList, text
-	var classAttr = hasOwn.call(attrs, "class") ? "class" : "className"
-	var className = attrs[classAttr]
+function execSelector(state, vnode) {
+	var attrs = vnode.attrs
+	var children = Vnode.normalizeChildren(vnode.children)
+	var hasClass = hasOwn.call(attrs, "class")
+	var className = hasClass ? attrs.class : attrs.className
+
+	vnode.tag = state.tag
+	vnode.attrs = null
+	vnode.children = undefined
 
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
 
-		for(var key in attrs) {
-			if (hasOwn.call(attrs, key)) {
-				newAttrs[key] = attrs[key]
-			}
+		for (var key in attrs) {
+			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
 		}
 
 		attrs = newAttrs
@@ -54,28 +58,28 @@ function execSelector(state, attrs, children) {
 	if (className != null || state.attrs.className != null) attrs.className =
 		className != null
 			? state.attrs.className != null
-				? state.attrs.className + " " + className
+				? String(state.attrs.className) + " " + String(className)
 				: className
 			: state.attrs.className != null
 				? state.attrs.className
 				: null
 
-	if (classAttr === "class") attrs.class = null
+	if (hasClass) attrs.class = null
 
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
-			hasAttrs = true
+			vnode.attrs = attrs
 			break
 		}
 	}
 
 	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
-		text = children[0].children
+		vnode.text = children[0].children
 	} else {
-		childList = children
+		vnode.children = children
 	}
 
-	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : null, childList, text)
+	return vnode
 }
 
 function hyperscript(selector) {
@@ -83,27 +87,13 @@ function hyperscript(selector) {
 		throw Error("The selector must be either a string or a component.");
 	}
 
-	var attrs = arguments[1], start = 2, children
-
-	if (attrs == null) {
-		attrs = {}
-	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
-		attrs = {}
-		start = 1
-	}
-
-	if (arguments.length === start + 1) {
-		children = arguments[start]
-		if (!Array.isArray(children)) children = [children]
-	} else {
-		children = []
-		while (start < arguments.length) children.push(arguments[start++])
-	}
+	var vnode = hyperscriptVnode.apply(1, arguments)
 
 	if (typeof selector === "string") {
-		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, Vnode.normalizeChildren(children))
+		return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	} else {
-		return Vnode(selector, attrs.key, attrs, children)
+		vnode.tag = selector
+		return vnode
 	}
 }
 

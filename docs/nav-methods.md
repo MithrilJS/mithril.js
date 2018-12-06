@@ -7,8 +7,6 @@
 	- [m.jsonp](jsonp.md)
 	- [m.parseQueryString](parseQueryString.md)
 	- [m.buildQueryString](buildQueryString.md)
-	- [m.withAttr](withAttr.md)
-	- [m.prop](prop.md)
 	- [m.trust](trust.md)
 	- [m.fragment](fragment.md)
 	- [m.redraw](redraw.md)

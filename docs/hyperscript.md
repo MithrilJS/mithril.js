@@ -5,7 +5,7 @@
 - [How it works](#how-it-works)
 - [Flexibility](#flexibility)
 - [CSS selectors](#css-selectors)
-- [Attributes passed as the second argument](attributes-passed-as-the-second-argument)
+- [Attributes passed as the second argument](#attributes-passed-as-the-second-argument)
 - [DOM attributes](#dom-attributes)
 - [Style attribute](#style-attribute)
 - [Events](#events)
@@ -40,12 +40,12 @@ You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m
 
 ### Signature
 
-`vnode = m(selector, attributes, children)`
+`vnode = m(selector, attrs, children)`
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
 `selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](components.md)
-`attributes` | `Object`                                   | No       | HTML attributes or element properties
+`attrs`      | `Object`                                   | No       | HTML attributes or element properties
 `children`   | `Array<Vnode>|String|Number|Boolean`       | No       | Child [vnodes](vnodes.md#structure). Can be written as [splat arguments](signatures.md#splats)
 **returns**  | `Vnode`                                    |          | A [vnode](vnodes.md#structure)
 
@@ -55,7 +55,7 @@ Argument     | Type                                       | Required | Descripti
 
 ### How it works
 
-Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attributes` object (optional) and a `children` array (optional).
+Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attrs` object (optional) and a `children` array (optional).
 
 ```javascript
 m("div", {id: "box"}, "hello")
@@ -261,6 +261,8 @@ m("div[style=background:red]")
 ```
 
 Using a string as a `style` would overwrite all inline styles in the element if it is redrawn, and not only CSS rules whose values have changed.
+
+You can use both hyphenated CSS property names (like `background-color`) and camel cased DOM `style` property names (like `backgroundColor`). You can also define [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables), if your browser supports them.
 
 Mithril does not attempt to add units to number values. It simply stringifies them.
 
@@ -539,7 +541,7 @@ Instead, prefer using Javascript expressions such as the ternary operator and Ar
 ```javascript
 // PREFER
 var BetterListComponent = {
-	view: function() {
+	view: function(vnode) {
 		return m("ul", vnode.attrs.items.map(function(item) {
 			return m("li", item)
 		}))

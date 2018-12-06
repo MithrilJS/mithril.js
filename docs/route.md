@@ -78,6 +78,19 @@ Argument          | Type      | Required | Description
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
+Remember that when using `.set` with params you also need to define the route:
+```javascript
+var Article = {
+	view: function(vnode) {
+		return "This is article " + vnode.attrs.articleid
+	}
+}
+
+m.route(document.body, {
+	'/article/:articleid': Article
+})
+m.route.set('/article/:articleid', {articleid: 1})
+```
 ##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
@@ -205,11 +218,11 @@ The routing strategy dictates how a library might actually implement routing. Th
 - Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
 - Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
 
-Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState` (namely, Internet Explorer 9), because it can fall back to using `onhashchange`. Use this strategy if you want to support IE9.
+Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState`, because it can fall back to using `onhashchange`. Use this strategy if you want to keep the hashes purely local.
 
-The querystring strategy also technically works in IE9, but it falls back to reloading the page. Use this strategy if you want to support anchored links and you are not able to make the server-side necessary to support the pathname strategy.
+The querystring strategy allows server-side detection, but it doesn't appear as a normal path. Use this strategy if you want to support and potentially detect anchored links server-side and you are not able to make the changes necessary to support the pathname strategy (like if you're using Apache and can't modify your .htaccess).
 
-The pathname strategy produces the cleanest looking URLs, but does not work in IE9 *and* requires setting up the server to serve the single page application code from every URL that the application can route to. Use this strategy if you want cleaner-looking URLs and do not need to support IE9.
+The pathname strategy produces the cleanest looking URLs, but requires setting up the server to serve the single page application code from every URL that the application can route to. Use this strategy if you want cleaner-looking URLs.
 
 Single page applications that use the hash strategy often use the convention of having an exclamation mark after the hash to indicate that they're using the hash as a routing mechanism and not for the purposes of linking to anchors. The `#!` string is known as a *hashbang*.
 
@@ -370,7 +383,10 @@ var Form = {
 	},
 	view: function() {
 		return m("form", [
-			m("input[placeholder='Search']", {oninput: m.withAttr("value", function(v) {state.term = v}), value: state.term}),
+			m("input[placeholder='Search']", {
+				oninput: function (e) { state.term = e.target.value },
+				value: state.term
+			}),
 			m("button", {onclick: state.search}, "Search")
 		])
 	}
@@ -576,8 +592,14 @@ var Auth = {
 var Login = {
 	view: function() {
 		return m("form", [
-			m("input[type=text]", {oninput: m.withAttr("value", Auth.setUsername), value: Auth.username}),
-			m("input[type=password]", {oninput: m.withAttr("value", Auth.setPassword), value: Auth.password}),
+			m("input[type=text]", {
+				oninput: function (e) { Auth.setUsername(e.target.value) },
+				value: Auth.username
+			}),
+			m("input[type=password]", {
+				oninput: function (e) { Auth.setPassword(e.target.value) },
+				value: Auth.password
+			}),
 			m("button[type=button]", {onclick: Auth.login}, "Login")
 		])
 	}

@@ -1430,22 +1430,22 @@ o.spec("domMock", function() {
 				o(input.type).equals("text")
 			})
 			"radio|button|checkbox|color|date|datetime|datetime-local|email|file|hidden|month|number|password|range|research|search|submit|tel|text|url|week|image"
-			.split("|").forEach(function(type) {
-				o("can be set to " + type, function(){
-					var input = $document.createElement("input")
-					input.type = type
+				.split("|").forEach(function(type) {
+					o("can be set to " + type, function(){
+						var input = $document.createElement("input")
+						input.type = type
 
-					o(input.getAttribute("type")).equals(type)
-					o(input.type).equals(type)
-				})
-				o("bad values set the attribute, but the getter corrects to 'text', " + type, function(){
-					var input = $document.createElement("input")
-					input.type = "badbad" + type
+						o(input.getAttribute("type")).equals(type)
+						o(input.type).equals(type)
+					})
+					o("bad values set the attribute, but the getter corrects to 'text', " + type, function(){
+						var input = $document.createElement("input")
+						input.type = "badbad" + type
 
-					o(input.getAttribute("type")).equals("badbad" + type)
-					o(input.type).equals("text")
+						o(input.getAttribute("type")).equals("badbad" + type)
+						o(input.type).equals("text")
+					})
 				})
-			})
 		})
 		o.spec("textarea[value]", function() {
 			o("reads from child if no value was ever set", function() {

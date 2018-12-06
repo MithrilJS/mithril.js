@@ -3,18 +3,13 @@
 var coreRenderer = require("../render/render")
 
 function throttle(callback) {
-	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var delay = 16
-	var last = 0, pending = null
-	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
+	var pending = null
 	return function() {
-		var elapsed = Date.now() - last
 		if (pending === null) {
-			pending = timeout(function() {
+			pending = requestAnimationFrame(function() {
 				pending = null
 				callback()
-				last = Date.now()
-			}, delay - elapsed)
+			})
 		}
 	}
 }
@@ -22,11 +17,6 @@ function throttle(callback) {
 
 module.exports = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
-	renderService.setEventCallback(function(e) {
-		if (e.redraw === false) e.redraw = undefined
-		else redraw()
-	})
-
 	var callbacks = []
 	var rendering = false
 
@@ -47,5 +37,6 @@ module.exports = function($window, throttleMock) {
 
 	var redraw = (throttleMock || throttle)(sync)
 	redraw.sync = sync
+	renderService.setRedraw(redraw)
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
