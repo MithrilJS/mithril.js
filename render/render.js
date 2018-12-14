@@ -687,7 +687,7 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (typeof value === "object") vnode.dom[key] = value
+		else if (typeof value === "object" || typeof value === "function" || typeof value === "symbol") vnode.dom[key] = value
 		else if (hasPropertyKey(vnode, key, ns)) {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
@@ -715,7 +715,7 @@ module.exports = function($window) {
 		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
 		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
-		else if (typeof old === "object") delete vnode.dom[key]
+		else if (typeof old === "object" || typeof old === "function" || typeof old === "symbol") delete vnode.dom[key]
 		else if (
 			hasPropertyKey(vnode, key, ns)
 			&& key !== "className"
