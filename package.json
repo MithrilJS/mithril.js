@@ -5,7 +5,6 @@
   "author": "Leo Horie",
   "license": "MIT",
   "main": "mithril.js",
-  "module": "mithril.mjs",
   "repository": "MithrilJS/mithril.js",
   "scripts": {
     "dev": "node bundler/cli browser.js -output mithril.js -watch",
