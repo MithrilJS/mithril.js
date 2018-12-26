@@ -42,7 +42,7 @@ Mithril has a few dependencies on globals that exist in all its supported browse
 
 The simplest way to do this is ensure the following snippet of code runs **before** you include mithril itself in your project.
 
-```js
+```javascript
 // Polyfill DOM env for mithril
 global.window = require("mithril/test-utils/browserMock.js")();
 global.document = window.document;

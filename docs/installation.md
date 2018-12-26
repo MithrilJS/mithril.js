@@ -37,7 +37,7 @@ $ npm install webpack webpack-cli --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
-```js
+```javascript
 {
 	// ...
 	"scripts": {
@@ -47,7 +47,7 @@ $ npm install webpack webpack-cli --save-dev
 ```
 
 4. Create `src/index.js` file.
-```js
+```javascript
 import m from "mithril";
 m.render(document.body, "hello world");
 ```
