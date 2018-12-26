@@ -80,7 +80,7 @@ m.mount(root, {
 
 
 ```
-> *[If it doesn't load, or you want a full playground, click here to try it out](https://flems.io/mithril#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8AAyIAEyRbBwgmDh4+NRwAjT0jMw8bAC6VFAQaADWFahNXGIQxIS+0AVB5DwkxAAOcIgA9Nsy66MA5m20WNtYs-PQAAKR+HcAbOeXC1D4-AXE2uvchdQL61ErH6rCAA)*
+> *[If it doesn't load, or you want a full playground, click here to try it out](https://flems.io/mithril@next#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8ACyIAExsHCCYOHj41HACNPSMzDxsALqsQA)*
 
 ---
 
