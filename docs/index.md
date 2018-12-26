@@ -65,12 +65,22 @@ Let's create an HTML file to follow along:
 </body>
 ```
 
-To make things simpler you can fork this pen which already has the latest version of mithril loaded.
+To make things simpler you can try out mithril right here. This is a live playground with mithril preloaded, which - by the way, is also built in mithril.
 
-<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
 
-Mithril is also loaded onto this page already, so you can start poking at the `m` object in the developer console right away if you'd like!
+// Your code here
+
+m.mount(root, {
+	view: function() {
+		return m("h1", "Try me out")
+	}
+})
+
+
+```
+> *[If it doesn't load, or you want a full playground, click here to try it out](https://flems.io/mithril#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8AAyIAEyRbBwgmDh4+NRwAjT0jMw8bAC6VFAQaADWFahNXGIQxIS+0AVB5DwkxAAOcIgA9Nsy66MA5m20WNtYs-PQAAKR+HcAbOeXC1D4-AXE2uvchdQL61ErH6rCAA)*
 
 ---
 
@@ -94,8 +104,11 @@ As you can see, you use the same code to both create and update HTML. Mithril au
 
 #### Live Example
 
-<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
+
+m.render(root, "Hello World")
+```
 
 ---
 
@@ -133,8 +146,16 @@ m("main", [
 
 #### Live Example
 
-<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
+
+m.render(root, [
+    m("main", [
+        m("h1", {class: "title"}, "My first app"),
+        m("button", "A button"),
+    ])
+])
+```
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
@@ -204,8 +225,25 @@ If you're wondering about performance, it turns out Mithril is very fast at rend
 
 #### Live Example
 
-<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
+var count = 0 // added a variable
+
+var Hello = {
+    view: function() {
+        return m("main", [
+            m("h1", {
+                class: "title"
+            }, "My first app"),
+            m("button", {
+                onclick: function() {count++}
+            }, count + " clicks")
+        ])
+    }
+}
+
+m.mount(root, Hello)
+```
 
 ---
 
@@ -242,8 +280,36 @@ Also, as you would expect, clicking on the link on the splash page takes you to 
 
 #### Live Example
 
-<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
+var count = 0
+
+var Hello = {
+    view: function() {
+        return m("main", [
+            m("h1", {
+                class: "title"
+            }, "My first app"),
+            m("button", {
+                onclick: function() {count++}
+            }, count + " clicks"),
+        ])
+    }
+}
+
+var Splash = {
+    view: function() {
+        return m("a", {
+            href: "#!/hello"
+        }, "Enter!")
+    }
+}
+
+m.route(root, "/splash", {
+    "/splash": Splash,
+    "/hello": Hello,
+})
+```
 
 ---
 
@@ -289,8 +355,37 @@ Clicking the button should now update the count.
 
 #### Live Example
 
-<p data-height="265" data-theme-id="light" data-slug-hash="WjeQBW" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril XHR Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/WjeQBW/">Mithril XHR Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+```js
+var root = document.body
+var count = 0
+
+var increment = function() {
+    m.request({
+        method: "PUT",
+        url: "//rem-rest-api.herokuapp.com/api/tutorial/1",
+        data: {count: count + 1},
+        withCredentials: true,
+    })
+    .then(function(data) {
+        count = parseInt(data.count)
+    })
+}
+
+var Hello = {
+    view: function() {
+        return m("main", [
+            m("h1", {
+                class: "title"
+            }, "My first app"),
+            m("button", {
+                onclick: increment
+            }, count + " clicks"),
+        ])
+    }
+}
+
+m.mount(root, Hello)
+```
 
 ---
 

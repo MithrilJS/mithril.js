@@ -38,5 +38,51 @@
 			}
 		}
 		</script>
+		<script src="https://flems.io/flems.html" defer></script>
+		<style type="text/css" media="screen">
+			.flems main {
+				margin: 0;
+				max-width: auto;
+			}
+			.flems {
+				margin: 20px;
+				max-height: 400px;
+				box-shadow: 0 0 20px rgba(0,0,0,0.25);
+			}
+		</style>
+		<script>
+			"use strict"
+			var systemFonts = [
+				"body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
+				"body { display:flex; justify-content: center; align-items:center; }"
+			].join('')
+			window.addEventListener("load", () => {
+				Array.from(document.querySelectorAll("pre.language-js")).forEach(function(el) {
+					const div = document.createElement("div")
+					window.Flems(div, {
+						middle        : 60,
+						editable      : true,
+						toolbar       : false,
+						shareButton   : true,
+						console       : false,
+						autoHeight    : true,
+						files: [{
+							name: ".js",
+							content: el.textContent
+						}, {
+							name: ".css",
+							content: systemFonts
+						}],
+						links: [{
+							name: "mithril",
+							type: "script",
+							url: "https://unpkg.com/mithril@[version]/mithril.js"
+						}]
+					}, "https://flems.io/flems.html")
+					el.parentNode.insertBefore(div, el)
+					el.remove()
+				})
+			})
+		</script>
 	</body>
 </html>
