@@ -31,6 +31,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js" defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-jsx.min.js" defer></script>
 		<script src="https://unpkg.com/mithril@[version]/mithril.js" async></script>
+		<script src="https://flems.io/flems.html" id="flems" defer></script>
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"
@@ -38,63 +39,41 @@
 				document.body.className = ''
 			}
 		}
-		</script>
-		<script src="https://flems.io/flems.html" defer></script>
-		<style type="text/css" media="screen">
-			.flems main {
-				margin: 0;
-				max-width: auto;
-			}
-			.flems {
-				margin: 20px;
-				max-height: 400px;
-				box-shadow: 0 0 20px rgba(0,0,0,0.25);
-			}
-			@media (max-width: 500px) {
-				.flems {
-					min-height: calc(100vw * 1.3);
-				}
-			}
-		</style>
-		<script>
-			"use strict"
-			var script = document.createElement("script")
-			script.onload = function() {
-				var systemFonts = [
-					"body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
-					"body { height: 100%; overflow:hidden; display:flex; justify-content: center; align-items:center; }"
-				].join("")
-				;[].forEach.call(document.querySelectorAll("pre.language-js,pre code.lang-js"), function(el) {
-					el.tagName === "CODE" && (el = el.parentNode)
-					const div = document.createElement("div")
-					window.Flems(div, {
-						middle        : 60,
-						editable      : true,
-						toolbar       : false,
-						shareButton   : true,
-						console       : false,
-						autoHeight    : true,
-						files: [{
-							name: ".js",
-							content: el.textContent
-						}, {
-							name: ".css",
-							content: systemFonts
-						}],
-						links: [{
-							name: "mithril",
-							type: "script",
-							url: "https://unpkg.com/mithril@[version]/mithril.js"
-						}]
-					}, "https://flems.io/flems.html")
+		document.getElementById("flems").onload = function() {
+			var systemFonts = [
+				"body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
+				"body { height: 100%; overflow:hidden; display:flex; justify-content: center; align-items:center; }"
+			].join("")
+			;[].forEach.call(document.querySelectorAll("pre.language-js,pre code.lang-js"), function(el) {
+				if (el.tagName === "CODE")
+					el = el.parentNode
 
-					el.parentNode.insertBefore(div, el)
-					el.parentNode.removeChild(el)
-				})
-			}
-			script.src = "https://flems.io/flems.html?nextie2"
-			script.async = true
-			document.body.appendChild(script)
+				var div = document.createElement("div")
+				window.Flems(div, {
+					middle        : 60,
+					editable      : true,
+					toolbar       : false,
+					shareButton   : true,
+					console       : false,
+					autoHeight    : true,
+					files: [{
+						name: ".js",
+						content: el.textContent
+					}, {
+						name: ".css",
+						content: systemFonts
+					}],
+					links: [{
+						name: "mithril",
+						type: "script",
+						url: "https://unpkg.com/mithril@[version]/mithril.js"
+					}]
+				}, "https://flems.io/flems.html")
+
+				el.parentNode.insertBefore(div, el)
+				el.parentNode.removeChild(el)
+			})
+		}
 		</script>
 	</body>
 </html>
