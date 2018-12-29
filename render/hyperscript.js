@@ -88,8 +88,12 @@ function hyperscript(selector) {
 	}
 
 	var vnode = hyperscriptVnode.apply(1, arguments)
-
-	if (typeof selector === "string") {
+    
+	if (selector === "[") {
+		vnode.tag = selector
+		vnode.children = Vnode.normalizeChildren(vnode.children)
+		return vnode
+	} else if (typeof selector === "string") {
 		return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	} else {
 		vnode.tag = selector
