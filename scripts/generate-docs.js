@@ -9,6 +9,7 @@ const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
 const HTMLMinifier = require("html-minifier")
 const upstream = require("./_upstream")
+const version = require("../package.json").version
 
 const r = (file) => path.resolve(__dirname, "..", file)
 
@@ -70,9 +71,31 @@ async function makeGenerator() {
 	// Tell Git to ignore our changes - it's no longer there.
 	execFileSync("git", ["add", "archive"])
 
-	return new Generator({version, guides, methods, layout})
+	// add version selector
+	const docsSelect = await archiveDocsSelect()
+
+	return new Generator({
+		version,
+		guides,
+		methods,
+		layout: layout.replaceAll("[archive-docs]", docsSelect)
+	})
 }
 
+async function getArchiveDirs() {
+	const dirs = await fs.readdir(r("dist/archive"))
+	const ver = "v" + version;
+	if (dirs.every((dir) => ver !== dir)) dirs.push(ver);
+	return dirs.reverse();
+}
+
+async function archiveDocsSelect() {
+	const archiveDirs = await getArchiveDirs()
+	var options = archiveDirs
+		.map((ad) => `<option>${ad}</option>`)
+		.join("")
+	return `<select id="archive-docs" onchange="location.href='archive/' + this.value + '/index.html'">${options}</select>`
+}
 class Generator {
 	constructor(opts) {
 		this._version = opts.version
@@ -81,7 +104,7 @@ class Generator {
 		this._layout = opts.layout
 	}
 
-	compilePage(file, markdown) {
+	async compilePage(file, markdown) {
 		file = path.basename(file)
 		const link = new RegExp(
 			`([ \t]*)(- )(\\[.+?\\]\\(${escapeRegExp(file)}\\))`
@@ -179,7 +202,7 @@ class Generator {
 		}
 		else {
 			let html = await fs.readFile(file, "utf-8")
-			if (file.endsWith(".md")) html = this.compilePage(file, html)
+			if (file.endsWith(".md")) html = await this.compilePage(file, html)
 			const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
 			await archived(
 				relative.replace(/\.md$/, ".html"),

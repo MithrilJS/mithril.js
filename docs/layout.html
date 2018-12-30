@@ -9,11 +9,11 @@
 		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
-	<body>
+	<body onload="window.requestAnimationFrame(function(){document.getElementById('archive-docs').selectedIndex = 0})" /* handle back navigation */>
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>[version]</small></h1>
+				<h1><img src="logo.svg"> Mithril [archive-docs]</h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
