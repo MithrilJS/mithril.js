@@ -3,7 +3,8 @@
 var o = require("../../ospec/ospec")
 var fragment = require("../../render/fragment")
 var m = require("../../render/hyperscript")
-var fragmentStr = function () {
+
+function fragmentStr() {
 	var args = [].slice.call(arguments);
 	args.unshift("[");
 	return m.apply(null, args)
