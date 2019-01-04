@@ -34,7 +34,6 @@ module.exports = function parseURL(url, root) {
 			var normalized = url.slice(0, pathnameEnd).replace(/^\.$/, root.pathname.slice(slashIndex + 1)).replace(/^\.\//, "")
 			var dotdot = /\/[^\/]+?\/\.{2}/g
 			var pathname = path + normalized
-			pathname = path + normalized
 			while (dotdot.test(pathname)) pathname = pathname.replace(dotdot, "")
 			pathname = pathname.replace(/\/\.\//g, "/").replace(/^(\/\.{2})+/, "") || "/"
 			data.pathname = pathname

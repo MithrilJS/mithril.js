@@ -1,29 +1,27 @@
 "use strict"
 
 var parseURL = require("../test-utils/parseURL")
-var callAsync = require("../test-utils/callAsync")
-
-function debouncedAsync(f) {
-	var ref
-	return function() {
-		if (ref != null) return
-		ref = callAsync(function(){
-			ref = null
-			f()
-		})
-	}
-}
+var debouncedAsync = require("../test-utils/debouncedAsync")
 
 module.exports = function(options) {
 	if (options == null) options = {}
 
 	var $window = options.window || {}
-	var protocol = options.protocol || "http:"
-	var hostname = options.hostname || "localhost"
-	var port = ""
-	var pathname = "/"
-	var search = ""
-	var hash = ""
+	var parsedURL = parseURL(
+		options.href || "",
+		{
+			protocol: options.protocol || "http:",
+			hostname: options.hostname || "localhost",
+			port: options.port || "",
+			pathname: "/"
+		}
+	)
+	var protocol = parsedURL.protocol
+	var hostname = parsedURL.hostname
+	var port = parsedURL.port
+	var pathname = parsedURL.pathname || "/"
+	var search = parsedURL.search
+	var hash = parsedURL.hash
 
 	var past = [{url: getURL(), isNew: true, state: null, title: null}], future = []
 

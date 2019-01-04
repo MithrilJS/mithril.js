@@ -51,7 +51,7 @@ module.exports = function($window, redrawService) {
 		routeService.setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
-	route.prefix = function(prefix) {routeService.prefix = prefix}
+	route.prefix = function(prefix, options) {routeService.prefix = prefix, routeService.usePushState = !options || !options.onhashchange}
 	var link = function(options, vnode) {
 		vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
 		vnode.dom.onclick = function(e) {
@@ -71,6 +71,7 @@ module.exports = function($window, redrawService) {
 		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
 		return attrs
 	}
+	route.core = routeService
 
 	return route
 }

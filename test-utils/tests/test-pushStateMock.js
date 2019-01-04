@@ -3,6 +3,7 @@
 var o = require("../../ospec/ospec")
 var pushStateMock = require("../../test-utils/pushStateMock")
 var callAsync = require("../../test-utils/callAsync")
+
 o.spec("pushStateMock", function() {
 
 	var $window
