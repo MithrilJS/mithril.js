@@ -114,7 +114,7 @@ function merge(streams) {
 function scan(fn, acc, origin) {
 	var stream = origin.map(function(v) {
 		var next = fn(acc, v)
-		acc = next === Stream.SKIP ? acc : next
+		if (next !== Stream.SKIP) acc = next
 		return next
 	})
 	stream(acc)
