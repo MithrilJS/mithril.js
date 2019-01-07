@@ -90,11 +90,12 @@ function hyperscript(selector) {
 	var vnode = hyperscriptVnode.apply(1, arguments)
 
 	if (typeof selector === "string") {
-		return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
-	} else {
-		vnode.tag = selector
-		return vnode
+		vnode.children = Vnode.normalizeChildren(vnode.children)
+		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	}
+	
+	vnode.tag = selector
+	return vnode
 }
 
 module.exports = hyperscript
