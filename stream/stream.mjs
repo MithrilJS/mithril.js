@@ -7,7 +7,7 @@ Stream.combine = combine
 Stream.scanMerge = scanMerge
 Stream["fantasy-land/of"] = Stream
 
-let warnedHalt = false
+var warnedHalt = false
 Object.defineProperty(Stream, "HALT", {
 	get: function() {
 		warnedHalt && console.log("HALT is deprecated and has been renamed to SKIP");
@@ -52,7 +52,7 @@ function Stream(value) {
 		return target
 	}
 
-	let end
+	var end
 	function createEnd() {
 		end = Stream()
 		end.map(function(value) {
@@ -87,7 +87,7 @@ function combine(fn, streams) {
 		? Stream(fn.apply(null, streams.concat([streams])))
 		: Stream()
 
-	let changed = []
+	var changed = []
 
 	streams.forEach(function(s) {
 		s.map(function(value) {
