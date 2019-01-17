@@ -4,6 +4,8 @@ var fs = require("fs")
 var path = require("path")
 var marked = require("marked")
 var layout = fs.readFileSync("./docs/layout.html", "utf-8")
+var rimraf = require("rimraf")
+var process = require("child_process")
 var version = JSON.parse(fs.readFileSync("./package.json", "utf-8")).version
 try {fs.mkdirSync("./dist")} catch (e) {/* ignore */}
 try {fs.mkdirSync("./dist/archive")} catch (e) {/* ignore */}
@@ -11,6 +13,7 @@ try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
 
 var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
 var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
+var archiveDirs = getArchiveDirs();
 
 generate("docs")
 
@@ -59,6 +62,7 @@ function generate(pathname) {
 
 					return `<h${n} id="${anchor}"><a href="#${anchor}">${text}</a></h${n}>`;
 				})
+				.replace(/\[archive-docs\]/g, archiveDocsSelect)
 			fs.writeFileSync("./dist/archive/v" + version + "/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 			fs.writeFileSync("./dist/" + outputFilename.replace(/^docs\//, ""), html, "utf-8")
 		}
@@ -68,4 +72,31 @@ function generate(pathname) {
 			fs.writeFileSync("./dist/" + pathname.replace(/^docs\//, ""), fs.readFileSync(pathname, encoding), encoding)
 		}
 	}
+}
+
+function getArchiveDirs() {
+	process.execSync("git checkout gh-pages -- archive")
+	var dirs = fs.readdirSync("./archive")
+	process.execSync("git reset -- archive")
+	rimraf.sync("./archive");
+
+	var ver = "v" + version;
+	if (dirs.every((dir) => ver !== dir)) dirs.push(ver);
+	return dirs.reverse();
+}
+
+function archiveDocsSelect() {
+	var options = archiveDirs
+		.map((ad) => `<option>${ad}</option>`)
+		.join("\n")
+
+	var select = `
+<select 
+	id="archive-docs"
+	style="vertical-align: middle" 
+	onchange="location.href='archive/' + this.value + '/index.html'">
+${options}
+</select>\n`
+
+	return select;
 }
