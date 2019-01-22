@@ -38,13 +38,13 @@ m.request({
 
 ### Signature
 
-`promise = m.request([url,] options)`
+`promise = m.request(options)`
 
 Argument                  | Type                              | Required | Description
 ------------------------- | --------------------------------- | -------- | ---
-`url`                     | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
+`options`                 | `Object`                          | Yes      | The request options to pass.
 `options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
-`options.url`             | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
+`options.url`             | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.data`.
 `options.data`            | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
 `options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
@@ -61,6 +61,16 @@ Argument                  | Type                              | Required | Descr
 `options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+`promise = m.request(url, options)`
+
+Argument    | Type      | Required | Description
+----------- | --------- | -------- | ---
+`url`       | `String`  | Yes      | The [path name](paths.md) to send the request to. `options.url` overrides this when present.
+`options`   | `Object`  | No       | The request options to pass.
+**returns** | `Promise` |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+This second form is mostly equivalent to `m.request(Object.assign({url: url}, options))`, just it does not depend on the ES6 global `Object.assign` internally.
 
 [How to read signatures](signatures.md)
 

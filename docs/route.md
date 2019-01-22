@@ -71,7 +71,7 @@ Redirects to a matching route, or to the default route if no matching routes can
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`path`            | `String`  | Yes      | The path to route to, without a prefix. The path may include slots for routing parameters
+`path`            | `String`  | Yes      | The [path name](paths.md) to route to, without a prefix. The path may include parameters, interpolated with values from `data`.
 `data`            | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
 `options.replace` | `Boolean` | No       | Whether to create a new history entry or to replace the current one. Defaults to false
 `options.state`   | `Object`  | No       | The `state` object to pass to the underlying `history.pushState` / `history.replaceState` call. This state object becomes available in the `history.state` property, and is merged into the [routing parameters](#routing-parameters) object. Note that this option only works when using the pushState API, but is ignored if the router falls back to hashchange mode (i.e. if the pushState API is not available)
@@ -209,7 +209,7 @@ Routing is a system that allows creating Single-Page-Applications (SPA), i.e. ap
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
-Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
+Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState%28%29_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
 
 #### Routing strategies
 
@@ -293,7 +293,7 @@ When navigating to routes, there's no need to explicitly specify the router pref
 
 ### Routing parameters
 
-Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:
+Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports [parameterized routes](paths.md#path-parameters):
 
 ```javascript
 var Edit = {

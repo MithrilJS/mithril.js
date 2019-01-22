@@ -36,11 +36,11 @@ module.exports = function($window, redrawService) {
 				if (payload.onmatch) {
 					Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
 						update(payload, resolved)
-					}, bail)
+					}, function () { bail(path) })
 				}
 				else update(payload, "div")
 			}
-		}, bail)
+		}, bail, defaultRoute)
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {

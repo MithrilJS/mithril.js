@@ -990,7 +990,8 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/", {
 						"/a": {view: view},
-						"/b": {onmatch: onmatch}
+						"/b": {onmatch: onmatch},
+						"/": {view: function() {}}
 					})
 
 					o(view.callCount).equals(1)

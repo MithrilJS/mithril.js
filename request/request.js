@@ -1,6 +1,6 @@
 "use strict"
 
-var buildQueryString = require("../querystring/build")
+var buildPathname = require("../pathname/build")
 
 module.exports = function($window, Promise) {
 	var callbackCount = 0
@@ -11,7 +11,7 @@ module.exports = function($window, Promise) {
 			if (typeof url !== "string") { args = url; url = url.url }
 			else if (args == null) args = {}
 			var promise = new Promise(function(resolve, reject) {
-				factory(url, args, function (data) {
+				factory(buildPathname(url, args.params), args, function (data) {
 					if (typeof args.type === "function") {
 						if (Array.isArray(data)) {
 							for (var i = 0; i < data.length; i++) {
@@ -54,30 +54,11 @@ module.exports = function($window, Promise) {
 		return false
 	}
 
-	function interpolate(url, data, assemble) {
-		if (data == null) return url
-		url = url.replace(/:([^\/]+)/gi, function (m, key) {
-			return data[key] != null ? data[key] : m
-		})
-		if (assemble && data != null) {
-			var querystring = buildQueryString(data)
-			if (querystring) url += (url.indexOf("?") < 0 ? "?" : "&") + querystring
-		}
-		return url
-	}
-
 	return {
 		request: makeRequest(function(url, args, resolve, reject) {
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
-			var useBody = method !== "GET" && method !== "TRACE" &&
-				(typeof args.useBody !== "boolean" || args.useBody)
-
-			var data = args.data
-			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(data instanceof $window.FormData)
-			if (useBody) {
-				if (typeof args.serialize === "function") data = args.serialize(data)
-				else if (!(data instanceof $window.FormData)) data = JSON.stringify(data)
-			}
+			var body = args.body
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
 
 			var xhr = new $window.XMLHttpRequest(),
 				aborted = false,
@@ -88,9 +69,9 @@ module.exports = function($window, Promise) {
 				_abort.call(xhr)
 			}
 
-			xhr.open(method, interpolate(url, args.data, !useBody), typeof args.async !== "boolean" || args.async, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
-			if (assumeJSON && useBody && !hasHeader(args, /^content-type$/i)) {
+			if (assumeJSON && !hasHeader(args, /^content-type$/i)) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
@@ -139,23 +120,24 @@ module.exports = function($window, Promise) {
 				}
 			}
 
-			if (useBody && data != null) xhr.send(data)
-			else xhr.send()
+			if (body == null) xhr.send()
+			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
+			else if (body instanceof $window.FormData) xhr.send(body)
+			else xhr.send(JSON.stringify(body))
 		}),
 		jsonp: makeRequest(function(url, args, resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
 			$window[callbackName] = function(data) {
+				delete $window[callbackName]
 				script.parentNode.removeChild(script)
 				resolve(data)
-				delete $window[callbackName]
 			}
 			script.onerror = function() {
+				delete $window[callbackName]
 				script.parentNode.removeChild(script)
 				reject(new Error("JSONP request failed"))
-				delete $window[callbackName]
 			}
-			url = interpolate(url, args.data, true)
 			script.src = url + (url.indexOf("?") < 0 ? "?" : "&") +
 				encodeURIComponent(args.callbackKey || "callback") + "=" +
 				encodeURIComponent(callbackName)

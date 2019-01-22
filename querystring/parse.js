@@ -1,10 +1,13 @@
 "use strict"
 
-module.exports = function(string) {
+// The extra `data` parameter is for if you want to append to an existing
+// parameters object.
+module.exports = function(string, data) {
+	if (data == null) data = {}
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 
-	var entries = string.split("&"), data = {}, counters = {}
+	var entries = string.split("&"), counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
 		var key = decodeURIComponent(entry[0])
@@ -22,12 +25,13 @@ module.exports = function(string) {
 			var isValue = j === levels.length - 1
 			if (level === "") {
 				var key = levels.slice(0, j).join()
-				if (counters[key] == null) counters[key] = 0
+				if (counters[key] == null) {
+					counters[key] = Array.isArray(cursor) ? cursor.length : 0
+				}
 				level = counters[key]++
 			}
-			if (cursor[level] == null) {
-				cursor[level] = isValue ? value : isNumber ? [] : {}
-			}
+			if (isValue) cursor[level] = value
+			else if (cursor[level] == null) cursor[level] = isNumber ? [] : {}
 			cursor = cursor[level]
 		}
 	}
