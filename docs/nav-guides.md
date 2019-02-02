@@ -26,3 +26,4 @@
 - Misc
 	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)
+	- [v1 Documentation](archive/v1.1.6)

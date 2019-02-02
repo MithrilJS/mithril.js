@@ -18,7 +18,7 @@ If you're new to Javascript or just want a very simple setup to get your feet we
 ### NPM
 
 ```bash
-$ npm install mithril --save
+$ npm install mithril@next --save
 ```
 
 ---
@@ -32,7 +32,7 @@ $ npm init --yes
 
 2. install required tools
 ```bash
-$ npm install mithril --save
+$ npm install mithril@next --save
 $ npm install webpack webpack-cli --save-dev
 ```
 
@@ -83,7 +83,7 @@ npm init --yes
 Then, to install Mithril, run:
 
 ```bash
-npm install mithril --save
+npm install mithril@next --save
 ```
 
 This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
@@ -206,7 +206,7 @@ Live reload is a feature where code changes automatically trigger the page to re
 
 ```bash
 # 1) install
-npm install mithril --save
+npm install mithril@next --save
 npm install budo -g
 
 # 2) add this line into the scripts section in package.json
