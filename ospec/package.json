@@ -1,6 +1,6 @@
 {
   "name": "ospec",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
   "module": "ospec.mjs",
@@ -18,6 +18,6 @@
   },
   "repository": "MithrilJS/mithril.js",
   "dependencies": {
-    "glob": "^7.1.2"
+    "glob": "^7.1.3"
   }
 }
