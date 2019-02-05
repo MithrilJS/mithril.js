@@ -51,7 +51,7 @@ o.spec("scan", function() {
 		action(7)
 		action("11")
 		action(undefined)
-	        action({a: 1})
+		action({a: 1})
 		action(8) // assures we didn't break the accumulator
 
 		result = child()
