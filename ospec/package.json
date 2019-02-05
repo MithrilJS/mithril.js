@@ -1,6 +1,6 @@
 {
   "name": "ospec",
-  "version": "3.1.0",
+  "version": "3.0.1",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
   "module": "ospec.mjs",
