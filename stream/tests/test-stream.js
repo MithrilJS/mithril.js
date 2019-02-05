@@ -42,30 +42,25 @@ o.spec("stream", function() {
 
 			o(b()).equals(2)
 		})
-		o("can HALT", function() {
-			var a = Stream(2)
-			var b = a.map(function(value) {
-				return value === 5
-					? Stream.HALT
-					: value
-			})
-
-			a(5)
-
-			o(b()).equals(2)
-		})
-		o("warns HALT deprecated", function() {
+		// NOTE: this *must* be the *only* uses of `Stream.HALT` in the entire
+		// test suite.
+		o("HALT is a deprecated alias of SKIP and warns once", function() {
 			var log = console.log
-			var warning = ""
+			var warnings = []
 			console.log = function(a) {
-				warning = a
+				warnings.push(a)
 			}
 
-			Stream.HALT
-
-			console.log = log
-
-			o(warning).equals("HALT is deprecated and has been renamed to SKIP")
+			try {
+				o(Stream.HALT).equals(Stream.SKIP)
+				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
+				o(Stream.HALT).equals(Stream.SKIP)
+				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
+				o(Stream.HALT).equals(Stream.SKIP)
+				o(warnings).deepEquals(["HALT is deprecated and has been renamed to SKIP"])
+			} finally {
+				console.log = log
+			}
 		})
 	})
 	o.spec("combine", function() {
@@ -364,7 +359,7 @@ o.spec("stream", function() {
 			var count = 0
 			var a = Stream(1)
 			var b = Stream.lift(function() {
-				return Stream.HALT
+				return Stream.SKIP
 			}, a)["fantasy-land/map"](function() {
 				count++
 				return 1
