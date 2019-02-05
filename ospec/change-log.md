@@ -3,9 +3,6 @@
 
 ## Upcoming...
 _2019-xx-yy_
-
-## 3.1.0
-_2019-02-05_
 - ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)
 <!-- Add new lines here. Version number will be decided later -->
 - Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call. (#2221 @isiahmeadows)
