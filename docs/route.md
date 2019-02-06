@@ -182,7 +182,7 @@ Argument        | Type                                     | Description
 --------------- | ---------------------------------------- | ---
 `args`          | `Object`                                 | The [routing parameters](#routing-parameters)
 `requestedPath` | `String`                                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
-`route`         | `String`                                 | The router path requested by the last routing action, including interpolated routing parameter values
+`route`         | `String`                                 | The router path requested by the last routing action, excluding interpolated routing parameter values
 **returns**     | `Component|Promise<Component>|undefined` | Returns a component or a promise that resolves to a component
 
 If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
