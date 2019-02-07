@@ -176,7 +176,7 @@ This method also allows you to asynchronously define what component will be rend
 
 For more information on `onmatch`, see the [advanced component resolution](#advanced-component-resolution) section
 
-`routeResolver.onmatch(args, requestedPath)`
+`routeResolver.onmatch(args, requestedPath, route)`
 
 Argument        | Type                                     | Description
 --------------- | ---------------------------------------- | ---
