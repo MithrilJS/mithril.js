@@ -261,6 +261,15 @@ o.spec("stream", function() {
 			o(thrown.constructor === TypeError).equals(false)
 			o(spy.callCount).equals(0)
 		})
+		o("combine callback not called when child stream was ended", function () {
+			var spy = o.spy()
+			var a = Stream(1)
+			var b = Stream(2)
+			var mapped = Stream.combine(spy, [a, b])
+			mapped.end(true)
+			a(11)
+			o(spy.callCount).equals(1)
+		})
 	})
 	o.spec("lift", function() {
 		o("transforms value", function() {
@@ -479,6 +488,12 @@ o.spec("stream", function() {
 
 			o(spy.callCount).equals(1)
 		})
+		o("ended stream works like a container", function() {
+			var stream = Stream(1)
+			stream.end(true)
+			stream(2)
+			o(stream()).equals(2)
+		})
 	})
 	o.spec("toJSON", function() {
 		o("works", function() {
@@ -543,6 +558,14 @@ o.spec("stream", function() {
 			var stream = Stream(undefined)
 
 			o(stream["fantasy-land/map"]).equals(stream.map)
+		})
+		o("mapping function is not invoked after ending", function () {
+			var stream = Stream(undefined)
+			var fn = o.spy()
+			var mapped = stream.map(fn)
+			mapped.end(true)
+			stream(undefined)
+			o(fn.callCount).equals(1)
 		})
 	})
 	o.spec("ap", function() {
