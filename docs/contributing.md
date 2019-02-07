@@ -1,6 +1,19 @@
-# Contributing
+# Contributing FAQs
 
-# FAQ
+- [How do I go about contributing ideas or new features?](#how-do-i-go-about-contributing-ideas-or-new-features?)
+- [How should I report bugs?](#how-should-i-report-bugs?)
+- [How do I send a pull request?](#how-do-i-send-a-pull-request?)
+- [I'm submitting a PR. How do I run tests?](#i'm-submitting-a-pr-how-do-i-run-tests?)
+- [How do I build Mithril?](#how-do-i-build-mithril?)
+- [Is there a style guide?](#is-there-a-style-guide?)
+- [Why do tests mock the browser APIs?](#why-do-tests-mock-the-browser-apis?)
+- [Why does Mithril use its own testing framework and not Mocha/Jasmine/Tape?](#why-does-mithril-use-its-own-testing-framework-and-not-mochajasminetape?)
+- [Why do tests use `module/module.js`? Why not use Browserify, Webpack or Rollup?](#why-do-tests-use-modulemodule.js?-why-not-use-browserify,-webpack-or-rollup?)
+- [Why doesn't the Mithril codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?](#why-doesn't-the-mithril-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?)
+- [Why doesn't the Mithril codebase use trailing semi-colons? Would a PR to add them be welcome?](#why-doesn't-the-mithril-codebase-use-trailing-semi-colons?-would-a-pr-to-add-them-be-welcome?)
+- [Why does the Mithril codebase use a mix of `instanceof` and `typeof` checks instead of `Object.prototype.toString.call`, `Array.isArray`, etc? Would a PR to refactor those checks be welcome?](#why-does-the-mithril-codebase-use-a-mix-of-instanceof-and-typeof-checks-instead-of-objectprototypetostringcall,-arrayisarray,-etc?-would-a-pr-to-refactor-those-checks-be-welcome?)
+- [What should I know in advance when attempting a performance related contribution?](#What-should-I-know-in-advance-when-attempting-a-performance-related-contribution?)
+- [Do you all accept donations?](#do-you-all-accept-donations?)
 
 ## How do I go about contributing ideas or new features?
 
@@ -104,3 +117,9 @@ Type checks are generally already irreducible expressions and having micro-modul
 You should be trying to reduce the number of DOM operations or reduce algorithmic complexity in a hot spot. Anything else is likely a waste of time. Specifically, micro-optimizations like caching array lengths, caching object property values and inlining functions won't have any positive impact in modern javascript engines.
 
 Keep object properties consistent (i.e. ensure the data objects always have the same properties and that properties are always in the same order) to allow the engine to keep using JIT'ed structs instead of hashmaps. Always place null checks first in compound type checking expressions to allow the Javascript engine to optimize to type-specific code paths. Prefer for loops over Array methods and try to pull conditionals out of loops if possible.
+
+
+
+## Do you all accept donations?
+
+Yes, we do, over at [our OpenCollective page](https://opencollective.com/mithriljs). We don't actively seek donations, but they are very much appreciated and are used to support development and related expenses. Both one-time and recurring donations are accepted.
