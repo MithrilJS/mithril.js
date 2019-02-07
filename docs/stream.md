@@ -49,7 +49,7 @@ You can also download the module directly if your environment does not support a
 <script src="https://unpkg.com/mithril@next/stream"></script>
 ```
 
-When loaded directly with a `<script>` tag (rather than required), the stream library will be exposed as `window.m.stream`. If `window.m` is already defined (e.g. because you also use the main Mithril script), it will attach itself to the existing object. Otherwise it creates a new `window.m`. If you want to use streams in conjunction with Mithril as raw script tags, you should include Mithril in your page before `mithril/stream`, because `mithril` will otherwise overwrite the `window.m` object defined by `mithril-stream`. This is not a concern when the libraries are consumed as CommonJS modules (using `require(...)`).
+When loaded directly with a `<script>` tag (rather than required), the stream library will be exposed as `window.m.stream`. If `window.m` is already defined (e.g. because you also use the main Mithril script), it will attach itself to the existing object. Otherwise it creates a new `window.m`. If you want to use streams in conjunction with Mithril as raw script tags, you should include Mithril in your page before `mithril/stream`, because `mithril` will otherwise overwrite the `window.m` object defined by `mithril/stream`. This is not a concern when the libraries are consumed as CommonJS modules (using `require(...)`).
 
 ---
 
