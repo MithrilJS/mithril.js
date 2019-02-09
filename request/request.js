@@ -118,7 +118,6 @@ module.exports = function($window, Promise) {
 						var response = xhr.responseText
 						if (typeof args.extract === "function") {
 							response = args.extract(xhr, args)
-							success = true
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						} else {
