@@ -84,7 +84,7 @@ A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon
 
 By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
 
-If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.
+If the HTTP response status code indicates an error, the returned Promise will be rejected.
 
 ---
 
