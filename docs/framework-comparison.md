@@ -1,3 +1,7 @@
+<!--meta
+Detailed comparison between Mithril and other popular frameworks
+-->
+
 # Framework comparison
 
 - [Why not X?](#why-not-insert-favorite-framework-here)

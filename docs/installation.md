@@ -1,3 +1,7 @@
+<!--meta
+Instructions on how to install Mithril
+-->
+
 # Installation
 
 - [CDN](#cdn)

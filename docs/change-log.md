@@ -1,3 +1,7 @@
+<!--meta
+Official change log for Mithril.js
+-->
+
 # Change log
 
 - [v2.0.0-rc](#v200rc)

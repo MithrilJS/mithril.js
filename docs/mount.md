@@ -1,3 +1,7 @@
+<!--meta
+Documentation on m.mount(), which binds Mithril components to certain DOM nodes
+-->
+
 # mount(root, component)
 
 - [Description](#description)

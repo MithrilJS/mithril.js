@@ -1,3 +1,7 @@
+<!--meta
+Links to Mithril learning content
+-->
+
 # Learning Resources
 
 Links to Mithril learning content:

@@ -1,3 +1,7 @@
+<!--meta
+The Mithril auto-redraw system re-renders your app after some functions complete. Here, we describe the idiomatic Mithril patterns that trigger those redraws.
+-->
+
 # The auto-redraw system
 
 Mithril implements a virtual DOM diffing system for fast rendering, and in addition, it offers various mechanisms to gain granular control over the rendering of an application.

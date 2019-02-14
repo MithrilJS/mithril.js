@@ -1,3 +1,7 @@
+<!--meta
+Documentation on Mithril's Promise polyfill
+-->
+
 # Promise(executor)
 
 - [Description](#description)

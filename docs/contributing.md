@@ -1,3 +1,7 @@
+<!--meta
+Contribution guide for Mithril.js
+-->
+
 # Contributing
 
 # FAQ

@@ -1,3 +1,7 @@
+<!--meta
+Documentation on Mithril's virtual DOM nodes (vnodes) and how they work
+-->
+
 # Virtual DOM nodes
 
 - [What is virtual DOM](#what-is-virtual-dom)

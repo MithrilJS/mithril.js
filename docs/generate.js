@@ -12,7 +12,29 @@ try {fs.mkdirSync("./dist/archive/v" + version)} catch (e) {/* ignore */}
 var guides = fs.readFileSync("docs/nav-guides.md", "utf-8")
 var methods = fs.readFileSync("docs/nav-methods.md", "utf-8")
 
+var metaDescriptionRegExp = new RegExp("<!--meta\n\([^\0]+\)\n-->", "m")
+
 generate("docs")
+
+function encodeHTML (str) {
+	const charsToEncode = /[&"'<>]/g
+	const encodeTo = {
+		"&": "&amp;",
+		"\"": "&quot;",
+		"'": "&#39;",
+		"<": "&lt;",
+		">": "&gt;",
+	}
+	return str.replace(charsToEncode, function(char) { return encodeTo[char] })
+}
+
+function extractMetaDescription(markdown) {
+	var match = markdown.match(metaDescriptionRegExp)
+	if (match) {
+		return encodeHTML(match[1])
+	}
+	return "Mithril.js Documentation"
+}
 
 function generate(pathname) {
 	if (fs.lstatSync(pathname).isDirectory()) {
@@ -25,7 +47,9 @@ function generate(pathname) {
 			var outputFilename = pathname.replace(/\.md$/, ".html")
 			var markdown = fs.readFileSync(pathname, "utf-8")
 			var anchors = {}
+			var metaDescription = extractMetaDescription(markdown)
 			var fixed = markdown
+				.replace(metaDescriptionRegExp, "")
 				.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim, function(match, a, b, c) { // fix pipes in code tags
 					return "<code>" + (a + b + c).replace(/\|/g, "&#124;") + "</code>"
 				})
@@ -47,6 +71,7 @@ function generate(pathname) {
 			var html = layout
 				.replace(/<title>Mithril\.js<\/title>/, "<title>" + title[1] + " - Mithril.js</title>")
 				.replace(/\[version\]/g, version) // update version
+				.replace(/\[metaDescription\]/, metaDescription)
 				.replace(/\[body\]/, markedHtml)
 				.replace(/<h(.) id="([^"]+?)">(.+?)<\/h.>/gim, function(match, n, id, text) { // fix anchors
 					var anchor = text.toLowerCase().replace(/<(\/?)code>/g, "").replace(/<a.*?>.+?<\/a>/g, "").replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "").replace(/\s/g, "-");

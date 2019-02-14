@@ -1,3 +1,7 @@
+<!--meta
+Mithril is a modern, small, fast client-side Javascript framework for building Single Page Applications.
+-->
+
 # Introduction
 
 - [What is Mithril?](#what-is-mithril)

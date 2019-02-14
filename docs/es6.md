@@ -1,3 +1,7 @@
+<!--meta
+Approaches you can use to integrate ES6 into your Mithril-based apps, including technology and usability suggestions
+-->
+
 # ES6
 
 - [Setup](#setup)

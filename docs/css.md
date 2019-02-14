@@ -1,3 +1,7 @@
+<!--meta
+Approaches you can use to style your Mithril-based apps, including technology and usability suggestions
+-->
+
 # CSS
 
 - [Vanilla CSS](#vanilla-css)

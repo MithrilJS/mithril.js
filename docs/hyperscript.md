@@ -1,3 +1,7 @@
+<!--meta
+Documentation on m(), Mithril's hyperscript DSL, which you can use to define the views of your app
+-->
+
 # m(selector, attributes, children)
 
 - [Description](#description)

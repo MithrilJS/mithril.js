@@ -1,3 +1,7 @@
+<!--meta
+A complete walkthrough tutorial for building your first simple application in Mithril, from beginning to end
+-->
+
 # Simple application
 
 Let's develop a simple application that covers some of the major aspects of Single Page Applications

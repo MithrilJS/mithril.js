@@ -1,3 +1,7 @@
+<!--meta
+Documentation on the special "key" attribute in Mithril, which tracks vnodes' identities
+-->
+
 # Keys
 
 - [What are keys](#what-are-keys)

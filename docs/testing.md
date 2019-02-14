@@ -1,3 +1,7 @@
+<!--meta
+Approaches you can use to testing your Mithril-based apps, including technology and usability suggestions
+-->
+
 # Testing
 
 Mithril comes with a testing framework called [ospec](https://github.com/MithrilJS/mithril.js/tree/master/ospec). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).

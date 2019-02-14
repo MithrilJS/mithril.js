@@ -1,3 +1,7 @@
+<!--meta
+Documentation on m.buildQueryString(), which converts an object like {a: "1", b: "2"} into a string like "a=1&b=2"
+-->
+
 # buildQueryString(object)
 
 - [Description](#description)
