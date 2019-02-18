@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8" />
-		<title> Contributing - Mithril.js</title>
+		<title> Contributing FAQs - Mithril.js</title>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="style.css" rel="stylesheet" />
 		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
@@ -22,7 +22,7 @@
 		</header>
 		<main>
 			<section>
-				<h1 id="contributing"><a href="#contributing">Contributing</a></h1>
+				<h1 id="contributing-faqs"><a href="#contributing-faqs">Contributing FAQs</a></h1>
 <ul>
 <li>Getting Started<ul>
 <li><a href="index.html">Introduction</a></li>
@@ -52,7 +52,23 @@
 </li>
 <li>Social<ul>
 <li><a href="https://github.com/MithrilJS/mithril.js/wiki/JOBS">Mithril Jobs</a></li>
-<li><strong><a href="contributing.html">How to contribute</a></strong></li>
+<li><strong><a href="contributing.html">How to contribute</a></strong><ul>
+<li><a href="#how-do-i-go-about-contributing-ideas-or-new-features?">How do I go about contributing ideas or new features?</a></li>
+<li><a href="#how-should-i-report-bugs?">How should I report bugs?</a></li>
+<li><a href="#how-do-i-send-a-pull-request?">How do I send a pull request?</a></li>
+<li><a href="#i&#39;m-submitting-a-pr-how-do-i-run-tests?">I&#39;m submitting a PR. How do I run tests?</a></li>
+<li><a href="#how-do-i-build-mithril?">How do I build Mithril?</a></li>
+<li><a href="#is-there-a-style-guide?">Is there a style guide?</a></li>
+<li><a href="#why-do-tests-mock-the-browser-apis?">Why do tests mock the browser APIs?</a></li>
+<li><a href="#why-does-mithril-use-its-own-testing-framework-and-not-mochajasminetape?">Why does Mithril use its own testing framework and not Mocha/Jasmine/Tape?</a></li>
+<li><a href="#why-do-tests-use-modulemodule.js?-why-not-use-browserify,-webpack-or-rollup?">Why do tests use <code>module/module.js</code>? Why not use Browserify, Webpack or Rollup?</a></li>
+<li><a href="#why-doesn&#39;t-the-mithril-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?">Why doesn&#39;t the Mithril codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?</a></li>
+<li><a href="#why-doesn&#39;t-the-mithril-codebase-use-trailing-semi-colons?-would-a-pr-to-add-them-be-welcome?">Why doesn&#39;t the Mithril codebase use trailing semi-colons? Would a PR to add them be welcome?</a></li>
+<li><a href="#why-does-the-mithril-codebase-use-a-mix-of-instanceof-and-typeof-checks-instead-of-objectprototypetostringcall,-arrayisarray,-etc?-would-a-pr-to-refactor-those-checks-be-welcome?">Why does the Mithril codebase use a mix of <code>instanceof</code> and <code>typeof</code> checks instead of <code>Object.prototype.toString.call</code>, <code>Array.isArray</code>, etc? Would a PR to refactor those checks be welcome?</a></li>
+<li><a href="#What-should-I-know-in-advance-when-attempting-a-performance-related-contribution?">What should I know in advance when attempting a performance related contribution?</a></li>
+<li><a href="#do-you-all-accept-donations?">Do you all accept donations?</a></li>
+</ul>
+</li>
 <li><a href="credits.html">Credits</a></li>
 <li><a href="code-of-conduct.html">Code of Conduct</a></li>
 </ul>
@@ -64,7 +80,6 @@
 </ul>
 </li>
 </ul>
-<h1 id="faq"><a href="#faq">FAQ</a></h1>
 <h2 id="how-do-i-go-about-contributing-ideas-or-new-features?"><a href="#how-do-i-go-about-contributing-ideas-or-new-features?">How do I go about contributing ideas or new features?</a></h2>
 <p>Create an <a href="https://github.com/MithrilJS/mithril.js/issues/new">issue thread on GitHub</a> to suggest your idea so the community can discuss it.</p>
 <p>If the consensus is that it&#39;s a good idea, the fastest way to get it into a release is to send a pull request. Without a PR, the time to implement the feature will depend on the bandwidth of the development team and its list of priorities.</p>
@@ -110,6 +125,8 @@
 <h2 id="what-should-i-know-in-advance-when-attempting-a-performance-related-contribution?"><a href="#what-should-i-know-in-advance-when-attempting-a-performance-related-contribution?">What should I know in advance when attempting a performance related contribution?</a></h2>
 <p>You should be trying to reduce the number of DOM operations or reduce algorithmic complexity in a hot spot. Anything else is likely a waste of time. Specifically, micro-optimizations like caching array lengths, caching object property values and inlining functions won&#39;t have any positive impact in modern javascript engines.</p>
 <p>Keep object properties consistent (i.e. ensure the data objects always have the same properties and that properties are always in the same order) to allow the engine to keep using JIT&#39;ed structs instead of hashmaps. Always place null checks first in compound type checking expressions to allow the Javascript engine to optimize to type-specific code paths. Prefer for loops over Array methods and try to pull conditionals out of loops if possible.</p>
+<h2 id="do-you-all-accept-donations?"><a href="#do-you-all-accept-donations?">Do you all accept donations?</a></h2>
+<p>Yes, we do, over at <a href="https://opencollective.com/mithriljs">our OpenCollective page</a>. We don&#39;t actively seek donations, but they are very much appreciated and are used to support development and related expenses. Both one-time and recurring donations are accepted.</p>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>
