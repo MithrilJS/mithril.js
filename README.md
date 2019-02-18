@@ -1,4 +1,4 @@
-mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril)
+mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
 ==========
 
 <p align="center">
