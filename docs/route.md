@@ -584,7 +584,7 @@ var Auth = {
 			url: "/api/v1/auth",
 			data: {username: Auth.username, password: Auth.password}
 		}).then(function(data) {
-			localStorage.setItem("auth-token": data.token)
+			localStorage.setItem("auth-token", data.token)
 			m.route.set("/secret")
 		})
 	}
