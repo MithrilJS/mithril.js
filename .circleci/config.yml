@@ -1,0 +1,14 @@
+# Java Maven CircleCI 2.1 configuration file
+#
+
+version: 2.1
+
+orbs:
+  whitesource-scan: whitesource/whitesource-scan@18.10.2
+
+workflows:
+  test:
+    jobs:
+      - whitesource-scan/scan:
+          context: WhiteSource
+          api_key: 52ed27e27ad547728036f915595c625787967c58e702401eb96800bfa1f9444c
