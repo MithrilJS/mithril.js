@@ -14,7 +14,7 @@ mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://ww
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Getting Help](#getting-help)
-- [Contributing](#contributing)
+- [Contributing](#contributing) 
 
 ## What is Mithril?
 
