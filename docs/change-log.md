@@ -37,6 +37,7 @@
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
 - render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 - API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
+- Ospec: `.throws` now explicitly compares constructors, instead of comparing with `instanceof`.
 
 #### News
 

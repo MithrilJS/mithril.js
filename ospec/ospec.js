@@ -269,7 +269,7 @@ else window.o = m()
 			if(typeof b === "string"){
 				return (e.message === b)
 			}else{
-				return (e instanceof b)
+				return (e.constructor === b)
 			}
 		}
 		return false

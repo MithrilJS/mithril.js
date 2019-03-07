@@ -167,8 +167,11 @@ o.spec("ospec", function() {
 			o([{a: 1, b: 2}, {c: 3}]).deepEquals([{a: 1, b: 2}, {c: 3}])
 			o(function(){throw new Error()}).throws(Error)
 			o(function(){"ayy".foo()}).throws(TypeError)
+			o(function(){"ayy".foo()}).notThrows(Error)
 			o(function(){Math.PI.toFixed(Math.pow(10,20))}).throws(RangeError)
+			o(function(){Math.PI.toFixed(Math.pow(10,20))}).notThrows(Error)
 			o(function(){decodeURIComponent("%")}).throws(URIError)
+			o(function(){decodeURIComponent("%")}).notThrows(Error)
 
 			o(function(){"ayy".foo()}).notThrows(SyntaxError)
 			o(function(){throw new Error("foo")}).throws("foo")
