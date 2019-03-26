@@ -574,23 +574,26 @@ For that reason you should avoid recreating components. Instead, consume compone
 ```javascript
 // AVOID
 var ComponentFactory = function(greeting) {
-	// creates a new component on every call
 	return {
 		view: function() {
 			return m("div", greeting)
 		}
 	}
 }
+
 m.render(document.body, m(ComponentFactory("hello")))
 // calling a second time recreates div from scratch rather than doing nothing
 m.render(document.body, m(ComponentFactory("hello")))
 
 // PREFER
-var Component = {
-	view: function(vnode) {
-		return m("div", vnode.attrs.greeting)
+var Component = function(vnode) {
+	return {
+		view: function() {
+			return m("div", vnode.attrs.greeting)
+		}
 	}
 }
+
 m.render(document.body, m(Component, {greeting: "hello"}))
 // calling a second time does not modify DOM
 m.render(document.body, m(Component, {greeting: "hello"}))
