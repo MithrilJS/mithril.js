@@ -12,7 +12,7 @@
 
 ### What is Mithril?
 
-Mithril is a modern client-side Javascript framework for building Single Page Applications.
+Mithril is a modern client-side JavaScript framework for building Single Page Applications.
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
@@ -80,7 +80,7 @@ Mithril is also loaded onto this page already, so you can start poking at the `m
 
 Let's start as small as we can: render some text on screen. Copy the code below into your file (and by copy, I mean type it out - you'll learn better)
 
-```javascript
+```JavaScript
 var root = document.body
 
 m.render(root, "Hello world")
@@ -88,7 +88,7 @@ m.render(root, "Hello world")
 
 Now, let's change the text to something else. Add this line of code under the previous one:
 
-```javascript
+```JavaScript
 m.render(root, "My first app")
 ```
 
@@ -105,19 +105,19 @@ As you can see, you use the same code to both create and update HTML. Mithril au
 
 Let's wrap our text in an `<h1>` tag.
 
-```javascript
+```JavaScript
 m.render(root, m("h1", "My first app"))
 ```
 
 The `m()` function can be used to describe any HTML structure you want. So if you need to add a class to the `<h1>`:
 
-```javascript
+```JavaScript
 m("h1", {class: "title"}, "My first app")
 ```
 
 If you want to have multiple elements:
 
-```javascript
+```JavaScript
 [
 	m("h1", {class: "title"}, "My first app"),
 	m("button", "A button"),
@@ -126,7 +126,7 @@ If you want to have multiple elements:
 
 And so on:
 
-```javascript
+```JavaScript
 m("main", [
 	m("h1", {class: "title"}, "My first app"),
 	m("button", "A button"),
@@ -154,7 +154,7 @@ Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin
 
 A Mithril component is just an object with a `view` function. Here's the code above as a component:
 
-```javascript
+```JavaScript
 var Hello = {
 	view: function() {
 		return m("main", [
@@ -167,7 +167,7 @@ var Hello = {
 
 To activate the component, we use `m.mount`.
 
-```javascript
+```JavaScript
 m.mount(root, Hello)
 ```
 
@@ -182,7 +182,7 @@ As you would expect, doing so creates this markup:
 
 The `m.mount` function is similar to `m.render`, but instead of rendering some HTML only once, it activates Mithril's auto-redrawing system. To understand what that means, let's add some events:
 
-```javascript
+```JavaScript
 var count = 0 // added a variable
 
 var Hello = {
@@ -217,7 +217,7 @@ Routing just means going from one screen to another in an application with sever
 
 Let's add a splash page that appears before our click counter. First we create a component for it:
 
-```javascript
+```JavaScript
 var Splash = {
 	view: function() {
 		return m("a", {href: "#!/hello"}, "Enter!")
@@ -229,7 +229,7 @@ As you can see, this component simply renders a link to `#!/hello`. The `#!` par
 
 Now that we're going to have more than one screen, we use `m.route` instead of `m.mount`.
 
-```javascript
+```JavaScript
 m.route(root, "/splash", {
 	"/splash": Splash,
 	"/hello": Hello,
@@ -257,7 +257,7 @@ Let's change our click counter to make it save data on a server. For the server,
 
 First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `withCredentials` means to enable cookies (a requirement for the REM API to work)
 
-```javascript
+```JavaScript
 var count = 0
 var increment = function() {
 	m.request({
@@ -276,7 +276,7 @@ Calling the increment function [upserts](https://en.wiktionary.org/wiki/upsert) 
 
 Let's replace the event handler in the component to call the `increment` function instead of incrementing the `count` variable directly:
 
-```javascript
+```JavaScript
 var Hello = {
 	view: function() {
 		return m("main", [
