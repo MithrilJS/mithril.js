@@ -10,7 +10,7 @@ The auto-redraw system simply consists of triggering a re-render function behind
 
 Mithril automatically redraws after DOM event handlers that are defined in a Mithril view:
 
-```javascript
+```JavaScript
 var MyComponent = {
 	view: function() {
 		return m("div", {onclick: doSomething})
@@ -26,7 +26,7 @@ m.mount(document.body, MyComponent)
 
 You can disable an auto-redraw for specific events by setting `e.redraw` to `false`.
 
-```javascript
+```JavaScript
 var MyComponent = {
 	view: function() {
 		return m("div", {onclick: doSomething})
@@ -46,7 +46,7 @@ m.mount(document.body, MyComponent)
 
 Mithril automatically redraws after [`m.request`](request.md) completes:
 
-```javascript
+```JavaScript
 m.request("/api/v1/users").then(function() {
 	// a redraw happens after this function runs
 })
@@ -54,7 +54,7 @@ m.request("/api/v1/users").then(function() {
 
 You can disable an auto-redraw for a specific request by setting the `background` option to true:
 
-```javascript
+```JavaScript
 m.request("/api/v1/users", {background: true}).then(function() {
 	// does not trigger a redraw
 })
@@ -65,7 +65,7 @@ m.request("/api/v1/users", {background: true}).then(function() {
 
 Mithril automatically redraws after [`m.route.set()`](route.md#mrouteset) calls (or route changes via links that use [`m.route.link`](route.md#mroutelink)
 
-```javascript
+```JavaScript
 var RoutedComponent = {
 	view: function() {
 		return [
@@ -95,7 +95,7 @@ Mithril also does not redraw after lifecycle methods. Parts of the UI may be red
 
 If you need to explicitly trigger a redraw within a lifecycle method, you should call `m.redraw()`, which will trigger an asynchronous redraw.
 
-```javascript
+```JavaScript
 function StableComponent() {
 	var height = 0
 
@@ -115,7 +115,7 @@ Mithril does not auto-redraw vnode trees that are rendered via `m.render`. This 
 
 Remember that `m.render` expects a vnode tree, and `m.mount` expects a component:
 
-```javascript
+```JavaScript
 // wrap the component in a m() call for m.render
 m.render(document.body, m(MyComponent))
 
