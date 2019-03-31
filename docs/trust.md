@@ -34,7 +34,7 @@ Argument    | Type                 | Required | Description
 
 By default, Mithril escapes all values in order to prevent a class of security problems called [XSS injections](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
-```javascript
+```JavaScript
 var userContent = "<script>alert('evil')</script>"
 var view = m("div", userContent)
 
@@ -46,7 +46,7 @@ m.render(document.body, view)
 
 However, sometimes it is desirable to render rich text and formatting markup. To fill that need, `m.trust` creates trusted HTML [vnodes](vnodes.md) which are rendered as HTML.
 
-```javascript
+```JavaScript
 var view = m("div", [
 	m.trust("<h1>Here's some <em>HTML</em></h1>")
 ])
@@ -63,17 +63,17 @@ Trusted HTML vnodes are objects, not strings; therefore they cannot be concatena
 
 ### Security considerations
 
-You **must sanitize the input** of `m.trust` to ensure there's no user-generated malicious code in the HTML string. If you don't sanitize an HTML string and mark it as a trusted string, any asynchronous javascript call points within the HTML string will be triggered and run with the authorization level of the user viewing the page.
+You **must sanitize the input** of `m.trust` to ensure there's no user-generated malicious code in the HTML string. If you don't sanitize an HTML string and mark it as a trusted string, any asynchronous JavaScript call points within the HTML string will be triggered and run with the authorization level of the user viewing the page.
 
 There are many ways in which an HTML string may contain executable code. The most common ways to inject security attacks are to add an `onload` or `onerror` attributes in `<img>` or `<iframe>` tags, and to use unbalanced quotes such as `" onerror="alert(1)` to inject executable contexts in unsanitized string interpolations.
 
-```javascript
+```JavaScript
 var data = {}
 
 // Sample vulnerable HTML string
 var description = "<img alt='" + data.title + "'> <span>" + data.description + "</span>"
 
-// An attack using javascript-related attributes
+// An attack using JavaScript-related attributes
 data.description = "<img onload='alert(1)'>"
 
 // An attack using unbalanced tags
@@ -85,7 +85,7 @@ data.title = "' onerror='alert(1)"
 // An attack using a different attribute
 data.title = "' onmouseover='alert(1)"
 
-// An attack that does not use javascript
+// An attack that does not use JavaScript
 data.description = "<a href='http://evil.com/login-page-that-steals-passwords.html'>Click here to read more</a>"
 ```
 
@@ -95,7 +95,7 @@ There are countless non-obvious ways of creating malicious code, so it is highly
 
 ### Scripts that do not run
 
-Even though there are many obscure ways to make an HTML string run Javascript, `<script>` tags are one thing that does not run when it appears in an HTML string.
+Even though there are many obscure ways to make an HTML string run JavaScript, `<script>` tags are one thing that does not run when it appears in an HTML string.
 
 For historical reasons, browsers ignore `<script>` tags that are inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible innerHTML property), the rendering engines cannot backtrack to the parsing-stage if the script calls something like document.write("</body>").
 
@@ -107,7 +107,7 @@ This browser behavior may seem surprising to a developer coming from jQuery, bec
 
 As a general rule of thumb, you should avoid using `m.trust` unless you are explicitly rendering rich text and there's no other way to get the results that you want.
 
-```javascript
+```JavaScript
 // AVOID
 m("div", m.trust("hello world"))
 
@@ -143,7 +143,7 @@ Here's the example snippet for the [Facebook Like button](https://developers.fac
 
 And here's how to refactor into a Mithril component in a way that avoids `m.trust`:
 
-```javascript
+```JavaScript
 var FacebookLikeButton = {
 	oncreate: function() {
 		(function(d, s, id) {
@@ -169,7 +169,7 @@ The Mithril component above simply copies the script tag's code into the `oncrea
 
 A common way to misuse `m.trust` is to use it for HTML entities. A better approach is to use the corresponding unicode characters:
 
-```javascript
+```JavaScript
 // AVOID
 m("h1", "Coca-Cola", m.trust("&trade;"))
 
@@ -181,4 +181,4 @@ Unicode characters for accented characters can be typed using a keyboard layout 
 
 All characters that are representable as HTML entities have unicode counterparts, including non-visible characters such as `&nbsp;` and `&shy;`.
 
-To avoid encoding issues, you should set the file encoding to UTF-8 on the Javascript file, as well as add the `<meta charset="utf-8">` meta tag in the host HTML file.
+To avoid encoding issues, you should set the file encoding to UTF-8 on the JavaScript file, as well as add the `<meta charset="utf-8">` meta tag in the host HTML file.
