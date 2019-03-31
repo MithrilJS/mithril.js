@@ -16,7 +16,7 @@
 
 [Components](components.md) and [virtual DOM nodes](vnodes.md) can have lifecycle methods, also known as *hooks*, which are called at various points during the lifetime of a DOM element.
 
-```javascript
+```JavaScript
 // Sample hook in component
 var ComponentWithHook = {
 	oninit: function(vnode) {
@@ -59,7 +59,7 @@ Like in other hooks, the `this` keyword in the `oninit` callback points to `vnod
 
 The `oninit` hook is useful for initializing component state based on arguments passed via `vnode.attrs` or `vnode.children`.
 
-```javascript
+```JavaScript
 function ComponentWithState() {
 	var initialData
 	return {
@@ -94,7 +94,7 @@ Like in other hooks, the `this` keyword in the `oncreate` callback points to `vn
 
 The `oncreate` hook is useful for reading layout values that may trigger a repaint, starting animations and for initializing third party libraries that require a reference to the DOM element.
 
-```javascript
+```JavaScript
 var HeightReporter = {
 	oncreate: function(vnode) {
 		console.log("Initialized with height of: ", vnode.dom.offsetHeight)
@@ -119,7 +119,7 @@ DOM elements whose vnodes have an `onupdate` hook do not get recycled.
 
 The `onupdate` hook is useful for reading layout values that may trigger a repaint, and for dynamically updating UI-affecting state in third party libraries after model data has been changed.
 
-```javascript
+```JavaScript
 function RedrawReporter() {
 	var count = 0
 	return {
@@ -143,7 +143,7 @@ This hook is only called on the DOM element that loses its `parentNode`, but it 
 
 Like in other hooks, the `this` keyword in the `onbeforeremove` callback points to `vnode.state`. DOM elements whose vnodes have an `onbeforeremove` hook do not get recycled.
 
-```javascript
+```JavaScript
 var Fader = {
 	onbeforeremove: function(vnode) {
 		vnode.dom.classList.add("fade-out")
@@ -169,7 +169,7 @@ Like in other hooks, the `this` keyword in the `onremove` callback points to `vn
 
 The `onremove` hook is useful for running clean up tasks.
 
-```javascript
+```JavaScript
 function Timer() {
 	var timeout = setTimeout(function() {
 		console.log("timed out")
