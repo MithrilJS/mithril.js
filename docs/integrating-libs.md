@@ -1,10 +1,10 @@
 # 3rd Party Integration
 
-Integration with third party libraries or vanilla javascript code can be achieved via [lifecycle methods](lifecycle-methods.md).
+Integration with third party libraries or vanilla JavaScript code can be achieved via [lifecycle methods](lifecycle-methods.md).
 
 ## noUiSlider Example
 
-```javascript
+```JavaScript
 /** NoUiSlider wrapper component */
 function Slider() {
 	var slider
@@ -68,7 +68,7 @@ m.mount(document.body, Demo)
 
 ## Bootstrap FullCalandar Example
 
-```javascript
+```JavaScript
 /** FullCalendar wrapper component */
 var FullCalendar = {
 	oncreate: function (vnode) {
