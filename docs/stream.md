@@ -39,7 +39,7 @@ Similarly, you can make a stream depend on other streams so that changing the va
 
 Streams are NOT bundled with Mithril's core distribution. To include the Streams module, use:
 
-```javascript
+```JavaScript
 var Stream = require("mithril/stream")
 ```
 
@@ -274,7 +274,7 @@ Argument    | Type                 | Required | Description
 
 Streams are not part of the core Mithril distribution. To include them in a project, require its module:
 
-```javascript
+```JavaScript
 var stream = require("mithril/stream")
 ```
 
@@ -283,7 +283,7 @@ var stream = require("mithril/stream")
 
 `stream()` returns a stream. At its most basic level, a stream works similar to a variable or a getter-setter property: it can hold state, which can be modified.
 
-```javascript
+```JavaScript
 var username = stream("John")
 console.log(username()) // logs "John"
 
@@ -293,7 +293,7 @@ console.log(username()) // logs "John Doe"
 
 The main difference is that a stream is a function, and therefore can be composed into higher order functions.
 
-```javascript
+```JavaScript
 var users = stream()
 
 // request users from a server using the fetch API
@@ -308,7 +308,7 @@ In the example above, the `users` stream is populated with the response data whe
 
 Streams can also be populated from event callbacks and similar.
 
-```javascript
+```JavaScript
 // a stream
 var user = stream("")
 
@@ -325,7 +325,7 @@ In the example above, when the user types in the input, the `user` stream is upd
 
 Streams are useful for implementing computed properties:
 
-```javascript
+```JavaScript
 var title = stream("")
 var slug = title.map(function(value) {
 	return value.toLowerCase().replace(/\W/g, "-")
@@ -339,7 +339,7 @@ In the example above, the value of `slug` is computed when `title` is updated, n
 
 It's of course also possible to compute properties based on multiple streams:
 
-```javascript
+```JavaScript
 var firstName = stream("John")
 var lastName = stream("Doe")
 var fullName = stream.merge([firstName, lastName]).map(function(values) {
@@ -361,7 +361,7 @@ Computed properties in Mithril are updated atomically: streams that depend on mu
 
 Streams can be chained using the `map` method. A chained stream is also known as a *dependent stream*.
 
-```javascript
+```JavaScript
 // parent stream
 var value = stream(1)
 
@@ -377,7 +377,7 @@ Dependent streams are *reactive*: their values are updated any time the value of
 
 You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
-```javascript
+```JavaScript
 var skipped = stream(1).map(function(value) {
 	return stream.SKIP
 })
@@ -393,7 +393,7 @@ skipped.map(function() {
 
 Streams can depend on more than one parent stream. These kinds of streams can be created via `stream.merge()`
 
-```javascript
+```JavaScript
 var a = stream("hello")
 var b = stream("world")
 
@@ -406,7 +406,7 @@ console.log(greeting()) // logs "hello world"
 
 Or you can use the helper function `stream.lift()`
 
-```javascript
+```JavaScript
 var a = stream("hello")
 var b = stream("world")
 
@@ -419,7 +419,7 @@ console.log(greeting()) // logs "hello world"
 
 There's also a lower level method called `stream.combine()` that exposes the stream themselves in the reactive computations for more advanced use cases
 
-```javascript
+```JavaScript
 var a = stream(5)
 var b = stream(7)
 
@@ -434,7 +434,7 @@ A stream can depend on any number of streams and it's guaranteed to update atomi
 
 You can prevent dependent streams from being updated by returning the special value `stream.SKIP`
 
-```javascript
+```JavaScript
 var skipped = stream.combine(function(stream) {
 	return stream.SKIP
 }, [stream(1)])
@@ -454,13 +454,13 @@ At any given time, a stream can be in one of three states: *pending*, *active*, 
 
 Pending streams can be created by calling `stream()` with no parameters.
 
-```javascript
+```JavaScript
 var pending = stream()
 ```
 
 If a stream is dependent on more than one stream, any of its parent streams is in a pending state, the dependent streams is also in a pending state, and does not update its value.
 
-```javascript
+```JavaScript
 var a = stream(5)
 var b = stream() // pending stream
 
@@ -475,7 +475,7 @@ In the example above, `added` is a pending stream, because its parent `b` is als
 
 This also applies to dependent streams created via `stream.map`:
 
-```javascript
+```JavaScript
 var value = stream()
 var doubled = value.map(function(value) {return value * 2})
 
@@ -486,7 +486,7 @@ console.log(doubled()) // logs undefined because `doubled` is pending
 
 When a stream receives a value, it becomes active (unless the stream is ended).
 
-```javascript
+```JavaScript
 var stream1 = stream("hello") // stream1 is active
 
 var stream2 = stream() // stream2 starts off pending
@@ -495,7 +495,7 @@ stream2("world") // then becomes active
 
 A dependent stream with multiple parents becomes active if all of its parents are active.
 
-```javascript
+```JavaScript
 var a = stream("hello")
 var b = stream()
 
@@ -510,7 +510,7 @@ In the example above, the `a` stream is active, but `b` is pending. setting `b("
 
 A stream can stop affecting its dependent streams by calling `stream.end(true)`. This effectively removes the connection between a stream and its dependent streams.
 
-```javascript
+```JavaScript
 var value = stream()
 var doubled = value.map(function(value) {return value * 2})
 
@@ -524,7 +524,7 @@ console.log(doubled())
 
 Ended streams still have state container semantics, i.e. you can still use them as getter-setters, even after they are ended.
 
-```javascript
+```JavaScript
 var value = stream(1)
 value.end(true) // set to ended state
 
@@ -542,7 +542,7 @@ Ending a stream can be useful in cases where a stream has a limited lifetime (fo
 
 Streams implement a `.toJSON()` method. When a stream is passed as the argument to `JSON.stringify()`, the value of the stream is serialized.
 
-```javascript
+```JavaScript
 var value = stream(123)
 var serialized = JSON.stringify(value)
 console.log(serialized) // logs 123
@@ -564,7 +564,7 @@ If redrawing is desired in response to other asynchronous events (e.g. `setTimeo
 
 For example, say we want to create a generic function called `plusOne`. The naive implementation would look like this:
 
-```javascript
+```JavaScript
 function plusOne(a) {
 	return a + 1
 }
@@ -574,7 +574,7 @@ The problem with this implementation is that it can only be used with a number. 
 
 This is where Fantasy Land can help. Let's rewrite that function in terms of a Fantasy Land algebra:
 
-```javascript
+```JavaScript
 var fl = require("fantasy-land")
 
 function plusOne(a) {
