@@ -31,7 +31,7 @@
 
 Navigate between "pages" within an application
 
-```javascript
+```JavaScript
 var Home = {
 	view: function() {
 		return "Welcome"
@@ -79,7 +79,7 @@ Argument          | Type      | Required | Description
 **returns**       |           |          | Returns `undefined`
 
 Remember that when using `.set` with params you also need to define the route:
-```javascript
+```JavaScript
 var Article = {
 	view: function(vnode) {
 		return "This is article " + vnode.attrs.articleid
@@ -235,7 +235,7 @@ The default strategy uses the hashbang.
 
 Normally, you need to create a few [components](components.md) to map routes to:
 
-```javascript
+```JavaScript
 var Home = {
 	view: function() {
 		return [
@@ -257,7 +257,7 @@ var Page1 = {
 
 In the example above, there are two components: `Home` and `Page1`. Each contains a menu and some text. The menu is itself being defined as a component to avoid repetition:
 
-```javascript
+```JavaScript
 var Menu = {
 	view: function() {
 		return m("nav", [
@@ -270,7 +270,7 @@ var Menu = {
 
 Now we can define routes and map our components to them:
 
-```javascript
+```JavaScript
 m.route(document.body, "/", {
 	"/": Home,
 	"/page1": Page1,
@@ -295,7 +295,7 @@ When navigating to routes, there's no need to explicitly specify the router pref
 
 Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:
 
-```javascript
+```JavaScript
 var Edit = {
 	view: function(vnode) {
 		return [
@@ -319,7 +319,7 @@ When a user navigates from a parameterized route to the same route with a differ
 
 To achieve that, it's possible to combine route parameterization with the virtual dom [key reconciliation](keys.md) feature:
 
-```javascript
+```JavaScript
 m.route(document.body, "/edit/1", {
 	"/edit/:key": Edit,
 })
@@ -339,7 +339,7 @@ Or even use the [`history state`](#history-state) feature to achieve reloadable 
 
 It's also possible to have variadic routes, i.e. a route with an argument that contains URL pathnames that contain slashes:
 
-```javascript
+```JavaScript
 m.route(document.body, "/edit/pictures/image.jpg", {
 	"/edit/:file...": Edit,
 })
@@ -347,11 +347,11 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
+For isomorphic / universal JavaScript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 
-```javascript
+```JavaScript
 m.route(document.body, "/", {
   "/": homeComponent,
   // [...]
@@ -365,7 +365,7 @@ It's possible to take full advantage of the underlying `history.pushState` API t
 
 For example, you could create a form like this:
 
-```javascript
+```JavaScript
 var state = {
 	term: "",
 	search: function() {
@@ -406,7 +406,7 @@ This way, if the user searches and presses the back button to return to the appl
 
 The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
-```javascript
+```JavaScript
 // set to pathname strategy
 m.route.prefix("")
 
@@ -427,7 +427,7 @@ m.route.prefix("/my-app")
 
 Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a `onmatch()` and/or a `render()` method. Both methods are optional but at least one of them must be present.
 
-```javascript
+```JavaScript
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function(args, requestedPath, route) {
@@ -448,7 +448,7 @@ RouteResolvers are useful for implementing a variety of advanced routing use cas
 
 It's often desirable to wrap all or most of the routed components in a reusable shell (often called a "layout"). In order to do that, you first need to create a component that contains the common markup that will wrap around the various different components:
 
-```javascript
+```JavaScript
 var Layout = {
 	view: function(vnode) {
 		return m(".layout", vnode.children)
@@ -460,7 +460,7 @@ In the example above, the layout merely consists of a `<div class="layout">` tha
 
 One way to wrap the layout is to define an anonymous component in the routes map:
 
-```javascript
+```JavaScript
 // example 1
 m.route(document.body, "/", {
 	"/": {
@@ -480,7 +480,7 @@ However, note that because the top level component is an anonymous component, ju
 
 If you would prefer to have the Layout component be diffed and maintained intact rather than recreated from scratch, you should instead use a RouteResolver as the root object:
 
-```javascript
+```JavaScript
 // example 2
 m.route(document.body, "/", {
 	"/": {
@@ -500,7 +500,7 @@ Note that in this case, if the Layout component has `oninit` and `oncreate` life
 
 To clarify the difference between the two examples, example 1 is equivalent to this code:
 
-```javascript
+```JavaScript
 // functionally equivalent to example 1
 var Anon1 = {
 	view: function() {
@@ -537,7 +537,7 @@ In example 2, since `Layout` is the top-level component in both routes, the DOM 
 
 The RouteResolver's `onmatch` hook can be used to run logic before the top level component in a route is initialized. The example below shows how to implement a login wall that prevents users from seeing the `/secret` page unless they login.
 
-```javascript
+```JavaScript
 var isLoggedIn = false
 
 var Login = {
@@ -568,7 +568,7 @@ When the application loads, `onmatch` is called and since `isLoggedIn` is false,
 
 For the sake of simplicity, in the example above, the user's logged in status is kept in a global variable, and that flag is merely toggled when the user clicks the login button. In a real life application, a user would obviously have to supply proper login credentials, and clicking the login button would trigger a request to a server to authenticate the user:
 
-```javascript
+```JavaScript
 var Auth = {
 	username: "",
 	password: "",
@@ -623,7 +623,7 @@ m.route(document.body, "/secret", {
 
 Typically, a component can load data upon initialization. Loading data this way renders the component twice. The first render pass occurs upon routing, and the second fires after the request completes. Take care to note that `loadUsers()` returns a Promise, but any Promise returned by `oninit` is currently ignored. The second render pass comes from the [`background` option for `m.request`](request.md).
 
-```javascript
+```JavaScript
 var state = {
 	users: [],
 	loadUsers: function() {
@@ -649,7 +649,7 @@ In the example above, on the first render, the UI displays `"loading"` since `st
 
 RouteResolvers can be used as a mechanism to preload data before rendering a component in order to avoid UI flickering and thus bypassing the need for a loading indicator:
 
-```javascript
+```JavaScript
 var state = {
 	users: [],
 	loadUsers: function() {
@@ -681,7 +681,7 @@ In a large application, it may be desirable to download the code for each route 
 
 At its most basic form, one could do the following:
 
-```javascript
+```JavaScript
 // Home.js
 module.export = {
 	view: function() {
@@ -693,7 +693,7 @@ module.export = {
 }
 ```
 
-```javascript
+```JavaScript
 // index.js
 function load(file) {
 	return m.request({
@@ -718,7 +718,7 @@ However, realistically, in order for that to work on a production scale, it woul
 
 Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [webpack's code splitting system](https://webpack.github.io/docs/code-splitting.html):
 
-```javascript
+```JavaScript
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function() {
