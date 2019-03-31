@@ -257,7 +257,7 @@ In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no l
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var m = require("mithril")
 
 var num = m.prop(1)
@@ -265,7 +265,7 @@ var num = m.prop(1)
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var m = require("mithril")
 var prop = require("mithril/stream")
 
@@ -281,7 +281,7 @@ In `v0.2.x` components could be created using either `m(component)` or `m.compon
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 // These are equivalent
 m.component(component)
 m(component)
@@ -289,7 +289,7 @@ m(component)
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m(component)
 ```
 
@@ -301,7 +301,7 @@ In `v0.2.x` mithril provided a single lifecycle method, `config`. `v1.x` provide
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m("div", {
     config : function(element, isInitialized) {
         // runs on each redraw
@@ -314,7 +314,7 @@ m("div", {
 
 More documentation on these new methods is available in [lifecycle-methods.md](lifecycle-methods.md).
 
-```javascript
+```JavaScript
 m("div", {
     // Called before the DOM node is created
     oninit : function(vnode) { /*...*/ },
@@ -350,7 +350,7 @@ In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked dr
 
 #### `v0.2.x`
 
-```javascript
+```JavaScript
 m("div", {
     onclick : function(e) {
         m.redraw.strategy("none")
@@ -360,7 +360,7 @@ m("div", {
 
 #### `v1.x`
 
-```javascript
+```JavaScript
 m("div", {
     onclick : function(e) {
         e.redraw = false
@@ -374,13 +374,13 @@ In v0.2.x it was possible to force mithril to redraw immediately by passing a tr
 
 #### `v0.2.x`
 
-```javascript
+```JavaScript
 m.redraw(true) // redraws immediately & synchronously
 ```
 
 #### `v1.x`
 
-```javascript
+```JavaScript
 m.redraw() // schedules a redraw on the next requestAnimationFrame tick
 ```
 
@@ -396,7 +396,7 @@ In `v1.x` there is no more `controller` property in components, use `oninit` ins
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.mount(document.body, {
     controller : function() {
         var ctrl = this
@@ -412,7 +412,7 @@ m.mount(document.body, {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m.mount(document.body, {
     oninit : function(vnode) {
         vnode.state.fooga = 1
@@ -448,7 +448,7 @@ Arguments to a component in `v1.x` must be an object, simple values like `String
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var component = {
     controller : function(options) {
         // options.fooga === 1
@@ -464,7 +464,7 @@ m("div", m.component(component, { fooga : 1 }))
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var component = {
     oninit : function(vnode) {
         // vnode.attrs.fooga === 1
@@ -486,7 +486,7 @@ In `v0.2.x` view functions are passed a reference to the `controller` instance a
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.mount(document.body, {
     controller : function() {},
 
@@ -498,7 +498,7 @@ m.mount(document.body, {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m.mount(document.body, {
     oninit : function(vnode) {
         // ...
@@ -519,13 +519,13 @@ In `v0.2.x` you could pass components as the second argument of `m()` w/o any wr
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m("div", component)
 ```
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m("div", m(component))
 ```
 
@@ -539,7 +539,7 @@ In `v1.x`, components are required instead in both cases.
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.mount(element, m('i', 'hello'))
 m.mount(element, m(Component, attrs))
 
@@ -550,7 +550,7 @@ m.route(element, '/', {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m.mount(element, {view: function () {return m('i', 'hello')}})
 m.mount(element, {view: function () {return m(Component, attrs)}})
 
@@ -567,14 +567,14 @@ In `v0.2.x` the routing mode could be set by assigning a string of `"pathname"`,
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.route.mode = "pathname"
 m.route.mode = "search"
 ```
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m.route.prefix("")
 m.route.prefix("?")
 ```
@@ -587,7 +587,7 @@ Handling clicks on anchor tags via the mithril router is similar to `v0.2.x` but
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 // When clicked this link will load the "/path" route instead of navigating
 m("a", {
     href   : "/path",
@@ -597,7 +597,7 @@ m("a", {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 // When clicked this link will load the "/path" route instead of navigating
 m("a", {
     href     : "/path",
@@ -613,7 +613,7 @@ In `v0.2.x` all interaction w/ the current route happened via `m.route()`. In `v
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 // Getting the current route
 m.route()
 
@@ -623,7 +623,7 @@ m.route("/other/route")
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 // Getting the current route
 m.route.get()
 
@@ -639,7 +639,7 @@ In `v0.2.x` reading route params was entirely handled through `m.route.param()`.
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.route(document.body, "/booga", {
     "/:attr" : {
         controller : function() {
@@ -654,7 +654,7 @@ m.route(document.body, "/booga", {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m.route(document.body, "/booga", {
     "/:attr" : {
         oninit : function(vnode) {
@@ -677,7 +677,7 @@ m.route(document.body, "/booga", {
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var qs = m.route.buildQueryString({ a : 1 });
 
 var obj = m.route.parseQueryString("a=1");
@@ -685,7 +685,7 @@ var obj = m.route.parseQueryString("a=1");
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var qs = m.buildQueryString({ a : 1 });
 
 var obj = m.parseQueryString("a=1");
@@ -699,7 +699,7 @@ It is no longer possible to prevent unmounting via `onunload`'s `e.preventDefaul
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var Component = {
     controller: function() {
         this.onunload = function(e) {
@@ -714,7 +714,7 @@ var Component = {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var Component = {
     view: function() {
         return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
@@ -730,7 +730,7 @@ Components no longer call `this.onunload` when they are being removed. They now 
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var Component = {
     controller: function() {
         this.onunload = function(e) {
@@ -745,7 +745,7 @@ var Component = {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var Component = {
     onremove : function() {
         // ...
@@ -766,7 +766,7 @@ In addition, requests no longer have `m.startComputation`/`m.endComputation` sem
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var data = m.request({
     method: "GET",
     url: "https://api.github.com/",
@@ -780,7 +780,7 @@ setTimeout(function() {
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var data = []
 m.request({
     method: "GET",
@@ -805,7 +805,7 @@ Additionally, if the `extract` option is passed to `m.request` the return value 
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 var greetAsync = function() {
     var deferred = m.deferred()
     setTimeout(function() {
@@ -821,7 +821,7 @@ greetAsync()
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 var greetAsync = function() {
     return new Promise(function(resolve){
         setTimeout(function() {
@@ -843,7 +843,7 @@ Since `v1.x` uses standards-compliant Promises, `m.sync` is redundant. Use `Prom
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m.sync([
     m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
@@ -855,7 +855,7 @@ m.sync([
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 Promise.all([
     m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
     m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
@@ -873,7 +873,7 @@ In `v0.2.x`, the `xlink` namespace was the only supported attribute namespace, a
 
 ### `v0.2.x`
 
-```javascript
+```JavaScript
 m("svg",
     // the `href` attribute is namespaced automatically
     m("image[href='image.gif']")
@@ -882,7 +882,7 @@ m("svg",
 
 ### `v1.x`
 
-```javascript
+```JavaScript
 m("svg",
     // User-specified namespace on the `href` attribute
     m("image[xlink:href='image.gif']")
