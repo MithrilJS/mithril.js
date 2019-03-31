@@ -24,7 +24,7 @@
 
 Represents an HTML element in a Mithril view
 
-```javascript
+```JavaScript
 m("div", {class: "foo"}, "hello")
 // represents <div class="foo">hello</div>
 ```
@@ -55,25 +55,25 @@ Argument     | Type                                       | Required | Descripti
 
 ### How it works
 
-Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attrs` object (optional) and a `children` array (optional).
+Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using JavaScript syntax. It accepts a `selector` string (required), an `attrs` object (optional) and a `children` array (optional).
 
-```javascript
+```JavaScript
 m("div", {id: "box"}, "hello")
 
 // equivalent HTML:
 // <div id="box">hello</div>
 ```
 
-The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a javascript object that represents the DOM element to be created.
+The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a JavaScript object that represents the DOM element to be created.
 
-```javascript
+```JavaScript
 // a vnode
 var vnode = {tag: "div", attrs: {id: "box"}, children: [ /*...*/ ]}
 ```
 
 To transform a vnode into an actual DOM element, use the [`m.render()`](render.md) function:
 
-```javascript
+```JavaScript
 m.render(document.body, m("br")) // puts a <br> in <body>
 ```
 
@@ -85,7 +85,7 @@ Calling `m.render()` multiple times does **not** recreate the DOM tree from scra
 
 The `m()` function is both *polymorphic* and *variadic*. In other words, it's very flexible in what it expects as input parameters:
 
-```javascript
+```JavaScript
 // simple tag
 m("div") // <div></div>
 
@@ -112,7 +112,7 @@ m("ul",               // <ul>
 
 The first argument of `m()` can be any CSS selector that can describe an HTML element. It accepts any valid CSS combinations of `#` (id), `.` (class) and `[]` (attribute) syntax.
 
-```javascript
+```JavaScript
 m("div#hello")
 // <div id="hello"></div>
 
@@ -128,13 +128,13 @@ m("a#exit.external[href='http://example.com']", "Leave")
 
 If you omit the tag name, Mithril assumes a `div` tag.
 
-```javascript
+```JavaScript
 m(".box.box-bordered") // <div class="box box-bordered"></div>
 ```
 
 Typically, it's recommended that you use CSS selectors for static attributes (i.e. attributes whose value do not change), and pass an attributes object for dynamic attribute values.
 
-```javascript
+```JavaScript
 var currentURL = "/"
 
 m("a.link[href=/]", {
@@ -167,11 +167,11 @@ If another attribute is present in both the first and the second argument, the s
 
 ### DOM attributes
 
-Mithril uses both the Javascript API and the DOM API (`setAttribute`) to resolve attributes. This means you can use both syntaxes to refer to attributes.
+Mithril uses both the JavaScript API and the DOM API (`setAttribute`) to resolve attributes. This means you can use both syntaxes to refer to attributes.
 
-For example, in the Javascript API, the `readonly` attribute is called `element.readOnly` (notice the uppercase). In Mithril, all of the following are supported:
+For example, in the JavaScript API, the `readonly` attribute is called `element.readOnly` (notice the uppercase). In Mithril, all of the following are supported:
 
-```javascript
+```JavaScript
 m("input", {readonly: true}) // lowercase
 m("input", {readOnly: true}) // uppercase
 m("input[readonly]")
@@ -180,7 +180,7 @@ m("input[readOnly]")
 
 This even includes custom elements. For example, you can use [A-Frame](https://aframe.io/docs/0.8.0/introduction/) within Mithril, no problem!
 
-```javascript
+```JavaScript
 m("a-scene", [
 	m("a-box", {
 		position: "-1 0.5 -3",
@@ -217,7 +217,7 @@ m("a-scene", [
 
 And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](http://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
 
-```javascript
+```JavaScript
 m("brick-deck[selected-index=0]", [/* ... */]) // lowercase
 m("brick-deck[selectedIndex=0]", [/* ... */]) // uppercase
 // I know these look odd, but `brick-deck`'s `selectedIndex` property is a
@@ -228,7 +228,7 @@ m("brick-deck", {"selectedIndex": "0"}, [/* ... */])
 
 For custom elements, it doesn't auto-stringify properties, in case they are objects, numbers, or some other non-string value. So assuming you had some custom element `my-special-element` that has an `elem.whitelist` array getter/setter property, you could do this, and it'd work as you'd expect:
 
-```javascript
+```JavaScript
 m("my-special-element", {
 	whitelist: [
 		"https://example.com",
@@ -240,7 +240,7 @@ m("my-special-element", {
 
 If you have classes or IDs for those elements, the shorthands still work as you would expect. To pull another A-Frame example:
 
-```javascript
+```JavaScript
 // These two are equivalent
 m("a-entity#player")
 m("a-entity", {id: "player"})
@@ -254,7 +254,7 @@ Do note that all the properties with magic semantics, like lifecycle attributes,
 
 Mithril supports both strings and objects as valid `style` values. In other words, all of the following are supported:
 
-```javascript
+```JavaScript
 m("div", {style: "background:red;"})
 m("div", {style: {background: "red"}})
 m("div[style=background:red]")
@@ -272,7 +272,7 @@ Mithril does not attempt to add units to number values. It simply stringifies th
 
 Mithril supports event handler binding for all DOM events, including events whose specs do not define an `on${event}` property, such as `touchstart`
 
-```javascript
+```JavaScript
 function doSomething(e) {
 	console.log(e)
 }
@@ -282,7 +282,7 @@ m("div", {onclick: doSomething})
 
 Mithril accepts functions and [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener) objects. So this will also work:
 
-```javascript
+```JavaScript
 var clickListener = {
 	handleEvent: function(e) {
 		console.log(e)
@@ -294,7 +294,7 @@ m("div", {onclick: clickListener})
 
 By default, when an event attached with hyperscript fires, this will trigger Mithril's auto-redraw after your event callback returns (assuming you are using `m.mount` or `m.route` instead of `m.render` directly). You can disable auto-redraw specifically for a single event by setting `e.redraw = false` on it:
 
-```javascript
+```JavaScript
 m("div", {
 	onclick: function(e) {
 		// Prevent auto-redraw
@@ -309,7 +309,7 @@ m("div", {
 
 Mithril supports DOM functionality that is accessible via properties such as `<select>`'s `selectedIndex` and `value` properties.
 
-```javascript
+```JavaScript
 m("select", {selectedIndex: 0}, [
 	m("option", "Option A"),
 	m("option", "Option B"),
@@ -322,9 +322,9 @@ m("select", {selectedIndex: 0}, [
 
 [Components](components.md) allow you to encapsulate logic into a unit and use it as if it was an element. They are the base for making large, scalable applications.
 
-A component is any Javascript object that contains a `view` method. To consume a component, pass the component as the first argument to `m()` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
+A component is any JavaScript object that contains a `view` method. To consume a component, pass the component as the first argument to `m()` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
 
-```javascript
+```JavaScript
 // define a component
 var Greeter = {
 	view: function(vnode) {
@@ -349,7 +349,7 @@ Vnodes and components can have lifecycle methods (also known as *hooks*), which 
 
 Lifecycle methods are defined in the same way as DOM event handlers, but receive the vnode as an argument, instead of an Event object:
 
-```javascript
+```JavaScript
 function initialize(vnode) {
 	console.log(vnode)
 }
@@ -376,7 +376,7 @@ Vnodes in a list can have a special attribute called `key`, which can be used to
 
 Typically, `key` should be the unique identifier field of the objects in the data array.
 
-```javascript
+```JavaScript
 var users = [
 	{id: 1, name: "John"},
 	{id: 2, name: "Mary"},
@@ -401,7 +401,7 @@ To learn more about keys, [see the keys page](keys.md)
 
 Mithril fully supports SVG. Xlink is also supported, but unlike in pre-v1.0 versions of Mithril, must have the namespace explicitly defined:
 
-```javascript
+```JavaScript
 m("svg", [
 	m("image[xlink:href='image.gif']")
 ])
@@ -413,11 +413,11 @@ MathML is also fully supported.
 
 ### Making templates dynamic
 
-Since nested vnodes are just plain Javascript expressions, you can simply use Javascript facilities to manipulate them
+Since nested vnodes are just plain JavaScript expressions, you can simply use JavaScript facilities to manipulate them
 
 #### Dynamic text
 
-```javascript
+```JavaScript
 var user = {name: "John"}
 
 m(".name", user.name) // <div class="name">John</div>
@@ -427,7 +427,7 @@ m(".name", user.name) // <div class="name">John</div>
 
 Use `Array` methods such as [`map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) to iterate over lists of data
 
-```javascript
+```JavaScript
 var users = [
 	{name: "John"},
 	{name: "Mary"},
@@ -448,13 +448,13 @@ m("ul", users.map(function(u) { // <ul>
 
 Use the ternary operator to conditionally set content on a view
 
-```javascript
+```JavaScript
 var isError = false
 
 m("div", isError ? "An error occurred" : "Saved") // <div>Saved</div>
 ```
 
-You cannot use Javascript statements such as `if` or `for` within Javascript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
+You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
 
 ---
 
@@ -474,7 +474,7 @@ Although Mithril is flexible, some code patterns are discouraged:
 
 Different DOM elements have different attributes, and often different behaviors. Making a selector configurable can leak the implementation details of a component out of its unit.
 
-```javascript
+```JavaScript
 // AVOID
 var BadInput = {
 	view: function(vnode) {
@@ -488,7 +488,7 @@ var BadInput = {
 
 Instead of making selectors dynamic, you are encouraged to explicitly code each valid possibility, or refactor the variable portion of the code out.
 
-```javascript
+```JavaScript
 // PREFER explicit code
 var BetterInput = {
 	view: function(vnode) {
@@ -520,9 +520,9 @@ var BetterLabeledComponent = {
 
 #### Avoid statements in view methods
 
-Javascript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
+JavaScript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
 
-```javascript
+```JavaScript
 // AVOID
 var BadListComponent = {
 	view: function(vnode) {
@@ -536,9 +536,9 @@ var BadListComponent = {
 }
 ```
 
-Instead, prefer using Javascript expressions such as the ternary operator and Array methods.
+Instead, prefer using JavaScript expressions such as the ternary operator and Array methods.
 
-```javascript
+```JavaScript
 // PREFER
 var BetterListComponent = {
 	view: function(vnode) {
