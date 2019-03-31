@@ -14,7 +14,7 @@ In other words, a `key` is a way of saying "this DOM element is for the data obj
 
 Typically, a `key` property should be the unique identifier field of the objects in the data array.
 
-```javascript
+```JavaScript
 var users = [
 	{id: 1, name: "John"},
 	{id: 2, name: "Mary"},
@@ -37,7 +37,7 @@ Having a key means that if the `users` array is shuffled and the view is re-rend
 
 A common pattern is to have data comprised of an array of objects and to generate a list of vnodes that map to each object in the array. For example, consider the following code:
 
-```javascript
+```JavaScript
 var people = [
 	{id: 1, name: "John"},
 	{id: 2, name: "Mary"},
@@ -55,7 +55,7 @@ m.render(document.body, userList(people))
 
 Let's suppose the `people` variable was changed to this:
 
-```javascript
+```JavaScript
 people = [{id: 2, name: "Mary"}]
 ```
 
@@ -67,7 +67,7 @@ Even though in this particular example, we humans intuitively guess that the fir
 
 Therefore, in the cases when a list of vnodes is derived from a dynamic array of data, you should add a `key` property to each virtual node that maps to a uniquely identifiable field in the source data. This will allow Mithril to intelligently re-order the DOM to maintain each DOM element correctly mapped to its respective item in the data source.
 
-```javascript
+```JavaScript
 function correctUserList(users) {
 	return users.map(function(u) {
 		return m("button", {key: u.id}, u.name)
@@ -85,7 +85,7 @@ Keys can cause confusing issues if they are misunderstood. A typical symptom of 
 
 Keys must be placed on the virtual node that is an immediate child of the array. This means that if you wrap the `button` in an `div` in the example above, the key must be moved to the `div`.
 
-```javascript
+```JavaScript
 // AVOID
 users.map(function(u) {
 	return m("div", [ // key should be in `div`
@@ -98,7 +98,7 @@ users.map(function(u) {
 
 If you refactor the code and make a user component, the key must be moved out of the component and put on the component itself, since it is now the immediate child of the array.
 
-```javascript
+```JavaScript
 // AVOID
 var User = {
 	view: function(vnode) {
@@ -118,7 +118,7 @@ users.map(function(u) {
 
 Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap arrays around keyed elements
 
-```javascript
+```JavaScript
 // AVOID
 users.map(function(u) {
 	return [ // fragment is a vnode, and therefore keyable
@@ -143,7 +143,7 @@ Keys must be strings if present or they will be cast to strings if they are not.
 
 You should use either strings or numbers as keys in one array, but not mix both.
 
-```javascript
+```JavaScript
 // AVOID
 var things = [
 	{id: "1", name: "Book"},
@@ -155,7 +155,7 @@ var things = [
 
 An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.
 
-```javascript
+```JavaScript
 // AVOID
 m("div", [
 	m("div", "a"),
@@ -182,7 +182,7 @@ m("div", [
 
 The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:
 
-```javascript
+```JavaScript
 // Data model
 var users = [
 	{id: 1, name: "John", key: 'a'},
