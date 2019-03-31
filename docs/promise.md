@@ -144,7 +144,7 @@ Argument      | Type                    | Required | Description
 
 A Promise is an object that represents a value which may be available in the future
 
-```javascript
+```JavaScript
 // this promise resolves after one second
 var promise = new Promise(function(resolve, reject) {
   setTimeout(function() {
@@ -160,7 +160,7 @@ promise.then(function(value) {
 
 Promises are useful for working with asynchronous APIs, such as [`m.request`](request.md)
 
-Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other Javascript code to run in the meantime. When they are done, they call a function with their results.
+Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other JavaScript code to run in the meantime. When they are done, they call a function with their results.
 
 The `m.request` function takes time to run because it makes an HTTP request to a remote server and has to wait for a response, which may take several milliseconds due to network latency.
 
@@ -170,7 +170,7 @@ The `m.request` function takes time to run because it makes an HTTP request to a
 
 Promises can be chained. Returning a value from a `then` callback makes it available as the argument to the next `then` callback. This allows refactoring code into smaller functions
 
-```javascript
+```JavaScript
 function getUsers() {return m.request("/api/v1/users")}
 
 // AVOID: hard to test god functions
@@ -203,7 +203,7 @@ In the refactored version, it's trivial to test whether `getFirstTen` has any of
 
 Promises absorb other promises. Basically, this means you can never receive a Promise as an argument to `onFulfilled` or `onRejected` callbacks for `then` and `catch` methods. This feature allows us to flatten nested promises to make code more manageable.
 
-```javascript
+```JavaScript
 function searchUsers(q) {return m.request("/api/v1/users/search", {data: {q: q}})}
 function getUserProjects(id) {return m.request("/api/v1/users/" + id + "/projects")}
 
@@ -235,7 +235,7 @@ In the refactored code, `getFirstId` returns an id, which is passed as the first
 
 Promises can propagate errors to appropriate handlers.
 
-```javascript
+```JavaScript
 searchUsers("John")
   .then(getFirstId)
   .then(getUserProjects)
@@ -260,7 +260,7 @@ Thanks to these error propagation semantics, it's easy to keep each function sma
 
 Sometimes, you already have a value, but want to wrap it in a Promise. It's for this purpose that `Promise.resolve` and `Promise.reject` exist.
 
-```javascript
+```JavaScript
 // suppose this list came from localStorage
 var users = [{id: 1, firstName: "John", lastName: "Doe"}]
 
@@ -278,7 +278,7 @@ promise
 
 In some occasions, you may need to make HTTP requests in parallel, and run code after all requests complete. This can be accomplished by `Promise.all`
 
-```javascript
+```JavaScript
 Promise.all([
   searchUsers("John"),
   searchUsers("Mary"),
