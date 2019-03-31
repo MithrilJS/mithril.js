@@ -20,11 +20,11 @@ First let's create an entry point for the application. Create a file `index.html
 </html>
 ```
 
-The `<!doctype html>` line indicates this is an HTML 5 document. The first `charset` meta tag indicates the encoding of the document and the `viewport` meta tag dictates how mobile browsers should scale the page. The `title` tag contains the text to be displayed on the browser tab for this application, and the `script` tag indicates what is the path to the Javascript file that controls the application.
+The `<!doctype html>` line indicates this is an HTML 5 document. The first `charset` meta tag indicates the encoding of the document and the `viewport` meta tag dictates how mobile browsers should scale the page. The `title` tag contains the text to be displayed on the browser tab for this application, and the `script` tag indicates what is the path to the JavaScript file that controls the application.
 
-We could create the entire application in a single Javascript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
+We could create the entire application in a single JavaScript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
 
-There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern Javascript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
+There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern JavaScript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
 
 ```bash
 npm init -y
@@ -38,7 +38,7 @@ To install Mithril, follow the instructions in the [installation](installation.m
 
 Let's start by creating a module to store our state. Let's create a file called `src/models/User.js`
 
-```javascript
+```JavaScript
 // src/models/User.js
 var User = {
 	list: []
@@ -49,7 +49,7 @@ module.exports = User
 
 Now let's add code to load some data from a server. To communicate with a server, we can use Mithril's XHR utility, `m.request`. First, we include Mithril in the module:
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -62,7 +62,7 @@ module.exports = User
 
 Next we create a function that will trigger an XHR call. Let's call it `loadList`
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -78,7 +78,7 @@ module.exports = User
 
 Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -101,7 +101,7 @@ module.exports = User
 
 The `method` option is an [HTTP method](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods). To retrieve data from the server without causing side-effects on the server, we need to use the `GET` method. The `url` is the address for the API endpoint. The `withCredentials: true` line indicates that we're using cookies (which is a requirement for the REM API).
 
-The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a Javascript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
+The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a JavaScript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
 
 Notice we also have a `return` statement in `loadList`. This is a general good practice when working with Promises, which allows us to register more callbacks to run after the completion of the XHR request.
 
@@ -113,7 +113,7 @@ Now, let's create a view module so that we can display data from our User model 
 
 Create a file called `src/views/UserList.js`. First, let's include Mithril and our model, since we'll need to use both:
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -121,7 +121,7 @@ var User = require("../models/User")
 
 Next, let's create a Mithril component. A component is simply an object that has a `view` method:
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -133,11 +133,11 @@ module.exports = {
 }
 ```
 
-By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply Javascript, it's possible to leverage a lot of Javascript tooling ecosystem: for example [Babel](es6.md), [JSX](jsx.md) (inline-HTML syntax extension), [eslint](http://eslint.org/) (linting), [uglifyjs](https://github.com/mishoo/UglifyJS2) (minification), [istanbul](https://github.com/gotwarlost/istanbul) (code coverage), [flow](https://flowtype.org/) (static type analysis), etc.
+By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem: for example [Babel](es6.md), [JSX](jsx.md) (inline-HTML syntax extension), [eslint](http://eslint.org/) (linting), [uglifyjs](https://github.com/mishoo/UglifyJS2) (minification), [istanbul](https://github.com/gotwarlost/istanbul) (code coverage), [flow](https://flowtype.org/) (static type analysis), etc.
 
 Let's use Mithril hyperscript to create a list of items. Hyperscript is the most idiomatic way of writing Mithril views, but [JSX is another popular alternative that you could explore](jsx.md) once you're more comfortable with the basics:
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -153,7 +153,7 @@ The `".user-list"` string is a CSS selector, and as you would expect, `.user-lis
 
 Now, let's reference the list of users from the model we created earlier (`User.list`) to dynamically loop through data:
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -167,11 +167,11 @@ module.exports = {
 }
 ```
 
-Since `User.list` is a Javascript array, and since hyperscript views are just Javascript, we can loop through the array using the `.map` method. This creates an array of vnodes that represents a list of `div`s, each containing the name of a user.
+Since `User.list` is a JavaScript array, and since hyperscript views are just JavaScript, we can loop through the array using the `.map` method. This creates an array of vnodes that represents a list of `div`s, each containing the name of a user.
 
 The problem, of course, is that we never called the `User.loadList` function. Therefore, `User.list` is still an empty array, and thus this view would render a blank page. Since we want `User.loadList` to be called when we render this component, we can take advantage of component [lifecycle methods](lifecycle-methods.md):
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -188,13 +188,13 @@ module.exports = {
 
 Notice that we added an `oninit` method to the component, which references `User.loadList`. This means that when the component initializes, User.loadList will be called, triggering an XHR request. When the server returns a response, `User.list` gets populated.
 
-Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common pitfall for developers new to javascript: calling the function immediately means that the XHR request will fire as soon as the source code is evaluated, even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
+Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common pitfall for developers new to JavaScript: calling the function immediately means that the XHR request will fire as soon as the source code is evaluated, even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
 
 ---
 
 Let's render the view from the entry point file `src/index.js` we created earlier:
 
-```javascript
+```JavaScript
 // src/index.js
 var m = require("mithril")
 
@@ -248,11 +248,11 @@ Reloading the browser window now should display some styled elements.
 
 Let's add routing to our application.
 
-Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via Javascript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
+Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via JavaScript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
 
 We can add routing by changing the `m.mount` call to a `m.route` call:
 
-```javascript
+```JavaScript
 // src/index.js
 var m = require("mithril")
 
@@ -273,7 +273,7 @@ The `#!` snippet is known as a hashbang, and it's a commonly used string for imp
 
 Let's add another route to our application for editing users. First let's create a module called `views/UserForm.js`
 
-```javascript
+```JavaScript
 // src/views/UserForm.js
 
 module.exports = {
@@ -285,7 +285,7 @@ module.exports = {
 
 Then we can `require` this new module from `src/index.js`
 
-```javascript
+```JavaScript
 // src/index.js
 var m = require("mithril")
 
@@ -299,7 +299,7 @@ m.route(document.body, "/list", {
 
 And finally, we can create a route that references it:
 
-```javascript
+```JavaScript
 // src/index.js
 var m = require("mithril")
 
@@ -316,7 +316,7 @@ Notice that the new route has a `:id` in it. This is a route parameter; you can 
 
 Let's implement the `UserForm` component so that it can respond to those route parameters:
 
-```javascript
+```JavaScript
 // src/views/UserForm.js
 var m = require("mithril")
 
@@ -351,7 +351,7 @@ body,.input,.button {font:normal 16px Verdana;margin:0;}
 
 Right now, this component does nothing to respond to user events. Let's add some code to our `User` model in `src/models/User.js`. This is how the code is right now:
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -374,7 +374,7 @@ module.exports = User
 
 Let's add code to allow us to load a single user
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -409,7 +409,7 @@ module.exports = User
 
 Notice we added a `User.current` property, and a `User.load(id)` method which populates that property. We can now populate the `UserForm` view using this new method:
 
-```javascript
+```JavaScript
 // src/views/UserForm.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -432,7 +432,7 @@ Similar to the `UserList` component, `oninit` calls `User.load()`. Remember we h
 
 Now, let's modify the `UserList` view so that we can navigate from there to a `UserForm`:
 
-```javascript
+```JavaScript
 // src/views/UserList.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -455,7 +455,7 @@ If you refresh the page in the browser, you should now be able to click on a per
 
 The form itself still doesn't save when you press "Save". Let's make this form work:
 
-```javascript
+```JavaScript
 // src/views/UserForm.js
 var m = require("mithril")
 var User = require("../models/User")
@@ -489,7 +489,7 @@ We added `oninput` events to both inputs, that set the `User.current.firstName` 
 
 In addition, we declared that a `User.save` method should be called when the "Save" button is pressed. Let's implement that method:
 
-```javascript
+```JavaScript
 // src/models/User.js
 var m = require("mithril")
 
@@ -541,7 +541,7 @@ Currently, we're only able to navigate back to the user list via the browser bac
 
 Let's create a file `src/views/Layout.js`:
 
-```javascript
+```JavaScript
 // src/views/Layout.js
 var m = require("mithril")
 
@@ -582,7 +582,7 @@ body,.input,.button {font:normal 16px Verdana;margin:0;}
 
 Let's change the router in `src/index.js` to add our layout into the mix:
 
-```javascript
+```JavaScript
 // src/index.js
 var m = require("mithril")
 
