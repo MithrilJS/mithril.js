@@ -10,7 +10,7 @@
 
 Turns a string of the form `?a=1&b=2` to an object
 
-```javascript
+```JavaScript
 var object = m.parseQueryString("a=1&b=2")
 // {a: "1", b: "2"}
 ```
@@ -34,7 +34,7 @@ Argument     | Type                                       | Required | Descripti
 
 The `m.parseQueryString` method creates an object from a querystring. It is useful for handling data from URL
 
-```javascript
+```JavaScript
 var data = m.parseQueryString("a=hello&b=world")
 
 // data is {a: "hello", b: "world"}
@@ -44,7 +44,7 @@ var data = m.parseQueryString("a=hello&b=world")
 
 This method attempts to cast boolean values if possible. This helps prevents bugs related to loose truthiness and unintended type casts.
 
-```javascript
+```JavaScript
 var data = m.parseQueryString("a=true&b=false")
 
 // data is {a: true, b: false}
@@ -54,7 +54,7 @@ var data = m.parseQueryString("a=true&b=false")
 
 For convenience, the `m.parseQueryString` method ignores a leading question mark, if present:
 
-```javascript
+```JavaScript
 var data = m.parseQueryString("?a=hello&b=world")
 
 // data is {a: "hello", b: "world"}
@@ -64,7 +64,7 @@ var data = m.parseQueryString("?a=hello&b=world")
 
 Querystrings that contain bracket notation are correctly parsed into deep data structures
 
-```javascript
+```JavaScript
 m.parseQueryString("a[0]=hello&a[1]=world")
 
 // data is {a: ["hello", "world"]}
