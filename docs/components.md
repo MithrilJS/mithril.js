@@ -14,9 +14,9 @@
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any Javascript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
+Any JavaScript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
-```javascript
+```JavaScript
 // define your component
 var Example = {
 	view: function(vnode) {
@@ -37,7 +37,7 @@ m(Example)
 
 Components can have the same [lifecycle methods](lifecycle-methods.md) as virtual DOM nodes. Note that `vnode` is passed as an argument to each lifecycle method, as well as to `view` (with the _previous_ vnode passed additionally to `onbeforeupdate`):
 
-```javascript
+```JavaScript
 var ComponentWithHooks = {
 	oninit: function(vnode) {
 		console.log("initialized")
@@ -69,7 +69,7 @@ var ComponentWithHooks = {
 
 Like other types of virtual DOM nodes, components may have additional lifecycle methods defined when consumed as vnode types.
 
-```javascript
+```JavaScript
 function initialize(vnode) {
 	console.log("initialized as vnode")
 }
@@ -89,13 +89,13 @@ To learn more about lifecycle methods, [see the lifecycle methods page](lifecycl
 
 Data can be passed to component instances by passing an `attrs` object as the second parameter in the hyperscript function:
 
-```javascript
+```JavaScript
 m(Example, {name: "Floyd"})
 ```
 
 This data can be accessed in the component's view or lifecycle methods via the `vnode.attrs`:
 
-```javascript
+```JavaScript
 var Example = {
 	view: function (vnode) {
 		return m("div", "Hello, " + vnode.attrs.name)
@@ -117,11 +117,11 @@ If a state change occurs that is not as a result of any of the above conditions 
 
 #### Closure Component State
 
-In the above examples, each component is defined as a POJO (Plain Old Javascript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
+In the above examples, each component is defined as a POJO (Plain Old JavaScript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
 
 With a closure component, state can simply be maintained by variables that are declared within the outer function:
 
-```javascript
+```JavaScript
 function ComponentWithState(initialVnode) {
 	// Component state variable, unique to each instance
 	var count = 0
@@ -148,7 +148,7 @@ function ComponentWithState(initialVnode) {
 
 Any functions declared within the closure also have access to its state variables.
 
-```javascript
+```JavaScript
 function ComponentWithState(initialVnode) {
 	var count = 0
 
@@ -193,7 +193,7 @@ For POJO components, the component object is the prototype of each component ins
 
 In the example below, `data` becomes a property of the `ComponentWithInitialState` component's `vnode.state` object.
 
-```javascript
+```JavaScript
 var ComponentWithInitialState = {
 	data: "Initial content",
 	view: function(vnode) {
@@ -211,7 +211,7 @@ m(ComponentWithInitialState)
 
 As you can see, state can also be accessed via the `vnode.state` property, which is available to all lifecycle methods as well as the `view` method of a component.
 
-```javascript
+```JavaScript
 var ComponentWithDynamicState = {
 	oninit: function(vnode) {
 		vnode.state.data = vnode.attrs.text
@@ -231,7 +231,7 @@ m(ComponentWithDynamicState, {text: "Hello"})
 
 State can also be accessed via the `this` keyword, which is available to all lifecycle methods as well as the `view` method of a component.
 
-```javascript
+```JavaScript
 var ComponentUsingThis = {
 	oninit: function(vnode) {
 		this.data = vnode.attrs.text
@@ -247,7 +247,7 @@ m(ComponentUsingThis, {text: "Hello"})
 // <div>Hello</div>
 ```
 
-Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
+Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this JavaScript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
 
 ---
 
@@ -255,7 +255,7 @@ Be aware that when using ES5 functions, the value of `this` in nested anonymous 
 
 If it suits your needs (like in object-oriented projects), components can also be written using ES6 class syntax:
 
-```javascript
+```JavaScript
 class ES6ClassComponent {
 	constructor(vnode) {
 		this.kind = "ES6 class"
@@ -273,7 +273,7 @@ Component classes must define a `view()` method, detected via `.prototype.view`,
 
 They can be consumed in the same way regular components can.
 
-```javascript
+```JavaScript
 // EXAMPLE: via m.render
 m.render(document.body, m(ES6ClassComponent))
 
@@ -299,7 +299,7 @@ class AnotherES6ClassComponent {
 
 With classes, state can be managed by class instance properties and methods, and accessed via `this`:
 
-```javascript
+```JavaScript
 class ComponentWithState {
 	constructor(vnode) {
 		this.count = 0
@@ -347,7 +347,7 @@ It's easier to refactor code if that logic is placed in the data layer than if i
 
 Consider this fat component:
 
-```javascript
+```JavaScript
 // views/Login.js
 // AVOID
 var Login = {
@@ -385,7 +385,7 @@ Right away, we see that sharing the `username` and `password` fields from this c
 
 It makes more sense to refactor this component and pull the state code out of the component and into the application's data layer. This can be as simple as creating a new module:
 
-```javascript
+```JavaScript
 // models/Auth.js
 // PREFER
 var Auth = {
@@ -408,7 +408,7 @@ module.exports = Auth
 
 Then, we can clean up the component:
 
-```javascript
+```JavaScript
 // views/Login.js
 // PREFER
 var Auth = require("../models/Auth")
@@ -441,7 +441,7 @@ As a bonus, notice that we no longer need to use `.bind` to keep a reference to 
 
 Sometimes, you might want to keep an interface flexible and your implementation simpler by forwarding attributes to a particular child component or element, in this case [Bootstrap's modal](https://getbootstrap.com/docs/4.1/components/modal/). It might be tempting to forward a vnode's attributes like this:
 
-```javascript
+```JavaScript
 // AVOID
 var Modal = {
 	// ...
@@ -509,7 +509,7 @@ Often it's desirable to define multiple sets of children, for example, if a comp
 
 Avoid destructuring the `children` property for this purpose.
 
-```javascript
+```JavaScript
 // AVOID
 var Header = {
 	view: function(vnode) {
@@ -537,7 +537,7 @@ m(Header, [
 
 The component above breaks the assumption that children will be output in the same contiguous format as they are received. It's difficult to understand the component without reading its implementation. Instead, use attributes as named parameters and reserve `children` for uniform child content:
 
-```javascript
+```JavaScript
 // PREFER
 var BetterHeader = {
 	view: function(vnode) {
@@ -571,7 +571,7 @@ If you create a component from within a `view` method (either directly inline or
 
 For that reason you should avoid recreating components. Instead, consume components idiomatically.
 
-```javascript
+```JavaScript
 // AVOID
 var ComponentFactory = function(greeting) {
 	// creates a new component on every call
@@ -600,7 +600,7 @@ m.render(document.body, m(Component, {greeting: "hello"}))
 
 Conversely, for similar reasons, if a component instance is created outside of a view, future redraws will perform an equality check on the node and skip it. Therefore component instances should always be created inside views:
 
-```javascript
+```JavaScript
 // AVOID
 var Counter = {
 	count: 0,
@@ -631,7 +631,7 @@ m.mount(document.body, {
 
 In the example above, clicking the counter component button will increase its state count, but its view will not be triggered because the vnode representing the component shares the same reference, and therefore the render process doesn't diff them. You should always call components in the view to ensure a new vnode is created:
 
-```javascript
+```JavaScript
 // PREFER
 var Counter = {
 	count: 0,
