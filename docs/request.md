@@ -23,7 +23,7 @@
 
 Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 
-```javascript
+```JavaScript
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
@@ -70,7 +70,7 @@ Argument                  | Type                              | Required | Descr
 
 The `m.request` utility is a thin wrapper around [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), and allows making HTTP requests to remote servers in order to save and/or retrieve data from a database.
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/api/v1/users",
@@ -82,7 +82,7 @@ m.request({
 
 A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
 
-By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
+By default, `m.request` assumes the response is in JSON format and parses it into a JavaScript object (or array).
 
 If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.
 
@@ -92,7 +92,7 @@ If the HTTP response status code indicates an error, the returned Promise will b
 
 Here's an illustrative example of a component that uses `m.request` to retrieve some data from a server.
 
-```javascript
+```JavaScript
 var Data = {
 	todos: {
 		list: [],
@@ -124,7 +124,7 @@ m.route(document.body, "/", {
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that JavaScript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
 
 ---
 
@@ -144,7 +144,7 @@ This is useful in many cases where errors are themselves things you can account 
 
 Here's an expanded version of the example above that implements a loading indicator and an error message:
 
-```javascript
+```JavaScript
 var Data = {
 	todos: {
 		list: null,
@@ -190,7 +190,7 @@ There are a few differences between this example and the one before. Here, `Data
 
 Request URLs may contain interpolations:
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/api/v1/users/:id",
@@ -204,7 +204,7 @@ In the code above, `:id` is populated with the data from the `{id: 123}` object,
 
 Interpolations are ignored if no matching data exists in the `data` property.
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/api/v1/users/foo:bar",
@@ -222,7 +222,7 @@ Sometimes, it is desirable to abort a request. For example, in an autocompleter/
 
 `m.request()` exposes its underlying `XMLHttpRequest` object via the `options.config` parameter, which allows you to save a reference to that object and call its `abort` method when required:
 
-```javascript
+```JavaScript
 var searchXHR = null
 function search() {
 	abortPreviousSearch()
@@ -246,7 +246,7 @@ function abortPreviousSearch() {
 
 To upload files, first you need to get a reference to a [`File`](https://developer.mozilla.org/en/docs/Web/API/File) object. The easiest way to do that is from a `<input type="file">`.
 
-```javascript
+```JavaScript
 m.render(document.body, [
 	m("input[type=file]", {onchange: upload})
 ])
@@ -260,7 +260,7 @@ The snippet above renders a file input. If a user picks a file, the `onchange` e
 
 Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData) object to create a [multipart request](https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html), which is a specially formatted HTTP request that is able to send file data in the request body.
 
-```javascript
+```JavaScript
 function upload(e) {
 	var file = e.target.files[0]
 
@@ -271,7 +271,7 @@ function upload(e) {
 
 Next, you need to call `m.request` and set `options.method` to an HTTP method that uses body (e.g. `POST`, `PUT`, `PATCH`) and use the `FormData` object as `options.data`.
 
-```javascript
+```JavaScript
 function upload(e) {
 	var file = e.target.files[0]
 
@@ -294,7 +294,7 @@ It's possible to upload multiple files in one request. Doing so will make the ba
 
 To upload multiple files, simply append them all to the `FormData` object. When using a file input, you can get a list of files by adding the `multiple` attribute to the input:
 
-```javascript
+```JavaScript
 m.render(document.body, [
 	m("input[type=file][multiple]", {onchange: upload})
 ])
@@ -323,7 +323,7 @@ Sometimes, if a request is inherently slow (e.g. a large file upload), it's desi
 
 `m.request()` exposes its underlying `XMLHttpRequest` object via the `options.config` parameter, which allows you to attach event listeners to the XMLHttpRequest object:
 
-```javascript
+```JavaScript
 var progress = 0
 
 m.mount(document.body, {
@@ -366,7 +366,7 @@ Depending on the overall application architecture, it may be desirable to transf
 
 You can pass a constructor as the `options.type` parameter and Mithril will instantiate it for each object in the HTTP response.
 
-```javascript
+```JavaScript
 function User(data) {
 	this.name = data.firstName + " " + data.lastName
 }
@@ -389,7 +389,7 @@ In the example above, assuming `/api/v1/users` returns an array of objects, the 
 
 Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/files/icon.svg",
@@ -404,7 +404,7 @@ In the example above, the request retrieves an SVG file, does nothing to parse i
 
 Of course, a `deserialize` function may be more elaborate:
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/files/data.csv",
@@ -426,7 +426,7 @@ Ignoring the fact that the parseCSV function above doesn't handle a lot of cases
 
 Custom headers may also be helpful in this regard. For example, if you're requesting an SVG, you probably want to set the content type accordingly. To override the default JSON request type, set `options.headers` to an object of key-value pairs corresponding to request header names and values.
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/files/image.svg",
@@ -445,7 +445,7 @@ m.request({
 
 By default Mithril attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
 
-```javascript
+```JavaScript
 m.request({
 	method: "GET",
 	url: "/api/v1/users",
@@ -464,7 +464,7 @@ The parameter to `options.extract` is the XMLHttpRequest object once its operati
 
 Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.
 
-By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via Javascript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
+By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
 
 By default, `m.request` expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.
 
@@ -504,9 +504,9 @@ In typical scenarios, streaming won't provide noticeable performance benefits be
 
 #### Promises are not the response data
 
-The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if Javascript waited for it, it would freeze the application until the data was available.
+The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
 
-```javascript
+```JavaScript
 // AVOID
 var users = m.request("/api/v1/users")
 console.log("list of users:", users)
