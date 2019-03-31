@@ -11,7 +11,7 @@
 
 Makes JSON-P requests. Typically, it's useful to interact with servers that allow JSON-P but that don't have CORS enabled.
 
-```javascript
+```JavaScript
 m.jsonp({
 	url: "/api/v1/users/:id",
 	data: {id: 1},
@@ -49,7 +49,7 @@ The `m.jsonp` utility is useful for third party APIs that can return data in [JS
 
 In a nutshell, JSON-P consists of creating a `script` tag whose `src` attribute points to a script that lives in the server outside of your control. Typically, you are required to define a global function and specify its name in the querystring of the script's URL. The response will return code that calls your global function, passing the server's data as the first parameter.
 
-JSON-P has several limitations: it can only use GET requests, it implicitly trusts that the third party server won't serve malicious code and it requires polluting the global Javascript scope. Nonetheless, it is sometimes the only available way to retrieve data from a service (for example, if the service doesn't support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)).
+JSON-P has several limitations: it can only use GET requests, it implicitly trusts that the third party server won't serve malicious code and it requires polluting the global JavaScript scope. Nonetheless, it is sometimes the only available way to retrieve data from a service (for example, if the service doesn't support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)).
 
 ---
 
@@ -57,7 +57,7 @@ JSON-P has several limitations: it can only use GET requests, it implicitly trus
 
 Some services follow the de-facto convention of responding with JSON-P if a `callback` querystring key is provided, thus making `m.jsonp` automatically work without any effort:
 
-```javascript
+```JavaScript
 m.jsonp({url: "https://api.github.com/users/lhorie"}).then(function(response) {
 	console.log(response.data.login) // logs "lhorie"
 })
@@ -65,7 +65,7 @@ m.jsonp({url: "https://api.github.com/users/lhorie"}).then(function(response) {
 
 Some services do not follow conventions and therefore you must specify the callback key that the service expects:
 
-```javascript
+```JavaScript
 m.jsonp({
 	url: "https://api.flickr.com/services/feeds/photos_public.gne?tags=kitten&format=json",
 	callbackKey: "jsoncallback",
@@ -77,7 +77,7 @@ m.jsonp({
 
 And sometimes, you just want to take advantage of HTTP caching for GET requests for rarely-modified data:
 
-```javascript
+```JavaScript
 // this request is always called with the same querystring, and therefore it is cached
 m.jsonp({
 	url: "https://api.github.com/users/lhorie",
