@@ -6,7 +6,7 @@ Here are examples for the most commonly used methods. If a method is not listed 
 
 #### m(selector, attrs, children) - [docs](hyperscript.md)
 
-```javascript
+```JavaScript
 m("div.class#id", {title: "title"}, ["children"])
 ```
 
@@ -14,7 +14,7 @@ m("div.class#id", {title: "title"}, ["children"])
 
 #### m.mount(element, component) - [docs](mount.md)
 
-```javascript
+```JavaScript
 var state = {
 	count: 0,
 	inc: function() {state.count++}
@@ -33,7 +33,7 @@ m.mount(document.body, Counter)
 
 #### m.route(root, defaultRoute, routes) - [docs](route.md)
 
-```javascript
+```JavaScript
 var Home = {
 	view: function() {
 		return "Welcome"
@@ -47,13 +47,13 @@ m.route(document.body, "/home", {
 
 #### m.route.set(path) - [docs](route.md#mrouteset)
 
-```javascript
+```JavaScript
 m.route.set("/home")
 ```
 
 #### m.route.get() - [docs](route.md#mrouteget)
 
-```javascript
+```JavaScript
 var currentRoute = m.route.get()
 ```
 
@@ -61,13 +61,13 @@ var currentRoute = m.route.get()
 
 Call this before `m.route()`
 
-```javascript
+```JavaScript
 m.route.prefix("#!")
 ```
 
 #### m.route.link() - [docs](route.md#mroutelink)
 
-```javascript
+```JavaScript
 m("a[href='/Home']", {oncreate: m.route.link}, "Go to home page")
 ```
 
@@ -75,7 +75,7 @@ m("a[href='/Home']", {oncreate: m.route.link}, "Go to home page")
 
 #### m.request(options) - [docs](request.md)
 
-```javascript
+```JavaScript
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
@@ -90,7 +90,7 @@ m.request({
 
 #### m.jsonp(options) - [docs](jsonp.md)
 
-```javascript
+```JavaScript
 m.jsonp({
 	url: "/api/v1/users/:id",
 	data: {id: 1},
@@ -105,7 +105,7 @@ m.jsonp({
 
 #### m.parseQueryString(querystring) - [docs](parseQueryString.md)
 
-```javascript
+```JavaScript
 var object = m.parseQueryString("a=1&b=2")
 // {a: "1", b: "2"}
 ```
@@ -114,7 +114,7 @@ var object = m.parseQueryString("a=1&b=2")
 
 #### m.buildQueryString(object) - [docs](buildQueryString.md)
 
-```javascript
+```JavaScript
 var querystring = m.buildQueryString({a: "1", b: "2"})
 // "a=1&b=2"
 ```
@@ -123,7 +123,7 @@ var querystring = m.buildQueryString({a: "1", b: "2"})
 
 #### m.trust(htmlString) - [docs](trust.md)
 
-```javascript
+```JavaScript
 m.render(document.body, m.trust("<h1>Hello</h1>"))
 ```
 
@@ -131,7 +131,7 @@ m.render(document.body, m.trust("<h1>Hello</h1>"))
 
 #### m.redraw() - [docs](redraw.md)
 
-```javascript
+```JavaScript
 var count = 0
 function inc() {
 	setInterval(function() {
