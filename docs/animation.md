@@ -9,7 +9,7 @@
 
 ### Technology choices
 
-Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](http://velocityjs.org/) that provide fast Javascript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
+Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](http://velocityjs.org/) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
 
 Mithril does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril does, however, offer hooks to make life easier in some specific cases where it's traditionally difficult to make animations work.
 
@@ -27,7 +27,7 @@ Animating an element via CSS when the element is created couldn't be simpler. Ju
 }
 ```
 
-```javascript
+```JavaScript
 var FancyComponent = {
 	view: function() {
 		return m(".fancy", "Hello world")
@@ -55,7 +55,7 @@ Let's create an `exit` animation that fades `opacity` from 1 to 0.
 
 Now let's create a contrived component that shows and hides the `FancyComponent` we created in the previous section:
 
-```javascript
+```JavaScript
 var on = true
 
 var Toggler = {
@@ -70,7 +70,7 @@ var Toggler = {
 
 Next, let's modify `FancyComponent` so that it fades out when removed:
 
-```javascript
+```JavaScript
 var FancyComponent = {
 	onbeforeremove: function(vnode) {
 		vnode.dom.classList.add("exit")
