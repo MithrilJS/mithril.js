@@ -17,7 +17,7 @@ Remember this is a JSON file, so object key names such as `"test"` must be insid
 
 To setup a test suite, create a `tests` folder and inside of it, create a test file:
 
-```javascript
+```JavaScript
 // file: tests/math-test.js
 var o = require("mithril/ospec/ospec")
 
@@ -28,7 +28,7 @@ o.spec("math", function() {
 })
 ```
 
-To run the test, use the command `npm test`. Ospec considers any Javascript file inside of a `tests` folder (anywhere in the project) to be a test.
+To run the test, use the command `npm test`. Ospec considers any JavaScript file inside of a `tests` folder (anywhere in the project) to be a test.
 
 ```
 npm test
@@ -68,7 +68,7 @@ Unit testing is the practice of isolating a part of an application (typically a 
 
 Testing a Mithril component is easy. Let's assume we have a simple component like this:
 
-```javascript
+```JavaScript
 // MyComponent.js
 var m = require("mithril")
 
@@ -83,7 +83,7 @@ module.exports = {
 
 We can then create a `tests/MyComponent.js` file and create a test for this component like this:
 
-```javascript
+```JavaScript
 var MyComponent = require("MyComponent")
 
 o.spec("MyComponent", function() {
