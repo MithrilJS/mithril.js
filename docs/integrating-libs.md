@@ -1,6 +1,6 @@
 # 3rd Party Integration
 
-Integration with third party libraries or vanilla javascript code can be achieved via [lifecycle methods](lifecycle-methods.md).
+Integration with third party libraries or vanilla JavaScript code can be achieved via [lifecycle methods](lifecycle-methods.md).
 
 ## noUiSlider Example
 

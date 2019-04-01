@@ -14,7 +14,7 @@
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any Javascript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
+Any JavaScript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
 ```javascript
 // define your component
@@ -117,7 +117,7 @@ If a state change occurs that is not as a result of any of the above conditions 
 
 #### Closure Component State
 
-In the above examples, each component is defined as a POJO (Plain Old Javascript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
+In the above examples, each component is defined as a POJO (Plain Old JavaScript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
 
 With a closure component, state can simply be maintained by variables that are declared within the outer function:
 
@@ -247,7 +247,7 @@ m(ComponentUsingThis, {text: "Hello"})
 // <div>Hello</div>
 ```
 
-Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this Javascript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
+Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this JavaScript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
 
 ---
 

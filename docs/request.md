@@ -82,7 +82,7 @@ m.request({
 
 A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
 
-By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
+By default, `m.request` assumes the response is in JSON format and parses it into a JavaScript object (or array).
 
 If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.
 
@@ -124,7 +124,7 @@ m.route(document.body, "/", {
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that JavaScript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
 
 ---
 
@@ -464,7 +464,7 @@ The parameter to `options.extract` is the XMLHttpRequest object once its operati
 
 Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.
 
-By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via Javascript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
+By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
 
 By default, `m.request` expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.
 
@@ -504,7 +504,7 @@ In typical scenarios, streaming won't provide noticeable performance benefits be
 
 #### Promises are not the response data
 
-The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if Javascript waited for it, it would freeze the application until the data was available.
+The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
 
 ```javascript
 // AVOID
