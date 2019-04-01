@@ -55,7 +55,7 @@ Argument     | Type                                       | Required | Descripti
 
 ### How it works
 
-Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using javascript syntax. It accepts a `selector` string (required), an `attrs` object (optional) and a `children` array (optional).
+Mithril provides a hyperscript function `m()`, which allows expressing any HTML structure using JavaScript syntax. It accepts a `selector` string (required), an `attrs` object (optional) and a `children` array (optional).
 
 ```javascript
 m("div", {id: "box"}, "hello")
@@ -64,7 +64,7 @@ m("div", {id: "box"}, "hello")
 // <div id="box">hello</div>
 ```
 
-The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a javascript object that represents the DOM element to be created.
+The `m()` function does not actually return a DOM element. Instead it returns a [virtual DOM node](vnodes.md), or *vnode*, which is a JavaScript object that represents the DOM element to be created.
 
 ```javascript
 // a vnode
@@ -167,9 +167,9 @@ If another attribute is present in both the first and the second argument, the s
 
 ### DOM attributes
 
-Mithril uses both the Javascript API and the DOM API (`setAttribute`) to resolve attributes. This means you can use both syntaxes to refer to attributes.
+Mithril uses both the JavaScript API and the DOM API (`setAttribute`) to resolve attributes. This means you can use both syntaxes to refer to attributes.
 
-For example, in the Javascript API, the `readonly` attribute is called `element.readOnly` (notice the uppercase). In Mithril, all of the following are supported:
+For example, in the JavaScript API, the `readonly` attribute is called `element.readOnly` (notice the uppercase). In Mithril, all of the following are supported:
 
 ```javascript
 m("input", {readonly: true}) // lowercase
@@ -322,7 +322,7 @@ m("select", {selectedIndex: 0}, [
 
 [Components](components.md) allow you to encapsulate logic into a unit and use it as if it was an element. They are the base for making large, scalable applications.
 
-A component is any Javascript object that contains a `view` method. To consume a component, pass the component as the first argument to `m()` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
+A component is any JavaScript object that contains a `view` method. To consume a component, pass the component as the first argument to `m()` instead of passing a CSS selector string. You can pass arguments to the component by defining attributes and children, as shown in the example below.
 
 ```javascript
 // define a component
@@ -413,7 +413,7 @@ MathML is also fully supported.
 
 ### Making templates dynamic
 
-Since nested vnodes are just plain Javascript expressions, you can simply use Javascript facilities to manipulate them
+Since nested vnodes are just plain JavaScript expressions, you can simply use JavaScript facilities to manipulate them
 
 #### Dynamic text
 
@@ -454,7 +454,7 @@ var isError = false
 m("div", isError ? "An error occurred" : "Saved") // <div>Saved</div>
 ```
 
-You cannot use Javascript statements such as `if` or `for` within Javascript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
+You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
 
 ---
 
@@ -520,7 +520,7 @@ var BetterLabeledComponent = {
 
 #### Avoid statements in view methods
 
-Javascript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
+JavaScript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
 
 ```javascript
 // AVOID
@@ -536,7 +536,7 @@ var BadListComponent = {
 }
 ```
 
-Instead, prefer using Javascript expressions such as the ternary operator and Array methods.
+Instead, prefer using JavaScript expressions such as the ternary operator and Array methods.
 
 ```javascript
 // PREFER
