@@ -160,7 +160,7 @@ promise.then(function(value) {
 
 Promises are useful for working with asynchronous APIs, such as [`m.request`](request.md)
 
-Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other Javascript code to run in the meantime. When they are done, they call a function with their results.
+Asynchronous APIs are those which typically take a long time to run, and therefore would take too long to return a value using the `return` statement of a function. Instead, they do their work in the background, allowing other JavaScript code to run in the meantime. When they are done, they call a function with their results.
 
 The `m.request` function takes time to run because it makes an HTTP request to a remote server and has to wait for a response, which may take several milliseconds due to network latency.
 
