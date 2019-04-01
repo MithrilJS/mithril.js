@@ -5,7 +5,7 @@
 
 ---
 
-Mithril is written in ES5, and is fully compatible with ES6 as well. ES6 is a recent update to Javascript that introduces new syntax sugar for various common cases. It's not yet fully supported by all major browsers and it's not a requirement for writing an application, but it may be pleasing to use depending on your team's preferences.
+Mithril is written in ES5, and is fully compatible with ES6 as well. ES6 is a recent update to JavaScript that introduces new syntax sugar for various common cases. It's not yet fully supported by all major browsers and it's not a requirement for writing an application, but it may be pleasing to use depending on your team's preferences.
 
 In some limited environments, it's possible to use a significant subset of ES6 directly without extra tooling (for example, in internal applications that do not support IE). However, for the vast majority of use cases, a compiler toolchain like [Babel](https://babeljs.io) is required to compile ES6 features down to ES5.
 
