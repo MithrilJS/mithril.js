@@ -65,11 +65,11 @@ Using `m.mount(element, null)` on an element with a previously mounted component
 
 ### Performance considerations
 
-It may seem wasteful to generate a vnode tree on every redraw, but as it turns out, creating and comparing Javascript data structures is surprisingly cheap compared to reading and modifying the DOM.
+It may seem wasteful to generate a vnode tree on every redraw, but as it turns out, creating and comparing JavaScript data structures is surprisingly cheap compared to reading and modifying the DOM.
 
 Touching the DOM can be extremely expensive for a couple of reasons. Alternating reads and writes can adversely affect performance by causing several browser repaints to occur in quick succession, whereas comparing virtual dom trees allows writes to be batched into a single repaint. Also, the performance characteristics of various DOM operations vary between implementations and can be difficult to learn and optimize for all browsers. For example, in some implementations, reading `childNodes.length` has a complexity of O(n); in some, reading `parentNode` causes a repaint, etc.
 
-In contrast, traversing a javascript data structure has a much more predictable and sane performance profile, and in addition, a vnode tree is implemented in such a way that enables modern javascript engines to apply aggressive optimizations such as hidden classes for even better performance.
+In contrast, traversing a JavaScript data structure has a much more predictable and sane performance profile, and in addition, a vnode tree is implemented in such a way that enables modern JavaScript engines to apply aggressive optimizations such as hidden classes for even better performance.
 
 ---
 
