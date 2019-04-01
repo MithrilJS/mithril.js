@@ -49,7 +49,7 @@ The `m.jsonp` utility is useful for third party APIs that can return data in [JS
 
 In a nutshell, JSON-P consists of creating a `script` tag whose `src` attribute points to a script that lives in the server outside of your control. Typically, you are required to define a global function and specify its name in the querystring of the script's URL. The response will return code that calls your global function, passing the server's data as the first parameter.
 
-JSON-P has several limitations: it can only use GET requests, it implicitly trusts that the third party server won't serve malicious code and it requires polluting the global Javascript scope. Nonetheless, it is sometimes the only available way to retrieve data from a service (for example, if the service doesn't support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)).
+JSON-P has several limitations: it can only use GET requests, it implicitly trusts that the third party server won't serve malicious code and it requires polluting the global JavaScript scope. Nonetheless, it is sometimes the only available way to retrieve data from a service (for example, if the service doesn't support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)).
 
 ---
 
