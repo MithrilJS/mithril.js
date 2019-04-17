@@ -31,9 +31,7 @@
 - hyperscript: when attributes have a `null` or `undefined` value, they are treated as if they were absent. [#1773](https://github.com/MithrilJS/mithril.js/issues/1773) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
 - API: `m.request` errors no longer copy response fields to the error, but instead assign the parsed JSON response to `error.response` and the HTTP status code `error.code`.
 - hyperscript: when an attribute is defined on both the first and second argument (as a CSS selector and an `attrs` field, respectively), the latter takes precedence, except for `class` attributes that are still added together. [#2172](https://github.com/MithrilJS/mithril.js/issues/2172) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
-- render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
-- render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
 - render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 - API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
@@ -77,6 +75,8 @@
 - render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
 - render/core: CSS vars can now be specified in `{style}` attributes ([#2192](https://github.com/MithrilJS/mithril.js/pull/2192) [@barneycarroll](https://github.com/barneycarroll)), ([#2311](https://github.com/MithrilJS/mithril.js/pull/2311) [@porsager](https://github.com/porsager)), ([#2312](https://github.com/MithrilJS/mithril.js/pull/2312) [@isiahmeadows](https://github.com/isiahmeadows))
 - request: don't modify params, call `extract`/`serialize`/`deserialize` with correct `this` value ([#2288](https://github.com/MithrilJS/mithril.js/pull/2288))
+- render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
+- render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 
 ---
 
