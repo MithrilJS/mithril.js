@@ -1,4 +1,4 @@
-mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril)
+mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
 ==========
 
 <p align="center">
@@ -18,7 +18,7 @@ mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://ww
 
 ## What is Mithril?
 
-A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->8.86 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->8.88 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
@@ -36,7 +36,10 @@ Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, 
 
 ### npm
 ```bash
+# For the most recent stable version
 $ npm install mithril --save
+# For the most recent unstable version
+$ npm install mithril@next --save
 ```
 
 The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.

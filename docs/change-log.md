@@ -10,10 +10,14 @@
 - [v1.1.0](#v110)
 - [v1.0.1](#v101)
 - [Migrating from v0.2.x](#migrating-from-v02x)
-- [Older docs](http://mithril.js.org/archive/v0.2.5/index.html)
-- [ospec change-log](../ospec/change-log.md)
+- [v1.x docs](http://mithril.js.org/archive/v1.1.6/index.html)
+- [v0.2 docs](http://mithril.js.org/archive/v0.2.5/index.html)
+- [`ospec` change log](https://github.com/MithrilJS/mithril.js/blob/master/ospec/change-log.md)
+- [`mithril/stream` change log](https://github.com/MithrilJS/mithril.js/blob/master/stream/change-log.md)
 
 ---
+
+### Upcoming...
 
 ### v2.0.0-rc
 
@@ -27,10 +31,7 @@
 - hyperscript: when attributes have a `null` or `undefined` value, they are treated as if they were absent. [#1773](https://github.com/MithrilJS/mithril.js/issues/1773) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
 - API: `m.request` errors no longer copy response fields to the error, but instead assign the parsed JSON response to `error.response` and the HTTP status code `error.code`.
 - hyperscript: when an attribute is defined on both the first and second argument (as a CSS selector and an `attrs` field, respectively), the latter takes precedence, except for `class` attributes that are still added together. [#2172](https://github.com/MithrilJS/mithril.js/issues/2172) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
-- stream: when a stream conditionally returns HALT, dependant stream will also end ([#2200](https://github.com/MithrilJS/mithril.js/pull/2200))
-- render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 - render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
-- render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
 - render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 - API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
@@ -49,7 +50,6 @@
 - render/core: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
 - render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
 - docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
-- stream: Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` [#1944](https://github.com/MithrilJS/mithril.js/issues/1944)
 - API: ES module bundles are now available for `mithril` and `mithril/stream` ([#2194](https://github.com/MithrilJS/mithril.js/pull/2194) [@porsager](https://github.com/porsager)).
     - All of the `m.*` properties from `mithril` are re-exported as named exports in addition to being attached to `m`.
     - `m()` itself from `mithril` is exported as the default export.
@@ -75,6 +75,8 @@
 - render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
 - render/core: CSS vars can now be specified in `{style}` attributes ([#2192](https://github.com/MithrilJS/mithril.js/pull/2192) [@barneycarroll](https://github.com/barneycarroll)), ([#2311](https://github.com/MithrilJS/mithril.js/pull/2311) [@porsager](https://github.com/porsager)), ([#2312](https://github.com/MithrilJS/mithril.js/pull/2312) [@isiahmeadows](https://github.com/isiahmeadows))
 - request: don't modify params, call `extract`/`serialize`/`deserialize` with correct `this` value ([#2288](https://github.com/MithrilJS/mithril.js/pull/2288))
+- render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
+- render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
 
 ---
 

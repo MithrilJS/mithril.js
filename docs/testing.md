@@ -28,7 +28,7 @@ o.spec("math", function() {
 })
 ```
 
-To run the test, use the command `npm test`. Ospec considers any Javascript file inside of a `tests` folder (anywhere in the project) to be a test.
+To run the test, use the command `npm test`. Ospec considers any JavaScript file inside of a `tests` folder (anywhere in the project) to be a test.
 
 ```
 npm test

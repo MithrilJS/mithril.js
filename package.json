@@ -1,6 +1,6 @@
 {
   "name": "mithril",
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0-rc.4",
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
-    "version": "npm run build && git add mithril.js mithril.min.js mithril.mjs mithril.min.mjs",
+    "version": "npm run build && git add mithril.js mithril.min.js mithril.mjs mithril.min.mjs stream/stream.mjs",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
@@ -32,15 +32,14 @@
     "benchmark": "^2.1.4",
     "chokidar": "^2.0.4",
     "dedent": "^0.7.0",
-    "eslint": "^5.9.0",
-    "gh-pages": "^0.12.0",
-    "glob": "^7.1.2",
+    "eslint": "^5.13.0",
+    "gh-pages": "^2.0.1",
     "istanbul": "^0.4.5",
-    "lint-staged": "^4.0.4",
+    "lint-staged": "^8.1.3",
     "locater": "^1.3.0",
-    "marked": "^0.3.19",
+    "marked": "^0.6.0",
     "pinpoint": "^1.1.0",
-    "terser": "^3.10.11"
+    "terser": "^3.16.1"
   },
   "bin": {
     "ospec": "./ospec/bin/ospec"

@@ -52,14 +52,16 @@ o.spec("scan", function() {
 		action("11")
 		action(undefined)
 		action({a: 1})
+		action(8) // assures we didn't break the accumulator
 
 		result = child()
 
 		// check we got the expect result
 		o(result[0]).equals(7)
+		o(result[1]).equals(8)
 
 		// check child received minimum # of updates
-		o(count).equals(2)
+		o(count).equals(3)
 	})
 
 })

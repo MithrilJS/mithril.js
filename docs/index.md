@@ -12,7 +12,7 @@
 
 ### What is Mithril?
 
-Mithril is a modern client-side Javascript framework for building Single Page Applications.
+Mithril is a modern client-side JavaScript framework for building Single Page Applications.
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
@@ -45,6 +45,8 @@ Mithril is used by companies like Vimeo and Nike, and open source platforms like
 If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
 Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required.
+
+*Looking for the v1 docs? [Click here](https://mithril.js.org/archive/v1.1.6/index.html).*
 
 ---
 

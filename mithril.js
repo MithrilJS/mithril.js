@@ -133,11 +133,12 @@ function hyperscript(selector) {
 	}
 	var vnode = hyperscriptVnode.apply(1, arguments)
 	if (typeof selector === "string") {
-		return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
-	} else {
-		vnode.tag = selector
-		return vnode
+		vnode.children = Vnode.normalizeChildren(vnode.children)
+		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
 	}
+	
+	vnode.tag = selector
+	return vnode
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
@@ -1518,7 +1519,7 @@ var _24 = function($window, redrawService0) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
-		routeService.defineRoutes(routes, function(payload, params, path) {
+		routeService.defineRoutes(routes, function(payload, params, path, route) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
@@ -1529,7 +1530,7 @@ var _24 = function($window, redrawService0) {
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
-					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
+					Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
 						update(payload, resolved)
 					}, bail)
 				}
@@ -1576,7 +1577,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "2.0.0-rc.3"
+m.version = "2.0.0-rc.4"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m
