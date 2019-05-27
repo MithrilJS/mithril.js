@@ -29,9 +29,9 @@ Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, 
 ### CDN
 
 ```html
-<script src="https://unpkg.com/mithril"></script>
+<script src="https://unpkg.com/mithril@next/mithril.js"></script>
 <!-- or -->
-<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mithril@next/mithril.js"></script>
 ```
 
 ### npm
