@@ -10,7 +10,7 @@
 If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
 ```markup
-<script src="https://unpkg.com/mithril/mithril.js"></script>
+<script src="https://unpkg.com/mithril@next/mithril.js"></script>
 ```
 
 ---
@@ -247,7 +247,7 @@ If you don't have the ability to run a bundler script due to company security po
     <title>Hello world</title>
   </head>
   <body>
-    <script src="https://cdn.rawgit.com/MithrilJS/mithril.js/master/mithril.js"></script>
+    <script src="https://unpkg.com/mithril@next/mithril.js"></script>
     <script src="index.js"></script>
   </body>
 </html>
