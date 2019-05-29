@@ -5,3 +5,6 @@ npm-debug.log
 .vscode
 .DS_Store
 .eslintcache
+
+# These are artifacts from Travis' deploy scripts
+/dist
