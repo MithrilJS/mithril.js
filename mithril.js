@@ -403,7 +403,7 @@ var _12 = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
-			if (args.responseType) xhr.responseType = args.responseType
+			xhr.responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 			for (var key in args.headers) {
 				if ({}.hasOwnProperty.call(args.headers, key)) {
 					xhr.setRequestHeader(key, args.headers[key])
@@ -416,19 +416,36 @@ var _12 = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var success = (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || (/^file:\/\//i).test(url)
-						var response = xhr.responseText
+						// When the response type0 isn't "" or "text",
+						// `xhr.responseText` is the wrong thing to use.
+						// Browsers do the right thing and throw here, and we
+						// should honor that and do the right thing by
+						// preferring `xhr.response` where possible/practical.
+						var response = xhr.response, message
+						if (response == null) {
+							try {
+								response = xhr.responseText
+								// Note: this snippet is intentionally *after*
+								// `xhr.responseText` is accessed, since the
+								// above will throw in modern browsers (thus
+								// skipping the rest of this section). It's an
+								// IE hack to detect and work around the lack of
+								// native `responseType: "json"` support there.
+								if (typeof args.extract !== "function" && xhr.responseType === "json") response = JSON.parse(response)
+							}
+							catch (e) { response = null }
+						}
 						if (typeof args.extract === "function") {
 							response = args.extract(xhr, args)
 							success = true
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
-						} else {
-							try {response = response ? JSON.parse(response) : null}
-							catch (e) {throw new Error("Invalid JSON: " + response)}
 						}
 						if (success) resolve(response)
 						else {
-							var error = new Error(xhr.responseText)
+							try { message = xhr.responseText }
+							catch (e) { message = response }
+							var error = new Error(message)
 							error.code = xhr.status
 							error.response = response
 							reject(error)
