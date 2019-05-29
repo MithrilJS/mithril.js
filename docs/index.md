@@ -12,7 +12,7 @@
 
 ### What is Mithril?
 
-Mithril is a modern client-side Javascript framework for building Single Page Applications.
+Mithril is a modern client-side JavaScript framework for building Single Page Applications.
 It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
@@ -58,7 +58,7 @@ Let's create an HTML file to follow along:
 
 ```markup
 <body>
-	<script src="https://unpkg.com/mithril/mithril.js"></script>
+	<script src="https://unpkg.com/mithril@next/mithril.js"></script>
 	<script>
 	var root = document.body
 

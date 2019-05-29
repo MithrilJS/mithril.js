@@ -38,7 +38,7 @@ React and Mithril share a lot of similarities. If you already learned React, you
 
 - They both use virtual DOM, lifecycle methods and key-based reconciliation
 - They both organize views via components
-- They both use Javascript as a flow control mechanism within views
+- They both use JavaScript as a flow control mechanism within views
 
 The most obvious difference between React and Mithril is in their scope. React is a view library, so a typical React-based application relies on third-party libraries for routing, XHR and state management. Using a library oriented approach allows developers to customize their stack to precisely match their needs. The not-so-nice way of saying that is that React-based architectures can vary wildly from project to project, and that those projects are that much more likely to cross the 1MB size line.
 
@@ -50,7 +50,7 @@ Both React and Mithril care strongly about rendering performance, but go about i
 
 Mithril follows the less-is-more school of thought. It has a substantially smaller, aggressively optimized codebase. The rationale is that a small codebase is easier to audit and optimize, and ultimately results in less code being run.
 
-Here's a comparison of library load times, i.e. the time it takes to parse and run the Javascript code for each framework, by adding a `console.time()` call on the first line and a `console.timeEnd()` call on the last of a script that is composed solely of framework code. For your reading convenience, here are best-of-20 results with logging code manually added to bundled scripts, running from the filesystem, in Chrome on a modest 2010 PC desktop:
+Here's a comparison of library load times, i.e. the time it takes to parse and run the JavaScript code for each framework, by adding a `console.time()` call on the first line and a `console.timeEnd()` call on the last of a script that is composed solely of framework code. For your reading convenience, here are best-of-20 results with logging code manually added to bundled scripts, running from the filesystem, in Chrome on a modest 2010 PC desktop:
 
 React   | Mithril
 ------- | -------
@@ -74,7 +74,7 @@ What these numbers show is that not only does Mithril initializes significantly 
 
 Update performance can be even more important than first-render performance, since updates can happen many times while a Single Page Application is running.
 
-A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare a [React implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/react/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Sample results are shown below:
+A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and JavaScript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare a [React implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/react/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Sample results are shown below:
 
 React   | Mithril
 ------- | -------
@@ -125,7 +125,7 @@ Angular and Mithril are fairly different, but they share a few similarities:
 - Both support componentization
 - Both have an array of tools for various aspects of web applications (e.g. routing, XHR)
 
-The most obvious difference between Angular and Mithril is in their complexity. This can be seen most easily in how views are implemented. Mithril views are plain Javascript, and flow control is done with Javascript built-in mechanisms such as ternary operators or `Array.prototype.map`. Angular, on the other hand, implements a directive system to extend HTML views so that it's possible to evaluate Javascript-like expressions within HTML attributes and interpolations. Angular actually ships with a parser and a compiler written in Javascript to achieve that. If that doesn't seem complex enough, there's actually two compilation modes (a default mode that generates Javascript functions dynamically for performance, and [a slower mode](https://docs.angularjs.org/api/ng/directive/ngCsp) for dealing with Content Security Policy restrictions).
+The most obvious difference between Angular and Mithril is in their complexity. This can be seen most easily in how views are implemented. Mithril views are plain JavaScript, and flow control is done with JavaScript built-in mechanisms such as ternary operators or `Array.prototype.map`. Angular, on the other hand, implements a directive system to extend HTML views so that it's possible to evaluate JavaScript-like expressions within HTML attributes and interpolations. Angular actually ships with a parser and a compiler written in JavaScript to achieve that. If that doesn't seem complex enough, there's actually two compilation modes (a default mode that generates JavaScript functions dynamically for performance, and [a slower mode](https://docs.angularjs.org/api/ng/directive/ngCsp) for dealing with Content Security Policy restrictions).
 
 #### Performance
 
@@ -139,7 +139,7 @@ Also, remember that frameworks like Angular and Mithril are designed for non-tri
 
 ##### Update performance
 
-A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare an [Angular implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/angular/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Both implementations are naive (i.e. no optimizations). Sample results are shown below:
+A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and JavaScript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare an [Angular implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/angular/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Both implementations are naive (i.e. no optimizations). Sample results are shown below:
 
 Angular | Mithril
 ------- | -------
@@ -155,7 +155,7 @@ Angular 2 has a lot more concepts to understand: on the language level, Typescri
 
 If we compare apples to apples, Angular 2 and Mithril have similar learning curves: in both, components are a central aspect of architecture, and both have reasonable routing and XHR tools.
 
-With that being said, Angular has a lot more concepts to learn than Mithril. It offers Angular-specific APIs for many things that often can be trivially implemented (e.g. pluralization is essentially a switch statement, "required" validation is simply an equality check, etc). Angular templates also have several layers of abstractions to emulate what Javascript does natively in Mithril - Angular's `ng-if`/`ngIf` is a *directive*, which uses a custom *parser* and *compiler* to evaluate an expression string and emulate lexical scoping... and so on. Mithril tends to be a lot more transparent, and therefore easier to reason about.
+With that being said, Angular has a lot more concepts to learn than Mithril. It offers Angular-specific APIs for many things that often can be trivially implemented (e.g. pluralization is essentially a switch statement, "required" validation is simply an equality check, etc). Angular templates also have several layers of abstractions to emulate what JavaScript does natively in Mithril - Angular's `ng-if`/`ngIf` is a *directive*, which uses a custom *parser* and *compiler* to evaluate an expression string and emulate lexical scoping... and so on. Mithril tends to be a lot more transparent, and therefore easier to reason about.
 
 #### Documentation
 
@@ -183,7 +183,7 @@ Vue is significantly smaller than Angular when comparing apples to apples, but n
 
 #### Performance
 
-Here's a comparison of library load times, i.e. the time it takes to parse and run the Javascript code for each framework, by adding a `console.time()` call on the first line and a `console.timeEnd()` call on the last of a script that is composed solely of framework code. For your reading convenience, here are best-of-20 results with logging code manually added to bundled scripts, running from the filesystem, in Chrome on a modest 2010 PC desktop:
+Here's a comparison of library load times, i.e. the time it takes to parse and run the JavaScript code for each framework, by adding a `console.time()` call on the first line and a `console.timeEnd()` call on the last of a script that is composed solely of framework code. For your reading convenience, here are best-of-20 results with logging code manually added to bundled scripts, running from the filesystem, in Chrome on a modest 2010 PC desktop:
 
 Vue     | Mithril
 ------- | -------
@@ -193,7 +193,7 @@ Library load times matter in applications that don't stay open for long periods 
 
 ##### Update performance
 
-A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and Javascript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare a [Vue implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/vue/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Both implementations are naive (i.e. no optimizations). Sample results are shown below:
+A useful tool to benchmark update performance is a tool developed by the Ember team called DbMonster. It updates a table as fast as it can and measures frames per second (FPS) and JavaScript times (min, max and mean). The FPS count can be difficult to evaluate since it also includes browser repaint times and `setTimeout` clamping delay, so the most meaningful number to look at is the mean render time. You can compare a [Vue implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/vue/index.html) and a [Mithril implementation](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/dbmonster/mithril/index.html). Both implementations are naive (i.e. no optimizations). Sample results are shown below:
 
 Vue    | Mithril
 ------ | -------
@@ -203,7 +203,7 @@ Vue    | Mithril
 
 Vue is heavily inspired by Angular and has many things that Angular does (e.g. directives, filters, bi-directional bindings, `v-cloak`), but also has things inspired by React (e.g. components). As of Vue 2.0, it's also possible to write templates using hyperscript/JSX syntax (in addition to single-file components and the various webpack-based language transpilation plugins). Vue provides both bi-directional data binding and an optional Redux-like state management library, but unlike Angular, it provides no style guide. The many-ways-of-doing-one-thing approach can cause architectural fragmentation in long-lived projects.
 
-Mithril has far less concepts and typically organizes applications in terms of components and a data layer.  All component creation styles in Mithril output the same vnode structure using native Javascript features only.  The direct consequence of leaning on the language is less tooling and a simpler project setup.
+Mithril has far less concepts and typically organizes applications in terms of components and a data layer.  All component creation styles in Mithril output the same vnode structure using native JavaScript features only.  The direct consequence of leaning on the language is less tooling and a simpler project setup.
 
 #### Documentation
 

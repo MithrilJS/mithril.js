@@ -21,8 +21,6 @@ before_script:
 - npm run build-browser
 # Pass -save so it'll update the readme as well
 - npm run build-min -- -save
-# must run after build-min in order to generate min.mjs
-- npm run build-esm
 
 # Run tests, lint, and then check for perf regressions
 script:
@@ -34,8 +32,8 @@ after_success:
   - |
     # Set up SSH environment
     $(npm bin)/set-up-ssh \
-      --key "$encrypted_8b86e0359d64_key" \
-      --iv "$encrypted_8b86e0359d64_iv" \
+      --key "$encrypted_016049456622_key" \
+      --iv "$encrypted_016049456622_iv" \
       --path-encrypted-key "./.deploy.enc"
 
     # Commit bundle changes generated in before_script step
@@ -75,20 +73,18 @@ after_success:
 env:
   global:
     # Set up GH_USER_EMAIL & GH_USER_NAME env variables used by travis-scripts package
-    - secure: Xvqvm3+PvJu/rs3jl/NNn0RWLkkLkIoPHiL0GCfVRaywgjCYVN02g54NVvIDaOfybqPmu9E6PJFVs92vhF34NMFQHf4EWskynusIGV271R2BV0i+OJBfLMuLgiwm6zRn7/Zw4JvWIUGEwcnlz0qxbqdHsS0SOR3fIkFzePickW0=
-    - secure: Rf/ldEO9d4vItJhe6EmqWpFAyCARzoCb422nHnjr1hYJknnwIXpgyZ1C/7On/9o7rWPPf+8WcHC/rgjK2rthKCldzdG5I60LfWSNzap9lk3Aa4TpSCoDBuEp7JVvDr5tc3rKnBXVT71hOay7RSx1StWzXiJs9mjaeVMJzYzRT78=
+    - secure: UdSk2uKTL56iOHkIZP9Tpj/OI8w26DRTs6INRq+peZKkHq8NVC0TmbtbpRoc5kxErovN2hyqsAnoMtXSQHKK+H9mpMx0v4ck/I+o2oEny/1hwi5YQ/Q0nAebVhZkgA3eVhJY1brK0bOlr8uI07m9mcPs3Qz0ramZutJQG7FdnZs=
 
 # Deploy to npm and github pages on tagged commits that successfully build
 deploy:
   - provider: releases
     api_key:
-      secure: PauFuz+pn7oRpHn2JTl4k3+iWjOofyBYBvavPQVNdXgKws9mGj0i2n5k2oIDU09VD7NeyEkwP6tdLCUFNaR8uwTJH/TBXMZE95oxUEaliFreA0nOiI3WkG4NCW0GwUoIIn1yL14y6+9oEBinWUia8DIn9kZNS11DNDgQpIPnoQQ=
+      secure: BBlVwr3CRWS6Zmc8nsYMMN59P95g/lg9OzNCsP7uiFyu7mnC6VdOIgwmmJXBviUiEymbcdepgRqEdjHIoemg2YhM5IOnhMoYFrfMBoWUpMihpejFY8EVm3NrTh0prXgCHbp/3OktoKdOn/Zhc2z7cKDMeToHzaDStLtQPR8u9jU=
     file:
       - "mithril.js"
       - "mithril.min.js"
-      - "mithril.mjs"
-      - "mithril.min.mjs"
     skip_cleanup: true
+    draft: true
     on:
       tags: true
       repo: MithrilJS/mithril.js

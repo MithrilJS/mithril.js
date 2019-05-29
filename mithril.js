@@ -298,6 +298,43 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key) + (value != null && value !== "" ? "=" + encodeURIComponent(value) : ""))
 	}
 }
+var assign = Object.assign || function(target, source) {
+	Object.keys(source).forEach(function(key) { target[key] = source[key] })
+}
+// Returns `path` from `template` + `params`
+var buildPathname = function(template, params) {
+	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
+		throw new SyntaxError("Template parameter names *must* be separated")
+	}
+	if (params == null) return template
+	var queryIndex = template.indexOf("?")
+	var hashIndex = template.indexOf("#")
+	var queryEnd = hashIndex < 0 ? template.length : hashIndex
+	var pathEnd = queryIndex < 0 ? queryEnd : queryIndex
+	var path = template.slice(0, pathEnd)
+	var query = {}
+	assign(query, params)
+	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m0, key, variadic) {
+		delete query[key]
+		// If no such parameter exists, don't interpolate it.
+		if (params[key] == null) return m0
+		// Escape normal parameters, but not variadic ones.
+		return variadic ? params[key] : encodeURIComponent(String(params[key]))
+	})
+	// In case the template substitution adds new query/hash parameters.
+	var newQueryIndex = resolved.indexOf("?")
+	var newHashIndex = resolved.indexOf("#")
+	var newQueryEnd = newHashIndex < 0 ? resolved.length : newHashIndex
+	var newPathEnd = newQueryIndex < 0 ? newQueryEnd : newQueryIndex
+	var result = resolved.slice(0, newPathEnd)
+	if (queryIndex >= 0) result += "?" + template.slice(queryIndex, queryEnd)
+	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
+	var querystring = buildQueryString(query)
+	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring
+	if (hashIndex >= 0) result += template.slice(hashIndex)
+	if (newHashIndex >= 0) result += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
+	return result
+}
 var _12 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
@@ -306,7 +343,7 @@ var _12 = function($window, Promise) {
 			if (typeof url !== "string") { args = url; url = url.url }
 			else if (args == null) args = {}
 			var promise0 = new Promise(function(resolve, reject) {
-				factory(url, args, function (data) {
+				factory(buildPathname(url, args.params), args, function (data) {
 					if (typeof args.type === "function") {
 						if (Array.isArray(data)) {
 							for (var i = 0; i < data.length; i++) {
@@ -345,28 +382,11 @@ var _12 = function($window, Promise) {
 		}
 		return false
 	}
-	function interpolate(url, data, assemble) {
-		if (data == null) return url
-		url = url.replace(/:([^\/]+)/gi, function (m0, key) {
-			return data[key] != null ? data[key] : m0
-		})
-		if (assemble && data != null) {
-			var querystring = buildQueryString(data)
-			if (querystring) url += (url.indexOf("?") < 0 ? "?" : "&") + querystring
-		}
-		return url
-	}
 	return {
 		request: makeRequest(function(url, args, resolve, reject) {
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
-			var useBody = method !== "GET" && method !== "TRACE" &&
-				(typeof args.useBody !== "boolean" || args.useBody)
-			var data = args.data
-			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(data instanceof $window.FormData)
-			if (useBody) {
-				if (typeof args.serialize === "function") data = args.serialize(data)
-				else if (!(data instanceof $window.FormData)) data = JSON.stringify(data)
-			}
+			var body = args.body
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
 			var xhr = new $window.XMLHttpRequest(),
 				aborted = false,
 				_abort = xhr.abort
@@ -374,8 +394,8 @@ var _12 = function($window, Promise) {
 				aborted = true
 				_abort.call(xhr)
 			}
-			xhr.open(method, interpolate(url, args.data, !useBody), typeof args.async !== "boolean" || args.async, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			if (assumeJSON && useBody && !hasHeader(args, /^content-type0$/i)) {
+			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
+			if (assumeJSON && !hasHeader(args, /^content-type0$/i)) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
@@ -383,7 +403,7 @@ var _12 = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
-			if (args.responseType) xhr.responseType = args.responseType
+			xhr.responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 			for (var key in args.headers) {
 				if ({}.hasOwnProperty.call(args.headers, key)) {
 					xhr.setRequestHeader(key, args.headers[key])
@@ -396,19 +416,36 @@ var _12 = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var success = (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || (/^file:\/\//i).test(url)
-						var response = xhr.responseText
+						// When the response type0 isn't "" or "text",
+						// `xhr.responseText` is the wrong thing to use.
+						// Browsers do the right thing and throw here, and we
+						// should honor that and do the right thing by
+						// preferring `xhr.response` where possible/practical.
+						var response = xhr.response, message
+						if (response == null) {
+							try {
+								response = xhr.responseText
+								// Note: this snippet is intentionally *after*
+								// `xhr.responseText` is accessed, since the
+								// above will throw in modern browsers (thus
+								// skipping the rest of this section). It's an
+								// IE hack to detect and work around the lack of
+								// native `responseType: "json"` support there.
+								if (typeof args.extract !== "function" && xhr.responseType === "json") response = JSON.parse(response)
+							}
+							catch (e) { response = null }
+						}
 						if (typeof args.extract === "function") {
 							response = args.extract(xhr, args)
 							success = true
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
-						} else {
-							try {response = response ? JSON.parse(response) : null}
-							catch (e) {throw new Error("Invalid JSON: " + response)}
 						}
 						if (success) resolve(response)
 						else {
-							var error = new Error(xhr.responseText)
+							try { message = xhr.responseText }
+							catch (e) { message = response }
+							var error = new Error(message)
 							error.code = xhr.status
 							error.response = response
 							reject(error)
@@ -419,23 +456,24 @@ var _12 = function($window, Promise) {
 					}
 				}
 			}
-			if (useBody && data != null) xhr.send(data)
-			else xhr.send()
+			if (body == null) xhr.send()
+			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
+			else if (body instanceof $window.FormData) xhr.send(body)
+			else xhr.send(JSON.stringify(body))
 		}),
 		jsonp: makeRequest(function(url, args, resolve, reject) {
 			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
 			var script = $window.document.createElement("script")
 			$window[callbackName] = function(data) {
+				delete $window[callbackName]
 				script.parentNode.removeChild(script)
 				resolve(data)
-				delete $window[callbackName]
 			}
 			script.onerror = function() {
+				delete $window[callbackName]
 				script.parentNode.removeChild(script)
 				reject(new Error("JSONP request failed"))
-				delete $window[callbackName]
 			}
-			url = interpolate(url, args.data, true)
 			script.src = url + (url.indexOf("?") < 0 ? "?" : "&") +
 				encodeURIComponent(args.callbackKey || "callback") + "=" +
 				encodeURIComponent(callbackName)
@@ -973,45 +1011,45 @@ var coreRenderer = function($window) {
 	// subsequece
 	function makeLisIndices(a) {
 		var p = a.slice()
-		var result = []
-		result.push(0)
+		var result0 = []
+		result0.push(0)
 		var u
 		var v
 		for (var i = 0, il = a.length; i < il; ++i) {
 			if (a[i] === -1) {
 				continue
 			}
-			var j = result[result.length - 1]
+			var j = result0[result0.length - 1]
 			if (a[j] < a[i]) {
 				p[i] = j
-				result.push(i)
+				result0.push(i)
 				continue
 			}
 			u = 0
-			v = result.length - 1
+			v = result0.length - 1
 			while (u < v) {
 				var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
-				if (a[result[c]] < a[i]) {
+				if (a[result0[c]] < a[i]) {
 					u = c + 1
 				}
 				else {
 					v = c
 				}
 			}
-			if (a[i] < a[result[u]]) {
+			if (a[i] < a[result0[u]]) {
 				if (u > 0) {
-					p[i] = result[u - 1]
+					p[i] = result0[u - 1]
 				}
-				result[u] = i
+				result0[u] = i
 			}
 		}
-		u = result.length
-		v = result[u - 1]
+		u = result0.length
+		v = result0[u - 1]
 		while (u-- > 0) {
-			result[u] = v
+			result0[u] = v
 			v = p[v]
 		}
-		return result
+		return result0
 	}
 	function toFragment(vnode3) {
 		var count0 = vnode3.domSize
@@ -1055,17 +1093,17 @@ var coreRenderer = function($window) {
 		var expected = 1, called = 0
 		var original = vnode3.state
 		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeremove === "function") {
-			var result = callHook.call(vnode3.state.onbeforeremove, vnode3)
-			if (result != null && typeof result.then === "function") {
+			var result0 = callHook.call(vnode3.state.onbeforeremove, vnode3)
+			if (result0 != null && typeof result0.then === "function") {
 				expected++
-				result.then(continuation, continuation)
+				result0.then(continuation, continuation)
 			}
 		}
 		if (vnode3.attrs && typeof vnode3.attrs.onbeforeremove === "function") {
-			var result = callHook.call(vnode3.attrs.onbeforeremove, vnode3)
-			if (result != null && typeof result.then === "function") {
+			var result0 = callHook.call(vnode3.attrs.onbeforeremove, vnode3)
+			if (result0 != null && typeof result0.then === "function") {
 				expected++
-				result.then(continuation, continuation)
+				result0.then(continuation, continuation)
 			}
 		}
 		continuation()
@@ -1120,7 +1158,7 @@ var coreRenderer = function($window) {
 				if (vnode3.tag === "option" && old !== null && vnode3.dom.value === "" + value) return
 				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
+			// If you assign0 an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
 			if (vnode3.tag === "input" && key === "type") vnode3.dom.setAttribute(key, value)
 			else vnode3.dom[key] = value
 		} else {
@@ -1252,12 +1290,12 @@ var coreRenderer = function($window) {
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler0 = this["on" + ev.type]
-		var result
-		if (typeof handler0 === "function") result = handler0.call(ev.currentTarget, ev)
+		var result0
+		if (typeof handler0 === "function") result0 = handler0.call(ev.currentTarget, ev)
 		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
 		if (ev.redraw === false) ev.redraw = undefined
 		else if (typeof redraw0 === "function") redraw0()
-		if (result === false) {
+		if (result0 === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
 		}
@@ -1331,7 +1369,7 @@ function throttle(callback) {
 		}
 	}
 }
-var _15 = function($window, throttleMock) {
+var _17 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
 	var callbacks = []
 	var rendering = false
@@ -1354,9 +1392,9 @@ var _15 = function($window, throttleMock) {
 	renderService.setRedraw(redraw)
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
-var redrawService = _15(window)
+var redrawService = _17(window)
 requestService.setCompletionCallback(redrawService.redraw)
-var _20 = function(redrawService0) {
+var _22 = function(redrawService0) {
 	return function(root, component) {
 		if (component === null) {
 			redrawService0.render(root, [])
@@ -1373,135 +1411,171 @@ var _20 = function(redrawService0) {
 		run0()
 	}
 }
-m.mount = _20(redrawService)
+m.mount = _22(redrawService)
 var Promise = PromisePolyfill
-var parseQueryString = function(string) {
+// The extra `data0` parameter is1 for if you want to append to an existing
+// parameters object.
+var parseQueryString = function(string, data0) {
+	if (data0 == null) data0 = {}
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
-	var entries = string.split("&"), data2 = {}, counters = {}
+	var entries = string.split("&"), counters = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key2 = decodeURIComponent(entry[0])
+		var key1 = decodeURIComponent(entry[0])
 		var value0 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
 		if (value0 === "true") value0 = true
 		else if (value0 === "false") value0 = false
-		var levels = key2.split(/\]\[?|\[/)
-		var cursor = data2
-		if (key2.indexOf("[") > -1) levels.pop()
+		var levels = key1.split(/\]\[?|\[/)
+		var cursor = data0
+		if (key1.indexOf("[") > -1) levels.pop()
 		for (var j0 = 0; j0 < levels.length; j0++) {
 			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
 			var isValue = j0 === levels.length - 1
 			if (level === "") {
-				var key2 = levels.slice(0, j0).join()
-				if (counters[key2] == null) counters[key2] = 0
-				level = counters[key2]++
+				var key1 = levels.slice(0, j0).join()
+				if (counters[key1] == null) {
+					counters[key1] = Array.isArray(cursor) ? cursor.length : 0
+				}
+				level = counters[key1]++
 			}
-			if (cursor[level] == null) {
-				cursor[level] = isValue ? value0 : isNumber ? [] : {}
-			}
+			if (isValue) cursor[level] = value0
+			else if (cursor[level] == null) cursor[level] = isNumber ? [] : {}
 			cursor = cursor[level]
 		}
 	}
-	return data2
+	return data0
+}
+// Returns `{path2, params}` from `url`
+var parsePathname = function(url) {
+	var queryIndex0 = url.indexOf("?")
+	var hashIndex0 = url.indexOf("#")
+	var queryEnd0 = hashIndex0 < 0 ? url.length : hashIndex0
+	var pathEnd0 = queryIndex0 < 0 ? queryEnd0 : queryIndex0
+	var path2 = url.slice(0, pathEnd0).replace(/\/{2,}/g, "/")
+	var params = {}
+	if (!path2) path2 = "/"
+	else {
+		if (path2[0] !== "/") path2 = "/" + path2
+		if (path2.length > 1 && path2[path2.length - 1] === "/") path2 = path2.slice(0, -1)
+	}
+	// Note: these are reversed because `parseQueryString` appends parameters
+	// only if they don't exist. Please don't flip them.
+	if (queryIndex0 >= 0) parseQueryString(url.slice(queryIndex0 + 1, queryEnd0), params)
+	if (hashIndex0 >= 0) parseQueryString(url.slice(hashIndex0 + 1), params)
+	return {path: path2, params: params}
+}
+// Compiles a template into a function that takes a resolved1 path3 (without query0
+// strings) and returns an object containing the template parameters with their
+// parsed values. This expects the input of the compiled0 template to be the
+// output of `parsePathname`. Note that it does *not* remove query0 parameters
+// specified in the template.
+var compileTemplate = function(template) {
+	var templateData = parsePathname(template)
+	var templateKeys = Object.keys(templateData.params)
+	var keys = []
+	var regexp = new RegExp("^" + templateData.path.replace(
+		// I escape literal text so people can use things like `:file.:ext` or
+		// `:lang-:locale` in routes. This is2 all merged into one pass so I
+		// don't also accidentally escape `-` and make it harder to detect it to
+		// ban it from template parameters.
+		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
+		function(m5, key2, extra) {
+			if (key2 == null) return "\\" + m5
+			keys.push({k: key2, r: extra === "..."})
+			if (extra === "...") return "(.*)"
+			if (extra === ".") return "([^/]+)\\."
+			return "([^/]+)" + (extra || "")
+		}
+	) + "$")
+	return function(data1) {
+		// First, check the params0. Usually, there isn't any, and it's just
+		// checking a static set.
+		for (var i = 0; i < templateKeys.length; i++) {
+			if (templateData.params[templateKeys[i]] !== data1.params[templateKeys[i]]) return false
+		}
+		// If no interpolations exist, let's skip all the ceremony
+		if (!keys.length) return regexp.test(data1.path)
+		var values = regexp.exec(data1.path)
+		if (values == null) return false
+		for (var i = 0; i < keys.length; i++) {
+			data1.params[keys[i].k] = keys[i].r ? values[i + 1] : decodeURIComponent(values[i + 1])
+		}
+		return true
+	}
 }
 var coreRouter = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
 	function normalize(fragment0) {
-		var data1 = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
-		if (fragment0 === "pathname" && data1[0] !== "/") data1 = "/" + data1
-		return data1
+		var data = $window.location[fragment0].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		if (fragment0 === "pathname" && data[0] !== "/") data = "/" + data
+		return data
 	}
 	var asyncId
-	function debounceAsync(callback) {
-		return function() {
-			if (asyncId != null) return
-			asyncId = callAsync0(function() {
-				asyncId = null
-				callback()
-			})
-		}
-	}
-	function parsePath(path, queryData, hashData) {
-		var queryIndex = path.indexOf("?")
-		var hashIndex = path.indexOf("#")
-		var pathEnd = queryIndex > -1 ? queryIndex : hashIndex > -1 ? hashIndex : path.length
-		if (queryIndex > -1) {
-			var queryEnd = hashIndex > -1 ? hashIndex : path.length
-			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key1 in queryParams) queryData[key1] = queryParams[key1]
-		}
-		if (hashIndex > -1) {
-			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key1 in hashParams) hashData[key1] = hashParams[key1]
-		}
-		return path.slice(0, pathEnd)
-	}
 	var router = {prefix: "#!"}
 	router.getPath = function() {
-		var type2 = router.prefix.charAt(0)
-		switch (type2) {
-			case "#": return normalize("hash").slice(router.prefix.length)
-			case "?": return normalize("search").slice(router.prefix.length) + normalize("hash")
-			default: return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
-		}
+		if (router.prefix.charAt(0) === "#") return normalize("hash").slice(router.prefix.length)
+		if (router.prefix.charAt(0) === "?") return normalize("search").slice(router.prefix.length) + normalize("hash")
+		return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
 	}
-	router.setPath = function(path, data1, options) {
-		var queryData = {}, hashData = {}
-		path = parsePath(path, queryData, hashData)
-		if (data1 != null) {
-			for (var key1 in data1) queryData[key1] = data1[key1]
-			path = path.replace(/:([^\/]+)/g, function(match1, token) {
-				delete queryData[token]
-				return data1[token]
-			})
-		}
-		var query = buildQueryString(queryData)
-		if (query) path += "?" + query
-		var hash = buildQueryString(hashData)
-		if (hash) path += "#" + hash
+	router.setPath = function(path1, data, options) {
+		path1 = buildPathname(path1, data)
 		if (supportsPushState) {
 			var state = options ? options.state : null
 			var title = options ? options.title : null
 			$window.onpopstate()
-			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path)
-			else $window.history.pushState(state, title, router.prefix + path)
+			if (options && options.replace) $window.history.replaceState(state, title, router.prefix + path1)
+			else $window.history.pushState(state, title, router.prefix + path1)
 		}
-		else $window.location.href = router.prefix + path
+		else $window.location.href = router.prefix + path1
 	}
-	router.defineRoutes = function(routes, resolve, reject) {
-		function resolveRoute() {
-			var path = router.getPath()
-			var params = {}
-			var pathname = parsePath(path, params, params)
-			var state = $window.history.state
-			if (state != null) {
-				for (var k in state) params[k] = state[k]
+	router.defineRoutes = function(routes, resolve, reject, defaultRoute) {
+		var compiled = Object.keys(routes).map(function(route0) {
+			if (route0.charAt(0) !== "/") throw new SyntaxError("Routes must start with a `/`")
+			if ((/:([^\/\.-]+)(\.{3})?:/).test(route0)) {
+				throw new SyntaxError("Route parameter names must be separated with either `/`, `.`, or `-`")
 			}
-			for (var route0 in routes) {
-				var matcher = new RegExp("^" + route0.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-				if (matcher.test(pathname)) {
-					pathname.replace(matcher, function() {
-						var keys = route0.match(/:[^\/]+/g) || []
-						var values = [].slice.call(arguments, 1, -2)
-						for (var i = 0; i < keys.length; i++) {
-							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-						}
-						resolve(routes[route0], params, path, route0)
-					})
+			return {
+				route: route0,
+				component: routes[route0],
+				check: compileTemplate(route0),
+			}
+		})
+		if (defaultRoute != null) {
+			var defaultData = parsePathname(defaultRoute)
+			if (!compiled.some(function (i) { return i.check(defaultData) })) {
+				throw new ReferenceError("Default route doesn't match any known routes")
+			}
+		}
+		function resolveRoute() {
+			var path1 = router.getPath()
+			var data = parsePathname(path1)
+			assign(data.params, $window.history.state)
+			for (var i = 0; i < compiled.length; i++) {
+				if (compiled[i].check(data)) {
+					resolve(compiled[i].component, data.params, path1, compiled[i].route)
 					return
 				}
 			}
-			reject(path, params)
+			reject(path1, data.params)
 		}
-		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
+		if (supportsPushState) {
+			$window.onpopstate = function() {
+				if (asyncId) return
+				asyncId = callAsync0(function() {
+					asyncId = null
+					resolveRoute()
+				})
+			}
+		}
 		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
 	return router
 }
-var _24 = function($window, redrawService0) {
+var _26 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
 	var identity = function(v0) {return v0}
 	var render1, component, attrs3, currentPath, lastUpdate
@@ -1515,36 +1589,36 @@ var _24 = function($window, redrawService0) {
 			redraw3 = redrawService0.redraw
 		}
 		redrawService0.subscribe(root, run1)
-		var bail = function(path) {
-			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+		var bail = function(path0) {
+			if (path0 !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
-		routeService.defineRoutes(routes, function(payload, params, path) {
+		routeService.defineRoutes(routes, function(payload, params, path0, route) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
-				attrs3 = params, currentPath = path, lastUpdate = null
+				attrs3 = params, currentPath = path0, lastUpdate = null
 				render1 = (routeResolver.render || identity).bind(routeResolver)
 				redraw3()
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
 				if (payload.onmatch) {
-					Promise.resolve(payload.onmatch(params, path)).then(function(resolved) {
-						update(payload, resolved)
-					}, bail)
+					Promise.resolve(payload.onmatch(params, path0, route)).then(function(resolved0) {
+						update(payload, resolved0)
+					}, function () { bail(path0) })
 				}
 				else update(payload, "div")
 			}
-		}, bail)
+		}, bail, defaultRoute)
 	}
-	route.set = function(path, data0, options) {
+	route.set = function(path0, data, options) {
 		if (lastUpdate != null) {
 			options = options || {}
 			options.replace = true
 		}
 		lastUpdate = null
-		routeService.setPath(path, data0, options)
+		routeService.setPath(path0, data, options)
 	}
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix) {routeService.prefix = prefix}
@@ -1569,14 +1643,16 @@ var _24 = function($window, redrawService0) {
 	}
 	return route
 }
-m.route = _24(window, redrawService)
-var _31 = coreRenderer(window)
-m.render = _31.render
+m.route = _26(window, redrawService)
+var _37 = coreRenderer(window)
+m.render = _37.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
+m.parsePathname = parsePathname
+m.buildPathname = buildPathname
 m.version = "2.0.0-rc.4"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill

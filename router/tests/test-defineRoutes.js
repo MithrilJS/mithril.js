@@ -22,14 +22,14 @@ o.spec("Router.defineRoutes", function() {
 				o("calls onRouteChange on init", function(done) {
 					$window.location.href = prefix + "/a"
 					router.defineRoutes({"/a": {data: 1}}, onRouteChange, onFail)
-					
+
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						
+
 						done()
 					})
 				})
-				
+
 				o("resolves to route", function(done) {
 					$window.location.href = prefix + "/test"
 					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
@@ -38,7 +38,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -51,7 +51,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -64,7 +64,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -81,7 +81,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/test", "/test"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -94,7 +94,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x"}, "/test/x", "/test/:a"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -107,7 +107,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x", b: "y"}, "/test/x/y", "/test/:a/:b"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -120,7 +120,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "x/y"}, "/test/x/y", "/test/:a..."])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -133,7 +133,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b&c=d", "/test"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -146,7 +146,7 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test#a=b&c=d", "/test"])
 						o(onFail.callCount).equals(0)
-						
+
 						done()
 					})
 				})
@@ -159,7 +159,20 @@ o.spec("Router.defineRoutes", function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b#c=d", "/test"])
 						o(onFail.callCount).equals(0)
-						
+
+						done()
+					})
+				})
+
+				o("handles route with search and hash + duplicate params", function(done) {
+					$window.location.href = prefix + "/test?a=b#a=d"
+					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
+
+					callAsync(function() {
+						o(onRouteChange.callCount).equals(1)
+						o(onRouteChange.args).deepEquals([{data: 1}, {a: "d"}, "/test?a=b#a=d", "/test"])
+						o(onFail.callCount).equals(0)
+
 						done()
 					})
 				})
@@ -171,7 +184,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onFail.callCount).equals(1)
 						o(onFail.args).deepEquals(["/test", {}])
-						
+
 						done()
 					})
 				})
@@ -183,7 +196,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onFail.callCount).equals(1)
 						o(onFail.args).deepEquals(["/test?a=b#c=d", {a: "b", c: "d"}])
-						
+
 						done()
 					})
 				})
@@ -195,7 +208,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
-						
+
 						done()
 					})
 				})
@@ -207,7 +220,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
-						
+
 						done()
 					})
 				})
@@ -223,7 +236,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
-						
+
 						done()
 					})
 				})
@@ -239,7 +252,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
-						
+
 						done()
 					})
 				})
@@ -254,7 +267,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 1}, {}, "/z/y/x", "/z/y/x"])
-						
+
 						done()
 					})
 				})
@@ -269,7 +282,7 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
 						o(onRouteChange.args).deepEquals([{data: 2}, {a: "z/y/x"}, "/z/y/x", "/:a..."])
-						
+
 						done()
 					})
 				})
@@ -280,7 +293,7 @@ o.spec("Router.defineRoutes", function() {
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						
+
 						done()
 					})
 				})

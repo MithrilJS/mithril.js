@@ -93,4 +93,20 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a")
 		o(data).deepEquals({a: ""})
 	})
+	o("prefers later values", function() {
+		var data = parseQueryString("a=1&b=2&a=3")
+		o(data).deepEquals({a: "3", b: "2"})
+	})
+	o("continues to append to arrays between calls", function() {
+		var data = {}
+		parseQueryString("a[]=1&a[]=2", data)
+		parseQueryString("a[]=3&a[]=4", data)
+		o(data).deepEquals({a: ["1", "2", "3", "4"]})
+	})
+	o("continues to append to objects between calls", function() {
+		var data = {}
+		parseQueryString("a[b]=1&a[c]=2", data)
+		parseQueryString("a[d]=3&a[e]=4", data)
+		o(data).deepEquals({a: {b: "1", c: "2", d: "3", e: "4"}})
+	})
 })

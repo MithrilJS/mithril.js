@@ -321,11 +321,12 @@ o.spec("route", function() {
 					}
 
 					var resolver = {
-						onmatch: function(args, requestedPath) {
+						onmatch: function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
 							o(requestedPath).equals("/abc")
+							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Component
 						},
@@ -362,11 +363,12 @@ o.spec("route", function() {
 					}
 
 					var resolver = {
-						onmatch: function(args, requestedPath) {
+						onmatch: function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
 							o(requestedPath).equals("/abc")
+							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve(Component)
 						},
@@ -398,11 +400,12 @@ o.spec("route", function() {
 					var renderCount = 0
 
 					var resolver = {
-						onmatch: function(args, requestedPath) {
+						onmatch: function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
 							o(requestedPath).equals("/abc")
+							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve()
 						},
@@ -434,11 +437,12 @@ o.spec("route", function() {
 					var renderCount = 0
 
 					var resolver = {
-						onmatch: function(args, requestedPath) {
+						onmatch: function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
 							o(requestedPath).equals("/abc")
+							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve([])
 						},
@@ -508,11 +512,12 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(args, requestedPath) {
+							onmatch: function(args, requestedPath, route) {
 								matchCount++
 
 								o(args.id).equals("abc")
 								o(requestedPath).equals("/abc")
+								o(route).equals("/:id")
 
 								return Component
 							},
@@ -985,7 +990,8 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/", {
 						"/a": {view: view},
-						"/b": {onmatch: onmatch}
+						"/b": {onmatch: onmatch},
+						"/": {view: function() {}}
 					})
 
 					o(view.callCount).equals(1)

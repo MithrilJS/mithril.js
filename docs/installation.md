@@ -7,10 +7,10 @@
 
 ### CDN
 
-If you're new to Javascript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
+If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
 ```markup
-<script src="https://unpkg.com/mithril/mithril.js"></script>
+<script src="https://unpkg.com/mithril@next/mithril.js"></script>
 ```
 
 ---
@@ -71,7 +71,7 @@ $ npm start
 
 For production-level projects, the recommended way of installing Mithril is to use NPM.
 
-NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the Javascript ecosystem. Download and install [Node.js](https://nodejs.org); NPM will be automatically installed as well.
+NPM (Node package manager) is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the JavaScript ecosystem. Download and install [Node.js](https://nodejs.org); NPM will be automatically installed as well.
 
 To use Mithril via NPM, go to your project folder, and run `npm init --yes` from the command line. This will create a file called `package.json`.
 
@@ -99,9 +99,9 @@ m.render(document.body, "hello world")
 
 Modularization is the practice of separating the code into files. Doing so makes it easier to find code, understand what code relies on what code, and test.
 
-CommonJS is a de-facto standard for modularizing Javascript code, and it's used by Node.js, as well as tools like [Browserify](http://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](http://rollupjs.org/), [Babel](https://babeljs.io/) or [Traceur](https://github.com/google/traceur-compiler).
+CommonJS is a de-facto standard for modularizing JavaScript code, and it's used by Node.js, as well as tools like [Browserify](http://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](http://rollupjs.org/), [Babel](https://babeljs.io/) or [Traceur](https://github.com/google/traceur-compiler).
 
-Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single Javascript file before running in a client-side application.
+Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single JavaScript file before running in a client-side application.
 
 A popular way for creating a bundle is to setup an NPM script for [Webpack](https://webpack.js.org/). To install Webpack, run this from the command line:
 
@@ -247,7 +247,7 @@ If you don't have the ability to run a bundler script due to company security po
     <title>Hello world</title>
   </head>
   <body>
-    <script src="https://cdn.rawgit.com/MithrilJS/mithril.js/master/mithril.js"></script>
+    <script src="https://unpkg.com/mithril@next/mithril.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

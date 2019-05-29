@@ -38,29 +38,39 @@ m.request({
 
 ### Signature
 
-`promise = m.request([url,] options)`
+`promise = m.request(options)`
 
 Argument                  | Type                              | Required | Description
 ------------------------- | --------------------------------- | -------- | ---
-`url`                     | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
+`options`                 | `Object`                          | Yes      | The request options to pass.
 `options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
-`options.url`             | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
+`options.url`             | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.data`.
 `options.data`            | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
 `options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
 `options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
 `options.timeout`         | `Number`                          | No       | The amount of milliseconds a request can take before automatically being [terminated](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout).  Defaults to `undefined`.
-`options.responseType`    | `String`                          | No       | The expected [type](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) of the response. Defaults to `undefined`.
+`options.responseType`    | `String`                          | No       | The expected [type](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) of the response. Defaults to `""` if `extract` is defined, `"json"` if missing. If `responseType: "json"`, it internally performs `JSON.parse(responseText)`.
 `options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
-`options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the `xhr.responseText`. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses. If `extract` is defined, `deserialize` will be skipped.
-`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `xhr.responseText`, which is in turn passed to `deserialize`. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves. Furthermore, when an extract callback is provided, exceptions are *not* thrown when the server response status code indicates an error.
+`options.deserialize`     | `any = Function(any)`          | No       | A deserialization method to be applied to the `xhr.response` or normalized `xhr.responseText`. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function). If `extract` is defined, `deserialize` will be skipped.
+`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `options.deserialize(parsedResponse)`, throwing an exception when the server response status code indicates an error or when the response is syntactically invalid. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves.
 `options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+`promise = m.request(url, options)`
+
+Argument    | Type      | Required | Description
+----------- | --------- | -------- | ---
+`url`       | `String`  | Yes      | The [path name](paths.md) to send the request to. `options.url` overrides this when present.
+`options`   | `Object`  | No       | The request options to pass.
+**returns** | `Promise` |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+This second form is mostly equivalent to `m.request(Object.assign({url: url}, options))`, just it does not depend on the ES6 global `Object.assign` internally.
 
 [How to read signatures](signatures.md)
 
@@ -82,7 +92,7 @@ m.request({
 
 A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
 
-By default, `m.request` assumes the response is in JSON format and parses it into a Javascript object (or array).
+By default, `m.request` assumes the response is in JSON format and parses it into a JavaScript object (or array).
 
 If the HTTP response status code indicates an error, the returned Promise will be rejected. Supplying an extract callback will prevent the promise rejection.
 
@@ -124,7 +134,7 @@ m.route(document.body, "/", {
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that Javascript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that JavaScript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
 
 ---
 
@@ -464,7 +474,7 @@ The parameter to `options.extract` is the XMLHttpRequest object once its operati
 
 Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.
 
-By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via Javascript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
+By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
 
 By default, `m.request` expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.
 
@@ -504,7 +514,7 @@ In typical scenarios, streaming won't provide noticeable performance benefits be
 
 #### Promises are not the response data
 
-The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if Javascript waited for it, it would freeze the application until the data was available.
+The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
 
 ```javascript
 // AVOID

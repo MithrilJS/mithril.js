@@ -71,7 +71,7 @@ Redirects to a matching route, or to the default route if no matching routes can
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`path`            | `String`  | Yes      | The path to route to, without a prefix. The path may include slots for routing parameters
+`path`            | `String`  | Yes      | The [path name](paths.md) to route to, without a prefix. The path may include parameters, interpolated with values from `data`.
 `data`            | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
 `options.replace` | `Boolean` | No       | Whether to create a new history entry or to replace the current one. Defaults to false
 `options.state`   | `Object`  | No       | The `state` object to pass to the underlying `history.pushState` / `history.replaceState` call. This state object becomes available in the `history.state` property, and is merged into the [routing parameters](#routing-parameters) object. Note that this option only works when using the pushState API, but is ignored if the router falls back to hashchange mode (i.e. if the pushState API is not available)
@@ -156,7 +156,7 @@ Argument          | Type            | Required | Description
 `key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
 **returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
 
- Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.params()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+ Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.param()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
 
 #### RouteResolver
 
@@ -176,12 +176,13 @@ This method also allows you to asynchronously define what component will be rend
 
 For more information on `onmatch`, see the [advanced component resolution](#advanced-component-resolution) section
 
-`routeResolver.onmatch(args, requestedPath)`
+`routeResolver.onmatch(args, requestedPath, route)`
 
 Argument        | Type                                     | Description
 --------------- | ---------------------------------------- | ---
 `args`          | `Object`                                 | The [routing parameters](#routing-parameters)
 `requestedPath` | `String`                                 | The router path requested by the last routing action, including interpolated routing parameter values, but without the prefix. When `onmatch` is called, the resolution for this path is not complete and `m.route.get()` still returns the previous path.
+`route`         | `String`                                 | The router path requested by the last routing action, excluding interpolated routing parameter values
 **returns**     | `Component|Promise<Component>|undefined` | Returns a component or a promise that resolves to a component
 
 If `onmatch` returns a component or a promise that resolves to a component, this component is used as the `vnode.tag` for the first argument in the RouteResolver's `render` method. Otherwise, `vnode.tag` is set to `"div"`. Similarly, if the `onmatch` method is omitted, `vnode.tag` is also `"div"`.
@@ -208,7 +209,7 @@ Routing is a system that allows creating Single-Page-Applications (SPA), i.e. ap
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
-Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
+Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState%28%29_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
 
 #### Routing strategies
 
@@ -292,7 +293,7 @@ When navigating to routes, there's no need to explicitly specify the router pref
 
 ### Routing parameters
 
-Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:
+Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports [parameterized routes](paths.md#path-parameters):
 
 ```javascript
 var Edit = {
@@ -346,7 +347,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 #### Handling 404s
 
-For isomorphic / universal javascript app, an url param and a variadic route combined is very useful to display custom 404 error page.
+For isomorphic / universal JavaScript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
 In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
 
@@ -429,7 +430,7 @@ Instead of mapping a component to a route, you can specify a RouteResolver objec
 ```javascript
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(args, requestedPath) {
+		onmatch: function(args, requestedPath, route) {
 			return Home
 		},
 		render: function(vnode) {
@@ -583,7 +584,7 @@ var Auth = {
 			url: "/api/v1/auth",
 			data: {username: Auth.username, password: Auth.password}
 		}).then(function(data) {
-			localStorage.setItem("auth-token": data.token)
+			localStorage.setItem("auth-token", data.token)
 			m.route.set("/secret")
 		})
 	}

@@ -20,11 +20,11 @@ First let's create an entry point for the application. Create a file `index.html
 </html>
 ```
 
-The `<!doctype html>` line indicates this is an HTML 5 document. The first `charset` meta tag indicates the encoding of the document and the `viewport` meta tag dictates how mobile browsers should scale the page. The `title` tag contains the text to be displayed on the browser tab for this application, and the `script` tag indicates what is the path to the Javascript file that controls the application.
+The `<!doctype html>` line indicates this is an HTML 5 document. The first `charset` meta tag indicates the encoding of the document and the `viewport` meta tag dictates how mobile browsers should scale the page. The `title` tag contains the text to be displayed on the browser tab for this application, and the `script` tag indicates what is the path to the JavaScript file that controls the application.
 
-We could create the entire application in a single Javascript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
+We could create the entire application in a single JavaScript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
 
-There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern Javascript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
+There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern JavaScript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
 
 ```bash
 npm init -y
@@ -101,7 +101,7 @@ module.exports = User
 
 The `method` option is an [HTTP method](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods). To retrieve data from the server without causing side-effects on the server, we need to use the `GET` method. The `url` is the address for the API endpoint. The `withCredentials: true` line indicates that we're using cookies (which is a requirement for the REM API).
 
-The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a Javascript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
+The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a JavaScript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
 
 Notice we also have a `return` statement in `loadList`. This is a general good practice when working with Promises, which allows us to register more callbacks to run after the completion of the XHR request.
 
@@ -133,7 +133,7 @@ module.exports = {
 }
 ```
 
-By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply Javascript, it's possible to leverage a lot of Javascript tooling ecosystem: for example [Babel](es6.md), [JSX](jsx.md) (inline-HTML syntax extension), [eslint](http://eslint.org/) (linting), [uglifyjs](https://github.com/mishoo/UglifyJS2) (minification), [istanbul](https://github.com/gotwarlost/istanbul) (code coverage), [flow](https://flowtype.org/) (static type analysis), etc.
+By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem: for example [Babel](es6.md), [JSX](jsx.md) (inline-HTML syntax extension), [eslint](http://eslint.org/) (linting), [uglifyjs](https://github.com/mishoo/UglifyJS2) (minification), [istanbul](https://github.com/gotwarlost/istanbul) (code coverage), [flow](https://flowtype.org/) (static type analysis), etc.
 
 Let's use Mithril hyperscript to create a list of items. Hyperscript is the most idiomatic way of writing Mithril views, but [JSX is another popular alternative that you could explore](jsx.md) once you're more comfortable with the basics:
 
@@ -167,7 +167,7 @@ module.exports = {
 }
 ```
 
-Since `User.list` is a Javascript array, and since hyperscript views are just Javascript, we can loop through the array using the `.map` method. This creates an array of vnodes that represents a list of `div`s, each containing the name of a user.
+Since `User.list` is a JavaScript array, and since hyperscript views are just JavaScript, we can loop through the array using the `.map` method. This creates an array of vnodes that represents a list of `div`s, each containing the name of a user.
 
 The problem, of course, is that we never called the `User.loadList` function. Therefore, `User.list` is still an empty array, and thus this view would render a blank page. Since we want `User.loadList` to be called when we render this component, we can take advantage of component [lifecycle methods](lifecycle-methods.md):
 
@@ -188,7 +188,7 @@ module.exports = {
 
 Notice that we added an `oninit` method to the component, which references `User.loadList`. This means that when the component initializes, User.loadList will be called, triggering an XHR request. When the server returns a response, `User.list` gets populated.
 
-Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common pitfall for developers new to javascript: calling the function immediately means that the XHR request will fire as soon as the source code is evaluated, even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
+Also notice we **didn't** do `oninit: User.loadList()` (with parentheses at the end). The difference is that `oninit: User.loadList()` calls the function once and immediately, but `oninit: User.loadList` only calls that function when the component renders. This is an important difference and a common pitfall for developers new to JavaScript: calling the function immediately means that the XHR request will fire as soon as the source code is evaluated, even if the component never renders. Also, if the component is ever recreated (through navigating back and forth through the application), the function won't be called again as expected.
 
 ---
 
@@ -248,7 +248,7 @@ Reloading the browser window now should display some styled elements.
 
 Let's add routing to our application.
 
-Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via Javascript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
+Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via JavaScript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
 
 We can add routing by changing the `m.mount` call to a `m.route` call:
 

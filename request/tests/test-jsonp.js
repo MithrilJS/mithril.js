@@ -47,7 +47,7 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify(queryData) + ")"}
 			}
 		})
-		jsonp({url: "/item", data: {a: "b", c: "d"}}).then(function(data) {
+		jsonp({url: "/item", params: {a: "b", c: "d"}}).then(function(data) {
 			delete data["callback"]
 			o(data).deepEquals({a: "b", c: "d"})
 		}).then(done)

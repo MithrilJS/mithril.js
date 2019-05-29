@@ -43,13 +43,28 @@ module.exports = function() {
 				args.user = user
 				args.password = password
 			}
+			this.responseType = ""
+			this.response = null
+			Object.defineProperty(this, "responseText", {get: function() {
+				if (this.responseType === "" || this.responseType === "text") {
+					return this.response
+				} else {
+					throw new Error("Failed to read the 'responseText' property from 'XMLHttpRequest': The value is only accessible if the object's 'responseType' is '' or 'text' (was '" + this.responseType + "').")
+				}
+			}})
 			this.send = function(body) {
 				var self = this
 				if(!aborted) {
 					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
 					var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
 					self.status = data.status
-					self.responseText = data.responseText
+					// Match spec
+					if (self.responseType === "json") {
+						try { self.response = JSON.parse(data.responseText) }
+						catch (e) { /* ignore */ }
+					} else {
+						self.response = data.responseText
+					}
 				} else {
 					self.status = 0
 				}

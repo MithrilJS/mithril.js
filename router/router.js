@@ -1,7 +1,9 @@
 "use strict"
 
-var buildQueryString = require("../querystring/build")
-var parseQueryString = require("../querystring/parse")
+var buildPathname = require("../pathname/build")
+var parsePathname = require("../pathname/parse")
+var compileTemplate = require("../pathname/compileTemplate")
+var assign = require("../pathname/assign")
 
 module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
@@ -14,58 +16,15 @@ module.exports = function($window) {
 	}
 
 	var asyncId
-	function debounceAsync(callback) {
-		return function() {
-			if (asyncId != null) return
-			asyncId = callAsync(function() {
-				asyncId = null
-				callback()
-			})
-		}
-	}
-
-	function parsePath(path, queryData, hashData) {
-		var queryIndex = path.indexOf("?")
-		var hashIndex = path.indexOf("#")
-		var pathEnd = queryIndex > -1 ? queryIndex : hashIndex > -1 ? hashIndex : path.length
-		if (queryIndex > -1) {
-			var queryEnd = hashIndex > -1 ? hashIndex : path.length
-			var queryParams = parseQueryString(path.slice(queryIndex + 1, queryEnd))
-			for (var key in queryParams) queryData[key] = queryParams[key]
-		}
-		if (hashIndex > -1) {
-			var hashParams = parseQueryString(path.slice(hashIndex + 1))
-			for (var key in hashParams) hashData[key] = hashParams[key]
-		}
-		return path.slice(0, pathEnd)
-	}
-
 	var router = {prefix: "#!"}
 	router.getPath = function() {
-		var type = router.prefix.charAt(0)
-		switch (type) {
-			case "#": return normalize("hash").slice(router.prefix.length)
-			case "?": return normalize("search").slice(router.prefix.length) + normalize("hash")
-			default: return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
-		}
+		if (router.prefix.charAt(0) === "#") return normalize("hash").slice(router.prefix.length)
+		if (router.prefix.charAt(0) === "?") return normalize("search").slice(router.prefix.length) + normalize("hash")
+		return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
 	}
+
 	router.setPath = function(path, data, options) {
-		var queryData = {}, hashData = {}
-		path = parsePath(path, queryData, hashData)
-		if (data != null) {
-			for (var key in data) queryData[key] = data[key]
-			path = path.replace(/:([^\/]+)/g, function(match, token) {
-				delete queryData[token]
-				return data[token]
-			})
-		}
-
-		var query = buildQueryString(queryData)
-		if (query) path += "?" + query
-
-		var hash = buildQueryString(hashData)
-		if (hash) path += "#" + hash
-
+		path = buildPathname(path, data)
 		if (supportsPushState) {
 			var state = options ? options.state : null
 			var title = options ? options.title : null
@@ -75,36 +34,53 @@ module.exports = function($window) {
 		}
 		else $window.location.href = router.prefix + path
 	}
-	router.defineRoutes = function(routes, resolve, reject) {
+
+	router.defineRoutes = function(routes, resolve, reject, defaultRoute) {
+		var compiled = Object.keys(routes).map(function(route) {
+			if (route.charAt(0) !== "/") throw new SyntaxError("Routes must start with a `/`")
+			if ((/:([^\/\.-]+)(\.{3})?:/).test(route)) {
+				throw new SyntaxError("Route parameter names must be separated with either `/`, `.`, or `-`")
+			}
+			return {
+				route: route,
+				component: routes[route],
+				check: compileTemplate(route),
+			}
+		})
+
+		if (defaultRoute != null) {
+			var defaultData = parsePathname(defaultRoute)
+
+			if (!compiled.some(function (i) { return i.check(defaultData) })) {
+				throw new ReferenceError("Default route doesn't match any known routes")
+			}
+		}
+
 		function resolveRoute() {
 			var path = router.getPath()
-			var params = {}
-			var pathname = parsePath(path, params, params)
+			var data = parsePathname(path)
 
-			var state = $window.history.state
-			if (state != null) {
-				for (var k in state) params[k] = state[k]
-			}
-			for (var route in routes) {
-				var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
+			assign(data.params, $window.history.state)
 
-				if (matcher.test(pathname)) {
-					pathname.replace(matcher, function() {
-						var keys = route.match(/:[^\/]+/g) || []
-						var values = [].slice.call(arguments, 1, -2)
-						for (var i = 0; i < keys.length; i++) {
-							params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
-						}
-						resolve(routes[route], params, path, route)
-					})
+			for (var i = 0; i < compiled.length; i++) {
+				if (compiled[i].check(data)) {
+					resolve(compiled[i].component, data.params, path, compiled[i].route)
 					return
 				}
 			}
 
-			reject(path, params)
+			reject(path, data.params)
 		}
 
-		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
+		if (supportsPushState) {
+			$window.onpopstate = function() {
+				if (asyncId) return
+				asyncId = callAsync(function() {
+					asyncId = null
+					resolveRoute()
+				})
+			}
+		}
 		else if (router.prefix.charAt(0) === "#") $window.onhashchange = resolveRoute
 		resolveRoute()
 	}
