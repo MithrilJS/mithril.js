@@ -77,6 +77,10 @@
 - request: don't modify params, call `extract`/`serialize`/`deserialize` with correct `this` value ([#2288](https://github.com/MithrilJS/mithril.js/pull/2288))
 - render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
 - render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
+- API: `mithril` loads `mithril/index.js`, not the bundle, so users of `mithril/hyperscript`, `mithril/render`, and similar see the same Mithril instance as those just using `mithril` itself.
+    - `https://unpkg.com/mithril` is configured to receive the *minified* bundle, not the development bundle.
+    - The raw bundle itself remains accessible at `mithril.js`, and is *not* browser-wrapped.
+    - Note: this *will* increase overhead with bundlers like Webpack, Rollup, and Browserify.
 
 ---
 
