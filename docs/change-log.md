@@ -35,6 +35,10 @@
 - cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
 - render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
 - API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
+- request: `data` has now been split to `params` and `body` and `useBody` has been removed in favor of just using `body`. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+- route, request: Interpolated arguments are URL-escaped (and for declared routes, URL-unescaped) automatically. If you want to use a raw route parameter, use a variadic parameter like in `/asset/:path.../view`. This was previously only available in `m.route` route definitions, but it's now usable in both that and where paths are accepted. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+- route, request: Interpolated arguments are *not* appended to the query string. This means `m.request({url: "/api/user/:id/get", params: {id: user.id}})` would result in a request like `GET /api/user/1/get`, not one like `GET /api/user/1/get?id=1`. If you really need it in both places, pass the same value via two separate parameters with the non-query-string parameter renamed, like in `m.request({url: "/api/user/:urlID/get", params: {id: user.id, urlID: user.id}})`. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+- route, request: `m.route.set`, `m.request`, and `m.jsonp` all use the same path template syntax now, and vary only in how they receive their parameters. Furthermore, declared routes in `m.route` shares the same syntax and semantics, but acts in reverse as if via pattern matching. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 
 #### News
 
@@ -55,6 +59,10 @@
     - `m()` itself from `mithril` is exported as the default export.
     - `mithril/stream`'s primary export is exported as the default export.
 - fragments: allow same attrs/children overloading logic as hyperscript ([#2328](https://github.com/MithrilJS/mithril.js/pull/2328))
+- route: Declared routes may check against path names with query strings. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+- route: Declared routes in `m.route` now support `-` and `.` as delimiters for path segments. This means you can have a route like `"/edit/:file.:ext"`. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+    - Previously, this was possible to do in `m.route.set`, `m.request`, and `m.jsonp`, but it was wholly untested for and also undocumented.
+- API: `m.buildPathname` and `m.parsePathname` added. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 
 #### Bug fixes
 

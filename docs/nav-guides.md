@@ -12,6 +12,7 @@
 	- [Testing](testing.md)
 	- [Examples](examples.md)
 	- [3rd Party Integration](integrating-libs.md)
+	- [Path Handling](paths.md)
 - Key concepts
 	- [Vnodes](vnodes.md)
 	- [Components](components.md)

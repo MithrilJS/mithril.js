@@ -79,7 +79,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", data: {x: "y"}}).then(function(data) {
+			xhr({method: "GET", url: "/item", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=y"})
 			}).then(done)
 		})
@@ -89,7 +89,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", data: {x: "y"}}).then(function(data) {
+			xhr({method: "POST", url: "/item", body: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: "y"}})
 			}).then(done)
 		})
@@ -99,7 +99,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", data: {x: ":y"}}).then(function(data) {
+			xhr({method: "GET", url: "/item", params: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=%3Ay"})
 			}).then(done)
 		})
@@ -109,28 +109,88 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", data: {x: ":y"}}).then(function(data) {
+			xhr({method: "POST", url: "/item", body: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: ":y"}})
 			}).then(done)
 		})
 		o("works w/ parameterized url via GET", function(done) {
 			mock.$defineRoutes({
 				"GET /item/y": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query})}
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: "?x=y"})
+			xhr({method: "GET", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: {}, c: null})
 			}).then(done)
 		})
 		o("works w/ parameterized url via POST", function(done) {
 			mock.$defineRoutes({
 				"POST /item/y": function(request) {
-					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", data: {x: "y"}}).then(function(data) {
-				o(data).deepEquals({a: "/item/y", b: {x: "y"}})
+			xhr({method: "POST", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: {}, c: null})
+			}).then(done)
+		})
+		o("works w/ parameterized url + body via GET", function(done) {
+			mock.$defineRoutes({
+				"GET /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
+				}
+			})
+			xhr({method: "GET", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
+			}).then(done)
+		})
+		o("works w/ parameterized url + body via POST", function(done) {
+			mock.$defineRoutes({
+				"POST /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
+				}
+			})
+			xhr({method: "POST", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
+			}).then(done)
+		})
+		o("works w/ parameterized url + query via GET", function(done) {
+			mock.$defineRoutes({
+				"GET /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
+				}
+			})
+			xhr({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
+			}).then(done)
+		})
+		o("works w/ parameterized url + query via POST", function(done) {
+			mock.$defineRoutes({
+				"POST /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
+				}
+			})
+			xhr({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
+			}).then(done)
+		})
+		o("works w/ parameterized url + query + body via GET", function(done) {
+			mock.$defineRoutes({
+				"GET /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
+				}
+			})
+			xhr({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
+			}).then(done)
+		})
+		o("works w/ parameterized url + query + body via POST", function(done) {
+			mock.$defineRoutes({
+				"POST /item/y": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
+				}
+			})
+			xhr({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
 			}).then(done)
 		})
 		o("works w/ array", function(done) {
@@ -139,7 +199,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/items", data: [{x: "y"}]}).then(function(data) {
+			xhr({method: "POST", url: "/items", body: [{x: "y"}]}).then(function(data) {
 				o(data).deepEquals({a: "/items", b: [{x: "y"}]})
 			}).then(done)
 		})
@@ -201,7 +261,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+			xhr({method: "GET", url: "/item", serialize: serialize, params: {id: 1}}).then(function(data) {
 				o(data.body).equals("?id=1")
 			}).then(done)
 		})
@@ -215,7 +275,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item", serialize: serialize, data: {id: 1}}).then(function(data) {
+			xhr({method: "POST", url: "/item", serialize: serialize, body: {id: 1}}).then(function(data) {
 				o(data.body).equals("id=1")
 			}).then(done)
 		})
