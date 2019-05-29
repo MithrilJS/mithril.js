@@ -290,7 +290,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
 		o("deserialize parameter works in POST", function(done) {
@@ -304,12 +304,12 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
 		o("extract parameter works in GET", function(done) {
 			var extract = function() {
-				return JSON.stringify({test: 123})
+				return {test: 123}
 			}
 
 			mock.$defineRoutes({
@@ -318,12 +318,12 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
 		o("extract parameter works in POST", function(done) {
 			var extract = function() {
-				return JSON.stringify({test: 123})
+				return {test: 123}
 			}
 
 			mock.$defineRoutes({
@@ -332,7 +332,7 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
-				o(data).equals("{\"test\":123}")
+				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
 		o("ignores deserialize if extract is defined", function(done) {
@@ -545,7 +545,8 @@ o.spec("xhr", function() {
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
-				o(e.message).equals(JSON.stringify({error: "error"}))
+				o(e.message).equals("[object Object]")
+				o(e.response).deepEquals({error: "error"})
 				o(e.code).equals(500)
 			}).then(done)
 		})
@@ -568,7 +569,8 @@ o.spec("xhr", function() {
 				}
 			})
 			xhr({method: "GET", url: "/item"}).catch(function(e) {
-				o(e.message).equals("Invalid JSON: error")
+				o(e.message).equals("null")
+				o(e.response).equals(null)
 			}).then(done)
 		})
 		o("triggers all branched catches upon rejection", function(done) {
