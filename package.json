@@ -4,15 +4,13 @@
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
-  "main": "mithril.js",
-  "module": "mithril.mjs",
+  "unpkg": "mithril.min.js",
   "repository": "MithrilJS/mithril.js",
   "scripts": {
     "dev": "node bundler/cli browser.js -output mithril.js -watch",
-    "build": "npm run build-browser & npm run build-min && npm run build-esm",
+    "build": "npm run build-browser & npm run build-min",
     "build-browser": "node bundler/cli browser.js -output mithril.js",
     "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
-    "build-esm": "node esm.js",
     "precommit": "lint-staged",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",
@@ -24,7 +22,7 @@
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
-    "version": "npm run build && git add mithril.js mithril.min.js mithril.mjs mithril.min.mjs stream/stream.mjs",
+    "version": "npm run build && git add mithril.js mithril.min.js",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {

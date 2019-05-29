@@ -3,7 +3,6 @@
   "version": "3.1.0",
   "description": "Noiseless testing framework",
   "main": "ospec.js",
-  "module": "ospec.mjs",
   "directories": {
     "test": "tests"
   },
@@ -12,9 +11,6 @@
   "license": "MIT",
   "bin": {
     "ospec": "./bin/ospec"
-  },
-  "scripts": {
-    "prepublishOnly": "node esm.js"
   },
   "repository": "MithrilJS/mithril.js",
   "dependencies": {

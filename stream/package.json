@@ -3,7 +3,6 @@
   "version": "2.0.0",
   "description": "Streaming data, mithril-style",
   "main": "stream.js",
-  "module": "stream.mjs",
   "directories": {
     "test": "tests"
   },
