@@ -8,7 +8,11 @@ module.exports = function($window) {
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
 	function normalize(fragment) {
-		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+		var data = $window.location[fragment]
+        // The route might contain invalid escapes, and thus
+        // `decodeURIComponent` could throw (consider `/abc%def`). We need to
+        // handle that case accordingly.
+		try { data = data.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent) } catch (e) { /* ignore */ }
 		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 		return data
 	}
@@ -42,8 +46,7 @@ module.exports = function($window) {
 
 	var router = {prefix: "#!"}
 	router.getPath = function() {
-		var type = router.prefix.charAt(0)
-		switch (type) {
+		switch (router.prefix.charAt(0)) {
 			case "#": return normalize("hash").slice(router.prefix.length)
 			case "?": return normalize("search").slice(router.prefix.length) + normalize("hash")
 			default: return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")

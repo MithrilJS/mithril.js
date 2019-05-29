@@ -55,7 +55,7 @@ o.spec("Router.setPath", function() {
 						router.setPath("/other/x/y/z?c=d#e=f")
 
 						o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
-						
+
 						done()
 					})
 				})
@@ -67,7 +67,19 @@ o.spec("Router.setPath", function() {
 						router.setPath("/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6")
 
 						o(router.getPath()).equals("/ö?ö=ö#ö=ö")
-						
+
+						done()
+					})
+				})
+				o("sets route w/ invalid escape", function(done) {
+					$window.location.href = prefix + "/test"
+					router.defineRoutes({"/test": {data: 1}, "/abcdef": {data: 2}, "/abc%def": {data: 3}}, onRouteChange, onFail)
+
+					callAsync(function() {
+						router.setPath("/abc%def")
+
+						o(router.getPath()).equals("/abc%def")
+
 						done()
 					})
 				})
@@ -79,7 +91,7 @@ o.spec("Router.setPath", function() {
 						router.setPath("/ö?ö=ö#ö=ö")
 
 						o(router.getPath()).equals("/ö?ö=ö#ö=ö")
-						
+
 						done()
 					})
 				})
@@ -96,7 +108,7 @@ o.spec("Router.setPath", function() {
 						router.setPath("/other/x/y/z?c=d#e=f")
 
 						o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
-						
+
 						done()
 					})
 				})
@@ -109,7 +121,7 @@ o.spec("Router.setPath", function() {
 						$window.onpopstate()
 
 						o(router.getPath()).equals("/other/x/y/z?c=d#e=f")
-						
+
 						done()
 					})
 				})
@@ -121,7 +133,7 @@ o.spec("Router.setPath", function() {
 						router.setPath("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
 
 						o(router.getPath()).equals("/other/x/y/z?c=d&e=f")
-						
+
 						done()
 					})
 				})
@@ -134,7 +146,7 @@ o.spec("Router.setPath", function() {
 						$window.history.back()
 
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + "/")
-						
+
 						done()
 					})
 				})
@@ -149,7 +161,7 @@ o.spec("Router.setPath", function() {
 						var slash = prefix[0] === "/" ? "" : "/"
 
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
-						
+
 						done()
 					})
 				})
@@ -161,7 +173,7 @@ o.spec("Router.setPath", function() {
 						router.setPath("/other", null, {state: {a: 1}})
 
 						o($window.history.state).deepEquals({a: 1})
-						
+
 						done()
 					})
 				})
