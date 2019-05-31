@@ -1653,7 +1653,7 @@ m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
 m.parsePathname = parsePathname
 m.buildPathname = buildPathname
-m.version = "2.0.0-rc.5"
+m.version = "2.0.0-rc.6"
 m.vnode = Vnode
 m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m
