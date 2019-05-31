@@ -71,7 +71,7 @@ module.exports = function($window, Promise) {
 
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
-			if (assumeJSON && !hasHeader(args, /^content-type$/i)) {
+			if (assumeJSON && body != null && !hasHeader(args, /^content-type$/i)) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {

@@ -40,6 +40,9 @@
 - route, request: Interpolated arguments are *not* appended to the query string. This means `m.request({url: "/api/user/:id/get", params: {id: user.id}})` would result in a request like `GET /api/user/1/get`, not one like `GET /api/user/1/get?id=1`. If you really need it in both places, pass the same value via two separate parameters with the non-query-string parameter renamed, like in `m.request({url: "/api/user/:urlID/get", params: {id: user.id, urlID: user.id}})`. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 - route, request: `m.route.set`, `m.request`, and `m.jsonp` all use the same path template syntax now, and vary only in how they receive their parameters. Furthermore, declared routes in `m.route` shares the same syntax and semantics, but acts in reverse as if via pattern matching. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 - request: `options.responseType` now defaults to `"json"` if `extract` is absent, and `deserialize` receives the parsed response, not the raw string. If you want the old behavior, [use `responseType: "text"`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType). ([#2335](https://github.com/MithrilJS/mithril.js/pull/2335))
+- request: set `Content-Type: application/json; charset=utf-8` for all XHR methods by default, provided they have a body that's `!= null` ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361), [#2421](https://github.com/MithrilJS/mithril.js/pull/2421))
+    - This can cause CORS issues when issuing `GET` with bodies, but you can address them through configuring CORS appropriately.
+    - Previously, it was only set for all non-`GET` methods and only when `useBody: true` was passed (the default), and it was always set for them. Now it's automatically omitted when no body is present, so the hole is slightly broadened.
 
 #### News
 

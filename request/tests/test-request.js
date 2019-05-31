@@ -434,19 +434,6 @@ o.spec("xhr", function() {
 				o(xhr.getRequestHeader("Content-Type")).equals("Value")
 			}
 		})
-		o("json headers are set to the correct default value", function(done) {
-			mock.$defineRoutes({
-				"POST /item": function() {
-					return {status: 200, responseText: ""}
-				}
-			})
-			xhr({method: "POST", url: "/item", config: config}).then(done)
-
-			function config(xhr) {
-				o(xhr.getRequestHeader("Content-Type")).equals("application/json; charset=utf-8")
-				o(xhr.getRequestHeader("Accept")).equals("application/json, text/*")
-			}
-		})
 		o("doesn't fail on abort", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {
@@ -639,5 +626,73 @@ o.spec("xhr", function() {
 				done()
 			})
 		})
+	})
+	o.spec("json header", function() {
+		function checkUnset(method) {
+			o("doesn't set header on " + method + " without body", function(done) {
+				var routes = {}
+				routes[method + " /item"] = function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+				mock.$defineRoutes(routes)
+				xhr({
+					method: method, url: "/item",
+					config: function(xhr) {
+						var header = xhr.getRequestHeader("Content-Type")
+						o(header).equals(undefined)
+						header = xhr.getRequestHeader("Accept")
+						o(header).equals("application/json, text/*")
+					}
+				}).then(function(result) {
+					o(result).deepEquals({a: 1})
+					done()
+				}).catch(function(e) {
+					done(e)
+				})
+			})
+		}
+
+		function checkSet(method, body) {
+			o("sets header on " + method + " with body", function(done) {
+				var routes = {}
+				routes[method + " /item"] = function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+				mock.$defineRoutes(routes)
+				xhr({
+					method: method, url: "/item", body: body,
+					config: function(xhr) {
+						var header = xhr.getRequestHeader("Content-Type")
+						o(header).equals("application/json; charset=utf-8")
+						header = xhr.getRequestHeader("Accept")
+						o(header).equals("application/json, text/*")
+					}
+				}).then(function(result) {
+					o(result).deepEquals({body: body})
+					done()
+				}).catch(function(e) {
+					done(e)
+				})
+			})
+		}
+
+		checkUnset("GET")
+		checkUnset("HEAD")
+		checkUnset("OPTIONS")
+		checkUnset("POST")
+		checkUnset("PUT")
+		checkUnset("DELETE")
+		checkUnset("PATCH")
+
+		checkSet("GET", {foo: "bar"})
+		checkSet("HEAD", {foo: "bar"})
+		checkSet("OPTIONS", {foo: "bar"})
+		checkSet("POST", {foo: "bar"})
+		checkSet("PUT", {foo: "bar"})
+		checkSet("DELETE", {foo: "bar"})
+		checkSet("PATCH", {foo: "bar"})
 	})
 })
