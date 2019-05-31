@@ -395,7 +395,7 @@ var _12 = function($window, Promise) {
 				_abort.call(xhr)
 			}
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			if (assumeJSON && !hasHeader(args, /^content-type0$/i)) {
+			if (assumeJSON && body != null && !hasHeader(args, /^content-type0$/i)) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
 			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
