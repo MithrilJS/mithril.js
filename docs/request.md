@@ -27,7 +27,8 @@ Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
-	data: {id: 1, name: "test"}
+	params: {id: 1},
+	body: {name: "test"}
 })
 .then(function(result) {
 	console.log(result)
@@ -45,7 +46,8 @@ Argument                  | Type                              | Required | Descr
 `options`                 | `Object`                          | Yes      | The request options to pass.
 `options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
 `options.url`             | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.data`.
-`options.data`            | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
+`options.params`          | `Object`                          | No       | The data to be interpolated into the URL and serialized into the querystring.
+`options.body`            | `Object`                          | No       | The data to be serialized into the body.
 `options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
@@ -204,25 +206,25 @@ Request URLs may contain interpolations:
 m.request({
 	method: "GET",
 	url: "/api/v1/users/:id",
-	data: {id: 123},
+	params: {id: 123},
 }).then(function(user) {
 	console.log(user.id) // logs 123
 })
 ```
 
-In the code above, `:id` is populated with the data from the `{id: 123}` object, and the request becomes `GET /api/v1/users/123`.
+In the code above, `:id` is populated with the data from the `params` object, and the request becomes `GET /api/v1/users/123`.
 
-Interpolations are ignored if no matching data exists in the `data` property.
+Interpolations are ignored if no matching data exists in the `params` property.
 
 ```javascript
 m.request({
 	method: "GET",
 	url: "/api/v1/users/foo:bar",
-	data: {id: 123},
+	params: {id: 123},
 })
 ```
 
-In the code above, the request becomes `GET /api/v1/users/foo:bar`
+In the code above, the request becomes `GET /api/v1/users/foo:bar?id=123`
 
 ---
 
@@ -240,7 +242,7 @@ function search() {
 	m.request({
 		method: "GET",
 		url: "/api/v1/users",
-		data: {search: query},
+		params: {search: query},
 		config: function(xhr) {searchXHR = xhr}
 	})
 }
@@ -285,13 +287,13 @@ Next, you need to call `m.request` and set `options.method` to an HTTP method th
 function upload(e) {
 	var file = e.target.files[0]
 
-	var data = new FormData()
-	data.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 	})
 }
 ```
@@ -312,15 +314,15 @@ m.render(document.body, [
 function upload(e) {
 	var files = e.target.files
 
-	var data = new FormData()
+	var body = new FormData()
 	for (var i = 0; i < files.length; i++) {
-		data.append("file" + i, files[i])
+		body.append("file" + i, files[i])
 	}
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 	})
 }
 ```
@@ -348,13 +350,13 @@ m.mount(document.body, {
 function upload(e) {
 	var file = e.target.files[0]
 
-	var data = new FormData()
-	data.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 		config: function(xhr) {
 			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
