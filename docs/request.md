@@ -497,7 +497,7 @@ Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of
 
 Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
 
-Despite being much smaller, Mithril's XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril's auto-redrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
+Despite being much smaller, Mithril's XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril's autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
 
 In addition, Mithril's XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
 
