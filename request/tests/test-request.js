@@ -695,4 +695,69 @@ o.spec("request", function() {
 		checkSet("DELETE", {foo: "bar"})
 		checkSet("PATCH", {foo: "bar"})
 	})
+
+	// See: https://github.com/MithrilJS/mithril.js/issues/2426
+	//
+	// TL;DR: lots of subtlety. Make sure you read the ES spec closely before
+	// updating this code or the corresponding finalizer code in
+	// `request/request` responsible for scheduling autoredraws, or you might
+	// inadvertently break things.
+	//
+	// The precise behavior here is that it schedules a redraw immediately after
+	// the second tick *after* the promise resolves, but `await` in engines that
+	// have implemented the change in https://github.com/tc39/ecma262/pull/1250
+	// will only take one tick to get the value. Engines that haven't
+	// implemented that spec change would wait until the tick after the redraw
+	// was scheduled before it can see the new value. But this only applies when
+	// the engine needs to coerce the value, and this is where things get a bit
+	// hairy. As per spec, V8 checks the `.constructor` property of promises and
+	// if that `=== Promise`, it does *not* coerce it using `.then`, but instead
+	// just resolves it directly. This, of course, can screw with our autoredraw
+	// behavior, and we have to work around that. At the time of writing, no
+	// other browser checks for this additional constraint, and just blindly
+	// invokes `.then` instead, and so we end up working as anticipated. But for
+	// obvious reasons, it's a bad idea to rely on a spec violation for things
+	// to work unless the spec itself is clearly broken (in this case, it's
+	// not). And so we need to test for this very unusual edge case.
+	//
+	// The direct `eval` is just so I can convert early errors to runtime
+	// errors without having to explicitly wire up all the bindings set up in
+	// `o.beforeEach`. I evaluate it immediately inside a `try`/`catch` instead
+	// of inside the test code so any relevant syntax error can be detected
+	// ahead of time and the test skipped entirely. It might trigger mental
+	// alarms because `eval` is normally asking for problems, but this is a
+	// rare case where it's genuinely safe and rational.
+	try {
+		// eslint-disable-next-line no-eval
+		var runAsyncTest = eval(
+			"async () => {\n" +
+			"    var p = request('/item')\n" +
+			"    o(complete.callCount).equals(0)\n" +
+			// Note: this step does *not* invoke `.then` on the promise returned
+			// from `p.then(resolve, reject)`.
+			"    await p\n" +
+			// The spec prior to https://github.com/tc39/ecma262/pull/1250 used
+			// to take 3 ticks instead of 1, so `complete` would have been
+			// called already and we would've been done. After it, it now takes
+			// 1 tick and so `complete` wouldn't have yet been called - it takes
+			// 2 ticks to get called. And so we have to wait for one more ticks
+			// for `complete` to get called.
+			"    await null\n" +
+			"    o(complete.callCount).equals(1)\n" +
+			"}"
+		)
+
+		o("invokes the redraw in native async/await", function () {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			return runAsyncTest()
+		})
+	} catch (e) {
+		// ignore - this is just for browsers that natively support
+		// `async`/`await`, like most modern browsers.
+		// it's just a syntax error anyways.
+	}
 })

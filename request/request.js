@@ -6,6 +6,16 @@ module.exports = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
 
+	function PromiseProxy(executor) {
+		return new Promise(executor)
+	}
+
+	// In case the global Promise is some userland library's where they rely on
+	// `foo instanceof this.constructor`, `this.constructor.resolve(value)`, or
+	// similar. Let's *not* break them.
+	PromiseProxy.prototype = Promise.prototype
+	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
+
 	function makeRequest(factory) {
 		return function(url, args) {
 			if (typeof url !== "string") { args = url; url = url.url }
@@ -33,6 +43,14 @@ module.exports = function($window, Promise) {
 
 			function wrap(promise) {
 				var then = promise.then
+				// Set the constructor, so engines know to not await or resolve
+				// this as a native promise. At the time of writing, this is
+				// only necessary for V8, but their behavior is the correct
+				// behavior per spec. See this spec issue for more details:
+				// https://github.com/tc39/ecma262/issues/1577. Also, see the
+				// corresponding comment in `request/tests/test-request.js` for
+				// a bit more background on the issue at hand.
+				promise.constructor = PromiseProxy
 				promise.then = function() {
 					count++
 					var next = then.apply(promise, arguments)
