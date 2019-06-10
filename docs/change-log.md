@@ -93,6 +93,7 @@
     - `https://unpkg.com/mithril` is configured to receive the *minified* bundle, not the development bundle.
     - The raw bundle itself remains accessible at `mithril.js`, and is *not* browser-wrapped.
     - Note: this *will* increase overhead with bundlers like Webpack, Rollup, and Browserify.
+- request: autoredraw support fixed for `async`/`await` in Chrome ([#2428](https://github.com/MithrilJS/mithril.js/pull/2428) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ---
 
