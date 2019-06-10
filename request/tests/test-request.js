@@ -6,12 +6,12 @@ var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 var Promise = require("../../promise/promise")
 
-o.spec("xhr", function() {
-	var mock, xhr, complete
+o.spec("request", function() {
+	var mock, request, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
 		var requestService = Request(mock, Promise)
-		xhr = requestService.request
+		request = requestService.request
 		complete = o.spy()
 		requestService.setCompletionCallback(complete)
 	})
@@ -23,7 +23,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).then(function(data) {
+			request({method: "GET", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(function() {
 				done()
@@ -35,7 +35,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({url: "/item"}).then(function(data) {
+			request({url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(function() {
 				done()
@@ -47,7 +47,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr("/item").then(function(data) {
+			request("/item").then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(function() {
 				done()
@@ -59,7 +59,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({method: "POST", url: "/item"}).then(function(data) {
+			request({method: "POST", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(done)
 		})
@@ -69,7 +69,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr("/item", {method: "POST"}).then(function(data) {
+			request("/item", {method: "POST"}).then(function(data) {
 				o(data).deepEquals({a: 1})
 			}).then(done)
 		})
@@ -79,7 +79,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", params: {x: "y"}}).then(function(data) {
+			request({method: "GET", url: "/item", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=y"})
 			}).then(done)
 		})
@@ -89,7 +89,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", body: {x: "y"}}).then(function(data) {
+			request({method: "POST", url: "/item", body: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: "y"}})
 			}).then(done)
 		})
@@ -99,7 +99,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", params: {x: ":y"}}).then(function(data) {
+			request({method: "GET", url: "/item", params: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=%3Ay"})
 			}).then(done)
 		})
@@ -109,7 +109,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item", body: {x: ":y"}}).then(function(data) {
+			request({method: "POST", url: "/item", body: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: ":y"}})
 			}).then(done)
 		})
@@ -119,7 +119,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+			request({method: "GET", url: "/item/:x", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: null})
 			}).then(done)
 		})
@@ -129,7 +129,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+			request({method: "POST", url: "/item/:x", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: null})
 			}).then(done)
 		})
@@ -139,7 +139,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+			request({method: "GET", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
 			}).then(done)
 		})
@@ -149,7 +149,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+			request({method: "POST", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
 			}).then(done)
 		})
@@ -159,7 +159,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+			request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
 			}).then(done)
 		})
@@ -169,7 +169,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+			request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
 			}).then(done)
 		})
@@ -179,7 +179,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+			request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
 			}).then(done)
 		})
@@ -189,7 +189,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+			request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
 			}).then(done)
 		})
@@ -199,7 +199,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
 				}
 			})
-			xhr({method: "POST", url: "/items", body: [{x: "y"}]}).then(function(data) {
+			request({method: "POST", url: "/items", body: [{x: "y"}]}).then(function(data) {
 				o(data).deepEquals({a: "/items", b: [{x: "y"}]})
 			}).then(done)
 		})
@@ -209,7 +209,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
+			request({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
@@ -219,7 +219,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			xhr({method: "GET", url: "/item/:x"}).then(function(data) {
+			request({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
 			}).then(done)
 		})
@@ -233,7 +233,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
 				}
 			})
-			xhr({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			request({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals([{_id: 1}, {_id: 2}, {_id: 3}])
 			}).then(done)
 		})
@@ -247,7 +247,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
 				}
 			})
-			xhr({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			request({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals({_id: 1})
 			}).then(done)
 		})
@@ -261,7 +261,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
 				}
 			})
-			xhr({method: "GET", url: "/item", serialize: serialize, params: {id: 1}}).then(function(data) {
+			request({method: "GET", url: "/item", serialize: serialize, params: {id: 1}}).then(function(data) {
 				o(data.body).equals("?id=1")
 			}).then(done)
 		})
@@ -275,7 +275,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
 				}
 			})
-			xhr({method: "POST", url: "/item", serialize: serialize, body: {id: 1}}).then(function(data) {
+			request({method: "POST", url: "/item", serialize: serialize, body: {id: 1}}).then(function(data) {
 				o(data.body).equals("id=1")
 			}).then(done)
 		})
@@ -289,7 +289,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			xhr({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
+			request({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -303,7 +303,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			xhr({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
+			request({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -317,7 +317,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "GET", url: "/item", extract: extract}).then(function(data) {
+			request({method: "GET", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -331,7 +331,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", extract: extract}).then(function(data) {
+			request({method: "POST", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
 			}).then(done)
 		})
@@ -346,7 +346,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).then(function(data) {
+			request({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).then(function(data) {
 				o(data).equals(200)
 			}).then(function() {
 				o(deserialize.callCount).equals(0)
@@ -358,7 +358,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", config: config}).then(done)
+			request({method: "POST", url: "/item", config: config}).then(done)
 
 			function config(xhr) {
 				o(typeof xhr.setRequestHeader).equals("function")
@@ -372,11 +372,11 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
-			xhr("/item").then(function() {
-				return xhr("/item")
+			request("/item").then(function() {
+				return request("/item")
 			})
-			xhr("/item").then(function() {
-				return xhr("/item")
+			request("/item").then(function() {
+				return request("/item")
 			})
 			setTimeout(function() {
 				o(complete.callCount).equals(4)
@@ -389,7 +389,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
-			var promise = xhr("/item")
+			var promise = request("/item")
 			promise.then(function() {}).then(function() {})
 			promise.then(function() {}).then(function() {})
 			setTimeout(function() {
@@ -403,7 +403,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
-			xhr("/item", {background: true}).then(function() {})
+			request("/item", {background: true}).then(function() {})
 
 			setTimeout(function() {
 				o(complete.callCount).equals(0)
@@ -416,7 +416,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", config: config, headers: {"Custom-Header": "Value"}}).then(done)
+			request({method: "POST", url: "/item", config: config, headers: {"Custom-Header": "Value"}}).then(done)
 
 			function config(xhr) {
 				o(xhr.getRequestHeader("Custom-Header")).equals("Value")
@@ -428,7 +428,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			xhr({method: "POST", url: "/item", config: config, headers: {"Content-Type": "Value"}}).then(done)
+			request({method: "POST", url: "/item", config: config, headers: {"Content-Type": "Value"}}).then(done)
 
 			function config(xhr) {
 				o(xhr.getRequestHeader("Content-Type")).equals("Value")
@@ -459,7 +459,7 @@ o.spec("xhr", function() {
 				})
 				xhr.abort()
 			}
-			xhr({method: "GET", url: "/item", config: handleAbort}).catch(function() {
+			request({method: "GET", url: "/item", config: handleAbort}).catch(function() {
 				failed = true
 			})
 				.then(function() {
@@ -473,7 +473,7 @@ o.spec("xhr", function() {
 				}
 			})
 			var failed = false
-			xhr({method: "GET", url: "file:///item"}).catch(function() {
+			request({method: "GET", url: "file:///item"}).catch(function() {
 				failed = true
 			}).then(function(data) {
 				o(failed).equals(false)
@@ -488,7 +488,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			return xhr({
+			return request({
 				method: "GET", url: "/item",
 				timeout: 42,
 				config: function(xhr) {
@@ -496,13 +496,13 @@ o.spec("xhr", function() {
 				}
 			})
 		})
-		o("set responseType to xhr instance", function() {
+		o("set responseType to request instance", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			return xhr({
+			return request({
 				method: "GET", url: "/item",
 				responseType: "blob",
 				config: function(xhr) {
@@ -518,7 +518,7 @@ o.spec("xhr", function() {
 			})
 			var data = {x: 1, y: 2}
 			var dataCopy = Object.assign({}, data);
-			xhr({method: "PUT", url: "/items/:x", data})
+			request({method: "PUT", url: "/items/:x", data})
 
 			o(data).deepEquals(dataCopy)
 		})*/
@@ -530,7 +530,7 @@ o.spec("xhr", function() {
 					return {status: 500, responseText: JSON.stringify({error: "error"})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).catch(function(e) {
+			request({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 				o(e.message).equals("[object Object]")
 				o(e.response).deepEquals({error: "error"})
@@ -543,7 +543,7 @@ o.spec("xhr", function() {
 					return {status: 500, responseText: JSON.stringify({message: "error", stack: "error on line 1"})}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).catch(function(e) {
+			request({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 				o(e.response.message).equals("error")
 				o(e.response.stack).equals("error on line 1")
@@ -555,7 +555,7 @@ o.spec("xhr", function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).catch(function(e) {
+			request({method: "GET", url: "/item"}).catch(function(e) {
 				o(e.message).equals("null")
 				o(e.response).equals(null)
 			}).then(done)
@@ -566,15 +566,15 @@ o.spec("xhr", function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
-			var request = xhr({method: "GET", url: "/item"})
+			var promise = request({method: "GET", url: "/item"})
 			var then = o.spy()
 			var catch1 = o.spy()
 			var catch2 = o.spy()
 			var catch3 = o.spy()
 
-			request.catch(catch1)
-			request.then(then, catch2)
-			request.then(then).catch(catch3)
+			promise.catch(catch1)
+			promise.then(then, catch2)
+			promise.then(then).catch(catch3)
 
 			callAsync(function() {
 				callAsync(function() {
@@ -592,7 +592,7 @@ o.spec("xhr", function() {
 					return {status: 0}
 				}
 			})
-			xhr({method: "GET", url: "/item"}).catch(function(e) {
+			request({method: "GET", url: "/item"}).catch(function(e) {
 				o(e instanceof Error).equals(true)
 			}).then(done)
 		})
@@ -602,7 +602,7 @@ o.spec("xhr", function() {
 					return {status: 500, responseText: JSON.stringify({message: "error"})}
 				}
 			})
-			xhr({
+			request({
 				method: "GET", url: "/item",
 				extract: function(xhr) {return JSON.parse(xhr.responseText)}
 			}).then(function(data) {
@@ -616,7 +616,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			xhr({
+			request({
 				method: "GET", url: "/item",
 				extract: function() {throw new Error("error")}
 			}).catch(function(e) {
@@ -635,7 +635,7 @@ o.spec("xhr", function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 				mock.$defineRoutes(routes)
-				xhr({
+				request({
 					method: method, url: "/item",
 					config: function(xhr) {
 						var header = xhr.getRequestHeader("Content-Type")
@@ -662,7 +662,7 @@ o.spec("xhr", function() {
 					}
 				}
 				mock.$defineRoutes(routes)
-				xhr({
+				request({
 					method: method, url: "/item", body: body,
 					config: function(xhr) {
 						var header = xhr.getRequestHeader("Content-Type")
