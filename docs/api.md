@@ -79,7 +79,7 @@ m("a[href='/Home']", {oncreate: m.route.link}, "Go to home page")
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
-	data: {id: 1, name: "test"}
+	params: {id: 1, name: "test"}
 })
 .then(function(result) {
 	console.log(result)
@@ -93,7 +93,7 @@ m.request({
 ```javascript
 m.jsonp({
 	url: "/api/v1/users/:id",
-	data: {id: 1},
+	params: {id: 1},
 	callbackKey: "callback",
 })
 .then(function(result) {

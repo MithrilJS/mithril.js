@@ -67,18 +67,18 @@ Argument               | Type                                     | Required | D
 
 Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
-`m.route.set(path, data, options)`
+`m.route.set(path, params, options)`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`path`            | `String`  | Yes      | The [path name](paths.md) to route to, without a prefix. The path may include parameters, interpolated with values from `data`.
-`data`            | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
+`path`            | `String`  | Yes      | The [path name](paths.md) to route to, without a prefix. The path may include parameters, interpolated with values from `params`.
+`params`          | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
 `options.replace` | `Boolean` | No       | Whether to create a new history entry or to replace the current one. Defaults to false
 `options.state`   | `Object`  | No       | The `state` object to pass to the underlying `history.pushState` / `history.replaceState` call. This state object becomes available in the `history.state` property, and is merged into the [routing parameters](#routing-parameters) object. Note that this option only works when using the pushState API, but is ignored if the router falls back to hashchange mode (i.e. if the pushState API is not available)
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
-Remember that when using `.set` with params you also need to define the route:
+Remember that when using `.set` with `params` you also need to define the route:
 ```javascript
 var Article = {
 	view: function(vnode) {
@@ -582,7 +582,7 @@ var Auth = {
 	login: function() {
 		m.request({
 			url: "/api/v1/auth",
-			data: {username: Auth.username, password: Auth.password}
+			params: {username: Auth.username, password: Auth.password}
 		}).then(function(data) {
 			localStorage.setItem("auth-token", data.token)
 			m.route.set("/secret")

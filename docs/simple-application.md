@@ -522,7 +522,7 @@ var User = {
 		return m.request({
 			method: "PUT",
 			url: "https://rem-rest-api.herokuapp.com/api/users/" + User.current.id,
-			data: User.current,
+			body: User.current,
 			withCredentials: true,
 		})
 	}
