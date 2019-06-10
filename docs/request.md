@@ -25,12 +25,12 @@ Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 
 ```javascript
 m.request({
-  method: "PUT",
-  url: "/api/v1/users/:id",
-  params: {id: 1, name: "test"}
+	method: "PUT",
+	url: "/api/v1/users/:id",
+	params: {id: 1, name: "test"}
 })
 .then(function(result) {
-  console.log(result)
+	console.log(result)
 })
 ```
 
@@ -82,11 +82,11 @@ The `m.request` utility is a thin wrapper around [`XMLHttpRequest`](https://deve
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/api/v1/users",
+	method: "GET",
+	url: "/api/v1/users",
 })
 .then(function(users) {
-  console.log(users)
+	console.log(users)
 })
 ```
 
@@ -104,31 +104,31 @@ Here's an illustrative example of a component that uses `m.request` to retrieve 
 
 ```javascript
 var Data = {
-  todos: {
-    list: [],
-    fetch: function() {
-      m.request({
-        method: "GET",
-        url: "/api/v1/todos",
-      })
-      .then(function(items) {
-        Data.todos.list = items
-      })
-    }
-  }
+	todos: {
+		list: [],
+		fetch: function() {
+			m.request({
+				method: "GET",
+				url: "/api/v1/todos",
+			})
+			.then(function(items) {
+				Data.todos.list = items
+			})
+		}
+	}
 }
 
 var Todos = {
-  oninit: Data.todos.fetch,
-  view: function(vnode) {
-    return Data.todos.list.map(function(item) {
-      return m("div", item.title)
-    })
-  }
+	oninit: Data.todos.fetch,
+	view: function(vnode) {
+		return Data.todos.list.map(function(item) {
+			return m("div", item.title)
+		})
+	}
 }
 
 m.route(document.body, "/", {
-  "/": Todos
+	"/": Todos
 })
 ```
 
@@ -156,39 +156,39 @@ Here's an expanded version of the example above that implements a loading indica
 
 ```javascript
 var Data = {
-  todos: {
-    list: null,
-    error: "",
-    fetch: function() {
-      m.request({
-        method: "GET",
-        url: "/api/v1/todos",
-      })
-      .then(function(items) {
-        Data.todos.list = items
-      })
-      .catch(function(e) {
-        Data.todos.error = e.message
-      })
-    }
-  }
+	todos: {
+		list: null,
+		error: "",
+		fetch: function() {
+			m.request({
+				method: "GET",
+				url: "/api/v1/todos",
+			})
+			.then(function(items) {
+				Data.todos.list = items
+			})
+			.catch(function(e) {
+				Data.todos.error = e.message
+			})
+		}
+	}
 }
 
 var Todos = {
-  oninit: Data.todos.fetch,
-  view: function(vnode) {
-    return Data.todos.error ? [
-      m(".error", Data.todos.error)
-    ] : Data.todos.list ? [
-      Data.todos.list.map(function(item) {
-        return m("div", item.title)
-      })
-    ] : m(".loading-icon")
-  }
+	oninit: Data.todos.fetch,
+	view: function(vnode) {
+		return Data.todos.error ? [
+			m(".error", Data.todos.error)
+		] : Data.todos.list ? [
+			Data.todos.list.map(function(item) {
+				return m("div", item.title)
+			})
+		] : m(".loading-icon")
+	}
 }
 
 m.route(document.body, "/", {
-  "/": Todos
+	"/": Todos
 })
 ```
 
@@ -202,11 +202,11 @@ Request URLs may contain interpolations:
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/api/v1/users/:id",
-  params: {id: 123},
+	method: "GET",
+	url: "/api/v1/users/:id",
+	params: {id: 123},
 }).then(function(user) {
-  console.log(user.id) // logs 123
+	console.log(user.id) // logs 123
 })
 ```
 
@@ -216,9 +216,9 @@ Interpolations are ignored if no matching data exists in the `params` property.
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/api/v1/users/foo:bar",
-  params: {id: 123},
+	method: "GET",
+	url: "/api/v1/users/foo:bar",
+	params: {id: 123},
 })
 ```
 
@@ -235,18 +235,18 @@ Sometimes, it is desirable to abort a request. For example, in an autocompleter/
 ```javascript
 var searchXHR = null
 function search() {
-  abortPreviousSearch()
+	abortPreviousSearch()
 
-  m.request({
-    method: "GET",
-    url: "/api/v1/users",
-    params: {search: query},
-    config: function(xhr) {searchXHR = xhr}
-  })
+	m.request({
+		method: "GET",
+		url: "/api/v1/users",
+		params: {search: query},
+		config: function(xhr) {searchXHR = xhr}
+	})
 }
 function abortPreviousSearch() {
-  if (searchXHR !== null) searchXHR.abort()
-  searchXHR = null
+	if (searchXHR !== null) searchXHR.abort()
+	searchXHR = null
 }
 ```
 
@@ -258,11 +258,11 @@ To upload files, first you need to get a reference to a [`File`](https://develop
 
 ```javascript
 m.render(document.body, [
-  m("input[type=file]", {onchange: upload})
+	m("input[type=file]", {onchange: upload})
 ])
 
 function upload(e) {
-  var file = e.target.files[0]
+	var file = e.target.files[0]
 }
 ```
 
@@ -272,10 +272,10 @@ Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/We
 
 ```javascript
 function upload(e) {
-  var file = e.target.files[0]
+	var file = e.target.files[0]
 
-  var body = new FormData()
-  body.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 }
 ```
 
@@ -283,16 +283,16 @@ Next, you need to call `m.request` and set `options.method` to an HTTP method th
 
 ```javascript
 function upload(e) {
-  var file = e.target.files[0]
+	var file = e.target.files[0]
 
-  var body = new FormData()
-  body.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
-  m.request({
-    method: "POST",
-    url: "/api/v1/upload",
-    body: body,
-  })
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		body: body,
+	})
 }
 ```
 
@@ -306,22 +306,22 @@ To upload multiple files, simply append them all to the `FormData` object. When 
 
 ```javascript
 m.render(document.body, [
-  m("input[type=file][multiple]", {onchange: upload})
+	m("input[type=file][multiple]", {onchange: upload})
 ])
 
 function upload(e) {
-  var files = e.target.files
+	var files = e.target.files
 
-  var body = new FormData()
-  for (var i = 0; i < files.length; i++) {
-    body.append("file" + i, files[i])
-  }
+	var body = new FormData()
+	for (var i = 0; i < files.length; i++) {
+		body.append("file" + i, files[i])
+	}
 
-  m.request({
-    method: "POST",
-    url: "/api/v1/upload",
-    body: body,
-  })
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		body: body,
+	})
 }
 ```
 
@@ -337,32 +337,32 @@ Sometimes, if a request is inherently slow (e.g. a large file upload), it's desi
 var progress = 0
 
 m.mount(document.body, {
-  view: function() {
-    return [
-      m("input[type=file]", {onchange: upload}),
-      progress + "% completed"
-    ]
-  }
+	view: function() {
+		return [
+			m("input[type=file]", {onchange: upload}),
+			progress + "% completed"
+		]
+	}
 })
 
 function upload(e) {
-  var file = e.target.files[0]
+	var file = e.target.files[0]
 
-  var body = new FormData()
-  body.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
-  m.request({
-    method: "POST",
-    url: "/api/v1/upload",
-    body: body,
-    config: function(xhr) {
-      xhr.upload.addEventListener("progress", function(e) {
-        progress = e.loaded / e.total
+	m.request({
+		method: "POST",
+		url: "/api/v1/upload",
+		body: body,
+		config: function(xhr) {
+			xhr.upload.addEventListener("progress", function(e) {
+				progress = e.loaded / e.total
 
-        m.redraw() // tell Mithril that data changed and a re-render is needed
-      })
-    }
-  })
+				m.redraw() // tell Mithril that data changed and a re-render is needed
+			})
+		}
+	})
 }
 ```
 
@@ -378,16 +378,16 @@ You can pass a constructor as the `options.type` parameter and Mithril will inst
 
 ```javascript
 function User(data) {
-  this.name = data.firstName + " " + data.lastName
+	this.name = data.firstName + " " + data.lastName
 }
 
 m.request({
-  method: "GET",
-  url: "/api/v1/users",
-  type: User
+	method: "GET",
+	url: "/api/v1/users",
+	type: User
 })
 .then(function(users) {
-  console.log(users[0].name) // logs a name
+	console.log(users[0].name) // logs a name
 })
 ```
 
@@ -401,12 +401,12 @@ Sometimes a server endpoint does not return a JSON response: for example, you ma
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/files/icon.svg",
-  deserialize: function(value) {return value}
+	method: "GET",
+	url: "/files/icon.svg",
+	deserialize: function(value) {return value}
 })
 .then(function(svg) {
-  m.render(document.body, m.trust(svg))
+	m.render(document.body, m.trust(svg))
 })
 ```
 
@@ -416,19 +416,19 @@ Of course, a `deserialize` function may be more elaborate:
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/files/data.csv",
-  deserialize: parseCSV
+	method: "GET",
+	url: "/files/data.csv",
+	deserialize: parseCSV
 })
 .then(function(data) {
-  console.log(data)
+	console.log(data)
 })
 
 function parseCSV(data) {
-  // naive implementation for the sake of keeping example simple
-  return data.split("\n").map(function(row) {
-    return row.split(",")
-  })
+	// naive implementation for the sake of keeping example simple
+	return data.split("\n").map(function(row) {
+		return row.split(",")
+	})
 }
 ```
 
@@ -438,13 +438,13 @@ Custom headers may also be helpful in this regard. For example, if you're reques
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/files/image.svg",
-  headers: {
-    "Content-Type": "image/svg+xml; charset=utf-8",
-    "Accept": "image/svg, text/*"
-  },
-  deserialize: function(value) {return value}
+	method: "GET",
+	url: "/files/image.svg",
+	headers: {
+		"Content-Type": "image/svg+xml; charset=utf-8",
+		"Accept": "image/svg, text/*"
+	},
+	deserialize: function(value) {return value}
 })
 ```
 
@@ -457,12 +457,12 @@ By default Mithril attempts to parse `xhr.responseText` as JSON and returns the 
 
 ```javascript
 m.request({
-  method: "GET",
-  url: "/api/v1/users",
-  extract: function(xhr) {return {status: xhr.status, body: xhr.responseText}}
+	method: "GET",
+	url: "/api/v1/users",
+	extract: function(xhr) {return {status: xhr.status, body: xhr.responseText}}
 })
 .then(function(response) {
-  console.log(response.status, response.body)
+	console.log(response.status, response.body)
 })
 ```
 
@@ -524,6 +524,6 @@ console.log("list of users:", users)
 
 // PREFER
 m.request("/api/v1/users").then(function(users) {
-  console.log("list of users:", users)
+	console.log("list of users:", users)
 })
 ```
