@@ -27,7 +27,7 @@ Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 m.request({
   method: "PUT",
   url: "/api/v1/users/:id",
-  body: {id: 1, name: "test"}
+  params: {id: 1, name: "test"}
 })
 .then(function(result) {
   console.log(result)
@@ -45,8 +45,8 @@ Argument                  | Type                              | Required | Descr
 `options`                 | `Object`                          | Yes      | The request options to pass.
 `options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
 `options.url`             | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.params`.
-`options.params`            | `any`                           | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests).
-`options.body`            | `any`                             | No       | The data to be serialized into the body (for other types of requests).
+`options.params`            | `Object`                        | No       | The data to be interpolated into the URL and/or serialized into the query string.
+`options.body`            | `Object`                          | No       | The data to be serialized into the body (for other types of requests).
 `options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
@@ -59,7 +59,6 @@ Argument                  | Type                              | Required | Descr
 `options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `body`. Defaults to `JSON.stringify`, or if `options.body` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`     | `any = Function(any)`          | No       | A deserialization method to be applied to the `xhr.response` or normalized `xhr.responseText`. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function). If `extract` is defined, `deserialize` will be skipped.
 `options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `options.deserialize(parsedResponse)`, throwing an exception when the server response status code indicates an error or when the response is syntactically invalid. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves.
-`options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `body` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
 
@@ -211,7 +210,7 @@ m.request({
 })
 ```
 
-In the code above, `:id` is populated with the data from the `{id: 123}` object, and the request becomes `GET /api/v1/users/123`.
+In the code above, `:id` is populated with the data from the `params` object, and the request becomes `GET /api/v1/users/123`.
 
 Interpolations are ignored if no matching data exists in the `params` property.
 
@@ -223,7 +222,7 @@ m.request({
 })
 ```
 
-In the code above, the request becomes `GET /api/v1/users/foo:bar`
+In the code above, the request becomes `GET /api/v1/users/foo:bar?id=123`
 
 ---
 
@@ -275,8 +274,8 @@ Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/We
 function upload(e) {
   var file = e.target.files[0]
 
-  var data = new FormData()
-  data.append("myfile", file)
+  var body = new FormData()
+  body.append("myfile", file)
 }
 ```
 
@@ -286,13 +285,13 @@ Next, you need to call `m.request` and set `options.method` to an HTTP method th
 function upload(e) {
   var file = e.target.files[0]
 
-  var data = new FormData()
-  data.append("myfile", file)
+  var body = new FormData()
+  body.append("myfile", file)
 
   m.request({
     method: "POST",
     url: "/api/v1/upload",
-    body: data,
+    body: body,
   })
 }
 ```
@@ -313,15 +312,15 @@ m.render(document.body, [
 function upload(e) {
   var files = e.target.files
 
-  var data = new FormData()
+  var body = new FormData()
   for (var i = 0; i < files.length; i++) {
-    data.append("file" + i, files[i])
+    body.append("file" + i, files[i])
   }
 
   m.request({
     method: "POST",
     url: "/api/v1/upload",
-    body: data,
+    body: body,
   })
 }
 ```
@@ -349,13 +348,13 @@ m.mount(document.body, {
 function upload(e) {
   var file = e.target.files[0]
 
-  var data = new FormData()
-  data.append("myfile", file)
+  var body = new FormData()
+  body.append("myfile", file)
 
   m.request({
     method: "POST",
     url: "/api/v1/upload",
-    body: data,
+    body: body,
     config: function(xhr) {
       xhr.upload.addEventListener("progress", function(e) {
         progress = e.loaded / e.total
