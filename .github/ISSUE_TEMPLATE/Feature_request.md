@@ -1,6 +1,10 @@
 ---
 name: "\U0001F680Feature or Enhancement"
 about: Suggest an Idea or Enhancement for MithrilJS
+title: ''
+labels: enhancement
+assignees: isiahmeadows
+
 ---
 
 ### Description
@@ -22,4 +26,3 @@ about: Suggest an Idea or Enhancement for MithrilJS
 ### Is this something you're interested in working on?
 
 <!--- Yes or no -->
-

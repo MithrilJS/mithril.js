@@ -1,6 +1,10 @@
 ---
 name: "\U0001F41BBug report"
 about: Report a bug in MithrilJS
+title: ''
+labels: bug
+assignees: isiahmeadows
+
 ---
 
 ### Mithril Version: x.x.x
