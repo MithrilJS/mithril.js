@@ -27,7 +27,8 @@ Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
-	params: {id: 1, name: "test"}
+	params: {id: 1},
+	body: {name: "test"}
 })
 .then(function(result) {
 	console.log(result)
