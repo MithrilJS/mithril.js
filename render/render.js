@@ -885,6 +885,7 @@ module.exports = function($window) {
 		vnode.dom = old.dom
 		vnode.domSize = old.domSize
 		vnode.instance = old.instance
+		vnode.state = old.state
 		return true
 	}
 
