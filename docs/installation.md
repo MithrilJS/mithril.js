@@ -21,6 +21,20 @@ If you're new to JavaScript or just want a very simple setup to get your feet we
 $ npm install mithril@next --save
 ```
 
+TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
+
+```bash
+$ npm install @types/mithril --save-dev
+```
+
+For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts
+
+Type definitions for pre-release versions of Mithril (on the `next` branch) align with the `next` branch of the [types development repo](https://github.com/MithrilJS/mithril.d.ts/tree/next). You can install these types with:
+
+```bash
+$ npm install -D MithrilJS/mithril.d.ts#next
+```
+
 ---
 
 ### Quick start with Webpack
@@ -259,15 +273,3 @@ If you don't have the ability to run a bundler script due to company security po
 // if a CommonJS environment is not detected, Mithril will be created in the global scope
 m.render(document.body, "hello world")
 ```
-
----
-
-### TypeScript
-
-TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
-
-```bash
-$ npm install @types/mithril --save-dev
-```
-
-For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts
