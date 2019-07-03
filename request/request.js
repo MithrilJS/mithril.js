@@ -77,6 +77,7 @@ module.exports = function($window, Promise) {
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
 			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
+			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
 			var xhr = new $window.XMLHttpRequest(),
 				aborted = false,
@@ -97,7 +98,7 @@ module.exports = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
-			xhr.responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
+			xhr.responseType = responseType
 
 			for (var key in args.headers) {
 				if ({}.hasOwnProperty.call(args.headers, key)) {
@@ -121,18 +122,17 @@ module.exports = function($window, Promise) {
 						// preferring `xhr.response` where possible/practical.
 						var response = xhr.response, message
 
-						if (response == null) {
-							try {
-								response = xhr.responseText
-								// Note: this snippet is intentionally *after*
-								// `xhr.responseText` is accessed, since the
-								// above will throw in modern browsers (thus
-								// skipping the rest of this section). It's an
-								// IE hack to detect and work around the lack of
-								// native `responseType: "json"` support there.
-								if (typeof args.extract !== "function" && xhr.responseType === "json") response = JSON.parse(response)
-							}
-							catch (e) { response = null }
+						if (responseType === "json") {
+							// For IE and Edge, which don't implement
+							// `responseType: "json"`.
+							if (!xhr.responseType && typeof args.extract !== "function") response = JSON.parse(xhr.responseText)
+						} else if (!responseType || responseType === "text") {
+							// Only use this default if it's text. If a parsed
+							// document is needed on old IE and friends (all
+							// unsupported), the user should use a custom
+							// `config` instead. They're already using this at
+							// their own risk.
+							if (response == null) response = xhr.responseText
 						}
 
 						if (typeof args.extract === "function") {
