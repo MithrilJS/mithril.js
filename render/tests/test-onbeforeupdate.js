@@ -306,4 +306,100 @@ o.spec("onbeforeupdate", function() {
 			})
 		})
 	})
+
+	// https://github.com/MithrilJS/mithril.js/issues/2067
+	o.spec("after prevented update", function() {
+		o("old attributes are retained", function() {
+			render(root, [
+				{tag: "div", attrs: {"id": "foo", onbeforeupdate: function() { return true }}, children: []},
+			])
+			render(root, [
+				{tag: "div", attrs: {"id": "bar", onbeforeupdate: function() { return false }}, children: []},
+			])
+			render(root, [
+				{tag: "div", attrs: {"id": "bar", onbeforeupdate: function() { return true }}, children: []},
+			])
+			o(root.firstChild.attributes["id"].value).equals("bar")
+		})
+		o("old children is retained", function() {
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, children: []}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
+					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
+				]},
+			])
+			o(root.firstChild.firstChild.childNodes.length).equals(1)
+		})
+		o("old text is retained", function() {
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, text: ""}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
+					{tag: "div", attrs: {}, text: "foo"}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, text: "foo"}
+				]},
+			])
+			o(root.firstChild.firstChild.firstChild.nodeValue).equals("foo")
+		})
+		o("updating component children doesn't error", function() {
+			var Child = {
+				view(v) {
+					return {tag: "div", attrs: {}, children: [
+						v.attrs.foo ? {tag: "div", attrs: {}, children: []} : null
+					]}
+				}
+			}
+
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: Child, attrs: {foo: false}, children: []},
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
+					{tag: Child, attrs: {foo: false}, children: []},
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: Child, attrs: {foo: true}, children: []},
+				]},
+			])
+			o(root.firstChild.firstChild.childNodes.length).equals(1)
+		})
+		o("adding dom children doesn't error", function() {
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, children: []}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
+					{tag: "div", attrs: {}, children: []}
+				]},
+			])
+			render(root, [
+				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
+					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
+				]},
+			])
+			o(root.firstChild.firstChild.childNodes.length).equals(1)
+		})
+	})
 })

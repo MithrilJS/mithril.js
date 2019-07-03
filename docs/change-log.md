@@ -94,6 +94,8 @@
     - The raw bundle itself remains accessible at `mithril.js`, and is *not* browser-wrapped.
     - Note: this *will* increase overhead with bundlers like Webpack, Rollup, and Browserify.
 - request: autoredraw support fixed for `async`/`await` in Chrome ([#2428](https://github.com/MithrilJS/mithril.js/pull/2428) [@isiahmeadows](https://github.com/isiahmeadows))
+- render: fix when attrs change with `onbeforeupdate` returning false, then remaining the same on next redraw ([#2447](https://github.com/MithrilJS/mithril.js/pull/2447) [@isiahmeadows](https://github.com/isiahmeadows))
+- render: fix internal error when `onbeforeupdate` returns false and then true with new child tree ([#2447](https://github.com/MithrilJS/mithril.js/pull/2447) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ---
 
