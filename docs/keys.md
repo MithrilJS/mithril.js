@@ -75,6 +75,27 @@ function correctUserList(users) {
 }
 ```
 
+Also, you might want to reinitialize a component. You can use the common pattern of a single-item keyed fragment where you change the key to destroy and reinitialize the element.
+
+```javascript
+function ResettableToggle() {
+	var toggleKey = false
+
+	function reset() {
+		toggleKey = !toggleKey
+	}
+
+	return {
+		view: function() {
+			return [
+				m("button", {onclick: reset}, "Reset toggle"),
+				[m(Toggle, {key: toggleKey})]
+			]
+		}
+	}
+}
+```
+
 ---
 
 ### Debugging key related issues

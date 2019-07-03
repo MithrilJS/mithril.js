@@ -101,6 +101,7 @@
 - route: arbitrary prefixes are properly supported now, including odd prefixes like `?#` and invalid prefixes like `#foo#bar` ([#2448](https://github.com/MithrilJS/mithril.js/pull/2448) [@isiahmeadows](https://github.com/isiahmeadows))
 - request: correct IE workaround for response type non-support ([#2449](https://github.com/MithrilJS/mithril.js/pull/2449) [@isiahmeadows](https://github.com/isiahmeadows))
 - render: correct `contenteditable` check to also check for `contentEditable` property name ([#2450](https://github.com/MithrilJS/mithril.js/pull/2450) [@isiahmeadows](https://github.com/isiahmeadows))
+- docs: clarify valid key usage
 
 ---
 
