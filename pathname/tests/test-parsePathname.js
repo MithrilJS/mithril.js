@@ -18,18 +18,18 @@ o.spec("parsePathname", function() {
 			params: {a: "b", c: "d"}
 		})
 	})
-	o("parses hash at start", function() {
+	o("ignores hash at start", function() {
 		var data = parsePathname("#a=b&c=d")
 		o(data).deepEquals({
 			path: "/",
-			params: {a: "b", c: "d"}
+			params: {}
 		})
 	})
-	o("parses query + hash at start", function() {
+	o("parses query, ignores hash at start", function() {
 		var data = parsePathname("?a=1&b=2#c=3&d=4")
 		o(data).deepEquals({
 			path: "/",
-			params: {a: "1", b: "2", c: "3", d: "4"}
+			params: {a: "1", b: "2"}
 		})
 	})
 	o("parses root", function() {
@@ -46,18 +46,18 @@ o.spec("parsePathname", function() {
 			params: {a: "b", c: "d"}
 		})
 	})
-	o("parses root + hash at start", function() {
+	o("parses root, ignores hash at start", function() {
 		var data = parsePathname("/#a=b&c=d")
 		o(data).deepEquals({
 			path: "/",
-			params: {a: "b", c: "d"}
+			params: {}
 		})
 	})
-	o("parses root + query + hash at start", function() {
+	o("parses root + query, ignores hash at start", function() {
 		var data = parsePathname("/?a=1&b=2#c=3&d=4")
 		o(data).deepEquals({
 			path: "/",
-			params: {a: "1", b: "2", c: "3", d: "4"}
+			params: {a: "1", b: "2"}
 		})
 	})
 	o("parses route", function() {
@@ -102,25 +102,25 @@ o.spec("parsePathname", function() {
 			params: {c: "3", d: "4"}
 		})
 	})
-	o("parses route + query + hash", function() {
+	o("parses route + query, ignores hash", function() {
 		var data = parsePathname("/route/foo?a=1&b=2#c=3&d=4")
 		o(data).deepEquals({
 			path: "/route/foo",
-			params: {a: "1", b: "2", c: "3", d: "4"}
+			params: {a: "1", b: "2"}
 		})
 	})
-	o("deduplicates same-named params in query + hash", function() {
-		var data = parsePathname("/route/foo?a=1&b=2#a=3&c=4")
-		o(data).deepEquals({
-			path: "/route/foo",
-			params: {a: "3", b: "2", c: "4"}
-		})
-	})
-	o("parses route + query + hash with lots of junk slashes", function() {
+	o("parses route + query, ignores hash with lots of junk slashes", function() {
 		var data = parsePathname("//route/////foo//?a=1&b=2#c=3&d=4")
 		o(data).deepEquals({
 			path: "/route/foo",
-			params: {a: "1", b: "2", c: "3", d: "4"}
+			params: {a: "1", b: "2"}
+		})
+	})
+	o("doesn't comprehend protocols", function() {
+		var data = parsePathname("https://example.com/foo/bar")
+		o(data).deepEquals({
+			path: "/https:/example.com/foo/bar",
+			params: {}
 		})
 	})
 })

@@ -73,6 +73,17 @@ o.spec("request", function() {
 				o(data).deepEquals({a: 1})
 			}).then(done)
 		})
+		o("first argument keeps protocol", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					o(request.rawUrl).equals("https://example.com/item")
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			request("https://example.com/item", {method: "POST"}).then(function(data) {
+				o(data).deepEquals({a: 1})
+			}).then(done)
+		})
 		o("works w/ parameterized data via GET", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function(request) {

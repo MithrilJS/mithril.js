@@ -7,9 +7,18 @@ o.spec("parseURL", function() {
 	var root = {protocol: "http:", hostname: "localhost", port: "", pathname: "/"}
 
 	o.spec("full URL", function() {
-		o("parses full URL", function() {
+		o("parses full http URL", function() {
 			var data = parseURL("http://www.google.com:80/test?a=b#c")
 			o(data.protocol).equals("http:")
+			o(data.hostname).equals("www.google.com")
+			o(data.port).equals("80")
+			o(data.pathname).equals("/test")
+			o(data.search).equals("?a=b")
+			o(data.hash).equals("#c")
+		})
+		o("parses full websocket URL", function() {
+			var data = parseURL("ws://www.google.com:80/test?a=b#c")
+			o(data.protocol).equals("ws:")
 			o(data.hostname).equals("www.google.com")
 			o(data.port).equals("80")
 			o(data.pathname).equals("/test")

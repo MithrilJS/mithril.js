@@ -43,6 +43,8 @@
 - request: set `Content-Type: application/json; charset=utf-8` for all XHR methods by default, provided they have a body that's `!= null` ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361), [#2421](https://github.com/MithrilJS/mithril.js/pull/2421))
     - This can cause CORS issues when issuing `GET` with bodies, but you can address them through configuring CORS appropriately.
     - Previously, it was only set for all non-`GET` methods and only when `useBody: true` was passed (the default), and it was always set for them. Now it's automatically omitted when no body is present, so the hole is slightly broadened.
+- route: query parameters in hash strings are no longer supported
+    - It's technically invalid in hashes, so I'd rather push people to keep in line with spec.
 
 #### News
 
@@ -96,6 +98,7 @@
 - request: autoredraw support fixed for `async`/`await` in Chrome ([#2428](https://github.com/MithrilJS/mithril.js/pull/2428) [@isiahmeadows](https://github.com/isiahmeadows))
 - render: fix when attrs change with `onbeforeupdate` returning false, then remaining the same on next redraw ([#2447](https://github.com/MithrilJS/mithril.js/pull/2447) [@isiahmeadows](https://github.com/isiahmeadows))
 - render: fix internal error when `onbeforeupdate` returns false and then true with new child tree ([#2447](https://github.com/MithrilJS/mithril.js/pull/2447) [@isiahmeadows](https://github.com/isiahmeadows))
+- route: arbitrary prefixes are properly supported now, including odd prefixes like `?#` and invalid prefixes like `#foo#bar`
 
 ---
 

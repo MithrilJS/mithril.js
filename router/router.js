@@ -9,18 +9,25 @@ module.exports = function($window) {
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 
-	function normalize(fragment) {
-		var data = $window.location[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
-		if (fragment === "pathname" && data[0] !== "/") data = "/" + data
-		return data
-	}
-
 	var asyncId
 	var router = {prefix: "#!"}
 	router.getPath = function() {
-		if (router.prefix.charAt(0) === "#") return normalize("hash").slice(router.prefix.length)
-		if (router.prefix.charAt(0) === "?") return normalize("search").slice(router.prefix.length) + normalize("hash")
-		return normalize("pathname").slice(router.prefix.length) + normalize("search") + normalize("hash")
+		// Consider the pathname holistically. The prefix might even be invalid,
+		// but that's not our problem.
+		var prefix = $window.location.hash
+		if (router.prefix[0] !== "#") {
+			prefix = $window.location.search + prefix
+			if (router.prefix[0] !== "?") {
+				prefix = $window.location.pathname + prefix
+				if (prefix[0] !== "/") prefix = "/" + prefix
+			}
+		}
+		// This seemingly useless `.concat()` speeds up the tests quite a bit,
+		// since the representation is consistently a relatively poorly
+		// optimized cons string.
+		return prefix.concat()
+			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+			.slice(router.prefix.length)
 	}
 
 	router.setPath = function(path, data, options) {
