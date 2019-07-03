@@ -33,7 +33,7 @@ module.exports = function(template, params) {
 	var newPathEnd = newQueryIndex < 0 ? newQueryEnd : newQueryIndex
 	var result = resolved.slice(0, newPathEnd)
 
-	if (queryIndex >= 0) result += "?" + template.slice(queryIndex, queryEnd)
+	if (queryIndex >= 0) result += template.slice(queryIndex, queryEnd)
 	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
 	var querystring = buildQueryString(query)
 	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring
