@@ -75,6 +75,27 @@ function correctUserList(users) {
 }
 ```
 
+Also, you might want to reinitialize a component. You can use the common pattern of a single-item keyed fragment where you change the key to destroy and reinitialize the element.
+
+```javascript
+function ResettableToggle() {
+	var toggleKey = false
+
+	function reset() {
+		toggleKey = !toggleKey
+	}
+
+	return {
+		view: function() {
+			return [
+				m("button", {onclick: reset}, "Reset toggle"),
+				[m(Toggle, {key: toggleKey})]
+			]
+		}
+	}
+}
+```
+
 ---
 
 ### Debugging key related issues
@@ -177,6 +198,10 @@ m("div", [
 	]
 ])
 ```
+
+In fact, this will cause an error to be thrown, to remind you to not do it. So don't do it!
+
+Note that `null`s, `undefined`s, and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])`, a keyed empty fragment.
 
 #### Avoid passing model data directly to components if the model uses `key` as a data property
 

@@ -159,7 +159,7 @@ m("button", {
 
 If the value of such an attribute is `null` or `undefined`, it is treated as if the attribute was absent.
 
-If there are class names in both first and second arguments of `m()`, they are merged together as you would expect. If the value of the class in the second argument is `null`or `undefined`, it is ignored.
+If there are class names in both first and second arguments of `m()`, they are merged together as you would expect. If the value of the class in the second argument is `null` or `undefined`, it is ignored.
 
 If another attribute is present in both the first and the second argument, the second one takes precedence even if it is  is `null` or `undefined`.
 
