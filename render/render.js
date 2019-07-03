@@ -123,10 +123,7 @@ module.exports = function($window) {
 
 		insertNode(parent, element, nextSibling)
 
-		if (attrs != null && attrs.contenteditable != null) {
-			setContentEditable(vnode)
-		}
-		else {
+		if (!maybeSetContentEditable(vnode)) {
 			if (vnode.text != null) {
 				if (vnode.text !== "") element.textContent = vnode.text
 				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
@@ -496,16 +493,15 @@ module.exports = function($window) {
 			}
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
-			setContentEditable(vnode)
-		}
-		else if (old.text != null && vnode.text != null && vnode.text !== "") {
-			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
-		}
-		else {
-			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+		if (!maybeSetContentEditable(vnode)) {
+			if (old.text != null && vnode.text != null && vnode.text !== "") {
+				if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
+			}
+			else {
+				if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+				if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+				updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			}
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
@@ -613,7 +609,11 @@ module.exports = function($window) {
 		else parent.appendChild(dom)
 	}
 
-	function setContentEditable(vnode) {
+	function maybeSetContentEditable(vnode) {
+		if (vnode.attrs == null || (
+			vnode.attrs.contenteditable == null && // attribute
+			vnode.attrs.contentEditable == null // property
+		)) return
 		var children = vnode.children
 		if (children != null && children.length === 1 && children[0].tag === "<") {
 			var content = children[0].children
