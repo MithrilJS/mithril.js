@@ -382,32 +382,32 @@ o.spec("hyperscript", function() {
 		o("handles number single child", function() {
 			var vnode = m("div", {}, [1])
 
-			o(vnode.text).equals(1)
+			o(vnode.text).equals("1")
 		})
 		o("handles falsy number single child", function() {
 			var vnode = m("div", {}, [0])
 
-			o(vnode.text).equals(0)
+			o(vnode.text).equals("0")
 		})
 		o("handles boolean single child", function() {
 			var vnode = m("div", {}, [true])
 
-			o(vnode.text).equals(true)
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles falsy boolean single child", function() {
 			var vnode = m("div", {}, [false])
 
-			o(vnode.text).equals("")
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles null single child", function() {
 			var vnode = m("div", {}, [null])
 
-			o(vnode.children[0]).equals(null)
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles undefined single child", function() {
 			var vnode = m("div", {}, [undefined])
 
-			o(vnode.children[0]).equals(undefined)
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles multiple string children", function() {
 			var vnode = m("div", {}, ["", "a"])
@@ -421,28 +421,24 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {}, [0, 1])
 
 			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals(0)
+			o(vnode.children[0].children).equals("0")
 			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals(1)
+			o(vnode.children[1].children).equals("1")
 		})
 		o("handles multiple boolean children", function() {
 			var vnode = m("div", {}, [false, true])
 
-			o(vnode.children[0].tag).equals("#")
-			o(vnode.children[0].children).equals("")
-			o(vnode.children[1].tag).equals("#")
-			o(vnode.children[1].children).equals(true)
+			o(vnode.children).deepEquals([null, null])
 		})
 		o("handles multiple null/undefined child", function() {
 			var vnode = m("div", {}, [null, undefined])
 
-			o(vnode.children[0]).equals(null)
-			o(vnode.children[1]).equals(undefined)
+			o(vnode.children).deepEquals([null, null])
 		})
 		o("handles falsy number single child without attrs", function() {
 			var vnode = m("div", 0)
 
-			o(vnode.text).equals(0)
+			o(vnode.text).equals("0")
 		})
 	})
 	o.spec("permutations", function() {
@@ -511,31 +507,31 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, [1])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals(1)
+			o(vnode.text).equals("1")
 		})
 		o("handles attr and single falsy number text child", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals(0)
+			o(vnode.text).equals("0")
 		})
 		o("handles attr and single boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [true])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals(true)
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles attr and single falsy boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals(0)
+			o(vnode.text).equals("0")
 		})
 		o("handles attr and single false boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [false])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("")
+			o(vnode.children).deepEquals([null])
 		})
 		o("handles attr and single text child unwrapped", function() {
 			var vnode = m("div", {a: "b"}, "c")

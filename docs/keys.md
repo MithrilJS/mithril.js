@@ -199,6 +199,10 @@ m("div", [
 ])
 ```
 
+In fact, this will cause an error to be thrown, to remind you to not do it. So don't do it!
+
+Note that `null`s, `undefined`s, and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])`, a keyed empty fragment.
+
 #### Avoid passing model data directly to components if the model uses `key` as a data property
 
 The `key` property may appear in your data model in a way that conflicts with Mithril's key logic. For example, a component may represent an entity whose `key` property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the `key` property, make sure to wrap the data such that Mithril doesn't misinterpret it as a rendering instruction:

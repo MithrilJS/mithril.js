@@ -5,8 +5,9 @@ function Vnode(tag, key, attrs, children, text, dom) {
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
-	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
-	return node
+	if (node == null || typeof node === "boolean") return null
+	if (typeof node === "object") return node
+	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
 	var children = []
