@@ -7,7 +7,7 @@ var Router = require("../../router/router")
 
 o.spec("Router.defineRoutes", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
+		void ["#", "?", "", "#!", "?!", "/foo", "?#", "##"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, router, onRouteChange, onFail
 
@@ -44,12 +44,12 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("resolves to route w/ escaped unicode", function(done) {
-					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6"
+					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
 					router.defineRoutes({"/ö": {data: 2}}, onRouteChange, onFail)
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
+						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö", "/ö"])
 						o(onFail.callCount).equals(0)
 
 						done()
@@ -57,12 +57,12 @@ o.spec("Router.defineRoutes", function() {
 				})
 
 				o("resolves to route w/ unicode", function(done) {
-					$window.location.href = prefix + "/ö?ö=ö#ö=ö"
+					$window.location.href = prefix + "/ö?ö=ö"
 					router.defineRoutes({"/ö": {data: 2}}, onRouteChange, onFail)
 
 					callAsync(function() {
 						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö#ö=ö", "/ö"])
+						o(onRouteChange.args).deepEquals([{data: 2}, {"ö": "ö"}, "/ö?ö=ö", "/ö"])
 						o(onFail.callCount).equals(0)
 
 						done()
@@ -138,45 +138,6 @@ o.spec("Router.defineRoutes", function() {
 					})
 				})
 
-				o("handles route with hash", function(done) {
-					$window.location.href = prefix + "/test#a=b&c=d"
-					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
-
-					callAsync(function() {
-						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test#a=b&c=d", "/test"])
-						o(onFail.callCount).equals(0)
-
-						done()
-					})
-				})
-
-				o("handles route with search and hash", function(done) {
-					$window.location.href = prefix + "/test?a=b#c=d"
-					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
-
-					callAsync(function() {
-						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "b", c: "d"}, "/test?a=b#c=d", "/test"])
-						o(onFail.callCount).equals(0)
-
-						done()
-					})
-				})
-
-				o("handles route with search and hash + duplicate params", function(done) {
-					$window.location.href = prefix + "/test?a=b#a=d"
-					router.defineRoutes({"/test": {data: 1}}, onRouteChange, onFail)
-
-					callAsync(function() {
-						o(onRouteChange.callCount).equals(1)
-						o(onRouteChange.args).deepEquals([{data: 1}, {a: "d"}, "/test?a=b#a=d", "/test"])
-						o(onFail.callCount).equals(0)
-
-						done()
-					})
-				})
-
 				o("calls reject", function(done) {
 					$window.location.href = prefix + "/test"
 					router.defineRoutes({"/other": {data: 1}}, onRouteChange, onFail)
@@ -184,18 +145,6 @@ o.spec("Router.defineRoutes", function() {
 					callAsync(function() {
 						o(onFail.callCount).equals(1)
 						o(onFail.args).deepEquals(["/test", {}])
-
-						done()
-					})
-				})
-
-				o("calls reject w/ search and hash", function(done) {
-					$window.location.href = prefix + "/test?a=b#c=d"
-					router.defineRoutes({"/other": {data: 1}}, onRouteChange, onFail)
-
-					callAsync(function() {
-						o(onFail.callCount).equals(1)
-						o(onFail.args).deepEquals(["/test?a=b#c=d", {a: "b", c: "d"}])
 
 						done()
 					})

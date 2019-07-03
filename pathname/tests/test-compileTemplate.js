@@ -198,18 +198,6 @@ o.spec("compileTemplate", function() {
 		o(compileTemplate("/route/:id?bar=foo")(data)).equals(false)
 		o(data.params).deepEquals({foo: "bar"})
 	})
-	o("checks hash params match", function() {
-		var data = parsePathname("/route/1#foo=bar")
-		o(compileTemplate("/route/:id#foo=bar")(data)).equals(true)
-		o(data.params).deepEquals({id: "1", foo: "bar"})
-	})
-	o("checks hash params mismatch", function() {
-		var data = parsePathname("/route/1#foo=bar")
-		o(compileTemplate("/route/:id#foo=1")(data)).equals(false)
-		o(data.params).deepEquals({foo: "bar"})
-		o(compileTemplate("/route/:id#bar=foo")(data)).equals(false)
-		o(data.params).deepEquals({foo: "bar"})
-	})
 	o("checks dot before dot", function() {
 		var data = parsePathname("/file.test.png/edit")
 		o(compileTemplate("/:file.:ext/edit")(data)).equals(true)

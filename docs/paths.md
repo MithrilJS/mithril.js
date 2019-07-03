@@ -123,7 +123,7 @@ m.route(document.body, "/edit/1", {
 })
 ```
 
-Note that query parameters are implicit - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril would treat that as you trying to literally match against `m.route.param("type") === ":type"`. Or in summary, use `m.route.param("key")` to extract parameters - it simplifies things.
+Query parameters are implicitly consumed - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril would treat that as you trying to literally match against `m.route.param("type") === ":type"`, so you probably don't want to do that. In short, use `m.route.param("key")` or route component attributes to read query parameters.
 
 ### Path normalization
 

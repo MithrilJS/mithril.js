@@ -32,11 +32,15 @@ Argument     | Type     | Required | Description
 
 ### How it works
 
-The `m.parsePathname` method creates an object from a path with a possible query string and hash string. It is useful for parsing a URL into more sensible paths, and it's what [`m.route`](route.md) uses internally to normalize paths to later match them. It uses [`m.parseQueryString`](parseQueryString.md) to parse the query parameters into an object.
+The `m.parsePathname` method creates an object from a path with a possible query string. It is useful for parsing a local path name into its parts, and it's what [`m.route`](route.md) uses internally to normalize paths to later match them. It uses [`m.parseQueryString`](parseQueryString.md) to parse the query parameters into an object.
 
 ```javascript
-var data = m.parsePathname("/path/user?a=hello&b=world#random=hash&some=value")
+var data = m.parsePathname("/path/user?a=hello&b=world")
 
 // data.path is "/path/user"
-// data.params is {a: "hello", b: "world", random: "hash", some: "value"}
+// data.params is {a: "hello", b: "world"}
 ```
+
+### General-purpose URL parsing
+
+The method is called `parsePathname` because it applies to pathnames. If you want a general-purpose URL parser, you should use [the global `URL` class](https://developer.mozilla.org/en-US/docs/Web/API/URL) instead.
