@@ -45,11 +45,11 @@
     - Previously, it was only set for all non-`GET` methods and only when `useBody: true` was passed (the default), and it was always set for them. Now it's automatically omitted when no body is present, so the hole is slightly broadened.
 - route: query parameters in hash strings are no longer supported ([#2448](https://github.com/MithrilJS/mithril.js/pull/2448) [@isiahmeadows](https://github.com/isiahmeadows))
     - It's technically invalid in hashes, so I'd rather push people to keep in line with spec.
-- render: validate all elements are either keyed or unkeyed, and treat `null`/`undefined`/booleans as strictly unkeyed ([#????](https://github.com/MithrilJS/mithril.js/pull/????) [@isiahmeadows](https://github.com/isiahmeadows))
+- render: validate all elements are either keyed or unkeyed, and treat `null`/`undefined`/booleans as strictly unkeyed ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
     - Gives a nice little perf boost with keyed fragments.
     - Minor, but imperceptible impact (within the margin of error) with unkeyed fragments.
     - Also makes the model a lot more consistent - all values are either keyed or unkeyed.
-- vnodes: normalize boolean children to `null`/`undefined` at the vnode level, always stringify non-object children that aren't holes ([#????](https://github.com/MithrilJS/mithril.js/pull/????) [@isiahmeadows](https://github.com/isiahmeadows))
+- vnodes: normalize boolean children to `null`/`undefined` at the vnode level, always stringify non-object children that aren't holes ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
     - Previously, `true` was equivalent to `"true"` and `false` was equivalent to `""`.
     - Previously, numeric children weren't coerced. Now, they are.
     - Unlikely to break most components, but it *could* break some users.
@@ -110,7 +110,7 @@
 - route: arbitrary prefixes are properly supported now, including odd prefixes like `?#` and invalid prefixes like `#foo#bar` ([#2448](https://github.com/MithrilJS/mithril.js/pull/2448) [@isiahmeadows](https://github.com/isiahmeadows))
 - request: correct IE workaround for response type non-support ([#2449](https://github.com/MithrilJS/mithril.js/pull/2449) [@isiahmeadows](https://github.com/isiahmeadows))
 - render: correct `contenteditable` check to also check for `contentEditable` property name ([#2450](https://github.com/MithrilJS/mithril.js/pull/2450) [@isiahmeadows](https://github.com/isiahmeadows))
-- docs: clarify valid key usage ([#????](https://github.com/MithrilJS/mithril.js/pull/????) [@isiahmeadows](https://github.com/isiahmeadows))
+- docs: clarify valid key usage ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ---
 
