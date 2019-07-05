@@ -15,6 +15,7 @@ function parse(file) {
 	try {return JSON.parse(json)} catch (e) {throw new Error("invalid JSON: " + json)}
 }
 
+var pkg = require("../package.json")
 var error
 module.exports = function (input) {
 	var modules = {}
@@ -23,6 +24,10 @@ module.exports = function (input) {
 	var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.\[\]"'`]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
 	var uuid = 0
 	var process = function(filepath, data) {
+		// HACK: inline Mithril's `package.json` keys without reading the whole file.
+		data = data.replace(/require\((['"])\.\/package\.json\1\)\.(\w+)/, function (match, quote, key) {
+			return JSON.stringify(pkg[key])
+		})
 		data.replace(declaration, function(match, binding) {bindings[binding] = 0})
 
 		return data.replace(include, function(match, def, variable, eq, dep, rest) {
@@ -106,13 +111,10 @@ module.exports = function (input) {
 			+ (rest ? "\n" + def + variable + eq + "_" + uuid : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
 	}
 
-	var versionTag = "bleeding-edge"
-	var packageFile = __dirname + "/../package.json"
 	var code = process(path.resolve(input), read(input))
 		.replace(/^\s*((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)(\2)(?=[\s]+(\w)|;|$)/gm, "") // remove assignments to self
 		.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
 		.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
-		.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 
 	code = ";(function() {\n" + code + "\n}());"
 	//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}

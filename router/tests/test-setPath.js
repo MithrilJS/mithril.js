@@ -11,6 +11,10 @@ o.spec("Router.setPath", function() {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, router, onRouteChange, onFail
 
+				function defineRoutes(routes, defaultRoute) {
+					router.defineRoutes(routes, onRouteChange, onFail, defaultRoute, function() {})
+				}
+
 				o.beforeEach(function() {
 					$window = pushStateMock(env)
 					router = new Router($window)
@@ -21,7 +25,7 @@ o.spec("Router.setPath", function() {
 
 				o("setPath calls onRouteChange asynchronously", function(done) {
 					$window.location.href = prefix + "/a"
-					router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/a": {data: 1}, "/b": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/b")
@@ -35,7 +39,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("setPath calls onFail asynchronously", function(done) {
 					$window.location.href = prefix + "/a"
-					router.defineRoutes({"/a": {data: 1}, "/b": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/a": {data: 1}, "/b": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/c")
@@ -49,7 +53,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("sets route via API", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other/x/y/z?c=d#e=f")
@@ -61,7 +65,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("sets route w/ escaped unicode", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/%C3%B6?%C3%B6=%C3%B6#%C3%B6=%C3%B6")
@@ -73,7 +77,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("sets route w/ unicode", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/ö/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/ö?ö=ö#ö=ö")
@@ -90,7 +94,7 @@ o.spec("Router.setPath", function() {
 					router = new Router($window)
 					router.prefix = prefix
 
-					router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other/x/y/z?c=d#e=f")
@@ -102,7 +106,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("sets route via pushState/onpopstate", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						$window.history.pushState(null, null, prefix + "/other/x/y/z?c=d#e=f")
@@ -115,7 +119,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("sets parameterized route", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other/:a/:b...": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
@@ -127,7 +131,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("replace:true works", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other", null, {replace: true})
@@ -140,7 +144,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("replace:false works", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other", null, {replace: false})
@@ -155,7 +159,7 @@ o.spec("Router.setPath", function() {
 				})
 				o("state works", function(done) {
 					$window.location.href = prefix + "/test"
-					router.defineRoutes({"/test": {data: 1}, "/other": {data: 2}}, onRouteChange, onFail)
+					defineRoutes({"/test": {data: 1}, "/other": {data: 2}})
 
 					callAsync(function() {
 						router.setPath("/other", null, {state: {a: 1}})

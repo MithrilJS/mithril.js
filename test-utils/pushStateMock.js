@@ -187,5 +187,13 @@ module.exports = function(options) {
 	$window.onhashchange = null,
 	$window.onunload = null
 
+	$window.addEventListener = function (name, handler) {
+		$window["on" + name] = handler
+	}
+
+	$window.removeEventListener = function (name, handler) {
+		$window["on" + name] = handler
+	}
+
 	return $window
 }

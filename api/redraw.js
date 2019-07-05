@@ -14,24 +14,40 @@ function throttle(callback) {
 	}
 }
 
-
 module.exports = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
-	var callbacks = []
+	var subscriptions = []
 	var rendering = false
 
-	function subscribe(key, callback) {
+	function run(sub) {
+		var vnode = sub.c(sub)
+		if (vnode !== sub) renderService.render(sub.k, vnode)
+	}
+	function subscribe(key, callback, onremove) {
+		var sub = {k: key, c: callback, r: onremove}
 		unsubscribe(key)
-		callbacks.push(key, callback)
+		subscriptions.push(sub)
+		var vnode = sub.c(sub)
+		if (vnode !== sub) renderService.render(sub.k, vnode)
 	}
 	function unsubscribe(key) {
-		var index = callbacks.indexOf(key)
-		if (index > -1) callbacks.splice(index, 2)
+		for (var i = 0; i < subscriptions.length; i++) {
+			var sub = subscriptions[i]
+			if (sub.k === key) {
+				subscriptions.splice(i, 1)
+				renderService.render(sub.k, [])
+				if (typeof sub.r === "function") sub.r()
+				break
+			}
+		}
 	}
 	function sync() {
 		if (rendering) throw new Error("Nested m.redraw.sync() call")
 		rendering = true
-		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {if (typeof console !== "undefined") console.error(e)}
+		for (var i = 0; i < subscriptions.length; i++) {
+			try { run(subscriptions[i]) }
+			catch (e) { if (typeof console !== "undefined") console.error(e) }
+		}
 		rendering = false
 	}
 

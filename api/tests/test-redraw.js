@@ -38,15 +38,15 @@ o.spec("redrawService", function() {
 
 		redrawService.subscribe(root, spy)
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 
 		redrawService.redraw()
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 
 		throttleMock.fire()
 
-		o(spy.callCount).equals(1)
+		o(spy.callCount).equals(2)
 	})
 
 	o("should run a single renderer entry", function(done) {
@@ -54,15 +54,15 @@ o.spec("redrawService", function() {
 
 		redrawService.subscribe(root, spy)
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 
 		redrawService.redraw()
 		redrawService.redraw()
 		redrawService.redraw()
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 		setTimeout(function() {
-			o(spy.callCount).equals(1)
+			o(spy.callCount).equals(2)
 
 			done()
 		}, 20)
@@ -82,57 +82,67 @@ o.spec("redrawService", function() {
 
 		redrawService.redraw()
 
-		o(spy1.callCount).equals(0)
-		o(spy2.callCount).equals(0)
-		o(spy3.callCount).equals(0)
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(1)
+		o(spy3.callCount).equals(1)
 
 		redrawService.redraw()
 
-		o(spy1.callCount).equals(0)
-		o(spy2.callCount).equals(0)
-		o(spy3.callCount).equals(0)
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(1)
+		o(spy3.callCount).equals(1)
 
 		setTimeout(function() {
-			o(spy1.callCount).equals(1)
-			o(spy2.callCount).equals(1)
-			o(spy3.callCount).equals(1)
+			o(spy1.callCount).equals(2)
+			o(spy2.callCount).equals(2)
+			o(spy3.callCount).equals(2)
 
 			done()
 		}, 20)
 	})
 
 	o("should stop running after unsubscribe", function(done) {
-		var spy = o.spy(function() {
-			throw new Error("This shouldn't have been called")
-		})
+		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
-		redrawService.unsubscribe(root, spy)
+		o(spy.callCount).equals(1)
+		redrawService.unsubscribe(root)
 
 		redrawService.redraw()
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 		setTimeout(function() {
-			o(spy.callCount).equals(0)
+			o(spy.callCount).equals(1)
 
 			done()
 		}, 20)
 	})
 
+	o("should invoke remove callback on unsubscribe", function() {
+		var spy = o.spy()
+		var onremove = o.spy()
+
+		redrawService.subscribe(root, spy, onremove)
+		o(spy.callCount).equals(1)
+		redrawService.unsubscribe(root)
+
+		o(spy.callCount).equals(1)
+		o(onremove.callCount).equals(1)
+	})
+
 	o("should stop running after unsubscribe, even if it occurs after redraw is requested", function(done) {
-		var spy = o.spy(function() {
-			throw new Error("This shouldn't have been called")
-		})
+		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
+		o(spy.callCount).equals(1)
 
 		redrawService.redraw()
 
-		redrawService.unsubscribe(root, spy)
+		redrawService.unsubscribe(root)
 
-		o(spy.callCount).equals(0)
+		o(spy.callCount).equals(1)
 		setTimeout(function() {
-			o(spy.callCount).equals(0)
+			o(spy.callCount).equals(1)
 
 			done()
 		}, 20)
@@ -142,12 +152,13 @@ o.spec("redrawService", function() {
 		var spy = o.spy()
 
 		redrawService.subscribe(root, spy)
-		redrawService.unsubscribe(null)
+		o(spy.callCount).equals(1)
 
+		redrawService.unsubscribe(null)
 		redrawService.redraw()
 
 		setTimeout(function() {
-			o(spy.callCount).equals(1)
+			o(spy.callCount).equals(2)
 
 			done()
 		}, 20)
@@ -165,12 +176,6 @@ o.spec("redrawService", function() {
 		redrawService.subscribe(el2, spy2)
 		redrawService.subscribe(el3, spy3)
 
-		o(spy1.callCount).equals(0)
-		o(spy2.callCount).equals(0)
-		o(spy3.callCount).equals(0)
-
-		redrawService.redraw.sync()
-
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(1)
 		o(spy3.callCount).equals(1)
@@ -180,5 +185,11 @@ o.spec("redrawService", function() {
 		o(spy1.callCount).equals(2)
 		o(spy2.callCount).equals(2)
 		o(spy3.callCount).equals(2)
+
+		redrawService.redraw.sync()
+
+		o(spy1.callCount).equals(3)
+		o(spy2.callCount).equals(3)
+		o(spy3.callCount).equals(3)
 	})
 })

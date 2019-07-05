@@ -4,13 +4,13 @@ var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
-var Promise = require("../../promise/promise")
+var PromisePolyfill = require("../../promise/promise")
 
 o.spec("request", function() {
 	var mock, request, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
-		var requestService = Request(mock, Promise)
+		var requestService = Request(mock, PromisePolyfill)
 		request = requestService.request
 		complete = o.spy()
 		requestService.setCompletionCallback(complete)
@@ -589,11 +589,13 @@ o.spec("request", function() {
 
 			callAsync(function() {
 				callAsync(function() {
-					o(catch1.callCount).equals(1)
-					o(then.callCount).equals(0)
-					o(catch2.callCount).equals(1)
-					o(catch3.callCount).equals(1)
-					done()
+					callAsync(function() {
+						o(catch1.callCount).equals(1)
+						o(then.callCount).equals(0)
+						o(catch2.callCount).equals(1)
+						o(catch3.callCount).equals(1)
+						done()
+					})
 				})
 			})
 		})
@@ -759,6 +761,14 @@ o.spec("request", function() {
 		)
 
 		o("invokes the redraw in native async/await", function () {
+			// Use the native promise for correct semantics. This test will fail
+			// if you use the polyfill, as it's based on `setImmediate` (falling
+			// back to `setTimeout`), and promise microtasks are run at higher
+			// priority than either of those.
+			var requestService = Request(mock, Promise)
+			request = requestService.request
+			complete = o.spy()
+			requestService.setCompletionCallback(complete)
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
