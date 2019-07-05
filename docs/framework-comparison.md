@@ -16,7 +16,7 @@ The reality is that most modern frameworks are fast, well-suited to build comple
 
 As a rule of thumb, if your team is already heavily invested in another framework/library/stack, it makes more sense to stick with it, unless your team agrees that there's a very strong reason to justify a costly rewrite.
 
-However, if you're starting something new, do consider giving Mithril a try, if nothing else, to see how much value Mithril adopters have been getting out of 8kb (gzipped) of code. Mithril is used by many well-known companies (e.g. Vimeo, Nike, Fitbit), and it powers large open-sourced platforms too (e.g. Lichess, Flarum).
+However, if you're starting something new, do consider giving Mithril a try, if nothing else, to see how much value Mithril adopters have been getting out of under 10kb (gzipped) of code. Mithril is used by many well-known companies (e.g. Vimeo, Nike, Fitbit), and it powers large open-sourced platforms too (e.g. Lichess, Flarum).
 
 ---
 
@@ -133,7 +133,7 @@ Angular has made a lot of progress in terms of performance over the years. Angul
 
 It's difficult to make a comparison of load times between Angular and Mithril for a couple of reasons. The first is that Angular 1 and 2 are in fact completely different codebases, and both versions are officially supported and maintained (and the vast majority of Angular codebases in the wild currently still use version 1). The second reason is that both Angular and Mithril are modular. In both cases, it's possible to remove a significant part of the framework that is not used in a given application.
 
-With that being said, the smallest known Angular 2 bundle is a [29kb hello world](https://www.lucidchart.com/techblog/2016/09/26/improving-angular-2-load-times/) compressed w/ the Brotli algorithm (it's 35kb using standard gzip), and with most of Angular's useful functionality removed. By comparison, a Mithril hello world - including the entire Mithril core - would not be over 8kb gzipped (a more optimized bundle could easily be half of that).
+With that being said, the smallest known Angular 2 bundle is a [29kb hello world](https://www.lucidchart.com/techblog/2016/09/26/improving-angular-2-load-times/) compressed w/ the Brotli algorithm (it's 35kb using standard gzip), and with most of Angular's useful functionality removed. By comparison, a Mithril hello world - including the entire Mithril core with batteries and everything - would be about 10kb gzipped.
 
 Also, remember that frameworks like Angular and Mithril are designed for non-trivial application, so an application that managed to use all of Angular's API surface would need to download several hundred kb of framework code, rather than merely 29kb.
 
