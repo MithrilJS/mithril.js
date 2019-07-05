@@ -455,19 +455,15 @@ o.spec("request", function() {
 			var failed = false
 			var resolved = false
 			function handleAbort(xhr) {
-				var onreadystatechange = xhr.onreadystatechange // probably not set yet
-				var testonreadystatechange = function() {
-					onreadystatechange.call(xhr)
+				var onreadystatechange = xhr.onreadystatechange
+				xhr.onreadystatechange = function() {
+					onreadystatechange.call(xhr, {target: xhr})
 					setTimeout(function() { // allow promises to (not) resolve first
 						o(failed).equals(false)
 						o(resolved).equals(false)
 						done()
 					}, 0)
 				}
-				Object.defineProperty(xhr, "onreadystatechange", {
-					set: function(val) { onreadystatechange = val },
-					get: function() { return testonreadystatechange }
-				})
 				xhr.abort()
 			}
 			request({method: "GET", url: "/item", config: handleAbort}).catch(function() {
@@ -476,6 +472,40 @@ o.spec("request", function() {
 				.then(function() {
 					resolved = true
 				})
+		})
+		o("doesn't fail on replaced abort", function(done) {
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+
+			var failed = false
+			var resolved = false
+			var abortSpy = o.spy()
+			var replacement
+			function handleAbort(xhr) {
+				var onreadystatechange = xhr.onreadystatechange
+				xhr.onreadystatechange = function() {
+					onreadystatechange.call(xhr, {target: xhr})
+					setTimeout(function() { // allow promises to (not) resolve first
+						o(failed).equals(false)
+						o(resolved).equals(false)
+						done()
+					}, 0)
+				}
+				return replacement = {
+					send: xhr.send.bind(xhr),
+					abort: abortSpy,
+				}
+			}
+			request({method: "GET", url: "/item", config: handleAbort}).then(function() {
+				resolved = true
+			}, function() {
+				failed = true
+			})
+			replacement.abort()
+			o(abortSpy.callCount).equals(1)
 		})
 		o("doesn't fail on file:// status 0", function(done) {
 			mock.$defineRoutes({
@@ -521,18 +551,58 @@ o.spec("request", function() {
 				}
 			})
 		})
-		/*o("data maintains after interpolate", function() {
+		o("params unmodified after interpolate", function() {
 			mock.$defineRoutes({
-				"PUT /items/:x": function() {
-					return {status: 200, responseText: ""}
+				"PUT /items/1": function() {
+					return {status: 200, responseText: "[]"}
 				}
 			})
-			var data = {x: 1, y: 2}
-			var dataCopy = Object.assign({}, data);
-			request({method: "PUT", url: "/items/:x", data})
+			var params = {x: 1, y: 2}
+			var p = request({method: "PUT", url: "/items/:x", params: params})
 
-			o(data).deepEquals(dataCopy)
-		})*/
+			o(params).deepEquals({x: 1, y: 2})
+
+			return p
+		})
+		o("can return replacement from config", function() {
+			mock.$defineRoutes({
+				"GET /a": function() {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			var result
+			return request({
+				url: "/a",
+				config: function(xhr) {
+					return result = {
+						send: o.spy(xhr.send.bind(xhr)),
+					}
+				},
+			})
+				.then(function () {
+					o(result.send.callCount).equals(1)
+				})
+		})
+		o("can abort from replacement", function() {
+			mock.$defineRoutes({
+				"GET /a": function() {
+					return {status: 200, responseText: "[]"}
+				}
+			})
+			var result
+
+			request({
+				url: "/a",
+				config: function(xhr) {
+					return result = {
+						send: o.spy(xhr.send.bind(xhr)),
+						abort: o.spy(),
+					}
+				},
+			})
+
+			result.abort()
+		})
 	})
 	o.spec("failure", function() {
 		o("rejects on server error", function(done) {
