@@ -72,7 +72,7 @@ module.exports = function() {
 				self.readyState = 4
 				if (args.async === true) {
 					callAsync(function() {
-						if (typeof self.onreadystatechange === "function") self.onreadystatechange()
+						if (typeof self.onreadystatechange === "function") self.onreadystatechange({target: self})
 					})
 				}
 			}

@@ -79,13 +79,13 @@ module.exports = function($window, Promise) {
 			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
 			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
-			var xhr = new $window.XMLHttpRequest(),
-				aborted = false,
-				_abort = xhr.abort
+			var xhr = new $window.XMLHttpRequest(), aborted = false
+			var original = xhr, replacedAbort
+			var abort = xhr.abort
 
-			xhr.abort = function abort() {
+			xhr.abort = function() {
 				aborted = true
-				_abort.call(xhr)
+				abort.call(this)
 			}
 
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
@@ -106,53 +106,64 @@ module.exports = function($window, Promise) {
 				}
 			}
 
-			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-
-			xhr.onreadystatechange = function() {
+			xhr.onreadystatechange = function(ev) {
 				// Don't throw errors on xhr.abort().
-				if(aborted) return
+				if (aborted) return
 
-				if (xhr.readyState === 4) {
+				if (ev.target.readyState === 4) {
 					try {
-						var success = (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || (/^file:\/\//i).test(url)
+						var success = (ev.target.status >= 200 && ev.target.status < 300) || ev.target.status === 304 || (/^file:\/\//i).test(url)
 						// When the response type isn't "" or "text",
 						// `xhr.responseText` is the wrong thing to use.
 						// Browsers do the right thing and throw here, and we
 						// should honor that and do the right thing by
 						// preferring `xhr.response` where possible/practical.
-						var response = xhr.response, message
+						var response = ev.target.response, message
 
 						if (responseType === "json") {
 							// For IE and Edge, which don't implement
 							// `responseType: "json"`.
-							if (!xhr.responseType && typeof args.extract !== "function") response = JSON.parse(xhr.responseText)
+							if (!ev.target.responseType && typeof args.extract !== "function") response = JSON.parse(ev.target.responseText)
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
 							// document is needed on old IE and friends (all
 							// unsupported), the user should use a custom
 							// `config` instead. They're already using this at
 							// their own risk.
-							if (response == null) response = xhr.responseText
+							if (response == null) response = ev.target.responseText
 						}
 
 						if (typeof args.extract === "function") {
-							response = args.extract(xhr, args)
+							response = args.extract(ev.target, args)
 							success = true
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						}
 						if (success) resolve(response)
 						else {
-							try { message = xhr.responseText }
+							try { message = ev.target.responseText }
 							catch (e) { message = response }
 							var error = new Error(message)
-							error.code = xhr.status
+							error.code = ev.target.status
 							error.response = response
 							reject(error)
 						}
 					}
 					catch (e) {
 						reject(e)
+					}
+				}
+			}
+
+			if (typeof args.config === "function") {
+				xhr = args.config(xhr, args, url) || xhr
+
+				// Propagate the `abort` to any replacement XHR as well.
+				if (xhr !== original) {
+					replacedAbort = xhr.abort
+					xhr.abort = function() {
+						aborted = true
+						replacedAbort.call(this)
 					}
 				}
 			}
