@@ -4,6 +4,7 @@ var o = require("../../ospec/ospec")
 var bundle = require("../bundle")
 
 var fs = require("fs")
+var pkg = require("../../package.json")
 
 var ns = "./"
 function write(filepath, data) {
@@ -318,5 +319,12 @@ o.spec("bundler", function() {
 
 		remove("a.js")
 		remove("b.js")
+	})
+	o("reads package.json keys", function() {
+		write("a.js", 'var b = require("./package.json").version')
+
+		o(bundle(ns + "a.js")).equals(";(function() {\nvar b = " + JSON.stringify(pkg.version) + "\n}());")
+
+		remove("a.js")
 	})
 })

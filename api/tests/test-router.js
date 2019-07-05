@@ -111,6 +111,25 @@ o.spec("route", function() {
 					o(view.callCount).equals(2)
 				})
 
+				o("subscribes correctly and removes when unmounted", function() {
+					$window.location.href = prefix + "/"
+
+					route(root, "/", {
+						"/" : {
+							view: function() {
+								return m("div")
+							}
+						}
+					})
+
+					o(root.firstChild.nodeName).equals("DIV")
+
+					// unsubscribe as if via `m.mount(root)`
+					redrawService.unsubscribe(root)
+
+					o(root.childNodes.length).equals(0)
+				})
+
 				o("default route doesn't break back button", function(done) {
 					$window.location.href = "http://old.com"
 					$window.location.href = "http://new.com"

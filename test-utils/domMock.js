@@ -224,8 +224,16 @@ module.exports = function(options) {
 		return string.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
 	}
 	var activeElement
+	var delay = 16, last = 0
 	var $window = {
 		DOMParser: DOMParser,
+		requestAnimationFrame: function(callback) {
+			var elapsed = Date.now() - last
+			return setTimeout(function() {
+				callback()
+				last = Date.now()
+			}, delay - elapsed)
+		},
 		document: {
 			createElement: function(tag) {
 				var cssText = ""

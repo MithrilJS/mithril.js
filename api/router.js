@@ -4,32 +4,38 @@ var Vnode = require("../render/vnode")
 var Promise = require("../promise/promise")
 var coreRouter = require("../router/router")
 
+var sentinel = {}
+
 module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
-	var identity = function(v) {return v}
-	var render, component, attrs, currentPath, lastUpdate
+	var currentResolver = sentinel, component, attrs, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		function run() {
-			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
-		}
-		var redraw = function() {
-			run()
-			redraw = redrawService.redraw
-		}
-		redrawService.subscribe(root, run)
+		var init = false
 		var bail = function(path) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
+		}
+		function run() {
+			init = true
+			if (sentinel !== currentResolver) {
+				var vnode = Vnode(component, attrs.key, attrs)
+				if (currentResolver) vnode = currentResolver.render(vnode)
+				return vnode
+			}
 		}
 		routeService.defineRoutes(routes, function(payload, params, path, route) {
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
-				render = (routeResolver.render || identity).bind(routeResolver)
-				redraw()
+				currentResolver = routeResolver.render ? routeResolver : null
+				if (init) redrawService.redraw()
+				else {
+					init = true
+					redrawService.redraw.sync()
+				}
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
@@ -40,7 +46,12 @@ module.exports = function($window, redrawService) {
 				}
 				else update(payload, "div")
 			}
-		}, bail, defaultRoute)
+		}, bail, defaultRoute, function (unsubscribe) {
+			redrawService.subscribe(root, function(sub) {
+				sub.c = run
+				return sub
+			}, unsubscribe)
+		})
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {

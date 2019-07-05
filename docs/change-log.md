@@ -78,6 +78,9 @@
 - route: Declared routes in `m.route` now support `-` and `.` as delimiters for path segments. This means you can have a route like `"/edit/:file.:ext"`. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
     - Previously, this was possible to do in `m.route.set`, `m.request`, and `m.jsonp`, but it was wholly untested for and also undocumented.
 - API: `m.buildPathname` and `m.parsePathname` added. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
+- route: Use `m.mount(root, null)` to unsubscribe and clean up after a `m.route(root, ...)` call. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
+- version: `m.version` returns the previous version string for what's in `next`. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
+    - If you're using `next`, you should hopefully know what you're doing. If you need stability, don't use `next`. (This is also why I'm not labelling it as a breaking change.)
 
 #### Bug fixes
 
@@ -111,6 +114,7 @@
 - request: correct IE workaround for response type non-support ([#2449](https://github.com/MithrilJS/mithril.js/pull/2449) [@isiahmeadows](https://github.com/isiahmeadows))
 - render: correct `contenteditable` check to also check for `contentEditable` property name ([#2450](https://github.com/MithrilJS/mithril.js/pull/2450) [@isiahmeadows](https://github.com/isiahmeadows))
 - docs: clarify valid key usage ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
+- route: don't pollute globals ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ---
 

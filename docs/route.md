@@ -24,6 +24,7 @@
 	- [Authentication](#authentication)
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
+- [Third-party integration](#third-party-integration)
 
 ---
 
@@ -729,4 +730,82 @@ m.route(document.body, "/", {
 		},
 	},
 })
+```
+
+---
+
+### Third-party integration
+
+In certain situations, you may find yourself needing to interoperate with another framework like React. Here's how you do it:
+
+- Define all your routes using `m.route` as normal, but make sure you only use it *once*. Multiple route points are not supported.
+- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on.
+
+Here's an example with React:
+
+```javascript
+class Child extends React.Component {
+	constructor(props) {
+		super(props)
+		this.root = React.createRef()
+	}
+
+	componentDidMount() {
+		m.route(this.root, "/", {
+			// ...
+		})
+	}
+
+	componentDidUnmount() {
+		m.mount(this.root, null)
+	}
+
+	render() {
+		return <div ref={this.root} />
+	}
+}
+```
+
+And here's the rough equivalent with Vue:
+
+```html
+<div ref="root"></div>
+```
+
+```javascript
+Vue.component("my-child", {
+	template: `<div ref="root"></div>`,
+	mounted: function() {
+		m.route(this.$refs.root, "/", {
+			// ...
+		})
+	},
+	destroyed: function() {
+		m.mount(this.$refs.root, null)
+	},
+})
+```
+
+Technically, there's nothing stopping you from even doing it in a Mithril component, even.
+
+```javascript
+// Don't do this. Use a proper global layout component for each route instead,
+// passing your child vnode/component in the attributes or children.
+function Child() {
+	return {
+		oncreate: function(vnode) {
+			m.route(vnode.dom, "/", {
+				// ...
+			})
+		},
+
+		onremove: function() {
+			m.mount(vnode.dom, null)
+		},
+
+		view: function() {
+			return m("div")
+		},
+	}
+}
 ```
