@@ -115,6 +115,7 @@
 - render: correct `contenteditable` check to also check for `contentEditable` property name ([#2450](https://github.com/MithrilJS/mithril.js/pull/2450) [@isiahmeadows](https://github.com/isiahmeadows))
 - docs: clarify valid key usage ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
 - route: don't pollute globals ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453) [@isiahmeadows](https://github.com/isiahmeadows))
+- request: track xhr replacements correctly ([#2455](https://github.com/MithrilJS/mithril.js/pull/2455) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ---
 
