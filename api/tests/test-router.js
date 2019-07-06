@@ -7,6 +7,7 @@ var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
 var callAsync = require("../../test-utils/callAsync")
+var apiMount = require("../../api/mount")
 var apiRedraw = require("../../api/redraw")
 var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
@@ -24,7 +25,7 @@ o.spec("route", function() {
 					root = $window.document.body
 
 					redrawService = apiRedraw($window, throttleMock.throttle)
-					route = apiRouter($window, redrawService)
+					route = apiRouter($window, redrawService, apiMount(redrawService))
 					route.prefix(prefix)
 				})
 
@@ -53,6 +54,165 @@ o.spec("route", function() {
 					})
 
 					o(root.firstChild.nodeName).equals("DIV")
+				})
+
+				o("resolves to route w/ escaped unicode", function() {
+					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
+					route(root, "/ö", {
+						"/ö" : {
+							view: function() {
+								return m("div")
+							}
+						}
+					})
+
+					o(root.firstChild.nodeName).equals("DIV")
+				})
+
+				o("resolves to route w/ unicode", function() {
+					$window.location.href = prefix + "/ö?ö=ö"
+					route(root, "/ö", {
+						"/ö" : {
+							view: function() {
+								return JSON.stringify(route.param()) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
+				})
+
+				o("handles parameterized route", function() {
+					$window.location.href = prefix + "/test/x"
+					route(root, "/test/:a", {
+						"/test/:a" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x"} {"a":"x"} /test/x'
+					)
+				})
+
+				o("handles multi-parameterized route", function() {
+					$window.location.href = prefix + "/test/x/y"
+					route(root, "/test/:a/:b", {
+						"/test/:a/:b" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x","b":"y"} {"a":"x","b":"y"} /test/x/y'
+					)
+				})
+
+				o("handles rest parameterized route", function() {
+					$window.location.href = prefix + "/test/x/y"
+					route(root, "/test/:a...", {
+						"/test/:a..." : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x/y"} {"a":"x/y"} /test/x/y'
+					)
+				})
+
+				o("handles route with search", function() {
+					$window.location.href = prefix + "/test?a=b&c=d"
+					route(root, "/test", {
+						"/test" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"b","c":"d"} {"a":"b","c":"d"} /test?a=b&c=d'
+					)
+				})
+
+				o("redirects to default route if no match", function(done) {
+					$window.location.href = prefix + "/test"
+					route(root, "/other", {
+						"/other": {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					callAsync(function() {
+						o(root.firstChild.nodeValue).equals("{} {} /other")
+						done()
+					})
+				})
+
+				o("handles out of order routes", function() {
+					$window.location.href = prefix + "/z/y/x"
+
+					route(root, "/z/y/x", {
+						"/z/y/x": {
+							view: function() { return "1" },
+						},
+						"/:a...": {
+							view: function() { return "2" },
+						},
+					})
+
+					o(root.firstChild.nodeValue).equals("1")
+				})
+
+				o("handles reverse out of order routes", function() {
+					$window.location.href = prefix + "/z/y/x"
+
+					route(root, "/z/y/x", {
+						"/:a...": {
+							view: function() { return "2" },
+						},
+						"/z/y/x": {
+							view: function() { return "1" },
+						},
+					})
+
+					o(root.firstChild.nodeValue).equals("2")
+				})
+
+				o("resolves to route on fallback mode", function() {
+					$window.location.href = "file://" + prefix + "/test"
+
+					route(root, "/test", {
+						"/test" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals("{} {} /test")
 				})
 
 				o("routed mount points only redraw asynchronously (POJO component)", function() {
