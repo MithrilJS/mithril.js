@@ -7,8 +7,7 @@ var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
 var callAsync = require("../../test-utils/callAsync")
-var apiMount = require("../../api/mount")
-var apiRedraw = require("../../api/redraw")
+var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
 
@@ -16,7 +15,7 @@ o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var $window, root, redrawService, route, throttleMock
+				var $window, root, mountRedraw, route, throttleMock
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
@@ -24,8 +23,8 @@ o.spec("route", function() {
 
 					root = $window.document.body
 
-					redrawService = apiRedraw($window, throttleMock.throttle)
-					route = apiRouter($window, redrawService, apiMount(redrawService))
+					mountRedraw = apiMountRedraw($window, throttleMock.schedule, console)
+					route = apiRouter($window, mountRedraw)
 					route.prefix(prefix)
 				})
 
@@ -223,7 +222,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -243,7 +242,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -262,7 +261,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -284,8 +283,7 @@ o.spec("route", function() {
 
 					o(root.firstChild.nodeName).equals("DIV")
 
-					// unsubscribe as if via `m.mount(root)`
-					redrawService.unsubscribe(root)
+					mountRedraw.mount(root)
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -352,7 +350,7 @@ o.spec("route", function() {
 
 					o(oninit.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 					throttleMock.fire()
 
 					o(onupdate.callCount).equals(1)
@@ -821,7 +819,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -857,7 +855,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -1182,7 +1180,7 @@ o.spec("route", function() {
 						o(view.callCount).equals(1)
 						o(onmatch.callCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(view.callCount).equals(2)
@@ -1446,10 +1444,10 @@ o.spec("route", function() {
 					})
 					var before = i
 
-					redrawService.redraw()
-					redrawService.redraw()
-					redrawService.redraw()
-					redrawService.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
 					var after = i
 
 					throttleMock.fire()

@@ -3,17 +3,8 @@
 module.exports = function() {
 	var queue = []
 	return {
-		throttle: function(fn) {
-			var pending = false
-			return function() {
-				if (!pending) {
-					queue.push(function(){
-						pending = false
-						fn()
-					})
-					pending = true
-				}
-			}
+		schedule: function(fn) {
+			queue.push(fn)
 		},
 		fire: function() {
 			var tasks = queue

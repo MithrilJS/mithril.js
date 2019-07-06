@@ -739,7 +739,7 @@ m.route(document.body, "/", {
 In certain situations, you may find yourself needing to interoperate with another framework like React. Here's how you do it:
 
 - Define all your routes using `m.route` as normal, but make sure you only use it *once*. Multiple route points are not supported.
-- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on.
+- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on. `m.route` uses `m.mount` internally to hook everything up, so it's not magic.
 
 Here's an example with React:
 

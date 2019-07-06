@@ -7,14 +7,14 @@ m.trust = hyperscript.trust
 m.fragment = hyperscript.fragment
 
 var requestService = require("./request")
-var redrawService = require("./redraw")
+var mountRedraw = require("./mount-redraw")
 
-requestService.setCompletionCallback(redrawService.redraw)
+requestService.setCompletionCallback(mountRedraw.redraw)
 
-m.mount = require("./mount")
+m.mount = mountRedraw.mount
 m.route = require("./route")
 m.render = require("./render").render
-m.redraw = redrawService.redraw
+m.redraw = mountRedraw.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = require("./querystring/parse")

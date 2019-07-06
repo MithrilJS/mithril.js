@@ -10,7 +10,7 @@ var assign = require("../pathname/assign")
 
 var sentinel = {}
 
-module.exports = function($window, redrawService, mount) {
+module.exports = function($window, mountRedraw) {
 	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
 	var supportsPushState = typeof $window.history.pushState === "function"
 	var routePrefix = "#!"
@@ -91,10 +91,10 @@ module.exports = function($window, redrawService, mount) {
 						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 						attrs = data.params, currentPath = path, lastUpdate = null
 						currentResolver = routeResolver.render ? routeResolver : null
-						if (state === 2) redrawService.redraw()
+						if (state === 2) mountRedraw.redraw()
 						else {
 							state = 2
-							redrawService.redraw.sync()
+							mountRedraw.redraw.sync()
 						}
 					}
 					if (payload.view || typeof payload === "function") update({}, payload)
@@ -135,7 +135,7 @@ module.exports = function($window, redrawService, mount) {
 			$window.addEventListener("hashchange", resolveRoute, false)
 		}
 
-		return mount(root, {
+		return mountRedraw.mount(root, {
 			onbeforeupdate: function() {
 				state = state ? 2 : 1
 				return !(!state || sentinel === currentResolver)

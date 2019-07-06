@@ -1,5 +1,3 @@
 "use strict"
 
-var redrawService = require("./redraw")
-
-module.exports = require("./api/mount")(redrawService)
+module.exports = require("./mount-redraw").mount

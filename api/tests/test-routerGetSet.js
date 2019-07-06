@@ -6,15 +6,14 @@ var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 var callAsync = require("../../test-utils/callAsync")
-var apiMount = require("../../api/mount")
-var apiRedraw = require("../../api/redraw")
+var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
 
 o.spec("route.get/route.set", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var $window, root, redrawService, route, throttleMock
+				var $window, root, mountRedraw, route, throttleMock
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
@@ -22,8 +21,8 @@ o.spec("route.get/route.set", function() {
 
 					root = $window.document.body
 
-					redrawService = apiRedraw($window, throttleMock.throttle)
-					route = apiRouter($window, redrawService, apiMount(redrawService))
+					mountRedraw = apiMountRedraw($window, throttleMock.schedule, console)
+					route = apiRouter($window, mountRedraw)
 					route.prefix(prefix)
 				})
 
