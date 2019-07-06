@@ -113,7 +113,7 @@ m.render(document.body, "hello world")
 
 Modularization is the practice of separating the code into files. Doing so makes it easier to find code, understand what code relies on what code, and test.
 
-CommonJS is a de-facto standard for modularizing JavaScript code, and it's used by Node.js, as well as tools like [Browserify](http://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](http://rollupjs.org/), [Babel](https://babeljs.io/) or [Traceur](https://github.com/google/traceur-compiler).
+CommonJS is a de-facto standard for modularizing JavaScript code, and it's used by Node.js, as well as tools like [Browserify](http://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](http://rollupjs.org/) or [Babel](https://babeljs.io/).
 
 Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single JavaScript file before running in a client-side application.
 

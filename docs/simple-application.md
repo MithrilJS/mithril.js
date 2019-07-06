@@ -133,9 +133,15 @@ module.exports = {
 }
 ```
 
-By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and in addition, since its syntax is simply JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem: for example [Babel](es6.md), [JSX](jsx.md) (inline-HTML syntax extension), [eslint](http://eslint.org/) (linting), [uglifyjs](https://github.com/mishoo/UglifyJS2) (minification), [istanbul](https://github.com/gotwarlost/istanbul) (code coverage), [flow](https://flowtype.org/) (static type analysis), etc.
+By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and since its syntax is just JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem. For example:
 
-Let's use Mithril hyperscript to create a list of items. Hyperscript is the most idiomatic way of writing Mithril views, but [JSX is another popular alternative that you could explore](jsx.md) once you're more comfortable with the basics:
+- You can use [Babel](es6.md) to transpile ES6+ to ES5 for IE and to transpile [JSX](jsx.md) (an inline HTML-like syntax extension) to appropriate hyperscript calls.
+- You can use [ESLint](http://eslint.org/) for easy linting with no special plugins.
+- You can use [Terser](https://github.com/terser-js/terser) or [UglifyJS](https://github.com/mishoo/UglifyJS2) (ES5 only) to minify your code easily.
+- You can use [Istanbul](https://github.com/istanbuljs/nyc) for code coverage.
+- You can use [TypeScript](https://www.typescriptlang.org/) for easy code analysis. (There are [community-supported type definitions available](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mithril), so you don't need to roll your own.)
+
+Let's start off with hyperscript and create a list of items. Hyperscript is the idiomatic way to use Mithril, but [JSX](jsx.md) works pretty similarly.
 
 ```javascript
 // src/views/UserList.js

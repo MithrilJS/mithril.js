@@ -25,15 +25,15 @@
 Represents an HTML element in a Mithril view
 
 ```javascript
-m("div", {class: "foo"}, "hello")
-// represents <div class="foo">hello</div>
+m("div.foo", {style: {color: "red"}}, "hello")
+// renders to this HTML:
+// <div class="foo" style="color: red">hello</div>
 ```
 
-You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E) via a Babel plugin.
+You can also use an HTML-like syntax called [JSX](jsx.md), using Babel to convert it to equivalent hyperscript calls. This is equivalent to the above.
 
-```markup
-/** jsx m */
-<div class="foo">hello</div>
+```jsx
+<div class="foo" style="color: red">hello</div>
 ```
 
 ---
@@ -60,7 +60,7 @@ Mithril provides a hyperscript function `m()`, which allows expressing any HTML 
 ```javascript
 m("div", {id: "box"}, "hello")
 
-// equivalent HTML:
+// renders to this HTML:
 // <div id="box">hello</div>
 ```
 
@@ -141,7 +141,7 @@ m("a.link[href=/]", {
 	class: currentURL === "/" ? "selected" : ""
 }, "Home")
 
-// equivalent HTML:
+// renders to this HTML:
 // <a href="/" class="link selected">Home</a>
 ```
 
@@ -335,7 +335,7 @@ var Greeter = {
 // consume it
 m(Greeter, {style: "color:red;"}, "world")
 
-// equivalent HTML:
+// renders to this HTML:
 // <div style="color:red;">Hello world</div>
 ```
 

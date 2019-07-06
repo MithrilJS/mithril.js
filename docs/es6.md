@@ -24,19 +24,14 @@ If you want to use Webpack and Babel together, [skip to the section below](#usin
 To install Babel as a standalone tool, use this command:
 
 ```bash
-npm install babel-cli babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/cli @babel/preset-env --save-dev
 ```
 
 Create a `.babelrc` file:
 
 ```json
 {
-	"presets": ["es2015"],
-	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
-		}]
-	]
+	"presets": ["@babel/preset-env"]
 }
 ```
 
@@ -51,19 +46,14 @@ babel src --out-dir bin --source-maps
 If you're already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.
 
 ```bash
-npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/core babel-loader @babel/preset-env --save-dev
 ```
 
 Create a `.babelrc` file:
 
 ```json
 {
-	"presets": ["es2015"],
-	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
-		}]
-	]
+	"presets": ["@babel/preset-env"]
 }
 ```
 
@@ -81,7 +71,7 @@ module.exports = {
 	module: {
 		loaders: [{
 			test: /\.js$/,
-			exclude: /node_modules/,
+			exclude: /\/node_modules\//,
 			loader: 'babel-loader'
 		}]
 	}
