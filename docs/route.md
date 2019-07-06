@@ -743,7 +743,7 @@ In certain situations, you may find yourself needing to interoperate with anothe
 
 Here's an example with React:
 
-```javascript
+```jsx
 class Child extends React.Component {
 	constructor(props) {
 		super(props)

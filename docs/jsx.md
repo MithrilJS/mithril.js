@@ -13,23 +13,24 @@
 JSX is a syntax extension that enables you to write HTML tags interspersed with JavaScript. It's not part of any JavaScript standards and it's not required for building applications, but it may be more pleasing to use depending on your team's preferences.
 
 ```jsx
-var MyComponent = {
-  view: function() {
-    return m("main", [
-      m("h1", "Hello world"),
-    ])
-  }
+function MyComponent() {
+	return {
+		view: () =>
+			m("main", [
+				m("h1", "Hello world"),
+			])
+	}
 }
 
 // can be written as:
-var MyComponent = {
-  view: function() {
-    return (
-      <main>
-        <h1>Hello world</h1>
-      </main>
-    )
-  }
+function MyComponent() {
+	return {
+		view: () => (
+			<main>
+				<h1>Hello world</h1>
+			</main>
+		)
+	}
 }
 ```
 
@@ -38,7 +39,7 @@ When using JSX, it's possible to interpolate JavaScript expressions within JSX t
 ```jsx
 var greeting = "Hello"
 var url = "http://google.com"
-var link = <a href={url}>{greeting + "!"}</a>
+var link = <a href={url}>{greeting}!</a>
 // yields <a href="http://google.com">Hello!</a>
 ```
 
@@ -66,17 +67,18 @@ If you want to use Webpack and Babel together, [skip to the section below](#usin
 To install Babel as a standalone tool, use this command:
 
 ```bash
-npm install babel-cli babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/cli @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
 
-```
+```json
 {
-	"presets": ["es2015"],
+	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
+		["@babel/plugin-transform-react-jsx", {
+			"pragma": "m",
+			"pragmaFrag": "'['"
 		}]
 	]
 }
@@ -93,17 +95,18 @@ babel src --out-dir bin --source-maps
 If you're already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.
 
 ```bash
-npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/core babel-loader @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
 
 ```json
 {
-	"presets": ["es2015"],
+	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
+		["@babel/plugin-transform-react-jsx", {
+			"pragma": "m",
+			"pragmaFrag": "'['"
 		}]
 	]
 }
@@ -111,7 +114,7 @@ Create a `.babelrc` file:
 
 Next, create a file called `webpack.config.js`
 
-```javascript
+```jsx
 const path = require('path')
 
 module.exports = {
@@ -123,7 +126,7 @@ module.exports = {
 	module: {
 		rules: [{
 			test: /\.js$/,
-			exclude: /node_modules/,
+			exclude: /\/node_modules\//,
 			loader: 'babel-loader'
 		}]
 	}
@@ -136,7 +139,7 @@ This configuration assumes the source code file for the application entry point 
 
 To run the bundler, setup an npm script. Open `package.json` and add this entry under `"scripts"`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -155,7 +158,7 @@ npm start
 
 To generate a minified file, open `package.json` and add a new npm script called `build`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -167,7 +170,7 @@ To generate a minified file, open `package.json` and add a new npm script called
 
 You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -184,58 +187,56 @@ You can use hooks in your production environment to run the production build scr
 
 JSX is essentially a trade-off: it introduces a non-standard syntax that cannot be run without appropriate tooling, in order to allow a developer to write HTML code using curly braces. The main benefit of using JSX instead of regular HTML is that the JSX specification is much stricter and yields syntax errors when appropriate, whereas HTML is far too forgiving and can make syntax issues difficult to spot.
 
-Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute. Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`.
+Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute. Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`. Also, unlike HTML, JSX is based on XML, so you can do things like `<div class="test" />` as equivalent to `<div class="test"></div>`, where in HTML you can only use the second.
 
-JSX is useful for teams where HTML is primarily written by someone without JavaScript experience, but it requires a significant amount of tooling to maintain (whereas plain HTML can, for the most part, simply be opened in a browser)
+JSX is useful for teams where HTML is primarily written by someone without JavaScript experience, but it requires a significant amount of tooling to maintain (whereas plain HTML can, for the most part, simply be opened in a browser).
 
 Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
 
-- it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
+- it does not require repeating the tag name in closing tags when children are present (e.g. `m("div", m("span"))` vs `<div><span /></div>`)
 - static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<a class="button"></a>`)
 
 In addition, since hyperscript is plain JavaScript, it's often more natural to indent than JSX:
 
 ```jsx
 //JSX
-var BigComponent = {
-  activate: function() {/*...*/},
-  deactivate: function() {/*...*/},
-  update: function() {/*...*/},
-  view: function(vnode) {
-    return [
-      {vnode.attrs.items.map(function(item) {
-        return <div>{item.name}</div>
-      })}
-      <div
-        ondragover={this.activate}
-        ondragleave={this.deactivate}
-        ondragend={this.deactivate}
-        ondrop={this.update}
-        onblur={this.deactivate}
-      ></div>
-    ]
-  }
+function BigComponent() {
+	function activate() { /* ... */ }
+	function deactivate() { /* ... */ }
+	function update() { /* ... */ }
+	return {
+		view: ({attrs}) => (
+			<>
+				{attrs.items.map((item) => <div>{item.name}</div>)}
+				<div
+					ondragover={activate}
+					ondragleave={deactivate}
+					ondragend={deactivate}
+					ondrop={update}
+					onblur={deactivate}
+				/>
+			</>
+		)
+	}
 }
 
 // hyperscript
-var BigComponent = {
-  activate: function() {/*...*/},
-  deactivate: function() {/*...*/},
-  update: function() {/*...*/},
-  view: function(vnode) {
-    return [
-      vnode.attrs.items.map(function(item) {
-        return m("div", item.name)
-      }),
-      m("div", {
-        ondragover: this.activate,
-        ondragleave: this.deactivate,
-        ondragend: this.deactivate,
-        ondrop: this.update,
-        onblur: this.deactivate,
-      })
-    ]
-  }
+function BigComponent() {
+	function activate() { /* ... */ }
+	function deactivate() { /* ... */ }
+	function update() { /* ... */ }
+	return {
+		view: ({attrs}) => [
+			attrs.items.map((item) => m("div", item.name)),
+			m("div", {
+				ondragover: this.activate,
+				ondragleave: this.deactivate,
+				ondragend: this.deactivate,
+				ondrop: this.update,
+				onblur: this.deactivate,
+			})
+		]
+	}
 }
 ```
 
@@ -247,6 +248,6 @@ Needless to say, since hyperscript is pure JavaScript, there's no need to run a 
 
 ### Converting HTML
 
-In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
+In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
-When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
+When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.
