@@ -7,6 +7,8 @@
 	- [m.jsonp](jsonp.md)
 	- [m.parseQueryString](parseQueryString.md)
 	- [m.buildQueryString](buildQueryString.md)
+	- [m.buildPathname](buildPathname.md)
+	- [m.parsePathname](parsePathname.md)
 	- [m.trust](trust.md)
 	- [m.fragment](fragment.md)
 	- [m.redraw](redraw.md)
