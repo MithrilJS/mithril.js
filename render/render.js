@@ -44,24 +44,8 @@ module.exports = function($window) {
 			return null
 		}
 	}
-	function validateKeys(vnodes, isKeyed) {
-		// Note: this is a *very* perf-sensitive check.
-		// Fun fact: merging the loop like this is somehow faster than splitting
-		// it, noticeably so.
-		for (var i = 1; i < vnodes.length; i++) {
-			if ((vnodes[i] != null && vnodes[i].key != null) !== isKeyed) {
-				throw new TypeError("Vnodes must either always have keys or never have keys!")
-			}
-		}
-	}
 	//create
-	function createNodesChecked(parent, vnodes, hooks, nextSibling, ns) {
-		if (vnodes.length) {
-			validateKeys(vnodes, vnodes[0] != null && vnodes[0].key != null)
-			createNodesUnchecked(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		}
-	}
-	function createNodesUnchecked(parent, vnodes, start, end, hooks, nextSibling, ns) {
+	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
@@ -115,7 +99,7 @@ module.exports = function($window) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
-			createNodesChecked(fragment, children, hooks, null, ns)
+			createNodes(fragment, children, 0, children.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
@@ -146,7 +130,7 @@ module.exports = function($window) {
 			}
 			if (vnode.children != null) {
 				var children = vnode.children
-				createNodesChecked(element, children, hooks, null, ns)
+				createNodes(element, children, 0, children.length, hooks, null, ns)
 				if (vnode.tag === "select" && attrs != null) setLateSelectAttrs(vnode, attrs)
 			}
 		}
@@ -289,19 +273,18 @@ module.exports = function($window) {
 
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null || old.length === 0) createNodesChecked(parent, vnodes, hooks, nextSibling, ns)
+		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
 		else {
 			var isOldKeyed = old[0] != null && old[0].key != null
 			var isKeyed = vnodes[0] != null && vnodes[0].key != null
 			var start = 0, oldStart = 0
-			validateKeys(vnodes, isKeyed)
 			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
 			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
 			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed) {
 				removeNodes(old, oldStart, old.length)
-				createNodesUnchecked(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
 				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
@@ -318,7 +301,7 @@ module.exports = function($window) {
 					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
 				if (old.length > commonLength) removeNodes(old, start, old.length)
-				if (vnodes.length > commonLength) createNodesUnchecked(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else {
 				// keyed diff
 				var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oe, ve, topSibling
@@ -366,7 +349,7 @@ module.exports = function($window) {
 					ve = vnodes[end]
 				}
 				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
-				else if (oldStart > oldEnd) createNodesUnchecked(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
 					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
@@ -387,7 +370,7 @@ module.exports = function($window) {
 					}
 					nextSibling = originalNextSibling
 					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
-					if (matched === 0) createNodesUnchecked(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 					else {
 						if (pos === -1) {
 							// the indices of the indices of the items that are part of the
