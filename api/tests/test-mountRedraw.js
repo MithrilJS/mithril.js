@@ -399,6 +399,26 @@ o.spec("mount/redraw", function() {
 
 				o(onupdate.callCount).equals(1)
 			})
+
+			o("emits errors correctly", function() {
+				errors = ["foo", "bar", "baz"]
+				var counter = -1
+
+				m.mount(root, createComponent({
+					view: function() {
+						var value = errors[counter++]
+						if (value != null) throw value
+						return null
+					}
+				}))
+
+				m.redraw()
+				throttleMock.fire()
+				m.redraw()
+				throttleMock.fire()
+				m.redraw()
+				throttleMock.fire()
+			})
 		})
 	})
 })
