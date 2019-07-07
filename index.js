@@ -13,7 +13,7 @@ requestService.setCompletionCallback(mountRedraw.redraw)
 
 m.mount = mountRedraw.mount
 m.route = require("./route")
-m.render = require("./render").render
+m.render = require("./render")
 m.redraw = mountRedraw.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
