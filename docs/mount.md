@@ -3,6 +3,7 @@
 - [Description](#description)
 - [Signature](#signature)
 - [How it works](#how-it-works)
+- [Headless mounts](#headless-mounts)
 - [Performance considerations](#performance-considerations)
 - [Differences from m.render](#differences-from-mrender)
 
@@ -60,6 +61,35 @@ Running `mount(element, OtherComponent)` where `element` is a current mount poin
 #### Unmount
 
 Using `m.mount(element, null)` on an element with a previously mounted component unmounts it and cleans up Mithril internal state. This can be useful to prevent memory leaks when removing the `root` node manually from the DOM.
+
+#### Headless mounts
+
+In certain more advanced situations, you may want to subscribe and listen for [redraws](autoredraw.md) without rendering anything to the screen. This can be done using a headless mount, created by simply invoking `m.mount` with an element that's not added to the live DOM tree and putting all your useful logic in the component you're mounting with. You still need a `view` in your component, just it doesn't have to return anything useful and it can just return a junk value like `null` or `undefined`.
+
+```javascript
+var elem = document.createElement("div")
+
+// Subscribe
+m.mount(elem, {
+	oncreate: function() {
+		// once added
+	},
+	onupdate: function() {
+		// on each redraw
+	},
+	onremove: function() {
+		// clean up whatever you need
+	},
+
+	// Necessary boilerplate
+	view: function () {},
+})
+
+// Unsubscribe
+m.mount(elem, null)
+```
+
+There's no need to worry about other mount roots. Multiple roots are supported and they won't step on each other. You can even do the above in a component when integrating with another framework, and it won't be a problem.
 
 ---
 

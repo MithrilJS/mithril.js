@@ -39,7 +39,7 @@ Argument    | Type                 | Required | Description
 
 The `m.render(element, vnodes)` method takes a virtual DOM tree (typically generated via the [`m()` hyperscript function](hyperscript.md)), generates a DOM tree and mounts it on `element`. If `element` already has a DOM tree mounted via a previous `m.render()` call, `vnodes` is diffed against the previous `vnodes` tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.
 
-If you pass the optional `redraw` argument, that is invoked each time an event handler anywhere in the subtree is called. This is used by [`m.mount`](mount.md) and [`m.redraw`](redraw.md) to implement the autoredraw mechanism, but is also exposed for convenience and third-party integration in advanced use cases.
+If you pass the optional `redraw` argument, that is invoked each time an event handler anywhere in the subtree is called. This is used by [`m.mount`](mount.md) and [`m.redraw`](redraw.md) to implement the [autoredraw](autoredraw.md) functionality, but it's also exposed for more advanced use cases like integration with some third-party frameworks.
 
 `m.render` is synchronous.
 
