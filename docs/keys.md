@@ -125,7 +125,7 @@ var User = {
 	view: function(vnode) {
 		return m("div", { key: vnode.attrs.user.id }, [
 			m(Button, vnode.attrs.user.name)
-    	])
+		])
 	}
 }
 
