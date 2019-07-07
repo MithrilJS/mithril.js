@@ -144,10 +144,10 @@ module.exports = function($window, mountRedraw) {
 			onremove: onremove,
 			view: function() {
 				if (!state || sentinel === currentResolver) return
-				var vnode = Vnode(component, attrs.key, attrs)
-				if (currentResolver) vnode = currentResolver.render(vnode)
 				// Wrap in a fragment to preserve existing key semantics
-				return [vnode]
+				var vnode = [Vnode(component, attrs.key, attrs)]
+				if (currentResolver) vnode = currentResolver.render(vnode[0])
+				return vnode
 			},
 		})
 	}

@@ -206,7 +206,7 @@ Argument            | Type                 | Description
 
 #### How it works
 
-Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
+Routing is a system that allows creating Single Page Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
@@ -335,6 +335,8 @@ You can take that idea further to create components that recreate themselves whe
 Or even use the [`history state`](#history-state) feature to achieve reloadable components without polluting the URL:
 
 `m.route.set(m.route.get(), null, {state: {key: Date.now()}})`
+
+Note that the key parameter works only for component routes. If you're using a route resolver, you'll need to use a [single-child keyed fragment](keys.md), passing `key: m.route.param("key")`, to accomplish the same.
 
 #### Variadic routes
 

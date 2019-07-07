@@ -11,7 +11,7 @@ o.spec("component", function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
 
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	components.forEach(function(cmp){

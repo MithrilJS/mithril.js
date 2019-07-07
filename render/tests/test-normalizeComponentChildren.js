@@ -8,7 +8,7 @@ var vdom = require("../../render/render")
 o.spec("component children", function () {
 	var $window = domMock()
 	var root = $window.document.createElement("div")
-	var render = vdom($window).render
+	var render = vdom($window)
 
 	o.spec("component children", function () {
 		var component = {

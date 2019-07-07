@@ -4,7 +4,7 @@ var Vnode = require("../render/vnode")
 var coreRenderer = require("../render/render")
 
 module.exports = function($window, schedule, console) {
-	var renderService = coreRenderer($window)
+	var render = coreRenderer($window, redraw)
 	var subscriptions = []
 	var rendering = false
 	var pending = false
@@ -13,11 +13,12 @@ module.exports = function($window, schedule, console) {
 		if (rendering) throw new Error("Nested m.redraw.sync() call")
 		rendering = true
 		for (var i = 0; i < subscriptions.length; i += 2) {
-			try { renderService.render(subscriptions[i], Vnode(subscriptions[i + 1])) }
+			try { render(subscriptions[i], Vnode(subscriptions[i + 1])) }
 			catch (e) { console.error(e) }
 		}
 		rendering = false
 	}
+
 	function redraw() {
 		if (!pending) {
 			pending = true
@@ -29,7 +30,6 @@ module.exports = function($window, schedule, console) {
 	}
 
 	redraw.sync = sync
-	renderService.setRedraw(redraw)
 
 	function mount(root, component) {
 		if (component != null && component.view == null && typeof component !== "function") {
@@ -39,12 +39,12 @@ module.exports = function($window, schedule, console) {
 		var index = subscriptions.indexOf(root)
 		if (index >= 0) {
 			subscriptions.splice(index, 2)
-			renderService.render(root, [])
+			render(root, [])
 		}
 
 		if (component != null) {
 			subscriptions.push(root, component)
-			renderService.render(root, Vnode(component))
+			render(root, Vnode(component))
 		}
 	}
 

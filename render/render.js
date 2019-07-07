@@ -2,16 +2,13 @@
 
 var Vnode = require("../render/vnode")
 
-module.exports = function($window) {
+module.exports = function($window, redraw) {
 	var $doc = $window.document
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
-
-	var redraw
-	function setRedraw(callback) {return redraw = callback}
 
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
@@ -866,7 +863,7 @@ module.exports = function($window) {
 		return true
 	}
 
-	function render(dom, vnodes) {
+	return function(dom, vnodes) {
 		if (!dom) throw new TypeError("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = activeElement()
@@ -882,6 +879,4 @@ module.exports = function($window) {
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
-
-	return {render: render, setRedraw: setRedraw}
 }

@@ -708,7 +708,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("changing `vnode.key` in `render` resets the component", function(done){
+				o("changing `key` param resets the component", function(done){
 					var oninit = o.spy()
 					var Component = {
 						oninit: oninit,
@@ -718,9 +718,7 @@ o.spec("route", function() {
 					}
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id": {render: function(vnode) {
-							return m(Component, {key: vnode.attrs.id})
-						}}
+						"/:key": Component,
 					})
 					callAsync(function() {
 						o(oninit.callCount).equals(1)

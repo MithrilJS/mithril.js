@@ -54,6 +54,10 @@
     - Previously, numeric children weren't coerced. Now, they are.
     - Unlikely to break most components, but it *could* break some users.
     - This increases consistency with how booleans are handled with children, so it should be more intuitive.
+- route: `key` parameter for routes now only works globally for components ([#????](https://github.com/MithrilJS/mithril.js/pull/????) [@isiahmeadows](https://github.com/isiahmeadows))
+    - Previously, it worked for route resolvers, too.
+    - This lets you ensure global layouts used in `render` still render by diff.
+
 
 #### News
 

@@ -1,3 +1,3 @@
 "use strict"
 
-module.exports = require("./render/render")(window).render
+module.exports = require("./render/render")(window)
