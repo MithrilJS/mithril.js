@@ -1,5 +1,6 @@
 "use strict"
 
+// Low-priority TODO: remove the dependency on the renderer here.
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
 var browserMock = require("../../test-utils/browserMock")
@@ -7,6 +8,7 @@ var throttleMocker = require("../../test-utils/throttleMock")
 
 var callAsync = require("../../test-utils/callAsync")
 var apiMountRedraw = require("../../api/mount-redraw")
+var coreRenderer = require("../../render/render")
 var apiRouter = require("../../api/router")
 
 o.spec("route.get/route.set", function() {
@@ -21,7 +23,7 @@ o.spec("route.get/route.set", function() {
 
 					root = $window.document.body
 
-					mountRedraw = apiMountRedraw($window, throttleMock.schedule, console)
+					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
 					route.prefix(prefix)
 				})

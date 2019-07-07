@@ -1,10 +1,8 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var coreRenderer = require("../render/render")
 
-module.exports = function($window, schedule, console) {
-	var render = coreRenderer($window, redraw)
+module.exports = function(render, schedule, console) {
 	var subscriptions = []
 	var rendering = false
 	var pending = false
@@ -13,7 +11,7 @@ module.exports = function($window, schedule, console) {
 		if (rendering) throw new Error("Nested m.redraw.sync() call")
 		rendering = true
 		for (var i = 0; i < subscriptions.length; i += 2) {
-			try { render(subscriptions[i], Vnode(subscriptions[i + 1])) }
+			try { render(subscriptions[i], Vnode(subscriptions[i + 1]), redraw) }
 			catch (e) { console.error(e) }
 		}
 		rendering = false
@@ -39,12 +37,12 @@ module.exports = function($window, schedule, console) {
 		var index = subscriptions.indexOf(root)
 		if (index >= 0) {
 			subscriptions.splice(index, 2)
-			render(root, [])
+			render(root, [], redraw)
 		}
 
 		if (component != null) {
 			subscriptions.push(root, component)
-			render(root, Vnode(component))
+			render(root, Vnode(component), redraw)
 		}
 	}
 

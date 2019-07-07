@@ -1,3 +1,5 @@
 "use strict"
 
-module.exports = require("./api/mount-redraw")(window, requestAnimationFrame, console)
+var render = require("./render")
+
+module.exports = require("./api/mount-redraw")(render, requestAnimationFrame, console)

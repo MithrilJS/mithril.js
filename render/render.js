@@ -2,8 +2,9 @@
 
 var Vnode = require("../render/vnode")
 
-module.exports = function($window, redraw) {
+module.exports = function($window) {
 	var $doc = $window.document
+	var currentRedraw
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -794,15 +795,17 @@ module.exports = function($window, redraw) {
 	//    that below.
 	// 6. In function-based event handlers, `return false` prevents the default
 	//    action and stops event propagation. We replicate that below.
-	function EventDict() {}
+	function EventDict() {
+		// Save this, so the current redraw is correctly tracked.
+		this._ = currentRedraw
+	}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler = this["on" + ev.type]
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (ev.redraw === false) ev.redraw = undefined
-		else if (typeof redraw === "function") redraw()
+		if (this._ && ev.redraw !== false) (0, this._)()
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
@@ -863,7 +866,7 @@ module.exports = function($window, redraw) {
 		return true
 	}
 
-	return function(dom, vnodes) {
+	return function(dom, vnodes, redraw) {
 		if (!dom) throw new TypeError("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = activeElement()
@@ -873,7 +876,13 @@ module.exports = function($window, redraw) {
 		if (dom.vnodes == null) dom.textContent = ""
 
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
-		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		var prevRedraw = currentRedraw
+		try {
+			currentRedraw = typeof redraw === "function" ? redraw : undefined
+			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		} finally {
+			currentRedraw = prevRedraw
+		}
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()

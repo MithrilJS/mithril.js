@@ -1,24 +1,13 @@
 "use strict"
 
+// Low-priority TODO: remove the dependency on the renderer here.
 var o = require("../../ospec/ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 var mountRedraw = require("../../api/mount-redraw")
+var coreRenderer = require("../../render/render")
 var h = require("../../render/hyperscript")
-
-// Because Node doesn't have this.
-if (typeof requestAnimationFrame !== "function") {
-	global.requestAnimationFrame = (function(delay, last) {
-		return function(callback) {
-			var elapsed = Date.now() - last
-			return setTimeout(function() {
-				callback()
-				last = Date.now()
-			}, delay - elapsed)
-		}
-	})(16, 0)
-}
 
 o.spec("mount/redraw", function() {
 	var root, m, throttleMock, consoleMock, $document, errors
@@ -27,7 +16,7 @@ o.spec("mount/redraw", function() {
 		consoleMock = {error: o.spy()}
 		throttleMock = throttleMocker()
 		root = $window.document.body
-		m = mountRedraw($window, throttleMock.schedule, consoleMock)
+		m = mountRedraw(coreRenderer($window), throttleMock.schedule, consoleMock)
 		$document = $window.document
 		errors = []
 	})
@@ -380,10 +369,12 @@ o.spec("mount/redraw", function() {
 				root.firstChild.dispatchEvent(e)
 
 				o(oninit.callCount).equals(1)
+				o(e.redraw).equals(false)
 
 				throttleMock.fire()
 
 				o(onupdate.callCount).equals(0)
+				o(e.redraw).equals(false)
 			})
 
 			o("redraws when the render function is run", function() {

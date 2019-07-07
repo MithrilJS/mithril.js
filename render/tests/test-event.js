@@ -10,8 +10,10 @@ o.spec("event", function() {
 		$window = domMock()
 		root = $window.document.body
 		redraw = o.spy()
-		var renderer = vdom($window, redraw)
-		render = renderer
+		var renderer = vdom($window)
+		render = function(dom, vnode) {
+			return renderer(dom, vnode, redraw)
+		}
 	})
 
 	o("handles onclick", function() {
