@@ -454,7 +454,7 @@ var isError = false
 m("div", isError ? "An error occurred" : "Saved") // <div>Saved</div>
 ```
 
-You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
+You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative.
 
 ---
 

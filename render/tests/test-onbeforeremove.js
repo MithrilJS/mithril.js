@@ -12,7 +12,7 @@ o.spec("onbeforeremove", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	o("does not call onbeforeremove when creating", function() {

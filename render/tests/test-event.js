@@ -11,8 +11,9 @@ o.spec("event", function() {
 		root = $window.document.body
 		redraw = o.spy()
 		var renderer = vdom($window)
-		renderer.setRedraw(redraw)
-		render = renderer.render
+		render = function(dom, vnode) {
+			return renderer(dom, vnode, redraw)
+		}
 	})
 
 	o("handles onclick", function() {

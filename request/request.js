@@ -2,9 +2,8 @@
 
 var buildPathname = require("../pathname/build")
 
-module.exports = function($window, Promise) {
+module.exports = function($window, Promise, oncompletion) {
 	var callbackCount = 0
-	var oncompletion
 
 	function PromiseProxy(executor) {
 		return new Promise(executor)
@@ -191,8 +190,5 @@ module.exports = function($window, Promise) {
 				encodeURIComponent(callbackName)
 			$window.document.documentElement.appendChild(script)
 		}),
-		setCompletionCallback: function(callback) {
-			oncompletion = callback
-		},
 	}
 }

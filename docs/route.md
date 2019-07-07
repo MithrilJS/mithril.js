@@ -206,7 +206,7 @@ Argument            | Type                 | Description
 
 #### How it works
 
-Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
+Routing is a system that allows creating Single Page Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
@@ -335,6 +335,8 @@ You can take that idea further to create components that recreate themselves whe
 Or even use the [`history state`](#history-state) feature to achieve reloadable components without polluting the URL:
 
 `m.route.set(m.route.get(), null, {state: {key: Date.now()}})`
+
+Note that the key parameter works only for component routes. If you're using a route resolver, you'll need to use a [single-child keyed fragment](keys.md), passing `key: m.route.param("key")`, to accomplish the same.
 
 #### Variadic routes
 
@@ -739,7 +741,7 @@ m.route(document.body, "/", {
 In certain situations, you may find yourself needing to interoperate with another framework like React. Here's how you do it:
 
 - Define all your routes using `m.route` as normal, but make sure you only use it *once*. Multiple route points are not supported.
-- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on.
+- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on. `m.route` uses `m.mount` internally to hook everything up, so it's not magic.
 
 Here's an example with React:
 

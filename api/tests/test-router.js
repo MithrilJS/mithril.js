@@ -1,13 +1,15 @@
 "use strict"
 
+// Low-priority TODO: remove the dependency on the renderer here.
 var o = require("../../ospec/ospec")
 var callAsync = require("../../test-utils/callAsync")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
+var coreRenderer = require("../../render/render")
 var callAsync = require("../../test-utils/callAsync")
-var apiRedraw = require("../../api/redraw")
+var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
 
@@ -15,7 +17,7 @@ o.spec("route", function() {
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var $window, root, redrawService, route, throttleMock
+				var $window, root, mountRedraw, route, throttleMock
 
 				o.beforeEach(function() {
 					$window = browserMock(env)
@@ -23,8 +25,8 @@ o.spec("route", function() {
 
 					root = $window.document.body
 
-					redrawService = apiRedraw($window, throttleMock.throttle)
-					route = apiRouter($window, redrawService)
+					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
+					route = apiRouter($window, mountRedraw)
 					route.prefix(prefix)
 				})
 
@@ -55,6 +57,165 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
+				o("resolves to route w/ escaped unicode", function() {
+					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
+					route(root, "/ö", {
+						"/ö" : {
+							view: function() {
+								return m("div")
+							}
+						}
+					})
+
+					o(root.firstChild.nodeName).equals("DIV")
+				})
+
+				o("resolves to route w/ unicode", function() {
+					$window.location.href = prefix + "/ö?ö=ö"
+					route(root, "/ö", {
+						"/ö" : {
+							view: function() {
+								return JSON.stringify(route.param()) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
+				})
+
+				o("handles parameterized route", function() {
+					$window.location.href = prefix + "/test/x"
+					route(root, "/test/:a", {
+						"/test/:a" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x"} {"a":"x"} /test/x'
+					)
+				})
+
+				o("handles multi-parameterized route", function() {
+					$window.location.href = prefix + "/test/x/y"
+					route(root, "/test/:a/:b", {
+						"/test/:a/:b" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x","b":"y"} {"a":"x","b":"y"} /test/x/y'
+					)
+				})
+
+				o("handles rest parameterized route", function() {
+					$window.location.href = prefix + "/test/x/y"
+					route(root, "/test/:a...", {
+						"/test/:a..." : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"x/y"} {"a":"x/y"} /test/x/y'
+					)
+				})
+
+				o("handles route with search", function() {
+					$window.location.href = prefix + "/test?a=b&c=d"
+					route(root, "/test", {
+						"/test" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"b","c":"d"} {"a":"b","c":"d"} /test?a=b&c=d'
+					)
+				})
+
+				o("redirects to default route if no match", function(done) {
+					$window.location.href = prefix + "/test"
+					route(root, "/other", {
+						"/other": {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					callAsync(function() {
+						o(root.firstChild.nodeValue).equals("{} {} /other")
+						done()
+					})
+				})
+
+				o("handles out of order routes", function() {
+					$window.location.href = prefix + "/z/y/x"
+
+					route(root, "/z/y/x", {
+						"/z/y/x": {
+							view: function() { return "1" },
+						},
+						"/:a...": {
+							view: function() { return "2" },
+						},
+					})
+
+					o(root.firstChild.nodeValue).equals("1")
+				})
+
+				o("handles reverse out of order routes", function() {
+					$window.location.href = prefix + "/z/y/x"
+
+					route(root, "/z/y/x", {
+						"/:a...": {
+							view: function() { return "2" },
+						},
+						"/z/y/x": {
+							view: function() { return "1" },
+						},
+					})
+
+					o(root.firstChild.nodeValue).equals("2")
+				})
+
+				o("resolves to route on fallback mode", function() {
+					$window.location.href = "file://" + prefix + "/test"
+
+					route(root, "/test", {
+						"/test" : {
+							view: function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							}
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals("{} {} /test")
+				})
+
 				o("routed mount points only redraw asynchronously (POJO component)", function() {
 					var view = o.spy()
 
@@ -63,7 +224,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -83,7 +244,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -102,7 +263,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -124,8 +285,7 @@ o.spec("route", function() {
 
 					o(root.firstChild.nodeName).equals("DIV")
 
-					// unsubscribe as if via `m.mount(root)`
-					redrawService.unsubscribe(root)
+					mountRedraw.mount(root)
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -192,7 +352,7 @@ o.spec("route", function() {
 
 					o(oninit.callCount).equals(1)
 
-					redrawService.redraw()
+					mountRedraw.redraw()
 					throttleMock.fire()
 
 					o(onupdate.callCount).equals(1)
@@ -258,8 +418,6 @@ o.spec("route", function() {
 					o(oninit.callCount).equals(1)
 
 					root.firstChild.dispatchEvent(e)
-
-					o(e.redraw).notEquals(false)
 
 					// Wrapped to ensure no redraw fired
 					callAsync(function() {
@@ -550,7 +708,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("changing `vnode.key` in `render` resets the component", function(done){
+				o("changing `key` param resets the component", function(done){
 					var oninit = o.spy()
 					var Component = {
 						oninit: oninit,
@@ -560,9 +718,7 @@ o.spec("route", function() {
 					}
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id": {render: function(vnode) {
-							return m(Component, {key: vnode.attrs.id})
-						}}
+						"/:key": Component,
 					})
 					callAsync(function() {
 						o(oninit.callCount).equals(1)
@@ -661,7 +817,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -697,7 +853,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -1022,7 +1178,7 @@ o.spec("route", function() {
 						o(view.callCount).equals(1)
 						o(onmatch.callCount).equals(1)
 
-						redrawService.redraw()
+						mountRedraw.redraw()
 						throttleMock.fire()
 
 						o(view.callCount).equals(2)
@@ -1286,10 +1442,10 @@ o.spec("route", function() {
 					})
 					var before = i
 
-					redrawService.redraw()
-					redrawService.redraw()
-					redrawService.redraw()
-					redrawService.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
+					mountRedraw.redraw()
 					var after = i
 
 					throttleMock.fire()

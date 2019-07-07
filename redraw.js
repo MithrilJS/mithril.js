@@ -1,3 +1,3 @@
 "use strict"
 
-module.exports = require("./api/redraw")(window)
+module.exports = require("./mount-redraw").redraw

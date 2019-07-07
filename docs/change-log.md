@@ -54,6 +54,13 @@
     - Previously, numeric children weren't coerced. Now, they are.
     - Unlikely to break most components, but it *could* break some users.
     - This increases consistency with how booleans are handled with children, so it should be more intuitive.
+- route: `key` parameter for routes now only works globally for components ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
+    - Previously, it worked for route resolvers, too.
+    - This lets you ensure global layouts used in `render` still render by diff.
+- redraw: `mithril/redraw` now just exposes the `m.redraw` callback ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
+    - The `.schedule`, `.unschedule`, and `.render` properties of the former `redrawService` are all removed.
+    - If you want to know how to work around it, look at the call to `mount` in Mithril's source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
+
 
 #### News
 
@@ -81,6 +88,7 @@
 - route: Use `m.mount(root, null)` to unsubscribe and clean up after a `m.route(root, ...)` call. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
 - version: `m.version` returns the previous version string for what's in `next`. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
     - If you're using `next`, you should hopefully know what you're doing. If you need stability, don't use `next`. (This is also why I'm not labelling it as a breaking change.)
+- render: new `redraw` parameter exposed any time a child event handler is used ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
 
 #### Bug fixes
 

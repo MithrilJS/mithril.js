@@ -10,10 +10,8 @@ o.spec("request", function() {
 	var mock, request, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
-		var requestService = Request(mock, PromisePolyfill)
-		request = requestService.request
 		complete = o.spy()
-		requestService.setCompletionCallback(complete)
+		request = Request(mock, PromisePolyfill, complete).request
 	})
 
 	o.spec("success", function() {
@@ -835,10 +833,7 @@ o.spec("request", function() {
 			// if you use the polyfill, as it's based on `setImmediate` (falling
 			// back to `setTimeout`), and promise microtasks are run at higher
 			// priority than either of those.
-			var requestService = Request(mock, Promise)
-			request = requestService.request
-			complete = o.spy()
-			requestService.setCompletionCallback(complete)
+			request = Request(mock, Promise, complete).request
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
