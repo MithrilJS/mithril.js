@@ -320,11 +320,4 @@ o.spec("bundler", function() {
 		remove("a.js")
 		remove("b.js")
 	})
-	o("reads package.json keys", function() {
-		write("a.js", 'var b = require("./package.json").version')
-
-		o(bundle(ns + "a.js")).equals(";(function() {\nvar b = " + JSON.stringify(pkg.version) + "\n}());")
-
-		remove("a.js")
-	})
 })

@@ -18,7 +18,7 @@ m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")
 m.buildPathname = require("./pathname/build")
-m.version = require("./package.json").version
+m.version = "next"
 m.vnode = require("./render/vnode")
 m.PromisePolyfill = require("./promise/polyfill")
 

@@ -24,10 +24,6 @@ module.exports = function (input) {
 	var include = /(?:((?:var|let|const|,|)[\t ]*)([\w_$\.\[\]"'`]+)(\s*=\s*))?require\(([^\)]+)\)(\s*[`\.\(\[])?/gm
 	var uuid = 0
 	var process = function(filepath, data) {
-		// HACK: inline Mithril's `package.json` keys without reading the whole file.
-		data = data.replace(/require\((['"])\.\/package\.json\1\)\.(\w+)/, function (match, quote, key) {
-			return JSON.stringify(pkg[key])
-		})
 		data.replace(declaration, function(match, binding) {bindings[binding] = 0})
 
 		return data.replace(include, function(match, def, variable, eq, dep, rest) {
