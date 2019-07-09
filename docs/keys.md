@@ -205,7 +205,7 @@ m("div", [
 ])
 ```
 
-Note that `null`s, `undefined`s and booleans are considered unkeyed nodes. If you want the keyed equivalent use `m.fragment({key: ...}, [])` which is a keyed empty fragment.
+Note that `null`s, `undefined`s and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])` which is a keyed empty fragment.
 
 ```javascript
 // AVOID
