@@ -86,8 +86,6 @@
     - Previously, this was possible to do in `m.route.set`, `m.request`, and `m.jsonp`, but it was wholly untested for and also undocumented.
 - API: `m.buildPathname` and `m.parsePathname` added. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 - route: Use `m.mount(root, null)` to unsubscribe and clean up after a `m.route(root, ...)` call. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
-- version: `m.version` returns the previous version string for what's in `next`. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
-    - If you're using `next`, you should hopefully know what you're doing. If you need stability, don't use `next`. (This is also why I'm not labelling it as a breaking change.)
 - render: new `redraw` parameter exposed any time a child event handler is used ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
 
 #### Bug fixes
