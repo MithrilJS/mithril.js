@@ -6,5 +6,5 @@ const index = require.resolve("../index")
 
 fs.writeFile(index,
 	fs.readFile(index, "utf-8")
-		.replace(/(version\s*=\s*)(['"])next\2/, `$1$2${version}$2`)
+		.replace(/(version\s*=\s*)(['"]).*?\2/, `$1$2${version}$2`)
 )
