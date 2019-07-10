@@ -24,13 +24,6 @@ o.spec("api", function() {
 			o(vnode.tag).equals("div")
 		})
 	})
-	o.spec("m.version", function() {
-		o("works", function() {
-			o(typeof m.version).equals("string")
-			o(m.version.indexOf(".") > -1).equals(true)
-			o((/\d/).test(m.version)).equals(true)
-		})
-	})
 	o.spec("m.trust", function() {
 		o("works", function() {
 			var vnode = m.trust("<br>")

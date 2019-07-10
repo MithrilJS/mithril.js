@@ -60,6 +60,7 @@
 - redraw: `mithril/redraw` now just exposes the `m.redraw` callback ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
     - The `.schedule`, `.unschedule`, and `.render` properties of the former `redrawService` are all removed.
     - If you want to know how to work around it, look at the call to `mount` in Mithril's source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
+- api: `m.version` has been removed. If you really need the version for whatever reason, just read the `version` field of `mithril/package.json` directly.
 
 
 #### News
