@@ -124,8 +124,8 @@ If you refactor the code and make a user component, the key must be moved out of
 var User = {
 	view: function(vnode) {
 		return m("div", { key: vnode.attrs.user.id }, [
-      m(Button, vnode.attrs.user.name)
-    ])
+			m(Button, vnode.attrs.user.name)
+		])
 	}
 }
 
@@ -174,7 +174,7 @@ var things = [
 
 #### Avoid mixing keyed and non-keyed vnodes in the same array
 
-An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.
+An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. In fact, this will cause an error to be thrown to remind you to not do it. So don't do it!
 
 ```javascript
 // AVOID
@@ -182,14 +182,20 @@ m("div", [
 	m("div", "a"),
 	m("div", {key: 1}, "b"),
 ])
+```
+If using keys, use a unique key for every element.
 
+```javascript
 // PREFER
 m("div", [
 	m("div", {key: 0}, "a"),
 	m("div", {key: 1}, "b"),
 ])
+```
 
+If you need to mix them, create a nested array.
 
+```javascript
 // PREFER
 m("div", [
 	m("div", "a"),
@@ -199,9 +205,21 @@ m("div", [
 ])
 ```
 
-In fact, this will cause an error to be thrown, to remind you to not do it. So don't do it!
+Note that `null`s, `undefined`s and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])` which is a keyed empty fragment.
 
-Note that `null`s, `undefined`s, and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])`, a keyed empty fragment.
+```javascript
+// AVOID
+m("div", [
+	a ? m("div", {key: 1}, "a") : null,
+	m("div", {key: 2}, "b"),
+])
+
+// PREFER
+m("div", [
+	a ? m("div", {key: 1}, "a") : m.fragment({key: 1}, []),
+	m("div", {key: 2}, "b"),
+])
+```
 
 #### Avoid passing model data directly to components if the model uses `key` as a data property
 
