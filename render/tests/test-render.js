@@ -12,6 +12,10 @@ o.spec("render", function() {
 		render = vdom($window)
 	})
 
+	o("initializes without DOM", function() {
+		vdom()
+	})
+
 	o("renders plain text", function() {
 		render(root, "a")
 		o(root.childNodes.length).equals(1)

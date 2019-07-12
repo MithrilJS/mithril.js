@@ -25,7 +25,7 @@ o.spec("route.get/route.set", function() {
 
 					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
-					route.prefix(prefix)
+					route.prefix = prefix
 				})
 
 				o.afterEach(function() {

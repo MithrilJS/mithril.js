@@ -104,7 +104,7 @@ o.spec("api", function() {
 				})
 				o("m.route.prefix", function(done) {
 					root = window.document.createElement("div")
-					m.route.prefix("#")
+					m.route.prefix = "#"
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})

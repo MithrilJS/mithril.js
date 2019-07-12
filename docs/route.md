@@ -6,7 +6,7 @@
 		- [m.route.set](#mrouteset)
 		- [m.route.get](#mrouteget)
 		- [m.route.prefix](#mrouteprefix)
-		- [m.route.link](#mroutelink)
+		- [m.route.Link](#mroutelink)
 		- [m.route.param](#mrouteparam)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
@@ -92,6 +92,7 @@ m.route(document.body, {
 })
 m.route.set('/article/:articleid', {articleid: 1})
 ```
+
 ##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
@@ -106,41 +107,107 @@ Argument          | Type      | Required | Description
 
 Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
-`m.route.prefix(prefix)`
+`m.route.prefix = prefix`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
 `prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategies) used by Mithril.
-**returns**       |           |          | Returns `undefined`
 
-##### m.route.link
+This is a simple property, so you can both read it and write to it.
 
-This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
+##### m.route.Link
 
-```JS
-m("a[href=/]", {oncreate: m.route.link})
+This component can create a dynamic routable link:
+
+```javascript
+m(m.route.Link, {href: "/test"})
 ```
 
-Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
+Using `m.route.Link` causes the link to behave as a router link - clicking it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
 
-If the `href` attribute is not static, the `onupdate` hook must also be set:
+You can also set the `options` passed to `m.route.set` when the link is clicked by passing the `options` attribute:
 
-```JS
-m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})
+```javascript
+m(m.route.Link, {href: "/test", options: {replace: true}})
+
+// You can even use URL templates this way, the same way you can with
+// `m.route.set`.
+m(m.route.Link, {href: "/edit/:id", options: {params: {id: item.id}}})
 ```
 
-`m.route.link` can also set the `options` passed to `m.route.set` when the link is clicked by calling the function in the lifecycle methods:
+You can pass other attributes, too, and you can also specify the tag name used.
 
-```JS
-m("a[href=/]", {oncreate: m.route.link({replace: true})})
+```javascript
+m(m.route.Link, {
+	// Any hyperscript selector is valid here - it's literally passed as the
+	// first parameter to `m`.
+	component: "span",
+	options: {replace: true},
+	href: "/test",
+	disabled: false,
+	class: "nav-link",
+	"data-foo": 1,
+	// and other attributes
+}, "link name")
 ```
 
-`m.route.link(args)`
+Magic attributes used by this component (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `component="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above component renders to this hyperscript, assuming the prefix is the default `#!`:
 
-Argument          | Type           | Required | Description
------------------ | ---------------| -------- | ---
-`args`            | `Vnode|Object` | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
-**returns**       | `function`     |          | Returns the onclick handler function for the component
+```javascript
+m("span", {
+	href: "#!/test",
+	onclick: function(e) {
+		// ...
+	},
+	disabled: false, // Only if you specify it
+	class: "nav-link",
+	"data-foo": 1,
+	// and other attributes
+})
+```
+
+You can also prevent navigation by, in an `onclick` handler, invoking `ev.preventDefault()` or returning `false`. This is the same way you block other events, so it's pretty natural.
+
+```javascript
+m(m.route.Link, {
+	href: "/test",
+	onclick: function(e) {
+		// Do things...
+		if (notReady()) e.preventDefault()
+	}
+}, "link name")
+```
+
+This supports full accessibility for both `a` and `button`, via a `disabled` attribute. This ensures [no `href` attribute or `onclick` handler is set](https://css-tricks.com/how-to-disable-links/) and that an `"aria-disabled": "true"` attribute *is* set. If you are passing an `onclick` handler already, that's dropped. (You can work around this by adding it directly in a [lifecycle hook](lifecycle.md).) The `disabled` attribute is itself proxied to the element or component, so you can disable routed `<button>`s and the like.
+
+```javascript
+// This does the right thing and the accessible thing for you.
+m(m.route.Link, {disabled: disabled, href: "/test"}, "disabled")
+
+// It renders to this hyperscript, assuming the prefix is the default one:
+m("a", {
+	href: "#!/test",
+	disabled: disabled,
+	"aria-disabled": disabled ? "true" : false,
+	onclick: disabled ? null : function(e) {
+		// ...
+	},
+})
+```
+
+Do note that this doesn't also disable pointer events for you - you have to do that yourself through CSS - this only does the JS part. Also, the removal of `href` *can* break certain style sheets - if you're relying on this to style disabled links, you may need to update your stylesheets accordingly. Chances are, you're probably just looking it up via `a`, `.some-class`, or `#some-id`, and if you are, you're already good to go. If you're using `[href]` or `:link`, in most cases you can just remove them and it'll still work - it's pretty common to over-specify selectors. If you can't do either, check for both `[href]`/`:link` *and* the non-standard `[disabled]` attribute that was implicitly forwarded to the component.
+
+`vnode = m(m.route.Link, attributes, children)`
+
+Argument               | Type                                 | Required | Description
+---------------------- | ------------------------------------ | -------- | ---
+`attributes.href`      | `Object`                             | Yes      | The target route to navigate to.
+`attributes.component` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`   | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.disabled`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`           | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`             | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**            | `Vnode`                              |          | A [vnode](vnodes.md).
 
 ##### m.route.param
 
@@ -216,9 +283,9 @@ Routing without page refreshes is made partially possible by the [`history.pushS
 
 The routing strategy dictates how a library might actually implement routing. There are three general strategies that can be used to implement a SPA routing system, and each has different caveats:
 
-- `m.route.prefix('#!')` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `http://localhost/#!/page1`
-- `m.route.prefix('?')` – Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
-- `m.route.prefix('')` – Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
+- `m.route.prefix = '#!'` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `http://localhost/#!/page1`
+- `m.route.prefix = '?'` – Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
+- `m.route.prefix = ''` – Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
 
 Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState`, because it can fall back to using `onhashchange`. Use this strategy if you want to keep the hashes purely local.
 
@@ -262,8 +329,8 @@ In the example above, there are two components: `Home` and `Page1`. Each contain
 var Menu = {
 	view: function() {
 		return m("nav", [
-			m("a[href=/]", {oncreate: m.route.link}, "Home"),
-			m("a[href=/page1]", {oncreate: m.route.link}, "Page 1"),
+			m(m.route.Link, {href: "/"}, "Home"),
+			m(m.route.Link, {href: "/page1"}, "Page 1"),
 		])
 	}
 }
@@ -284,11 +351,11 @@ Here we specify two routes: `/` and `/page1`, which render their respective comp
 
 ### Navigating to different routes
 
-In the example above, the `Menu` component has two links. You can specify that their `href` attribute is a route URL (rather than being a regular link that navigates away from the current page), by adding the hook `{oncreate: m.route.link}`
+In the example above, the `Menu` component has two `m.route.Link`s. That creates an element, by default an `<a>`, and sets it up to where if the user clicks on it, it navigates to another route on its own. It doesn't navigate remotely, just locally.
 
 You can also navigate programmatically, via `m.route.set(route)`. For example, `m.route.set("/page1")`.
 
-When navigating to routes, there's no need to explicitly specify the router prefix. In other words, don't add the hashbang `#!` in front of the route path when linking via `m.route.link` or redirecting.
+When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril routes, including in both `m.route.set` and in `m.route.Link`.
 
 ---
 
@@ -411,17 +478,18 @@ The router prefix is a fragment of the URL that dictates the underlying [strateg
 
 ```javascript
 // set to pathname strategy
-m.route.prefix("")
+m.route.prefix = ""
 
 // set to querystring strategy
-m.route.prefix("?")
+m.route.prefix = "?"
 
 // set to hash without bang
-m.route.prefix("#")
+m.route.prefix = "#"
 
 // set to pathname strategy on a non-root URL
-// e.g. if the app lives under `http://localhost/my-app` and something else lives under `http://localhost`
-m.route.prefix("/my-app")
+// e.g. if the app lives under `http://localhost/my-app` and something else
+// lives under `http://localhost`
+m.route.prefix = "/my-app"
 ```
 
 ---

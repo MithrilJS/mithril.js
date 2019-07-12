@@ -27,7 +27,7 @@ o.spec("route", function() {
 
 					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
-					route.prefix(prefix)
+					route.prefix = prefix
 				})
 
 				o.afterEach(function() {
@@ -427,7 +427,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("changes location on route.link", function() {
+				o("changes location on route.Link", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -436,10 +436,7 @@ o.spec("route", function() {
 					route(root, "/", {
 						"/" : {
 							view: function() {
-								return m("a", {
-									href: "/test",
-									oncreate: route.link
-								})
+								return m(route.Link, {href: "/test"})
 							}
 						},
 						"/test" : {
@@ -458,7 +455,7 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
-				o("passes options on route.link", function() {
+				o("passes options on route.Link", function() {
 					var opts = {}
 					var e = $window.document.createEvent("MouseEvents")
 
@@ -468,9 +465,9 @@ o.spec("route", function() {
 					route(root, "/", {
 						"/" : {
 							view: function() {
-								return m("a", {
+								return m(route.Link, {
 									href: "/test",
-									oncreate: route.link(opts)
+									options: opts,
 								})
 							}
 						},
@@ -486,6 +483,146 @@ o.spec("route", function() {
 
 					o(route.set.callCount).equals(1)
 					o(route.set.args[2]).equals(opts)
+				})
+
+				o("route.Link can render without routes or dom access", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {href: "/test", foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("A")
+					o(root.firstChild.href).equals(prefix + "/test")
+					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
+					o(root.firstChild.hasAttribute("disabled")).equals(false)
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render other tag without routes or dom access", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {component: "button", href: "/test", foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("BUTTON")
+					o(root.firstChild.attributes["href"].value).equals(prefix + "/test")
+					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
+					o(root.firstChild.hasAttribute("disabled")).equals(false)
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render other selector without routes or dom access", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {component: "button[href=/test]", foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("BUTTON")
+					o(root.firstChild.attributes["href"].value).equals(prefix + "/test")
+					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
+					o(root.firstChild.hasAttribute("disabled")).equals(false)
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render not disabled", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {href: "/test", disabled: false, foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("A")
+					o(root.firstChild.href).equals(prefix + "/test")
+					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
+					o(root.firstChild.hasAttribute("disabled")).equals(false)
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render falsy disabled", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {href: "/test", disabled: 0, foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("A")
+					o(root.firstChild.href).equals(prefix + "/test")
+					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
+					o(root.firstChild.hasAttribute("disabled")).equals(false)
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render disabled", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {href: "/test", disabled: true, foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("A")
+					o(root.firstChild.href).equals("")
+					o(root.firstChild.attributes["aria-disabled"].value).equals("true")
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.attributes["disabled"].value).equals("")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link can render truthy disabled", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					render(root, m(route.Link, {href: "/test", disabled: 1, foo: "bar"}, "text"))
+
+					o(root.childNodes.length).equals(1)
+					o(root.firstChild.nodeName).equals("A")
+					o(root.firstChild.href).equals("")
+					o(root.firstChild.attributes["aria-disabled"].value).equals("true")
+					o(root.firstChild.attributes["foo"].value).equals("bar")
+					o(root.firstChild.attributes["disabled"].value).equals("")
+					o(root.firstChild.childNodes.length).equals(1)
+					o(root.firstChild.firstChild.nodeName).equals("#text")
+					o(root.firstChild.firstChild.nodeValue).equals("text")
 				})
 
 				o("accepts RouteResolver with onmatch that returns Component", function(done) {

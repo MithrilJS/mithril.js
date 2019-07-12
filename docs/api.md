@@ -57,18 +57,18 @@ m.route.set("/home")
 var currentRoute = m.route.get()
 ```
 
-#### m.route.prefix(prefix) - [docs](route.md#mrouteprefix)
+#### m.route.prefix = prefix - [docs](route.md#mrouteprefix)
 
-Call this before `m.route()`
+Invoke this before `m.route()` to change the routing prefix.
 
 ```javascript
-m.route.prefix("#!")
+m.route.prefix = "#!"
 ```
 
-#### m.route.link() - [docs](route.md#mroutelink)
+#### m(m.route.Link, ...) - [docs](route.md#mroutelink)
 
 ```javascript
-m("a[href='/Home']", {oncreate: m.route.link}, "Go to home page")
+m(m.route.Link, {href: "/Home"}, "Go to home page")
 ```
 
 ---

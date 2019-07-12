@@ -61,6 +61,11 @@
     - The `.schedule`, `.unschedule`, and `.render` properties of the former `redrawService` are all removed.
     - If you want to know how to work around it, look at the call to `mount` in Mithril's source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
 - api: `m.version` has been removed. If you really need the version for whatever reason, just read the `version` field of `mithril/package.json` directly. ([#2466](https://github.com/MithrilJS/mithril.js/pull/2466) [@isiahmeadows](https://github.com/isiahmeadows))
+- route: `m.route.prefix(...)` is now `m.route.prefix = ...`.
+    - This is a fully fledged property, so you can not only write to it, but you can also read from it.
+- route: `m.route.link` function removed in favor of `m.route.Link` component.
+    - An optional `options` object is accepted as an attribute. This was initially targeting the old `m.route.link` function and was transferred to this. ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
+    - The new component handles many more edge cases around user interaction.
 
 
 #### News
@@ -68,7 +73,6 @@
 - Mithril now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. ([#2296](https://github.com/MithrilJS/mithril.js/pull/2296))
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1949](https://github.com/MithrilJS/mithril.js/pull/1949), [#2222](https://github.com/MithrilJS/mithril.js/pull/2222)).
-- API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
 - API: `m.request` better error message on JSON parse error - ([#2195](https://github.com/MithrilJS/mithril.js/pull/2195), [@codeclown](https://github.com/codeclown))
 - API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
 - API: `m.request` supports `responseType` as attr - ([#2193](https://github.com/MithrilJS/mithril.js/pull/2193))
