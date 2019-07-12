@@ -15,7 +15,6 @@ function parse(file) {
 	try {return JSON.parse(json)} catch (e) {throw new Error("invalid JSON: " + json)}
 }
 
-var pkg = require("../package.json")
 var error
 module.exports = function (input) {
 	var modules = {}

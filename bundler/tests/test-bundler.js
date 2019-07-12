@@ -4,7 +4,6 @@ var o = require("../../ospec/ospec")
 var bundle = require("../bundle")
 
 var fs = require("fs")
-var pkg = require("../../package.json")
 
 var ns = "./"
 function write(filepath, data) {
