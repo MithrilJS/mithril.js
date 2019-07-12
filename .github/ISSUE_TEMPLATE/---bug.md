@@ -1,5 +1,5 @@
 ---
-name: "\U0001F41BBug report"
+name: "\U0001F41B Bug"
 about: Report a bug in Mithril
 title: ''
 labels: bug

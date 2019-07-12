@@ -1,5 +1,5 @@
 ---
-name: "\U0001F680Feature or Enhancement"
+name: "\U0001F680 Feature or Enhancement"
 about: Suggest an idea or feature for Mithril
 title: ''
 labels: enhancement
