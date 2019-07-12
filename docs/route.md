@@ -8,6 +8,7 @@
 		- [m.route.prefix](#mrouteprefix)
 		- [m.route.Link](#mroutelink)
 		- [m.route.param](#mrouteparam)
+		- [m.route.SKIP](#mrouteskip)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -24,6 +25,8 @@
 	- [Authentication](#authentication)
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
+	- [Typed routes](#typed-routes)
+	- [Hidden routes](#typed-routes)
 - [Third-party integration](#third-party-integration)
 
 ---
@@ -224,7 +227,11 @@ Argument          | Type            | Required | Description
 `key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
 **returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
 
- Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.param()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.param()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+
+##### m.route.SKIP
+
+A special value that can be returned from a [route resolver's `onmatch`](#routeresolveronmatch) to skip to the next route.
 
 #### RouteResolver
 
@@ -427,7 +434,7 @@ m.route(document.body, "/", {
   // [...]
   "/:404...": errorPageComponent
 });
- ```
+```
 
 #### History state
 
@@ -799,6 +806,43 @@ m.route(document.body, "/", {
 			})
 		},
 	},
+})
+```
+
+---
+
+### Typed routes
+
+In certain advanced routing cases, you may want to constrain a value further than just the path itself, only matching something like a numeric ID. You can do that pretty easily by returning `m.route.SKIP` from a route.
+
+```javascript
+m.route(document.body, "/", {
+	"/view/:id": {
+		onmatch: function(args) {
+			if (!/^\d+$/.test(args.id)) return m.route.SKIP
+			return ItemView
+		},
+	},
+	"/view/:name": UserView,
+})
+```
+
+---
+
+### Hidden routes
+
+In rare circumstances, you may want to hide certain routes for some users, but not all. For instance, a user might be prohibited from viewing a particular user, and instead of showing a permission error, you'd rather pretend it doesn't exist and redirect to a 404 view instead. In this case, you can use `m.route.SKIP` to just pretend the route doesn't exist.
+
+```javascript
+m.route(document.body, "/", {
+	"/user/:id": {
+		onmatch: function(args) {
+			return Model.checkViewable(args.id).then(function(viewable) {
+				return viewable ? UserView : m.route.SKIP
+			})
+		},
+	},
+	"/:404...": PageNotFound,
 })
 ```
 

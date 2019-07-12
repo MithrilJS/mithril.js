@@ -99,6 +99,7 @@
 - API: `m.buildPathname` and `m.parsePathname` added. ([#2361](https://github.com/MithrilJS/mithril.js/pull/2361))
 - route: Use `m.mount(root, null)` to unsubscribe and clean up after a `m.route(root, ...)` call. ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453))
 - render: new `redraw` parameter exposed any time a child event handler is used ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
+- route: `m.route.SKIP` can be returned from route resolvers to skip to the next route ([#2469](https://github.com/MithrilJS/mithril.js/pull/2469) [@isiahmeadows](https://github.com/isiahmeadows))
 
 #### Bug fixes
 

@@ -2,24 +2,75 @@
 
 // Low-priority TODO: remove the dependency on the renderer here.
 var o = require("../../ospec/ospec")
-var callAsync = require("../../test-utils/callAsync")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
-var callAsync = require("../../test-utils/callAsync")
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
 var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
+	// Note: the `n` parameter used in calls to this are generally found by
+	// either trial-and-error or by studying the source. If tests are failing,
+	// find the failing assertions, set `n` to about 10 on the preceding call to
+	// `waitCycles`, then drop them down incrementally until it fails. The last
+	// one to succeed is the one you want to keep. And just do that for each
+	// failing assertion, and it'll eventually work.
+	//
+	// This is effectively what I did when designing this and hooking everything
+	// up. (It would be so much easier to just be able to run the calls with a
+	// different event loop and just turn it until I get what I want, but JS
+	// lacks that functionality.)
+
+	// Use precisely what `m.route` uses, for consistency and to ensure timings
+	// are aligned.
+	var waitFunc = typeof setImmediate === "function" ? setImmediate : setTimeout
+	function waitCycles(n) {
+		n = Math.max(n, 1)
+		return new Promise(function(resolve) {
+			return loop()
+			function loop() {
+				if (n === 0) resolve()
+				else { n--; waitFunc(loop) }
+			}
+		})
+	}
+
 	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
 		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, root, mountRedraw, route, throttleMock
+				var nextID = 0
+				var currentTest = 0
+
+				// Once done, a root should no longer be alive. This verifies
+				// that, and it's a *very* subtle test bug that can lead to
+				// some rather unusual consequences. If this fails, use
+				// `waitCycles(n)` to avoid this.
+				function lock(func) {
+					var id = currentTest
+					var start = Date.now()
+					try {
+						throw new Error()
+					} catch (trace) {
+						return function() {
+							// This *will* cause a test failure.
+							if (id != null && id !== currentTest) {
+								id = undefined
+								trace.message = "called " +
+									(Date.now() - start) + "ms after test end"
+								console.error(trace.stack)
+								o("in test").equals("not in test")
+							}
+							return func.apply(this, arguments)
+						}
+					}
+				}
 
 				o.beforeEach(function() {
+					currentTest = nextID++
 					$window = browserMock(env)
 					throttleMock = throttleMocker()
 
@@ -32,12 +83,13 @@ o.spec("route", function() {
 
 				o.afterEach(function() {
 					o(throttleMock.queueLength()).equals(0)
+					currentTest = -1 // doesn't match any test
 				})
 
 				o("throws on invalid `root` DOM node", function() {
 					var threw = false
 					try {
-						route(null, "/", {"/":{view: function() {}}})
+						route(null, "/", {"/":{view: lock(function() {})}})
 					} catch (e) {
 						threw = true
 					}
@@ -48,9 +100,9 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
@@ -61,9 +113,9 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
 					route(root, "/ö", {
 						"/ö" : {
-							view: function() {
+							view: lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
@@ -74,10 +126,10 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/ö?ö=ö"
 					route(root, "/ö", {
 						"/ö" : {
-							view: function() {
+							view: lock(function() {
 								return JSON.stringify(route.param()) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -88,11 +140,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/test/x"
 					route(root, "/test/:a", {
 						"/test/:a" : {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -105,11 +157,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/test/x/y"
 					route(root, "/test/:a/:b", {
 						"/test/:a/:b" : {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -122,11 +174,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/test/x/y"
 					route(root, "/test/:a...", {
 						"/test/:a..." : {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -139,11 +191,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/test?a=b&c=d"
 					route(root, "/test", {
 						"/test" : {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -152,21 +204,20 @@ o.spec("route", function() {
 					)
 				})
 
-				o("redirects to default route if no match", function(done) {
+				o("redirects to default route if no match", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/other", {
 						"/other": {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(root.firstChild.nodeValue).equals("{} {} /other")
-						done()
 					})
 				})
 
@@ -175,10 +226,10 @@ o.spec("route", function() {
 
 					route(root, "/z/y/x", {
 						"/z/y/x": {
-							view: function() { return "1" },
+							view: lock(function() { return "1" }),
 						},
 						"/:a...": {
-							view: function() { return "2" },
+							view: lock(function() { return "2" }),
 						},
 					})
 
@@ -190,10 +241,10 @@ o.spec("route", function() {
 
 					route(root, "/z/y/x", {
 						"/:a...": {
-							view: function() { return "2" },
+							view: lock(function() { return "2" }),
 						},
 						"/z/y/x": {
-							view: function() { return "1" },
+							view: lock(function() { return "1" }),
 						},
 					})
 
@@ -205,11 +256,11 @@ o.spec("route", function() {
 
 					route(root, "/test", {
 						"/test" : {
-							view: function(vnode) {
+							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
-							}
+							})
 						}
 					})
 
@@ -236,8 +287,8 @@ o.spec("route", function() {
 				o("routed mount points only redraw asynchronously (constructible component)", function() {
 					var view = o.spy()
 
-					var Cmp = function(){}
-					Cmp.prototype.view = view
+					var Cmp = lock(function(){})
+					Cmp.prototype.view = lock(view)
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {"/":Cmp})
@@ -256,10 +307,10 @@ o.spec("route", function() {
 				o("routed mount points only redraw asynchronously (closure component)", function() {
 					var view = o.spy()
 
-					function Cmp() {return {view: view}}
+					function Cmp() {return {view: lock(view)}}
 
 					$window.location.href = prefix + "/"
-					route(root, "/", {"/":Cmp})
+					route(root, "/", {"/":lock(Cmp)})
 
 					o(view.callCount).equals(1)
 
@@ -277,9 +328,9 @@ o.spec("route", function() {
 
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
@@ -290,19 +341,19 @@ o.spec("route", function() {
 					o(root.childNodes.length).equals(0)
 				})
 
-				o("default route doesn't break back button", function(done) {
+				o("default route doesn't break back button", function() {
 					$window.location.href = "http://old.com"
 					$window.location.href = "http://new.com"
 
 					route(root, "/a", {
 						"/a" : {
-							view: function() {
+							view: lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(root.firstChild.nodeName).equals("DIV")
 
 						o(route.get()).equals("/a")
@@ -311,27 +362,23 @@ o.spec("route", function() {
 
 						o($window.location.pathname).equals("/")
 						o($window.location.hostname).equals("old.com")
-
-						done()
 					})
 				})
 
-				o("default route does not inherit params", function(done) {
+				o("default route does not inherit params", function() {
 					$window.location.href = "/invalid?foo=bar"
 					route(root, "/a", {
 						"/a" : {
-							oninit: init,
-							view: function() {
+							oninit: lock(function(vnode) {
+								o(vnode.attrs.foo).equals(undefined)
+							}),
+							view: lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
-					function init(vnode) {
-						o(vnode.attrs.foo).equals(undefined)
-
-						done()
-					}
+					return waitCycles(1)
 				})
 
 				o("redraws when render function is executed", function() {
@@ -341,12 +388,12 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
 									onupdate: onupdate
 								})
-							}
+							})
 						}
 					})
 
@@ -369,13 +416,13 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
 									onupdate: onupdate,
 									onclick: onclick,
 								})
-							}
+							})
 						}
 					})
 
@@ -393,7 +440,7 @@ o.spec("route", function() {
 					o(onupdate.callCount).equals(1)
 				})
 
-				o("event handlers can skip redraw", function(done) {
+				o("event handlers can skip redraw", function() {
 					var onupdate = o.spy()
 					var oninit = o.spy()
 					var e = $window.document.createEvent("MouseEvents")
@@ -403,15 +450,15 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
 									onupdate: onupdate,
-									onclick: function(e) {
+									onclick: lock(function(e) {
 										e.redraw = false
-									},
+									}),
 								})
-							}
+							})
 						}
 					})
 
@@ -420,10 +467,8 @@ o.spec("route", function() {
 					root.firstChild.dispatchEvent(e)
 
 					// Wrapped to ensure no redraw fired
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(onupdate.callCount).equals(0)
-
-						done()
 					})
 				})
 
@@ -435,14 +480,14 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m(route.Link, {href: "/test"})
-							}
+							})
 						},
 						"/test" : {
-							view : function() {
+							view : lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 
@@ -464,17 +509,17 @@ o.spec("route", function() {
 
 					route(root, "/", {
 						"/" : {
-							view: function() {
+							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
 									options: opts,
 								})
-							}
+							})
 						},
 						"/test" : {
-							view : function() {
+							view : lock(function() {
 								return m("div")
-							}
+							})
 						}
 					})
 					route.set = o.spy(route.set)
@@ -625,17 +670,17 @@ o.spec("route", function() {
 					o(root.firstChild.firstChild.nodeValue).equals("text")
 				})
 
-				o("accepts RouteResolver with onmatch that returns Component", function(done) {
+				o("accepts RouteResolver with onmatch that returns Component", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("span")
-						}
+						})
 					}
 
 					var resolver = {
-						onmatch: function(args, requestedPath, route) {
+						onmatch: lock(function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
@@ -643,15 +688,15 @@ o.spec("route", function() {
 							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Component
-						},
-						render: function(vnode) {
+						}),
+						render: lock(function(vnode) {
 							renderCount++
 
 							o(vnode.attrs.id).equals("abc")
 							o(this).equals(resolver)
 
 							return vnode
-						},
+						}),
 					}
 
 					$window.location.href = prefix + "/abc"
@@ -659,25 +704,84 @@ o.spec("route", function() {
 						"/:id" : resolver
 					})
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("SPAN")
-						done()
 					})
 				})
 
-				o("accepts RouteResolver with onmatch that returns Promise<Component>", function(done) {
+				o("accepts RouteResolver with onmatch that returns route.SKIP", function() {
+					var match1Count = 0
+					var match2Count = 0
+					var render1 = o.spy()
+					var render2Count = 0
+					var Component = {
+						view: lock(function() {
+							return m("span")
+						})
+					}
+
+					var resolver1 = {
+						onmatch: lock(function(args, requestedPath, key) {
+							match1Count++
+
+							o(args.id1).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(key).equals("/:id1")
+							o(this).equals(resolver1)
+							return route.SKIP
+						}),
+						render: lock(render1),
+					}
+
+					var resolver2 = {
+						onmatch: function(args, requestedPath, key) {
+							match2Count++
+
+							o(args.id2).equals("abc")
+							o(requestedPath).equals("/abc")
+							o(key).equals("/:id2")
+							o(this).equals(resolver2)
+							return Component
+						},
+						render: function(vnode) {
+							render2Count++
+
+							o(vnode.attrs.id2).equals("abc")
+							o(this).equals(resolver2)
+							o(render1.callCount).equals(0)
+
+							return vnode
+						},
+					}
+
+					$window.location.href = prefix + "/abc"
+					route(root, "/abc", {
+						"/:id1" : resolver1,
+						"/:id2" : resolver2
+					})
+
+					return waitCycles(4).then(function() {
+						o(match1Count).equals(1)
+						o(match2Count).equals(1)
+						o(render2Count).equals(1)
+						o(render1.callCount).equals(0)
+						o(root.firstChild.nodeName).equals("SPAN")
+					})
+				})
+
+				o("accepts RouteResolver with onmatch that returns Promise<Component>", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("span")
-						}
+						})
 					}
 
 					var resolver = {
-						onmatch: function(args, requestedPath, route) {
+						onmatch: lock(function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
@@ -685,15 +789,15 @@ o.spec("route", function() {
 							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve(Component)
-						},
-						render: function(vnode) {
+						}),
+						render: lock(function(vnode) {
 							renderCount++
 
 							o(vnode.attrs.id).equals("abc")
 							o(this).equals(resolver)
 
 							return vnode
-						},
+						}),
 					}
 
 					$window.location.href = prefix + "/abc"
@@ -701,20 +805,19 @@ o.spec("route", function() {
 						"/:id" : resolver
 					})
 
-					callAsync(function() {
+					return waitCycles(10).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("SPAN")
-						done()
 					})
 				})
 
-				o("accepts RouteResolver with onmatch that returns Promise<undefined>", function(done) {
+				o("accepts RouteResolver with onmatch that returns Promise<undefined>", function() {
 					var matchCount = 0
 					var renderCount = 0
 
 					var resolver = {
-						onmatch: function(args, requestedPath, route) {
+						onmatch: lock(function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
@@ -722,15 +825,15 @@ o.spec("route", function() {
 							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve()
-						},
-						render: function(vnode) {
+						}),
+						render: lock(function(vnode) {
 							renderCount++
 
 							o(vnode.attrs.id).equals("abc")
 							o(this).equals(resolver)
 
 							return vnode
-						},
+						}),
 					}
 
 					$window.location.href = prefix + "/abc"
@@ -738,20 +841,19 @@ o.spec("route", function() {
 						"/:id" : resolver
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-						done()
 					})
 				})
 
-				o("accepts RouteResolver with onmatch that returns Promise<any>", function(done) {
+				o("accepts RouteResolver with onmatch that returns Promise<any>", function() {
 					var matchCount = 0
 					var renderCount = 0
 
 					var resolver = {
-						onmatch: function(args, requestedPath, route) {
+						onmatch: lock(function(args, requestedPath, route) {
 							matchCount++
 
 							o(args.id).equals("abc")
@@ -759,15 +861,15 @@ o.spec("route", function() {
 							o(route).equals("/:id")
 							o(this).equals(resolver)
 							return Promise.resolve([])
-						},
-						render: function(vnode) {
+						}),
+						render: lock(function(vnode) {
 							renderCount++
 
 							o(vnode.attrs.id).equals("abc")
 							o(this).equals(resolver)
 
 							return vnode
-						},
+						}),
 					}
 
 					$window.location.href = prefix + "/abc"
@@ -775,28 +877,27 @@ o.spec("route", function() {
 						"/:id" : resolver
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-						done()
 					})
 				})
 
-				o("accepts RouteResolver with onmatch that returns rejected Promise", function(done) {
+				o("accepts RouteResolver with onmatch that returns rejected Promise", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var spy = o.spy()
 
 					var resolver = {
-						onmatch: function() {
+						onmatch: lock(function() {
 							matchCount++
 							return Promise.reject(new Error("error"))
-						},
-						render: function(vnode) {
+						}),
+						render: lock(function(vnode) {
 							renderCount++
 							return vnode
-						},
+						}),
 					}
 
 					$window.location.href = prefix + "/test/1"
@@ -805,28 +906,25 @@ o.spec("route", function() {
 						"/test/:id" : resolver
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							o(matchCount).equals(1)
-							o(renderCount).equals(0)
-							o(spy.callCount).equals(1)
-							done()
-						})
+					return waitCycles(3).then(function() {
+						o(matchCount).equals(1)
+						o(renderCount).equals(0)
+						o(spy.callCount).equals(1)
 					})
 				})
 
-				o("accepts RouteResolver without `render` method as payload", function(done) {
+				o("accepts RouteResolver without `render` method as payload", function() {
 					var matchCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("div")
-						}
+						})
 					}
 
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
-							onmatch: function(args, requestedPath, route) {
+							onmatch: lock(function(args, requestedPath, route) {
 								matchCount++
 
 								o(args.id).equals("abc")
@@ -834,38 +932,34 @@ o.spec("route", function() {
 								o(route).equals("/:id")
 
 								return Component
-							},
+							}),
 						},
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						o(matchCount).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-						done()
 					})
 				})
 
-				o("changing `key` param resets the component", function(done){
+				o("changing `key` param resets the component", function(){
 					var oninit = o.spy()
 					var Component = {
 						oninit: oninit,
-						view: function() {
+						view: lock(function() {
 							return m("div")
-						}
+						})
 					}
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:key": Component,
 					})
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(oninit.callCount).equals(1)
 						route.set("/def")
-						callAsync(function() {
+						return waitCycles(1).then(function() {
 							throttleMock.fire()
-
 							o(oninit.callCount).equals(2)
-
-							done()
 						})
 					})
 				})
@@ -873,21 +967,21 @@ o.spec("route", function() {
 				o("accepts RouteResolver without `onmatch` method as payload", function() {
 					var renderCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("div")
-						}
+						})
 					}
 
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:id" : {
-							render: function(vnode) {
+							render: lock(function(vnode) {
 								renderCount++
 
 								o(vnode.attrs.id).equals("abc")
 
 								return m(Component)
-							},
+							}),
 						},
 					})
 
@@ -895,18 +989,18 @@ o.spec("route", function() {
 					o(renderCount).equals(1)
 				})
 
-				o("RouteResolver `render` does not have component semantics", function(done) {
+				o("RouteResolver `render` does not have component semantics", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							render: function() {
+							render: lock(function() {
 								return m("div", m("p"))
-							},
+							}),
 						},
 						"/b" : {
-							render: function() {
+							render: lock(function() {
 								return m("div", m("a"))
-							},
+							}),
 						},
 					})
 
@@ -917,40 +1011,38 @@ o.spec("route", function() {
 
 					route.set("/b")
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 
 						o(root.firstChild).equals(dom)
 						o(root.firstChild.firstChild).notEquals(child)
-
-						done()
 					})
 				})
 
-				o("calls onmatch and view correct number of times", function(done) {
+				o("calls onmatch and view correct number of times", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("div")
-						}
+						})
 					}
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								matchCount++
 								return Component
-							},
-							render: function(vnode) {
+							}),
+							render: lock(function(vnode) {
 								renderCount++
 								return vnode
-							},
+							}),
 						},
 					})
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
@@ -959,34 +1051,32 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-
-						done()
 					})
 				})
 
-				o("calls onmatch and view correct number of times when not onmatch returns undefined", function(done) {
+				o("calls onmatch and view correct number of times when not onmatch returns undefined", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var Component = {
-						view: function() {
+						view: lock(function() {
 							return m("div")
-						}
+						})
 					}
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								matchCount++
-							},
-							render: function() {
+							}),
+							render: lock(function() {
 								renderCount++
 								return {tag: Component}
-							},
+							}),
 						},
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
@@ -995,39 +1085,35 @@ o.spec("route", function() {
 
 						o(matchCount).equals(1)
 						o(renderCount).equals(2)
-
-						done()
 					})
 				})
 
-				o("onmatch can redirect to another route", function(done) {
+				o("onmatch can redirect to another route", function() {
 					var redirected = false
 					var render = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								route.set("/b")
-							},
-							render: render
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							view: function() {
+							view: lock(function() {
 								redirected = true
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						o(render.callCount).equals(0)
 						o(redirected).equals(true)
-
-						done()
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function(done) {
+				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function() {
 					var redirected = false
 					var render = o.spy()
 					var view = o.spy(function() {return m("div")})
@@ -1035,99 +1121,55 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								route.set("/b", {}, {state: {a: 5}})
-							},
-							render: render
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								redirected = true
-								return {view: view}
-							}
+								return {view: lock(view)}
+							})
 						}
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							o(render.callCount).equals(0)
-							o(redirected).equals(true)
-							o(view.callCount).equals(1)
-							o(root.childNodes.length).equals(1)
-							o(root.firstChild.nodeName).equals("DIV")
-							o($window.history.state).deepEquals({a: 5})
-
-							done()
-						})
-					})
-				})
-
-				o("onmatch can redirect to another route that has RouteResolver w/ only render", function(done) {
-					var redirected = false
-					var render = o.spy()
-
-					$window.location.href = prefix + "/a"
-					route(root, "/a", {
-						"/a" : {
-							onmatch: function() {
-								route.set("/b")
-							},
-							render: render
-						},
-						"/b" : {
-							render: function(){
-								redirected = true
-							}
-						}
-					})
-
-					callAsync(function() {
+					return waitCycles(3).then(function() {
 						o(render.callCount).equals(0)
 						o(redirected).equals(true)
-
-						done()
+						o(view.callCount).equals(1)
+						o(root.childNodes.length).equals(1)
+						o(root.firstChild.nodeName).equals("DIV")
+						o($window.history.state).deepEquals({a: 5})
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver whose onmatch resolves asynchronously", function(done) {
+				o("onmatch can redirect to another route that has RouteResolver w/ only render", function() {
 					var redirected = false
 					var render = o.spy()
-					var view = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								route.set("/b")
-							},
-							render: render
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							onmatch: function() {
+							render: lock(function(){
 								redirected = true
-								return new Promise(function(fulfill){
-									callAsync(function(){
-										fulfill({view: view})
-									})
-								})
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							callAsync(function() {
-								o(render.callCount).equals(0)
-								o(redirected).equals(true)
-								o(view.callCount).equals(1)
-
-								done()
-							})
-						})
+					return waitCycles(2).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
 					})
 				})
 
-				o("onmatch can redirect to another route asynchronously", function(done) {
+				o("onmatch can redirect to another route that has RouteResolver whose onmatch resolves asynchronously", function() {
 					var redirected = false
 					var render = o.spy()
 					var view = o.spy()
@@ -1135,34 +1177,58 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
-								callAsync(function() {route.set("/b")})
-								return new Promise(function() {})
-							},
-							render: render
+							onmatch: lock(function() {
+								route.set("/b")
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								redirected = true
-								return {view: view}
-							}
+								return waitCycles(1).then(function(){
+									return {view: view}
+								})
+							})
 						}
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							callAsync(function() {
-								o(render.callCount).equals(0)
-								o(redirected).equals(true)
-								o(view.callCount).equals(1)
-
-								done()
-							})
-						})
+					return waitCycles(6).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
+						o(view.callCount).equals(1)
 					})
 				})
 
-				o("onmatch can redirect w/ window.history.back()", function(done) {
+				o("onmatch can redirect to another route asynchronously", function() {
+					var redirected = false
+					var render = o.spy()
+					var view = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/a", {
+						"/a" : {
+							onmatch: lock(function() {
+								waitCycles(1).then(function() {route.set("/b")})
+								return new Promise(function() {})
+							}),
+							render: lock(render)
+						},
+						"/b" : {
+							onmatch: lock(function() {
+								redirected = true
+								return {view: lock(view)}
+							})
+						}
+					})
+
+					return waitCycles(5).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
+						o(view.callCount).equals(1)
+					})
+				})
+
+				o("onmatch can redirect w/ window.history.back()", function() {
 
 					var render = o.spy()
 					var component = {view: o.spy()}
@@ -1170,130 +1236,115 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								return component
-							},
-							render: function(vnode) {
+							}),
+							render: lock(function(vnode) {
 								return vnode
-							}
+							})
 						},
 						"/b" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								$window.history.back()
 								return new Promise(function() {})
-							},
-							render: render
+							}),
+							render: lock(render)
 						}
 					})
 
-					callAsync(function() {
+					return waitCycles(2).then(function() {
 						throttleMock.fire()
 
 						route.set("/b")
-						callAsync(function() {
-							callAsync(function() {
-								callAsync(function() {
-									throttleMock.fire()
+						o(render.callCount).equals(0)
+						o(component.view.callCount).equals(1)
 
-									o(render.callCount).equals(0)
-									o(component.view.callCount).equals(2)
+						return waitCycles(4).then(function() {
+							throttleMock.fire()
 
-									done()
-								})
+							o(render.callCount).equals(0)
+							o(component.view.callCount).equals(2)
+						})
+					})
+				})
+
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ onmatch", function() {
+					var redirected = false
+					var render = o.spy()
+
+					$window.location.href = prefix + "/a"
+					route(root, "/b", {
+						"/a" : {
+							onmatch: lock(function() {
+								route.set("/c")
+							}),
+							render: lock(render)
+						},
+						"/b" : {
+							onmatch: lock(function(){
+								redirected = true
+								return {view: lock(function() {})}
 							})
-						})
+						}
+					})
+
+					return waitCycles(3).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ onmatch", function(done) {
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ render", function() {
 					var redirected = false
 					var render = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/b", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								route.set("/c")
-							},
-							render: render
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							onmatch: function(){
+							render: lock(function(){
 								redirected = true
-								return {view: function() {}}
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							o(render.callCount).equals(0)
-							o(redirected).equals(true)
-
-							done()
-						})
+					return waitCycles(3).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ render", function(done) {
+				o("onmatch can redirect to a non-existent route that defaults to a component", function() {
 					var redirected = false
 					var render = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/b", {
 						"/a" : {
-							onmatch: function() {
+							onmatch: lock(function() {
 								route.set("/c")
-							},
-							render: render
+							}),
+							render: lock(render)
 						},
 						"/b" : {
-							render: function(){
+							view: lock(function(){
 								redirected = true
-							}
+							})
 						}
 					})
 
-					callAsync(function() {
-						callAsync(function() {
-							o(render.callCount).equals(0)
-							o(redirected).equals(true)
-
-							done()
-						})
+					return waitCycles(3).then(function() {
+						o(render.callCount).equals(0)
+						o(redirected).equals(true)
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a component", function(done) {
-					var redirected = false
-					var render = o.spy()
-
-					$window.location.href = prefix + "/a"
-					route(root, "/b", {
-						"/a" : {
-							onmatch: function() {
-								route.set("/c")
-							},
-							render: render
-						},
-						"/b" : {
-							view: function(){
-								redirected = true
-							}
-						}
-					})
-
-					callAsync(function() {
-						callAsync(function() {
-							o(render.callCount).equals(0)
-							o(redirected).equals(true)
-
-							done()
-						})
-					})
-				})
-
-				o("the previous view redraws while onmatch resolution is pending (#1268)", function(done) {
+				o("the previous view redraws while onmatch resolution is pending (#1268)", function() {
 					var view = o.spy()
 					var onmatch = o.spy(function() {
 						return new Promise(function() {})
@@ -1301,9 +1352,9 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/", {
-						"/a": {view: view},
-						"/b": {onmatch: onmatch},
-						"/": {view: function() {}}
+						"/a": {view: lock(view)},
+						"/b": {onmatch: lock(onmatch)},
+						"/": {view: lock(function() {})}
 					})
 
 					o(view.callCount).equals(1)
@@ -1311,7 +1362,7 @@ o.spec("route", function() {
 
 					route.set("/b")
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(view.callCount).equals(1)
 						o(onmatch.callCount).equals(1)
 
@@ -1320,8 +1371,6 @@ o.spec("route", function() {
 
 						o(view.callCount).equals(2)
 						o(onmatch.callCount).equals(1)
-
-						done()
 					})
 				})
 
@@ -1329,49 +1378,44 @@ o.spec("route", function() {
 					var renderA = o.spy()
 					var renderB = o.spy()
 					var onmatchA = o.spy(function(){
-						return new Promise(function(fulfill) {
-							setTimeout(function(){
-								fulfill()
-							}, 10)
-						})
+						return waitCycles(3)
 					})
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
-							onmatch: onmatchA,
-							render: renderA
+							onmatch: lock(onmatchA),
+							render: lock(renderA)
 						},
 						"/b": {
-							onmatch: function(){
+							onmatch: lock(function(){
 								var p = new Promise(function(fulfill) {
 									o(onmatchA.callCount).equals(1)
 									o(renderA.callCount).equals(0)
 									o(renderB.callCount).equals(0)
 
-									setTimeout(function(){
+									waitCycles(3).then(function(){
 										o(onmatchA.callCount).equals(1)
 										o(renderA.callCount).equals(0)
 										o(renderB.callCount).equals(0)
 
 										fulfill()
-
-										p.then(function(){
-											o(onmatchA.callCount).equals(1)
-											o(renderA.callCount).equals(0)
-											o(renderB.callCount).equals(1)
-
-											done()
-										})
-									}, 20)
+										return p
+									}).then(function(){
+										return waitCycles(1)
+									}).then(function(){
+										o(onmatchA.callCount).equals(1)
+										o(renderA.callCount).equals(0)
+										o(renderB.callCount).equals(1)
+									}).then(done, done)
 								})
 								return p
-							},
-							render: renderB
+							}),
+							render: lock(renderB)
 						}
 					})
 
-					callAsync(function() {
+					waitCycles(1).then(lock(function() {
 						o(onmatchA.callCount).equals(1)
 						o(renderA.callCount).equals(0)
 						o(renderB.callCount).equals(0)
@@ -1379,22 +1423,22 @@ o.spec("route", function() {
 						o(onmatchA.callCount).equals(1)
 						o(renderA.callCount).equals(0)
 						o(renderB.callCount).equals(0)
-					})
+					}))
 				})
 
-				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(done){
+				o("m.route.set(m.route.get()) re-runs the resolution logic (#1180)", function(){
 					var onmatch = o.spy()
 					var render = o.spy(function() {return m("div")})
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
 						"/": {
-							onmatch: onmatch,
-							render: render
+							onmatch: lock(onmatch),
+							render: lock(render)
 						}
 					})
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 
 						o(onmatch.callCount).equals(1)
@@ -1402,28 +1446,24 @@ o.spec("route", function() {
 
 						route.set(route.get())
 
-						callAsync(function() {
-							callAsync(function() {
-								throttleMock.fire()
+						return waitCycles(2).then(function() {
+							throttleMock.fire()
 
-								o(onmatch.callCount).equals(2)
-								o(render.callCount).equals(2)
-
-								done()
-							})
+							o(onmatch.callCount).equals(2)
+							o(render.callCount).equals(2)
 						})
 					})
 				})
 
-				o("m.route.get() returns the last fully resolved route (#1276)", function(done){
+				o("m.route.get() returns the last fully resolved route (#1276)", function(){
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/": {view: function() {}},
+						"/": {view: lock(function() {})},
 						"/2": {
-							onmatch: function() {
+							onmatch: lock(function() {
 								return new Promise(function() {})
-							}
+							})
 						}
 					})
 
@@ -1432,142 +1472,130 @@ o.spec("route", function() {
 
 					route.set("/2")
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(route.get()).equals("/")
-						done()
 					})
 				})
 
-				o("routing with RouteResolver works more than once", function(done) {
+				o("routing with RouteResolver works more than once", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
-							render: function() {
+							render: lock(function() {
 								return m("a", "a")
-							}
+							})
 						},
 						"/b": {
-							render: function() {
+							render: lock(function() {
 								return m("b", "b")
-							}
+							})
 						}
 					})
 
 					route.set("/b")
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 
 						o(root.firstChild.nodeName).equals("B")
 
 						route.set("/a")
 
-						callAsync(function() {
+						return waitCycles(1).then(function() {
 							throttleMock.fire()
 
 							o(root.firstChild.nodeName).equals("A")
-
-							done()
 						})
 					})
 				})
 
-				o("calling route.set invalidates pending onmatch resolution", function(done) {
+				o("calling route.set invalidates pending onmatch resolution", function() {
 					var rendered = false
 					var resolved
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
-							onmatch: function() {
-								return new Promise(function(resolve) {
-									callAsync(function() {
-										callAsync(function() {
-											resolve({view: function() {rendered = true}})
-										})
-									})
+							onmatch: lock(function() {
+								return waitCycles(2).then(function() {
+									return {view: lock(function() {rendered = true})}
 								})
-							},
-							render: function() {
+							}),
+							render: lock(function() {
 								rendered = true
 								resolved = "a"
-							}
+							})
 						},
 						"/b": {
-							view: function() {
+							view: lock(function() {
 								resolved = "b"
-							}
+							})
 						}
 					})
 
 					route.set("/b")
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(rendered).equals(false)
 						o(resolved).equals("b")
 
-						callAsync(function() {
+						return waitCycles(1).then(function() {
 							o(rendered).equals(false)
 							o(resolved).equals("b")
-							done()
 						})
 					})
 				})
 
-				o("route changes activate onbeforeremove", function(done) {
+				o("route changes activate onbeforeremove", function() {
 					var spy = o.spy()
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
 						"/a": {
-							onbeforeremove: spy,
-							view: function() {}
+							onbeforeremove: lock(spy),
+							view: lock(function() {})
 						},
 						"/b": {
-							view: function() {}
+							view: lock(function() {})
 						}
 					})
 
 					route.set("/b")
 
 					// setting the route is asynchronous
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 						o(spy.callCount).equals(1)
-
-						done()
 					})
 				})
 
-				o("asynchronous route.set in onmatch works", function(done) {
+				o("asynchronous route.set in onmatch works", function() {
 					var rendered = false, resolved
 					route(root, "/a", {
 						"/a": {
-							onmatch: function() {
-								return Promise.resolve().then(function() {
+							onmatch: lock(function() {
+								return Promise.resolve().then(lock(function() {
 									route.set("/b")
-								})
-							},
-							render: function() {
+								}))
+							}),
+							render: lock(function() {
 								rendered = true
 								resolved = "a"
-							}
+							})
 						},
 						"/b": {
-							view: function() {
+							view: lock(function() {
 								resolved = "b"
-							}
+							})
 						},
 					})
 
-					callAsync(function() { // tick for popstate for /a
-						callAsync(function() { // tick for promise in onmatch
-							callAsync(function() { // tick for onpopstate for /b
-								o(rendered).equals(false)
-								o(resolved).equals("b")
-
-								done()
-							})
-						})
+					// tick for popstate for /a
+					// tick for onmatch
+					// tick for promise in onmatch
+					// tick for onpopstate for /b
+					return waitCycles(4).then(function() {
+						o(rendered).equals(false)
+						o(resolved).equals("b")
 					})
 				})
 
@@ -1575,7 +1603,7 @@ o.spec("route", function() {
 					var i = 0
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/": {view: function() {i++}}
+						"/": {view: lock(function() {i++})}
 					})
 					var before = i
 
@@ -1592,27 +1620,25 @@ o.spec("route", function() {
 					o(i).equals(2)
 				})
 
-				o("m.route.param is available outside of route handlers", function(done) {
+				o("m.route.param is available outside of route handlers", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/1", {
 						"/:id" : {
-							view : function() {
+							view : lock(function() {
 								o(route.param("id")).equals("1")
 
 								return m("div")
-							}
+							})
 						}
 					})
 
 					o(route.param("id")).equals(undefined);
 					o(route.param()).deepEquals(undefined);
 
-					callAsync(function() {
+					return waitCycles(1).then(function() {
 						o(route.param("id")).equals("1")
 						o(route.param()).deepEquals({id:"1"})
-
-						done()
 					})
 				})
 			})

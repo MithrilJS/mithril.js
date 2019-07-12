@@ -29,6 +29,9 @@ module.exports = function($window, mountRedraw) {
 	}
 
 	var currentResolver = sentinel, component, attrs, currentPath, lastUpdate
+
+	var SKIP = route.SKIP = {}
+
 	function route(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		// 0 = start
@@ -48,6 +51,7 @@ module.exports = function($window, mountRedraw) {
 			}
 		})
 		var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+		var p = Promise.resolve()
 		var scheduled = false
 		var onremove
 
@@ -83,52 +87,70 @@ module.exports = function($window, mountRedraw) {
 
 			assign(data.params, $window.history.state)
 
-			for (var i = 0; i < compiled.length; i++) {
-				if (compiled[i].check(data)) {
-					var payload = compiled[i].component
-					var matchedRoute = compiled[i].route
-					var update = lastUpdate = function(routeResolver, comp) {
-						if (update !== lastUpdate) return
-						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
-						attrs = data.params, currentPath = path, lastUpdate = null
-						currentResolver = routeResolver.render ? routeResolver : null
-						if (state === 2) mountRedraw.redraw()
-						else {
-							state = 2
-							mountRedraw.redraw.sync()
-						}
-					}
-					if (payload.view || typeof payload === "function") update({}, payload)
-					else {
-						if (payload.onmatch) {
-							Promise.resolve(payload.onmatch(data.params, path, matchedRoute)).then(function(resolved) {
-								update(payload, resolved)
-							}, function () {
-								if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
-								setPath(defaultRoute, null, {replace: true})
-							})
-						}
-						else update(payload, "div")
-					}
-					return
-				}
+			function fail() {
+				if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
+				setPath(defaultRoute, null, {replace: true})
 			}
 
-			if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
-			setPath(defaultRoute, null, {replace: true})
+			loop(0)
+			function loop(i) {
+				// 0 = init
+				// 1 = scheduled
+				// 2 = done
+				for (; i < compiled.length; i++) {
+					if (compiled[i].check(data)) {
+						var payload = compiled[i].component
+						var matchedRoute = compiled[i].route
+						var localComp = payload
+						var update = lastUpdate = function(comp) {
+							if (update !== lastUpdate) return
+							if (comp === SKIP) return loop(i + 1)
+							component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+							attrs = data.params, currentPath = path, lastUpdate = null
+							currentResolver = payload.render ? payload : null
+							if (state === 2) mountRedraw.redraw()
+							else {
+								state = 2
+								mountRedraw.redraw.sync()
+							}
+						}
+						// There's no understating how much I *wish* I could
+						// use `async`/`await` here...
+						if (payload.view || typeof payload === "function") {
+							payload = {}
+							update(localComp)
+						}
+						else if (payload.onmatch) {
+							p.then(function () {
+								return payload.onmatch(data.params, path, matchedRoute)
+							}).then(update, fail)
+						}
+						else update("div")
+						return
+					}
+				}
+				fail()
+			}
+		}
+
+		// Set it unconditionally so `m.route.set` and `m.route.Link` both work,
+		// even if neither `pushState` nor `hashchange` are supported. It's
+		// cleared if `hashchange` is used, since that makes it automatically
+		// async.
+		fireAsync = function() {
+			if (!scheduled) {
+				scheduled = true
+				callAsync(resolveRoute)
+			}
 		}
 
 		if (typeof $window.history.pushState === "function") {
 			onremove = function() {
 				$window.removeEventListener("popstate", fireAsync, false)
 			}
-			$window.addEventListener("popstate", fireAsync = function() {
-				if (!scheduled) {
-					scheduled = true
-					callAsync(resolveRoute)
-				}
-			}, false)
+			$window.addEventListener("popstate", fireAsync, false)
 		} else if (route.prefix[0] === "#") {
+			fireAsync = null
 			onremove = function() {
 				$window.removeEventListener("hashchange", resolveRoute, false)
 			}
