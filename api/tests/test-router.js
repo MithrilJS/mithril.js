@@ -550,6 +550,64 @@ o.spec("route", function() {
 					o(root.firstChild.firstChild.nodeValue).equals("text")
 				})
 
+				o("route.Link keeps magic attributes from being double-called", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					var oninit = o.spy()
+					var oncreate = o.spy()
+					var onbeforeupdate = o.spy()
+					var onupdate = o.spy()
+					var onbeforeremove = o.spy()
+					var onremove = o.spy()
+
+					render(root, m(route.Link, {
+						href: "/test",
+						oninit: oninit,
+						oncreate: oncreate,
+						onbeforeupdate: onbeforeupdate,
+						onupdate: onupdate,
+						onbeforeremove: onbeforeremove,
+						onremove: onremove,
+					}, "text"))
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(0)
+					o(onupdate.callCount).equals(0)
+					o(onbeforeremove.callCount).equals(0)
+					o(onremove.callCount).equals(0)
+
+					render(root, m(route.Link, {
+						href: "/test",
+						oninit: oninit,
+						oncreate: oncreate,
+						onbeforeupdate: onbeforeupdate,
+						onupdate: onupdate,
+						onbeforeremove: onbeforeremove,
+						onremove: onremove,
+					}, "text"))
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(1)
+					o(onupdate.callCount).equals(1)
+					o(onbeforeremove.callCount).equals(0)
+					o(onremove.callCount).equals(0)
+
+					render(root, [])
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(1)
+					o(onupdate.callCount).equals(1)
+					o(onbeforeremove.callCount).equals(1)
+					o(onremove.callCount).equals(1)
+				})
+
 				o("route.Link can render other tag without routes or dom access", function() {
 					$window = browserMock(env)
 					var render = coreRenderer($window)
