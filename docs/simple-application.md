@@ -447,13 +447,16 @@ module.exports = {
 	oninit: User.loadList,
 	view: function() {
 		return m(".user-list", User.list.map(function(user) {
-			return m("a.user-list-item", {href: "/edit/" + user.id, oncreate: m.route.link}, user.firstName + " " + user.lastName)
+			return m(m.route.Link, {
+				class: "user-list-item",
+				href: "/edit/" + user.id,
+			}, user.firstName + " " + user.lastName)
 		}))
 	}
 }
 ```
 
-Here we changed `.user-list-item` to `a.user-list-item`. We added an `href` that references the route we want, and finally we added `oncreate: m.route.link`. This makes the link behave like a routed link (as opposed to merely behaving like a regular link). What this means is that clicking the link would change the part of URL that comes after the hashbang `#!` (thus changing the route without unloading the current HTML page)
+Here we swapped out the `.user-list-item` vnode with an `m.route.Link` with that class and the same children. We added an `href` that references the route we want. What this means is that clicking the link would change the part of URL that comes after the hashbang `#!` (thus changing the route without unloading the current HTML page). Behind the scenes, it uses an `<a>` to implement the link, and it all just works.
 
 If you refresh the page in the browser, you should now be able to click on a person and be taken to a form. You should also be able to press the back button in the browser to go back from the form to the list of people.
 
@@ -555,7 +558,7 @@ module.exports = {
 	view: function(vnode) {
 		return m("main.layout", [
 			m("nav.menu", [
-				m("a[href='/list']", {oncreate: m.route.link}, "Users")
+				m(m.route.Link, {href: "/list"}, "Users")
 			]),
 			m("section", vnode.children)
 		])
@@ -563,7 +566,7 @@ module.exports = {
 }
 ```
 
-This component is fairly straightforward, it has a `<nav>` with a link to the list of users. Similar to what we did to the `/edit` links, this link uses `m.route.link` to activate routing behavior in the link.
+This component is fairly straightforward, it has a `<nav>` with a link to the list of users. Similar to what we did to the `/edit` links, this link uses `m.route.Link` to create a routable link.
 
 Notice there's also a `<section>` element with `vnode.children` as children. `vnode` is a reference to the vnode that represents an instance of the Layout component (i.e. the vnode returned by a `m(Layout)` call). Therefore, `vnode.children` refer to any children of that vnode.
 

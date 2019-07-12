@@ -83,7 +83,7 @@ var Header = {
 				m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
 			]),
 			m("h2", [
-				m("a[href='/']", {oncreate: m.route.link}, "ThreaditJS: Mithril"),
+				m(m.route.Link, {href: "/"}, "ThreaditJS: Mithril"),
 			]),
 		]
 	}
@@ -102,7 +102,7 @@ var Home = {
 					threads.map(function(thread) {
 						return [
 							m("p", [
-								m("a", {href: "/thread/" + thread.id, oncreate: m.route.link}, m.trust(T.trimTitle(thread.text))),
+								m(m.route.Link, {href: "/thread/" + thread.id}, m.trust(T.trimTitle(thread.text))),
 							]),
 							m("p.comment_count", thread.comment_count + " comment(s)"),
 							m("hr"),

@@ -19,6 +19,21 @@ module.exports = function(options) {
 	var spy = options.spy || function(f){return f}
 	var spymap = []
 
+	// This way I'm not also implementing a partial `URL` polyfill. Based on the
+	// regexp at http://urlregex.com/, but adapted to allow relative URLs and
+	// care only about HTTP(S) URLs.
+	var urlHash = "#[?!/+=&;%@.\\w_-]*"
+	var urlQuery = "\\?[!/+=&;%@.\\w_-]*"
+	var urlPath = "/[+~%/.\\w_-]*"
+	var urlRelative = urlPath + "(?:" + urlQuery + ")?(?:" + urlHash + ")?"
+	var urlDomain = "https?://[A-Za-z0-9][A-Za-z0-9.-]+[A-Za-z0-9]"
+	var validURLRegex = new RegExp(
+		"^" + urlDomain + "(" + urlRelative + ")?$|" +
+		"^" + urlRelative + "$|" +
+		"^" + urlQuery + "(?:" + urlHash + ")?$|" +
+		"^" + urlHash + "$"
+	)
+
 	var hasOwn = ({}.hasOwnProperty)
 
 	function registerSpies(element, spies) {
@@ -440,7 +455,13 @@ module.exports = function(options) {
 							if (this.namespaceURI === "http://www.w3.org/2000/svg") {
 								var val = this.hasAttribute("href") ? this.attributes.href.value : ""
 								return {baseVal: val, animVal: val}
-							} else return this.attributes["href"] === undefined ? "" : "[FIXME implement]"
+							} else if (this.namespaceURI === "http://www.w3.org/1999/xhtml") {
+								if (!this.hasAttribute("href")) return ""
+								// HACK: if it's valid already, there's nothing to implement.
+								var value = this.attributes.href.value
+								if (validURLRegex.test(value)) return value
+							}
+							return "[FIXME implement]"
 						},
 						set: function(value) {
 							// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL

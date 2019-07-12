@@ -3,7 +3,7 @@
 var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
-	var $doc = $window.document
+	var $doc = $window && $window.document
 	var currentRedraw
 
 	var nameSpace = {

@@ -44,7 +44,7 @@ You can also use an HTML-like syntax called [JSX](jsx.md), using Babel to conver
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
-`selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](components.md)
+`selector`   | `String|Object|Function`                   | Yes      | A CSS selector or a [component](components.md)
 `attrs`      | `Object`                                   | No       | HTML attributes or element properties
 `children`   | `Array<Vnode>|String|Number|Boolean`       | No       | Child [vnodes](vnodes.md#structure). Can be written as [splat arguments](signatures.md#splats)
 **returns**  | `Vnode`                                    |          | A [vnode](vnodes.md#structure)

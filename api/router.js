@@ -1,6 +1,7 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
+var m = require("../render/hyperscript")
 var Promise = require("../promise/promise")
 
 var buildPathname = require("../pathname/build")
@@ -11,9 +12,6 @@ var assign = require("../pathname/assign")
 var sentinel = {}
 
 module.exports = function($window, mountRedraw) {
-	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
-	var supportsPushState = typeof $window.history.pushState === "function"
-	var routePrefix = "#!"
 	var fireAsync
 
 	function setPath(path, data, options) {
@@ -22,16 +20,19 @@ module.exports = function($window, mountRedraw) {
 			fireAsync()
 			var state = options ? options.state : null
 			var title = options ? options.title : null
-			if (options && options.replace) $window.history.replaceState(state, title, routePrefix + path)
-			else $window.history.pushState(state, title, routePrefix + path)
+			if (options && options.replace) $window.history.replaceState(state, title, route.prefix + path)
+			else $window.history.pushState(state, title, route.prefix + path)
 		}
 		else {
-			$window.location.href = routePrefix + path
+			$window.location.href = route.prefix + path
 		}
 	}
 
 	var currentResolver = sentinel, component, attrs, currentPath, lastUpdate
-	var route = function(root, defaultRoute, routes) {
+
+	var SKIP = route.SKIP = {}
+
+	function route(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		// 0 = start
 		// 1 = init
@@ -49,7 +50,10 @@ module.exports = function($window, mountRedraw) {
 				check: compileTemplate(route),
 			}
 		})
-		var onremove, asyncId
+		var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+		var p = Promise.resolve()
+		var scheduled = false
+		var onremove
 
 		fireAsync = null
 
@@ -62,12 +66,13 @@ module.exports = function($window, mountRedraw) {
 		}
 
 		function resolveRoute() {
+			scheduled = false
 			// Consider the pathname holistically. The prefix might even be invalid,
 			// but that's not our problem.
 			var prefix = $window.location.hash
-			if (routePrefix[0] !== "#") {
+			if (route.prefix[0] !== "#") {
 				prefix = $window.location.search + prefix
-				if (routePrefix[0] !== "?") {
+				if (route.prefix[0] !== "?") {
 					prefix = $window.location.pathname + prefix
 					if (prefix[0] !== "/") prefix = "/" + prefix
 				}
@@ -77,58 +82,75 @@ module.exports = function($window, mountRedraw) {
 			// optimized cons string.
 			var path = prefix.concat()
 				.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
-				.slice(routePrefix.length)
+				.slice(route.prefix.length)
 			var data = parsePathname(path)
 
 			assign(data.params, $window.history.state)
 
-			for (var i = 0; i < compiled.length; i++) {
-				if (compiled[i].check(data)) {
-					var payload = compiled[i].component
-					var route = compiled[i].route
-					var update = lastUpdate = function(routeResolver, comp) {
-						if (update !== lastUpdate) return
-						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
-						attrs = data.params, currentPath = path, lastUpdate = null
-						currentResolver = routeResolver.render ? routeResolver : null
-						if (state === 2) mountRedraw.redraw()
-						else {
-							state = 2
-							mountRedraw.redraw.sync()
-						}
-					}
-					if (payload.view || typeof payload === "function") update({}, payload)
-					else {
-						if (payload.onmatch) {
-							Promise.resolve(payload.onmatch(data.params, path, route)).then(function(resolved) {
-								update(payload, resolved)
-							}, function () {
-								if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
-								setPath(defaultRoute, null, {replace: true})
-							})
-						}
-						else update(payload, "div")
-					}
-					return
-				}
+			function fail() {
+				if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
+				setPath(defaultRoute, null, {replace: true})
 			}
 
-			if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
-			setPath(defaultRoute, null, {replace: true})
+			loop(0)
+			function loop(i) {
+				// 0 = init
+				// 1 = scheduled
+				// 2 = done
+				for (; i < compiled.length; i++) {
+					if (compiled[i].check(data)) {
+						var payload = compiled[i].component
+						var matchedRoute = compiled[i].route
+						var localComp = payload
+						var update = lastUpdate = function(comp) {
+							if (update !== lastUpdate) return
+							if (comp === SKIP) return loop(i + 1)
+							component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+							attrs = data.params, currentPath = path, lastUpdate = null
+							currentResolver = payload.render ? payload : null
+							if (state === 2) mountRedraw.redraw()
+							else {
+								state = 2
+								mountRedraw.redraw.sync()
+							}
+						}
+						// There's no understating how much I *wish* I could
+						// use `async`/`await` here...
+						if (payload.view || typeof payload === "function") {
+							payload = {}
+							update(localComp)
+						}
+						else if (payload.onmatch) {
+							p.then(function () {
+								return payload.onmatch(data.params, path, matchedRoute)
+							}).then(update, fail)
+						}
+						else update("div")
+						return
+					}
+				}
+				fail()
+			}
 		}
 
-		if (supportsPushState) {
+		// Set it unconditionally so `m.route.set` and `m.route.Link` both work,
+		// even if neither `pushState` nor `hashchange` are supported. It's
+		// cleared if `hashchange` is used, since that makes it automatically
+		// async.
+		fireAsync = function() {
+			if (!scheduled) {
+				scheduled = true
+				callAsync(resolveRoute)
+			}
+		}
+
+		if (typeof $window.history.pushState === "function") {
 			onremove = function() {
 				$window.removeEventListener("popstate", fireAsync, false)
 			}
-			$window.addEventListener("popstate", fireAsync = function() {
-				if (asyncId) return
-				asyncId = callAsync(function() {
-					asyncId = null
-					resolveRoute()
-				})
-			}, false)
-		} else if (routePrefix[0] === "#") {
+			$window.addEventListener("popstate", fireAsync, false)
+		} else if (route.prefix[0] === "#") {
+			fireAsync = null
 			onremove = function() {
 				$window.removeEventListener("hashchange", resolveRoute, false)
 			}
@@ -160,25 +182,77 @@ module.exports = function($window, mountRedraw) {
 		setPath(path, data, options)
 	}
 	route.get = function() {return currentPath}
-	route.prefix = function(prefix) {routePrefix = prefix}
-	var link = function(options, vnode) {
-		vnode.dom.setAttribute("href", routePrefix + vnode.attrs.href)
-		vnode.dom.onclick = function(e) {
-			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
-			e.preventDefault()
-			e.redraw = false
-			var href = this.getAttribute("href")
-			if (href.indexOf(routePrefix) === 0) href = href.slice(routePrefix.length)
-			route.set(href, undefined, options)
-		}
-	}
-	route.link = function(args) {
-		if (args.tag == null) return link.bind(link, args)
-		return link({}, args)
+	route.prefix = "#!"
+	route.Link = {
+		view: function(vnode) {
+			var options = vnode.attrs.options
+			// Remove these so they don't get overwritten
+			var attrs = {}, onclick, href
+			assign(attrs, vnode.attrs)
+			attrs.component = null
+			attrs.options = null
+			attrs.key = null
+
+			// Do this now so we can get the most current `href` and `disabled`.
+			// Those attributes may also be specified in the selector, and we
+			// should honor that.
+			var child = m(vnode.attrs.component || "a", attrs, vnode.children)
+
+			// Let's provide a *right* way to disable a route link, rather than
+			// letting people screw up accessibility on accident.
+			//
+			// The attribute is coerced so users don't get surprised over
+			// `disabled: 0` resulting in a button that's somehow routable
+			// despite being visibly disabled.
+			if (child.attrs.disabled = Boolean(child.attrs.disabled)) {
+				child.attrs.href = null
+				child.attrs["aria-disabled"] = "true"
+				// If you *really* do want to do this on a disabled link, use
+				// an `oncreate` hook to add it.
+				child.attrs.onclick = null
+			} else {
+				onclick = child.attrs.onclick
+				href = child.attrs.href
+				child.attrs.href = route.prefix + href
+				child.attrs.onclick = function(e) {
+					var result
+					if (typeof onclick === "function") {
+						result = onclick.call(e.currentTarget, e)
+					} else if (onclick == null || typeof onclick !== "object") {
+						// do nothing
+					} else if (typeof onclick.handleEvent === "function") {
+						onclick.handleEvent(e)
+					}
+
+					// Adapted from React Router's implementation:
+					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
+					//
+					// Try to be flexible and intuitive in how we handle links.
+					// Fun fact: links aren't as obvious to get right as you
+					// would expect. There's a lot more valid ways to click a
+					// link than this, and one might want to not simply click a
+					// link, but right click or command-click it to copy the
+					// link target, etc. Nope, this isn't just for blind people.
+					if (
+						// Skip if `onclick` prevented default
+						result === false || !e.defaultPrevented &&
+						// Ignore everything but left clicks
+						(e.button === 0 || e.which === 0 || e.which === 1) &&
+						// Let the browser handle `target=_blank`, etc.
+						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
+						// No modifier keys
+						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
+					) return
+					e.preventDefault()
+					e.redraw = false
+					route.set(href, null, options)
+				}
+			}
+			return child
+		},
 	}
 	route.param = function(key) {
-		if(typeof attrs !== "undefined" && typeof key !== "undefined") return attrs[key]
-		return attrs
+		return attrs && key != null ? attrs[key] : attrs
 	}
 
 	return route
