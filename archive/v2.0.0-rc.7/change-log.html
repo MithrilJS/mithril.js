@@ -125,13 +125,41 @@
 <li>This increases consistency with how booleans are handled with children, so it should be more intuitive.</li>
 </ul>
 </li>
+<li>route: <code>key</code> parameter for routes now only works globally for components (<a href="https://github.com/MithrilJS/mithril.js/pull/2458">#2458</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)<ul>
+<li>Previously, it worked for route resolvers, too.</li>
+<li>This lets you ensure global layouts used in <code>render</code> still render by diff.</li>
+</ul>
+</li>
+<li>redraw: <code>mithril/redraw</code> now just exposes the <code>m.redraw</code> callback (<a href="https://github.com/MithrilJS/mithril.js/pull/2458">#2458</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)<ul>
+<li>The <code>.schedule</code>, <code>.unschedule</code>, and <code>.render</code> properties of the former <code>redrawService</code> are all removed.</li>
+<li>If you want to know how to work around it, look at the call to <code>mount</code> in Mithril&#39;s source for <code>m.route</code>. That should help you in finding ways around the removed feature. (It doesn&#39;t take that much more code.)</li>
+</ul>
+</li>
+<li>api: <code>m.version</code> has been removed. If you really need the version for whatever reason, just read the <code>version</code> field of <code>mithril/package.json</code> directly. (<a href="https://github.com/MithrilJS/mithril.js/pull/2466">#2466</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)</li>
+<li>route: <code>m.route.prefix(...)</code> is now <code>m.route.prefix = ...</code>. (<a href="https://github.com/MithrilJS/mithril.js/pull/2469">#2469</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)<ul>
+<li>This is a fully fledged property, so you can not only write to it, but you can also read from it.</li>
+<li>This aligns better with user intuition.</li>
+</ul>
+</li>
+<li>route: <code>m.route.link</code> function removed in favor of <code>m.route.Link</code> component. (<a href="https://github.com/MithrilJS/mithril.js/pull/2469">#2469</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)<ul>
+<li>An optional <code>options</code> object is accepted as an attribute. This was initially targeting the old <code>m.route.link</code> function and was transferred to this. (<a href="https://github.com/MithrilJS/mithril.js/pull/1930">#1930</a>)</li>
+<li>The new component handles many more edge cases around user interaction, including accessibility.</li>
+<li>Link navigation can be disabled and cancelled.</li>
+<li>Link targets can be trivially changed.</li>
+</ul>
+</li>
+<li>API: Full DOM no longer required to execute <code>require(&quot;mithril&quot;)</code>. You just need to set the necessary globals to <em>something</em>, even if <code>null</code> or <code>undefined</code>, so they can be properly used. (<a href="https://github.com/MithrilJS/mithril.js/pull/2469">#2469</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)<ul>
+<li>This enables isomorphic use of <code>m.route.Link</code> and <code>m.route.prefix</code>.</li>
+<li>This enables isomorphic use of <code>m.request</code>, provided the <code>background: true</code> option is set and that an <code>XMLHttpRequest</code> polyfill is included as necessary.</li>
+<li>Note that methods requiring DOM operations will still throw errors, such as <code>m.render(...)</code>, <code>m.redraw()</code>, and <code>m.route(...)</code>.</li>
+</ul>
+</li>
 </ul>
 <h4 id="news"><a href="#news">News</a></h4>
 <ul>
 <li>Mithril now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. (<a href="https://github.com/MithrilJS/mithril.js/pull/2296">#2296</a>)</li>
 <li>API: Introduction of <code>m.redraw.sync()</code> (<a href="https://github.com/MithrilJS/mithril.js/pull/1592">#1592</a>)</li>
 <li>API: Event handlers may also be objects with <code>handleEvent</code> methods (<a href="https://github.com/MithrilJS/mithril.js/pull/1949">#1949</a>, <a href="https://github.com/MithrilJS/mithril.js/pull/2222">#2222</a>).</li>
-<li>API: <code>m.route.link</code> accepts an optional <code>options</code> object (<a href="https://github.com/MithrilJS/mithril.js/pull/1930">#1930</a>)</li>
 <li>API: <code>m.request</code> better error message on JSON parse error - (<a href="https://github.com/MithrilJS/mithril.js/pull/2195">#2195</a>, <a href="https://github.com/codeclown">@codeclown</a>)</li>
 <li>API: <code>m.request</code> supports <code>timeout</code> as attr - (<a href="https://github.com/MithrilJS/mithril.js/pull/1966">#1966</a>)</li>
 <li>API: <code>m.request</code> supports <code>responseType</code> as attr - (<a href="https://github.com/MithrilJS/mithril.js/pull/2193">#2193</a>)</li>
@@ -154,10 +182,8 @@
 </li>
 <li>API: <code>m.buildPathname</code> and <code>m.parsePathname</code> added. (<a href="https://github.com/MithrilJS/mithril.js/pull/2361">#2361</a>)</li>
 <li>route: Use <code>m.mount(root, null)</code> to unsubscribe and clean up after a <code>m.route(root, ...)</code> call. (<a href="https://github.com/MithrilJS/mithril.js/pull/2453">#2453</a>)</li>
-<li>version: <code>m.version</code> returns the previous version string for what&#39;s in <code>next</code>. (<a href="https://github.com/MithrilJS/mithril.js/pull/2453">#2453</a>)<ul>
-<li>If you&#39;re using <code>next</code>, you should hopefully know what you&#39;re doing. If you need stability, don&#39;t use <code>next</code>. (This is also why I&#39;m not labelling it as a breaking change.)</li>
-</ul>
-</li>
+<li>render: new <code>redraw</code> parameter exposed any time a child event handler is used (<a href="https://github.com/MithrilJS/mithril.js/pull/2458">#2458</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)</li>
+<li>route: <code>m.route.SKIP</code> can be returned from route resolvers to skip to the next route (<a href="https://github.com/MithrilJS/mithril.js/pull/2469">#2469</a> <a href="https://github.com/isiahmeadows">@isiahmeadows</a>)</li>
 </ul>
 <h4 id="bug-fixes"><a href="#bug-fixes">Bug fixes</a></h4>
 <ul>

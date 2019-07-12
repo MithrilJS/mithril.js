@@ -115,7 +115,7 @@ m.render(document.body, userList(people))</code></pre>
         return m(&quot;button&quot;, {key: u.id}, u.name)
     })
 }</code></pre>
-<p>Also, you might want to reinitialize a component. You can use the common pattern of a single-item keyed fragment where you change the key to destroy and reinitialize the element.</p>
+<p>Also, you might want to reinitialize a component. You can use the common pattern of a single-child keyed fragment where you change the key to destroy and reinitialize the element.</p>
 <pre><code class="language-javascript">function ResettableToggle() {
     var toggleKey = false
 
@@ -149,8 +149,8 @@ users.map(function(u) {
 var User = {
     view: function(vnode) {
         return m(&quot;div&quot;, { key: vnode.attrs.user.id }, [
-      m(Button, vnode.attrs.user.name)
-    ])
+            m(Button, vnode.attrs.user.name)
+        ])
     }
 }
 
@@ -185,29 +185,38 @@ var things = [
     {id: 1, name: &quot;Cup&quot;},
 ]</code></pre>
 <h4 id="avoid-mixing-keyed-and-non-keyed-vnodes-in-the-same-array"><a href="#avoid-mixing-keyed-and-non-keyed-vnodes-in-the-same-array">Avoid mixing keyed and non-keyed vnodes in the same array</a></h4>
-<p>An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.</p>
+<p>An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. In fact, this will cause an error to be thrown to remind you to not do it. So don&#39;t do it!</p>
 <pre><code class="language-javascript">// AVOID
 m(&quot;div&quot;, [
     m(&quot;div&quot;, &quot;a&quot;),
     m(&quot;div&quot;, {key: 1}, &quot;b&quot;),
-])
-
-// PREFER
+])</code></pre>
+<p>If using keys, use a unique key for every element.</p>
+<pre><code class="language-javascript">// PREFER
 m(&quot;div&quot;, [
     m(&quot;div&quot;, {key: 0}, &quot;a&quot;),
     m(&quot;div&quot;, {key: 1}, &quot;b&quot;),
-])
-
-
-// PREFER
+])</code></pre>
+<p>If you need to mix them, create a nested array.</p>
+<pre><code class="language-javascript">// PREFER
 m(&quot;div&quot;, [
     m(&quot;div&quot;, &quot;a&quot;),
     [
         m(&quot;div&quot;, {key: 1}, &quot;b&quot;),
     ]
 ])</code></pre>
-<p>In fact, this will cause an error to be thrown, to remind you to not do it. So don&#39;t do it!</p>
-<p>Note that <code>null</code>s, <code>undefined</code>s, and booleans are considered unkeyed nodes. If you want the keyed equivalent, use <code>m.fragment({key: ...}, [])</code>, a keyed empty fragment.</p>
+<p>Note that <code>null</code>s, <code>undefined</code>s and booleans are considered unkeyed nodes. If you want the keyed equivalent, use <code>m.fragment({key: ...}, [])</code> which is a keyed empty fragment.</p>
+<pre><code class="language-javascript">// AVOID
+m(&quot;div&quot;, [
+    a ? m(&quot;div&quot;, {key: 1}, &quot;a&quot;) : null,
+    m(&quot;div&quot;, {key: 2}, &quot;b&quot;),
+])
+
+// PREFER
+m(&quot;div&quot;, [
+    a ? m(&quot;div&quot;, {key: 1}, &quot;a&quot;) : m.fragment({key: 1}, []),
+    m(&quot;div&quot;, {key: 2}, &quot;b&quot;),
+])</code></pre>
 <h4 id="avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property"><a href="#avoid-passing-model-data-directly-to-components-if-the-model-uses-key-as-a-data-property">Avoid passing model data directly to components if the model uses <code>key</code> as a data property</a></h4>
 <p>The <code>key</code> property may appear in your data model in a way that conflicts with Mithril&#39;s key logic. For example, a component may represent an entity whose <code>key</code> property is expected to change over time. This can lead to components receiving the wrong data, re-initialize, or change positions unexpectedly. If your data model uses the <code>key</code> property, make sure to wrap the data such that Mithril doesn&#39;t misinterpret it as a rendering instruction:</p>
 <pre><code class="language-javascript">// Data model

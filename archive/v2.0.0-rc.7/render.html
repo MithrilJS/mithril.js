@@ -41,10 +41,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -64,7 +65,7 @@
 // &lt;body&gt;hello&lt;/body&gt;</code></pre>
 <hr>
 <h3 id="signature"><a href="#signature">Signature</a></h3>
-<p><code>m.render(element, vnodes)</code></p>
+<p><code>m.render(element, vnodes, redraw)</code></p>
 <table>
 <thead>
 <tr>
@@ -87,6 +88,12 @@
 <td>The <a href="vnodes.html">vnodes</a> to be rendered</td>
 </tr>
 <tr>
+<td><code>redraw</code></td>
+<td><code>() -&gt; any</code></td>
+<td>No</td>
+<td>A callback invoked each time an event handler in the subtree is invoked</td>
+</tr>
+<tr>
 <td><strong>returns</strong></td>
 <td></td>
 <td></td>
@@ -96,7 +103,8 @@
 <p><a href="signatures.html">How to read signatures</a></p>
 <hr>
 <h3 id="how-it-works"><a href="#how-it-works">How it works</a></h3>
-<p>The <code>m.render(element, vnodes)</code> method takes a virtual DOM tree (typically generated via the <a href="hyperscript.html"><code>m()</code> hyperscript function</a>), generates a DOM tree and mounts it on <code>element</code>. If <code>element</code> already has a DOM tree mounted via a previous <code>m.render()</code> call, <code>vnodes</code> is diffed against the previous <code>vnodes</code> tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all. </p>
+<p>The <code>m.render(element, vnodes)</code> method takes a virtual DOM tree (typically generated via the <a href="hyperscript.html"><code>m()</code> hyperscript function</a>), generates a DOM tree and mounts it on <code>element</code>. If <code>element</code> already has a DOM tree mounted via a previous <code>m.render()</code> call, <code>vnodes</code> is diffed against the previous <code>vnodes</code> tree and the existing DOM tree is modified only where needed to reflect the changes. Unchanged DOM nodes are not touched at all.</p>
+<p>If you pass the optional <code>redraw</code> argument, that is invoked each time an event handler anywhere in the subtree is called. This is used by <a href="mount.html"><code>m.mount</code></a> and <a href="redraw.html"><code>m.redraw</code></a> to implement the <a href="autoredraw.html">autoredraw</a> functionality, but it&#39;s also exposed for more advanced use cases like integration with some third-party frameworks.</p>
 <p><code>m.render</code> is synchronous.</p>
 <hr>
 <h3 id="why-virtual-dom"><a href="#why-virtual-dom">Why Virtual DOM</a></h3>
@@ -111,8 +119,8 @@
 <hr>
 <h3 id="standalone-usage"><a href="#standalone-usage">Standalone usage</a></h3>
 <p><code>var render = require(&quot;mithril/render&quot;)</code></p>
-<p>The <code>m.render</code> module is similar in scope to view libraries like Knockout, React and Vue. It is approximately 500 lines of code (3kb min+gzip) and implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril and can be used as a standalone library.</p>
-<p>Despite being incredibly small, the render module is fully functional and self-sufficient. It supports everything you might expect: SVG, custom elements, and all valid attributes and events - without any weird case-sensitive edge cases or exceptions. Of course, it also fully supports <a href="components.html">components</a> and <a href="lifecycle-methods.html">lifecycle methods</a>.</p>
+<p>The <code>m.render</code> module is similar in scope to view libraries like Knockout, React and Vue. It implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril aside from normalization exposed via <code>require(&quot;mithril/render/vnode&quot;)</code> and can be used as a standalone library.</p>
+<p>Despite being relatively small, the render module is fully functional and self-sufficient. It supports everything you might expect: SVG, custom elements, and all valid attributes and events - without any weird case-sensitive edge cases or exceptions. Of course, it also fully supports <a href="components.html">components</a> and <a href="lifecycle-methods.html">lifecycle methods</a>.</p>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>

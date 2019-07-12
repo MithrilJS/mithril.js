@@ -33,10 +33,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -82,11 +83,11 @@ m.route(document.body, &quot;/home&quot;, {
 <pre><code class="language-javascript">m.route.set(&quot;/home&quot;)</code></pre>
 <h4 id="mrouteget---"><a href="#mrouteget---">m.route.get() - <a href="route.html#mrouteget">docs</a></a></h4>
 <pre><code class="language-javascript">var currentRoute = m.route.get()</code></pre>
-<h4 id="mrouteprefixprefix---"><a href="#mrouteprefixprefix---">m.route.prefix(prefix) - <a href="route.html#mrouteprefix">docs</a></a></h4>
-<p>Call this before <code>m.route()</code></p>
-<pre><code class="language-javascript">m.route.prefix(&quot;#!&quot;)</code></pre>
-<h4 id="mroutelink---"><a href="#mroutelink---">m.route.link() - <a href="route.html#mroutelink">docs</a></a></h4>
-<pre><code class="language-javascript">m(&quot;a[href=&#39;/Home&#39;]&quot;, {oncreate: m.route.link}, &quot;Go to home page&quot;)</code></pre>
+<h4 id="mrouteprefix-=-prefix---"><a href="#mrouteprefix-=-prefix---">m.route.prefix = prefix - <a href="route.html#mrouteprefix">docs</a></a></h4>
+<p>Invoke this before <code>m.route()</code> to change the routing prefix.</p>
+<pre><code class="language-javascript">m.route.prefix = &quot;#!&quot;</code></pre>
+<h4 id="mmroutelink,----"><a href="#mmroutelink,----">m(m.route.Link, ...) - <a href="route.html#mroutelink">docs</a></a></h4>
+<pre><code class="language-javascript">m(m.route.Link, {href: &quot;/Home&quot;}, &quot;Go to home page&quot;)</code></pre>
 <hr>
 <h4 id="mrequestoptions---"><a href="#mrequestoptions---">m.request(options) - <a href="request.html">docs</a></a></h4>
 <pre><code class="language-javascript">m.request({

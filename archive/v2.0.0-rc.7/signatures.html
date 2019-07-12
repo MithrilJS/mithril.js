@@ -33,10 +33,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -106,6 +107,87 @@
 <p>Functions are denoted with an arrow (<code>-&gt;</code>). The left side of the arrow indicates the types of the input arguments and the right side indicates the type for the return value.</p>
 <p>For example, <code>parseFloat</code> has the signature <code>String -&gt; Number</code>, i.e. it takes a string as input and returns a number as output.</p>
 <p>Functions with multiple arguments are denoted with parenthesis: <code>(String, Array) -&gt; Number</code></p>
+<hr>
+<h3 id="component-signatures"><a href="#component-signatures">Component signatures</a></h3>
+<p>Components are denoted via calls to <code>m</code>, but with the selector argument set to a constant named in the relevant prose:</p>
+<p><code>vnode = m(m.route.Link, attributes, children)</code></p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>attributes.href</code></td>
+<td><code>Object</code></td>
+<td>Yes</td>
+<td>The target route to navigate to.</td>
+</tr>
+<tr>
+<td><code>attributes.component</code></td>
+<td><code>String&#124;Object&#124;Function</code></td>
+<td>No</td>
+<td>This sets the tag name to use. Must be a valid selector for <a href="hyperscript.html"><code>m</code></a> if given, defaults to <code>&quot;a&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>attributes.options</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>This sets the options passed to <a href="#mrouteset"><code>m.route.set</code></a>.</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>Other attributes to apply to the returned vnode may be passed.</td>
+</tr>
+<tr>
+<td><code>children</code></td>
+<td><code>Array&lt;Vnode&gt;&#124;String&#124;Number&#124;Boolean</code></td>
+<td>No</td>
+<td>Child <a href="vnodes.html">vnodes</a> for this link.</td>
+</tr>
+<tr>
+<td><strong>returns</strong></td>
+<td><code>Vnode</code></td>
+<td></td>
+<td>A <a href="vnodes.html">vnode</a>.</td>
+</tr>
+</tbody></table>
+<p>Children here, if specified, are assumed to be able to be written as <a href="#splats">splat arguments</a>, unless otherwise specified in prose.</p>
+<p>An element with no sensible children and/or attributes may elect to elide the relevant parameter entirely, so it might look closer to this:</p>
+<p><code>vnode = m(Component, attributes)</code></p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>attributes.href</code></td>
+<td><code>Object</code></td>
+<td>Yes</td>
+<td>The</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>Other attributes to apply to the returned vnode</td>
+</tr>
+<tr>
+<td><strong>returns</strong></td>
+<td><code>Vnode</code></td>
+<td></td>
+<td>A <a href="vnodes.html">vnode</a></td>
+</tr>
+</tbody></table>
 
 				<hr />
 				<small>License: MIT. &copy; Leo Horie.</small>

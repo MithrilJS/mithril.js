@@ -52,10 +52,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -90,7 +91,7 @@
 </thead>
 <tbody><tr>
 <td><code>selector</code></td>
-<td><code>String&#124;Object</code></td>
+<td><code>String&#124;Object&#124;Function</code></td>
 <td>Yes</td>
 <td>A CSS selector or a <a href="components.html">component</a></td>
 </tr>
@@ -395,7 +396,7 @@ m(&quot;ul&quot;, users.map(function(u) { // &lt;ul&gt;
 <pre><code class="language-javascript">var isError = false
 
 m(&quot;div&quot;, isError ? &quot;An error occurred&quot; : &quot;Saved&quot;) // &lt;div&gt;Saved&lt;/div&gt;</code></pre>
-<p>You cannot use JavaScript statements such as <code>if</code> or <code>for</code> within JavaScript expressions. It&#39;s preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.</p>
+<p>You cannot use JavaScript statements such as <code>if</code> or <code>for</code> within JavaScript expressions. It&#39;s preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative.</p>
 <hr>
 <h3 id="converting-html"><a href="#converting-html">Converting HTML</a></h3>
 <p>In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.</p>

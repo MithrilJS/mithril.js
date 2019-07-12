@@ -35,8 +35,9 @@
 <li><a href="#mrouteset">m.route.set</a></li>
 <li><a href="#mrouteget">m.route.get</a></li>
 <li><a href="#mrouteprefix">m.route.prefix</a></li>
-<li><a href="#mroutelink">m.route.link</a></li>
+<li><a href="#mroutelink">m.route.Link</a></li>
 <li><a href="#mrouteparam">m.route.param</a></li>
+<li><a href="#mrouteskip">m.route.SKIP</a></li>
 </ul>
 </li>
 <li><a href="#routeresolver">RouteResolver</a><ul>
@@ -61,6 +62,8 @@
 <li><a href="#authentication">Authentication</a></li>
 <li><a href="#preloading-data">Preloading data</a></li>
 <li><a href="#code-splitting">Code splitting</a></li>
+<li><a href="#typed-routes">Typed routes</a></li>
+<li><a href="#typed-routes">Hidden routes</a></li>
 </ul>
 </li>
 <li><a href="#third-party-integration">Third-party integration</a></li>
@@ -70,10 +73,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -219,7 +223,7 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 </tbody></table>
 <h5 id="mrouteprefix"><a href="#mrouteprefix">m.route.prefix</a></h5>
 <p>Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying <a href="#routing-strategies">strategy</a> used by the router.</p>
-<p><code>m.route.prefix(prefix)</code></p>
+<p><code>m.route.prefix = prefix</code></p>
 <table>
 <thead>
 <tr>
@@ -235,22 +239,64 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 <td>Yes</td>
 <td>The prefix that controls the underlying <a href="#routing-strategies">routing strategy</a> used by Mithril.</td>
 </tr>
-<tr>
-<td><strong>returns</strong></td>
-<td></td>
-<td></td>
-<td>Returns <code>undefined</code></td>
-</tr>
 </tbody></table>
-<h5 id="mroutelink"><a href="#mroutelink">m.route.link</a></h5>
-<p>This function can be used as the <code>oncreate</code> (and <code>onupdate</code>) hook in a <code>m(&quot;a&quot;)</code> vnode:</p>
-<pre><code class="language-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link})</code></pre>
-<p>Using <code>m.route.link</code> as a <code>oncreate</code> hook causes the link to behave as a router link (i.e. it navigates to the route specified in <code>href</code>, instead of navigating away from the current page to the URL specified in <code>href</code>.</p>
-<p>If the <code>href</code> attribute is not static, the <code>onupdate</code> hook must also be set:</p>
-<pre><code class="language-JS">m(&quot;a&quot;, {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})</code></pre>
-<p><code>m.route.link</code> can also set the <code>options</code> passed to <code>m.route.set</code> when the link is clicked by calling the function in the lifecycle methods:</p>
-<pre><code class="language-JS">m(&quot;a[href=/]&quot;, {oncreate: m.route.link({replace: true})})</code></pre>
-<p><code>m.route.link(args)</code></p>
+<p>This is a simple property, so you can both read it and write to it.</p>
+<h5 id="mroutelink"><a href="#mroutelink">m.route.Link</a></h5>
+<p>This component can create a dynamic routable link:</p>
+<pre><code class="language-javascript">m(m.route.Link, {href: &quot;/test&quot;})</code></pre>
+<p>Using <code>m.route.Link</code> causes the link to behave as a router link - clicking it navigates to the route specified in <code>href</code>, instead of navigating away from the current page to the URL specified in <code>href</code>.</p>
+<p>You can also set the <code>options</code> passed to <code>m.route.set</code> when the link is clicked by passing the <code>options</code> attribute:</p>
+<pre><code class="language-javascript">m(m.route.Link, {href: &quot;/test&quot;, options: {replace: true}})
+
+// You can even use URL templates this way, the same way you can with
+// `m.route.set`.
+m(m.route.Link, {href: &quot;/edit/:id&quot;, options: {params: {id: item.id}}})</code></pre>
+<p>You can pass other attributes, too, and you can also specify the tag name used.</p>
+<pre><code class="language-javascript">m(m.route.Link, {
+    // Any hyperscript selector is valid here - it&#39;s literally passed as the
+    // first parameter to `m`.
+    component: &quot;span&quot;,
+    options: {replace: true},
+    href: &quot;/test&quot;,
+    disabled: false,
+    class: &quot;nav-link&quot;,
+    &quot;data-foo&quot;: 1,
+    // and other attributes
+}, &quot;link name&quot;)</code></pre>
+<p>Magic attributes used by this component (except <code>href</code> and <code>disabled</code>) <em>are</em> removed while proxying, so you won&#39;t have an odd <code>component=&quot;span&quot;</code> or <code>options=&quot;[object Object]&quot;</code> attribute show up in your link&#39;s DOM node. The above component renders to this hyperscript, assuming the prefix is the default <code>#!</code>:</p>
+<pre><code class="language-javascript">m(&quot;span&quot;, {
+    href: &quot;#!/test&quot;,
+    onclick: function(e) {
+        // ...
+    },
+    disabled: false, // Only if you specify it
+    class: &quot;nav-link&quot;,
+    &quot;data-foo&quot;: 1,
+    // and other attributes
+})</code></pre>
+<p>You can also prevent navigation by, in an <code>onclick</code> handler, invoking <code>ev.preventDefault()</code> or returning <code>false</code>. This is the same way you block other events, so it&#39;s pretty natural.</p>
+<pre><code class="language-javascript">m(m.route.Link, {
+    href: &quot;/test&quot;,
+    onclick: function(e) {
+        // Do things...
+        if (notReady()) e.preventDefault()
+    }
+}, &quot;link name&quot;)</code></pre>
+<p>This supports full accessibility for both <code>a</code> and <code>button</code>, via a <code>disabled</code> attribute. This ensures <a href="https://css-tricks.com/how-to-disable-links/">no <code>href</code> attribute or <code>onclick</code> handler is set</a> and that an <code>&quot;aria-disabled&quot;: &quot;true&quot;</code> attribute <em>is</em> set. If you are passing an <code>onclick</code> handler already, that&#39;s dropped. (You can work around this by adding it directly in a <a href="lifecycle.html">lifecycle hook</a>.) The <code>disabled</code> attribute is itself proxied to the element or component, so you can disable routed <code>&lt;button&gt;</code>s and the like.</p>
+<pre><code class="language-javascript">// This does the right thing and the accessible thing for you.
+m(m.route.Link, {disabled: disabled, href: &quot;/test&quot;}, &quot;disabled&quot;)
+
+// It renders to this hyperscript, assuming the prefix is the default one:
+m(&quot;a&quot;, {
+    href: &quot;#!/test&quot;,
+    disabled: disabled,
+    &quot;aria-disabled&quot;: disabled ? &quot;true&quot; : false,
+    onclick: disabled ? null : function(e) {
+        // ...
+    },
+})</code></pre>
+<p>Do note that this doesn&#39;t also disable pointer events for you - you have to do that yourself through CSS - this only does the JS part. Also, the removal of <code>href</code> <em>can</em> break certain style sheets - if you&#39;re relying on this to style disabled links, you may need to update your stylesheets accordingly. Chances are, you&#39;re probably just looking it up via <code>a</code>, <code>.some-class</code>, or <code>#some-id</code>, and if you are, you&#39;re already good to go. If you&#39;re using <code>[href]</code> or <code>:link</code>, in most cases you can just remove them and it&#39;ll still work - it&#39;s pretty common to over-specify selectors. If you can&#39;t do either, check for both <code>[href]</code>/<code>:link</code> <em>and</em> the non-standard <code>[disabled]</code> attribute that was implicitly forwarded to the component.</p>
+<p><code>vnode = m(m.route.Link, attributes, children)</code></p>
 <table>
 <thead>
 <tr>
@@ -261,16 +307,46 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>args</code></td>
-<td><code>Vnode&#124;Object</code></td>
+<td><code>attributes.href</code></td>
+<td><code>Object</code></td>
 <td>Yes</td>
-<td>This method is meant to be used as or in conjunction with an <code>&lt;a&gt;</code> <a href="vnodes.html">vnode</a>&#39;s <a href="lifecycle-methods.html"><code>oncreate</code> and <code>onupdate</code> hooks</a></td>
+<td>The target route to navigate to.</td>
+</tr>
+<tr>
+<td><code>attributes.component</code></td>
+<td><code>String&#124;Object&#124;Function</code></td>
+<td>No</td>
+<td>This sets the tag name to use. Must be a valid selector for <a href="hyperscript.html"><code>m</code></a> if given, defaults to <code>&quot;a&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>attributes.options</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>This sets the options passed to <a href="#mrouteset"><code>m.route.set</code></a>.</td>
+</tr>
+<tr>
+<td><code>attributes.disabled</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>This sets the options passed to <a href="#mrouteset"><code>m.route.set</code></a>.</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td><code>Object</code></td>
+<td>No</td>
+<td>Other attributes to apply to the returned vnode may be passed.</td>
+</tr>
+<tr>
+<td><code>children</code></td>
+<td><code>Array&lt;Vnode&gt;&#124;String&#124;Number&#124;Boolean</code></td>
+<td>No</td>
+<td>Child <a href="vnodes.html">vnodes</a> for this link.</td>
 </tr>
 <tr>
 <td><strong>returns</strong></td>
-<td><code>function</code></td>
+<td><code>Vnode</code></td>
 <td></td>
-<td>Returns the onclick handler function for the component</td>
+<td>A <a href="vnodes.html">vnode</a>.</td>
 </tr>
 </tbody></table>
 <h5 id="mrouteparam"><a href="#mrouteparam">m.route.param</a></h5>
@@ -303,7 +379,9 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 <td>Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys</td>
 </tr>
 </tbody></table>
-<p> Note that in the <code>onmatch</code> function of a RouteResolver, the new route hasn&#39;t yet been fully resolved, and <code>m.route.param()</code> will return the parameters of the previous route, if any. <code>onmatch</code> receives the parameters of the new route as an argument.</p>
+<p>Note that in the <code>onmatch</code> function of a RouteResolver, the new route hasn&#39;t yet been fully resolved, and <code>m.route.param()</code> will return the parameters of the previous route, if any. <code>onmatch</code> receives the parameters of the new route as an argument.</p>
+<h5 id="mrouteskip"><a href="#mrouteskip">m.route.SKIP</a></h5>
+<p>A special value that can be returned from a <a href="#routeresolveronmatch">route resolver&#39;s <code>onmatch</code></a> to skip to the next route.</p>
 <h4 id="routeresolver"><a href="#routeresolver">RouteResolver</a></h4>
 <p>A RouteResolver is a non-component object that contains an <code>onmatch</code> method and/or a <code>render</code> method. Both methods are optional, but at least one must be present.</p>
 <p>If an object can be detected as a component (by the presence of a <code>view</code> method or by being a <code>function</code>/<code>class</code>), it will be treated as such even if it has <code>onmatch</code> or <code>render</code> methods. Since a RouteResolver is not a component, it does not have lifecycle methods.</p>
@@ -374,15 +452,15 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 </tbody></table>
 <hr>
 <h4 id="how-it-works"><a href="#how-it-works">How it works</a></h4>
-<p>Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a &quot;page&quot; to another without causing a full browser refresh.</p>
+<p>Routing is a system that allows creating Single Page Applications (SPA), i.e. applications that can go from a &quot;page&quot; to another without causing a full browser refresh.</p>
 <p>It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser&#39;s history mechanism.</p>
 <p>Routing without page refreshes is made partially possible by the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState%28%29_method"><code>history.pushState</code></a> API. Using this API, it&#39;s possible to programmatically change the URL displayed by the browser after a page has loaded, but it&#39;s the application developer&#39;s responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.</p>
 <h4 id="routing-strategies"><a href="#routing-strategies">Routing strategies</a></h4>
 <p>The routing strategy dictates how a library might actually implement routing. There are three general strategies that can be used to implement a SPA routing system, and each has different caveats:</p>
 <ul>
-<li><code>m.route.prefix(&#39;#!&#39;)</code> (default) – Using the <a href="https://en.wikipedia.org/wiki/Fragment_identifier">fragment identifier</a> (aka the hash) portion of the URL. A URL using this strategy typically looks like <code>http://localhost/#!/page1</code></li>
-<li><code>m.route.prefix(&#39;?&#39;)</code> – Using the querystring. A URL using this strategy typically looks like <code>http://localhost/?/page1</code></li>
-<li><code>m.route.prefix(&#39;&#39;)</code> – Using the pathname. A URL using this strategy typically looks like <code>http://localhost/page1</code></li>
+<li><code>m.route.prefix = &#39;#!&#39;</code> (default) – Using the <a href="https://en.wikipedia.org/wiki/Fragment_identifier">fragment identifier</a> (aka the hash) portion of the URL. A URL using this strategy typically looks like <code>http://localhost/#!/page1</code></li>
+<li><code>m.route.prefix = &#39;?&#39;</code> – Using the querystring. A URL using this strategy typically looks like <code>http://localhost/?/page1</code></li>
+<li><code>m.route.prefix = &#39;&#39;</code> – Using the pathname. A URL using this strategy typically looks like <code>http://localhost/page1</code></li>
 </ul>
 <p>Using the hash strategy is guaranteed to work in browsers that don&#39;t support <code>history.pushState</code>, because it can fall back to using <code>onhashchange</code>. Use this strategy if you want to keep the hashes purely local.</p>
 <p>The querystring strategy allows server-side detection, but it doesn&#39;t appear as a normal path. Use this strategy if you want to support and potentially detect anchored links server-side and you are not able to make the changes necessary to support the pathname strategy (like if you&#39;re using Apache and can&#39;t modify your .htaccess).</p>
@@ -413,8 +491,8 @@ var Page1 = {
 <pre><code class="language-javascript">var Menu = {
     view: function() {
         return m(&quot;nav&quot;, [
-            m(&quot;a[href=/]&quot;, {oncreate: m.route.link}, &quot;Home&quot;),
-            m(&quot;a[href=/page1]&quot;, {oncreate: m.route.link}, &quot;Page 1&quot;),
+            m(m.route.Link, {href: &quot;/&quot;}, &quot;Home&quot;),
+            m(m.route.Link, {href: &quot;/page1&quot;}, &quot;Page 1&quot;),
         ])
     }
 }</code></pre>
@@ -426,9 +504,9 @@ var Page1 = {
 <p>Here we specify two routes: <code>/</code> and <code>/page1</code>, which render their respective components when the user navigates to each URL. By default, the SPA router prefix is <code>#!</code></p>
 <hr>
 <h3 id="navigating-to-different-routes"><a href="#navigating-to-different-routes">Navigating to different routes</a></h3>
-<p>In the example above, the <code>Menu</code> component has two links. You can specify that their <code>href</code> attribute is a route URL (rather than being a regular link that navigates away from the current page), by adding the hook <code>{oncreate: m.route.link}</code></p>
+<p>In the example above, the <code>Menu</code> component has two <code>m.route.Link</code>s. That creates an element, by default an <code>&lt;a&gt;</code>, and sets it up to where if the user clicks on it, it navigates to another route on its own. It doesn&#39;t navigate remotely, just locally.</p>
 <p>You can also navigate programmatically, via <code>m.route.set(route)</code>. For example, <code>m.route.set(&quot;/page1&quot;)</code>.</p>
-<p>When navigating to routes, there&#39;s no need to explicitly specify the router prefix. In other words, don&#39;t add the hashbang <code>#!</code> in front of the route path when linking via <code>m.route.link</code> or redirecting.</p>
+<p>When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang <code>#!</code> (or whatever prefix you set <code>m.route.prefix</code> to) when linking Mithril routes, including in both <code>m.route.set</code> and in <code>m.route.Link</code>.</p>
 <hr>
 <h3 id="routing-parameters"><a href="#routing-parameters">Routing parameters</a></h3>
 <p>Sometimes we want to have a variable id or similar data appear in a route, but we don&#39;t want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports <a href="paths.html#path-parameters">parameterized routes</a>:</p>
@@ -456,6 +534,7 @@ m.route(document.body, &quot;/edit/1&quot;, {
 <p><code>m.route.set(m.route.get(), {key: Date.now()})</code></p>
 <p>Or even use the <a href="#history-state"><code>history state</code></a> feature to achieve reloadable components without polluting the URL:</p>
 <p><code>m.route.set(m.route.get(), null, {state: {key: Date.now()}})</code></p>
+<p>Note that the key parameter works only for component routes. If you&#39;re using a route resolver, you&#39;ll need to use a <a href="keys.html">single-child keyed fragment</a>, passing <code>key: m.route.param(&quot;key&quot;)</code>, to accomplish the same.</p>
 <h4 id="variadic-routes"><a href="#variadic-routes">Variadic routes</a></h4>
 <p>It&#39;s also possible to have variadic routes, i.e. a route with an argument that contains URL pathnames that contain slashes:</p>
 <pre><code class="language-javascript">m.route(document.body, &quot;/edit/pictures/image.jpg&quot;, {
@@ -507,17 +586,18 @@ m.route(document.body, &quot;/&quot;, {
 <h3 id="changing-router-prefix"><a href="#changing-router-prefix">Changing router prefix</a></h3>
 <p>The router prefix is a fragment of the URL that dictates the underlying <a href="#routing-strategies">strategy</a> used by the router.</p>
 <pre><code class="language-javascript">// set to pathname strategy
-m.route.prefix(&quot;&quot;)
+m.route.prefix = &quot;&quot;
 
 // set to querystring strategy
-m.route.prefix(&quot;?&quot;)
+m.route.prefix = &quot;?&quot;
 
 // set to hash without bang
-m.route.prefix(&quot;#&quot;)
+m.route.prefix = &quot;#&quot;
 
 // set to pathname strategy on a non-root URL
-// e.g. if the app lives under `http://localhost/my-app` and something else lives under `http://localhost`
-m.route.prefix(&quot;/my-app&quot;)</code></pre>
+// e.g. if the app lives under `http://localhost/my-app` and something else
+// lives under `http://localhost`
+m.route.prefix = &quot;/my-app&quot;</code></pre>
 <hr>
 <h3 id="advanced-component-resolution"><a href="#advanced-component-resolution">Advanced component resolution</a></h3>
 <p>Instead of mapping a component to a route, you can specify a RouteResolver object. A RouteResolver object contains a <code>onmatch()</code> and/or a <code>render()</code> method. Both methods are optional but at least one of them must be present.</p>
@@ -761,11 +841,36 @@ m.route(document.body, &quot;/&quot;, {
     },
 })</code></pre>
 <hr>
+<h3 id="typed-routes"><a href="#typed-routes">Typed routes</a></h3>
+<p>In certain advanced routing cases, you may want to constrain a value further than just the path itself, only matching something like a numeric ID. You can do that pretty easily by returning <code>m.route.SKIP</code> from a route.</p>
+<pre><code class="language-javascript">m.route(document.body, &quot;/&quot;, {
+    &quot;/view/:id&quot;: {
+        onmatch: function(args) {
+            if (!/^\d+$/.test(args.id)) return m.route.SKIP
+            return ItemView
+        },
+    },
+    &quot;/view/:name&quot;: UserView,
+})</code></pre>
+<hr>
+<h3 id="hidden-routes"><a href="#hidden-routes">Hidden routes</a></h3>
+<p>In rare circumstances, you may want to hide certain routes for some users, but not all. For instance, a user might be prohibited from viewing a particular user, and instead of showing a permission error, you&#39;d rather pretend it doesn&#39;t exist and redirect to a 404 view instead. In this case, you can use <code>m.route.SKIP</code> to just pretend the route doesn&#39;t exist.</p>
+<pre><code class="language-javascript">m.route(document.body, &quot;/&quot;, {
+    &quot;/user/:id&quot;: {
+        onmatch: function(args) {
+            return Model.checkViewable(args.id).then(function(viewable) {
+                return viewable ? UserView : m.route.SKIP
+            })
+        },
+    },
+    &quot;/:404...&quot;: PageNotFound,
+})</code></pre>
+<hr>
 <h3 id="third-party-integration"><a href="#third-party-integration">Third-party integration</a></h3>
 <p>In certain situations, you may find yourself needing to interoperate with another framework like React. Here&#39;s how you do it:</p>
 <ul>
 <li>Define all your routes using <code>m.route</code> as normal, but make sure you only use it <em>once</em>. Multiple route points are not supported.</li>
-<li>When you need to remove routing subscriptions, use <code>m.mount(root, null)</code>, using the same root you used <code>m.route(root, ...)</code> on.</li>
+<li>When you need to remove routing subscriptions, use <code>m.mount(root, null)</code>, using the same root you used <code>m.route(root, ...)</code> on. <code>m.route</code> uses <code>m.mount</code> internally to hook everything up, so it&#39;s not magic.</li>
 </ul>
 <p>Here&#39;s an example with React:</p>
 <pre><code class="language-jsx">class Child extends React.Component {

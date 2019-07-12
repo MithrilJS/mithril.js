@@ -31,6 +31,7 @@
 <li><a href="#description">Description</a></li>
 <li><a href="#signature">Signature</a></li>
 <li><a href="#how-it-works">How it works</a></li>
+<li><a href="#headless-mounts">Headless mounts</a></li>
 <li><a href="#performance-considerations">Performance considerations</a></li>
 <li><a href="#differences-from-mrender">Differences from m.render</a></li>
 </ul>
@@ -40,10 +41,11 @@
 <li><a href="jsonp.html">m.jsonp</a></li>
 <li><a href="parseQueryString.html">m.parseQueryString</a></li>
 <li><a href="buildQueryString.html">m.buildQueryString</a></li>
+<li><a href="buildPathname.html">m.buildPathname</a></li>
+<li><a href="parsePathname.html">m.parsePathname</a></li>
 <li><a href="trust.html">m.trust</a></li>
 <li><a href="fragment.html">m.fragment</a></li>
 <li><a href="redraw.html">m.redraw</a></li>
-<li><a href="version.html">m.version</a></li>
 <li><a href="promise.html">Promise</a></li>
 </ul>
 </li>
@@ -113,6 +115,29 @@ m.mount(document.body, Counter)</code></pre>
 <p>Running <code>mount(element, OtherComponent)</code> where <code>element</code> is a current mount point replaces the component previously mounted with <code>OtherComponent</code>.</p>
 <h4 id="unmount"><a href="#unmount">Unmount</a></h4>
 <p>Using <code>m.mount(element, null)</code> on an element with a previously mounted component unmounts it and cleans up Mithril internal state. This can be useful to prevent memory leaks when removing the <code>root</code> node manually from the DOM.</p>
+<h4 id="headless-mounts"><a href="#headless-mounts">Headless mounts</a></h4>
+<p>In certain more advanced situations, you may want to subscribe and listen for <a href="autoredraw.html">redraws</a> without rendering anything to the screen. This can be done using a headless mount, created by simply invoking <code>m.mount</code> with an element that&#39;s not added to the live DOM tree and putting all your useful logic in the component you&#39;re mounting with. You still need a <code>view</code> in your component, just it doesn&#39;t have to return anything useful and it can just return a junk value like <code>null</code> or <code>undefined</code>.</p>
+<pre><code class="language-javascript">var elem = document.createElement(&quot;div&quot;)
+
+// Subscribe
+m.mount(elem, {
+    oncreate: function() {
+        // once added
+    },
+    onupdate: function() {
+        // on each redraw
+    },
+    onremove: function() {
+        // clean up whatever you need
+    },
+
+    // Necessary boilerplate
+    view: function () {},
+})
+
+// Unsubscribe
+m.mount(elem, null)</code></pre>
+<p>There&#39;s no need to worry about other mount roots. Multiple roots are supported and they won&#39;t step on each other. You can even do the above in a component when integrating with another framework, and it won&#39;t be a problem.</p>
 <hr>
 <h3 id="performance-considerations"><a href="#performance-considerations">Performance considerations</a></h3>
 <p>It may seem wasteful to generate a vnode tree on every redraw, but as it turns out, creating and comparing JavaScript data structures is surprisingly cheap compared to reading and modifying the DOM.</p>

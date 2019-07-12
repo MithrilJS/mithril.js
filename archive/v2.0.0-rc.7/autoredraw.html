@@ -104,12 +104,12 @@ m.mount(document.body, MyComponent)</code></pre>
     // does not trigger a redraw
 })</code></pre>
 <h3 id="after-route-changes"><a href="#after-route-changes">After route changes</a></h3>
-<p>Mithril automatically redraws after <a href="route.html#mrouteset"><code>m.route.set()</code></a> calls (or route changes via links that use <a href="route.html#mroutelink"><code>m.route.link</code></a></p>
+<p>Mithril automatically redraws after <a href="route.html#mrouteset"><code>m.route.set()</code></a> calls and after route changes via links using <a href="route.html#mroutelink"><code>m.route.Link</code></a>.</p>
 <pre><code class="language-javascript">var RoutedComponent = {
     view: function() {
         return [
             // a redraw happens asynchronously after the route changes
-            m(&quot;a&quot;, {href: &quot;/&quot;, oncreate: m.route.link}),
+            m(m.route.Link, {href: &quot;/&quot;}),
             m(&quot;div&quot;, {
                 onclick: function() {
                     m.route.set(&quot;/&quot;)

@@ -383,11 +383,14 @@ module.exports = {
     oninit: User.loadList,
     view: function() {
         return m(&quot;.user-list&quot;, User.list.map(function(user) {
-            return m(&quot;a.user-list-item&quot;, {href: &quot;/edit/&quot; + user.id, oncreate: m.route.link}, user.firstName + &quot; &quot; + user.lastName)
+            return m(m.route.Link, {
+                class: &quot;user-list-item&quot;,
+                href: &quot;/edit/&quot; + user.id,
+            }, user.firstName + &quot; &quot; + user.lastName)
         }))
     }
 }</code></pre>
-<p>Here we changed <code>.user-list-item</code> to <code>a.user-list-item</code>. We added an <code>href</code> that references the route we want, and finally we added <code>oncreate: m.route.link</code>. This makes the link behave like a routed link (as opposed to merely behaving like a regular link). What this means is that clicking the link would change the part of URL that comes after the hashbang <code>#!</code> (thus changing the route without unloading the current HTML page)</p>
+<p>Here we swapped out the <code>.user-list-item</code> vnode with an <code>m.route.Link</code> with that class and the same children. We added an <code>href</code> that references the route we want. What this means is that clicking the link would change the part of URL that comes after the hashbang <code>#!</code> (thus changing the route without unloading the current HTML page). Behind the scenes, it uses an <code>&lt;a&gt;</code> to implement the link, and it all just works.</p>
 <p>If you refresh the page in the browser, you should now be able to click on a person and be taken to a form. You should also be able to press the back button in the browser to go back from the form to the list of people.</p>
 <hr>
 <p>The form itself still doesn&#39;t save when you press &quot;Save&quot;. Let&#39;s make this form work:</p>
@@ -471,13 +474,13 @@ module.exports = {
     view: function(vnode) {
         return m(&quot;main.layout&quot;, [
             m(&quot;nav.menu&quot;, [
-                m(&quot;a[href=&#39;/list&#39;]&quot;, {oncreate: m.route.link}, &quot;Users&quot;)
+                m(m.route.Link, {href: &quot;/list&quot;}, &quot;Users&quot;)
             ]),
             m(&quot;section&quot;, vnode.children)
         ])
     }
 }</code></pre>
-<p>This component is fairly straightforward, it has a <code>&lt;nav&gt;</code> with a link to the list of users. Similar to what we did to the <code>/edit</code> links, this link uses <code>m.route.link</code> to activate routing behavior in the link.</p>
+<p>This component is fairly straightforward, it has a <code>&lt;nav&gt;</code> with a link to the list of users. Similar to what we did to the <code>/edit</code> links, this link uses <code>m.route.Link</code> to create a routable link.</p>
 <p>Notice there&#39;s also a <code>&lt;section&gt;</code> element with <code>vnode.children</code> as children. <code>vnode</code> is a reference to the vnode that represents an instance of the Layout component (i.e. the vnode returned by a <code>m(Layout)</code> call). Therefore, <code>vnode.children</code> refer to any children of that vnode.</p>
 <p>Let&#39;s add some styles:</p>
 <pre><code class="language-css">/* styles.css */
