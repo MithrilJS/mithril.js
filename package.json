@@ -10,7 +10,7 @@
     "dev": "node bundler/cli browser.js -output mithril.js -watch",
     "build": "npm run build-browser & npm run build-min",
     "build-browser": "node bundler/cli browser.js -output mithril.js",
-    "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
+    "build-min": "node bundler/cli browser.js -output mithril.min.js -minify -save",
     "precommit": "lint-staged",
     "lintdocs": "node docs/lint",
     "gendocs": "node docs/generate",

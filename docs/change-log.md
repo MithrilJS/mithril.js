@@ -63,9 +63,16 @@
 - api: `m.version` has been removed. If you really need the version for whatever reason, just read the `version` field of `mithril/package.json` directly. ([#2466](https://github.com/MithrilJS/mithril.js/pull/2466) [@isiahmeadows](https://github.com/isiahmeadows))
 - route: `m.route.prefix(...)` is now `m.route.prefix = ...`.
     - This is a fully fledged property, so you can not only write to it, but you can also read from it.
+    - This aligns better with user intuition.
 - route: `m.route.link` function removed in favor of `m.route.Link` component.
     - An optional `options` object is accepted as an attribute. This was initially targeting the old `m.route.link` function and was transferred to this. ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
-    - The new component handles many more edge cases around user interaction.
+    - The new component handles many more edge cases around user interaction, including accessibility.
+    - Link navigation can be disabled and cancelled.
+    - Link targets can be trivially changed.
+- API: Full DOM no longer required to execute `require("mithril")`. You just need to set the necessary globals to *something*, even if `null` or `undefined`, so they can be properly used.
+    - This enables isomorphic use of `m.route.Link` and `m.route.prefix`.
+    - This enables isomorphic use of `m.request`, provided the `background: true` option is set and that an `XMLHttpRequest` polyfill is included as necessary.
+    - Note that methods requiring DOM operations will still throw errors, such as `m.render(...)`, `m.redraw()`, and `m.route(...)`.
 
 
 #### News
