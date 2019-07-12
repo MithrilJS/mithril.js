@@ -189,9 +189,11 @@ module.exports = function($window, mountRedraw) {
 			// Remove these so they don't get overwritten
 			var attrs = {}, onclick, href
 			assign(attrs, vnode.attrs)
-			attrs.component = null
-			attrs.options = null
-			attrs.key = null
+			// The first two are internal, but the rest are magic attributes
+			// that need censored to not screw up rendering.
+			attrs.component = attrs.options = attrs.key = attrs.oninit =
+			attrs.oncreate = attrs.onbeforeupdate = attrs.onupdate =
+			attrs.onbeforeremove = attrs.onremove = null
 
 			// Do this now so we can get the most current `href` and `disabled`.
 			// Those attributes may also be specified in the selector, and we
