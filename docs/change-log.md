@@ -61,15 +61,15 @@
     - The `.schedule`, `.unschedule`, and `.render` properties of the former `redrawService` are all removed.
     - If you want to know how to work around it, look at the call to `mount` in Mithril's source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
 - api: `m.version` has been removed. If you really need the version for whatever reason, just read the `version` field of `mithril/package.json` directly. ([#2466](https://github.com/MithrilJS/mithril.js/pull/2466) [@isiahmeadows](https://github.com/isiahmeadows))
-- route: `m.route.prefix(...)` is now `m.route.prefix = ...`.
+- route: `m.route.prefix(...)` is now `m.route.prefix = ...`. ([#2469](https://github.com/MithrilJS/mithril.js/pull/2469) [@isiahmeadows](https://github.com/isiahmeadows))
     - This is a fully fledged property, so you can not only write to it, but you can also read from it.
     - This aligns better with user intuition.
-- route: `m.route.link` function removed in favor of `m.route.Link` component.
+- route: `m.route.link` function removed in favor of `m.route.Link` component. ([#2469](https://github.com/MithrilJS/mithril.js/pull/2469) [@isiahmeadows](https://github.com/isiahmeadows))
     - An optional `options` object is accepted as an attribute. This was initially targeting the old `m.route.link` function and was transferred to this. ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
     - The new component handles many more edge cases around user interaction, including accessibility.
     - Link navigation can be disabled and cancelled.
     - Link targets can be trivially changed.
-- API: Full DOM no longer required to execute `require("mithril")`. You just need to set the necessary globals to *something*, even if `null` or `undefined`, so they can be properly used.
+- API: Full DOM no longer required to execute `require("mithril")`. You just need to set the necessary globals to *something*, even if `null` or `undefined`, so they can be properly used. ([#2469](https://github.com/MithrilJS/mithril.js/pull/2469) [@isiahmeadows](https://github.com/isiahmeadows))
     - This enables isomorphic use of `m.route.Link` and `m.route.prefix`.
     - This enables isomorphic use of `m.request`, provided the `background: true` option is set and that an `XMLHttpRequest` polyfill is included as necessary.
     - Note that methods requiring DOM operations will still throw errors, such as `m.render(...)`, `m.redraw()`, and `m.route(...)`.
