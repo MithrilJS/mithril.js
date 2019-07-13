@@ -1685,7 +1685,7 @@ var _25 = function($window, mountRedraw00) {
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
 			//
-			// The attribute is1 coerced so users don't get surprised over
+			// The attribute is coerced so users don't get surprised over
 			// `disabled: 0` resulting in a button that's somehow routable
 			// despite being visibly disabled.
 			if (child0.attrs.disabled = Boolean(child0.attrs.disabled)) {
