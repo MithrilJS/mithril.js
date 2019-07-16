@@ -191,14 +191,14 @@ module.exports = function($window, mountRedraw) {
 			assign(attrs, vnode.attrs)
 			// The first two are internal, but the rest are magic attributes
 			// that need censored to not screw up rendering.
-			attrs.component = attrs.options = attrs.key = attrs.oninit =
+			attrs.selector = attrs.options = attrs.key = attrs.oninit =
 			attrs.oncreate = attrs.onbeforeupdate = attrs.onupdate =
 			attrs.onbeforeremove = attrs.onremove = null
 
 			// Do this now so we can get the most current `href` and `disabled`.
 			// Those attributes may also be specified in the selector, and we
 			// should honor that.
-			var child = m(vnode.attrs.component || "a", attrs, vnode.children)
+			var child = m(vnode.attrs.selector || "a", attrs, vnode.children)
 
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.

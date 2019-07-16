@@ -57,22 +57,22 @@ Functions with multiple arguments are denoted with parenthesis: `(String, Array)
 
 ### Component signatures
 
-Components are denoted via calls to `m`, but with the selector argument set to a constant named in the relevant prose:
+Components are denoted via calls to `m`, but with the initial selector argument set to a constant named in the relevant prose:
 
 `vnode = m(m.route.Link, attributes, children)`
 
-Argument               | Type                                 | Required | Description
----------------------- | ------------------------------------ | -------- | ---
-`attributes.href`      | `Object`                             | Yes      | The target route to navigate to.
-`attributes.component` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`   | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes`           | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
-`children`             | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
-**returns**            | `Vnode`                              |          | A [vnode](vnodes.md).
+Argument              | Type                                 | Required | Description
+--------------------- | ------------------------------------ | -------- | ---
+`attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
+`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
 
 Children here, if specified, are assumed to be able to be written as [splat arguments](#splats), unless otherwise specified in prose.
 
-An element with no sensible children and/or attributes may elect to elide the relevant parameter entirely, so it might look closer to this:
+An element with no sensible children and/or attributes may choose to elide the relevant parameter entirely:
 
 `vnode = m(Component, attributes)`
 

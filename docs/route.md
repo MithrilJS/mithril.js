@@ -144,7 +144,7 @@ You can pass other attributes, too, and you can also specify the tag name used.
 m(m.route.Link, {
 	// Any hyperscript selector is valid here - it's literally passed as the
 	// first parameter to `m`.
-	component: "span",
+	selector: "span",
 	options: {replace: true},
 	href: "/test",
 	disabled: false,
@@ -154,7 +154,7 @@ m(m.route.Link, {
 }, "link name")
 ```
 
-Magic attributes used by this component (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `component="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above component renders to this hyperscript, assuming the prefix is the default `#!`:
+Magic attributes used by this selector (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `selector="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above vnode renders to this hyperscript, assuming the prefix is the default `#!`:
 
 ```javascript
 m("span", {
@@ -202,15 +202,15 @@ Do note that this doesn't also disable pointer events for you - you have to do t
 
 `vnode = m(m.route.Link, attributes, children)`
 
-Argument               | Type                                 | Required | Description
----------------------- | ------------------------------------ | -------- | ---
-`attributes.href`      | `Object`                             | Yes      | The target route to navigate to.
-`attributes.component` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`   | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes`           | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
-`children`             | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
-**returns**            | `Vnode`                              |          | A [vnode](vnodes.md).
+Argument              | Type                                 | Required | Description
+--------------------- | ------------------------------------ | -------- | ---
+`attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
+`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.disabled` | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
 
 ##### m.route.param
 
