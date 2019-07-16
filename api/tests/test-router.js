@@ -615,7 +615,7 @@ o.spec("route", function() {
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {component: "button", href: "/test", foo: "bar"}, "text"))
+					render(root, m(route.Link, {selector: "button", href: "/test", foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("BUTTON")
@@ -635,7 +635,7 @@ o.spec("route", function() {
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {component: "button[href=/test]", foo: "bar"}, "text"))
+					render(root, m(route.Link, {selector: "button[href=/test]", foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("BUTTON")
