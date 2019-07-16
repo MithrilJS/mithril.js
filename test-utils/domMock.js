@@ -401,7 +401,7 @@ module.exports = function(options) {
 						e.preventDefault = function() {
 							prevented = true
 						}
-						Object.defineProperty(e, "$defaultPrevented", {
+						Object.defineProperty(e, "defaultPrevented", {
 							configurable: true,
 							get: function () { return prevented }
 						})
@@ -409,10 +409,6 @@ module.exports = function(options) {
 						e.stopPropagation = function() {
 							stopped = true
 						}
-						Object.defineProperty(e, "$propagationStopped", {
-							configurable: true,
-							get: function () { return prevented }
-						})
 						e.eventPhase = 1
 						try {
 							for (var i = parents.length - 1; 0 <= i; i--) {

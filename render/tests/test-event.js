@@ -16,107 +16,124 @@ o.spec("event", function() {
 		}
 	})
 
+	function eventSpy(fn) {
+		function spy(e) {
+			spy.calls.push({
+				this: this, type: e.type,
+				target: e.target, currentTarget: e.currentTarget,
+			})
+			if (fn) return fn.apply(this, arguments)
+		}
+		spy.calls = []
+		return spy
+	}
+
 	o("handles onclick", function() {
-		var spy = o.spy()
-		var div = {tag: "div", attrs: {onclick: spy}}
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-
-		render(root, [div])
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(div.dom)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(e.$defaultPrevented).equals(false)
-		o(e.$propagationStopped).equals(false)
-	})
-
-	o("handles onclick returning false", function() {
-		var spy = o.spy(function () { return false })
-		var div = {tag: "div", attrs: {onclick: spy}}
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-
-		render(root, [div])
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(div.dom)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(e.$defaultPrevented).equals(true)
-		o(e.$propagationStopped).equals(true)
-	})
-
-	o("handles click EventListener object", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var div = {tag: "div", attrs: {onclick: listener}}
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-
-		render(root, [div])
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(listener)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(e.$defaultPrevented).equals(false)
-		o(e.$propagationStopped).equals(false)
-	})
-
-	o("handles click EventListener object returning false", function() {
-		var spy = o.spy(function () { return false })
-		var listener = {handleEvent: spy}
-		var div = {tag: "div", attrs: {onclick: listener}}
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-
-		render(root, [div])
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(listener)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(e.$defaultPrevented).equals(false)
-		o(e.$propagationStopped).equals(false)
-	})
-
-	o("handles propagated onclick", function() {
-		var spy = o.spy()
-		var child = {tag: "div"}
-		var parent = {tag: "div", attrs: {onclick: spy}, children: [child]}
+		var spyDiv = eventSpy()
+		var spyParent = eventSpy()
+		var div = {tag: "div", attrs: {onclick: spyDiv}}
+		var parent = {tag: "div", attrs: {onclick: spyParent}, children: [div]}
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
 		render(root, [parent])
-		child.dom.dispatchEvent(e)
+		div.dom.dispatchEvent(e)
 
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(parent.dom)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(child.dom)
+		o(spyDiv.calls.length).equals(1)
+		o(spyDiv.calls[0].this).equals(div.dom)
+		o(spyDiv.calls[0].type).equals("click")
+		o(spyDiv.calls[0].target).equals(div.dom)
+		o(spyDiv.calls[0].currentTarget).equals(div.dom)
+		o(spyParent.calls.length).equals(1)
+		o(spyParent.calls[0].this).equals(parent.dom)
+		o(spyParent.calls[0].type).equals("click")
+		o(spyParent.calls[0].target).equals(div.dom)
+		o(spyParent.calls[0].currentTarget).equals(parent.dom)
+		o(redraw.callCount).equals(2)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+		o(e.defaultPrevented).equals(false)
+	})
+
+	o("handles onclick returning false", function() {
+		var spyDiv = eventSpy(function() { return false })
+		var spyParent = eventSpy()
+		var div = {tag: "div", attrs: {onclick: spyDiv}}
+		var parent = {tag: "div", attrs: {onclick: spyParent}, children: [div]}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [parent])
+		div.dom.dispatchEvent(e)
+
+		o(spyDiv.calls.length).equals(1)
+		o(spyDiv.calls[0].this).equals(div.dom)
+		o(spyDiv.calls[0].type).equals("click")
+		o(spyDiv.calls[0].target).equals(div.dom)
+		o(spyDiv.calls[0].currentTarget).equals(div.dom)
+		o(spyParent.calls.length).equals(0)
 		o(redraw.callCount).equals(1)
 		o(redraw.this).equals(undefined)
 		o(redraw.args.length).equals(0)
-		o(e.$defaultPrevented).equals(false)
-		o(e.$propagationStopped).equals(false)
+		o(e.defaultPrevented).equals(true)
+	})
+
+	o("handles click EventListener object", function() {
+		var spyDiv = eventSpy()
+		var spyParent = eventSpy()
+		var listenerDiv = {handleEvent: spyDiv}
+		var listenerParent = {handleEvent: spyParent}
+		var div = {tag: "div", attrs: {onclick: listenerDiv}}
+		var parent = {tag: "div", attrs: {onclick: listenerParent}, children: [div]}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [parent])
+		div.dom.dispatchEvent(e)
+
+		o(spyDiv.calls.length).equals(1)
+		o(spyDiv.calls[0].this).equals(listenerDiv)
+		o(spyDiv.calls[0].type).equals("click")
+		o(spyDiv.calls[0].target).equals(div.dom)
+		o(spyDiv.calls[0].currentTarget).equals(div.dom)
+		o(spyParent.calls.length).equals(1)
+		o(spyParent.calls[0].this).equals(listenerParent)
+		o(spyParent.calls[0].type).equals("click")
+		o(spyParent.calls[0].target).equals(div.dom)
+		o(spyParent.calls[0].currentTarget).equals(parent.dom)
+		o(redraw.callCount).equals(2)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+		o(e.defaultPrevented).equals(false)
+	})
+
+	o("handles click EventListener object returning false", function() {
+		var spyDiv = eventSpy(function() { return false })
+		var spyParent = eventSpy()
+		var listenerDiv = {handleEvent: spyDiv}
+		var listenerParent = {handleEvent: spyParent}
+		var div = {tag: "div", attrs: {onclick: listenerDiv}}
+		var parent = {tag: "div", attrs: {onclick: listenerParent}, children: [div]}
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, [parent])
+		div.dom.dispatchEvent(e)
+
+		o(spyDiv.calls.length).equals(1)
+		o(spyDiv.calls[0].this).equals(listenerDiv)
+		o(spyDiv.calls[0].type).equals("click")
+		o(spyDiv.calls[0].target).equals(div.dom)
+		o(spyDiv.calls[0].currentTarget).equals(div.dom)
+		o(spyParent.calls.length).equals(1)
+		o(spyParent.calls[0].this).equals(listenerParent)
+		o(spyParent.calls[0].type).equals("click")
+		o(spyParent.calls[0].target).equals(div.dom)
+		o(spyParent.calls[0].currentTarget).equals(parent.dom)
+		o(redraw.callCount).equals(2)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+		o(e.defaultPrevented).equals(false)
 	})
 
 	o("removes event", function() {

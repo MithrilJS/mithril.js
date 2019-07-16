@@ -243,6 +243,15 @@ As a rule of thumb, RouteResolvers should be in the same file as the `m.route` c
 
 `routeResolver = {onmatch, render}`
 
+When using components, you could think of them as special sugar for this route resolver, assuming your component is `Home`:
+
+```js
+var routeResolver = {
+	onmatch: function() { return Home },
+	render: function(vnode) { return [vnode] },
+}
+```
+
 ##### routeResolver.onmatch
 
 The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)
@@ -266,7 +275,7 @@ If `onmatch` returns a promise that gets rejected, the router redirects back to 
 
 ##### routeResolver.render
 
-The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
+The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component). It also lets you escape from Mithril's normal behavior of replacing the entire subtree.
 
 `vnode = routeResolve.render(vnode)`
 
@@ -275,6 +284,8 @@ Argument            | Type                 | Description
 `vnode`             | `Object`             | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
 `vnode.attrs`       | `Object`             | A map of URL parameter values
 **returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
+
+The `vnode` parameter is just `m(Component, m.route.param())` where `Component` is the resolved component for the route (after `routeResolver.onmatch`) and `m.route.param()` is as documented [here](#mrouteparam). If you omit this method, the default return value is `[vnode]`, wrapped in a fragment so you can use [key parameters](#key-parameter). Combined with a `:key` parameter, it becomes a [single-element keyed fragment](keys.md#single-child-keyed-fragments), since it ends up rendering to something like `[m(Component, {key: m.route.param("key"), ...})]`.
 
 ---
 
@@ -352,7 +363,7 @@ m.route(document.body, "/", {
 })
 ```
 
-Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL. By default, the SPA router prefix is `#!`
+Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL.
 
 ---
 
@@ -363,6 +374,8 @@ In the example above, the `Menu` component has two `m.route.Link`s. That creates
 You can also navigate programmatically, via `m.route.set(route)`. For example, `m.route.set("/page1")`.
 
 When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril routes, including in both `m.route.set` and in `m.route.Link`.
+
+Do note that when navigating between components, the entire subtree is replaced. Use [a route resolver with a `render` method](#routeresolverrender) if you want to just patch the subtree.
 
 ---
 
