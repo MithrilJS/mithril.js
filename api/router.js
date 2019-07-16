@@ -237,17 +237,18 @@ module.exports = function($window, mountRedraw) {
 					// link target, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
-						result === false || !e.defaultPrevented &&
+						result !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
 						// Let the browser handle `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
-					) return
-					e.preventDefault()
-					e.redraw = false
-					route.set(href, null, options)
+					) {
+						e.preventDefault()
+						e.redraw = false
+						route.set(href, null, options)
+					}
 				}
 			}
 			return child

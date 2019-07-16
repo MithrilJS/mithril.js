@@ -412,6 +412,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
@@ -446,6 +447,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
@@ -465,6 +467,7 @@ o.spec("route", function() {
 					o(oninit.callCount).equals(1)
 
 					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
 
 					// Wrapped to ensure no redraw fired
 					return waitCycles(1).then(function() {
@@ -476,6 +479,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
@@ -496,7 +500,7 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
 
 					root.firstChild.dispatchEvent(e)
-
+					throttleMock.fire()
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
@@ -505,6 +509,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
