@@ -2,6 +2,7 @@
 
 - [What are keys](#what-are-keys)
 - [How to use](#how-to-use)
+	- [Single-child keyed fragments](#single-child-keyed-fragments)
 - [Debugging key related issues](#debugging-key-related-issues)
 
 ---
@@ -75,7 +76,9 @@ function correctUserList(users) {
 }
 ```
 
-Also, you might want to reinitialize a component. You can use the common pattern of a single-child keyed fragment where you change the key to destroy and reinitialize the element.
+#### Single-child keyed fragments
+
+Sometimes, you might want to reinitialize a component on command. You can use the common pattern of a single-child keyed fragment where you change the key to destroy and reinitialize the element.
 
 ```javascript
 function ResettableToggle() {
@@ -91,6 +94,20 @@ function ResettableToggle() {
 				m("button", {onclick: reset}, "Reset toggle"),
 				[m(Toggle, {key: toggleKey})]
 			]
+		}
+	}
+}
+```
+
+You can also bind it to a known identity, for things like item views where you need to fetch a remote resource based on an ID. It's usually simpler than implementing all the logic to diff the ID and re-fetch a resource if it changes.
+
+```javascript
+function Page() {
+	return {
+		view: function() {
+			return m(Layout, [
+				[m(ItemView, {key: m.route.param("id")})],
+			])
 		}
 	}
 }
@@ -120,7 +137,7 @@ users.map(function(u) {
 If you refactor the code and make a user component, the key must be moved out of the component and put on the component itself, since it is now the immediate child of the array.
 
 ```javascript
-// AVOID
+// AVOID - doesn't work
 var User = {
 	view: function(vnode) {
 		return m("div", { key: vnode.attrs.user.id }, [
@@ -137,7 +154,7 @@ users.map(function(u) {
 
 #### Avoid wrapping keyed elements in arrays
 
-Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap arrays around keyed elements
+Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap arrays around keyed elements outside [single-child keyed fragments](#single-child-keyed-fragments).
 
 ```javascript
 // AVOID
