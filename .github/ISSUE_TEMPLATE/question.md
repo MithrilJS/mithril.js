@@ -1,5 +1,5 @@
 ---
-name: "\U0001F64B‍♀️Question"
+name: "🙋‍♀️ Question"
 about: Ask a question about Mithril
 title: ''
 labels: question

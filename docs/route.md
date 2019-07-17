@@ -144,7 +144,7 @@ You can pass other attributes, too, and you can also specify the tag name used.
 m(m.route.Link, {
 	// Any hyperscript selector is valid here - it's literally passed as the
 	// first parameter to `m`.
-	component: "span",
+	selector: "span",
 	options: {replace: true},
 	href: "/test",
 	disabled: false,
@@ -154,7 +154,7 @@ m(m.route.Link, {
 }, "link name")
 ```
 
-Magic attributes used by this component (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `component="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above component renders to this hyperscript, assuming the prefix is the default `#!`:
+Magic attributes used by this selector (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `selector="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above vnode renders to this hyperscript, assuming the prefix is the default `#!`:
 
 ```javascript
 m("span", {
@@ -202,15 +202,15 @@ Do note that this doesn't also disable pointer events for you - you have to do t
 
 `vnode = m(m.route.Link, attributes, children)`
 
-Argument               | Type                                 | Required | Description
----------------------- | ------------------------------------ | -------- | ---
-`attributes.href`      | `Object`                             | Yes      | The target route to navigate to.
-`attributes.component` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`   | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes`           | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
-`children`             | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
-**returns**            | `Vnode`                              |          | A [vnode](vnodes.md).
+Argument              | Type                                 | Required | Description
+--------------------- | ------------------------------------ | -------- | ---
+`attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
+`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.disabled` | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
 
 ##### m.route.param
 
@@ -243,6 +243,15 @@ As a rule of thumb, RouteResolvers should be in the same file as the `m.route` c
 
 `routeResolver = {onmatch, render}`
 
+When using components, you could think of them as special sugar for this route resolver, assuming your component is `Home`:
+
+```js
+var routeResolver = {
+	onmatch: function() { return Home },
+	render: function(vnode) { return [vnode] },
+}
+```
+
 ##### routeResolver.onmatch
 
 The `onmatch` hook is called when the router needs to find a component to render. It is called once per router path changes, but not on subsequent redraws while on the same path. It can be used to run logic before a component initializes (for example authentication logic, data preloading, redirection analytics tracking, etc)
@@ -266,7 +275,7 @@ If `onmatch` returns a promise that gets rejected, the router redirects back to 
 
 ##### routeResolver.render
 
-The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
+The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component). It also lets you escape from Mithril's normal behavior of replacing the entire subtree.
 
 `vnode = routeResolve.render(vnode)`
 
@@ -275,6 +284,8 @@ Argument            | Type                 | Description
 `vnode`             | `Object`             | A [vnode](vnodes.md) whose attributes object contains routing parameters. If onmatch does not return a component or a promise that resolves to a component, the vnode's `tag` field defaults to `"div"`
 `vnode.attrs`       | `Object`             | A map of URL parameter values
 **returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
+
+The `vnode` parameter is just `m(Component, m.route.param())` where `Component` is the resolved component for the route (after `routeResolver.onmatch`) and `m.route.param()` is as documented [here](#mrouteparam). If you omit this method, the default return value is `[vnode]`, wrapped in a fragment so you can use [key parameters](#key-parameter). Combined with a `:key` parameter, it becomes a [single-element keyed fragment](keys.md#single-child-keyed-fragments), since it ends up rendering to something like `[m(Component, {key: m.route.param("key"), ...})]`.
 
 ---
 
@@ -352,7 +363,7 @@ m.route(document.body, "/", {
 })
 ```
 
-Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL. By default, the SPA router prefix is `#!`
+Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL.
 
 ---
 
@@ -363,6 +374,8 @@ In the example above, the `Menu` component has two `m.route.Link`s. That creates
 You can also navigate programmatically, via `m.route.set(route)`. For example, `m.route.set("/page1")`.
 
 When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril routes, including in both `m.route.set` and in `m.route.Link`.
+
+Do note that when navigating between components, the entire subtree is replaced. Use [a route resolver with a `render` method](#routeresolverrender) if you want to just patch the subtree.
 
 ---
 

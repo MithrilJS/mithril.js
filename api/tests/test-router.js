@@ -465,6 +465,7 @@ o.spec("route", function() {
 					o(oninit.callCount).equals(1)
 
 					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
 
 					// Wrapped to ensure no redraw fired
 					return waitCycles(1).then(function() {
@@ -476,6 +477,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
@@ -496,7 +498,7 @@ o.spec("route", function() {
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
 
 					root.firstChild.dispatchEvent(e)
-
+					throttleMock.fire()
 					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
 				})
 
@@ -505,6 +507,7 @@ o.spec("route", function() {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
+					e.button = 0
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
@@ -550,6 +553,64 @@ o.spec("route", function() {
 					o(root.firstChild.firstChild.nodeValue).equals("text")
 				})
 
+				o("route.Link keeps magic attributes from being double-called", function() {
+					$window = browserMock(env)
+					var render = coreRenderer($window)
+					route = apiRouter(null, null)
+					route.prefix = prefix
+					root = $window.document.body
+
+					var oninit = o.spy()
+					var oncreate = o.spy()
+					var onbeforeupdate = o.spy()
+					var onupdate = o.spy()
+					var onbeforeremove = o.spy()
+					var onremove = o.spy()
+
+					render(root, m(route.Link, {
+						href: "/test",
+						oninit: oninit,
+						oncreate: oncreate,
+						onbeforeupdate: onbeforeupdate,
+						onupdate: onupdate,
+						onbeforeremove: onbeforeremove,
+						onremove: onremove,
+					}, "text"))
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(0)
+					o(onupdate.callCount).equals(0)
+					o(onbeforeremove.callCount).equals(0)
+					o(onremove.callCount).equals(0)
+
+					render(root, m(route.Link, {
+						href: "/test",
+						oninit: oninit,
+						oncreate: oncreate,
+						onbeforeupdate: onbeforeupdate,
+						onupdate: onupdate,
+						onbeforeremove: onbeforeremove,
+						onremove: onremove,
+					}, "text"))
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(1)
+					o(onupdate.callCount).equals(1)
+					o(onbeforeremove.callCount).equals(0)
+					o(onremove.callCount).equals(0)
+
+					render(root, [])
+
+					o(oninit.callCount).equals(1)
+					o(oncreate.callCount).equals(1)
+					o(onbeforeupdate.callCount).equals(1)
+					o(onupdate.callCount).equals(1)
+					o(onbeforeremove.callCount).equals(1)
+					o(onremove.callCount).equals(1)
+				})
+
 				o("route.Link can render other tag without routes or dom access", function() {
 					$window = browserMock(env)
 					var render = coreRenderer($window)
@@ -557,7 +618,7 @@ o.spec("route", function() {
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {component: "button", href: "/test", foo: "bar"}, "text"))
+					render(root, m(route.Link, {selector: "button", href: "/test", foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("BUTTON")
@@ -577,7 +638,7 @@ o.spec("route", function() {
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {component: "button[href=/test]", foo: "bar"}, "text"))
+					render(root, m(route.Link, {selector: "button[href=/test]", foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("BUTTON")
@@ -668,6 +729,139 @@ o.spec("route", function() {
 					o(root.firstChild.childNodes.length).equals(1)
 					o(root.firstChild.firstChild.nodeName).equals("#text")
 					o(root.firstChild.firstChild.nodeValue).equals("text")
+				})
+
+				o("route.Link doesn't redraw on wrong button", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 10
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {href: "/test"})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+
+					var slash = prefix[0] === "/" ? "" : "/"
+
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+
+					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+				})
+
+				o("route.Link doesn't redraw on preventDefault", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 0
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {
+									href: "/test",
+									onclick: function(e) {
+										e.preventDefault()
+									}
+								})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+
+					var slash = prefix[0] === "/" ? "" : "/"
+
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+
+					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+				})
+
+				o("route.Link doesn't redraw on preventDefault in handleEvent", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 0
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {
+									href: "/test",
+									onclick: {
+										handleEvent: function(e) {
+											e.preventDefault()
+										}
+									}
+								})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+
+					var slash = prefix[0] === "/" ? "" : "/"
+
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+
+					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+				})
+
+				o("route.Link doesn't redraw on return false", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 0
+
+					$window.location.href = prefix + "/"
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {
+									href: "/test",
+									onclick: function() {
+										return false
+									}
+								})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+
+					var slash = prefix[0] === "/" ? "" : "/"
+
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
+
+					root.firstChild.dispatchEvent(e)
+					throttleMock.fire()
+					o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : ""))
 				})
 
 				o("accepts RouteResolver with onmatch that returns Component", function() {

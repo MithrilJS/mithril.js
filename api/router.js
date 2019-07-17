@@ -189,14 +189,16 @@ module.exports = function($window, mountRedraw) {
 			// Remove these so they don't get overwritten
 			var attrs = {}, onclick, href
 			assign(attrs, vnode.attrs)
-			attrs.component = null
-			attrs.options = null
-			attrs.key = null
+			// The first two are internal, but the rest are magic attributes
+			// that need censored to not screw up rendering.
+			attrs.selector = attrs.options = attrs.key = attrs.oninit =
+			attrs.oncreate = attrs.onbeforeupdate = attrs.onupdate =
+			attrs.onbeforeremove = attrs.onremove = null
 
 			// Do this now so we can get the most current `href` and `disabled`.
 			// Those attributes may also be specified in the selector, and we
 			// should honor that.
-			var child = m(vnode.attrs.component || "a", attrs, vnode.children)
+			var child = m(vnode.attrs.selector || "a", attrs, vnode.children)
 
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
@@ -235,17 +237,18 @@ module.exports = function($window, mountRedraw) {
 					// link target, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
-						result === false || !e.defaultPrevented &&
+						result !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
 						// Let the browser handle `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
-					) return
-					e.preventDefault()
-					e.redraw = false
-					route.set(href, null, options)
+					) {
+						e.preventDefault()
+						e.redraw = false
+						route.set(href, null, options)
+					}
 				}
 			}
 			return child
