@@ -132,10 +132,6 @@ You can also set the `options` passed to `m.route.set` when the link is clicked 
 
 ```javascript
 m(m.route.Link, {href: "/test", options: {replace: true}})
-
-// You can even use URL templates this way, the same way you can with
-// `m.route.set`.
-m(m.route.Link, {href: "/edit/:id", options: {params: {id: item.id}}})
 ```
 
 You can pass other attributes, too, and you can also specify the tag name used.
