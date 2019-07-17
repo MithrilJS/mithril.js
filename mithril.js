@@ -1675,17 +1675,19 @@ var _25 = function($window, mountRedraw00) {
 			// Remove these so they don't get overwritten
 			var attrs3 = {}, onclick, href
 			assign(attrs3, vnode5.attrs)
-			attrs3.component = null
-			attrs3.options = null
-			attrs3.key = null
+			// The first two are internal, but the rest are magic attributes
+			// that need censored to not screw up rendering0.
+			attrs3.selector = attrs3.options = attrs3.key = attrs3.oninit =
+			attrs3.oncreate = attrs3.onbeforeupdate = attrs3.onupdate =
+			attrs3.onbeforeremove = attrs3.onremove = null
 			// Do this now so we can get the most current `href` and `disabled`.
 			// Those attributes may also be specified in the selector, and we
 			// should honor that.
-			var child0 = m3(vnode5.attrs.component || "a", attrs3, vnode5.children)
+			var child0 = m3(vnode5.attrs.selector || "a", attrs3, vnode5.children)
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
 			//
-			// The attribute is coerced so users don't get surprised over
+			// The attribute is1 coerced so users don't get surprised over
 			// `disabled: 0` resulting in a button that's somehow routable
 			// despite being visibly disabled.
 			if (child0.attrs.disabled = Boolean(child0.attrs.disabled)) {
@@ -1718,17 +1720,18 @@ var _25 = function($window, mountRedraw00) {
 					// link target, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
-						result1 === false || !e.defaultPrevented &&
+						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
 						// Let the browser handle1 `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
-					) return
-					e.preventDefault()
-					e.redraw = false
-					route.set(href, null, options)
+					) {
+						e.preventDefault()
+						e.redraw = false
+						route.set(href, null, options)
+					}
 				}
 			}
 			return child0
