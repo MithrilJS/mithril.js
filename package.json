@@ -22,7 +22,7 @@
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "preversion": "npm run test",
-    "version": "npm run build && git add index.js mithril.js mithril.min.js",
+    "version": "npm run build && git add index.js mithril.js mithril.min.js README.md",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
