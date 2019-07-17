@@ -246,11 +246,7 @@ m.route.set(&#39;/article/:articleid&#39;, {articleid: 1})</code></pre>
 <pre><code class="language-javascript">m(m.route.Link, {href: &quot;/test&quot;})</code></pre>
 <p>Using <code>m.route.Link</code> causes the link to behave as a router link - clicking it navigates to the route specified in <code>href</code>, instead of navigating away from the current page to the URL specified in <code>href</code>.</p>
 <p>You can also set the <code>options</code> passed to <code>m.route.set</code> when the link is clicked by passing the <code>options</code> attribute:</p>
-<pre><code class="language-javascript">m(m.route.Link, {href: &quot;/test&quot;, options: {replace: true}})
-
-// You can even use URL templates this way, the same way you can with
-// `m.route.set`.
-m(m.route.Link, {href: &quot;/edit/:id&quot;, options: {params: {id: item.id}}})</code></pre>
+<pre><code class="language-javascript">m(m.route.Link, {href: &quot;/test&quot;, options: {replace: true}})</code></pre>
 <p>You can pass other attributes, too, and you can also specify the tag name used.</p>
 <pre><code class="language-javascript">m(m.route.Link, {
     // Any hyperscript selector is valid here - it&#39;s literally passed as the
