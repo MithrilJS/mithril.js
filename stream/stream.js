@@ -41,16 +41,14 @@ function Stream(value) {
 	stream._parents = []
 
 	stream._changing = function() {
-		open(stream) && (stream._state = "changing")
+		if (open(stream)) stream._state = "changing"
 		dependentStreams.forEach(function(s) {
 			s._changing()
 		})
 	}
 
 	stream._map = function(fn, ignoreInitial) {
-		var target = stream._state === "active" && !ignoreInitial
-			? Stream(fn(value))
-			: Stream()
+		var target = ignoreInitial ? Stream() : Stream(fn(value))
 		target._parents.push(stream)
 		dependentStreams.push(target)
 		dependentFns.push(fn)
@@ -58,7 +56,7 @@ function Stream(value) {
 	}
 
 	stream.map = function(fn) {
-		return stream._map(fn, false)
+		return stream._map(fn, stream._state !== "active")
 	}
 
 	var end
