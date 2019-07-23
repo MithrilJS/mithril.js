@@ -6,7 +6,7 @@
 	- [Getting Help](support.md)
 - Resources
 	- [JSX](jsx.md)
-	- [ES6](es6.md)
+	- [ES6+ on legacy browsers](es6.md)
 	- [CSS](css.md)
 	- [Animation](animation.md)
 	- [Testing](testing.md)

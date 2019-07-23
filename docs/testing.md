@@ -10,8 +10,8 @@
 
 Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://mochajs.org/), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
 
-```sh
-$ npm install --save-dev ospec mithril-query jsdom
+```bash
+npm install --save-dev ospec mithril-query jsdom
 ```
 
 And getting them set up is also relatively easy and requires a few short steps:
@@ -85,8 +85,8 @@ o.spec("MyComponent", function() {
 
 Once you've got all that set up, in that same terminal you installed everything to, run this command.
 
-```sh
-$ npm test
+```bash
+npm test
 ```
 
 Provided you have everything set up properly, you should end up with output that looks something like this:
