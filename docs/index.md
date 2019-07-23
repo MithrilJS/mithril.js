@@ -56,9 +56,9 @@ An easy way to try out Mithril is to include it from a CDN and follow this tutor
 
 Let's create an HTML file to follow along:
 
-```markup
+```html
 <body>
-	<script src="https://unpkg.com/mithril@next/mithril.js"></script>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script>
 	var root = document.body
 
@@ -173,7 +173,7 @@ m.mount(root, Hello)
 
 As you would expect, doing so creates this markup:
 
-```markup
+```html
 <main>
 	<h1 class="title">My first app</h1>
 	<button>A button</button>

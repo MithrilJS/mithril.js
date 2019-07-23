@@ -9,8 +9,8 @@
 
 If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
-```markup
-<script src="https://unpkg.com/mithril@next/mithril.js"></script>
+```html
+<script src="https://unpkg.com/mithril/mithril.js"></script>
 ```
 
 ---
@@ -18,7 +18,7 @@ If you're new to JavaScript or just want a very simple setup to get your feet we
 ### NPM
 
 ```bash
-$ npm install mithril@next --save
+$ npm install mithril --save
 ```
 
 TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
@@ -46,7 +46,7 @@ $ npm init --yes
 
 2. install required tools
 ```bash
-$ npm install mithril@next --save
+$ npm install mithril --save
 $ npm install webpack webpack-cli --save-dev
 ```
 
@@ -97,7 +97,7 @@ npm init --yes
 Then, to install Mithril, run:
 
 ```bash
-npm install mithril@next --save
+npm install mithril --save
 ```
 
 This will create a folder called `node_modules`, and a `mithril` folder inside of it. It will also add an entry under `dependencies` in the `package.json` file
@@ -148,7 +148,7 @@ npm start
 
 Now that you have created a bundle, you can then reference the `bin/app.js` file from an HTML file:
 
-```markup
+```html
 <html>
   <head>
     <title>Hello world</title>
@@ -220,7 +220,7 @@ Live reload is a feature where code changes automatically trigger the page to re
 
 ```bash
 # 1) install
-npm install mithril@next --save
+npm install mithril --save
 npm install budo -g
 
 # 2) add this line into the scripts section in package.json
@@ -255,13 +255,13 @@ If you want to try it and give feedback, you can open `package.json` and change 
 
 If you don't have the ability to run a bundler script due to company security policies, there's an options to not use a module system at all:
 
-```markup
+```html
 <html>
   <head>
     <title>Hello world</title>
   </head>
   <body>
-    <script src="https://unpkg.com/mithril@next/mithril.js"></script>
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

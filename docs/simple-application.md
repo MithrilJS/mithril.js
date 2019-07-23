@@ -6,7 +6,7 @@ Let's develop a simple application that shows off how to do most of the major th
 
 First let's create an entry point for the application. Create a file `index.html`:
 
-```markup
+```html
 <!doctype html>
 <html>
 	<head>
@@ -217,7 +217,7 @@ The `m.mount` call renders the specified component (`UserList`) into a DOM eleme
 
 Right now, the list looks rather plain because we have not defined any styles. So let's add a few of them. Let's first create a file called `styles.css` and include it in the `index.html` file:
 
-```markup
+```html
 <!doctype html>
 <html>
 	<head>

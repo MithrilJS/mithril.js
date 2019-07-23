@@ -28,46 +28,47 @@ script:
 - npm run perf
 
 # After a successful build commit changes back to repo
-after_success:
-  - |
-    # Set up SSH environment
-    $(npm bin)/set-up-ssh \
-      --key "$encrypted_016049456622_key" \
-      --iv "$encrypted_016049456622_iv" \
-      --path-encrypted-key "./.deploy.enc"
-
-    # Commit bundle changes generated in before_script step
-    # --commands is a weird no-op but required for commit-changes to run
-    # --branch arg is to ensure this only runs against the `next` branch
-    $(npm bin)/commit-changes \
-      --commands "echo committing" \
-      --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
-      --branch "next"
-
-    # Only want to commit docs when building pushes on master &
-    # this doesn't have the built-in branch protection like commit-changes
-    if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
-       [ "$TRAVIS_BRANCH" == "master" ] && \
-       [ "$TRAVIS_REPO_SLUG" == "MithrilJS/mithril.js" ]
-    then
-      # Generate docs
-      npm run gendocs
-
-      # Set up git env
-      git config --global user.email "$GH_USER_EMAIL"
-      git config --global user.name "$GH_USER_NAME"
-
-      # Commit docs to gh-pages branch
-      # Using --add to ensure that archived versions aren't lost
-      # Using --repo to force it to go over SSH so the saved keys are used (tschaub/gh-pages#160)
-      $(npm bin)/gh-pages \
-        --dist ./dist \
-        --add \
-        --repo "git@github.com:MithrilJS/mithril.js.git" \
-        --message "Generated docs for commit $TRAVIS_COMMIT [skip ci]"
-    else
-      echo "Not submitting documentation updates"
-    fi
+# Disable per https://github.com/MithrilJS/mithril.js/issues/2417
+# after_success:
+#   - |
+#     # Set up SSH environment
+#     $(npm bin)/set-up-ssh \
+#       --key "$encrypted_016049456622_key" \
+#       --iv "$encrypted_016049456622_iv" \
+#       --path-encrypted-key "./.deploy.enc"
+#
+#     # Commit bundle changes generated in before_script step
+#     # --commands is a weird no-op but required for commit-changes to run
+#     # --branch arg is to ensure this only runs against the `next` branch
+#     $(npm bin)/commit-changes \
+#       --commands "echo committing" \
+#       --commit-message "Bundled output for commit $TRAVIS_COMMIT [skip ci]" \
+#       --branch "next"
+#
+#     # Only want to commit docs when building pushes on master &
+#     # this doesn't have the built-in branch protection like commit-changes
+#     if [ "$TRAVIS_EVENT_TYPE" == "push" ] && \
+#        [ "$TRAVIS_BRANCH" == "master" ] && \
+#        [ "$TRAVIS_REPO_SLUG" == "MithrilJS/mithril.js" ]
+#     then
+#       # Generate docs
+#       npm run gendocs
+#
+#       # Set up git env
+#       git config --global user.email "$GH_USER_EMAIL"
+#       git config --global user.name "$GH_USER_NAME"
+#
+#       # Commit docs to gh-pages branch
+#       # Using --add to ensure that archived versions aren't lost
+#       # Using --repo to force it to go over SSH so the saved keys are used (tschaub/gh-pages#160)
+#       $(npm bin)/gh-pages \
+#         --dist ./dist \
+#         --add \
+#         --repo "git@github.com:MithrilJS/mithril.js.git" \
+#         --message "Generated docs for commit $TRAVIS_COMMIT [skip ci]"
+#     else
+#       echo "Not submitting documentation updates"
+#     fi
 
 # Environment configuration
 env:

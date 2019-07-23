@@ -121,7 +121,7 @@ One common way to misuse `m.trust` is when working with third party services who
 
 Here's the example snippet for the [Facebook Like button](https://developers.facebook.com/docs/plugins/like-button):
 
-```markup
+```html
 <!-- Load Facebook SDK for JavaScript -->
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
