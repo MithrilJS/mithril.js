@@ -6,8 +6,9 @@
 - [State](#state)
 	- [Closure component state](#closure-component-state)
 	- [POJO component state](#pojo-component-state)
-- [ES6 Classes](#es6-classes)
+- [Classes](#classes)
 	- [Class component state](#class-component-state)
+- [Special attributes](#special-attributes)
 - [Avoid anti-patterns](#avoid-anti-patterns)
 
 ### Structure
@@ -115,7 +116,7 @@ Note that unlike many other frameworks, mutating component state does *not* trig
 
 If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
 
-#### Closure Component State
+#### Closure component state
 
 In the above examples, each component is defined as a POJO (Plain Old JavaScript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
 
@@ -183,7 +184,7 @@ A big advantage of closure components is that we don't need to worry about bindi
 
 ---
 
-#### POJO Component State
+#### POJO component state
 
 It is generally recommended that you use closures for managing component state. If, however, you have reason to manage state in a POJO, the state of a component can be accessed in three ways: as a blueprint at initialization, via `vnode.state` and via the `this` keyword in component methods.
 
@@ -247,55 +248,55 @@ m(ComponentUsingThis, {text: "Hello"})
 // <div>Hello</div>
 ```
 
-Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this JavaScript limitation, use ES6 arrow functions, or if ES6 is not available, use `vnode.state`.
+Be aware that when using ES5 functions, the value of `this` in nested anonymous functions is not the component instance. There are two recommended ways to get around this JavaScript limitation, use arrow functions, or if those are not supported, use `vnode.state`.
 
 ---
 
-### ES6 classes
+### Classes
 
-If it suits your needs (like in object-oriented projects), components can also be written using ES6 class syntax:
+If it suits your needs (like in object-oriented projects), components can also be written using classes:
 
 ```javascript
-class ES6ClassComponent {
+class ClassComponent {
 	constructor(vnode) {
-		this.kind = "ES6 class"
+		this.kind = "class component"
 	}
 	view() {
-		return m("div", `Hello from an ${this.kind}`)
+		return m("div", `Hello from a ${this.kind}`)
 	}
 	oncreate() {
-		console.log(`A ${this.kind} component was created`)
+		console.log(`A ${this.kind} was created`)
 	}
 }
 ```
 
-Component classes must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
+Class components must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
 
 They can be consumed in the same way regular components can.
 
 ```javascript
 // EXAMPLE: via m.render
-m.render(document.body, m(ES6ClassComponent))
+m.render(document.body, m(ClassComponent))
 
 // EXAMPLE: via m.mount
-m.mount(document.body, ES6ClassComponent)
+m.mount(document.body, ClassComponent)
 
 // EXAMPLE: via m.route
 m.route(document.body, "/", {
-	"/": ES6ClassComponent
+	"/": ClassComponent
 })
 
 // EXAMPLE: component composition
-class AnotherES6ClassComponent {
+class AnotherClassComponent {
 	view() {
 		return m("main", [
-			m(ES6ClassComponent)
+			m(ClassComponent)
 		])
 	}
 }
 ```
 
-#### Class Component State
+#### Class component state
 
 With classes, state can be managed by class instance properties and methods, and accessed via `this`:
 
@@ -324,7 +325,7 @@ class ComponentWithState {
 }
 ```
 
-Note that we must wrap the event callbacks in arrow functions so that the `this` context is preserved correctly.
+Note that we must use arrow functions for the event handler callbacks so the `this` context can be referenced correctly.
 
 ---
 
@@ -332,6 +333,15 @@ Note that we must wrap the event callbacks in arrow functions so that the `this`
 
 Components can be freely mixed. A class component can have closure or POJO components as children, etc...
 
+---
+
+### Special attributes
+
+Mithril places special semantics on several property keys, so you should normally avoid using them in normal component attributes.
+
+- [Lifecycle methods](lifecycle-methods.md): `oninit`, `oncreate`, `onbeforeupdate`, `onupdate`, `onbeforeremove`, and `onremove`
+- `key`, which is used to track identity in keyed fragments
+- `tag`, which is used to tell vnodes apart from normal attributes objects and other things that are non-vnode objects.
 
 ---
 

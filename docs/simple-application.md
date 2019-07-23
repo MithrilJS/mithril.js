@@ -1,8 +1,8 @@
 # Simple application
 
-Let's develop a simple application that covers some of the major aspects of Single Page Applications
+Let's develop a simple application that shows off how to do most of the major things you would need to deal with while using Mithril.
 
-An interactive running example can be seen here [flems: Simple Application](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcICGAHLA6AVmCADQgBmAljEagNqgB2GAthGiAKqQBOAsgPZJoBIqVj8GiSewBuGbgAIuERQF4FwADoMFuhVAph4qBbQC6xbXv38MSADKHjCsgFcGCChIAUASg1W1nrcEPCu3DrMuCEAjq4QRt5aOkGprPAAFoImmiAA4gCiACq5limp1uFQOSAZ8PBYYKgA9M0hzAC0IUYd2BS4GSr8ANau2HjizM19za48YKWBFXoA7hSZAMIhQpIUGFBNCvDc8WXLAL6+S0G4mRAM3m4e8F4P3a5Q8P7Jy9bK3LgDEYFOp3p9cEgMPAMNdrJdrucytdYOEQpITMBEdcoLYkCYnp4fBQkN9YcFQuFItEIHEEvAkmS0qEsniFLlCiUSIyglUanUGk1Wu0unTelh+oNuCMxjhcJNpuLZvNmrkFABqBTEs6-XRrTbbe4vfaHY6nbnw8o3O4PAkvHxgr4BS3Lf5y1GGkEKB3mq6WrEMa5gDAyCD49yEh6k53ksIRBRRWLxRI-HXx5nZNkgAAKHE52p1vMz-MaLTaEE63XgYolQ1G4zl-CmMzmKjAKpA6qUPDd3DR8FwWu51kh0JMrpRvcN+d+eoyW2Qhr2BxMpog07hvrh2nOIERjBYbHQ-0cRhEJBA4kkhtk8i7KhP8E9Kd0EgoDHWY+7OLsD+nMgoEArGGzyvH4TrLCEsaRN4uS4C23AdEC8ClHeAJIbgzDYI84Z2g88FRqmXoUnGzAwZgcE8IhTgdOs5YocAGQhGQNTNMg6ztp28EDkgxAKBIsAhFCobxtE-CuIggJvsMiIKFxlDcEYAByB6dqqqoalxUAYEpB6bhUlx6bo5zbruxD7qw7D-AAYvw3BRIQ56XlI8A3oo1m2cwT7XK+77OLaoEyAwggQN8rrfkg3iBcFuBQscYDcb4-rWP+gHARGYHPkEkGUvGZFkB59FDhUEhgK4ABGzAfi4OGgSF4GERUEC4FgIQhpIAAiEBkBgHz0oZDV-N2QYhn4RWpMZ0bjbxtBjbluRaWVwgLdAKG5FZFAKY+TCsLkvjrhUpG5G+WDiQODAnfAtDwAAnlgECqIgAAe8BmLQWBabAEBZFAQjcKo62bQo20QGYhWTb8PkXSYUSzgAgvU3BkXIUDxCh-k+Mj8Shd2E59rg8k6awnqYxAlz7TqJOfioPZ4wT8DKTt4MbuTQSHSAy1QICGCLVAq0gPY2lbQeu0s9YbPHadEuXe9GCfd9v2qALwLA6DJD1QNkPidDuBwwjSP7Kjavow8JPY9TuOGlzhMQMTBuk3ts3JXbVMAhbkhW-TwtM3oZOzWzZXifAEi4AH9QSFdt33aVFXrKrvG5AAysGEAi9yZj9RNO57iAwPsAL11if2DliBIzmuQo+eF15lopUB1UgRjQVCARFTZSRZGYW+XMF+JKEzd7uhs0wMgYfcrh947ehszCauZQNjFdSYADkzRIUvosQx4gmINrUriU1BgMMMk9GfHnDzLts3pxvg9kZAEYoVFQhyhkVBIGi-XWOnCImdnufoPWYuF5S7XnQAmQuTUWpdQoI9bwS8ADES9fTgP3t4JA-AUSsHdmVQQ10z6rycGDawuQCFGFyBibkaJfppVwhlWabdoKV3ErxUix4nC+E-j7BE04SFsXgM0VAxJyHqyyvcah9d0pPzqnPVuxFGEYB7vAFh3h3J2V4lImKCMwAcPNNw7cvhTLmUPCAOUYBRDAKvNIdAOCkB4LOhdYgIdA4SA0PldEQU7L7AUAARgAGxYEegoAAaioSETAADcmFuAAHM3wmAAEwAAYAkTW0N3KuwAomxIYKgbxyTAk9SDpEjAj0OhrCQJkXJiTqkBPCRNUeDBXAaCyXExJCg2kAGZ8l1O0Gk+CVFgTACQh0Iw10YCoCCgwCAxSYmtPaT47pWA7BIDfNE1AiSekMAoioAZVZaKeWAGVWWwxol7wYHieB3UrkYHCTg7g1DvEBIUGAfgBgkAKHgUgL54TxA4m4KgeBHSgXhJWWAGW11UBlRxLAYYMzsnrPmY8x64SllfNWagAAHE87xABWWpT0qxCHENwKErwJkSGmfU-pwz9moCyCGRQwACUdCJbZUlEhUDuF+ofSlvStkcw0KC8FkLoWwpaTktpbS8XIvqVLDQdyHlPJeW8j5XykC3Nsr9LodgKBzFQB02pODSlgAoAAL3RQqnZRqQWGGFVCjBYr5DwslQs2pqKVkMDWXk7F0rwnlMqXkxJABSTZTiw46EOcc05YlzkAogPGjV9yVC5KVa84kqrvmWoQiSlZeqDXIt+bZAFQKOk2rBVpCFb4eUdHtTCuFcy2neuRe69FTafG+uZaykluFyVTNDaHIOOT6UqHlVGs5FyIAYsnZOupu4LDsykjQegOcDzsEqpkbgVBzxVHYMWQUsxzonIbFMddjEqAAAFvG4Cvb45op7N2cyATdO67AHLnDMOcIAA)
+*An interactive example of the finished application can be seen [here](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcIB0sxhAGhADMBLGXVAbVADsBDAWwjRAFVIAnAWQHsloMAVrgKxu1ROOYA3WuwAEbCPIC8c4AB1qc7XKjEw8VHIoBdPJp27utJABl9huYQCu1BMTEAKAJRqLlnXYIeGd2LXoMIIBHZwgDTw0tAOTGeAALXiN1EABxAFEAFWzzJOTLUKgskDT4eAAHMFQAeiag+gBaIIN22jriDDSlbgBrZ166rG56Jt7iJucOMGL-Mp0Ad2J0gGEgvnFiWihGuXh2WJLVgF9vFYCMdIhqTxc3eA8nrucoeF9E1ctFOwMHoDHJVJ9vhgkLR4LRbpZrrdLiVbrBQkFxEZgMjblBrEgjC93F5iEhfvDAsFQuFIhAYnF4AkKSlghkCXJsvkivhmQEKlUavVGi02p0GT0+gMhqNxpNprN5osmtk5ABqOSki7-bQbba7R5vQ7HU7nXmI0p3B5PIlvLwQn5+C2rQFYdEGsFye1mm4WnHUW5gWhSCCE1zEp7kp2UkJhOQRaKxeJ-bVx1mZDkgAAKLG5Wu1-IzgoazVaEA6XXgEv6g3YIzGdQmonlfUVSjAypAaoUHFd7Ax8Awmt5lmhsKMLrRfYNef+urSO2QBoORyMJogM4RPoRmkuIGRNAYTHQgPsBkEwhAonEBuksm7SlP8A9ye0YmI1E2457eJsj5nUmICA1lDV53h8R1ViCGNwk8bIMAWJR2hBeBinvIFkIwehemeMNbSeBD2EjFNPSpWN6FgkBaHgjgkIcdpNjLVDgDSIJCCqJpkE2DsuwIwckDwOQxFgIIYRDONIm4ZxEGBd9hmROReJIdgDAAOUPLsVRVdVeKgWhVMPLcymuQztEuHc9zwA9GGYQEADFuHYCIhHwS8xAkeBb3kOyHPoZ9bjfD9HBtMCpGoXgIF+F0fyQTxQvCjAYVOMA+O8P1LAAoCQPDcCXwCKDqTjCjCB8pjhzKMQwGcAAjehPycXCwIiiDiLKCAMDqIJg3EAARCBCFoL5GRMlqAR7QNgx8MrkjMqNpoEigpsK7JdKq-gVugVDsls4hlKfOhGGybwNzKcjsnfOopMHagLvgCh4AATzqCBlEQAAPeATAoOpdNgCAMigPh2GUbbdrkfaIBMUrZv+AKbqMCI5wAQVqdgKJkKBYlQ4KvHR2JIp7Sd+wwJT9MYD1cYga5ju1CmvyUXsiZJ+A1IO6HN2pgJTpAdaoGBWhVqgTaQFsPS9sPQ6OcsLnzsumXbu+2hfv+wHlBF0Fwch-BmpG2GpPhjAkZRtHDkxrXsaeCn8fpwmDT50mIHJk3KaOxb0qdumgRt8Q7eZ8W2Z0KnFq5qqpPgMQMBD2oxDux7nsqmrNk1gTsgAZSDCAJd5Exhpm3d9xAcHmBF+7JIHZyRDcm90BkeRi9LvyLQy4D6tAnGwr4IiynysiKKw98+ZLqTUIW-3tC5ugpEwx5nGH12dC5uEtdykaWL6owAHImmQ9fJZhtwRMQfXayktq9GoYY59M5PWEWQ7Fuz3ex4oyBw1QuK+CwNJSCQDFhssbOkTmXzoXdAspy6uWvJIdA8ZS5tQ6n1Ygr1PDrwAMTrx9DAk+ngkDcDRIwb2VVeD3WvlvBwUNLDZFIQYbIWJeQYkBllPCOVFrdxgnXKSAlyIngcN4P+AckQzkoZxeATRUCkhodrPKjwGEt2yu-Jqy8u6kTYbQQe8BOGeG8o5AS8iEoozALws0AidzeAslZI8mBsAXivO5ZghCkDELkFdG6AkI6hzEM1YqmIwY+UOHIAAjAANjqK9OQAA1JQ0I6AAG5-BYXYAAc3fEYAATAABhCbE6gM1NAD3rsmeJSTqBGH8Rk0JA0w5ZLHrQV67QNhIHSCUtJzTMk7k0Lk-BzhmqFOSXINJfS5AAGYylZJydQaiiFkLNWQu0Aw90YBGDCtQCAVS4yyCKUYfp-TSmtKSHUGwSB3wJM2aM9p4yCK0W6AxXyyYqqK2GAk4+1B2QoP6m82gqzCHsBkf4kJcgwDcD0EgOQKCkBgtWaIPE7AjAoMGXC1ZhywAK3ukYKqeJYDDFWT04pAztm7O0PssFRyjAAA4-n+IAKz4pOBAd67Q+CiHYDCd4iyxArLaf6c5NEZnXNQBkYM8hkxvUrAyhyzKxBGFcIDM+7LslnL5gLZqiLkWovRZiuJ6zelbLkFS16pzOXOKks1L5Py-kAqBSCsFSBPkOUBp0GwxAFhGEGdSwhtSwDEAAF7ErkCaxCbqEX6BVb6tVWLNU4u1TsvV-hCWHOoMcgJZSAm6tWfUxpia0kAFJ9W5MjmHLQtz7mPMks8mFEBy02u+UoEpZrAWkkteC-wfr2D2sOU6oZ1LIUORhXCwZgakW6RRRqagMr2hotweqpI2LNkDKjas2NPqo3JupcK+lcAxV4VZcsnN4y80Sv5UoY1RankvIgCSs9Z7RkuUgDAcM5AQCBJSagfxe4zDc1kuQKgBdDzMFqukdgpAXIVGYEWYU8xroPLlE0P9LFSAAAF-EYEQ4E6DmxYO83AQ9J6zAwDCWIHUDylwTCXCAA)*
 
 First let's create an entry point for the application. Create a file `index.html`:
 
@@ -213,13 +213,7 @@ The `m.mount` call renders the specified component (`UserList`) into a DOM eleme
 
 ---
 
-Right now, the list looks rather plain because we have not defined any styles.
-
-There are many similar conventions and libraries that help organize application styles nowadays. Some, like [Bootstrap](http://getbootstrap.com/) dictate a specific set of HTML structures and semantically meaningful class names, which has the upside of providing low cognitive dissonance, but the downside of making customization more difficult. Others, like [Tachyons](http://tachyons.io/) provide a large number of self-describing, atomic class names at the cost of making the class names themselves non-semantic. "CSS-in-JS" is another type of CSS system that is growing in popularity, which basically consists of scoping CSS via transpilation tooling. CSS-in-JS libraries achieve maintainability by reducing the size of the problem space, but come at the cost of having high complexity.
-
-Regardless of what CSS convention/library you choose, a good rule of thumb is to avoid the cascading aspect of CSS. To keep this tutorial simple, we'll just use plain CSS with overly explicit class names, so that the styles themselves provide the atomicity of Tachyons, and class name collisions are made unlikely through the verbosity of the class names. Plain CSS can be sufficient for low-complexity projects (e.g. 3 to 6 man-months of initial implementation time and few project phases).
-
-To add styles, let's first create a file called `styles.css` and include it in the `index.html` file:
+Right now, the list looks rather plain because we have not defined any styles. So let's add a few of them. Let's first create a file called `styles.css` and include it in the `index.html` file:
 
 ```markup
 <!doctype html>
@@ -239,14 +233,26 @@ To add styles, let's first create a file called `styles.css` and include it in t
 Now we can style the `UserList` component:
 
 ```css
-.user-list {list-style:none;margin:0 0 10px;padding:0;}
-.user-list-item {background:#fafafa;border:1px solid #ddd;color:#333;display:block;margin:0 0 1px;padding:8px 15px;text-decoration:none;}
-.user-list-item:hover {text-decoration:underline;}
+.user-list {
+	list-style: none;
+	margin: 0 0 10px;
+	padding: 0;
+}
+
+.user-list-item {
+	background: #fafafa;
+	border: 1px solid #ddd;
+	color: #333;
+	display: block;
+	margin: 0 0 1px;
+	padding: 8px 15px;
+	text-decoration: none;
+}
+
+.user-list-item:hover {
+	text-decoration: underline;
+}
 ```
-
-The CSS above is written using a convention of keeping all styles for a rule in a single line, in alphabetical order. This convention is designed to take maximum advantage of screen real estate, and makes it easier to scan the CSS selectors (since they are always on the left side) and their logical grouping, and it enforces predictable and uniform placement of CSS rules for each selector.
-
-Obviously you can use whatever spacing/indentation convention you prefer. The example above is just an illustration of a not-so-widespread convention that has strong rationales behind it, but deviates from the more widespread cosmetic-oriented spacing conventions.
 
 Reloading the browser window now should display some styled elements.
 
@@ -339,20 +345,64 @@ module.exports = {
 }
 ```
 
-And let's add some styles to `styles.css`:
+And let's add some more styles to `styles.css`:
 
 ```css
 /* styles.css */
-body,.input,.button {font:normal 16px Verdana;margin:0;}
+body, .input, .button {
+	font: normal 16px Verdana;
+	margin: 0;
+}
 
-.user-list {list-style:none;margin:0 0 10px;padding:0;}
-.user-list-item {background:#fafafa;border:1px solid #ddd;color:#333;display:block;margin:0 0 1px;padding:8px 15px;text-decoration:none;}
-.user-list-item:hover {text-decoration:underline;}
+.user-list {
+	list-style: none;
+	margin: 0 0 10px;
+	padding: 0;
+}
 
-.label {display:block;margin:0 0 5px;}
-.input {border:1px solid #ddd;border-radius:3px;box-sizing:border-box;display:block;margin:0 0 10px;padding:10px 15px;width:100%;}
-.button {background:#eee;border:1px solid #ddd;border-radius:3px;color:#333;display:inline-block;margin:0 0 10px;padding:10px 15px;text-decoration:none;}
-.button:hover {background:#e8e8e8;}
+.user-list-item {
+	background: #fafafa;
+	border: 1px solid #ddd;
+	color: #333;
+	display: block;
+	margin: 0 0 1px;
+	padding: 8px 15px;
+	text-decoration: none;
+}
+
+.user-list-item:hover {
+	text-decoration: underline;
+}
+
+.label {
+	display: block;
+	margin: 0 0 5px;
+}
+
+.input {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	box-sizing: border-box;
+	display: block;
+	margin: 0 0 10px;
+	padding: 10px 15px;
+	width: 100%;
+}
+
+.button {
+	background: #eee;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	color: #333;
+	display: inline-block;
+	margin: 0 0 10px;
+	padding: 10px 15px;
+	text-decoration: none;
+}
+
+.button:hover {
+	background: #e8e8e8;
+}
 ```
 
 Right now, this component does nothing to respond to user events. Let's add some code to our `User` model in `src/models/User.js`. This is how the code is right now:
@@ -570,23 +620,73 @@ This component is fairly straightforward, it has a `<nav>` with a link to the li
 
 Notice there's also a `<section>` element with `vnode.children` as children. `vnode` is a reference to the vnode that represents an instance of the Layout component (i.e. the vnode returned by a `m(Layout)` call). Therefore, `vnode.children` refer to any children of that vnode.
 
-Let's add some styles:
+And let's update the styles once more:
 
 ```css
 /* styles.css */
-body,.input,.button {font:normal 16px Verdana;margin:0;}
+body, .input, .button {
+	font: normal 16px Verdana;
+	margin: 0;
+}
 
-.layout {margin:10px auto;max-width:1000px;}
-.menu {margin:0 0 30px;}
+.layout {
+	margin: 10px auto;
+	max-width: 1000px;
+}
 
-.user-list {list-style:none;margin:0 0 10px;padding:0;}
-.user-list-item {background:#fafafa;border:1px solid #ddd;color:#333;display:block;margin:0 0 1px;padding:8px 15px;text-decoration:none;}
-.user-list-item:hover {text-decoration:underline;}
+.menu {
+	margin: 0 0 30px;
+}
 
-.label {display:block;margin:0 0 5px;}
-.input {border:1px solid #ddd;border-radius:3px;box-sizing:border-box;display:block;margin:0 0 10px;padding:10px 15px;width:100%;}
-.button {background:#eee;border:1px solid #ddd;border-radius:3px;color:#333;display:inline-block;margin:0 0 10px;padding:10px 15px;text-decoration:none;}
-.button:hover {background:#e8e8e8;}
+.user-list {
+	list-style: none;
+	margin: 0 0 10px;
+	padding: 0;
+}
+
+.user-list-item {
+	background: #fafafa;
+	border: 1px solid #ddd;
+	color: #333;
+	display: block;
+	margin: 0 0 1px;
+	padding: 8px 15px;
+	text-decoration: none;
+}
+
+.user-list-item:hover {
+	text-decoration: underline;
+}
+
+.label {
+	display: block;
+	margin: 0 0 5px;
+}
+
+.input {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	box-sizing: border-box;
+	display: block;
+	margin: 0 0 10px;
+	padding: 10px 15px;
+	width: 100%;
+}
+
+.button {
+	background: #eee;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	color: #333;
+	display: inline-block;
+	margin: 0 0 10px;
+	padding: 10px 15px;
+	text-decoration: none;
+}
+
+.button:hover {
+	background: #e8e8e8;
+}
 ```
 
 Let's change the router in `src/index.js` to add our layout into the mix:
