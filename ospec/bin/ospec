@@ -11,7 +11,7 @@ function parseArgs(argv) {
 	var args = {}
 	var name
 	argv.forEach(function(arg) {
-		if (/^--/.test(arg)) {
+		if ((/^--/).test(arg)) {
 			name = arg.substr(2)
 			args[name] = args[name] || []
 		} else {
@@ -24,12 +24,15 @@ function parseArgs(argv) {
 
 var args = parseArgs(process.argv)
 var globList = args.globs && args.globs.length ? args.globs : ["**/tests/**/*.js"]
-var ignore = ["**/node_modules/**"].concat(args.ignore||[])
+var ignore = ["**/node_modules/**"].concat(args.ignore || [])
 var cwd = process.cwd()
 
-args.require && args.require.forEach(function(module) {
-	module && require(require.resolve(module, { basedir: cwd }))
-})
+if (args.require) {
+	args.require.forEach(function(module) {
+		// eslint-disable-next-line global-require
+		if (module) require(require.resolve(module, {basedir: cwd}))
+	})
+}
 
 var pending = globList.length
 globList.forEach(function(globPattern) {

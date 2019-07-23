@@ -10,7 +10,7 @@
 
 ### Description
 
-JSX is a syntax extension that enables you to write HTML tags interspersed with JavaScript. It's not part of any JavaScript standards and it's not required for building applications, but it may be more pleasing to use depending on your team's preferences.
+JSX is a syntax extension that enables you to write HTML tags interspersed with JavaScript. It's not part of any JavaScript standards and it's not required for building applications, but it may be more pleasing to use depending on you or your team's preferences.
 
 ```jsx
 function MyComponent() {
@@ -185,64 +185,154 @@ You can use hooks in your production environment to run the production build scr
 
 ### JSX vs hyperscript
 
-JSX is essentially a trade-off: it introduces a non-standard syntax that cannot be run without appropriate tooling, in order to allow a developer to write HTML code using curly braces. The main benefit of using JSX instead of regular HTML is that the JSX specification is much stricter and yields syntax errors when appropriate, whereas HTML is far too forgiving and can make syntax issues difficult to spot.
+JSX and hyperscript are two different syntaxes you can use for specifying vnodes, and they have different tradeoffs:
 
-Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute. Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`. Also, unlike HTML, JSX is based on XML, so you can do things like `<div class="test" />` as equivalent to `<div class="test"></div>`, where in HTML you can only use the second.
+- JSX is much more approachable if you're coming from an HTML/XML background and are more comfortable specifying DOM elements with that kind of syntax. It is also slightly cleaner in many cases since it uses fewer punctuation and the attributes contain less visual noise, so many people find it much easier to read. And of course, many common editors provide autocomplete support for DOM elements in the same way they do for HTML. However, it requires an extra build step to use, editor support isn't as broad as it is with normal JS, and it's considerably more verbose. It's also a bit more verbose when dealing with a lot of dynamic content because you have to use interpolations for everything.
 
-JSX is useful for teams where HTML is primarily written by someone without JavaScript experience, but it requires a significant amount of tooling to maintain (whereas plain HTML can, for the most part, simply be opened in a browser).
+- Hyperscript is more approachable if you come from a backend JS background that doesn't involve much HTML or XML. It's more concise with less redundancy, and it provides a CSS-like sugar for static classes, IDs, and other attributes. It also can be used with no build step at all, although [you can add one if you wish](https://github.com/MithrilJS/mopt). And it's slightly easier to work with in the face of a lot of dynamic content, because you don't need to "interpolate" anything. However, the terseness does make it harder to read for some people, especially those less experienced and coming from a front end HTML/CSS/XML background, and I'm not aware of any plugins that auto-complete parts of hyperscript selectors like IDs, classes, and attributes.
 
-Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
+You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@isiahmeadows](https://github.com/isiahmeadows/) with some alterations for clarity and readability:
 
-- it does not require repeating the tag name in closing tags when children are present (e.g. `m("div", m("span"))` vs `<div><span /></div>`)
-- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<a class="button"></a>`)
+```js
+function SummaryView() {
+    let tag, posts
 
-In addition, since hyperscript is plain JavaScript, it's often more natural to indent than JSX:
+    function init({attrs}) {
+        Model.sendView(attrs.tag != null)
+        if (attrs.tag != null) {
+            tag = attrs.tag.toLowerCase()
+            posts = Model.getTag(tag)
+        } else {
+            tag = undefined
+            posts = Model.posts
+        }
+    }
 
-```jsx
-//JSX
-function BigComponent() {
-	function activate() { /* ... */ }
-	function deactivate() { /* ... */ }
-	function update() { /* ... */ }
-	return {
-		view: ({attrs}) => (
-			<>
-				{attrs.items.map((item) => <div>{item.name}</div>)}
-				<div
-					ondragover={activate}
-					ondragleave={deactivate}
-					ondragend={deactivate}
-					ondrop={update}
-					onblur={deactivate}
-				/>
-			</>
-		)
-	}
-}
+    function feed(type, href) {
+        return m(".feed", [
+            type,
+            m("a", {href}, m("img.feed-icon[src=./feed-icon-16.gif]")),
+        ])
+    }
 
-// hyperscript
-function BigComponent() {
-	function activate() { /* ... */ }
-	function deactivate() { /* ... */ }
-	function update() { /* ... */ }
-	return {
-		view: ({attrs}) => [
-			attrs.items.map((item) => m("div", item.name)),
-			m("div", {
-				ondragover: this.activate,
-				ondragleave: this.deactivate,
-				ondragend: this.deactivate,
-				ondrop: this.update,
-				onblur: this.deactivate,
-			})
-		]
-	}
+    return {
+        oninit: init,
+        // To ensure the tag gets properly diffed on route change.
+        onbeforeupdate: init,
+        view: () =>
+            m(".blog-summary", [
+                m("p", "My ramblings about everything"),
+
+                m(".feeds", [
+                    feed("Atom", "blog.atom.xml"),
+                    feed("RSS", "blog.rss.xml"),
+                ]),
+
+                tag != null
+                    ? m(TagHeader, {len: posts.length, tag})
+                    : m(".summary-header", [
+                        m(".summary-title", "Posts, sorted by most recent."),
+                        m(TagSearch),
+                    ]),
+
+                m(".blog-list", posts.map((post) =>
+                    m(m.route.Link, {
+                        class: "blog-entry",
+                        href: `/posts/${post.url}`,
+                    }, [
+                        m(".post-date", post.date.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                        })),
+
+                        m(".post-stub", [
+                            m(".post-title", post.title),
+                            m(".post-preview", post.preview, "..."),
+                        ]),
+
+                        m(TagList, {post, tag}),
+                    ])
+                )),
+            ])
+    }
 }
 ```
 
-In non-trivial applications, it's possible for components to have more control flow and component configuration code than markup, making a JavaScript-first approach more readable than an HTML-first approach.
+Here's the exact equivalent of the above code, using JSX instead. You can see how the two syntaxes differ just in this bit, and what tradeoffs apply.
 
-Needless to say, since hyperscript is pure JavaScript, there's no need to run a compilation step to produce runnable code.
+```jsx
+function SummaryView() {
+    let tag, posts
+
+    function init({attrs}) {
+        Model.sendView(attrs.tag != null)
+        if (attrs.tag != null) {
+            tag = attrs.tag.toLowerCase()
+            posts = Model.getTag(tag)
+        } else {
+            tag = undefined
+            posts = Model.posts
+        }
+    }
+
+    function feed(type, href) {
+        return (
+            <div class="feed">
+                {type}
+                <a href={href}><img class="feed-icon" src="./feed-icon-16.gif" /></a>
+            </div>
+        )
+    }
+
+    return {
+        oninit: init,
+        // To ensure the tag gets properly diffed on route change.
+        onbeforeupdate: init,
+        view: () => (
+            <div class="blog-summary">
+                <p>My ramblings about everything</p>
+
+                <div class="feeds">
+                    {feed("Atom", "blog.atom.xml")}
+                    {feed("RSS", "blog.rss.xml")}
+                </div>
+
+                {tag != null
+                    ? <TagHeader len={posts.length} tag={tag} />
+                    : (
+                        <div class="summary-header">
+                            <div class="summary-title">Posts, sorted by most recent</div>
+                            <TagSearch />
+                        </div>
+                    )
+                }
+
+                <div class="blog-list">
+                    {posts.map((post) => (
+                        <m.route.Link class="blog-entry" href={`/posts/${post.url}`}>
+                            <div class="post-date">
+                                {post.date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </div>
+
+                            <div class="post-stub">
+                                <div class="post-title">{post.title}</div>
+                                <div class="post-preview">{post.preview}...</div>
+                            </div>
+
+                            <TagList post={post} tag={tag} />
+                        </m.route.Link>
+                    ))}
+                </div>
+            </div>
+        )
+    }
+}
+```
 
 ---
 

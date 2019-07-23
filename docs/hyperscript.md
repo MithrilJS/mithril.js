@@ -438,7 +438,7 @@ m("ul", users.map(function(u) { // <ul>
 	                            //   <li>Mary</li>
 }))                             // </ul>
 
-// ES6:
+// ES6+:
 // m("ul", users.map(u =>
 //   m("li", u.name)
 // ))

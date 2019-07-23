@@ -1,103 +1,175 @@
 # Testing
 
-Mithril comes with a testing framework called [ospec](https://github.com/MithrilJS/mithril.js/tree/master/ospec). What makes it different from most test frameworks is that it avoids all configurability for the sake of avoiding [yak shaving](http://catb.org/jargon/html/Y/yak-shaving.html) and [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis).
+- [Setup](#setup)
+- [Best practices](#best-practices)
+- [Unit testing](#unit-testing)
 
-The easist way to setup the test runner is to create an NPM script for it. Open your project's `package.json` file and edit the `test` line under the `scripts` section:
+---
 
+### Setup
+
+Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://mochajs.org/), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
+
+```bash
+npm install --save-dev ospec mithril-query jsdom
 ```
+
+And getting them set up is also relatively easy and requires a few short steps:
+
+1. Add a `"test": "mocha"` to your npm scripts in your `package.json` file. This will end up looking something like this, maybe with a few extra fields relevant to your project:
+
+```json
 {
 	"name": "my-project",
 	"scripts": {
-		"test": "ospec"
+		"test": "ospec --require ./test-setup.js"
 	}
 }
 ```
 
-Remember this is a JSON file, so object key names such as `"test"` must be inside of double quotes.
-
-To setup a test suite, create a `tests` folder and inside of it, create a test file:
+2. Create a setup file, `test-setup.js`, that looks like this:
 
 ```javascript
-// file: tests/math-test.js
-var o = require("mithril/ospec/ospec")
+var o = require("ospec")
+var jsdom = require("jsdom")
+var dom = new jsdom.JSDOM("", {
+	// So we can get `requestAnimationFrame`
+	pretendToBeVisual: true,
+})
 
-o.spec("math", function() {
-	o("addition works", function() {
-		o(1 + 2).equals(3)
+// Fill in the globals Mithril needs to operate. Also, the first two are often
+// useful to have just in tests.
+global.window = dom.window
+global.document = dom.window.document
+global.requestAnimationFrame = dom.window.requestAnimationFrame
+
+// Require Mithril to make sure it loads properly.
+require("mithril")
+
+// And now, make sure JSDOM ends when the tests end.
+o.after(function() {
+	dom.window.close()
+})
+```
+
+3. Create a component, say `src/my-component.js`, that looks like this:
+
+```javascript
+function MyComponent() {
+	return {
+		view: function (vnode) {
+			return m("div", vnode.attrs.text)
+		}
+	}
+}
+
+module.exports = MyComponent
+```
+
+4. And finally, create a test file, say `src/tests/my-component.js`, that looks like this:
+
+```javascript
+var mq = require("mithril-query")
+var o = require("ospec")
+
+var MyComponent = require("../my-component.js")
+
+o.spec("MyComponent", function() {
+	o("things are working", function() {
+		var out = mq(MyComponent, {text: "What a wonderful day to be alive!"})
+
+		out.should.contain("day")
 	})
 })
 ```
 
-To run the test, use the command `npm test`. Ospec considers any JavaScript file inside of a `tests` folder (anywhere in the project) to be a test.
+Once you've got all that set up, in that same terminal you installed everything to, run this command.
 
-```
+```bash
 npm test
 ```
 
----
+Provided you have everything set up properly, you should end up with output that looks something like this:
 
-### Running mithril in a non-browser environment
-
-Mithril has a few dependencies on globals that exist in all its supported browser environments but are missing in all non-browser environments. To work around this you can use the browser mocks that ship with the mithril npm package.
-
-The simplest way to do this is ensure the following snippet of code runs **before** you include mithril itself in your project.
-
-```js
-// Polyfill DOM env for mithril
-global.window = require("mithril/test-utils/browserMock.js")();
-global.document = window.document;
+```
+––––––
+All 1 assertions passed in 0ms
 ```
 
-Once that snippet has been run you can `require("mithril")` and it should be quite happy.
-
 ---
 
-### Good testing practices
+### Best practices
 
-Generally speaking, there are two ways to write tests: upfront and after the fact.
+Testing is relatively straightforward in most cases. Each test usually consists of three parts: set up state, run code, check results. But there are things you do need to keep in mind while you test, to ensure you get the best bang for your buck and to help save you a *lot* of time.
 
-Writing tests upfront requires specifications to be frozen. Upfront tests are a great way of codifying the rules that a yet-to-be-implemented API must obey. However, writing tests upfront may not be a suitable strategy if you don't have a reasonable idea of what your project will look like, if the scope of the API is not well known or if it's likely to change (e.g. based on previous history at the company).
+1. First and foremost, you want to write your tests as early in the process as possible. You don't need to write your tests immediately, but you want to at the very least write your tests as you write your code. That way, if things aren't working as you thought they were, you're spending 5 minutes now, knowing exactly what's going on, instead of 5 days straight 6 months later when you're trying to release that amazing app idea that's now spectacularly broken. You don't want to be stuck in *that* rut.
 
-Writing tests after the fact is a way to document the behavior of a system and avoid regressions. They are useful to ensure that obscure corner cases are not inadvertently broken and that previously fixed bugs do not get re-introduced by unrelated changes.
+1. Test the API, test the behavior, but don't test the implementation. If you need to test that an event is being fired if a particular action happens, that's all fine and dandy, and feel free to do that. But don't test the entire DOM structure in your test. You don't want to be stuck having to rewrite part of 5 different tests just because you added a simple style-related class. You also don't want to rewrite all your tests simply because you added a new instance method to an object.
+
+1. Don't be afraid to repeat yourself, and only abstract when you're literally doing the same thing tens to hundreds of times in the same file or when you're explicitly generating tests. Normally, in code, it's a good idea to draw a line when you're repeating the same logic more than 2-3 times and abstract it into a function, but when you're testing, even though there's a lot of duplicate logic, that redundancy helps give you context when troubleshooting tests. Remember: tests are specifications, not normal code.
 
 ---
 
 ### Unit testing
 
-Unit testing is the practice of isolating a part of an application (typically a single module), and asserting that, given some inputs, it produces the expected outputs.
+Unit testing isolates parts of your application, usually a single module but sometimes even a single function, and tests them as a single "unit". It checks that given a particular input and initial state, it produces the desired output and side effects. This all seems complicated, but I promise, it's not. Here's a couple unit tests for JavaScript's `+` operator, applied to numbers:
 
-Testing a Mithril component is easy. Let's assume we have a simple component like this:
+```javascript
+o.spec("addition", function() {
+	o("works with integers", function() {
+		o(1 + 2).equals(3)
+	})
+
+	o("works with floats", function() {
+		// Yep, thanks IEEE-754 floating point for being weird.
+		o(0.1 + 0.2).equals(0.30000000000000004)
+	})
+})
+```
+
+Just like you can unit test simple stuff like that, you can unit test Mithril components, too. Suppose you have this component:
 
 ```javascript
 // MyComponent.js
 var m = require("mithril")
 
-module.exports = {
-	view: function() {
-		return m("div", 
-		    m("p", "Hello World")
-		)
+function MyComponent() {
+	return {
+		view: function(vnode) {
+			return m("div", [
+				vnode.attrs.type === "goodbye"
+					? "Goodbye, world!"
+					: "Hello, world!"
+			])
+		}
 	}
 }
+
+module.exports = MyComponent
 ```
 
-We can then create a `tests/MyComponent.js` file and create a test for this component like this:
+You could easily create a few unit tests for that.
 
-```javascript
-var MyComponent = require("MyComponent")
+```js
+var mq = require("mithril-query")
+var MyComponent = require("./MyComponent")
 
 o.spec("MyComponent", function() {
-	o("returns a div", function() {
-		var vnode = MyComponent.view()
-		
-		o(vnode.tag).equals("div")
-		o(vnode.children.length).equals(1)
-		o(vnode.children[0].tag).equals("p")
-		o(vnode.children[0].children).equals("Hello world")
+	o("says 'Hello, world!' when `type` is `hello`", function() {
+		var out = mq(MyComponent, {type: "hello"})
+		out.should.contain("Hello, world!")
+	})
+
+	o("says 'Goodbye, world!' when `type` is `goodbye`", function() {
+		var out = mq(MyComponent, {type: "goodbye"})
+		out.should.contain("Goodbye, world!")
+	})
+
+	o("says 'Hello, world!' when no `type` is given", function() {
+		var out = mq(MyComponent)
+		out.should.contain("Hello, world!")
 	})
 })
 ```
 
-Typically, you wouldn't test the structure of the vnode tree so granularly, and you would instead only test non-trivial, dynamic aspects of the view. A tool that can help making testing easier with deep vnode trees is [Mithril Query](https://github.com/StephanHoyer/mithril-query).
-
-Sometimes, you need to mock the dependencies of a module in order to test the module in isolation. [Mockery](https://github.com/mfncooper/mockery) is one tool that allows you to do that.
+As mentioned before, tests are specifications. You can see from the tests how the component is supposed to work, and the component does it very effectively.

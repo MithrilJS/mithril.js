@@ -22,7 +22,7 @@
 
 ### Description
 
-A [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
+An [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
 
 A Promise is a mechanism for working with asynchronous computations.
 
