@@ -1,8 +1,8 @@
 ---
-name: "🐛 Bug"
+name: "\U0001F41B Bug"
 about: Report a bug in Mithril
 title: ''
-labels: bug
+labels: 'Type: Bug'
 assignees: isiahmeadows
 
 ---
