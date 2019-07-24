@@ -41,6 +41,11 @@ $ npm install mithril --save
 # For the most recent unstable version
 $ npm install mithril@next --save
 ```
+TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
+
+```bash
+$ npm install @types/mithril --save-dev
+```
 
 The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.
 

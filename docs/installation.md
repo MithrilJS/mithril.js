@@ -18,6 +18,9 @@ If you're new to JavaScript or just want a very simple setup to get your feet we
 ### NPM
 
 ```bash
+# For the most recent stable version
+$ npm install mithril --save
+# For the most recent unstable version
 $ npm install mithril@next --save
 ```
 
