@@ -176,7 +176,7 @@ function traverseDirectory(pathname, callback) {
 
 //run
 traverseDirectory("./docs", function(pathname) {
-	if (pathname.indexOf(".md") > -1 && !pathname.match(/change-log|node_modules/)) {
+	if (pathname.indexOf(".md") > -1 && !pathname.match(/change-log|migration-|node_modules/)) {
 		fs.readFile(pathname, "utf8", function(err, data) {
 			if (err) console.log(err)
 			else lint(pathname, data)

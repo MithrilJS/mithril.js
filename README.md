@@ -1,4 +1,4 @@
-mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
+mithril.js [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![npm License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
 ==========
 
 <p align="center">
@@ -29,17 +29,19 @@ Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, 
 ### CDN
 
 ```html
-<script src="https://unpkg.com/mithril@next/mithril.js"></script>
-<!-- or -->
-<script src="https://cdn.jsdelivr.net/npm/mithril@next/mithril.js"></script>
+<!-- Development: whichever you prefer -->
+<script src="https://unpkg.com/mithril/mithril.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.js"></script>
+
+<!-- Production: whichever you prefer -->
+<script src="https://unpkg.com/mithril/mithril.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.min.js"></script>
 ```
 
 ### npm
+
 ```bash
-# For the most recent stable version
-$ npm install mithril --save
-# For the most recent unstable version
-$ npm install mithril@next --save
+npm install mithril --save
 ```
 
 The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.

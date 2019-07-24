@@ -24,13 +24,13 @@ The `<!doctype html>` line indicates this is an HTML 5 document. The first `char
 
 We could create the entire application in a single JavaScript file, but doing so would make it difficult to navigate the codebase later on. Instead, let's split the code into *modules*, and assemble these modules into a *bundle* `bin/app.js`.
 
-There are many ways to setup a bundler tool, but most are distributed via NPM. In fact, most modern JavaScript libraries and tools are distributed that way, including Mithril. NPM stands for Node.js Package Manager. To download NPM, [install Node.js](https://nodejs.org/en/); NPM is installed automatically with it. Once you have Node.js and NPM installed, open the command line and run this command:
+There are many ways to setup a bundler tool, but most are distributed via npm. In fact, most modern JavaScript libraries and tools are distributed that way, including Mithril. To download npm, [install Node.js](https://nodejs.org/en/); npm is installed automatically with it. Once you have Node.js and npm installed, open the command line and run this command:
 
 ```bash
 npm init -y
 ```
 
-If NPM is installed correctly, a file `package.json` will be created. This file will contain a skeleton project meta-description file. Feel free to edit the project and author information in this file.
+If npm is installed correctly, a file `package.json` will be created. This file will contain a skeleton project meta-description file. Feel free to edit the project and author information in this file.
 
 ---
 
@@ -76,7 +76,7 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](http://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](https://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 *Note: third-party cookies may have to be enabled for the REM endpoint to work.*
 
@@ -138,7 +138,7 @@ module.exports = {
 By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and since its syntax is just JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem. For example:
 
 - You can use [Babel](es6.md) to transpile ES6+ to ES5 for IE and to transpile [JSX](jsx.md) (an inline HTML-like syntax extension) to appropriate hyperscript calls.
-- You can use [ESLint](http://eslint.org/) for easy linting with no special plugins.
+- You can use [ESLint](https://eslint.org/) for easy linting with no special plugins.
 - You can use [Terser](https://github.com/terser-js/terser) or [UglifyJS](https://github.com/mishoo/UglifyJS2) (ES5 only) to minify your code easily.
 - You can use [Istanbul](https://github.com/istanbuljs/nyc) for code coverage.
 - You can use [TypeScript](https://www.typescriptlang.org/) for easy code analysis. (There are [community-supported type definitions available](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mithril), so you don't need to roll your own.)

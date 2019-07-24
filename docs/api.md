@@ -41,7 +41,7 @@ var Home = {
 }
 
 m.route(document.body, "/home", {
-	"/home": Home, // defines `http://localhost/#!/home`
+	"/home": Home, // defines `https://example.com/#!/home`
 })
 ```
 

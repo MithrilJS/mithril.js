@@ -38,9 +38,9 @@ When using JSX, it's possible to interpolate JavaScript expressions within JSX t
 
 ```jsx
 var greeting = "Hello"
-var url = "http://google.com"
+var url = "https://google.com"
 var link = <a href={url}>{greeting}!</a>
-// yields <a href="http://google.com">Hello!</a>
+// yields <a href="https://google.com">Hello!</a>
 ```
 
 Components can be used by using a convention of uppercasing the first letter of the component name:
@@ -56,7 +56,7 @@ m.render(document.body, <MyComponent />)
 
 The simplest way to use JSX is via a [Babel](https://babeljs.io/) plugin.
 
-Babel requires NPM, which is automatically installed when you install [Node.js](https://nodejs.org/en/). Once NPM is installed, create a project folder and run this command:
+Babel requires npm, which is automatically installed when you install [Node.js](https://nodejs.org/en/). Once npm is installed, create a project folder and run this command:
 
 ```bash
 npm init -y
@@ -340,4 +340,4 @@ function SummaryView() {
 
 In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
-When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.
+When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.

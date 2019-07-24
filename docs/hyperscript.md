@@ -122,8 +122,8 @@ m("section.container")
 m("input[type=text][placeholder=Name]")
 // <input type="text" placeholder="Name" />
 
-m("a#exit.external[href='http://example.com']", "Leave")
-// <a id="exit" class="external" href="http://example.com">Leave</a>
+m("a#exit.external[href='https://example.com']", "Leave")
+// <a id="exit" class="external" href="https://example.com">Leave</a>
 ```
 
 If you omit the tag name, Mithril assumes a `div` tag.
@@ -215,7 +215,7 @@ m("a-scene", [
 ])
 ```
 
-And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](http://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
+And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](https://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
 
 ```javascript
 m("brick-deck[selected-index=0]", [/* ... */]) // lowercase
@@ -232,7 +232,7 @@ For custom elements, it doesn't auto-stringify properties, in case they are obje
 m("my-special-element", {
 	whitelist: [
 		"https://example.com",
-		"http://neverssl.com",
+		"https://neverssl.com",
 		"https://google.com",
 	],
 })
@@ -462,7 +462,7 @@ You cannot use JavaScript statements such as `if` or `for` within JavaScript exp
 
 In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
 
-When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
+When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html).
 
 ---
 

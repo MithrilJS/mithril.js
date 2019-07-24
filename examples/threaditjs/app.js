@@ -80,7 +80,7 @@ var Header = {
 			m("p.head_links", [
 				m("a[href='https://github.com/koglerjs/threaditjs/tree/master/examples/mithril']", "Source"),
 				" | ",
-				m("a[href='http://threaditjs.com']", "ThreaditJS Home"),
+				m("a[href='https://threaditjs.com']", "ThreaditJS Home"),
 			]),
 			m("h2", [
 				m(m.route.Link, {href: "/"}, "ThreaditJS: Mithril"),

@@ -20,7 +20,7 @@ module.exports = function(options) {
 	var spymap = []
 
 	// This way I'm not also implementing a partial `URL` polyfill. Based on the
-	// regexp at http://urlregex.com/, but adapted to allow relative URLs and
+	// regexp at https://urlregex.com/, but adapted to allow relative URLs and
 	// care only about HTTP(S) URLs.
 	var urlHash = "#[?!/+=&;%@.\\w_-]*"
 	var urlQuery = "\\?[!/+=&;%@.\\w_-]*"

@@ -26,4 +26,5 @@
 - Misc
 	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)
-	- [v1 Documentation](archive/v1.1.6)
+	- [v1 Documentation](https://mithril.js.org/archive/v1.1.6/)
+	- [v0.2 Documentation](https://mithril.js.org/archive/v0.2.5/)

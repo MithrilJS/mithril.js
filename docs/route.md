@@ -43,7 +43,7 @@ var Home = {
 }
 
 m.route(document.body, "/home", {
-	"/home": Home, // defines `http://localhost/#!/home`
+	"/home": Home, // defines `https://localhost/#!/home`
 })
 ```
 
@@ -297,9 +297,9 @@ Routing without page refreshes is made partially possible by the [`history.pushS
 
 The routing strategy dictates how a library might actually implement routing. There are three general strategies that can be used to implement a SPA routing system, and each has different caveats:
 
-- `m.route.prefix = '#!'` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `http://localhost/#!/page1`
-- `m.route.prefix = '?'` – Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
-- `m.route.prefix = ''` – Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
+- `m.route.prefix = '#!'` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `https://localhost/#!/page1`
+- `m.route.prefix = '?'` – Using the querystring. A URL using this strategy typically looks like `https://localhost/?/page1`
+- `m.route.prefix = ''` – Using the pathname. A URL using this strategy typically looks like `https://localhost/page1`
 
 Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState`, because it can fall back to using `onhashchange`. Use this strategy if you want to keep the hashes purely local.
 
@@ -503,8 +503,8 @@ m.route.prefix = "?"
 m.route.prefix = "#"
 
 // set to pathname strategy on a non-root URL
-// e.g. if the app lives under `http://localhost/my-app` and something else
-// lives under `http://localhost`
+// e.g. if the app lives under `https://localhost/my-app` and something else
+// lives under `https://localhost`
 m.route.prefix = "/my-app"
 ```
 
