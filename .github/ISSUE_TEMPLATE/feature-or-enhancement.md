@@ -1,8 +1,8 @@
 ---
-name: "🚀 Feature or Enhancement"
+name: "\U0001F680 Feature or Enhancement"
 about: Suggest an idea or feature for Mithril
 title: ''
-labels: enhancement
+labels: 'Type: Enhancement'
 assignees: isiahmeadows
 
 ---

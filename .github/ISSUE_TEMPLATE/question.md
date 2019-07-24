@@ -1,8 +1,8 @@
 ---
-name: "🙋‍♀️ Question"
+name: "\U0001F64B‍♀️ Question"
 about: Ask a question about Mithril
 title: ''
-labels: question
+labels: 'Type: Question'
 assignees: ''
 
 ---
