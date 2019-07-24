@@ -1,5 +1,6 @@
 # Change log
 
+- [v2.0.1](#v201)
 - [v2.0.0](#v200)
 - [Migrating from v1.x](migration-v1x.md)
 - [Migrating from v0.2.x](migration-v02x.md)
@@ -12,6 +13,10 @@
 ---
 
 ### Upcoming...
+
+### v2.0.1
+
+Same as v2.0.0, but with a publish that didn't have a botched upload.
 
 ### v2.0.0
 
