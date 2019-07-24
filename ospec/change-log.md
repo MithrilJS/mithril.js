@@ -12,6 +12,9 @@
 
 ### Upcoming...
 
+### 4.0.0
+- Pull ESM support out
+
 ### 3.1.0
 - ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)
 <!-- Add new lines here. Version number will be decided later -->
