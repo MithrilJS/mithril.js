@@ -291,8 +291,12 @@ Clicking the button should now update the count.
 
 #### Live Example
 
-<p data-height="265" data-theme-id="light" data-slug-hash="WjeQBW" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril XHR Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/WjeQBW/">Mithril XHR Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="isiahmeadows" data-slug-hash="aeBZEq" data-preview="true" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Mithril XHR Example">
+  <span>See the Pen <a href="https://codepen.io/isiahmeadows/pen/aeBZEq/">
+  Mithril XHR Example</a> by Isiah Meadows (<a href="https://codepen.io/isiahmeadows">@isiahmeadows</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
 
 ---
 
