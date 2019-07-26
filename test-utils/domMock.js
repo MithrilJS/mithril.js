@@ -94,7 +94,7 @@ module.exports = function(options) {
 		}
 		else {
 			this.childNodes.push(child)
-			if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+			if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 			child.parentNode = this
 		}
 	}
@@ -124,14 +124,14 @@ module.exports = function(options) {
 				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
 				while (child.firstChild) {
 					var subchild = child.firstChild
-					child.removeChild(subchild)
+					removeChild.call(child, subchild)
 					subchild.parentNode = this
 				}
 				child.childNodes = []
 			}
 			else {
 				this.childNodes.splice(refIndex, 0, child)
-				if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+				if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 				child.parentNode = this
 			}
 		}
@@ -214,14 +214,14 @@ module.exports = function(options) {
 					if (ns != null) element.setAttributeNS(ns, name, value)
 					else element.setAttribute(name, value)
 				})
-				stack[depth].appendChild(element)
+				appendChild.call(stack[depth], element)
 				if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
 			}
 			else if (endTag) {
 				depth--
 			}
 			else if (text) {
-				stack[depth].appendChild($window.document.createTextNode(text)) // FIXME handle html entities
+				appendChild.call(stack[depth], $window.document.createTextNode(text)) // FIXME handle html entities
 			}
 		})
 	}
@@ -319,7 +319,7 @@ module.exports = function(options) {
 					},
 					set innerHTML(value) {
 						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-						while (this.firstChild) this.removeChild(this.firstChild)
+						while (this.firstChild) removeChild.call(this, this.firstChild)
 						var match = value.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/), root, ns
 						if (match) {
 							var value = match[1]
@@ -659,11 +659,19 @@ module.exports = function(options) {
 					nodeType: 3,
 					nodeName: "#text",
 					parentNode: null,
+					get childNodes() { return [] },
+					get firstChild() { return null },
 					get nodeValue() {return nodeValue},
 					set nodeValue(value) {
 						/*eslint-disable no-implicit-coercion*/
 						nodeValue = "" + value
 						/*eslint-enable no-implicit-coercion*/
+					},
+					get nextSibling() {
+						if (this.parentNode == null) return null
+						var index = this.parentNode.childNodes.indexOf(this)
+						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
+						return this.parentNode.childNodes[index + 1] || null
 					},
 				}
 			},
@@ -691,9 +699,9 @@ module.exports = function(options) {
 		},
 	}
 	$window.document.documentElement = $window.document.createElement("html")
-	$window.document.documentElement.appendChild($window.document.createElement("head"))
+	appendChild.call($window.document.documentElement, $window.document.createElement("head"))
 	$window.document.body = $window.document.createElement("body")
-	$window.document.documentElement.appendChild($window.document.body)
+	appendChild.call($window.document.documentElement, $window.document.body)
 	activeElement = $window.document.body
 
 	if (options.spy) $window.__getSpies = getSpies

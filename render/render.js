@@ -86,9 +86,12 @@ module.exports = function($window) {
 		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
+		// Capture nodes to remove, so we don't confuse them.
+		vnode.instance = []
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
+			vnode.instance.push(child)
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
@@ -272,7 +275,7 @@ module.exports = function($window) {
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
+		else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length)
 		else {
 			var isOldKeyed = old[0] != null && old[0].key != null
 			var isKeyed = vnodes[0] != null && vnodes[0].key != null
@@ -281,7 +284,7 @@ module.exports = function($window) {
 			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
 			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed) {
-				removeNodes(old, oldStart, old.length)
+				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
@@ -295,10 +298,10 @@ module.exports = function($window) {
 					v = vnodes[start]
 					if (o === v || o == null && v == null) continue
 					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
-					else if (v == null) removeNode(o)
+					else if (v == null) removeNode(parent, o)
 					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
-				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else {
 				// keyed diff
@@ -326,9 +329,9 @@ module.exports = function($window) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
-					insertNode(parent, toFragment(oe), topSibling)
+					moveNodes(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-					if (++start <= --end) insertNode(parent, toFragment(o), nextSibling)
+					if (++start <= --end) moveNodes(parent, o, nextSibling)
 					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldStart++; oldEnd--
@@ -346,7 +349,7 @@ module.exports = function($window) {
 					oe = old[oldEnd]
 					ve = vnodes[end]
 				}
-				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
+				if (start > end) removeNodes(parent, old, oldStart, oldEnd + 1)
 				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
@@ -367,7 +370,7 @@ module.exports = function($window) {
 						}
 					}
 					nextSibling = originalNextSibling
-					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
+					if (matched !== oldEnd - oldStart + 1) removeNodes(parent, old, oldStart, oldEnd + 1)
 					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 					else {
 						if (pos === -1) {
@@ -380,7 +383,7 @@ module.exports = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else insertNode(parent, toFragment(v), nextSibling)
+									else moveNodes(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -416,7 +419,7 @@ module.exports = function($window) {
 			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 		}
 		else {
-			removeNode(old)
+			removeNode(parent, old)
 			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
@@ -428,7 +431,7 @@ module.exports = function($window) {
 	}
 	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
-			toFragment(old)
+			removeHTML(parent, old)
 			createHTML(parent, vnode, ns, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
@@ -483,7 +486,7 @@ module.exports = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance)
+			removeNode(parent, old.instance)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -550,24 +553,50 @@ module.exports = function($window) {
 		return result
 	}
 
-	function toFragment(vnode) {
-		var count = vnode.domSize
-		if (count != null || vnode.dom == null) {
-			var fragment = $doc.createDocumentFragment()
-			if (count > 0) {
-				var dom = vnode.dom
-				while (--count) fragment.appendChild(dom.nextSibling)
-				fragment.insertBefore(dom, fragment.firstChild)
-			}
-			return fragment
-		}
-		else return vnode.dom
-	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
+	}
+
+	// This covers a really specific edge case:
+	// - Parent node is keyed and contains child
+	// - Child is removed, returns unresolved promise in `onbeforeremove`
+	// - Parent node is moved in keyed diff
+	// - Remaining children still need moved appropriately
+	//
+	// Ideally, I'd track removed nodes as well, but that introduces a lot more
+	// complexity and I'm not exactly interested in doing that.
+	function moveNodes(parent, vnode, nextSibling) {
+		var frag = $doc.createDocumentFragment()
+		moveChildToFrag(parent, frag, vnode)
+		insertNode(parent, frag, nextSibling)
+	}
+	function moveChildToFrag(parent, frag, vnode) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode.dom != null && vnode.dom.parentNode === parent) {
+			if (typeof vnode.tag !== "string") {
+				vnode = vnode.instance
+				if (vnode != null) continue
+			} else if (vnode.tag === "<") {
+				for (var i = 0; i < vnode.instance.length; i++) {
+					frag.appendChild(vnode.instance[i])
+				}
+			} else if (vnode.tag !== "[") {
+				// Don't recurse for text nodes *or* elements, just fragments
+				frag.appendChild(vnode.dom)
+			} else if (vnode.children.length === 1) {
+				vnode = vnode.children[0]
+				if (vnode != null) continue
+			} else {
+				for (var i = 0; i < vnode.children.length; i++) {
+					var child = vnode.children[i]
+					if (child != null) moveChildToFrag(parent, frag, child)
+				}
+			}
+			break
+		}
 	}
 
 	function insertNode(parent, dom, nextSibling) {
@@ -589,41 +618,89 @@ module.exports = function($window) {
 	}
 
 	//remove
-	function removeNodes(vnodes, start, end) {
+	function removeNodes(parent, vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
-			if (vnode != null) removeNode(vnode)
+			if (vnode != null) removeNode(parent, vnode)
 		}
 	}
-	function removeNode(vnode) {
-		var expected = 1, called = 0
+	function removeNode(parent, vnode) {
+		var mask = 0
 		var original = vnode.state
+		var stateResult, attrsResult
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
 			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				mask = 1
+				stateResult = result
 			}
 		}
 		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
 			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				// eslint-disable-next-line no-bitwise
+				mask |= 2
+				attrsResult = result
 			}
 		}
-		continuation()
-		function continuation() {
-			if (++called === expected) {
-				checkState(vnode, original)
-				onremove(vnode)
-				if (vnode.dom) {
-					var parent = vnode.dom.parentNode
-					var count = vnode.domSize || 1
-					while (--count) parent.removeChild(vnode.dom.nextSibling)
+		checkState(vnode, original)
+
+		// If we can, try to fast-path it and avoid all the overhead of awaiting
+		if (!mask) {
+			onremove(vnode)
+			removeChild(parent, vnode)
+		} else {
+			if (stateResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 1) { mask &= 2; if (!mask) reallyRemove() }
+				}
+				stateResult.then(next, next)
+			}
+			if (attrsResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 2) { mask &= 1; if (!mask) reallyRemove() }
+				}
+				attrsResult.then(next, next)
+			}
+		}
+
+		function reallyRemove() {
+			checkState(vnode, original)
+			onremove(vnode)
+			removeChild(parent, vnode)
+		}
+	}
+	function removeHTML(parent, vnode) {
+		for (var i = 0; i < vnode.instance.length; i++) {
+			parent.removeChild(vnode.instance[i])
+		}
+	}
+	function removeChild(parent, vnode) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode.dom != null && vnode.dom.parentNode === parent) {
+			if (typeof vnode.tag !== "string") {
+				vnode = vnode.instance
+				if (vnode != null) continue
+			} else if (vnode.tag === "<") {
+				removeHTML(parent, vnode)
+			} else {
+				if (vnode.tag !== "[") {
 					parent.removeChild(vnode.dom)
+					if (!Array.isArray(vnode.children)) break
+				}
+				if (vnode.children.length === 1) {
+					vnode = vnode.children[0]
+					if (vnode != null) continue
+				} else {
+					for (var i = 0; i < vnode.children.length; i++) {
+						var child = vnode.children[i]
+						if (child != null) removeChild(parent, child)
+					}
 				}
 			}
+			break
 		}
 	}
 	function onremove(vnode) {
