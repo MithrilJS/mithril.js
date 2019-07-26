@@ -13,7 +13,7 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 		render = vdom($window)
 	})
 
-	
+
 	void [
 		{delMax: 0, movMax: 50, insMax: 9},
 		{delMax: 3, movMax: 5, insMax: 5},
@@ -31,7 +31,7 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 				render(root, test.updated.map(function(x){return {tag: x, key: x}}))
 
 				if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
-				
+
 				o(root.appendChild.callCount + root.insertBefore.callCount).equals(test.expected.creations + test.expected.moves)("moves")
 				o(root.removeChild.callCount).equals(test.expected.deletions)("deletions")
 				o([].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()})).deepEquals(test.updated)
@@ -154,4 +154,3 @@ function addSpies(node) {
 	node.insertBefore = o.spy(node.insertBefore)
 	node.removeChild = o.spy(node.removeChild)
 }
-

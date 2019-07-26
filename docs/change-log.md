@@ -16,6 +16,8 @@
 
 ### Upcoming...
 
+- Ensure vnodes are removed correctly in the face of `onbeforeremove` resolving after new nodes are added ([#2492](https://github.com/MithrilJS/mithril.js/pull/2492) [@isiahmeadows](https://github.com/isiahmeadows))
+
 -->
 
 ### v2.0.1
