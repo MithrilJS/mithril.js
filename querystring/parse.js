@@ -1,7 +1,5 @@
 "use strict"
 
-// The extra `data` parameter is for if you want to append to an existing
-// parameters object.
 module.exports = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -29,9 +27,17 @@ module.exports = function(string) {
 				}
 				level = counters[key]++
 			}
+			// Disallow direct prototype pollution
+			else if (level === "__proto__") break
 			if (isValue) cursor[level] = value
-			else if (cursor[level] == null) cursor[level] = isNumber ? [] : {}
-			cursor = cursor[level]
+			else {
+				// Read own properties exclusively to disallow indirect
+				// prototype pollution
+				value = Object.getOwnPropertyDescriptor(cursor, level)
+				if (value != null) value = value.value
+				if (value == null) value = cursor[level] = isNumber ? [] : {}
+			}
+			cursor = value
 		}
 	}
 	return data
