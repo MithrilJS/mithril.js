@@ -51,7 +51,7 @@ $ npm install webpack webpack-cli --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
-```js
+```javascript
 {
 	// ...
 	"scripts": {
@@ -61,7 +61,7 @@ $ npm install webpack webpack-cli --save-dev
 ```
 
 4. Create `src/index.js` file.
-```js
+```javascript
 import m from "mithril";
 m.render(document.body, "hello world");
 ```
@@ -113,7 +113,7 @@ m.render(document.body, "hello world")
 
 Modularization is the practice of separating the code into files. Doing so makes it easier to find code, understand what code relies on what code, and test.
 
-CommonJS is a de-facto standard for modularizing JavaScript code, and it's used by Node.js, as well as tools like [Browserify](https://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](https://rollupjs.org/) or [Babel](https://babeljs.io/).
+CommonJS is a de-facto standard for modularizing JavaScript code, and it's used by Node.js, as well as tools like [Browserify](http://browserify.org/) and [Webpack](https://webpack.js.org/). It's a robust, battle-tested precursor to ES6 modules. Although the syntax for ES6 modules is specified in Ecmascript 6, the actual module loading mechanism is not. If you wish to use ES6 modules despite the non-standardized status of module loading, you can use tools like [Rollup](https://rollupjs.org/) or [Babel](https://babeljs.io/).
 
 Most browser today do not natively support modularization systems (CommonJS or ES6), so modularized code must be bundled into a single JavaScript file before running in a client-side application.
 
@@ -125,7 +125,7 @@ npm install webpack webpack-cli --save-dev
 
 Open the `package.json` that you created earlier, and add an entry to the `scripts` section:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -199,7 +199,7 @@ If you open bin/app.js, you'll notice that the Webpack bundle is not minified, s
 
 You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {

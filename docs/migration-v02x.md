@@ -349,7 +349,7 @@ m("div", m(Component, "value", function(key) { return "child" }))
 
 In v0.2.x, the children of DOM nodes were represented literally with no normalization aside from using the children directly if only a single array child is present. It returned a structure more like this, with the strings represented literally.
 
-```js
+```javascript
 m("div", "value", ["nested"])
 
 // Becomes:
@@ -365,7 +365,7 @@ m("div", "value", ["nested"])
 
 In v2.x, children of DOM vnodes are normalized to objects of a single consistent structure.
 
-```js
+```javascript
 m("div", "value", ["nested"])
 
 // Becomes roughly:
@@ -383,7 +383,7 @@ m("div", "value", ["nested"])
 
 If only a single text child is present on a DOM vnode, it instead sets `text` to that value.
 
-```js
+```javascript
 m("div", "value")
 
 // Becomes roughly:
