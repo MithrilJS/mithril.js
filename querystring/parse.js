@@ -25,10 +25,17 @@ module.exports = function(string) {
 				if (counters[key] == null) counters[key] = 0
 				level = counters[key]++
 			}
-			if (cursor[level] == null) {
-				cursor[level] = isValue ? value : isNumber ? [] : {}
+			// Disallow direct prototype pollution
+			else if (level === "__proto__") break
+			if (isValue) cursor[level] = value
+			else {
+				// Read own properties exclusively to disallow indirect
+				// prototype pollution
+				value = Object.getOwnPropertyDescriptor(cursor, level)
+				if (value != null) value = value.value
+				if (value == null) value = cursor[level] = isNumber ? [] : {}
 			}
-			cursor = cursor[level]
+			cursor = value
 		}
 	}
 	return data

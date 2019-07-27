@@ -93,4 +93,20 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a")
 		o(data).deepEquals({a: ""})
 	})
+	o("prefers later values", function() {
+		var data = parseQueryString("a=1&b=2&a=3")
+		o(data).deepEquals({a: "3", b: "2"})
+	})
+	o("doesn't pollute prototype directly, censors `__proto__`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("a=b&__proto__%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		o(data).deepEquals({a: "b"})
+	})
+	o("doesn't pollute prototype indirectly, retains `constructor`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("constructor%5Bprototype%5D%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		o(data).deepEquals({a: "b"})
+	})
 })
