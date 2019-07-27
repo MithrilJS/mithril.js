@@ -16,10 +16,12 @@
 
 ### Upcoming...
 
+-->
+
+### v2.0.2
+
 - Ensure vnodes are removed correctly in the face of `onbeforeremove` resolving after new nodes are added ([#2492](https://github.com/MithrilJS/mithril.js/pull/2492) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix prototype pollution vulnerability in `m.parseQueryString` ([#2494](https://github.com/MithrilJS/mithril.js/pull/2494) [@isiahmeadows](https://github.com/isiahmeadows))
-
--->
 
 ### v2.0.1
 
