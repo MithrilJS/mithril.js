@@ -16,12 +16,6 @@ install:
 # This is to prevent lint-staged/prettier from running on the bundles
 - npm rm husky
 
-# Build bundles (so they're always up to date)
-before_script:
-- npm run build-browser
-# Pass -save so it'll update the readme as well
-- npm run build-min -- -save
-
 # Run tests, lint, and then check for perf regressions
 script:
 - npm test
@@ -90,12 +84,13 @@ deploy:
       tags: true
       repo: MithrilJS/mithril.js
 
-  - provider: npm
-    skip_cleanup: true
-    email: me@isiahmeadows.com
-    api_key:
-      secure: "uPLbeJTalA/b38srb1VuWnD3eOgeKTkXf8VVUasUXIqc2xub4DSkFm1IVKSVd/rzP7EeO7+gRUs2UteNKlpZJl226IS5mFPSVtC7ViW46WSpYT0wlMsc7hrubMBGTx3/XYpPwtmMlTIGs5ICT7YkGAuju/6i79LDAB+gbnEY8Bc="
-    on:
-      tags: true
-      repo: MithrilJS/mithril.js
-      condition: "$TRAVIS_TAG != *-*"
+  # Skip until I can figure out what's going on with docs + version deployment
+  # - provider: npm
+  #   skip_cleanup: true
+  #   email: me@isiahmeadows.com
+  #   api_key:
+  #     secure: "uPLbeJTalA/b38srb1VuWnD3eOgeKTkXf8VVUasUXIqc2xub4DSkFm1IVKSVd/rzP7EeO7+gRUs2UteNKlpZJl226IS5mFPSVtC7ViW46WSpYT0wlMsc7hrubMBGTx3/XYpPwtmMlTIGs5ICT7YkGAuju/6i79LDAB+gbnEY8Bc="
+  #   on:
+  #     tags: true
+  #     repo: MithrilJS/mithril.js
+  #     condition: "$TRAVIS_TAG != *-*"

@@ -6,5 +6,6 @@ npm-debug.log
 .DS_Store
 .eslintcache
 
-# These are artifacts from Travis' deploy scripts
+# These are artifacts from various scripts
 /dist
+/archive
