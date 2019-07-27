@@ -22,7 +22,7 @@ const rimraf = require("rimraf")
 
 function showHelp() {
 	console.error(`
-scripts/release.sh increment [ --preid id ]
+node scripts/release increment [ --preid id ]
 
 Invoke as \`scripts/release.sh\` to invoke the release sequence, specifying the
 version increment via \`increment\` (required). Here's how they all work:
@@ -62,9 +62,10 @@ const parsed = require("minimist")(process.argv.slice(2), {
 	string: ["preid"],
 	"--": true,
 })
+parsed._ = parsed._.concat(parsed["--"])
 
-if (parsed.help || !parsed["--"].length) showHelp()
-const publishType = parsed["--"][0]
+if (parsed.help || !parsed._.length) showHelp()
+const publishType = parsed._[0]
 const publishPreid = parsed.preid
 const publishArgs = publishType.startsWith("pre") ? ["--tag", "next"] : []
 let releaseArgs = []
@@ -77,12 +78,23 @@ if (publishType.startsWith("pre") && publishType !== "prerelease") {
 }
 
 function exec(cmd, args, opts) {
-	return execFileSync(name, args, {
+	return execFileSync(cmd, args, {
 		windowsHide: true,
 		stdio: "inherit",
 		encoding: "utf-8",
 		...opts,
 	})
+}
+
+function getChanges() {
+	const result = exec("git", ["status", "-z"], {
+		stdio: ["inherit", "pipe", "inherit"],
+	})
+	return result.split(/\0/g).filter(Boolean)
+}
+
+if (getChanges().length) {
+	bail("Error: Tree must not be dirty to start!")
 }
 
 const upstream = require("./_upstream")
@@ -101,7 +113,7 @@ Flems snippets. Press enter once ready to continue.
 let changelogUpdated = false
 let treeDirty = false
 
-for (const line of exec("git", ["status", "-z"]).split(/\0/g)) {
+for (const line of getChanges()) {
 	switch (line) {
 		case " M CHANGELOG.md":
 		case "M  CHANGELOG.md":
@@ -133,21 +145,24 @@ exec("npm", ["install-test"])
 
 exec("npm", ["version", "-m", "v%s", publishType, ...releaseArgs])
 
-exec("git", ["push", "--follow-tags", "origin", "master"])
-exec("git", ["push", "--follow-tags", upstream.push.branch, "master"])
-
 exec("git", ["checkout", "next"])
 exec("git", ["checkout", "master", "--", "mithril.js", "mithril.min.js"])
 // That's already been updated in `master`.
 exec("git", ["commit", "-m", `Generated bundles for ${readVersion()} [skip ci]`])
 
-exec("git", ["push"])
-exec("git", ["push", upstream.push.branch, "next"])
-
 exec("git", ["checkout", "master"])
 
-exec("npm", ["login"])
-exec("npm", ["publish", ...publishArgs])
-exec("npm", ["logout"])
+console.log("publish args: ", publishArgs)
+console.log("push all: ", upstream.push.branch)
+// exec("npm", ["login"])
+// exec("npm", ["publish", ...publishArgs])
+// exec("npm", ["logout"])
+//
+// // Only push after successful publish
+// exec("git", ["push", "--follow-tags", "origin", "master:master", "next:next"])
+// exec("git", ["push", "--follow-tags", upstream.push.branch, "master:master", "next:next"])
 
-require("./update-docs")()
+exec("git", ["checkout", "next"])
+
+console.log("update docs")
+// require("./update-docs")()
