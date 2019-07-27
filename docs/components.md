@@ -466,7 +466,7 @@ var Modal = {
 
 If you do it like above, you could run into issues when using it:
 
-```js
+```javascript
 var MyModal = {
 	view: function() {
 		return m(Modal, {
@@ -483,7 +483,7 @@ var MyModal = {
 
 Instead, you should forward *single* attributes into vnodes:
 
-```js
+```javascript
 // PREFER
 var Modal = {
 	// ...

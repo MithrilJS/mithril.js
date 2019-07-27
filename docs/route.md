@@ -177,7 +177,7 @@ m(m.route.Link, {
 }, "link name")
 ```
 
-This supports full accessibility for both `a` and `button`, via a `disabled` attribute. This ensures [no `href` attribute or `onclick` handler is set](https://css-tricks.com/how-to-disable-links/) and that an `"aria-disabled": "true"` attribute *is* set. If you are passing an `onclick` handler already, that's dropped. (You can work around this by adding it directly in a [lifecycle hook](lifecycle.md).) The `disabled` attribute is itself proxied to the element or component, so you can disable routed `<button>`s and the like.
+This supports full accessibility for both `a` and `button`, via a `disabled` attribute. This ensures [no `href` attribute or `onclick` handler is set](https://css-tricks.com/how-to-disable-links/) and that an `"aria-disabled": "true"` attribute *is* set. If you are passing an `onclick` handler already, that's dropped. (You can work around this by adding it directly in a [lifecycle hook](lifecycle-methods.md).) The `disabled` attribute is itself proxied to the element or component, so you can disable routed `<button>`s and the like.
 
 ```javascript
 // This does the right thing and the accessible thing for you.
@@ -241,7 +241,7 @@ As a rule of thumb, RouteResolvers should be in the same file as the `m.route` c
 
 When using components, you could think of them as special sugar for this route resolver, assuming your component is `Home`:
 
-```js
+```javascript
 var routeResolver = {
 	onmatch: function() { return Home },
 	render: function(vnode) { return [vnode] },
@@ -803,16 +803,13 @@ m.route(document.body, "/", {
 
 However, realistically, in order for that to work on a production scale, it would be necessary to bundle all of the dependencies for the `Home.js` module into the file that is ultimately served by the server.
 
-Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [webpack's code splitting system](https://webpack.github.io/docs/code-splitting.html):
+Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [native dynamic `import(...)`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), supported by many bundlers:
 
 ```javascript
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function() {
-			// using Webpack async code splitting
-			return new Promise(function(resolve) {
-				require(['./Home.js'], resolve)
-			})
+			return import('./Home.js')
 		},
 	},
 })

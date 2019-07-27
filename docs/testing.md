@@ -150,7 +150,7 @@ module.exports = MyComponent
 
 You could easily create a few unit tests for that.
 
-```js
+```javascript
 var mq = require("mithril-query")
 var MyComponent = require("./MyComponent")
 

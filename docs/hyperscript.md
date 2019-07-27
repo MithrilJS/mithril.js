@@ -215,7 +215,7 @@ m("a-scene", [
 ])
 ```
 
-And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](https://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
+And yes, this translates to both attributes and properties, and it works just like they would in the DOM. Using [Brick's `brick-deck`](http://brick.mozilla.io/docs/brick-deck) as an example, they have a `selected-index` attribute with a corresponding `selectedIndex` getter/setter property.
 
 ```javascript
 m("brick-deck[selected-index=0]", [/* ... */]) // lowercase
