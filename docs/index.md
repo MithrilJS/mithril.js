@@ -69,7 +69,6 @@ Let's create an HTML file to follow along:
 
 To make things simpler you can try out mithril right here. This is a live playground with mithril preloaded, which - by the way, is also built in mithril.
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 
@@ -80,12 +79,6 @@ m.mount(root, {
 		return m("h1", "Try me out")
 	}
 })
-=======
-<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
-
-
 ```
 > *[If it doesn't load, or you want a full playground, click here to try it out](https://flems.io/mithril@next#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8ACyIAExsHCCYOHj41HACNPSMzDxsALqsQA)*
 
@@ -111,16 +104,11 @@ As you can see, you use the same code to both create and update HTML. Mithril au
 
 #### Live Example
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 
 m.render(root, "Hello World")
 ```
-=======
-<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
 
 ---
 
@@ -158,7 +146,6 @@ m("main", [
 
 #### Live Example
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 
@@ -169,10 +156,6 @@ m.render(root, [
     ])
 ])
 ```
-=======
-<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
 
@@ -242,7 +225,6 @@ If you're wondering about performance, it turns out Mithril is very fast at rend
 
 #### Live Example
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 var count = 0 // added a variable
@@ -261,11 +243,6 @@ var Hello = {
 }
 
 m.mount(root, Hello)
-```
-=======
-<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
 
 ---
 
@@ -302,7 +279,6 @@ Also, as you would expect, clicking on the link on the splash page takes you to 
 
 #### Live Example
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 var count = 0
@@ -333,10 +309,6 @@ m.route(root, "/splash", {
     "/hello": Hello,
 })
 ```
-=======
-<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
 
 ---
 
@@ -382,7 +354,6 @@ Clicking the button should now update the count.
 
 #### Live Example
 
-<<<<<<< HEAD
 ```js
 var root = document.body
 var count = 0
@@ -414,14 +385,6 @@ var Hello = {
 
 m.mount(root, Hello)
 ```
-=======
-<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="isiahmeadows" data-slug-hash="aeBZEq" data-preview="true" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Mithril XHR Example">
-  <span>See the Pen <a href="https://codepen.io/isiahmeadows/pen/aeBZEq/">
-  Mithril XHR Example</a> by Isiah Meadows (<a href="https://codepen.io/isiahmeadows">@isiahmeadows</a>)
-  on <a href="https://codepen.io">CodePen</a>.</span>
-</p>
-<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
->>>>>>> MithrilJS/next
 
 ---
 

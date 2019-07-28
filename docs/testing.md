@@ -77,17 +77,9 @@ var MyComponent = require("../my-component.js")
 o.spec("MyComponent", function() {
 	o("things are working", function() {
 		var out = mq(MyComponent, {text: "What a wonderful day to be alive!"})
-
-<<<<<<< HEAD
-```javascript
-// Polyfill DOM env for mithril
-global.window = require("mithril/test-utils/browserMock.js")();
-global.document = window.document;
-=======
 		out.should.contain("day")
 	})
 })
->>>>>>> MithrilJS/next
 ```
 
 Once you've got all that set up, in that same terminal you installed everything to, run this command.
