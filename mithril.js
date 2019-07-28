@@ -1510,7 +1510,6 @@ var parseQueryString = function(string) {
 		for (var j0 = 0; j0 < levels.length; j0++) {
 			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
-			var isValue = j0 === levels.length - 1
 			if (level === "") {
 				var key5 = levels.slice(0, j0).join()
 				if (counters[key5] == null) {
@@ -1520,15 +1519,15 @@ var parseQueryString = function(string) {
 			}
 			// Disallow direct prototype pollution
 			else if (level === "__proto__") break
-			if (isValue) cursor[level] = value2
+			if (j0 === levels.length - 1) cursor[level] = value2
 			else {
 				// Read own properties exclusively to disallow indirect
 				// prototype pollution
-				value2 = Object.getOwnPropertyDescriptor(cursor, level)
-				if (value2 != null) value2 = value2.value
-				if (value2 == null) value2 = cursor[level] = isNumber ? [] : {}
+				var desc = Object.getOwnPropertyDescriptor(cursor, level)
+				if (desc != null) desc = desc.value
+				if (desc == null) cursor[level] = desc = isNumber ? [] : {}
+				cursor = desc
 			}
-			cursor = value2
 		}
 	}
 	return data0

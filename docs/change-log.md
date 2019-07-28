@@ -1,5 +1,6 @@
 # Change log
 
+- [v2.0.3](#v203)
 - [v2.0.1](#v201)
 - [v2.0.0](#v200)
 - [Migrating from v1.x](migration-v1x.md)
@@ -18,10 +19,12 @@
 
 -->
 
-### v2.0.2
+### v2.0.3
 
 - Ensure vnodes are removed correctly in the face of `onbeforeremove` resolving after new nodes are added ([#2492](https://github.com/MithrilJS/mithril.js/pull/2492) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix prototype pollution vulnerability in `m.parseQueryString` ([#2494](https://github.com/MithrilJS/mithril.js/pull/2494) [@isiahmeadows](https://github.com/isiahmeadows))
+
+*v2.0.2 was skipped as it had a critical flaw and was immediately unpublished.*
 
 ### v2.0.1
 

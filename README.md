@@ -18,7 +18,7 @@ mithril.js [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://ww
 
 ## What is Mithril?
 
-A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->9.77 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->9.78 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
