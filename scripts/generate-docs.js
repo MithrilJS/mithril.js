@@ -57,6 +57,8 @@ async function generate() {
 	execFileSync("git", ["checkout", "gh-pages", "--", "archive"])
 	await fs.rename(r("archive"), r("dist/archive"))
 	await fs.mkdir(r(`dist/archive/v${version}`), {recursive: true})
+	// Tell Git to ignore our changes - it's no longer there.
+	execFileSync("git", ["add", "archive"])
 
 	function compilePage(file, markdown) {
 		file = path.basename(file)

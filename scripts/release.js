@@ -139,7 +139,7 @@ exec("git", ["checkout", "master"])
 exec("git", ["pull", "--rebase", upstream.fetch.branch, "master"])
 // There may be merge conflicts with `index.js` and/or the bundle - just ignore
 // them. Whatever they have is canon, as is the case with everything else.
-exec("git", ["merge", "next", "-s", "theirs"])
+exec("git", ["merge", "next", "--strategy-option=theirs"])
 rimraf.sync(p("node_modules"))
 exec("npm", ["install-test"])
 
