@@ -105,8 +105,11 @@ o.spec("parseQueryString", function() {
 	})
 	o("doesn't pollute prototype indirectly, retains `constructor`", function() {
 		var prev = Object.prototype.toString
-		var data = parseQueryString("constructor%5Bprototype%5D%5BtoString%5D=123")
+		var data = parseQueryString("a=b&constructor%5Bprototype%5D%5BtoString%5D=123")
 		o(Object.prototype.toString).equals(prev)
-		o(data).deepEquals({a: "b"})
+		// The deep matcher is borked here.
+		o(Object.keys(data)).deepEquals(["a", "constructor"])
+		o(data.a).equals("b")
+		o(data.constructor).deepEquals({prototype: {toString: "123"}})
 	})
 })
