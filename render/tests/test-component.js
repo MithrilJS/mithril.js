@@ -11,7 +11,7 @@ o.spec("component", function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
 
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	components.forEach(function(cmp){
@@ -110,7 +110,7 @@ o.spec("component", function() {
 					visible = false
 					render(root, [{tag: component}])
 
-					o(root.firstChild.nodeValue).equals("")
+					o(root.childNodes.length).equals(0)
 				})
 				o("updates root from null to null", function() {
 					var component = createComponent({
@@ -218,7 +218,7 @@ o.spec("component", function() {
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("0")
 				})
-				o("can return boolean", function() {
+				o("can return `true`", function() {
 					var component = createComponent({
 						view: function() {
 							return true
@@ -226,10 +226,9 @@ o.spec("component", function() {
 					})
 					render(root, [{tag: component}])
 
-					o(root.firstChild.nodeType).equals(3)
-					o(root.firstChild.nodeValue).equals("true")
+					o(root.childNodes.length).equals(0)
 				})
-				o("can return falsy boolean", function() {
+				o("can return `false`", function() {
 					var component = createComponent({
 						view: function() {
 							return false
@@ -237,8 +236,7 @@ o.spec("component", function() {
 					})
 					render(root, [{tag: component}])
 
-					o(root.firstChild.nodeType).equals(3)
-					o(root.firstChild.nodeValue).equals("")
+					o(root.childNodes.length).equals(0)
 				})
 				o("can return null", function() {
 					var component = createComponent({
@@ -293,8 +291,7 @@ o.spec("component", function() {
 					})
 					render(root, [{tag: component}])
 
-					o(root.firstChild.nodeType).equals(3)
-					o(root.firstChild.nodeValue).equals("")
+					o(root.childNodes.length).equals(0)
 
 					try {
 						render(root, [{tag: component}])

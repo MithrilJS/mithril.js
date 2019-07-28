@@ -9,7 +9,7 @@ o.spec("updateHTML", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	o("updates html", function() {

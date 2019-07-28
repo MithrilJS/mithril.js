@@ -34,24 +34,22 @@ o.spec("normalize", function() {
 		var node = Vnode.normalize(1)
 
 		o(node.tag).equals("#")
-		o(node.children).equals(1)
+		o(node.children).equals("1")
 	})
 	o("normalizes falsy number into text node", function() {
 		var node = Vnode.normalize(0)
 
 		o(node.tag).equals("#")
-		o(node.children).equals(0)
+		o(node.children).equals("0")
 	})
-	o("normalizes boolean into text node", function() {
+	o("normalizes `true` to `null`", function() {
 		var node = Vnode.normalize(true)
 
-		o(node.tag).equals("#")
-		o(node.children).equals(true)
+		o(node).equals(null)
 	})
-	o("normalizes falsy boolean into empty text node", function() {
+	o("normalizes `false` to `null`", function() {
 		var node = Vnode.normalize(false)
 
-		o(node.tag).equals("#")
-		o(node.children).equals("")
+		o(node).equals(null)
 	})
 })

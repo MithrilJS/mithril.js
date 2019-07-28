@@ -1,6 +1,7 @@
 # Change log for ospec
 
 - [Upcoming](#upcoming)
+- [4.0.0](#400)
 - [3.1.0](#310)
 - [3.0.1](#301)
 - [3.0.0](#300)
@@ -11,6 +12,9 @@
 - [1.3 and earlier](#13-and-earlier)
 
 ### Upcoming...
+
+### 4.0.0
+- Pull ESM support out
 
 ### 3.1.0
 - ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)

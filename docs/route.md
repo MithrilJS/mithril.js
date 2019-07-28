@@ -6,8 +6,9 @@
 		- [m.route.set](#mrouteset)
 		- [m.route.get](#mrouteget)
 		- [m.route.prefix](#mrouteprefix)
-		- [m.route.link](#mroutelink)
+		- [m.route.Link](#mroutelink)
 		- [m.route.param](#mrouteparam)
+		- [m.route.SKIP](#mrouteskip)
 	- [RouteResolver](#routeresolver)
 		- [routeResolver.onmatch](#routeresolveronmatch)
 		- [routeResolver.render](#routeresolverrender)
@@ -24,6 +25,9 @@
 	- [Authentication](#authentication)
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
+	- [Typed routes](#typed-routes)
+	- [Hidden routes](#typed-routes)
+- [Third-party integration](#third-party-integration)
 
 ---
 
@@ -39,7 +43,7 @@ var Home = {
 }
 
 m.route(document.body, "/home", {
-	"/home": Home, // defines `http://localhost/#!/home`
+	"/home": Home, // defines `https://localhost/#!/home`
 })
 ```
 
@@ -67,18 +71,18 @@ Argument               | Type                                     | Required | D
 
 Redirects to a matching route, or to the default route if no matching routes can be found. Triggers an asynchronous redraw off all mount points.
 
-`m.route.set(path, data, options)`
+`m.route.set(path, params, options)`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
-`path`            | `String`  | Yes      | The path to route to, without a prefix. The path may include slots for routing parameters
-`data`            | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
+`path`            | `String`  | Yes      | The [path name](paths.md) to route to, without a prefix. The path may include parameters, interpolated with values from `params`.
+`params`          | `Object`  | No       | Routing parameters. If `path` has routing parameter slots, the properties of this object are interpolated into the path string
 `options.replace` | `Boolean` | No       | Whether to create a new history entry or to replace the current one. Defaults to false
 `options.state`   | `Object`  | No       | The `state` object to pass to the underlying `history.pushState` / `history.replaceState` call. This state object becomes available in the `history.state` property, and is merged into the [routing parameters](#routing-parameters) object. Note that this option only works when using the pushState API, but is ignored if the router falls back to hashchange mode (i.e. if the pushState API is not available)
 `options.title`   | `String`  | No       | The `title` string to pass to the underlying `history.pushState` / `history.replaceState` call.
 **returns**       |           |          | Returns `undefined`
 
-Remember that when using `.set` with params you also need to define the route:
+Remember that when using `.set` with `params` you also need to define the route:
 ```javascript
 var Article = {
 	view: function(vnode) {
@@ -91,6 +95,7 @@ m.route(document.body, {
 })
 m.route.set('/article/:articleid', {articleid: 1})
 ```
+
 ##### m.route.get
 
 Returns the last fully resolved routing path, without the prefix. It may differ from the path displayed in the location bar while an asynchronous route is [pending resolution](#code-splitting).
@@ -105,41 +110,103 @@ Argument          | Type      | Required | Description
 
 Defines a router prefix. The router prefix is a fragment of the URL that dictates the underlying [strategy](#routing-strategies) used by the router.
 
-`m.route.prefix(prefix)`
+`m.route.prefix = prefix`
 
 Argument          | Type      | Required | Description
 ----------------- | --------- | -------- | ---
 `prefix`          | `String`  | Yes      | The prefix that controls the underlying [routing strategy](#routing-strategies) used by Mithril.
-**returns**       |           |          | Returns `undefined`
 
-##### m.route.link
+This is a simple property, so you can both read it and write to it.
 
-This function can be used as the `oncreate` (and `onupdate`) hook in a `m("a")` vnode:
+##### m.route.Link
 
-```JS
-m("a[href=/]", {oncreate: m.route.link})
+This component can create a dynamic routable link:
+
+```javascript
+m(m.route.Link, {href: "/test"})
 ```
 
-Using `m.route.link` as a `oncreate` hook causes the link to behave as a router link (i.e. it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
+Using `m.route.Link` causes the link to behave as a router link - clicking it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
 
-If the `href` attribute is not static, the `onupdate` hook must also be set:
+You can also set the `options` passed to `m.route.set` when the link is clicked by passing the `options` attribute:
 
-```JS
-m("a", {href: someVariable, oncreate: m.route.link, onupdate: m.route.link})
+```javascript
+m(m.route.Link, {href: "/test", options: {replace: true}})
 ```
 
-`m.route.link` can also set the `options` passed to `m.route.set` when the link is clicked by calling the function in the lifecycle methods:
+You can pass other attributes, too, and you can also specify the tag name used.
 
-```JS
-m("a[href=/]", {oncreate: m.route.link({replace: true})})
+```javascript
+m(m.route.Link, {
+	// Any hyperscript selector is valid here - it's literally passed as the
+	// first parameter to `m`.
+	selector: "span",
+	options: {replace: true},
+	href: "/test",
+	disabled: false,
+	class: "nav-link",
+	"data-foo": 1,
+	// and other attributes
+}, "link name")
 ```
 
-`m.route.link(args)`
+Magic attributes used by this selector (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `selector="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above vnode renders to this hyperscript, assuming the prefix is the default `#!`:
 
-Argument          | Type           | Required | Description
------------------ | ---------------| -------- | ---
-`args`            | `Vnode|Object` | Yes      | This method is meant to be used as or in conjunction with an `<a>` [vnode](vnodes.md)'s [`oncreate` and `onupdate` hooks](lifecycle-methods.md)
-**returns**       | `function`     |          | Returns the onclick handler function for the component
+```javascript
+m("span", {
+	href: "#!/test",
+	onclick: function(e) {
+		// ...
+	},
+	disabled: false, // Only if you specify it
+	class: "nav-link",
+	"data-foo": 1,
+	// and other attributes
+})
+```
+
+You can also prevent navigation by, in an `onclick` handler, invoking `ev.preventDefault()` or returning `false`. This is the same way you block other events, so it's pretty natural.
+
+```javascript
+m(m.route.Link, {
+	href: "/test",
+	onclick: function(e) {
+		// Do things...
+		if (notReady()) e.preventDefault()
+	}
+}, "link name")
+```
+
+This supports full accessibility for both `a` and `button`, via a `disabled` attribute. This ensures [no `href` attribute or `onclick` handler is set](https://css-tricks.com/how-to-disable-links/) and that an `"aria-disabled": "true"` attribute *is* set. If you are passing an `onclick` handler already, that's dropped. (You can work around this by adding it directly in a [lifecycle hook](lifecycle-methods.md).) The `disabled` attribute is itself proxied to the element or component, so you can disable routed `<button>`s and the like.
+
+```javascript
+// This does the right thing and the accessible thing for you.
+m(m.route.Link, {disabled: disabled, href: "/test"}, "disabled")
+
+// It renders to this hyperscript, assuming the prefix is the default one:
+m("a", {
+	href: "#!/test",
+	disabled: disabled,
+	"aria-disabled": disabled ? "true" : false,
+	onclick: disabled ? null : function(e) {
+		// ...
+	},
+})
+```
+
+Do note that this doesn't also disable pointer events for you - you have to do that yourself through CSS - this only does the JS part. Also, the removal of `href` *can* break certain style sheets - if you're relying on this to style disabled links, you may need to update your stylesheets accordingly. Chances are, you're probably just looking it up via `a`, `.some-class`, or `#some-id`, and if you are, you're already good to go. If you're using `[href]` or `:link`, in most cases you can just remove them and it'll still work - it's pretty common to over-specify selectors. If you can't do either, check for both `[href]`/`:link` *and* the non-standard `[disabled]` attribute that was implicitly forwarded to the component.
+
+`vnode = m(m.route.Link, attributes, children)`
+
+Argument              | Type                                 | Required | Description
+--------------------- | ------------------------------------ | -------- | ---
+`attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
+`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.disabled` | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
 
 ##### m.route.param
 
@@ -156,7 +223,11 @@ Argument          | Type            | Required | Description
 `key`             | `String`        | No       | A route parameter name (e.g. `id` in route `/users/:id`, or `page` in path `/users/1?page=3`, or a key in `history.state`)
 **returns**       | `String|Object` |          | Returns a value for the specified key. If a key is not specified, it returns an object that contains all the interpolation keys
 
- Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.param()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+Note that in the `onmatch` function of a RouteResolver, the new route hasn't yet been fully resolved, and `m.route.param()` will return the parameters of the previous route, if any. `onmatch` receives the parameters of the new route as an argument.
+
+##### m.route.SKIP
+
+A special value that can be returned from a [route resolver's `onmatch`](#routeresolveronmatch) to skip to the next route.
 
 #### RouteResolver
 
@@ -167,6 +238,15 @@ If an object can be detected as a component (by the presence of a `view` method 
 As a rule of thumb, RouteResolvers should be in the same file as the `m.route` call, whereas component definitions should be in their own modules.
 
 `routeResolver = {onmatch, render}`
+
+When using components, you could think of them as special sugar for this route resolver, assuming your component is `Home`:
+
+```javascript
+var routeResolver = {
+	onmatch: function() { return Home },
+	render: function(vnode) { return [vnode] },
+}
+```
 
 ##### routeResolver.onmatch
 
@@ -191,7 +271,7 @@ If `onmatch` returns a promise that gets rejected, the router redirects back to 
 
 ##### routeResolver.render
 
-The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component).
+The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component). It also lets you escape from Mithril's normal behavior of replacing the entire subtree.
 
 `vnode = routeResolve.render(vnode)`
 
@@ -201,23 +281,25 @@ Argument            | Type                 | Description
 `vnode.attrs`       | `Object`             | A map of URL parameter values
 **returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
 
+The `vnode` parameter is just `m(Component, m.route.param())` where `Component` is the resolved component for the route (after `routeResolver.onmatch`) and `m.route.param()` is as documented [here](#mrouteparam). If you omit this method, the default return value is `[vnode]`, wrapped in a fragment so you can use [key parameters](#key-parameter). Combined with a `:key` parameter, it becomes a [single-element keyed fragment](keys.md#single-child-keyed-fragments), since it ends up rendering to something like `[m(Component, {key: m.route.param("key"), ...})]`.
+
 ---
 
 #### How it works
 
-Routing is a system that allows creating Single-Page-Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
+Routing is a system that allows creating Single Page Applications (SPA), i.e. applications that can go from a "page" to another without causing a full browser refresh.
 
 It enables seamless navigability while preserving the ability to bookmark each page individually, and the ability to navigate the application via the browser's history mechanism.
 
-Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
+Routing without page refreshes is made partially possible by the [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState%28%29_method) API. Using this API, it's possible to programmatically change the URL displayed by the browser after a page has loaded, but it's the application developer's responsibility to ensure that navigating to any given URL from a cold state (e.g. a new tab) will render the appropriate markup.
 
 #### Routing strategies
 
 The routing strategy dictates how a library might actually implement routing. There are three general strategies that can be used to implement a SPA routing system, and each has different caveats:
 
-- `m.route.prefix('#!')` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `http://localhost/#!/page1`
-- `m.route.prefix('?')` – Using the querystring. A URL using this strategy typically looks like `http://localhost/?/page1`
-- `m.route.prefix('')` – Using the pathname. A URL using this strategy typically looks like `http://localhost/page1`
+- `m.route.prefix = '#!'` (default) – Using the [fragment identifier](https://en.wikipedia.org/wiki/Fragment_identifier) (aka the hash) portion of the URL. A URL using this strategy typically looks like `https://localhost/#!/page1`
+- `m.route.prefix = '?'` – Using the querystring. A URL using this strategy typically looks like `https://localhost/?/page1`
+- `m.route.prefix = ''` – Using the pathname. A URL using this strategy typically looks like `https://localhost/page1`
 
 Using the hash strategy is guaranteed to work in browsers that don't support `history.pushState`, because it can fall back to using `onhashchange`. Use this strategy if you want to keep the hashes purely local.
 
@@ -261,8 +343,8 @@ In the example above, there are two components: `Home` and `Page1`. Each contain
 var Menu = {
 	view: function() {
 		return m("nav", [
-			m("a[href=/]", {oncreate: m.route.link}, "Home"),
-			m("a[href=/page1]", {oncreate: m.route.link}, "Page 1"),
+			m(m.route.Link, {href: "/"}, "Home"),
+			m(m.route.Link, {href: "/page1"}, "Page 1"),
 		])
 	}
 }
@@ -277,23 +359,25 @@ m.route(document.body, "/", {
 })
 ```
 
-Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL. By default, the SPA router prefix is `#!`
+Here we specify two routes: `/` and `/page1`, which render their respective components when the user navigates to each URL.
 
 ---
 
 ### Navigating to different routes
 
-In the example above, the `Menu` component has two links. You can specify that their `href` attribute is a route URL (rather than being a regular link that navigates away from the current page), by adding the hook `{oncreate: m.route.link}`
+In the example above, the `Menu` component has two `m.route.Link`s. That creates an element, by default an `<a>`, and sets it up to where if the user clicks on it, it navigates to another route on its own. It doesn't navigate remotely, just locally.
 
 You can also navigate programmatically, via `m.route.set(route)`. For example, `m.route.set("/page1")`.
 
-When navigating to routes, there's no need to explicitly specify the router prefix. In other words, don't add the hashbang `#!` in front of the route path when linking via `m.route.link` or redirecting.
+When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril routes, including in both `m.route.set` and in `m.route.Link`.
+
+Do note that when navigating between components, the entire subtree is replaced. Use [a route resolver with a `render` method](#routeresolverrender) if you want to just patch the subtree.
 
 ---
 
 ### Routing parameters
 
-Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports parameterized routes:
+Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports [parameterized routes](paths.md#path-parameters):
 
 ```javascript
 var Edit = {
@@ -335,6 +419,8 @@ Or even use the [`history state`](#history-state) feature to achieve reloadable 
 
 `m.route.set(m.route.get(), null, {state: {key: Date.now()}})`
 
+Note that the key parameter works only for component routes. If you're using a route resolver, you'll need to use a [single-child keyed fragment](keys.md), passing `key: m.route.param("key")`, to accomplish the same.
+
 #### Variadic routes
 
 It's also possible to have variadic routes, i.e. a route with an argument that contains URL pathnames that contain slashes:
@@ -357,7 +443,7 @@ m.route(document.body, "/", {
   // [...]
   "/:404...": errorPageComponent
 });
- ```
+```
 
 #### History state
 
@@ -408,17 +494,18 @@ The router prefix is a fragment of the URL that dictates the underlying [strateg
 
 ```javascript
 // set to pathname strategy
-m.route.prefix("")
+m.route.prefix = ""
 
 // set to querystring strategy
-m.route.prefix("?")
+m.route.prefix = "?"
 
 // set to hash without bang
-m.route.prefix("#")
+m.route.prefix = "#"
 
 // set to pathname strategy on a non-root URL
-// e.g. if the app lives under `http://localhost/my-app` and something else lives under `http://localhost`
-m.route.prefix("/my-app")
+// e.g. if the app lives under `https://localhost/my-app` and something else
+// lives under `https://localhost`
+m.route.prefix = "/my-app"
 ```
 
 ---
@@ -582,7 +669,7 @@ var Auth = {
 	login: function() {
 		m.request({
 			url: "/api/v1/auth",
-			data: {username: Auth.username, password: Auth.password}
+			params: {username: Auth.username, password: Auth.password}
 		}).then(function(data) {
 			localStorage.setItem("auth-token", data.token)
 			m.route.set("/secret")
@@ -716,17 +803,129 @@ m.route(document.body, "/", {
 
 However, realistically, in order for that to work on a production scale, it would be necessary to bundle all of the dependencies for the `Home.js` module into the file that is ultimately served by the server.
 
-Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [webpack's code splitting system](https://webpack.github.io/docs/code-splitting.html):
+Fortunately, there are a number of tools that facilitate the task of bundling modules for lazy loading. Here's an example using [native dynamic `import(...)`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), supported by many bundlers:
 
 ```javascript
 m.route(document.body, "/", {
 	"/": {
 		onmatch: function() {
-			// using Webpack async code splitting
-			return new Promise(function(resolve) {
-				require(['./Home.js'], resolve)
-			})
+			return import('./Home.js')
 		},
 	},
 })
+```
+
+---
+
+### Typed routes
+
+In certain advanced routing cases, you may want to constrain a value further than just the path itself, only matching something like a numeric ID. You can do that pretty easily by returning `m.route.SKIP` from a route.
+
+```javascript
+m.route(document.body, "/", {
+	"/view/:id": {
+		onmatch: function(args) {
+			if (!/^\d+$/.test(args.id)) return m.route.SKIP
+			return ItemView
+		},
+	},
+	"/view/:name": UserView,
+})
+```
+
+---
+
+### Hidden routes
+
+In rare circumstances, you may want to hide certain routes for some users, but not all. For instance, a user might be prohibited from viewing a particular user, and instead of showing a permission error, you'd rather pretend it doesn't exist and redirect to a 404 view instead. In this case, you can use `m.route.SKIP` to just pretend the route doesn't exist.
+
+```javascript
+m.route(document.body, "/", {
+	"/user/:id": {
+		onmatch: function(args) {
+			return Model.checkViewable(args.id).then(function(viewable) {
+				return viewable ? UserView : m.route.SKIP
+			})
+		},
+	},
+	"/:404...": PageNotFound,
+})
+```
+
+---
+
+### Third-party integration
+
+In certain situations, you may find yourself needing to interoperate with another framework like React. Here's how you do it:
+
+- Define all your routes using `m.route` as normal, but make sure you only use it *once*. Multiple route points are not supported.
+- When you need to remove routing subscriptions, use `m.mount(root, null)`, using the same root you used `m.route(root, ...)` on. `m.route` uses `m.mount` internally to hook everything up, so it's not magic.
+
+Here's an example with React:
+
+```jsx
+class Child extends React.Component {
+	constructor(props) {
+		super(props)
+		this.root = React.createRef()
+	}
+
+	componentDidMount() {
+		m.route(this.root, "/", {
+			// ...
+		})
+	}
+
+	componentDidUnmount() {
+		m.mount(this.root, null)
+	}
+
+	render() {
+		return <div ref={this.root} />
+	}
+}
+```
+
+And here's the rough equivalent with Vue:
+
+```html
+<div ref="root"></div>
+```
+
+```javascript
+Vue.component("my-child", {
+	template: `<div ref="root"></div>`,
+	mounted: function() {
+		m.route(this.$refs.root, "/", {
+			// ...
+		})
+	},
+	destroyed: function() {
+		m.mount(this.$refs.root, null)
+	},
+})
+```
+
+Technically, there's nothing stopping you from even doing it in a Mithril component, even.
+
+```javascript
+// Don't do this. Use a proper global layout component for each route instead,
+// passing your child vnode/component in the attributes or children.
+function Child() {
+	return {
+		oncreate: function(vnode) {
+			m.route(vnode.dom, "/", {
+				// ...
+			})
+		},
+
+		onremove: function() {
+			m.mount(vnode.dom, null)
+		},
+
+		view: function() {
+			return m("div")
+		},
+	}
+}
 ```

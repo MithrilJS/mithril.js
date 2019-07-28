@@ -2,6 +2,7 @@
 
 - [What are keys](#what-are-keys)
 - [How to use](#how-to-use)
+	- [Single-child keyed fragments](#single-child-keyed-fragments)
 - [Debugging key related issues](#debugging-key-related-issues)
 
 ---
@@ -75,6 +76,43 @@ function correctUserList(users) {
 }
 ```
 
+#### Single-child keyed fragments
+
+Sometimes, you might want to reinitialize a component on command. You can use the common pattern of a single-child keyed fragment where you change the key to destroy and reinitialize the element.
+
+```javascript
+function ResettableToggle() {
+	var toggleKey = false
+
+	function reset() {
+		toggleKey = !toggleKey
+	}
+
+	return {
+		view: function() {
+			return [
+				m("button", {onclick: reset}, "Reset toggle"),
+				[m(Toggle, {key: toggleKey})]
+			]
+		}
+	}
+}
+```
+
+You can also bind it to a known identity, for things like item views where you need to fetch a remote resource based on an ID. It's usually simpler than implementing all the logic to diff the ID and re-fetch a resource if it changes.
+
+```javascript
+function Page() {
+	return {
+		view: function() {
+			return m(Layout, [
+				[m(ItemView, {key: m.route.param("id")})],
+			])
+		}
+	}
+}
+```
+
 ---
 
 ### Debugging key related issues
@@ -99,12 +137,12 @@ users.map(function(u) {
 If you refactor the code and make a user component, the key must be moved out of the component and put on the component itself, since it is now the immediate child of the array.
 
 ```javascript
-// AVOID
+// AVOID - doesn't work
 var User = {
 	view: function(vnode) {
 		return m("div", { key: vnode.attrs.user.id }, [
-      m(Button, vnode.attrs.user.name)
-    ])
+			m(Button, vnode.attrs.user.name)
+		])
 	}
 }
 
@@ -116,7 +154,7 @@ users.map(function(u) {
 
 #### Avoid wrapping keyed elements in arrays
 
-Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap arrays around keyed elements
+Arrays are [vnodes](vnodes.md), and therefore keyable. You should not wrap arrays around keyed elements outside [single-child keyed fragments](#single-child-keyed-fragments).
 
 ```javascript
 // AVOID
@@ -153,7 +191,7 @@ var things = [
 
 #### Avoid mixing keyed and non-keyed vnodes in the same array
 
-An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. If you need to mix them, create a nested array.
+An array of vnodes must have only keyed vnodes or non-keyed vnodes, but not both. In fact, this will cause an error to be thrown to remind you to not do it. So don't do it!
 
 ```javascript
 // AVOID
@@ -161,20 +199,42 @@ m("div", [
 	m("div", "a"),
 	m("div", {key: 1}, "b"),
 ])
+```
+If using keys, use a unique key for every element.
 
+```javascript
 // PREFER
 m("div", [
 	m("div", {key: 0}, "a"),
 	m("div", {key: 1}, "b"),
 ])
+```
 
+If you need to mix them, create a nested array.
 
+```javascript
 // PREFER
 m("div", [
 	m("div", "a"),
 	[
 		m("div", {key: 1}, "b"),
 	]
+])
+```
+
+Note that `null`s, `undefined`s and booleans are considered unkeyed nodes. If you want the keyed equivalent, use `m.fragment({key: ...}, [])` which is a keyed empty fragment.
+
+```javascript
+// AVOID
+m("div", [
+	a ? m("div", {key: 1}, "a") : null,
+	m("div", {key: 2}, "b"),
+])
+
+// PREFER
+m("div", [
+	a ? m("div", {key: 1}, "a") : m.fragment({key: 1}, []),
+	m("div", {key: 2}, "b"),
 ])
 ```
 

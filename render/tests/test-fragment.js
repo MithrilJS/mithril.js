@@ -57,25 +57,23 @@ function runTest(name, fragment) {
 				var vnode = fragment([1])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(1)
+				o(vnode.children[0].children).equals("1")
 			})
 			o("handles falsy number single child", function() {
 				var vnode = fragment([0])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(0)
+				o(vnode.children[0].children).equals("0")
 			})
 			o("handles boolean single child", function() {
 				var vnode = fragment([true])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(true)
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles falsy boolean single child", function() {
 				var vnode = fragment([false])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals("")
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles null single child", function() {
 				var vnode = fragment([null])
@@ -85,7 +83,7 @@ function runTest(name, fragment) {
 			o("handles undefined single child", function() {
 				var vnode = fragment([undefined])
 
-				o(vnode.children[0]).equals(undefined)
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles multiple string children", function() {
 				var vnode = fragment(["", "a"])
@@ -99,29 +97,25 @@ function runTest(name, fragment) {
 				var vnode = fragment([0, 1])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(0)
+				o(vnode.children[0].children).equals("0")
 				o(vnode.children[1].tag).equals("#")
-				o(vnode.children[1].children).equals(1)
+				o(vnode.children[1].children).equals("1")
 			})
 			o("handles multiple boolean children", function() {
 				var vnode = fragment([false, true])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals("")
-				o(vnode.children[1].tag).equals("#")
-				o(vnode.children[1].children).equals(true)
+				o(vnode.children).deepEquals([null, null])
 			})
 			o("handles multiple null/undefined child", function() {
 				var vnode = fragment([null, undefined])
 
-				o(vnode.children[0]).equals(null)
-				o(vnode.children[1]).equals(undefined)
+				o(vnode.children).deepEquals([null, null])
 			})
 			o("handles falsy number single child without attrs", function() {
 				var vnode = fragment(0)
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(0)
+				o(vnode.children[0].children).equals("0")
 			})
 		})
 		o.spec("children with attrs", function() {
@@ -141,35 +135,33 @@ function runTest(name, fragment) {
 				var vnode = fragment({}, [1])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(1)
+				o(vnode.children[0].children).equals("1")
 			})
 			o("handles falsy number single child", function() {
 				var vnode = fragment({}, [0])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(0)
+				o(vnode.children[0].children).equals("0")
 			})
 			o("handles boolean single child", function() {
 				var vnode = fragment({}, [true])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(true)
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles falsy boolean single child", function() {
 				var vnode = fragment({}, [false])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals("")
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles null single child", function() {
 				var vnode = fragment({}, [null])
 
-				o(vnode.children[0]).equals(null)
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles undefined single child", function() {
 				var vnode = fragment({}, [undefined])
 
-				o(vnode.children[0]).equals(undefined)
+				o(vnode.children).deepEquals([null])
 			})
 			o("handles multiple string children", function() {
 				var vnode = fragment({}, ["", "a"])
@@ -183,23 +175,19 @@ function runTest(name, fragment) {
 				var vnode = fragment({}, [0, 1])
 
 				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals(0)
+				o(vnode.children[0].children).equals("0")
 				o(vnode.children[1].tag).equals("#")
-				o(vnode.children[1].children).equals(1)
+				o(vnode.children[1].children).equals("1")
 			})
 			o("handles multiple boolean children", function() {
 				var vnode = fragment({}, [false, true])
 
-				o(vnode.children[0].tag).equals("#")
-				o(vnode.children[0].children).equals("")
-				o(vnode.children[1].tag).equals("#")
-				o(vnode.children[1].children).equals(true)
+				o(vnode.children).deepEquals([null, null])
 			})
 			o("handles multiple null/undefined child", function() {
 				var vnode = fragment({}, [null, undefined])
 
-				o(vnode.children[0]).equals(null)
-				o(vnode.children[1]).equals(undefined)
+				o(vnode.children).deepEquals([null, null])
 			})
 		})
 	})

@@ -3,17 +3,15 @@
 var o = require("../../ospec/ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
-var Promise = require("../../promise/promise")
+var PromisePolyfill = require("../../promise/promise")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
 	var mock, jsonp, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
-		var requestService = Request(mock, Promise)
-		jsonp = requestService.jsonp
 		complete = o.spy()
-		requestService.setCompletionCallback(complete)
+		jsonp = Request(mock, PromisePolyfill, complete).jsonp
 	})
 
 	o("works", function(done) {
@@ -47,7 +45,7 @@ o.spec("jsonp", function() {
 				return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify(queryData) + ")"}
 			}
 		})
-		jsonp({url: "/item", data: {a: "b", c: "d"}}).then(function(data) {
+		jsonp({url: "/item", params: {a: "b", c: "d"}}).then(function(data) {
 			delete data["callback"]
 			o(data).deepEquals({a: "b", c: "d"})
 		}).then(done)

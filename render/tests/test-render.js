@@ -9,7 +9,11 @@ o.spec("render", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		render = vdom($window)
+	})
+
+	o("initializes without DOM", function() {
+		vdom()
 	})
 
 	o("renders plain text", function() {

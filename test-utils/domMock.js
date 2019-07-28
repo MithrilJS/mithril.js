@@ -19,6 +19,21 @@ module.exports = function(options) {
 	var spy = options.spy || function(f){return f}
 	var spymap = []
 
+	// This way I'm not also implementing a partial `URL` polyfill. Based on the
+	// regexp at https://urlregex.com/, but adapted to allow relative URLs and
+	// care only about HTTP(S) URLs.
+	var urlHash = "#[?!/+=&;%@.\\w_-]*"
+	var urlQuery = "\\?[!/+=&;%@.\\w_-]*"
+	var urlPath = "/[+~%/.\\w_-]*"
+	var urlRelative = urlPath + "(?:" + urlQuery + ")?(?:" + urlHash + ")?"
+	var urlDomain = "https?://[A-Za-z0-9][A-Za-z0-9.-]+[A-Za-z0-9]"
+	var validURLRegex = new RegExp(
+		"^" + urlDomain + "(" + urlRelative + ")?$|" +
+		"^" + urlRelative + "$|" +
+		"^" + urlQuery + "(?:" + urlHash + ")?$|" +
+		"^" + urlHash + "$"
+	)
+
 	var hasOwn = ({}.hasOwnProperty)
 
 	function registerSpies(element, spies) {
@@ -79,7 +94,7 @@ module.exports = function(options) {
 		}
 		else {
 			this.childNodes.push(child)
-			if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+			if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 			child.parentNode = this
 		}
 	}
@@ -109,14 +124,14 @@ module.exports = function(options) {
 				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
 				while (child.firstChild) {
 					var subchild = child.firstChild
-					child.removeChild(subchild)
+					removeChild.call(child, subchild)
 					subchild.parentNode = this
 				}
 				child.childNodes = []
 			}
 			else {
 				this.childNodes.splice(refIndex, 0, child)
-				if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+				if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 				child.parentNode = this
 			}
 		}
@@ -199,14 +214,14 @@ module.exports = function(options) {
 					if (ns != null) element.setAttributeNS(ns, name, value)
 					else element.setAttribute(name, value)
 				})
-				stack[depth].appendChild(element)
+				appendChild.call(stack[depth], element)
 				if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
 			}
 			else if (endTag) {
 				depth--
 			}
 			else if (text) {
-				stack[depth].appendChild($window.document.createTextNode(text)) // FIXME handle html entities
+				appendChild.call(stack[depth], $window.document.createTextNode(text)) // FIXME handle html entities
 			}
 		})
 	}
@@ -224,8 +239,16 @@ module.exports = function(options) {
 		return string.replace(/-\D/g, function(match) {return match[1].toUpperCase()})
 	}
 	var activeElement
+	var delay = 16, last = 0
 	var $window = {
 		DOMParser: DOMParser,
+		requestAnimationFrame: function(callback) {
+			var elapsed = Date.now() - last
+			return setTimeout(function() {
+				callback()
+				last = Date.now()
+			}, delay - elapsed)
+		},
 		document: {
 			createElement: function(tag) {
 				var cssText = ""
@@ -296,7 +319,7 @@ module.exports = function(options) {
 					},
 					set innerHTML(value) {
 						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-						while (this.firstChild) this.removeChild(this.firstChild)
+						while (this.firstChild) removeChild.call(this, this.firstChild)
 						var match = value.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/), root, ns
 						if (match) {
 							var value = match[1]
@@ -378,7 +401,7 @@ module.exports = function(options) {
 						e.preventDefault = function() {
 							prevented = true
 						}
-						Object.defineProperty(e, "$defaultPrevented", {
+						Object.defineProperty(e, "defaultPrevented", {
 							configurable: true,
 							get: function () { return prevented }
 						})
@@ -386,10 +409,6 @@ module.exports = function(options) {
 						e.stopPropagation = function() {
 							stopped = true
 						}
-						Object.defineProperty(e, "$propagationStopped", {
-							configurable: true,
-							get: function () { return prevented }
-						})
 						e.eventPhase = 1
 						try {
 							for (var i = parents.length - 1; 0 <= i; i--) {
@@ -432,7 +451,13 @@ module.exports = function(options) {
 							if (this.namespaceURI === "http://www.w3.org/2000/svg") {
 								var val = this.hasAttribute("href") ? this.attributes.href.value : ""
 								return {baseVal: val, animVal: val}
-							} else return this.attributes["href"] === undefined ? "" : "[FIXME implement]"
+							} else if (this.namespaceURI === "http://www.w3.org/1999/xhtml") {
+								if (!this.hasAttribute("href")) return ""
+								// HACK: if it's valid already, there's nothing to implement.
+								var value = this.attributes.href.value
+								if (validURLRegex.test(value)) return value
+							}
+							return "[FIXME implement]"
 						},
 						set: function(value) {
 							// This is a readonly attribute for SVG, todo investigate MathML which may have yet another IDL
@@ -634,11 +659,19 @@ module.exports = function(options) {
 					nodeType: 3,
 					nodeName: "#text",
 					parentNode: null,
+					get childNodes() { return [] },
+					get firstChild() { return null },
 					get nodeValue() {return nodeValue},
 					set nodeValue(value) {
 						/*eslint-disable no-implicit-coercion*/
 						nodeValue = "" + value
 						/*eslint-enable no-implicit-coercion*/
+					},
+					get nextSibling() {
+						if (this.parentNode == null) return null
+						var index = this.parentNode.childNodes.indexOf(this)
+						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
+						return this.parentNode.childNodes[index + 1] || null
 					},
 				}
 			},
@@ -666,9 +699,9 @@ module.exports = function(options) {
 		},
 	}
 	$window.document.documentElement = $window.document.createElement("html")
-	$window.document.documentElement.appendChild($window.document.createElement("head"))
+	appendChild.call($window.document.documentElement, $window.document.createElement("head"))
 	$window.document.body = $window.document.createElement("body")
-	$window.document.documentElement.appendChild($window.document.body)
+	appendChild.call($window.document.documentElement, $window.document.body)
 	activeElement = $window.document.body
 
 	if (options.spy) $window.__getSpies = getSpies

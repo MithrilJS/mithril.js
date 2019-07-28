@@ -10,26 +10,27 @@
 
 ### Description
 
-JSX is a syntax extension that enables you to write HTML tags interspersed with JavaScript. It's not part of any JavaScript standards and it's not required for building applications, but it may be more pleasing to use depending on your team's preferences.
+JSX is a syntax extension that enables you to write HTML tags interspersed with JavaScript. It's not part of any JavaScript standards and it's not required for building applications, but it may be more pleasing to use depending on you or your team's preferences.
 
 ```jsx
-var MyComponent = {
-  view: function() {
-    return m("main", [
-      m("h1", "Hello world"),
-    ])
-  }
+function MyComponent() {
+	return {
+		view: () =>
+			m("main", [
+				m("h1", "Hello world"),
+			])
+	}
 }
 
 // can be written as:
-var MyComponent = {
-  view: function() {
-    return (
-      <main>
-        <h1>Hello world</h1>
-      </main>
-    )
-  }
+function MyComponent() {
+	return {
+		view: () => (
+			<main>
+				<h1>Hello world</h1>
+			</main>
+		)
+	}
 }
 ```
 
@@ -37,9 +38,9 @@ When using JSX, it's possible to interpolate JavaScript expressions within JSX t
 
 ```jsx
 var greeting = "Hello"
-var url = "http://google.com"
-var link = <a href={url}>{greeting + "!"}</a>
-// yields <a href="http://google.com">Hello!</a>
+var url = "https://google.com"
+var link = <a href={url}>{greeting}!</a>
+// yields <a href="https://google.com">Hello!</a>
 ```
 
 Components can be used by using a convention of uppercasing the first letter of the component name:
@@ -55,7 +56,7 @@ m.render(document.body, <MyComponent />)
 
 The simplest way to use JSX is via a [Babel](https://babeljs.io/) plugin.
 
-Babel requires NPM, which is automatically installed when you install [Node.js](https://nodejs.org/en/). Once NPM is installed, create a project folder and run this command:
+Babel requires npm, which is automatically installed when you install [Node.js](https://nodejs.org/en/). Once npm is installed, create a project folder and run this command:
 
 ```bash
 npm init -y
@@ -66,17 +67,18 @@ If you want to use Webpack and Babel together, [skip to the section below](#usin
 To install Babel as a standalone tool, use this command:
 
 ```bash
-npm install babel-cli babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/cli @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
 
-```
+```json
 {
-	"presets": ["es2015"],
+	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
+		["@babel/plugin-transform-react-jsx", {
+			"pragma": "m",
+			"pragmaFrag": "'['"
 		}]
 	]
 }
@@ -93,17 +95,18 @@ babel src --out-dir bin --source-maps
 If you're already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.
 
 ```bash
-npm install babel-core babel-loader babel-preset-es2015 babel-plugin-transform-react-jsx --save-dev
+npm install @babel/core babel-loader @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
 
 ```json
 {
-	"presets": ["es2015"],
+	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["transform-react-jsx", {
-			"pragma": "m"
+		["@babel/plugin-transform-react-jsx", {
+			"pragma": "m",
+			"pragmaFrag": "'['"
 		}]
 	]
 }
@@ -111,7 +114,7 @@ Create a `.babelrc` file:
 
 Next, create a file called `webpack.config.js`
 
-```javascript
+```jsx
 const path = require('path')
 
 module.exports = {
@@ -123,7 +126,7 @@ module.exports = {
 	module: {
 		rules: [{
 			test: /\.js$/,
-			exclude: /node_modules/,
+			exclude: /\/node_modules\//,
 			loader: 'babel-loader'
 		}]
 	}
@@ -136,7 +139,7 @@ This configuration assumes the source code file for the application entry point 
 
 To run the bundler, setup an npm script. Open `package.json` and add this entry under `"scripts"`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -155,7 +158,7 @@ npm start
 
 To generate a minified file, open `package.json` and add a new npm script called `build`:
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -167,7 +170,7 @@ To generate a minified file, open `package.json` and add a new npm script called
 
 You can use hooks in your production environment to run the production build script automatically. Here's an example for [Heroku](https://www.heroku.com/):
 
-```
+```json
 {
 	"name": "my-project",
 	"scripts": {
@@ -182,71 +185,159 @@ You can use hooks in your production environment to run the production build scr
 
 ### JSX vs hyperscript
 
-JSX is essentially a trade-off: it introduces a non-standard syntax that cannot be run without appropriate tooling, in order to allow a developer to write HTML code using curly braces. The main benefit of using JSX instead of regular HTML is that the JSX specification is much stricter and yields syntax errors when appropriate, whereas HTML is far too forgiving and can make syntax issues difficult to spot.
+JSX and hyperscript are two different syntaxes you can use for specifying vnodes, and they have different tradeoffs:
 
-Unlike HTML, JSX is case-sensitive. This means `<div className="test"></div>` is different from `<div classname="test"></div>` (all lower case). The former compiles to `m("div", {className: "test"})` and the latter compiles to `m("div", {classname: "test"})`, which is not a valid way of creating a class attribute. Fortunately, Mithril supports standard HTML attribute names, and thus, this example can be written like regular HTML: `<div class="test"></div>`.
+- JSX is much more approachable if you're coming from an HTML/XML background and are more comfortable specifying DOM elements with that kind of syntax. It is also slightly cleaner in many cases since it uses fewer punctuation and the attributes contain less visual noise, so many people find it much easier to read. And of course, many common editors provide autocomplete support for DOM elements in the same way they do for HTML. However, it requires an extra build step to use, editor support isn't as broad as it is with normal JS, and it's considerably more verbose. It's also a bit more verbose when dealing with a lot of dynamic content because you have to use interpolations for everything.
 
-JSX is useful for teams where HTML is primarily written by someone without JavaScript experience, but it requires a significant amount of tooling to maintain (whereas plain HTML can, for the most part, simply be opened in a browser)
+- Hyperscript is more approachable if you come from a backend JS background that doesn't involve much HTML or XML. It's more concise with less redundancy, and it provides a CSS-like sugar for static classes, IDs, and other attributes. It also can be used with no build step at all, although [you can add one if you wish](https://github.com/MithrilJS/mopt). And it's slightly easier to work with in the face of a lot of dynamic content, because you don't need to "interpolate" anything. However, the terseness does make it harder to read for some people, especially those less experienced and coming from a front end HTML/CSS/XML background, and I'm not aware of any plugins that auto-complete parts of hyperscript selectors like IDs, classes, and attributes.
 
-Hyperscript is the compiled representation of JSX. It's designed to be readable and can also be used as-is, instead of JSX (as is done in most of the documentation). Hyperscript tends to be terser than JSX for a couple of reasons:
+You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@isiahmeadows](https://github.com/isiahmeadows/) with some alterations for clarity and readability:
 
-- it does not require repeating the tag name in closing tags (e.g. `m("div")` vs `<div></div>`)
-- static attributes can be written using CSS selector syntax (i.e. `m("a.button")` vs `<a class="button"></a>`)
+```javascript
+function SummaryView() {
+    let tag, posts
 
-In addition, since hyperscript is plain JavaScript, it's often more natural to indent than JSX:
+    function init({attrs}) {
+        Model.sendView(attrs.tag != null)
+        if (attrs.tag != null) {
+            tag = attrs.tag.toLowerCase()
+            posts = Model.getTag(tag)
+        } else {
+            tag = undefined
+            posts = Model.posts
+        }
+    }
 
-```jsx
-//JSX
-var BigComponent = {
-  activate: function() {/*...*/},
-  deactivate: function() {/*...*/},
-  update: function() {/*...*/},
-  view: function(vnode) {
-    return [
-      {vnode.attrs.items.map(function(item) {
-        return <div>{item.name}</div>
-      })}
-      <div
-        ondragover={this.activate}
-        ondragleave={this.deactivate}
-        ondragend={this.deactivate}
-        ondrop={this.update}
-        onblur={this.deactivate}
-      ></div>
-    ]
-  }
-}
+    function feed(type, href) {
+        return m(".feed", [
+            type,
+            m("a", {href}, m("img.feed-icon[src=./feed-icon-16.gif]")),
+        ])
+    }
 
-// hyperscript
-var BigComponent = {
-  activate: function() {/*...*/},
-  deactivate: function() {/*...*/},
-  update: function() {/*...*/},
-  view: function(vnode) {
-    return [
-      vnode.attrs.items.map(function(item) {
-        return m("div", item.name)
-      }),
-      m("div", {
-        ondragover: this.activate,
-        ondragleave: this.deactivate,
-        ondragend: this.deactivate,
-        ondrop: this.update,
-        onblur: this.deactivate,
-      })
-    ]
-  }
+    return {
+        oninit: init,
+        // To ensure the tag gets properly diffed on route change.
+        onbeforeupdate: init,
+        view: () =>
+            m(".blog-summary", [
+                m("p", "My ramblings about everything"),
+
+                m(".feeds", [
+                    feed("Atom", "blog.atom.xml"),
+                    feed("RSS", "blog.rss.xml"),
+                ]),
+
+                tag != null
+                    ? m(TagHeader, {len: posts.length, tag})
+                    : m(".summary-header", [
+                        m(".summary-title", "Posts, sorted by most recent."),
+                        m(TagSearch),
+                    ]),
+
+                m(".blog-list", posts.map((post) =>
+                    m(m.route.Link, {
+                        class: "blog-entry",
+                        href: `/posts/${post.url}`,
+                    }, [
+                        m(".post-date", post.date.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                        })),
+
+                        m(".post-stub", [
+                            m(".post-title", post.title),
+                            m(".post-preview", post.preview, "..."),
+                        ]),
+
+                        m(TagList, {post, tag}),
+                    ])
+                )),
+            ])
+    }
 }
 ```
 
-In non-trivial applications, it's possible for components to have more control flow and component configuration code than markup, making a JavaScript-first approach more readable than an HTML-first approach.
+Here's the exact equivalent of the above code, using JSX instead. You can see how the two syntaxes differ just in this bit, and what tradeoffs apply.
 
-Needless to say, since hyperscript is pure JavaScript, there's no need to run a compilation step to produce runnable code.
+```jsx
+function SummaryView() {
+    let tag, posts
+
+    function init({attrs}) {
+        Model.sendView(attrs.tag != null)
+        if (attrs.tag != null) {
+            tag = attrs.tag.toLowerCase()
+            posts = Model.getTag(tag)
+        } else {
+            tag = undefined
+            posts = Model.posts
+        }
+    }
+
+    function feed(type, href) {
+        return (
+            <div class="feed">
+                {type}
+                <a href={href}><img class="feed-icon" src="./feed-icon-16.gif" /></a>
+            </div>
+        )
+    }
+
+    return {
+        oninit: init,
+        // To ensure the tag gets properly diffed on route change.
+        onbeforeupdate: init,
+        view: () => (
+            <div class="blog-summary">
+                <p>My ramblings about everything</p>
+
+                <div class="feeds">
+                    {feed("Atom", "blog.atom.xml")}
+                    {feed("RSS", "blog.rss.xml")}
+                </div>
+
+                {tag != null
+                    ? <TagHeader len={posts.length} tag={tag} />
+                    : (
+                        <div class="summary-header">
+                            <div class="summary-title">Posts, sorted by most recent</div>
+                            <TagSearch />
+                        </div>
+                    )
+                }
+
+                <div class="blog-list">
+                    {posts.map((post) => (
+                        <m.route.Link class="blog-entry" href={`/posts/${post.url}`}>
+                            <div class="post-date">
+                                {post.date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </div>
+
+                            <div class="post-stub">
+                                <div class="post-title">{post.title}</div>
+                                <div class="post-preview">{post.preview}...</div>
+                            </div>
+
+                            <TagList post={post} tag={tag} />
+                        </m.route.Link>
+                    ))}
+                </div>
+            </div>
+        )
+    }
+}
+```
 
 ---
 
 ### Converting HTML
 
-In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
+In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
-When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
+When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.

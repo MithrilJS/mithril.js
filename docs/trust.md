@@ -86,7 +86,7 @@ data.title = "' onerror='alert(1)"
 data.title = "' onmouseover='alert(1)"
 
 // An attack that does not use JavaScript
-data.description = "<a href='http://evil.com/login-page-that-steals-passwords.html'>Click here to read more</a>"
+data.description = "<a href='https://evil.com/login-page-that-steals-passwords.html'>Click here to read more</a>"
 ```
 
 There are countless non-obvious ways of creating malicious code, so it is highly recommended that you use a [whitelist](https://en.wikipedia.org/wiki/Whitelist) of permitted HTML tags, attributes and attribute values, as opposed to a [blacklist](https://en.wikipedia.org/wiki/Blacklisting) to sanitize the user input. It's also highly recommended that you use a proper HTML parser, instead of regular expressions for sanitization, because regular expressions are extremely difficult to test for all edge cases.
@@ -121,7 +121,7 @@ One common way to misuse `m.trust` is when working with third party services who
 
 Here's the example snippet for the [Facebook Like button](https://developers.facebook.com/docs/plugins/like-button):
 
-```markup
+```html
 <!-- Load Facebook SDK for JavaScript -->
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
@@ -134,7 +134,7 @@ Here's the example snippet for the [Facebook Like button](https://developers.fac
 
 <!-- Your like button code -->
 <div class="fb-like"
-	data-href="http://www.your-domain.com/your-page.html"
+	data-href="https://www.your-domain.com/your-page.html"
 	data-layout="standard"
 	data-action="like"
 	data-show-faces="true">
@@ -157,7 +157,7 @@ var FacebookLikeButton = {
 	view: function() {
 		return [
 			m("#fb-root"),
-			m("#fb-like[data-href=http://www.your-domain.com/your-page.html][data-layout=standard][data-action=like][data-show-faces=true]")
+			m("#fb-like[data-href=https://www.your-domain.com/your-page.html][data-layout=standard][data-action=like][data-show-faces=true]")
 		]
 	}
 }

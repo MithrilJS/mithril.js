@@ -1,10 +1,7 @@
-.vscode/
-coverage/
-docs/lib/
-examples/
+/.vscode
+/coverage
+/docs/lib
+/examples
 /mithril.js
-/mithril.mjs
 /mithril.min.js
-/mithril.min.mjs
-/stream/stream.mjs
-node_modules/
+/node_modules
