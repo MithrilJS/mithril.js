@@ -140,23 +140,27 @@ async function generate() {
 	async function generate(file) {
 		try {
 			const handle = await fs.open(file, "r")
-			const relative = path.relative(r("docs"), file)
-			const archive = r(`dist/archive/v${version}/${relative}`)
-			await fs.mkdir(path.dirname(archive), {recursive: true})
+			try {
+				const relative = path.relative(r("docs"), file)
+				const archive = r(`dist/archive/v${version}/${relative}`)
+				await fs.mkdir(path.dirname(archive), {recursive: true})
 
-			if (file.endsWith(".md")) {
-				const html = compilePage(file, await handle.readFile("utf-8"))
-				const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
-				await fs.writeFile(archive.replace(/\.md$/, ".html"), minified)
-			} else if (file.endsWith(".html")) {
-				const html = await handle.readFile("utf-8")
-				const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
-				await fs.writeFile(archive, minified)
-			} else {
-				await pipeline(
-					createReadStream(null, {fd: handle.fd}),
-					createWriteStream(archive)
-				)
+				if (file.endsWith(".md")) {
+					const html = compilePage(file, await handle.readFile("utf-8"))
+					const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
+					await fs.writeFile(archive.replace(/\.md$/, ".html"), minified)
+				} else if (file.endsWith(".html")) {
+					const html = await handle.readFile("utf-8")
+					const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
+					await fs.writeFile(archive, minified)
+				} else {
+					await pipeline(
+						createReadStream(null, {fd: handle.fd}),
+						createWriteStream(archive)
+					)
+				}
+			} finally {
+				handle.close()
 			}
 		} catch (e) {
 			if (e.code !== "EISDIR") throw e
