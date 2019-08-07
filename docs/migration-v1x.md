@@ -17,7 +17,7 @@ v2.x is almost entirely API-compatible with v1.x, but there are some breaking ch
 - [`m.request` headers](#mrequest-headers)
 - [Query parameters in hash strings in routes](#query-parameters-in-hash-strings-in-routes)
 - [Keys](#keys)
-- [`m.version` remvoed](#mversion-removed)
+- [`m.version` removed](#mversion-removed)
 
 ---
 
