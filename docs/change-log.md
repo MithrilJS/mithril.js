@@ -17,6 +17,8 @@
 
 ### Upcoming...
 
+- Fix `ospec require` with relative paths
+
 -->
 
 ### v2.0.3
