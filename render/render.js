@@ -434,7 +434,11 @@ module.exports = function($window) {
 			removeHTML(parent, old)
 			createHTML(parent, vnode, ns, nextSibling)
 		}
-		else vnode.dom = old.dom, vnode.domSize = old.domSize
+		else {
+			vnode.dom = old.dom
+			vnode.domSize = old.domSize
+			vnode.instance = old.instance
+		}
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
