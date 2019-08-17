@@ -20,18 +20,16 @@ function find(type) {
 
 	const line = remoteInfo.find((line) => regexp.test(line))
 
-	if (line == null) {
-		console.error(
-			"An upstream must be configured with both fetch and push!"
-		)
-		process.exit(1)
-	}
-
-	return {
-		branch: line.slice(0, line.indexOf("\t")),
+	return line == null ? undefined : {
+		remote: line.slice(0, line.indexOf("\t")),
 		repo: line.slice(line.lastIndexOf("\t") + 1, -(type.length + 3)),
 	}
 }
 
 exports.fetch = find("fetch")
 exports.push = find("push")
+
+if (exports.fetch == null) {
+	console.error("You must have an upstream to pull from!")
+	process.exit(1)
+}

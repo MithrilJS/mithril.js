@@ -13,9 +13,6 @@ const ghPages = require("gh-pages")
 const upstream = require("./_upstream")
 const generate = require("./generate-docs")
 
-require("./_command")(module, () => update())
-module.exports = update
-
 async function update() {
 	await generate()
 	const commit = execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
@@ -30,10 +27,17 @@ async function update() {
 		// force it to go over SSH so the saved keys are used.
 		// https://github.com/tschaub/gh-pages/issues/160
 		repo: upstream.push.repo,
-		remote: upstream.push.branch,
+		remote: upstream.push.remote,
 		src: ["**/*", ".nojekyll"],
 		message: `Generated docs for commit ${commit} [skip ci]`,
 		// May want to enable this if an API token resolves the issue.
 		// silent: !!process.env.TRAVIS_CI,
 	})
+
+	console.log("Published!")
+}
+
+/* eslint-disable global-require */
+if (require.main === module) {
+	require("./_command")({exec: update})
 }

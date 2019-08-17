@@ -10,8 +10,8 @@
     "precommit": "lint-staged",
     "watch": "run-p watch:**",
     "watch:js": "node bundler/cli browser.js -output mithril.js -watch",
-    "watch:docs": "node scripts/watch-docs.js",
-    "build": "run-p build:**",
+    "watch:docs": "node scripts/generate-docs --watch",
+    "build": "run-p build:browser build:min",
     "build:browser": "node bundler/cli browser.js -output mithril.js",
     "build:docs": "node scripts/generate-docs",
     "build:min": "node bundler/cli browser.js -output mithril.min.js -minify -save",
@@ -49,6 +49,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "rimraf": "^2.6.3",
+    "semver": "^6.3.0",
     "terser": "^3.16.1"
   },
   "bin": {
