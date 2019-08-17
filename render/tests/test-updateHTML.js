@@ -47,4 +47,14 @@ o.spec("updateHTML", function() {
 		o(updated.domSize).equals(0)
 		o(root.childNodes.length).equals(0)
 	})
+	o("updates the dom correctly with a contenteditable parent", function() {
+		var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "<", children: "<a></a>"}]}
+
+		render(root, div)
+		var tags = []
+		for (var i = 0; i < div.dom.childNodes.length; i++) {
+			tags.push(div.dom.childNodes[i].nodeName)
+		}
+		o(tags).deepEquals(["A"])
+	})
 })

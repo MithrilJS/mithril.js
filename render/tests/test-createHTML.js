@@ -81,4 +81,14 @@ o.spec("createHTML", function() {
 		o(vnode.dom.nextSibling.nodeName).equals("text")
 		o(vnode.dom.nextSibling.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
+	o("creates the dom correctly with a contenteditable parent", function() {
+		var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "<", children: "<a></a>"}]}
+
+		render(root, div)
+		var tags = []
+		for (var i = 0; i < div.dom.childNodes.length; i++) {
+			tags.push(div.dom.childNodes[i].nodeName)
+		}
+		o(tags).deepEquals(["A"])
+	})
 })
