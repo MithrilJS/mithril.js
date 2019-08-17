@@ -12,6 +12,7 @@
 - [1.3 and earlier](#13-and-earlier)
 
 ### Upcoming...
+- Fix `require` with relative paths
 
 ### 4.0.0
 - Pull ESM support out
