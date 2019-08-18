@@ -17,10 +17,12 @@
 
 ### Upcoming...
 
+-->
+
+### v2.0.4
+
 - Fix double-rendering of trusted content within `contenteditable` elements ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix error on `m.trust` updating ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
-
--->
 
 ### v2.0.3
 

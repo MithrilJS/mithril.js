@@ -23,9 +23,8 @@
     "test": "node ospec/bin/ospec",
     "posttest": "npm run lint",
     "cover": "istanbul cover --print both ospec/bin/ospec",
-    "release": "node scripts/release",
-    "release:docs": "node scripts/update-docs",
-    "version": "npm run build && git add index.js mithril.js mithril.min.js README.md"
+    "release": "npm version -m 'v%s'",
+    "version": "npm run build && git add mithril.js mithril.min.js README.md"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
