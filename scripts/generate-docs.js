@@ -5,7 +5,6 @@ const path = require("path")
 const {promisify} = require("util")
 const marked = require("marked")
 const rimraf = promisify(require("rimraf"))
-const copy = require("recursive-copy")
 const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
 const HTMLMinifier = require("html-minifier")
@@ -174,7 +173,7 @@ class Generator {
 				await init(dest)
 			})
 
-		if ((/\.(md|html)$/).test(file)) {
+		if (!(/\.(md|html)$/).test(file)) {
 			await archived(relative, (dest) => fs.copyFile(file, dest))
 			console.log(`Copied: ${relative}`)
 		}
@@ -211,7 +210,6 @@ class Generator {
 
 	async generate() {
 		await this.generateRec(r("docs"))
-		await copy(r(`dist/archive/v${this._version}`), r("dist"))
 		// Just ensure it exists.
 		await (await fs.open(r("dist/.nojekyll"), "a")).close()
 	}

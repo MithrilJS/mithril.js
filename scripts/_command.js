@@ -2,7 +2,7 @@
 
 process.on("unhandledRejection", function (e) {
 	process.exitCode = 1
-	if (!e.stdout || !e.stderr) return false
+	if (!e.stdout || !e.stderr) throw e
 	console.error(e.stack)
 
 	if (e.stdout && e.stdout.length) {
@@ -12,7 +12,8 @@ process.on("unhandledRejection", function (e) {
 		console.error(e.stderr.toString("utf-8"))
 	}
 
-	return true
+	// eslint-disable-next-line no-process-exit
+	process.exit()
 })
 
 module.exports = ({exec, watch}) => {
