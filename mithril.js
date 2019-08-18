@@ -699,7 +699,11 @@ var _12 = function($window) {
 			removeHTML(parent, old)
 			createHTML(parent, vnode3, ns, nextSibling)
 		}
-		else vnode3.dom = old.dom, vnode3.domSize = old.domSize
+		else {
+			vnode3.dom = old.dom
+			vnode3.domSize = old.domSize
+			vnode3.instance = old.instance
+		}
 	}
 	function updateFragment(parent, old, vnode3, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode3.children, hooks, nextSibling, ns)
@@ -868,13 +872,14 @@ var _12 = function($window) {
 		if (vnode3.attrs == null || (
 			vnode3.attrs.contenteditable == null && // attribute
 			vnode3.attrs.contentEditable == null // property
-		)) return
+		)) return false
 		var children3 = vnode3.children
 		if (children3 != null && children3.length === 1 && children3[0].tag === "<") {
 			var content = children3[0].children
 			if (vnode3.dom.innerHTML !== content) vnode3.dom.innerHTML = content
 		}
 		else if (vnode3.text != null || children3 != null && children3.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		return true
 	}
 	//remove
 	function removeNodes(parent, vnodes, start, end) {
