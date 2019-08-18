@@ -1,6 +1,7 @@
 # Change log for ospec
 
 - [Upcoming](#upcoming)
+- [4.0.1](#401)
 - [4.0.0](#400)
 - [3.1.0](#310)
 - [3.0.1](#301)
@@ -12,6 +13,8 @@
 - [1.3 and earlier](#13-and-earlier)
 
 ### Upcoming...
+
+### 4.0.1
 - Fix `require` with relative paths
 
 ### 4.0.0
