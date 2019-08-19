@@ -15,6 +15,8 @@
 ### Upcoming...
 
 ### 4.0.1
+_2019-08-18_
+
 - Fix `require` with relative paths
 
 ### 4.0.0

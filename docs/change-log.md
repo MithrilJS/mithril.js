@@ -20,6 +20,7 @@
 -->
 
 ### v2.0.4
+_2019-08-18_
 
 - Fix double-rendering of trusted content within `contenteditable` elements ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix error on `m.trust` updating ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
