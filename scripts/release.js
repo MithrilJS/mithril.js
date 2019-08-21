@@ -123,7 +123,9 @@ async function release({increment, preid, publish}) {
 
 	console.error(`
 Copy the parts listed in "Upcoming" to a new section "### v${version}" in
-docs/change-log.md and clear that section out.
+docs/change-log.md and clear that section out. Also, add today's date under the
+new section's heading to match the others and don't forget to update the table
+of contents accordingly.
 `)
 
 	for (;;) {
