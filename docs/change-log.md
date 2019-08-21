@@ -20,11 +20,13 @@
 -->
 
 ### v2.0.4
+_2019-08-18_
 
 - Fix double-rendering of trusted content within `contenteditable` elements ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix error on `m.trust` updating ([#2516](https://github.com/MithrilJS/mithril.js/pull/2516) [@isiahmeadows](https://github.com/isiahmeadows))
 
 ### v2.0.3
+_2019-07-28_
 
 - Ensure vnodes are removed correctly in the face of `onbeforeremove` resolving after new nodes are added ([#2492](https://github.com/MithrilJS/mithril.js/pull/2492) [@isiahmeadows](https://github.com/isiahmeadows))
 - Fix prototype pollution vulnerability in `m.parseQueryString` ([#2494](https://github.com/MithrilJS/mithril.js/pull/2494) [@isiahmeadows](https://github.com/isiahmeadows))
@@ -32,10 +34,12 @@
 *v2.0.2 was skipped as it had a critical flaw and was immediately unpublished.*
 
 ### v2.0.1
+_2019-07-24_
 
 Same as v2.0.0, but with a publish that didn't have a botched upload.
 
 ### v2.0.0
+_2019-07-24_
 
 #### Breaking changes
 

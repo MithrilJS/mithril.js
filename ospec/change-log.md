@@ -15,12 +15,18 @@
 ### Upcoming...
 
 ### 4.0.1
+_2019-08-18_
+
 - Fix `require` with relative paths
 
 ### 4.0.0
+_2019-07-24_
+
 - Pull ESM support out
 
 ### 3.1.0
+_2019-02-07_
+
 - ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)
 <!-- Add new lines here. Version number will be decided later -->
 - Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call. (#2221 @isiahmeadows)
@@ -28,11 +34,13 @@
 - Update `glob` dependency.
 
 ### 3.0.1
+_2018-06-30_
 
 #### Bug fix
 - Move `glob` from `devDependencies` to `dependencies`, fix the test runner ([#2186](https://github.com/MithrilJS/mithril.js/pull/2186) [@porsager](https://github.com/porsager)
 
 ### 3.0.0
+_2018-06-26_
 
 #### Breaking
 - Better input checking to prevent misuses of the library. Misues of the library will now throw errors, rather than report failures. This may uncover bugs in your test suites. Since it is potentially a disruptive update this change triggers a semver major bump. ([#2167](https://github.com/MithrilJS/mithril.js/pull/2167))
@@ -53,6 +61,7 @@
 - Fix a stack overflow when using `o.only()` with a large test suite ([#2171](https://github.com/MithrilJS/mithril.js/pull/2171))
 
 ### 2.1.0
+_2018-05-25_
 
 #### Features
 - Pinpoint the `o.only()` call site ([#2157](https://github.com/MithrilJS/mithril.js/pull/2157))
@@ -63,6 +72,7 @@
 
 
 ### 2.0.0
+_2018-05-09_
 
 - Added `--require` feature to the ospec executable ([#2144](https://github.com/MithrilJS/mithril.js/pull/2144), [@gilbert](https://github.com/gilbert))
 - In Node.js, ospec only uses colors when the output is sent to a terminal ([#2143](https://github.com/MithrilJS/mithril.js/pull/2143))
@@ -78,12 +88,14 @@
 
 
 ### 1.4.1
+_2018-05-03_
 
 - Identical to v1.4.0, but with UNIX-style line endings so that BASH is happy.
 
 
 
 ### 1.4.0
+_2017-12-01_
 
 - Added support for async functions and promises in tests ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928), [@StephanHoyer](https://github.com/StephanHoyer))
 - Error handling for async tests with `done` callbacks supports error as first argument ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
