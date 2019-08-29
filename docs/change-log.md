@@ -19,7 +19,7 @@
 
 - core: Workaround for [Internet Explorer bug](https://www.tjvantoll.com/2013/08/30/bugs-with-document-activeelement-in-internet-explorer/) when running in an iframe
 
-- Fix prototype pollution vulnerability in `m.parseQueryString` [#2523](https://github.com/MithrilJS/mithril.js/pull/2523) [@isiahmeadows](https://github.com/isiahmeadows)) Ported to 1.1.x by [@Hunter-Dolan](https://github.com/Hunter-Dolan)
+- Fix prototype pollution vulnerability in `m.parseQueryString` ([#2523](https://github.com/MithrilJS/mithril.js/pull/2523) [@isiahmeadows](https://github.com/isiahmeadows) [@Hunter-Dolan](https://github.com/Hunter-Dolan))
 
 
 ### v1.1.6
