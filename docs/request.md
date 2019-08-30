@@ -494,7 +494,7 @@ Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
-- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer, Safari and Android (non-Chromium).
+- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).
 
 Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
 
