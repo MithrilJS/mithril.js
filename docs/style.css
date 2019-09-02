@@ -98,7 +98,8 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 
 /* flems theming */
 .flems main { margin: 0; max-width: auto; }
-.flems { margin: 20px; max-height: 400px; box-shadow: 0 0 20px rgba(0,0,0,0.25); }
+.flems { margin: 20px 0; max-height: 400px; }
+.flems .runtime { border: 1px solid #ddd; }
 @media (max-width: 500px) {
 	.flems { min-height: calc(100vw * 1.3); }
 }
