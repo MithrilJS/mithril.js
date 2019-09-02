@@ -44,10 +44,8 @@
 				"body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
 				"body { height: 100%; overflow:hidden; display:flex; justify-content: center; align-items:center; }"
 			].join("")
-			;[].forEach.call(document.querySelectorAll("pre.language-js,pre code.language-js"), function(el) {
-				console.log(el)
-				if (el.tagName === "CODE")
-					el = el.parentNode
+			;[].forEach.call(document.querySelectorAll("pre code.language-js"), function(el) {
+				el = el.parentNode
 
 				var div = document.createElement("div")
 				window.Flems(div, {
