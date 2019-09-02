@@ -67,7 +67,7 @@ Let's create an HTML file to follow along:
 </body>
 ```
 
-To make things simpler you can try out mithril right here. This is a live playground with mithril preloaded, which - by the way, is also built in mithril.
+To make things simpler you can try out mithril right here. This is a live playground with Mithril preloaded that - by the way - is also built in Mithril.
 
 ```js
 var root = document.body
@@ -80,7 +80,7 @@ m.mount(root, {
 	}
 })
 ```
-> *[If it doesn't load, or you want a full playground, click here to try it out](https://flems.io/mithril@next#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8ACyIAExsHCCYOHj41HACNPSMzDxsALqsQA)*
+> *[Click here to open the sample on flems.io](https://flems.io/mithril@next#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4s+LLQCuDABQATWtSk4G+AEa15ATwoACYAB00e03oBuEGAHdEesDOrEI9WQEoDxs970AnGMRSviZYsgDkhACMYfphACq+2no4etLEYW5eZqzGrG6UIHAwsE4uaAg8ACyIAExsHCCYOHj41HACNPSMzDxsALqsQA)*
 
 ---
 
