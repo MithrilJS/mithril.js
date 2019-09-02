@@ -1,6 +1,6 @@
 {
   "name": "mithril",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
@@ -10,8 +10,8 @@
     "precommit": "lint-staged",
     "watch": "run-p watch:**",
     "watch:js": "node bundler/cli browser.js -output mithril.js -watch",
-    "watch:docs": "node scripts/watch-docs.js",
-    "build": "run-p build:**",
+    "watch:docs": "node scripts/generate-docs --watch",
+    "build": "run-p build:browser build:min",
     "build:browser": "node bundler/cli browser.js -output mithril.js",
     "build:docs": "node scripts/generate-docs",
     "build:min": "node bundler/cli browser.js -output mithril.min.js -minify -save",
@@ -23,9 +23,8 @@
     "test": "node ospec/bin/ospec",
     "posttest": "npm run lint",
     "cover": "istanbul cover --print both ospec/bin/ospec",
-    "release": "node scripts/release",
-    "release:docs": "node scripts/update-docs",
-    "version": "npm run build && git add index.js mithril.js mithril.min.js README.md"
+    "release": "npm version -m 'v%s'",
+    "version": "npm run build && git add mithril.js mithril.min.js README.md"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
@@ -45,10 +44,10 @@
     "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
     "pinpoint": "^1.1.0",
-    "recursive-copy": "^2.0.10",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "rimraf": "^2.6.3",
+    "semver": "^6.3.0",
     "terser": "^3.16.1"
   },
   "bin": {

@@ -115,10 +115,12 @@ module.exports = {
 		filename: 'app.js',
 	},
 	module: {
-		loaders: [{
+		rules: [{
 			test: /\.js$/,
 			exclude: /\/node_modules\//,
-			loader: 'babel-loader'
+			use: {
+				loader: 'babel-loader'
+			}
 		}]
 	}
 }

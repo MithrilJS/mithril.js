@@ -6,4 +6,7 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": 2019,
     },
+    "rules": {
+        "no-process-env": "off",
+    },
 };

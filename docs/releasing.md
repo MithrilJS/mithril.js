@@ -18,7 +18,8 @@ $ git pull --rebase mithriljs next
 ```
 
 2. Determine patch level of the change
-3. Update information in `docs/change-log.md` to match reality of the new version being prepared for release
+3. Update information in `docs/change-log.md` to match reality of the new version being prepared for release.
+	- Don't forget to add today's date under the version heading!
 4. Replace all existing references to `mithril@next` to `mithril` if moving from a release candidate to stable.
     - Note: if making an initial release candidate, don't forget to move all the playground snippets to pull from `mithril@next`!
 5. Commit changes to `next`
@@ -131,8 +132,10 @@ $ git pull --rebase mithriljs next
 ```
 
 2. Determine patch level of the change
-3. Update `version` field in `ospec/package.json` to match new version being prepared for release
-4. Commit changes to `next`
+3. Update `version` field in `ospec/package.json` to match new version being prepared for release.
+4. Update `ospec/change-log.md` to match new version being prepared for release.
+	- Don't forget to add today's date under the version heading!
+5. Commit changes to `next`
 
 ```
 $ git add .

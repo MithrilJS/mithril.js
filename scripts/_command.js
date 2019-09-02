@@ -1,9 +1,8 @@
 "use strict"
 
-process.on("unhandledRejection", (e) => { throw e })
-
-function reportExec(e) {
-	if (!e.stdout || !e.stderr) return false
+process.on("unhandledRejection", function (e) {
+	process.exitCode = 1
+	if (!e.stdout || !e.stderr) throw e
 	console.error(e.stack)
 
 	if (e.stdout && e.stdout.length) {
@@ -13,24 +12,25 @@ function reportExec(e) {
 		console.error(e.stderr.toString("utf-8"))
 	}
 
-	return true
-}
+	// eslint-disable-next-line no-process-exit
+	process.exit()
+})
 
-exports.exec = (mod, init) => {
-	if (require.main === mod) {
-		// Skip the first tick.
-		Promise.resolve().then(init).catch((e) => {
+module.exports = ({exec, watch}) => {
+	const index = process.argv.indexOf("--watch")
+	if (index >= 0) {
+		process.argv.splice(index, 1)
+
+		if (watch == null) {
+			console.error("Watching this script is not supported!")
 			// eslint-disable-next-line no-process-exit
-			if (reportExec(e)) process.exit(1)
-			else throw e
-		})
-	}
-}
+			process.exit(1)
+		}
 
-exports.run = async (init) => {
-	try {
-		await init()
-	} catch (e) {
-		if (!reportExec(e)) console.error(e)
+		watch()
+	} else {
+		Promise.resolve(exec()).then((code) => {
+			if (code != null) process.exitCode = code
+		})
 	}
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict"
 
-const {promises} = require("fs")
+const {promises: fs} = require("fs")
 const path = require("path")
 const {Glob} = require("glob")
 const marked = require("marked")
@@ -9,8 +9,6 @@ const marked = require("marked")
 const babelParser = require("@babel/parser")
 // Peer dependency on `request`
 const request = require("request-promise-native")
-
-require("./_command").exec(module, () => lint())
 
 // lint rules
 class LintRenderer extends marked.Renderer {
@@ -61,7 +59,8 @@ class LintRenderer extends marked.Renderer {
 			}, (e) => {
 				if (e.statusCode === 404) {
 					this._emit(`broken external link: ${href}`)
-				} else {
+				}
+				else {
 					if (
 						e.error.code === "ERR_TLS_CERT_ALTNAME_INVALID" &&
 						href.startsWith("https://")
@@ -75,11 +74,12 @@ class LintRenderer extends marked.Renderer {
 					httpError(e)
 				}
 			}))
-		} else {
+		}
+		else {
 			const exec = (/^([^#?]*\.md)(?:$|\?|#)/).exec(href)
 			if (exec != null) {
 				const resolved = path.resolve(this._dir, exec[1])
-				this._awaiting.push(promises.access(resolved).catch(() => {
+				this._awaiting.push(fs.access(resolved).catch(() => {
 					this._emit(`broken internal link: ${href}`)
 				}))
 			}
@@ -100,7 +100,8 @@ class LintRenderer extends marked.Renderer {
 					allowUndeclaredExports: true,
 					plugins: ["dynamicImport"],
 				})
-			} catch (e) {
+			}
+			catch (e) {
 				this._error = e
 			}
 		}
@@ -126,7 +127,8 @@ class LintRenderer extends marked.Renderer {
 					"Code block possibly missing `json` language tag",
 					this._block(),
 				)
-			} catch {
+			}
+			catch (_) {
 				// ignore
 			}
 		}
@@ -150,7 +152,16 @@ class LintRenderer extends marked.Renderer {
 	}
 }
 
-function lint() {
+exports.lintOne = lintOne
+async function lintOne(file) {
+	const contents = await fs.readFile(file, "utf-8")
+	const renderer = new LintRenderer(file)
+	marked(contents, {renderer})
+	return Promise.all(renderer._awaiting)
+}
+
+exports.lintAll = lintAll
+function lintAll() {
 	return new Promise((resolve, reject) => {
 		const glob = new Glob(path.resolve(__dirname, "../docs/**/*.md"), {
 			ignore: [
@@ -163,15 +174,29 @@ function lint() {
 		const awaiting = []
 
 		glob.on("match", (file) => {
-			awaiting.push(promises.readFile(file, "utf-8").then((contents) => {
-				const renderer = new LintRenderer(file)
-				marked(contents, {renderer})
-				return Promise.all(renderer._awaiting)
-			}))
+			awaiting.push(lintOne(file))
 		})
 
 		glob.on("error", reject)
 		glob.on("end", () => resolve(Promise.all(awaiting)))
 	})
 }
-module.exports = lint
+
+/* eslint-disable global-require */
+if (require.main === module) {
+	require("./_command")({
+		exec: lintAll,
+		watch() {
+			require("chokidar")
+				.watch(path.resolve(__dirname, "../docs/**/*.md"), {
+					ignore: [
+						"**/change-log.md",
+						"**/migration-*.md",
+						"**/node_modules/**",
+					],
+				})
+				.on("add", lintOne)
+				.on("change", lintOne)
+		},
+	})
+}
