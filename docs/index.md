@@ -243,6 +243,7 @@ var Hello = {
 }
 
 m.mount(root, Hello)
+```
 
 ---
 
