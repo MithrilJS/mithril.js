@@ -299,7 +299,7 @@ o.spec("ospec", function() {
 		})
 	})
 
-	o.spec("throwing in test context is recoreded as a failure", function() {
+	o.spec("throwing in test context is recorded as a failure", function() {
 		var oo
 		o.beforeEach(function(){oo = o.new()})
 		o.afterEach(function() {
