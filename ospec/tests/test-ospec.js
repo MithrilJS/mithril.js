@@ -659,6 +659,24 @@ o.spec("ospec", function() {
 			})
 		})
 	})
+
+	o.spec("descriptions", function() {
+		o("description returned on failure", function(done) {
+			var oo = o.new()
+			oo("no description", function() {
+				oo(1).equals(2)
+			})
+			oo("description", function() {
+				oo(1).equals(2)("howdy")
+			})
+			oo.run(function(results) {
+				o(results.length).equals(2)
+				o(results[1].message).equals(`howdy\n\n${results[0].message}`)
+				o(results[1].pass).equals(false)
+				done()
+			})
+		})
+	})
 })
 o.spec("the done parser", function() {
 	o("accepts non-English names", function() {
