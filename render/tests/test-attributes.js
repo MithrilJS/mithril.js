@@ -9,7 +9,7 @@ o.spec("attributes", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.body
-		render = vdom($window).render
+		render = vdom($window)
 	})
 	o.spec("basics", function() {
 		o("works (create/update/remove)", function() {
@@ -255,7 +255,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window).render
+			var render = vdom($window)
 
 			var a = {tag: "input"}
 			var b = {tag: "input", attrs: {value: "1"}}
@@ -294,7 +294,7 @@ o.spec("attributes", function() {
 		o("the input.type setter is never used", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window).render
+			var render = vdom($window)
 
 			var a = {tag: "input", attrs: {type: "radio"}}
 			var b = {tag: "input", attrs: {type: "text"}}
@@ -334,7 +334,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window).render
+			var render = vdom($window)
 
 			var a = {tag: "textarea"}
 			var b = {tag: "textarea", attrs: {value: "1"}}
@@ -480,7 +480,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window).render
+			var render = vdom($window)
 
 			var a = {tag: "option"}
 			var b = {tag: "option", attrs: {value: "1"}}
@@ -618,7 +618,7 @@ o.spec("attributes", function() {
 		o("updates with the same value do not re-set the attribute if the select has focus", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window).render
+			var render = vdom($window)
 
 			var a = makeSelect()
 			var b = makeSelect("1")
@@ -648,7 +648,7 @@ o.spec("attributes", function() {
 			o(d.dom.value).equals("2")
 		})
 	})
-	o.spec("contenteditable throws on untrusted children", function() {
+	o.spec("contenteditable attr throws on untrusted children", function() {
 		o("including text nodes", function() {
 			var div = {tag: "div", attrs: {contenteditable: true}, text: ""}
 			var succeeded = false
@@ -690,6 +690,60 @@ o.spec("attributes", function() {
 		})
 		o("tolerating trusted content", function() {
 			var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "<", children: "<a></a>"}]}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){/* ignore */}
+
+			o(succeeded).equals(true)
+		})
+	})
+	o.spec("contentEditable prop throws on untrusted children", function() {
+		o("including text nodes", function() {
+			var div = {tag: "div", attrs: {contentEditable: true}, text: ""}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){/* ignore */}
+
+			o(succeeded).equals(false)
+		})
+		o("including elements", function() {
+			var div = {tag: "div", attrs: {contentEditable: true}, children: [{tag: "script", attrs: {src: "http://evil.com"}}]}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){/* ignore */}
+
+			o(succeeded).equals(false)
+		})
+		o("tolerating empty children", function() {
+			var div = {tag: "div", attrs: {contentEditable: true}, children: []}
+			var succeeded = false
+
+			try {
+				render(root, div)
+
+				succeeded = true
+			}
+			catch(e){/* ignore */}
+
+			o(succeeded).equals(true)
+		})
+		o("tolerating trusted content", function() {
+			var div = {tag: "div", attrs: {contentEditable: true}, children: [{tag: "<", children: "<a></a>"}]}
 			var succeeded = false
 
 			try {

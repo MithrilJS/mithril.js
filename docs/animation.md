@@ -9,7 +9,7 @@
 
 ### Technology choices
 
-Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](http://velocityjs.org/) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
+Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](https://velocityjs.org/) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
 
 Mithril does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril does, however, offer hooks to make life easier in some specific cases where it's traditionally difficult to make animations work.
 
@@ -102,4 +102,4 @@ Note that the `onbeforeremove` hook only fires on the element that loses its `pa
 
 When creating animations, it's recommended that you only use the `opacity` and `transform` CSS rules, since these can be hardware-accelerated by modern browsers and yield better performance than animating `top`, `left`, `width`, and `height`.
 
-It's also recommended that you avoid the `box-shadow` rule and selectors like `:nth-child`, since these are also resource intensive options. If you want to animate a `box-shadow`, consider [putting the `box-shadow` rule on a pseudo element, and animate that element's opacity instead](http://tobiasahlin.com/blog/how-to-animate-box-shadow/). Other things that can be expensive include large or dynamically scaled images and overlapping elements with different `position` values (e.g. an absolute positioned element over a fixed element).
+It's also recommended that you avoid the `box-shadow` rule and selectors like `:nth-child`, since these are also resource intensive options. If you want to animate a `box-shadow`, consider [putting the `box-shadow` rule on a pseudo element, and animate that element's opacity instead](https://tobiasahlin.com/blog/how-to-animate-box-shadow/). Other things that can be expensive include large or dynamically scaled images and overlapping elements with different `position` values (e.g. an absolute positioned element over a fixed element).

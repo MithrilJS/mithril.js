@@ -27,7 +27,8 @@ Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
 m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
-	data: {id: 1, name: "test"}
+	params: {id: 1},
+	body: {name: "test"}
 })
 .then(function(result) {
 	console.log(result)
@@ -38,29 +39,39 @@ m.request({
 
 ### Signature
 
-`promise = m.request([url,] options)`
+`promise = m.request(options)`
 
 Argument                  | Type                              | Required | Description
 ------------------------- | --------------------------------- | -------- | ---
-`url`                     | `String`                          | No       | If present, it's equivalent to having the options `{method: "GET", url: url}`. Values passed to the `options` argument override options set via this shorthand.
+`options`                 | `Object`                          | Yes      | The request options to pass.
 `options.method`          | `String`                          | No       | The HTTP method to use. This value should be one of the following: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` or `OPTIONS`. Defaults to `GET`.
-`options.url`             | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
-`options.data`            | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring (for GET requests) or body (for other types of requests).
+`options.url`             | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.params`.
+`options.params`            | `Object`                        | No       | The data to be interpolated into the URL and/or serialized into the query string.
+`options.body`            | `Object`                          | No       | The data to be serialized into the body (for other types of requests).
 `options.async`           | `Boolean`                         | No       | Whether the request should be asynchronous. Defaults to `true`.
 `options.user`            | `String`                          | No       | A username for HTTP authorization. Defaults to `undefined`.
 `options.password`        | `String`                          | No       | A password for HTTP authorization. Defaults to `undefined`. This option is provided for `XMLHttpRequest` compatibility, but you should avoid using it because it sends the password in plain text over the network.
 `options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
 `options.timeout`         | `Number`                          | No       | The amount of milliseconds a request can take before automatically being [terminated](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout).  Defaults to `undefined`.
-`options.responseType`    | `String`                          | No       | The expected [type](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) of the response. Defaults to `undefined`.
-`options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.responseType`    | `String`                          | No       | The expected [type](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) of the response. Defaults to `""` if `extract` is defined, `"json"` if missing. If `responseType: "json"`, it internally performs `JSON.parse(responseText)`.
+`options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration and optional replacement (by returning a new XHR).
 `options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `data`. Defaults to `JSON.stringify`, or if `options.data` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
-`options.deserialize`     | `any = Function(string)`          | No       | A deserialization method to be applied to the `xhr.responseText`. Defaults to a small wrapper around `JSON.parse` that returns `null` for empty responses. If `extract` is defined, `deserialize` will be skipped.
-`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `xhr.responseText`, which is in turn passed to `deserialize`. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves. Furthermore, when an extract callback is provided, exceptions are *not* thrown when the server response status code indicates an error.
-`options.useBody`         | `Boolean`                         | No       | Force the use of the HTTP body section for `data` in `GET` requests when set to `true`, or the use of querystring for other HTTP methods when set to `false`. Defaults to `false` for `GET` requests and `true` for other methods.
+`options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `body`. Defaults to `JSON.stringify`, or if `options.body` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
+`options.deserialize`     | `any = Function(any)`          | No       | A deserialization method to be applied to the `xhr.response` or normalized `xhr.responseText`. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function). If `extract` is defined, `deserialize` will be skipped.
+`options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `options.deserialize(parsedResponse)`, throwing an exception when the server response status code indicates an error or when the response is syntactically invalid. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+`promise = m.request(url, options)`
+
+Argument    | Type      | Required | Description
+----------- | --------- | -------- | ---
+`url`       | `String`  | Yes      | The [path name](paths.md) to send the request to. `options.url` overrides this when present.
+`options`   | `Object`  | No       | The request options to pass.
+**returns** | `Promise` |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+
+This second form is mostly equivalent to `m.request(Object.assign({url: url}, options))`, just it does not depend on the ES6 global `Object.assign` internally.
 
 [How to read signatures](signatures.md)
 
@@ -124,7 +135,7 @@ m.route(document.body, "/", {
 
 Let's assume making a request to the server URL `/api/items` returns an array of objects in JSON format.
 
-When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that JavaScript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each todo.
+When `m.route` is called at the bottom, the `Todos` component is initialized. `oninit` is called, which calls `m.request`. This retrieves an array of objects from the server asynchronously. "Asynchronously" means that JavaScript continues running other code while it waits for the response from server. In this case, it means `fetch` returns, and the component is rendered using the original empty array as `Data.todos.list`. Once the request to the server completes, the array of objects `items` is assigned to `Data.todos.list` and the component is rendered again, yielding a list of `<div>`s containing the titles of each `todo`.
 
 ---
 
@@ -194,31 +205,31 @@ Request URLs may contain interpolations:
 m.request({
 	method: "GET",
 	url: "/api/v1/users/:id",
-	data: {id: 123},
+	params: {id: 123},
 }).then(function(user) {
 	console.log(user.id) // logs 123
 })
 ```
 
-In the code above, `:id` is populated with the data from the `{id: 123}` object, and the request becomes `GET /api/v1/users/123`.
+In the code above, `:id` is populated with the data from the `params` object, and the request becomes `GET /api/v1/users/123`.
 
-Interpolations are ignored if no matching data exists in the `data` property.
+Interpolations are ignored if no matching data exists in the `params` property.
 
 ```javascript
 m.request({
 	method: "GET",
 	url: "/api/v1/users/foo:bar",
-	data: {id: 123},
+	params: {id: 123},
 })
 ```
 
-In the code above, the request becomes `GET /api/v1/users/foo:bar`
+In the code above, the request becomes `GET /api/v1/users/foo:bar?id=123`
 
 ---
 
 ### Aborting requests
 
-Sometimes, it is desirable to abort a request. For example, in an autocompleter/typeahead widget, you want to ensure that only the last request completes, because typically autocompleters fire several requests as the user types  and HTTP requests may complete out of order due to the unpredictable nature of networks. If another request finishes after the last fired request, the widget would display less relevant (or potentially wrong) data than if the last fired request finished last.
+Sometimes, it is desirable to abort a request. For example, in an autocompleter/typeahead widget, you want to ensure that only the last request completes, because typically autocompleters fire several requests as the user types and HTTP requests may complete out of order due to the unpredictable nature of networks. If another request finishes after the last fired request, the widget would display less relevant (or potentially wrong) data than if the last fired request finished last.
 
 `m.request()` exposes its underlying `XMLHttpRequest` object via the `options.config` parameter, which allows you to save a reference to that object and call its `abort` method when required:
 
@@ -230,7 +241,7 @@ function search() {
 	m.request({
 		method: "GET",
 		url: "/api/v1/users",
-		data: {search: query},
+		params: {search: query},
 		config: function(xhr) {searchXHR = xhr}
 	})
 }
@@ -264,24 +275,24 @@ Next, you need to create a [`FormData`](https://developer.mozilla.org/en/docs/We
 function upload(e) {
 	var file = e.target.files[0]
 
-	var data = new FormData()
-	data.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 }
 ```
 
-Next, you need to call `m.request` and set `options.method` to an HTTP method that uses body (e.g. `POST`, `PUT`, `PATCH`) and use the `FormData` object as `options.data`.
+Next, you need to call `m.request` and set `options.method` to an HTTP method that uses body (e.g. `POST`, `PUT`, `PATCH`) and use the `FormData` object as `options.body`.
 
 ```javascript
 function upload(e) {
 	var file = e.target.files[0]
 
-	var data = new FormData()
-	data.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 	})
 }
 ```
@@ -302,15 +313,15 @@ m.render(document.body, [
 function upload(e) {
 	var files = e.target.files
 
-	var data = new FormData()
+	var body = new FormData()
 	for (var i = 0; i < files.length; i++) {
-		data.append("file" + i, files[i])
+		body.append("file" + i, files[i])
 	}
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 	})
 }
 ```
@@ -338,13 +349,13 @@ m.mount(document.body, {
 function upload(e) {
 	var file = e.target.files[0]
 
-	var data = new FormData()
-	data.append("myfile", file)
+	var body = new FormData()
+	body.append("myfile", file)
 
 	m.request({
 		method: "POST",
 		url: "/api/v1/upload",
-		data: data,
+		body: body,
 		config: function(xhr) {
 			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
@@ -381,7 +392,7 @@ m.request({
 })
 ```
 
-In the example above, assuming `/api/v1/users` returns an array of objects, the `User` constructor will be instantiated (i.e. called as `new User(data)`) for each object in the array. If the response returned a single object, that object would be used as the `data` argument.
+In the example above, assuming `/api/v1/users` returns an array of objects, the `User` constructor will be instantiated (i.e. called as `new User(data)`) for each object in the array. If the response returned a single object, that object would be used as the `body` argument.
 
 ---
 
@@ -483,7 +494,7 @@ Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
-- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer, Safari and Android (non-Chromium).
+- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).
 
 Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
 

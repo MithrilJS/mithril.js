@@ -76,7 +76,6 @@ Property   | Type                             | Description
 `state`    | `Object?`                        | An object that is persisted between redraws. It is provided by the core engine when needed. In POJO component vnodes, the `state` inherits prototypically from the component object/class. In class component vnodes it is an instance of the class. In closure components it is the object returned by the closure.
 `events`   | `Object?`                        | An object that is persisted between redraws and that stores event handlers so that they can be removed using the DOM API. The `events` property is `undefined` if there are no event handlers defined. This property is only used internally by Mithril, do not use or modify it.
 `instance` | `Object?`                        | For components, a storage location for the value returned by the `view`. This property is only used internally by Mithril, do not use or modify it.
-`skip`     | `Boolean`                        | This property is only used internally by Mithril when diffing keyed lists, do not use or modify it.
 
 
 ---

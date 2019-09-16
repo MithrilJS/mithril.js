@@ -3,15 +3,13 @@
 var Vnode = require("../render/vnode")
 
 module.exports = function($window) {
-	var $doc = $window.document
+	var $doc = $window && $window.document
+	var currentRedraw
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
-
-	var redraw
-	function setRedraw(callback) {return redraw = callback}
 
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
@@ -88,9 +86,12 @@ module.exports = function($window) {
 		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
+		// Capture nodes to remove, so we don't confuse them.
+		vnode.instance = []
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
+			vnode.instance.push(child)
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
@@ -123,10 +124,7 @@ module.exports = function($window) {
 
 		insertNode(parent, element, nextSibling)
 
-		if (attrs != null && attrs.contenteditable != null) {
-			setContentEditable(vnode)
-		}
-		else {
+		if (!maybeSetContentEditable(vnode)) {
 			if (vnode.text != null) {
 				if (vnode.text !== "") element.textContent = vnode.text
 				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
@@ -277,24 +275,16 @@ module.exports = function($window) {
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
+		else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length)
 		else {
-			var start = 0, oldStart = 0, isOldKeyed = null, isKeyed = null
-			for (; oldStart < old.length; oldStart++) {
-				if (old[oldStart] != null) {
-					isOldKeyed = old[oldStart].key != null
-					break
-				}
-			}
-			for (; start < vnodes.length; start++) {
-				if (vnodes[start] != null) {
-					isKeyed = vnodes[start].key != null
-					break
-				}
-			}
+			var isOldKeyed = old[0] != null && old[0].key != null
+			var isKeyed = vnodes[0] != null && vnodes[0].key != null
+			var start = 0, oldStart = 0
+			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
+			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
 			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed) {
-				removeNodes(old, oldStart, old.length)
+				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed) {
 				// Don't index past the end of either list (causes deopts).
@@ -308,10 +298,10 @@ module.exports = function($window) {
 					v = vnodes[start]
 					if (o === v || o == null && v == null) continue
 					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
-					else if (v == null) removeNode(o)
+					else if (v == null) removeNode(parent, o)
 					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
-				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else {
 				// keyed diff
@@ -321,46 +311,30 @@ module.exports = function($window) {
 				while (oldEnd >= oldStart && end >= start) {
 					oe = old[oldEnd]
 					ve = vnodes[end]
-					if (oe == null) oldEnd--
-					else if (ve == null) end--
-					else if (oe.key === ve.key) {
-						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
-						if (ve.dom != null) nextSibling = ve.dom
-						oldEnd--, end--
-					} else {
-						break
-					}
+					if (oe.key !== ve.key) break
+					if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+					if (ve.dom != null) nextSibling = ve.dom
+					oldEnd--, end--
 				}
 				// top-down
 				while (oldEnd >= oldStart && end >= start) {
 					o = old[oldStart]
 					v = vnodes[start]
-					if (o == null) oldStart++
-					else if (v == null) start++
-					else if (o.key === v.key) {
-						oldStart++, start++
-						if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
-					} else {
-						break
-					}
+					if (o.key !== v.key) break
+					oldStart++, start++
+					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 				}
 				// swaps and list reversals
 				while (oldEnd >= oldStart && end >= start) {
-					if (o == null) oldStart++
-					else if (v == null) start++
-					else if (oe == null) oldEnd--
-					else if (ve == null) end--
-					else if (start === end) break
-					else {
-						if (o.key !== ve.key || oe.key !== v.key) break
-						topSibling = getNextSibling(old, oldStart, nextSibling)
-						insertNode(parent, toFragment(oe), topSibling)
-						if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-						if (++start <= --end) insertNode(parent, toFragment(o), nextSibling)
-						if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
-						if (ve.dom != null) nextSibling = ve.dom
-						oldStart++; oldEnd--
-					}
+					if (start === end) break
+					if (o.key !== ve.key || oe.key !== v.key) break
+					topSibling = getNextSibling(old, oldStart, nextSibling)
+					moveNodes(parent, oe, topSibling)
+					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
+					if (++start <= --end) moveNodes(parent, o, nextSibling)
+					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
+					if (ve.dom != null) nextSibling = ve.dom
+					oldStart++; oldEnd--
 					oe = old[oldEnd]
 					ve = vnodes[end]
 					o = old[oldStart]
@@ -368,19 +342,14 @@ module.exports = function($window) {
 				}
 				// bottom up once again
 				while (oldEnd >= oldStart && end >= start) {
-					if (oe == null) oldEnd--
-					else if (ve == null) end--
-					else if (oe.key === ve.key) {
-						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
-						if (ve.dom != null) nextSibling = ve.dom
-						oldEnd--, end--
-					} else {
-						break
-					}
+					if (oe.key !== ve.key) break
+					if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+					if (ve.dom != null) nextSibling = ve.dom
+					oldEnd--, end--
 					oe = old[oldEnd]
 					ve = vnodes[end]
 				}
-				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
+				if (start > end) removeNodes(parent, old, oldStart, oldEnd + 1)
 				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
@@ -389,21 +358,19 @@ module.exports = function($window) {
 					for (i = end; i >= start; i--) {
 						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
 						ve = vnodes[i]
-						if (ve != null) {
-							var oldIndex = map[ve.key]
-							if (oldIndex != null) {
-								pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
-								oldIndices[i-start] = oldIndex
-								oe = old[oldIndex]
-								old[oldIndex] = null
-								if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
-								if (ve.dom != null) nextSibling = ve.dom
-								matched++
-							}
+						var oldIndex = map[ve.key]
+						if (oldIndex != null) {
+							pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
+							oldIndices[i-start] = oldIndex
+							oe = old[oldIndex]
+							old[oldIndex] = null
+							if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+							if (ve.dom != null) nextSibling = ve.dom
+							matched++
 						}
 					}
 					nextSibling = originalNextSibling
-					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
+					if (matched !== oldEnd - oldStart + 1) removeNodes(parent, old, oldStart, oldEnd + 1)
 					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 					else {
 						if (pos === -1) {
@@ -416,7 +383,7 @@ module.exports = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else insertNode(parent, toFragment(v), nextSibling)
+									else moveNodes(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -452,7 +419,7 @@ module.exports = function($window) {
 			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 		}
 		else {
-			removeNode(old)
+			removeNode(parent, old)
 			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
@@ -464,10 +431,14 @@ module.exports = function($window) {
 	}
 	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
-			toFragment(old)
+			removeHTML(parent, old)
 			createHTML(parent, vnode, ns, nextSibling)
 		}
-		else vnode.dom = old.dom, vnode.domSize = old.domSize
+		else {
+			vnode.dom = old.dom
+			vnode.domSize = old.domSize
+			vnode.instance = old.instance
+		}
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
@@ -496,16 +467,15 @@ module.exports = function($window) {
 			}
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
-			setContentEditable(vnode)
-		}
-		else if (old.text != null && vnode.text != null && vnode.text !== "") {
-			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
-		}
-		else {
-			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, hooks, null, ns)
+		if (!maybeSetContentEditable(vnode)) {
+			if (old.text != null && vnode.text != null && vnode.text !== "") {
+				if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
+			}
+			else {
+				if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+				if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+				updateNodes(element, old.children, vnode.children, hooks, null, ns)
+			}
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
@@ -520,7 +490,7 @@ module.exports = function($window) {
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance)
+			removeNode(parent, old.instance)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -545,26 +515,26 @@ module.exports = function($window) {
 	// occur multiple times) and returns an array with the indices
 	// of the items that are part of the longest increasing
 	// subsequece
+	var lisTemp = []
 	function makeLisIndices(a) {
-		var p = a.slice()
-		var result = []
-		result.push(0)
-		var u
-		var v
-		for (var i = 0, il = a.length; i < il; ++i) {
-			if (a[i] === -1) {
-				continue
-			}
+		var result = [0]
+		var u = 0, v = 0, i = 0
+		var il = lisTemp.length = a.length
+		for (var i = 0; i < il; i++) lisTemp[i] = a[i]
+		for (var i = 0; i < il; ++i) {
+			if (a[i] === -1) continue
 			var j = result[result.length - 1]
 			if (a[j] < a[i]) {
-				p[i] = j
+				lisTemp[i] = j
 				result.push(i)
 				continue
 			}
 			u = 0
 			v = result.length - 1
 			while (u < v) {
-				var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
+				// Fast integer average without overflow.
+				// eslint-disable-next-line no-bitwise
+				var c = (u >>> 1) + (v >>> 1) + (u & v & 1)
 				if (a[result[c]] < a[i]) {
 					u = c + 1
 				}
@@ -573,9 +543,7 @@ module.exports = function($window) {
 				}
 			}
 			if (a[i] < a[result[u]]) {
-				if (u > 0) {
-					p[i] = result[u - 1]
-				}
+				if (u > 0) lisTemp[i] = result[u - 1]
 				result[u] = i
 			}
 		}
@@ -583,24 +551,12 @@ module.exports = function($window) {
 		v = result[u - 1]
 		while (u-- > 0) {
 			result[u] = v
-			v = p[v]
+			v = lisTemp[v]
 		}
+		lisTemp.length = 0
 		return result
 	}
 
-	function toFragment(vnode) {
-		var count = vnode.domSize
-		if (count != null || vnode.dom == null) {
-			var fragment = $doc.createDocumentFragment()
-			if (count > 0) {
-				var dom = vnode.dom
-				while (--count) fragment.appendChild(dom.nextSibling)
-				fragment.insertBefore(dom, fragment.firstChild)
-			}
-			return fragment
-		}
-		else return vnode.dom
-	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
@@ -608,56 +564,148 @@ module.exports = function($window) {
 		return nextSibling
 	}
 
+	// This covers a really specific edge case:
+	// - Parent node is keyed and contains child
+	// - Child is removed, returns unresolved promise in `onbeforeremove`
+	// - Parent node is moved in keyed diff
+	// - Remaining children still need moved appropriately
+	//
+	// Ideally, I'd track removed nodes as well, but that introduces a lot more
+	// complexity and I'm not exactly interested in doing that.
+	function moveNodes(parent, vnode, nextSibling) {
+		var frag = $doc.createDocumentFragment()
+		moveChildToFrag(parent, frag, vnode)
+		insertNode(parent, frag, nextSibling)
+	}
+	function moveChildToFrag(parent, frag, vnode) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode.dom != null && vnode.dom.parentNode === parent) {
+			if (typeof vnode.tag !== "string") {
+				vnode = vnode.instance
+				if (vnode != null) continue
+			} else if (vnode.tag === "<") {
+				for (var i = 0; i < vnode.instance.length; i++) {
+					frag.appendChild(vnode.instance[i])
+				}
+			} else if (vnode.tag !== "[") {
+				// Don't recurse for text nodes *or* elements, just fragments
+				frag.appendChild(vnode.dom)
+			} else if (vnode.children.length === 1) {
+				vnode = vnode.children[0]
+				if (vnode != null) continue
+			} else {
+				for (var i = 0; i < vnode.children.length; i++) {
+					var child = vnode.children[i]
+					if (child != null) moveChildToFrag(parent, frag, child)
+				}
+			}
+			break
+		}
+	}
+
 	function insertNode(parent, dom, nextSibling) {
 		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 
-	function setContentEditable(vnode) {
+	function maybeSetContentEditable(vnode) {
+		if (vnode.attrs == null || (
+			vnode.attrs.contenteditable == null && // attribute
+			vnode.attrs.contentEditable == null // property
+		)) return false
 		var children = vnode.children
 		if (children != null && children.length === 1 && children[0].tag === "<") {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
 		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		return true
 	}
 
 	//remove
-	function removeNodes(vnodes, start, end) {
+	function removeNodes(parent, vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
-			if (vnode != null) removeNode(vnode)
+			if (vnode != null) removeNode(parent, vnode)
 		}
 	}
-	function removeNode(vnode) {
-		var expected = 1, called = 0
+	function removeNode(parent, vnode) {
+		var mask = 0
 		var original = vnode.state
+		var stateResult, attrsResult
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
 			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				mask = 1
+				stateResult = result
 			}
 		}
 		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
 			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				// eslint-disable-next-line no-bitwise
+				mask |= 2
+				attrsResult = result
 			}
 		}
-		continuation()
-		function continuation() {
-			if (++called === expected) {
-				checkState(vnode, original)
-				onremove(vnode)
-				if (vnode.dom) {
-					var parent = vnode.dom.parentNode
-					var count = vnode.domSize || 1
-					while (--count) parent.removeChild(vnode.dom.nextSibling)
+		checkState(vnode, original)
+
+		// If we can, try to fast-path it and avoid all the overhead of awaiting
+		if (!mask) {
+			onremove(vnode)
+			removeChild(parent, vnode)
+		} else {
+			if (stateResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 1) { mask &= 2; if (!mask) reallyRemove() }
+				}
+				stateResult.then(next, next)
+			}
+			if (attrsResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 2) { mask &= 1; if (!mask) reallyRemove() }
+				}
+				attrsResult.then(next, next)
+			}
+		}
+
+		function reallyRemove() {
+			checkState(vnode, original)
+			onremove(vnode)
+			removeChild(parent, vnode)
+		}
+	}
+	function removeHTML(parent, vnode) {
+		for (var i = 0; i < vnode.instance.length; i++) {
+			parent.removeChild(vnode.instance[i])
+		}
+	}
+	function removeChild(parent, vnode) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode.dom != null && vnode.dom.parentNode === parent) {
+			if (typeof vnode.tag !== "string") {
+				vnode = vnode.instance
+				if (vnode != null) continue
+			} else if (vnode.tag === "<") {
+				removeHTML(parent, vnode)
+			} else {
+				if (vnode.tag !== "[") {
 					parent.removeChild(vnode.dom)
+					if (!Array.isArray(vnode.children)) break
+				}
+				if (vnode.children.length === 1) {
+					vnode = vnode.children[0]
+					if (vnode != null) continue
+				} else {
+					for (var i = 0; i < vnode.children.length; i++) {
+						var child = vnode.children[i]
+						if (child != null) removeChild(parent, child)
+					}
 				}
 			}
+			break
 		}
 	}
 	function onremove(vnode) {
@@ -829,15 +877,17 @@ module.exports = function($window) {
 	//    that below.
 	// 6. In function-based event handlers, `return false` prevents the default
 	//    action and stops event propagation. We replicate that below.
-	function EventDict() {}
+	function EventDict() {
+		// Save this, so the current redraw is correctly tracked.
+		this._ = currentRedraw
+	}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
 		var handler = this["on" + ev.type]
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (ev.redraw === false) ev.redraw = undefined
-		else if (typeof redraw === "function") redraw()
+		if (this._ && ev.redraw !== false) (0, this._)()
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
@@ -885,11 +935,21 @@ module.exports = function($window) {
 		vnode.dom = old.dom
 		vnode.domSize = old.domSize
 		vnode.instance = old.instance
+		// One would think having the actual latest attributes would be ideal,
+		// but it doesn't let us properly diff based on our current internal
+		// representation. We have to save not only the old DOM info, but also
+		// the attributes used to create it, as we diff *that*, not against the
+		// DOM directly (with a few exceptions in `setAttr`). And, of course, we
+		// need to save the children and text as they are conceptually not
+		// unlike special "attributes" internally.
+		vnode.attrs = old.attrs
+		vnode.children = old.children
+		vnode.text = old.text
 		return true
 	}
 
-	function render(dom, vnodes) {
-		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
+	return function(dom, vnodes, redraw) {
+		if (!dom) throw new TypeError("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = activeElement()
 		var namespace = dom.namespaceURI
@@ -898,12 +958,16 @@ module.exports = function($window) {
 		if (dom.vnodes == null) dom.textContent = ""
 
 		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
-		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		var prevRedraw = currentRedraw
+		try {
+			currentRedraw = typeof redraw === "function" ? redraw : undefined
+			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		} finally {
+			currentRedraw = prevRedraw
+		}
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
 		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
-
-	return {render: render, setRedraw: setRedraw}
 }

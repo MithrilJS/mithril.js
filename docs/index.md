@@ -13,12 +13,12 @@
 ### What is Mithril?
 
 Mithril is a modern client-side JavaScript framework for building Single Page Applications.
-It's small (< 8kb gzip), fast and provides routing and XHR utilities out of the box.
+It's small (< 10kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
 	<div style="width:50%;">
 		<h5>Download size</h5>
-		<small>Mithril (8kb)</small>
+		<small>Mithril (9.5kb)</small>
 		<div style="animation:grow 0.08s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:4%;"></div>
 		<small style="color:#aaa;">Vue + Vue-Router + Vuex + fetch (40kb)</small>
 		<div style="animation:grow 0.4s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:20%"></div>
@@ -56,7 +56,7 @@ An easy way to try out Mithril is to include it from a CDN and follow this tutor
 
 Let's create an HTML file to follow along:
 
-```markup
+```html
 <body>
 	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script>
@@ -69,7 +69,7 @@ Let's create an HTML file to follow along:
 
 To make things simpler you can fork this pen which already has the latest version of mithril loaded.
 
-<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<p data-height="265" data-theme-id="light" data-slug-hash="XRrXVR" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Scaffold" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/XRrXVR/">Mithril Scaffold</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 Mithril is also loaded onto this page already, so you can start poking at the `m` object in the developer console right away if you'd like!
@@ -96,7 +96,7 @@ As you can see, you use the same code to both create and update HTML. Mithril au
 
 #### Live Example
 
-<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<p data-height="265" data-theme-id="light" data-slug-hash="KmPdOO" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Hello World" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/KmPdOO/">Mithril Hello World</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
@@ -135,7 +135,7 @@ m("main", [
 
 #### Live Example
 
-<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<p data-height="275" data-theme-id="light" data-slug-hash="gWYade" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Simple Mithril Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/gWYade/">Simple Mithril Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin](jsx.md).
@@ -173,7 +173,7 @@ m.mount(root, Hello)
 
 As you would expect, doing so creates this markup:
 
-```markup
+```html
 <main>
 	<h1 class="title">My first app</h1>
 	<button>A button</button>
@@ -206,7 +206,7 @@ If you're wondering about performance, it turns out Mithril is very fast at rend
 
 #### Live Example
 
-<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<p data-height="300" data-theme-id="light" data-slug-hash="rmBOQV" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Component Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/rmBOQV/">Mithril Component Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
@@ -238,13 +238,13 @@ m.route(root, "/splash", {
 
 The `m.route` function still has the same auto-redrawing functionality that `m.mount` does, and it also enables URL awareness; in other words, it lets Mithril know what to do when it sees a `#!` in the URL.
 
-The `"/splash"` right after `root` means that's the default route, i.e. if the hashbang in the URL doesn't point to one of the defined routes (`/splash` and `/hello`, in our case), then Mithril redirects to the default route. So if you open the page in a browser and your URL is `http://localhost`, then you get redirected to `http://localhost/#!/splash`.
+The `"/splash"` right after `root` means that's the default route, i.e. if the hashbang in the URL doesn't point to one of the defined routes (`/splash` and `/hello`, in our case), then Mithril redirects to the default route. So if you open the page in a browser and your URL is `https://localhost`, then you get redirected to `https://localhost/#!/splash`.
 
-Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to `http://localhost/#!/hello`. You can navigate back and forth to the splash page using the browser's back and next button.
+Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to `https://localhost/#!/hello`. You can navigate back and forth to the splash page using the browser's back and next button.
 
 #### Live Example
 
-<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<p data-height="300" data-theme-id="light" data-slug-hash="qmWOvr" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril Routing Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/qmWOvr/">Mithril Routing Example</a> by Pat Cavit (<a href="https://codepen.io/tivac">@tivac</a>) on <a href="https://codepen.io">CodePen</a>.</p>
 <script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
 
 ---
@@ -253,9 +253,9 @@ Also, as you would expect, clicking on the link on the splash page takes you to 
 
 Basically, XHR is just a way to talk to a server.
 
-Let's change our click counter to make it save data on a server. For the server, we'll use [REM](http://rem-rest-api.herokuapp.com), a mock REST API designed for toy apps like this tutorial.
+Let's change our click counter to make it save data on a server. For the server, we'll use [REM](https://rem-rest-api.herokuapp.com), a mock REST API designed for toy apps like this tutorial.
 
-First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `data` is the payload that we're sending to the endpoint and `withCredentials` means to enable cookies (a requirement for the REM API to work)
+First we create a function that calls `m.request`. The `url` specifies an endpoint that represents a resource, the `method` specifies the type of action we're taking (typically the `PUT` method [upserts](https://en.wiktionary.org/wiki/upsert)), `body` is the payload that we're sending to the endpoint and `withCredentials` means to enable cookies (a requirement for the REM API to work)
 
 ```javascript
 var count = 0
@@ -263,7 +263,7 @@ var increment = function() {
 	m.request({
 		method: "PUT",
 		url: "//rem-rest-api.herokuapp.com/api/tutorial/1",
-		data: {count: count + 1},
+		body: {count: count + 1},
 		withCredentials: true,
 	})
 	.then(function(data) {
@@ -291,8 +291,12 @@ Clicking the button should now update the count.
 
 #### Live Example
 
-<p data-height="265" data-theme-id="light" data-slug-hash="WjeQBW" data-default-tab="js,result" data-user="tivac" data-embed-version="2" data-pen-title="Mithril XHR Example" data-preview="true" class="codepen">See the Pen <a href="https://codepen.io/tivac/pen/WjeQBW/">Mithril XHR Example</a> by Pat Cavit (<a href="http://codepen.io/tivac">@tivac</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script>
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="isiahmeadows" data-slug-hash="aeBZEq" data-preview="true" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Mithril XHR Example">
+  <span>See the Pen <a href="https://codepen.io/isiahmeadows/pen/aeBZEq/">
+  Mithril XHR Example</a> by Isiah Meadows (<a href="https://codepen.io/isiahmeadows">@isiahmeadows</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
 
 ---
 

@@ -106,13 +106,10 @@ module.exports = function (input) {
 			+ (rest ? "\n" + def + variable + eq + "_" + uuid : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
 	}
 
-	var versionTag = "bleeding-edge"
-	var packageFile = __dirname + "/../package.json"
 	var code = process(path.resolve(input), read(input))
 		.replace(/^\s*((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)(\2)(?=[\s]+(\w)|;|$)/gm, "") // remove assignments to self
 		.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
 		.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") // remove multiline breaks
-		.replace(versionTag, isFile(packageFile) ? parse(packageFile).version : versionTag) // set version
 
 	code = ";(function() {\n" + code + "\n}());"
 	//try {new Function(code); console.log("build completed at " + new Date())} catch (e) {}

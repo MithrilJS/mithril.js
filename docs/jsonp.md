@@ -14,7 +14,7 @@ Makes JSON-P requests. Typically, it's useful to interact with servers that allo
 ```javascript
 m.jsonp({
 	url: "/api/v1/users/:id",
-	data: {id: 1},
+	params: {id: 1},
 	callbackKey: "callback",
 })
 .then(function(result) {
@@ -26,18 +26,28 @@ m.jsonp({
 
 ### Signature
 
-`promise = m.jsonp([url,] options)`
+`promise = m.jsonp(options)`
 
 Argument               | Type                              | Required | Description
 ---------------------- | --------------------------------- | -------- | ---
-`url`                  | `String`                          | No       | If present, it's equivalent to having the option `{url: url}`. Values passed to the `options` argument override options set via this shorthand.
-`options.url`          | `String`                          | Yes      | The URL to send the request to. The URL may be either absolute or relative, and it may contain [interpolations](#dynamic-urls).
-`options.data`         | `any`                             | No       | The data to be interpolated into the URL and serialized into the querystring.
+`options`              | `Object`                          | Yes      | The request options to pass.
+`options.url`          | `String`                          | Yes      | The [path name](paths.md) to send the request to, optionally interpolated with values from `options.params`.
+`options.params`       | `Object`                          | No       | The data to be interpolated into the URL and serialized into the querystring.
 `options.type`         | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.callbackName` | `String`                          | No       | The name of the function that will be called as the callback. Defaults to a randomized string (e.g. `_mithril_6888197422121285_0({a: 1})`
 `options.callbackKey`  | `String`                          | No       | The name of the querystring parameter name that specifies the callback name. Defaults to `callback` (e.g. `/someapi?callback=_mithril_6888197422121285_0`)
 `options.background`   | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
 **returns**            | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through `type` method
+
+`promise = m.jsonp(url, options)`
+
+Argument    | Type      | Required | Description
+----------- | --------- | -------- | ---
+`url`       | `String`  | Yes      | The [path name](paths.md) to send the request to. `options.url` overrides this when present.
+`options`   | `Object`  | No       | The request options to pass.
+**returns** | `Promise` |          | A promise that resolves to the response data, after it has been piped through the `type` method
+
+This second form is mostly equivalent to `m.jsonp(Object.assign({url: url}, options))`, just it does not depend on the ES6 global `Object.assign` internally.
 
 [How to read signatures](signatures.md)
 
@@ -87,4 +97,3 @@ m.jsonp({
 	console.log(response.data.login) // logs "lhorie"
 })
 ```
-

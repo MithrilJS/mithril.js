@@ -9,7 +9,7 @@ o.spec("createNodes", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	o("creates nodes", function() {

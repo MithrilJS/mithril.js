@@ -22,7 +22,7 @@
 
 ### Description
 
-A [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
+An [ES6 Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) polyfill.
 
 A Promise is a mechanism for working with asynchronous computations.
 
@@ -204,7 +204,7 @@ In the refactored version, it's trivial to test whether `getFirstTen` has any of
 Promises absorb other promises. Basically, this means you can never receive a Promise as an argument to `onFulfilled` or `onRejected` callbacks for `then` and `catch` methods. This feature allows us to flatten nested promises to make code more manageable.
 
 ```javascript
-function searchUsers(q) {return m.request("/api/v1/users/search", {data: {q: q}})}
+function searchUsers(q) {return m.request("/api/v1/users/search", {params: {q: q}})}
 function getUserProjects(id) {return m.request("/api/v1/users/" + id + "/projects")}
 
 // AVOID: pyramid of doom

@@ -44,7 +44,7 @@ if(!doc) {
 }
 
 var m = require("../render/hyperscript")
-m.render = require("../render/render")(window).render
+m.render = require("../render/render")(window)
 
 
 function resetScratch() {
