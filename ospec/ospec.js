@@ -291,8 +291,11 @@ else window.o = m()
 			var message = serialize(self.value) + "\n  " + verb + "\n" + serialize(value)
 			if (compare(self.value, value)) succeed(self, message)
 			else fail(self, message)
+			var result = results[self.i]
 			return function(message) {
-				if (!self.pass) self.message = message + "\n\n" + self.message
+				if (!result.pass) {
+					result.message = message + "\n\n" + result.message
+				}
 			}
 		}
 	}
