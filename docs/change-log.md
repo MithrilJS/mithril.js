@@ -1,5 +1,6 @@
 # Change log
 
+- [v1.1.7](#v117)
 - [v1.1.6](#v116)
 - [v1.1.5](#v115)
 - [v1.1.4](#v114)
@@ -18,7 +19,6 @@
 #### Bug fixes
 
 - core: Workaround for [Internet Explorer bug](https://www.tjvantoll.com/2013/08/30/bugs-with-document-activeelement-in-internet-explorer/) when running in an iframe
-
 - Fix prototype pollution vulnerability in `m.parseQueryString` ([#2523](https://github.com/MithrilJS/mithril.js/pull/2523) [@isiahmeadows](https://github.com/isiahmeadows) [@Hunter-Dolan](https://github.com/Hunter-Dolan))
 
 
