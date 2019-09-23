@@ -65,7 +65,10 @@
 $ git pull --rebase mithriljs next</code></pre>
 <ol start=2>
 <li>Determine patch level of the change</li>
-<li>Update information in <code>docs/change-log.md</code> to match reality of the new version being prepared for release</li>
+<li>Update information in <code>docs/change-log.md</code> to match reality of the new version being prepared for release.<ul>
+<li>Don&#39;t forget to add today&#39;s date under the version heading!</li>
+</ul>
+</li>
 <li>Replace all existing references to <code>mithril@next</code> to <code>mithril</code> if moving from a release candidate to stable.<ul>
 <li>Note: if making an initial release candidate, don&#39;t forget to move all the playground snippets to pull from <code>mithril@next</code>!</li>
 </ul>
@@ -150,7 +153,11 @@ $ git push mithriljs</code></pre>
 $ git pull --rebase mithriljs next</code></pre>
 <ol start=2>
 <li>Determine patch level of the change</li>
-<li>Update <code>version</code> field in <code>ospec/package.json</code> to match new version being prepared for release</li>
+<li>Update <code>version</code> field in <code>ospec/package.json</code> to match new version being prepared for release.</li>
+<li>Update <code>ospec/change-log.md</code> to match new version being prepared for release.<ul>
+<li>Don&#39;t forget to add today&#39;s date under the version heading!</li>
+</ul>
+</li>
 <li>Commit changes to <code>next</code></li>
 </ol>
 <pre><code>$ git add .

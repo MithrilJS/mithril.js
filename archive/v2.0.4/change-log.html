@@ -65,33 +65,37 @@
 <li><a href=#v200>v2.0.0</a></li>
 <li><a href=migration-v1x.html>Migrating from v1.x</a></li>
 <li><a href=migration-v02x.html>Migrating from v0.2.x</a></li>
-<li><a href=https://mithril.js.org/archive/v1.1.6/change-log.html>v1.x changelog</a></li>
-<li><a href=https://mithril.js.org/archive/v1.1.6/index.html>v1.x docs</a></li>
+<li><a href=https://mithril.js.org/archive/v1.1.7/change-log.html>v1.x changelog</a></li>
+<li><a href=https://mithril.js.org/archive/v1.1.7/index.html>v1.x docs</a></li>
 <li><a href=https://mithril.js.org/archive/v0.2.5/index.html>v0.2 docs</a></li>
 <li><a href=https://github.com/MithrilJS/mithril.js/blob/master/ospec/change-log.md><code>ospec</code> change log</a></li>
 <li><a href=https://github.com/MithrilJS/mithril.js/blob/master/stream/change-log.md><code>mithril/stream</code> change log</a></li>
 </ul>
 </li>
-<li><a href=https://mithril.js.org/archive/v1.1.6/ >v1 Documentation</a></li>
+<li><a href=https://mithril.js.org/archive/v1.1.7/ >v1 Documentation</a></li>
 <li><a href=https://mithril.js.org/archive/v0.2.5/ >v0.2 Documentation</a></li>
 </ul>
 </li>
 </ul>
 <hr>
 <h3 id=v204><a href=#v204>v2.0.4</a></h3>
+<p><em>2019-08-18</em></p>
 <ul>
 <li>Fix double-rendering of trusted content within <code>contenteditable</code> elements (<a href=https://github.com/MithrilJS/mithril.js/pull/2516>#2516</a> <a href=https://github.com/isiahmeadows>@isiahmeadows</a>)</li>
 <li>Fix error on <code>m.trust</code> updating (<a href=https://github.com/MithrilJS/mithril.js/pull/2516>#2516</a> <a href=https://github.com/isiahmeadows>@isiahmeadows</a>)</li>
 </ul>
 <h3 id=v203><a href=#v203>v2.0.3</a></h3>
+<p><em>2019-07-28</em></p>
 <ul>
 <li>Ensure vnodes are removed correctly in the face of <code>onbeforeremove</code> resolving after new nodes are added (<a href=https://github.com/MithrilJS/mithril.js/pull/2492>#2492</a> <a href=https://github.com/isiahmeadows>@isiahmeadows</a>)</li>
 <li>Fix prototype pollution vulnerability in <code>m.parseQueryString</code> (<a href=https://github.com/MithrilJS/mithril.js/pull/2494>#2494</a> <a href=https://github.com/isiahmeadows>@isiahmeadows</a>)</li>
 </ul>
 <p><em>v2.0.2 was skipped as it had a critical flaw and was immediately unpublished.</em></p>
 <h3 id=v201><a href=#v201>v2.0.1</a></h3>
+<p><em>2019-07-24</em></p>
 <p>Same as v2.0.0, but with a publish that didn&#39;t have a botched upload.</p>
 <h3 id=v200><a href=#v200>v2.0.0</a></h3>
+<p><em>2019-07-24</em></p>
 <h4 id=breaking-changes><a href=#breaking-changes>Breaking changes</a></h4>
 <ul>
 <li>API: Component vnode <code>children</code> are not normalized into vnodes on ingestion; normalization only happens if and when they are ingested by the view (<a href=https://github.com/MithrilJS/mithril.js/pull/2155/ >#2155</a> (thanks to <a href=https://github.com/magikstm>@magikstm</a> for related optimization <a href=https://github.com/MithrilJS/mithril.js/pull/2064>#2064</a>))</li>
