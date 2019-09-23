@@ -539,7 +539,7 @@ function parseCSV(data) {
 <li><code>fetch</code> is not fully standardized yet, and may be subject to specification changes.</li>
 <li><code>XMLHttpRequest</code> calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).</li>
 <li><code>XMLHttpRequest</code> provides hooks for progress listeners for long running requests (e.g. file uploads).</li>
-<li><code>XMLHttpRequest</code> is supported by all browsers, whereas <code>fetch()</code> is not supported by Internet Explorer, Safari and Android (non-Chromium).</li>
+<li><code>XMLHttpRequest</code> is supported by all browsers, whereas <code>fetch()</code> is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).</li>
 </ul>
 <p>Currently, due to lack of browser support, <code>fetch()</code> typically requires a <a href=https://github.com/github/fetch>polyfill</a>, which is over 11kb uncompressed - nearly three times larger than Mithril&#39;s XHR module.</p>
 <p>Despite being much smaller, Mithril&#39;s XHR module supports many important and not-so-trivial-to-implement features like <a href=#dynamic-urls>URL interpolation</a>, querystring serialization and <a href=jsonp.html>JSON-P requests</a>, in addition to its ability to integrate seamlessly to Mithril&#39;s autoredrawing subsystem. The <code>fetch</code> polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.</p>
