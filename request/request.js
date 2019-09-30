@@ -1,6 +1,7 @@
 "use strict"
 
 var buildPathname = require("../pathname/build")
+var hasOwn = require("../util/hasOwn")
 
 module.exports = function($window, Promise, oncompletion) {
 	var callbackCount = 0
@@ -66,7 +67,7 @@ module.exports = function($window, Promise, oncompletion) {
 
 	function hasHeader(args, name) {
 		for (var key in args.headers) {
-			if ({}.hasOwnProperty.call(args.headers, key) && name.test(key)) return true
+			if (hasOwn.call(args.headers, key) && name.test(key)) return true
 		}
 		return false
 	}
@@ -100,7 +101,7 @@ module.exports = function($window, Promise, oncompletion) {
 			xhr.responseType = responseType
 
 			for (var key in args.headers) {
-				if ({}.hasOwnProperty.call(args.headers, key)) {
+				if (hasOwn.call(args.headers, key)) {
 					xhr.setRequestHeader(key, args.headers[key])
 				}
 			}

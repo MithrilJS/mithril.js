@@ -7,7 +7,8 @@ var Promise = require("../promise/promise")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
-var assign = require("../pathname/assign")
+var assign = require("../util/assign")
+var censor = require("../util/censor")
 
 var sentinel = {}
 
@@ -189,20 +190,17 @@ module.exports = function($window, mountRedraw) {
 	route.prefix = "#!"
 	route.Link = {
 		view: function(vnode) {
-			var options = vnode.attrs.options
-			// Remove these so they don't get overwritten
-			var attrs = {}, onclick, href
-			assign(attrs, vnode.attrs)
-			// The first two are internal, but the rest are magic attributes
-			// that need censored to not screw up rendering.
-			attrs.selector = attrs.options = attrs.key = attrs.oninit =
-			attrs.oncreate = attrs.onbeforeupdate = attrs.onupdate =
-			attrs.onbeforeremove = attrs.onremove = null
-
-			// Do this now so we can get the most current `href` and `disabled`.
-			// Those attributes may also be specified in the selector, and we
-			// should honor that.
-			var child = m(vnode.attrs.selector || "a", attrs, vnode.children)
+			// Omit the used parameters from the rendered element - they are
+			// internal. Also, censor the various lifecycle methods.
+			//
+			// We don't strip the other parameters because for convenience we
+			// let them be specified in the selector as well.
+			var child = m(
+				vnode.attrs.selector || "a",
+				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
+				vnode.children
+			)
+			var options, onclick, href
 
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
@@ -213,13 +211,13 @@ module.exports = function($window, mountRedraw) {
 			if (child.attrs.disabled = Boolean(child.attrs.disabled)) {
 				child.attrs.href = null
 				child.attrs["aria-disabled"] = "true"
-				// If you *really* do want to do this on a disabled link, use
+				// If you *really* do want add `onclick` on a disabled link, use
 				// an `oncreate` hook to add it.
-				child.attrs.onclick = null
 			} else {
-				onclick = child.attrs.onclick
+				options = vnode.attrs.options
+				onclick = vnode.attrs.onclick
 				// Easier to build it now to keep it isomorphic.
-				href = buildPathname(child.attrs.href, child.attrs.params)
+				href = buildPathname(child.attrs.href, vnode.attrs.params)
 				child.attrs.href = route.prefix + href
 				child.attrs.onclick = function(e) {
 					var result
