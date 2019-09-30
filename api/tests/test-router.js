@@ -541,6 +541,36 @@ o.spec("route", function() {
 					o(route.set.args[2]).equals(opts)
 				})
 
+				o("passes params on route.Link", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 0
+					$window.location.href = prefix + "/"
+
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {
+									href: "/test",
+									params: {key: "value"},
+								})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+					route.set = o.spy(route.set)
+
+					root.firstChild.dispatchEvent(e)
+
+					o(route.set.callCount).equals(1)
+					o(route.set.args[0]).equals("/test?key=value")
+				})
+
 				o("route.Link can render without routes or dom access", function() {
 					$window = browserMock(env)
 					var render = coreRenderer($window)

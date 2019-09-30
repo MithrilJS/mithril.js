@@ -142,6 +142,7 @@ m(m.route.Link, {
 	// first parameter to `m`.
 	selector: "span",
 	options: {replace: true},
+	params: {key: "value"},
 	href: "/test",
 	disabled: false,
 	class: "nav-link",
@@ -201,9 +202,10 @@ Do note that this doesn't also disable pointer events for you - you have to do t
 Argument              | Type                                 | Required | Description
 --------------------- | ------------------------------------ | -------- | ---
 `attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
-`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled` | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.selector` | `String|Object|Function`             | No       | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No       | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.params`   | `Object`                             | No       | This sets the parameters passed to [`m.route.set`](#mrouteset).
+`attributes.disabled` | `Object`                             | No       | This disables the link, so clicking on it doesn't route anywhere.
 `attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
 `children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
 **returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
