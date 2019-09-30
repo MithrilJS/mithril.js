@@ -1,7 +1,7 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
-var assign = require("./assign")
+var assign = require("../util/assign")
 
 // Returns `path` from `template` + `params`
 module.exports = function(template, params) {

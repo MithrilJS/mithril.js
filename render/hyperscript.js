@@ -2,10 +2,10 @@
 
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
+var hasOwn = require("../util/hasOwn")
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
-var hasOwn = {}.hasOwnProperty
 
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
