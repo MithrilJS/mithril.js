@@ -304,6 +304,13 @@ module.exports = function(options) {
 					parentNode: null,
 					childNodes: [],
 					attributes: {},
+					contains: function(child) {
+						while (child != null) {
+							if (child === this) return true
+							child = child.parentNode
+						}
+						return false
+					},
 					get firstChild() {
 						return this.childNodes[0] || null
 					},

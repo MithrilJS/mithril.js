@@ -17,6 +17,14 @@
 
 ### Upcoming...
 
+*Note for later: release as semver-minor.*
+
+- Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+- The redraw reentrancy check was moved from `m.mount` to `m.render` and its error message was updated accordingly. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+    - This is unlikely to break people because if you were to do it with `m.render` directly before now, you'd corrupt Mithril's internal representation and internal errors could occur as a result. Now, it just warns you.
+- For a better debugging experience with `m.route` route resolvers, errors on `onmatch` in the default route are left unhandled and errors in `onmatch` in other routes are logged to the console before redirecting. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+- Bug fix with `m.redraw` where if you removed a root that was previously visited in the current redraw pass, it would lose its place and skip the next root.
+
 -->
 
 ### v2.0.4

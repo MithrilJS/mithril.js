@@ -532,7 +532,7 @@ o.spec("ospec", function() {
 					err = e
 				}
 				o(err instanceof Error).equals(true)
-				o(err.message).equals("`oodone()` should only be called once")
+				o(err.message).equals("'oodone()' should only be called once.")
 			})
 			oo.run(function(results) {
 				o(results.length).equals(1)
@@ -551,7 +551,7 @@ o.spec("ospec", function() {
 					err = e
 				}
 				o(err instanceof Error).equals(true)
-				o(err.message).equals("`oodone()` should only be called once")
+				o(err.message).equals("'oodone()' should only be called once.")
 			})
 			oo.run(function(results) {
 				o(results.length).equals(1)
@@ -570,7 +570,7 @@ o.spec("ospec", function() {
 					err = e
 				}
 				o(err instanceof Error).equals(true)
-				o(err.message).equals("`oodone()` should only be called once")
+				o(err.message).equals("'oodone()' should only be called once.")
 			})
 			oo.run(function(results) {
 				o(results.length).equals(1)
@@ -590,7 +590,7 @@ o.spec("ospec", function() {
 					err = e
 				}
 				o(err instanceof Error).equals(true)
-				o(err.message).equals("`oodone()` should only be called once")
+				o(err.message).equals("'oodone()' should only be called once.")
 			})
 			oo.run(function(results) {
 				o(results.length).equals(1)
