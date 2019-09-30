@@ -14,12 +14,12 @@ else window.o = m()
 	}
 	function o(subject, predicate) {
 		if (predicate === undefined) {
-			if (!isRunning()) throw new Error("Assertions should not occur outside test definitions")
+			if (!isRunning()) throw new Error("Assertions should not occur outside test definitions.")
 			return new Assert(subject)
 		} else {
-			if (isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests use `o.spec()`")
+			if (isRunning()) throw new Error("Test definitions and hooks shouldn't be nested. To group tests, use 'o.spec()'.")
 			subject = String(subject)
-			if (subject.charCodeAt(0) === 1) throw new Error("test names starting with '\\x01' are reserved for internal use")
+			if (subject.charCodeAt(0) === 1) throw new Error("test names starting with '\\x01' are reserved for internal use.")
 			ctx[unique(subject)] = new Task(predicate, ensureStackTrace(new Error))
 		}
 	}
@@ -28,9 +28,9 @@ else window.o = m()
 	o.beforeEach = hook("\x01beforeEach")
 	o.afterEach = hook("\x01afterEach")
 	o.specTimeout = function (t) {
-		if (isRunning()) throw new Error("o.specTimeout() can only be called before o.run()")
-		if (hasOwn.call(ctx, "\x01specTimeout")) throw new Error("A default timeout has already been defined in this context")
-		if (typeof t !== "number") throw new Error("o.specTimeout() expects a number as argument")
+		if (isRunning()) throw new Error("o.specTimeout() can only be called before o.run().")
+		if (hasOwn.call(ctx, "\x01specTimeout")) throw new Error("A default timeout has already been defined in this context.")
+		if (typeof t !== "number") throw new Error("o.specTimeout() expects a number as argument.")
 		ctx["\x01specTimeout"] = t
 	}
 	o.new = init
@@ -139,7 +139,7 @@ else window.o = m()
 				// public API, may only be called once from use code (or after returned Promise resolution)
 				function done(err) {
 					if (!isDone) isDone = true
-					else throw new Error("`" + arg + "()` should only be called once")
+					else throw new Error("'" + arg + "()' should only be called once.")
 					if (timeout === undefined) console.warn("# elapsed: " + Math.round(new Date - s) + "ms, expected under " + delay + "ms\n" + o.cleanStackTrace(task.err))
 					finalizeAsync(err)
 				}
@@ -161,7 +161,7 @@ else window.o = m()
 					}, Math.min(delay, 2147483647))
 				}
 				function setDelay (t) {
-					if (typeof t !== "number") throw new Error("timeout() and o.timeout() expect a number as argument")
+					if (typeof t !== "number") throw new Error("timeout() and o.timeout() expect a number as argument.")
 					delay = t
 				}
 				if (fn.length > 0) {
@@ -169,7 +169,7 @@ else window.o = m()
 					arg = (body.match(/^(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*=>/) || body.match(/\((?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*[,\)]/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) {
 						var e = new Error
-						e.stack = "`" + arg + "()` should be called at least once\n" + o.cleanStackTrace(task.err)
+						e.stack = "'" + arg + "()' should be called at least once\n" + o.cleanStackTrace(task.err)
 						throw e
 					}
 					try {
@@ -204,14 +204,14 @@ else window.o = m()
 	}
 	function unique(subject) {
 		if (hasOwn.call(ctx, subject)) {
-			console.warn("A test or a spec named `" + subject + "` was already defined")
+			console.warn("A test or a spec named '" + subject + "' was already defined.")
 			while (hasOwn.call(ctx, subject)) subject += "*"
 		}
 		return subject
 	}
 	function hook(name) {
 		return function(predicate) {
-			if (ctx[name]) throw new Error("This hook should be defined outside of a loop or inside a nested test group:\n" + predicate)
+			if (ctx[name]) throw new Error(name.slice(1) + " should be defined outside of a loop or inside a nested test group.")
 			ctx[name] = new Task(predicate, ensureStackTrace(new Error))
 		}
 	}
@@ -317,7 +317,7 @@ else window.o = m()
 		try {return JSON.stringify(value)} catch (e) {return String(value)}
 	}
 	function noTimeoutRightNow() {
-		throw new Error("o.timeout must be called snchronously from within a test definition or a hook")
+		throw new Error("o.timeout must be called snchronously from within a test definition or a hook.")
 	}
 	var colorCodes = {
 		red: "31m",

@@ -17,7 +17,7 @@ module.exports = function($window) {
 
 	//sanity check to discourage people from doing `vnode.state = ...`
 	function checkState(vnode, original) {
-		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
+		if (vnode.state !== original) throw new Error("'vnode.state' must not be modified.")
 	}
 
 	//Note: the hook is passed as the `this` argument to allow proxying the
@@ -618,7 +618,7 @@ module.exports = function($window) {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
 		return true
 	}
 
@@ -948,26 +948,33 @@ module.exports = function($window) {
 		return true
 	}
 
+	var currentDOM
+
 	return function(dom, vnodes, redraw) {
-		if (!dom) throw new TypeError("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
+		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
+		if (currentDOM != null && dom.contains(currentDOM)) {
+			throw new TypeError("Node is currently being rendered to and thus is locked.")
+		}
+		var prevRedraw = currentRedraw
+		var prevDOM = currentDOM
 		var hooks = []
 		var active = activeElement()
 		var namespace = dom.namespaceURI
 
-		// First time rendering into a node clears it out
-		if (dom.vnodes == null) dom.textContent = ""
-
-		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
-		var prevRedraw = currentRedraw
+		currentDOM = dom
+		currentRedraw = typeof redraw === "function" ? redraw : undefined
 		try {
-			currentRedraw = typeof redraw === "function" ? redraw : undefined
+			// First time rendering into a node clears it out
+			if (dom.vnodes == null) dom.textContent = ""
+			vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
 			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+			dom.vnodes = vnodes
+			// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
+			if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
+			for (var i = 0; i < hooks.length; i++) hooks[i]()
 		} finally {
 			currentRedraw = prevRedraw
+			currentDOM = prevDOM
 		}
-		dom.vnodes = vnodes
-		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
-		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
-		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 }

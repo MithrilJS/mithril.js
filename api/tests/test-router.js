@@ -69,6 +69,9 @@ o.spec("route", function() {
 					}
 				}
 
+				// In case it doesn't get reset
+				var realError = console.error
+
 				o.beforeEach(function() {
 					currentTest = nextID++
 					$window = browserMock(env)
@@ -79,11 +82,16 @@ o.spec("route", function() {
 					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
 					route.prefix = prefix
+					console.error = function() {
+						realError.call(this, new Error("Unexpected `console.error` call"))
+						realError.apply(this, arguments)
+					}
 				})
 
 				o.afterEach(function() {
 					o(throttleMock.queueLength()).equals(0)
 					currentTest = -1 // doesn't match any test
+					console.error = realError
 				})
 
 				o("throws on invalid `root` DOM node", function() {
@@ -1082,11 +1090,13 @@ o.spec("route", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var spy = o.spy()
+					var error = new Error("error")
+					var errorSpy = console.error = o.spy()
 
 					var resolver = {
 						onmatch: lock(function() {
 							matchCount++
-							return Promise.reject(new Error("error"))
+							return Promise.reject(error)
 						}),
 						render: lock(function(vnode) {
 							renderCount++
@@ -1104,6 +1114,8 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(0)
 						o(spy.callCount).equals(1)
+						o(errorSpy.callCount).equals(1)
+						o(errorSpy.args[0]).equals(error)
 					})
 				})
 
