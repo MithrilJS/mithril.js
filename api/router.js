@@ -218,7 +218,8 @@ module.exports = function($window, mountRedraw) {
 				child.attrs.onclick = null
 			} else {
 				onclick = child.attrs.onclick
-				href = child.attrs.href
+				// Easier to build it now to keep it isomorphic.
+				href = buildPathname(child.attrs.href, child.attrs.params)
 				child.attrs.href = route.prefix + href
 				child.attrs.onclick = function(e) {
 					var result
