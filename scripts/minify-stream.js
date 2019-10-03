@@ -24,10 +24,10 @@ async function minify() {
 	const minified = Terser.minify(original)
 	if (minified.error) throw new Error(minified.error)
 	await fs.writeFile(output, minified.code, "utf-8")
-	var originalSize = Buffer.byteLength(original, "utf-8")
-	var compressedSize = Buffer.byteLength(minified.code, "utf-8")
-	var originalGzipSize = zlib.gzipSync(original).byteLength
-	var compressedGzipSize = zlib.gzipSync(minified.code).byteLength
+	const originalSize = Buffer.byteLength(original, "utf-8")
+	const compressedSize = Buffer.byteLength(minified.code, "utf-8")
+	const originalGzipSize = zlib.gzipSync(original).byteLength
+	const compressedGzipSize = zlib.gzipSync(minified.code).byteLength
 
 	console.log("Original size: " + format(originalGzipSize) + " bytes gzipped (" + format(originalSize) + " bytes uncompressed)")
 	console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")

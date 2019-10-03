@@ -320,10 +320,12 @@ module.exports = function(options) {
 						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
 						return this.parentNode.childNodes[index + 1] || null
 					},
+					// eslint-disable-next-line accessor-pairs
 					set textContent(value) {
 						this.childNodes = []
 						if (value !== "") appendChild.call(this, $window.document.createTextNode(value))
 					},
+					// eslint-disable-next-line accessor-pairs
 					set innerHTML(value) {
 						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 						while (this.firstChild) removeChild.call(this, this.firstChild)
@@ -436,8 +438,6 @@ module.exports = function(options) {
 									return
 								}
 							}
-						} catch(e) {
-							throw e
 						} finally {
 							e.eventPhase = 0
 							if (!prevented) {

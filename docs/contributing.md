@@ -8,7 +8,6 @@
 - [Is there a style guide?](#is-there-a-style-guide?)
 - [Why do tests mock the browser APIs?](#why-do-tests-mock-the-browser-apis?)
 - [Why does Mithril use its own testing framework and not Mocha/Jasmine/Tape?](#why-does-mithril-use-its-own-testing-framework-and-not-mochajasminetape?)
-- [Why do tests use `module/module.js`? Why not use Browserify, Webpack or Rollup?](#why-do-tests-use-modulemodule.js?-why-not-use-browserify,-webpack-or-rollup?)
 - [Why doesn't the Mithril codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?](#why-doesn't-the-mithril-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?)
 - [Why doesn't the Mithril codebase use trailing semi-colons? Would a PR to add them be welcome?](#why-doesn't-the-mithril-codebase-use-trailing-semi-colons?-would-a-pr-to-add-them-be-welcome?)
 - [Why does the Mithril codebase use a mix of `instanceof` and `typeof` checks instead of `Object.prototype.toString.call`, `Array.isArray`, etc? Would a PR to refactor those checks be welcome?](#why-does-the-mithril-codebase-use-a-mix-of-instanceof-and-typeof-checks-instead-of-objectprototypetostringcall,-arrayisarray,-etc?-would-a-pr-to-refactor-those-checks-be-welcome?)
@@ -81,14 +80,6 @@ Another important reason is that it allows us to document browser API quirks via
 ## Why does Mithril use its own testing framework and not Mocha/Jasmine/Tape?
 
 Mainly to avoid requiring dependencies. `ospec` is customized to provide only essential information for common testing workflows (namely, no spamming ok's on pass, and accurate noiseless errors on failure)
-
-
-
-## Why do tests use `module/module.js`? Why not use Browserify, Webpack or Rollup?
-
-Again, to avoid requiring dependencies. The Mithril codebase is written using a statically analyzable subset of CommonJS module definitions (as opposed to ES6 modules) because its syntax is backwards compatible with ES5, therefore making it possible to run source code unmodified in browsers without the need for a build tool or a file watcher.
-
-This simplifies the workflow for bug fixes, which means they can be fixed faster.
 
 
 
