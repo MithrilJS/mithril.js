@@ -1,5 +1,6 @@
 # Change log
 
+- [v2.0.4](#v204)
 - [v2.0.3](#v203)
 - [v2.0.1](#v201)
 - [v2.0.0](#v200)
@@ -26,6 +27,18 @@
 - Bug fix with `m.redraw` where if you removed a root that was previously visited in the current redraw pass, it would lose its place and skip the next root.
 - Add `params:` attribute to `m.route.Link`. ([#2537](https://github.com/MithrilJS/mithril.js/pull/2537) [@isiahmeadows](https://github.com/isiahmeadows))
 - Add `m.censor`. ([#2538](https://github.com/MithrilJS/mithril.js/pull/2538) [@isiahmeadows](https://github.com/isiahmeadows))
+- Re-add stream bundles. ([#2539](https://github.com/MithrilJS/mithril.js/pull/2539) [@isiahmeadows](https://github.com/isiahmeadows))
+
+Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
+
+- Mithril's internal bundler, previously available at `mithril/bundler`
+	- Prefer using a dedicated bundler like Webpack or Rollup instead.
+- Mithril's CommonJS sham polyfill, previously available at `mithril/module`
+	- Prefer using native `import`/`export` and/or Budo instead.
+- Mithril's internal test mocks, previously available at `mithril/test-utils`
+	- Prefer using JSDOM or similar instead.
+
+I'd like to apologize for missing these deprecations in the initial 2.0.0 change log. This was a major policy change we had been communicating the entire time and we should've let you all know this there in the change log as well.
 
 -->
 

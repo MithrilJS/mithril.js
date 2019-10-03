@@ -1,8 +1,17 @@
 "use strict"
 
-var callAsync = require("../../test-utils/callAsync")
-var o = require("../ospec")
+// So it can load correctly in browsers using a global instance.
+var o, callAsync
 
+if (typeof require !== "undefined") {
+	/* eslint-disable global-require */
+	callAsync = require("../../test-utils/callAsync")
+	o = require("../ospec")
+	/* eslint-enable global-require */
+} else {
+	callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+	o = window.o
+}
 
 // this throws an async error that can't be caught in browsers
 if (typeof process !== "undefined") {
@@ -617,8 +626,8 @@ o.spec("ospec", function() {
 		var a = 0, b = 0
 
 		function wrapPromise(fn) {
-			return new Promise((resolve, reject) => {
-				callAsync(() => {
+			return new Promise(function (resolve, reject) {
+				callAsync(function () {
 					try {
 						fn()
 						resolve()
@@ -630,7 +639,7 @@ o.spec("ospec", function() {
 		}
 
 		o.before(function() {
-			return wrapPromise(() => {
+			return wrapPromise(function () {
 				a = 1
 			})
 		})

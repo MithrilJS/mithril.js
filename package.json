@@ -9,12 +9,13 @@
   "scripts": {
     "precommit": "lint-staged",
     "watch": "run-p watch:**",
-    "watch:js": "node bundler/cli browser.js -output mithril.js -watch",
+    "watch:js": "node scripts/bundler browser.js -output mithril.js -watch",
     "watch:docs": "node scripts/generate-docs --watch",
-    "build": "run-p build:browser build:min",
-    "build:browser": "node bundler/cli browser.js -output mithril.js",
+    "build": "run-p build:browser build:min build:stream-min",
+    "build:browser": "node scripts/bundler browser.js -output mithril.js",
     "build:docs": "node scripts/generate-docs",
-    "build:min": "node bundler/cli browser.js -output mithril.min.js -minify -save",
+    "build:min": "node scripts/bundler browser.js -output mithril.min.js -minify -save",
+    "build:stream-min": "node scripts/minify-stream",
     "lint": "run-s -cn lint:**",
     "lint:js": "eslint . --cache",
     "lint:docs": "node scripts/lint-docs",
@@ -24,21 +25,20 @@
     "posttest": "npm run lint",
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
-    "version": "npm run build && git add mithril.js mithril.min.js README.md"
+    "version": "npm run build && git add mithril.js mithril.min.js stream.js stream.min.js README.md"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
-    "@babel/parser": "^7.5.5",
+    "@babel/parser": "^7.6.2",
     "benchmark": "^2.1.4",
-    "chokidar": "^2.0.4",
-    "dedent": "^0.7.0",
+    "chokidar": "^3.2.1",
     "escape-string-regexp": "^2.0.0",
-    "eslint": "^5.13.0",
-    "gh-pages": "^2.0.1",
+    "eslint": "^6.5.1",
+    "gh-pages": "^2.1.1",
     "glob": "^7.1.4",
     "html-minifier": "^4.0.0",
     "istanbul": "^0.4.5",
-    "lint-staged": "^8.1.3",
+    "lint-staged": "^9.4.1",
     "locater": "^1.3.0",
     "marked": "^0.7.0",
     "minimist": "^1.2.0",
@@ -46,9 +46,9 @@
     "pinpoint": "^1.1.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "semver": "^6.3.0",
-    "terser": "^3.16.1"
+    "terser": "^4.3.4"
   },
   "bin": {
     "ospec": "./ospec/bin/ospec"

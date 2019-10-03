@@ -1,10 +1,22 @@
 # Development-specific files
-.deploy.env
-.editorconfig
-.eslintrc.js
-.gitattributes
-.gitignore
-.travis.yml
-CONTRIBUTING.md
-yarn.lock
-scripts
+/.deploy.env
+/.editorconfig
+/.eslintrc.js
+/.eslintcache
+/.eslintignore
+/.gitattributes
+/.gitignore
+/.travis.yml
+/yarn.lock
+/scripts/
+
+# Exclude all directories named "tests" as it's used only for tests. This is
+# intentionally not prefixed with a `/` because it applies to both the root and
+# subdirectories.
+tests/
+
+# Mithril's mocks are for internal use only, and it's wholly undocumented for a
+# reason. I've already gotten way too many complaints over users' tests breaking
+# from changes to it in patch releases. Let's force people to finally stop using
+# them.
+/test-utils/

@@ -13,6 +13,7 @@ const ghPages = require("gh-pages")
 const upstream = require("./_upstream")
 const generate = require("./generate-docs")
 
+module.exports = update
 async function update() {
 	await generate()
 	const commit = execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
