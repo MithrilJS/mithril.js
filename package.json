@@ -11,10 +11,11 @@
     "watch": "run-p watch:**",
     "watch:js": "node bundler/cli browser.js -output mithril.js -watch",
     "watch:docs": "node scripts/generate-docs --watch",
-    "build": "run-p build:browser build:min",
+    "build": "run-p build:browser build:min build:stream-min",
     "build:browser": "node bundler/cli browser.js -output mithril.js",
     "build:docs": "node scripts/generate-docs",
     "build:min": "node bundler/cli browser.js -output mithril.min.js -minify -save",
+    "build:stream-min": "node scripts/minify-stream",
     "lint": "run-s -cn lint:**",
     "lint:js": "eslint . --cache",
     "lint:docs": "node scripts/lint-docs",
@@ -24,7 +25,7 @@
     "posttest": "npm run lint",
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
-    "version": "npm run build && git add mithril.js mithril.min.js README.md"
+    "version": "npm run build && git add mithril.js mithril.min.js stream.min.js README.md"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",

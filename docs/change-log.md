@@ -26,6 +26,7 @@
 - Bug fix with `m.redraw` where if you removed a root that was previously visited in the current redraw pass, it would lose its place and skip the next root.
 - Add `params:` attribute to `m.route.Link`. ([#2537](https://github.com/MithrilJS/mithril.js/pull/2537) [@isiahmeadows](https://github.com/isiahmeadows))
 - Add `m.censor`. ([#2538](https://github.com/MithrilJS/mithril.js/pull/2538) [@isiahmeadows](https://github.com/isiahmeadows))
+- Re-add stream bundles. ([#2539](https://github.com/MithrilJS/mithril.js/pull/2539) [@isiahmeadows](https://github.com/isiahmeadows))
 
 -->
 
