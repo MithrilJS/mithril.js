@@ -1,7 +1,7 @@
 # Framework comparison
 
-- [Why not X?](#why-not-insert-favorite-framework-here)
-- [Why use Mithril?](#why-use-mithril)
+- [Why not X?](#why-not-insert-favorite-framework-here?)
+- [Why use Mithril?](#why-use-mithril?)
 - [React](#react)
 - [Angular](#angular)
 - [Vue](#vue)
