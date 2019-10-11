@@ -1,6 +1,6 @@
 # Introduction
 
-- [What is Mithril?](#what-is-mithril)
+- [What is Mithril?](#what-is-mithril?)
 - [Getting started](#getting-started)
 - [Hello world](#hello-world)
 - [DOM elements](#dom-elements)

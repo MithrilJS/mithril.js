@@ -109,7 +109,7 @@ function Layout() {
 }
 ```
 
-This would end up [throwing an error](keys.md#avoid-mixing-keyed-and-non-keyed-vnodes-in-the-same-array) because here's what Mithril sees when creating the `Layout` vnode:
+This would end up [throwing an error](keys.md#key-restrictions) because here's what Mithril sees when creating the `Layout` vnode:
 
 ```javascript
 return [
