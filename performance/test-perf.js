@@ -1,4 +1,3 @@
-/* global Benchmark */
 "use strict"
 
 /* Based off of preact's perf tests, so including their MIT license */
@@ -26,67 +25,141 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var browserMock = require("../test-utils/browserMock")
+// Note: this tests against the generated bundle in browsers, but it tests
+// against `index.js` in Node. Please do keep that in mind while testing.
+//
+// Mithril and Benchmark.js are loaded globally via bundle in the browser, so
+// this doesn't require a CommonJS sham polyfill.
 
-// Do this silly dance so browser testing works
-var B = typeof Benchmark === "undefined" ? require("benchmark") : Benchmark
-
-var scratch;
+// I add it globally just so it's visible in the tests.
+/* global m, rootElem: true */
 
 // set up browser env on before running tests
-var doc = typeof document !== "undefined" ? document : null
+var isDOM = typeof window !== "undefined"
+var Benchmark
 
-if(!doc) {
-	var mock = browserMock()
-	if (typeof global !== "undefined") { global.window = mock }
-
-	doc = mock.document
+if (isDOM) {
+	Benchmark = window.Benchmark
+	window.rootElem = null
+} else {
+	/* eslint-disable global-require */
+	global.window = require("../test-utils/browserMock")()
+	global.document = window.document
+	// We're benchmarking renders, not our throttling.
+	global.requestAnimationFrame = function () {
+		throw new Error("This should never be called.")
+	}
+	global.m = require("../index.js")
+	global.rootElem = null
+	Benchmark = require("benchmark")
+	/* eslint-enable global-require */
 }
 
-var m = require("../render/hyperscript")
-m.render = require("../render/render")(window)
-
-
-function resetScratch() {
-	doc.documentElement.innerHTML = "<div></div>"
-	scratch = doc.documentElement.firstChild
+function cycleRoot() {
+	if (rootElem) document.body.removeChild(rootElem)
+	document.body.appendChild(rootElem = document.createElement("div"))
 }
-
-resetScratch()
 
 // Initialize benchmark suite
-var suite = new B.Suite("mithril perf")
-var xuite = {add: function(options) {console.log("skipping " + options.name)}} // eslint-disable-line no-unused-vars
+Benchmark.options.async = true
+Benchmark.options.initCount = 10
+Benchmark.options.minSamples = 40
 
-suite.on("start", function() {
-	this.start = Date.now();
+if (isDOM) {
+	// Wait long enough for the browser to actually commit the DOM changes to
+	// the screen before moving on to the next cycle, so things are at least
+	// reasonably fresh each cycle.
+	Benchmark.options.delay = 1 / 30 /* frames per second */
+}
+
+var suite = new Benchmark.Suite("mithril perf", {
+	onStart: function () {
+		this.start = Date.now()
+	},
+
+	onCycle: function (e) {
+		console.log(e.target.toString())
+		cycleRoot()
+	},
+
+	onComplete: function () {
+		console.log("Completed perf tests in " + (Date.now() - this.start) + "ms")
+	},
+
+	onError: function (e) {
+		console.error(e)
+	},
 })
+// eslint-disable-next-line no-unused-vars
+var xsuite = {add: function(name) { console.log("skipping " + name) }}
 
-suite.on("cycle", function(e) {
-	console.log(e.target.toString())
+suite.add("construct large vnode tree", {
+	setup: function () {
+		this.fields = []
 
-	resetScratch()
-})
-
-suite.on("complete", function() {
-	console.log("Completed perf tests in " + (Date.now() - this.start) + "ms")
-})
-
-suite.on("error", console.error.bind(console))
-
-suite.add({
-	name : "rerender identical vnode",
-	onStart : function() {
-		this.vdom = m("div", {class: "foo bar", "data-foo": "bar", p: 2},
+		for(var i=100; i--;) {
+			this.fields.push((i * 999).toString(36))
+		}
+	},
+	fn: function () {
+		m(".foo.bar[data-foo=bar]", {p: 2},
 			m("header",
-				m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
+				m("h1.asdf", "a ", "b", " c ", 0, " d"),
+				m("nav",
+					m("a[href=/foo]", "Foo"),
+					m("a[href=/bar]", "Bar")
+				)
+			),
+			m("main",
+				m("form",
+					{onSubmit: function () {}},
+					m("input[type=checkbox][checked]"),
+					m("input[type=checkbox]"),
+					m("fieldset",
+						this.fields.map(function (field) {
+							return m("label",
+								field,
+								":",
+								m("input", {placeholder: field})
+							)
+						})
+					),
+					m("button-bar",
+						m("button",
+							{style: "width:10px; height:10px; border:1px solid #FFF;"},
+							"Normal CSS"
+						),
+						m("button",
+							{style: "top:0 ; right: 20"},
+							"Poor CSS"
+						),
+						m("button",
+							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+							"Poorer CSS"
+						),
+						m("button",
+							{style: {margin: 0, padding: "10px", overflow: "visible"}},
+							"Object CSS"
+						)
+					)
+				)
+			)
+		)
+	},
+})
+
+suite.add("rerender identical vnode", {
+	setup: function () {
+		this.cached = m(".foo.bar[data-foo=bar]", {p: 2},
+			m("header",
+				m("h1.asdf", "a ", "b", " c ", 0, " d"),
 				m("nav",
 					m("a", {href: "/foo"}, "Foo"),
 					m("a", {href: "/bar"}, "Bar")
 				)
 			),
 			m("main",
-				m("form", {onSubmit: function onSubmit() {}},
+				m("form", {onSubmit: function () {}},
 					m("input", {type: "checkbox", checked: true}),
 					m("input", {type: "checkbox", checked: false}),
 					m("fieldset",
@@ -119,24 +192,23 @@ suite.add({
 			)
 		)
 	},
-	fn : function() {
-		m.render(scratch, this.vdom)
-	}
+	fn: function () {
+		m.render(rootElem, this.cached)
+	},
 })
 
-suite.add({
-	name : "rerender same tree",
-	fn : function() {
-		m.render(scratch, m("div", {class: "foo bar", "data-foo": "bar", p: 2},
+suite.add("rerender same tree", {
+	fn: function () {
+		m.render(rootElem, m(".foo.bar[data-foo=bar]", {p: 2},
 			m("header",
-				m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
+				m("h1.asdf", "a ", "b", " c ", 0, " d"),
 				m("nav",
 					m("a", {href: "/foo"}, "Foo"),
 					m("a", {href: "/bar"}, "Bar")
 				)
 			),
 			m("main",
-				m("form", {onSubmit: function onSubmit() {}},
+				m("form", {onSubmit: function () {}},
 					m("input", {type: "checkbox", checked: true}),
 					m("input", {type: "checkbox", checked: false}),
 					m("fieldset",
@@ -168,38 +240,44 @@ suite.add({
 				)
 			)
 		))
-	}
+	},
 })
 
-suite.add({
-	name : "construct large VDOM tree",
-
-	onStart : function() {
+suite.add("add large nested tree", {
+	setup: function () {
 		var fields = []
 
 		for(var i=100; i--;) {
 			fields.push((i * 999).toString(36))
 		}
 
-		this.fields = fields;
-	},
-
-	fn : function () {
-		m("div", {class: "foo bar", "data-foo": "bar", p: 2},
-			m("header",
-				m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
-				m("nav",
-					m("a", {href: "/foo"}, "Foo"),
-					m("a", {href: "/bar"}, "Bar")
+		var NestedHeader = {
+			view: function () {
+				return m("header",
+					m("h1.asdf", "a ", "b", " c ", 0, " d"),
+					m("nav",
+						m("a", {href: "/foo"}, "Foo"),
+						m("a", {href: "/bar"}, "Bar")
+					)
 				)
-			),
-			m("main",
-				m("form",
-					{onSubmit: function onSubmit() {}},
-					m("input", {type: "checkbox", checked: true}),
-					m("input", {type: "checkbox"}),
+			}
+		}
+
+		var NestedForm = {
+			view: function () {
+				return m("form", {onSubmit: function () {}},
+					m("input[type=checkbox][checked]"),
+					m("input[type=checkbox]", {checked: false}),
 					m("fieldset",
-						this.fields.map(function (field) {
+						m("label",
+							m("input[type=radio][checked]")
+						),
+						m("label",
+							m("input[type=radio]")
+						)
+					),
+					m("fieldset",
+						fields.map(function (field) {
 							return m("label",
 								field,
 								":",
@@ -207,49 +285,77 @@ suite.add({
 							)
 						})
 					),
-					m("button-bar",
-						m("button",
-							{style: "width:10px; height:10px; border:1px solid #FFF;"},
-							"Normal CSS"
-						),
-						m("button",
-							{style: "top:0 ; right: 20"},
-							"Poor CSS"
-						),
-						m("button",
-							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-							"Poorer CSS"
-						),
-						m("button",
-							{style: {margin: 0, padding: "10px", overflow: "visible"}},
-							"Object CSS"
-						)
+					m(NestedButtonBar, null)
+				)
+			}
+		}
+
+		var NestedButtonBar = {
+			view: function () {
+				return m(".button-bar",
+					m(NestedButton,
+						{style: "width:10px; height:10px; border:1px solid #FFF;"},
+						"Normal CSS"
+					),
+					m(NestedButton,
+						{style: "top:0 ; right: 20"},
+						"Poor CSS"
+					),
+					m(NestedButton,
+						{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+						"Poorer CSS"
+					),
+					m(NestedButton,
+						{style: {margin: 0, padding: "10px", overflow: "visible"}},
+						"Object CSS"
 					)
 				)
-			)
-		)
-	}
+			}
+		}
+
+		var NestedButton = {
+			view: function (vnode) {
+				return m("button", m.censor(vnode.attrs), vnode.children)
+			}
+		}
+
+		var NestedMain = {
+			view: function () {
+				return m(NestedForm)
+			}
+		}
+
+		this.NestedRoot = {
+			view: function () {
+				return m("div.foo.bar[data-foo=bar]",
+					{p: 2},
+					m(NestedHeader),
+					m(NestedMain)
+				)
+			}
+		}
+	},
+	fn: function () {
+		m.render(rootElem, m(this.NestedRoot))
+	},
 })
 
-suite.add({
-	name : "mutate styles/properties",
-	// minSamples: 100,
-	onStart : function () {
+suite.add("mutate styles/properties", {
+	setup: function () {
+		function get(obj, i) { return obj[i % obj.length] }
 		var counter = 0
-		var keyLooper = function (n) { return function (c) { return c % n ? (c + "px") : c } }
-		var get = function (obj, i) { return obj[i%obj.length] }
 		var classes = ["foo", "foo bar", "", "baz-bat", null, "fooga", null, null, undefined]
 		var styles = []
 		var multivalue = ["0 1px", "0 0 1px 0", "0", "1px", "20px 10px", "7em 5px", "1px 0 5em 2px"]
 		var stylekeys = [
-			["left", keyLooper(3)],
-			["top", keyLooper(2)],
+			["left", function (c) { return c % 3 ? c + "px" : c }],
+			["top", function (c) { return c % 2 ? c + "px" : c }],
 			["margin", function (c) { return get(multivalue, c).replace("1px", c+"px") }],
 			["padding", function (c) { return get(multivalue, c) }],
 			["position", function (c) { return c%5 ? c%2 ? "absolute" : "relative" : null }],
 			["display", function (c) { return c%10 ? c%2 ? "block" : "inline" : "none" }],
 			["color", function (c) { return ("rgba(" + (c%255) + ", " + (255 - c%255) + ", " + (50+c%150) + ", " + (c%50/50) + ")") }],
-			["border", function (c) { return c%5 ? ((c%10) + "px " + (c%2?"solid":"dotted") + " " + (stylekeys[6][1](c))) : "" }]
+			["border", function (c) { return c%5 ? (c%10) + "px " + (c%2?"solid":"dotted") + " " + stylekeys[6][1](c) : "" }]
 		]
 		var i, j, style, conf
 
@@ -262,125 +368,126 @@ suite.add({
 			styles[i] = style
 		}
 
-		this.count = 0
-		this.app = function (index) {
-			var last = index + 300
+		var count = 0
+
+		this.app = function () {
 			var vnodes = []
-			for (; index < last; index++) vnodes.push(
-				m("div.booga",
-					{
-						class: get(classes, index),
-						"data-index": index,
-						title: index.toString(36)
-					},
-					m("input.dooga", {type: "checkbox", checked: index % 3 == 0}),
-					m("input", {value: "test " + (Math.floor(index / 4)), disabled: index % 10 ? null : true}),
-					m("div", {class: get(classes, index * 11)},
-						m("p", {style: get(styles, index)}, "p1"),
-						m("p", {style: get(styles, index + 1)}, "p2"),
-						m("p", {style: get(styles, index * 2)}, "p3"),
-						m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
+			for (var index = ++count, last = index + 300; index < last; index++) {
+				vnodes.push(
+					m("div.booga",
+						{
+							class: get(classes, index),
+							"data-index": index,
+							title: index.toString(36)
+						},
+						m("input.dooga", {type: "checkbox", checked: index % 3 === 0}),
+						m("input", {value: "test " + Math.floor(index / 4), disabled: index % 10 ? null : true}),
+						m("div", {class: get(classes, index * 11)},
+							m("p", {style: get(styles, index)}, "p1"),
+							m("p", {style: get(styles, index + 1)}, "p2"),
+							m("p", {style: get(styles, index * 2)}, "p3"),
+							m("p.zooga", {style: get(styles, index * 3 + 1), className: get(classes, index * 7)}, "p4")
+						)
 					)
 				)
-			)
+			}
 			return vnodes
 		}
 	},
-
-	fn : function () {
-		m.render(scratch, this.app(++this.count))
-	}
+	fn: function () {
+		m.render(rootElem, this.app())
+	},
 })
 
-// Shared components for node recyling benchmarks
-var Header = {
-	view : function () {
-		return m("header",
-			m("h1", {class: "asdf"}, "a ", "b", " c ", 0, " d"),
-			m("nav",
-				m("a", {href: "/foo"}, "Foo"),
-				m("a", {href: "/bar"}, "Bar")
-			)
-		)
-	}
-}
-
-var Form = {
-	view : function () {
-		return m("form", {onSubmit: function onSubmit() {}},
-			m("input", {type: "checkbox", checked: true}),
-			m("input", {type: "checkbox", checked: false}),
-			m("fieldset",
-				m("label",
-					m("input", {type: "radio", checked: true})
-				),
-				m("label",
-					m("input", {type: "radio"})
+suite.add("repeated add/removal", {
+	setup: function () {
+		var RepeatedHeader = {
+			view: function () {
+				return m("header",
+					m("h1.asdf", "a ", "b", " c ", 0, " d"),
+					m("nav",
+						m("a", {href: "/foo"}, "Foo"),
+						m("a", {href: "/bar"}, "Bar")
+					)
 				)
-			),
-			m(ButtonBar, null)
-		)
-	}
-}
+			}
+		}
 
-var ButtonBar = {
-	view : function () {
-		return m("button-bar",
-			m(Button,
-				{style: "width:10px; height:10px; border:1px solid #FFF;"},
-				"Normal CSS"
-			),
-			m(Button,
-				{style: "top:0 ; right: 20"},
-				"Poor CSS"
-			),
-			m(Button,
-				{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-				"Poorer CSS"
-			),
-			m(Button,
-				{style: {margin: 0, padding: "10px", overflow: "visible"}},
-				"Object CSS"
-			)
-		)
-	}
-}
+		var RepeatedForm = {
+			view: function () {
+				return m("form", {onSubmit: function () {}},
+					m("input", {type: "checkbox", checked: true}),
+					m("input", {type: "checkbox", checked: false}),
+					m("fieldset",
+						m("label",
+							m("input", {type: "radio", checked: true})
+						),
+						m("label",
+							m("input", {type: "radio"})
+						)
+					),
+					m(RepeatedButtonBar, null)
+				)
+			}
+		}
 
-var Button = {
-	view : function (vnode) {
-		return m("button", vnode.attrs, vnode.children)
-	}
-}
+		var RepeatedButtonBar = {
+			view: function () {
+				return m(".button-bar",
+					m(RepeatedButton,
+						{style: "width:10px; height:10px; border:1px solid #FFF;"},
+						"Normal CSS"
+					),
+					m(RepeatedButton,
+						{style: "top:0 ; right: 20"},
+						"Poor CSS"
+					),
+					m(RepeatedButton,
+						{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+						"Poorer CSS"
+					),
+					m(RepeatedButton,
+						{style: {margin: 0, padding: "10px", overflow: "visible"}},
+						"Object CSS"
+					)
+				)
+			}
+		}
 
-var Main = {
-	view : function () {
-		return m(Form)
-	}
-}
+		var RepeatedButton = {
+			view: function (vnode) {
+				return m("button", vnode.attrs, vnode.children)
+			}
+		}
 
-var Root = {
-	view : function () {
-		return m("div",
-			{class: "foo bar", "data-foo": "bar", p: 2},
-			m(Header, null),
-			m(Main, null)
-		)
-	}
-}
+		var RepeatedMain = {
+			view: function () {
+				return m(RepeatedForm)
+			}
+		}
 
-
-suite.add({
-	name : "repeated trees",
-	fn : function () {
-		m.render(scratch, [m(Root)])
-		m.render(scratch, [])
-
-		// Second empty render is to clear out the pool of nodes
-		// so that there's nothing that can be recycled
-		m.render(scratch, [])
-	}
+		this.RepeatedRoot = {
+			view: function () {
+				return m("div.foo.bar[data-foo=bar]",
+					{p: 2},
+					m(RepeatedHeader, null),
+					m(RepeatedMain, null)
+				)
+			}
+		}
+	},
+	fn: function () {
+		m.render(rootElem, [m(this.RepeatedRoot)])
+		m.render(rootElem, [])
+	},
 })
 
-suite.run({
-	async : true
-})
+if (isDOM) {
+	window.onload = function () {
+		cycleRoot()
+		suite.run()
+	}
+} else {
+	cycleRoot()
+	suite.run()
+}

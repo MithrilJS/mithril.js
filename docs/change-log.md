@@ -1,12 +1,13 @@
 # Change log
 
+- [v2.0.4](#v204)
 - [v2.0.3](#v203)
 - [v2.0.1](#v201)
 - [v2.0.0](#v200)
 - [Migrating from v1.x](migration-v1x.md)
 - [Migrating from v0.2.x](migration-v02x.md)
-- [v1.x changelog](https://mithril.js.org/archive/v1.1.6/change-log.html)
-- [v1.x docs](https://mithril.js.org/archive/v1.1.6/index.html)
+- [v1.x changelog](https://mithril.js.org/archive/v1.1.7/change-log.html)
+- [v1.x docs](https://mithril.js.org/archive/v1.1.7/index.html)
 - [v0.2 docs](https://mithril.js.org/archive/v0.2.5/index.html)
 - [`ospec` change log](https://github.com/MithrilJS/mithril.js/blob/master/ospec/change-log.md)
 - [`mithril/stream` change log](https://github.com/MithrilJS/mithril.js/blob/master/stream/change-log.md)
@@ -16,6 +17,28 @@
 <!--
 
 ### Upcoming...
+
+*Note for later: release as semver-minor.*
+
+- Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+- The redraw reentrancy check was moved from `m.mount` to `m.render` and its error message was updated accordingly. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+    - This is unlikely to break people because if you were to do it with `m.render` directly before now, you'd corrupt Mithril's internal representation and internal errors could occur as a result. Now, it just warns you.
+- For a better debugging experience with `m.route` route resolvers, errors on `onmatch` in the default route are left unhandled and errors in `onmatch` in other routes are logged to the console before redirecting. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
+- Bug fix with `m.redraw` where if you removed a root that was previously visited in the current redraw pass, it would lose its place and skip the next root.
+- Add `params:` attribute to `m.route.Link`. ([#2537](https://github.com/MithrilJS/mithril.js/pull/2537) [@isiahmeadows](https://github.com/isiahmeadows))
+- Add `m.censor`. ([#2538](https://github.com/MithrilJS/mithril.js/pull/2538) [@isiahmeadows](https://github.com/isiahmeadows))
+- Re-add stream bundles. ([#2539](https://github.com/MithrilJS/mithril.js/pull/2539) [@isiahmeadows](https://github.com/isiahmeadows))
+
+Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
+
+- Mithril's internal bundler, previously available at `mithril/bundler`
+	- Prefer using a dedicated bundler like Webpack or Rollup instead.
+- Mithril's CommonJS sham polyfill, previously available at `mithril/module`
+	- Prefer using native `import`/`export` and/or Budo instead.
+- Mithril's internal test mocks, previously available at `mithril/test-utils`
+	- Prefer using JSDOM or similar instead.
+
+I'd like to apologize for missing these deprecations in the initial 2.0.0 change log. This was a major policy change we had been communicating the entire time and we should've let you all know this there in the change log as well.
 
 -->
 
@@ -123,6 +146,7 @@ _2019-07-24_
 #### Bug fixes
 
 - API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- ospec: Fix assertion definitions breaking on comparison failure
 - render/attrs: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
 - render/attrs All vnodes attributes are properly removed when absent or set to `null` or `undefined` [#1804](https://github.com/MithrilJS/mithril.js/issues/1804) [#2082](https://github.com/MithrilJS/mithril.js/issues/2082) ([#1865](https://github.com/MithrilJS/mithril.js/pull/1865), [#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
 - render/core: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916) ([#1918](https://github.com/MithrilJS/mithril.js/pull/1918) [@robinchew](https://github.com/robinchew), [#2052](https://github.com/MithrilJS/mithril.js/pull/2052))

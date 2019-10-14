@@ -1,6 +1,6 @@
 # Introduction
 
-- [What is Mithril?](#what-is-mithril)
+- [What is Mithril?](#what-is-mithril?)
 - [Getting started](#getting-started)
 - [Hello world](#hello-world)
 - [DOM elements](#dom-elements)
@@ -46,7 +46,7 @@ If you are an experienced developer and want to know how Mithril compares to oth
 
 Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required.
 
-*Looking for the v1 docs? [Click here](https://mithril.js.org/archive/v1.1.6/index.html).*
+*Looking for the v1 docs? [Click here](https://mithril.js.org/archive/v1.1.7/index.html).*
 
 ---
 

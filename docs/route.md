@@ -142,6 +142,7 @@ m(m.route.Link, {
 	// first parameter to `m`.
 	selector: "span",
 	options: {replace: true},
+	params: {key: "value"},
 	href: "/test",
 	disabled: false,
 	class: "nav-link",
@@ -201,9 +202,10 @@ Do note that this doesn't also disable pointer events for you - you have to do t
 Argument              | Type                                 | Required | Description
 --------------------- | ------------------------------------ | -------- | ---
 `attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
-`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled` | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.selector` | `String|Object|Function`             | No       | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No       | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes.params`   | `Object`                             | No       | This sets the parameters passed to [`m.route.set`](#mrouteset).
+`attributes.disabled` | `Object`                             | No       | This disables the link, so clicking on it doesn't route anywhere.
 `attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
 `children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
 **returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
@@ -281,7 +283,7 @@ Argument            | Type                 | Description
 `vnode.attrs`       | `Object`             | A map of URL parameter values
 **returns**         | `Array<Vnode>|Vnode` | The [vnodes](vnodes.md) to be rendered
 
-The `vnode` parameter is just `m(Component, m.route.param())` where `Component` is the resolved component for the route (after `routeResolver.onmatch`) and `m.route.param()` is as documented [here](#mrouteparam). If you omit this method, the default return value is `[vnode]`, wrapped in a fragment so you can use [key parameters](#key-parameter). Combined with a `:key` parameter, it becomes a [single-element keyed fragment](keys.md#single-child-keyed-fragments), since it ends up rendering to something like `[m(Component, {key: m.route.param("key"), ...})]`.
+The `vnode` parameter is just `m(Component, m.route.param())` where `Component` is the resolved component for the route (after `routeResolver.onmatch`) and `m.route.param()` is as documented [here](#mrouteparam). If you omit this method, the default return value is `[vnode]`, wrapped in a fragment so you can use [key parameters](#key-parameter). Combined with a `:key` parameter, it becomes a [single-element keyed fragment](keys.md#reinitializing-views-with-single-child-keyed-fragments), since it ends up rendering to something like `[m(Component, {key: m.route.param("key"), ...})]`.
 
 ---
 
@@ -401,7 +403,7 @@ It's possible to have multiple arguments in a route, for example `/edit/:project
 
 When a user navigates from a parameterized route to the same route with a different parameter (e.g. going from `/page/1` to `/page/2` given a route `/page/:id`, the component would not be recreated from scratch since both routes resolve to the same component, and thus result in a virtual dom in-place diff. This has the side-effect of triggering the `onupdate` hook, rather than `oninit`/`oncreate`. However, it's relatively common for a developer to want to synchronize the recreation of the component to the route change event.
 
-To achieve that, it's possible to combine route parameterization with the virtual dom [key reconciliation](keys.md) feature:
+To achieve that, it's possible to combine route parameterization with [keys](#reinitializing-views-with-single-child-keyed-fragments) for a very convenient pattern:
 
 ```javascript
 m.route(document.body, "/edit/1", {
@@ -419,7 +421,7 @@ Or even use the [`history state`](#history-state) feature to achieve reloadable 
 
 `m.route.set(m.route.get(), null, {state: {key: Date.now()}})`
 
-Note that the key parameter works only for component routes. If you're using a route resolver, you'll need to use a [single-child keyed fragment](keys.md), passing `key: m.route.param("key")`, to accomplish the same.
+Note that the key parameter works only for component routes. If you're using a route resolver, you'll need to use a [single-child keyed fragment](keys.md#reinitializing-views-with-single-child-keyed-fragments), passing `key: m.route.param("key")`, to accomplish the same.
 
 #### Variadic routes
 

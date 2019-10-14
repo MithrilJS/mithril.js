@@ -7,7 +7,8 @@ var Promise = require("../promise/promise")
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
-var assign = require("../pathname/assign")
+var assign = require("../util/assign")
+var censor = require("../util/censor")
 
 var sentinel = {}
 
@@ -33,16 +34,16 @@ module.exports = function($window, mountRedraw) {
 	var SKIP = route.SKIP = {}
 
 	function route(root, defaultRoute, routes) {
-		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
+		if (!root) throw new TypeError("DOM element being rendered to does not exist.")
 		// 0 = start
 		// 1 = init
 		// 2 = ready
 		var state = 0
 
 		var compiled = Object.keys(routes).map(function(route) {
-			if (route[0] !== "/") throw new SyntaxError("Routes must start with a `/`")
+			if (route[0] !== "/") throw new SyntaxError("Routes must start with a '/'.")
 			if ((/:([^\/\.-]+)(\.{3})?:/).test(route)) {
-				throw new SyntaxError("Route parameter names must be separated with either `/`, `.`, or `-`")
+				throw new SyntaxError("Route parameter names must be separated with either '/', '.', or '-'.")
 			}
 			return {
 				route: route,
@@ -61,7 +62,7 @@ module.exports = function($window, mountRedraw) {
 			var defaultData = parsePathname(defaultRoute)
 
 			if (!compiled.some(function (i) { return i.check(defaultData) })) {
-				throw new ReferenceError("Default route doesn't match any known routes")
+				throw new ReferenceError("Default route doesn't match any known routes.")
 			}
 		}
 
@@ -87,8 +88,8 @@ module.exports = function($window, mountRedraw) {
 
 			assign(data.params, $window.history.state)
 
-			function fail() {
-				if (path === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
+			function reject(e) {
+				console.error(e)
 				setPath(defaultRoute, null, {replace: true})
 			}
 
@@ -123,13 +124,17 @@ module.exports = function($window, mountRedraw) {
 						else if (payload.onmatch) {
 							p.then(function () {
 								return payload.onmatch(data.params, path, matchedRoute)
-							}).then(update, fail)
+							}).then(update, path === defaultRoute ? null : reject)
 						}
 						else update("div")
 						return
 					}
 				}
-				fail()
+
+				if (path === defaultRoute) {
+					throw new Error("Could not resolve default route " + defaultRoute + ".")
+				}
+				setPath(defaultRoute, null, {replace: true})
 			}
 		}
 
@@ -157,12 +162,11 @@ module.exports = function($window, mountRedraw) {
 			$window.addEventListener("hashchange", resolveRoute, false)
 		}
 
-		return mountRedraw.mount(root, {
+		mountRedraw.mount(root, {
 			onbeforeupdate: function() {
 				state = state ? 2 : 1
 				return !(!state || sentinel === currentResolver)
 			},
-			oncreate: resolveRoute,
 			onremove: onremove,
 			view: function() {
 				if (!state || sentinel === currentResolver) return
@@ -172,6 +176,7 @@ module.exports = function($window, mountRedraw) {
 				return vnode
 			},
 		})
+		resolveRoute()
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {
@@ -185,20 +190,17 @@ module.exports = function($window, mountRedraw) {
 	route.prefix = "#!"
 	route.Link = {
 		view: function(vnode) {
-			var options = vnode.attrs.options
-			// Remove these so they don't get overwritten
-			var attrs = {}, onclick, href
-			assign(attrs, vnode.attrs)
-			// The first two are internal, but the rest are magic attributes
-			// that need censored to not screw up rendering.
-			attrs.selector = attrs.options = attrs.key = attrs.oninit =
-			attrs.oncreate = attrs.onbeforeupdate = attrs.onupdate =
-			attrs.onbeforeremove = attrs.onremove = null
-
-			// Do this now so we can get the most current `href` and `disabled`.
-			// Those attributes may also be specified in the selector, and we
-			// should honor that.
-			var child = m(vnode.attrs.selector || "a", attrs, vnode.children)
+			// Omit the used parameters from the rendered element - they are
+			// internal. Also, censor the various lifecycle methods.
+			//
+			// We don't strip the other parameters because for convenience we
+			// let them be specified in the selector as well.
+			var child = m(
+				vnode.attrs.selector || "a",
+				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
+				vnode.children
+			)
+			var options, onclick, href
 
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
@@ -209,12 +211,13 @@ module.exports = function($window, mountRedraw) {
 			if (child.attrs.disabled = Boolean(child.attrs.disabled)) {
 				child.attrs.href = null
 				child.attrs["aria-disabled"] = "true"
-				// If you *really* do want to do this on a disabled link, use
+				// If you *really* do want add `onclick` on a disabled link, use
 				// an `oncreate` hook to add it.
-				child.attrs.onclick = null
 			} else {
-				onclick = child.attrs.onclick
-				href = child.attrs.href
+				options = vnode.attrs.options
+				onclick = vnode.attrs.onclick
+				// Easier to build it now to keep it isomorphic.
+				href = buildPathname(child.attrs.href, vnode.attrs.params)
 				child.attrs.href = route.prefix + href
 				child.attrs.onclick = function(e) {
 					var result

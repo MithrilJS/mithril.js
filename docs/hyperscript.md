@@ -393,7 +393,7 @@ m.render(document.body, userInputs(users))
 
 Having a key means that if the `users` array is shuffled and the view is re-rendered, the inputs will be shuffled in the exact same order, so as to maintain correct focus and DOM state.
 
-To learn more about keys, [see the keys page](keys.md)
+To learn more about keys, [see the keys page](keys.md).
 
 ---
 

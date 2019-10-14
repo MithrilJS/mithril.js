@@ -78,6 +78,8 @@ deploy:
     file:
       - "mithril.js"
       - "mithril.min.js"
+      - "stream/stream.js"
+      - "stream/stream.min.js"
     skip_cleanup: true
     draft: true
     on:

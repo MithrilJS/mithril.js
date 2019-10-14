@@ -1,3 +1,4 @@
+/* global window */
 "use strict"
 
 var PromisePolyfill = require("./polyfill")

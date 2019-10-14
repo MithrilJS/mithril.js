@@ -91,6 +91,30 @@ o.spec("mount/redraw", function() {
 		o(spy3.callCount).equals(2)
 	})
 
+	o("should not redraw when mounting another root", function() {
+		var el1 = $document.createElement("div")
+		var el2 = $document.createElement("div")
+		var el3 = $document.createElement("div")
+		var spy1 = o.spy()
+		var spy2 = o.spy()
+		var spy3 = o.spy()
+
+		m.mount(el1, {view: spy1})
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(0)
+		o(spy3.callCount).equals(0)
+
+		m.mount(el2, {view: spy2})
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(1)
+		o(spy3.callCount).equals(0)
+
+		m.mount(el3, {view: spy3})
+		o(spy1.callCount).equals(1)
+		o(spy2.callCount).equals(1)
+		o(spy3.callCount).equals(1)
+	})
+
 	o("should stop running after mount null", function() {
 		var spy = o.spy()
 
@@ -202,6 +226,136 @@ o.spec("mount/redraw", function() {
 
 	o("throws on invalid component", function() {
 		o(function() { m.mount(root, {}) }).throws(TypeError)
+	})
+
+	o("skips roots that were synchronously unsubscribed before they were visited", function() {
+		var calls = []
+		var root1 = $document.createElement("div")
+		var root2 = $document.createElement("div")
+		var root3 = $document.createElement("div")
+
+		m.mount(root1, {
+			onbeforeupdate: function() {
+				m.mount(root2, null)
+			},
+			view: function() { calls.push("root1") },
+		})
+		m.mount(root2, {view: function() { calls.push("root2") }})
+		m.mount(root3, {view: function() { calls.push("root3") }})
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+		])
+
+		m.redraw.sync()
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+			"root1", "root3",
+		])
+	})
+
+	o("keeps its place when synchronously unsubscribing previously visited roots", function() {
+		var calls = []
+		var root1 = $document.createElement("div")
+		var root2 = $document.createElement("div")
+		var root3 = $document.createElement("div")
+
+		m.mount(root1, {view: function() { calls.push("root1") }})
+		m.mount(root2, {
+			onbeforeupdate: function() {
+				m.mount(root1, null)
+			},
+			view: function() { calls.push("root2") },
+		})
+		m.mount(root3, {view: function() { calls.push("root3") }})
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+		])
+
+		m.redraw.sync()
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+			"root1", "root2", "root3",
+		])
+	})
+
+	o("keeps its place when synchronously unsubscribing previously visited roots in the face of errors", function() {
+		errors = ["fail"]
+		var calls = []
+		var root1 = $document.createElement("div")
+		var root2 = $document.createElement("div")
+		var root3 = $document.createElement("div")
+
+		m.mount(root1, {view: function() { calls.push("root1") }})
+		m.mount(root2, {
+			onbeforeupdate: function() {
+				m.mount(root1, null)
+				throw "fail"
+			},
+			view: function() { calls.push("root2") },
+		})
+		m.mount(root3, {view: function() { calls.push("root3") }})
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+		])
+
+		m.redraw.sync()
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+			"root1", "root3",
+		])
+	})
+
+	o("keeps its place when synchronously unsubscribing the current root", function() {
+		var calls = []
+		var root1 = $document.createElement("div")
+		var root2 = $document.createElement("div")
+		var root3 = $document.createElement("div")
+
+		m.mount(root1, {view: function() { calls.push("root1") }})
+		m.mount(root2, {
+			onbeforeupdate: function() {
+				try { m.mount(root2, null) } catch (e) { calls.push([e.constructor, e.message]) }
+			},
+			view: function() { calls.push("root2") },
+		})
+		m.mount(root3, {view: function() { calls.push("root3") }})
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+		])
+
+		m.redraw.sync()
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+			"root1", [TypeError, "Node is currently being rendered to and thus is locked."], "root2", "root3",
+		])
+	})
+
+	o("keeps its place when synchronously unsubscribing the current root in the face of an error", function() {
+		errors = [
+			[TypeError, "Node is currently being rendered to and thus is locked."],
+		]
+		var calls = []
+		var root1 = $document.createElement("div")
+		var root2 = $document.createElement("div")
+		var root3 = $document.createElement("div")
+
+		m.mount(root1, {view: function() { calls.push("root1") }})
+		m.mount(root2, {
+			onbeforeupdate: function() {
+				try { m.mount(root2, null) } catch (e) { throw [e.constructor, e.message] }
+			},
+			view: function() { calls.push("root2") },
+		})
+		m.mount(root3, {view: function() { calls.push("root3") }})
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+		])
+
+		m.redraw.sync()
+		o(calls).deepEquals([
+			"root1", "root2", "root3",
+			"root1", "root3",
+		])
 	})
 
 	components.forEach(function(cmp){

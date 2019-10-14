@@ -1,8 +1,8 @@
 "use strict"
 /** @constructor */
 var PromisePolyfill = function(executor) {
-	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
-	if (typeof executor !== "function") throw new TypeError("executor must be a function")
+	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with 'new'.")
+	if (typeof executor !== "function") throw new TypeError("executor must be a function.")
 
 	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
 	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
@@ -12,7 +12,7 @@ var PromisePolyfill = function(executor) {
 			var then
 			try {
 				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
+					if (value === self) throw new TypeError("Promise can't be resolved with itself.")
 					executeOnce(then.bind(value))
 				}
 				else {
