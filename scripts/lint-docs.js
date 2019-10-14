@@ -106,7 +106,6 @@ class LintRenderer extends marked.Renderer {
 			}
 		}
 		this._ensureCodeIsHighlightable()
-		this._ensureCodeHasConsistentTag()
 		this._ensureCodeIsSyntaticallyValid()
 		this._ensureCommentStyle()
 	}
@@ -132,12 +131,6 @@ class LintRenderer extends marked.Renderer {
 			catch (_) {
 				// ignore
 			}
-		}
-	}
-
-	_ensureCodeHasConsistentTag() {
-		if (this._lang === "js") {
-			this._emit("JS code block has wrong language tag", this._block())
 		}
 	}
 
