@@ -6,6 +6,7 @@
 - [I'm submitting a PR. How do I run tests?](#i'm-submitting-a-pr-how-do-i-run-tests?)
 - [How do I build Mithril?](#how-do-i-build-mithril?)
 - [Is there a style guide?](#is-there-a-style-guide?)
+- [How do I embed live previews in docs?](#how-do-I-embed-live-previews-in-docs?)
 - [Why do tests mock the browser APIs?](#why-do-tests-mock-the-browser-apis?)
 - [Why does Mithril use its own testing framework and not Mocha/Jasmine/Tape?](#why-does-mithril-use-its-own-testing-framework-and-not-mochajasminetape?)
 - [Why doesn't the Mithril codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?](#why-doesn't-the-mithril-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?)
@@ -66,6 +67,12 @@ To generate the bundled file for testing, run `npm run dev` from the command lin
 Yes, there's an `eslint` configuration, but it's not strict about formatting at all. If your contribution passes `npm run lint`, it's good enough for a PR (and it can still be accepted even if it doesn't pass).
 
 Spacing and formatting inconsistencies may be fixed after the fact, and we don't want that kind of stuff getting in the way of contributing.
+
+
+
+## How do I embed live previews in docs?
+
+Any code tag marked as `js` and not `javascript` will automatically be wrapped in a live Flems preview.
 
 
 
