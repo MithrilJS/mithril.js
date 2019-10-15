@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var fragment = require("../../render/fragment")
 var m = require("../../render/hyperscript")
 

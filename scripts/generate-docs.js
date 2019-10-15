@@ -143,7 +143,7 @@ class Generator {
 				let anchor = text.toLowerCase()
 					.replace(/<(\/?)code>/g, "")
 					.replace(/<a.*?>.+?<\/a>/g, "")
-					.replace(/\.|\[|\]|&quot;|\/|\(|\)/g, "")
+					.replace(/[.`[\]\/()]|&quot;/g, "")
 					.replace(/\s/g, "-");
 
 				const anchorId = anchorIds.get(anchor)

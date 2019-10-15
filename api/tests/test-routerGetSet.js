@@ -1,7 +1,7 @@
 "use strict"
 
 // Low-priority TODO: remove the dependency on the renderer here.
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 

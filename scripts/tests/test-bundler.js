@@ -7,7 +7,7 @@ const access = util.promisify(fs.access)
 const writeFile = util.promisify(fs.writeFile)
 const unlink = util.promisify(fs.unlink)
 
-const o = require("../../ospec/ospec")
+const o = require("ospec")
 const bundle = require("../_bundler-impl")
 
 o.spec("bundler", async () => {

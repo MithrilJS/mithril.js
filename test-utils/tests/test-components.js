@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var components = require("../../test-utils/components")
 
 o.spec("test-utils/components", function() {
