@@ -166,7 +166,7 @@ else window.o = m()
 				}
 				if (fn.length > 0) {
 					var body = fn.toString()
-					arg = (body.match(/^(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*=>/) || body.match(/\((?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*[,\)]/) || []).pop()
+					arg = (body.match(/\((.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*[,\)].*\s=>/) || body.match(/^(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*=>/) || body.match(/\((?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*(.+?)(?:\s|\/\*[\s\S]*?\*\/|\/\/.*?\n)*[,\)]/) || []).pop()
 					if (body.indexOf(arg) === body.lastIndexOf(arg)) {
 						var e = new Error
 						e.stack = "'" + arg + "()' should be called at least once\n" + o.cleanStackTrace(task.err)

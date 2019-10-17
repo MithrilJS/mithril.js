@@ -305,6 +305,17 @@ o.spec("ospec", function() {
 					done()
 				})
 			})
+			o("hooks work as intended the third time (arrow function)", (done) => {
+				callAsync(function() {
+					var spy = o.spy()
+					spy(a)
+
+					o(a).equals(1)
+					o(b).equals(1)
+
+					done()
+				})
+			})
 		})
 	})
 
