@@ -141,8 +141,15 @@ module.exports = function($window, Promise, oncompletion) {
 						}
 						if (success) resolve(response)
 						else {
-							try { message = ev.target.responseText }
-							catch (e) { message = response }
+							try {
+								if (ev.target.responseType == "" || ev.target.responseType == "text") {
+									message = ev.target.responseText
+								}
+								else {
+									message = ev.target.status +": "+ ev.target.statusText
+								}
+							}
+							catch (e) { message = "Error retrieving error message" }
 							var error = new Error(message)
 							error.code = ev.target.status
 							error.response = response
