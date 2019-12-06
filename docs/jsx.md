@@ -187,7 +187,7 @@ You can use hooks in your production environment to run the production build scr
 #### Making `m` accessible globally
 In order to access `m` globally from all your project first import `webpack` in your `webpack.config.js` like this:
 ```
-const webpack = require('webpack');
+const webpack = require('webpack')
 ```
 Then create a new plugin in the `plugins` property of the Webpack configuration object:
 ```js
@@ -383,7 +383,7 @@ When using Mithril's router it's recommended to use the `m.route.Link` component
 ```
 Or if you prefer:
 ```jsx
-const Link = m.route.Link;
+const Link = m.route.Link
 // and then in your JSX
 <Link href="/home">Go home</Link>
 ```
