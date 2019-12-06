@@ -5,7 +5,6 @@
 - [Using Babel with Webpack](#using-babel-with-webpack)
 - [Differences with React](#differences-with-react)
 - [JSX vs hyperscript](#jsx-vs-hyperscript)
-- [Converting HTML](#converting-html)
 - [Tips and Tricks](#tips-and-tricks)
 
 ---
