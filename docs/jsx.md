@@ -3,8 +3,10 @@
 - [Description](#description)
 - [Setup](#setup)
 - [Using Babel with Webpack](#using-babel-with-webpack)
+- [Differences with React](#differences-with-react)
 - [JSX vs hyperscript](#jsx-vs-hyperscript)
 - [Converting HTML](#converting-html)
+- [Tips and Tricks](#tips-and-tricks)
 
 ---
 
@@ -183,6 +185,34 @@ You can use hooks in your production environment to run the production build scr
 }
 ```
 
+#### Making `m` accessible globally
+To make `m` accessible globally to all your project first import `webpack` in `webpack.config.js` like this:
+```
+const webpack = require('webpack');
+```
+Then create a new plugin in the `plugins` property of the Webpack configuration object:
+```js
+{
+	plugins: [
+		new webpack.ProvidePlugin({
+			m: 'mithril'
+		})
+	]
+}
+```
+See [the Webpack docs](https://webpack.js.org/plugins/provide-plugin/) for more information on `ProvidePlugin`.
+
+---
+
+### Differences with React
+JSX in Mithril has some subtle but important differences compared to React's JSX.
+
+#### `class` vs `className`
+React follows a purist JavaScript approach hence `class` is a reserved word that cannot be used in JSX. In Mithril both are valid since we believe `class` is more idiomatic to HTML markup.
+
+#### DOM events
+Mithril uses the native syntax for binding DOM events. Instead of using React's `onClick` on `onSubmit` syntax (which are handlers for its synthetic event system) you'd use the native `onclick` or `onsubmit`. Mithril supports all DOM element events bindings.
+
 ---
 
 ### JSX vs hyperscript
@@ -343,3 +373,18 @@ function SummaryView() {
 In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
 When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.
+
+### Tips and tricks
+
+#### Using `m.route.Link`
+
+When using Mithril's router it's recommended to use the `m.route.Link` component instead of the native `<a>` element to trigger route changes to prevent a full reload of the page. To use it in JSX you can simply:
+```jsx
+<m.route.Link href="/home">Go home</m.route.Link>
+```
+Or if you prefer:
+```jsx
+const Link = m.route.Link;
+// and then in your JSX
+<Link href="/home">Go home</Link>
+```
