@@ -186,7 +186,7 @@ You can use hooks in your production environment to run the production build scr
 ```
 
 #### Making `m` accessible globally
-To make `m` accessible globally to all your project first import `webpack` in `webpack.config.js` like this:
+In order to access `m` globally from all your project first import `webpack` in your `webpack.config.js` like this:
 ```
 const webpack = require('webpack');
 ```
@@ -211,7 +211,7 @@ JSX in Mithril has some subtle but important differences compared to React's JSX
 React follows a purist JavaScript approach hence `class` is a reserved word that cannot be used in JSX. In Mithril both are valid since we believe `class` is more idiomatic to HTML markup.
 
 #### DOM events
-Mithril uses the native syntax for binding DOM events. Instead of using React's `onClick` on `onSubmit` syntax (which are handlers for its synthetic event system) you'd use the native `onclick` or `onsubmit`. Mithril supports all DOM element events bindings.
+Mithril uses the native syntax for binding DOM events. Instead of using React's `onClick` or `onSubmit` syntax (which are handlers for its synthetic event system) you'd use the native `onclick` or `onsubmit`. Mithril supports all DOM element event bindings.
 
 ---
 
