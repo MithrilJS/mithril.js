@@ -4,13 +4,13 @@ Explanation, examples, and build notes on how to use JSX in your Mithril.js-base
 
 # JSX
 
-- [Description](#description)
-- [Setup](#setup)
-- [Production build](#production-build)
-- [Using Babel with Webpack](#using-babel-with-webpack)
-- [JSX vs hyperscript](#jsx-vs-hyperscript)
-- [A note on event listeners](#a-note-on-event-listeners)
-- [Converting HTML](#converting-html)
+-   [Description](#description)
+-   [Setup](#setup)
+-   [Production build](#production-build)
+-   [Using Babel with Webpack](#using-babel-with-webpack)
+-   [Differences with React](#differences-with-react)
+-   [JSX vs hyperscript](#jsx-vs-hyperscript)
+-   [Tips and Tricks](#tips-and-tricks)
 
 ---
 
@@ -21,11 +21,8 @@ JSX is a syntax extension that enables you to write HTML tags interspersed with 
 ```jsx
 function MyComponent() {
 	return {
-		view: () =>
-			m("main", [
-				m("h1", "Hello world"),
-			])
-	}
+		view: () => m("main", [m("h1", "Hello world")]),
+	};
 }
 
 // can be written as:
@@ -36,25 +33,27 @@ function MyComponent() {
 			<main>
 				<h1>Hello world</h1>
 			</main>
-		)
-	}
+		),
+	};
 }
 ```
 
 When using JSX, it's possible to interpolate JavaScript expressions within JSX tags by using curly braces:
 
 ```jsx
-var greeting = "Hello"
-var url = "https://google.com"
-var link = <a href={url}>{greeting}!</a>
+var greeting = "Hello";
+var url = "https://google.com";
+var link = <a href={url}>{greeting}!</a>;
 // yields <a href="https://google.com">Hello!</a>
 ```
 
-Components can be used by using a convention of uppercasing the first letter of the component name:
+Components can be used by using a convention of uppercasing the first letter of the component name or by accessing it as a property:
 
 ```jsx
 m.render(document.body, <MyComponent />)
 // equivalent to m.render(document.body, m(MyComponent))
+<m.route.Link href="/home">Go home</m.route.Link>
+// equivalent to m(m.route.Link, {href: "/home"}, "Go home")
 ```
 
 ---
@@ -83,10 +82,13 @@ Create a `.babelrc` file:
 {
 	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["@babel/plugin-transform-react-jsx", {
-			"pragma": "m",
-			"pragmaFrag": "'['"
-		}]
+		[
+			"@babel/plugin-transform-react-jsx",
+			{
+				"pragma": "m",
+				"pragmaFrag": "'['"
+			}
+		]
 	]
 }
 ```
@@ -95,10 +97,10 @@ To run Babel, setup an npm script. Open `package.json` and add this entry under 
 
 ```json
 {
-    "name": "my-project",
-    "scripts": {
-        "babel": "babel src --out-dir bin --source-maps"
-    }
+	"name": "my-project",
+	"scripts": {
+		"babel": "babel src --out-dir bin --source-maps"
+	}
 }
 ```
 
@@ -128,10 +130,13 @@ Create a `.babelrc` file:
 {
 	"presets": ["@babel/preset-env"],
 	"plugins": [
-		["@babel/plugin-transform-react-jsx", {
-			"pragma": "m",
-			"pragmaFrag": "'['"
-		}]
+		[
+			"@babel/plugin-transform-react-jsx",
+			{
+				"pragma": "m",
+				"pragmaFrag": "'['"
+			}
+		]
 	]
 }
 ```
@@ -139,27 +144,29 @@ Create a `.babelrc` file:
 Next, create a file called `webpack.config.js`
 
 ```jsx
-const path = require('path')
+const path = require("path");
 
 module.exports = {
-	entry: './src/index.js',
+	entry: "./src/index.js",
 	output: {
-		path: path.resolve(__dirname, './bin'),
-		filename: 'app.js',
+		path: path.resolve(__dirname, "./bin"),
+		filename: "app.js",
 	},
 	module: {
-		rules: [{
-			test: /\.(js|jsx)$/,
-			exclude: /\/node_modules\//,
-			use: {
-				loader: 'babel-loader'
-			}
-		}]
+		rules: [
+			{
+				test: /\.(js|jsx)$/,
+				exclude: /\/node_modules\//,
+				use: {
+					loader: "babel-loader",
+				},
+			},
+		],
 	},
-    resolve: {
-        extensions: ['.js', '.jsx']
-    }
-}
+	resolve: {
+		extensions: [".js", ".jsx"],
+	},
+};
 ```
 
 For those familiar with Webpack already, please note that adding the Babel options to the `babel-loader` section of your `webpack.config.js` will throw an error, so you need to include them in the separate `.babelrc` file.
@@ -192,7 +199,7 @@ To generate a minified file, open `package.json` and add a new npm script called
 	"name": "my-project",
 	"scripts": {
 		"start": "webpack -d --watch",
-		"build": "webpack -p",
+		"build": "webpack -p"
 	}
 }
 ```
@@ -210,81 +217,134 @@ You can use hooks in your production environment to run the production build scr
 }
 ```
 
+#### Making `m` accessible globally
+
+In order to access `m` globally from all your project first import `webpack` in your `webpack.config.js` like this:
+
+```
+const webpack = require('webpack')
+```
+
+Then create a new plugin in the `plugins` property of the Webpack configuration object:
+
+```js
+{
+	plugins: [
+		new webpack.ProvidePlugin({
+			m: "mithril",
+		}),
+	];
+}
+```
+
+See [the Webpack docs](https://webpack.js.org/plugins/provide-plugin/) for more information on `ProvidePlugin`.
+
+---
+
+### Differences with React
+
+JSX in Mithril has some subtle but important differences compared to React's JSX.
+
+#### Attribute and style property case conventions
+
+React requires you use the camel-cased DOM property names instead of HTML attribute names for all attributes other than `data-*` and `aria-*` attributes. For example using `className` instead of `class` and `htmlFor` instead of `for`. In Mithril, it's more idiomatic to use the lowercase HTML attribute names instead. Mithril always falls back to setting attributes if a property doesn't exist which aligns more intuitively with HTML. Note that in most cases, the DOM property and HTML attribute names are either the same or very similar. For example `value`/`checked` for inputs and the `tabindex` global attribute vs the `elem.tabIndex` property on HTML elements. Very rarely do they differ beyond case: the `elem.className` property for the `class` attribute or the `elem.htmlFor` property for the `for` attribute are among the few exceptions.
+
+Similarly, React always uses the camel-cased style property names exposed in the DOM via properties of `elem.style` (like `cssHeight` and `backgroundColor`). Mithril supports both that and the kebab-cased CSS property names (like `height` and `background-color`) and idiomatically prefers the latter. Only `cssHeight`, `cssFloat`, and vendor-prefixed properties differ in more than case.
+
+#### DOM events
+
+React upper-cases the first character of all event handlers: `onClick` listens for `click` events and `onSubmit` for `submit` events. Some are further altered as they're multiple words concatenated together. For instance, `onMouseMove` listens for `mousemove` events. Mithril does not do this case mapping but instead just prepends `on` to the native event, so you'd add listeners for `onclick` and `onmousemove` to listen to those two events respectively. This corresponds much more closely to HTML's naming scheme and is much more intuitive if you come from an HTML or vanilla DOM background.
+
+React supports scheduling event listeners during the capture phase (in the first pass, out to in, as opposed to the default bubble phase going in to out in the second pass) by appending `Capture` to that event. Mithril currently lacks such functionality, but it could gain this in the future. If this is necessary you can manually add and remove your own listeners in [lifecycle hooks](lifecycle.md).
+
 ---
 
 ### JSX vs hyperscript
 
 JSX and hyperscript are two different syntaxes you can use for specifying vnodes, and they have different tradeoffs:
 
-- JSX is much more approachable if you're coming from an HTML/XML background and are more comfortable specifying DOM elements with that kind of syntax. It is also slightly cleaner in many cases since it uses fewer punctuation and the attributes contain less visual noise, so many people find it much easier to read. And of course, many common editors provide autocomplete support for DOM elements in the same way they do for HTML. However, it requires an extra build step to use, editor support isn't as broad as it is with normal JS, and it's considerably more verbose. It's also a bit more verbose when dealing with a lot of dynamic content because you have to use interpolations for everything.
+-   JSX is much more approachable if you're coming from an HTML/XML background and are more comfortable specifying DOM elements with that kind of syntax. It is also slightly cleaner in many cases since it uses fewer punctuation and the attributes contain less visual noise, so many people find it much easier to read. And of course, many common editors provide autocomplete support for DOM elements in the same way they do for HTML. However, it requires an extra build step to use, editor support isn't as broad as it is with normal JS, and it's considerably more verbose. It's also a bit more verbose when dealing with a lot of dynamic content because you have to use interpolations for everything.
 
-- Hyperscript is more approachable if you come from a backend JS background that doesn't involve much HTML or XML. It's more concise with less redundancy, and it provides a CSS-like sugar for static classes, IDs, and other attributes. It also can be used with no build step at all, although [you can add one if you wish](https://github.com/MithrilJS/mopt). And it's slightly easier to work with in the face of a lot of dynamic content, because you don't need to "interpolate" anything. However, the terseness does make it harder to read for some people, especially those less experienced and coming from a front end HTML/CSS/XML background, and I'm not aware of any plugins that auto-complete parts of hyperscript selectors like IDs, classes, and attributes.
+-   Hyperscript is more approachable if you come from a backend JS background that doesn't involve much HTML or XML. It's more concise with less redundancy, and it provides a CSS-like sugar for static classes, IDs, and other attributes. It also can be used with no build step at all, although [you can add one if you wish](https://github.com/MithrilJS/mopt). And it's slightly easier to work with in the face of a lot of dynamic content, because you don't need to "interpolate" anything. However, the terseness does make it harder to read for some people, especially those less experienced and coming from a front end HTML/CSS/XML background, and I'm not aware of any plugins that auto-complete parts of hyperscript selectors like IDs, classes, and attributes.
 
 You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@isiahmeadows](https://github.com/isiahmeadows/) with some alterations for clarity and readability:
 
 ```javascript
 function SummaryView() {
-    let tag, posts
+	let tag, posts;
 
-    function init({attrs}) {
-        Model.sendView(attrs.tag != null)
-        if (attrs.tag != null) {
-            tag = attrs.tag.toLowerCase()
-            posts = Model.getTag(tag)
-        } else {
-            tag = undefined
-            posts = Model.posts
-        }
-    }
+	function init({ attrs }) {
+		Model.sendView(attrs.tag != null);
+		if (attrs.tag != null) {
+			tag = attrs.tag.toLowerCase();
+			posts = Model.getTag(tag);
+		} else {
+			tag = undefined;
+			posts = Model.posts;
+		}
+	}
 
-    function feed(type, href) {
-        return m(".feed", [
-            type,
-            m("a", {href}, m("img.feed-icon[src=./feed-icon-16.gif]")),
-        ])
-    }
+	function feed(type, href) {
+		return m(".feed", [
+			type,
+			m("a", { href }, m("img.feed-icon[src=./feed-icon-16.gif]")),
+		]);
+	}
 
-    return {
-        oninit: init,
-        // To ensure the tag gets properly diffed on route change.
-        onbeforeupdate: init,
-        view: () =>
-            m(".blog-summary", [
-                m("p", "My ramblings about everything"),
+	return {
+		oninit: init,
+		// To ensure the tag gets properly diffed on route change.
+		onbeforeupdate: init,
+		view: () =>
+			m(".blog-summary", [
+				m("p", "My ramblings about everything"),
 
-                m(".feeds", [
-                    feed("Atom", "blog.atom.xml"),
-                    feed("RSS", "blog.rss.xml"),
-                ]),
+				m(".feeds", [
+					feed("Atom", "blog.atom.xml"),
+					feed("RSS", "blog.rss.xml"),
+				]),
 
-                tag != null
-                    ? m(TagHeader, {len: posts.length, tag})
-                    : m(".summary-header", [
-                        m(".summary-title", "Posts, sorted by most recent."),
-                        m(TagSearch),
-                    ]),
+				tag != null
+					? m(TagHeader, { len: posts.length, tag })
+					: m(".summary-header", [
+							m(
+								".summary-title",
+								"Posts, sorted by most recent."
+							),
+							m(TagSearch),
+					  ]),
 
-                m(".blog-list", posts.map((post) =>
-                    m(m.route.Link, {
-                        class: "blog-entry",
-                        href: `/posts/${post.url}`,
-                    }, [
-                        m(".post-date", post.date.toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        })),
+				m(
+					".blog-list",
+					posts.map((post) =>
+						m(
+							m.route.Link,
+							{
+								class: "blog-entry",
+								href: `/posts/${post.url}`,
+							},
+							[
+								m(
+									".post-date",
+									post.date.toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})
+								),
 
-                        m(".post-stub", [
-                            m(".post-title", post.title),
-                            m(".post-preview", post.preview, "..."),
-                        ]),
+								m(".post-stub", [
+									m(".post-title", post.title),
+									m(".post-preview", post.preview, "..."),
+								]),
 
-                        m(TagList, {post, tag}),
-                    ])
-                )),
-            ])
-    }
+								m(TagList, { post, tag }),
+							]
+						)
+					)
+				),
+			]),
+	};
 }
 ```
 
@@ -292,98 +352,90 @@ Here's the exact equivalent of the above code, using JSX instead. You can see ho
 
 ```jsx
 function SummaryView() {
-    let tag, posts
+	let tag, posts;
 
-    function init({attrs}) {
-        Model.sendView(attrs.tag != null)
-        if (attrs.tag != null) {
-            tag = attrs.tag.toLowerCase()
-            posts = Model.getTag(tag)
-        } else {
-            tag = undefined
-            posts = Model.posts
-        }
-    }
+	function init({ attrs }) {
+		Model.sendView(attrs.tag != null);
+		if (attrs.tag != null) {
+			tag = attrs.tag.toLowerCase();
+			posts = Model.getTag(tag);
+		} else {
+			tag = undefined;
+			posts = Model.posts;
+		}
+	}
 
-    function feed(type, href) {
-        return (
-            <div class="feed">
-                {type}
-                <a href={href}><img class="feed-icon" src="./feed-icon-16.gif" /></a>
-            </div>
-        )
-    }
+	function feed(type, href) {
+		return (
+			<div class="feed">
+				{type}
+				<a href={href}>
+					<img class="feed-icon" src="./feed-icon-16.gif" />
+				</a>
+			</div>
+		);
+	}
 
-    return {
-        oninit: init,
-        // To ensure the tag gets properly diffed on route change.
-        onbeforeupdate: init,
-        view: () => (
-            <div class="blog-summary">
-                <p>My ramblings about everything</p>
+	return {
+		oninit: init,
+		// To ensure the tag gets properly diffed on route change.
+		onbeforeupdate: init,
+		view: () => (
+			<div class="blog-summary">
+				<p>My ramblings about everything</p>
 
-                <div class="feeds">
-                    {feed("Atom", "blog.atom.xml")}
-                    {feed("RSS", "blog.rss.xml")}
-                </div>
+				<div class="feeds">
+					{feed("Atom", "blog.atom.xml")}
+					{feed("RSS", "blog.rss.xml")}
+				</div>
 
-                {tag != null
-                    ? <TagHeader len={posts.length} tag={tag} />
-                    : (
-                        <div class="summary-header">
-                            <div class="summary-title">Posts, sorted by most recent</div>
-                            <TagSearch />
-                        </div>
-                    )
-                }
+				{tag != null ? (
+					<TagHeader len={posts.length} tag={tag} />
+				) : (
+					<div class="summary-header">
+						<div class="summary-title">
+							Posts, sorted by most recent
+						</div>
+						<TagSearch />
+					</div>
+				)}
 
-                <div class="blog-list">
-                    {posts.map((post) => (
-                        <m.route.Link class="blog-entry" href={`/posts/${post.url}`}>
-                            <div class="post-date">
-                                {post.date.toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                })}
-                            </div>
+				<div class="blog-list">
+					{posts.map((post) => (
+						<m.route.Link
+							class="blog-entry"
+							href={`/posts/${post.url}`}
+						>
+							<div class="post-date">
+								{post.date.toLocaleDateString("en-US", {
+									year: "numeric",
+									month: "long",
+									day: "numeric",
+								})}
+							</div>
 
-                            <div class="post-stub">
-                                <div class="post-title">{post.title}</div>
-                                <div class="post-preview">{post.preview}...</div>
-                            </div>
+							<div class="post-stub">
+								<div class="post-title">{post.title}</div>
+								<div class="post-preview">
+									{post.preview}...
+								</div>
+							</div>
 
-                            <TagList post={post} tag={tag} />
-                        </m.route.Link>
-                    ))}
-                </div>
-            </div>
-        )
-    }
+							<TagList post={post} tag={tag} />
+						</m.route.Link>
+					))}
+				</div>
+			</div>
+		),
+	};
 }
 ```
 
 ---
 
-### A note on event listeners
+### Tips and tricks
 
-While JSX events are usually named using camelCase, lowercase names should be used when JSX is used with Mithril.
-
-```jsx
-m("main", [
-	m("input", { type: "text", oninput: ... }),
-	m("input", { type: "button", value: "Click me", onclick: ... })
-])
-
-// can be written as:
-
-<main>
-    <input type="text" oninput={...}/>
-    <input type="button" value="Click me" onclick={...}/>
-</main>
-```
-
-### Converting HTML
+#### Converting HTML to JSX
 
 In Mithril.js, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
