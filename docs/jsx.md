@@ -206,11 +206,15 @@ See [the Webpack docs](https://webpack.js.org/plugins/provide-plugin/) for more 
 ### Differences with React
 JSX in Mithril has some subtle but important differences compared to React's JSX.
 
-#### `class` vs `className`
-React follows a purist JavaScript approach hence `class` is a reserved word that cannot be used in JSX. In Mithril both are valid since we believe `class` is more idiomatic to HTML markup.
+#### Attribute and style property case conventions
+React requires you use the camel-cased DOM property names instead of HTML attribute names for all attributes other than `data-*` and `aria-*` attributes. For example using `className` instead of `class` and `htmlFor` instead of `for`. In Mithril, it's more idiomatic to use the lowercase HTML attribute names instead. Mithril always falls back to setting attributes if a property doesn't exist which aligns more intuitively with HTML. Note that in most cases, the DOM property and HTML attribute names are either the same or very similar. For example `value`/`checked` for inputs and the `tabindex` global attribute vs the `elem.tabIndex` property on HTML elements. Very rarely do they differ beyond case: the `elem.className` property for the `class` attribute or the `elem.htmlFor` property for the `for` attribute are among the few exceptions.
+
+Similarly, React always uses the camel-cased style property names exposed in the DOM via properties of `elem.style` (like `cssHeight` and `backgroundColor`). Mithril supports both that and the kebab-cased CSS property names (like `height` and `background-color`) and idiomatically prefers the latter. Only `cssHeight`, `cssFloat`, and vendor-prefixed properties differ in more than case.
 
 #### DOM events
-Mithril uses the native syntax for binding DOM events. Instead of using React's `onClick` or `onSubmit` syntax (which are handlers for its synthetic event system) you'd use the native `onclick` or `onsubmit`. Mithril supports all DOM element event bindings.
+React upper-cases the first character of all event handlers: `onClick` listens for `click` events and `onSubmit` for `submit` events. Some are further altered as they're multiple words concatenated together. For instance, `onMouseMove` listens for `mousemove` events. Mithril does not do this case mapping but instead just prepends `on` to the native event, so you'd add listeners for `onclick` and `onmousemove` to listen to those two events respectively. This corresponds much more closely to HTML's naming scheme and is much more intuitive if you come from an HTML or vanilla DOM background.
+
+React supports scheduling event listeners during the capture phase (in the first pass, out to in, as opposed to the default bubble phase going in to out in the second pass) by appending `Capture` to that event. Mithril currently lacks such functionality, but it could gain this in the future. If this is necessary you can manually add and remove your own listeners in [lifecycle hooks](lifecycle.md).
 
 ---
 
