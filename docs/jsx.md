@@ -44,13 +44,14 @@ var link = <a href={url}>{greeting}!</a>
 // yields <a href="https://google.com">Hello!</a>
 ```
 
-Components can be used by using a convention of uppercasing the first letter of the component name:
+Components can be used by using a convention of uppercasing the first letter of the component name or by accessing it as a property:
 
 ```jsx
 m.render(document.body, <MyComponent />)
 // equivalent to m.render(document.body, m(MyComponent))
+<m.route.Link href="/home">Go home</m.route.Link>
+// equivalent to m(m.route.Link, {href: "/home"}, "Go home")
 ```
-
 ---
 
 ### Setup
@@ -378,16 +379,3 @@ function SummaryView() {
 In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
 When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.
-
-#### Using `m.route.Link`
-
-When using Mithril's router it's recommended to use the `m.route.Link` component instead of the native `<a>` element to trigger route changes to prevent a full reload of the page. To use it in JSX you can simply:
-```jsx
-<m.route.Link href="/home">Go home</m.route.Link>
-```
-Or if you prefer:
-```jsx
-const Link = m.route.Link
-// and then in your JSX
-<Link href="/home">Go home</Link>
-```
