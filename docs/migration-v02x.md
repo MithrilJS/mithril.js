@@ -834,7 +834,7 @@ The first of the two headers, `Content-Type`, will trigger a CORS prefetch as it
 
 ## `m.deferred` removed
 
-v0.2.x used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. v2.x uses Promises instead, and implements a [polyfill](promises.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
+v0.2.x used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. v2.x uses Promises instead, and implements a [polyfill](promise.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
 
 ### v0.2.x
 

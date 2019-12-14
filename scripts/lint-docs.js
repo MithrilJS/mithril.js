@@ -14,24 +14,24 @@ const request = require("request-promise-native")
 class LintRenderer extends marked.Renderer {
 	constructor(file) {
 		super()
-		this._file = file
 		this._dir = path.dirname(file)
 		this._context = undefined
 		this._code = undefined
 		this._lang = undefined
 		this._error = undefined
-		this._awaiting = []
+		this.awaiting = []
+		this.messages = []
+		this.fatalErrorCount = 0
 	}
-
 	_emitTolerate(...data) {
 		let str = data.join("\n")
 		if (str.endsWith("\n")) str = str.slice(0, -1)
-		console.log(`${this._file} - ${str}\n${"-".repeat(60)}`)
+		this.messages.push(str)
 	}
 
 	_emit(...data) {
 		this._emitTolerate(...data)
-		process.exitCode = 1
+		this.fatalErrorCount++
 	}
 
 	_block() {
@@ -48,7 +48,7 @@ class LintRenderer extends marked.Renderer {
 		// inaccessible.
 		if ((/^https?:\/\//).test(href)) {
 			const url = href.replace(/#.*$/, "")
-			this._awaiting.push(request.head(url).then(() => {
+			this.awaiting.push(request.head(url).then(() => {
 				const isHTTPS = href.startsWith("https:")
 				if (!isHTTPS) {
 					return request.head(`https:${url.slice(7)}`).then(
@@ -79,7 +79,7 @@ class LintRenderer extends marked.Renderer {
 			const exec = (/^([^#?]*\.md)(?:$|\?|#)/).exec(href)
 			if (exec != null) {
 				const resolved = path.resolve(this._dir, exec[1])
-				this._awaiting.push(fs.access(resolved).catch(() => {
+				this.awaiting.push(fs.access(resolved).catch(() => {
 					this._emit(`broken internal link: ${href}`)
 				}))
 			}
@@ -152,21 +152,90 @@ class LintRenderer extends marked.Renderer {
 	}
 }
 
-exports.lintOne = lintOne
-async function lintOne(file) {
-	const contents = await fs.readFile(file, "utf-8")
-	const renderer = new LintRenderer(file)
-	marked(contents, {renderer})
-	return Promise.all(renderer._awaiting)
+async function getFileInfo(file) {
+	const {size, mtime} = await fs.stat(file)
+	const timestamp = Number(mtime)
+	return {size, timestamp}
 }
 
+function report(file, data, totals, nextCache) {
+	data.messages.forEach((msg) => console.log(`${file} - ${msg}\n${"-".repeat(60)}`))
+	if (data.fatalErrorCount > 0) process.exitCode = 1
+	if (nextCache != null) nextCache[file] = data
+	if (totals != null) {
+		totals.errors += data.fatalErrorCount
+		totals.warnings += data.messages.length - data.fatalErrorCount
+	}
+}
+
+exports.lintOne = lintOne
+// `cache` and `nextCache` are only passed from `lintAll()`, not when watching
+async function lintOne(file, totals, cache, nextCache) {
+	const contents = await fs.readFile(file, "utf-8")
+	// check for nextCache, because cache will be undefined the first time the linter runs
+	const {size, timestamp} = (nextCache != null) ? await getFileInfo(file) : {}
+	if (cache != null && cache[file] != null) {
+		const cached = cache[file]
+		if (size === cached.size && timestamp === cached.timestamp && cached.messages.length === 0) {
+			report(file, cached, totals, nextCache)
+			return
+		}
+	}
+	const renderer = new LintRenderer(file)
+	marked(contents, {renderer})
+	return Promise.all(renderer.awaiting).then(() => {
+		const {fatalErrorCount, messages} = renderer
+		report(file, {fatalErrorCount, messages, size, timestamp}, totals, nextCache)
+	})
+}
+
+
+const cachePath = path.join(process.cwd(), ".lint-docs-cache")
+
+async function loadCache() {
+	try {
+		const source = await fs.readFile(cachePath, "utf-8")
+		try {
+			return JSON.parse(source)
+		} catch (e) {
+			console.error(e)
+			return
+		}
+	} catch (e) {
+		return
+	}
+}
+
+function saveCache(nextCache) {
+	return async () => {
+		await fs.writeFile(cachePath, JSON.stringify(nextCache), "utf-8")
+		// empty return so that _command takes process.exitCode into account.
+	}
+}
+
+function finalReport(totals) {
+	return () => {
+		const buffer = []
+		if (totals.errors > 0) buffer.push(`${totals.errors} error(s)`)
+		if (totals.warnings > 0) buffer.push(`${totals.warnings} warning(s)`)
+		console.log()
+		if (buffer.length > 0) console.log(`${buffer.join(", ")} found in the docs`)
+		else console.log("The docs are in good shape!")
+	}
+}
 exports.lintAll = lintAll
-function lintAll() {
+async function lintAll({useCache}) {
+	const cache = useCache ? await loadCache() : null
+	const totals = {
+		errors: 0,
+		warnings: 0,
+	}
+	// always populate the cache, even if we don't read from it
+	const nextCache = {}
 	return new Promise((resolve, reject) => {
-		const glob = new Glob(path.resolve(__dirname, "../docs/**/*.md"), {
+		const glob = new Glob(path.resolve(__dirname, "../**/*.md"), {
 			ignore: [
 				"**/change-log.md",
-				"**/migration-*.md",
 				"**/node_modules/**",
 			],
 			nodir: true,
@@ -174,11 +243,15 @@ function lintAll() {
 		const awaiting = []
 
 		glob.on("match", (file) => {
-			awaiting.push(lintOne(file))
+			awaiting.push(lintOne(file, totals, cache, nextCache))
 		})
 
 		glob.on("error", reject)
-		glob.on("end", () => resolve(Promise.all(awaiting)))
+		glob.on("end", () => resolve(
+			Promise.all(awaiting)
+				.then(finalReport(totals))
+				.then(saveCache(nextCache))
+		))
 	})
 }
 
@@ -188,10 +261,9 @@ if (require.main === module) {
 		exec: lintAll,
 		watch() {
 			require("chokidar")
-				.watch(path.resolve(__dirname, "../docs/**/*.md"), {
+				.watch(path.resolve(__dirname, "../**/*.md"), {
 					ignore: [
 						"**/change-log.md",
-						"**/migration-*.md",
 						"**/node_modules/**",
 					],
 				})
