@@ -503,7 +503,7 @@ If you absolutely must and you have no control over this, use a prefix denoting 
 
 ```javascript
 things.map(function(thing) {
-	return m(".thing"
+	return m(".thing",
 		{key: (typeof thing.id) + ":" + thing.id},
 		// ...
 	)

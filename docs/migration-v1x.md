@@ -32,7 +32,7 @@ var Counter = {
     oninit: function(vnode) { vnode.state = 0 },
     view: function(vnode) {
         return m(".counter", [
-            m("button", {onclick: function() { vnode.state-- }}, "-")
+            m("button", {onclick: function() { vnode.state-- }}, "-"),
             vnode.state,
             m("button", {onclick: function() { vnode.state++ }}, "+")
         ])
@@ -47,7 +47,7 @@ var Counter = {
     oninit: function(vnode) { vnode.state.count = 0 },
     view: function(vnode) {
         return m(".counter", [
-            m("button", {onclick: function() { vnode.state.count-- }}, "-")
+            m("button", {onclick: function() { vnode.state.count-- }}, "-"),
             vnode.state.count,
             m("button", {onclick: function() { vnode.state.count++ }}, "+")
         ])

@@ -19,19 +19,17 @@ class LintRenderer extends marked.Renderer {
 		this._code = undefined
 		this._lang = undefined
 		this._error = undefined
-		this.awaiting = []
-		this.messages = []
-		this.fatalErrorCount = 0
-	}
-	_emitTolerate(...data) {
-		let str = data.join("\n")
-		if (str.endsWith("\n")) str = str.slice(0, -1)
-		this.messages.push(str)
+		this._awaiting = []
+		this._warnings = []
+		this._errors = []
 	}
 
-	_emit(...data) {
-		this._emitTolerate(...data)
-		this.fatalErrorCount++
+	_addWarning(...data) {
+		this._warnings.push(formatMessage(...data))
+	}
+
+	_addError(...data) {
+		this._errors.push(formatMessage(...data))
 	}
 
 	_block() {
@@ -42,31 +40,48 @@ class LintRenderer extends marked.Renderer {
 		// Don't fail if something byzantine shows up - it's the freaking
 		// internet. Just log it and move on.
 		const httpError = (e) =>
-			this._emitTolerate(`http error for ${href}`, e.message)
+			this._addWarning(`http error for ${href}`, e.message)
 
 		// Prefer https: > http: where possible, but allow http: when https: is
 		// inaccessible.
 		if ((/^https?:\/\//).test(href)) {
 			const url = href.replace(/#.*$/, "")
-			this.awaiting.push(request.head(url).then(() => {
-				const isHTTPS = href.startsWith("https:")
+			const isHTTPS = href.startsWith("https:")
+			// pass along realistic headers, some sites (i.e. the IETF) return a 403 otherwise.
+			const headers = {
+				"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0",
+			}
+			// some more headers if more were ever needed (from my local Firefox)
+
+			// "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			// "Accept-Language": "en-US,en;q=0.5",
+			// "Accept-Encoding": "gzip, deflate, br",
+			// "DNT": "1",
+			// "Connection": "keep-alive",
+			// "Upgrade-Insecure-Requests": "1",
+			// "Pragma": "no-cache",
+			// "Cache-Control": "no-cache"
+
+			this._awaiting.push(request.head(url, {headers}).then(() => {
 				if (!isHTTPS) {
-					return request.head(`https:${url.slice(7)}`).then(
-						() => this._emit("change http: to https:"),
+					return request.head(`https:${url.slice(7)}`, {headers}).then(
+						() => this._addError("change http: to https:"),
 						() => { /* ignore inner errors */ }
 					)
 				}
 			}, (e) => {
 				if (e.statusCode === 404) {
-					this._emit(`broken external link: ${href}`)
+					this._addError(`broken external link: ${href}`)
 				}
 				else {
 					if (
-						e.error.code === "ERR_TLS_CERT_ALTNAME_INVALID" &&
-						href.startsWith("https://")
+						isHTTPS && (
+							e.error.code === "ERR_TLS_CERT_ALTNAME_INVALID" ||
+							(/ssl/i).test(e.message)
+						)
 					) {
-						return request.head(`http:${url.slice(6)}`).then(
-							() => this._emit(`change ${href} to use http:`),
+						return request.head(`http:${url.slice(6)}`, {headers}).then(
+							() => this._addError(`change ${href} to use http:`),
 							// ignore inner errors
 							() => httpError(e)
 						)
@@ -79,8 +94,8 @@ class LintRenderer extends marked.Renderer {
 			const exec = (/^([^#?]*\.md)(?:$|\?|#)/).exec(href)
 			if (exec != null) {
 				const resolved = path.resolve(this._dir, exec[1])
-				this.awaiting.push(fs.access(resolved).catch(() => {
-					this._emit(`broken internal link: ${href}`)
+				this._awaiting.push(fs.access(resolved).catch(() => {
+					this._addError(`broken internal link: ${href}`)
 				}))
 			}
 		}
@@ -89,6 +104,8 @@ class LintRenderer extends marked.Renderer {
 	code(code, lang) {
 		this._code = code
 		this._lang = lang
+		this._error = null
+
 		if (!lang || lang === "js" || lang === "javascript") {
 			try {
 				// Could be within any production.
@@ -115,7 +132,7 @@ class LintRenderer extends marked.Renderer {
 		if (!this._lang) {
 			// TODO: ensure all code blocks have tags, and check this in CI.
 			if (this._error == null) {
-				this._emit(
+				this._addError(
 					"Code block possibly missing `javascript` language tag",
 					this._block(),
 				)
@@ -123,7 +140,7 @@ class LintRenderer extends marked.Renderer {
 
 			try {
 				JSON.parse(this._code)
-				this._emit(
+				this._addError(
 					"Code block possibly missing `json` language tag",
 					this._block(),
 				)
@@ -135,9 +152,9 @@ class LintRenderer extends marked.Renderer {
 	}
 
 	_ensureCodeIsSyntaticallyValid() {
-		if (!this.lang || !(/^js$|^javascript$/).test(this._lang)) return
+		if (!this._lang || !(/^js$|^javascript$/).test(this._lang)) return
 		if (this._error != null) {
-			this._emit(
+			this._addError(
 				"JS code block has invalid syntax", this._error.message,
 				this._block()
 			)
@@ -145,9 +162,9 @@ class LintRenderer extends marked.Renderer {
 	}
 
 	_ensureCommentStyle() {
-		if (!this.lang || !(/^js$|^javascript$/).test(this._lang)) return
+		if (!this._lang || !(/^js$|^javascript$/).test(this._lang)) return
 		if ((/(^|\s)\/\/[\S]/).test(this._code)) {
-			this._emit("Comment is missing a preceding space", this._block())
+			this._addError("Comment is missing a preceding space", this._block())
 		}
 	}
 }
@@ -159,13 +176,36 @@ async function getFileInfo(file) {
 }
 
 function report(file, data, totals, nextCache) {
-	data.messages.forEach((msg) => console.log(`${file} - ${msg}\n${"-".repeat(60)}`))
-	if (data.fatalErrorCount > 0) process.exitCode = 1
-	if (nextCache != null) nextCache[file] = data
-	if (totals != null) {
-		totals.errors += data.fatalErrorCount
-		totals.warnings += data.messages.length - data.fatalErrorCount
+	const {_warnings, _errors} = data;
+	if (_warnings.length + _errors.length > 0) {
+		console.log("- ".repeat(file.length/2 + 1))
+		console.log(file)
+		console.log("- ".repeat(file.length/2 + 1) + "\n")
+		if (_errors.length > 0) {
+			process.exitCode = 1
+			const s = _errors.length > 1 ? "s " : " -"
+			console.log(`-- ${_errors.length} Error${s}----------`)
+			_errors.forEach((msg) => console.log(`\n${msg}`))
+			console.log("\n")
+		}
+		if (_warnings.length > 0) {
+			const s = _warnings.length > 1 ? "s " : " -"
+			console.log(`-- ${_warnings.length} Warning${s}--------`)
+			_warnings.forEach((msg) => console.log(`\n${msg}`))
+			console.log("\n")
+		}
+		if (totals != null) {
+			totals.errors += _errors.length
+			totals.warnings += _warnings.length
+		}
 	}
+	if (nextCache != null) nextCache[file] = data
+}
+
+function formatMessage(...data) {
+	let str = data.join("\n")
+	if (str.endsWith("\n")) str = str.slice(0, -1)
+	return str
 }
 
 exports.lintOne = lintOne
@@ -176,16 +216,20 @@ async function lintOne(file, totals, cache, nextCache) {
 	const {size, timestamp} = (nextCache != null) ? await getFileInfo(file) : {}
 	if (cache != null && cache[file] != null) {
 		const cached = cache[file]
-		if (size === cached.size && timestamp === cached.timestamp && cached.messages.length === 0) {
+		if (
+			size === cached.size &&
+			timestamp === cached.timestamp &&
+			cached._errors.length + cached._warnings.length === 0
+		) {
 			report(file, cached, totals, nextCache)
 			return
 		}
 	}
 	const renderer = new LintRenderer(file)
 	marked(contents, {renderer})
-	return Promise.all(renderer.awaiting).then(() => {
-		const {fatalErrorCount, messages} = renderer
-		report(file, {fatalErrorCount, messages, size, timestamp}, totals, nextCache)
+	return Promise.all(renderer._awaiting).then(() => {
+		const {_warnings, _errors} = renderer
+		report(file, {_warnings, _errors, size, timestamp}, totals, nextCache)
 	})
 }
 
@@ -207,22 +251,21 @@ async function loadCache() {
 }
 
 function saveCache(nextCache) {
-	return async () => {
-		await fs.writeFile(cachePath, JSON.stringify(nextCache), "utf-8")
-		// empty return so that _command takes process.exitCode into account.
-	}
+	return fs.writeFile(cachePath, JSON.stringify(nextCache), "utf-8")
 }
 
 function finalReport(totals) {
-	return () => {
-		const buffer = []
-		if (totals.errors > 0) buffer.push(`${totals.errors} error(s)`)
-		if (totals.warnings > 0) buffer.push(`${totals.warnings} warning(s)`)
-		console.log()
-		if (buffer.length > 0) console.log(`${buffer.join(", ")} found in the docs`)
-		else console.log("The docs are in good shape!")
+	const buffer = []
+	if (totals.errors > 0) {
+		buffer.push(`${totals.errors} error${totals.errors > 1 ? "s" : ""}`)
 	}
+	if (totals.warnings > 0) {
+		buffer.push(`${totals.warnings} warning${totals.warnings > 1 ? "s" : ""}`)
+	}
+	if (buffer.length > 0) console.log(`\n${buffer.join(", ")} found in the docs\n`)
+	else console.log("The docs are in good shape!\n")
 }
+
 exports.lintAll = lintAll
 async function lintAll({useCache}) {
 	const cache = useCache ? await loadCache() : null
@@ -232,10 +275,11 @@ async function lintAll({useCache}) {
 	}
 	// always populate the cache, even if we don't read from it
 	const nextCache = {}
-	return new Promise((resolve, reject) => {
+	await new Promise((resolve, reject) => {
 		const glob = new Glob(path.resolve(__dirname, "../**/*.md"), {
 			ignore: [
 				"**/change-log.md",
+				"**/migration-v02x.md",
 				"**/node_modules/**",
 			],
 			nodir: true,
@@ -247,12 +291,11 @@ async function lintAll({useCache}) {
 		})
 
 		glob.on("error", reject)
-		glob.on("end", () => resolve(
-			Promise.all(awaiting)
-				.then(finalReport(totals))
-				.then(saveCache(nextCache))
-		))
+		glob.on("end", () => resolve(Promise.all(awaiting)))
 	})
+	finalReport(totals)
+	await saveCache(nextCache)
+	// don't return anything so that _command.js picks up the errorCode.
 }
 
 /* eslint-disable global-require */
@@ -262,8 +305,9 @@ if (require.main === module) {
 		watch() {
 			require("chokidar")
 				.watch(path.resolve(__dirname, "../**/*.md"), {
-					ignore: [
+					ignored: [
 						"**/change-log.md",
+						"**/migration-v02x.md",
 						"**/node_modules/**",
 					],
 				})

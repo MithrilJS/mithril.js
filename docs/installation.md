@@ -51,9 +51,9 @@ $ npm install webpack webpack-cli --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
-```javascript
+```json
 {
-	// ...
+	"...": "...",
 	"scripts": {
 		"start": "webpack src/index.js --output bin/app.js -d --watch"
 	}
