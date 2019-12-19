@@ -9,7 +9,7 @@
 
 ### Technology choices
 
-Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](http://velocityjs.org/) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
+Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](https://github.com/julianshapiro/velocity) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
 
 Mithril does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril does, however, offer hooks to make life easier in some specific cases where it's traditionally difficult to make animations work.
 
