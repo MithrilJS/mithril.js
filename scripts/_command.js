@@ -18,6 +18,7 @@ process.on("unhandledRejection", function (e) {
 
 module.exports = ({exec, watch}) => {
 	const index = process.argv.indexOf("--watch")
+	const useCache = process.argv.indexOf("--cache") >= 0
 	if (index >= 0) {
 		process.argv.splice(index, 1)
 
@@ -29,7 +30,7 @@ module.exports = ({exec, watch}) => {
 
 		watch()
 	} else {
-		Promise.resolve(exec()).then((code) => {
+		Promise.resolve(exec({useCache})).then((code) => {
 			if (code != null) process.exitCode = code
 		})
 	}
