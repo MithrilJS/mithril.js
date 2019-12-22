@@ -9,4 +9,5 @@ Here are some examples of Mithril in action
 - SVG: [Clock](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/clock.html), [Ring](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/ring.html), [Tiger](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/svg/tiger.html)
 - [ThreadItJS](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/threaditjs/index.html)
 - [TodoMVC](http://cdn.rawgit.com/MithrilJS/mithril.js/master/examples/todomvc/index.html)
-
+- [Conway Game Of Life](https://tinyurl.com/w6bw6uy)
+- [Tic Tac Toe](https://tinyurl.com/sgah7jl)
