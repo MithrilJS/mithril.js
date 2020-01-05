@@ -20,3 +20,6 @@ tests/
 # from changes to it in patch releases. Let's force people to finally stop using
 # them.
 /test-utils/
+
+# Exclude archive of previous docs (see #2552)
+/archive/

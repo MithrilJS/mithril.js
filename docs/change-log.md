@@ -20,6 +20,7 @@
 
 *Note for later: release as semver-minor.*
 
+- Reduced package download size substantially by removing the archive of previous releases' documentation. ([#2561](https://github.com/MithrilJS/mithril.js/pull/2561) [@cztomsik](https://github.com/cztomsik))
 - Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
 - The redraw reentrancy check was moved from `m.mount` to `m.render` and its error message was updated accordingly. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
     - This is unlikely to break people because if you were to do it with `m.render` directly before now, you'd corrupt Mithril's internal representation and internal errors could occur as a result. Now, it just warns you.
