@@ -1,10 +1,10 @@
 "use strict"
 
 var buildPathname = require("../pathname/build")
+var hasOwn = require("../util/hasOwn")
 
-module.exports = function($window, Promise) {
+module.exports = function($window, Promise, oncompletion) {
 	var callbackCount = 0
-	var oncompletion
 
 	function PromiseProxy(executor) {
 		return new Promise(executor)
@@ -67,7 +67,7 @@ module.exports = function($window, Promise) {
 
 	function hasHeader(args, name) {
 		for (var key in args.headers) {
-			if ({}.hasOwnProperty.call(args.headers, key) && name.test(key)) return true
+			if (hasOwn.call(args.headers, key) && name.test(key)) return true
 		}
 		return false
 	}
@@ -77,14 +77,15 @@ module.exports = function($window, Promise) {
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
 			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
+			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
-			var xhr = new $window.XMLHttpRequest(),
-				aborted = false,
-				_abort = xhr.abort
+			var xhr = new $window.XMLHttpRequest(), aborted = false
+			var original = xhr, replacedAbort
+			var abort = xhr.abort
 
-			xhr.abort = function abort() {
+			xhr.abort = function() {
 				aborted = true
-				_abort.call(xhr)
+				abort.call(this)
 			}
 
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
@@ -97,62 +98,72 @@ module.exports = function($window, Promise) {
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
-			xhr.responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
+			xhr.responseType = responseType
 
 			for (var key in args.headers) {
-				if ({}.hasOwnProperty.call(args.headers, key)) {
+				if (hasOwn.call(args.headers, key)) {
 					xhr.setRequestHeader(key, args.headers[key])
 				}
 			}
 
-			if (typeof args.config === "function") xhr = args.config(xhr, args) || xhr
-
-			xhr.onreadystatechange = function() {
+			xhr.onreadystatechange = function(ev) {
 				// Don't throw errors on xhr.abort().
-				if(aborted) return
+				if (aborted) return
 
-				if (xhr.readyState === 4) {
+				if (ev.target.readyState === 4) {
 					try {
-						var success = (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || (/^file:\/\//i).test(url)
+						var success = (ev.target.status >= 200 && ev.target.status < 300) || ev.target.status === 304 || (/^file:\/\//i).test(url)
 						// When the response type isn't "" or "text",
 						// `xhr.responseText` is the wrong thing to use.
 						// Browsers do the right thing and throw here, and we
 						// should honor that and do the right thing by
 						// preferring `xhr.response` where possible/practical.
-						var response = xhr.response, message
+						var response = ev.target.response, message
 
-						if (response == null) {
-							try {
-								response = xhr.responseText
-								// Note: this snippet is intentionally *after*
-								// `xhr.responseText` is accessed, since the
-								// above will throw in modern browsers (thus
-								// skipping the rest of this section). It's an
-								// IE hack to detect and work around the lack of
-								// native `responseType: "json"` support there.
-								if (typeof args.extract !== "function" && xhr.responseType === "json") response = JSON.parse(response)
-							}
-							catch (e) { response = null }
+						if (responseType === "json") {
+							// For IE and Edge, which don't implement
+							// `responseType: "json"`.
+							if (!ev.target.responseType && typeof args.extract !== "function") response = JSON.parse(ev.target.responseText)
+						} else if (!responseType || responseType === "text") {
+							// Only use this default if it's text. If a parsed
+							// document is needed on old IE and friends (all
+							// unsupported), the user should use a custom
+							// `config` instead. They're already using this at
+							// their own risk.
+							if (response == null) response = ev.target.responseText
 						}
 
 						if (typeof args.extract === "function") {
-							response = args.extract(xhr, args)
+							response = args.extract(ev.target, args)
 							success = true
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						}
 						if (success) resolve(response)
 						else {
-							try { message = xhr.responseText }
+							try { message = ev.target.responseText }
 							catch (e) { message = response }
 							var error = new Error(message)
-							error.code = xhr.status
+							error.code = ev.target.status
 							error.response = response
 							reject(error)
 						}
 					}
 					catch (e) {
 						reject(e)
+					}
+				}
+			}
+
+			if (typeof args.config === "function") {
+				xhr = args.config(xhr, args, url) || xhr
+
+				// Propagate the `abort` to any replacement XHR as well.
+				if (xhr !== original) {
+					replacedAbort = xhr.abort
+					xhr.abort = function() {
+						aborted = true
+						replacedAbort.call(this)
 					}
 				}
 			}
@@ -180,8 +191,5 @@ module.exports = function($window, Promise) {
 				encodeURIComponent(callbackName)
 			$window.document.documentElement.appendChild(script)
 		}),
-		setCompletionCallback: function(callback) {
-			oncompletion = callback
-		},
 	}
 }

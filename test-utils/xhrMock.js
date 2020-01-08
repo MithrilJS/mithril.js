@@ -36,6 +36,7 @@ module.exports = function() {
 			}
 			this.open = function(method, url, async, user, password) {
 				var urlData = parseURL(url, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
+				args.rawUrl = url
 				args.method = method
 				args.pathname = urlData.pathname
 				args.search = urlData.search
@@ -56,7 +57,7 @@ module.exports = function() {
 				var self = this
 				if(!aborted) {
 					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
-					var data = handler({url: args.pathname, query: args.search || {}, body: body || null})
+					var data = handler({rawUrl: args.rawUrl, url: args.pathname, query: args.search || {}, body: body || null})
 					self.status = data.status
 					// Match spec
 					if (self.responseType === "json") {
@@ -71,7 +72,7 @@ module.exports = function() {
 				self.readyState = 4
 				if (args.async === true) {
 					callAsync(function() {
-						if (typeof self.onreadystatechange === "function") self.onreadystatechange()
+						if (typeof self.onreadystatechange === "function") self.onreadystatechange({target: self})
 					})
 				}
 			}

@@ -115,9 +115,9 @@ var Todos = {
 					state.remaining === 1 ? " item left" : " items left",
 				]),
 				m("ul#filters", [
-					m("li", m("a[href='/']", {oncreate: m.route.link, class: state.showing === "" ? "selected" : ""}, "All")),
-					m("li", m("a[href='/active']", {oncreate: m.route.link, class: state.showing === "active" ? "selected" : ""}, "Active")),
-					m("li", m("a[href='/completed']", {oncreate: m.route.link, class: state.showing === "completed" ? "selected" : ""}, "Completed")),
+					m("li", m(m.route.Link, {href: "/", class: state.showing === "" ? "selected" : ""}, "All")),
+					m("li", m(m.route.Link, {href: "/active", class: state.showing === "active" ? "selected" : ""}, "Active")),
+					m("li", m(m.route.Link, {href: "/completed", class: state.showing === "completed" ? "selected" : ""}, "Completed")),
 				]),
 				m("button#clear-completed", {onclick: function() {state.dispatch("clear")}}, "Clear completed"),
 			]) : null,

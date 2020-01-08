@@ -1,4 +1,4 @@
-ospec [![NPM Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![NPM License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
+ospec [![npm Version](https://img.shields.io/npm/v/ospec.svg)](https://www.npmjs.com/package/ospec) [![npm License](https://img.shields.io/npm/l/ospec.svg)](https://www.npmjs.com/package/ospec)
 =====
 
 [About](#about) | [Usage](#usage) | [CLI](#command-line-interface) | [API](#api) | [Goals](#goals)
@@ -10,7 +10,7 @@ Noiseless testing framework
 - ~360 LOC including the CLI runner
 - terser and faster test code than with mocha, jasmine or tape
 - test code reads like bullet points
-- assertion code follows [SVO](https://en.wikipedia.org/wiki/Subject–verb–object) structure in present tense for terseness and readability
+- assertion code follows [SVO](https://en.wikipedia.org/wiki/Subject%E2%80%93verb%E2%80%93object) structure in present tense for terseness and readability
 - supports:
 	- test grouping
 	- assertions
@@ -98,10 +98,10 @@ o.spec("math", function() {
 The `o.spy()` method can be used to create a stub function that keeps track of its call count and received parameters
 
 ```javascript
-//code to be tested
+// code to be tested
 function call(cb, arg) {cb(arg)}
 
-//test suite
+// test suite
 var o = require("ospec")
 
 o.spec("call()", function() {
@@ -119,13 +119,13 @@ o.spec("call()", function() {
 A spy can also wrap other functions, like a decorator:
 
 ```javascript
-//code to be tested
+// code to be tested
 var count = 0
 function inc() {
 	count++
 }
 
-//test suite
+// test suite
 var o = require("ospec")
 
 o.spec("call()", function() {
@@ -194,7 +194,7 @@ This can also be changed on a per-test basis using the `o.timeout(delay)` functi
 
 ```javascript
 o("setTimeout calls callback", function(done, timeout) {
-	o.timeout(500) //wait 500ms before bailing out of the test
+	o.timeout(500) // wait 500ms before bailing out of the test
 
 	setTimeout(done, 300)
 })
@@ -258,7 +258,7 @@ o.spec("math", function() {
 		})
 	})
 
-	//tests only run after async hooks complete
+	// tests only run after async hooks complete
 	o("addition", function() {
 		acc += 1
 
@@ -303,12 +303,12 @@ o.spec("math", function() {
 ### Running the test suite
 
 ```javascript
-//define a test
+// define a test
 o("addition", function() {
 	o(1 + 1).equals(2)
 })
 
-//run the suite
+// run the suite
 o.run()
 ```
 
@@ -371,7 +371,7 @@ ospec '**/*.test.js' --ignore 'folder1/**' --require esm ./my-file.js
 
 ### Run ospec directly from the command line:
 
-ospec comes with an executable named `ospec`. NPM auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec` from your project root, but there are more convenient methods to do so that we will soon describe.
+ospec comes with an executable named `ospec`. npm auto-installs local binaries to `./node_modules/.bin/`. You can run ospec by running `./node_modules/.bin/ospec` from your project root, but there are more convenient methods to do so that we will soon describe.
 
 ospec doesn't work when installed globally (`npm install -g`). Using global scripts is generally a bad idea since you can end up with different, incompatible versions of the same package installed locally and globally.
 
@@ -433,7 +433,7 @@ Starts an assertion. There are six types of assertion: `equals`, `notEquals`, `d
 
 Assertions have this form:
 
-```
+```javascript
 o(actualValue).equals(expectedValue)
 ```
 
@@ -441,13 +441,13 @@ As a matter of convention, the actual value should be the first argument and the
 
 Assertions can also accept an optional description curried parameter:
 
-```
+```javascript
 o(actualValue).equals(expectedValue)("this is a description for this assertion")
 ```
 
 Assertion descriptions can be simplified using ES6 tagged template string syntax:
 
-```
+```javascript
 o(actualValue).equals(expectedValue) `this is a description for this assertion`
 ```
 

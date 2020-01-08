@@ -8,7 +8,7 @@ o.spec("form inputs", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
-		render = vdom($window).render
+		render = vdom($window)
 		root = $window.document.createElement("div")
 		$window.document.body.appendChild(root)
 	})

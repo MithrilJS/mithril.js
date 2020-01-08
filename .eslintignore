@@ -1,7 +1,16 @@
-.vscode/
-coverage/
-docs/lib/
-examples/
+/coverage
+/node_modules
+/jsconfig.json
+/npm-debug.log
+/.vscode
+/.DS_Store
+/.eslintcache
+
+# These are artifacts from various scripts
+/dist
+/archive
 /mithril.js
 /mithril.min.js
-node_modules/
+
+# And the examples are ignored (for now).
+/examples

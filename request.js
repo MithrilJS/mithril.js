@@ -1,4 +1,6 @@
 "use strict"
 
 var PromisePolyfill = require("./promise/promise")
-module.exports = require("./request/request")(window, PromisePolyfill)
+var mountRedraw = require("./mount-redraw")
+
+module.exports = require("./request/request")(window, PromisePolyfill, mountRedraw.redraw)

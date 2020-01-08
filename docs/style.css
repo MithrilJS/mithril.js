@@ -1,6 +1,6 @@
 body {background:white;-webkit-text-size-adjust: 100%;}
 body,table,h5 {font-weight:normal;font-size:16px;font-family:'Open Sans',sans-serif;}
-header,main {margin:auto;max-width:1000px;}
+header,main {max-width:1000px;}
 header section {position:absolute;width:250px;}
 nav a {border-left:1px solid #ddd;padding:0 10px;}
 nav a:first-child {border:0;padding-left:0;}
@@ -28,7 +28,7 @@ h2 {font-size:22px;margin:45px 0 15px;}
 h3 {font-size:20px;margin:45px 0 15px;}
 h4 {font-size:18px;margin:30px 0 15px;}
 h5 {font-weight:bold;margin:15px 0 15px;}
-h1 img {transform:rotate(180deg);vertical-align:middle;width:20px;}
+h1 img {vertical-align:middle;width:20px;}
 h1 small {font-size:16px;}
 h2 a,h3 a,h4 a,h5 a,
 h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,
@@ -95,3 +95,11 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 .token.selector,.token.attr-name,.token.string,.token.builtin {color:#690;}
 .token.atrule,.token.attr-value,.token.punctuation,.token.keyword {color:#1e5799;}
 .token.regex,.token.important {color:#e90;}
+
+/* flems theming */
+.flems main { margin: 0; max-width: auto; }
+.flems { margin: 20px 0; max-height: 400px; }
+.flems .runtime { border: 1px solid #ddd; }
+@media (max-width: 500px) {
+	.flems { min-height: calc(100vw * 1.3); }
+}

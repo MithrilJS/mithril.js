@@ -54,7 +54,7 @@ Argument                  | Type                              | Required | Descr
 `options.withCredentials` | `Boolean`                         | No       | Whether to send cookies to 3rd party domains. Defaults to `false`
 `options.timeout`         | `Number`                          | No       | The amount of milliseconds a request can take before automatically being [terminated](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/timeout).  Defaults to `undefined`.
 `options.responseType`    | `String`                          | No       | The expected [type](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType) of the response. Defaults to `""` if `extract` is defined, `"json"` if missing. If `responseType: "json"`, it internally performs `JSON.parse(responseText)`.
-`options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
+`options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration and optional replacement (by returning a new XHR).
 `options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
 `options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `body`. Defaults to `JSON.stringify`, or if `options.body` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
@@ -494,7 +494,7 @@ Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
-- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer, Safari and Android (non-Chromium).
+- `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).
 
 Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
 

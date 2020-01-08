@@ -1,12 +1,12 @@
 "use strict"
 
 var buildQueryString = require("../querystring/build")
-var assign = require("./assign")
+var assign = require("../util/assign")
 
 // Returns `path` from `template` + `params`
 module.exports = function(template, params) {
 	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
-		throw new SyntaxError("Template parameter names *must* be separated")
+		throw new SyntaxError("Template parameter names must be separated by either a '/', '-', or '.'.")
 	}
 	if (params == null) return template
 	var queryIndex = template.indexOf("?")
@@ -33,7 +33,7 @@ module.exports = function(template, params) {
 	var newPathEnd = newQueryIndex < 0 ? newQueryEnd : newQueryIndex
 	var result = resolved.slice(0, newPathEnd)
 
-	if (queryIndex >= 0) result += "?" + template.slice(queryIndex, queryEnd)
+	if (queryIndex >= 0) result += template.slice(queryIndex, queryEnd)
 	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
 	var querystring = buildQueryString(query)
 	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring

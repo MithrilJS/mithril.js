@@ -55,7 +55,7 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [github@patcavit.com](mailto:github@patcavit.com?subject=Mithril%20Code%20of%20Conduct). All
+reported by contacting the project team at [contact@isiahmeadows.com](mailto:contact@isiahmeadows.com?subject=Mithril%20Code%20of%20Conduct). All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
@@ -65,10 +65,12 @@ Project maintainers who do not follow or enforce the Code of Conduct in good
 faith may face temporary or permanent repercussions as determined by other
 members of the project's leadership.
 
+As a general policy, we generally do not disclose any particular action taken in accordance with this Code of Conduct beyond those who need to know.
+
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][version]
+available at [https://contributor-covenant.org/version/1/4][version]
 
-[homepage]: http://contributor-covenant.org
-[version]: http://contributor-covenant.org/version/1/4/
+[homepage]: https://contributor-covenant.org
+[version]: https://contributor-covenant.org/version/1/4/

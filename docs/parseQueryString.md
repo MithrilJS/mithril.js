@@ -19,13 +19,12 @@ var object = m.parseQueryString("a=1&b=2")
 
 ### Signature
 
-`object = m.parseQueryString(string, object)`
+`object = m.parseQueryString(string)`
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
 `string`     | `String`                                   | Yes      | A querystring
-`object`     | `Object`                                   | No       | An existing key-value map to merge values into, potentially from a previous `m.parseQueryString` call
-**returns**  | `Object`                                   |          | A key-value map, `object` if provided
+**returns**  | `Object`                                   |          | A key-value map
 
 [How to read signatures](signatures.md)
 

@@ -6,8 +6,7 @@
 	- [Getting Help](support.md)
 - Resources
 	- [JSX](jsx.md)
-	- [ES6](es6.md)
-	- [CSS](css.md)
+	- [ES6+ on legacy browsers](es6.md)
 	- [Animation](animation.md)
 	- [Testing](testing.md)
 	- [Examples](examples.md)
@@ -27,4 +26,5 @@
 - Misc
 	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](change-log.md)
-	- [v1 Documentation](archive/v1.1.6)
+	- [v1 Documentation](https://mithril.js.org/archive/v1.1.7/)
+	- [v0.2 Documentation](https://mithril.js.org/archive/v0.2.5/)

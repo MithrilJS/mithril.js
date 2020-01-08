@@ -5,12 +5,16 @@ var browserMock = require("../test-utils/browserMock")
 var components = require("../test-utils/components")
 
 o.spec("api", function() {
-	var m
 	var FRAME_BUDGET = Math.floor(1000 / 60)
-	o.beforeEach(function() {
-		var mock = browserMock()
-		if (typeof global !== "undefined") global.window = mock
-		m = require("../mithril") // eslint-disable-line global-require
+	var mock = browserMock(), root
+	if (typeof global !== "undefined") {
+		global.window = mock
+		global.requestAnimationFrame = mock.requestAnimationFrame
+	}
+	var m = require("..") // eslint-disable-line global-require
+
+	o.afterEach(function() {
+		if (root) m.mount(root, null)
 	})
 
 	o.spec("m", function() {
@@ -18,13 +22,6 @@ o.spec("api", function() {
 			var vnode = m("div")
 
 			o(vnode.tag).equals("div")
-		})
-	})
-	o.spec("m.version", function() {
-		o("works", function() {
-			o(typeof m.version).equals("string")
-			o(m.version.indexOf(".") > -1).equals(true)
-			o((/\d/).test(m.version)).equals(true)
 		})
 	})
 	o.spec("m.trust", function() {
@@ -71,7 +68,7 @@ o.spec("api", function() {
 	})
 	o.spec("m.render", function() {
 		o("works", function() {
-			var root = window.document.createElement("div")
+			root = window.document.createElement("div")
 			m.render(root, m("div"))
 
 			o(root.childNodes.length).equals(1)
@@ -84,7 +81,7 @@ o.spec("api", function() {
 
 			o.spec("m.mount", function() {
 				o("works", function() {
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					m.mount(root, createComponent({view: function() {return m("div")}}))
 
 					o(root.childNodes.length).equals(1)
@@ -93,7 +90,7 @@ o.spec("api", function() {
 			})
 			o.spec("m.route", function() {
 				o("works", function(done) {
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
@@ -106,8 +103,8 @@ o.spec("api", function() {
 					}, FRAME_BUDGET)
 				})
 				o("m.route.prefix", function(done) {
-					var root = window.document.createElement("div")
-					m.route.prefix("#")
+					root = window.document.createElement("div")
+					m.route.prefix = "#"
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
@@ -120,7 +117,7 @@ o.spec("api", function() {
 					}, FRAME_BUDGET)
 				})
 				o("m.route.get", function(done) {
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
@@ -133,7 +130,7 @@ o.spec("api", function() {
 				})
 				o("m.route.set", function(done, timeout) {
 					timeout(100)
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/:id": createComponent({view: function() {return m("div")}})
 					})
@@ -151,7 +148,7 @@ o.spec("api", function() {
 			o.spec("m.redraw", function() {
 				o("works", function(done) {
 					var count = 0
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					m.mount(root, createComponent({view: function() {count++}}))
 					o(count).equals(1)
 					m.redraw()
@@ -164,7 +161,7 @@ o.spec("api", function() {
 					}, FRAME_BUDGET)
 				})
 				o("sync", function() {
-					var root = window.document.createElement("div")
+					root = window.document.createElement("div")
 					var view = o.spy()
 					m.mount(root, createComponent({view: view}))
 					o(view.callCount).equals(1)

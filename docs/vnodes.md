@@ -76,7 +76,6 @@ Property   | Type                             | Description
 `state`    | `Object?`                        | An object that is persisted between redraws. It is provided by the core engine when needed. In POJO component vnodes, the `state` inherits prototypically from the component object/class. In class component vnodes it is an instance of the class. In closure components it is the object returned by the closure.
 `events`   | `Object?`                        | An object that is persisted between redraws and that stores event handlers so that they can be removed using the DOM API. The `events` property is `undefined` if there are no event handlers defined. This property is only used internally by Mithril, do not use or modify it.
 `instance` | `Object?`                        | For components, a storage location for the value returned by the `view`. This property is only used internally by Mithril, do not use or modify it.
-`skip`     | `Boolean`                        | This property is only used internally by Mithril when diffing keyed lists, do not use or modify it.
 
 
 ---
@@ -114,3 +113,30 @@ When creating libraries that emit vnodes, you should use this module instead of 
 Vnodes are supposed to represent the state of the DOM at a certain point in time. Mithril's rendering engine assumes a reused vnode is unchanged, so modifying a vnode that was used in a previous render will result in undefined behavior.
 
 It is possible to reuse vnodes to prevent a diff, but it's preferable to use the `onbeforeupdate` hook to make your intent clear to other developers (or your future self).
+
+#### Avoid passing model data directly to components via attributes
+
+The `key` property may appear in your data model in a way that conflicts with Mithril's key logic, and your model might itself be a mutable instance with a method that shares a name with a lifecycle hook like `onupdate` or `onremove`. For example, a model might use a `key` property to represent a customizable color key. When this changes, it can lead to components receiving wrong data, changing positions unexpectedly, or other unexpected, unwanted behavior. Instead, pass it as an attribute so Mithril doesn't misinterpret it (and so you still can potentially mutate it or call prototype methods on it later on):
+
+```javascript
+// Data model
+var users = [
+	{id: 1, name: "John", key: 'red'},
+	{id: 2, name: "Mary", key: 'blue'},
+]
+
+// Later on...
+users[0].key = 'yellow'
+
+// AVOID
+users.map(function(user){
+	// The component for John will be destroyed and recreated
+	return m(UserComponent, user)
+})
+
+// PREFER
+users.map(function(user){
+	// Key is specifically extracted: data model is given its own property
+	return m(UserComponent, {key: user.id, model: user})
+})
+```

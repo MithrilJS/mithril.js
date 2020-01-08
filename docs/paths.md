@@ -4,6 +4,7 @@
 - [Path parameters](#path-parameters)
 - [Parameter normalization](#parameter-normalization)
 - [Path normalization](#path-normalization)
+- [Path escaping](#path-escaping)
 
 -----
 
@@ -123,10 +124,22 @@ m.route(document.body, "/edit/1", {
 })
 ```
 
-Note that query parameters are implicit - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril would treat that as you trying to literally match against `m.route.param("type") === ":type"`. Or in summary, use `m.route.param("key")` to extract parameters - it simplifies things.
+Query parameters are implicitly consumed - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril would treat that as you trying to literally match against `m.route.param("type") === ":type"`, so you probably don't want to do that. In short, use `m.route.param("key")` or route component attributes to read query parameters.
 
 ### Path normalization
 
 Parsed paths are always returned with all the duplicate parameters and extra slashes dropped, and they always start with a slash. These little differences often get in the way, and it makes routing and path handling a lot more complicated than it should be. Mithril internally normalizes paths for routing, but it does not expose the current, normalized route directly. (You could compute it via [`m.parsePathname(m.route.get()).path`](parsePathname.md).)
 
 When parameters are deduplicated during matching, parameters in the query string are preferred over parameters in the path name, and parameters towards the end of the URL are preferred over parameters closer to the start of the URL.
+
+### Path escaping
+
+There are some characters that, if you want to use them literally, you need to escape. Conveniently, `encodeURIComponent` encodes these (and more), and when you substitute parameters and add query parameters, they're encoded as necessary using this. Here's the ones Mithril interprets:
+
+- `:` = `%3A`
+- `/` = `%2F` (required only in paths)
+- `%` = `%25`
+- `?` = `%3F` (required only in paths)
+- `#` = `%23`
+
+Of course, there's others you have to escape per the URL spec, like spaces. But as already noted, `encodeURIComponent` does that for you, and Mithril uses that implicitly when you substitute parameters. So you only really need to care if you're specifying parameters explicitly like in `m.request("https://example.com/api/user/User%20Name/:field", {params: {field: ...}})`.

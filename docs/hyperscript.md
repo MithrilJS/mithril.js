@@ -25,15 +25,15 @@
 Represents an HTML element in a Mithril view
 
 ```javascript
-m("div", {class: "foo"}, "hello")
-// represents <div class="foo">hello</div>
+m("div.foo", {style: {color: "red"}}, "hello")
+// renders to this HTML:
+// <div class="foo" style="color: red">hello</div>
 ```
 
-You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m%20*%2F%0A%3Ch1%3EMy%20first%20app%3C%2Fh1%3E) via a Babel plugin.
+You can also use an HTML-like syntax called [JSX](jsx.md), using Babel to convert it to equivalent hyperscript calls. This is equivalent to the above.
 
-```markup
-/** jsx m */
-<div class="foo">hello</div>
+```jsx
+<div class="foo" style="color: red">hello</div>
 ```
 
 ---
@@ -44,7 +44,7 @@ You can also [use HTML syntax](https://babeljs.io/repl/#?code=%2F**%20%40jsx%20m
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
-`selector`   | `String|Object`                            | Yes      | A CSS selector or a [component](components.md)
+`selector`   | `String|Object|Function`                   | Yes      | A CSS selector or a [component](components.md)
 `attrs`      | `Object`                                   | No       | HTML attributes or element properties
 `children`   | `Array<Vnode>|String|Number|Boolean`       | No       | Child [vnodes](vnodes.md#structure). Can be written as [splat arguments](signatures.md#splats)
 **returns**  | `Vnode`                                    |          | A [vnode](vnodes.md#structure)
@@ -60,7 +60,7 @@ Mithril provides a hyperscript function `m()`, which allows expressing any HTML 
 ```javascript
 m("div", {id: "box"}, "hello")
 
-// equivalent HTML:
+// renders to this HTML:
 // <div id="box">hello</div>
 ```
 
@@ -122,8 +122,8 @@ m("section.container")
 m("input[type=text][placeholder=Name]")
 // <input type="text" placeholder="Name" />
 
-m("a#exit.external[href='http://example.com']", "Leave")
-// <a id="exit" class="external" href="http://example.com">Leave</a>
+m("a#exit.external[href='https://example.com']", "Leave")
+// <a id="exit" class="external" href="https://example.com">Leave</a>
 ```
 
 If you omit the tag name, Mithril assumes a `div` tag.
@@ -141,7 +141,7 @@ m("a.link[href=/]", {
 	class: currentURL === "/" ? "selected" : ""
 }, "Home")
 
-// equivalent HTML:
+// renders to this HTML:
 // <a href="/" class="link selected">Home</a>
 ```
 
@@ -159,7 +159,7 @@ m("button", {
 
 If the value of such an attribute is `null` or `undefined`, it is treated as if the attribute was absent.
 
-If there are class names in both first and second arguments of `m()`, they are merged together as you would expect. If the value of the class in the second argument is `null`or `undefined`, it is ignored.
+If there are class names in both first and second arguments of `m()`, they are merged together as you would expect. If the value of the class in the second argument is `null` or `undefined`, it is ignored.
 
 If another attribute is present in both the first and the second argument, the second one takes precedence even if it is  is `null` or `undefined`.
 
@@ -232,7 +232,7 @@ For custom elements, it doesn't auto-stringify properties, in case they are obje
 m("my-special-element", {
 	whitelist: [
 		"https://example.com",
-		"http://neverssl.com",
+		"https://neverssl.com",
 		"https://google.com",
 	],
 })
@@ -335,7 +335,7 @@ var Greeter = {
 // consume it
 m(Greeter, {style: "color:red;"}, "world")
 
-// equivalent HTML:
+// renders to this HTML:
 // <div style="color:red;">Hello world</div>
 ```
 
@@ -393,7 +393,7 @@ m.render(document.body, userInputs(users))
 
 Having a key means that if the `users` array is shuffled and the view is re-rendered, the inputs will be shuffled in the exact same order, so as to maintain correct focus and DOM state.
 
-To learn more about keys, [see the keys page](keys.md)
+To learn more about keys, [see the keys page](keys.md).
 
 ---
 
@@ -438,7 +438,7 @@ m("ul", users.map(function(u) { // <ul>
 	                            //   <li>Mary</li>
 }))                             // </ul>
 
-// ES6:
+// ES6+:
 // m("ul", users.map(u =>
 //   m("li", u.name)
 // ))
@@ -454,7 +454,7 @@ var isError = false
 m("div", isError ? "An error occurred" : "Saved") // <div>Saved</div>
 ```
 
-You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative, and to avoid deoptimizations.
+You cannot use JavaScript statements such as `if` or `for` within JavaScript expressions. It's preferable to avoid using those statements altogether and instead, use the constructs above exclusively in order to keep the structure of the templates linear and declarative.
 
 ---
 
@@ -462,7 +462,7 @@ You cannot use JavaScript statements such as `if` or `for` within JavaScript exp
 
 In Mithril, well-formed HTML is valid JSX. Little effort other than copy-pasting is required to integrate an independently produced HTML file into a project using JSX.
 
-When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](http://arthurclemens.github.io/mithril-template-converter/index.html).
+When using hyperscript, it's necessary to convert HTML to hyperscript syntax before the code can be run. To facilitate this, you can [use the HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html).
 
 ---
 

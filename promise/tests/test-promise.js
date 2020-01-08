@@ -1,8 +1,19 @@
+/* global window */
 "use strict"
 
-var o = require("../../ospec/ospec")
-var callAsync = require("../../test-utils/callAsync")
-var Promise = require("../../promise/polyfill")
+var o, callAsync, Promise
+
+if (typeof require !== "undefined") {
+	/* eslint-disable global-require */
+	callAsync = require("../../test-utils/callAsync")
+	o = require("../../ospec/ospec")
+	Promise = require("../../promise/polyfill")
+	/* eslint-enable global-require */
+} else {
+	callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
+	o = window.o
+	Promise = window.PromisePolyfill
+}
 
 o.spec("promise", function() {
 	o.spec("constructor", function() {

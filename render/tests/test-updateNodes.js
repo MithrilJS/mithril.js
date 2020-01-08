@@ -10,7 +10,7 @@ o.spec("updateNodes", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window).render
+		render = vdom($window)
 	})
 
 	o("handles el noop", function() {
@@ -451,9 +451,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom.nodeName).equals("I")
 		o(updated[1].dom).equals(root.childNodes[2])
 	})
-	o("populates array followed by null then el", function() {
-		var vnodes = [{tag: "[", key: 1, children: []}, null, {tag: "i", key: 2}]
-		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, null, {tag: "i", key: 2}]
+	o("populates array followed by el keyed", function() {
+		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "i", key: 2}]
+		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, {tag: "i", key: 2}]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -464,10 +464,38 @@ o.spec("updateNodes", function() {
 		o(updated[0].domSize).equals(2)
 		o(updated[0].dom.nextSibling.nodeName).equals("B")
 		o(updated[0].dom.nextSibling).equals(root.childNodes[1])
-		o(updated[2].dom.nodeName).equals("I")
-		o(updated[2].dom).equals(root.childNodes[2])
+		o(updated[1].dom.nodeName).equals("I")
+		o(updated[1].dom).equals(root.childNodes[2])
 	})
-	o("populates childless array followed by el", function() {
+	o("throws populates array followed by el keyed", function() {
+		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "i", key: 2}]
+		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, {tag: "i", key: 2}]
+
+		render(root, vnodes)
+		render(root, updated)
+
+		o(root.childNodes.length).equals(3)
+		o(updated[0].dom.nodeName).equals("A")
+		o(updated[0].dom).equals(root.childNodes[0])
+		o(updated[0].domSize).equals(2)
+		o(updated[0].dom.nextSibling.nodeName).equals("B")
+		o(updated[0].dom.nextSibling).equals(root.childNodes[1])
+		o(updated[1].dom.nodeName).equals("I")
+		o(updated[1].dom).equals(root.childNodes[2])
+	})
+	o("throws if array followed by null then el on first render keyed", function() {
+		var vnodes = [{tag: "[", key: 1, children: []}, null, {tag: "i", key: 2}]
+
+		o(function () { render(root, vnodes) }).throws(TypeError)
+	})
+	o("throws if array followed by null then el on next render keyed", function() {
+		var vnodes = [{tag: "[", key: 1, children: []}, {tag: "i", key: 2}]
+		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, null, {tag: "i", key: 2}]
+
+		render(root, vnodes)
+		o(function () { render(root, updated) }).throws(TypeError)
+	})
+	o("populates childless array replaced followed by el keyed", function() {
 		var vnodes = [{tag: "[", key: 1}, {tag: "i", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, {tag: "i", key: 2}]
 
@@ -483,21 +511,12 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom.nodeName).equals("I")
 		o(updated[1].dom).equals(root.childNodes[2])
 	})
-	o("populates childless array followed by null then el", function() {
-		var vnodes = [{tag: "[", key: 1}, null, {tag: "i", key: 2}]
+	o("throws if childless array replaced followed by null then el keyed", function() {
+		var vnodes = [{tag: "[", key: 1}, {tag: "i", key: 2}]
 		var updated = [{tag: "[", key: 1, children: [{tag: "a"}, {tag: "b"}]}, null, {tag: "i", key: 2}]
 
 		render(root, vnodes)
-		render(root, updated)
-
-		o(root.childNodes.length).equals(3)
-		o(updated[0].dom.nodeName).equals("A")
-		o(updated[0].dom).equals(root.childNodes[0])
-		o(updated[0].domSize).equals(2)
-		o(updated[0].dom.nextSibling.nodeName).equals("B")
-		o(updated[0].dom.nextSibling).equals(root.childNodes[1])
-		o(updated[2].dom.nodeName).equals("I")
-		o(updated[2].dom).equals(root.childNodes[2])
+		o(function () { render(root, updated) }).throws(TypeError)
 	})
 	o("moves from end to start", function() {
 		var vnodes = [{tag: "a", key: 1}, {tag: "b", key: 2}, {tag: "i", key: 3}, {tag: "s", key: 4}]

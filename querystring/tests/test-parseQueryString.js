@@ -97,16 +97,19 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("a=1&b=2&a=3")
 		o(data).deepEquals({a: "3", b: "2"})
 	})
-	o("continues to append to arrays between calls", function() {
-		var data = {}
-		parseQueryString("a[]=1&a[]=2", data)
-		parseQueryString("a[]=3&a[]=4", data)
-		o(data).deepEquals({a: ["1", "2", "3", "4"]})
+	o("doesn't pollute prototype directly, censors `__proto__`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("a=b&__proto__%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		o(data).deepEquals({a: "b"})
 	})
-	o("continues to append to objects between calls", function() {
-		var data = {}
-		parseQueryString("a[b]=1&a[c]=2", data)
-		parseQueryString("a[d]=3&a[e]=4", data)
-		o(data).deepEquals({a: {b: "1", c: "2", d: "3", e: "4"}})
+	o("doesn't pollute prototype indirectly, retains `constructor`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("a=b&constructor%5Bprototype%5D%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		// The deep matcher is borked here.
+		o(Object.keys(data)).deepEquals(["a", "constructor"])
+		o(data.a).equals("b")
+		o(data.constructor).deepEquals({prototype: {toString: "123"}})
 	})
 })

@@ -101,6 +101,21 @@ o.spec("buildPathname", function() {
 
 			o(string).equals(prefix + "/image.png/view")
 		})
+		o("merges query strings", function() {
+			var string = buildPathname(prefix + "/item?a=1&b=2", {c: 3})
+
+			o(string).equals(prefix + "/item?a=1&b=2&c=3")
+		})
+		o("merges query strings with other parameters", function() {
+			var string = buildPathname(prefix + "/item/:id?a=1&b=2", {id: "foo", c: 3})
+
+			o(string).equals(prefix + "/item/foo?a=1&b=2&c=3")
+		})
+		o("consumes template parameters without modifying query string", function() {
+			var string = buildPathname(prefix + "/item/:id?a=1&b=2", {id: "foo"})
+
+			o(string).equals(prefix + "/item/foo?a=1&b=2")
+		})
 	}
 	o.spec("absolute", function() { test("") })
 	o.spec("relative", function() { test("..") })

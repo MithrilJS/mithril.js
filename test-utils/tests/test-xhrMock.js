@@ -61,6 +61,23 @@ o.spec("xhrMock", function() {
 			}
 			xhr.send("a=b")
 		})
+		o("passes event to onreadystatechange", function(done) {
+			$window.$defineRoutes({
+				"GET /item": function(request) {
+					o(request.url).equals("/item")
+					return {status: 200, responseText: "test"}
+				}
+			})
+			var xhr = new $window.XMLHttpRequest()
+			xhr.open("GET", "/item")
+			xhr.onreadystatechange = function(ev) {
+				o(ev.target).equals(xhr)
+				if (xhr.readyState === 4) {
+					done()
+				}
+			}
+			xhr.send()
+		})
 		o("handles routing error", function(done) {
 			var xhr = new $window.XMLHttpRequest()
 			xhr.open("GET", "/nonexistent")

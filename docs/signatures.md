@@ -41,7 +41,7 @@ A splat argument means that if the argument is an array, you can omit the square
 
 In the example at the top, this means that `m("div", {id: "foo"}, ["a", "b", "c"])` can also be written as `m("div", {id: "foo"}, "a", "b", "c")`.
 
-Splats are useful in some compile-to-js languages such as Coffeescript, and also allow helpful shorthands for some common use cases.
+Splats are useful in some compile-to-JS languages such as CoffeeScript, and also allow helpful shorthands for some common use cases.
 
 ---
 
@@ -53,3 +53,31 @@ For example, `parseFloat` has the signature `String -> Number`, i.e. it takes a 
 
 Functions with multiple arguments are denoted with parenthesis: `(String, Array) -> Number`
 
+---
+
+### Component signatures
+
+Components are denoted via calls to `m`, but with the initial selector argument set to a constant named in the relevant prose:
+
+`vnode = m(m.route.Link, attributes, children)`
+
+Argument              | Type                                 | Required | Description
+--------------------- | ------------------------------------ | -------- | ---
+`attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
+`attributes.selector` | `String|Object|Function`             | No      | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
+`attributes.options`  | `Object`                             | No      | This sets the options passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
+**returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
+
+Children here, if specified, are assumed to be able to be written as [splat arguments](#splats), unless otherwise specified in prose.
+
+An element with no sensible children and/or attributes may choose to elide the relevant parameter entirely:
+
+`vnode = m(Component, attributes)`
+
+Argument          | Type     | Required | Description
+----------------- | -------- | -------- | ---
+`attributes.href` | `Object` | Yes      | The
+`attributes`      | `Object` | No       | Other attributes to apply to the returned vnode
+**returns**       | `Vnode`  |          | A [vnode](vnodes.md)
