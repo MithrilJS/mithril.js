@@ -2,4 +2,4 @@
 
 Links to Mithril learning content:
 
-- [Mithril 0-60](https://scrimba.com/playlist/playlist-34)
+- [Mithril 0-60](https://vimeo.com/showcase/5584199)
