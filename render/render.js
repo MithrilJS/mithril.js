@@ -897,6 +897,7 @@ module.exports = function($window) {
 	//event
 	function updateEvent(vnode, key, value) {
 		if (vnode.events != null) {
+			vnode.events._ = currentRedraw
 			if (vnode.events[key] === value) return
 			if (value != null && (typeof value === "function" || typeof value === "object")) {
 				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
