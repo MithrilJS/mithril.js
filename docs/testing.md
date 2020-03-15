@@ -8,7 +8,7 @@
 
 ### Setup
 
-Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://github.com/MithrilJS/mithril.js/blob/next/ospec/README.md), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
+Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://github.com/MithrilJS/ospec), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
 
 ```bash
 npm install --save-dev ospec mithril-query jsdom
