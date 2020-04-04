@@ -46,6 +46,7 @@ module.exports = function() {
 			}
 			this.responseType = ""
 			this.response = null
+			this.timeout = 0
 			Object.defineProperty(this, "responseText", {get: function() {
 				if (this.responseType === "" || this.responseType === "text") {
 					return this.response
@@ -55,25 +56,49 @@ module.exports = function() {
 			}})
 			this.send = function(body) {
 				var self = this
-				if(!aborted) {
-					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
-					var data = handler({rawUrl: args.rawUrl, url: args.pathname, query: args.search || {}, body: body || null})
-					self.status = data.status
-					// Match spec
-					if (self.responseType === "json") {
-						try { self.response = JSON.parse(data.responseText) }
-						catch (e) { /* ignore */ }
+				
+				var completeResponse = function (data) {
+					self._responseCompleted = true
+					if(!aborted) {
+						self.status = data.status
+						// Match spec
+						if (self.responseType === "json") {
+							try { self.response = JSON.parse(data.responseText) }
+							catch (e) { /* ignore */ }
+						} else {
+							self.response = data.responseText
+						}
 					} else {
-						self.response = data.responseText
+						self.status = 0
 					}
-				} else {
-					self.status = 0
+					self.readyState = 4
+					if (args.async === true) {
+						callAsync(function() {
+							if (typeof self.onreadystatechange === "function") self.onreadystatechange({target: self})
+						})
+					}
 				}
-				self.readyState = 4
-				if (args.async === true) {
-					callAsync(function() {
-						if (typeof self.onreadystatechange === "function") self.onreadystatechange({target: self})
-					})
+
+				var data
+				if (!aborted) {
+					var handler = routes[args.method + " " + args.pathname] || serverErrorHandler.bind(null, args.pathname)
+					data = handler({rawUrl: args.rawUrl, url: args.pathname, query: args.search || {}, body: body || null})
+				}
+
+				if (typeof self.timeout === "number" && self.timeout > 0) {
+					setTimeout(function () {
+						if (self._responseCompleted) {
+							return
+						}
+
+						if (typeof self.ontimeout === "function") self.ontimeout({target: self})
+					}, self.timeout)
+				}
+
+				if (data instanceof Promise) {
+					data.then(completeResponse)
+				} else {
+					completeResponse(data)
 				}
 			}
 			this.abort = function() {
