@@ -18,7 +18,9 @@ o.spec("request", function() {
 		o("works via GET", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return {status: 200, responseText: JSON.stringify({a: 1})}
+					return new Promise(function (resolve) {
+						resolve({status: 200, responseText: JSON.stringify({a: 1})})
+					})
 				}
 			})
 			request({method: "GET", url: "/item"}).then(function(data) {
@@ -694,7 +696,9 @@ o.spec("request", function() {
 		o("rejects on error in extract", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return {status: 200, responseText: JSON.stringify({a: 1})}
+					return new Promise(function (resolve) {
+						resolve({status: 200, responseText: JSON.stringify({a: 1})})
+					})
 				}
 			})
 			request({
@@ -704,6 +708,30 @@ o.spec("request", function() {
 				o(e instanceof Error).equals(true)
 				o(e.message).equals("error")
 			}).then(function() {
+				done()
+			})
+		})
+		o("rejects on timeout", function(done) {
+			var timeout = 50
+			var gotTimeoutError = false
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return new Promise(function (resolve) {
+						setTimeout(function () {
+							resolve({status: 200, responseText: JSON.stringify({a: 1})})
+						}, timeout*2)
+					})
+				}
+			})
+			request(
+				{method: "GET", url: "/item", timeout: timeout}
+			).catch(function(e) {
+				gotTimeoutError	 = true
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("Request timeout")
+				o(e.timeout).equals(timeout)
+			}).then(function () {
+				o(gotTimeoutError).equals(true)
 				done()
 			})
 		})
