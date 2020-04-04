@@ -707,6 +707,30 @@ o.spec("request", function() {
 				done()
 			})
 		})
+		o("rejects on timeout", function(done) {
+			var timeout = 50;
+			var gotTimeoutError = false;
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return new Promise(function (resolve) {
+						callAsync(function () {
+							resolve({status: 200, responseText: JSON.stringify({a: 1})})
+						}, timeout*2)
+					})
+				}
+			})
+			request(
+				{method: "GET", url: "/item", timeout: timeout}
+			).catch(function(e) {
+				gotTimeoutError	 = true;
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("Request timeout")
+				o(e.timeout).equals(timeout)
+			}).then(function () {
+				o(gotTimeoutError).equals(true);
+				done()
+			})
+		})
 	})
 	o.spec("json header", function() {
 		function checkUnset(method) {
