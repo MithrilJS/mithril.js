@@ -514,7 +514,7 @@ module.exports = function($window) {
 	// takes a list of unique numbers (-1 is special and can
 	// occur multiple times) and returns an array with the indices
 	// of the items that are part of the longest increasing
-	// subsequece
+	// subsequence
 	var lisTemp = []
 	function makeLisIndices(a) {
 		var result = [0]
