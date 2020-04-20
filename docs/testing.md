@@ -16,7 +16,7 @@ npm install --save-dev ospec mithril-query jsdom
 
 And getting them set up is also relatively easy and requires a few short steps:
 
-1. Add a `"test": "mocha"` to your npm scripts in your `package.json` file. This will end up looking something like this, maybe with a few extra fields relevant to your project:
+1. Add a `"test": "ospec"` to your npm scripts in your `package.json` file. This will end up looking something like this, maybe with a few extra fields relevant to your project:
 
 ```json
 {
