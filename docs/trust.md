@@ -97,7 +97,7 @@ There are countless non-obvious ways of creating malicious code, so it is highly
 
 Even though there are many obscure ways to make an HTML string run JavaScript, `<script>` tags are one thing that does not run when it appears in an HTML string.
 
-For historical reasons, browsers ignore `<script>` tags that are inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible innerHTML property), the rendering engines cannot backtrack to the parsing-stage if the script calls something like document.write("</body>").
+For historical reasons, browsers ignore `<script>` tags that are inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible innerHTML property), the rendering engines cannot backtrack to the parsing-stage if the script calls something like `document.write("</body>")`.
 
 This browser behavior may seem surprising to a developer coming from jQuery, because jQuery implements code specifically to find script tags and run them in this scenario. Mithril follows the browser behavior. If jQuery behavior is desired, you should consider either moving the code out of the HTML string and into an `oncreate` [lifecycle method](lifecycle-methods.md), or use jQuery (or re-implement its script parsing code).
 

@@ -19,7 +19,7 @@ Once you've got that downloaded, open a terminal and run these commands:
 
 ```bash
 # Replace this with the actual path to your project. Quote it if it has spaces,
-# and single-quote it if you're on Linux/Mac and it contains a `$` anywhere.
+# and single-quote it if you're on Linux/Mac and it contains a `$$` anywhere.
 cd "/path/to/your/project"
 
 # If you have a `package.json` there already, skip this command.
