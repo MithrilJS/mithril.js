@@ -30,6 +30,7 @@
 - Add `m.censor`. ([#2538](https://github.com/MithrilJS/mithril.js/pull/2538) [@isiahmeadows](https://github.com/isiahmeadows))
 - Re-add stream bundles. ([#2539](https://github.com/MithrilJS/mithril.js/pull/2539) [@isiahmeadows](https://github.com/isiahmeadows))
 - Remove extra isLifecycleMethod call from removeAttr. ([#2594](https://github.com/MithrilJS/mithril.js/pull/2594) [@ZeikJT](https://github.com/zeikjt))
+- Fix issue where ending a stream in the middle of a stream callback would result in erroneous parent stream state for the rest of that emit. ([#2603](https://github.com/MithrilJS/mithril.js/pull/2603) [@isiahmeadows](https://github.com/isiahmeadows))
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
