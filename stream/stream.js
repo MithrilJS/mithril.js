@@ -29,7 +29,11 @@ function Stream(value) {
 			if (open(stream)) {
 				stream._changing()
 				stream._state = "active"
-				dependentStreams.forEach(function(s, i) { s(dependentFns[i](value)) })
+				// Cloning the list to ensure it's still iterated in intended
+				// order
+				dependentStreams.slice().forEach(function(s, i) {
+					if (open(s)) s(this[i](value))
+				}, dependentFns.slice())
 			}
 		}
 
