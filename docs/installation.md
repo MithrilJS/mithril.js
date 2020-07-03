@@ -86,7 +86,7 @@ Optionally, you can define mithril as a webpack plugin, the benefit is that mith
 plugins: [
     new webpack.ProvidePlugin({m: 'mithril'}),
     // ...
-    ]
+]
 ```
 Then you could remove the import line from step 4 (dont forget to restart webpack if you ran it with `--watch`) and it will work just the same
 #### Step by step
