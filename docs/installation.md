@@ -84,7 +84,7 @@ $ npm start
 Optionally, you can include Mithril as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
 ```js
 plugins: [
-    new webpack.ProvidePlugin({m: 'mithril'}),
+    new webpack.ProvidePlugin({m: "mithril"}),
     // ...
 ]
 ```
