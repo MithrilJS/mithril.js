@@ -88,7 +88,7 @@ plugins: [
     // ...
 ]
 ```
-Then you could remove the import line from step 4 (don't forget to restart Webpack if you ran it with `--watch`) and it will work just the same.
+Then, you could remove the import line from step 4 (don't forget to restart Webpack if you ran it with `--watch`), and it will work just the same.
 
 #### Step by step
 
