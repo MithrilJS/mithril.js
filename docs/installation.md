@@ -82,7 +82,7 @@ $ npm start
 7. open `index.html` in a browser
 
 Optionally, you can include Mithril as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
-```json
+```js
 plugins: [
     new webpack.ProvidePlugin({m: 'mithril'}),
     // ...
