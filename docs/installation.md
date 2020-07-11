@@ -81,7 +81,7 @@ $ npm start
 
 7. open `index.html` in a browser
 
-Optionally, you can define Mithril as a Webpack plugin, the benefit is that Mithril will be included globally and you will not have have to `import m from "mithril"`:
+Optionally, you can include Mithril as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
 ```json
 plugins: [
     new webpack.ProvidePlugin({m: 'mithril'}),
