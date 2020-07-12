@@ -81,6 +81,15 @@ $ npm start
 
 7. open `index.html` in a browser
 
+Optionally, you can include Mithril as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
+```js
+plugins: [
+    new webpack.ProvidePlugin({m: "mithril"}),
+    // ...
+]
+```
+Then, you could remove the import line from step 4 (don't forget to restart Webpack if you ran it with `--watch`), and it will work just the same.
+
 #### Step by step
 
 For production-level projects, the recommended way of installing Mithril is to use npm.
