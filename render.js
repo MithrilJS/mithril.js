@@ -11,7 +11,6 @@ try {
 	}
 }
 finally {
-	null
 }
 
 module.exports = require("./render/render")(window)
