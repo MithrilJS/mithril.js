@@ -4,17 +4,19 @@ Instructions on how to install Mithril.js
 
 # Installation
 
-- [CDN](#cdn)
+- [CDN and online playground](#cdn)
 - [npm](#npm)
 - [Quick start with Webpack](#quick-start-with-webpack)
 
-### CDN
+### CDN and online playground
 
 If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril.js from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
 ```html
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 ```
+
+If you would like to try out mithril without setting up a local environment, you can easily use an online playground at [flems.io/mithril](https://flems.io/mithril).
 
 ---
 
@@ -97,7 +99,7 @@ Then, you could remove the import line from step 4 (don't forget to restart Webp
 
 For production-level projects, the recommended way of installing Mithril.js is to use npm.
 
-npm is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the JavaScript ecosystem. Download and install [Node](https://nodejs.org); npm is bundled with that and installed alongside it.
+npm is the default package manager that is bundled with Node.js. It is widely used as the package manager for both client-side and server-side libraries in the JavaScript ecosystem. Download and install [Node](https://nodejs.org); npm is bundled with that and installed alongside it.
 
 To use Mithril.js via npm, go to your project folder, and run `npm init --yes` from the command line. This will create a file called `package.json`.
 
