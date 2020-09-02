@@ -26,14 +26,13 @@ o.spec("route", function() {
 
 	// Use precisely what `m.route` uses, for consistency and to ensure timings
 	// are aligned.
-	var waitFunc = typeof setImmediate === "function" ? setImmediate : setTimeout
 	function waitCycles(n) {
 		n = Math.max(n, 1)
 		return new Promise(function(resolve) {
 			return loop()
 			function loop() {
 				if (n === 0) resolve()
-				else { n--; waitFunc(loop) }
+				else { n--; setTimeout(loop, 4) }
 			}
 		})
 	}
@@ -75,6 +74,8 @@ o.spec("route", function() {
 				o.beforeEach(function() {
 					currentTest = nextID++
 					$window = browserMock(env)
+					$window.setTimeout = setTimeout
+					// $window.setImmediate = setImmediate
 					throttleMock = throttleMocker()
 
 					root = $window.document.body
