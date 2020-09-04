@@ -495,6 +495,37 @@ module.exports = function(options) {
 						set: valueSetter,
 						enumerable: true,
 					})
+					Object.defineProperty(element, "valueAsDate", {
+						get: function() {
+							if (this.getAttribute("type") !== "date") return null
+							return new Date(value).getTime()
+						},
+						set: function(v) {
+							if (this.getAttribute("type") !== "date") throw new Error("invalid state")
+							var time = new Date(v).getTime()
+							return valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
+						},
+						enumerable: true,
+					})
+					Object.defineProperty(element, "valueAsNumber", {
+						get: function() {
+							switch (this.getAttribute("type")) {
+								case "date": return new Date(value).getTime()
+								case "number": return new Date(value).getTime()
+								default: return NaN
+							}
+						},
+						set: function(v) {
+							v = Number(v)
+							if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
+							switch (this.getAttribute("type")) {
+								case "date": return valueSetter(isNaN(v) ? "" : new Date(v).toUTCString())
+								case "number": return valueSetter(String(value))
+								default: throw new Error("invalid state")
+							}
+						},
+						enumerable: true,
+					})
 
 					// we currently emulate the non-ie behavior, but emulating ie may be more useful (throw when an invalid type is set)
 					var typeSetter = spy(function(v) {

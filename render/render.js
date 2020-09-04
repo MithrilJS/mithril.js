@@ -726,13 +726,18 @@ module.exports = function($window) {
 
 	//attrs
 	function setAttrs(vnode, attrs, ns) {
+		// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
+		//
+		// Also, the DOM does things to inputs based on the value, so it needs set first.
+		// See: https://github.com/MithrilJS/mithril.js/issues/2622
+		if (vnode.tag === "input" && attrs.type != null) vnode.dom.setAttribute("type", attrs.type)
 		var isFileInput = attrs != null && vnode.tag === "input" && attrs.type === "file"
 		for (var key in attrs) {
 			setAttr(vnode, key, null, attrs[key], ns, isFileInput)
 		}
 	}
 	function setAttr(vnode, key, old, value, ns, isFileInput) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || key === "type" && vnode.tag === "input") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
@@ -752,9 +757,7 @@ module.exports = function($window) {
 				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
-			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
-			else vnode.dom[key] = value
+			vnode.dom[key] = value
 		} else {
 			if (typeof value === "boolean") {
 				if (value) vnode.dom.setAttribute(key, "")
@@ -798,6 +801,11 @@ module.exports = function($window) {
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
 		if (attrs != null) {
+			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
+			//
+			// Also, the DOM does things to inputs based on the value, so it needs set first.
+			// See: https://github.com/MithrilJS/mithril.js/issues/2622
+			if (vnode.tag === "input" && attrs.type != null) vnode.dom.setAttribute("type", attrs.type)
 			var isFileInput = vnode.tag === "input" && attrs.type === "file"
 			for (var key in attrs) {
 				setAttr(vnode, key, old && old[key], attrs[key], ns, isFileInput)
