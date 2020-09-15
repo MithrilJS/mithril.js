@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   enable-background="new 0 0 38.044 38.044"
+   version="1.1"
+   viewBox="0 0 38.044 38.044"
+   id="svg4"
+   sodipodi:docname="logo.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   inkscape:export-filename="C:\Users\impin\projects\mithril.js\assets\github-logo.png"
+   inkscape:export-xdpi="1261.7"
+   inkscape:export-ydpi="1261.7">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Leo Horie</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:contributor>
+          <cc:Agent>
+            <dc:title />
+          </cc:Agent>
+        </dc:contributor>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1368"
+     inkscape:window-height="850"
+     id="namedview6"
+     showgrid="false"
+     inkscape:zoom="16.822627"
+     inkscape:cx="9.6794233"
+     inkscape:cy="19.021999"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4"
+     inkscape:document-rotation="0" />
+  <path
+     d="m31.716 24.543c-0.017 7.03-5.742 12.745-12.776 12.745-7.045 0-12.777-5.732-12.777-12.777 0-0.022 4e-3 -0.043 4e-3 -0.065-3.69-2.243-6.167-6.29-6.167-10.914 0-7.046 5.731-12.777 12.777-12.777 2.268 0 4.395 0.601 6.244 1.642 1.849-1.041 3.977-1.642 6.245-1.642 7.046 0 12.777 5.732 12.777 12.777 0 4.691-2.548 8.789-6.327 11.011zm-12.695-19.461c-2.312 1.713-3.906 4.341-4.22 7.352 1.3-0.448 2.689-0.702 4.139-0.702 1.514 0 2.96 0.278 4.307 0.764-0.298-3.037-1.898-5.689-4.226-7.414zm-10.504 18.063c1.303 0.579 2.743 0.909 4.26 0.909 1.475 0 2.879-0.307 4.154-0.858-2.114-1.826-3.629-4.325-4.195-7.167-2.263 1.662-3.838 4.2-4.219 7.116zm10.423-9.157c-1.457 0-2.846 0.298-4.109 0.837 0.361 2.928 1.929 5.482 4.19 7.157 2.243-1.662 3.802-4.187 4.18-7.085-1.304-0.581-2.744-0.909-4.261-0.909zm2.171 9.209c1.275 0.55 2.679 0.858 4.154 0.858 1.457 0 2.846-0.298 4.11-0.837-0.356-2.885-1.883-5.404-4.089-7.082-0.582 2.799-2.087 5.257-4.175 7.061zm-2.171 11.836c5.432 0 9.915-4.137 10.466-9.425-1.3 0.447-2.689 0.702-4.14 0.702-2.268 0-4.396-0.601-6.245-1.642-1.848 1.041-3.975 1.642-6.244 1.642-1.514 0-2.96-0.278-4.307-0.763 0.523 5.317 5.018 9.486 10.47 9.486zm-6.163-32.024c-5.803 0-10.523 4.72-10.523 10.523 0 3.418 1.645 6.451 4.177 8.375 0.744-3.581 2.999-6.607 6.059-8.408 0.011-3.847 1.735-7.293 4.442-9.631-1.276-0.552-2.679-0.859-4.155-0.859zm12.489 0c-1.475 0-2.879 0.307-4.154 0.858 2.715 2.345 4.444 5.804 4.444 9.664 0 0.022-4e-3 0.044-4e-3 0.065 3.007 1.829 5.209 4.852 5.918 8.416 2.613-1.917 4.319-4.999 4.319-8.48-1e-3 -5.802-4.721-10.523-10.523-10.523z"
+     fill="#010002"
+     id="path2" />
+</svg>
