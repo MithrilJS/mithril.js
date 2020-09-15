@@ -3,6 +3,7 @@ This contains general base image assets for docs and such.
 - `logo.svg` is the logo source file, the base asset. It's an Inkscape SVG file, complete with relevant metadata.
 - `github-logo.png` is the logo export used for the GitHub profile picture.
 - `gitter-logo.png` is the logo export used for the Gitter avatar picture.
+- `open-collective-logo.png` is the logo export used for Open Collective. Unlike the GitHub and Gitter logos, this one has a transparent background.
 - `16.png`, `32.png`, and `48.png` are the logo exports used for the favicon. They are generated separately by Inkscape as ImageMagick's output is horrendously blurry. (I don't get how such a powerful image manipulation library can be so bad at rasterizing an SVG file, but apparently it's possible.)
 
 In the docs, some of the logos are stored there directly rather than being first generated here.
@@ -50,6 +51,12 @@ If you want to generate all these yourself from the originals and replicate ever
 	- Export area: page
 	- Image width: 96 pixels
 	- Image height: 96 pixels
+
+1. Export as a PNG to `assets/open-collective-logo.png` with the following settings:
+
+	- Export area: page
+	- Image width: 256 pixels
+	- Image height: 256 pixels
 
 1. Export as a PNG to `assets/16.png` with the following settings:
 
