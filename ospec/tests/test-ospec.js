@@ -6,7 +6,11 @@ var o, callAsync
 if (typeof require !== "undefined") {
 	/* eslint-disable global-require */
 	callAsync = require("../../test-utils/callAsync")
+	var warn = console.warn
+	// Let's drop the warning to leave the console a little less noisy.
+	console.warn = function() {}
 	o = require("../ospec")
+	console.warn = warn
 	/* eslint-enable global-require */
 } else {
 	callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout

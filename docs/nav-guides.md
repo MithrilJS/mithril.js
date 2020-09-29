@@ -25,6 +25,6 @@
 	- [Code of Conduct](code-of-conduct.md)
 - Misc
 	- [Framework comparison](framework-comparison.md)
-	- [Change log/Migration](change-log.md)
+	- [Change log/Migration](changelog.md)
 	- [v1 Documentation](https://mithril.js.org/archive/v1.1.7/)
 	- [v0.2 Documentation](https://mithril.js.org/archive/v0.2.5/)

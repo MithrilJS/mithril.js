@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
 var PromisePolyfill = require("../../promise/promise")

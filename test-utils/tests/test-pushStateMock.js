@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var pushStateMock = require("../../test-utils/pushStateMock")
 var callAsync = require("../../test-utils/callAsync")
 o.spec("pushStateMock", function() {

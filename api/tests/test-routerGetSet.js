@@ -1,12 +1,10 @@
 "use strict"
 
 // Low-priority TODO: remove the dependency on the renderer here.
-var o = require("../../ospec/ospec")
-var callAsync = require("../../test-utils/callAsync")
+var o = require("ospec")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
-var callAsync = require("../../test-utils/callAsync")
 var apiMountRedraw = require("../../api/mount-redraw")
 var coreRenderer = require("../../render/render")
 var apiRouter = require("../../api/router")
@@ -20,6 +18,7 @@ o.spec("route.get/route.set", function() {
 				o.beforeEach(function() {
 					$window = browserMock(env)
 					throttleMock = throttleMocker()
+					$window.setTimeout = setTimeout
 
 					root = $window.document.body
 
@@ -87,7 +86,7 @@ o.spec("route.get/route.set", function() {
 					route.set("/b")
 					o(spy1.callCount).equals(1)
 					o(spy2.callCount).equals(0)
-					callAsync(function() {
+					setTimeout(function() {
 						throttleMock.fire()
 
 						o(spy1.callCount).equals(1)
@@ -111,10 +110,10 @@ o.spec("route.get/route.set", function() {
 					route.set("/c")
 					o(spy1.callCount).equals(0)
 					o(spy2.callCount).equals(1)
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/b")
-						callAsync(function() {
+						setTimeout(function() {
 							// Yep, before even the throttle mechanism takes hold.
 							o(route.get()).equals("/a")
 							throttleMock.fire()
@@ -134,7 +133,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y/z?c=d#e=f")
 						throttleMock.fire()
@@ -150,7 +149,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set(encodeURI("/ö?ö=ö#ö=ö"))
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/ö?ö=ö#ö=ö")
 						throttleMock.fire()
@@ -166,7 +165,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/ö?ö=ö#ö=ö")
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/ö?ö=ö#ö=ö")
 						throttleMock.fire()
@@ -182,7 +181,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y/z?c=d#e=f")
 						throttleMock.fire()
@@ -197,11 +196,11 @@ o.spec("route.get/route.set", function() {
 						"/other/:a/:b...": {view: function() {}},
 					})
 
-					callAsync(function() {
+					setTimeout(function() {
 						$window.history.pushState(null, null, prefix + "/other/x/y/z?c=d#e=f")
 						$window.onpopstate()
 
-						callAsync(function() {
+						setTimeout(function() {
 							// Yep, before even the throttle mechanism takes hold.
 							o(route.get()).equals("/other/x/y/z?c=d#e=f")
 							throttleMock.fire()
@@ -219,7 +218,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
-					callAsync(function() {
+					setTimeout(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y%2Fz?c=d&e=f")
 						throttleMock.fire()
@@ -236,7 +235,7 @@ o.spec("route.get/route.set", function() {
 
 					route.set("/other", null, {replace: true})
 
-					callAsync(function() {
+					setTimeout(function() {
 						throttleMock.fire()
 						$window.history.back()
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + "/")
@@ -253,7 +252,7 @@ o.spec("route.get/route.set", function() {
 
 					route.set("/other", null, {replace: false})
 
-					callAsync(function() {
+					setTimeout(function() {
 						throttleMock.fire()
 						$window.history.back()
 						var slash = prefix[0] === "/" ? "" : "/"
@@ -270,7 +269,7 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other", null, {state: {a: 1}})
-					callAsync(function() {
+					setTimeout(function() {
 						throttleMock.fire()
 						o($window.history.state).deepEquals({a: 1})
 						done()

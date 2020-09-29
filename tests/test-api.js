@@ -1,12 +1,13 @@
 "use strict"
 
-var o = require("../ospec/ospec")
+var o = require("ospec")
 var browserMock = require("../test-utils/browserMock")
 var components = require("../test-utils/components")
 
 o.spec("api", function() {
 	var FRAME_BUDGET = Math.floor(1000 / 60)
 	var mock = browserMock(), root
+	mock.setTimeout = setTimeout
 	if (typeof global !== "undefined") {
 		global.window = mock
 		global.requestAnimationFrame = mock.requestAnimationFrame

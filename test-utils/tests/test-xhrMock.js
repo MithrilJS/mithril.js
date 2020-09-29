@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var parseQueryString = require("../../querystring/parse")
 

@@ -3,6 +3,12 @@
 if (typeof module !== "undefined") module["exports"] = m()
 else window.o = m()
 })(function init(name) {
+	console.warn(
+		"Please switch to the `ospec` package to remove this warning and see " +
+		"the most recent features. Using the `ospec` bundled within Mithril " +
+		"is deprecated, and it will be removed in the next major release."
+	)
+
 	var spec = {}, subjects = [], results, only = [], ctx = spec, start, stack = 0, nextTickish, hasProcess = typeof process === "object", hasOwn = ({}).hasOwnProperty
 	var ospecFileName = getStackName(ensureStackTrace(new Error), /[\/\\](.*?):\d+:\d+/), timeoutStackName
 	var globalTimeout = noTimeoutRightNow

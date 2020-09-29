@@ -5,7 +5,7 @@
   "author": "Leo Horie",
   "license": "MIT",
   "unpkg": "mithril.min.js",
-  "repository": "MithrilJS/mithril.js",
+  "repository": "github:MithrilJS/mithril.js",
   "scripts": {
     "precommit": "lint-staged",
     "watch": "run-p watch:**",
@@ -24,7 +24,7 @@
     "perf": "node performance/test-perf.js",
     "pretest": "npm run lint",
     "test": "run-s test:js",
-    "test:js": "node ospec/bin/ospec",
+    "test:js": "ospec",
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
     "version": "npm run build && git add mithril.js mithril.min.js stream.js stream.min.js README.md"
@@ -45,6 +45,7 @@
     "marked": "^0.7.0",
     "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
+    "ospec": "^4.0.1",
     "pinpoint": "^1.1.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
@@ -61,5 +62,7 @@
       "git add"
     ]
   },
-  "dependencies": {}
+  "dependencies": {
+    "ospec": "*"
+  }
 }

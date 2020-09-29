@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("parseQueryString", function() {

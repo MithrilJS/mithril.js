@@ -278,8 +278,8 @@ async function lintAll({useCache}) {
 	await new Promise((resolve, reject) => {
 		const glob = new Glob(path.resolve(__dirname, "../**/*.md"), {
 			ignore: [
-				"**/change-log.md",
-				"**/migration-v02x.md",
+				"**/changelog.md",
+				"**/migration-*.md",
 				"**/node_modules/**",
 			],
 			nodir: true,
@@ -304,10 +304,10 @@ if (require.main === module) {
 		exec: lintAll,
 		watch() {
 			require("chokidar")
-				.watch(path.resolve(__dirname, "../**/*.md"), {
-					ignored: [
-						"**/change-log.md",
-						"**/migration-v02x.md",
+				.watch(path.resolve(__dirname, "../docs/**/*.md"), {
+					ignore: [
+						"**/changelog.md",
+						"**/migration-*.md",
 						"**/node_modules/**",
 					],
 				})

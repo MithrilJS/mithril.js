@@ -6,7 +6,7 @@ var o, callAsync, Promise
 if (typeof require !== "undefined") {
 	/* eslint-disable global-require */
 	callAsync = require("../../test-utils/callAsync")
-	o = require("../../ospec/ospec")
+	o = require("ospec")
 	Promise = require("../../promise/polyfill")
 	/* eslint-enable global-require */
 } else {

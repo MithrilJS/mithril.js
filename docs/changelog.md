@@ -9,8 +9,8 @@
 - [v1.x changelog](https://mithril.js.org/archive/v1.1.7/change-log.html)
 - [v1.x docs](https://mithril.js.org/archive/v1.1.7/index.html)
 - [v0.2 docs](https://mithril.js.org/archive/v0.2.5/index.html)
-- [`ospec` change log](https://github.com/MithrilJS/mithril.js/blob/master/ospec/change-log.md)
-- [`mithril/stream` change log](https://github.com/MithrilJS/mithril.js/blob/master/stream/change-log.md)
+- [`ospec` change log](https://github.com/MithrilJS/ospec/blob/master/changelog.md)
+- [`mithril-stream` change log](#mithril-stream-change-log)
 
 ---
 
@@ -19,6 +19,8 @@
 ### Upcoming...
 
 *Note for later: release as semver-minor.*
+
+PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelog. I've also moved the old stream changelog into this file [here](#mithril-stream-change-log).
 
 - Reduced package download size substantially by removing the archive of previous releases' documentation. ([#2561](https://github.com/MithrilJS/mithril.js/pull/2561) [@cztomsik](https://github.com/cztomsik))
 - Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
@@ -31,6 +33,9 @@
 - Re-add stream bundles. ([#2539](https://github.com/MithrilJS/mithril.js/pull/2539) [@isiahmeadows](https://github.com/isiahmeadows))
 - Remove extra isLifecycleMethod call from removeAttr. ([#2594](https://github.com/MithrilJS/mithril.js/pull/2594) [@ZeikJT](https://github.com/zeikjt))
 - Fix issue where ending a stream in the middle of a stream callback would result in erroneous parent stream state for the rest of that emit. ([#2603](https://github.com/MithrilJS/mithril.js/pull/2603) [@isiahmeadows](https://github.com/isiahmeadows))
+- Fix issue where new redraw handlers weren't copied over on update. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
+- Make changes to file inputs gracefully handled, and don't break if the current value and old value mismatch (and the new value isn't empty), but instead just log an error. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
+    - This mainly exists just to kick the can down the road - this is the only case I'm aware of where the DOM itself would be responsible for throwing an error. A proper fix to the greater issue of error handling is much more complex, and I'd rather not block users any longer over this one specific issue.
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
@@ -181,3 +186,22 @@ _2019-07-24_
 - docs: clarify valid key usage ([#2452](https://github.com/MithrilJS/mithril.js/pull/2452) [@isiahmeadows](https://github.com/isiahmeadows))
 - route: don't pollute globals ([#2453](https://github.com/MithrilJS/mithril.js/pull/2453) [@isiahmeadows](https://github.com/isiahmeadows))
 - request: track xhr replacements correctly ([#2455](https://github.com/MithrilJS/mithril.js/pull/2455) [@isiahmeadows](https://github.com/isiahmeadows))
+
+## `mithril-stream` change log
+
+Formerly, `mithril/stream` was available standalone as the package `mithril-stream`, but this package has been deprecated and is no longer updated. The changelog for that package prior to being merged back into Mithril proper is below.
+
+### 2.0.0
+_2019-02-07_
+
+- when a stream conditionally returns HALT, dependant stream will also end ([#2200](https://github.com/MithrilJS/mithril.js/pull/2200), [#2369](https://github.com/MithrilJS/mithril.js/pull/2369))
+- Add `stream.lift` as a user-friendly alternative to `merge -> map` or `combine` ([#1944](https://github.com/MithrilJS/mithril.js/issues/1944))
+- renamed HALT to SKIP ([#2207](https://github.com/MithrilJS/mithril.js/pull/2207))
+- rewrote implementation ([#2207](https://github.com/MithrilJS/mithril.js/pull/2207))
+- Removed `valueOf` & `toString` methods ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150))
+- fixed `stream.end` propagation ([#2369](https://github.com/MithrilJS/mithril.js/pull/2369))
+
+### 1.1.0
+_2017-07-13_
+
+- Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
