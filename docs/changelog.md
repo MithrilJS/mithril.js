@@ -20,7 +20,7 @@
 
 *Note for later: release as semver-minor.*
 
-PSA: changes to [`mithril/stream`](stream.md) are now specified in this change log. I've also moved the old into this file [here](#mithril-stream-change-log).
+PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelog. I've also moved the old stream changelog into this file [here](#mithril-stream-change-log).
 
 - Reduced package download size substantially by removing the archive of previous releases' documentation. ([#2561](https://github.com/MithrilJS/mithril.js/pull/2561) [@cztomsik](https://github.com/cztomsik))
 - Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
