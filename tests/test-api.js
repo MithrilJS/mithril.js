@@ -152,11 +152,9 @@ o.spec("api", function() {
 					root = window.document.createElement("div")
 					m.mount(root, createComponent({view: function() {count++}}), false)
 					o(count).equals(1)
-					m.redraw()
-					o(count).equals(1)
 					setTimeout(function() {
 
-						o(count).equals(1)
+						o(count).equals(0)
 
 						done()
 					}, FRAME_BUDGET)
