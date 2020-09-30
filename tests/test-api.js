@@ -90,7 +90,7 @@ o.spec("api", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("enabled autoredraw", function(done) {
+				o("enabled autoredraw - default", function(done) {
 					var $window = domMock()
 
 					root = window.document.createElement("div")
@@ -102,6 +102,29 @@ o.spec("api", function() {
 						m("span", "count is " + count)
 						)
 					}}))
+
+					var e = $window.document.createEvent("MouseEvents")
+					e.initEvent("click", true, true)
+					root.childNodes[0].dispatchEvent(e)
+
+					setTimeout(() => {
+						o(root.childNodes[0].childNodes[0].childNodes[0].nodeValue).equals("count is 1")
+						done()
+					}, FRAME_BUDGET)
+				})
+
+				o("enabled autoredraw - explicit", function(done) {
+					var $window = domMock()
+
+					root = window.document.createElement("div")
+					let count = 0
+					m.mount(root, createComponent({view: function() {
+						return m("div", {onclick: () => {
+							count++
+						}},
+						m("span", "count is " + count)
+						)
+					}}), true)
 
 					var e = $window.document.createEvent("MouseEvents")
 					e.initEvent("click", true, true)
