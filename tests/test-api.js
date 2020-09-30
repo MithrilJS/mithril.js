@@ -96,10 +96,10 @@ o.spec("api", function() {
 					root = window.document.createElement("div")
 					let count = 0
 					m.mount(root, createComponent({view: function() {
-						return m("div", { onclick: () => {
-							  count++
-							}},
-							m("span", "count is " + count)
+						return m("div", {onclick: () => {
+							count++
+						}},
+						m("span", "count is " + count)
 						)
 					}}))
 
@@ -119,10 +119,10 @@ o.spec("api", function() {
 					root = window.document.createElement("div")
 					let count = 0
 					m.mount(root, createComponent({view: function() {
-						return m("div", { onclick: () => {
-							  count++
-							}},
-							m("span", "count is " + count)
+						return m("div", {onclick: () => {
+							count++
+						}},
+						m("span", "count is " + count)
 						)
 					}}), false)
 
