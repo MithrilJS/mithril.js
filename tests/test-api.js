@@ -147,6 +147,20 @@ o.spec("api", function() {
 				})
 			})
 			o.spec("m.redraw", function() {
+				o("disabled", function(done) {
+					var count = 0
+					root = window.document.createElement("div")
+					m.mount(root, createComponent({view: function() {count++}}), false)
+					o(count).equals(1)
+					m.redraw()
+					o(count).equals(1)
+					setTimeout(function() {
+
+						o(count).equals(1)
+
+						done()
+					}, FRAME_BUDGET)
+				})
 				o("works", function(done) {
 					var count = 0
 					root = window.document.createElement("div")

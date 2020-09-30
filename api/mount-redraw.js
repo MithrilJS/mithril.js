@@ -27,7 +27,7 @@ module.exports = function(render, schedule, console) {
 
 	redraw.sync = sync
 
-	function mount(root, component) {
+	function mount(root, component, enableAutoRedraw=true) {
 		if (component != null && component.view == null && typeof component !== "function") {
 			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
@@ -41,7 +41,7 @@ module.exports = function(render, schedule, console) {
 
 		if (component != null) {
 			subscriptions.push(root, component)
-			render(root, Vnode(component), redraw)
+			render(root, Vnode(component), enableAutoRedraw && redraw)
 		}
 	}
 
