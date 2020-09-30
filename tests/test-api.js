@@ -2,6 +2,7 @@
 
 var o = require("ospec")
 var browserMock = require("../test-utils/browserMock")
+var domMock = require("../test-utils/domMock")
 var components = require("../test-utils/components")
 
 o.spec("api", function() {
@@ -88,7 +89,54 @@ o.spec("api", function() {
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
 				})
+
+				o("enabled autoredraw", function(done) {
+					var $window = domMock()
+
+					root = window.document.createElement("div")
+					let count = 0
+					m.mount(root, createComponent({view: function() {
+						return m("div", { onclick: () => {
+							  count++
+							}},
+							m("span", "count is " + count)
+						)
+					}}))
+
+					var e = $window.document.createEvent("MouseEvents")
+					e.initEvent("click", true, true)
+					root.childNodes[0].dispatchEvent(e)
+
+					setTimeout(() => {
+						o(root.childNodes[0].childNodes[0].childNodes[0].nodeValue).equals("count is 1")
+						done()
+					}, FRAME_BUDGET)
+				})
+
+				o("disabled autoredraw", function(done) {
+					var $window = domMock()
+
+					root = window.document.createElement("div")
+					let count = 0
+					m.mount(root, createComponent({view: function() {
+						return m("div", { onclick: () => {
+							  count++
+							}},
+							m("span", "count is " + count)
+						)
+					}}), false)
+
+					var e = $window.document.createEvent("MouseEvents")
+					e.initEvent("click", true, true)
+					root.childNodes[0].dispatchEvent(e)
+
+					setTimeout(() => {
+						o(root.childNodes[0].childNodes[0].childNodes[0].nodeValue).equals("count is 0")
+						done()
+					}, FRAME_BUDGET)
+				})
 			})
+
 			o.spec("m.route", function() {
 				o("works", function(done) {
 					root = window.document.createElement("div")
@@ -147,18 +195,6 @@ o.spec("api", function() {
 				})
 			})
 			o.spec("m.redraw", function() {
-				o("disabled", function(done) {
-					var count = 0
-					root = window.document.createElement("div")
-					m.mount(root, createComponent({view: function() {count++}}), false)
-					o(count).equals(1)
-					setTimeout(function() {
-
-						o(count).equals(0)
-
-						done()
-					}, FRAME_BUDGET)
-				})
 				o("works", function(done) {
 					var count = 0
 					root = window.document.createElement("div")
