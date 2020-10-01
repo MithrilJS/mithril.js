@@ -158,6 +158,32 @@ o.spec("api", function() {
 						done()
 					}, FRAME_BUDGET)
 				})
+
+				o("disabled autoredraw - manual still works", function(done) {
+					var $window = domMock()
+
+					root = window.document.createElement("div")
+					let count = 0
+					m.mount(root, createComponent({view: function() {
+						return m("div", {onclick: () => {
+							count++
+							m.redraw()
+						}},
+						m("span", "count is " + count)
+						)
+					}}), false)
+
+					var e = $window.document.createEvent("MouseEvents")
+					e.initEvent("click", true, true)
+					root.childNodes[0].dispatchEvent(e)
+
+					setTimeout(() => {
+						o(root.childNodes[0].childNodes[0].childNodes[0].nodeValue).equals("count is 1")
+						done()
+					}, FRAME_BUDGET)
+				})
+
+				m.redraw()
 			})
 
 			o.spec("m.route", function() {
