@@ -1,18 +1,18 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
 o.spec("event", function() {
-	var $window, root, redraw, render
+	var $window, root, redraw, render, reallyRender
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.body
 		redraw = o.spy()
-		var renderer = vdom($window)
+		reallyRender = vdom($window)
 		render = function(dom, vnode) {
-			return renderer(dom, vnode, redraw)
+			return reallyRender(dom, vnode, redraw)
 		}
 	})
 
@@ -354,5 +354,33 @@ o.spec("event", function() {
 		o(redraw.callCount).equals(1)
 		o(redraw.this).equals(undefined)
 		o(redraw.args.length).equals(0)
+	})
+
+	o("handles changed spy", function() {
+		var div1 = {tag: "div", attrs: {ontransitionend: function() {}}}
+
+		reallyRender(root, [div1], redraw)
+		var e = $window.document.createEvent("HTMLEvents")
+		e.initEvent("transitionend", true, true)
+		div1.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+
+		var replacementRedraw = o.spy()
+		var div2 = {tag: "div", attrs: {ontransitionend: function() {}}}
+
+		reallyRender(root, [div2], replacementRedraw)
+		var e = $window.document.createEvent("HTMLEvents")
+		e.initEvent("transitionend", true, true)
+		div2.dom.dispatchEvent(e)
+
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+		o(replacementRedraw.callCount).equals(1)
+		o(replacementRedraw.this).equals(undefined)
+		o(replacementRedraw.args.length).equals(0)
 	})
 })

@@ -29,7 +29,11 @@ function Stream(value) {
 			if (open(stream)) {
 				stream._changing()
 				stream._state = "active"
-				dependentStreams.forEach(function(s, i) { s(dependentFns[i](value)) })
+				// Cloning the list to ensure it's still iterated in intended
+				// order
+				dependentStreams.slice().forEach(function(s, i) {
+					if (open(s)) s(this[i](value))
+				}, dependentFns.slice())
 			}
 		}
 
@@ -96,7 +100,7 @@ function Stream(value) {
 function combine(fn, streams) {
 	var ready = streams.every(function(s) {
 		if (s.constructor !== Stream)
-			throw new Error("Ensure that each item passed to stream.combine/stream.merge/lift is a stream")
+			throw new Error("Ensure that each item passed to stream.combine/stream.merge/lift is a stream.")
 		return s._state === "active"
 	})
 	var stream = ready

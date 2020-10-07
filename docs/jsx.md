@@ -127,7 +127,9 @@ module.exports = {
 		rules: [{
 			test: /\.js$/,
 			exclude: /\/node_modules\//,
-			loader: 'babel-loader'
+			use: {
+				loader: 'babel-loader'
+			}
 		}]
 	}
 }
@@ -193,7 +195,7 @@ JSX and hyperscript are two different syntaxes you can use for specifying vnodes
 
 You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@isiahmeadows](https://github.com/isiahmeadows/) with some alterations for clarity and readability:
 
-```js
+```javascript
 function SummaryView() {
     let tag, posts
 

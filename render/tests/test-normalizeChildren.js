@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var Vnode = require("../../render/vnode")
 
 o.spec("normalizeChildren", function() {

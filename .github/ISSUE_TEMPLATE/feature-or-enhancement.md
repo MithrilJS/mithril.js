@@ -12,17 +12,18 @@ assignees: isiahmeadows
 Optional: Provide the exact version of Mithril you're experiencing issues with.
 This could matter, even if it's really old like version 0.1.0. Do note that bugs
 in older versions are commonly fixed in newer versions and that newer versions
-do end up with a lot more features than older versions, so it's unlikely we'll
+are much more actively maintained than older versions, so it's unlikely we'll
 add new features to older versions like 0.1.x.
 -->
 **Mithril version:**
 
 <!--
-Optional: Provide the name and version of both the browser and operating system
-you're running Mithril on. If it's multiple, feel free to list multiple. This
-could matter, even if it's super ancient like IE 6 on Windows XP.
+Optional: Provide the name and version of both the platform (Chrome, Node, etc.)
+and operating system you're running Mithril on. If it's multiple, feel free to
+list multiple. This could matter, even if it's super ancient like IE 6 on
+Windows XP.
 -->
-**Browser and OS:**
+**Platform and OS:**
 
 <!--
 Optional: Provide a link to your project, if it happens to be open source or if

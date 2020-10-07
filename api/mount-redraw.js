@@ -4,17 +4,15 @@ var Vnode = require("../render/vnode")
 
 module.exports = function(render, schedule, console) {
 	var subscriptions = []
-	var rendering = false
 	var pending = false
+	var offset = -1
 
 	function sync() {
-		if (rendering) throw new Error("Nested m.redraw.sync() call")
-		rendering = true
-		for (var i = 0; i < subscriptions.length; i += 2) {
-			try { render(subscriptions[i], Vnode(subscriptions[i + 1]), redraw) }
+		for (offset = 0; offset < subscriptions.length; offset += 2) {
+			try { render(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
 			catch (e) { console.error(e) }
 		}
-		rendering = false
+		offset = -1
 	}
 
 	function redraw() {
@@ -31,13 +29,14 @@ module.exports = function(render, schedule, console) {
 
 	function mount(root, component) {
 		if (component != null && component.view == null && typeof component !== "function") {
-			throw new TypeError("m.mount(element, component) expects a component, not a vnode")
+			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
 
 		var index = subscriptions.indexOf(root)
 		if (index >= 0) {
 			subscriptions.splice(index, 2)
-			render(root, [], redraw)
+			if (index <= offset) offset -= 2
+			render(root, [])
 		}
 
 		if (component != null) {

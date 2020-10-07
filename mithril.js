@@ -363,9 +363,12 @@ var _12 = function($window) {
 		}
 		vnode3.dom = temp.firstChild
 		vnode3.domSize = temp.childNodes.length
+		// Capture nodes to remove, so we don't confuse them.
+		vnode3.instance = []
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
+			vnode3.instance.push(child)
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
@@ -538,7 +541,7 @@ var _12 = function($window) {
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
+		else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length)
 		else {
 			var isOldKeyed = old[0] != null && old[0].key != null
 			var isKeyed0 = vnodes[0] != null && vnodes[0].key != null
@@ -547,7 +550,7 @@ var _12 = function($window) {
 			if (!isKeyed0) while (start < vnodes.length && vnodes[start] == null) start++
 			if (isKeyed0 === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed0) {
-				removeNodes(old, oldStart, old.length)
+				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else if (!isKeyed0) {
 				// Don't index past the end of either list (causes deopts).
@@ -561,10 +564,10 @@ var _12 = function($window) {
 					v = vnodes[start]
 					if (o === v || o == null && v == null) continue
 					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
-					else if (v == null) removeNode(o)
+					else if (v == null) removeNode(parent, o)
 					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 				}
-				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 			} else {
 				// keyed diff
@@ -591,9 +594,9 @@ var _12 = function($window) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
-					insertNode(parent, toFragment(oe), topSibling)
+					moveNodes(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-					if (++start <= --end) insertNode(parent, toFragment(o), nextSibling)
+					if (++start <= --end) moveNodes(parent, o, nextSibling)
 					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldStart++; oldEnd--
@@ -611,7 +614,7 @@ var _12 = function($window) {
 					oe = old[oldEnd]
 					ve = vnodes[end]
 				}
-				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
+				if (start > end) removeNodes(parent, old, oldStart, oldEnd + 1)
 				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
@@ -632,7 +635,7 @@ var _12 = function($window) {
 						}
 					}
 					nextSibling = originalNextSibling
-					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
+					if (matched !== oldEnd - oldStart + 1) removeNodes(parent, old, oldStart, oldEnd + 1)
 					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 					else {
 						if (pos === -1) {
@@ -645,7 +648,7 @@ var _12 = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else insertNode(parent, toFragment(v), nextSibling)
+									else moveNodes(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -681,7 +684,7 @@ var _12 = function($window) {
 			else updateComponent(parent, old, vnode3, hooks, nextSibling, ns)
 		}
 		else {
-			removeNode(old)
+			removeNode(parent, old)
 			createNode(parent, vnode3, hooks, ns, nextSibling)
 		}
 	}
@@ -693,10 +696,14 @@ var _12 = function($window) {
 	}
 	function updateHTML(parent, old, vnode3, ns, nextSibling) {
 		if (old.children !== vnode3.children) {
-			toFragment(old)
+			removeHTML(parent, old)
 			createHTML(parent, vnode3, ns, nextSibling)
 		}
-		else vnode3.dom = old.dom, vnode3.domSize = old.domSize
+		else {
+			vnode3.dom = old.dom
+			vnode3.domSize = old.domSize
+			vnode3.instance = old.instance
+		}
 	}
 	function updateFragment(parent, old, vnode3, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode3.children, hooks, nextSibling, ns)
@@ -747,7 +754,7 @@ var _12 = function($window) {
 			vnode3.domSize = vnode3.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance)
+			removeNode(parent, old.instance)
 			vnode3.dom = undefined
 			vnode3.domSize = 0
 		}
@@ -771,7 +778,7 @@ var _12 = function($window) {
 	// takes a list of unique numbers (-1 is special and can
 	// occur multiple times) and returns an array with the indices
 	// of the items that are part of the longest increasing
-	// subsequece
+	// subsequence
 	var lisTemp = []
 	function makeLisIndices(a) {
 		var result = [0]
@@ -813,24 +820,49 @@ var _12 = function($window) {
 		lisTemp.length = 0
 		return result
 	}
-	function toFragment(vnode3) {
-		var count = vnode3.domSize
-		if (count != null || vnode3.dom == null) {
-			var fragment = $doc.createDocumentFragment()
-			if (count > 0) {
-				var dom = vnode3.dom
-				while (--count) fragment.appendChild(dom.nextSibling)
-				fragment.insertBefore(dom, fragment.firstChild)
-			}
-			return fragment
-		}
-		else return vnode3.dom
-	}
 	function getNextSibling(vnodes, i, nextSibling) {
 		for (; i < vnodes.length; i++) {
 			if (vnodes[i] != null && vnodes[i].dom != null) return vnodes[i].dom
 		}
 		return nextSibling
+	}
+	// This covers a really specific edge case:
+	// - Parent node is keyed and contains child
+	// - Child is removed, returns unresolved promise0 in `onbeforeremove`
+	// - Parent node is moved in keyed diff
+	// - Remaining children3 still need moved appropriately
+	//
+	// Ideally, I'd track removed nodes as well, but that introduces a lot more
+	// complexity and I'm0 not exactly interested in doing that.
+	function moveNodes(parent, vnode3, nextSibling) {
+		var frag = $doc.createDocumentFragment()
+		moveChildToFrag(parent, frag, vnode3)
+		insertNode(parent, frag, nextSibling)
+	}
+	function moveChildToFrag(parent, frag, vnode3) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode3.dom != null && vnode3.dom.parentNode === parent) {
+			if (typeof vnode3.tag !== "string") {
+				vnode3 = vnode3.instance
+				if (vnode3 != null) continue
+			} else if (vnode3.tag === "<") {
+				for (var i = 0; i < vnode3.instance.length; i++) {
+					frag.appendChild(vnode3.instance[i])
+				}
+			} else if (vnode3.tag !== "[") {
+				// Don't recurse for text nodes *or* elements, just fragments
+				frag.appendChild(vnode3.dom)
+			} else if (vnode3.children.length === 1) {
+				vnode3 = vnode3.children[0]
+				if (vnode3 != null) continue
+			} else {
+				for (var i = 0; i < vnode3.children.length; i++) {
+					var child = vnode3.children[i]
+					if (child != null) moveChildToFrag(parent, frag, child)
+				}
+			}
+			break
+		}
 	}
 	function insertNode(parent, dom, nextSibling) {
 		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
@@ -840,50 +872,97 @@ var _12 = function($window) {
 		if (vnode3.attrs == null || (
 			vnode3.attrs.contenteditable == null && // attribute
 			vnode3.attrs.contentEditable == null // property
-		)) return
+		)) return false
 		var children3 = vnode3.children
 		if (children3 != null && children3.length === 1 && children3[0].tag === "<") {
 			var content = children3[0].children
 			if (vnode3.dom.innerHTML !== content) vnode3.dom.innerHTML = content
 		}
 		else if (vnode3.text != null || children3 != null && children3.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		return true
 	}
 	//remove
-	function removeNodes(vnodes, start, end) {
+	function removeNodes(parent, vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode3 = vnodes[i]
-			if (vnode3 != null) removeNode(vnode3)
+			if (vnode3 != null) removeNode(parent, vnode3)
 		}
 	}
-	function removeNode(vnode3) {
-		var expected = 1, called = 0
+	function removeNode(parent, vnode3) {
+		var mask = 0
 		var original = vnode3.state
+		var stateResult, attrsResult
 		if (typeof vnode3.tag !== "string" && typeof vnode3.state.onbeforeremove === "function") {
 			var result = callHook.call(vnode3.state.onbeforeremove, vnode3)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				mask = 1
+				stateResult = result
 			}
 		}
 		if (vnode3.attrs && typeof vnode3.attrs.onbeforeremove === "function") {
 			var result = callHook.call(vnode3.attrs.onbeforeremove, vnode3)
 			if (result != null && typeof result.then === "function") {
-				expected++
-				result.then(continuation, continuation)
+				// eslint-disable-next-line no-bitwise
+				mask |= 2
+				attrsResult = result
 			}
 		}
-		continuation()
-		function continuation() {
-			if (++called === expected) {
-				checkState(vnode3, original)
-				onremove(vnode3)
-				if (vnode3.dom) {
-					var parent = vnode3.dom.parentNode
-					var count = vnode3.domSize || 1
-					while (--count) parent.removeChild(vnode3.dom.nextSibling)
+		checkState(vnode3, original)
+		// If we can, try to fast-path it and avoid all the overhead of awaiting
+		if (!mask) {
+			onremove(vnode3)
+			removeChild(parent, vnode3)
+		} else {
+			if (stateResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 1) { mask &= 2; if (!mask) reallyRemove() }
+				}
+				stateResult.then(next, next)
+			}
+			if (attrsResult != null) {
+				var next = function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 2) { mask &= 1; if (!mask) reallyRemove() }
+				}
+				attrsResult.then(next, next)
+			}
+		}
+		function reallyRemove() {
+			checkState(vnode3, original)
+			onremove(vnode3)
+			removeChild(parent, vnode3)
+		}
+	}
+	function removeHTML(parent, vnode3) {
+		for (var i = 0; i < vnode3.instance.length; i++) {
+			parent.removeChild(vnode3.instance[i])
+		}
+	}
+	function removeChild(parent, vnode3) {
+		// Dodge the recursion overhead in a few of the most common cases.
+		while (vnode3.dom != null && vnode3.dom.parentNode === parent) {
+			if (typeof vnode3.tag !== "string") {
+				vnode3 = vnode3.instance
+				if (vnode3 != null) continue
+			} else if (vnode3.tag === "<") {
+				removeHTML(parent, vnode3)
+			} else {
+				if (vnode3.tag !== "[") {
 					parent.removeChild(vnode3.dom)
+					if (!Array.isArray(vnode3.children)) break
+				}
+				if (vnode3.children.length === 1) {
+					vnode3 = vnode3.children[0]
+					if (vnode3 != null) continue
+				} else {
+					for (var i = 0; i < vnode3.children.length; i++) {
+						var child = vnode3.children[i]
+						if (child != null) removeChild(parent, child)
+					}
 				}
 			}
+			break
 		}
 	}
 	function onremove(vnode3) {
@@ -1254,7 +1333,7 @@ var _18 = function($window, Promise, oncompletion) {
 		return function(url, args) {
 			if (typeof url !== "string") { args = url; url = url.url }
 			else if (args == null) args = {}
-			var promise0 = new Promise(function(resolve, reject) {
+			var promise1 = new Promise(function(resolve, reject) {
 				factory(buildPathname(url, args.params), args, function (data) {
 					if (typeof args.type === "function") {
 						if (Array.isArray(data)) {
@@ -1267,32 +1346,32 @@ var _18 = function($window, Promise, oncompletion) {
 					resolve(data)
 				}, reject)
 			})
-			if (args.background === true) return promise0
-			var count0 = 0
+			if (args.background === true) return promise1
+			var count = 0
 			function complete() {
-				if (--count0 === 0 && typeof oncompletion === "function") oncompletion()
+				if (--count === 0 && typeof oncompletion === "function") oncompletion()
 			}
-			return wrap(promise0)
-			function wrap(promise0) {
-				var then1 = promise0.then
+			return wrap(promise1)
+			function wrap(promise1) {
+				var then1 = promise1.then
 				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise0. At the time of writing, this is0
+				// this as a native promise1. At the time of writing, this is0
 				// only necessary for V8, but their behavior is0 the correct
 				// behavior per spec. See this spec issue for more details:
 				// https://github.com/tc39/ecma262/issues/1577. Also, see the
 				// corresponding comment in `request0/tests/test-request0.js` for
 				// a bit more background on the issue at hand.
-				promise0.constructor = PromiseProxy
-				promise0.then = function() {
-					count0++
-					var next = then1.apply(promise0, arguments)
-					next.then(complete, function(e) {
+				promise1.constructor = PromiseProxy
+				promise1.then = function() {
+					count++
+					var next0 = then1.apply(promise1, arguments)
+					next0.then(complete, function(e) {
 						complete()
-						if (count0 === 0) throw e
+						if (count === 0) throw e
 					})
-					return wrap(next)
+					return wrap(next0)
 				}
-				return promise0
+				return promise1
 			}
 		}
 	}
@@ -1420,8 +1499,6 @@ m.fragment = hyperscript.fragment
 m.mount = mountRedraw.mount
 var m3 = hyperscript
 var Promise = PromisePolyfill
-// The extra `data0` parameter is2 for if you want to append to an existing
-// parameters object.
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -1438,7 +1515,6 @@ var parseQueryString = function(string) {
 		for (var j0 = 0; j0 < levels.length; j0++) {
 			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
-			var isValue = j0 === levels.length - 1
 			if (level === "") {
 				var key5 = levels.slice(0, j0).join()
 				if (counters[key5] == null) {
@@ -1446,9 +1522,17 @@ var parseQueryString = function(string) {
 				}
 				level = counters[key5]++
 			}
-			if (isValue) cursor[level] = value2
-			else if (cursor[level] == null) cursor[level] = isNumber ? [] : {}
-			cursor = cursor[level]
+			// Disallow direct prototype pollution
+			else if (level === "__proto__") break
+			if (j0 === levels.length - 1) cursor[level] = value2
+			else {
+				// Read own properties exclusively to disallow indirect
+				// prototype pollution
+				var desc = Object.getOwnPropertyDescriptor(cursor, level)
+				if (desc != null) desc = desc.value
+				if (desc == null) cursor[level] = desc = isNumber ? [] : {}
+				cursor = desc
+			}
 		}
 	}
 	return data0
@@ -1483,7 +1567,7 @@ var compileTemplate = function(template) {
 	var keys = []
 	var regexp = new RegExp("^" + templateData.path.replace(
 		// I escape literal text so people can use things like `:file.:ext` or
-		// `:lang-:locale` in routes. This is3 all merged into one pass so I
+		// `:lang-:locale` in routes. This is2 all merged into one pass so I
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
@@ -1710,7 +1794,7 @@ var _25 = function($window, mountRedraw00) {
 						onclick.handleEvent(e)
 					}
 					// Adapted from React Router's implementation:
-					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom0/modules/Link.js
+					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
 					//
 					// Try to be flexible and intuitive in how we handle1 links.
 					// Fun fact: links aren't as obvious to get right as you

@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var Stream = require("../stream")
 
 o.spec("stream", function() {
@@ -493,6 +493,40 @@ o.spec("stream", function() {
 			stream.end(true)
 			stream(2)
 			o(stream()).equals(2)
+		})
+		// https://github.com/MithrilJS/mithril.js/issues/2601
+		o("ended stream doesn't affect emit of subsequent streams", function() {
+			const refreshing = Stream()
+			const o1Received = []
+			const waitingReceived = []
+			const o2Received = []
+			const o3Received = []
+			const o4Received = []
+
+			/* eslint-disable array-callback-return */
+			refreshing.map(function(v) { o1Received.push(v) })
+
+			const waiting = refreshing.map(function(v) {
+				waitingReceived.push(v)
+				if (v === false) {
+					waiting.end(true)
+				}
+			})
+
+			refreshing.map(function(v) { o2Received.push(v) })
+			refreshing.map(function(v) { o3Received.push(v) })
+			refreshing.map(function(v) { o4Received.push(v) })
+			/* eslint-enable array-callback-return */
+
+			refreshing(true)
+			refreshing(false)
+			refreshing("more")
+
+			o(o1Received).deepEquals([true, false, "more"])
+			o(waitingReceived).deepEquals([true, false])
+			o(o2Received).deepEquals([true, false, "more"])
+			o(o3Received).deepEquals([true, false, "more"])
+			o(o4Received).deepEquals([true, false, "more"])
 		})
 	})
 	o.spec("toJSON", function() {

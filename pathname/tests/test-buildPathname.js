@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var buildPathname = require("../../pathname/build")
 
 o.spec("buildPathname", function() {

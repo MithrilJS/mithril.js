@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("parseQueryString", function() {
@@ -96,5 +96,20 @@ o.spec("parseQueryString", function() {
 	o("prefers later values", function() {
 		var data = parseQueryString("a=1&b=2&a=3")
 		o(data).deepEquals({a: "3", b: "2"})
+	})
+	o("doesn't pollute prototype directly, censors `__proto__`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("a=b&__proto__%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		o(data).deepEquals({a: "b"})
+	})
+	o("doesn't pollute prototype indirectly, retains `constructor`", function() {
+		var prev = Object.prototype.toString
+		var data = parseQueryString("a=b&constructor%5Bprototype%5D%5BtoString%5D=123")
+		o(Object.prototype.toString).equals(prev)
+		// The deep matcher is borked here.
+		o(Object.keys(data)).deepEquals(["a", "constructor"])
+		o(data.a).equals("b")
+		o(data.constructor).deepEquals({prototype: {toString: "123"}})
 	})
 })

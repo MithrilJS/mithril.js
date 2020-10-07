@@ -94,7 +94,7 @@ module.exports = function(options) {
 		}
 		else {
 			this.childNodes.push(child)
-			if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+			if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 			child.parentNode = this
 		}
 	}
@@ -124,14 +124,14 @@ module.exports = function(options) {
 				this.childNodes.splice.apply(this.childNodes, [refIndex, 0].concat(child.childNodes))
 				while (child.firstChild) {
 					var subchild = child.firstChild
-					child.removeChild(subchild)
+					removeChild.call(child, subchild)
 					subchild.parentNode = this
 				}
 				child.childNodes = []
 			}
 			else {
 				this.childNodes.splice(refIndex, 0, child)
-				if (child.parentNode != null && child.parentNode !== this) child.parentNode.removeChild(child)
+				if (child.parentNode != null && child.parentNode !== this) removeChild.call(child.parentNode, child)
 				child.parentNode = this
 			}
 		}
@@ -214,14 +214,14 @@ module.exports = function(options) {
 					if (ns != null) element.setAttributeNS(ns, name, value)
 					else element.setAttribute(name, value)
 				})
-				stack[depth].appendChild(element)
+				appendChild.call(stack[depth], element)
 				if (!selfClosed && voidElements.indexOf(startTag.toLowerCase()) < 0) stack[++depth] = element
 			}
 			else if (endTag) {
 				depth--
 			}
 			else if (text) {
-				stack[depth].appendChild($window.document.createTextNode(text)) // FIXME handle html entities
+				appendChild.call(stack[depth], $window.document.createTextNode(text)) // FIXME handle html entities
 			}
 		})
 	}
@@ -304,6 +304,13 @@ module.exports = function(options) {
 					parentNode: null,
 					childNodes: [],
 					attributes: {},
+					contains: function(child) {
+						while (child != null) {
+							if (child === this) return true
+							child = child.parentNode
+						}
+						return false
+					},
 					get firstChild() {
 						return this.childNodes[0] || null
 					},
@@ -313,13 +320,15 @@ module.exports = function(options) {
 						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
 						return this.parentNode.childNodes[index + 1] || null
 					},
+					// eslint-disable-next-line accessor-pairs
 					set textContent(value) {
 						this.childNodes = []
 						if (value !== "") appendChild.call(this, $window.document.createTextNode(value))
 					},
+					// eslint-disable-next-line accessor-pairs
 					set innerHTML(value) {
 						var voidElements = ["area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-						while (this.firstChild) this.removeChild(this.firstChild)
+						while (this.firstChild) removeChild.call(this, this.firstChild)
 						var match = value.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">(.*)<\/svg>$/), root, ns
 						if (match) {
 							var value = match[1]
@@ -429,8 +438,6 @@ module.exports = function(options) {
 									return
 								}
 							}
-						} catch(e) {
-							throw e
 						} finally {
 							e.eventPhase = 0
 							if (!prevented) {
@@ -486,6 +493,37 @@ module.exports = function(options) {
 							return value
 						},
 						set: valueSetter,
+						enumerable: true,
+					})
+					Object.defineProperty(element, "valueAsDate", {
+						get: function() {
+							if (this.getAttribute("type") !== "date") return null
+							return new Date(value).getTime()
+						},
+						set: function(v) {
+							if (this.getAttribute("type") !== "date") throw new Error("invalid state")
+							var time = new Date(v).getTime()
+							return valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
+						},
+						enumerable: true,
+					})
+					Object.defineProperty(element, "valueAsNumber", {
+						get: function() {
+							switch (this.getAttribute("type")) {
+								case "date": return new Date(value).getTime()
+								case "number": return new Date(value).getTime()
+								default: return NaN
+							}
+						},
+						set: function(v) {
+							v = Number(v)
+							if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
+							switch (this.getAttribute("type")) {
+								case "date": return valueSetter(isNaN(v) ? "" : new Date(v).toUTCString())
+								case "number": return valueSetter(String(value))
+								default: throw new Error("invalid state")
+							}
+						},
 						enumerable: true,
 					})
 
@@ -659,11 +697,19 @@ module.exports = function(options) {
 					nodeType: 3,
 					nodeName: "#text",
 					parentNode: null,
+					get childNodes() { return [] },
+					get firstChild() { return null },
 					get nodeValue() {return nodeValue},
 					set nodeValue(value) {
 						/*eslint-disable no-implicit-coercion*/
 						nodeValue = "" + value
 						/*eslint-enable no-implicit-coercion*/
+					},
+					get nextSibling() {
+						if (this.parentNode == null) return null
+						var index = this.parentNode.childNodes.indexOf(this)
+						if (index < 0) throw new TypeError("Parent's childNodes is out of sync")
+						return this.parentNode.childNodes[index + 1] || null
 					},
 				}
 			},
@@ -691,9 +737,9 @@ module.exports = function(options) {
 		},
 	}
 	$window.document.documentElement = $window.document.createElement("html")
-	$window.document.documentElement.appendChild($window.document.createElement("head"))
+	appendChild.call($window.document.documentElement, $window.document.createElement("head"))
 	$window.document.body = $window.document.createElement("body")
-	$window.document.documentElement.appendChild($window.document.body)
+	appendChild.call($window.document.documentElement, $window.document.body)
 	activeElement = $window.document.body
 
 	if (options.spy) $window.__getSpies = getSpies

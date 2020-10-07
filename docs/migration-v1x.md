@@ -17,7 +17,7 @@ v2.x is almost entirely API-compatible with v1.x, but there are some breaking ch
 - [`m.request` headers](#mrequest-headers)
 - [Query parameters in hash strings in routes](#query-parameters-in-hash-strings-in-routes)
 - [Keys](#keys)
-- [`m.version` remvoed](#mversion-removed)
+- [`m.version` removed](#mversion-removed)
 
 ---
 
@@ -32,7 +32,7 @@ var Counter = {
     oninit: function(vnode) { vnode.state = 0 },
     view: function(vnode) {
         return m(".counter", [
-            m("button", {onclick: function() { vnode.state-- }}, "-")
+            m("button", {onclick: function() { vnode.state-- }}, "-"),
             vnode.state,
             m("button", {onclick: function() { vnode.state++ }}, "+")
         ])
@@ -47,7 +47,7 @@ var Counter = {
     oninit: function(vnode) { vnode.state.count = 0 },
     view: function(vnode) {
         return m(".counter", [
-            m("button", {onclick: function() { vnode.state.count-- }}, "-")
+            m("button", {onclick: function() { vnode.state.count-- }}, "-"),
             vnode.state.count,
             m("button", {onclick: function() { vnode.state.count++ }}, "+")
         ])

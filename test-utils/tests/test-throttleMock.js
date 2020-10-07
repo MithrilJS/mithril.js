@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 o.spec("throttleMock", function() {

@@ -8,7 +8,7 @@
 
 ### Setup
 
-Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://mochajs.org/), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
+Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://github.com/MithrilJS/ospec), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
 
 ```bash
 npm install --save-dev ospec mithril-query jsdom
@@ -16,7 +16,7 @@ npm install --save-dev ospec mithril-query jsdom
 
 And getting them set up is also relatively easy and requires a few short steps:
 
-1. Add a `"test": "mocha"` to your npm scripts in your `package.json` file. This will end up looking something like this, maybe with a few extra fields relevant to your project:
+1. Add a `"test": "ospec"` to your npm scripts in your `package.json` file. This will end up looking something like this, maybe with a few extra fields relevant to your project:
 
 ```json
 {
@@ -77,7 +77,6 @@ var MyComponent = require("../my-component.js")
 o.spec("MyComponent", function() {
 	o("things are working", function() {
 		var out = mq(MyComponent, {text: "What a wonderful day to be alive!"})
-
 		out.should.contain("day")
 	})
 })
@@ -150,7 +149,7 @@ module.exports = MyComponent
 
 You could easily create a few unit tests for that.
 
-```js
+```javascript
 var mq = require("mithril-query")
 var MyComponent = require("./MyComponent")
 

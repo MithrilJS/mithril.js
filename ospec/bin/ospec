@@ -30,7 +30,7 @@ var cwd = process.cwd()
 if (args.require) {
 	args.require.forEach(function(module) {
 		// eslint-disable-next-line global-require
-		if (module) require(require.resolve(module, {basedir: cwd}))
+		if (module) require(require.resolve(module, {paths: [cwd]}))
 	})
 }
 

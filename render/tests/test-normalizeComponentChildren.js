@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var m = require("../../render/hyperscript")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")

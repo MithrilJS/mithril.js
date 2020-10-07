@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var parsePathname = require("../../pathname/parse")
 var compileTemplate = require("../../pathname/compileTemplate")
 

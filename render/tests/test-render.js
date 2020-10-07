@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
@@ -328,5 +328,66 @@ o.spec("render", function() {
 		o(root.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 		render(root.childNodes[0], [{tag: "g"}])
 		o(root.childNodes[0].childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
+	})
+	o("does not allow reentrant invocations", function() {
+		var thrown = []
+		function A() {
+			var updated = false
+			try {render(root, {tag: A})} catch (e) {thrown.push("construct")}
+			return {
+				oninit: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("oninit")}
+				},
+				oncreate: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("oncreate")}
+				},
+				onbeforeupdate: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("onbeforeupdate")}
+				},
+				onupdate: function() {
+					if (updated) return
+					updated = true
+					try {render(root, {tag: A})} catch (e) {thrown.push("onupdate")}
+				},
+				onbeforeremove: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("onbeforeremove")}
+				},
+				onremove: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("onremove")}
+				},
+				view: function() {
+					try {render(root, {tag: A})} catch (e) {thrown.push("view")}
+				},
+			}
+		}
+		render(root, {tag: A})
+		o(thrown).deepEquals([
+			"construct",
+			"oninit",
+			"view",
+			"oncreate",
+		])
+		render(root, {tag: A})
+		o(thrown).deepEquals([
+			"construct",
+			"oninit",
+			"view",
+			"oncreate",
+			"onbeforeupdate",
+			"view",
+			"onupdate",
+		])
+		render(root, [])
+		o(thrown).deepEquals([
+			"construct",
+			"oninit",
+			"view",
+			"oncreate",
+			"onbeforeupdate",
+			"view",
+			"onupdate",
+			"onbeforeremove",
+			"onremove",
+		])
 	})
 })

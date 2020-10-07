@@ -1,7 +1,7 @@
 "use strict"
 
 // Low-priority TODO: remove the dependency on the renderer here.
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
@@ -26,14 +26,13 @@ o.spec("route", function() {
 
 	// Use precisely what `m.route` uses, for consistency and to ensure timings
 	// are aligned.
-	var waitFunc = typeof setImmediate === "function" ? setImmediate : setTimeout
 	function waitCycles(n) {
 		n = Math.max(n, 1)
 		return new Promise(function(resolve) {
 			return loop()
 			function loop() {
 				if (n === 0) resolve()
-				else { n--; waitFunc(loop) }
+				else { n--; setTimeout(loop, 4) }
 			}
 		})
 	}
@@ -69,9 +68,14 @@ o.spec("route", function() {
 					}
 				}
 
+				// In case it doesn't get reset
+				var realError = console.error
+
 				o.beforeEach(function() {
 					currentTest = nextID++
 					$window = browserMock(env)
+					$window.setTimeout = setTimeout
+					// $window.setImmediate = setImmediate
 					throttleMock = throttleMocker()
 
 					root = $window.document.body
@@ -79,11 +83,16 @@ o.spec("route", function() {
 					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
 					route.prefix = prefix
+					console.error = function() {
+						realError.call(this, new Error("Unexpected `console.error` call"))
+						realError.apply(this, arguments)
+					}
 				})
 
 				o.afterEach(function() {
 					o(throttleMock.queueLength()).equals(0)
 					currentTest = -1 // doesn't match any test
+					console.error = realError
 				})
 
 				o("throws on invalid `root` DOM node", function() {
@@ -531,6 +540,36 @@ o.spec("route", function() {
 
 					o(route.set.callCount).equals(1)
 					o(route.set.args[2]).equals(opts)
+				})
+
+				o("passes params on route.Link", function() {
+					var e = $window.document.createEvent("MouseEvents")
+
+					e.initEvent("click", true, true)
+					e.button = 0
+					$window.location.href = prefix + "/"
+
+					route(root, "/", {
+						"/" : {
+							view: lock(function() {
+								return m(route.Link, {
+									href: "/test",
+									params: {key: "value"},
+								})
+							})
+						},
+						"/test" : {
+							view : lock(function() {
+								return m("div")
+							})
+						}
+					})
+					route.set = o.spy(route.set)
+
+					root.firstChild.dispatchEvent(e)
+
+					o(route.set.callCount).equals(1)
+					o(route.set.args[0]).equals("/test?key=value")
 				})
 
 				o("route.Link can render without routes or dom access", function() {
@@ -1082,11 +1121,13 @@ o.spec("route", function() {
 					var matchCount = 0
 					var renderCount = 0
 					var spy = o.spy()
+					var error = new Error("error")
+					var errorSpy = console.error = o.spy()
 
 					var resolver = {
 						onmatch: lock(function() {
 							matchCount++
-							return Promise.reject(new Error("error"))
+							return Promise.reject(error)
 						}),
 						render: lock(function(vnode) {
 							renderCount++
@@ -1104,6 +1145,8 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(0)
 						o(spy.callCount).equals(1)
+						o(errorSpy.callCount).equals(1)
+						o(errorSpy.args[0]).equals(error)
 					})
 				})
 

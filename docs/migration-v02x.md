@@ -349,7 +349,7 @@ m("div", m(Component, "value", function(key) { return "child" }))
 
 In v0.2.x, the children of DOM nodes were represented literally with no normalization aside from using the children directly if only a single array child is present. It returned a structure more like this, with the strings represented literally.
 
-```js
+```javascript
 m("div", "value", ["nested"])
 
 // Becomes:
@@ -365,7 +365,7 @@ m("div", "value", ["nested"])
 
 In v2.x, children of DOM vnodes are normalized to objects of a single consistent structure.
 
-```js
+```javascript
 m("div", "value", ["nested"])
 
 // Becomes roughly:
@@ -383,7 +383,7 @@ m("div", "value", ["nested"])
 
 If only a single text child is present on a DOM vnode, it instead sets `text` to that value.
 
-```js
+```javascript
 m("div", "value")
 
 // Becomes roughly:
@@ -834,7 +834,7 @@ The first of the two headers, `Content-Type`, will trigger a CORS prefetch as it
 
 ## `m.deferred` removed
 
-v0.2.x used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. v2.x uses Promises instead, and implements a [polyfill](promises.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
+v0.2.x used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. v2.x uses Promises instead, and implements a [polyfill](promise.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
 
 ### v0.2.x
 

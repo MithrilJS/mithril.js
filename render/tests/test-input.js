@@ -1,6 +1,6 @@
 "use strict"
 
-var o = require("../../ospec/ospec")
+var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 
@@ -85,6 +85,89 @@ o.spec("form inputs", function() {
 			render(root, [updated])
 
 			o(updated.dom.checked).equals(true)
+		})
+
+		o("syncs file input value attribute if DOM value differs from vdom value and is empty", function() {
+			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
+			var updated = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
+			var spy = o.spy()
+			var error = console.error
+
+			render(root, [input])
+
+			input.dom.value = "test.png"
+
+			try {
+				console.error = spy
+				render(root, [updated])
+			} finally {
+				console.error = error
+			}
+
+			o(updated.dom.value).equals("")
+			o(spy.callCount).equals(0)
+		})
+
+		o("warns and ignores file input value attribute if DOM value differs from vdom value and is non-empty", function() {
+			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
+			var updated = {tag: "input", attrs: {type: "file", value: "other.png", onclick: function() {}}}
+			var spy = o.spy()
+			var error = console.error
+
+			render(root, [input])
+
+			input.dom.value = "test.png"
+
+			try {
+				console.error = spy
+				render(root, [updated])
+			} finally {
+				console.error = error
+			}
+
+			o(updated.dom.value).equals("test.png")
+			o(spy.callCount).equals(1)
+		})
+
+		o("retains file input value attribute if DOM value is the same as vdom value and is non-empty", function() {
+			var $window = domMock(o)
+			var render = vdom($window)
+			var root = $window.document.createElement("div")
+			$window.document.body.appendChild(root)
+			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
+			var updated1 = {tag: "input", attrs: {type: "file", value: "test.png", onclick: function() {}}}
+			var updated2 = {tag: "input", attrs: {type: "file", value: "test.png", onclick: function() {}}}
+			var spy = o.spy()
+			var error = console.error
+
+			render(root, [input])
+
+			// Verify our assumptions about the outer element state
+			o($window.__getSpies(input.dom).valueSetter.callCount).equals(0)
+			input.dom.value = "test.png"
+			o($window.__getSpies(input.dom).valueSetter.callCount).equals(1)
+
+			try {
+				console.error = spy
+				render(root, [updated1])
+			} finally {
+				console.error = error
+			}
+
+			o(updated1.dom.value).equals("test.png")
+			o(spy.callCount).equals(0)
+			o($window.__getSpies(updated1.dom).valueSetter.callCount).equals(1)
+
+			try {
+				console.error = spy
+				render(root, [updated2])
+			} finally {
+				console.error = error
+			}
+
+			o(updated2.dom.value).equals("test.png")
+			o(spy.callCount).equals(0)
+			o($window.__getSpies(updated2.dom).valueSetter.callCount).equals(1)
 		})
 	})
 
