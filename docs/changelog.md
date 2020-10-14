@@ -36,6 +36,7 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Fix issue where new redraw handlers weren't copied over on update. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
 - Make changes to file inputs gracefully handled, and don't break if the current value and old value mismatch (and the new value isn't empty), but instead just log an error. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
     - This mainly exists just to kick the can down the road - this is the only case I'm aware of where the DOM itself would be responsible for throwing an error. A proper fix to the greater issue of error handling is much more complex, and I'd rather not block users any longer over this one specific issue.
+- Allow Mithril to be loaded in non-browser environments without modification. ([#2633](https://github.com/MithrilJS/mithril.js/pull/2633) [@isiahmeadows](https://github.com/isiahmeadows))
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
