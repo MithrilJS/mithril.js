@@ -662,6 +662,6 @@ Explicitly disallowing modularity and configuration in test-space has a few bene
 
 - tests always look the same, even across different projects and teams
 - single source of documentation for entire testing API
-- no need to hunt down plugins to figure out what they do, especially if they replace common javascript idioms with fuzzy spoken language constructs (e.g. what does `.is()` do?)
+- no need to hunt down plugins to figure out what they do, especially if they replace common JavaScript idioms with fuzzy spoken language constructs (e.g. what does `.is()` do?)
 - no need to pollute project-space with ad-hoc configuration code
 - discourages side-tracking and yak-shaving
