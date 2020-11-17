@@ -128,7 +128,6 @@ module.exports = function($window, Promise, oncompletion) {
 								try { response = JSON.parse(ev.target.responseText) }
 								catch (e) { response = null }
 							}
-
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
 							// document is needed on old IE and friends (all
