@@ -91,7 +91,8 @@ module.exports = function() {
 							return
 						}
 
-						if (typeof self.ontimeout === "function") self.ontimeout({target: self})
+						self.status = 0;
+						if (typeof self.ontimeout === "function") self.ontimeout({target: self, type:"timeout"})
 					}, self.timeout)
 				}
 
