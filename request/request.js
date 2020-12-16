@@ -155,6 +155,13 @@ module.exports = function($window, Promise, oncompletion) {
 				}
 			}
 
+			xhr.ontimeout = function (ev) {
+				if (aborted) return;
+				var error = new Error("Request timeout");
+				error.timeout = ev.target.timeout;
+				reject(error);
+			}
+
 			if (typeof args.config === "function") {
 				xhr = args.config(xhr, args, url) || xhr
 
