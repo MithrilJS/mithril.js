@@ -677,6 +677,57 @@ o.spec("request", function() {
 				o(e instanceof Error).equals(true)
 			}).then(done)
 		})
+		o("rejects on request timeout", function(done) {
+			var timeout = 50
+			var timeToGetItem = timeout + 1
+
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return new Promise(function(resolve) {
+						setTimeout(function() {
+							resolve({status: 200})
+						}, timeToGetItem)
+					})
+				}
+			})
+
+			request({
+				method: "GET", url: "/item",
+				timeout: timeout
+			}).catch(function(e) {
+				o(e instanceof Error).equals(true)
+				o(e.message).equals("Request timed out")
+				o(e.code).equals(0)
+			}).then(function() {
+				done()
+			})
+		})
+		o("does not reject when time to request resource does not exceed timeout", function(done) {
+			var timeout = 50
+			var timeToGetItem = timeout - 1
+			var isRequestRejected = false
+
+			mock.$defineRoutes({
+				"GET /item": function() {
+					return new Promise(function(resolve) {
+						setTimeout(function() {
+							resolve({status: 200})
+						}, timeToGetItem)
+					})
+				}
+			})
+
+			request({
+				method: "GET", url: "/item",
+				timeout: timeout
+			}).catch(function(e) {
+				isRequestRejected = true
+				o(e.message).notEquals("Request timed out")
+			}).then(function() {
+				o(isRequestRejected).equals(false)
+				done()
+			})
+		})
 		o("does not reject on status error code when extract provided", function(done) {
 			mock.$defineRoutes({
 				"GET /item": function() {

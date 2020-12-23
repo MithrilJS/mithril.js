@@ -79,7 +79,7 @@ module.exports = function($window, Promise, oncompletion) {
 			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
 			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
-			var xhr = new $window.XMLHttpRequest(), aborted = false
+			var xhr = new $window.XMLHttpRequest(), aborted = false, isTimeout = false
 			var original = xhr, replacedAbort
 			var abort = xhr.abort
 
@@ -141,18 +141,38 @@ module.exports = function($window, Promise, oncompletion) {
 						}
 						if (success) resolve(response)
 						else {
-							try { message = ev.target.responseText }
-							catch (e) { message = response }
-							var error = new Error(message)
-							error.code = ev.target.status
-							error.response = response
-							reject(error)
+							var completeErrorResponse = function() {
+								try { message = ev.target.responseText }
+								catch (e) { message = response }
+								var error = new Error(message)
+								error.code = ev.target.status
+								error.response = response
+								reject(error)
+							}
+
+							if (xhr.status === 0) {
+								// Use setTimeout to push this code block onto the event queue
+								// This allows `xhr.ontimeout` to run in the case that there is a timeout
+								// Without this setTimeout, `xhr.ontimeout` doesn't have a chance to reject
+								// as `xhr.onreadystatechange` will run before it
+								setTimeout(function() {
+									if (isTimeout) return
+									completeErrorResponse()
+								})
+							} else completeErrorResponse()
 						}
 					}
 					catch (e) {
 						reject(e)
 					}
 				}
+			}
+
+			xhr.ontimeout = function (ev) {
+				isTimeout = true
+				var error = new Error("Request timed out")
+				error.code = ev.target.status
+				reject(error)
 			}
 
 			if (typeof args.config === "function") {
