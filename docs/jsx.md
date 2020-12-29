@@ -338,6 +338,41 @@ function SummaryView() {
 
 ---
 
+### A note on event listeners
+
+While JSX events are usually named using camelCase, lowercase names should be used when JSX is used with Mithril.
+
+```javascript
+function MyComponent() {
+    return {
+        view: () =>
+            m("main", [
+                m("input", {
+                    type: "button",
+                    onclick: () => console.log('clicked'),
+                    value: "Click me!"
+                })
+            ])
+    }
+}
+```
+
+Should be written as:
+
+```jsx
+function MyComponent() {
+    return {
+        view: () => (
+            <main>
+                <input type="button" onclick={() => console.log('clicked')} value="Click me!"/>
+            </main>
+        )
+    }
+}
+```
+
+---
+
 ### Converting HTML
 
 In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
