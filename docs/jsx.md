@@ -70,7 +70,7 @@ If you want to use Webpack and Babel together, [skip to the section below](#usin
 To install Babel as a standalone tool, use this command:
 
 ```bash
-npm install @babel/cli @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
+npm install @babel/core @babel/cli @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
 ```
 
 Create a `.babelrc` file:
@@ -87,15 +87,32 @@ Create a `.babelrc` file:
 }
 ```
 
-To run Babel as a standalone tool, run this from the command line:
+To run Babel, setup an npm script. Open `package.json` and add this entry under `"scripts"`:
+
+```json
+{
+    "name": "my-project",
+    "scripts": {
+        "babel": "babel src --out-dir bin --source-maps"
+    }
+}
+```
+
+You can now run Babel using this command:
 
 ```bash
-babel src --out-dir bin --source-maps
+npm run babel
 ```
 
 #### Using Babel with Webpack
 
-If you're already using Webpack as a bundler, you can integrate Babel to Webpack by following these steps.
+If you haven't already installed Webpack as a bundler, use this command:
+
+```bash
+npm install webpack webpack-cli --save-dev
+```
+
+You can integrate Babel to Webpack by following these steps.
 
 ```bash
 npm install @babel/core babel-loader @babel/preset-env @babel/plugin-transform-react-jsx --save-dev
@@ -128,13 +145,16 @@ module.exports = {
 	},
 	module: {
 		rules: [{
-			test: /\.js$/,
+			test: /\.(js|jsx)$/,
 			exclude: /\/node_modules\//,
 			use: {
 				loader: 'babel-loader'
 			}
 		}]
-	}
+	},
+    resolve: {
+        extensions: ['.js', '.jsx']
+    }
 }
 ```
 
@@ -148,7 +168,7 @@ To run the bundler, setup an npm script. Open `package.json` and add this entry 
 {
 	"name": "my-project",
 	"scripts": {
-		"start": "webpack -d --watch"
+		"start": "webpack --mode development --watch"
 	}
 }
 ```
