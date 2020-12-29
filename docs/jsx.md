@@ -2,8 +2,10 @@
 
 - [Description](#description)
 - [Setup](#setup)
+- [Production build](#production-build)
 - [Using Babel with Webpack](#using-babel-with-webpack)
 - [JSX vs hyperscript](#jsx-vs-hyperscript)
+- [A note on event listeners](#a-note-on-event-listeners)
 - [Converting HTML](#converting-html)
 
 ---
