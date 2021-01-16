@@ -67,7 +67,7 @@ module.exports = function($window, Promise, oncompletion) {
 
 	function hasHeader(args, name) {
 		for (var key in args.headers) {
-			if (hasOwn.call(args.headers, key) && name.test(key)) return true
+			if (hasOwn.call(args.headers, key) && key.toLowerCase() === name) return true
 		}
 		return false
 	}
@@ -90,10 +90,10 @@ module.exports = function($window, Promise, oncompletion) {
 
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
-			if (assumeJSON && body != null && !hasHeader(args, /^content-type$/i)) {
+			if (assumeJSON && body != null && !hasHeader(args, "content-type")) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
+			if (typeof args.deserialize !== "function" && !hasHeader(args, "accept")) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
