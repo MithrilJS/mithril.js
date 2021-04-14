@@ -174,8 +174,8 @@ o.spec("form inputs", function() {
 
 	o.spec("select", function() {
 		o("select works without attributes", function() {
-			var select = m("select", 
-				m("option", {value: "a"}, "aaa"),
+			var select = m("select",
+				m("option", {value: "a"}, "aaa")
 			)
 
 			render(root, select)
@@ -248,7 +248,7 @@ o.spec("form inputs", function() {
 			var select = m("select", {value: "b"},
 				m("option", {value: "a"}, "aaa"),
 				m("option", {value: "b"}, "bbb"),
-				m("option", {value: "c"}, "ccc"),
+				m("option", {value: "c"}, "ccc")
 			)
 
 			render(root, select)
@@ -262,7 +262,7 @@ o.spec("form inputs", function() {
 				return m("select", {value: "b"},
 					m("option", {value: "a"}, "aaa"),
 					m("option", {value: "b"}, "bbb"),
-					m("option", {value: "c"}, "ccc"),
+					m("option", {value: "c"}, "ccc")
 				)
 			}
 

@@ -695,7 +695,7 @@ o.spec("updateNodes", function() {
 		var vnodes = m("div",
 			undefined,
 			m("#", "a")
-			)
+		)
 		var updated = m("div",
 			m.fragment(m("#", "b")),
 			undefined,
@@ -843,7 +843,7 @@ o.spec("updateNodes", function() {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = m("B", {key: 1},
-				m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
 		)
 		render(root, m("div", cached))
 		render(root, [])
@@ -857,7 +857,7 @@ o.spec("updateNodes", function() {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
 		var cached = m("B",
-				m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
 		)
 		render(root, m("div", cached))
 		render(root, [])

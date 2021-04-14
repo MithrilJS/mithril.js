@@ -534,7 +534,7 @@ o.spec("attributes", function() {
 		   attribute. Ask isiahmeadows.
 
 		o("render select options", function() {
-			var select = m("select", {selectedIndex: 0}, 
+			var select = m("select", {selectedIndex: 0},
 				m("option", {value: "1", selected: ""})
 			)
 			render(root, select)

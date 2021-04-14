@@ -218,13 +218,13 @@ o.spec("render", function() {
 		var a = function() {
 			return m("div", {key: 1},
 				m("div", {key: 11, oncreate: createA, onupdate: updateA, onremove: removeA}),
-				m("div", {key: 12}),
+				m("div", {key: 12})
 			)
 		}
 		var b = function() {
 			return m("div", {key: 2},
 				m("div", {key: 21, oncreate: createB, onupdate: updateB, onremove: removeB}),
-				m("div", {key: 22}),
+				m("div", {key: 22})
 			)
 		}
 		render(root, a())
@@ -247,12 +247,12 @@ o.spec("render", function() {
 		var removeB = o.spy()
 		var a = function() {
 			return m("div", {key: 1},
-				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA}),
+				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
 			)
 		}
 		var b = function() {
 			return m("div", {key: 2},
-				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB}),
+				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
 			)
 		}
 		render(root, a())
@@ -276,12 +276,12 @@ o.spec("render", function() {
 
 		var a = function() {
 			return m("div", {key: 1},
-				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA}),
+				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
 			)
 		}
 		var b = function() {
 			return m("div", {key: 2},
-				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB}),
+				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
 			)
 		}
 		render(root, a())
@@ -304,9 +304,9 @@ o.spec("render", function() {
 	})
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
 		// note that this only exerciese one branch of the keyed diff algo
-		var svg = m("svg", 
+		var svg = m("svg",
 			m("g", {key: 0}),
-			m("g", {key: 1}),
+			m("g", {key: 1})
 		)
 		render(root, svg)
 
@@ -314,9 +314,9 @@ o.spec("render", function() {
 		o(svg.dom.childNodes[0].namespaceURI).equals("http://www.w3.org/2000/svg")
 		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 
-		svg = m("svg", 
+		svg = m("svg",
 			m("g", {key: 1, x: 1}),
-			m("g", {key: 2, x: 2}),
+			m("g", {key: 2, x: 2})
 		)
 		render(root, svg)
 
