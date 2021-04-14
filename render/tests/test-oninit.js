@@ -181,7 +181,7 @@ o.spec("oninit", function() {
 		o(vnode.dom.oninit).equals(undefined)
 		o(vnode.dom.attributes["oninit"]).equals(undefined)
 	})
-	
+
 	o("No spurious oninit calls in mapped keyed diff when the pool is involved (#1992)", function () {
 		var oninit1 = o.spy()
 		var oninit2 = o.spy()

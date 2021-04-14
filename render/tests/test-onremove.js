@@ -238,9 +238,9 @@ o.spec("onremove", function() {
 										return {then: function (r) { resolve = r }}
 									},
 								},
-									m("div", id),
+								m("div", id)
 								)
-							),
+							)
 						)
 					)
 				}
@@ -344,9 +344,9 @@ o.spec("onremove", function() {
 										}}
 									},
 								},
-									m("div", id),
+								m("div", id)
 								)
-							),
+							)
 						)
 					)
 				}

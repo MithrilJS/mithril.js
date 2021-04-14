@@ -302,38 +302,38 @@ o.spec("onbeforeupdate", function() {
 			o(root.firstChild.attributes["id"].value).equals("bar")
 		})
 		o("old children is retained", function() {
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div")
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return false }},
 					m("div", m("div"))
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div", m("div"))
-				),
+				)
 			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
 		o("old text is retained", function() {
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div")
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return false }},
 					m("div", "foo")
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div", "foo")
-				),
+				)
 			)
 			o(root.firstChild.firstChild.firstChild.nodeValue).equals("foo")
 		})
@@ -346,38 +346,38 @@ o.spec("onbeforeupdate", function() {
 				}
 			}
 
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m(Child, {foo: false})
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return false }},
 					m(Child, {foo: false})
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m(Child, {foo: true})
-				),
+				)
 			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
 		o("adding dom children doesn't error", function() {
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div")
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return false }},
 					m("div")
-				),
+				)
 			)
-			render(root, 
+			render(root,
 				m("div", {onbeforeupdate: function() { return true }},
 					m("div", m("div"))
-				),
+				)
 			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
