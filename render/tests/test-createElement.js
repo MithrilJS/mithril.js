@@ -3,6 +3,7 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("createElement", function() {
 	var $window, root, render
@@ -13,48 +14,48 @@ o.spec("createElement", function() {
 	})
 
 	o("creates element", function() {
-		var vnode = {tag: "div"}
-		render(root, [vnode])
+		var vnode = m("div")
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 	})
 	o("creates attr", function() {
-		var vnode = {tag: "div", attrs: {id: "a", title: "b"}}
-		render(root, [vnode])
+		var vnode = m("div", {id: "a", title: "b"})
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.attributes["id"].value).equals("a")
 		o(vnode.dom.attributes["title"].value).equals("b")
 	})
 	o("creates style", function() {
-		var vnode = {tag: "div", attrs: {style: {backgroundColor: "red"}}}
-		render(root, [vnode])
+		var vnode = m("div", {style: {backgroundColor: "red"}})
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.style.backgroundColor).equals("red")
 	})
 	o("allows css vars in style", function() {
-		var vnode = {tag: "div", attrs: {style: {"--css-var": "red"}}}
-		render(root, [vnode])
+		var vnode = m("div", {style: {"--css-var": "red"}})
+		render(root, vnode)
 
 		o(vnode.dom.style["--css-var"]).equals("red")
 	})
 	o("allows css vars in style with uppercase letters", function() {
-		var vnode = {tag: "div", attrs: {style: {"--cssVar": "red"}}}
-		render(root, [vnode])
+		var vnode = m("div", {style: {"--cssVar": "red"}})
+		render(root, vnode)
 
 		o(vnode.dom.style["--cssVar"]).equals("red")
 	})
 	o("censors cssFloat to float", function() {
-		var vnode = {tag: "a", attrs: {style: {cssFloat: "left"}}}
+		var vnode = m("a", {style: {cssFloat: "left"}})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		o(vnode.dom.style.float).equals("left")
 	})
 	o("creates children", function() {
-		var vnode = {tag: "div", children: [{tag: "a"}, {tag: "b"}]}
-		render(root, [vnode])
+		var vnode = m("div", m("a"), m("b"))
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.childNodes.length).equals(2)
@@ -62,8 +63,8 @@ o.spec("createElement", function() {
 		o(vnode.dom.childNodes[1].nodeName).equals("B")
 	})
 	o("creates attrs and children", function() {
-		var vnode = {tag: "div", attrs: {id: "a", title: "b"}, children: [{tag: "a"}, {tag: "b"}]}
-		render(root, [vnode])
+		var vnode = m("div", {id: "a", title: "b"}, m("a"), m("b"))
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("DIV")
 		o(vnode.dom.attributes["id"].value).equals("a")
@@ -74,11 +75,11 @@ o.spec("createElement", function() {
 	})
 	/* eslint-disable no-script-url */
 	o("creates svg", function() {
-		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", children: [
-			{tag: "a", ns: "http://www.w3.org/2000/svg", attrs: {"xlink:href": "javascript:;"}},
-			{tag: "foreignObject", children: [{tag: "body", attrs: {xmlns: "http://www.w3.org/1999/xhtml"}}]}
-		]}
-		render(root, [vnode])
+		var vnode = m("svg",
+			m("a", {"xlink:href": "javascript:;"}),
+			m("foreignObject", m("body", {xmlns: "http://www.w3.org/1999/xhtml"}))
+		)
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("svg")
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/2000/svg")
@@ -92,14 +93,14 @@ o.spec("createElement", function() {
 	})
 	/* eslint-enable no-script-url */
 	o("sets attributes correctly for svg", function() {
-		var vnode = {tag: "svg", ns: "http://www.w3.org/2000/svg", attrs: {viewBox: "0 0 100 100"}}
-		render(root, [vnode])
+		var vnode = m("svg", {viewBox: "0 0 100 100"})
+		render(root, vnode)
 
 		o(vnode.dom.attributes["viewBox"].value).equals("0 0 100 100")
 	})
 	o("creates mathml", function() {
-		var vnode = {tag: "math", ns: "http://www.w3.org/1998/Math/MathML", children: [{tag: "mrow", ns: "http://www.w3.org/1998/Math/MathML"}]}
-		render(root, [vnode])
+		var vnode = m("math", m("mrow"))
+		render(root, vnode)
 
 		o(vnode.dom.nodeName).equals("math")
 		o(vnode.dom.namespaceURI).equals("http://www.w3.org/1998/Math/MathML")

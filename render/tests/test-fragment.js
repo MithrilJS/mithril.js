@@ -14,8 +14,8 @@ function runTest(name, fragment) {
 	o.spec(name, function() {
 		o("works", function() {
 			var attrs = {foo: 5}
-			var child = {tag: "p"}
-			var frag = fragment(attrs, [child])
+			var child = m("p")
+			var frag = fragment(attrs, child)
 
 			o(frag.tag).equals("[")
 
