@@ -3,6 +3,7 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("form inputs", function() {
 	var $window, root, render
@@ -19,9 +20,9 @@ o.spec("form inputs", function() {
 
 	o.spec("input", function() {
 		o("maintains focus after move", function() {
-			var input = {tag: "input", key: 1}
-			var a = {tag: "a", key: 2}
-			var b = {tag: "b", key: 3}
+			var input = m("input", {key: 1})
+			var a = m("a", {key: 2})
+			var b = m("b", {key: 3})
 
 			render(root, [input, a, b])
 			input.dom.focus()
@@ -31,20 +32,20 @@ o.spec("form inputs", function() {
 		})
 
 		o("maintains focus when changed manually in hook", function() {
-			var input = {tag: "input", attrs: {oncreate: function() {
+			var input = m("input", {oncreate: function() {
 				input.dom.focus();
-			}}};
+			}});
 
-			render(root, [input])
+			render(root, input)
 
 			o($window.document.activeElement).equals(input.dom)
 		})
 
 		o("syncs input value if DOM value differs from vdom value", function() {
-			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
-			var updated = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
+			var input = m("input", {value: "aaa", oninput: function() {}})
+			var updated = m("input", {value: "aaa", oninput: function() {}})
 
-			render(root, [input])
+			render(root, input)
 
 			//simulate user typing
 			var e = $window.document.createEvent("KeyboardEvent")
@@ -54,26 +55,26 @@ o.spec("form inputs", function() {
 			input.dom.dispatchEvent(e)
 
 			//re-render may use same vdom value as previous render call
-			render(root, [updated])
+			render(root, updated)
 
 			o(updated.dom.value).equals("aaa")
 		})
 
 		o("clear element value if vdom value is set to undefined (aka removed)", function() {
-			var input = {tag: "input", attrs: {value: "aaa", oninput: function() {}}}
-			var updated = {tag: "input", attrs: {value: undefined, oninput: function() {}}}
+			var input = m("input", {value: "aaa", oninput: function() {}})
+			var updated = m("input", {value: undefined, oninput: function() {}})
 
-			render(root, [input])
-			render(root, [updated])
+			render(root, input)
+			render(root, updated)
 
 			o(updated.dom.value).equals("")
 		})
 
 		o("syncs input checked attribute if DOM value differs from vdom value", function() {
-			var input = {tag: "input", attrs: {type: "checkbox", checked: true, onclick: function() {}}}
-			var updated = {tag: "input", attrs: {type: "checkbox", checked: true, onclick: function() {}}}
+			var input = m("input", {type: "checkbox", checked: true, onclick: function() {}})
+			var updated = m("input", {type: "checkbox", checked: true, onclick: function() {}})
 
-			render(root, [input])
+			render(root, input)
 
 			//simulate user clicking checkbox
 			var e = $window.document.createEvent("MouseEvents")
@@ -82,24 +83,24 @@ o.spec("form inputs", function() {
 			input.dom.dispatchEvent(e)
 
 			//re-render may use same vdom value as previous render call
-			render(root, [updated])
+			render(root, updated)
 
 			o(updated.dom.checked).equals(true)
 		})
 
 		o("syncs file input value attribute if DOM value differs from vdom value and is empty", function() {
-			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
-			var updated = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
+			var input = m("input", {type: "file", value: "", onclick: function() {}})
+			var updated = m("input", {type: "file", value: "", onclick: function() {}})
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, [input])
+			render(root, input)
 
 			input.dom.value = "test.png"
 
 			try {
 				console.error = spy
-				render(root, [updated])
+				render(root, updated)
 			} finally {
 				console.error = error
 			}
@@ -109,18 +110,18 @@ o.spec("form inputs", function() {
 		})
 
 		o("warns and ignores file input value attribute if DOM value differs from vdom value and is non-empty", function() {
-			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
-			var updated = {tag: "input", attrs: {type: "file", value: "other.png", onclick: function() {}}}
+			var input = m("input", {type: "file", value: "", onclick: function() {}})
+			var updated = m("input", {type: "file", value: "other.png", onclick: function() {}})
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, [input])
+			render(root, input)
 
 			input.dom.value = "test.png"
 
 			try {
 				console.error = spy
-				render(root, [updated])
+				render(root, updated)
 			} finally {
 				console.error = error
 			}
@@ -134,13 +135,13 @@ o.spec("form inputs", function() {
 			var render = vdom($window)
 			var root = $window.document.createElement("div")
 			$window.document.body.appendChild(root)
-			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}
-			var updated1 = {tag: "input", attrs: {type: "file", value: "test.png", onclick: function() {}}}
-			var updated2 = {tag: "input", attrs: {type: "file", value: "test.png", onclick: function() {}}}
+			var input = m("input", {type: "file", value: "", onclick: function() {}})
+			var updated1 = m("input", {type: "file", value: "test.png", onclick: function() {}})
+			var updated2 = m("input", {type: "file", value: "test.png", onclick: function() {}})
 			var spy = o.spy()
 			var error = console.error
 
-			render(root, [input])
+			render(root, input)
 
 			// Verify our assumptions about the outer element state
 			o($window.__getSpies(input.dom).valueSetter.callCount).equals(0)
@@ -149,7 +150,7 @@ o.spec("form inputs", function() {
 
 			try {
 				console.error = spy
-				render(root, [updated1])
+				render(root, updated1)
 			} finally {
 				console.error = error
 			}
@@ -160,7 +161,7 @@ o.spec("form inputs", function() {
 
 			try {
 				console.error = spy
-				render(root, [updated2])
+				render(root, updated2)
 			} finally {
 				console.error = error
 			}
@@ -173,84 +174,84 @@ o.spec("form inputs", function() {
 
 	o.spec("select", function() {
 		o("select works without attributes", function() {
-			var select = {tag: "select", children: [
-				{tag: "option", attrs: {value: "a"}, text: "aaa"},
-			]}
+			var select = m("select", 
+				m("option", {value: "a"}, "aaa"),
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.value).equals("a")
 			o(select.dom.selectedIndex).equals(0)
 		})
 
 		o("select option can have empty string value", function() {
-			var select = {tag: "select", children :[
-				{tag: "option", attrs: {value: ""}, text: "aaa"}
-			]}
+			var select = m("select",
+				m("option", {value: ""}, "aaa")
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.firstChild.value).equals("")
 		})
 
 		o("option value defaults to textContent unless explicitly set", function() {
-			var select = {tag: "select", children :[
-				{tag: "option", text: "aaa"}
-			]}
+			var select = m("select",
+				m("option", "aaa")
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.firstChild.value).equals("aaa")
 			o(select.dom.value).equals("aaa")
 
 			//test that value changes when content changes
-			select = {tag: "select", children :[
-				{tag: "option", text: "bbb"}
-			]}
+			select = m("select",
+				m("option", "bbb")
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.firstChild.value).equals("bbb")
 			o(select.dom.value).equals("bbb")
 
 			//test that value can be set to "" in subsequent render
-			select = {tag: "select", children :[
-				{tag: "option", attrs: {value: ""}, text: "aaa"}
-			]}
+			select = m("select",
+				m("option", {value: ""}, "aaa")
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.firstChild.value).equals("")
 			o(select.dom.value).equals("")
 
 			//test that value reverts to textContent when value omitted
-			select = {tag: "select", children :[
-				{tag: "option", text: "aaa"}
-			]}
+			select = m("select",
+				m("option", "aaa")
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.firstChild.value).equals("aaa")
 			o(select.dom.value).equals("aaa")
 		})
 
 		o("select yields invalid value without children", function() {
-			var select = {tag: "select", attrs: {value: "a"}}
+			var select = m("select", {value: "a"})
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.value).equals("")
 			o(select.dom.selectedIndex).equals(-1)
 		})
 
 		o("select value is set correctly on first render", function() {
-			var select = {tag: "select", attrs: {value: "b"}, children: [
-				{tag: "option", attrs: {value: "a"}, text: "aaa"},
-				{tag: "option", attrs: {value: "b"}, text: "bbb"},
-				{tag: "option", attrs: {value: "c"}, text: "ccc"},
-			]}
+			var select = m("select", {value: "b"},
+				m("option", {value: "a"}, "aaa"),
+				m("option", {value: "b"}, "bbb"),
+				m("option", {value: "c"}, "ccc"),
+			)
 
-			render(root, [select])
+			render(root, select)
 
 			o(select.dom.value).equals("b")
 			o(select.dom.selectedIndex).equals(1)
@@ -258,21 +259,21 @@ o.spec("form inputs", function() {
 
 		o("syncs select value if DOM value differs from vdom value", function() {
 			function makeSelect() {
-				return {tag: "select", attrs: {value: "b"}, children: [
-					{tag: "option", attrs: {value: "a"}, text: "aaa"},
-					{tag: "option", attrs: {value: "b"}, text: "bbb"},
-					{tag: "option", attrs: {value: "c"}, text: "ccc"},
-				]}
+				return m("select", {value: "b"},
+					m("option", {value: "a"}, "aaa"),
+					m("option", {value: "b"}, "bbb"),
+					m("option", {value: "c"}, "ccc"),
+				)
 			}
 
-			render(root, [makeSelect()])
+			render(root, makeSelect())
 
 			//simulate user selecting option
 			root.firstChild.value = "c"
 			root.firstChild.focus()
 
 			//re-render may use same vdom value as previous render call
-			render(root, [makeSelect()])
+			render(root, makeSelect())
 
 			o(root.firstChild.value).equals("b")
 			o(root.firstChild.selectedIndex).equals(1)
@@ -281,13 +282,13 @@ o.spec("form inputs", function() {
 
 	o.spec("textarea", function() {
 		o("updates after user input", function() {
-			render(root, [{tag: "textarea", text: "aaa"}])
+			render(root, m("textarea", "aaa"))
 
 			//simulate typing
 			root.firstChild.value = "bbb"
 
 			//re-render may occur after value attribute is touched
-			render(root, [{tag: "textarea", text: "ccc"}])
+			render(root, m("textarea", "ccc"))
 
 			o(root.firstChild.value).equals("ccc")
 			//FIXME should fail if fix is commented out

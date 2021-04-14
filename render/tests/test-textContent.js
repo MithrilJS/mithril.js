@@ -3,6 +3,7 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("textContent", function() {
 	var $window, root, render
@@ -13,188 +14,184 @@ o.spec("textContent", function() {
 	})
 
 	o("ignores null", function() {
-		var vnodes = [{tag: "a", text: null}]
+		var vnode = m("a", null)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(0)
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("ignores undefined", function() {
-		var vnodes = [{tag: "a", text: undefined}]
+		var vnode = m("a", undefined)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(0)
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates string", function() {
-		var vnodes = [{tag: "a", text: "a"}]
+		var vnode = m("a", "a")
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("a")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("a")
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates falsy string", function() {
-		var vnodes = [{tag: "a", text: ""}]
+		var vnode = m("a", "")
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("")
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates number", function() {
-		var vnodes = [{tag: "a", text: 1}]
+		var vnode = m("a", 1)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("1")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("1")
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates falsy number", function() {
-		var vnodes = [{tag: "a", text: 0}]
+		var vnode = m("a", 0)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("0")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("0")
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates boolean", function() {
-		var vnodes = [{tag: "a", text: true}]
+		var vnode = m("a", true)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("true")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("creates falsy boolean", function() {
-		var vnodes = [{tag: "a", text: false}]
+		var vnode = m("a", false)
 
-		render(root, vnodes)
+		render(root, vnode)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("false")
-		o(vnodes[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(vnode.dom).equals(root.childNodes[0])
 	})
 	o("updates to string", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: "b"}]
+		var vnode = m("a", "a")
+		var updated = m("a", "b")
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("b")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("b")
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates to falsy string", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: ""}]
+		var vnode = m("a", "a")
+		var updated = m("a", "")
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("")
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates to number", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: 1}]
+		var vnode = m("a", "a")
+		var updated = m("a", 1)
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("1")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("1")
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates to falsy number", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: 0}]
+		var vnode = m("a", "a")
+		var updated = m("a", 0)
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("0")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("0")
+		o(updated.dom).equals(root.childNodes[0])
 	})
-	o("updates to boolean", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: true}]
+	o("updates true to nothing", function() {
+		var vnode = m("a", "a")
+		var updated = m("a", true)
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("true")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(updated.dom).equals(root.childNodes[0])
 	})
-	o("updates to falsy boolean", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a", text: false}]
+	o("updates false to nothing", function() {
+		var vnode = m("a", "a")
+		var updated = m("a", false)
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("false")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates with typecasting", function() {
-		var vnodes = [{tag: "a", text: "1"}]
-		var updated = [{tag: "a", text: 1}]
+		var vnode = m("a", "1")
+		var updated = m("a", 1)
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("1")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("1")
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates from without text to with text", function() {
-		var vnodes = [{tag: "a"}]
-		var updated = [{tag: "a", text: "b"}]
+		var vnode = m("a")
+		var updated = m("a", "b")
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes[0].nodeValue).equals("b")
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(1)
+		o(vnode.dom.childNodes[0].nodeValue).equals("b")
+		o(updated.dom).equals(root.childNodes[0])
 	})
 	o("updates from with text to without text", function() {
-		var vnodes = [{tag: "a", text: "a"}]
-		var updated = [{tag: "a"}]
+		var vnode = m("a", "a")
+		var updated = m("a")
 
-		render(root, vnodes)
+		render(root, vnode)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(vnodes[0].dom.childNodes.length).equals(0)
-		o(updated[0].dom).equals(root.childNodes[0])
+		o(vnode.dom.childNodes.length).equals(0)
+		o(updated.dom).equals(root.childNodes[0])
 	})
 })

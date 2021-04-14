@@ -6,6 +6,8 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var Promise = require("../../promise/promise")
+var m = require("../../render/hyperscript")
+m.fragment = require("../../render/fragment")
 
 o.spec("onbeforeremove", function() {
 	var $window, root, render
@@ -17,28 +19,28 @@ o.spec("onbeforeremove", function() {
 
 	o("does not call onbeforeremove when creating", function() {
 		var create = o.spy()
-		var vnode = {tag: "div", attrs: {onbeforeremove: create}}
+		var vnode = m("div", {onbeforeremove: create})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		o(create.callCount).equals(0)
 	})
 	o("does not call onbeforeremove when updating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onbeforeremove: create}}
-		var updated = {tag: "div", attrs: {onbeforeremove: update}}
+		var vnode = m("div", {onbeforeremove: create})
+		var updated = m("div", {onbeforeremove: update})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
 	o("calls onbeforeremove when removing element", function(done) {
-		var vnode = {tag: "div", attrs: {onbeforeremove: remove}}
+		var vnode = m("div", {onbeforeremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		function remove(node) {
@@ -55,46 +57,10 @@ o.spec("onbeforeremove", function() {
 			})
 		}
 	})
-	o("calls onbeforeremove when removing text", function(done) {
-		var vnode = {tag: "#", attrs: {onbeforeremove: remove}, children: "a"}
-
-		render(root, [vnode])
-		render(root, [])
-
-		function remove(node) {
-			o(node).equals(vnode)
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild).equals(vnode.dom)
-
-			callAsync(function() {
-				o(root.childNodes.length).equals(0)
-
-				done()
-			})
-		}
-	})
 	o("calls onbeforeremove when removing fragment", function(done) {
-		var vnode = {tag: "[", attrs: {onbeforeremove: remove}, children: [{tag: "div"}]}
+		var vnode = m.fragment({onbeforeremove: remove}, m("div"))
 
-		render(root, [vnode])
-		render(root, [])
-
-		function remove(node) {
-			o(node).equals(vnode)
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild).equals(vnode.dom)
-
-			callAsync(function() {
-				o(root.childNodes.length).equals(0)
-
-				done()
-			})
-		}
-	})
-	o("calls onbeforeremove when removing html", function(done) {
-		var vnode = {tag: "<", attrs: {onbeforeremove: remove}, children: "a"}
-
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		function remove(node) {
@@ -111,9 +77,9 @@ o.spec("onbeforeremove", function() {
 	})
 	o("calls remove after onbeforeremove resolves", function(done) {
 		var spy = o.spy()
-		var vnode = {tag: "<", attrs: {onbeforeremove: remove, onremove: spy}, children: "a"}
+		var vnode = m.fragment({onbeforeremove: remove, onremove: spy}, "a")
 
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		function remove(node) {
@@ -131,28 +97,28 @@ o.spec("onbeforeremove", function() {
 	})
 	o("does not set onbeforeremove as an event handler", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onbeforeremove: remove}, children: []}
+		var vnode = m("div", {onbeforeremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		o(vnode.dom.onbeforeremove).equals(undefined)
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
 	o("does not recycle when there's an onbeforeremove", function() {
 		var remove = function() {}
-		var vnode = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
-		var updated = {tag: "div", key: 1, attrs: {onbeforeremove: remove}}
+		var vnode = m("div", {key: 1, onbeforeremove: remove})
+		var updated = m("div", {key: 1, onbeforeremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
-		render(root, [updated])
+		render(root, updated)
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
 	o("does not leave elements out of order during removal", function(done) {
 		var remove = function() {return Promise.resolve()}
-		var vnodes = [{tag: "div", key: 1, attrs: {onbeforeremove: remove}, text: "1"}, {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}]
-		var updated = {tag: "div", key: 2, attrs: {onbeforeremove: remove}, text: "2"}
+		var vnodes = [m("div", {key: 1, onbeforeremove: remove}, "1"), m("div", {key: 2, onbeforeremove: remove}, "2")]
+		var updated = m("div", {key: 2, onbeforeremove: remove}, "2")
 
 		render(root, vnodes)
 		render(root, updated)
@@ -178,7 +144,7 @@ o.spec("onbeforeremove", function() {
 					onremove: onremove,
 					view: function() {},
 				})
-				render(root, [{tag: component, attrs: {onbeforeremove: onbeforeremove, onremove: onremove}}])
+				render(root, m(component, {onbeforeremove: onbeforeremove, onremove: onremove}))
 				render(root, [])
 				callAsync(function() {
 					o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
@@ -194,7 +160,7 @@ o.spec("onbeforeremove", function() {
 					onremove: onremove,
 					view: view,
 				})
-				render(root, [{tag: component}])
+				render(root, m(component))
 				render(root, [])
 
 				o(onremove.callCount).equals(0)

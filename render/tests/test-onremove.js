@@ -5,6 +5,7 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
+m.fragment = require("../../render/fragment")
 
 o.spec("onremove", function() {
 	var $window, root, render
@@ -17,42 +18,31 @@ o.spec("onremove", function() {
 	o("does not call onremove when creating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(create.callCount).equals(0)
 	})
 	o("does not call onremove when updating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
 	o("calls onremove when removing element", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, state: {}}
+		var vnode = m("div", {onremove: remove})
 
-		render(root, [vnode])
-		render(root, [])
-
-		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode.state)
-		o(remove.args[0]).equals(vnode)
-	})
-	o("calls onremove when removing text", function() {
-		var remove = o.spy()
-		var vnode = {tag: "#", attrs: {onremove: remove}, children: "a", state: {}}
-
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		o(remove.callCount).equals(1)
@@ -61,20 +51,9 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = {tag: "[", attrs: {onremove: remove}, children: [], state: {}}
+		var vnode = m.fragment({onremove: remove})
 
-		render(root, [vnode])
-		render(root, [])
-
-		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode.state)
-		o(remove.args[0]).equals(vnode)
-	})
-	o("calls onremove when removing html", function() {
-		var remove = o.spy()
-		var vnode = {tag: "<", attrs: {onremove: remove}, children: "a", state: {}}
-
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		o(remove.callCount).equals(1)
@@ -83,9 +62,9 @@ o.spec("onremove", function() {
 	})
 	o("does not set onremove as an event handler", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, children: []}
+		var vnode = m("div", {onremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		o(vnode.dom.onremove).equals(undefined)
 		o(vnode.dom.attributes["onremove"]).equals(undefined)
@@ -93,9 +72,9 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove on keyed nodes", function() {
 		var remove = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = [{tag: "div", key: 2, attrs: {onremove: remove}}]
-		var updated = [{tag: "div", key: 1}]
+		var vnodes = [m("div", {key: 1})]
+		var temp = [m("div", {key: 2, onremove: remove})]
+		var updated = [m("div", {key: 1})]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -106,12 +85,12 @@ o.spec("onremove", function() {
 	})
 	o("does not recycle when there's an onremove", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {onremove: remove}}
-		var updated = {tag: "div", key: 1, attrs: {onremove: remove}}
+		var vnode = m("div", {key: 1, onremove: remove})
+		var updated = m("div", {key: 1, onremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
-		render(root, [updated])
+		render(root, updated)
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
@@ -131,7 +110,7 @@ o.spec("onremove", function() {
 					onremove: spy,
 					view: function() {return m("div")}
 				})
-				render(root, {tag: comp})
+				render(root, m(comp))
 				render(root, null)
 
 				o(spy.callCount).equals(1)
@@ -147,7 +126,7 @@ o.spec("onremove", function() {
 				var inner = createComponent({
 					view: function(vnode) {return m("div", vnode.children)}
 				})
-				render(root, {tag: comp})
+				render(root, m(comp))
 				render(root, null)
 
 				o(spy.callCount).equals(1)
@@ -162,7 +141,7 @@ o.spec("onremove", function() {
 					view: function() {},
 					onremove: spy
 				})
-				render(root, {tag: parent, children: [child]})
+				render(root, m(parent, m(child)))
 				try {
 					render(root, null)
 				} catch (e) {
@@ -182,9 +161,9 @@ o.spec("onremove", function() {
 					view: function() {},
 					onremove: spy
 				})
-				render(root, {tag: parent, children: [child]})
+				render(root, m(parent, m(child)))
 				try {
-					render(root, {tag: parent})
+					render(root, m(parent))
 				} catch (e) {
 					threw = true
 				}
@@ -203,13 +182,13 @@ o.spec("onremove", function() {
 			})
 			o("doesn't fire when removing the children of a node that's brought back from the pool (#1991 part 2)", function() {
 				var onremove = o.spy()
-				var vnode = {tag: "div", key: 1, children: [{tag: "div", attrs: {onremove: onremove}}]}
-				var temp = {tag: "div", key: 2}
-				var updated = {tag: "div", key: 1, children: [{tag: "p"}]}
+				var vnode = m("div", {key: 1}, m("div", {onremove: onremove}))
+				var temp = m("div", {key: 2})
+				var updated = m("div", {key: 1}, m("p"))
 
-				render(root, [vnode])
-				render(root, [temp])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, temp)
+				render(root, updated)
 
 				o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 				o(onremove.callCount).equals(1)
@@ -250,20 +229,20 @@ o.spec("onremove", function() {
 				var resolve
 
 				function update(id, showParent, showChild) {
-					render(root, [
-						{tag: "div", children: [
-							showParent ? {tag: "[", children: [
-								{tag: "#", children: ""}, // Required
-								showChild ? {tag: "[", attrs: {
+					render(root,
+						m("div",
+							showParent && m.fragment(
+								"", // Required
+								showChild && m.fragment({
 									onbeforeremove: function () {
 										return {then: function (r) { resolve = r }}
 									},
-								}, children: [
-									{tag: "div", text: id},
-								]} : undefined,
-							]} : undefined,
-						]}
-					])
+								},
+									m("div", id),
+								)
+							),
+						)
+					)
 				}
 
 				update("1", true, true)
@@ -353,23 +332,23 @@ o.spec("onremove", function() {
 				var resolve, reject
 
 				function update(id, showParent, showChild) {
-					render(root, [
-						{tag: "div", children: [
-							showParent ? {tag: "[", children: [
-								{tag: "#", children: ""}, // Required
-								showChild ? {tag: "[", attrs: {
+					render(root,
+						m("div",
+							showParent && m.fragment(
+								"", // Required
+								showChild && m.fragment({
 									onbeforeremove: function () {
 										return {then: function (res, rej) {
 											resolve = res
 											reject = rej
 										}}
 									},
-								}, children: [
-									{tag: "div", text: id},
-								]} : undefined,
-							]} : undefined,
-						]}
-					])
+								},
+									m("div", id),
+								)
+							),
+						)
+					)
 				}
 
 				update("1", true, true)
