@@ -4,7 +4,7 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-m.fragment = require("../../render/hyperscript")
+var fragment = require("../../render/fragment")
 
 o.spec("oninit", function() {
 	var $window, root, render
@@ -26,7 +26,7 @@ o.spec("oninit", function() {
 	})
 	o("calls oninit when creating fragment", function() {
 		var callback = o.spy()
-		var vnode = m.fragment({oninit: callback})
+		var vnode = fragment({oninit: callback})
 
 		render(root, vnode)
 

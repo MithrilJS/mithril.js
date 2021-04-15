@@ -4,7 +4,7 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-m.fragment = require("../../render/fragment")
+var fragment = require("../../render/fragment")
 
 o.spec("onupdate", function() {
 	var $window, root, render
@@ -114,8 +114,8 @@ o.spec("onupdate", function() {
 	o("calls onupdate when updating fragment", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = m.fragment({onupdate: create})
-		var updated = m.fragment({onupdate: update})
+		var vnode = fragment({onupdate: create})
+		var updated = fragment({onupdate: update})
 
 		render(root, vnode)
 		render(root, updated)

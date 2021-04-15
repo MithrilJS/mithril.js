@@ -7,7 +7,7 @@ var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var Promise = require("../../promise/promise")
 var m = require("../../render/hyperscript")
-m.fragment = require("../../render/fragment")
+var fragment = require("../../render/fragment")
 
 o.spec("onbeforeremove", function() {
 	var $window, root, render
@@ -58,7 +58,7 @@ o.spec("onbeforeremove", function() {
 		}
 	})
 	o("calls onbeforeremove when removing fragment", function(done) {
-		var vnode = m.fragment({onbeforeremove: remove}, m("div"))
+		var vnode = fragment({onbeforeremove: remove}, m("div"))
 
 		render(root, vnode)
 		render(root, [])
@@ -77,7 +77,7 @@ o.spec("onbeforeremove", function() {
 	})
 	o("calls remove after onbeforeremove resolves", function(done) {
 		var spy = o.spy()
-		var vnode = m.fragment({onbeforeremove: remove, onremove: spy}, "a")
+		var vnode = fragment({onbeforeremove: remove, onremove: spy}, "a")
 
 		render(root, vnode)
 		render(root, [])
