@@ -431,20 +431,6 @@ m("div", "value", ["nested"])
 }
 ```
 
-If only a single text child is present on a DOM vnode, it instead sets `text` to that value.
-
-```javascript
-m("div", "value")
-
-// Becomes roughly:
-{
-	tag: "div",
-	attrs: null,
-	text: "",
-	children: undefined,
-}
-```
-
 See [the vnode docs](vnodes.md) for more details on the v2.x vnode structure and how things are normalized.
 
 *Most of the v2.x vnode properties here are omitted for brevity.*
