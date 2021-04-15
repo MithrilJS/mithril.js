@@ -108,11 +108,11 @@ When creating libraries that emit vnodes, you should use this module instead of 
 
 ### Avoid anti-patterns
 
-#### Avoid memoizing mutable vnodes
+#### Avoid reusing vnodes
 
-Vnodes are supposed to represent the state of the DOM at a certain point in time. Mithril's rendering engine assumes a reused vnode is unchanged, so modifying a vnode that was used in a previous render will result in undefined behavior.
+Vnodes are supposed to represent the state of the DOM at a certain point in time. Mithril's rendering engine binds vnodes to DOM references & temporary data so it can compute patches. Reusing vnode references in different parts of the view will therefore lead to unpredictable behaviour.
 
-It is possible to reuse vnodes to prevent a diff, but it's preferable to use the `onbeforeupdate` hook to make your intent clear to other developers (or your future self).
+It is possible to reuse vnodes in place to prevent a diff, but it's preferable to use the [`onbeforeupdate`](lifecycle.md#onbeforeupdate). 
 
 #### Avoid passing model data directly to components via attributes
 
