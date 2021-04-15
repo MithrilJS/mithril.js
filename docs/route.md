@@ -859,15 +859,13 @@ m.route(document.body, "/", {
 
 ### Route cancellation / blocking
 
-RouteResolver `onmatch` can prevent navigation away from the current route by returning a promise that never resolves:
+RouteResolver `onmatch` can prevent route resolution by returning a promise that never resolves. This can be used to detect attempted redundant route resolutions and cancel them:
 
 ```javascript
-var blocked = true
-
 m.route(document.body, "/", {
 	"/": {
-		onmatch: function(args) {
-			if (blocked)
+		onmatch: function(args, requestedPath) {
+			if (m.route.get() === requestedPath)
 				return new Promise(function() {})
 		},
 	},
