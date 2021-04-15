@@ -317,7 +317,7 @@ m.mount(document.body, {
 
 ## Component arguments
 
-Arguments to a component in v2.x must be an object, simple values like `String`/`Number`/`Boolean` will be treated as text children. Arguments are accessed within the component by reading them from the `vnode.attrs` object.
+Arguments to a component in v2.x must be an object, simple values like `String`/`Number`/`Boolean` will be treated as children. Arguments are accessed within the component by reading them from the `vnode.attrs` object.
 
 ### v0.2.x
 
@@ -428,6 +428,20 @@ m("div", "value", ["nested"])
 			{tag: "#", children: "nested"},
 		]},
 	]
+}
+```
+
+If only a single text child is present on a DOM vnode, it instead sets `text` to that value.
+
+```javascript
+m("div", "value")
+
+// Becomes roughly:
+{
+	tag: "div",
+	attrs: null,
+	text: "",
+	children: undefined,
 }
 ```
 
