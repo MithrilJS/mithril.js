@@ -4,8 +4,8 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-m.fragment = require("../../render/fragment")
-m.trust = require("../../render/trust")
+var fragment = require("../../render/fragment")
+var trust = require("../../render/trust")
 
 o.spec("createNodes", function() {
 	var $window, root, render
@@ -19,8 +19,8 @@ o.spec("createNodes", function() {
 		var vnodes = [
 			m("a"),
 			"b",
-			m.trust("c"),
-			m.fragment("d"),
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 
@@ -35,8 +35,8 @@ o.spec("createNodes", function() {
 			m("a"),
 			"b",
 			null,
-			m.trust("c"),
-			m.fragment("d"),
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 
@@ -51,8 +51,8 @@ o.spec("createNodes", function() {
 			m("a"),
 			"b",
 			undefined,
-			m.trust("c"),
-			m.fragment("d"),
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 

@@ -4,7 +4,7 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-m.trust = require("../../render/trust")
+var trust = require("../../render/trust")
 
 o.spec("updateHTML", function() {
 	var $window, root, render
@@ -15,8 +15,8 @@ o.spec("updateHTML", function() {
 	})
 
 	o("updates html", function() {
-		var vnode = m.trust("a")
-		var updated = m.trust("b")
+		var vnode = trust("a")
+		var updated = trust("b")
 
 		render(root, vnode)
 		render(root, updated)
@@ -26,8 +26,8 @@ o.spec("updateHTML", function() {
 		o(updated.dom.nodeValue).equals("b")
 	})
 	o("adds html", function() {
-		var vnode = m.trust("")
-		var updated = m.trust("<a></a><b></b>")
+		var vnode = trust("")
+		var updated = trust("<a></a><b></b>")
 
 		render(root, vnode)
 		render(root, updated)
@@ -39,8 +39,8 @@ o.spec("updateHTML", function() {
 		o(root.childNodes[1].nodeName).equals("B")
 	})
 	o("removes html", function() {
-		var vnode = m.trust("<a></a><b></b>")
-		var updated = m.trust("")
+		var vnode = trust("<a></a><b></b>")
+		var updated = trust("")
 
 		render(root, vnode)
 		render(root, updated)
@@ -60,14 +60,14 @@ o.spec("updateHTML", function() {
 		return result
 	}
 	o("updates the dom correctly with a contenteditable parent", function() {
-		var div = m("div", {contenteditable: true}, m.trust("<a></a>"))
+		var div = m("div", {contenteditable: true}, trust("<a></a>"))
 
 		render(root, div)
 		o(childKeysOf(div.dom, "nodeName")).deepEquals(["A"])
 	})
 	o("updates dom with multiple text children", function() {
-		var vnode = ["a", m.trust("<a></a>"), m.trust("<b></b>")]
-		var replacement = ["a", m.trust("<c></c>"), m.trust("<d></d>")]
+		var vnode = ["a", trust("<a></a>"), trust("<b></b>")]
+		var replacement = ["a", trust("<c></c>"), trust("<d></d>")]
 
 		render(root, vnode)
 		render(root, replacement)
@@ -76,12 +76,12 @@ o.spec("updateHTML", function() {
 	})
 	o("updates dom with multiple text children in other parents", function() {
 		var vnode = [
-			m("div", "a", m.trust("<a></a>")),
-			m("div", "b", m.trust("<b></b>")),
+			m("div", "a", trust("<a></a>")),
+			m("div", "b", trust("<b></b>")),
 		]
 		var replacement = [
-			m("div", "c", m.trust("<c></c>")),
-			m("div", "d", m.trust("<d></d>")),
+			m("div", "c", trust("<c></c>")),
+			m("div", "d", trust("<d></d>")),
 		]
 
 		render(root, vnode)
@@ -95,20 +95,20 @@ o.spec("updateHTML", function() {
 	})
 	o("correctly diffs if followed by another trusted vnode", function() {
 		render(root, [
-			m.trust("<span>A</span>"),
-			m.trust("<span>A</span>"),
+			trust("<span>A</span>"),
+			trust("<span>A</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["A", "A"])
 		render(root, [
-			m.trust("<span>B</span>"),
-			m.trust("<span>A</span>"),
+			trust("<span>B</span>"),
+			trust("<span>A</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["B", "A"])
 		render(root, [
-			m.trust("<span>B</span>"),
-			m.trust("<span>B</span>"),
+			trust("<span>B</span>"),
+			trust("<span>B</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["B", "B"])

@@ -4,7 +4,7 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-m.fragment = require("../../render/fragment")
+var fragment = require("../../render/fragment")
 
 o.spec("oncreate", function() {
 	var $window, root, render
@@ -26,7 +26,7 @@ o.spec("oncreate", function() {
 	})
 	o("calls oncreate when creating fragment", function() {
 		var callback = o.spy()
-		var vnode = m.fragment({oncreate: callback})
+		var vnode = fragment({oncreate: callback})
 
 		render(root, vnode)
 
