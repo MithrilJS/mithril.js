@@ -2,14 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("createHTML", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 	})
 
 	o("creates HTML", function() {

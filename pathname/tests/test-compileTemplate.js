@@ -1,10 +1,16 @@
 "use strict"
 
 var o = require("ospec")
-var parsePathname = require("../../pathname/parse")
-var compileTemplate = require("../../pathname/compileTemplate")
+var load = require("../../test-utils/load")
 
 o.spec("compileTemplate", function() {
+	var parsePathname, compileTemplate
+
+	o.beforeEach(function() {
+		parsePathname = load.mithril().parsePathname
+		compileTemplate = load.compileTemplate()
+	})
+
 	o("checks empty string", function() {
 		var data = parsePathname("/")
 		o(compileTemplate("/")(data)).equals(true)

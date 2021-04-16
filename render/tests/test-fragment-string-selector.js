@@ -3,7 +3,7 @@
 var o = require("ospec")
 var loadMithril = require("../../test-utils/load").mithril
 
-o.spec("fragment", function() {
+o.spec("fragment-string-selector", function() {
 	var m
 
 	o.beforeEach(function () {
@@ -13,7 +13,7 @@ o.spec("fragment", function() {
 	o("works", function() {
 		var attrs = {foo: 5}
 		var child = {tag: "p"}
-		var frag = m.fragment(attrs, [child])
+		var frag = m("[", attrs, [child])
 
 		o(frag.tag).equals("[")
 
@@ -27,7 +27,7 @@ o.spec("fragment", function() {
 	})
 	o("supports keys", function() {
 		var attrs = {key: 7}
-		var frag = m.fragment(attrs, [])
+		var frag = m("[", attrs, [])
 		o(frag.tag).equals("[")
 
 		o(Array.isArray(frag.children)).equals(true)
@@ -40,51 +40,51 @@ o.spec("fragment", function() {
 	})
 	o.spec("children with no attrs", function() {
 		o("handles string single child", function() {
-			var vnode = m.fragment(["a"])
+			var vnode = m("[", ["a"])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("a")
 		})
 		o("handles falsy string single child", function() {
-			var vnode = m.fragment([""])
+			var vnode = m("[", [""])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("")
 		})
 		o("handles number single child", function() {
-			var vnode = m.fragment([1])
+			var vnode = m("[", [1])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("1")
 		})
 		o("handles falsy number single child", function() {
-			var vnode = m.fragment([0])
+			var vnode = m("[", [0])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("0")
 		})
 		o("handles boolean single child", function() {
-			var vnode = m.fragment([true])
+			var vnode = m("[", [true])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles falsy boolean single child", function() {
-			var vnode = m.fragment([false])
+			var vnode = m("[", [false])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles null single child", function() {
-			var vnode = m.fragment([null])
+			var vnode = m("[", [null])
 
 			o(vnode.children[0]).equals(null)
 		})
 		o("handles undefined single child", function() {
-			var vnode = m.fragment([undefined])
+			var vnode = m("[", [undefined])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles multiple string children", function() {
-			var vnode = m.fragment(["", "a"])
+			var vnode = m("[", ["", "a"])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("")
@@ -92,7 +92,7 @@ o.spec("fragment", function() {
 			o(vnode.children[1].children).equals("a")
 		})
 		o("handles multiple number children", function() {
-			var vnode = m.fragment([0, 1])
+			var vnode = m("[", [0, 1])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("0")
@@ -100,17 +100,17 @@ o.spec("fragment", function() {
 			o(vnode.children[1].children).equals("1")
 		})
 		o("handles multiple boolean children", function() {
-			var vnode = m.fragment([false, true])
+			var vnode = m("[", [false, true])
 
 			o(vnode.children).deepEquals([null, null])
 		})
 		o("handles multiple null/undefined child", function() {
-			var vnode = m.fragment([null, undefined])
+			var vnode = m("[", [null, undefined])
 
 			o(vnode.children).deepEquals([null, null])
 		})
 		o("handles falsy number single child without attrs", function() {
-			var vnode = m.fragment(0)
+			var vnode = m("[", 0)
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("0")
@@ -118,51 +118,51 @@ o.spec("fragment", function() {
 	})
 	o.spec("children with attrs", function() {
 		o("handles string single child", function() {
-			var vnode = m.fragment({}, ["a"])
+			var vnode = m("[", {}, ["a"])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("a")
 		})
 		o("handles falsy string single child", function() {
-			var vnode = m.fragment({}, [""])
+			var vnode = m("[", {}, [""])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("")
 		})
 		o("handles number single child", function() {
-			var vnode = m.fragment({}, [1])
+			var vnode = m("[", {}, [1])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("1")
 		})
 		o("handles falsy number single child", function() {
-			var vnode = m.fragment({}, [0])
+			var vnode = m("[", {}, [0])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("0")
 		})
 		o("handles boolean single child", function() {
-			var vnode = m.fragment({}, [true])
+			var vnode = m("[", {}, [true])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles falsy boolean single child", function() {
-			var vnode = m.fragment({}, [false])
+			var vnode = m("[", {}, [false])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles null single child", function() {
-			var vnode = m.fragment({}, [null])
+			var vnode = m("[", {}, [null])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles undefined single child", function() {
-			var vnode = m.fragment({}, [undefined])
+			var vnode = m("[", {}, [undefined])
 
 			o(vnode.children).deepEquals([null])
 		})
 		o("handles multiple string children", function() {
-			var vnode = m.fragment({}, ["", "a"])
+			var vnode = m("[", {}, ["", "a"])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("")
@@ -170,7 +170,7 @@ o.spec("fragment", function() {
 			o(vnode.children[1].children).equals("a")
 		})
 		o("handles multiple number children", function() {
-			var vnode = m.fragment({}, [0, 1])
+			var vnode = m("[", {}, [0, 1])
 
 			o(vnode.children[0].tag).equals("#")
 			o(vnode.children[0].children).equals("0")
@@ -178,12 +178,12 @@ o.spec("fragment", function() {
 			o(vnode.children[1].children).equals("1")
 		})
 		o("handles multiple boolean children", function() {
-			var vnode = m.fragment({}, [false, true])
+			var vnode = m("[", {}, [false, true])
 
 			o(vnode.children).deepEquals([null, null])
 		})
 		o("handles multiple null/undefined child", function() {
-			var vnode = m.fragment({}, [null, undefined])
+			var vnode = m("[", {}, [null, undefined])
 
 			o(vnode.children).deepEquals([null, null])
 		})

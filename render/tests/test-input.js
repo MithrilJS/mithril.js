@@ -2,13 +2,13 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("form inputs", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 		root = $window.document.createElement("div")
 		$window.document.body.appendChild(root)
 	})
@@ -131,7 +131,7 @@ o.spec("form inputs", function() {
 
 		o("retains file input value attribute if DOM value is the same as vdom value and is non-empty", function() {
 			var $window = domMock(o)
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 			var root = $window.document.createElement("div")
 			$window.document.body.appendChild(root)
 			var input = {tag: "input", attrs: {type: "file", value: "", onclick: function() {}}}

@@ -1,9 +1,11 @@
 "use strict"
 
 var o = require("ospec")
-var m = require("../../render/hyperscript")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("hyperscript", function() {
+	var m; o.beforeEach(function () { m = loadMithril() })
+
 	o.spec("selector", function() {
 		o("throws on null selector", function(done) {
 			try {m(null)} catch(e) {done()}

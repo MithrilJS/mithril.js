@@ -1,16 +1,16 @@
 "use strict"
 
 var o = require("ospec")
-var components = require("../../test-utils/components")
+var utils = require("../../test-utils/utils")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("onbeforeupdate", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 	})
 
 	o("prevents update in element", function() {
@@ -134,9 +134,9 @@ o.spec("onbeforeupdate", function() {
 		o(onbeforeupdate.callCount).equals(0)
 	})
 
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	Object.keys(utils.components).forEach(function(kind){
+		o.spec(kind, function(){
+			var createComponent = utils.components[kind]
 
 			o("prevents update in component", function() {
 				var component = createComponent({

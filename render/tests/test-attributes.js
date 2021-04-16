@@ -2,14 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("attributes", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.body
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 	})
 	o.spec("basics", function() {
 		o("works (create/update/remove)", function() {
@@ -255,7 +255,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 
 			var a = {tag: "input"}
 			var b = {tag: "input", attrs: {value: "1"}}
@@ -294,7 +294,7 @@ o.spec("attributes", function() {
 		o("the input.type setter is never used", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 
 			var a = {tag: "input", attrs: {type: "radio"}}
 			var b = {tag: "input", attrs: {type: "text"}}
@@ -334,7 +334,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 
 			var a = {tag: "textarea"}
 			var b = {tag: "textarea", attrs: {value: "1"}}
@@ -480,7 +480,7 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 
 			var a = {tag: "option"}
 			var b = {tag: "option", attrs: {value: "1"}}
@@ -618,7 +618,7 @@ o.spec("attributes", function() {
 		o("updates with the same value do not re-set the attribute if the select has focus", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
+			var render = loadMithril({window: $window}).render
 
 			var a = makeSelect()
 			var b = makeSelect("1")

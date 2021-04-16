@@ -1,9 +1,12 @@
 "use strict"
 
 var o = require("ospec")
-var parsePathname = require("../../pathname/parse")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("parsePathname", function() {
+	var parsePathname
+	o.beforeEach(function() { parsePathname = loadMithril().parsePathname })
+
 	o("parses empty string", function() {
 		var data = parsePathname("")
 		o(data).deepEquals({

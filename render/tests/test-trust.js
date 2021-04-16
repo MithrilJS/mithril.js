@@ -1,29 +1,31 @@
 "use strict"
 
 var o = require("ospec")
-var trust = require("../../render/trust")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("trust", function() {
+	var m; o.beforeEach(function() { m = loadMithril() })
+
 	o("works with html", function() {
-		var vnode = trust("<a></a>")
+		var vnode = m.trust("<a></a>")
 
 		o(vnode.tag).equals("<")
 		o(vnode.children).equals("<a></a>")
 	})
 	o("works with text", function() {
-		var vnode = trust("abc")
+		var vnode = m.trust("abc")
 
 		o(vnode.tag).equals("<")
 		o(vnode.children).equals("abc")
 	})
 	o("casts null to empty string", function() {
-		var vnode = trust(null)
+		var vnode = m.trust(null)
 
 		o(vnode.tag).equals("<")
 		o(vnode.children).equals("")
 	})
 	o("casts undefined to empty string", function() {
-		var vnode = trust(undefined)
+		var vnode = m.trust(undefined)
 
 		o(vnode.tag).equals("<")
 		o(vnode.children).equals("")

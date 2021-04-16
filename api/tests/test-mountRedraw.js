@@ -2,12 +2,10 @@
 
 // Low-priority TODO: remove the dependency on the renderer here.
 var o = require("ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var throttleMocker = require("../../test-utils/throttleMock")
-var mountRedraw = require("../../api/mount-redraw")
-var coreRenderer = require("../../render/render")
-var h = require("../../render/hyperscript")
+var loadMithril = require("../../test-utils/load").mithril
+var utils = require("../../test-utils/utils")
 
 o.spec("mount/redraw", function() {
 	var root, m, throttleMock, consoleMock, $document, errors
@@ -16,7 +14,8 @@ o.spec("mount/redraw", function() {
 		consoleMock = {error: o.spy()}
 		throttleMock = throttleMocker()
 		root = $window.document.body
-		m = mountRedraw(coreRenderer($window), throttleMock.schedule, consoleMock)
+		$window.requestAnimationFrame = throttleMock.schedule
+		m = loadMithril({window: $window, console: consoleMock})
 		$document = $window.document
 		errors = []
 	})
@@ -358,9 +357,9 @@ o.spec("mount/redraw", function() {
 		])
 	})
 
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	Object.keys(utils.components).forEach(function(kind){
+		o.spec(kind, function(){
+			var createComponent = utils.components[kind]
 
 			o("throws on invalid `root` DOM node", function() {
 				o(function() {
@@ -371,7 +370,7 @@ o.spec("mount/redraw", function() {
 			o("renders into `root` synchronously", function() {
 				m.mount(root, createComponent({
 					view: function() {
-						return h("div")
+						return m("div")
 					}
 				}))
 
@@ -381,7 +380,7 @@ o.spec("mount/redraw", function() {
 			o("mounting null unmounts", function() {
 				m.mount(root, createComponent({
 					view: function() {
-						return h("div")
+						return m("div")
 					}
 				}))
 
@@ -416,7 +415,7 @@ o.spec("mount/redraw", function() {
 
 				m.mount(root, createComponent({
 					view: function() {
-						return h("div", {
+						return m("div", {
 							oninit: oninit,
 							onupdate: onupdate,
 							onclick: onclick,
@@ -455,7 +454,7 @@ o.spec("mount/redraw", function() {
 
 				m.mount(root1, createComponent({
 					view: function() {
-						return h("div", {
+						return m("div", {
 							oninit: oninit0,
 							onupdate: onupdate0,
 							onclick: onclick0,
@@ -468,7 +467,7 @@ o.spec("mount/redraw", function() {
 
 				m.mount(root2, createComponent({
 					view: function() {
-						return h("div", {
+						return m("div", {
 							oninit: oninit1,
 							onupdate: onupdate1,
 							onclick: onclick1,
@@ -510,7 +509,7 @@ o.spec("mount/redraw", function() {
 
 				m.mount(root, createComponent({
 					view: function() {
-						return h("div", {
+						return m("div", {
 							oninit: oninit,
 							onupdate: onupdate,
 							onclick: function(e) {
@@ -537,7 +536,7 @@ o.spec("mount/redraw", function() {
 
 				m.mount(root, createComponent({
 					view: function() {
-						return h("div", {
+						return m("div", {
 							oninit: oninit,
 							onupdate: onupdate
 						})

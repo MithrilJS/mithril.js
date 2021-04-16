@@ -1,17 +1,17 @@
 "use strict"
 
 var o = require("ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
-var m = require("../../render/hyperscript")
+var loadMithril = require("../../test-utils/load").mithril
+var utils = require("../../test-utils/utils")
 
 o.spec("onremove", function() {
-	var $window, root, render
+	var $window, root, m, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		m = loadMithril({window: $window})
+		render = m.render
 	})
 
 	o("does not call onremove when creating", function() {
@@ -115,9 +115,9 @@ o.spec("onremove", function() {
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	Object.keys(utils.components).forEach(function(kind){
+		o.spec(kind, function(){
+			var createComponent = utils.components[kind]
 
 			o("calls onremove on nested component", function() {
 				var spy = o.spy()

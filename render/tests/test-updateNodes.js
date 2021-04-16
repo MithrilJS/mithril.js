@@ -1,16 +1,16 @@
 "use strict"
 
 var o = require("ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
+var utils = require("../../test-utils/utils")
 
 o.spec("updateNodes", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 	})
 
 	o("handles el noop", function() {
@@ -1277,9 +1277,9 @@ o.spec("updateNodes", function() {
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	Object.keys(utils.components).forEach(function(kind){
+		o.spec(kind, function(){
+			var createComponent = utils.components[kind]
 
 			o("fragment child toggles from null when followed by null component then tag", function() {
 				var component = createComponent({view: function() {return null}})

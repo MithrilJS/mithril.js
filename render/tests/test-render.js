@@ -2,18 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("render", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
-	})
-
-	o("initializes without DOM", function() {
-		vdom()
+		render = loadMithril({window: $window}).render
 	})
 
 	o("renders plain text", function() {

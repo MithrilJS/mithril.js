@@ -1,9 +1,12 @@
 "use strict"
 
 var o = require("ospec")
-var buildQueryString = require("../../querystring/build")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("buildQueryString", function() {
+	var buildQueryString
+	o.beforeEach(function() { buildQueryString = loadMithril().buildQueryString })
+
 	o("handles flat object", function() {
 		var string = buildQueryString({a: "b", c: 1})
 

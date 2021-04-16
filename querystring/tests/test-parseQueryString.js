@@ -1,9 +1,12 @@
 "use strict"
 
 var o = require("ospec")
-var parseQueryString = require("../../querystring/parse")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("parseQueryString", function() {
+	var parseQueryString
+	o.beforeEach(function() { parseQueryString = loadMithril().parseQueryString })
+
 	o("works", function() {
 		var data = parseQueryString("?aaa=bbb")
 		o(data).deepEquals({aaa: "bbb"})

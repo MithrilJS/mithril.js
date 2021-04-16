@@ -2,7 +2,7 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("event", function() {
 	var $window, root, redraw, render, reallyRender
@@ -10,7 +10,7 @@ o.spec("event", function() {
 		$window = domMock()
 		root = $window.document.body
 		redraw = o.spy()
-		reallyRender = vdom($window)
+		reallyRender = loadMithril({window: $window}).render
 		render = function(dom, vnode) {
 			return reallyRender(dom, vnode, redraw)
 		}

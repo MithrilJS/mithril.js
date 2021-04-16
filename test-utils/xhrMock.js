@@ -11,8 +11,23 @@ module.exports = function() {
 		return {status: 500, responseText: "server error, most likely the URL was not defined " + url}
 	}
 
+	function invokeScript($window, element) {
+		var urlData = parseURL(element.src, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
+		var handler = routes["GET " + urlData.pathname] || serverErrorHandler.bind(null, element.src)
+		var data = handler({url: urlData.pathname, query: urlData.search, body: null})
+		parseQueryString(urlData.search)
+		callAsync(function() {
+			if (data.status === 200) {
+				new Function("$window", "with ($window) return " + data.responseText).call($window, $window)
+			}
+			else if (typeof element.onerror === "function") {
+				element.onerror({type: "error"})
+			}
+		})
+	}
+
 	function FormData() {}
-	var $window = {
+	return {
 		FormData: FormData,
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
@@ -56,7 +71,7 @@ module.exports = function() {
 			}})
 			this.send = function(body) {
 				var self = this
-				
+
 				var completeResponse = function (data) {
 					self._responseCompleted = true
 					if(!aborted) {
@@ -106,32 +121,15 @@ module.exports = function() {
 				aborted = true
 			}
 		},
-		document: {
-			createElement: function(tag) {
-				return {nodeName: tag.toUpperCase(), parentNode: null}
-			},
-			documentElement: {
-				appendChild: function(element) {
-					element.parentNode = this
-					if (element.nodeName === "SCRIPT") {
-						var urlData = parseURL(element.src, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
-						var handler = routes["GET " + urlData.pathname] || serverErrorHandler.bind(null, element.src)
-						var data = handler({url: urlData.pathname, query: urlData.search, body: null})
-						parseQueryString(urlData.search)
-						callAsync(function() {
-							if (data.status === 200) {
-								new Function("$window", "with ($window) return " + data.responseText).call($window, $window)
-							}
-							else if (typeof element.onerror === "function") {
-								element.onerror({type: "error"})
-							}
-						})
-					}
-				},
-				removeChild: function(element) {
-					element.parentNode = null
-				},
-			},
+		$crawlScripts: function($window) {
+			var current = $window.document.documentElement.firstChild
+			while (current != null) {
+				if (current.nodeName === "SCRIPT" && !current.$$visited) {
+					current.$$visited = true
+					invokeScript($window, current)
+				}
+				current = current.nextSibling
+			}
 		},
 		$defineRoutes: function(rules) {
 			routes = rules
@@ -140,5 +138,4 @@ module.exports = function() {
 			// callback = key
 		},
 	}
-	return $window
 }

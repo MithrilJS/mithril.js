@@ -2,23 +2,25 @@
 
 var o = require("ospec")
 var xhrMock = require("../../test-utils/xhrMock")
+var domMock = require("../../test-utils/domMock")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("xhrMock", function() {
-	var $window
+	var mock, $window
 	o.beforeEach(function() {
-		$window = xhrMock()
+		mock = xhrMock()
+		$window = domMock()
 	})
 
 	o.spec("xhr", function() {
 		o("works", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /item": function(request) {
 					o(request.url).equals("/item")
 					return {status: 200, responseText: "test"}
 				}
 			})
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("GET", "/item")
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -30,13 +32,13 @@ o.spec("xhrMock", function() {
 			xhr.send()
 		})
 		o("works w/ search", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /item": function(request) {
 					o(request.query).equals("?a=b")
 					return {status: 200, responseText: "test"}
 				}
 			})
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("GET", "/item?a=b")
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -46,13 +48,13 @@ o.spec("xhrMock", function() {
 			xhr.send()
 		})
 		o("works w/ body", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"POST /item": function(request) {
 					o(request.body).equals("a=b")
 					return {status: 200, responseText: "test"}
 				}
 			})
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("POST", "/item")
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -62,13 +64,13 @@ o.spec("xhrMock", function() {
 			xhr.send("a=b")
 		})
 		o("passes event to onreadystatechange", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /item": function(request) {
 					o(request.url).equals("/item")
 					return {status: 200, responseText: "test"}
 				}
 			})
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("GET", "/item")
 			xhr.onreadystatechange = function(ev) {
 				o(ev.target).equals(xhr)
@@ -79,7 +81,7 @@ o.spec("xhrMock", function() {
 			xhr.send()
 		})
 		o("handles routing error", function(done) {
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("GET", "/nonexistent")
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -91,7 +93,7 @@ o.spec("xhrMock", function() {
 		})
 		o("Setting a header twice merges the header", function() {
 			// Source: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/setRequestHeader
-			var xhr = new $window.XMLHttpRequest()
+			var xhr = new mock.XMLHttpRequest()
 			xhr.open("POST", "/test")
 			xhr.setRequestHeader("Content-Type", "foo")
 			xhr.setRequestHeader("Content-Type", "bar")
@@ -100,7 +102,7 @@ o.spec("xhrMock", function() {
 	})
 	o.spec("jsonp", function() {
 		o("works", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /test": function(request) {
 					var queryData = parseQueryString(request.query)
 					return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify({a: 1}) + ")"}
@@ -112,6 +114,7 @@ o.spec("xhrMock", function() {
 			var script = $window.document.createElement("script")
 			script.src = "/test?callback=cb"
 			$window.document.documentElement.appendChild(script)
+			mock.$crawlScripts($window)
 
 			function finish(data) {
 				o(data).deepEquals({a: 1})
@@ -119,19 +122,20 @@ o.spec("xhrMock", function() {
 			}
 		})
 		o("works w/ custom callback key", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /test": function(request) {
 					var queryData = parseQueryString(request.query)
 					return {status: 200, responseText: queryData["cb"] + "(" + JSON.stringify({a: 2}) + ")"}
 				}
 			})
-			$window.$defineJSONPCallbackKey("cb")
+			mock.$defineJSONPCallbackKey("cb")
 
 			$window["customcb"] = finish2
 
 			var script = $window.document.createElement("script")
 			script.src = "/test?cb=customcb"
 			$window.document.documentElement.appendChild(script)
+			mock.$crawlScripts($window)
 
 			function finish2(data) {
 				o(data).deepEquals({a: 2})
@@ -139,7 +143,7 @@ o.spec("xhrMock", function() {
 			}
 		})
 		o("works with other querystring params", function(done) {
-			$window.$defineRoutes({
+			mock.$defineRoutes({
 				"GET /test": function(request) {
 					var queryData = parseQueryString(request.query)
 					return {status: 200, responseText: queryData["callback"] + "(" + JSON.stringify({a: 3}) + ")"}
@@ -151,6 +155,7 @@ o.spec("xhrMock", function() {
 			var script = $window.document.createElement("script")
 			script.src = "/test?a=b&callback=cbwithinparams&c=d"
 			$window.document.documentElement.appendChild(script)
+			mock.$crawlScripts($window)
 
 			function finish(data) {
 				o(data).deepEquals({a: 3})
@@ -162,6 +167,7 @@ o.spec("xhrMock", function() {
 			script.onerror = finish
 			script.src = "/test?cb=nonexistent"
 			$window.document.documentElement.appendChild(script)
+			mock.$crawlScripts($window)
 
 			function finish(e) {
 				o(e.type).equals("error")

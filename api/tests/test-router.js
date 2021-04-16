@@ -4,12 +4,8 @@
 var o = require("ospec")
 var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
-
-var m = require("../../render/hyperscript")
-var coreRenderer = require("../../render/render")
-var apiMountRedraw = require("../../api/mount-redraw")
-var apiRouter = require("../../api/router")
-var Promise = require("../../promise/promise")
+var apiRouter = require("../router")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("route", function() {
 	// Note: the `n` parameter used in calls to this are generally found by
@@ -37,10 +33,10 @@ o.spec("route", function() {
 		})
 	}
 
-	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
+	[{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
+		["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
-				var $window, root, mountRedraw, route, throttleMock
+				var $window, root, route, throttleMock, m, Promise
 				var nextID = 0
 				var currentTest = 0
 
@@ -80,8 +76,10 @@ o.spec("route", function() {
 
 					root = $window.document.body
 
-					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
-					route = apiRouter($window, mountRedraw)
+					$window.requestAnimationFrame = throttleMock.schedule
+					m = loadMithril({window: $window})
+					Promise = $window.Promise
+					route = m.route
 					route.prefix = prefix
 					console.error = function() {
 						realError.call(this, new Error("Unexpected `console.error` call"))
@@ -284,7 +282,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					mountRedraw.redraw()
+					m.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -304,7 +302,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					mountRedraw.redraw()
+					m.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -323,7 +321,7 @@ o.spec("route", function() {
 
 					o(view.callCount).equals(1)
 
-					mountRedraw.redraw()
+					m.redraw()
 
 					o(view.callCount).equals(1)
 
@@ -345,7 +343,7 @@ o.spec("route", function() {
 
 					o(root.firstChild.nodeName).equals("DIV")
 
-					mountRedraw.mount(root)
+					m.mount(root)
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -408,7 +406,7 @@ o.spec("route", function() {
 
 					o(oninit.callCount).equals(1)
 
-					mountRedraw.redraw()
+					m.redraw()
 					throttleMock.fire()
 
 					o(onupdate.callCount).equals(1)
@@ -574,40 +572,32 @@ o.spec("route", function() {
 
 				o("route.Link can render without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
+					var m = loadMithril()
+					route = m.route
 					route.prefix = prefix
-					root = $window.document.body
 
-					render(root, m(route.Link, {href: "/test", foo: "bar"}, "text"))
+					var vnode = m(route.Link, {href: "/test", foo: "bar"}, "text")
+					var result = route.Link.view(vnode)
 
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("A")
-					o(root.firstChild.href).equals(prefix + "/test")
-					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
-					o(root.firstChild.hasAttribute("disabled")).equals(false)
-					o(root.firstChild.attributes["foo"].value).equals("bar")
-					o(root.firstChild.childNodes.length).equals(1)
-					o(root.firstChild.firstChild.nodeName).equals("#text")
-					o(root.firstChild.firstChild.nodeValue).equals("text")
+					o(result).deepEquals(m("a", {
+						href: prefix + "/test",
+						onclick: result.attrs.onclick,
+						disabled: false,
+						foo: "bar"
+					}, "text"))
 				})
 
 				o("route.Link keeps magic attributes from being double-called", function() {
-					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
-					route.prefix = prefix
-					root = $window.document.body
-
 					var oninit = o.spy()
 					var oncreate = o.spy()
 					var onbeforeupdate = o.spy()
 					var onupdate = o.spy()
 					var onbeforeremove = o.spy()
 					var onremove = o.spy()
+					var route = apiRouter(null, null)
 
-					render(root, m(route.Link, {
-						href: "/test",
+					m.render(root, m(route.Link, {
+						href: prefix + "/test",
 						oninit: oninit,
 						oncreate: oncreate,
 						onbeforeupdate: onbeforeupdate,
@@ -623,8 +613,8 @@ o.spec("route", function() {
 					o(onbeforeremove.callCount).equals(0)
 					o(onremove.callCount).equals(0)
 
-					render(root, m(route.Link, {
-						href: "/test",
+					m.render(root, m(route.Link, {
+						href: prefix + "/test",
 						oninit: oninit,
 						oncreate: oncreate,
 						onbeforeupdate: onbeforeupdate,
@@ -640,7 +630,7 @@ o.spec("route", function() {
 					o(onbeforeremove.callCount).equals(0)
 					o(onremove.callCount).equals(0)
 
-					render(root, [])
+					m.render(root, [])
 
 					o(oninit.callCount).equals(1)
 					o(oncreate.callCount).equals(1)
@@ -652,52 +642,42 @@ o.spec("route", function() {
 
 				o("route.Link can render other tag without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
+					var m = loadMithril()
+					route = m.route
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {selector: "button", href: "/test", foo: "bar"}, "text"))
+					var vnode = m(route.Link, {selector: "button", href: "/test", foo: "bar"}, "text")
+					var result = route.Link.view(vnode)
 
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("BUTTON")
-					o(root.firstChild.attributes["href"].value).equals(prefix + "/test")
-					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
-					o(root.firstChild.hasAttribute("disabled")).equals(false)
-					o(root.firstChild.attributes["foo"].value).equals("bar")
-					o(root.firstChild.childNodes.length).equals(1)
-					o(root.firstChild.firstChild.nodeName).equals("#text")
-					o(root.firstChild.firstChild.nodeValue).equals("text")
+					o(result).deepEquals(m("button", {
+						href: prefix + "/test",
+						onclick: result.attrs.onclick,
+						disabled: false,
+						foo: "bar"
+					}, "text"))
 				})
 
 				o("route.Link can render other selector without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
+					var m = loadMithril()
+					route = m.route
 					route.prefix = prefix
 					root = $window.document.body
 
-					render(root, m(route.Link, {selector: "button[href=/test]", foo: "bar"}, "text"))
+					var vnode = m(route.Link, {selector: "button[href=/test]", foo: "bar"}, "text")
+					var result = route.Link.view(vnode)
 
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("BUTTON")
-					o(root.firstChild.attributes["href"].value).equals(prefix + "/test")
-					o(root.firstChild.hasAttribute("aria-disabled")).equals(false)
-					o(root.firstChild.hasAttribute("disabled")).equals(false)
-					o(root.firstChild.attributes["foo"].value).equals("bar")
-					o(root.firstChild.childNodes.length).equals(1)
-					o(root.firstChild.firstChild.nodeName).equals("#text")
-					o(root.firstChild.firstChild.nodeValue).equals("text")
+					o(result).deepEquals(m("button", {
+						href: prefix + "/test",
+						onclick: result.attrs.onclick,
+						disabled: false,
+						foo: "bar"
+					}, "text"))
 				})
 
 				o("route.Link can render not disabled", function() {
-					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
-					route.prefix = prefix
-					root = $window.document.body
-
-					render(root, m(route.Link, {href: "/test", disabled: false, foo: "bar"}, "text"))
+					m.render(root, m(route.Link, {href: "/test", disabled: false, foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("A")
@@ -711,13 +691,7 @@ o.spec("route", function() {
 				})
 
 				o("route.Link can render falsy disabled", function() {
-					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
-					route.prefix = prefix
-					root = $window.document.body
-
-					render(root, m(route.Link, {href: "/test", disabled: 0, foo: "bar"}, "text"))
+					m.render(root, m(route.Link, {href: "/test", disabled: 0, foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("A")
@@ -731,13 +705,7 @@ o.spec("route", function() {
 				})
 
 				o("route.Link can render disabled", function() {
-					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
-					route.prefix = prefix
-					root = $window.document.body
-
-					render(root, m(route.Link, {href: "/test", disabled: true, foo: "bar"}, "text"))
+					m.render(root, m(route.Link, {href: "/test", disabled: true, foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("A")
@@ -751,13 +719,7 @@ o.spec("route", function() {
 				})
 
 				o("route.Link can render truthy disabled", function() {
-					$window = browserMock(env)
-					var render = coreRenderer($window)
-					route = apiRouter(null, null)
-					route.prefix = prefix
-					root = $window.document.body
-
-					render(root, m(route.Link, {href: "/test", disabled: 1, foo: "bar"}, "text"))
+					m.render(root, m(route.Link, {href: "/test", disabled: 1, foo: "bar"}, "text"))
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild.nodeName).equals("A")
@@ -1283,7 +1245,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						mountRedraw.redraw()
+						m.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -1317,7 +1279,7 @@ o.spec("route", function() {
 						o(matchCount).equals(1)
 						o(renderCount).equals(1)
 
-						mountRedraw.redraw()
+						m.redraw()
 						throttleMock.fire()
 
 						o(matchCount).equals(1)
@@ -1603,7 +1565,7 @@ o.spec("route", function() {
 						o(view.callCount).equals(1)
 						o(onmatch.callCount).equals(1)
 
-						mountRedraw.redraw()
+						m.redraw()
 						throttleMock.fire()
 
 						o(view.callCount).equals(2)
@@ -1844,10 +1806,10 @@ o.spec("route", function() {
 					})
 					var before = i
 
-					mountRedraw.redraw()
-					mountRedraw.redraw()
-					mountRedraw.redraw()
-					mountRedraw.redraw()
+					m.redraw()
+					m.redraw()
+					m.redraw()
+					m.redraw()
 					var after = i
 
 					throttleMock.fire()

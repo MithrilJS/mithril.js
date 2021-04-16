@@ -1,238 +1,243 @@
 "use strict"
 
 var o = require("ospec")
-var callAsync = require("../../test-utils/callAsync")
+var domMock = require("../../test-utils/domMock")
 var xhrMock = require("../../test-utils/xhrMock")
-var Request = require("../../request/request")
-var PromisePolyfill = require("../../promise/promise")
+var throttleMocker = require("../../test-utils/throttleMock")
+var loadMithril = require("../../test-utils/load").mithril
+var utils = require("../../test-utils/utils")
 
 o.spec("request", function() {
-	var mock, request, complete
+	var mock, $window, request, complete, throttleMock
 	o.beforeEach(function() {
+		$window = domMock()
 		mock = xhrMock()
 		complete = o.spy()
-		request = Request(mock, PromisePolyfill, complete).request
+		throttleMock = throttleMocker()
+		$window.XMLHttpRequest = mock.XMLHttpRequest
+		$window.FormData = mock.FormData
+		$window.requestAnimationFrame = throttleMock.schedule
+		var m = loadMithril({window: $window})
+		request = m.request
+		m.mount($window.document.body, {
+			view: function() {},
+			onupdate: complete,
+		})
 	})
 
 	o.spec("success", function() {
-		o("works via GET", function(done) {
+		o("works via GET", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request({method: "GET", url: "/item"}).then(function(data) {
+			return request({method: "GET", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(function() {
-				done()
 			})
 		})
-		o("implicit GET method", function(done){
+		o("implicit GET method", function(){
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request({url: "/item"}).then(function(data) {
+			return request({url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(function() {
-				done()
 			})
 		})
-		o("first argument can be a string aliasing url property", function(done){
+		o("first argument can be a string aliasing url property", function(){
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request("/item").then(function(data) {
+			return request("/item").then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(function() {
-				done()
 			})
 		})
-		o("works via POST", function(done) {
+		o("works via POST", function() {
 			mock.$defineRoutes({
 				"POST /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request({method: "POST", url: "/item"}).then(function(data) {
+			return request({method: "POST", url: "/item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(done)
+			})
 		})
-		o("first argument can act as URI with second argument providing options", function(done) {
+		o("first argument can act as URI with second argument providing options", function() {
 			mock.$defineRoutes({
 				"POST /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request("/item", {method: "POST"}).then(function(data) {
+			return request("/item", {method: "POST"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(done)
+			})
 		})
-		o("first argument keeps protocol", function(done) {
+		o("first argument keeps protocol", function() {
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					o(request.rawUrl).equals("https://example.com/item")
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request("https://example.com/item", {method: "POST"}).then(function(data) {
+			return request("https://example.com/item", {method: "POST"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized data via GET", function(done) {
+		o("works w/ parameterized data via GET", function() {
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			request({method: "GET", url: "/item", params: {x: "y"}}).then(function(data) {
+			return request({method: "GET", url: "/item", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=y"})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized data via POST", function(done) {
+		o("works w/ parameterized data via POST", function() {
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "POST", url: "/item", body: {x: "y"}}).then(function(data) {
+			return request({method: "POST", url: "/item", body: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: "y"}})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized data containing colon via GET", function(done) {
+		o("works w/ parameterized data containing colon via GET", function() {
 			mock.$defineRoutes({
 				"GET /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.query})}
 				}
 			})
-			request({method: "GET", url: "/item", params: {x: ":y"}}).then(function(data) {
+			return request({method: "GET", url: "/item", params: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: "?x=%3Ay"})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized data containing colon via POST", function(done) {
+		o("works w/ parameterized data containing colon via POST", function() {
 			mock.$defineRoutes({
 				"POST /item": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "POST", url: "/item", body: {x: ":y"}}).then(function(data) {
+			return request({method: "POST", url: "/item", body: {x: ":y"}}).then(function(data) {
 				o(data).deepEquals({a: {x: ":y"}})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url via GET", function(done) {
+		o("works w/ parameterized url via GET", function() {
 			mock.$defineRoutes({
 				"GET /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			request({method: "GET", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+			return request({method: "GET", url: "/item/:x", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: null})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url via POST", function(done) {
+		o("works w/ parameterized url via POST", function() {
 			mock.$defineRoutes({
 				"POST /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			request({method: "POST", url: "/item/:x", params: {x: "y"}}).then(function(data) {
+			return request({method: "POST", url: "/item/:x", params: {x: "y"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: null})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + body via GET", function(done) {
+		o("works w/ parameterized url + body via GET", function() {
 			mock.$defineRoutes({
 				"GET /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "GET", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+			return request({method: "GET", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + body via POST", function(done) {
+		o("works w/ parameterized url + body via POST", function() {
 			mock.$defineRoutes({
 				"POST /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "POST", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
+			return request({method: "POST", url: "/item/:x", params: {x: "y"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: {}, c: {a: "b"}})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + query via GET", function(done) {
+		o("works w/ parameterized url + query via GET", function() {
 			mock.$defineRoutes({
 				"GET /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+			return request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + query via POST", function(done) {
+		o("works w/ parameterized url + query via POST", function() {
 			mock.$defineRoutes({
 				"POST /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: request.body})}
 				}
 			})
-			request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
+			return request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: null})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + query + body via GET", function(done) {
+		o("works w/ parameterized url + query + body via GET", function() {
 			mock.$defineRoutes({
 				"GET /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+			return request({method: "GET", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
-			}).then(done)
+			})
 		})
-		o("works w/ parameterized url + query + body via POST", function(done) {
+		o("works w/ parameterized url + query + body via POST", function() {
 			mock.$defineRoutes({
 				"POST /item/y": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.query, c: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
+			return request({method: "POST", url: "/item/:x", params: {x: "y", q: "term"}, body: {a: "b"}}).then(function(data) {
 				o(data).deepEquals({a: "/item/y", b: "?q=term", c: {a: "b"}})
-			}).then(done)
+			})
 		})
-		o("works w/ array", function(done) {
+		o("works w/ array", function() {
 			mock.$defineRoutes({
 				"POST /items": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url, b: JSON.parse(request.body)})}
 				}
 			})
-			request({method: "POST", url: "/items", body: [{x: "y"}]}).then(function(data) {
+			return request({method: "POST", url: "/items", body: [{x: "y"}]}).then(function(data) {
 				o(data).deepEquals({a: "/items", b: [{x: "y"}]})
-			}).then(done)
+			})
 		})
-		o("ignores unresolved parameter via GET", function(done) {
+		o("ignores unresolved parameter via GET", function() {
 			mock.$defineRoutes({
 				"GET /item/:x": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			request({method: "GET", url: "/item/:x"}).then(function(data) {
+			return request({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
-			}).then(done)
+			})
 		})
-		o("ignores unresolved parameter via POST", function(done) {
+		o("ignores unresolved parameter via POST", function() {
 			mock.$defineRoutes({
 				"GET /item/:x": function(request) {
 					return {status: 200, responseText: JSON.stringify({a: request.url})}
 				}
 			})
-			request({method: "GET", url: "/item/:x"}).then(function(data) {
+			return request({method: "GET", url: "/item/:x"}).then(function(data) {
 				o(data).deepEquals({a: "/item/:x"})
-			}).then(done)
+			})
 		})
-		o("type parameter works for Array responses", function(done) {
+		o("type parameter works for Array responses", function() {
 			var Entity = function(args) {
 				return {_id: args.id}
 			}
@@ -242,11 +247,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify([{id: 1}, {id: 2}, {id: 3}])}
 				}
 			})
-			request({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			return request({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals([{_id: 1}, {_id: 2}, {_id: 3}])
-			}).then(done)
+			})
 		})
-		o("type parameter works for Object responses", function(done) {
+		o("type parameter works for Object responses", function() {
 			var Entity = function(args) {
 				return {_id: args.id}
 			}
@@ -256,11 +261,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify({id: 1})}
 				}
 			})
-			request({method: "GET", url: "/item", type: Entity}).then(function(data) {
+			return request({method: "GET", url: "/item", type: Entity}).then(function(data) {
 				o(data).deepEquals({_id: 1})
-			}).then(done)
+			})
 		})
-		o("serialize parameter works in GET", function(done) {
+		o("serialize parameter works in GET", function() {
 			var serialize = function(data) {
 				return "id=" + data.id
 			}
@@ -270,11 +275,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.query})}
 				}
 			})
-			request({method: "GET", url: "/item", serialize: serialize, params: {id: 1}}).then(function(data) {
+			return request({method: "GET", url: "/item", serialize: serialize, params: {id: 1}}).then(function(data) {
 				o(data.body).equals("?id=1")
-			}).then(done)
+			})
 		})
-		o("serialize parameter works in POST", function(done) {
+		o("serialize parameter works in POST", function() {
 			var serialize = function(data) {
 				return "id=" + data.id
 			}
@@ -284,11 +289,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify({body: request.body})}
 				}
 			})
-			request({method: "POST", url: "/item", serialize: serialize, body: {id: 1}}).then(function(data) {
+			return request({method: "POST", url: "/item", serialize: serialize, body: {id: 1}}).then(function(data) {
 				o(data.body).equals("id=1")
-			}).then(done)
+			})
 		})
-		o("deserialize parameter works in GET", function(done) {
+		o("deserialize parameter works in GET", function() {
 			var deserialize = function(data) {
 				return data
 			}
@@ -298,11 +303,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			request({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
+			return request({method: "GET", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).deepEquals({test: 123})
-			}).then(done)
+			})
 		})
-		o("deserialize parameter works in POST", function(done) {
+		o("deserialize parameter works in POST", function() {
 			var deserialize = function(data) {
 				return data
 			}
@@ -312,11 +317,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: JSON.stringify({test: 123})}
 				}
 			})
-			request({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
+			return request({method: "POST", url: "/item", deserialize: deserialize}).then(function(data) {
 				o(data).deepEquals({test: 123})
-			}).then(done)
+			})
 		})
-		o("extract parameter works in GET", function(done) {
+		o("extract parameter works in GET", function() {
 			var extract = function() {
 				return {test: 123}
 			}
@@ -326,11 +331,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "GET", url: "/item", extract: extract}).then(function(data) {
+			return request({method: "GET", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
-			}).then(done)
+			})
 		})
-		o("extract parameter works in POST", function(done) {
+		o("extract parameter works in POST", function() {
 			var extract = function() {
 				return {test: 123}
 			}
@@ -340,11 +345,11 @@ o.spec("request", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "POST", url: "/item", extract: extract}).then(function(data) {
+			return request({method: "POST", url: "/item", extract: extract}).then(function(data) {
 				o(data).deepEquals({test: 123})
-			}).then(done)
+			})
 		})
-		o("ignores deserialize if extract is defined", function(done) {
+		o("ignores deserialize if extract is defined", function() {
 			var extract = function(data) {
 				return data.status
 			}
@@ -355,27 +360,28 @@ o.spec("request", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).then(function(data) {
+			return request({method: "GET", url: "/item", extract: extract, deserialize: deserialize}).then(function(data) {
 				o(data).equals(200)
 			}).then(function() {
 				o(deserialize.callCount).equals(0)
-			}).then(done)
+			})
 		})
-		o("config parameter works", function(done) {
+		o("config parameter works", function() {
 			mock.$defineRoutes({
 				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "POST", url: "/item", config: config}).then(done)
 
 			function config(xhr) {
 				o(typeof xhr.setRequestHeader).equals("function")
 				o(typeof xhr.open).equals("function")
 				o(typeof xhr.send).equals("function")
 			}
+
+			return request({method: "POST", url: "/item", config: config})
 		})
-		o("requests don't block each other", function(done) {
+		o("requests don't block each other", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
@@ -387,12 +393,12 @@ o.spec("request", function() {
 			request("/item").then(function() {
 				return request("/item")
 			})
-			setTimeout(function() {
-				o(complete.callCount).equals(4)
-				done()
-			}, 20)
+			return utils.delay(10).then(function() {
+				throttleMock.fire()
+				o(complete.callCount).equals(1)
+			})
 		})
-		o("requests trigger finally once with a chained then", function(done) {
+		o("requests trigger finally once with a chained then", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
@@ -401,12 +407,12 @@ o.spec("request", function() {
 			var promise = request("/item")
 			promise.then(function() {}).then(function() {})
 			promise.then(function() {}).then(function() {})
-			setTimeout(function() {
+			return utils.delay(10).then(function() {
+				throttleMock.fire()
 				o(complete.callCount).equals(1)
-				done()
-			}, 20)
+			})
 		})
-		o("requests does not trigger finally when background: true", function(done) {
+		o("requests does not trigger finally when background: true", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
@@ -414,111 +420,114 @@ o.spec("request", function() {
 			})
 			request("/item", {background: true}).then(function() {})
 
-			setTimeout(function() {
+			return utils.delay(10).then(function() {
+				throttleMock.fire()
 				o(complete.callCount).equals(0)
-				done()
-			}, 20)
+			})
 		})
-		o("headers are set when header arg passed", function(done) {
+		o("headers are set when header arg passed", function() {
 			mock.$defineRoutes({
 				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "POST", url: "/item", config: config, headers: {"Custom-Header": "Value"}}).then(done)
 
 			function config(xhr) {
 				o(xhr.getRequestHeader("Custom-Header")).equals("Value")
 			}
+
+			return request({method: "POST", url: "/item", config: config, headers: {"Custom-Header": "Value"}})
 		})
-		o("headers are with higher precedence than default headers", function(done) {
+		o("headers are with higher precedence than default headers", function() {
 			mock.$defineRoutes({
 				"POST /item": function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			request({method: "POST", url: "/item", config: config, headers: {"Content-Type": "Value"}}).then(done)
 
 			function config(xhr) {
 				o(xhr.getRequestHeader("Content-Type")).equals("Value")
 			}
+
+			return request({method: "POST", url: "/item", config: config, headers: {"Content-Type": "Value"}})
 		})
-		o("doesn't fail on abort", function(done) {
+		o("doesn't fail on abort", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
 
-			var failed = false
-			var resolved = false
-			function handleAbort(xhr) {
-				var onreadystatechange = xhr.onreadystatechange
-				xhr.onreadystatechange = function() {
-					onreadystatechange.call(xhr, {target: xhr})
-					setTimeout(function() { // allow promises to (not) resolve first
-						o(failed).equals(false)
-						o(resolved).equals(false)
-						done()
-					}, 0)
-				}
-				xhr.abort()
-			}
-			request({method: "GET", url: "/item", config: handleAbort}).catch(function() {
-				failed = true
+			var state = "pending"
+			return new Promise(function(resolve) {
+				request({
+					method: "GET",
+					url: "/item",
+					config: function(xhr) {
+						var onreadystatechange = xhr.onreadystatechange
+						xhr.onreadystatechange = function() {
+							onreadystatechange.call(xhr, {target: xhr})
+							resolve()
+						}
+						xhr.abort()
+					}
+				}).then(
+					function() { state = "resolved" },
+					function() { state = "rejected" }
+				)
 			})
+				// allow promises to (not) resolve first
+				.then(function() { return utils.delay(10) })
 				.then(function() {
-					resolved = true
+					o(state).equals("pending")
 				})
 		})
-		o("doesn't fail on replaced abort", function(done) {
+		o("doesn't fail on replaced abort", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
 
-			var failed = false
-			var resolved = false
+			var state = "pending"
 			var abortSpy = o.spy()
 			var replacement
-			function handleAbort(xhr) {
-				var onreadystatechange = xhr.onreadystatechange
-				xhr.onreadystatechange = function() {
-					onreadystatechange.call(xhr, {target: xhr})
-					setTimeout(function() { // allow promises to (not) resolve first
-						o(failed).equals(false)
-						o(resolved).equals(false)
-						done()
-					}, 0)
-				}
-				return replacement = {
-					send: xhr.send.bind(xhr),
-					abort: abortSpy,
-				}
-			}
-			request({method: "GET", url: "/item", config: handleAbort}).then(function() {
-				resolved = true
-			}, function() {
-				failed = true
+			return new Promise(function(resolve) {
+				request({
+					method: "GET",
+					url: "/item",
+					config: function(xhr) {
+						var onreadystatechange = xhr.onreadystatechange
+						xhr.onreadystatechange = function() {
+							onreadystatechange.call(xhr, {target: xhr})
+							resolve()
+						}
+						return replacement = {
+							send: function(body) { xhr.send(body) },
+							abort: abortSpy,
+						}
+					}
+				}).then(
+					function() { state = "resolved" },
+					function() { state = "rejected" }
+				)
+				replacement.abort()
+				o(abortSpy.callCount).equals(1)
 			})
-			replacement.abort()
-			o(abortSpy.callCount).equals(1)
+				// allow promises to (not) resolve first
+				.then(function() { return utils.delay(10) })
+				.then(function() {
+					o(state).equals("pending")
+				})
 		})
-		o("doesn't fail on file:// status 0", function(done) {
+		o("doesn't fail on file:// status 0", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 0, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			var failed = false
-			request({method: "GET", url: "file:///item"}).catch(function() {
-				failed = true
-			}).then(function(data) {
-				o(failed).equals(false)
+			return request({method: "GET", url: "file:///item"}).then(function(data) {
 				o(data).deepEquals({a: 1})
-			}).then(function() {
-				done()
 			})
 		})
 		o("set timeout to xhr instance", function() {
@@ -541,13 +550,14 @@ o.spec("request", function() {
 					return {status: 200, responseText: ""}
 				}
 			})
-			return request({
+			var responseType
+			var p = request({
 				method: "GET", url: "/item",
 				responseType: "blob",
-				config: function(xhr) {
-					o(xhr.responseType).equals("blob")
-				}
+				config: function(xhr) { responseType = xhr.responseType }
 			})
+			o(responseType).equals("blob")
+			return p
 		})
 		o("params unmodified after interpolate", function() {
 			mock.$defineRoutes({
@@ -581,65 +591,54 @@ o.spec("request", function() {
 					o(result.send.callCount).equals(1)
 				})
 		})
-		o("can abort from replacement", function() {
-			mock.$defineRoutes({
-				"GET /a": function() {
-					return {status: 200, responseText: "[]"}
-				}
-			})
-			var result
-
-			request({
-				url: "/a",
-				config: function(xhr) {
-					return result = {
-						send: o.spy(xhr.send.bind(xhr)),
-						abort: o.spy(),
-					}
-				},
-			})
-
-			result.abort()
-		})
 	})
 	o.spec("failure", function() {
-		o("rejects on server error", function(done) {
+		o("rejects on server error", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({error: "error"})}
 				}
 			})
-			request({method: "GET", url: "/item"}).catch(function(e) {
-				o(e instanceof Error).equals(true)
-				o(e.message).equals("[object Object]")
-				o(e.response).deepEquals({error: "error"})
-				o(e.code).equals(500)
-			}).then(done)
+			return request({method: "GET", url: "/item"}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e instanceof Error).equals(true)
+					o(e.message).equals("[object Object]")
+					o(e.response).deepEquals({error: "error"})
+					o(e.code).equals(500)
+				}
+			)
 		})
-		o("adds response to Error", function(done) {
+		o("adds response to Error", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({message: "error", stack: "error on line 1"})}
 				}
 			})
-			request({method: "GET", url: "/item"}).catch(function(e) {
-				o(e instanceof Error).equals(true)
-				o(e.response.message).equals("error")
-				o(e.response.stack).equals("error on line 1")
-			}).then(done)
+			return request({method: "GET", url: "/item"}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e instanceof Error).equals(true)
+					o(e.response.message).equals("error")
+					o(e.response.stack).equals("error on line 1")
+				}
+			)
 		})
-		o("rejects on non-JSON server error", function(done) {
+		o("rejects on non-JSON server error", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: "error"}
 				}
 			})
-			request({method: "GET", url: "/item"}).catch(function(e) {
-				o(e.message).equals("null")
-				o(e.response).equals(null)
-			}).then(done)
+			return request({method: "GET", url: "/item"}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e.message).equals("null")
+					o(e.response).equals(null)
+				}
+			)
 		})
-		o("triggers all branched catches upon rejection", function(done) {
+		o("triggers all branched catches upon rejection", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: "error"}
@@ -655,177 +654,371 @@ o.spec("request", function() {
 			promise.then(then, catch2)
 			promise.then(then).catch(catch3)
 
-			callAsync(function() {
-				callAsync(function() {
-					callAsync(function() {
-						o(catch1.callCount).equals(1)
-						o(then.callCount).equals(0)
-						o(catch2.callCount).equals(1)
-						o(catch3.callCount).equals(1)
-						done()
-					})
-				})
+			return utils.delay(10).then(function() {
+				o(catch1.callCount).equals(1)
+				o(then.callCount).equals(0)
+				o(catch2.callCount).equals(1)
+				o(catch3.callCount).equals(1)
 			})
 		})
-		o("rejects on cors-like error", function(done) {
+		o("rejects on cors-like error", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 0}
 				}
 			})
-			request({method: "GET", url: "/item"}).catch(function(e) {
-				o(e instanceof Error).equals(true)
-			}).then(done)
+			return request({method: "GET", url: "/item"}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e instanceof Error).equals(true)
+				}
+			)
 		})
-		o("rejects on request timeout", function(done) {
+		o("rejects on request timeout", function() {
 			var timeout = 50
-			var timeToGetItem = timeout + 1
-
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return new Promise(function(resolve) {
-						setTimeout(function() {
-							resolve({status: 200})
-						}, timeToGetItem)
-					})
+					return utils.delay(timeout + 5)
+						.then(function() { return {status: 200} })
 				}
 			})
-
-			request({
-				method: "GET", url: "/item",
-				timeout: timeout
-			}).catch(function(e) {
-				o(e instanceof Error).equals(true)
-				o(e.message).equals("Request timed out")
-				o(e.code).equals(0)
-			}).then(function() {
-				done()
-			})
+			return request({method: "GET", url: "/item", timeout: timeout}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e instanceof Error).equals(true)
+					o(e.message).equals("Request timed out")
+					o(e.code).equals(0)
+				}
+			)
 		})
-		o("does not reject when time to request resource does not exceed timeout", function(done) {
+		o("does not reject when time to request resource does not exceed timeout", function() {
 			var timeout = 50
-			var timeToGetItem = timeout - 1
-			var isRequestRejected = false
-
 			mock.$defineRoutes({
 				"GET /item": function() {
-					return new Promise(function(resolve) {
-						setTimeout(function() {
-							resolve({status: 200})
-						}, timeToGetItem)
-					})
+					return utils.delay(timeout - 5)
+						.then(function() { return {status: 200} })
 				}
 			})
-
-			request({
-				method: "GET", url: "/item",
-				timeout: timeout
-			}).catch(function(e) {
-				isRequestRejected = true
-				o(e.message).notEquals("Request timed out")
-			}).then(function() {
-				o(isRequestRejected).equals(false)
-				done()
-			})
+			return request({method: "GET", url: "/item", timeout: timeout})
 		})
-		o("does not reject on status error code when extract provided", function(done) {
+		o("does not reject on status error code when extract provided", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 500, responseText: JSON.stringify({message: "error"})}
 				}
 			})
-			request({
+			return request({
 				method: "GET", url: "/item",
 				extract: function(xhr) {return JSON.parse(xhr.responseText)}
 			}).then(function(data) {
 				o(data.message).equals("error")
-				done()
 			})
 		})
-		o("rejects on error in extract", function(done) {
+		o("rejects on error in extract", function() {
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
 			})
-			request({
+			return request({
 				method: "GET", url: "/item",
 				extract: function() {throw new Error("error")}
-			}).catch(function(e) {
-				o(e instanceof Error).equals(true)
-				o(e.message).equals("error")
-			}).then(function() {
-				done()
-			})
+			}).then(
+				function() { throw new Error("Expected an error to be thrown") },
+				function(e) {
+					o(e instanceof Error).equals(true)
+					o(e.message).equals("error")
+				}
+			)
 		})
 	})
 	o.spec("json header", function() {
-		function checkUnset(method) {
-			o("doesn't set header on " + method + " without body", function(done) {
-				var routes = {}
-				routes[method + " /item"] = function() {
+		o("doesn't set header on GET without body", function() {
+			mock.$defineRoutes({
+				"GET /item": function() {
 					return {status: 200, responseText: JSON.stringify({a: 1})}
 				}
-				mock.$defineRoutes(routes)
-				request({
-					method: method, url: "/item",
-					config: function(xhr) {
-						var header = xhr.getRequestHeader("Content-Type")
-						o(header).equals(undefined)
-						header = xhr.getRequestHeader("Accept")
-						o(header).equals("application/json, text/*")
-					}
-				}).then(function(result) {
-					o(result).deepEquals({a: 1})
-					done()
-				}).catch(function(e) {
-					done(e)
-				})
 			})
-		}
+			return request({
+				method: "GET", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
 
-		function checkSet(method, body) {
-			o("sets header on " + method + " with body", function(done) {
-				var routes = {}
-				routes[method + " /item"] = function(response) {
+		o("sets header on GET with body", function() {
+			mock.$defineRoutes({
+				"GET /item": function(response) {
 					return {
 						status: 200,
 						responseText: JSON.stringify({body: JSON.parse(response.body)}),
 					}
 				}
-				mock.$defineRoutes(routes)
-				request({
-					method: method, url: "/item", body: body,
-					config: function(xhr) {
-						var header = xhr.getRequestHeader("Content-Type")
-						o(header).equals("application/json; charset=utf-8")
-						header = xhr.getRequestHeader("Accept")
-						o(header).equals("application/json, text/*")
-					}
-				}).then(function(result) {
-					o(result).deepEquals({body: body})
-					done()
-				}).catch(function(e) {
-					done(e)
-				})
 			})
-		}
+			return request({
+				method: "GET", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
 
-		checkUnset("GET")
-		checkUnset("HEAD")
-		checkUnset("OPTIONS")
-		checkUnset("POST")
-		checkUnset("PUT")
-		checkUnset("DELETE")
-		checkUnset("PATCH")
+		o("doesn't set header on HEAD without body", function() {
+			mock.$defineRoutes({
+				"HEAD /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "HEAD", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
 
-		checkSet("GET", {foo: "bar"})
-		checkSet("HEAD", {foo: "bar"})
-		checkSet("OPTIONS", {foo: "bar"})
-		checkSet("POST", {foo: "bar"})
-		checkSet("PUT", {foo: "bar"})
-		checkSet("DELETE", {foo: "bar"})
-		checkSet("PATCH", {foo: "bar"})
+		o("sets header on HEAD with body", function() {
+			mock.$defineRoutes({
+				"HEAD /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "HEAD", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
+
+		o("doesn't set header on OPTIONS without body", function() {
+			mock.$defineRoutes({
+				"OPTIONS /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "OPTIONS", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
+
+		o("sets header on OPTIONS with body", function() {
+			mock.$defineRoutes({
+				"OPTIONS /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "OPTIONS", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
+
+		o("doesn't set header on POST without body", function() {
+			mock.$defineRoutes({
+				"POST /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "POST", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
+
+		o("sets header on POST with body", function() {
+			mock.$defineRoutes({
+				"POST /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "POST", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
+
+		o("doesn't set header on PUT without body", function() {
+			mock.$defineRoutes({
+				"PUT /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "PUT", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
+
+		o("sets header on PUT with body", function() {
+			mock.$defineRoutes({
+				"PUT /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "PUT", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
+
+		o("doesn't set header on DELETE without body", function() {
+			mock.$defineRoutes({
+				"DELETE /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "DELETE", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
+
+		o("sets header on DELETE with body", function() {
+			mock.$defineRoutes({
+				"DELETE /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "DELETE", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
+
+		o("doesn't set header on PATCH without body", function() {
+			mock.$defineRoutes({
+				"PATCH /item": function() {
+					return {status: 200, responseText: JSON.stringify({a: 1})}
+				}
+			})
+			return request({
+				method: "PATCH", url: "/item",
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals(undefined)
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({a: 1})
+			})
+		})
+
+		o("sets header on PATCH with body", function() {
+			mock.$defineRoutes({
+				"PATCH /item": function(response) {
+					return {
+						status: 200,
+						responseText: JSON.stringify({body: JSON.parse(response.body)}),
+					}
+				}
+			})
+			return request({
+				method: "PATCH", url: "/item", body: {foo: "bar"},
+				config: function(xhr) {
+					var header = xhr.getRequestHeader("Content-Type")
+					o(header).equals("application/json; charset=utf-8")
+					header = xhr.getRequestHeader("Accept")
+					o(header).equals("application/json, text/*")
+				}
+			}).then(function(result) {
+				o(result).deepEquals({body: {foo: "bar"}})
+			})
+		})
 	})
 
 	// See: https://github.com/MithrilJS/mithril.js/issues/2426
@@ -852,18 +1045,18 @@ o.spec("request", function() {
 	// to work unless the spec itself is clearly broken (in this case, it's
 	// not). And so we need to test for this very unusual edge case.
 	//
-	// The direct `eval` is just so I can convert early errors to runtime
-	// errors without having to explicitly wire up all the bindings set up in
-	// `o.beforeEach`. I evaluate it immediately inside a `try`/`catch` instead
-	// of inside the test code so any relevant syntax error can be detected
-	// ahead of time and the test skipped entirely. It might trigger mental
-	// alarms because `eval` is normally asking for problems, but this is a
-	// rare case where it's genuinely safe and rational.
+	// I evaluate it immediately inside a `try`/`catch` instead of inside the
+	// test code so any relevant syntax error can be detected ahead of time and
+	// the test skipped entirely. It might trigger mental alarms because dynamic
+	// evaluation is normally asking for problems, but this is a rare case where
+	// it's genuinely safe and rational.
 	try {
-		// eslint-disable-next-line no-eval
-		var runAsyncTest = eval(
-			"async () => {\n" +
+		// eslint-disable-next-line no-new-func
+		var runAsyncTest = Function(
+			"'use strict'\n" +
+			"return async (o, request, complete, throttleMock) => {\n" +
 			"    var p = request('/item')\n" +
+			"    throttleMock.fire()\n" +
 			"    o(complete.callCount).equals(0)\n" +
 			// Note: this step does *not* invoke `.then` on the promise returned
 			// from `p.then(resolve, reject)`.
@@ -875,22 +1068,21 @@ o.spec("request", function() {
 			// 2 ticks to get called. And so we have to wait for one more ticks
 			// for `complete` to get called.
 			"    await null\n" +
+			"    throttleMock.fire()\n" +
 			"    o(complete.callCount).equals(1)\n" +
 			"}"
-		)
+		)()
 
 		o("invokes the redraw in native async/await", function () {
-			// Use the native promise for correct semantics. This test will fail
-			// if you use the polyfill, as it's based on `setImmediate` (falling
-			// back to `setTimeout`), and promise microtasks are run at higher
-			// priority than either of those.
-			request = Request(mock, Promise, complete).request
+			// This test will fail if you use the polyfill, as it's based on
+			// `setImmediate` (falling back to `setTimeout`), and native promise
+			// microtasks are run at higher priority than either of those.
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}
 				}
 			})
-			return runAsyncTest()
+			return runAsyncTest(o, request, complete, throttleMock)
 		})
 	} catch (e) {
 		// ignore - this is just for browsers that natively support

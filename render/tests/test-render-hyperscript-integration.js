@@ -1,16 +1,16 @@
 "use strict"
 
 var o = require("ospec")
-var m = require("../../render/hyperscript")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("render/hyperscript integration", function() {
-	var $window, root, render
+	var $window, root, m, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		m = loadMithril({window: $window})
+		render = m.render
 	})
 	o.spec("setting class", function() {
 		o("selector only", function() {

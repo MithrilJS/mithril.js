@@ -9,6 +9,7 @@
 # These are artifacts from various scripts
 /dist
 /archive
+/temp
 /mithril.js
 /mithril.min.js
 

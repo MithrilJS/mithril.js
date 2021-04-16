@@ -1,9 +1,11 @@
 "use strict"
 
 var o = require("ospec")
-var Vnode = require("../../render/vnode")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("normalize", function() {
+	var Vnode; o.beforeEach(function() { Vnode = loadMithril().vnode })
+
 	o("normalizes array into fragment", function() {
 		var node = Vnode.normalize([])
 

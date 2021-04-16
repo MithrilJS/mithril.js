@@ -2,14 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var loadMithril = require("../../test-utils/load").mithril
 
 o.spec("oninit", function() {
 	var $window, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
 	})
 
 	o("calls oninit when creating element", function() {
@@ -199,7 +199,7 @@ o.spec("oninit", function() {
 		o(vnode.dom.oninit).equals(undefined)
 		o(vnode.dom.attributes["oninit"]).equals(undefined)
 	})
-	
+
 	o("No spurious oninit calls in mapped keyed diff when the pool is involved (#1992)", function () {
 		var oninit1 = o.spy()
 		var oninit2 = o.spy()

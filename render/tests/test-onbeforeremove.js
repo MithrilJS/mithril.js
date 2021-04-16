@@ -2,17 +2,17 @@
 
 var o = require("ospec")
 var callAsync = require("../../test-utils/callAsync")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
-var Promise = require("../../promise/promise")
+var loadMithril = require("../../test-utils/load").mithril
+var utils = require("../../test-utils/utils")
 
 o.spec("onbeforeremove", function() {
-	var $window, root, render
+	var $window, Promise, root, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
+		render = loadMithril({window: $window}).render
+		Promise = $window.Promise
 	})
 
 	o("does not call onbeforeremove when creating", function() {
@@ -167,9 +167,9 @@ o.spec("onbeforeremove", function() {
 			done()
 		})
 	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	Object.keys(utils.components).forEach(function(kind){
+		o.spec(kind, function(){
+			var createComponent = utils.components[kind]
 			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
 				var onremove = o.spy()
 				var onbeforeremove = function(){return Promise.resolve()}
