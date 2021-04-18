@@ -282,7 +282,6 @@ module.exports = function($window) {
 			var start = 0, oldStart = 0
 			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
 			if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
-			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed) {
 				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
