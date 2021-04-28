@@ -2,7 +2,7 @@
 
 var o = require("ospec")
 var browserMock = require("../test-utils/browserMock")
-var loadMithril = require("../test-utils/load").mithril
+var loadMithril = require("../test-utils/loadMithril")
 var utils = require("../test-utils/utils")
 
 o.spec("api", function() {

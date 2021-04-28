@@ -23,7 +23,7 @@ module.exports = function(options) {
 	var port = ""
 	var pathname = "/"
 	var search = ""
-	var hash = ""
+	var hash = options.hash || ""
 
 	var past = [{url: getURL(), isNew: true, state: null, title: null}], future = []
 
