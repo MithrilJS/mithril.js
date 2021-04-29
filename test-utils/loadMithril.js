@@ -3,11 +3,18 @@
 var fs = require("fs")
 var path = require("path")
 
-require("child_process").execFileSync(
+var result = require("child_process").spawnSync(
 	"node",
 	[path.resolve(__dirname, "../scripts/build-rollup.js"), "--test"],
 	{stdio: "inherit"}
 )
+if (result.status) {
+	// Intentionally abort the process. Otherwise, it's just going to call this
+	// repeatedly, and hitting Ctrl+C every time it errors gets annoying really
+	// quick.
+	// eslint-disable-next-line no-process-exit
+	process.exit(result.status)
+}
 
 var browserBundle = fs.readFileSync(
 	path.resolve(__dirname, "../temp/browser.js"),

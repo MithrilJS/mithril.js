@@ -4,7 +4,8 @@ module.exports = {
         "browser": null,
 	},
     "parserOptions": {
-        "ecmaVersion": 2019,
+        "ecmaVersion": 2020,
+		"sourceType": "script",
     },
     "rules": {
         "no-process-env": "off",

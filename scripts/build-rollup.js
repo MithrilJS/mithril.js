@@ -5,17 +5,7 @@
 // we can avoid a round trip with npm in the tests.
 const path = require("path")
 const {rollup} = require("rollup")
-const commonjs = require("@rollup/plugin-commonjs")
-const {nodeResolve} = require("@rollup/plugin-node-resolve")
 const {terser} = require("rollup-plugin-terser")
-
-const inputPlugins = [
-	commonjs({
-		transformMixedEsModules: true,
-		requireReturnsDefault: true,
-	}),
-	nodeResolve(),
-]
 
 // Reuse the build cache across everything - help speed this up a little
 let cache
@@ -23,8 +13,7 @@ let cache
 async function build(target) {
 	const bundle = await rollup({
 		cache,
-		input: path.resolve(__dirname, "../browser.js"),
-		plugins: inputPlugins,
+		input: path.resolve(__dirname, "../src/browser.js"),
 	})
 
 	// ESLint's wrong here. It's safe.
@@ -33,8 +22,8 @@ async function build(target) {
 
 	await bundle.write({
 		file: path.resolve(__dirname, "..", target),
-		format: "cjs",
-		exports: "default",
+		format: "iife",
+		exports: "none",
 		plugins: target.endsWith(".min.js") ? [terser()] : [],
 	})
 
@@ -50,4 +39,7 @@ async function main() {
 	}
 }
 
-main()
+main().catch((e) => {
+	console.error(e.stack)
+	process.exitCode = 1
+})
