@@ -1,7 +1,8 @@
-import parseQueryString from "../querystring/parse.js"
+import "./parseQueryString.js"
+import m from "./m.js"
 
 // Returns `{path, params}` from `url`
-export default function(url) {
+m.parsePathname = function(url) {
 	var queryIndex = url.indexOf("?")
 	var hashIndex = url.indexOf("#")
 	var queryEnd = hashIndex < 0 ? url.length : hashIndex
@@ -17,6 +18,6 @@ export default function(url) {
 		path: path,
 		params: queryIndex < 0
 			? {}
-			: parseQueryString(url.slice(queryIndex + 1, queryEnd)),
+			: m.parseQueryString(url.slice(queryIndex + 1, queryEnd)),
 	}
 }

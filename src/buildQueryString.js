@@ -1,5 +1,8 @@
-export default function(object) {
-	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
+import m from "./m.js"
+import {toString} from "./util.js"
+
+m.buildQueryString = function(object) {
+	if (toString.call(object) !== "[object Object]") return ""
 
 	var args = []
 	for (var key in object) {
@@ -14,7 +17,7 @@ export default function(object) {
 				destructure(key + "[" + i + "]", value[i])
 			}
 		}
-		else if (Object.prototype.toString.call(value) === "[object Object]") {
+		else if (toString.call(value) === "[object Object]") {
 			for (var i in value) {
 				destructure(key + "[" + i + "]", value[i])
 			}

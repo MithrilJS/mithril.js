@@ -4,6 +4,7 @@
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
+  "main": "mithril.js",
   "unpkg": "mithril.min.js",
   "repository": "github:MithrilJS/mithril.js",
   "scripts": {

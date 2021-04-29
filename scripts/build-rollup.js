@@ -13,7 +13,7 @@ let cache
 async function build(target) {
 	const bundle = await rollup({
 		cache,
-		input: path.resolve(__dirname, "../src/browser.js"),
+		input: path.resolve(__dirname, "../src/index.js"),
 	})
 
 	// ESLint's wrong here. It's safe.
@@ -32,7 +32,7 @@ async function build(target) {
 
 async function main() {
 	if (process.argv.includes("--test", 2)) {
-		await build("temp/browser.js")
+		await build("temp/index.js")
 	} else {
 		await build("mithril.js")
 		await build("mithril.min.js")

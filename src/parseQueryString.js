@@ -1,4 +1,6 @@
-export default function(string) {
+import m from "./m.js"
+
+m.parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 

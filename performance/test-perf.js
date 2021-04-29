@@ -49,7 +49,7 @@ if (isDOM) {
 	global.requestAnimationFrame = function () {
 		throw new Error("This should never be called.")
 	}
-	global.m = require("../index.js")
+	global.m = require("..")
 	global.rootElem = null
 	Benchmark = require("benchmark")
 	/* eslint-enable global-require */
@@ -242,6 +242,35 @@ suite.add("rerender same tree", {
 		))
 	},
 })
+
+// Because the current bundle doesn't expose it - let's give it an even playing
+// field.
+if (!m.censor) {
+	m.censor = (function () {
+		var magic = /^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$/
+		var hasOwn = {}.hasOwnProperty
+
+		return function censor(attrs, extras) {
+			var result = {}
+
+			if (extras != null) {
+				for (var key in attrs) {
+					if (hasOwn.call(attrs, key) && !magic.test(key) && extras.indexOf(key) < 0) {
+						result[key] = attrs[key]
+					}
+				}
+			} else {
+				for (var key in attrs) {
+					if (hasOwn.call(attrs, key) && !magic.test(key)) {
+						result[key] = attrs[key]
+					}
+				}
+			}
+
+			return result
+		}
+	})()
+}
 
 suite.add("add large nested tree", {
 	setup: function () {

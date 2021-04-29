@@ -1,3 +1,6 @@
+import {hasOwn} from "./util.js"
+import m from "./m.js"
+
 // Note: this is mildly perf-sensitive.
 //
 // It does *not* use `delete` - dynamic `delete`s usually cause objects to bail
@@ -21,10 +24,9 @@
 // }
 // ```
 
-import hasOwn from "./hasOwn"
 var magic = /^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$/
 
-export default function(attrs, extras) {
+m.censor = function(attrs, extras) {
 	var result = {}
 
 	if (extras != null) {

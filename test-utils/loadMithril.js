@@ -17,7 +17,7 @@ if (result.status) {
 }
 
 var browserBundle = fs.readFileSync(
-	path.resolve(__dirname, "../temp/browser.js"),
+	path.resolve(__dirname, "../temp/index.js"),
 	"utf-8"
 )
 

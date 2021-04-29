@@ -1,13 +1,15 @@
-function Vnode(tag, key, attrs, children, text, dom) {
+export function Vnode(tag, key, attrs, children, text, dom) {
 	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
-Vnode.normalize = function(node) {
-	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
+
+export function normalize(node) {
+	if (Array.isArray(node)) return Vnode("[", undefined, undefined, normalizeChildren(node), undefined, undefined)
 	if (node == null || typeof node === "boolean") return null
 	if (typeof node === "object") return node
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
-Vnode.normalizeChildren = function(input) {
+
+export function normalizeChildren(input) {
 	var children = []
 	if (input.length) {
 		var isKeyed = input[0] != null && input[0].key != null
@@ -24,10 +26,8 @@ Vnode.normalizeChildren = function(input) {
 			}
 		}
 		for (var i = 0; i < input.length; i++) {
-			children[i] = Vnode.normalize(input[i])
+			children[i] = normalize(input[i])
 		}
 	}
 	return children
 }
-
-export default Vnode

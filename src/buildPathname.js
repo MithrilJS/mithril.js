@@ -1,8 +1,9 @@
-import assign from "../util/assign.js"
-import buildQueryString from "../querystring/build.js"
+import "./buildQueryString.js"
+import {assign} from "./util.js"
+import m from "./m.js"
 
 // Returns `path` from `template` + `params`
-export default function(template, params) {
+m.buildPathname = function(template, params) {
 	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
 		throw new SyntaxError("Template parameter names must be separated by either a '/', '-', or '.'.")
 	}
@@ -33,7 +34,7 @@ export default function(template, params) {
 
 	if (queryIndex >= 0) result += template.slice(queryIndex, queryEnd)
 	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
-	var querystring = buildQueryString(query)
+	var querystring = m.buildQueryString(query)
 	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring
 	if (hashIndex >= 0) result += template.slice(hashIndex)
 	if (newHashIndex >= 0) result += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)

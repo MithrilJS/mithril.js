@@ -1,4 +1,7 @@
+/* eslint-env commonjs */
 /* global setImmediate */
+import m from "./m.js"
+
 /** @constructor */
 var PromisePolyfill = function(executor) {
 	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with 'new'.")
@@ -109,4 +112,26 @@ PromisePolyfill.race = function(list) {
 	})
 }
 
-export default PromisePolyfill
+m.PromisePolyfill = PromisePolyfill
+
+let exportedPromise
+
+if (typeof window !== "undefined") {
+	if (typeof window.Promise === "undefined") {
+		window.Promise = PromisePolyfill
+	} else if (!window.Promise.prototype.finally) {
+		window.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
+	exportedPromise = window.Promise
+} else if (typeof global !== "undefined") {
+	if (typeof global.Promise === "undefined") {
+		global.Promise = PromisePolyfill
+	} else if (!global.Promise.prototype.finally) {
+		global.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
+	exportedPromise = global.Promise
+} else {
+	exportedPromise = PromisePolyfill
+}
+
+export {exportedPromise as default}
