@@ -36,7 +36,7 @@ function execSelector(state, vnode) {
 	var className = hasClass ? attrs.class : attrs.className
 
 	vnode.tag = state.tag
-	vnode.attrs = null
+	vnode.attrs = {}
 
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
