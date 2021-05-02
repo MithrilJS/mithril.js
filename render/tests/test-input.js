@@ -279,19 +279,4 @@ o.spec("form inputs", function() {
 			o(root.firstChild.selectedIndex).equals(1)
 		})
 	})
-
-	o.spec("textarea", function() {
-		o("updates after user input", function() {
-			render(root, m("textarea", "aaa"))
-
-			//simulate typing
-			root.firstChild.value = "bbb"
-
-			//re-render may occur after value attribute is touched
-			render(root, m("textarea", "ccc"))
-
-			o(root.firstChild.value).equals("ccc")
-			//FIXME should fail if fix is commented out
-		})
-	})
 })
