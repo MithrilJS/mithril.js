@@ -271,7 +271,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {key:"a"})
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -343,7 +343,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("custom-element", {key:"a"})
 
 			o(vnode.tag).equals("custom-element")
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -551,20 +551,20 @@ o.spec("hyperscript", function() {
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
 		o("handles child without attr unwrapped", function() {
 			var vnode = m("div", m("i"))
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 		})
 		o("handles children without attr unwrapped", function() {
 			var vnode = m("div", m("i"), m("s"))
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
