@@ -9,8 +9,12 @@
 # These are artifacts from various scripts
 /dist
 /archive
+/temp
 /mithril.js
 /mithril.min.js
 
 # And the examples are ignored (for now).
 /examples
+
+# Ignore this as it's kinda useless at best.
+**/.eslintrc

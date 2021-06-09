@@ -4,28 +4,27 @@
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
+  "main": "mithril.js",
   "unpkg": "mithril.min.js",
   "repository": "github:MithrilJS/mithril.js",
   "scripts": {
     "precommit": "lint-staged",
-    "watch": "run-p watch:**",
-    "watch:js": "node scripts/bundler browser.js -output mithril.js -watch",
     "watch:docs": "node scripts/generate-docs --watch",
     "watch:docs-lint": "node scripts/lint-docs --watch",
-    "build": "run-p build:browser build:min build:stream-min",
-    "build:browser": "node scripts/bundler browser.js -output mithril.js",
+    "build": "run-p build:js build:readme",
     "build:docs": "node scripts/generate-docs",
-    "build:min": "node scripts/bundler browser.js -output mithril.min.js -minify -save",
-    "build:stream-min": "node scripts/minify-stream",
+    "build:readme": "node scripts/compute-bundle-sizes --save",
+    "build:js": "run-p build:js:**",
+    "build:js:core": "node scripts/build-rollup.js",
+    "build:js:stream": "node scripts/minify-stream",
     "cleanup:lint": "rimraf .eslintcache .lint-docs-cache",
     "lint": "run-s -cn lint:**",
     "lint:js": "eslint . --cache",
     "lint:docs": "node scripts/lint-docs --cache",
     "perf": "node performance/test-perf.js",
-    "pretest": "npm run lint",
-    "test": "run-s test:js",
-    "test:js": "ospec",
-    "cover": "istanbul cover --print both ospec/bin/ospec",
+    "test": "run-s lint test:js",
+    "test:js": "node_modules/.bin/ospec",
+    "cover": "istanbul cover --print both node_modules/.bin/ospec",
     "release": "npm version -m 'v%s'",
     "version": "npm run build && git add mithril.js mithril.min.js stream.js stream.min.js README.md"
   },
@@ -50,6 +49,8 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "rimraf": "^3.0.0",
+    "rollup": "^2.45.2",
+    "rollup-plugin-terser": "^7.0.2",
     "semver": "^6.3.0",
     "terser": "^4.3.4"
   },
@@ -61,8 +62,5 @@
       "eslint . --fix",
       "git add"
     ]
-  },
-  "dependencies": {
-    "ospec": "4.0.0"
   }
 }

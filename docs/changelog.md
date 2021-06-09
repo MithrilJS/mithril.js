@@ -37,8 +37,12 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Make changes to file inputs gracefully handled, and don't break if the current value and old value mismatch (and the new value isn't empty), but instead just log an error. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
     - This mainly exists just to kick the can down the road - this is the only case I'm aware of where the DOM itself would be responsible for throwing an error. A proper fix to the greater issue of error handling is much more complex, and I'd rather not block users any longer over this one specific issue.
 - Allow Mithril to be loaded in non-browser environments without modification. ([#2633](https://github.com/MithrilJS/mithril.js/pull/2633) [@isiahmeadows](https://github.com/isiahmeadows))
+- Significantly simplify the initial code path with help from Rollup and a major internal restructuring. ([#2677](https://github.com/MithrilJS/mithril.js/pull/2677) [@isiahmeadows](https://github.com/isiahmeadows))
+    - This means it can load even quicker. (As if it didn't already load blazingly quick to begin with.)
+    - Size-wise it's approximately the same as before.
+- Fix issue where `m.route.Link` failed to prevent certain lifecycle hooks from being double-called. ([#2677](https://github.com/MithrilJS/mithril.js/pull/2677) [@isiahmeadows](https://github.com/isiahmeadows))
 
-Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
+Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were all intended for internal usage and as of v2 are all 100% unsupported in userland.
 
 - Mithril's internal bundler, previously available at `mithril/bundler`
 	- Prefer using a dedicated bundler like Webpack or Rollup instead.
@@ -46,6 +50,12 @@ Important note: if you were using any of these undocumented tools, they are no l
 	- Prefer using native `import`/`export` and/or Budo instead.
 - Mithril's internal test mocks, previously available at `mithril/test-utils`
 	- Prefer using JSDOM or similar instead.
+- Mithril's internal factories, previously available at various places
+    - Prefer using JSDOM or similar or otherwise mocking the needed globals
+- Mithril's `mithril/*` named modules
+	- Use the relevant properties from the main `mithril` bundle instead.
+- Mithril's old entry point `mithril/index.js`
+	- Use `mithril` or `mithril/mithril.js` instead as appropriate.
 
 I'd like to apologize for missing these deprecations in the initial 2.0.0 change log. This was a major policy change we had been communicating the entire time and we should've let you all know this there in the change log as well.
 
