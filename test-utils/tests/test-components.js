@@ -2,6 +2,7 @@
 
 var o = require("ospec")
 var components = require("../../test-utils/components")
+var m = require("../../render/hyperscript")
 
 o.spec("test-utils/components", function() {
 	var test = o.spy(function(component) {
@@ -32,7 +33,7 @@ o.spec("test-utils/components", function() {
 				var vnode = cmp1.view()
 
 				o(vnode != null).equals(true)
-				o(vnode).deepEquals({tag: "div"})
+				o(vnode).deepEquals(m("div"))
 
 				if (component.kind !== "constructible") {
 					o(cmp2).deepEquals(methods)

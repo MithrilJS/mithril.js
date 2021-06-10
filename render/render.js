@@ -125,10 +125,6 @@ module.exports = function($window) {
 		insertNode(parent, element, nextSibling)
 
 		if (!maybeSetContentEditable(vnode)) {
-			if (vnode.text != null) {
-				if (vnode.text !== "") element.textContent = vnode.text
-				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			}
 			if (vnode.children != null) {
 				var children = vnode.children
 				createNodes(element, children, 0, children.length, hooks, null, ns)
@@ -460,21 +456,10 @@ module.exports = function($window) {
 
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
-			if (vnode.text != null) {
-				vnode.attrs.value = vnode.text //FIXME handle multiple children
-				vnode.text = undefined
-			}
 		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 		if (!maybeSetContentEditable(vnode)) {
-			if (old.text != null && vnode.text != null && vnode.text !== "") {
-				if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
-			}
-			else {
-				if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-				if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-				updateNodes(element, old.children, vnode.children, hooks, null, ns)
-			}
+			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
@@ -617,7 +602,7 @@ module.exports = function($window) {
 			var content = children[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
+		else if (children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
 		return true
 	}
 

@@ -4,6 +4,7 @@ var o = require("ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("component", function() {
 	var $window, root, render
@@ -22,12 +23,12 @@ o.spec("component", function() {
 				o("works", function() {
 					var component = createComponent({
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
-					var node = {tag: component}
+					var node = m(component)
 
-					render(root, [node])
+					render(root, node)
 
 					o(root.firstChild.nodeName).equals("DIV")
 					o(root.firstChild.attributes["id"].value).equals("a")
@@ -36,12 +37,12 @@ o.spec("component", function() {
 				o("receives arguments", function() {
 					var component = createComponent({
 						view: function(vnode) {
-							return {tag: "div", attrs: vnode.attrs, text: vnode.text}
+							return m("div", vnode.attrs, vnode.children)
 						}
 					})
-					var node = {tag: component, attrs: {id: "a"}, text: "b"}
+					var node = m(component, {id: "a"}, "b")
 
-					render(root, [node])
+					render(root, node)
 
 					o(root.firstChild.nodeName).equals("DIV")
 					o(root.firstChild.attributes["id"].value).equals("a")
@@ -50,11 +51,11 @@ o.spec("component", function() {
 				o("updates", function() {
 					var component = createComponent({
 						view: function(vnode) {
-							return {tag: "div", attrs: vnode.attrs, text: vnode.text}
+							return m("div", vnode.attrs, vnode.children)
 						}
 					})
-					render(root, [{tag: component, attrs: {id: "a"}, text: "b"}])
-					render(root, [{tag: component, attrs: {id: "c"}, text: "d"}])
+					render(root, [m(component, {id: "a"}, "b")])
+					render(root, [m(component, {id: "c"}, "d")])
 
 					o(root.firstChild.nodeName).equals("DIV")
 					o(root.firstChild.attributes["id"].value).equals("c")
@@ -64,12 +65,12 @@ o.spec("component", function() {
 					var visible = false
 					var component = createComponent({
 						view: function() {
-							return visible ? {tag: "div"} : null
+							return visible ? m("div") : null
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 					visible = true
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeName).equals("DIV")
 				})
@@ -77,12 +78,12 @@ o.spec("component", function() {
 					var visible = false
 					var component = createComponent({
 						view: function() {
-							return visible ? {tag: "div"} : false
+							return visible ? m("div") : false
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 					visible = true
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeName).equals("DIV")
 				})
@@ -90,12 +91,12 @@ o.spec("component", function() {
 					var visible = true
 					var component = createComponent({
 						view: function() {
-							return visible ? {tag: "div"} : null
+							return visible ? m("div") : null
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 					visible = false
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -103,12 +104,12 @@ o.spec("component", function() {
 					var visible = true
 					var component = createComponent({
 						view: function() {
-							return visible ? {tag: "div"} : false
+							return visible ? m("div") : false
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 					visible = false
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -118,20 +119,20 @@ o.spec("component", function() {
 							return null
 						}
 					})
-					render(root, [{tag: component}])
-					render(root, [{tag: component}])
+					render(root, m(component))
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
 				o("removes", function() {
 					var component = createComponent({
 						view: function() {
-							return {tag: "div"}
+							return m("div")
 						}
 					})
-					var div = {tag: "div", key: 2}
-					render(root, [{tag: component, key: 1}, div])
-					render(root, [{tag: "div", key: 2}])
+					var div = m("div", {key: 2})
+					render(root, [m(component, {key: 1}), div])
+					render(root, div)
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -139,21 +140,21 @@ o.spec("component", function() {
 				o("svg works when creating across component boundary", function() {
 					var component = createComponent({
 						view: function() {
-							return {tag: "g"}
+							return m("g")
 						}
 					})
-					render(root, [{tag: "svg", children: [{tag: component}]}])
+					render(root, m("svg", m(component)))
 
 					o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 				})
 				o("svg works when updating across component boundary", function() {
 					var component = createComponent({
 						view: function() {
-							return {tag: "g"}
+							return m("g")
 						}
 					})
-					render(root, [{tag: "svg", children: [{tag: component}]}])
-					render(root, [{tag: "svg", children: [{tag: component}]}])
+					render(root, m("svg", m(component)))
+					render(root, m("svg", m(component)))
 
 					o(root.firstChild.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 				})
@@ -163,12 +164,12 @@ o.spec("component", function() {
 					var component = createComponent({
 						view: function() {
 							return [
-								{tag: "label"},
-								{tag: "input"},
+								m("label"),
+								m("input"),
 							]
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(2)
 					o(root.childNodes[0].nodeName).equals("LABEL")
@@ -180,7 +181,7 @@ o.spec("component", function() {
 							return "a"
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("a")
@@ -191,7 +192,7 @@ o.spec("component", function() {
 							return ""
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("")
@@ -202,7 +203,7 @@ o.spec("component", function() {
 							return 1
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("1")
@@ -213,7 +214,7 @@ o.spec("component", function() {
 							return 0
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("0")
@@ -224,7 +225,7 @@ o.spec("component", function() {
 							return true
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -234,7 +235,7 @@ o.spec("component", function() {
 							return false
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -244,7 +245,7 @@ o.spec("component", function() {
 							return null
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -254,7 +255,7 @@ o.spec("component", function() {
 							return undefined
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -267,7 +268,7 @@ o.spec("component", function() {
 						}
 					})
 					try {
-						render(root, [{tag: component}])
+						render(root, m(component))
 					}
 					catch (e) {
 						threw = true
@@ -289,12 +290,12 @@ o.spec("component", function() {
 							else return vnode
 						}
 					})
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 
 					try {
-						render(root, [{tag: component}])
+						render(root, m(component))
 					}
 					catch (e) {
 						threw = true
@@ -309,13 +310,13 @@ o.spec("component", function() {
 					var component = createComponent({
 						view: function() {
 							return [
-								{tag: "label"},
-								{tag: "input"},
+								m("label"),
+								m("input"),
 							]
 						}
 					})
-					render(root, [{tag: component}])
-					render(root, [{tag: component}])
+					render(root, m(component))
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(2)
 					o(root.childNodes[0].nodeName).equals("LABEL")
@@ -327,8 +328,8 @@ o.spec("component", function() {
 							return "a"
 						}
 					})
-					render(root, [{tag: component}])
-					render(root, [{tag: component}])
+					render(root, m(component))
+					render(root, m(component))
 
 					o(root.firstChild.nodeType).equals(3)
 					o(root.firstChild.nodeValue).equals("a")
@@ -339,8 +340,8 @@ o.spec("component", function() {
 							return null
 						}
 					})
-					render(root, [{tag: component}])
-					render(root, [{tag: component}])
+					render(root, m(component))
+					render(root, m(component))
 
 					o(root.childNodes.length).equals(0)
 				})
@@ -348,15 +349,15 @@ o.spec("component", function() {
 					var component = createComponent({
 						view: function() {
 							return [
-								{tag: "label"},
-								{tag: "input"},
+								m("label"),
+								m("input"),
 							]
 						}
 					})
-					var div = {tag: "div", key: 2}
-					render(root, [{tag: component, key: 1}, div])
+					var div = m("div", {key: 2})
+					render(root, [m(component, {key: 1}), div])
 
-					render(root, [{tag: "div", key: 2}])
+					render(root, [m("div", {key: 2})])
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -367,10 +368,10 @@ o.spec("component", function() {
 							return "a"
 						}
 					})
-					var div = {tag: "div", key: 2}
-					render(root, [{tag: component, key: 1}, div])
+					var div = m("div", {key: 2})
+					render(root, [m(component, {key: 1}), div])
 
-					render(root, [{tag: "div", key: 2}])
+					render(root, [m("div", {key: 2})])
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -388,12 +389,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(0)
 						},
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
-					var node = {tag: component}
 
-					render(root, [node])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -411,12 +411,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(0)
 						},
 						view: function() {
-							return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+							return [m("div", {id: "a"}, "b")]
 						}
 					})
-					var node = {tag: component}
 
-					render(root, [node])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -425,30 +424,29 @@ o.spec("component", function() {
 				})
 				o("calls oninit before view", function() {
 					var viewCalled = false
+					var component = createComponent({
+						view: function() {
+							viewCalled = true
+							return m("div", {id: "a"}, "b")
+						},
+						oninit: function() {
+							o(viewCalled).equals(false)
+						},
+					})
 
-					render(root, createComponent({
-						tag: {
-							view: function() {
-								viewCalled = true
-								return [{tag: "div", attrs: {id: "a"}, text: "b"}]
-							},
-							oninit: function() {
-								o(viewCalled).equals(false)
-							},
-						}
-					}))
+					render(root, m(component))
 				})
 				o("does not calls oninit on redraw", function() {
 					var init = o.spy()
 					var component = createComponent({
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						},
 						oninit: init,
 					})
 
 					function view() {
-						return {tag: component}
+						return m(component)
 					}
 
 					render(root, view())
@@ -467,12 +465,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
-					var node = {tag: component}
 
-					render(root, [node])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -483,13 +480,13 @@ o.spec("component", function() {
 					var create = o.spy()
 					var component = createComponent({
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						},
 						oncreate: create,
 					})
 
 					function view() {
-						return {tag: component}
+						return m(component)
 					}
 
 					render(root, view())
@@ -508,12 +505,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+							return m("div", {id: "a"}, "b")
 						}
 					})
-					var node = {tag: component}
 
-					render(root, [node])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -531,15 +527,15 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -557,15 +553,15 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+							return [m("div", {id: "a"}, "b")]
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(1)
 					o(root.firstChild.nodeName).equals("DIV")
@@ -583,11 +579,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
@@ -607,11 +603,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+							return [m("div", {id: "a"}, "b")]
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
@@ -631,11 +627,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return {tag: "div", attrs: {id: "a"}, text: "b"}
+							return m("div", {id: "a"}, "b")
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
@@ -655,11 +651,11 @@ o.spec("component", function() {
 							o(root.childNodes.length).equals(1)
 						},
 						view: function() {
-							return [{tag: "div", attrs: {id: "a"}, text: "b"}]
+							return [m("div", {id: "a"}, "b")]
 						}
 					})
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					o(called).equals(0)
 
@@ -672,15 +668,15 @@ o.spec("component", function() {
 					var component = createComponent({
 						onupdate: function() {},
 						view: function() {
-							return {tag: "div"}
+							return m("div")
 						}
 					})
-					var vnode = {tag: component, key: 1}
-					var updated = {tag: component, key: 1}
+					var vnode = m(component, {key: 1})
+					var updated = m(component, {key: 1})
 
-					render(root, [vnode])
+					render(root, vnode)
 					render(root, [])
-					render(root, [updated])
+					render(root, updated)
 
 					o(vnode.dom).notEquals(updated.dom)
 				})
@@ -729,7 +725,7 @@ o.spec("component", function() {
 						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
 					})
 
-					render(root, [{tag: component, attrs: attrs}])
+					render(root, [m(component, attrs)])
 
 					o(methods.view.callCount).equals(1)
 					o(methods.oninit.callCount).equals(1)
@@ -743,7 +739,7 @@ o.spec("component", function() {
 						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
 					})
 
-					render(root, [{tag: component, attrs: attrs}])
+					render(root, [m(component, attrs)])
 
 					o(methods.view.callCount).equals(2)
 					o(methods.oninit.callCount).equals(1)
@@ -794,8 +790,8 @@ o.spec("component", function() {
 
 					var component = createComponent(methods)
 
-					render(root, [{tag: component, attrs: attrs}])
-					render(root, [{tag: component, attrs: attrs}])
+					render(root, [m(component, attrs)])
+					render(root, [m(component, attrs)])
 					render(root, [])
 
 					hooks.forEach(function(hook) {
@@ -824,15 +820,15 @@ o.spec("component", function() {
 						} else {
 							o(vnode.state).notEquals(firstState)
 						}
-						return {tag: "div"}
+						return m("div")
 					})
 					var component = createComponent({view: view})
 
-					render(root, [{tag: "div", children: [{tag: component, key: 1}]}])
+					render(root, [m("div", m(component, {key: 1}))])
 					var child = root.firstChild.firstChild
 					render(root, [])
 					step = 1
-					render(root, [{tag: "div", children: [{tag: component, key: 1}]}])
+					render(root, [m("div", m(component, {key: 1}))])
 
 					o(child).notEquals(root.firstChild.firstChild) // this used to be a recycling pool test
 					o(view.callCount).equals(2)
@@ -849,7 +845,7 @@ o.spec("component", function() {
 						}
 					}))
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					function init(vnode) {
 						o(vnode.state.data).equals(data)
@@ -866,7 +862,7 @@ o.spec("component", function() {
 						}
 					}))
 
-					render(root, [{tag: component}])
+					render(root, m(component))
 
 					function init(vnode) {
 						o(vnode.state.data).equals(data)
@@ -888,7 +884,7 @@ o.spec("component", function() {
 					}
 				}
 
-				render(root, [{tag: component}])
+				render(root, m(component))
 
 				function init(vnode) {
 					o(vnode.state.data).equals(data)
@@ -911,8 +907,8 @@ o.spec("component", function() {
 				component.prototype.view = view
 				component.prototype.oninit = oninit
 
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [m(component, {oninit: oninit})])
+				render(root, [m(component, {oninit: oninit})])
 				render(root, [])
 
 				o(component.callCount).equals(1)
@@ -934,8 +930,8 @@ o.spec("component", function() {
 					}
 				})
 
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
-				render(root, [{tag: component, attrs: {oninit: oninit}}])
+				render(root, [m(component, {oninit: oninit})])
+				render(root, [m(component, {oninit: oninit})])
 				render(root, [])
 
 				o(component.callCount).equals(1)

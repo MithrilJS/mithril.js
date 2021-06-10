@@ -1308,7 +1308,7 @@ o.spec("route", function() {
 							}),
 							render: lock(function() {
 								renderCount++
-								return {tag: Component}
+								return m(Component)
 							}),
 						},
 					})

@@ -3,6 +3,9 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
+var fragment = require("../../render/fragment")
+var trust = require("../../render/trust")
 
 o.spec("createNodes", function() {
 	var $window, root, render
@@ -14,10 +17,10 @@ o.spec("createNodes", function() {
 
 	o("creates nodes", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			m("a"),
+			"b",
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 
@@ -29,11 +32,11 @@ o.spec("createNodes", function() {
 	})
 	o("ignores null", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
+			m("a"),
+			"b",
 			null,
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 
@@ -45,11 +48,11 @@ o.spec("createNodes", function() {
 	})
 	o("ignores undefined", function() {
 		var vnodes = [
-			{tag: "a"},
-			{tag: "#", children: "b"},
+			m("a"),
+			"b",
 			undefined,
-			{tag: "<", children: "c"},
-			{tag: "[", children: [{tag: "#", children: "d"}]},
+			trust("c"),
+			fragment("d"),
 		]
 		render(root, vnodes)
 
