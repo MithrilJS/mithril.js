@@ -26,7 +26,8 @@
 	- [Preloading data](#preloading-data)
 	- [Code splitting](#code-splitting)
 	- [Typed routes](#typed-routes)
-	- [Hidden routes](#typed-routes)
+	- [Hidden routes](#hidden-routes)
+	- [Route cancellation / blocking](#route-cancellation--blocking)
 - [Third-party integration](#third-party-integration)
 
 ---
@@ -856,6 +857,23 @@ m.route(document.body, "/", {
 
 ---
 
+### Route cancellation / blocking
+
+RouteResolver `onmatch` can prevent route resolution by returning a promise that never resolves. This can be used to detect attempted redundant route resolutions and cancel them:
+
+```javascript
+m.route(document.body, "/", {
+	"/": {
+		onmatch: function(args, requestedPath) {
+			if (m.route.get() === requestedPath)
+				return new Promise(function() {})
+		},
+	},
+})
+```
+
+---
+
 ### Third-party integration
 
 In certain situations, you may find yourself needing to interoperate with another framework like React. Here's how you do it:
@@ -906,28 +924,4 @@ Vue.component("my-child", {
 		m.mount(this.$refs.root, null)
 	},
 })
-```
-
-Technically, there's nothing stopping you from even doing it in a Mithril component, even.
-
-```javascript
-// Don't do this. Use a proper global layout component for each route instead,
-// passing your child vnode/component in the attributes or children.
-function Child() {
-	return {
-		oncreate: function(vnode) {
-			m.route(vnode.dom, "/", {
-				// ...
-			})
-		},
-
-		onremove: function() {
-			m.mount(vnode.dom, null)
-		},
-
-		view: function() {
-			return m("div")
-		},
-	}
-}
 ```
