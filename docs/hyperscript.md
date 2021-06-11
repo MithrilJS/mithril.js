@@ -554,3 +554,8 @@ var BetterListComponent = {
 When a redraw encounters a vnode which is strictly equal to the one in the previous render, it will be skipped and its contents will not be updated. While this may seem like an opportunity for performance optimisation, it should be avoided because it prevents dynamic changes in that node's tree - this leads to side-effects such as downstream lifecycle methods failing to trigger on redraw. In this sense, Mithril vnodes are immutable: new vnodes are compared to old ones; mutations to vnodes are not persisted.
 
 The component documentation contains [more detail and an example of this anti-pattern](components.md#avoid-creating-component-instances-outside-views).
+
+#### Standalone usage
+`var m = require("mithril/hyperscript");`
+
+The hyperscript module exports the hyperscript function `m()` as described above. The resulting vnode(s) can be rendered with [`m.mount()`](mount.md), [`m.route()`](route.md), or [`m.render()`](render.md).
