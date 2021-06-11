@@ -2,8 +2,10 @@
 
 - [Description](#description)
 - [Setup](#setup)
+- [Production build](#production-build)
 - [Using Babel with Webpack](#using-babel-with-webpack)
 - [JSX vs hyperscript](#jsx-vs-hyperscript)
+- [A note on event listeners](#a-note-on-event-listeners)
 - [Converting HTML](#converting-html)
 
 ---
@@ -331,6 +333,41 @@ function SummaryView() {
                     ))}
                 </div>
             </div>
+        )
+    }
+}
+```
+
+---
+
+### A note on event listeners
+
+While JSX events are usually named using camelCase, lowercase names should be used when JSX is used with Mithril.
+
+```javascript
+function MyComponent() {
+    return {
+        view: () =>
+            m("main", [
+                m("input", {
+                    type: "button",
+                    onclick: () => console.log('clicked'),
+                    value: "Click me!"
+                })
+            ])
+    }
+}
+```
+
+Should be written as:
+
+```jsx
+function MyComponent() {
+    return {
+        view: () => (
+            <main>
+                <input type="button" onclick={() => console.log('clicked')} value="Click me!"/>
+            </main>
         )
     }
 }
