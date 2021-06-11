@@ -47,7 +47,7 @@ $ npm init --yes
 2. install required tools
 ```bash
 $ npm install mithril --save
-$ npm install webpack webpack-cli --save-dev
+$ npm install webpack@4 webpack-cli@3 --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
