@@ -2,6 +2,9 @@ sudo: false
 
 # Only care about running tests against latest node
 language: node_js
+arch:
+ - amd64
+ - ppc64le
 node_js:
 - node
 
