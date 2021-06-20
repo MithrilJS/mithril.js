@@ -39,6 +39,7 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Allow Mithril to be loaded in non-browser environments without modification. ([#2633](https://github.com/MithrilJS/mithril.js/pull/2633) [@isiahmeadows](https://github.com/isiahmeadows))
 - Work around a bundler bug that corrupted RegExps [#2647](https://github.com/MithrilJS/mithril.js/issues/) ([#2655](https://github.com/MithrilJS/mithril.js/pull/2655))
 - Adapt handling of no content (204) responses to match XHR Spec ([#2624](https://github.com/MithrilJS/mithril.js/pull/2641)) [@Evoke-PHP](https://github.com/Evoke-PHP)
+- Add `URLSearchParams` support to `m.request` ([#2695](https://github.com/MithrilJS/mithril.js/pull/2695) [@Coteh](https://github.com/Coteh))
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
