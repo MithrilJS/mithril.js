@@ -58,7 +58,7 @@ You can only have one `m.route` call per application.
 Argument               | Type                                     | Required | Description
 ---------------------- | ---------------------------------------- | -------- | ---
 `root`                 | `Element`                                | Yes      | A DOM element that will be the parent node to the subtree
-`defaultRoute`         | `String`                                 | Yes      | The route to redirect to if the current URL does not match a route
+`defaultRoute`         | `String`                                 | Yes      | The route to redirect to if the current URL does not match a route. Note, this is not the initial route.  Initial route will be your  address bar's url.
 `routes`               | <code>Object&#x3c;String,Component&vert;RouteResolver&#x3e;</code> | Yes      | An object whose keys are route strings and values are either components or a [RouteResolver](#routeresolver)
 **returns**            |                                          |          | Returns `undefined`
 
