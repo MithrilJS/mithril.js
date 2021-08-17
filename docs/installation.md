@@ -3,7 +3,6 @@
 - [CDN](#cdn)
 - [npm](#npm)
 - [Quick start with Webpack](#quick-start-with-webpack)
-- [TypeScript](#typescript)
 
 ### CDN
 
