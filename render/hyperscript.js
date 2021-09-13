@@ -3,31 +3,13 @@
 var Vnode = require("../render/vnode")
 var hyperscriptVnode = require("./hyperscriptVnode")
 var hasOwn = require("../util/hasOwn")
+var compileSelector = require("../render/compileselector")
 
-var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
 
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
 	return true
-}
-
-function compileSelector(selector) {
-	var match, tag = "div", classes = [], attrs = {}
-	while (match = selectorParser.exec(selector)) {
-		var type = match[1], value = match[2]
-		if (type === "" && value !== "") tag = value
-		else if (type === "#") attrs.id = value
-		else if (type === ".") classes.push(value)
-		else if (match[3][0] === "[") {
-			var attrValue = match[6]
-			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\")
-			if (match[4] === "class") classes.push(attrValue)
-			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true
-		}
-	}
-	if (classes.length > 0) attrs.className = classes.join(" ")
-	return selectorCache[selector] = {tag: tag, attrs: attrs}
 }
 
 function execSelector(state, vnode) {
@@ -91,7 +73,7 @@ function hyperscript(selector) {
 
 	if (typeof selector === "string") {
 		vnode.children = Vnode.normalizeChildren(vnode.children)
-		if (selector !== "[") return execSelector(selectorCache[selector] || compileSelector(selector), vnode)
+		if (selector !== "[") return execSelector(selectorCache[selector] || (selectorCache[selector] = compileSelector(selector)), vnode)
 	}
 
 	vnode.tag = selector

@@ -21,5 +21,6 @@ m.buildPathname = require("./pathname/build")
 m.vnode = require("./render/vnode")
 m.PromisePolyfill = require("./promise/polyfill")
 m.censor = require("./util/censor")
+m.compileSelector = require("./render/compileselector")
 
 module.exports = m
