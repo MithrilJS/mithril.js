@@ -3,7 +3,7 @@
 const {promises: fs} = require("fs")
 const path = require("path")
 const {promisify} = require("util")
-const marked = require("marked")
+const {marked} = require("marked")
 const rimraf = promisify(require("rimraf"))
 const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
