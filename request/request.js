@@ -123,7 +123,11 @@ module.exports = function($window, Promise, oncompletion) {
 						if (responseType === "json") {
 							// For IE and Edge, which don't implement
 							// `responseType: "json"`.
-							if (!ev.target.responseType && typeof args.extract !== "function") response = JSON.parse(ev.target.responseText)
+							if (!ev.target.responseType && typeof args.extract !== "function") {
+								// Handle no-content which will not parse.
+								try { response = JSON.parse(ev.target.responseText) }
+								catch (e) { response = null }
+							}
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
 							// document is needed on old IE and friends (all
