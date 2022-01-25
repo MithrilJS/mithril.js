@@ -25,6 +25,7 @@ function MyComponent() {
 }
 
 // can be written as:
+
 function MyComponent() {
 	return {
 		view: () => (
@@ -344,36 +345,19 @@ function SummaryView() {
 
 While JSX events are usually named using camelCase, lowercase names should be used when JSX is used with Mithril.
 
-```javascript
-function MyComponent() {
-    return {
-        view: () =>
-            m("main", [
-                m("input", {
-                    type: "button",
-                    onclick: () => console.log('clicked'),
-                    value: "Click me!"
-                })
-            ])
-    }
-}
-```
-
-Should be written as:
-
 ```jsx
-function MyComponent() {
-    return {
-        view: () => (
-            <main>
-                <input type="button" onclick={() => console.log('clicked')} value="Click me!"/>
-            </main>
-        )
-    }
-}
-```
+m("main", [
+	m("input", { type: "text", oninput: ... }),
+	m("input", { type: "button", value: "Click me", onclick: ... })
+])
 
----
+// can be written as:
+
+<main>
+    <input type="text" oninput={...}/>
+    <input type="button" value="Click me" onclick={...}/>
+</main>
+```
 
 ### Converting HTML
 
