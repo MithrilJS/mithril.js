@@ -772,6 +772,7 @@ module.exports = function($window) {
 		else if (
 			hasPropertyKey(vnode, key, ns)
 			&& key !== "className"
+			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
 				vnode.tag === "option"
 				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement()
