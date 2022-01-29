@@ -800,6 +800,9 @@ module.exports = function($window) {
 		if ("selectedIndex" in attrs) setAttr(vnode, "selectedIndex", null, attrs.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
+		if (old && old === attrs) {
+			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+		}
 		if (attrs != null) {
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
 			//
