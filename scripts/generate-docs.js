@@ -115,9 +115,6 @@ class Generator {
 			path + ((/http/).test(path) ? extension : ".html")
 		)
 
-		// Fix type signatures containing Array<...>
-		body = body.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;")
-
 		const markedHtml = marked(body)
 		const title = body.match(/^#([^\n\r]+)/i) || []
 
