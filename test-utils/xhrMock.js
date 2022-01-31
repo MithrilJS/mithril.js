@@ -14,6 +14,7 @@ module.exports = function() {
 	function FormData() {}
 	var $window = {
 		FormData: FormData,
+		URLSearchParams: URLSearchParams,
 		XMLHttpRequest: function XMLHttpRequest() {
 			var args = {}
 			var headers = {}

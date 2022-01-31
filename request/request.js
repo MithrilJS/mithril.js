@@ -76,7 +76,7 @@ module.exports = function($window, Promise, oncompletion) {
 		request: makeRequest(function(url, args, resolve, reject) {
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
-			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData || body instanceof $window.URLSearchParams)
 			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
 			var xhr = new $window.XMLHttpRequest(), aborted = false, isTimeout = false
@@ -194,7 +194,7 @@ module.exports = function($window, Promise, oncompletion) {
 
 			if (body == null) xhr.send()
 			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
-			else if (body instanceof $window.FormData) xhr.send(body)
+			else if (body instanceof $window.FormData || body instanceof $window.URLSearchParams) xhr.send(body)
 			else xhr.send(JSON.stringify(body))
 		}),
 		jsonp: makeRequest(function(url, args, resolve, reject) {
