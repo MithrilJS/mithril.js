@@ -2,6 +2,7 @@ name: 'Push `master`'
 on:
   pull_request:
     branches: ['master']
+    types: [created]
 jobs:
   comment:
     runs-on: ubuntu-latest
