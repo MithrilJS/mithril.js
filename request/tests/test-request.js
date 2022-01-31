@@ -212,6 +212,16 @@ o.spec("request", function() {
 				o(data).deepEquals({a: "/items", b: [{x: "y"}]})
 			}).then(done)
 		})
+		o("works w/ URLSearchParams body", function(done) {
+			mock.$defineRoutes({
+				"POST /item": function(request) {
+					return {status: 200, responseText: JSON.stringify({a: request.url, b: request.body.toString()})}
+				}
+			})
+			request({method: "POST", url: "/item", body: new URLSearchParams({x: "y", z: "w"})}).then(function(data) {
+				o(data).deepEquals({a: "/item", b: "x=y&z=w"})
+			}).then(done)
+		});
 		o("ignores unresolved parameter via GET", function(done) {
 			mock.$defineRoutes({
 				"GET /item/:x": function(request) {

@@ -12,7 +12,6 @@ module.exports = function() {
 	}
 
 	function FormData() {}
-	function URLSearchParams() {}
 	var $window = {
 		FormData: FormData,
 		URLSearchParams: URLSearchParams,
