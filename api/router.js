@@ -12,6 +12,14 @@ var censor = require("../util/censor")
 
 var sentinel = {}
 
+function decodeURIComponentSave(component) {
+	try {
+		return decodeURIComponent(component)
+	} catch(e) {
+		return component
+	}
+}
+
 module.exports = function($window, mountRedraw) {
 	var callAsync = $window == null
 		// In case Mithril's loaded globally without the DOM, let's not break
@@ -67,7 +75,7 @@ module.exports = function($window, mountRedraw) {
 		// since the representation is consistently a relatively poorly
 		// optimized cons string.
 		var path = prefix.concat()
-			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
 			.slice(route.prefix.length)
 		var data = parsePathname(path)
 

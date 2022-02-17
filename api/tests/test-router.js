@@ -145,6 +145,19 @@ o.spec("route", function() {
 					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
 				})
 
+				o("resolves to route w/ matching invalid escape", function() {
+					$window.location.href = prefix + "/%C3%B6abc%def"
+					route(root, "/öabc%def", {
+						"/öabc%def" : {
+							view: lock(function() {
+								return route.get()
+							})
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals("/öabc%def")
+				})
+
 				o("handles parameterized route", function() {
 					$window.location.href = prefix + "/test/x"
 					route(root, "/test/:a", {
