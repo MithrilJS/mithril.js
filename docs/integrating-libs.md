@@ -113,10 +113,10 @@ function Demo() {
 				}),
 				m('button', {
 					onclick: prev
-				}, 'Mithril Button -'),
+				}, 'Mithril.js Button -'),
 				m('button', {
 					onclick: next
-				}, 'Mithril Button +')
+				}, 'Mithril.js Button +')
 			]
 		}
 	}

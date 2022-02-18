@@ -1,5 +1,5 @@
 <!--meta-description
-Documentation on m.mount(), which binds a Mithril component to a given DOM node
+Documentation on m.mount(), which binds a Mithril.js component to a given DOM node
 -->
 
 # mount(root, component)
@@ -64,7 +64,7 @@ Running `mount(element, OtherComponent)` where `element` is a current mount poin
 
 #### Unmount
 
-Using `m.mount(element, null)` on an element with a previously mounted component unmounts it and cleans up Mithril internal state. This can be useful to prevent memory leaks when removing the `root` node manually from the DOM.
+Using `m.mount(element, null)` on an element with a previously mounted component unmounts it and cleans up Mithril.js internal state. This can be useful to prevent memory leaks when removing the `root` node manually from the DOM.
 
 #### Headless mounts
 
@@ -111,6 +111,6 @@ In contrast, traversing a JavaScript data structure has a much more predictable 
 
 A component rendered via `m.mount` [automatically redraws](autoredraw.md) in response to view events, `m.redraw()` calls or `m.request()` calls. Vnodes rendered via `m.render()` do not.
 
-`m.mount()` is suitable for application developers integrating Mithril widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril's auto-redrawing facilities.
+`m.mount()` is suitable for application developers integrating Mithril.js widgets into existing codebases where routing is handled by another library or framework, while still enjoying Mithril.js' auto-redrawing facilities.
 
 `m.render()` is suitable for library authors who wish to manually control rendering (e.g. when hooking to a third party router, or using third party data-layer libraries like Redux).

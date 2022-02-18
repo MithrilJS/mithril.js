@@ -1,5 +1,5 @@
 <!--meta-description
-A complete walkthrough tutorial for building your first simple application in Mithril, from beginning to end
+A complete walkthrough tutorial for building your first simple application in Mithril.js, from beginning to end
 -->
 
 # Simple application
@@ -38,7 +38,7 @@ If npm is installed correctly, a file `package.json` will be created. This file 
 
 ---
 
-To install Mithril, follow the instructions in the [installation](installation.md) page. Once you have a project skeleton with Mithril installed, we are ready to create the application.
+To install Mithril.js, follow the instructions in the [installation](installation.md) page. Once you have a project skeleton with Mithril.js installed, we are ready to create the application.
 
 Let's start by creating a module to store our state. Let's create a file called `src/models/User.js`
 
@@ -51,7 +51,7 @@ var User = {
 module.exports = User
 ```
 
-Now let's add code to load some data from a server. To communicate with a server, we can use Mithril's XHR utility, `m.request`. First, we include Mithril in the module:
+Now let's add code to load some data from a server. To communicate with a server, we can use Mithril.js' XHR utility, `m.request`. First, we include Mithril.js in the module:
 
 ```javascript
 // src/models/User.js
@@ -107,7 +107,7 @@ module.exports = User
 
 The `method` option is an [HTTP method](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods). To retrieve data from the server without causing side-effects on the server, we need to use the `GET` method. The `url` is the address for the API endpoint. The `withCredentials: true` line indicates that we're using cookies (which is a requirement for the REM API).
 
-The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril assumes a HTTP response body are in JSON format and automatically parses it into a JavaScript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
+The `m.request` call returns a Promise that resolves to the data from the endpoint. By default, Mithril.js assumes a HTTP response body are in JSON format and automatically parses it into a JavaScript object or array. The `.then` callback runs when the XHR request completes. In this case, the callback assigns the `result.data` array to `User.list`.
 
 Notice we also have a `return` statement in `loadList`. This is a general good practice when working with Promises, which allows us to register more callbacks to run after the completion of the XHR request.
 
@@ -117,7 +117,7 @@ This simple model exposes two members: `User.list` (an array of user objects), a
 
 Now, let's create a view module so that we can display data from our User model module.
 
-Create a file called `src/views/UserList.js`. First, let's include Mithril and our model, since we'll need to use both:
+Create a file called `src/views/UserList.js`. First, let's include Mithril.js and our model, since we'll need to use both:
 
 ```javascript
 // src/views/UserList.js
@@ -125,7 +125,7 @@ var m = require("mithril")
 var User = require("../models/User")
 ```
 
-Next, let's create a Mithril component. A component is simply an object that has a `view` method:
+Next, let's create a Mithril.js component. A component is simply an object that has a `view` method:
 
 ```javascript
 // src/views/UserList.js
@@ -139,7 +139,7 @@ module.exports = {
 }
 ```
 
-By default, Mithril views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and since its syntax is just JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem. For example:
+By default, Mithril.js views are described using [hyperscript](hyperscript.md). Hyperscript offers a terse syntax that can be indented more naturally than HTML for complex tags, and since its syntax is just JavaScript, it's possible to leverage a lot of JavaScript tooling ecosystem. For example:
 
 - You can use [Babel](es6.md) to transpile ES6+ to ES5 for IE and to transpile [JSX](jsx.md) (an inline HTML-like syntax extension) to appropriate hyperscript calls.
 - You can use [ESLint](https://eslint.org/) for easy linting with no special plugins.
@@ -147,7 +147,7 @@ By default, Mithril views are described using [hyperscript](hyperscript.md). Hyp
 - You can use [Istanbul](https://github.com/istanbuljs/nyc) for code coverage.
 - You can use [TypeScript](https://www.typescriptlang.org/) for easy code analysis. (There are [community-supported type definitions available](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mithril), so you don't need to roll your own.)
 
-Let's start off with hyperscript and create a list of items. Hyperscript is the idiomatic way to use Mithril, but [JSX](jsx.md) works pretty similarly.
+Let's start off with hyperscript and create a list of items. Hyperscript is the idiomatic way to use Mithril.js, but [JSX](jsx.md) works pretty similarly.
 
 ```javascript
 // src/views/UserList.js
@@ -266,7 +266,7 @@ Reloading the browser window now should display some styled elements.
 
 Let's add routing to our application.
 
-Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via JavaScript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
+Routing means binding a screen to a unique URL, to create the ability to go from one "page" to another. Mithril.js is designed for Single Page Applications, so these "pages" aren't necessarily different HTML files in the traditional sense of the word. Instead, routing in Single Page Applications retains the same HTML file throughout its lifetime, but changes the state of the application via JavaScript. Client side routing has the benefit of avoiding flashes of blank screen between page transitions, and can reduce the amount of data being sent down from the server when used in conjunction with an web service oriented architecture (i.e. an application that downloads data as JSON instead of downloading pre-rendered chunks of verbose HTML).
 
 We can add routing by changing the `m.mount` call to a `m.route` call:
 
@@ -733,4 +733,4 @@ This concludes the tutorial.
 
 In this tutorial, we went through the process of creating a very simple application where we can list users from a server and edit them individually. As an extra exercise, try to implement user creation and deletion on your own.
 
-If you want to see more examples of Mithril code, check the [examples](examples.md) page. If you have questions, feel free to drop by the [Mithril chat room](https://gitter.im/MithrilJS/mithril.js).
+If you want to see more examples of Mithril.js code, check the [examples](examples.md) page. If you have questions, feel free to drop by the [Mithril.js chat room](https://gitter.im/MithrilJS/mithril.js).

@@ -63,7 +63,7 @@ In contrast, traversing a JavaScript data structure has a much more predictable 
 
 `m.render()` method is internally called by [`m.mount()`](mount.md), [`m.route()`](route.md), [`m.redraw()`](redraw.md) and [`m.request()`](request.md). It is not called after [stream updates](stream.md)
 
-Unlike with `m.mount()` and `m.route()`, a vnode tree rendered via `m.render()` does not auto-redraw in response to view events, `m.redraw()` calls or `m.request()` calls. It is a low level mechanism suitable for library authors who wish to manually control rendering instead of relying on Mithril's built-in auto-redrawing system.
+Unlike with `m.mount()` and `m.route()`, a vnode tree rendered via `m.render()` does not auto-redraw in response to view events, `m.redraw()` calls or `m.request()` calls. It is a low level mechanism suitable for library authors who wish to manually control rendering instead of relying on Mithril.js' built-in auto-redrawing system.
 
 Another difference is that `m.render` method expects a [vnode](vnodes.md) (or a array of vnodes) as its second parameter, whereas `m.mount()` and `m.route()` expect components.
 
@@ -73,7 +73,7 @@ Another difference is that `m.render` method expects a [vnode](vnodes.md) (or a 
 
 `var render = require("mithril/render")`
 
-The `m.render` module is similar in scope to view libraries like Knockout, React and Vue. It implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril aside from normalization exposed via `require("mithril/render/vnode")` and can be used as a standalone library.
+The `m.render` module is similar in scope to view libraries like Knockout, React and Vue. It implements a virtual DOM diffing engine with a modern search space reduction algorithm and DOM recycling, which translate to top-of-class performance, both in terms of initial page load and re-rendering. It has no dependencies on other parts of Mithril.js aside from normalization exposed via `require("mithril/render/vnode")` and can be used as a standalone library.
 
 Despite being relatively small, the render module is fully functional and self-sufficient. It supports everything you might expect: SVG, custom elements, and all valid attributes and events - without any weird case-sensitive edge cases or exceptions. Of course, it also fully supports [components](components.md) and [lifecycle methods](lifecycle-methods.md).
 

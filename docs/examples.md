@@ -1,10 +1,10 @@
 <!--meta-description
-Some examples on how you can use MithrilJS
+Some examples on how you can use Mithril.js
 -->
 
 # Examples
 
-Here are some examples of Mithril in action
+Here are some examples of Mithril.js in action
 
 - [Animation](https://raw.githack.com/MithrilJS/mithril.js/master/examples/animation/mosaic.html)
 - [Community Added Examples](https://how-to-mithril.js.org)

@@ -1,5 +1,5 @@
 <!--meta-description
-Documentation on m.trust(), a utility for rendering raw HTML and SVG within Mithril, along with tips on when to (and not to) use it
+Documentation on m.trust(), a utility for rendering raw HTML and SVG within Mithril.js, along with tips on when to (and not to) use it
 -->
 
 # trust(html)
@@ -36,7 +36,7 @@ Argument    | Type                 | Required | Description
 
 ### How it works
 
-By default, Mithril escapes all values in order to prevent a class of security problems called [XSS injections](https://en.wikipedia.org/wiki/Cross-site_scripting).
+By default, Mithril.js escapes all values in order to prevent a class of security problems called [XSS injections](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
 ```javascript
 var userContent = "<script>alert('evil')</script>"
@@ -103,7 +103,7 @@ Even though there are many obscure ways to make an HTML string run JavaScript, `
 
 For historical reasons, browsers ignore `<script>` tags that are inserted into the DOM via innerHTML. They do this because once the element is ready (and thus, has an accessible innerHTML property), the rendering engines cannot backtrack to the parsing-stage if the script calls something like `document.write("</body>")`.
 
-This browser behavior may seem surprising to a developer coming from jQuery, because jQuery implements code specifically to find script tags and run them in this scenario. Mithril follows the browser behavior. If jQuery behavior is desired, you should consider either moving the code out of the HTML string and into an `oncreate` [lifecycle method](lifecycle-methods.md), or use jQuery (or re-implement its script parsing code).
+This browser behavior may seem surprising to a developer coming from jQuery, because jQuery implements code specifically to find script tags and run them in this scenario. Mithril.js follows the browser behavior. If jQuery behavior is desired, you should consider either moving the code out of the HTML string and into an `oncreate` [lifecycle method](lifecycle-methods.md), or use jQuery (or re-implement its script parsing code).
 
 ---
 
@@ -145,7 +145,7 @@ Here's the example snippet for the [Facebook Like button](https://developers.fac
 </div>
 ```
 
-And here's how to refactor into a Mithril component in a way that avoids `m.trust`:
+And here's how to refactor into a Mithril.js component in a way that avoids `m.trust`:
 
 ```javascript
 var FacebookLikeButton = {
@@ -167,7 +167,7 @@ var FacebookLikeButton = {
 }
 ```
 
-The Mithril component above simply copies the script tag's code into the `oncreate` hook and declares the remaining HTML tags using Mithril's `m()` syntax.
+The Mithril.js component above simply copies the script tag's code into the `oncreate` hook and declares the remaining HTML tags using Mithril.js' `m()` syntax.
 
 #### Avoid HTML entities
 

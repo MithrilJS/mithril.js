@@ -10,19 +10,19 @@ mithril.js [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://ww
 	</a>
 </p>
 
-- [What is Mithril?](#what-is-mithril)
+- [What is Mithril.js?](#what-is-mithriljs?)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Getting Help](#getting-help)
 - [Contributing](#contributing)
 
-## What is Mithril?
+## What is Mithril.js?
 
 A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->10.04 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
-Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
+Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
-Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
+Mithril.js supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
 ## Installation
 
@@ -60,11 +60,11 @@ You may be interested in the [API Docs](https://mithril.js.org/api.html), a [Sim
 
 ## Getting Help
 
-Mithril has an active & welcoming community on [Gitter](https://gitter.im/mithriljs/mithril.js), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
+Mithril.js has an active & welcoming community on [Gitter](https://gitter.im/mithriljs/mithril.js), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
 
 ## Contributing
 
-There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the mithril site that hopefully helps, but if not definitely hop into the [Gitter Room](https://gitter.im/mithriljs/mithril.js) and ask away!
+There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the Mithril.js site that hopefully helps, but if not definitely hop into the [Gitter Room](https://gitter.im/mithriljs/mithril.js) and ask away!
 
 ---
 

@@ -1,5 +1,5 @@
 <!--meta-description
-Explanation, examples, and build notes on how to use JSX in your MithrilJS-apps
+Explanation, examples, and build notes on how to use JSX in your Mithril.js-based apps
 -->
 
 # JSX
@@ -385,6 +385,6 @@ m("main", [
 
 ### Converting HTML
 
-In Mithril, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
+In Mithril.js, well-formed HTML is generally valid JSX. Little more than just pasting raw HTML is required for things to just work. About the only things you'd normally have to do are change unquoted property values like `attr=value` to `attr="value"` and change void elements like `<input>` to `<input />`, this being due to JSX being based on XML and not HTML.
 
 When using hyperscript, you often need to translate HTML to hyperscript syntax to use it. To help speed up this process along, you can use a [community-created HTML-to-Mithril-template converter](https://arthurclemens.github.io/mithril-template-converter/index.html) to do much of it for you.

@@ -4,7 +4,7 @@ Mithril.js is a modern, small, fast client-side Javascript framework for buildin
 
 # Introduction
 
-- [What is Mithril?](#what-is-mithril?)
+- [What is Mithril.js?](#what-is-mithriljs?)
 - [Getting started](#getting-started)
 - [Hello world](#hello-world)
 - [DOM elements](#dom-elements)
@@ -14,15 +14,15 @@ Mithril.js is a modern, small, fast client-side Javascript framework for buildin
 
 ---
 
-### What is Mithril?
+### What is Mithril.js?
 
-Mithril is a modern client-side JavaScript framework for building Single Page Applications.
+Mithril.js is a modern client-side JavaScript framework for building Single Page Applications.
 It's small (< 10kb gzip), fast and provides routing and XHR utilities out of the box.
 
 <div style="display:flex;margin:0 0 30px;">
 	<div style="width:50%;">
 		<h5>Download size</h5>
-		<small>Mithril (9.5kb)</small>
+		<small>Mithril.js (9.5kb)</small>
 		<div style="animation:grow 0.08s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:4%;"></div>
 		<small style="color:#aaa;">Vue + Vue-Router + Vuex + fetch (40kb)</small>
 		<div style="animation:grow 0.4s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:20%"></div>
@@ -33,7 +33,7 @@ It's small (< 10kb gzip), fast and provides routing and XHR utilities out of the
 	</div>
 	<div style="width:50%;">
 		<h5>Performance</h5>
-		<small>Mithril (6.4ms)</small>
+		<small>Mithril.js (6.4ms)</small>
 		<div style="animation:grow 0.64s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:24%;"></div>
 		<small style="color:#aaa;">Vue (9.8ms)</small>
 		<div style="animation:grow 0.98s;background:#1e5799;height:3px;margin:0 10px 10px 0;transform-origin:0;width:40%"></div>
@@ -44,11 +44,11 @@ It's small (< 10kb gzip), fast and provides routing and XHR utilities out of the
 	</div>
 </div>
 
-Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess.
+Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess.
 
-If you are an experienced developer and want to know how Mithril compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
+If you are an experienced developer and want to know how Mithril.js compares to other frameworks, see the [framework comparison](framework-comparison.md) page.
 
-Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required.
+Mithril.js supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required.
 
 *Looking for the v1 docs? [Click here](https://mithril.js.org/archive/v1.1.7/index.html).*
 
@@ -56,7 +56,7 @@ Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, 
 
 ### Getting started
 
-An easy way to try out Mithril is to include it from a CDN and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
+An easy way to try out Mithril.js is to include it from a CDN and follow this tutorial. It'll cover the majority of the API surface (including routing and XHR) but it'll only take 10 minutes.
 
 Let's create an HTML file to follow along:
 
@@ -71,7 +71,7 @@ Let's create an HTML file to follow along:
 </body>
 ```
 
-To make things simpler you can try out mithril right here. This is a live playground with Mithril preloaded that - by the way - is also built in Mithril.
+To make things simpler you can try out Mithril.js right here. This is a live playground with Mithril.js preloaded that - by the way - is also built in Mithril.
 
 ```js
 var root = document.body
@@ -104,7 +104,7 @@ Now, let's change the text to something else. Add this line of code under the pr
 m.render(root, "My first app")
 ```
 
-As you can see, you use the same code to both create and update HTML. Mithril automatically figures out the most efficient way of updating the text, rather than blindly recreating it from scratch.
+As you can see, you use the same code to both create and update HTML. Mithril.js automatically figures out the most efficient way of updating the text, rather than blindly recreating it from scratch.
 
 #### Live Example
 
@@ -175,7 +175,7 @@ Note: If you prefer `<html>` syntax, [it's possible to use it via a Babel plugin
 
 ### Components
 
-A Mithril component is just an object with a `view` function. Here's the code above as a component:
+A Mithril.js component is just an object with a `view` function. Here's the code above as a component:
 
 ```javascript
 var Hello = {
@@ -203,7 +203,7 @@ As you would expect, doing so creates this markup:
 </main>
 ```
 
-The `m.mount` function is similar to `m.render`, but instead of rendering some HTML only once, it activates Mithril's auto-redrawing system. To understand what that means, let's add some events:
+The `m.mount` function is similar to `m.render`, but instead of rendering some HTML only once, it activates Mithril.js' auto-redrawing system. To understand what that means, let's add some events:
 
 ```javascript
 var count = 0 // added a variable
@@ -223,9 +223,9 @@ m.mount(root, Hello)
 
 We defined an `onclick` event on the button, which increments a variable `count` (which was declared at the top). We are now also rendering the value of that variable in the button label.
 
-You can now update the label of the button by clicking the button. Since we used `m.mount`, you don't need to manually call `m.render` to apply the changes in the `count` variable to the HTML; Mithril does it for you.
+You can now update the label of the button by clicking the button. Since we used `m.mount`, you don't need to manually call `m.render` to apply the changes in the `count` variable to the HTML; Mithril.js does it for you.
 
-If you're wondering about performance, it turns out Mithril is very fast at rendering updates, because it only touches the parts of the DOM it absolutely needs to. So in our example above, when you click the button, the text in it is the only part of the DOM Mithril actually updates.
+If you're wondering about performance, it turns out Mithril.js is very fast at rendering updates, because it only touches the parts of the DOM it absolutely needs to. So in our example above, when you click the button, the text in it is the only part of the DOM Mithril.js actually updates.
 
 #### Live Example
 
@@ -276,9 +276,9 @@ m.route(root, "/splash", {
 })
 ```
 
-The `m.route` function still has the same auto-redrawing functionality that `m.mount` does, and it also enables URL awareness; in other words, it lets Mithril know what to do when it sees a `#!` in the URL.
+The `m.route` function still has the same auto-redrawing functionality that `m.mount` does, and it also enables URL awareness; in other words, it lets Mithril.js know what to do when it sees a `#!` in the URL.
 
-The `"/splash"` right after `root` means that's the default route, i.e. if the hashbang in the URL doesn't point to one of the defined routes (`/splash` and `/hello`, in our case), then Mithril redirects to the default route. So if you open the page in a browser and your URL is `https://localhost`, then you get redirected to `https://localhost/#!/splash`.
+The `"/splash"` right after `root` means that's the default route, i.e. if the hashbang in the URL doesn't point to one of the defined routes (`/splash` and `/hello`, in our case), then Mithril.js redirects to the default route. So if you open the page in a browser and your URL is `https://localhost`, then you get redirected to `https://localhost/#!/splash`.
 
 Also, as you would expect, clicking on the link on the splash page takes you to the click counter screen we created earlier. Notice that now your URL will point to `https://localhost/#!/hello`. You can navigate back and forth to the splash page using the browser's back and next button.
 
@@ -395,4 +395,4 @@ m.mount(root, Hello)
 
 We covered how to create and update HTML, how to create components, routes for a Single Page Application, and interacted with a server via XHR.
 
-This should be enough to get you started writing the frontend for a real application. Now that you are comfortable with the basics of the Mithril API, [be sure to check out the simple application tutorial](simple-application.md), which walks you through building a realistic application.
+This should be enough to get you started writing the frontend for a real application. Now that you are comfortable with the basics of the Mithril.js API, [be sure to check out the simple application tutorial](simple-application.md), which walks you through building a realistic application.

@@ -22,7 +22,7 @@ function decodeURIComponentSave(component) {
 
 module.exports = function($window, mountRedraw) {
 	var callAsync = $window == null
-		// In case Mithril's loaded globally without the DOM, let's not break
+		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
 		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
 	var p = Promise.resolve()
