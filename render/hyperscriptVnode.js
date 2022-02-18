@@ -11,7 +11,7 @@ var Vnode = require("../render/vnode")
 // In native ES6, I'd instead add a final `...args` parameter to the
 // `hyperscript` and `fragment` factories and define this as
 // `hyperscriptVnode(...args)`, since modern engines do optimize that away. But
-// ES5 (what Mithril requires thanks to IE support) doesn't give me that luxury,
+// ES5 (what Mithril.js requires thanks to IE support) doesn't give me that luxury,
 // and engines aren't nearly intelligent enough to do either of these:
 //
 // 1. Elide the allocation for `[].slice.call(arguments, 1)` when it's passed to

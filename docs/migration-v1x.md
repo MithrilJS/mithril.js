@@ -318,12 +318,12 @@ In v1.x, component vnode children were normalized like other vnodes. In v2.x, th
 
 ## `m.request` headers
 
-In v1.x, Mithril set these two headers on all non-`GET` requests, but only when `useBody` was set to `true` (the default) and the other conditions listed hold:
+In v1.x, Mithril.js set these two headers on all non-`GET` requests, but only when `useBody` was set to `true` (the default) and the other conditions listed hold:
 
 - `Content-Type: application/json; charset=utf-8` for requests with JSON bodies
 - `Accept: application/json, text/*` for requests expecting JSON responses
 
-In v2.x, Mithril sets the first for all requests with JSON bodies that are `!= null` and omits it by default otherwise, and this is done independent of which method is chosen, including on `GET` requests.
+In v2.x, Mithril.js sets the first for all requests with JSON bodies that are `!= null` and omits it by default otherwise, and this is done independent of which method is chosen, including on `GET` requests.
 
 The first of the two headers, `Content-Type`, will trigger a CORS prefetch as it [is not a CORS-safelisted request header](https://fetch.spec.whatwg.org/#cors-safelisted-request-header) due to the specified content type, and that could introduce new errors depending on how CORS is configured on your server. If you run into issues with this, you may need to override that header in question by passing `headers: {"Content-Type": "text/plain"}`. (The `Accept` header doesn't trigger anything, so you don't need to override that.)
 

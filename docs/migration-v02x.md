@@ -122,7 +122,7 @@ It served little use in general, and you can always add it back yourself. You sh
 
 ## `config` function
 
-In v0.2.x mithril provided a single lifecycle method, `config`. v2.x provide much more fine-grained control over the lifecycle of a vnode.
+In v0.2.x Mithril.js provided a single lifecycle method, `config`. v2.x provide much more fine-grained control over the lifecycle of a vnode.
 
 ### v0.2.x
 
@@ -163,11 +163,11 @@ If available the DOM-Element of the vnode can be accessed at `vnode.dom`.
 
 ## Changes in redraw behaviour
 
-Mithril's rendering engine still operates on the basis of semi-automated global redraws, but some APIs and behaviours differ:
+Mithril.js' rendering engine still operates on the basis of semi-automated global redraws, but some APIs and behaviours differ:
 
 ### No more redraw locks
 
-In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked draw logic: by default, `m.request` would lock the draw loop on execution and unlock when all pending requests had resolved - the same behaviour could be invoked manually using `m.startComputation()` and `m.endComputation()`. The latter APIs and the associated behaviour has been removed in v2.x without replacement. Redraw locking can lead to buggy UIs: the concerns of one part of the application should not be allowed to prevent other parts of the view from updating to reflect change.
+In v0.2.x, Mithril.js allowed 'redraw locks' which temporarily prevented blocked draw logic: by default, `m.request` would lock the draw loop on execution and unlock when all pending requests had resolved - the same behaviour could be invoked manually using `m.startComputation()` and `m.endComputation()`. The latter APIs and the associated behaviour has been removed in v2.x without replacement. Redraw locking can lead to buggy UIs: the concerns of one part of the application should not be allowed to prevent other parts of the view from updating to reflect change.
 
 ### Cancelling redraw from event handlers
 
@@ -195,7 +195,7 @@ m("div", {
 
 ### Synchronous redraw changed
 
-In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. In v2.x, this functionality was split into two different methods for clarity.
+In v0.2.x it was possible to force Mithril.js to redraw immediately by passing a truthy value to `m.redraw()`. In v2.x, this functionality was split into two different methods for clarity.
 
 #### v0.2.x
 
@@ -821,7 +821,7 @@ Additionally, if the `extract` option is passed to `m.request` the return value 
 
 ## `m.request` headers
 
-In v0.2.x, Mithril didn't set any headers on requests by default. Now, it sets up to 2 headers:
+In v0.2.x, Mithril.js didn't set any headers on requests by default. Now, it sets up to 2 headers:
 
 - `Content-Type: application/json; charset=utf-8` for requests with JSON bodies that are `!= null`
 - `Accept: application/json, text/*` for requests expecting JSON responses

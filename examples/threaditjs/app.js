@@ -22,7 +22,7 @@ var threads = [], current = null, loaded = false, error = false, notFound = fals
 function loadThreads() {
 	loaded = false
 	api.home().then(function(response) {
-		document.title = "ThreaditJS: Mithril | Home"
+		document.title = "ThreaditJS: Mithril.js | Home"
 		threads = response.data
 		loaded = true
 	}, function() {
@@ -34,7 +34,7 @@ function loadThread(id) {
 	loaded = false
 	notFound = false
 	api.thread(id).then(function(response) {
-		document.title = "ThreaditJS: Mithril | " + T.trimTitle(response.root.text);
+		document.title = "ThreaditJS: Mithril.js | " + T.trimTitle(response.root.text);
 		loaded = true
 		current = response
 	}, function(response) {

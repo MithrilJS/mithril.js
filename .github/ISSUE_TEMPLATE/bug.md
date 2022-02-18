@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Bug"
-about: Report a bug in Mithril
+about: Report a bug in Mithril.js
 title: ''
 labels: 'Type: Bug'
 assignees: isiahmeadows
@@ -9,12 +9,12 @@ assignees: isiahmeadows
 
 <!-- Provide a general summary of your issue in the "Title" above -->
 <!--
-Provide the exact version of Mithril you're experiencing these issues with. This
+Provide the exact version of Mithril.js you're experiencing these issues with. This
 matters, even if it's really old like version 0.1.0. Do note that bugs in older
 versions are commonly fixed in newer versions, so you should try to test it
 against the latest version if you can.
 -->
-**Mithril version:**
+**Mithril.js version:**
 
 <!--
 Provide the name and version of both the browser and operating system you're
@@ -35,7 +35,7 @@ projects, feel free to list them all.
 What did you try? What code is causing the unexpected behavior? Make sure to
 try to reduce your code as best as you can while still reproducing the bug, so
 we can more accurately determine the cause. Ideally, it should just be a bunch
-of Mithril calls with virtually no logic at all, but it's sufficient to just
+of Mithril.js calls with virtually no logic at all, but it's sufficient to just
 remove unrelated network calls, attributes, and the like.
 
 In addition, make sure the bug still persists with the latest version of

@@ -364,14 +364,14 @@ function upload(e) {
 			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
 
-				m.redraw() // tell Mithril that data changed and a re-render is needed
+				m.redraw() // tell Mithril.js that data changed and a re-render is needed
 			})
 		}
 	})
 }
 ```
 
-In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the `config` callback, a `progress` event handler is registered. This event handler is fired whenever there's a progress update in the XMLHttpRequest. Because the XMLHttpRequest's progress event is not directly handled by Mithril's virtual DOM engine, `m.redraw()` must be called to signal to Mithril that data has changed and a redraw is required.
+In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the `config` callback, a `progress` event handler is registered. This event handler is fired whenever there's a progress update in the XMLHttpRequest. Because the XMLHttpRequest's progress event is not directly handled by Mithril.js' virtual DOM engine, `m.redraw()` must be called to signal to Mithril.js that data has changed and a redraw is required.
 
 ---
 
@@ -379,7 +379,7 @@ In the example above, a file input is rendered. If the user picks a file, an upl
 
 Depending on the overall application architecture, it may be desirable to transform the response data of a request to a specific class or type (for example, to uniformly parse date fields or to have helper methods).
 
-You can pass a constructor as the `options.type` parameter and Mithril will instantiate it for each object in the HTTP response.
+You can pass a constructor as the `options.type` parameter and Mithril.js will instantiate it for each object in the HTTP response.
 
 ```javascript
 function User(data) {
@@ -402,7 +402,7 @@ In the example above, assuming `/api/v1/users` returns an array of objects, the 
 
 ### Non-JSON responses
 
-Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
+Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril.js attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
 
 ```javascript
 m.request({
@@ -458,7 +458,7 @@ m.request({
 
 ### Retrieving response details
 
-By default Mithril attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
+By default Mithril.js attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
 
 ```javascript
 m.request({
@@ -479,9 +479,9 @@ The parameter to `options.extract` is the XMLHttpRequest object once its operati
 
 Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.
 
-By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
+By contrast, Mithril.js is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril.js enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
 
-By default, `m.request` expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.
+By default, `m.request` expects response data to be in JSON format. In a typical Mithril.js application, that JSON data is then usually consumed by a view.
 
 You should avoid trying to render server-generated dynamic HTML with Mithril. If you have an existing application that does use a server-side templating system, and you wish to re-architecture it, first decide whether the effort is feasible at all to begin with. Migrating from a thick server architecture to a thick client architecture is typically a somewhat large effort, and involves refactoring logic out of templates into logical data services (and the testing that goes with it).
 
@@ -493,18 +493,18 @@ Data services may be organized in many different ways depending on the nature of
 
 [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) is a newer Web API for fetching resources from servers, similar to `XMLHttpRequest`.
 
-Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of reasons:
+Mithril.js' `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of reasons:
 
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
 - `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).
 
-Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
+Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril.js' XHR module.
 
-Despite being much smaller, Mithril's XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril's autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
+Despite being much smaller, Mithril.js' XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril.js' autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
 
-In addition, Mithril's XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
+In addition, Mithril.js' XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
 
 The `fetch()` API does have a few technical advantages over `XMLHttpRequest` in a few uncommon cases:
 

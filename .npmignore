@@ -15,7 +15,7 @@
 # subdirectories.
 tests/
 
-# Mithril's mocks are for internal use only, and it's wholly undocumented for a
+# Mithril.js' mocks are for internal use only, and it's wholly undocumented for a
 # reason. I've already gotten way too many complaints over users' tests breaking
 # from changes to it in patch releases. Let's force people to finally stop using
 # them.

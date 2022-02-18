@@ -2,14 +2,14 @@
 Describes how we do releases of Mithril.js
 -->
 
-# Mithril Release Processes
+# Mithril.js Release Processes
 
 **Note** These steps all assume that `MithrilJS/mithril.js` is a git remote named `mithriljs`, adjust accordingly if that doesn't match your setup.
 
-- [Releasing a new Mithril version](#releasing-a-new-mithril-version)
+- [Releasing a new Mithril.js version](#releasing-a-new-mithriljs-version)
 - [Updating mithril.js.org](#updating-mithriljsorg)
 
-## Releasing a new Mithril version
+## Releasing a new Mithril.js version
 
 ### Prepare the release
 

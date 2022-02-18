@@ -28,7 +28,7 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Reduced package download size substantially by removing the archive of previous releases' documentation. ([#2561](https://github.com/MithrilJS/mithril.js/pull/2561) [@cztomsik](https://github.com/cztomsik))
 - Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
 - The redraw reentrancy check was moved from `m.mount` to `m.render` and its error message was updated accordingly. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
-    - This is unlikely to break people because if you were to do it with `m.render` directly before now, you'd corrupt Mithril's internal representation and internal errors could occur as a result. Now, it just warns you.
+    - This is unlikely to break people because if you were to do it with `m.render` directly before now, you'd corrupt Mithril.js' internal representation and internal errors could occur as a result. Now, it just warns you.
 - For a better debugging experience with `m.route` route resolvers, errors on `onmatch` in the default route are left unhandled and errors in `onmatch` in other routes are logged to the console before redirecting. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@isiahmeadows](https://github.com/isiahmeadows))
 - Bug fix with `m.redraw` where if you removed a root that was previously visited in the current redraw pass, it would lose its place and skip the next root.
 - Add `params:` attribute to `m.route.Link`. ([#2537](https://github.com/MithrilJS/mithril.js/pull/2537) [@isiahmeadows](https://github.com/isiahmeadows))
@@ -39,7 +39,7 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Fix issue where new redraw handlers weren't copied over on update. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
 - Make changes to file inputs gracefully handled, and don't break if the current value and old value mismatch (and the new value isn't empty), but instead just log an error. ([#2578](https://github.com/MithrilJS/mithril.js/pull/2578) [@isiahmeadows](https://github.com/isiahmeadows))
     - This mainly exists just to kick the can down the road - this is the only case I'm aware of where the DOM itself would be responsible for throwing an error. A proper fix to the greater issue of error handling is much more complex, and I'd rather not block users any longer over this one specific issue.
-- Allow Mithril to be loaded in non-browser environments without modification. ([#2633](https://github.com/MithrilJS/mithril.js/pull/2633) [@isiahmeadows](https://github.com/isiahmeadows))
+- Allow Mithril.js to be loaded in non-browser environments without modification. ([#2633](https://github.com/MithrilJS/mithril.js/pull/2633) [@isiahmeadows](https://github.com/isiahmeadows))
 - Work around a bundler bug that corrupted RegExps [#2647](https://github.com/MithrilJS/mithril.js/issues/) ([#2655](https://github.com/MithrilJS/mithril.js/pull/2655))
 - Adapt handling of no content (204) responses to match XHR Spec ([#2624](https://github.com/MithrilJS/mithril.js/pull/2641)) [@Evoke-PHP](https://github.com/Evoke-PHP)
 - Add `URLSearchParams` support to `m.request` ([#2695](https://github.com/MithrilJS/mithril.js/pull/2695) [@Coteh](https://github.com/Coteh))
@@ -48,11 +48,11 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
-- Mithril's internal bundler, previously available at `mithril/bundler`
+- Mithril.js' internal bundler, previously available at `mithril/bundler`
 	- Prefer using a dedicated bundler like Webpack or Rollup instead.
-- Mithril's CommonJS sham polyfill, previously available at `mithril/module`
+- Mithril.js' CommonJS sham polyfill, previously available at `mithril/module`
 	- Prefer using native `import`/`export` and/or Budo instead.
-- Mithril's internal test mocks, previously available at `mithril/test-utils`
+- Mithril.js' internal test mocks, previously available at `mithril/test-utils`
 	- Prefer using JSDOM or similar instead.
 
 I'd like to apologize for missing these deprecations in the initial 2.0.0 change log. This was a major policy change we had been communicating the entire time and we should've let you all know this there in the change log as well.
@@ -118,7 +118,7 @@ _2019-07-24_
     - This lets you ensure global layouts used in `render` still render by diff.
 - redraw: `mithril/redraw` now just exposes the `m.redraw` callback ([#2458](https://github.com/MithrilJS/mithril.js/pull/2458) [@isiahmeadows](https://github.com/isiahmeadows))
     - The `.schedule`, `.unschedule`, and `.render` properties of the former `redrawService` are all removed.
-    - If you want to know how to work around it, look at the call to `mount` in Mithril's source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
+    - If you want to know how to work around it, look at the call to `mount` in Mithril.js' source for `m.route`. That should help you in finding ways around the removed feature. (It doesn't take that much more code.)
 - api: `m.version` has been removed. If you really need the version for whatever reason, just read the `version` field of `mithril/package.json` directly. ([#2466](https://github.com/MithrilJS/mithril.js/pull/2466) [@isiahmeadows](https://github.com/isiahmeadows))
 - route: `m.route.prefix(...)` is now `m.route.prefix = ...`. ([#2469](https://github.com/MithrilJS/mithril.js/pull/2469) [@isiahmeadows](https://github.com/isiahmeadows))
     - This is a fully fledged property, so you can not only write to it, but you can also read from it.
@@ -131,7 +131,7 @@ _2019-07-24_
 
 #### News
 
-- Mithril now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. ([#2296](https://github.com/MithrilJS/mithril.js/pull/2296))
+- Mithril.js now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. ([#2296](https://github.com/MithrilJS/mithril.js/pull/2296))
 - API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
 - API: Event handlers may also be objects with `handleEvent` methods ([#1949](https://github.com/MithrilJS/mithril.js/pull/1949), [#2222](https://github.com/MithrilJS/mithril.js/pull/2222)).
 - API: `m.request` better error message on JSON parse error - ([#2195](https://github.com/MithrilJS/mithril.js/pull/2195), [@codeclown](https://github.com/codeclown))
@@ -198,7 +198,7 @@ _2019-07-24_
 
 ## `mithril-stream` change log
 
-Formerly, `mithril/stream` was available standalone as the package `mithril-stream`, but this package has been deprecated and is no longer updated. The changelog for that package prior to being merged back into Mithril proper is below.
+Formerly, `mithril/stream` was available standalone as the package `mithril-stream`, but this package has been deprecated and is no longer updated. The changelog for that package prior to being merged back into Mithril.js proper is below.
 
 ### 2.0.0
 _2019-02-07_

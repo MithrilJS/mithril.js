@@ -278,7 +278,7 @@ If `onmatch` returns a promise that gets rejected, the router redirects back to 
 
 ##### routeResolver.render
 
-The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component). It also lets you escape from Mithril's normal behavior of replacing the entire subtree.
+The `render` method is called on every redraw for a matching route. It is similar to the `view` method in components and it exists to simplify [component composition](#wrapping-a-layout-component). It also lets you escape from Mithril.js' normal behavior of replacing the entire subtree.
 
 `vnode = routeResolver.render(vnode)`
 
@@ -376,7 +376,7 @@ In the example above, the `Menu` component has two `m.route.Link`s. That creates
 
 You can also navigate programmatically, via `m.route.set(route)`. For example, `m.route.set("/page1")`.
 
-When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril routes, including in both `m.route.set` and in `m.route.Link`.
+When navigating between routes, the router prefix is handled for you. In other words, leave out the hashbang `#!` (or whatever prefix you set `m.route.prefix` to) when linking Mithril.js routes, including in both `m.route.set` and in `m.route.Link`.
 
 Do note that when navigating between components, the entire subtree is replaced. Use [a route resolver with a `render` method](#routeresolverrender) if you want to just patch the subtree.
 
@@ -384,7 +384,7 @@ Do note that when navigating between components, the entire subtree is replaced.
 
 ### Routing parameters
 
-Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril supports [parameterized routes](paths.md#path-parameters):
+Sometimes we want to have a variable id or similar data appear in a route, but we don't want to explicitly specify a separate route for every possible id. In order to achieve that, Mithril.js supports [parameterized routes](paths.md#path-parameters):
 
 ```javascript
 var Edit = {
@@ -442,7 +442,7 @@ m.route(document.body, "/edit/pictures/image.jpg", {
 
 For isomorphic / universal JavaScript app, an url param and a variadic route combined is very useful to display custom 404 error page.
 
-In a case of 404 Not Found error, the server send back the custom page to client. When Mithril is loaded, it will redirect client to the default route because it can't know that route.
+In a case of 404 Not Found error, the server send back the custom page to client. When Mithril.js is loaded, it will redirect client to the default route because it can't know that route.
 
 ```javascript
 m.route(document.body, "/", {
@@ -775,7 +775,7 @@ Above, `render` only runs after the request completes, making the ternary operat
 
 #### Code splitting
 
-In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril, this can be accomplished by returning a promise from the `onmatch` hook:
+In a large application, it may be desirable to download the code for each route on demand, rather than upfront. Dividing the codebase this way is known as code splitting or lazy loading. In Mithril.js, this can be accomplished by returning a promise from the `onmatch` hook:
 
 At its most basic form, one could do the following:
 

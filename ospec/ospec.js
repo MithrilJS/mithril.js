@@ -5,7 +5,7 @@ else window.o = m()
 })(function init(name) {
 	console.warn(
 		"Please switch to the `ospec` package to remove this warning and see " +
-		"the most recent features. Using the `ospec` bundled within Mithril " +
+		"the most recent features. Using the `ospec` bundled within Mithril.js " +
 		"is deprecated, and it will be removed in the next major release."
 	)
 

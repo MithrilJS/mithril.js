@@ -28,7 +28,7 @@ SOFTWARE.
 // Note: this tests against the generated bundle in browsers, but it tests
 // against `index.js` in Node. Please do keep that in mind while testing.
 //
-// Mithril and Benchmark.js are loaded globally via bundle in the browser, so
+// Mithril.js and Benchmark.js are loaded globally via bundle in the browser, so
 // this doesn't require a CommonJS sham polyfill.
 
 // I add it globally just so it's visible in the tests.
@@ -72,7 +72,7 @@ if (isDOM) {
 	Benchmark.options.delay = 1 / 30 /* frames per second */
 }
 
-var suite = new Benchmark.Suite("mithril perf", {
+var suite = new Benchmark.Suite("Mithril.js perf", {
 	onStart: function () {
 		this.start = Date.now()
 	},
