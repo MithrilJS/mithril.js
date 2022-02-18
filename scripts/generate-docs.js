@@ -142,11 +142,12 @@ class Generator {
 		const title = body.match(/^#([^\n\r]+)/i) || []
 
 		let result = this._layout
-
-		result = result.replace(
-			/<title>Mithril\.js<\/title>/,
-			`<title>${title[1]} - Mithril.js</title>`
-		)
+		if (title[1]) {
+			result = result.replace(
+				/<title>Mithril\.js<\/title>/,
+				`<title>${title[1]} - Mithril.js</title>`
+			)
+		}
 
 		// update version
 		result = result.replace(/\[version\]/g, this._version)
