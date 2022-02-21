@@ -2,7 +2,6 @@
 
 var Vnode = require("../render/vnode")
 var m = require("../render/hyperscript")
-var Promise = require("../promise/promise")
 
 var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")

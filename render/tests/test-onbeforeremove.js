@@ -5,7 +5,6 @@ var callAsync = require("../../test-utils/callAsync")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
-var Promise = require("../../promise/promise")
 var m = require("../../render/hyperscript")
 var fragment = require("../../render/fragment")
 

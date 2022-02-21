@@ -4,14 +4,13 @@ var o = require("ospec")
 var callAsync = require("../../test-utils/callAsync")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
-var PromisePolyfill = require("../../promise/promise")
 
 o.spec("request", function() {
 	var mock, request, complete
 	o.beforeEach(function() {
 		mock = xhrMock()
 		complete = o.spy()
-		request = Request(mock, PromisePolyfill, complete).request
+		request = Request(mock, complete).request
 	})
 
 	o.spec("success", function() {
@@ -894,7 +893,7 @@ o.spec("request", function() {
 			// if you use the polyfill, as it's based on `setImmediate` (falling
 			// back to `setTimeout`), and promise microtasks are run at higher
 			// priority than either of those.
-			request = Request(mock, Promise, complete).request
+			request = Request(mock, complete).request
 			mock.$defineRoutes({
 				"GET /item": function() {
 					return {status: 200, responseText: "[]"}

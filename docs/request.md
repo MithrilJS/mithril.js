@@ -25,7 +25,7 @@ Documentation on m.request(), a utility for making XHR/AJAX requests
 
 ### Description
 
-Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
+Makes XHR (aka AJAX) requests, and returns a promise
 
 ```javascript
 m.request({
@@ -95,7 +95,7 @@ m.request({
 })
 ```
 
-A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
+A call to `m.request` returns a promise and triggers a redraw upon completion of its promise chain.
 
 By default, `m.request` assumes the response is in JSON format and parses it into a JavaScript object (or array).
 

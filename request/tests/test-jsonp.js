@@ -3,7 +3,6 @@
 var o = require("ospec")
 var xhrMock = require("../../test-utils/xhrMock")
 var Request = require("../../request/request")
-var PromisePolyfill = require("../../promise/promise")
 var parseQueryString = require("../../querystring/parse")
 
 o.spec("jsonp", function() {
@@ -11,7 +10,7 @@ o.spec("jsonp", function() {
 	o.beforeEach(function() {
 		mock = xhrMock()
 		complete = o.spy()
-		jsonp = Request(mock, PromisePolyfill, complete).jsonp
+		jsonp = Request(mock, complete).jsonp
 	})
 
 	o("works", function(done) {

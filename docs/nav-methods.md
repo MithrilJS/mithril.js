@@ -12,7 +12,6 @@
 	- [m.trust](trust.md)
 	- [m.fragment](fragment.md)
 	- [m.redraw](redraw.md)
-	- [Promise](promise.md)
 - Optional
 	- [Stream](stream.md)
 - Tooling

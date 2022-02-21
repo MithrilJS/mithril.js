@@ -20,7 +20,6 @@ m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")
 m.buildPathname = require("./pathname/build")
 m.vnode = require("./render/vnode")
-m.PromisePolyfill = require("./promise/polyfill")
 m.censor = require("./util/censor")
 
 module.exports = m
