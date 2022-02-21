@@ -3,7 +3,7 @@
 var buildPathname = require("../pathname/build")
 var hasOwn = require("../util/hasOwn")
 
-module.exports = function($window, Promise, oncompletion) {
+module.exports = function($window, oncompletion) {
 	var callbackCount = 0
 
 	function PromiseProxy(executor) {

@@ -9,7 +9,6 @@ var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
-var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
 	// Note: the `n` parameter used in calls to this are generally found by

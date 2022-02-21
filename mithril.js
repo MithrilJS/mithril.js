@@ -159,131 +159,7 @@ hyperscript.fragment = function() {
 	vnode2.children = Vnode.normalizeChildren(vnode2.children)
 	return vnode2
 }
-/* global window */
-/** @constructor */
-var PromisePolyfill = function(executor) {
-	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with 'new'.")
-	if (typeof executor !== "function") throw new TypeError("executor must be a function.")
-	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
-	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
-	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
-	function handler(list, shouldAbsorb) {
-		return function execute(value) {
-			var then
-			try {
-				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-					if (value === self) throw new TypeError("Promise can't be resolved with itself.")
-					executeOnce(then.bind(value))
-				}
-				else {
-					callAsync(function() {
-						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
-						for (var i = 0; i < list.length; i++) list[i](value)
-						resolvers.length = 0, rejectors.length = 0
-						instance.state = shouldAbsorb
-						instance.retry = function() {execute(value)}
-					})
-				}
-			}
-			catch (e) {
-				rejectCurrent(e)
-			}
-		}
-	}
-	function executeOnce(then) {
-		var runs = 0
-		function run(fn) {
-			return function(value) {
-				if (runs++ > 0) return
-				fn(value)
-			}
-		}
-		var onerror = run(rejectCurrent)
-		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
-	}
-	executeOnce(executor)
-}
-PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
-	var self = this, instance = self._instance
-	function handle(callback, list, next, state) {
-		list.push(function(value) {
-			if (typeof callback !== "function") next(value)
-			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
-		})
-		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
-	}
-	var resolveNext, rejectNext
-	var promise = new PromisePolyfill(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
-	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
-	return promise
-}
-PromisePolyfill.prototype.catch = function(onRejection) {
-	return this.then(null, onRejection)
-}
-PromisePolyfill.prototype.finally = function(callback) {
-	return this.then(
-		function(value) {
-			return PromisePolyfill.resolve(callback()).then(function() {
-				return value
-			})
-		},
-		function(reason) {
-			return PromisePolyfill.resolve(callback()).then(function() {
-				return PromisePolyfill.reject(reason);
-			})
-		}
-	)
-}
-PromisePolyfill.resolve = function(value) {
-	if (value instanceof PromisePolyfill) return value
-	return new PromisePolyfill(function(resolve) {resolve(value)})
-}
-PromisePolyfill.reject = function(value) {
-	return new PromisePolyfill(function(resolve, reject) {reject(value)})
-}
-PromisePolyfill.all = function(list) {
-	return new PromisePolyfill(function(resolve, reject) {
-		var total = list.length, count = 0, values = []
-		if (list.length === 0) resolve([])
-		else for (var i = 0; i < list.length; i++) {
-			(function(i) {
-				function consume(value) {
-					count++
-					values[i] = value
-					if (count === total) resolve(values)
-				}
-				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
-					list[i].then(consume, reject)
-				}
-				else consume(list[i])
-			})(i)
-		}
-	})
-}
-PromisePolyfill.race = function(list) {
-	return new PromisePolyfill(function(resolve, reject) {
-		for (var i = 0; i < list.length; i++) {
-			list[i].then(resolve, reject)
-		}
-	})
-}
-if (typeof window !== "undefined") {
-	if (typeof window.Promise === "undefined") {
-		window.Promise = PromisePolyfill
-	} else if (!window.Promise.prototype.finally) {
-		window.Promise.prototype.finally = PromisePolyfill.prototype.finally
-	}
-	var PromisePolyfill = window.Promise
-} else if (typeof global !== "undefined") {
-	if (typeof global.Promise === "undefined") {
-		global.Promise = PromisePolyfill
-	} else if (!global.Promise.prototype.finally) {
-		global.Promise.prototype.finally = PromisePolyfill.prototype.finally
-	}
-	var PromisePolyfill = global.Promise
-} else {
-}
-var _13 = function($window) {
+var _11 = function($window) {
 	var $doc = $window && $window.document
 	var currentRedraw
 	var nameSpace = {
@@ -480,7 +356,7 @@ var _13 = function($window) {
 	// 3) remove the nodes present in the old list, but absent in the new one
 	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
 	//
-	// To achieve 1) one can create a dictionary of keys => index (for the old list), then0 iterate
+	// To achieve 1) one can create a dictionary of keys => index (for the old list), then iterate
 	// over the new list and for each new vnode3, find the corresponding vnode3 in the old list using
 	// the map.
 	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
@@ -526,7 +402,7 @@ var _13 = function($window) {
 	//
 	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
-	// the old DOM nodes before updateNode runs0 because it enables us to use the cached `nextSibling`
+	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
@@ -811,7 +687,7 @@ var _13 = function($window) {
 	}
 	// This covers a really specific edge case:
 	// - Parent node is keyed and contains child
-	// - Child is removed, returns unresolved promise0 in `onbeforeremove`
+	// - Child is removed, returns unresolved promise in `onbeforeremove`
 	// - Parent node is moved in keyed diff
 	// - Remaining children2 still need moved appropriately
 	//
@@ -1127,7 +1003,7 @@ var _13 = function($window) {
 	//    with a `handleEvent` method.
 	// 3. The object does not inherit from `Object.prototype`, to avoid
 	//    any potential interference with that (e.g. setters).
-	// 4. The event name is remapped to the handler0 before calling it.
+	// 4. The event name is remapped to the handler before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
 	// 6. In function-based event handlers, `return false` prevents the default
@@ -1138,10 +1014,10 @@ var _13 = function($window) {
 	}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
-		var handler0 = this["on" + ev.type]
+		var handler = this["on" + ev.type]
 		var result
-		if (typeof handler0 === "function") result = handler0.call(ev.currentTarget, ev)
-		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
+		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
+		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (this._ && ev.redraw !== false) (0, this._)()
 		if (result === false) {
 			ev.preventDefault()
@@ -1229,8 +1105,8 @@ var _13 = function($window) {
 		}
 	}
 }
-var render = _13(typeof window !== "undefined" ? window : null)
-var _16 = function(render0, schedule, console) {
+var render = _11(typeof window !== "undefined" ? window : null)
+var _14 = function(render0, schedule, console) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1
@@ -1268,7 +1144,7 @@ var _16 = function(render0, schedule, console) {
 	}
 	return {mount: mount, redraw: redraw}
 }
-var mountRedraw0 = _16(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
+var mountRedraw0 = _14(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -1330,7 +1206,7 @@ var buildPathname = function(template, params) {
 	if (newHashIndex >= 0) result0 += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result0
 }
-var _19 = function($window, Promise, oncompletion) {
+var _17 = function($window, oncompletion) {
 	var callbackCount = 0
 	function PromiseProxy(executor) {
 		return new Promise(executor)
@@ -1344,7 +1220,7 @@ var _19 = function($window, Promise, oncompletion) {
 		return function(url, args) {
 			if (typeof url !== "string") { args = url; url = url.url }
 			else if (args == null) args = {}
-			var promise1 = new Promise(function(resolve, reject) {
+			var promise = new Promise(function(resolve, reject) {
 				factory(buildPathname(url, args.params), args, function (data) {
 					if (typeof args.type === "function") {
 						if (Array.isArray(data)) {
@@ -1357,32 +1233,32 @@ var _19 = function($window, Promise, oncompletion) {
 					resolve(data)
 				}, reject)
 			})
-			if (args.background === true) return promise1
+			if (args.background === true) return promise
 			var count = 0
 			function complete() {
 				if (--count === 0 && typeof oncompletion === "function") oncompletion()
 			}
-			return wrap(promise1)
-			function wrap(promise1) {
-				var then1 = promise1.then
+			return wrap(promise)
+			function wrap(promise) {
+				var then = promise.then
 				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise1. At the time of writing, this is0
+				// this as a native promise. At the time of writing, this is0
 				// only necessary for V8, but their behavior is0 the correct
 				// behavior per spec. See this spec issue for more details:
 				// https://github.com/tc39/ecma262/issues/1577. Also, see the
 				// corresponding comment in `request0/tests/test-request0.js` for
 				// a bit more background on the issue at hand.
-				promise1.constructor = PromiseProxy
-				promise1.then = function() {
+				promise.constructor = PromiseProxy
+				promise.then = function() {
 					count++
-					var next0 = then1.apply(promise1, arguments)
+					var next0 = then.apply(promise, arguments)
 					next0.then(complete, function(e) {
 						complete()
 						if (count === 0) throw e
 					})
 					return wrap(next0)
 				}
-				return promise1
+				return promise
 			}
 		}
 	}
@@ -1466,9 +1342,9 @@ var _19 = function($window, Promise, oncompletion) {
 							}
 							if (xhr.status === 0) {
 								// Use setTimeout to push this code block onto the event queue
-								// This allows `xhr.ontimeout` to run0 in the case that there is0 a timeout
+								// This allows `xhr.ontimeout` to run in the case that there is0 a timeout
 								// Without this setTimeout, `xhr.ontimeout` doesn't have a chance to reject
-								// as `xhr.onreadystatechange` will run0 before it
+								// as `xhr.onreadystatechange` will run before it
 								setTimeout(function() {
 									if (isTimeout) return
 									completeErrorResponse()
@@ -1523,7 +1399,7 @@ var _19 = function($window, Promise, oncompletion) {
 		}),
 	}
 }
-var request = _19(typeof window !== "undefined" ? window : null, PromisePolyfill, mountRedraw0.redraw)
+var request = _17(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
 var mountRedraw = mountRedraw0
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
@@ -1532,7 +1408,6 @@ m.fragment = hyperscript.fragment
 m.Fragment = "["
 m.mount = mountRedraw.mount
 var m6 = hyperscript
-var Promise = PromisePolyfill
 function decodeURIComponentSave0(str) {
 	try {
 		return decodeURIComponent(str)
@@ -1588,7 +1463,6 @@ var parsePathname = function(url) {
 	if (!path1) path1 = "/"
 	else {
 		if (path1[0] !== "/") path1 = "/" + path1
-		if (path1.length > 1 && path1[path1.length - 1] === "/") path1 = path1.slice(0, -1)
 	}
 	return {
 		path: path1,
@@ -1685,8 +1559,8 @@ function decodeURIComponentSave(component) {
 		return component
 	}
 }
-var _28 = function($window, mountRedraw00) {
-	var callAsync0 = $window == null
+var _26 = function($window, mountRedraw00) {
+	var callAsync = $window == null
 		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
 		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
@@ -1794,7 +1668,7 @@ var _28 = function($window, mountRedraw00) {
 			// TODO: just do `mountRedraw00.redraw1()` here and elide the timer
 			// dependency. Note that this will muck with tests a *lot*, so it's
 			// not as easy of a change as it sounds.
-			callAsync0(resolveRoute)
+			callAsync(resolveRoute)
 		}
 	}
 	function setPath(path0, data, options) {
@@ -1891,7 +1765,7 @@ var _28 = function($window, mountRedraw00) {
 					// Adapted from React Router's implementation:
 					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
 					//
-					// Try to be flexible and intuitive in how we handle0 links.
+					// Try to be flexible and intuitive in how we handle links.
 					// Fun fact: links aren't as obvious to get right as you
 					// would expect. There's a lot more valid ways to click a
 					// link than this, and one might want to not simply click a
@@ -1902,7 +1776,7 @@ var _28 = function($window, mountRedraw00) {
 						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
-						// Let the browser handle0 `target=_blank`, etc.
+						// Let the browser handle `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
@@ -1921,7 +1795,7 @@ var _28 = function($window, mountRedraw00) {
 	}
 	return route
 }
-m.route = _28(typeof window !== "undefined" ? window : null, mountRedraw)
+m.route = _26(typeof window !== "undefined" ? window : null, mountRedraw)
 m.render = render
 m.redraw = mountRedraw.redraw
 m.request = request.request
@@ -1931,7 +1805,6 @@ m.buildQueryString = buildQueryString
 m.parsePathname = parsePathname
 m.buildPathname = buildPathname
 m.vnode = Vnode
-m.PromisePolyfill = PromisePolyfill
 m.censor = censor
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
