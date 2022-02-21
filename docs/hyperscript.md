@@ -522,37 +522,6 @@ var BetterLabeledComponent = {
 }
 ```
 
-#### Avoid statements in view methods
-
-JavaScript statements often require changing the naturally nested structure of an HTML tree, making the code more verbose and harder to understand. Constructing an virtual DOM tree procedurally can also potentially trigger expensive deoptimizations (such as an entire template being recreated from scratch)
-
-```javascript
-// AVOID
-var BadListComponent = {
-	view: function(vnode) {
-		var list = []
-		for (var i = 0; i < vnode.attrs.items.length; i++) {
-			list.push(m("li", vnode.attrs.items[i]))
-		}
-
-		return m("ul", list)
-	}
-}
-```
-
-Instead, prefer using JavaScript expressions such as the ternary operator and Array methods.
-
-```javascript
-// PREFER
-var BetterListComponent = {
-	view: function(vnode) {
-		return m("ul", vnode.attrs.items.map(function(item) {
-			return m("li", item)
-		}))
-	}
-}
-```
-
 #### Avoid creating vnodes outside views
 
 When a redraw encounters a vnode which is strictly equal to the one in the previous render, it will be skipped and its contents will not be updated. While this may seem like an opportunity for performance optimisation, it should be avoided because it prevents dynamic changes in that node's tree - this leads to side-effects such as downstream lifecycle methods failing to trigger on redraw. In this sense, Mithril.js vnodes are immutable: new vnodes are compared to old ones; mutations to vnodes are not persisted.
