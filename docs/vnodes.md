@@ -144,3 +144,34 @@ users.map(function(user){
 	return m(UserComponent, {key: user.id, model: user})
 })
 ```
+
+#### Avoid statements in view methods
+
+JavaScript statements in view methods often require changing the naturally nested structure of an HTML tree, making the code more verbose and less readable.
+
+```javascript
+// AVOID
+var BadListComponent = {
+	view: function(vnode) {
+		var list = []
+		for (var i = 0; i < vnode.attrs.items.length; i++) {
+			list.push(m("li", vnode.attrs.items[i]))
+		}
+
+		return m("ul", list)
+	}
+}
+```
+
+Instead, prefer using JavaScript expressions such as the ternary operator for conditional rendering and Array methods for list-like structures.
+
+```javascript
+// PREFER
+var BetterListComponent = {
+	view: function(vnode) {
+		return m("ul", vnode.attrs.items.map(function(item) {
+			return m("li", item)
+		}))
+	}
+}
+```
