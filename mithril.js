@@ -40,7 +40,7 @@ Vnode.normalizeChildren = function(input) {
 // In native ES6, I'd instead add a final `...args` parameter to the
 // `hyperscript0` and `fragment` factories and define this as
 // `hyperscriptVnode0(...args)`, since modern engines do optimize that away. But
-// ES5 (what Mithril requires thanks to IE support) doesn't give me that luxury,
+// ES5 (what Mithril.js requires thanks to IE support) doesn't give me that luxury,
 // and engines aren't nearly intelligent enough to do either of these:
 //
 // 1. Elide the allocation for `[].slice.call(arguments, 1)` when it's passed to
@@ -1529,17 +1529,25 @@ var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
 m.trust = hyperscript.trust
 m.fragment = hyperscript.fragment
+m.Fragment = "["
 m.mount = mountRedraw.mount
 var m6 = hyperscript
 var Promise = PromisePolyfill
+function decodeURIComponentSave0(str) {
+	try {
+		return decodeURIComponent(str)
+	} catch(err) {
+		return str
+	}
+}
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 	var entries = string.split("&"), counters = {}, data0 = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key5 = decodeURIComponent(entry[0])
-		var value2 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		var key5 = decodeURIComponentSave0(entry[0])
+		var value2 = entry.length === 2 ? decodeURIComponentSave0(entry[1]) : ""
 		if (value2 === "true") value2 = true
 		else if (value2 === "false") value2 = false
 		var levels = key5.split(/\]\[?|\[/)
@@ -1678,7 +1686,7 @@ function decodeURIComponentSave(component) {
 }
 var _28 = function($window, mountRedraw00) {
 	var callAsync0 = $window == null
-		// In case Mithril's loaded globally without the DOM, let's not break
+		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
 		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
 	var p = Promise.resolve()
