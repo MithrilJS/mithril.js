@@ -503,7 +503,7 @@ module.exports = function(options) {
 						set: function(v) {
 							if (this.getAttribute("type") !== "date") throw new Error("invalid state")
 							var time = new Date(v).getTime()
-							return valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
+							valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
 						},
 						enumerable: true,
 					})
@@ -519,8 +519,8 @@ module.exports = function(options) {
 							v = Number(v)
 							if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
 							switch (this.getAttribute("type")) {
-								case "date": return valueSetter(isNaN(v) ? "" : new Date(v).toUTCString())
-								case "number": return valueSetter(String(value))
+								case "date": valueSetter(isNaN(v) ? "" : new Date(v).toUTCString()); break;
+								case "number": valueSetter(String(value)); break;
 								default: throw new Error("invalid state")
 							}
 						},

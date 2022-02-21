@@ -1,12 +1,14 @@
+"use strict"
+
 module.exports = {
-    "extends": "../.eslintrc.js",
+	"extends": "../.eslintrc.js",
 	"env": {
-        "browser": null,
+		"browser": null,
 	},
-    "parserOptions": {
-        "ecmaVersion": 2019,
-    },
-    "rules": {
-        "no-process-env": "off",
-    },
+	"parserOptions": {
+		"ecmaVersion": 2019,
+	},
+	"rules": {
+		"no-process-env": "off",
+	},
 };
