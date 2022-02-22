@@ -1,6 +1,7 @@
 name: 'Push `master`'
 on:
   pull_request:
+    types: [opened]
     branches: ['master']
 jobs:
   comment:
