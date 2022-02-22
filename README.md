@@ -1,12 +1,23 @@
-mithril.js [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![npm License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
-==========
+# Mithril.js
 
-<p align="center">
-	<a href="https://travis-ci.org/MithrilJS/mithril.js">
-		<img src="https://img.shields.io/travis/MithrilJS/mithril.js/next.svg" alt="Build Status">
-	</a>
+<p>
+	<a href="https://www.npmjs.com/package/mithril">
+		<img src="https://img.shields.io/npm/v/mithril.svg" alt="npm Version" />
+	</a>&nbsp;
+	<a href="https://github.com/MithrilJS/mithril.js/blob/next/LICENSE">
+		<img src="https://img.shields.io/npm/l/mithril.svg" alt="License" />
+	</a>&nbsp;
+	<a href="https://www.npmjs.com/package/mithril">
+		<img src="https://img.shields.io/npm/dm/mithril.svg" alt="npm Downloads">
+	</a>&nbsp;
+	<a href="https://www.npmjs.com/package/mithril">
+		<img src="https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen" alt="Build Status">
+	</a>&nbsp;
+	<a href="https://opencollective.com/mithriljs">
+		<img src="https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen" alt="Donate at OpenCollective">
+	</a>&nbsp;
 	<a href="https://gitter.im/mithriljs/mithril.js">
-		<img src="https://img.shields.io/gitter/room/mithriljs/mithril.js.svg" alt="Gitter" />
+		<img src="https://img.shields.io/gitter/room/mithriljs/mithril.js.svg?logo=gitter" alt="Gitter" />
 	</a>
 </p>
 
@@ -44,7 +55,7 @@ Mithril.js supports IE11, Firefox ESR, and the last two versions of Firefox, Edg
 npm install mithril --save
 ```
 
-The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.
+The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use Mithril.js.
 
 TypeScript type definitions are available from DefinitelyTyped. They can be installed with:
 
