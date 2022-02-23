@@ -1658,7 +1658,8 @@ var compileTemplate = function(template) {
 //     return result2
 // }
 // ```
-var magic = /^(?:key7|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove1)$/
+// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
+var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
 var censor = function(attrs4, extras) {
 	var result2 = {}
 	if (extras != null) {
