@@ -462,7 +462,7 @@ module.exports = function(options) {
 								if (!this.hasAttribute("href")) return ""
 								// HACK: if it's valid already, there's nothing to implement.
 								var value = this.attributes.href.value
-								if (validURLRegex.test(value)) return value
+								if (validURLRegex.test(encodeURI(value))) return value
 							}
 							return "[FIXME implement]"
 						},

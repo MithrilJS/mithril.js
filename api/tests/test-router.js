@@ -37,8 +37,8 @@ o.spec("route", function() {
 		})
 	}
 
-	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
+	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}, {protocol: "http:", hostname: "ööö"}].forEach(function(env) {
+		void ["#", "?", "", "#!", "?!", "/foo", "/föö"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, root, mountRedraw, route, throttleMock
 				var nextID = 0
@@ -118,7 +118,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("resolves to route w/ escaped unicode", function() {
+				o("resolves to route with escaped unicode", function() {
 					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
 					route(root, "/ö", {
 						"/ö" : {
