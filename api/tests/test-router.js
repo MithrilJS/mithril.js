@@ -131,7 +131,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("resolves to route w/ unicode", function() {
+				o("resolves to route with unicode", function() {
 					$window.location.href = prefix + "/ö?ö=ö"
 					route(root, "/ö", {
 						"/ö" : {
@@ -145,7 +145,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
 				})
 
-				o("resolves to route w/ matching invalid escape", function() {
+				o("resolves to route with matching invalid escape", function() {
 					$window.location.href = prefix + "/%C3%B6abc%def"
 					route(root, "/öabc%def", {
 						"/öabc%def" : {
@@ -1363,7 +1363,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function() {
+				o("onmatch can redirect to another route that has RouteResolver with only onmatch", function() {
 					var redirected = false
 					var render = o.spy()
 					var view = o.spy(function() {return m("div")})
@@ -1394,7 +1394,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver w/ only render", function() {
+				o("onmatch can redirect to another route that has RouteResolver with only render", function() {
 					var redirected = false
 					var render = o.spy()
 
@@ -1478,7 +1478,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect w/ window.history.back()", function() {
+				o("onmatch can redirect with window.history.back()", function() {
 
 					var render = o.spy()
 					var component = {view: o.spy()}
@@ -1518,7 +1518,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ onmatch", function() {
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver with onmatch", function() {
 					var redirected = false
 					var render = o.spy()
 
@@ -1544,7 +1544,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ render", function() {
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver with render", function() {
 					var redirected = false
 					var render = o.spy()
 
