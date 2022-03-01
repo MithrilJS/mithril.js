@@ -60,7 +60,7 @@ $ npm install webpack webpack-cli --save-dev
 {
 	"...": "...",
 	"scripts": {
-		"start": "webpack src/index.js --output bin/app.js -d --watch"
+		"start": "webpack ./src/index.js --output-path ./bin --watch"
 	}
 }
 ```
@@ -75,7 +75,7 @@ m.render(document.body, "hello world");
 ```html
 <!DOCTYPE html>
 <body>
-    <script src="bin/app.js"></script>
+	<script src="bin/main.js"></script>
 </body>
 ```
 
