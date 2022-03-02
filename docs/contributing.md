@@ -24,7 +24,9 @@ Create an [issue thread on GitHub](https://github.com/MithrilJS/mithril.js/issue
 
 If the consensus is that it's a good idea, the fastest way to get it into a release is to send a pull request. Without a PR, the time to implement the feature will depend on the bandwidth of the development team and its list of priorities.
 
+## Releases
 
+Releases are managed by [pr-release](https://pr-release.org/), simply tag your feature branch with major/minor/patch and the correct semver will automatically be generated.  It helps make the maintainers lives a lot simpler.
 
 ## How should I report bugs?
 
@@ -124,3 +126,4 @@ Keep object properties consistent (i.e. ensure the data objects always have the 
 ## Do you all accept donations?
 
 Yes, we do, over at [our OpenCollective page](https://opencollective.com/mithriljs). We don't actively seek donations, but they are very much appreciated and are used to support development and related expenses. Both one-time and recurring donations are accepted.
+
