@@ -92,7 +92,7 @@ deploy:
   # Skip until I can figure out what's going on with docs + version deployment
   # - provider: npm
   #   skip_cleanup: true
-  #   email: me@isiahmeadows.com
+  #   email: contact@claudiameadows.dev
   #   api_key:
   #     secure: "uPLbeJTalA/b38srb1VuWnD3eOgeKTkXf8VVUasUXIqc2xub4DSkFm1IVKSVd/rzP7EeO7+gRUs2UteNKlpZJl226IS5mFPSVtC7ViW46WSpYT0wlMsc7hrubMBGTx3/XYpPwtmMlTIGs5ICT7YkGAuju/6i79LDAB+gbnEY8Bc="
   #   on:

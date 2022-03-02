@@ -3,7 +3,7 @@ name: "\U0001F41B Bug"
 about: Report a bug in Mithril.js
 title: ''
 labels: 'Type: Bug'
-assignees: isiahmeadows
+assignees: dead-claudia
 
 ---
 

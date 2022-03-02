@@ -879,7 +879,7 @@ Since v2.x uses standards-compliant Promises, `m.sync` is redundant. Use `Promis
 ```javascript
 m.sync([
 	m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
-	m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
+	m.request({ method: 'GET', url: 'https://api.github.com/users/dead-claudia' }),
 ])
 .then(function (users) {
 	console.log("Contributors:", users[0].name, "and", users[1].name)
@@ -891,7 +891,7 @@ m.sync([
 ```javascript
 Promise.all([
 	m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
-	m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
+	m.request({ method: 'GET', url: 'https://api.github.com/users/dead-claudia' }),
 ])
 .then(function (users) {
 	console.log("Contributors:", users[0].name, "and", users[1].name)

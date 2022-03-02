@@ -267,7 +267,7 @@ JSX and hyperscript are two different syntaxes you can use for specifying vnodes
 
 -   Hyperscript is more approachable if you come from a backend JS background that doesn't involve much HTML or XML. It's more concise with less redundancy, and it provides a CSS-like sugar for static classes, IDs, and other attributes. It also can be used with no build step at all, although [you can add one if you wish](https://github.com/MithrilJS/mopt). And it's slightly easier to work with in the face of a lot of dynamic content, because you don't need to "interpolate" anything. However, the terseness does make it harder to read for some people, especially those less experienced and coming from a front end HTML/CSS/XML background, and I'm not aware of any plugins that auto-complete parts of hyperscript selectors like IDs, classes, and attributes.
 
-You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@isiahmeadows](https://github.com/isiahmeadows/) with some alterations for clarity and readability:
+You can see the tradeoffs come into play in more complex trees. For instance, consider this hyperscript tree, adapted from a real-world project by [@dead-claudia](https://github.com/dead-claudia) with some alterations for clarity and readability:
 
 ```javascript
 function SummaryView() {
