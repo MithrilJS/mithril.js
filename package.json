@@ -27,7 +27,7 @@
     "test:js": "ospec",
     "cover": "istanbul cover --print both ospec/bin/ospec",
     "release": "npm version -m 'v%s'",
-    "version": "npm run build && git add mithril.js mithril.min.js stream.js stream.min.js README.md"
+    "version": "npm run build"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
