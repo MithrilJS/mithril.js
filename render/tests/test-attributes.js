@@ -531,7 +531,7 @@ o.spec("attributes", function() {
 		   This incomplete test is meant for testing #1916.
 		   However it cannot be completed until #1978 is addressed
 		   which is a lack a working select.selected / option.selected
-		   attribute. Ask isiahmeadows.
+		   attribute. Ask @dead-claudia.
 
 		o("render select options", function() {
 			var select = m("select", {selectedIndex: 0},

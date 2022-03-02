@@ -3,7 +3,7 @@ name: "\U0001F680 Feature or Enhancement"
 about: Suggest an idea or feature for Mithril.js
 title: ''
 labels: 'Type: Enhancement'
-assignees: isiahmeadows
+assignees: dead-claudia
 
 ---
 

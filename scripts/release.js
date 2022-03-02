@@ -197,7 +197,7 @@ of contents accordingly.
 		// deploy:
 		//   - provider: npm
 		//     skip_cleanup: true
-		//     email: 'contact@isiahmeadows.com'
+		//     email: 'contact@claudiameadows.dev'
 		//     api_key:
 		//       secure: 'output of `travis encrypt NPM_AUTH_TOKEN`'
 		//     on:
@@ -206,7 +206,7 @@ of contents accordingly.
 		//   - provider: npm
 		//     skip_cleanup: true
 		//     tag: next
-		//     email: 'contact@isiahmeadows.com'
+		//     email: 'contact@claudiameadows.dev'
 		//     api_key:
 		//       secure: 'output of `travis encrypt NPM_AUTH_TOKEN`'
 		//     on:

@@ -29,7 +29,7 @@ _2019-02-07_
 
 - ospec: Test results now include `.message` and `.context` regardless of whether the test passed or failed. (#2227 @robertakarobin)
 <!-- Add new lines here. Version number will be decided later -->
-- Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call. (#2221 @isiahmeadows)
+- Add `spy.calls` array property to get the `this` and `arguments` values for any arbitrary call. (#2221 [@dead-claudia](https://github.com/dead-claudia))
 - Added `.throws` and `.notThrows` assertions to ospec. (#2255 @robertakarobin)
 - Update `glob` dependency.
 
