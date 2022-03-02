@@ -29,13 +29,13 @@ jobs:
     - run: npx pr-release pr --verbose --target main --source next --compact --verbose
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-# The following will publish a pre-release to npm
-   - run: npx pr-release extract-changelog --target main --source next --compact --out                       
-   - run: npm version --no-verify --no-commit-hooks --no-git-tag-version $(cat ./.pr-release/nextVersion) 
-   - run: npm version --no-verify --no-commit-hooks --no-git-tag-version prerelease --preid=next          
-   - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc                                   
-     name: Setup NPM Auth                                                                                 
-     env:                                                                                                 
-       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}                                                                
-   - run: npm publish --tag=next                                                                          
-     name: Publish                                                                                        
+    # The following will publish a pre-release to npm
+    - run: npx pr-release extract-changelog --target main --source next --compact --out                       
+    - run: npm version --no-verify --no-commit-hooks --no-git-tag-version $(cat ./.pr-release/nextVersion) 
+    - run: npm version --no-verify --no-commit-hooks --no-git-tag-version prerelease --preid=next          
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc                                   
+      name: Setup NPM Auth                                                                                 
+      env:                                                                                                 
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}                                                                
+    - run: npm publish --tag=next                                                                          
+      name: Publish                                                                                        
