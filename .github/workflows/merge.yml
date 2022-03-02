@@ -11,35 +11,35 @@ concurrency: prr:deploy
 jobs:
   merge:
 
-    runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [16.x]
+  strategy:
+    matrix:
+      node-version: [16.x]
 
-    steps:
-    - uses: actions/checkout@v2
-      with: 
-        ref: 'next'
-        fetch-depth: 0
+  steps:
+  - uses: actions/checkout@v2
+    with: 
+      ref: 'next'
+      fetch-depth: 0
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npx pr-release merge --target main --source next --commit --force --clean --changelog --compact
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  - name: Use Node.js ${{ matrix.node-version }}
+    uses: actions/setup-node@v2
+    with:
+      node-version: ${{ matrix.node-version }}
+      cache: 'npm'
+  - run: npm ci
+  - run: npm run build --if-present
+  - run: npx pr-release merge --target main --source next --commit --force --clean --changelog --compact
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-   - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc  
-     name: Setup NPM Auth                                                
-     env:                                                                
-       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}                               
-   - run: npm publish                                                    
-     name: Publish                                                       
+  - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc  
+    name: Setup NPM Auth                                                
+    env:                                                                
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}                               
+  - run: npm publish                                                    
+    name: Publish                                                       
 
 
 
