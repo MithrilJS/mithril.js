@@ -34,7 +34,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-    The following will publish the release to npm
    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc  
      name: Setup NPM Auth                                                
      env:                                                                
