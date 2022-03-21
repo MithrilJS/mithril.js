@@ -4,7 +4,7 @@ Describes how we do releases of Mithril.js
 
 # Mithril.js Release Processes
 
-Mithril's release process is automated by [pr-release].  pr-release is maintained by a long time mithril.js community member [@JAForbes](https://github.com/JAForbes).
+Mithril.js' release process is automated by [pr-release].  pr-release is maintained by a long time Mithril.js community member [@JAForbes](https://github.com/JAForbes).
 
 pr-release handles the following:
 
@@ -26,7 +26,7 @@ If you do not have permissions, the maintainer will set the label on your behalf
 
 ## Changelog
 
-There are two changelogs in the mithril project
+There are two changelogs in the Mithril.js project
 
 - `docs/changelog.md` a hand written curated reflection of changes to the codebase
 - `docs/release.md` an automatically prepended log of changes, managed by pr-release
