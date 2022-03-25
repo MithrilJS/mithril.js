@@ -12,7 +12,7 @@ function parseArgs(argv) {
 	var name
 	argv.forEach(function(arg) {
 		if ((/^--/).test(arg)) {
-			name = arg.substr(2)
+			name = arg.slice(2)
 			args[name] = args[name] || []
 		} else {
 			args[name].push(arg)
