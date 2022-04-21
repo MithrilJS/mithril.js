@@ -37,7 +37,7 @@ In future we may collapse these into a single file, the separation is due to the
 
 Whenever a new feature branch is opened, a reviewing maintainer should add the correct semver label to their PR (`major` | `minor` | `patch`).  If no label is set, `patch` is assumed.
 
-If a `major` or `minor` feature branch is merge, but no labels were set, you can go back and apply the labels and then re-run the `pr` workflow in github actions, this will recalculate the semver version.
+If a `major` or `minor` feature branch is merged but no labels were set, you can still go back and edit the semver labels.  On label change the release pr will automatically be regenerated and will recalculate the semver version.
 
 ## Updating mithril.js.org
 

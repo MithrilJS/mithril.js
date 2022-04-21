@@ -6,6 +6,9 @@ on:
 
   workflow_dispatch:
 
+  pull_request:
+    types: [labeled, unlabeled, edited]
+
 concurrency: prr:pre-release
 
 jobs:
@@ -18,14 +21,14 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run build --if-present
+    - run: npm run build
     - run: npx pr-release pr --verbose --target main --source next --compact --verbose
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
