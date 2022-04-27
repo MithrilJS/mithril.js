@@ -29,7 +29,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release pr --verbose --target main --source next --compact --verbose
+    - run: npx pr-release pr --verbose --target master --source next --compact --verbose
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
     # The following will publish a prerelease to npm
