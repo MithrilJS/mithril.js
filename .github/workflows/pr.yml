@@ -6,9 +6,6 @@ on:
 
   workflow_dispatch:
 
-  pull_request:
-    types: [labeled, unlabeled, edited]
-
 concurrency: prr:pre-release
 
 jobs:
