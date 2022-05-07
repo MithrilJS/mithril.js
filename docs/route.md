@@ -137,8 +137,9 @@ m(m.route.Link, {href: "/foo"}, "foo")
 Links accept a selection of special attributes: 
 * `selector` is what would be passed as the first argument to [`m`](hyperscript.md): any selector is valid, including non-`a` elements.
 * `params` & `options` are the arguments with the same names as defined in [`m.route.set`](#mrouteset).
-* `disabled`, if true, disables routing behaviour and any click handlers, and attaches a `data-disabled="true"` attribute for accessibility hints; if the element is an `a`, the `href` is removed.
+* `disabled`, if true, disables routing behaviour and any bound `onclick` handler, and attaches a `data-disabled="true"` attribute for accessibility hints; if the element is an `a`, the `href` is removed.
 
+*Routing behaviour cannot be prevented using the event handling API: use `disabled` instead.*
 
 ```javascript
 m(m.route.Link, {
