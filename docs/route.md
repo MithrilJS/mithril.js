@@ -125,94 +125,45 @@ This is a simple property, so you can both read it and write to it.
 
 ##### m.route.Link
 
-This component can create a dynamic routable link:
+This component creates a dynamic routed link. Its essential function is to produce `a` links with local `href`s transformed to take account of the [route prefix](#mrouteprefix).
 
 ```javascript
-m(m.route.Link, {href: "/test"})
+m(m.route.Link, {href: "/foo"}, "foo")
+
+// Renders to
+// <a href="#!/foo">foo</a>
 ```
 
-Using `m.route.Link` causes the link to behave as a router link - clicking it navigates to the route specified in `href`, instead of navigating away from the current page to the URL specified in `href`.
+Links accept a selection of special attributes: 
+* `selector` is what would be passed as the first argument to [`m`](hyperscript.md): any selector is valid, including non-`a` elements.
+* `params` & `options` are the arguments with the same names as defined in [`m.route.set`](#mrouteset).
+* `disabled`, if true, disables routing behaviour and any click handlers, and attaches a `data-disabled="true"` attribute for accessibility hints; if the element is an `a`, the `href` is removed.
 
-You can also set the `options` passed to `m.route.set` when the link is clicked by passing the `options` attribute:
-
-```javascript
-m(m.route.Link, {href: "/test", options: {replace: true}})
-```
-
-You can pass other attributes, too, and you can also specify the tag name used.
 
 ```javascript
 m(m.route.Link, {
-	// Any hyperscript selector is valid here - it's literally passed as the
-	// first parameter to `m`.
-	selector: "span",
-	options: {replace: true},
+	href: "/foo",
+	selector: "button.large",
+	disabled: true,
 	params: {key: "value"},
-	href: "/test",
-	disabled: false,
-	class: "nav-link",
-	"data-foo": 1,
-	// and other attributes
+	options: {replace: true},
 }, "link name")
+
+// Renders to:
+// <button disabled class"large">link name</a>
 ```
-
-Magic attributes used by this selector (except `href` and `disabled`) *are* removed while proxying, so you won't have an odd `selector="span"` or `options="[object Object]"` attribute show up in your link's DOM node. The above vnode renders to this hyperscript, assuming the prefix is the default `#!`:
-
-```javascript
-m("span", {
-	href: "#!/test",
-	onclick: function(e) {
-		// ...
-	},
-	disabled: false, // Only if you specify it
-	class: "nav-link",
-	"data-foo": 1,
-	// and other attributes
-})
-```
-
-You can also prevent navigation by, in an `onclick` handler, invoking `e.preventDefault()` or returning `false`. This is the same way you block other events, so it's pretty natural.
-
-```javascript
-m(m.route.Link, {
-	href: "/test",
-	onclick: function(e) {
-		// Do things...
-		if (notReady()) e.preventDefault()
-	}
-}, "link name")
-```
-
-This supports full accessibility for both `a` and `button`, via a `disabled` attribute. This ensures [no `href` attribute or `onclick` handler is set](https://css-tricks.com/how-to-disable-links/) and that an `"aria-disabled": "true"` attribute *is* set. If you are passing an `onclick` handler already, that's dropped. (You can work around this by adding it directly in a [lifecycle hook](lifecycle-methods.md).) The `disabled` attribute is itself proxied to the element or component, so you can disable routed `<button>`s and the like.
-
-```javascript
-// This does the right thing and the accessible thing for you.
-m(m.route.Link, {disabled: disabled, href: "/test"}, "disabled")
-
-// It renders to this hyperscript, assuming the prefix is the default one:
-m("a", {
-	href: "#!/test",
-	disabled: disabled,
-	"aria-disabled": disabled ? "true" : false,
-	onclick: disabled ? null : function(e) {
-		// ...
-	},
-})
-```
-
-Do note that this doesn't also disable pointer events for you - you have to do that yourself through CSS - this only does the JS part. Also, the removal of `href` *can* break certain style sheets - if you're relying on this to style disabled links, you may need to update your stylesheets accordingly. Chances are, you're probably just looking it up via `a`, `.some-class`, or `#some-id`, and if you are, you're already good to go. If you're using `[href]` or `:link`, in most cases you can just remove them and it'll still work - it's pretty common to over-specify selectors. If you can't do either, check for both `[href]`/`:link` *and* the non-standard `[disabled]` attribute that was implicitly forwarded to the component.
 
 `vnode = m(m.route.Link, attributes, children)`
 
 Argument              | Type                                 | Required | Description
 --------------------- | ------------------------------------ | -------- | ---
 `attributes.href`     | `Object`                             | Yes      | The target route to navigate to.
-`attributes.selector` | <code>String&vert;Object&vert;Function</code>           | No       | This sets the tag name to use. Must be a valid selector for [`m`](hyperscript.md) if given, defaults to `"a"`.
-`attributes.options`  | `Object`                             | No       | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled` | `Object`                             | No       | This sets the options passed to [`m.route.set`](#mrouteset).
-`attributes.disabled` | `Object`                             | No       | This disables the link, so clicking on it doesn't route anywhere.
-`attributes`          | `Object`                             | No       | Other attributes to apply to the returned vnode may be passed.
-`children`            | <code>Array&#x3c;Vnode&#x3e;&vert;String&vert;Number&vert;Boolean</code> | No       | Child [vnodes](vnodes.md) for this link.
+`attributes.disabled` | `Boolean`                            | No       | Disables the element accessibly.
+`attributes.selector` | `String|Object|Function`             | No       | A selector for [`m`](hyperscript.md), defaults to `"a"`.
+`attributes.options`  | `Object`                             | No       | Sets the `options` passed to [`m.route.set`](#mrouteset).
+`attributes.params`   | `Object`                             | No       | Sets the `params` passed to [`m.route.set`](#mrouteset).
+`attributes`          | `Object`                             | No       | Any other attributes to be forwarded to `m`.
+`children`            | `Array<Vnode>|String|Number|Boolean` | No       | Child [vnodes](vnodes.md) for this link.
 **returns**           | `Vnode`                              |          | A [vnode](vnodes.md).
 
 ##### m.route.param
