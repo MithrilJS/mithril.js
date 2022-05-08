@@ -130,7 +130,7 @@ This component creates a dynamic routed link. Its essential function is to produ
 ```javascript
 m(m.route.Link, {href: "/foo"}, "foo")
 
-// Renders to
+// Unless m.route.prefix has changed from the default strategy, render to:
 // <a href="#!/foo">foo</a>
 ```
 
@@ -151,7 +151,7 @@ m(m.route.Link, {
 }, "link name")
 
 // Renders to:
-// <button disabled class"large">link name</a>
+// <button disabled aria-disabled="true" class"large">link name</a>
 ```
 
 `vnode = m(m.route.Link, attributes, children)`
