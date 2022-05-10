@@ -151,7 +151,7 @@ m(m.route.Link, {
 }, "link name")
 
 // Renders to:
-// <button disabled aria-disabled="true" class"large">link name</a>
+// <button disabled aria-disabled="true" class="large">link name</button>
 ```
 
 `vnode = m(m.route.Link, attributes, children)`
