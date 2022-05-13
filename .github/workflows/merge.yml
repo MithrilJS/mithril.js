@@ -30,7 +30,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact
+    - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
