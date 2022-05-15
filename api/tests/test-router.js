@@ -567,11 +567,11 @@ o.spec("route", function() {
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
-									params: {key: "value"},
+									params: {interpolated: "foo", appended: "bar"},
 								})
 							})
 						},
-						"/test" : {
+						"/:interpolated" : {
 							view : lock(function() {
 								return m("div")
 							})
@@ -582,7 +582,7 @@ o.spec("route", function() {
 					root.firstChild.dispatchEvent(e)
 
 					o(route.set.callCount).equals(1)
-					o(route.set.args[0]).equals("/test?key=value")
+					o(route.set.args[0]).equals("/foo?appended=bar")
 				})
 
 				o("route.Link can render without routes or dom access", function() {

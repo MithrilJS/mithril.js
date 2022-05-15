@@ -1909,7 +1909,7 @@ var _28 = function($window, mountRedraw00) {
 					) {
 						e.preventDefault()
 						e.redraw = false
-						route.set(href, null, options)
+						route.set(child0.attrs.href, params, options)
 					}
 				}
 			}

@@ -214,7 +214,7 @@ module.exports = function($window, mountRedraw) {
 				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
 				vnode.children
 			)
-			var options, onclick, href
+			var options, onclick
 
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
@@ -230,9 +230,7 @@ module.exports = function($window, mountRedraw) {
 			} else {
 				options = vnode.attrs.options
 				onclick = vnode.attrs.onclick
-				// Easier to build it now to keep it isomorphic.
-				href = buildPathname(child.attrs.href, vnode.attrs.params)
-				child.attrs.href = route.prefix + href
+				child.attrs.href = route.prefix + vnode.attrs.href
 				child.attrs.onclick = function(e) {
 					var result
 					if (typeof onclick === "function") {
@@ -264,7 +262,7 @@ module.exports = function($window, mountRedraw) {
 					) {
 						e.preventDefault()
 						e.redraw = false
-						route.set(href, null, options)
+						route.set(vnode.attrs.href, vnode.attrs.params, options)
 					}
 				}
 			}
