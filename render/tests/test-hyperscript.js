@@ -229,6 +229,18 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("option")
 			o(vnode.attrs.value).equals("")
 		})
+		o("handles newlines in attribute values", function() {
+			// eslint-disable-next-line quotes
+			var vnode = m(`option[style="
+				display: block;
+				padding: 1em;
+			"]`)
+
+			o(vnode.attrs.style).equals(`
+				display: block;
+				padding: 1em;
+			`)
+		})
 	})
 	o.spec("attrs", function() {
 		o("handles string attr", function() {
