@@ -34,5 +34,5 @@ jobs:
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npx pr-release infer-prerelease --preid=next --verbose --publish --minimize-semver-change
+    - run: npx pr-release infer-prerelease --preid=next --target master --source next --verbose --publish --minimize-semver-change
       name: Publish

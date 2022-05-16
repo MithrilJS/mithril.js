@@ -9,7 +9,6 @@ var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
-var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
 	// Note: the `n` parameter used in calls to this are generally found by
@@ -206,6 +205,23 @@ o.spec("route", function() {
 
 					o(root.firstChild.nodeValue).equals(
 						'{"a":"x/y"} {"a":"x/y"} /test/x/y'
+					)
+				})
+
+				o("keeps trailing / in rest parameterized route", function() {
+					$window.location.href = prefix + "/test/d/"
+					route(root, "/test/:a...", {
+						"/test/:a..." : {
+							view: lock(function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							})
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"d/"} {"a":"d/"} /test/d/'
 					)
 				})
 

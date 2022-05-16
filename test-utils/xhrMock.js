@@ -137,9 +137,6 @@ module.exports = function() {
 		$defineRoutes: function(rules) {
 			routes = rules
 		},
-		$defineJSONPCallbackKey: function(/* key */) {
-			// callback = key
-		},
 	}
 	return $window
 }

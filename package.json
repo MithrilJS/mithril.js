@@ -1,6 +1,6 @@
 {
   "name": "mithril",
-  "version": "2.0.4",
+  "version": "2.2.2",
   "description": "A framework for building brilliant applications",
   "author": "Leo Horie",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "marked": "^4.0.10",
     "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
-    "ospec": "^4.0.1",
+    "ospec": "4.1.6",
     "pinpoint": "^1.1.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
@@ -59,8 +59,5 @@
       "eslint . --fix",
       "git add"
     ]
-  },
-  "dependencies": {
-    "ospec": "4.0.0"
   }
 }

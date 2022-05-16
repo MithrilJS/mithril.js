@@ -92,21 +92,6 @@ m.request({
 
 ---
 
-#### m.jsonp(options) - [docs](jsonp.md)
-
-```javascript
-m.jsonp({
-	url: "/api/v1/users/:id",
-	params: {id: 1},
-	callbackKey: "callback",
-})
-.then(function(result) {
-	console.log(result)
-})
-```
-
----
-
 #### m.parseQueryString(querystring) - [docs](parseQueryString.md)
 
 ```javascript

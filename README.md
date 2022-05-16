@@ -1,25 +1,11 @@
 # Mithril.js
 
-<p>
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/npm/v/mithril.svg" alt="npm Version" />
-	</a>&nbsp;
-	<a href="https://github.com/MithrilJS/mithril.js/blob/next/LICENSE">
-		<img src="https://img.shields.io/npm/l/mithril.svg" alt="License" />
-	</a>&nbsp;
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/npm/dm/mithril.svg" alt="npm Downloads">
-	</a>&nbsp;
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen" alt="Build Status">
-	</a>&nbsp;
-	<a href="https://opencollective.com/mithriljs">
-		<img src="https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen" alt="Donate at OpenCollective">
-	</a>&nbsp;
-	<a href="https://gitter.im/mithriljs/mithril.js">
-		<img src="https://img.shields.io/gitter/room/mithriljs/mithril.js.svg?logo=gitter" alt="Gitter" />
-	</a>
-</p>
+[![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
+[![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/MithrilJS/mithril.js/blob/next/LICENSE) &nbsp;
+[![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Build Status](https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs) &nbsp;
+[![Zulip, join chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mithril.zulipchat.com/)
 
 - [What is Mithril.js?](#what-is-mithriljs?)
 - [Installation](#installation)
@@ -29,7 +15,7 @@
 
 ## What is Mithril.js?
 
-A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->10.05 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->9.14 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
@@ -71,11 +57,11 @@ You may be interested in the [API Docs](https://mithril.js.org/api.html), a [Sim
 
 ## Getting Help
 
-Mithril.js has an active & welcoming community on [Gitter](https://gitter.im/mithriljs/mithril.js), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
+Mithril.js has an active & welcoming community on [Zulip](https://mithril.zulipchat.com/), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
 
 ## Contributing
 
-There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the Mithril.js site that hopefully helps, but if not definitely hop into the [Gitter Room](https://gitter.im/mithriljs/mithril.js) and ask away!
+There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the Mithril.js site that hopefully helps, but if not definitely hop into the [Zulip stream](https://mithril.zulipchat.com/) and ask away!
 
 ---
 

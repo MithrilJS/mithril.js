@@ -99,12 +99,15 @@ module.exports = function(options) {
 		}
 	}
 	function removeChild(child) {
+		if (child == null || typeof child !== "object" || !("nodeType" in child)) {
+			throw new TypeError("Failed to execute removeChild, parameter is not of type 'Node'")
+		}
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) {
 			this.childNodes.splice(index, 1)
 			child.parentNode = null
 		}
-		else throw new TypeError("Failed to execute 'removeChild'")
+		else throw new TypeError("Failed to execute 'removeChild', child not found in parent")
 	}
 	function insertBefore(child, reference) {
 		var ancestor = this
