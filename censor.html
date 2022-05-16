@@ -8,7 +8,7 @@
 <link href=style.css rel=stylesheet>
 <link rel=icon type=image/png sizes=32x32 href=favicon.png>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="Documentation on m.buildPathname(), which creates URLs from path templates and query objects">
+<meta name=description content="Documentation on m.censor(), which helps cloning vnodes">
 </head>
 <body onload="window.requestAnimationFrame(function(){document.getElementById('archive-docs').selectedIndex = 0})" /* handle back navigation */>
 <header>
@@ -25,7 +25,7 @@
 </header>
 <main>
 <section>
-<h1 id=buildpathnameobject><a href=#buildpathnameobject>buildPathname(object)</a></h1>
+<h1 id=censorobject,-extra><a href=#censorobject,-extra>censor(object, extra)</a></h1>
 <ul>
 <li>Core<ul>
 <li><a href=hyperscript.html>m</a></li>
@@ -36,12 +36,7 @@
 <li><a href=jsonp.html>m.jsonp</a></li>
 <li><a href=parseQueryString.html>m.parseQueryString</a></li>
 <li><a href=buildQueryString.html>m.buildQueryString</a></li>
-<li><strong><a href=buildPathname.html>m.buildPathname</a></strong><ul>
-<li><a href=#description>Description</a></li>
-<li><a href=#signature>Signature</a></li>
-<li><a href=#how-it-works>How it works</a></li>
-</ul>
-</li>
+<li><a href=buildPathname.html>m.buildPathname</a></li>
 <li><a href=parsePathname.html>m.parsePathname</a></li>
 <li><a href=trust.html>m.trust</a></li>
 <li><a href=fragment.html>m.fragment</a></li>
@@ -60,13 +55,14 @@
 </ul>
 <hr>
 <h3 id=description><a href=#description>Description</a></h3>
-<p>Turns a <a href=paths.html>path template</a> and a parameters object into a string of form <code>/path/user?a=1&amp;b=2</code></p>
-<pre><code class=language-javascript>var pathname = m.buildPathname(&quot;/path/:id&quot;, {id: &quot;user&quot;, a: &quot;1&quot;, b: &quot;2&quot;})
-// &quot;/path/user?a=1&amp;b=2&quot;
+<p>Returns a shallow-cloned object with lifecycle attributes and any given custom attributes omitted.</p>
+<pre><code class=language-javascript>var attrs = {one: &quot;two&quot;, enabled: false, oninit: function() {}}
+var censored = m.censor(attrs, [&quot;enabled&quot;])
+// {one: &quot;two&quot;}
 </code></pre>
 <hr>
 <h3 id=signature><a href=#signature>Signature</a></h3>
-<p><code>pathname = m.buildPathname(object)</code></p>
+<p><code>censored = m.censor(object, extra)</code></p>
 <table>
 <thead>
 <tr>
@@ -77,31 +73,123 @@
 </tr>
 </thead>
 <tr>
-<td><code>path</code></td>
-<td><code>String</code></td>
-<td>Yes</td>
-<td>A URL path</td>
-</tr>
-<tr>
-<td><code>query </code></td>
+<td><code>object</code></td>
 <td><code>Object</code></td>
 <td>Yes</td>
 <td>A key-value map to be converted into a string</td>
 </tr>
 <tr>
+<td><code>extra</code></td>
+<td><code>Array&lt;String&gt;</code></td>
+<td>No</td>
+<td>Additional properties to omit.</td>
+</tr>
+<tr>
 <td><strong>returns</strong></td>
-<td><code>String</code></td>
+<td><code>Object</code></td>
 <td></td>
-<td>A string representing the URL with the query string</td>
+<td>The original object if no properties to omit existed on it, a shallow-cloned object with the removed properties otherwise.</td>
 </tr>
 </table>
 <p><a href=signatures.html>How to read signatures</a></p>
 <hr>
 <h3 id=how-it-works><a href=#how-it-works>How it works</a></h3>
-<p>The <code>m.buildPathname</code> creates a <a href=paths.html>path name</a> from a path template and a parameters object. It&#39;s useful for building URLs, and it&#39;s what <a href=route.html><code>m.route</code></a>, <a href=request.html><code>m.request</code></a>, and <a href=jsonp.html><code>m.jsonp</code></a> all use internally to interpolate paths. It uses <a href=buildQueryString.html><code>m.buildQueryString</code></a> to generate the query parameters to append to the path name.</p>
-<pre><code class=language-javascript>var pathname = m.buildPathname(&quot;/path/:id&quot;, {id: &quot;user&quot;, a: 1, b: 2})
+<p>Ordinarily, you don&#39;t need this method, and you&#39;ll just want to specify the attributes you want. But sometimes, it&#39;s more convenient to send all attributes you don&#39;t know to another element. This is often perfectly reasonable, but it can lead you into a major trap with lifecycle methods getting called twice.</p>
+<pre><code class=language-javascript>function SomePage() {
+    return {
+        view: function() {
+            return m(SomeFancyView, {
+                oncreate: function() {
+                    sendViewHit(m.route.get(), &quot;some fancy view&quot;)
+                },
+            })
+        },
+    }
+}
 
-// pathname is &quot;/path/user?a=1&amp;b=2&quot;
+function SomeFancyView() {
+    return {
+        view: function(vnode) {
+            return m(&quot;div&quot;, vnode.attrs, [ // !!!
+                // ...
+            ])
+        },
+    }
+}
+</code></pre>
+<p>This looks benign, but this creates a problem: you&#39;re sending two hits each time this view is navigated. This is where <code>m.censor</code> come in: it lets you strip that <code>oncreate</code> from the attributes so it only gets called once and so the caller can remain sane and rest assured they aren&#39;t dealing with super weird bugs because of it.</p>
+<pre><code class=language-javascript>// Fixed
+function SomeFancyView() {
+    return {
+        view: function(vnode) {
+            return m(&quot;div&quot;, m.censor(vnode.attrs), [
+                // ...
+            ])
+        },
+    }
+}
+</code></pre>
+<p>You can also run into similar issues with keys:</p>
+<pre><code class=language-javascript>function SomePage() {
+    return {
+        view: function() {
+            return m(Layout, {
+                pageTitle: &quot;Some Page&quot;,
+                key: someKey,
+            }, [
+                // ...
+            ])
+        },
+    }
+}
+
+function Layout() {
+    return {
+        view: function(vnode) {
+            return [
+                m(&quot;header&quot;, [
+                    m(&quot;h1&quot;, &quot;My beautiful web app&quot;),
+                    m(&quot;nav&quot;),
+                ]),
+                m(&quot;.body&quot;, vnode.attrs, [ // !!!
+                    m(&quot;h2&quot;, vnode.attrs.pageTitle),
+                    vnode.children,
+                ])
+            ]
+        },
+    }
+}
+</code></pre>
+<p>This would end up <a href=keys.html#key-restrictions>throwing an error</a> because here&#39;s what Mithril.js sees when creating the <code>Layout</code> vnode:</p>
+<pre><code class=language-javascript>return [
+    m(&quot;header&quot;, [
+        m(&quot;h1&quot;, &quot;My beautiful web app&quot;),
+        m(&quot;nav&quot;),
+    ]),
+    m(&quot;.body&quot;, {pageTitle: &quot;Some Page&quot;, key: someKey}, [
+        m(&quot;h2&quot;, &quot;Some Page&quot;),
+        [/* ... */],
+    ])
+]
+</code></pre>
+<p>You wouldn&#39;t likely catch that at first glance, especially in much more real-world scenarios where there might be indirection and/or other issues. To correct this, you similarly have to censor out the <code>key:</code> attribute. You can also censor out the custom <code>pageTitle</code> attribute, too, since it doesn&#39;t provide any real value being in the DOM.</p>
+<pre><code class=language-javascript>// Fixed
+function Layout() {
+    return {
+        view: function(vnode) {
+            return [
+                m(&quot;header&quot;, [
+                    m(&quot;h1&quot;, &quot;My beautiful web app&quot;),
+                    m(&quot;nav&quot;),
+                ]),
+                m(&quot;.body&quot;, m.censor(vnode.attrs, [&quot;pageTitle&quot;]), [
+                    m(&quot;h2&quot;, vnode.attrs.pageTitle),
+                    vnode.children,
+                ])
+            ]
+        },
+    }
+}
 </code></pre>
 <hr>
 <small>License: MIT. &copy; Leo Horie.</small>

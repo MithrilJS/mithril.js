@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=UTF-8>
+<title>Mithril.js</title>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel=stylesheet>
+<link href=https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css rel=stylesheet>
+<link href=style.css rel=stylesheet>
+<link rel=icon type=image/png sizes=32x32 href=favicon.png>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="Mithril.js Documentation">
+</head>
+<body onload="window.requestAnimationFrame(function(){document.getElementById('archive-docs').selectedIndex = 0})" /* handle back navigation */>
+<header>
+<section>
+<a class=hamburger href=javascript:;>≡</a>
+<h1><img src=logo.svg> Mithril <select id=archive-docs onchange="location.href='archive/' + this.value + '/index.html'"><option>v2.2.0<option>v2.0.4<option>v2.0.3<option>v2.0.2<option>v2.0.1<option>v2.0.0-rc.9<option>v2.0.0-rc.8<option>v2.0.0-rc.7<option>v2.0.0-rc.6<option>v2.0.0-rc.5<option>v2.0.0-rc.4<option>v2.0.0-rc.3<option>v2.0.0-rc.1<option>v2.0.0-rc.0<option>v1.1.7<option>v1.1.6<option>v1.1.5<option>v1.1.4<option>v1.1.3<option>v1.1.2<option>v1.1.1<option>v1.1.0-rc.1<option>v1.1.0<option>v1.0.1<option>v1.0.0<option>v0.2.5<option>v0.2.4<option>v0.2.3<option>v0.2.2-rc.1<option>v0.2.1<option>v0.2.0<option>v0.1.9<option>v0.1.8<option>v0.1.7<option>v0.1.6<option>v0.1.5<option>v0.1.4<option>v0.1.34<option>v0.1.33<option>v0.1.32<option>v0.1.31<option>v0.1.30<option>v0.1.3<option>v0.1.29<option>v0.1.28<option>v0.1.27<option>v0.1.26<option>v0.1.25<option>v0.1.24<option>v0.1.23<option>v0.1.22<option>v0.1.21<option>v0.1.20<option>v0.1.2<option>v0.1.19<option>v0.1.18<option>v0.1.17<option>v0.1.16<option>v0.1.15<option>v0.1.14<option>v0.1.13<option>v0.1.12<option>v0.1.11<option>v0.1.10<option>v0.1.1<option>v0.1</select></h1>
+<nav>
+<a href=index.html>Guide</a>
+<a href=api.html>API</a>
+<a href=https://gitter.im/MithrilJS/mithril.js>Chat</a>
+<a href=https://github.com/MithrilJS/mithril.js>GitHub</a>
+</nav>
+</section>
+</header>
+<main>
+<section>
+<h1 id=release-v220><a href=#release-v220>Release v2.2.0</a></h1>
+<ul>
+<li>Core<ul>
+<li><a href=hyperscript.html>m</a></li>
+<li><a href=render.html>m.render</a></li>
+<li><a href=mount.html>m.mount</a></li>
+<li><a href=route.html>m.route</a></li>
+<li><a href=request.html>m.request</a></li>
+<li><a href=jsonp.html>m.jsonp</a></li>
+<li><a href=parseQueryString.html>m.parseQueryString</a></li>
+<li><a href=buildQueryString.html>m.buildQueryString</a></li>
+<li><a href=buildPathname.html>m.buildPathname</a></li>
+<li><a href=parsePathname.html>m.parsePathname</a></li>
+<li><a href=trust.html>m.trust</a></li>
+<li><a href=fragment.html>m.fragment</a></li>
+<li><a href=redraw.html>m.redraw</a></li>
+<li><a href=promise.html>Promise</a></li>
+</ul>
+</li>
+<li>Optional<ul>
+<li><a href=stream.html>Stream</a></li>
+</ul>
+</li>
+<li>Tooling<ul>
+<li><a href=https://github.com/MithrilJS/mithril.js/blob/master/ospec>Ospec</a></li>
+</ul>
+</li>
+</ul>
+<h3 id=minor-changes><a href=#minor-changes>Minor Changes</a></h3>
+<h4><a href=#><a href=https://github.com/MithrilJS/mithril.js/pull/2752>m.censor: work around a bunder bug (@kfule)</a></a></h4>
+<p>The internal bundler sometimes mangles the words in RegExp literals incorrectly. Please see below.</p>
+<h4 id=0><a href=#0><a href=https://github.com/MithrilJS/mithril.js/pull/2722>Warn about reusing mutated attrs object - fixes #2719 (@StephanHoyer)</a></a></h4>
+<h4 id=1><a href=#1><a href=https://github.com/MithrilJS/mithril.js/pull/2695>Send URLSearchParams as request body without extra configuration (@Coteh)</a></a></h4>
+<p>This PR fixes an oddity I noticed in the way <code>m.request</code> handles <code>URLSearchParams</code> object. It now handles it in the same sort of way XHR and Fetch do it.</p>
+<h4 id=2><a href=#2><a href=https://github.com/MithrilJS/mithril.js/pull/2537>Add <code>params:</code> to <code>m.route.Link</code>, fix docs (@dead-claudia)</a></a></h4>
+<p>Add <code>params:</code> to <code>m.route.Link</code>. Minor fix to docs to reflect reality with <code>m.route.Link</code>&#39;s <code>disabled:</code> attribute.</p>
+<h4 id=3><a href=#3><a href=https://github.com/MithrilJS/mithril.js/pull/2633>Allow Mithril to be loaded in non-browser environments without modification (@dead-claudia)</a></a></h4>
+<p>Recast the global reads to all be guarded with <code>typeof</code>, so that if they aren&#39;t defined, they&#39;re just <code>null</code>.</p>
+<h4 id=4><a href=#4><a href=https://github.com/MithrilJS/mithril.js/pull/2744>Add a <code>m.Fragment = &quot;[&quot;</code> utility for JSX users. (@dead-claudia)</a></a></h4>
+<p>The title says it all, and the diff&#39;s obvious. Resolves <a href=https://github.com/MithrilJS/mithril.js/issues/2640>https://github.com/MithrilJS/mithril.js/issues/2640</a> and probably others.</p>
+<h3 id=patch-changes><a href=#patch-changes>Patch Changes</a></h3>
+<h4 id=5><a href=#5><a href=https://github.com/MithrilJS/mithril.js/pull/2769>Enable --minimize-semver-change for pr-release (@JAForbes)</a></a></h4>
+<p>Minimizes semver changes on release to the minimum required version bump to satisfy major/minor/patch semver ranges. Minimizes the semver change so that.</p>
+<h4 id=6><a href=#6><a href=https://github.com/MithrilJS/mithril.js/pull/2768>Clean up m.route.Link (@barneycarroll)</a></a></h4>
+<p>An attempt at better demonstrating <code>m.route.Link</code> with less text. Fixes #2767.</p>
+<h4 id=7><a href=#7><a href=https://github.com/MithrilJS/mithril.js/pull/2578>Runtime-deprecate ospec, change <code>change-log</code> to <code>changelog</code>, fix a few assorted bugs (@dead-claudia)</a></a></h4>
+<p>This PR is in two parts: 1. Revise the build system and some of the local dev setup. Fully split ospec from the repo, and add it as a dependency.</p>
+<h4 id=8><a href=#8><a href=https://github.com/MithrilJS/mithril.js/pull/2316>Add meta description to docs (@StephanHoyer)</a></a></h4>
+<p>rework of #2149. added a meta description parser and meta descriptions to all docs pages. because google. built the docs, inspected the output manually.</p>
+<h4 id=9><a href=#9><a href=https://github.com/MithrilJS/mithril.js/pull/2750>Fixed badges, consistent naming of Mithril.js (@tbreuss)</a></a></h4>
+<p>use consistent naming of Mithril.js. fix badges in README. Fixes issue #2749.</p>
+<h4 id=10><a href=#10><a href=https://github.com/MithrilJS/mithril.js/pull/2711>Catch malformed URI Components (@jdiderik)</a></a></h4>
+<p>Fix for error thrown when a value contains non-valid / malformed URI Component. Example: test=%c5%a1%e8ZM%80%82H. will throw &quot;URI malformed&quot;.</p>
+<h4 id=11><a href=#11><a href=https://github.com/MithrilJS/mithril.js/pull/2743>Correctly handle invalid escapes in routes based on 0a5ead31c9fbd7b153c521c7f9d3df7bf826ce6c (@StephanHoyer)</a></a></h4>
+<p>fixes #2061. @dead-claudia I just redid your change but slightly different in order to handle a mix of wrong and right encodings properly.</p>
+<h4 id=12><a href=#12><a href=https://github.com/MithrilJS/mithril.js/pull/2670>Standardise vnode text representation (@barneycarroll)</a></a></h4>
+<p>This addresses the crucial feature of #2669: text is always represented as virtual text nodes, never as a <code>vnode.text</code>.</p>
+<h4 id=13><a href=#13><a href=https://github.com/MithrilJS/mithril.js/pull/2641>Issue 2624 no content 204 parse (@Evoke-PHP)</a></a></h4>
+<p>Added guard so that JSON.parse does not fail on IE11 with no content empty string being parsed. Fixes <a href=https://github.com/MithrilJS/mithril.js/issues/2624>https://github.com/MithrilJS/mithril.js/issues/2624</a>.</p>
+<h4 id=14><a href=#14><a href=https://github.com/MithrilJS/mithril.js/pull/2655>[m.request] work around a bundler bug, fix #2647 (@pygy)</a></a></h4>
+<p>The bundler mangles identifier-like strings within RegExps, this works around the problem by not using such RegExps.</p>
+<h4 id=15><a href=#15><a href=https://github.com/MithrilJS/mithril.js/pull/2646>Reject request on XHR timeout (@kevinfiol)</a></a></h4>
+<p>Derived from PR #2581. Allows requests to properly reject on event of a timeout.</p>
+<h4 id=16><a href=#16><a href=https://github.com/MithrilJS/mithril.js/pull/2594>Remove extra isLifecycleMethod call from removeAttr (@ZeikJT)</a></a></h4>
+<p>Removing an extra isLifecycleMethod in the removeAttr method, it isn&#39;t needed since it&#39;s already checked on the previous line.</p>
+<h4 id=17><a href=#17><a href=https://github.com/MithrilJS/mithril.js/pull/2603>Fix #2601 (@dead-claudia)</a></a></h4>
+<p>Fix issue where ending a stream in the middle of a stream callback would result in erroneous parent stream state for the rest of that emit. Fixes #2601.</p>
+<h4 id=18><a href=#18><a href=https://github.com/MithrilJS/mithril.js/pull/2539>Add streams to releases again, include minified bundle, drop internal stuff from npm (@dead-claudia)</a></a></h4>
+<p>Add <code>stream/stream.js</code> to releases again. Add <code>stream/stream.min.js</code> now that the process is remotely sane now.</p>
+<h4 id=19><a href=#19><a href=https://github.com/MithrilJS/mithril.js/pull/2536>Make errors and their messages more accurate and helpful (@dead-claudia)</a></a></h4>
+<p>I updated error messages to be much more helpful.</p>
+<h4 id=20><a href=#20><a href=https://github.com/MithrilJS/mithril.js/pull/2405>Fix assertion descriptions (@soulofmischief)</a></a></h4>
+<p>I moved the return statement to the end of define() so that it returns even if the comparison fails.</p>
+<h4 id=21><a href=#21><a href=https://github.com/MithrilJS/mithril.js/pull/2765>Fix branch target (@dead-claudia)</a></a></h4>
+<p><a href="https://github.com/MithrilJS/mithril.js/runs/6199543939?check_suite_focus=true">https://github.com/MithrilJS/mithril.js/runs/6199543939?check_suite_focus=true</a>.</p>
+<h4 id=22><a href=#22><a href=https://github.com/MithrilJS/mithril.js/pull/2760>Automate mithril&#39;s release workflow (@JAForbes)</a></a></h4>
+<p>Automated releases, pre-releases, (code) rollbacks and recovery, npm publishing, change log management just by using normal github flow.</p>
+<h4 id=23><a href=#23><a href=https://github.com/MithrilJS/mithril.js/pull/2758>rework jsx docs (@StephanHoyer)</a></a></h4>
+<h4 id=24><a href=#24><a href=https://github.com/MithrilJS/mithril.js/pull/2751>Add Simple Application Flems Supporting v2.0.4 and up (@tbreuss)</a></a></h4>
+<p>Added Flems for Simple Application supporting v2.0.4 of Mithril.js. Fixes Issue #2710.</p>
+<h4 id=25><a href=#25><a href=https://github.com/MithrilJS/mithril.js/pull/2757>Make example work with webpack v5.69.1 (@StephanHoyer)</a></a></h4>
+<p>fixes #2634.</p>
+<h4 id=26><a href=#26><a href=https://github.com/MithrilJS/mithril.js/pull/2748>2604: correct and move text about statements in view method (@kevinfiol)</a></a></h4>
+<p>Addresses #2604.</p>
+<h4 id=27><a href=#27><a href=https://github.com/MithrilJS/mithril.js/pull/2745>Fix lint errors (@StephanHoyer)</a></a></h4>
+<h4 id=28><a href=#28><a href=https://github.com/MithrilJS/mithril.js/pull/2620>WIP: Update modularisation details in Installation docs (@orbitbot)</a></a></h4>
+<p>added link to flems.io as an easier way to just try out the framework. -. Documentation has grown a bit stale.</p>
+<h4 id=29><a href=#29><a href=https://github.com/MithrilJS/mithril.js/pull/2644>Added power support for the travis.yml file with ppc64le (@sreekanth370)</a></a></h4>
+<p>Added power support for the travis.yml file with ppc64le. This is part of the Ubuntu distribution for ppc64le.</p>
+<h4 id=30><a href=#30><a href=https://github.com/MithrilJS/mithril.js/pull/2649>Updated babel/webpack docs to work with latest versions (@pereriksson)</a></a></h4>
+<p>As a developer I tried setting up Mithril with Babel and Webpack but failed because of a variety of errors.</p>
+<h4 id=31><a href=#31><a href=https://github.com/MithrilJS/mithril.js/pull/1767>[docs] route redirection using the history API (@pygy)</a></a></h4>
+<p>This is an attempt at fixing #1759, but there may be more to be added. Feedback welcome. ping @dontwork.</p>
+<h4 id=32><a href=#32><a href=https://github.com/MithrilJS/mithril.js/pull/2718>Bump path-parse from 1.0.6 to 1.0.7 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/jbgutierrez/path-parse>path-parse</a> from 1.0.6 to 1.0.7. Commits. See full diff in compare view.</p>
+<h4 id=33><a href=#33><a href=https://github.com/MithrilJS/mithril.js/pull/2693>Bump glob-parent from 5.1.0 to 5.1.2 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/gulpjs/glob-parent>glob-parent</a> from 5.1.0 to 5.1.2. Release notes. Sourced from glob-parent&#39;s releases. v5.1.2. Bug Fixes.</p>
+<h4 id=34><a href=#34><a href=https://github.com/MithrilJS/mithril.js/pull/2741>Bump ajv from 6.10.2 to 6.12.6 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/ajv-validator/ajv>ajv</a> from 6.10.2 to 6.12.6. Release notes. Sourced from ajv&#39;s releases. v6.12.6. Fix performance issue of &quot;url&quot; format.</p>
+<h4 id=35><a href=#35><a href=https://github.com/MithrilJS/mithril.js/pull/2651>Update standalone usage (@ghost)</a></a></h4>
+<h4 id=36><a href=#36><a href=https://github.com/MithrilJS/mithril.js/pull/2721>Avoid double encoding of function signatures - fixes #2720 (@StephanHoyer)</a></a></h4>
+<h4 id=37><a href=#37><a href=https://github.com/MithrilJS/mithril.js/pull/2353>Show previous versions (@mike-ward)</a></a></h4>
+<p>Add Dropdown that shows links to archived versions of the documentation.</p>
+<h4 id=38><a href=#38><a href=https://github.com/MithrilJS/mithril.js/pull/2206>docs: improve m.request return value description (@GAumala)</a></a></h4>
+<p>In the m.request return value description, add a line informing that error status codes cause the promise to reject.</p>
+<h4 id=39><a href=#39><a href=https://github.com/MithrilJS/mithril.js/pull/2648>A note on JSX events (@pereriksson)</a></a></h4>
+<p>Naming JSX events according to their documentation produces unexpected results with incorrectly named events when using JSX with Mithril.</p>
+<h4 id=40><a href=#40><a href=https://github.com/MithrilJS/mithril.js/pull/2672>Document route resolution cancellation, fixes #1759 (@barneycarroll)</a></a></h4>
+<p>Also fixes a broken internal link.</p>
+<h4 id=41><a href=#41><a href=https://github.com/MithrilJS/mithril.js/pull/2717>Bump marked from 0.7.0 to 4.0.10 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/markedjs/marked>marked</a> from 0.7.0 to 4.0.10. Release notes. Sourced from marked&#39;s releases. v4.0.10. 4.0.10 (2022-01-13). Bug Fixes.</p>
+<h4 id=42><a href=#42><a href=https://github.com/MithrilJS/mithril.js/pull/2348>Flems in docs (#2348) [skip ci] (@porsager)</a></a></h4>
+<p>Added flems instead of the current codepen samples.</p>
+<h4 id=43><a href=#43><a href=https://github.com/MithrilJS/mithril.js/pull/2698>Remove old TOC link (@ArthurClemens)</a></a></h4>
+<p>Content was moved some time ago and linked section no longer exists.</p>
+<h4 id=44><a href=#44><a href=https://github.com/MithrilJS/mithril.js/pull/2696>Cavemansspa patch 1 (@cavemansspa)</a></a></h4>
+<p>Documentation update.</p>
+<h4 id=45><a href=#45><a href=https://github.com/MithrilJS/mithril.js/pull/2684>Bump hosted-git-info from 2.8.4 to 2.8.9 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/npm/hosted-git-info>hosted-git-info</a> from 2.8.4 to 2.8.9. Changelog. Sourced from hosted-git-info&#39;s changelog. 2.8.9 (2021-04-07).</p>
+<h4 id=46><a href=#46><a href=https://github.com/MithrilJS/mithril.js/pull/2680>Bump lodash from 4.17.20 to 4.17.21 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/lodash/lodash>lodash</a> from 4.17.20 to 4.17.21. Commits. f299b52 Bump to v4.17.21.</p>
+<h4 id=47><a href=#47><a href=https://github.com/MithrilJS/mithril.js/pull/2679>Bump handlebars from 4.7.6 to 4.7.7 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/wycats/handlebars.js>handlebars</a> from 4.7.6 to 4.7.7. Changelog. Sourced from handlebars&#39;s changelog. v4.7.7 - February 15th, 2021.</p>
+<h4 id=48><a href=#48><a href=https://github.com/MithrilJS/mithril.js/pull/2673>Remove unreachable keyed node logic, fixes #2597 (@barneycarroll)</a></a></h4>
+<h4 id=49><a href=#49><a href=https://github.com/MithrilJS/mithril.js/pull/2674>Delete test-utils/README.md (@dead-claudia)</a></a></h4>
+<p>We don&#39;t expose this publicly anymore, so there&#39;s literally no justification for this file&#39;s existence.</p>
+<h4 id=50><a href=#50><a href=https://github.com/MithrilJS/mithril.js/pull/2657>simple-application.md: consistent use of type=submit (@danbst)</a></a></h4>
+<p>When following tutorial and typing everything in, I was confused that Save button didn&#39;t work.</p>
+<h4 id=51><a href=#51><a href=https://github.com/MithrilJS/mithril.js/pull/2639>Fix inconsistent capitalizations of &quot;JavaScript&quot; (@mtsknn)</a></a></h4>
+<p>&quot;Javascript&quot;/&quot;javascript&quot; → &quot;JavaScript&quot;. Fixes #2398, or at least I can&#39;t find any more incorrect capitalizations.</p>
+<h4 id=52><a href=#52><a href=https://github.com/MithrilJS/mithril.js/pull/2487>fix some typos (@osban)</a></a></h4>
+<p>Found some typos. Mainly unescaped <code>|</code> in tables, but also a few other irregularities. Not all problems are visible in the website docs.</p>
+<h4 id=53><a href=#53><a href=https://github.com/MithrilJS/mithril.js/pull/2585>Replace mocha by ospec in testing page (@gamtiq)</a></a></h4>
+<p>Fixed a typo in testing doc page. Currently there is reference to <code>mocha</code> in the page whereas <code>opsec</code> is used.</p>
+<h4 id=54><a href=#54><a href=https://github.com/MithrilJS/mithril.js/pull/2630>Bump acorn from 7.1.0 to 7.4.0 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/acornjs/acorn>acorn</a> from 7.1.0 to 7.4.0. Commits. 54efb62 Mark version 7.4.0.</p>
+<h4 id=55><a href=#55><a href=https://github.com/MithrilJS/mithril.js/pull/2629>Bump handlebars from 4.4.2 to 4.7.6 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/wycats/handlebars.js>handlebars</a> from 4.4.2 to 4.7.6. Changelog. Sourced from handlebars&#39;s changelog. v4.7.6 - April 3rd, 2020.</p>
+<h4 id=56><a href=#56><a href=https://github.com/MithrilJS/mithril.js/pull/2628>Bump lodash from 4.17.15 to 4.17.20 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/lodash/lodash>lodash</a> from 4.17.15 to 4.17.20. Commits. ded9bc6 Bump to v4.17.20. 63150ef Documentation fixes.</p>
+<h4 id=57><a href=#57><a href=https://github.com/MithrilJS/mithril.js/pull/2627>Bump minimist from 1.2.0 to 1.2.3 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/substack/minimist>minimist</a> from 1.2.0 to 1.2.3. Commits. 6457d74 1.2.3. 38a4d1c even more aggressive checks for protocol pollution.</p>
+<h4 id=58><a href=#58><a href=https://github.com/MithrilJS/mithril.js/pull/2608>Update installation.md (@purefan)</a></a></h4>
+<p>Offer to install mithril as a webpack plugin. Just makes my life easier by not having to include mithril in every one of my js files.</p>
+<h4 id=59><a href=#59><a href=https://github.com/MithrilJS/mithril.js/pull/2605>replace slave label with replica (@stephanos)</a></a></h4>
+<p>One of the example is using the antiquated word &quot;slave&quot; for a database replica. I updated the language and tested the change.</p>
+<h4 id=60><a href=#60><a href=https://github.com/MithrilJS/mithril.js/pull/2593>ES6 and m.trust docs patch (@kczx3)</a></a></h4>
+<p>While reading through some of the documentation I saw some issues with both the ES6 and <code>m.trust</code> pages.</p>
+<h4 id=61><a href=#61><a href=https://github.com/MithrilJS/mithril.js/pull/2582>docs: Fix simple typo, subsequece -&gt; subsequence (@timgates42)</a></a></h4>
+<p>There is a small typo in mithril.js, render/render.js. Should read <code>subsequence</code> rather than <code>subsequece</code>.</p>
+<h4 id=62><a href=#62><a href=https://github.com/MithrilJS/mithril.js/pull/2576>change link to go to ospec instead of mocha (@akessner)</a></a></h4>
+<p>Change the link to point to ospec docs in github. ospec link went to mochajs. <a href=https://github.com/MithrilJS/mithril.js/issues/2575>issue 2575</a>. N/A. N/A. N/A.</p>
+<h4 id=63><a href=#63><a href=https://github.com/MithrilJS/mithril.js/pull/2573>updated to the Vimeo showcase (@CreaturesInUnitards)</a></a></h4>
+<p>The scrimba version of Mithril 0-60 was built on their beta platform, and doesn&#39;t really even work anymore.</p>
+<h4 id=64><a href=#64><a href=https://github.com/MithrilJS/mithril.js/pull/2567>adding more community examples (@boazblake)</a></a></h4>
+<h4 id=65><a href=#65><a href=https://github.com/MithrilJS/mithril.js/pull/2561>Exclude archive of previous docs (@cztomsik)</a></a></h4>
+<p>update .npmignore so that archives are not included in the resulting package. space/bandwidth savings. fix #2552.</p>
+<h4 id=66><a href=#66><a href=https://github.com/MithrilJS/mithril.js/pull/2553>Pimp the docs linter (and assorted changes) (@pygy)</a></a></h4>
+<p>Add an optional cache for faster runs. Add a final report. Don&#39;t return anything from <code>exec()</code>. Cover more files. Look for a &quot;--cache&quot; option.</p>
+<h4 id=67><a href=#67><a href=https://github.com/MithrilJS/mithril.js/pull/2540>Recast key docs to be much clearer and more accurate (@dead-claudia)</a></a></h4>
+<p>Recast key docs to be much clearer and more accurate, including a few Flems examples to help intuitively explain things.</p>
+<h4 id=68><a href=#68><a href=https://github.com/MithrilJS/mithril.js/pull/2538>Add <code>m.censor</code>, adjust <code>m.route.Link</code> to use it (@dead-claudia)</a></a></h4>
+<p>Add <code>m.censor</code>. Adjust <code>m.route.Link</code> to use it. Restructure a few things for better code reuse. Fixes #2472.</p>
+<h4 id=69><a href=#69><a href=https://github.com/MithrilJS/mithril.js/pull/2522>Update fetch() browser support in docs (@qgustavor)</a></a></h4>
+<p>As <a href="https://caniuse.com/#feat=fetch">Can I use</a> shows <code>fetch()</code> supported since Safari 10.1 and iOS Safari 10.3.</p>
+<h4 id=70><a href=#70><a href=https://github.com/MithrilJS/mithril.js/pull/2513>docs: Add release dates to all change-log files (@maranomynet)</a></a></h4>
+<p>I&#39;d like to introduce release dates to the change log files. Release dates are human-friendly and add a bit of historical perspective to change-log files.</p>
+<h1 id=release-v210><a href=#release-v210>Release v2.1.0</a></h1>
+<h3 id=minor-changes0><a href=#minor-changes0>Minor Changes</a></h3>
+<h4 id=71><a href=#71><a href=https://github.com/MithrilJS/mithril.js/pull/2752>m.censor: work around a bunder bug (@kfule)</a></a></h4>
+<p>The internal bundler sometimes mangles the words in RegExp literals incorrectly. Please see below.</p>
+<h4 id=72><a href=#72><a href=https://github.com/MithrilJS/mithril.js/pull/2722>Warn about reusing mutated attrs object - fixes #2719 (@StephanHoyer)</a></a></h4>
+<h4 id=73><a href=#73><a href=https://github.com/MithrilJS/mithril.js/pull/2695>Send URLSearchParams as request body without extra configuration (@Coteh)</a></a></h4>
+<p>This PR fixes an oddity I noticed in the way <code>m.request</code> handles <code>URLSearchParams</code> object. It now handles it in the same sort of way XHR and Fetch do it.</p>
+<h4 id=74><a href=#74><a href=https://github.com/MithrilJS/mithril.js/pull/2537>Add <code>params:</code> to <code>m.route.Link</code>, fix docs (@dead-claudia)</a></a></h4>
+<p>Add <code>params:</code> to <code>m.route.Link</code>. Minor fix to docs to reflect reality with <code>m.route.Link</code>&#39;s <code>disabled:</code> attribute.</p>
+<h4 id=75><a href=#75><a href=https://github.com/MithrilJS/mithril.js/pull/2633>Allow Mithril to be loaded in non-browser environments without modification (@dead-claudia)</a></a></h4>
+<p>Recast the global reads to all be guarded with <code>typeof</code>, so that if they aren&#39;t defined, they&#39;re just <code>null</code>.</p>
+<h4 id=76><a href=#76><a href=https://github.com/MithrilJS/mithril.js/pull/2744>Add a <code>m.Fragment = &quot;[&quot;</code> utility for JSX users. (@dead-claudia)</a></a></h4>
+<p>The title says it all, and the diff&#39;s obvious. Resolves <a href=https://github.com/MithrilJS/mithril.js/issues/2640>https://github.com/MithrilJS/mithril.js/issues/2640</a> and probably others.</p>
+<h3 id=patch-changes0><a href=#patch-changes0>Patch Changes</a></h3>
+<h4 id=77><a href=#77><a href=https://github.com/MithrilJS/mithril.js/pull/2769>Enable --minimize-semver-change for pr-release (@JAForbes)</a></a></h4>
+<p>Minimizes semver changes on release to the minimum required version bump to satisfy major/minor/patch semver ranges. Minimizes the semver change so that.</p>
+<h4 id=78><a href=#78><a href=https://github.com/MithrilJS/mithril.js/pull/2768>Clean up m.route.Link (@barneycarroll)</a></a></h4>
+<p>An attempt at better demonstrating <code>m.route.Link</code> with less text. Fixes #2767.</p>
+<h4 id=79><a href=#79><a href=https://github.com/MithrilJS/mithril.js/pull/2578>Runtime-deprecate ospec, change <code>change-log</code> to <code>changelog</code>, fix a few assorted bugs (@dead-claudia)</a></a></h4>
+<p>This PR is in two parts: 1. Revise the build system and some of the local dev setup. Fully split ospec from the repo, and add it as a dependency.</p>
+<h4 id=80><a href=#80><a href=https://github.com/MithrilJS/mithril.js/pull/2316>Add meta description to docs (@StephanHoyer)</a></a></h4>
+<p>rework of #2149. added a meta description parser and meta descriptions to all docs pages. because google. built the docs, inspected the output manually.</p>
+<h4 id=81><a href=#81><a href=https://github.com/MithrilJS/mithril.js/pull/2750>Fixed badges, consistent naming of Mithril.js (@tbreuss)</a></a></h4>
+<p>use consistent naming of Mithril.js. fix badges in README. Fixes issue #2749.</p>
+<h4 id=82><a href=#82><a href=https://github.com/MithrilJS/mithril.js/pull/2711>Catch malformed URI Components (@jdiderik)</a></a></h4>
+<p>Fix for error thrown when a value contains non-valid / malformed URI Component. Example: test=%c5%a1%e8ZM%80%82H. will throw &quot;URI malformed&quot;.</p>
+<h4 id=83><a href=#83><a href=https://github.com/MithrilJS/mithril.js/pull/2743>Correctly handle invalid escapes in routes based on 0a5ead31c9fbd7b153c521c7f9d3df7bf826ce6c (@StephanHoyer)</a></a></h4>
+<p>fixes #2061. @dead-claudia I just redid your change but slightly different in order to handle a mix of wrong and right encodings properly.</p>
+<h4 id=84><a href=#84><a href=https://github.com/MithrilJS/mithril.js/pull/2670>Standardise vnode text representation (@barneycarroll)</a></a></h4>
+<p>This addresses the crucial feature of #2669: text is always represented as virtual text nodes, never as a <code>vnode.text</code>.</p>
+<h4 id=85><a href=#85><a href=https://github.com/MithrilJS/mithril.js/pull/2641>Issue 2624 no content 204 parse (@Evoke-PHP)</a></a></h4>
+<p>Added guard so that JSON.parse does not fail on IE11 with no content empty string being parsed. Fixes <a href=https://github.com/MithrilJS/mithril.js/issues/2624>https://github.com/MithrilJS/mithril.js/issues/2624</a>.</p>
+<h4 id=86><a href=#86><a href=https://github.com/MithrilJS/mithril.js/pull/2655>[m.request] work around a bundler bug, fix #2647 (@pygy)</a></a></h4>
+<p>The bundler mangles identifier-like strings within RegExps, this works around the problem by not using such RegExps.</p>
+<h4 id=87><a href=#87><a href=https://github.com/MithrilJS/mithril.js/pull/2646>Reject request on XHR timeout (@kevinfiol)</a></a></h4>
+<p>Derived from PR #2581. Allows requests to properly reject on event of a timeout.</p>
+<h4 id=88><a href=#88><a href=https://github.com/MithrilJS/mithril.js/pull/2594>Remove extra isLifecycleMethod call from removeAttr (@ZeikJT)</a></a></h4>
+<p>Removing an extra isLifecycleMethod in the removeAttr method, it isn&#39;t needed since it&#39;s already checked on the previous line.</p>
+<h4 id=89><a href=#89><a href=https://github.com/MithrilJS/mithril.js/pull/2603>Fix #2601 (@dead-claudia)</a></a></h4>
+<p>Fix issue where ending a stream in the middle of a stream callback would result in erroneous parent stream state for the rest of that emit. Fixes #2601.</p>
+<h4 id=90><a href=#90><a href=https://github.com/MithrilJS/mithril.js/pull/2539>Add streams to releases again, include minified bundle, drop internal stuff from npm (@dead-claudia)</a></a></h4>
+<p>Add <code>stream/stream.js</code> to releases again. Add <code>stream/stream.min.js</code> now that the process is remotely sane now.</p>
+<h4 id=91><a href=#91><a href=https://github.com/MithrilJS/mithril.js/pull/2536>Make errors and their messages more accurate and helpful (@dead-claudia)</a></a></h4>
+<p>I updated error messages to be much more helpful.</p>
+<h4 id=92><a href=#92><a href=https://github.com/MithrilJS/mithril.js/pull/2405>Fix assertion descriptions (@soulofmischief)</a></a></h4>
+<p>I moved the return statement to the end of define() so that it returns even if the comparison fails.</p>
+<h4 id=93><a href=#93><a href=https://github.com/MithrilJS/mithril.js/pull/2765>Fix branch target (@dead-claudia)</a></a></h4>
+<p><a href="https://github.com/MithrilJS/mithril.js/runs/6199543939?check_suite_focus=true">https://github.com/MithrilJS/mithril.js/runs/6199543939?check_suite_focus=true</a>.</p>
+<h4 id=94><a href=#94><a href=https://github.com/MithrilJS/mithril.js/pull/2760>Automate mithril&#39;s release workflow (@JAForbes)</a></a></h4>
+<p>Automated releases, pre-releases, (code) rollbacks and recovery, npm publishing, change log management just by using normal github flow.</p>
+<h4 id=95><a href=#95><a href=https://github.com/MithrilJS/mithril.js/pull/2758>rework jsx docs (@StephanHoyer)</a></a></h4>
+<h4 id=96><a href=#96><a href=https://github.com/MithrilJS/mithril.js/pull/2751>Add Simple Application Flems Supporting v2.0.4 and up (@tbreuss)</a></a></h4>
+<p>Added Flems for Simple Application supporting v2.0.4 of Mithril.js. Fixes Issue #2710.</p>
+<h4 id=97><a href=#97><a href=https://github.com/MithrilJS/mithril.js/pull/2757>Make example work with webpack v5.69.1 (@StephanHoyer)</a></a></h4>
+<p>fixes #2634.</p>
+<h4 id=98><a href=#98><a href=https://github.com/MithrilJS/mithril.js/pull/2748>2604: correct and move text about statements in view method (@kevinfiol)</a></a></h4>
+<p>Addresses #2604.</p>
+<h4 id=99><a href=#99><a href=https://github.com/MithrilJS/mithril.js/pull/2745>Fix lint errors (@StephanHoyer)</a></a></h4>
+<h4 id=100><a href=#100><a href=https://github.com/MithrilJS/mithril.js/pull/2620>WIP: Update modularisation details in Installation docs (@orbitbot)</a></a></h4>
+<p>added link to flems.io as an easier way to just try out the framework. -. Documentation has grown a bit stale.</p>
+<h4 id=101><a href=#101><a href=https://github.com/MithrilJS/mithril.js/pull/2644>Added power support for the travis.yml file with ppc64le (@sreekanth370)</a></a></h4>
+<p>Added power support for the travis.yml file with ppc64le. This is part of the Ubuntu distribution for ppc64le.</p>
+<h4 id=102><a href=#102><a href=https://github.com/MithrilJS/mithril.js/pull/2649>Updated babel/webpack docs to work with latest versions (@pereriksson)</a></a></h4>
+<p>As a developer I tried setting up Mithril with Babel and Webpack but failed because of a variety of errors.</p>
+<h4 id=103><a href=#103><a href=https://github.com/MithrilJS/mithril.js/pull/1767>[docs] route redirection using the history API (@pygy)</a></a></h4>
+<p>This is an attempt at fixing #1759, but there may be more to be added. Feedback welcome. ping @dontwork.</p>
+<h4 id=104><a href=#104><a href=https://github.com/MithrilJS/mithril.js/pull/2718>Bump path-parse from 1.0.6 to 1.0.7 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/jbgutierrez/path-parse>path-parse</a> from 1.0.6 to 1.0.7. Commits. See full diff in compare view.</p>
+<h4 id=105><a href=#105><a href=https://github.com/MithrilJS/mithril.js/pull/2693>Bump glob-parent from 5.1.0 to 5.1.2 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/gulpjs/glob-parent>glob-parent</a> from 5.1.0 to 5.1.2. Release notes. Sourced from glob-parent&#39;s releases. v5.1.2. Bug Fixes.</p>
+<h4 id=106><a href=#106><a href=https://github.com/MithrilJS/mithril.js/pull/2741>Bump ajv from 6.10.2 to 6.12.6 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/ajv-validator/ajv>ajv</a> from 6.10.2 to 6.12.6. Release notes. Sourced from ajv&#39;s releases. v6.12.6. Fix performance issue of &quot;url&quot; format.</p>
+<h4 id=107><a href=#107><a href=https://github.com/MithrilJS/mithril.js/pull/2651>Update standalone usage (@ghost)</a></a></h4>
+<h4 id=108><a href=#108><a href=https://github.com/MithrilJS/mithril.js/pull/2721>Avoid double encoding of function signatures - fixes #2720 (@StephanHoyer)</a></a></h4>
+<h4 id=109><a href=#109><a href=https://github.com/MithrilJS/mithril.js/pull/2353>Show previous versions (@mike-ward)</a></a></h4>
+<p>Add Dropdown that shows links to archived versions of the documentation.</p>
+<h4 id=110><a href=#110><a href=https://github.com/MithrilJS/mithril.js/pull/2206>docs: improve m.request return value description (@GAumala)</a></a></h4>
+<p>In the m.request return value description, add a line informing that error status codes cause the promise to reject.</p>
+<h4 id=111><a href=#111><a href=https://github.com/MithrilJS/mithril.js/pull/2648>A note on JSX events (@pereriksson)</a></a></h4>
+<p>Naming JSX events according to their documentation produces unexpected results with incorrectly named events when using JSX with Mithril.</p>
+<h4 id=112><a href=#112><a href=https://github.com/MithrilJS/mithril.js/pull/2672>Document route resolution cancellation, fixes #1759 (@barneycarroll)</a></a></h4>
+<p>Also fixes a broken internal link.</p>
+<h4 id=113><a href=#113><a href=https://github.com/MithrilJS/mithril.js/pull/2717>Bump marked from 0.7.0 to 4.0.10 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/markedjs/marked>marked</a> from 0.7.0 to 4.0.10. Release notes. Sourced from marked&#39;s releases. v4.0.10. 4.0.10 (2022-01-13). Bug Fixes.</p>
+<h4 id=114><a href=#114><a href=https://github.com/MithrilJS/mithril.js/pull/2348>Flems in docs (#2348) [skip ci] (@porsager)</a></a></h4>
+<p>Added flems instead of the current codepen samples.</p>
+<h4 id=115><a href=#115><a href=https://github.com/MithrilJS/mithril.js/pull/2698>Remove old TOC link (@ArthurClemens)</a></a></h4>
+<p>Content was moved some time ago and linked section no longer exists.</p>
+<h4 id=116><a href=#116><a href=https://github.com/MithrilJS/mithril.js/pull/2696>Cavemansspa patch 1 (@cavemansspa)</a></a></h4>
+<p>Documentation update.</p>
+<h4 id=117><a href=#117><a href=https://github.com/MithrilJS/mithril.js/pull/2684>Bump hosted-git-info from 2.8.4 to 2.8.9 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/npm/hosted-git-info>hosted-git-info</a> from 2.8.4 to 2.8.9. Changelog. Sourced from hosted-git-info&#39;s changelog. 2.8.9 (2021-04-07).</p>
+<h4 id=118><a href=#118><a href=https://github.com/MithrilJS/mithril.js/pull/2680>Bump lodash from 4.17.20 to 4.17.21 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/lodash/lodash>lodash</a> from 4.17.20 to 4.17.21. Commits. f299b52 Bump to v4.17.21.</p>
+<h4 id=119><a href=#119><a href=https://github.com/MithrilJS/mithril.js/pull/2679>Bump handlebars from 4.7.6 to 4.7.7 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/wycats/handlebars.js>handlebars</a> from 4.7.6 to 4.7.7. Changelog. Sourced from handlebars&#39;s changelog. v4.7.7 - February 15th, 2021.</p>
+<h4 id=120><a href=#120><a href=https://github.com/MithrilJS/mithril.js/pull/2673>Remove unreachable keyed node logic, fixes #2597 (@barneycarroll)</a></a></h4>
+<h4 id=121><a href=#121><a href=https://github.com/MithrilJS/mithril.js/pull/2674>Delete test-utils/README.md (@dead-claudia)</a></a></h4>
+<p>We don&#39;t expose this publicly anymore, so there&#39;s literally no justification for this file&#39;s existence.</p>
+<h4 id=122><a href=#122><a href=https://github.com/MithrilJS/mithril.js/pull/2657>simple-application.md: consistent use of type=submit (@danbst)</a></a></h4>
+<p>When following tutorial and typing everything in, I was confused that Save button didn&#39;t work.</p>
+<h4 id=123><a href=#123><a href=https://github.com/MithrilJS/mithril.js/pull/2639>Fix inconsistent capitalizations of &quot;JavaScript&quot; (@mtsknn)</a></a></h4>
+<p>&quot;Javascript&quot;/&quot;javascript&quot; → &quot;JavaScript&quot;. Fixes #2398, or at least I can&#39;t find any more incorrect capitalizations.</p>
+<h4 id=124><a href=#124><a href=https://github.com/MithrilJS/mithril.js/pull/2487>fix some typos (@osban)</a></a></h4>
+<p>Found some typos. Mainly unescaped <code>|</code> in tables, but also a few other irregularities. Not all problems are visible in the website docs.</p>
+<h4 id=125><a href=#125><a href=https://github.com/MithrilJS/mithril.js/pull/2585>Replace mocha by ospec in testing page (@gamtiq)</a></a></h4>
+<p>Fixed a typo in testing doc page. Currently there is reference to <code>mocha</code> in the page whereas <code>opsec</code> is used.</p>
+<h4 id=126><a href=#126><a href=https://github.com/MithrilJS/mithril.js/pull/2630>Bump acorn from 7.1.0 to 7.4.0 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/acornjs/acorn>acorn</a> from 7.1.0 to 7.4.0. Commits. 54efb62 Mark version 7.4.0.</p>
+<h4 id=127><a href=#127><a href=https://github.com/MithrilJS/mithril.js/pull/2629>Bump handlebars from 4.4.2 to 4.7.6 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/wycats/handlebars.js>handlebars</a> from 4.4.2 to 4.7.6. Changelog. Sourced from handlebars&#39;s changelog. v4.7.6 - April 3rd, 2020.</p>
+<h4 id=128><a href=#128><a href=https://github.com/MithrilJS/mithril.js/pull/2628>Bump lodash from 4.17.15 to 4.17.20 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/lodash/lodash>lodash</a> from 4.17.15 to 4.17.20. Commits. ded9bc6 Bump to v4.17.20. 63150ef Documentation fixes.</p>
+<h4 id=129><a href=#129><a href=https://github.com/MithrilJS/mithril.js/pull/2627>Bump minimist from 1.2.0 to 1.2.3 (@dependabot[bot])</a></a></h4>
+<p>Bumps <a href=https://github.com/substack/minimist>minimist</a> from 1.2.0 to 1.2.3. Commits. 6457d74 1.2.3. 38a4d1c even more aggressive checks for protocol pollution.</p>
+<h4 id=130><a href=#130><a href=https://github.com/MithrilJS/mithril.js/pull/2608>Update installation.md (@purefan)</a></a></h4>
+<p>Offer to install mithril as a webpack plugin. Just makes my life easier by not having to include mithril in every one of my js files.</p>
+<h4 id=131><a href=#131><a href=https://github.com/MithrilJS/mithril.js/pull/2605>replace slave label with replica (@stephanos)</a></a></h4>
+<p>One of the example is using the antiquated word &quot;slave&quot; for a database replica. I updated the language and tested the change.</p>
+<h4 id=132><a href=#132><a href=https://github.com/MithrilJS/mithril.js/pull/2593>ES6 and m.trust docs patch (@kczx3)</a></a></h4>
+<p>While reading through some of the documentation I saw some issues with both the ES6 and <code>m.trust</code> pages.</p>
+<h4 id=133><a href=#133><a href=https://github.com/MithrilJS/mithril.js/pull/2582>docs: Fix simple typo, subsequece -&gt; subsequence (@timgates42)</a></a></h4>
+<p>There is a small typo in mithril.js, render/render.js. Should read <code>subsequence</code> rather than <code>subsequece</code>.</p>
+<h4 id=134><a href=#134><a href=https://github.com/MithrilJS/mithril.js/pull/2576>change link to go to ospec instead of mocha (@akessner)</a></a></h4>
+<p>Change the link to point to ospec docs in github. ospec link went to mochajs. <a href=https://github.com/MithrilJS/mithril.js/issues/2575>issue 2575</a>. N/A. N/A. N/A.</p>
+<h4 id=135><a href=#135><a href=https://github.com/MithrilJS/mithril.js/pull/2573>updated to the Vimeo showcase (@CreaturesInUnitards)</a></a></h4>
+<p>The scrimba version of Mithril 0-60 was built on their beta platform, and doesn&#39;t really even work anymore.</p>
+<h4 id=136><a href=#136><a href=https://github.com/MithrilJS/mithril.js/pull/2567>adding more community examples (@boazblake)</a></a></h4>
+<h4 id=137><a href=#137><a href=https://github.com/MithrilJS/mithril.js/pull/2561>Exclude archive of previous docs (@cztomsik)</a></a></h4>
+<p>update .npmignore so that archives are not included in the resulting package. space/bandwidth savings. fix #2552.</p>
+<h4 id=138><a href=#138><a href=https://github.com/MithrilJS/mithril.js/pull/2553>Pimp the docs linter (and assorted changes) (@pygy)</a></a></h4>
+<p>Add an optional cache for faster runs. Add a final report. Don&#39;t return anything from <code>exec()</code>. Cover more files. Look for a &quot;--cache&quot; option.</p>
+<h4 id=139><a href=#139><a href=https://github.com/MithrilJS/mithril.js/pull/2540>Recast key docs to be much clearer and more accurate (@dead-claudia)</a></a></h4>
+<p>Recast key docs to be much clearer and more accurate, including a few Flems examples to help intuitively explain things.</p>
+<h4 id=140><a href=#140><a href=https://github.com/MithrilJS/mithril.js/pull/2538>Add <code>m.censor</code>, adjust <code>m.route.Link</code> to use it (@dead-claudia)</a></a></h4>
+<p>Add <code>m.censor</code>. Adjust <code>m.route.Link</code> to use it. Restructure a few things for better code reuse. Fixes #2472.</p>
+<h4 id=141><a href=#141><a href=https://github.com/MithrilJS/mithril.js/pull/2522>Update fetch() browser support in docs (@qgustavor)</a></a></h4>
+<p>As <a href="https://caniuse.com/#feat=fetch">Can I use</a> shows <code>fetch()</code> supported since Safari 10.1 and iOS Safari 10.3.</p>
+<h4 id=142><a href=#142><a href=https://github.com/MithrilJS/mithril.js/pull/2513>docs: Add release dates to all change-log files (@maranomynet)</a></a></h4>
+<p>I&#39;d like to introduce release dates to the change log files. Release dates are human-friendly and add a bit of historical perspective to change-log files.</p>
+<hr>
+<small>License: MIT. &copy; Leo Horie.</small>
+</section>
+</main>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/prism.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-jsx.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-diff.min.js></script>
+<script src=https://unpkg.com/mithril@2.2.0/mithril.js async></script>
+<script src=https://flems.io/flems.html id=flems defer></script>
+<script>
+document.querySelector(".hamburger").onclick = function() {
+			document.body.className = document.body.className === "navigating" ? "" : "navigating"
+			document.querySelector("h1 + ul").onclick = function() {
+				document.body.className = ''
+			}
+		}
+		document.getElementById("flems").onload = function() {
+			var systemFonts = [
+				"body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
+				"body { height: 100%; overflow:hidden; display:flex; justify-content: center; align-items:center; }"
+			].join("")
+			;[].forEach.call(document.querySelectorAll("pre code.language-js"), function(el) {
+				el = el.parentNode
+
+				var div = document.createElement("div")
+				window.Flems(div, {
+					middle        : 60,
+					editable      : true,
+					toolbar       : false,
+					shareButton   : true,
+					console       : false,
+					autoHeight    : true,
+					files: [{
+						name: ".js",
+						content: el.textContent
+					}, {
+						name: ".css",
+						content: systemFonts
+					}],
+					links: [{
+						name: "mithril",
+						type: "script",
+						url: "https://unpkg.com/mithril@2.2.0/mithril.js"
+					}]
+				}, "https://flems.io/flems.html")
+
+				el.parentNode.insertBefore(div, el)
+				el.parentNode.removeChild(el)
+			})
+		}
+</script>
