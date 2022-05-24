@@ -1,4 +1,12 @@
 
+# Release v2.2.1
+
+### Patch Changes
+
+#### [Move the chat to Zulip (@pygy)](https://github.com/MithrilJS/mithril.js/pull/2771)
+
+This updates the documentation to link to the new Zulip chat room.
+
 # Release v2.2.0
 
 ### Minor Changes
