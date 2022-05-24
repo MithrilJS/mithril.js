@@ -16,8 +16,8 @@
 	<a href="https://opencollective.com/mithriljs">
 		<img src="https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen" alt="Donate at OpenCollective">
 	</a>&nbsp;
-	<a href="https://gitter.im/mithriljs/mithril.js">
-		<img src="https://img.shields.io/gitter/room/mithriljs/mithril.js.svg?logo=gitter" alt="Gitter" />
+	<a href="https://mithril.zulipchat.com/">
+		<img src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg alt="Zulip, join chat" />
 	</a>
 </p>
 
@@ -71,11 +71,11 @@ You may be interested in the [API Docs](https://mithril.js.org/api.html), a [Sim
 
 ## Getting Help
 
-Mithril.js has an active & welcoming community on [Gitter](https://gitter.im/mithriljs/mithril.js), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
+Mithril.js has an active & welcoming community on [Zulip](https://mithril.zulipchat.com/), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
 
 ## Contributing
 
-There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the Mithril.js site that hopefully helps, but if not definitely hop into the [Gitter Room](https://gitter.im/mithriljs/mithril.js) and ask away!
+There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the Mithril.js site that hopefully helps, but if not definitely hop into the [Zulip stream](https://mithril.zulipchat.com/) and ask away!
 
 ---
 
