@@ -17,7 +17,7 @@
 		<img src="https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen" alt="Donate at OpenCollective">
 	</a>&nbsp;
 	<a href="https://mithril.zulipchat.com/">
-		<img src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg alt="Zulip, join chat" />
+		<img src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg" alt="Zulip, join chat" />
 	</a>
 </p>
 
