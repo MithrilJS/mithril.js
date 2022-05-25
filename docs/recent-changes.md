@@ -1,4 +1,12 @@
 
+# Release v2.2.2
+
+### Patch Changes
+
+#### [Use markdown for the README badges (@pygy)](https://github.com/MithrilJS/mithril.js/pull/2773)
+
+Use markdown for the README badges.
+
 # Release v2.2.1
 
 ### Patch Changes
