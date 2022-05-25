@@ -1,25 +1,11 @@
 # Mithril.js
 
-<p>
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/npm/v/mithril.svg" alt="npm Version" />
-	</a>&nbsp;
-	<a href="https://github.com/MithrilJS/mithril.js/blob/next/LICENSE">
-		<img src="https://img.shields.io/npm/l/mithril.svg" alt="License" />
-	</a>&nbsp;
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/npm/dm/mithril.svg" alt="npm Downloads">
-	</a>&nbsp;
-	<a href="https://www.npmjs.com/package/mithril">
-		<img src="https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen" alt="Build Status">
-	</a>&nbsp;
-	<a href="https://opencollective.com/mithriljs">
-		<img src="https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen" alt="Donate at OpenCollective">
-	</a>&nbsp;
-	<a href="https://mithril.zulipchat.com/">
-		<img src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg" alt="Zulip, join chat" />
-	</a>
-</p>
+[![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
+[![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/MithrilJS/mithril.js/blob/next/LICENSE) &nbsp;
+[![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Build Status](https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs) &nbsp;
+[![Zulip, join chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mithril.zulipchat.com/)
 
 - [What is Mithril.js?](#what-is-mithriljs?)
 - [Installation](#installation)
