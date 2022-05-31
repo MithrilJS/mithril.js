@@ -4,7 +4,6 @@
 	- [m.mount](mount.md)
 	- [m.route](route.md)
 	- [m.request](request.md)
-	- [m.jsonp](jsonp.md)
 	- [m.parseQueryString](parseQueryString.md)
 	- [m.buildQueryString](buildQueryString.md)
 	- [m.buildPathname](buildPathname.md)

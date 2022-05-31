@@ -14,7 +14,6 @@ m.route = require("./route")
 m.render = require("./render")
 m.redraw = mountRedraw.redraw
 m.request = request.request
-m.jsonp = request.jsonp
 m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")

@@ -11,7 +11,7 @@ Documentation on how to work with paths in Mithril.js
 
 -----
 
-[`m.route`](route.md), [`m.request`](request.md), and [`m.jsonp`](jsonp.md) each have a concept called a path. This is used to generate the URL you route to or fetch from.
+[`m.route`](route.md) and [`m.request`](request.md) each have a concept called a path. This is used to generate the URL you route to or fetch from.
 
 ### Path types
 
@@ -20,7 +20,7 @@ There are two general types of paths: raw paths and parameterized paths.
 - Raw paths are simply strings used directly as URLs. Nothing is substituted or even split. It's just normalized with all the parameters appended to the end.
 - Parameterized paths let you insert values into paths, escaped by default for convenience and safety against URL injection.
 
-For [`m.request`](request.md) and [`m.jsonp`](jsonp.md), these can be pretty much any URL, but for [routes](route.md), these can only be absolute URL path names without schemes or domains.
+For [`m.request`](request.md) these can be pretty much any URL, but for [routes](route.md), these can only be absolute URL path names without schemes or domains.
 
 ### Path parameters
 
@@ -29,7 +29,7 @@ Path parameters are themselves pretty simple. They come in two forms:
 - `:foo` - This injects a simple `params.foo` into the URL, escaping its value first.
 - `:foo...` - This injects a raw `params.foo` path into the URL without escaping anything.
 
-You're probably wondering what that `params` object is supposed to be. It's pretty simple: it's the `params` in either [`m.route.set(path, params)`](route.md#mrouteset), [`m.request({url, params})`](request.md#signature), or [`m.jsonp({url, params})`](jsonp.md#signature).
+You're probably wondering what that `params` object is supposed to be. It's pretty simple: it's the `params` in either [`m.route.set(path, params)`](route.md#mrouteset), [`m.request({url, params})`](request.md#signature).
 
 When receiving routes via [`m.route(root, defaultRoute, routes)`](route.md#signature), you can use these parameters to *extract* values from routes. They work basically the same way as generating the paths, just in the opposite direction.
 
