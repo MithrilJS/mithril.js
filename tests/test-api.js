@@ -62,11 +62,6 @@ o.spec("api", function() {
 			o(typeof m.request).equals("function") // TODO improve
 		})
 	})
-	o.spec("m.jsonp", function() {
-		o("works", function() {
-			o(typeof m.jsonp).equals("function") // TODO improve
-		})
-	})
 	o.spec("m.render", function() {
 		o("works", function() {
 			root = window.document.createElement("div")
