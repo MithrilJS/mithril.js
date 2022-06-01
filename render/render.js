@@ -262,11 +262,6 @@ module.exports = function($window) {
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
 	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
-	//
-	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
-	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
-	// nodes remain together in the new list in a way that isn't covered by parts one and
-	// three of the diff algo.
 
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
