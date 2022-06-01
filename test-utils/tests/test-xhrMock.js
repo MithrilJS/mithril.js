@@ -2,7 +2,6 @@
 
 var o = require("ospec")
 var xhrMock = require("../../test-utils/xhrMock")
-var parseQueryString = require("../../querystring/parse")
 
 o.spec("xhrMock", function() {
 	var $window
