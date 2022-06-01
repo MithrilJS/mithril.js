@@ -1207,69 +1207,12 @@ var buildPathname = function(template, params) {
 	return result0
 }
 var _17 = function($window, oncompletion) {
-	var callbackCount = 0
 	function PromiseProxy(executor) {
 		return new Promise(executor)
 	}
-	// In case the global Promise is0 some userland library's where they rely on
-	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
-	// similar. Let's *not* break them.
-	PromiseProxy.prototype = Promise.prototype
-	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
-	function makeRequest(factory) {
-		return function(url, args) {
-			if (typeof url !== "string") { args = url; url = url.url }
-			else if (args == null) args = {}
-			var promise = new Promise(function(resolve, reject) {
-				factory(buildPathname(url, args.params), args, function (data) {
-					if (typeof args.type === "function") {
-						if (Array.isArray(data)) {
-							for (var i = 0; i < data.length; i++) {
-								data[i] = new args.type(data[i])
-							}
-						}
-						else data = new args.type(data)
-					}
-					resolve(data)
-				}, reject)
-			})
-			if (args.background === true) return promise
-			var count = 0
-			function complete() {
-				if (--count === 0 && typeof oncompletion === "function") oncompletion()
-			}
-			return wrap(promise)
-			function wrap(promise) {
-				var then = promise.then
-				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise. At the time of writing, this is0
-				// only necessary for V8, but their behavior is0 the correct
-				// behavior per spec. See this spec issue for more details:
-				// https://github.com/tc39/ecma262/issues/1577. Also, see the
-				// corresponding comment in `request0/tests/test-request0.js` for
-				// a bit more background on the issue at hand.
-				promise.constructor = PromiseProxy
-				promise.then = function() {
-					count++
-					var next0 = then.apply(promise, arguments)
-					next0.then(complete, function(e) {
-						complete()
-						if (count === 0) throw e
-					})
-					return wrap(next0)
-				}
-				return promise
-			}
-		}
-	}
-	function hasHeader(args, name) {
-		for (var key0 in args.headers) {
-			if (hasOwn.call(args.headers, key0) && key0.toLowerCase() === name) return true
-		}
-		return false
-	}
-	return {
-		request: makeRequest(function(url, args, resolve, reject) {
+	function fetch(url, args) {
+		return new Promise(function(resolve, reject) {
+			url = buildPathname(url, args.params)
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
 			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData || body instanceof $window.URLSearchParams)
@@ -1330,7 +1273,17 @@ var _17 = function($window, oncompletion) {
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						}
-						if (success) resolve(response)
+						if (success) {
+							if (typeof args.type === "function") {
+								if (Array.isArray(response)) {
+									for (var i = 0; i < response.length; i++) {
+										response[i] = new args.type(response[i])
+									}
+								}
+								else response = new args.type(response)
+							}
+							resolve(response)
+						}
 						else {
 							var completeErrorResponse = function() {
 								try { message = ev.target.responseText }
@@ -1378,7 +1331,52 @@ var _17 = function($window, oncompletion) {
 			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
 			else if (body instanceof $window.FormData || body instanceof $window.URLSearchParams) xhr.send(body)
 			else xhr.send(JSON.stringify(body))
-		}),
+		})
+	}
+	// In case the global Promise is0 some userland library's where they rely on
+	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
+	// similar. Let's *not* break them.
+	PromiseProxy.prototype = Promise.prototype
+	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
+	function hasHeader(args, name) {
+		for (var key0 in args.headers) {
+			if (hasOwn.call(args.headers, key0) && key0.toLowerCase() === name) return true
+		}
+		return false
+	}
+	return {
+		request: function(url, args) {
+			if (typeof url !== "string") { args = url; url = url.url }
+			else if (args == null) args = {}
+			var promise =	fetch(url, args)
+			if (args.background === true) return promise
+			var count = 0
+			function complete() {
+				if (--count === 0 && typeof oncompletion === "function") oncompletion()
+			}
+			return wrap(promise)
+			function wrap(promise) {
+				var then = promise.then
+				// Set the constructor, so engines know to not await or resolve
+				// this as a native promise. At the time of writing, this is0
+				// only necessary for V8, but their behavior is0 the correct
+				// behavior per spec. See this spec issue for more details:
+				// https://github.com/tc39/ecma262/issues/1577. Also, see the
+				// corresponding comment in `request0/tests/test-request0.js` for
+				// a bit more background on the issue at hand.
+				promise.constructor = PromiseProxy
+				promise.then = function() {
+					count++
+					var next0 = then.apply(promise, arguments)
+					next0.then(complete, function(e) {
+						complete()
+						if (count === 0) throw e
+					})
+					return wrap(next0)
+				}
+				return promise
+			}
+		}
 	}
 }
 var request = _17(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
