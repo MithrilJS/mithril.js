@@ -222,8 +222,8 @@ o.spec("onremove", function() {
 							text: textNode.nodeValue,
 						})
 					}
-					actual = JSON.stringify(actual, null, '  ')
-					expected = JSON.stringify(expected, null, '  ')
+					actual = JSON.stringify(actual, null, "  ")
+					expected = JSON.stringify(expected, null, "  ")
 					return {
 						pass: actual === expected,
 						message:
@@ -232,21 +232,24 @@ o.spec("onremove", function() {
 ${actual}`
 					}
 				}}
-
-				var finallyCB
+				var finallyCB1
+				var finallyCB2
+				var C = createComponent({
+					view({children}){return children},
+					onbeforeremove(){
+						return {then(){}, finally: function (fcb) { finallyCB1 = fcb }}
+					}
+				})
 				function update(id, showParent, showChild) {
 					render(root,
 						m("div",
 							showParent && fragment(
 								"", // Required
-								showChild && fragment(
-									{
-										onbeforeremove: function () {
-											return {then(){}, finally: function (fcb) { finallyCB = fcb }}
-										},
+								showChild && m(C, {
+									onbeforeremove: function () {
+										return {then(){}, finally: function (fcb) { finallyCB2 = fcb }}
 									},
-									m("div", id)
-								)
+								}, m("div", id))
 							)
 						)
 					)
@@ -257,7 +260,8 @@ ${actual}`
 					["#text", ""],
 					["DIV", "1"],
 				]))
-				o(finallyCB).equals(undefined)
+				o(finallyCB1).equals(undefined)
+				o(finallyCB2).equals(undefined)
 
 				update("2", true, false)
 
@@ -265,9 +269,10 @@ ${actual}`
 					["#text", ""],
 					["DIV", "1"],
 				]))
-				o(typeof finallyCB).equals("function")
+				o(typeof finallyCB1).equals("function")
 
-				var original = finallyCB
+				var original1 = finallyCB1
+				var original2 = finallyCB2
 
 				update("3", true, true)
 
@@ -276,14 +281,16 @@ ${actual}`
 					["DIV", "1"],
 					["DIV", "3"],
 				]))
-				o(finallyCB).equals(original)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
 				update("4", false, true)
 
 				o(root).satisfies(template([
 					["DIV", "1"],
 				]))
-				o(finallyCB).equals(original)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
 				update("5", true, true)
 
@@ -292,22 +299,26 @@ ${actual}`
 					["#text", ""],
 					["DIV", "5"],
 				]))
-				o(finallyCB).equals(original)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
-				finallyCB()
+				finallyCB1()
+				finallyCB2()
 
 				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "5"],
 				]))
-				o(finallyCB).equals(original)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
 				update("6", true, true)
 				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "6"],
 				]))
-				o(finallyCB).equals(original)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 			})
 		})
 	})

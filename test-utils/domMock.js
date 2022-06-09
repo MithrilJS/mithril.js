@@ -99,7 +99,7 @@ module.exports = function(options) {
 		}
 	}
 	function removeChild(child) {
-		if (child == null || typeof child !== 'object' || !("nodeType" in child)) {
+		if (child == null || typeof child !== "object" || !("nodeType" in child)) {
 			throw new TypeError("Failed to execute removeChild, parameter is not of type 'Node'")
 		}
 		var index = this.childNodes.indexOf(child)
