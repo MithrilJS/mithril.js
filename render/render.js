@@ -1,15 +1,19 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
+const Vnode = require("../render/vnode")
+const {domFor, delayedRemoval} = require("../render/dom-for")
 
 module.exports = function($window) {
-	var $doc = $window && $window.document
-	var currentRedraw
+	const $doc = $window && $window.document
 
-	var nameSpace = {
+	const nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
+
+	let currentRedraw
+	let currentDOM
+	let currentRender
 
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
@@ -87,11 +91,9 @@ module.exports = function($window) {
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
 		// Capture nodes to remove, so we don't confuse them.
-		vnode.instance = []
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
-			vnode.instance.push(child)
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
@@ -421,13 +423,12 @@ module.exports = function($window) {
 	}
 	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
-			removeHTML(parent, old)
+			removeDOM(parent, old, undefined)
 			createHTML(parent, vnode, ns, nextSibling)
 		}
 		else {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
-			vnode.instance = old.instance
 		}
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
@@ -543,42 +544,18 @@ module.exports = function($window) {
 		return nextSibling
 	}
 
-	// This covers a really specific edge case:
-	// - Parent node is keyed and contains child
-	// - Child is removed, returns unresolved promise in `onbeforeremove`
-	// - Parent node is moved in keyed diff
-	// - Remaining children still need moved appropriately
-	//
-	// Ideally, I'd track removed nodes as well, but that introduces a lot more
-	// complexity and I'm not exactly interested in doing that.
+	// This handles fragments with zombie children (removed from vdom, but persisted in DOM throug onbeforeremove)
 	function moveNodes(parent, vnode, nextSibling) {
-		var frag = $doc.createDocumentFragment()
-		moveChildToFrag(parent, frag, vnode)
-		insertNode(parent, frag, nextSibling)
-	}
-	function moveChildToFrag(parent, frag, vnode) {
-		// Dodge the recursion overhead in a few of the most common cases.
-		while (vnode.dom != null && vnode.dom.parentNode === parent) {
-			if (typeof vnode.tag !== "string") {
-				vnode = vnode.instance
-				if (vnode != null) continue
-			} else if (vnode.tag === "<") {
-				for (var i = 0; i < vnode.instance.length; i++) {
-					frag.appendChild(vnode.instance[i])
-				}
-			} else if (vnode.tag !== "[") {
-				// Don't recurse for text nodes *or* elements, just fragments
-				frag.appendChild(vnode.dom)
-			} else if (vnode.children.length === 1) {
-				vnode = vnode.children[0]
-				if (vnode != null) continue
+		if (vnode.dom != null) {
+			var target
+			if (vnode.domSize == null) {
+				// don't allocate for the common case
+				target = vnode.dom
 			} else {
-				for (var i = 0; i < vnode.children.length; i++) {
-					var child = vnode.children[i]
-					if (child != null) moveChildToFrag(parent, frag, child)
-				}
+				target = $doc.createDocumentFragment()
+				for (const dom of domFor(vnode)) target.appendChild(dom)
 			}
-			break
+			insertNode(parent, target, nextSibling)
 		}
 	}
 
@@ -628,65 +605,42 @@ module.exports = function($window) {
 			}
 		}
 		checkState(vnode, original)
-
+		var generation
 		// If we can, try to fast-path it and avoid all the overhead of awaiting
 		if (!mask) {
 			onremove(vnode)
-			removeChild(parent, vnode)
+			removeDOM(parent, vnode, undefined)
 		} else {
-			if (stateResult != null) {
-				var next = function () {
+			generation = currentRender
+			for (const dom of domFor(vnode)) delayedRemoval.set(dom, generation)
+			function finalizer(a, b) {
+				return function () {
 					// eslint-disable-next-line no-bitwise
-					if (mask & 1) { mask &= 2; if (!mask) reallyRemove() }
+					if (mask & a) { mask &= b; if (!mask) {
+						checkState(vnode, original)
+						onremove(vnode)
+						removeDOM(parent, vnode, generation)
+					} }
 				}
-				stateResult.then(next, next)
+			}
+			if (stateResult != null) {
+				stateResult.finally(finalizer(1, 2))
 			}
 			if (attrsResult != null) {
-				var next = function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & 2) { mask &= 1; if (!mask) reallyRemove() }
-				}
-				attrsResult.then(next, next)
+				attrsResult.finally(finalizer(2, 1))
 			}
 		}
+	}
+	function removeDOM(parent, vnode, generation) {
+		if (vnode.dom == null) return
+		if (vnode.domSize == null) {
+			// don't allocate for the common case
+			if (delayedRemoval.get(vnode.dom) === generation) parent.removeChild(vnode.dom)
+		} else {
+			for (const dom of domFor(vnode, {generation})) parent.removeChild(dom)
+		}
+	}
 
-		function reallyRemove() {
-			checkState(vnode, original)
-			onremove(vnode)
-			removeChild(parent, vnode)
-		}
-	}
-	function removeHTML(parent, vnode) {
-		for (var i = 0; i < vnode.instance.length; i++) {
-			parent.removeChild(vnode.instance[i])
-		}
-	}
-	function removeChild(parent, vnode) {
-		// Dodge the recursion overhead in a few of the most common cases.
-		while (vnode.dom != null && vnode.dom.parentNode === parent) {
-			if (typeof vnode.tag !== "string") {
-				vnode = vnode.instance
-				if (vnode != null) continue
-			} else if (vnode.tag === "<") {
-				removeHTML(parent, vnode)
-			} else {
-				if (vnode.tag !== "[") {
-					parent.removeChild(vnode.dom)
-					if (!Array.isArray(vnode.children)) break
-				}
-				if (vnode.children.length === 1) {
-					vnode = vnode.children[0]
-					if (vnode != null) continue
-				} else {
-					for (var i = 0; i < vnode.children.length; i++) {
-						var child = vnode.children[i]
-						if (child != null) removeChild(parent, child)
-					}
-				}
-			}
-			break
-		}
-	}
 	function onremove(vnode) {
 		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
@@ -946,8 +900,6 @@ module.exports = function($window) {
 		return true
 	}
 
-	var currentDOM
-
 	return function(dom, vnodes, redraw) {
 		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 		if (currentDOM != null && dom.contains(currentDOM)) {
@@ -961,6 +913,7 @@ module.exports = function($window) {
 
 		currentDOM = dom
 		currentRedraw = typeof redraw === "function" ? redraw : undefined
+		currentRender = {}
 		try {
 			// First time rendering into a node clears it out
 			if (dom.vnodes == null) dom.textContent = ""
