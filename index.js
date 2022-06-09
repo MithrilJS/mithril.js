@@ -3,6 +3,7 @@
 var hyperscript = require("./hyperscript")
 var request = require("./request")
 var mountRedraw = require("./mount-redraw")
+var domFor = require("./render/dom-for")
 
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
@@ -20,5 +21,6 @@ m.parsePathname = require("./pathname/parse")
 m.buildPathname = require("./pathname/build")
 m.vnode = require("./render/vnode")
 m.censor = require("./util/censor")
+m.domFor = domFor.domFor
 
 module.exports = m

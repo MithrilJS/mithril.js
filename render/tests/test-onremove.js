@@ -195,13 +195,13 @@ o.spec("onremove", function() {
 			})
 			// Warning: this test is complicated because it's replicating a race condition.
 			o("removes correct nodes when child delays removal, parent removes, then child resolves", function () {
-				// Sugar over the complexity - I need to test the entire tree for consistency.
-				function expect(expectedPairs) {
+				// Custom assertion - we need to test the entire tree for consistency.
+				function template(tpl) {return function (root) {
 					var expected = []
 
-					for (var i = 0; i < expectedPairs.length; i++) {
-						var name = expectedPairs[i][0]
-						var text = expectedPairs[i][1]
+					for (var i = 0; i < tpl.length; i++) {
+						var name = tpl[i][0]
+						var text = tpl[i][1]
 						expected.push({
 							name: name,
 							firstType: name === "#text" ? null : "#text",
@@ -222,23 +222,30 @@ o.spec("onremove", function() {
 							text: textNode.nodeValue,
 						})
 					}
+					actual = JSON.stringify(actual, null, '  ')
+					expected = JSON.stringify(expected, null, '  ')
+					return {
+						pass: actual === expected,
+						message:
+`${expected}
+  expected, got
+${actual}`
+					}
+				}}
 
-					o(actual).deepEquals(expected)
-				}
-
-				var resolve
-
+				var finallyCB
 				function update(id, showParent, showChild) {
 					render(root,
 						m("div",
 							showParent && fragment(
 								"", // Required
-								showChild && fragment({
-									onbeforeremove: function () {
-										return {then: function (r) { resolve = r }}
+								showChild && fragment(
+									{
+										onbeforeremove: function () {
+											return {then(){}, finally: function (fcb) { finallyCB = fcb }}
+										},
 									},
-								},
-								m("div", id)
+									m("div", id)
 								)
 							)
 						)
@@ -246,170 +253,61 @@ o.spec("onremove", function() {
 				}
 
 				update("1", true, true)
-				expect([
+				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "1"],
-				])
-				o(resolve).equals(undefined)
+				]))
+				o(finallyCB).equals(undefined)
 
 				update("2", true, false)
-				expect([
+
+				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "1"],
-				])
-				o(typeof resolve).equals("function")
-				var original = resolve
+				]))
+				o(typeof finallyCB).equals("function")
+
+				var original = finallyCB
 
 				update("3", true, true)
-				expect([
+
+				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "1"],
 					["DIV", "3"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB).equals(original)
 
 				update("4", false, true)
-				expect([
+
+				o(root).satisfies(template([
 					["DIV", "1"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB).equals(original)
 
 				update("5", true, true)
-				expect([
+
+				o(root).satisfies(template([
 					["DIV", "1"],
 					["#text", ""],
 					["DIV", "5"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB).equals(original)
 
-				resolve()
-				expect([
+				finallyCB()
+
+				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "5"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB).equals(original)
 
 				update("6", true, true)
-				expect([
+				o(root).satisfies(template([
 					["#text", ""],
 					["DIV", "6"],
-				])
-				o(resolve).equals(original)
-			})
-			// Warning: this test is complicated because it's replicating a race condition.
-			o("removes correct nodes when child delays removal, parent removes, then child resolves + rejects both", function () {
-				// Sugar over the complexity - I need to test the entire tree for consistency.
-				function expect(expectedPairs) {
-					var expected = []
-
-					for (var i = 0; i < expectedPairs.length; i++) {
-						var name = expectedPairs[i][0]
-						var text = expectedPairs[i][1]
-						expected.push({
-							name: name,
-							firstType: name === "#text" ? null : "#text",
-							text: text,
-						})
-					}
-
-					var actual = []
-					var list = root.firstChild.childNodes
-					for (var i = 0; i < list.length; i++) {
-						var current = list[i]
-						var textNode = current.childNodes.length === 1
-							? current.firstChild
-							: current
-						actual.push({
-							name: current.nodeName,
-							firstType: textNode === current ? null : textNode.nodeName,
-							text: textNode.nodeValue,
-						})
-					}
-
-					o(actual).deepEquals(expected)
-				}
-
-				var resolve, reject
-
-				function update(id, showParent, showChild) {
-					render(root,
-						m("div",
-							showParent && fragment(
-								"", // Required
-								showChild && fragment({
-									onbeforeremove: function () {
-										return {then: function (res, rej) {
-											resolve = res
-											reject = rej
-										}}
-									},
-								},
-								m("div", id)
-								)
-							)
-						)
-					)
-				}
-
-				update("1", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-				])
-				o(resolve).equals(undefined)
-
-				update("2", true, false)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-				])
-				o(typeof resolve).equals("function")
-				var originalResolve = resolve
-				var originalReject = reject
-
-				update("3", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-					["DIV", "3"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("4", false, true)
-				expect([
-					["DIV", "1"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("5", true, true)
-				expect([
-					["DIV", "1"],
-					["#text", ""],
-					["DIV", "5"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				resolve()
-				reject()
-				reject()
-				resolve()
-				expect([
-					["#text", ""],
-					["DIV", "5"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("6", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "6"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
+				]))
+				o(finallyCB).equals(original)
 			})
 		})
 	})
