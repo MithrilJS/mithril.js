@@ -1,6 +1,7 @@
 "use strict"
 
-var delayedRemoval = module.exports.delayedRemoval = new WeakMap
+var delayedRemoval = new WeakMap
+module.exports.delayedRemoval = delayedRemoval
 
 module.exports.domFor = function *domFor(vnode, {generation} = {generation: undefined}) {
 	let {dom, domSize} = vnode

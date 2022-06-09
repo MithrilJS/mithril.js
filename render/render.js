@@ -1,19 +1,21 @@
 "use strict"
 
-const Vnode = require("../render/vnode")
-const {domFor, delayedRemoval} = require("../render/dom-for")
+var Vnode = require("../render/vnode")
+var df = require("../render/dom-for")
+var delayedRemoval = df.delayedRemoval
+var domFor = df.domFor
 
 module.exports = function($window) {
-	const $doc = $window && $window.document
+	var $doc = $window && $window.document
 
-	const nameSpace = {
+	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
 
-	let currentRedraw
-	let currentDOM
-	let currentRender
+	var currentRedraw
+	var currentDOM
+	var currentRender
 
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
@@ -71,7 +73,7 @@ module.exports = function($window) {
 	}
 	function createText(parent, vnode, nextSibling) {
 		vnode.dom = $doc.createTextNode(vnode.children)
-		insertNode(parent, vnode.dom, nextSibling)
+		insertDOM(parent, vnode.dom, nextSibling)
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode, ns, nextSibling) {
@@ -96,7 +98,7 @@ module.exports = function($window) {
 		while (child = temp.firstChild) {
 			fragment.appendChild(child)
 		}
-		insertNode(parent, fragment, nextSibling)
+		insertDOM(parent, fragment, nextSibling)
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
@@ -106,7 +108,7 @@ module.exports = function($window) {
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
-		insertNode(parent, fragment, nextSibling)
+		insertDOM(parent, fragment, nextSibling)
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
@@ -124,7 +126,7 @@ module.exports = function($window) {
 			setAttrs(vnode, attrs, ns)
 		}
 
-		insertNode(parent, element, nextSibling)
+		insertDOM(parent, element, nextSibling)
 
 		if (!maybeSetContentEditable(vnode)) {
 			if (vnode.children != null) {
@@ -321,9 +323,9 @@ module.exports = function($window) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
-					moveNodes(parent, oe, topSibling)
+					moveNode(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-					if (++start <= --end) moveNodes(parent, o, nextSibling)
+					if (++start <= --end) moveNode(parent, o, nextSibling)
 					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldStart++; oldEnd--
@@ -375,7 +377,7 @@ module.exports = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else moveNodes(parent, v, nextSibling)
+									else moveNode(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -544,8 +546,8 @@ module.exports = function($window) {
 		return nextSibling
 	}
 
-	// This handles fragments with zombie children (removed from vdom, but persisted in DOM throug onbeforeremove)
-	function moveNodes(parent, vnode, nextSibling) {
+	// This handles fragments with zombie children (removed from vdom, but persisted in DOM through onbeforeremove)
+	function moveNode(parent, vnode, nextSibling) {
 		if (vnode.dom != null) {
 			var target
 			if (vnode.domSize == null) {
@@ -553,13 +555,13 @@ module.exports = function($window) {
 				target = vnode.dom
 			} else {
 				target = $doc.createDocumentFragment()
-				for (const dom of domFor(vnode)) target.appendChild(dom)
+				for (var dom of domFor(vnode)) target.appendChild(dom)
 			}
-			insertNode(parent, target, nextSibling)
+			insertDOM(parent, target, nextSibling)
 		}
 	}
 
-	function insertNode(parent, dom, nextSibling) {
+	function insertDOM(parent, dom, nextSibling) {
 		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
@@ -612,8 +614,8 @@ module.exports = function($window) {
 			removeDOM(parent, vnode, undefined)
 		} else {
 			generation = currentRender
-			for (const dom of domFor(vnode)) delayedRemoval.set(dom, generation)
-			function finalizer(a, b) {
+			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
+			var finalizer = function(a, b) {
 				return function () {
 					// eslint-disable-next-line no-bitwise
 					if (mask & a) { mask &= b; if (!mask) {
@@ -637,7 +639,7 @@ module.exports = function($window) {
 			// don't allocate for the common case
 			if (delayedRemoval.get(vnode.dom) === generation) parent.removeChild(vnode.dom)
 		} else {
-			for (const dom of domFor(vnode, {generation})) parent.removeChild(dom)
+			for (var dom of domFor(vnode, {generation})) parent.removeChild(dom)
 		}
 	}
 
