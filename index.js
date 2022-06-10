@@ -3,7 +3,7 @@
 var hyperscript = require("./hyperscript")
 var request = require("./request")
 var mountRedraw = require("./mount-redraw")
-var domFor = require("./render/dom-for")
+var domFor = require("./render/>domFor")
 
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript

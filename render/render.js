@@ -1,7 +1,7 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
-var df = require("../render/dom-for")
+var df = require("../render/>domFor")
 var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
 
