@@ -49,7 +49,7 @@ To send a pull request:
 
 ## I'm submitting a PR. How do I run tests?
 
-After having run `npm install` (a one-time operation), ou can run `npm run test` from the command line to run all tests.
+After having run `npm install` (a one-time operation), run `npm run test` from the command line to run all tests.
 
 While testing, you can modify a test to use `o.only(description, test)` instead of `o(description, test)` if you wish to run only a specific test to speed up your debugging experience. Don't forget to remove the `.only` after you're done!
 
