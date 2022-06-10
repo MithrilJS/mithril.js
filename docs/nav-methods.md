@@ -14,4 +14,4 @@
 - Optional
 	- [Stream](stream.md)
 - Tooling
-	- [Ospec](https://github.com/MithrilJS/mithril.js/blob/master/ospec)
+	- [Ospec](https://github.com/MithrilJS/ospec)
