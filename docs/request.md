@@ -519,7 +519,7 @@ In typical scenarios, streaming won't provide noticeable performance benefits be
 
 #### Promises are not the response data
 
-The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
+The `m.request` method returns a `Promise`, not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
 
 ```javascript
 // AVOID
