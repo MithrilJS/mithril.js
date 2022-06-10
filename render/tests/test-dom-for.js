@@ -3,10 +3,10 @@
 const o = require("ospec")
 const components = require("../../test-utils/components")
 const domMock = require("../../test-utils/domMock")
-const vdom = require("../render")
-const m = require("../hyperscript")
-const fragment = require("../fragment")
-const domFor = require("../../render/>domFor").domFor
+const vdom = require("../../render/render")
+const m = require("../../render/hyperscript")
+const fragment = require("../../render/fragment")
+const domFor = require("../../render/dom-for").domFor
 
 o.spec("domFor(vnode)", function() {
 	let $window, root, render
