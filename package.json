@@ -59,5 +59,8 @@
       "eslint . --fix",
       "git add"
     ]
+  },
+  "dependencies": {
+    "ospec": "4.0.1"
   }
 }
