@@ -12,10 +12,13 @@ module.exports.domFor = function *domFor({dom, domSize}, {generation} = {}) {
 			yield dom
 	}
 	else while (domSize) {
+		const {nextSibling} = dom
+
 		if (delayedRemoval.get(dom) === generation) {
 			yield dom
 			domSize--
 		}
-		dom = dom.nextSibling
+		
+		dom = nextSibling
 	}
 }
