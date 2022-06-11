@@ -49,11 +49,9 @@ To send a pull request:
 
 ## I'm submitting a PR. How do I run tests?
 
-Assuming you have forked this repo, you can open the `index.html` file in a module's `tests` folder and look at console output to see only tests for that module, or you can run `ospec/bin/ospec` from the command line to run all tests.
+After having run `npm install` (a one-time operation), run `npm run test` from the command line to run all tests.
 
 While testing, you can modify a test to use `o.only(description, test)` instead of `o(description, test)` if you wish to run only a specific test to speed up your debugging experience. Don't forget to remove the `.only` after you're done!
-
-There is no need to `npm install` anything in order to run the test suite, however NodeJS is required to run the test suite from the command line. You do need to `npm install` if you want to lint or get a code coverage report though.
 
 
 
@@ -61,7 +59,7 @@ There is no need to `npm install` anything in order to run the test suite, howev
 
 If all you're trying to do is run examples in the codebase, you don't need to build Mithril.js, you can just open the various html files and things should just work.
 
-To generate the bundled file for testing, run `npm run dev` from the command line. To generate the minified file, run `npm run build`. There is no need to `npm install` anything, but NodeJS is required to run the build scripts.
+To generate the bundled file for testing, run `npm run dev` from the command line. To generate the minified file, run `npm run build`.
 
 
 

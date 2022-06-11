@@ -25,7 +25,7 @@
     "pretest": "npm run lint",
     "test": "run-s test:js",
     "test:js": "ospec",
-    "cover": "istanbul cover --print both ospec/bin/ospec"
+    "cover": "istanbul cover --print both ospec"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
@@ -50,9 +50,6 @@
     "rimraf": "^3.0.0",
     "semver": "^6.3.0",
     "terser": "^4.3.4"
-  },
-  "bin": {
-    "ospec": "./ospec/bin/ospec"
   },
   "lint-staged": {
     "*.js": [
