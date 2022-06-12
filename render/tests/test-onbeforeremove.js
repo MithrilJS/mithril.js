@@ -74,17 +74,18 @@ o.spec("onbeforeremove", function() {
 			})
 		}
 	})
-	o("calls remove after onbeforeremove resolves", function(done) {
+	o("calls onremove after onbeforeremove resolves", function(done) {
 		var spy = o.spy()
-		var vnode = fragment({onbeforeremove: remove, onremove: spy}, "a")
+		var vnode = fragment({onbeforeremove: onbeforeremove, onremove: spy}, "a")
 
 		render(root, vnode)
 		render(root, [])
 
-		function remove(node) {
+		function onbeforeremove(node) {
 			o(node).equals(vnode)
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild).equals(vnode.dom)
+			o(spy.callCount).equals(0)
 
 			callAsync(function() {
 				o(root.childNodes.length).equals(0)
@@ -102,17 +103,6 @@ o.spec("onbeforeremove", function() {
 
 		o(vnode.dom.onbeforeremove).equals(undefined)
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
-	})
-	o("does not recycle when there's an onbeforeremove", function() {
-		var remove = function() {}
-		var vnode = m("div", {key: 1, onbeforeremove: remove})
-		var updated = m("div", {key: 1, onbeforeremove: remove})
-
-		render(root, vnode)
-		render(root, [])
-		render(root, updated)
-
-		o(vnode.dom).notEquals(updated.dom)
 	})
 	o("does not leave elements out of order during removal", function(done) {
 		var remove = function() {return Promise.resolve()}
