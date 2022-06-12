@@ -14,7 +14,6 @@ module.exports = function($window) {
 	}
 
 	var currentRedraw
-	var currentDOM
 	var currentRender
 
 	function getNameSpace(vnode) {
@@ -323,9 +322,9 @@ module.exports = function($window) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
-					moveNode(parent, oe, topSibling)
+					moveDOM(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-					if (++start <= --end) moveNode(parent, o, nextSibling)
+					if (++start <= --end) moveDOM(parent, o, nextSibling)
 					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldStart++; oldEnd--
@@ -377,7 +376,7 @@ module.exports = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else moveNode(parent, v, nextSibling)
+									else moveDOM(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -547,7 +546,7 @@ module.exports = function($window) {
 	}
 
 	// This handles fragments with zombie children (removed from vdom, but persisted in DOM through onbeforeremove)
-	function moveNode(parent, vnode, nextSibling) {
+	function moveDOM(parent, vnode, nextSibling) {
 		if (vnode.dom != null) {
 			var target
 			if (vnode.domSize == null) {
@@ -611,25 +610,37 @@ module.exports = function($window) {
 		// If we can, try to fast-path it and avoid all the overhead of awaiting
 		if (!mask) {
 			onremove(vnode)
-			removeDOM(parent, vnode, undefined)
+			removeDOM(parent, vnode, generation)
 		} else {
 			generation = currentRender
 			for (var dom of domFor(vnode)) delayedRemoval.set(dom, generation)
-			var finalizer = function(a, b) {
-				return function () {
-					// eslint-disable-next-line no-bitwise
-					if (mask & a) { mask &= b; if (!mask) {
-						checkState(vnode, original)
-						onremove(vnode)
-						removeDOM(parent, vnode, generation)
-					} }
-				}
-			}
 			if (stateResult != null) {
-				stateResult.finally(finalizer(1, 2))
+				stateResult.finally(function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 1) {
+						// eslint-disable-next-line no-bitwise
+						mask &= 2
+						if (!mask) {
+							checkState(vnode, original)
+							onremove(vnode)
+							removeDOM(parent, vnode, generation)
+						}
+					}
+				})
 			}
 			if (attrsResult != null) {
-				attrsResult.finally(finalizer(2, 1))
+				attrsResult.finally(function () {
+					// eslint-disable-next-line no-bitwise
+					if (mask & 2) {
+						// eslint-disable-next-line no-bitwise
+						mask &= 1
+						if (!mask) {
+							checkState(vnode, original)
+							onremove(vnode)
+							removeDOM(parent, vnode, generation)
+						}
+					}
+				})
 			}
 		}
 	}
@@ -901,6 +912,8 @@ module.exports = function($window) {
 		vnode.text = old.text
 		return true
 	}
+
+	var currentDOM
 
 	return function(dom, vnodes, redraw) {
 		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
