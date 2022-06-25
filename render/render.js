@@ -411,6 +411,11 @@ module.exports = function($window) {
 			}
 			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 		}
+		else if(typeof oldTag === "function" && oldTag.toString() === tag.toString()) {
+			vnode.state = old.state
+
+			updateComponent(parent, old, vnode, hooks, nextSibling, ns)
+		}
 		else {
 			removeNode(parent, old)
 			createNode(parent, vnode, hooks, ns, nextSibling)
