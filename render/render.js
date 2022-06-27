@@ -886,17 +886,17 @@ module.exports = function($window) {
 		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
-		do {
+		onbeforeupdate: {
 			if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
 				var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-				if (force !== undefined && !force) break
+				if (force !== undefined && !force) break onbeforeupdate
 			}
 			if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
 				var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-				if (force !== undefined && !force) break
+				if (force !== undefined && !force) break onbeforeupdate
 			}
 			return false
-		} while (false); // eslint-disable-line no-constant-condition
+		}
 		vnode.dom = old.dom
 		vnode.domSize = old.domSize
 		vnode.instance = old.instance
