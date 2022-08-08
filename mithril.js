@@ -119,8 +119,8 @@
 		for (var attrName in attrs) {
 			if (hasOwn.call(attrs, attrName)) {
 				if (attrName === classAttr &&
-						attrs[attrName] != null &&
-						attrs[attrName] !== "") {
+					attrs[attrName] != null &&
+					attrs[attrName] !== "") {
 					classes.push(attrs[attrName])
 					// create key in correct iteration order
 					target[attrName] = ""
@@ -338,7 +338,7 @@
 		if (data.tag !== cached.tag) return true
 
 		if (dataAttrKeys.sort().join() !==
-				Object.keys(cached.attrs).sort().join()) {
+			Object.keys(cached.attrs).sort().join()) {
 			return true
 		}
 
@@ -367,7 +367,7 @@
 			if (cached.nodes.length) clear(cached.nodes)
 
 			if (cached.configContext &&
-					isFunction(cached.configContext.onunload)) {
+				isFunction(cached.configContext.onunload)) {
 				cached.configContext.onunload()
 			}
 
@@ -485,8 +485,8 @@
 		var cached
 
 		if (typeof data === "string" ||
-				typeof data === "number" ||
-				typeof data === "boolean") {
+			typeof data === "number" ||
+			typeof data === "boolean") {
 			cached = new data.constructor(data)
 		} else {
 			cached = data
@@ -518,8 +518,8 @@
 			} else {
 				// was a trusted string
 				if (nodes[0].nodeType === 1 || nodes.length > 1 ||
-						(nodes[0].nodeValue.trim &&
-							!nodes[0].nodeValue.trim())) {
+					(nodes[0].nodeValue.trim &&
+						!nodes[0].nodeValue.trim())) {
 					clear(cached.nodes, cached)
 					nodes = [$document.createTextNode(data)]
 				}
@@ -758,8 +758,8 @@
 
 	function updateLists(views, controllers, view, controller) {
 		if (controller.onunload != null &&
-				unloaders.map(function (u) { return u.handler })
-					.indexOf(controller.onunload) < 0) {
+			unloaders.map(function (u) { return u.handler })
+				.indexOf(controller.onunload) < 0) {
 			unloaders.push({
 				controller: controller,
 				handler: controller.onunload
@@ -788,9 +788,9 @@
 		var key = data && data.attrs && data.attrs.key
 
 		if (pendingRequests === 0 ||
-				forcing ||
-				cachedControllers &&
-					cachedControllers.indexOf(controller) > -1) {
+			forcing ||
+			cachedControllers &&
+			cachedControllers.indexOf(controller) > -1) {
 			data = data.view(controller)
 		} else {
 			data = {tag: "placeholder"}
@@ -1045,7 +1045,7 @@
 			// hook event handlers to the auto-redrawing system
 			node[attrName] = autoredraw(dataAttr, node)
 		} else if (attrName === "style" && dataAttr != null &&
-				isObject(dataAttr)) {
+			isObject(dataAttr)) {
 			// handle `style: {...}`
 			copyStyleAttrs(node, dataAttr, cachedAttr)
 		} else if (namespace != null) {
@@ -1106,7 +1106,7 @@
 				if (e.message.indexOf("Invalid argument") < 0) throw e
 			}
 		} else if (attrName === "value" && tag === "input" &&
-				node.value !== dataAttr) {
+			node.value !== dataAttr) {
 			// #348 dataAttr may not be a string, so use loose comparison
 			node.value = dataAttr
 		}
@@ -1116,13 +1116,13 @@
 		for (var attrName in dataAttrs) {
 			if (hasOwn.call(dataAttrs, attrName)) {
 				if (trySetAttr(
-						node,
-						attrName,
-						dataAttrs[attrName],
-						cachedAttrs[attrName],
-						cachedAttrs,
-						tag,
-						namespace)) {
+					node,
+					attrName,
+					dataAttrs[attrName],
+					cachedAttrs[attrName],
+					cachedAttrs,
+					tag,
+					namespace)) {
 					continue
 				}
 			}
@@ -1255,7 +1255,7 @@
 		appendChild: function (node) {
 			if (html === undefined) html = $document.createElement("html")
 			if ($document.documentElement &&
-					$document.documentElement !== node) {
+				$document.documentElement !== node) {
 				$document.replaceChild(node, $document.documentElement)
 			} else {
 				$document.appendChild(node)
@@ -1339,7 +1339,7 @@
 
 	m.prop = function (store) {
 		if ((store != null && (isObject(store) || isFunction(store)) || ((typeof Promise !== "undefined") && (store instanceof Promise))) &&
-				isFunction(store.then)) {
+			isFunction(store.then)) {
 			return propify(store)
 		}
 
@@ -1402,7 +1402,40 @@
 			if (component) {
 				currentComponent = topComponent = component
 			} else {
-				currentComponent = topComponent = component = {controller: noop}
+				currentComponent = topComponent = component = { controller: noop }
+			}
+
+			var controller = new (component.controller || noop)()
+
+			// controllers may call m.mount recursively (via m.route redirects,
+			// for example)
+			// this conditional ensures only the last recursive m.mount call is
+			// applied
+			if (currentComponent === topComponent) {
+				controllers[index] = controller
+				components[index] = component
+			}
+			endFirstComputation()
+			if (component === null) {
+				removeRootElement(root, index)
+			}
+			return controllers[index]
+		} else if (component == null) {
+			removeRootElement(root, index)
+		}
+	}
+
+	function checkPreventedDiff(component, root, index, isPrevented) {
+		if (!isPrevented) {
+			m.redraw.strategy("diff")
+			m.startComputation()
+			roots[index] = root
+			var currentComponent
+
+			if (component) {
+				currentComponent = topComponent = component
+			} else {
+				currentComponent = topComponent = component = { controller: noop }
 			}
 
 			var controller = new (component.controller || noop)()
@@ -1462,6 +1495,43 @@
 		return checkPrevented(component, root, index, isPrevented)
 	}
 
+	m.diffMount = m.module = function (root, component) {
+		if (!root) {
+			throw new Error("Please ensure the DOM element exists before " +
+				"rendering a template into it.")
+		}
+
+		var index = roots.indexOf(root)
+		if (index < 0) index = roots.length
+
+		var isPrevented = false
+		var event = {
+			preventDefault: function () {
+				isPrevented = true
+				computePreRedrawHook = computePostRedrawHook = null
+			}
+		}
+
+		forEach(unloaders, function (unloader) {
+			unloader.handler.call(unloader.controller, event)
+			unloader.controller.onunload = null
+		})
+
+		if (isPrevented) {
+			forEach(unloaders, function (unloader) {
+				unloader.controller.onunload = unloader.handler
+			})
+		} else {
+			unloaders = []
+		}
+
+		if (controllers[index] && isFunction(controllers[index].onunload)) {
+			controllers[index].onunload(event)
+		}
+
+		return checkPreventedDiff(component, root, index, isPrevented)
+	}
+
 	function removeRootElement(root, index) {
 		roots.splice(index, 1)
 		controllers.splice(index, 1)
@@ -1487,7 +1557,7 @@
 				// currently scheduled timeout
 				// when rAF: always reschedule redraw
 				if ($requestAnimationFrame === global.requestAnimationFrame ||
-						new Date() - lastRedrawCallTime > FRAME_BUDGET) {
+					new Date() - lastRedrawCallTime > FRAME_BUDGET) {
 					if (lastRedrawId > 0) $cancelAnimationFrame(lastRedrawId)
 					lastRedrawId = $requestAnimationFrame(redraw, FRAME_BUDGET)
 				}
@@ -1929,7 +1999,7 @@
 
 		function thennable(then, success, failure, notThennable) {
 			if (((promiseValue != null && isObject(promiseValue)) ||
-					isFunction(promiseValue)) && isFunction(then)) {
+				isFunction(promiseValue)) && isFunction(then)) {
 				try {
 					// count protects against abuse calls from spec checker
 					var count = 0
@@ -2004,7 +2074,7 @@
 
 	m.deferred.onerror = function (e) {
 		if (type.call(e) === "[object Error]" &&
-				!/ Error/.test(e.constructor.toString())) {
+			!/ Error/.test(e.constructor.toString())) {
 			pendingRequests = 0
 			throw e
 		}
@@ -2105,8 +2175,8 @@
 		}
 
 		if (options.serialize === JSON.stringify &&
-				options.data &&
-				options.method !== "GET") {
+			options.data &&
+			options.method !== "GET") {
 			xhr.setRequestHeader("Content-Type",
 				"application/json; charset=utf-8")
 		}
@@ -2171,7 +2241,7 @@
 
 		if (isJSONP) {
 			serialize = options.serialize =
-			deserialize = options.deserialize = identity
+				deserialize = options.deserialize = identity
 
 			extract = function (jsonp) { return jsonp.responseText }
 		} else {
