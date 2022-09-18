@@ -95,7 +95,7 @@ module.exports = function($window, oncompletion) {
 						else {
 							var completeErrorResponse = function() {
 								try { message = ev.target.responseText }
-								catch (e) { message = response }
+								catch (e) { message = JSON.stringify(response) }
 								var error = new Error(message)
 								error.code = ev.target.status
 								error.response = response
