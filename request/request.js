@@ -93,13 +93,17 @@ module.exports = function($window, oncompletion) {
 							resolve(response)
 						}
 						else {
-							var completeErrorResponse = function() {
-								try { message = ev.target.responseText }
-								catch (e) { message = JSON.stringify(response) }
-								var error = new Error(message)
-								error.code = ev.target.status
-								error.response = response
-								reject(error)
+							var completeErrorResponse = function () {
+								if (ev.target.responseType == "json") {
+									reject(response)
+								} else {
+									try { message = ev.target.responseText }
+									catch (e) { message = response }
+									var error = new Error(message)
+									error.code = ev.target.status
+									error.response = response
+									reject(error)
+								}
 							}
 
 							if (xhr.status === 0) {
