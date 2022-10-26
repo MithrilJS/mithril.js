@@ -49,5 +49,11 @@ module.exports = function() {
 		while (start < arguments.length) children.push(arguments[start++])
 	}
 
-	return Vnode("", attrs.key, attrs, children)
+	const vnode = Vnode("", attrs.key, attrs, children);
+
+	if (attrs.ref && typeof attrs.ref == "object") {
+		attrs.ref.current = vnode;
+	}
+
+	return vnode
 }

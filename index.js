@@ -20,6 +20,7 @@ m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")
 m.buildPathname = require("./pathname/build")
 m.vnode = require("./render/vnode")
+m.ref = require("./render/ref")
 m.censor = require("./util/censor")
 m.domFor = domFor.domFor
 
