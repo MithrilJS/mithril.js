@@ -416,6 +416,9 @@ m.route(rootElem, "/", {
 })
 ```
 
+Note we've added the `key` property to the child of `Layout`,
+i.e. it's `m(Layout, m(Person, {key: ...}))` not `m(Layout, {key: ...}, m(Person, ...))`.
+
 ### Common gotchas
 
 There's several common gotchas that people run into with keys. Here's some of them, to help you understand why they don't work.
