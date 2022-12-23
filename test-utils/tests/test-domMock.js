@@ -671,7 +671,119 @@ o.spec("domMock", function() {
 
 			o(div.style.background).equals("red")
 			o(div.style.cssText).equals("background: red;")
+		})
+	})
+	o.spec("odd exotic bool attributes", function() {
+		o("download when not specified as attribute beforehand", function() {
+			var a = $document.createElement("a")
+			a.setAttribute("href", "#")
 
+			o(a.hasAttribute("download")).equals(false)
+			o(a.download).equals("")
+
+			a.download = ""
+
+			o(a.hasAttribute("download")).equals(true)
+			o(a.getAttribute("download")).equals("")
+			o(a.download).equals("")
+
+			a.download = false
+
+			o(a.getAttribute("download")).equals("false")
+		})
+		o("download when specified as boolean attribute beforehand", function() {
+			var a = $document.createElement("a")
+			a.setAttribute("href", "#")
+			a.setAttribute("download", "")
+
+			o(a.hasAttribute("download")).equals(true)
+			o(a.download).equals("")
+		})
+		o("download when specified as string attribute beforehand", function() {
+			var a = $document.createElement("a")
+			a.setAttribute("href", "#")
+			a.setAttribute("download", "file-name.extension")
+
+			o(a.hasAttribute("download")).equals(true)
+			o(a.download).equals("file-name.extension")
+		})
+		o("spellcheck when not set as attribute", function() {
+			var div = $document.createElement("div")
+
+			o(div.spellcheck).equals(true)
+
+			div.spellcheck = false
+
+			o(div.getAttribute("spellcheck")).equals("false")
+
+			div.spellcheck = ""
+
+			o(div.getAttribute("spellcheck")).equals("false")
+
+			div.spellcheck = "false"
+
+			o(div.getAttribute("spellcheck")).equals("true")
+
+			div.spellcheck = true
+
+			o(div.getAttribute("spellcheck")).equals("true")
+		})
+		o("spellcheck when set as boolean attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("spellcheck", "")
+
+			o(div.spellcheck).equals(true)
+		})
+		o("spellcheck when set to 'true' as attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("spellcheck", "true")
+
+			o(div.spellcheck).equals(true)
+		})
+		o("spellcheck when set to 'false' as attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("spellcheck", "false")
+
+			o(div.spellcheck).equals(false)
+		})
+		o("translate when not set as attribute", function() {
+			var div = $document.createElement("div")
+
+			o(div.translate).equals(true)
+
+			div.translate = false
+
+			o(div.getAttribute("translate")).equals("no")
+
+			div.translate = ""
+
+			o(div.getAttribute("translate")).equals("no")
+
+			div.translate = "false"
+
+			o(div.getAttribute("translate")).equals("yes")
+
+			div.translate = true
+
+			o(div.getAttribute("translate")).equals("yes")
+		})
+		o("translate when set as boolean attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("translate", "")
+
+			o(div.translate).equals(true)
+		})
+		o("translate when set to 'true' as attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("translate", "yes")
+
+			o(div.translate).equals(true)
+		})
+		o("translate when set to 'false' as attribute", function() {
+			var div = $document.createElement("div")
+			div.setAttribute("translate", "no")
+
+			o(div.translate).equals(false)
 		})
 	})
 	o.spec("events", function() {

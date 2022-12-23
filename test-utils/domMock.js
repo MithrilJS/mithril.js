@@ -352,6 +352,27 @@ module.exports = function(options) {
 					get className() {
 						return this.attributes["class"] ? this.attributes["class"].value : ""
 					},
+					get download() {
+						return this.hasAttribute("download") ? this.getAttribute("download") : ""
+					},
+					set download(value) {
+						/*eslint-disable-next-line no-implicit-coercion*/
+						this.setAttribute("download", ""+value)
+					},
+					get spellcheck() {
+						return this.getAttribute("spellcheck") !== "false"
+					},
+					set spellcheck(value) {
+						// we can rely on implicit bool conversion
+						this.setAttribute("spellcheck", value ? "true" : "false")
+					},
+					get translate() {
+						return this.getAttribute("translate") !== "no"
+					},
+					set translate(value) {
+						// we can rely on implicit bool conversion
+						this.setAttribute("translate", value ? "yes" : "no")
+					},
 					set className(value) {
 						if (this.namespaceURI === "http://www.w3.org/2000/svg") throw new Error("Cannot set property className of SVGElement")
 						else this.setAttribute("class", value)

@@ -650,6 +650,69 @@ o.spec("attributes", function() {
 			o(d.dom.value).equals("2")
 		})
 	})
+	o.spec("unusual bool attributes", function() {
+		o.spec("download", function() {
+			o("a.download created through hyperscript as a boolean attr", function() {
+				var a = m('a[href=#][download]')
+				render(root, a)
+
+				o(a.dom.getAttribute("download")).equals("")
+			})
+		})
+
+		o("spellcheck", function(){
+			var div = m("[spellcheck=false]")
+			render(root, div)
+
+			o(div.dom.spellcheck).equals(false)
+
+			div = m("[spellcheck]")
+			render(root, div)
+
+			o(div.dom.spellcheck).equals(true)
+
+			div = m("[spellcheck=true]")
+			render(root, div)
+
+			o(div.dom.spellcheck).equals(true)
+
+			div = m("div", {spellcheck: true})
+			render(root, div)
+
+			o(div.dom.spellcheck).equals(true)
+
+			div = m("div", {spellcheck: false})
+			render(root, div)
+
+			o(div.dom.spellcheck).equals(false)
+		})
+		o("translate", function(){
+			var div = m("[translate=no]")
+			render(root, div)
+
+			o(div.dom.translate).equals(false)
+
+			div = m("[translate]")
+			render(root, div)
+
+			o(div.dom.translate).equals(true)
+
+			div = m("[translate=yes]")
+			render(root, div)
+
+			o(div.dom.translate).equals(true)
+
+			div = m("div", {translate: true})
+			render(root, div)
+
+			o(div.dom.translate).equals(true)
+
+			div = m("div", {translate: false})
+			render(root, div)
+
+			o(div.dom.translate).equals(false)
+		})
+	})
 	o.spec("contenteditable throws on untrusted children", function() {
 		o("including elements", function() {
 			var div = m("div", {contenteditable: true}, m("script", {src: "http://evil.com"}))
