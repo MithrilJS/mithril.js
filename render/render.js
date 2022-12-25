@@ -687,7 +687,7 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
-		else if (hasPropertyKey(vnode, key, ns)) {
+		else if (shouldUseProp(vnode, key, value, ns)) {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
@@ -717,7 +717,7 @@ module.exports = function($window) {
 		if (key[0] === "o" && key[1] === "n") updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
-			hasPropertyKey(vnode, key, ns)
+			shouldUseProp(vnode, key, old, ns)
 			&& key !== "className"
 			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
@@ -776,13 +776,19 @@ module.exports = function($window) {
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function hasPropertyKey(vnode, key, ns) {
+	// determine if a vDOM attr should be set as property or attribute
+	function shouldUseProp(vnode, key, value, ns) {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
 			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
 			// If it's a normal element, let's try to avoid a few browser bugs.
 			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
+			// `m("a[download]")` would otherwilse be set to the string "true"
+			&& !(key === "download" && value === true)
+			// `m("[spellcheck=false]")` and `m("[translate=no]")` would otherwise be paradoxically truthy
+			&& !(key === "spellcheck" && typeof value === "string")
+			&& !(key === "translate" && typeof value === "string")
 			// Defer the property check until *after* we check everything.
 		) && key in vnode.dom
 	}
