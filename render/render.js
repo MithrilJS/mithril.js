@@ -800,10 +800,10 @@ module.exports = function($window) {
 			// Styles are equivalent, do nothing.
 		} else if (style == null) {
 			// New style is missing, just clear it.
-			element.style.cssText = ""
+			element.style = ""
 		} else if (typeof style !== "object") {
 			// New style is a string, let engine deal with patching.
-			element.style.cssText = style
+			element.style = style
 		} else if (old == null || typeof old !== "object") {
 			// `old` is missing or a string, `style` is an object.
 			element.style.cssText = ""

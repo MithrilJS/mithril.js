@@ -346,9 +346,8 @@ module.exports = function(options) {
 					get style() {
 						return style
 					},
-					set style(_){
-						// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style#Setting_style
-						throw new Error("setting element.style is not portable")
+					set style(value){
+						this.style.cssText = value
 					},
 					get className() {
 						return this.attributes["class"] ? this.attributes["class"].value : ""
