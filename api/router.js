@@ -24,7 +24,7 @@ module.exports = function($window, mountRedraw) {
 	var callAsync = $window == null
 		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
-		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
+		: typeof setImmediate === "function" ? setImmediate : $window.setTimeout
 	var p = Promise.resolve()
 
 	var scheduled = false

@@ -13,6 +13,7 @@ module.exports = function(env) {
 	for (var key in dom) if (!$window[key]) $window[key] = dom[key]
 	for (var key in xhr) if (!$window[key]) $window[key] = xhr[key]
 	pushStateMock(env)
+	$window.Promise = Promise
 
 	return $window
 }

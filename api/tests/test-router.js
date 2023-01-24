@@ -26,13 +26,14 @@ o.spec("route", function() {
 
 	// Use precisely what `m.route` uses, for consistency and to ensure timings
 	// are aligned.
+	var waitFunc = typeof setImmediate === "function" ? setImmediate : setTimeout
 	function waitCycles(n) {
 		n = Math.max(n, 1)
 		return new Promise(function(resolve) {
 			return loop()
 			function loop() {
 				if (n === 0) resolve()
-				else { n--; setTimeout(loop, 4) }
+				else { n--; waitFunc(loop) }
 			}
 		})
 	}
@@ -43,6 +44,9 @@ o.spec("route", function() {
 				var $window, root, mountRedraw, route, throttleMock
 				var nextID = 0
 				var currentTest = 0
+
+				// In case it doesn't get reset
+				var realError = console.error
 
 				// Once done, a root should no longer be alive. This verifies
 				// that, and it's a *very* subtle test bug that can lead to
@@ -60,16 +64,13 @@ o.spec("route", function() {
 								id = undefined
 								trace.message = "called " +
 									(Date.now() - start) + "ms after test end"
-								console.error(trace.stack)
+								realError.call(console, trace.stack)
 								o("in test").equals("not in test")
 							}
 							return func.apply(this, arguments)
 						}
 					}
 				}
-
-				// In case it doesn't get reset
-				var realError = console.error
 
 				o.beforeEach(function() {
 					currentTest = nextID++

@@ -9,9 +9,22 @@ var apiMountRedraw = require("../../api/mount-redraw")
 var coreRenderer = require("../../render/render")
 var apiRouter = require("../../api/router")
 
+var waitFunc = typeof setImmediate === "function" ? setImmediate : setTimeout
+function waitCycles(n) {
+	n = Math.max(n, 1)
+	return new Promise(function(resolve) {
+		return loop()
+		function loop() {
+			if (n === 0) resolve()
+			else { n--; waitFunc(loop) }
+		}
+	})
+}
+
+
 o.spec("route.get/route.set", function() {
-	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
+	void [{protocol: "http:", hostname: "föö"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
+		void ["#", "?", "", "#!", "?!", "/bár"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, root, mountRedraw, route, throttleMock
 
@@ -71,7 +84,7 @@ o.spec("route.get/route.set", function() {
 					o(route.get()).equals("/ö/é/å?ö=ö#ö=ö")
 				})
 
-				o("sets path asynchronously", function(done) {
+				o("sets path asynchronously", function() {
 					$window.location.href = prefix + "/a"
 					var spy1 = o.spy()
 					var spy2 = o.spy()
@@ -86,16 +99,16 @@ o.spec("route.get/route.set", function() {
 					route.set("/b")
 					o(spy1.callCount).equals(1)
 					o(spy2.callCount).equals(0)
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 
 						o(spy1.callCount).equals(1)
 						o(spy2.callCount).equals(1)
-						done()
+
 					})
 				})
 
-				o("sets fallback asynchronously", function(done) {
+				o("sets fallback asynchronously", function() {
 					$window.location.href = prefix + "/b"
 					var spy1 = o.spy()
 					var spy2 = o.spy()
@@ -110,22 +123,20 @@ o.spec("route.get/route.set", function() {
 					route.set("/c")
 					o(spy1.callCount).equals(0)
 					o(spy2.callCount).equals(1)
-					setTimeout(function() {
+					return waitCycles(1).then(function (){
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/b")
-						setTimeout(function() {
-							// Yep, before even the throttle mechanism takes hold.
-							o(route.get()).equals("/a")
-							throttleMock.fire()
+						return waitCycles(1)
+					}).then(function(){
+						o(route.get()).equals("/a")
+						throttleMock.fire()
 
-							o(spy1.callCount).equals(1)
-							o(spy2.callCount).equals(1)
-							done()
-						})
+						o(spy1.callCount).equals(1)
+						o(spy2.callCount).equals(1)
 					})
 				})
 
-				o("exposes new route asynchronously", function(done) {
+				o("exposes new route asynchronously", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -133,15 +144,15 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y/z?c=d#e=f")
 						throttleMock.fire()
-						done()
+
 					})
 				})
 
-				o("exposes new escaped unicode route asynchronously", function(done) {
+				o("exposes new escaped unicode route asynchronously", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -149,15 +160,15 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set(encodeURI("/ö?ö=ö#ö=ö"))
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/ö?ö=ö#ö=ö")
 						throttleMock.fire()
-						done()
+
 					})
 				})
 
-				o("exposes new unescaped unicode route asynchronously", function(done) {
+				o("exposes new unescaped unicode route asynchronously", function() {
 					$window.location.href = "file://" + prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -165,15 +176,15 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/ö?ö=ö#ö=ö")
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/ö?ö=ö#ö=ö")
 						throttleMock.fire()
-						done()
+
 					})
 				})
 
-				o("exposes new route asynchronously on fallback mode", function(done) {
+				o("exposes new route asynchronously on fallback mode", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -181,36 +192,36 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y/z?c=d#e=f")
 						throttleMock.fire()
-						done()
+
 					})
 				})
 
-				o("sets route via pushState/onpopstate", function(done) {
+				o("sets route via pushState/onpopstate", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
 						"/other/:a/:b...": {view: function() {}},
 					})
 
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						$window.history.pushState(null, null, prefix + "/other/x/y/z?c=d#e=f")
 						$window.onpopstate()
 
-						setTimeout(function() {
+						return waitCycles(1).then(function() {
 							// Yep, before even the throttle mechanism takes hold.
 							o(route.get()).equals("/other/x/y/z?c=d#e=f")
 							throttleMock.fire()
 
-							done()
+
 						})
 					})
 				})
 
-				o("sets parameterized route", function(done) {
+				o("sets parameterized route", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -218,15 +229,15 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y%2Fz?c=d&e=f")
 						throttleMock.fire()
-						done()
+
 					})
 				})
 
-				o("replace:true works", function(done) {
+				o("replace:true works", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -235,15 +246,15 @@ o.spec("route.get/route.set", function() {
 
 					route.set("/other", null, {replace: true})
 
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 						$window.history.back()
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + "/")
-						done()
+
 					})
 				})
 
-				o("replace:false works", function(done) {
+				o("replace:false works", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -252,16 +263,16 @@ o.spec("route.get/route.set", function() {
 
 					route.set("/other", null, {replace: false})
 
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 						$window.history.back()
 						var slash = prefix[0] === "/" ? "" : "/"
 						o($window.location.href).equals(env.protocol + "//" + (env.hostname === "/" ? "" : env.hostname) + slash + (prefix ? prefix + "/" : "") + "test")
-						done()
+
 					})
 				})
 
-				o("state works", function(done) {
+				o("state works", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
 						"/test": {view: function() {}},
@@ -269,10 +280,10 @@ o.spec("route.get/route.set", function() {
 					})
 
 					route.set("/other", null, {state: {a: 1}})
-					setTimeout(function() {
+					return waitCycles(1).then(function() {
 						throttleMock.fire()
 						o($window.history.state).deepEquals({a: 1})
-						done()
+
 					})
 				})
 			})
