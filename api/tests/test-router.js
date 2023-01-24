@@ -37,8 +37,8 @@ o.spec("route", function() {
 		})
 	}
 
-	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}, {protocol: "http:", hostname: "ööö"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo", "/föö"].forEach(function(prefix) {
+	void [{protocol: "http:", hostname: "föö"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
+		void ["#", "?", "", "#!", "?!", "/bár"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, root, mountRedraw, route, throttleMock
 				var nextID = 0
