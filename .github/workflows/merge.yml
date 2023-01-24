@@ -30,14 +30,9 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-    # The following will publish the release to npm
     - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npm publish
+    - run: npm unpublish mithril@2.2.3
       name: Publish
