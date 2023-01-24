@@ -221,7 +221,7 @@ You can use hooks in your production environment to run the production build scr
 
 In order to access `m` globally from all your project first import `webpack` in your `webpack.config.js` like this:
 
-```
+```js
 const webpack = require('webpack')
 ```
 
@@ -255,7 +255,7 @@ Similarly, React always uses the camel-cased style property names exposed in the
 
 React upper-cases the first character of all event handlers: `onClick` listens for `click` events and `onSubmit` for `submit` events. Some are further altered as they're multiple words concatenated together. For instance, `onMouseMove` listens for `mousemove` events. Mithril does not do this case mapping but instead just prepends `on` to the native event, so you'd add listeners for `onclick` and `onmousemove` to listen to those two events respectively. This corresponds much more closely to HTML's naming scheme and is much more intuitive if you come from an HTML or vanilla DOM background.
 
-React supports scheduling event listeners during the capture phase (in the first pass, out to in, as opposed to the default bubble phase going in to out in the second pass) by appending `Capture` to that event. Mithril currently lacks such functionality, but it could gain this in the future. If this is necessary you can manually add and remove your own listeners in [lifecycle hooks](lifecycle.md).
+React supports scheduling event listeners during the capture phase (in the first pass, out to in, as opposed to the default bubble phase going in to out in the second pass) by appending `Capture` to that event. Mithril currently lacks such functionality, but it could gain this in the future. If this is necessary you can manually add and remove your own listeners in [lifecycle hooks](lifecycle-methods.md).
 
 ---
 

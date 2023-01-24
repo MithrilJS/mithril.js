@@ -80,7 +80,7 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](https://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the REM (DEAD LINK, FIXME: https //rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 *Note: third-party cookies may have to be enabled for the REM endpoint to work.*
 

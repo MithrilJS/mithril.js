@@ -281,6 +281,7 @@ async function lintAll({useCache}) {
 				"**/changelog.md",
 				"**/migration-*.md",
 				"**/node_modules/**",
+				"**/recent-changes.md",
 			],
 			nodir: true,
 		})
@@ -309,6 +310,7 @@ if (require.main === module) {
 						"**/changelog.md",
 						"**/migration-*.md",
 						"**/node_modules/**",
+						"**/recent-changes.md",
 					],
 				})
 				.on("add", lintOne)
