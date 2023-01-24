@@ -2,7 +2,7 @@ name: merge
 
 on:
   push:
-    branches: [ master ]
+    branches: [ v2.x ]
 
   workflow_dispatch:
 
