@@ -36,7 +36,6 @@ function execSelector(state, vnode) {
 	var className = hasClass ? attrs.class : attrs.className
 
 	vnode.tag = state.tag
-	vnode.attrs = {}
 
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
@@ -64,12 +63,7 @@ function execSelector(state, vnode) {
 
 	if (hasClass) attrs.class = null
 
-	for (var key in attrs) {
-		if (hasOwn.call(attrs, key) && key !== "key") {
-			vnode.attrs = attrs
-			break
-		}
-	}
+	vnode.attrs = attrs
 
 	return vnode
 }

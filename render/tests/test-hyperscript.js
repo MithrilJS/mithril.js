@@ -271,7 +271,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {key:"a"})
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs).deepEquals({})
+			o(vnode.attrs).deepEquals({key:"a"})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -343,7 +343,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("custom-element", {key:"a"})
 
 			o(vnode.tag).equals("custom-element")
-			o(vnode.attrs).deepEquals({})
+			o(vnode.attrs).deepEquals({key:"a"})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
