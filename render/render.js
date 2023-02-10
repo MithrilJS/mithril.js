@@ -451,9 +451,6 @@ module.exports = function($window) {
 		var element = vnode.dom = old.dom
 		ns = getNameSpace(vnode) || ns
 
-		if (vnode.tag === "textarea") {
-			if (vnode.attrs == null) vnode.attrs = {}
-		}
 		updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 		if (!maybeSetContentEditable(vnode)) {
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
