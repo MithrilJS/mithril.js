@@ -38,7 +38,7 @@ function execSelector(state, vnode) {
 	vnode.tag = state.tag
 	vnode.attrs = {}
 
-	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+	if (!isEmpty(state.attrs)) {
 		var newAttrs = {}
 
 		for (var key in attrs) {
