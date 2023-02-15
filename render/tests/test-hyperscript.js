@@ -580,6 +580,15 @@ o.spec("hyperscript", function() {
 			o(nodeB.attrs.className).equals("b")
 			o(nodeB.attrs.a).equals("b")
 		})
+		o("handles shared empty attrs (#2821)", function() {
+			var attrs = {}
+
+			var nodeA = m(".a", attrs)
+			var nodeB = m(".b", attrs)
+
+			o(nodeA.attrs.className).equals("a")
+			o(nodeB.attrs.className).equals("b")
+		})
 		o("doesnt modify passed attributes object", function() {
 			var attrs = {a: "b"}
 			m(".a", attrs)
