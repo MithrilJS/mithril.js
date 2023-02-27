@@ -2,6 +2,8 @@
 
 var Vnode = require("../render/vnode")
 var df = require("../render/domFor")
+var errorManager = require("../util/errorManager").em
+
 var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
 
@@ -151,8 +153,12 @@ module.exports = function($window) {
 		}
 		initLifecycle(vnode.state, vnode, hooks)
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
-		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		try {
+			vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		} catch (e) {
+			errorManager.fail(e, vnode)
+		}
 		sentinel.$$reentrantLock$$ = null
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
@@ -700,7 +706,7 @@ module.exports = function($window) {
 				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
 				//setting input[type=file][value] to different value is an error if it's non-empty
 				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
-				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
+				if (isFileInput && "" + value !== "") { errorManager.log(0, "`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
 			vnode.dom[key] = value
@@ -748,7 +754,7 @@ module.exports = function($window) {
 	}
 	function updateAttrs(vnode, old, attrs, ns) {
 		if (old && old === attrs) {
-			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+			errorManager.log(1, "Don't reuse attrs object, use new object for every redraw, this will throw in next major")
 		}
 		if (attrs != null) {
 			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
