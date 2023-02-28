@@ -33,10 +33,10 @@ module.exports = {
         })
     },
 
-    fail(error, vnode) {
-      this.executeListeners(
+    fail(error, vnode, inView) {
+      return this.executeListeners(
         this.failEventListeners,
-        {error:error, vnode:vnode},
+        {error:error, vnode:vnode, inView:inView},
         () => {
           this.debugVnode(0, vnode)
           if (error instanceof Error) 
@@ -67,8 +67,8 @@ module.exports = {
     executeListeners(listeners, param, defaultHandler) {
       let stopProcessing = false;
       for (let i=0 ; i<listeners.length ; i++) {
-        listeners[i](param, () => {stopProcessing=true})
-        if (stopProcessing) return
+        let returnValue = listeners[i](param, () => {stopProcessing=true})
+        if (stopProcessing) return returnValue
       }
       defaultHandler()
     },
