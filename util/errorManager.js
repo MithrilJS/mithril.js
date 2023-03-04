@@ -49,7 +49,7 @@ module.exports = {
 
     debugVnode(level, vnode) {
       if (vnode) {
-        this.log(level, "Context: " + JSON.stringify(vnode))
+        this.log(level, "Component: " + vnode.tag.name + " with attributes " + JSON.stringify(vnode.attrs))
       }
     },
 
