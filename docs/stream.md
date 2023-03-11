@@ -462,7 +462,7 @@ Pending streams can be created by calling `stream()` with no parameters.
 var pending = stream()
 ```
 
-If a stream is dependent on more than one stream, and any of its parent streams is in a pending state, the dependent stream is also in a pending state, and does not update its value.
+If a stream is dependent on more than one stream and any of its parent streams is in a pending state, the dependent stream is also in a pending state, and does not update its value.
 
 ```javascript
 var a = stream(5)
