@@ -43,11 +43,13 @@ h2:hover::before,h3:hover::before,h4:hover::before,h5:hover::before {visibility:
 #signature + p code {padding:3px 10px;}
 h1 + ul {margin:40px 0 0 -270px;padding:0;position:absolute;width:250px;z-index:1;}
 h1 + ul + hr {display:none;}
-h1 + ul li {list-style:none;margin:0;padding:0;}
+h1 + ul li {list-style:none;margin:0 0 13px;padding:0;display:block;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 h1 + ul li:last-child {border-bottom:0;}
-h1 + ul ul {margin:0 0 2px;padding:0 0 0 15px;}
-h1 + ul ul li {border:0;}
-h1 + ul strong + ul {border-left:3px solid #1e5799;}
+h1 + ul ul {margin:0 0 2px;padding:0;}
+h1 + ul ul li {border:0;margin-bottom:0;}
+h1 + ul ul ul {margin:0 0 2px;padding:0 0 0 12px;}
+h1 + ul ul ul ul {display:none;}
+h1 + ul strong + ul {border-left:3px solid #1e5799;margin-left:1.25px;}
 
 .logo {color:#010002;}
 .logo:hover {text-decoration:none;}
@@ -65,6 +67,7 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 	header section {margin:0 0 20px;position:static;width:auto;}
 	h1 + ul {background:#eee;border:1px solid #ccc;box-sizing:border-box;display:none;height:100%;margin:0;overflow:auto;padding:20px;position:fixed;right:0;top:0;width:100%;z-index:31}
 	h1 + ul + hr {display:block;}
+	h1 + ul ul ul ul {display:block;}
 	.navigating h1 + ul {display:block;}
 	.navigating {overflow:hidden;}
 }
