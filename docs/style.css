@@ -59,7 +59,7 @@ h1 + ul strong + ul {border-left:3px solid #1e5799;}
 }
 
 @media (max-width: 767px) {
-	.hamburger {display:block;font-size:30px;padding:0 10px;position:fixed;right:0;top:0;z-index:2;}
+	.hamburger {display:block;font-size:42px;line-height:1;padding:0 10px;position:fixed;right:0;top:0;z-index:32;}
 	.hamburger:hover {text-decoration:none;}
 	main section {margin:0;}
 	header section {margin:0 0 20px;position:static;width:auto;}
