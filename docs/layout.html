@@ -14,7 +14,7 @@
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril [archive-docs]</h1>
+				<h1><a class="logo" href="index.html"><img src="logo.svg"> Mithril</a> [archive-docs]</h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
@@ -76,6 +76,14 @@
 				el.parentNode.removeChild(el)
 			})
 		}
+		document.body.addEventListener('click', function (e) {
+			if (e.target.tagName !== 'A') return
+			if (e.target.hostname === location.hostname) return
+			if (e.target.classList.contains('hamburger')) return
+			e.preventDefault()
+			window.open(e.target.href)
+			return false
+		})
 		</script>
 	</body>
 </html>
