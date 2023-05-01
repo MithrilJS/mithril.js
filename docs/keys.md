@@ -6,7 +6,7 @@ Documentation on the special "key" attribute in Mithril.js, which tracks vnodes'
 
 - [What are keys?](#what-are-keys?)
 	- [Key restrictions](#key-restrictions)
-- [Linking model data in lists of views](#linking-model-data-to-views)
+- [Linking model data in lists of views](#linking-model-data-in-lists-of-views)
 - [Keeping collections of animated objects glitch-free](#keeping-collections-of-animated-objects-glitch-free)
 - [Reinitializing views with single-child keyed fragments](#reinitializing-views-with-single-child-keyed-fragments)
 - [Common gotchas](#common-gotchas)
@@ -438,7 +438,7 @@ users.map(function(user) {
 })
 ```
 
-The first binds the key to the `User` component, but the outer fragment created by `users.map(...)` is entirely unkeyed. Wrapping a keyed element this way doesn't work, and the result could be anything ranging from extra requests each time the list is changed to inner form inputs losing their state. The resulting behavior would similar to the [post list's broken example](#linking-model-data-to-views), but without the issue of state corruption.
+The first binds the key to the `User` component, but the outer fragment created by `users.map(...)` is entirely unkeyed. Wrapping a keyed element this way doesn't work, and the result could be anything ranging from extra requests each time the list is changed to inner form inputs losing their state. The resulting behavior would similar to the [post list's broken example](#linking-model-data-in-lists-of-views), but without the issue of state corruption.
 
 The second binds it to the `.wrapper` element, ensuring the outer fragment *is* keyed. This does what you likely wanted to do all along, and removing a user won't pose any issues with the state of other user instances.
 
