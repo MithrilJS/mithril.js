@@ -736,7 +736,7 @@ var Component = {
 var Component = {
 	onremove: function() {
 		// ...
-	}
+	},
 	view: function() {
 		// ...
 	}
@@ -849,7 +849,7 @@ var greetAsync = function() {
 
 greetAsync()
 	.then(function(value) {return value + " world"})
-	.then(function(value) {console.log(value)}) //logs "hello world" after 1 second
+	.then(function(value) {console.log(value)}) // logs "hello world" after 1 second
 ```
 
 ### v2.x
@@ -865,7 +865,7 @@ var greetAsync = function() {
 
 greetAsync()
 	.then(function(value) {return value + " world"})
-	.then(function(value) {console.log(value)}) //logs "hello world" after 1 second
+	.then(function(value) {console.log(value)}) // logs "hello world" after 1 second
 ```
 
 ---
