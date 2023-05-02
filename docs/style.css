@@ -19,7 +19,7 @@ thead tr {background:#e5e2e0;}
 tbody tr {border-bottom:1px solid #e5e2e0;}
 th {text-align:left;}
 th,td {padding:3px 10px;vertical-align:top;}
-td:not(:last-child) code {border:none;outline:none;background-color:transparent;padding:0;font-size:15px;}
+td:not(:last-child) code {border:none;outline:none;background-color:transparent;padding:0;font-size:14px;}
 td:last-child code {background-color:white;}
 td:last-child a code {background-color:inherit;}
 a {color:#1e5799;text-decoration:none;}
