@@ -84,6 +84,10 @@
 			window.open(e.target.href)
 			return false
 		})
+		var elms = document.evaluate("//a/code[not(normalize-space(preceding-sibling::text())) and not(normalize-space(following-sibling::text()))]", document.body, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null)
+		for ( var i=0 ; i < elms.snapshotLength; i++ ){
+			elms.snapshotItem(i).parentNode.classList.add('a-with-code-only')
+		}
 		</script>
 	</body>
 </html>

@@ -24,7 +24,8 @@ td:last-child code {background-color:white;}
 td:last-child a code {background-color:inherit;}
 a {color:#1e5799;text-decoration:none;}
 a:hover {text-decoration:underline;}
-a code {background:inherit;outline:inherit;display:inherit;margin:inherit;padding:inherit;white-space:inherit;line-height:inherit;font-family:inherit;font-size:inherit;}
+h1 a code,h2 a code,h3 a code,li a code,td a code,p a:not(.a-with-code-only) code {background:inherit;outline:inherit;display:inherit;margin:inherit;padding:inherit;white-space:inherit;line-height:inherit;font-family:inherit;font-size:inherit;}
+p a.a-with-code-only code {outline-color:#3c73ba4a;background-color:#eeeef5;}
 hr {border:0;border-bottom:1px solid #ddd;margin:30px 0;}
 
 /* Headings */
