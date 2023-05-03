@@ -161,7 +161,7 @@ class Generator {
 		)
 
 		const markedHtml = marked(body)
-		const title = body.match(/^#([^\n\r]+)/i) || []
+		const title = body.match(/^#\s+([^\n\r]+)/m) || []
 
 		let result = this._layout
 		if (title[1]) {
