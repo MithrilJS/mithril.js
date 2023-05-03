@@ -161,7 +161,7 @@ class Generator {
 		)
 
 		const markedHtml = marked(body)
-		const title = body.match(/^#([^\n\r]+)/i) || []
+		const title = body.match(/#([^\n\r]+)/i) || []
 
 		let result = this._layout
 		if (title[1]) {
@@ -176,7 +176,7 @@ class Generator {
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
-		
+
 		// insert meta description
 		result = result.replace(/\[metaDescription\]/, metaDescription)
 
