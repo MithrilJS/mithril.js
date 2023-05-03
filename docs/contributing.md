@@ -3,20 +3,22 @@ Contribution guide for Mithril.js
 -->
 # Contributing FAQs
 
-* [How do I go about contributing ideas or new features?](#how-do-i-go-about-contributing-ideas-or-new-features?)
-* [How should I report bugs?](#how-should-i-report-bugs?)
-* [How do I send a pull request?](#how-do-i-send-a-pull-request?)
-* [I'm submitting a PR. How do I run tests?](#i'm-submitting-a-pr-how-do-i-run-tests?)
-* [How do I build Mithril.js?](#how-do-i-build-mithriljs?)
-* [Is there a style guide?](#is-there-a-style-guide?)
-* [How do I embed live previews in docs?](#how-do-i-embed-live-previews-in-docs?)
-* [Why do tests mock the browser APIs?](#why-do-tests-mock-the-browser-apis?)
-* [Why does Mithril.js use its own testing framework and not Mocha/Jasmine/Tape?](#why-does-mithriljs-use-its-own-testing-framework-and-not-mochajasminetape?)
-* [Why doesn't the Mithril.js codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?](#why-doesn't-the-mithriljs-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?)
-* [Why doesn't the Mithril.js codebase use trailing semi-colons? Would a PR to add them be welcome?](#why-doesn't-the-mithriljs-codebase-use-trailing-semi-colons?-would-a-pr-to-add-them-be-welcome?)
-* [Why does the Mithril.js codebase use a mix of `instanceof` and `typeof` checks instead of `Object.prototype.toString.call`, `Array.isArray`, etc? Would a PR to refactor those checks be welcome?](#why-does-the-mithriljs-codebase-use-a-mix-of-instanceof-and-typeof-checks-instead-of-objectprototypetostringcall,-arrayisarray,-etc?-would-a-pr-to-refactor-those-checks-be-welcome?)
-* [What should I know in advance when attempting a performance related contribution?](#what-should-i-know-in-advance-when-attempting-a-performance-related-contribution?)
-* [Do you all accept donations?](#do-you-all-accept-donations?)
+Contribution guide for Mithril.js.
+
+- [How do I go about contributing ideas or new features?](#how-do-i-go-about-contributing-ideas-or-new-features?)
+- [How should I report bugs?](#how-should-i-report-bugs?)
+- [How do I send a pull request?](#how-do-i-send-a-pull-request?)
+- [I'm submitting a PR. How do I run tests?](#i'm-submitting-a-pr-how-do-i-run-tests?)
+- [How do I build Mithril.js?](#how-do-i-build-mithriljs?)
+- [Is there a style guide?](#is-there-a-style-guide?)
+- [How do I embed live previews in docs?](#how-do-i-embed-live-previews-in-docs?)
+- [Why do tests mock the browser APIs?](#why-do-tests-mock-the-browser-apis?)
+- [Why does Mithril.js use its own testing framework and not Mocha/Jasmine/Tape?](#why-does-mithriljs-use-its-own-testing-framework-and-not-mochajasminetape?)
+- [Why doesn't the Mithril.js codebase use ES6 via Babel or Bublé? Would a PR to upgrade be welcome?](#why-doesn't-the-mithriljs-codebase-use-es6-via-babel-or-bublé?-would-a-pr-to-upgrade-be-welcome?)
+- [Why doesn't the Mithril.js codebase use trailing semi-colons? Would a PR to add them be welcome?](#why-doesn't-the-mithriljs-codebase-use-trailing-semi-colons?-would-a-pr-to-add-them-be-welcome?)
+- [Why does the Mithril.js codebase use a mix of `instanceof` and `typeof` checks instead of `Object.prototype.toString.call`, `Array.isArray`, etc? Would a PR to refactor those checks be welcome?](#why-does-the-mithriljs-codebase-use-a-mix-of-instanceof-and-typeof-checks-instead-of-objectprototypetostringcall,-arrayisarray,-etc?-would-a-pr-to-refactor-those-checks-be-welcome?)
+- [What should I know in advance when attempting a performance related contribution?](#what-should-i-know-in-advance-when-attempting-a-performance-related-contribution?)
+- [Do you all accept donations?](#do-you-all-accept-donations?)
 
 ## How do I go about contributing ideas or new features?
 
