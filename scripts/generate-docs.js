@@ -176,7 +176,7 @@ class Generator {
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
-
+		
 		// insert meta description
 		result = result.replace(/\[metaDescription\]/, metaDescription)
 
