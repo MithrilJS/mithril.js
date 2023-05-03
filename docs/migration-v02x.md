@@ -753,7 +753,7 @@ In addition, requests no longer have `m.startComputation`/`m.endComputation` sem
 
 The `data` parameter has now been split into `params`, query parameters interpolated into the URL and appended to the request, and `body`, the body to send in the underlying XHR.
 
-In v0.2.x, you would use a `dataType: "jsonp"` to initiate a JSONP request. In v2.x, you now use [`m.jsonp`](jsonp.md), which carries mostly the same API as `m.request` without the XHR-related parts.
+In v0.2.x, you would use a `dataType: "jsonp"` to initiate a JSONP request. In v2.x, you now use `m.jsonp`, which carries mostly the same API as `m.request` without the XHR-related parts.
 
 ### v0.2.x
 
