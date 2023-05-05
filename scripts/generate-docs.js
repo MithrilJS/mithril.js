@@ -95,7 +95,7 @@ async function archiveDocsSelect() {
 	var options = archiveDirs
 		.map((ad) => `<option>${ad}</option>`)
 		.join("")
-	return `<select id="archive-docs" onchange="location.href='archive/' + this.value + '/index.html'">${options}</select>`
+	return `<select id="archive-docs" onchange="location.href='/archive/' + this.value + '/index.html'">${options}</select>`
 }
 
 function encodeHTML (str) {
