@@ -14,7 +14,7 @@ pr-release handles the following:
 - Creating github releases
 - Rollbacks
 
-## For contributors
+### For contributors
 
 Contributors should create their feature branch targetting the default branch `next`.  When this branch is merged `pr-release` will either generate or update a release PR from `next` to `main`.
 
@@ -24,7 +24,7 @@ Contributors who have permissions should add the correct semver label to their P
 
 If you do not have permissions, the maintainer will set the label on your behalf.
 
-## Changelog
+### Changelog
 
 There are two changelogs in the Mithril.js project
 
@@ -33,13 +33,13 @@ There are two changelogs in the Mithril.js project
 
 In future we may collapse these into a single file, the separation is due to the fact the `changelog.md` predates the `release.md` file.
 
-## For maintainers
+### For maintainers
 
 Whenever a new feature branch is opened, a reviewing maintainer should add the correct semver label to their PR (`major` | `minor` | `patch`).  If no label is set, `patch` is assumed.
 
 If a `major` or `minor` feature branch is merged but no labels were set, you can still go back and edit the semver labels.  On label change the release pr will automatically be regenerated and will recalculate the semver version.
 
-## Updating mithril.js.org
+### Updating mithril.js.org
 
 Fixes to documentation can land whenever, updates to the site are built and published via `scripts/update-docs.js`.
 
