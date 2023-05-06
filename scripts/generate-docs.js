@@ -292,14 +292,14 @@ if (require.main === module) {
 	require("./_command")({
 		exec: generate,
 		async watch() {
-			let generator = (await makeGenerator())
+			const generator = (await makeGenerator())
 
 			function isLayoutFile(relative) {
-				return relative === 'layout.html'
+				return relative === "layout.html"
 			}
 
 			function isNavigationFile(relative) {
-				return ['nav-guides.md', 'nav-methods.md'].includes(relative)
+				return ["nav-guides.md", "nav-methods.md"].includes(relative)
 			}
 
 			async function updateGenerator() {
@@ -310,9 +310,9 @@ if (require.main === module) {
 				const relative = path.relative(r("docs"), file)
 				if (isLayoutFile(relative)) {
 					generator.setLayout(await loadLayoutFile())
-					generator.generate()					
+					generator.generate()
 				} else if (isNavigationFile(relative)) {
-					let [guides, methods] = await loadNavigationFiles()
+					const [guides, methods] = await loadNavigationFiles()
 					generator.setGuides(guides)
 					generator.setMethods(methods)
 					generator.generate()
@@ -324,11 +324,9 @@ if (require.main === module) {
 			async function removeFile(file) {
 				const relative = path.relative(r("docs"), file)
 				if (isLayoutFile(relative)) {
-					console.error(`Error: the layout file "${relative}" is required!`);
-					process.exit(1);					
+					throw `Error: the layout file "${relative}" is required!`
 				} else if (isNavigationFile(relative)) {
-					console.error(`Error: the navigation file "${relative}" is required!`);
-					process.exit(1);
+					throw `Error: the navigation file "${relative}" is required!`
 				}
 				const relativeDist = relative.replace(/\.md$/, ".html")
 				generator.eachTarget(relativeDist, (dest) => fs.unlink(dest))
