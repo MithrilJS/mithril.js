@@ -292,7 +292,7 @@ if (require.main === module) {
 	require("./_command")({
 		exec: generate,
 		async watch() {
-			const generator = (await makeGenerator())
+			const generator = await makeGenerator()
 
 			function isLayoutFile(relative) {
 				return relative === "layout.html"
@@ -303,21 +303,21 @@ if (require.main === module) {
 			}
 
 			async function updateGenerator() {
-				generator.generate()
+				await generator.generate()
 			}
 
 			async function updateFile(file) {
 				const relative = path.relative(r("docs"), file)
 				if (isLayoutFile(relative)) {
 					generator.setLayout(await loadLayoutFile())
-					generator.generate()
+					await generator.generate()
 				} else if (isNavigationFile(relative)) {
 					const [guides, methods] = await loadNavigationFiles()
 					generator.setGuides(guides)
 					generator.setMethods(methods)
-					generator.generate()
+					await generator.generate()
 				} else {
-					generator.generateSingle(file)
+					await generator.generateSingle(file)
 				}
 			}
 
@@ -329,7 +329,7 @@ if (require.main === module) {
 					throw `Error: the navigation file "${relative}" is required!`
 				}
 				const relativeDist = relative.replace(/\.md$/, ".html")
-				generator.eachTarget(relativeDist, (dest) => fs.unlink(dest))
+				await generator.eachTarget(relativeDist, (dest) => fs.unlink(dest))
 				console.log("Removed: " + relative)
 			}
 
