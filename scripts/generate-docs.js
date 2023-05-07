@@ -84,7 +84,8 @@ async function makeGenerator() {
 }
 
 async function getArchiveDirs() {
-	const dirs = await fs.readdir(r("dist/archive"))
+	const allDirs = await fs.readdir(r("dist/archive"))
+	const dirs = allDirs.filter(dir => !dir.includes('-rc.'));
 	const ver = "v" + version;
 	if (dirs.every((dir) => ver !== dir)) dirs.push(ver);
 	return dirs.reverse();
@@ -92,6 +93,7 @@ async function getArchiveDirs() {
 
 async function archiveDocsSelect() {
 	const archiveDirs = await getArchiveDirs()
+	console.log(archiveDirs)
 	var options = archiveDirs
 		.map((ad) => `<option>${ad}</option>`)
 		.join("")
