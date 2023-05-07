@@ -19,10 +19,9 @@
 	- [Keys](keys.md)
 	- [Autoredraw system](autoredraw.md)
 - Social
-	- [Mithril.js Jobs](https://github.com/MithrilJS/mithril.js/wiki/JOBS)
 	- [How to contribute](contributing.md)
-	- [Credits](credits.md)
 	- [Code of Conduct](code-of-conduct.md)
+	- [Credits](credits.md)
 - Misc
 	- [Framework comparison](framework-comparison.md)
 	- [Change log/Migration](changelog.md)
