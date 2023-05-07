@@ -25,5 +25,3 @@
 	- [ES6+ on legacy browsers](es6.md)
 	- [Learning Resources](learning-mithril.md)
 	- [Change log/Migration](changelog.md)
-	- [v1 Documentation](https://mithril.js.org/archive/v1.1.7/)
-	- [v0.2 Documentation](https://mithril.js.org/archive/v0.2.5/)
