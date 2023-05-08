@@ -58,6 +58,7 @@ h1 + ul ul ul {margin:0 0 2px;padding:0 0 0 12px;}
 h1 + ul ul ul ul {display:none;}
 h1 + ul strong + ul {border-left:3px solid #1e5799;margin-left:1.25px;}
 
+.footer a {color:inherit;text-decoration:underline;}
 .logo {color:#010002;}
 .logo:hover {text-decoration:none;}
 .hamburger {display:none;}

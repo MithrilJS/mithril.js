@@ -181,6 +181,9 @@ class Generator {
 		// insert meta description
 		result = result.replace(/\[metaDescription\]/, metaDescription)
 
+		// current year
+		result = result.replace(/\[currentYear\]/, new Date().getFullYear())
+
 		// fix anchors
 		const anchorIds = new Map()
 
