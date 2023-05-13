@@ -6,8 +6,8 @@ Explanation, examples, and build notes on how to use JSX in your Mithril.js-base
 
 -   [Description](#description)
 -   [Setup](#setup)
--   [Production build](#production-build)
 -   [Using Babel with Webpack](#using-babel-with-webpack)
+-   [Production build](#production-build)
 -   [Differences with React](#differences-with-react)
 -   [JSX vs hyperscript](#jsx-vs-hyperscript)
 -   [Tips and Tricks](#tips-and-tricks)
