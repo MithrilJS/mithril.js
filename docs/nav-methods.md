@@ -11,6 +11,7 @@
 	- [m.trust](trust.md)
 	- [m.fragment](fragment.md)
 	- [m.redraw](redraw.md)
+	- [m.censor](censor.md)
 - Optional
 	- [Stream](stream.md)
 - Tooling
