@@ -90,13 +90,31 @@ async function getArchiveDirs() {
 	return dirs.reverse();
 }
 
+function filterVersions(versions) {
+	const majorVersions = ["v0"];
+	return versions.filter((version) => {
+		if (version.includes("-rc.")) {
+			return false
+		}
+		const [major] = version.split(".")
+		if (!majorVersions.includes(major)) {
+			majorVersions.push(major)
+			return true
+		}
+		return false
+	})
+}
+
 async function archiveDocsSelect() {
-	const archiveDirs = await getArchiveDirs()
-	var options = archiveDirs
-		.filter(dir => !dir.includes('-rc.'))
-		.map((ad) => `<option>${ad}</option>`)
+	const archiveDirs = filterVersions(await getArchiveDirs())
+	const currentVersion = archiveDirs.shift()
+	const links = archiveDirs
+		.map((ad) => `<a class="version-selector-link" href="/archive/${ad}/index.html">${ad}</a>`)
 		.join("")
-	return `<select id="archive-docs" onchange="location.href='/archive/' + this.value + '/index.html'">${options}</select>`
+	return `<div id="archive-docs" class="version-selector">
+		<span class="version-selector-current">${currentVersion}</span>
+		<div class="version-selector-archive">${links}</div>
+	</div>`
 }
 
 function encodeHTML (str) {
@@ -112,7 +130,7 @@ function encodeHTML (str) {
 }
 
 function extractMetaDescription(markdown) {
-	var match = markdown.match(metaDescriptionRegExp)
+	const match = markdown.match(metaDescriptionRegExp)
 	if (match) {
 		return encodeHTML(match[1])
 	}
@@ -121,6 +139,7 @@ function extractMetaDescription(markdown) {
 class Generator {
 	constructor(opts) {
 		this._version = opts.version
+		this._versionStamp = Date.now()
 		this._guides = opts.guides
 		this._methods = opts.methods
 		this._layout = opts.layout
@@ -141,23 +160,31 @@ class Generator {
 				`<code>${(a + b + c).replace(/\|/g, "&#124;")}</code>`
 		)
 
-		// inject menu
+		// extract menu
+		let menu = ""
+
 		body = body.replace(
 			/(^# .+?(?:\r?\n){2,}?)(?:(-(?:.|\r|\n)+?)((?:\r?\n){2,})|)/m,
 			(match, title, nav) => {
 				if (!nav) {
-					return title + src.replace(link, "$1$2**$3**") + "\n\n"
+					menu = src.replace(link, "$1$2**$3**")
+					return title + "\n\n"
 				}
-				return title + src.replace(link, (match, space, li, link) =>
+				menu = src.replace(link, (match, space, li, link) =>
 					`${space}${li}**${link}**\n${
 						nav.replace(/(^|\n)/g, `$1\t${space}`)
 					}`
-				) + "\n\n"
+				)
+				return title + "\n\n"
 			}
 		)
 
 		// fix links
 		body = body.replace(/(\]\([^\)]+)(\.md)/gim, (match, path, extension) =>
+			path + ((/http/).test(path) ? extension : ".html")
+		)
+
+		menu = menu.replace(/(\]\([^\)]+)(\.md)/gim, (match, path, extension) =>
 			path + ((/http/).test(path) ? extension : ".html")
 		)
 
@@ -174,6 +201,10 @@ class Generator {
 
 		// update version
 		result = result.replace(/\[version\]/g, this._version)
+		result = result.replace(/\[version-stamp\]/g, this._versionStamp)
+
+		// insert parsed Menu
+		result = result.replace(/\[nav\]/, marked(menu))
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)

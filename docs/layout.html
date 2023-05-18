@@ -5,31 +5,38 @@
 		<title>Mithril.js</title>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css" rel="stylesheet" />
-		<link href="style.css" rel="stylesheet" />
+		<link href="style.css?v=[version-stamp]" rel="stylesheet" />
 		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="[metaDescription]">
 	</head>
 	<body onload="window.requestAnimationFrame(function(){document.getElementById('archive-docs').selectedIndex = 0})" /* handle back navigation */>
-		<header>
-			<section>
-				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><a class="logo" href="index.html"><img src="logo.svg"> Mithril</a> [archive-docs]</h1>
-				<nav>
-					<a href="index.html">Guide</a>
-					<a href="api.html">API</a>
-					<a href="https://mithril.zulipchat.com/">Chat</a>
-					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
-				</nav>
-			</section>
-		</header>
-		<main>
-			<section>
-				[body]
-				<hr />
-				<small class="footer">Released under the <a href="https://opensource.org/license/mit/">MIT License</a>. &copy; 2014-[currentYear] Mithril.js <a href="https://github.com/MithrilJS/mithril.js/graphs/contributors">Contributors</a></small>
-			</section>
-		</main>
+		<a class=hamburger href=javascript:;><span></span><span></span><span></span></a>
+		<div class="container">
+			<div class="container-left">
+				<header>
+					<h1><a class="logo" href="index.html"><img src="logo.svg"> Mithril.js</a> [archive-docs]</h1>
+					<nav class="main">
+						<a href="index.html">Guide</a>
+						<a href="api.html">API</a>
+						<a href="https://mithril.zulipchat.com/">Chat</a>
+						<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
+					</nav>
+				</header>
+				<nav class="sidebar">[nav]</nav>
+			</div>
+			<div class="container-right">
+				<main>
+					<article>[body]</article>
+				</main>
+				<footer>
+					<section>
+						<span>Released under the <a href="https://opensource.org/license/mit/">MIT License</a>.</span>
+						<span>&copy; 2014-[currentYear] Mithril.js <a href="https://github.com/MithrilJS/mithril.js/graphs/contributors">Contributors</a></span>
+					</section>
+				</footer>
+			</div>
+		</div>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/prism.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-jsx.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-diff.min.js"></script>
@@ -38,7 +45,7 @@
 		<script>
 		document.querySelector(".hamburger").onclick = function() {
 			document.body.className = document.body.className === "navigating" ? "" : "navigating"
-			document.querySelector("h1 + ul").onclick = function() {
+			document.querySelector("nav.sidebar ul").onclick = function() {
 				document.body.className = ''
 			}
 		}
