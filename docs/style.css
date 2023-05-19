@@ -1,4 +1,4 @@
-body {background:white;-webkit-text-size-adjust:100%;line-height:1.6;margin:0;}
+body {color:#181818;background:white;-webkit-text-size-adjust:100%;line-height:1.6;margin:0;}
 body,table,h5 {font-weight:normal;font-size:16px;font-family:'Open Sans',sans-serif;}
 table {font-size:15px;}
 
@@ -84,7 +84,7 @@ h1 small {font-size:16px;}
 h2 a,h3 a,h4 a,h5 a,
 h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,
 h2 a:active,h3 a:active,h4 a:active,h5 a:active,
-h2 a:visited,h3 a:visited,h4 a:visited,h5 a:visited {color:#000;text-decoration:none;}
+h2 a:visited,h3 a:visited,h4 a:visited,h5 a:visited {color:#000000;text-decoration:none;}
 h2::before,h3::before,h4::before,h5::before,h6::before {content:"#";position:absolute;left:-0.8em;visibility:hidden;}
 h2:hover::before,h3:hover::before,h4:hover::before,h5:hover::before,h6:hover::before {visibility:visible;}
 #signature + p code {padding:3px 10px;}
