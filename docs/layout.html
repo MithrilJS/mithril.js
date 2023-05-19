@@ -97,13 +97,13 @@
 		}
 		// memorize scroll position of left column across page loads
 		window.addEventListener("DOMContentLoaded", () => {
-			var scrollTop = localStorage.getItem("container-left-scroll")
+			var scrollTop = sessionStorage.getItem("container-left-scroll")
 			if (scrollTop !== null) {
 				document.querySelector(".container-left").scrollTop = parseInt(scrollTop, 10)
 			}			
 		})
 		window.addEventListener("beforeunload", () => {
-			localStorage.setItem("container-left-scroll", document.querySelector(".container-left").scrollTop)
+			sessionStorage.setItem("container-left-scroll", document.querySelector(".container-left").scrollTop)
 		})
 		</script>
 	</body>
