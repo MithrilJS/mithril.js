@@ -95,6 +95,16 @@
 		for ( var i=0 ; i < elms.snapshotLength; i++ ){
 			elms.snapshotItem(i).parentNode.classList.add('a-with-code-only')
 		}
+		// memorize scroll position of left column across page loads
+		window.addEventListener("DOMContentLoaded", () => {
+			var scrollTop = localStorage.getItem("container-left-scroll")
+			if (scrollTop !== null) {
+				document.querySelector(".container-left").scrollTop = parseInt(scrollTop, 10)
+			}			
+		})
+		window.addEventListener("beforeunload", () => {
+			localStorage.setItem("container-left-scroll", document.querySelector(".container-left").scrollTop)
+		})
 		</script>
 	</body>
 </html>
