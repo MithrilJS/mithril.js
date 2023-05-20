@@ -25,6 +25,7 @@ Official change log for Mithril.js
 
 PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelog. I've also moved the old stream changelog into this file [here](#mithril-stream-change-log).
 
+- Updated web design, fixed most obvious UX, UI, and design flaws, fixed obviously incorrect content [@tbreuss](https://github.com/tbreuss)
 - Added `m.Fragment = "["` for an easier time with JSX setups. ([#2744](https://github.com/MithrilJS/mithril.js/pull/2744) [@dead-claudia](https://github.com/dead-claudia))
 - Reduced package download size substantially by removing the archive of previous releases' documentation. ([#2561](https://github.com/MithrilJS/mithril.js/pull/2561) [@cztomsik](https://github.com/cztomsik))
 - Improved error messages in multiple places. ([#2536](https://github.com/MithrilJS/mithril.js/pull/2536) [@dead-claudia](https://github.com/dead-claudia))
