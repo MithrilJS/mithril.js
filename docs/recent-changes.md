@@ -37,7 +37,7 @@ Recast the global reads to all be guarded with `typeof`, so that if they aren't 
 #### [Add a `m.Fragment = "["` utility for JSX users. (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2744)
 
 The title says it all, and the diff's obvious.  Resolves https://github.com/MithrilJS/mithril.js/issues/2640 and probably others.
-   
+
 ### Patch Changes
 
 #### [Enable --minimize-semver-change for pr-release (@JAForbes)](https://github.com/MithrilJS/mithril.js/pull/2769)
@@ -198,7 +198,7 @@ Bumps [handlebars](https://github.com/wycats/handlebars.js) from 4.4.2 to 4.7.6.
 Bumps [lodash](https://github.com/lodash/lodash) from 4.17.15 to 4.17.20.  Commits.  ded9bc6 Bump to v4.17.20.  63150ef Documentation fixes.
 #### [Bump minimist from 1.2.0 to 1.2.3 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2627)
 
-Bumps [minimist](https://github.com/substack/minimist) from 1.2.0 to 1.2.3.  Commits.  6457d74 1.2.3.  38a4d1c even more aggressive checks for protocol pollution.
+Bumps [minimist](https://github.com/minimistjs/minimist) from 1.2.0 to 1.2.3.  Commits.  6457d74 1.2.3.  38a4d1c even more aggressive checks for protocol pollution.
 #### [Update installation.md (@purefan)](https://github.com/MithrilJS/mithril.js/pull/2608)
 
 Offer to install mithril as a webpack plugin.  Just makes my life easier by not having to include mithril in every one of my js files.
@@ -261,7 +261,7 @@ Recast the global reads to all be guarded with `typeof`, so that if they aren't 
 #### [Add a `m.Fragment = "["` utility for JSX users. (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2744)
 
 The title says it all, and the diff's obvious.  Resolves https://github.com/MithrilJS/mithril.js/issues/2640 and probably others.
-   
+
 ### Patch Changes
 
 #### [Enable --minimize-semver-change for pr-release (@JAForbes)](https://github.com/MithrilJS/mithril.js/pull/2769)
@@ -422,7 +422,7 @@ Bumps [handlebars](https://github.com/wycats/handlebars.js) from 4.4.2 to 4.7.6.
 Bumps [lodash](https://github.com/lodash/lodash) from 4.17.15 to 4.17.20.  Commits.  ded9bc6 Bump to v4.17.20.  63150ef Documentation fixes.
 #### [Bump minimist from 1.2.0 to 1.2.3 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2627)
 
-Bumps [minimist](https://github.com/substack/minimist) from 1.2.0 to 1.2.3.  Commits.  6457d74 1.2.3.  38a4d1c even more aggressive checks for protocol pollution.
+Bumps [minimist](https://github.com/minimistjs/minimist) from 1.2.0 to 1.2.3.  Commits.  6457d74 1.2.3.  38a4d1c even more aggressive checks for protocol pollution.
 #### [Update installation.md (@purefan)](https://github.com/MithrilJS/mithril.js/pull/2608)
 
 Offer to install mithril as a webpack plugin.  Just makes my life easier by not having to include mithril in every one of my js files.

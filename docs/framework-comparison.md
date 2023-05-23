@@ -5,7 +5,7 @@ Detailed comparison between Mithril.js and other popular frameworks
 # Framework comparison
 
 - [Why not X?](#why-not-insert-favorite-framework-here?)
-- [Why use Mithril.js?](#why-use-mithril?)
+- [Why use Mithril.js?](#why-use-mithriljs?)
 - [React](#react)
 - [Angular](#angular)
 - [Vue](#vue)

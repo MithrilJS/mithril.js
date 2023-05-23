@@ -4,7 +4,7 @@ Instructions on how to install Mithril.js
 
 # Installation
 
-- [CDN and online playground](#cdn)
+- [CDN and online playground](#cdn-and-online-playground)
 - [npm](#npm)
 - [Quick start with Webpack](#quick-start-with-webpack)
 
