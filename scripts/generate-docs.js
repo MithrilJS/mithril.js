@@ -95,7 +95,7 @@ async function archiveDocsSelect() {
 	var options = archiveDirs
 		.map((ad) => `<option>${ad}</option>`)
 		.join("")
-	return `<select id="archive-docs" onchange="location.href='archive/' + this.value + '/index.html'">${options}</select>`
+	return `<select id="archive-docs" onchange="location.href='/archive/' + this.value + '/index.html'">${options}</select>`
 }
 
 function encodeHTML (str) {
@@ -161,7 +161,7 @@ class Generator {
 		)
 
 		const markedHtml = marked(body)
-		const title = body.match(/^#([^\n\r]+)/i) || []
+		const title = body.match(/^#\s+([^\n\r]+)/m) || []
 
 		let result = this._layout
 		if (title[1]) {
