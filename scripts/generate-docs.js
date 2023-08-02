@@ -83,6 +83,20 @@ async function makeGenerator() {
 	})
 }
 
+async function loadLayoutFile() {
+	const layout = await fs.readFile(r("docs/layout.html"), "utf-8")
+	const docsSelect = await archiveDocsSelect()
+	return layout.replaceAll("[archive-docs]", docsSelect)
+}
+
+async function loadNavigationFiles() {
+	const [guides, methods] = await Promise.all([
+		fs.readFile(r("docs/nav-guides.md"), "utf-8"),
+		fs.readFile(r("docs/nav-methods.md"), "utf-8"),
+	])
+	return [guides, methods]
+}
+
 async function getArchiveDirs() {
 	const dirs = await fs.readdir(r("dist/archive"))
 	const ver = "v" + version;
@@ -123,6 +137,18 @@ class Generator {
 		this._guides = opts.guides
 		this._methods = opts.methods
 		this._layout = opts.layout
+	}
+
+	setLayout(layout) {
+		this._layout = layout
+	}
+
+	setGuides(guides) {
+		this._guides = guides
+	}
+
+	setMethods(methods) {
+		this._methods = methods
 	}
 
 	async compilePage(file, markdown) {
@@ -266,27 +292,45 @@ if (require.main === module) {
 	require("./_command")({
 		exec: generate,
 		async watch() {
-			let timeout, genPromise
-			function updateGenerator() {
-				if (timeout == null) return
-				clearTimeout(timeout)
-				genPromise = new Promise((resolve) => {
-					timeout = setTimeout(function() {
-						timeout = null
-						resolve(makeGenerator().then((g) => g.generate()))
-					}, 100)
-				})
+			const generator = await makeGenerator()
+
+			function isLayoutFile(relative) {
+				return relative === "layout.html"
+			}
+
+			function isNavigationFile(relative) {
+				return ["nav-guides.md", "nav-methods.md"].includes(relative)
+			}
+
+			async function updateGenerator() {
+				await generator.generate()
 			}
 
 			async function updateFile(file) {
-				if ((/^layout\.html$|^archive$|^nav-/).test(file)) {
-					updateGenerator()
+				const relative = path.relative(r("docs"), file)
+				if (isLayoutFile(relative)) {
+					generator.setLayout(await loadLayoutFile())
+					await generator.generate()
+				} else if (isNavigationFile(relative)) {
+					const [guides, methods] = await loadNavigationFiles()
+					generator.setGuides(guides)
+					generator.setMethods(methods)
+					await generator.generate()
+				} else {
+					await generator.generateSingle(file)
 				}
-				(await genPromise).generateSingle(file)
 			}
 
 			async function removeFile(file) {
-				(await genPromise).eachTarget(file, (dest) => fs.unlink(dest))
+				const relative = path.relative(r("docs"), file)
+				if (isLayoutFile(relative)) {
+					throw `Error: the layout file "${relative}" is required!`
+				} else if (isNavigationFile(relative)) {
+					throw `Error: the navigation file "${relative}" is required!`
+				}
+				const relativeDist = relative.replace(/\.md$/, ".html")
+				await generator.eachTarget(relativeDist, (dest) => fs.unlink(dest))
+				console.log("Removed: " + relative)
 			}
 
 			require("chokidar").watch(r("docs"), {
