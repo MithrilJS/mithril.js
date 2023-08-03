@@ -277,6 +277,9 @@ class ClassComponent {
 Class components must define a `view()` method, detected via `.prototype.view`, to get the tree to render.
 
 They can be consumed in the same way regular components can.
+Note the class itself is the component: it's `m(ClassComponent)` not `m(new ClassComponent())`,
+with any constructor called in place of the `oninit()` lifecycle method.
+
 
 ```javascript
 // EXAMPLE: via m.render
