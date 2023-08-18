@@ -851,7 +851,13 @@ module.exports = function($window) {
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (this._ && ev.redraw !== false) (0, this._)()
+		if (this._ && ev.redraw !== false) {
+			(0, this._)()
+			if (result != null) {
+				if (typeof result.finally === "function") result.finally((0, this._))
+				else if (typeof result.then === "function") result.then((0, this._))
+			}
+		}
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
