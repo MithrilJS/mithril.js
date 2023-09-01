@@ -23,21 +23,21 @@
 // }
 // ```
 
-var hasOwn = require("./hasOwn")
+let hasOwn = require("./hasOwn")
 // Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
-var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
+let magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
 
 module.exports = function(attrs, extras) {
-	var result = {}
+	let result = {}
 
 	if (extras != null) {
-		for (var key in attrs) {
+		for (let key in attrs) {
 			if (hasOwn.call(attrs, key) && !magic.test(key) && extras.indexOf(key) < 0) {
 				result[key] = attrs[key]
 			}
 		}
 	} else {
-		for (var key in attrs) {
+		for (let key in attrs) {
 			if (hasOwn.call(attrs, key) && !magic.test(key)) {
 				result[key] = attrs[key]
 			}
