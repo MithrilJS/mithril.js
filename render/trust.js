@@ -1,6 +1,6 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
+let Vnode = require("../render/vnode")
 
 module.exports = function(html) {
 	if (html == null) html = ""
