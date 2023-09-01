@@ -10,13 +10,13 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
+	let children = []
 	if (input.length) {
-		var isKeyed = input[0] != null && input[0].key != null
+		let isKeyed = input[0] != null && input[0].key != null
 		// Note: this is a *very* perf-sensitive check.
 		// Fun fact: merging the loop like this is somehow faster than splitting
 		// it, noticeably so.
-		for (var i = 1; i < input.length; i++) {
+		for (let i = 1; i < input.length; i++) {
 			if ((input[i] != null && input[i].key != null) !== isKeyed) {
 				throw new TypeError(
 					isKeyed && (input[i] != null || typeof input[i] === "boolean")
@@ -25,7 +25,7 @@ Vnode.normalizeChildren = function(input) {
 				)
 			}
 		}
-		for (var i = 0; i < input.length; i++) {
+		for (let i = 0; i < input.length; i++) {
 			children[i] = Vnode.normalize(input[i])
 		}
 	}
