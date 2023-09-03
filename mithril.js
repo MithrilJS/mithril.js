@@ -108,7 +108,7 @@ function execSelector(state, vnode) {
 	var className = hasClass ? attrs.class : attrs.className
 	vnode.tag = state.tag
 	vnode.attrs = {}
-	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+	if (!isEmpty(state.attrs)) {
 		var newAttrs = {}
 		for (var key in attrs) {
 			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
@@ -159,13 +159,32 @@ hyperscript.fragment = function() {
 	vnode2.children = Vnode.normalizeChildren(vnode2.children)
 	return vnode2
 }
+var delayedRemoval0 = new WeakMap
+function *domFor1({dom, domSize0}, {generation0} = {}) {
+	if (dom != null) do {
+		const {nextSibling} = dom
+		if (delayedRemoval0.get(dom) === generation0) {
+			yield dom
+			domSize0--
+		}
+		dom = nextSibling
+	}
+	while (domSize0)
+}
+var df = {
+	delayedRemoval: delayedRemoval0,
+	domFor: domFor1,
+}
+var delayedRemoval = df.delayedRemoval
+var domFor0 = df.domFor
 var _11 = function($window) {
 	var $doc = $window && $window.document
-	var currentRedraw
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
+	var currentRedraw
+	var currentRender
 	function getNameSpace(vnode3) {
 		return vnode3.attrs && vnode3.attrs.xmlns || nameSpace[vnode3.tag]
 	}
@@ -219,7 +238,7 @@ var _11 = function($window) {
 	}
 	function createText(parent, vnode3, nextSibling) {
 		vnode3.dom = $doc.createTextNode(vnode3.children)
-		insertNode(parent, vnode3.dom, nextSibling)
+		insertDOM(parent, vnode3.dom, nextSibling)
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode3, ns, nextSibling) {
@@ -239,14 +258,12 @@ var _11 = function($window) {
 		vnode3.dom = temp.firstChild
 		vnode3.domSize = temp.childNodes.length
 		// Capture nodes to remove, so we don't confuse them.
-		vnode3.instance = []
 		var fragment = $doc.createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
-			vnode3.instance.push(child)
 			fragment.appendChild(child)
 		}
-		insertNode(parent, fragment, nextSibling)
+		insertDOM(parent, fragment, nextSibling)
 	}
 	function createFragment(parent, vnode3, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
@@ -256,7 +273,7 @@ var _11 = function($window) {
 		}
 		vnode3.dom = fragment.firstChild
 		vnode3.domSize = fragment.childNodes.length
-		insertNode(parent, fragment, nextSibling)
+		insertDOM(parent, fragment, nextSibling)
 	}
 	function createElement(parent, vnode3, hooks, ns, nextSibling) {
 		var tag = vnode3.tag
@@ -270,7 +287,7 @@ var _11 = function($window) {
 		if (attrs2 != null) {
 			setAttrs(vnode3, attrs2, ns)
 		}
-		insertNode(parent, element, nextSibling)
+		insertDOM(parent, element, nextSibling)
 		if (!maybeSetContentEditable(vnode3)) {
 			if (vnode3.children != null) {
 				var children2 = vnode3.children
@@ -404,11 +421,6 @@ var _11 = function($window) {
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
 	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
-	//
-	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
-	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
-	// nodes remain together in the new list in a way that isn't covered by parts one and
-	// three of the diff algo.
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
@@ -464,9 +476,9 @@ var _11 = function($window) {
 					if (start === end) break
 					if (o.key !== ve.key || oe.key !== v.key) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
-					moveNodes(parent, oe, topSibling)
+					moveDOM(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
-					if (++start <= --end) moveNodes(parent, o, nextSibling)
+					if (++start <= --end) moveDOM(parent, o, nextSibling)
 					if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldStart++; oldEnd--
@@ -518,7 +530,7 @@ var _11 = function($window) {
 								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
 								else {
 									if (lisIndices[li] === i - start) li--
-									else moveNodes(parent, v, nextSibling)
+									else moveDOM(parent, v, nextSibling)
 								}
 								if (v.dom != null) nextSibling = vnodes[i].dom
 							}
@@ -566,13 +578,12 @@ var _11 = function($window) {
 	}
 	function updateHTML(parent, old, vnode3, ns, nextSibling) {
 		if (old.children !== vnode3.children) {
-			removeHTML(parent, old)
+			removeDOM(parent, old, undefined)
 			createHTML(parent, vnode3, ns, nextSibling)
 		}
 		else {
 			vnode3.dom = old.dom
 			vnode3.domSize = old.domSize
-			vnode3.instance = old.instance
 		}
 	}
 	function updateFragment(parent, old, vnode3, hooks, nextSibling, ns) {
@@ -685,45 +696,21 @@ var _11 = function($window) {
 		}
 		return nextSibling
 	}
-	// This covers a really specific edge case:
-	// - Parent node is keyed and contains child
-	// - Child is removed, returns unresolved promise in `onbeforeremove`
-	// - Parent node is moved in keyed diff
-	// - Remaining children2 still need moved appropriately
-	//
-	// Ideally, I'd track removed nodes as well, but that introduces a lot more
-	// complexity and I'm2 not exactly interested in doing that.
-	function moveNodes(parent, vnode3, nextSibling) {
-		var frag = $doc.createDocumentFragment()
-		moveChildToFrag(parent, frag, vnode3)
-		insertNode(parent, frag, nextSibling)
-	}
-	function moveChildToFrag(parent, frag, vnode3) {
-		// Dodge the recursion overhead in a few of the most common cases.
-		while (vnode3.dom != null && vnode3.dom.parentNode === parent) {
-			if (typeof vnode3.tag !== "string") {
-				vnode3 = vnode3.instance
-				if (vnode3 != null) continue
-			} else if (vnode3.tag === "<") {
-				for (var i = 0; i < vnode3.instance.length; i++) {
-					frag.appendChild(vnode3.instance[i])
-				}
-			} else if (vnode3.tag !== "[") {
-				// Don't recurse for text nodes *or* elements, just fragments
-				frag.appendChild(vnode3.dom)
-			} else if (vnode3.children.length === 1) {
-				vnode3 = vnode3.children[0]
-				if (vnode3 != null) continue
+	// This handles fragments with zombie children2 (removed from vdom, but persisted in DOM through onbeforeremove)
+	function moveDOM(parent, vnode3, nextSibling) {
+		if (vnode3.dom != null) {
+			var target
+			if (vnode3.domSize == null) {
+				// don't allocate for the common case
+				target = vnode3.dom
 			} else {
-				for (var i = 0; i < vnode3.children.length; i++) {
-					var child = vnode3.children[i]
-					if (child != null) moveChildToFrag(parent, frag, child)
-				}
+				target = $doc.createDocumentFragment()
+				for (var dom of domFor0(vnode3)) target.appendChild(dom)
 			}
-			break
+			insertDOM(parent, target, nextSibling)
 		}
 	}
-	function insertNode(parent, dom, nextSibling) {
+	function insertDOM(parent, dom, nextSibling) {
 		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
@@ -767,61 +754,51 @@ var _11 = function($window) {
 			}
 		}
 		checkState(vnode3, original)
+		var generation
 		// If we can, try to fast-path it and avoid all the overhead of awaiting
 		if (!mask) {
 			onremove(vnode3)
-			removeChild(parent, vnode3)
+			removeDOM(parent, vnode3, generation)
 		} else {
+			generation = currentRender
+			for (var dom of domFor0(vnode3)) delayedRemoval.set(dom, generation)
 			if (stateResult != null) {
-				var next = function () {
+				stateResult.finally(function () {
 					// eslint-disable-next-line no-bitwise
-					if (mask & 1) { mask &= 2; if (!mask) reallyRemove() }
-				}
-				stateResult.then(next, next)
+					if (mask & 1) {
+						// eslint-disable-next-line no-bitwise
+						mask &= 2
+						if (!mask) {
+							checkState(vnode3, original)
+							onremove(vnode3)
+							removeDOM(parent, vnode3, generation)
+						}
+					}
+				})
 			}
 			if (attrsResult != null) {
-				var next = function () {
+				attrsResult.finally(function () {
 					// eslint-disable-next-line no-bitwise
-					if (mask & 2) { mask &= 1; if (!mask) reallyRemove() }
-				}
-				attrsResult.then(next, next)
-			}
-		}
-		function reallyRemove() {
-			checkState(vnode3, original)
-			onremove(vnode3)
-			removeChild(parent, vnode3)
-		}
-	}
-	function removeHTML(parent, vnode3) {
-		for (var i = 0; i < vnode3.instance.length; i++) {
-			parent.removeChild(vnode3.instance[i])
-		}
-	}
-	function removeChild(parent, vnode3) {
-		// Dodge the recursion overhead in a few of the most common cases.
-		while (vnode3.dom != null && vnode3.dom.parentNode === parent) {
-			if (typeof vnode3.tag !== "string") {
-				vnode3 = vnode3.instance
-				if (vnode3 != null) continue
-			} else if (vnode3.tag === "<") {
-				removeHTML(parent, vnode3)
-			} else {
-				if (vnode3.tag !== "[") {
-					parent.removeChild(vnode3.dom)
-					if (!Array.isArray(vnode3.children)) break
-				}
-				if (vnode3.children.length === 1) {
-					vnode3 = vnode3.children[0]
-					if (vnode3 != null) continue
-				} else {
-					for (var i = 0; i < vnode3.children.length; i++) {
-						var child = vnode3.children[i]
-						if (child != null) removeChild(parent, child)
+					if (mask & 2) {
+						// eslint-disable-next-line no-bitwise
+						mask &= 1
+						if (!mask) {
+							checkState(vnode3, original)
+							onremove(vnode3)
+							removeDOM(parent, vnode3, generation)
+						}
 					}
-				}
+				})
 			}
-			break
+		}
+	}
+	function removeDOM(parent, vnode3, generation) {
+		if (vnode3.dom == null) return
+		if (vnode3.domSize == null) {
+			// don't allocate for the common case
+			if (delayedRemoval.get(vnode3.dom) === generation) parent.removeChild(vnode3.dom)
+		} else {
+			for (var dom of domFor0(vnode3, {generation})) parent.removeChild(dom)
 		}
 	}
 	function onremove(vnode3) {
@@ -968,10 +945,10 @@ var _11 = function($window) {
 			// Styles are equivalent, do nothing.
 		} else if (style == null) {
 			// New style is missing, just clear it.
-			element.style.cssText = ""
+			element.style = ""
 		} else if (typeof style !== "object") {
 			// New style is a string, let engine deal with patching.
-			element.style.cssText = style
+			element.style = style
 		} else if (old == null || typeof old !== "object") {
 			// `old` is missing or a string, `style` is an object.
 			element.style.cssText = ""
@@ -1018,7 +995,10 @@ var _11 = function($window) {
 		var result
 		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (this._ && ev.redraw !== false) (0, this._)()
+		if (this._ && ev.redraw !== false) {
+			(0, this._)()
+			if (result != null && typeof result.then === "function") result.then((0, this._))
+		}
 		if (result === false) {
 			ev.preventDefault()
 			ev.stopPropagation()
@@ -1090,6 +1070,7 @@ var _11 = function($window) {
 		var namespace = dom.namespaceURI
 		currentDOM = dom
 		currentRedraw = typeof redraw === "function" ? redraw : undefined
+		currentRender = {}
 		try {
 			// First time rendering into a node clears it out
 			if (dom.vnodes == null) dom.textContent = ""
@@ -1106,7 +1087,7 @@ var _11 = function($window) {
 	}
 }
 var render = _11(typeof window !== "undefined" ? window : null)
-var _14 = function(render0, schedule, console) {
+var _15 = function(render0, schedule, console) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1
@@ -1144,7 +1125,7 @@ var _14 = function(render0, schedule, console) {
 	}
 	return {mount: mount, redraw: redraw}
 }
-var mountRedraw0 = _14(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
+var mountRedraw0 = _15(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -1166,10 +1147,10 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key2) + (value1 != null && value1 !== "" ? "=" + encodeURIComponent(value1) : ""))
 	}
 }
-// This exists so I'm5 only saving it once.
-var assign = Object.assign || function(target, source) {
+// This exists so I'm4 only saving it once.
+var assign = Object.assign || function(target1, source) {
 	for (var key3 in source) {
-		if (hasOwn.call(source, key3)) target[key3] = source[key3]
+		if (hasOwn.call(source, key3)) target1[key3] = source[key3]
 	}
 }
 // Returns `path` from `template` + `params`
@@ -1185,10 +1166,10 @@ var buildPathname = function(template, params) {
 	var path = template.slice(0, pathEnd)
 	var query = {}
 	assign(query, params)
-	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m4, key1, variadic) {
+	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m3, key1, variadic) {
 		delete query[key1]
 		// If no such parameter exists, don't interpolate it.
-		if (params[key1] == null) return m4
+		if (params[key1] == null) return m3
 		// Escape normal parameters, but not variadic ones.
 		return variadic ? params[key1] : encodeURIComponent(String(params[key1]))
 	})
@@ -1206,11 +1187,11 @@ var buildPathname = function(template, params) {
 	if (newHashIndex >= 0) result0 += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result0
 }
-var _17 = function($window, oncompletion) {
+var _18 = function($window, oncompletion) {
 	function PromiseProxy(executor) {
 		return new Promise(executor)
 	}
-	function fetch(url, args) {
+	function makeRequest(url, args) {
 		return new Promise(function(resolve, reject) {
 			url = buildPathname(url, args.params)
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
@@ -1348,7 +1329,7 @@ var _17 = function($window, oncompletion) {
 		request: function(url, args) {
 			if (typeof url !== "string") { args = url; url = url.url }
 			else if (args == null) args = {}
-			var promise =	fetch(url, args)
+			var promise = makeRequest(url, args)
 			if (args.background === true) return promise
 			var count = 0
 			function complete() {
@@ -1367,27 +1348,28 @@ var _17 = function($window, oncompletion) {
 				promise.constructor = PromiseProxy
 				promise.then = function() {
 					count++
-					var next0 = then.apply(promise, arguments)
-					next0.then(complete, function(e) {
+					var next = then.apply(promise, arguments)
+					next.then(complete, function(e) {
 						complete()
 						if (count === 0) throw e
 					})
-					return wrap(next0)
+					return wrap(next)
 				}
 				return promise
 			}
 		}
 	}
 }
-var request = _17(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
+var request = _18(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
 var mountRedraw = mountRedraw0
+var domFor = df
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
 m.trust = hyperscript.trust
 m.fragment = hyperscript.fragment
 m.Fragment = "["
 m.mount = mountRedraw.mount
-var m6 = hyperscript
+var m5 = hyperscript
 function decodeURIComponentSave0(str) {
 	try {
 		return decodeURIComponent(str)
@@ -1466,8 +1448,8 @@ var compileTemplate = function(template) {
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
-		function(m7, key6, extra) {
-			if (key6 == null) return "\\" + m7
+		function(m6, key6, extra) {
+			if (key6 == null) return "\\" + m6
 			keys.push({k: key6, r: extra === "..."})
 			if (extra === "...") return "(.*)"
 			if (extra === ".") return "([^/]+)\\."
@@ -1539,7 +1521,7 @@ function decodeURIComponentSave(component) {
 		return component
 	}
 }
-var _26 = function($window, mountRedraw00) {
+var _28 = function($window, mountRedraw00) {
 	var callAsync = $window == null
 		// In case Mithril.js' loaded globally without the DOM, let's not break
 		? null
@@ -1638,7 +1620,7 @@ var _26 = function($window, mountRedraw00) {
 			setPath(fallbackRoute, null, {replace: true})
 		}
 	}
-	// Set it unconditionally so `m6.route.set` and `m6.route.Link` both work,
+	// Set it unconditionally so `m5.route.set` and `m5.route.Link` both work,
 	// even if neither `pushState` nor `hashchange` are supported. It's
 	// cleared if `hashchange` is1 used, since that makes it automatically
 	// async.
@@ -1710,7 +1692,7 @@ var _26 = function($window, mountRedraw00) {
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
-			var child0 = m6(
+			var child0 = m5(
 				vnode5.attrs.selector || "a",
 				censor(vnode5.attrs, ["options", "params", "selector", "onclick"]),
 				vnode5.children
@@ -1750,13 +1732,13 @@ var _26 = function($window, mountRedraw00) {
 					// would expect. There's a lot more valid ways to click a
 					// link than this, and one might want to not simply click a
 					// link, but right click or command-click it to copy the
-					// link target, etc. Nope, this isn't just for blind people.
+					// link target2, etc. Nope, this isn't just for blind people.
 					if (
 						// Skip if `onclick` prevented default
 						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
-						// Let the browser handle `target=_blank`, etc.
+						// Let the browser handle `target2=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
@@ -1775,7 +1757,7 @@ var _26 = function($window, mountRedraw00) {
 	}
 	return route
 }
-m.route = _26(typeof window !== "undefined" ? window : null, mountRedraw)
+m.route = _28(typeof window !== "undefined" ? window : null, mountRedraw)
 m.render = render
 m.redraw = mountRedraw.redraw
 m.request = request.request
@@ -1785,6 +1767,7 @@ m.parsePathname = parsePathname
 m.buildPathname = buildPathname
 m.vnode = Vnode
 m.censor = censor
+m.domFor = domFor.domFor
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());

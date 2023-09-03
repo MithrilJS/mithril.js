@@ -853,10 +853,7 @@ module.exports = function($window) {
 		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (this._ && ev.redraw !== false) {
 			(0, this._)()
-			if (result != null) {
-				if (typeof result.finally === "function") result.finally((0, this._))
-				else if (typeof result.then === "function") result.then((0, this._))
-			}
+			if (result != null && typeof result.then === "function") result.then((0, this._))
 		}
 		if (result === false) {
 			ev.preventDefault()
