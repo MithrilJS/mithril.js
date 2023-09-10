@@ -531,12 +531,12 @@ o.spec("mount/redraw", function() {
 				o(e.redraw).equals(false)
 			})
 
-			o("async event handlers should not cause additional redraw when immediately settled", function() {
+			o("async event handlers should not cause additional redraw when immediately resolved", function() {
 				var onupdate = o.spy()
 				var oninit = o.spy()
 				var e = $document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
-				var getImmediatelyInvokedThenable = function() {
+				var getImmediatelyResolvedThenable = function() {
 					return {
 						then: function(callback) {
 							callback()
@@ -549,7 +549,7 @@ o.spec("mount/redraw", function() {
 						return h("div", {
 							oninit: oninit,
 							onupdate: onupdate,
-							onclick: getImmediatelyInvokedThenable,
+							onclick: getImmediatelyResolvedThenable,
 						})
 					}
 				}))
@@ -561,56 +561,6 @@ o.spec("mount/redraw", function() {
 				throttleMock.fire()
 
 				o(onupdate.callCount).equals(1)
-			})
-
-			o("async event handlers redraw after settle", function() {
-				var onupdate = o.spy()
-				var oninit = o.spy()
-				var e = $document.createEvent("MouseEvents")
-				e.initEvent("click", true, true)
-				var RemotePromiseLike = function() {
-					var callbacks = []
-
-					return {
-						finally: function(callback) {
-							callbacks.push(callback)
-						},
-						then: true,
-						fire: function() {
-							callbacks.forEach(function(callback) {
-								callback()
-							})
-						},
-					}
-				}
-				var remotePromiseLike = RemotePromiseLike()
-				var getRemotePromiseLike = function() {
-					return remotePromiseLike
-				}
-
-				m.mount(root, createComponent({
-					view: function() {
-						return h("button", {
-							onclick: getRemotePromiseLike,
-							oninit: oninit,
-							onupdate: onupdate,
-						})
-					},
-				}))
-
-				root.firstChild.dispatchEvent(e)
-				throttleMock.fire()
-
-				o(onupdate.callCount).equals(1)
-				o(oninit.callCount).equals(1)
-
-				remotePromiseLike.finally(function() {
-					throttleMock.fire()
-					o(oninit.callCount).equals(1)
-					o(onupdate.callCount).equals(2)
-				})
-
-				remotePromiseLike.fire()
 			})
 
 			o("async event handlers redraw after resolve", function() {
@@ -653,67 +603,11 @@ o.spec("mount/redraw", function() {
 				o(onupdate.callCount).equals(1)
 				o(oninit.callCount).equals(1)
 
-				remoteThenable.then(function() {
-					throttleMock.fire()
-					o(oninit.callCount).equals(1)
-					o(onupdate.callCount).equals(2)
-				})
-
 				remoteThenable.fire()
-			})
-
-			o("async event handlers should call `finally` and not `then` on result", function() {
-				var promiseLike = {
-					finally: o.spy(),
-					then: o.spy(function() {
-						throw new Error("Then should not be called if finally is available")
-					}),
-				}
-				var e = $document.createEvent("MouseEvents")
-				e.initEvent("click", true, true)
-
-				m.mount(root, createComponent({
-					view: function() {
-						return h("button", {
-							onclick: function() {
-								return promiseLike
-							},
-						})
-					}
-				}))
-
-				o(promiseLike.finally.callCount).equals(0)
-
-				root.firstChild.dispatchEvent(e)
 				throttleMock.fire()
 
-				o(promiseLike.finally.callCount).equals(1)
-			})
-
-			o("async event handlers should fallback and call `then` on result if `finally` is not callable", function() {
-				var thenable = {
-					finally: true,
-					then: o.spy(),
-				}
-				var e = $document.createEvent("MouseEvents")
-				e.initEvent("click", true, true)
-
-				m.mount(root, createComponent({
-					view: function() {
-						return h("button", {
-							onclick: function() {
-								return thenable
-							},
-						})
-					}
-				}))
-
-				o(thenable.then.callCount).equals(0)
-
-				root.firstChild.dispatchEvent(e)
-				throttleMock.fire()
-
-				o(thenable.then.callCount).equals(1)
+				o(oninit.callCount).equals(1)
+				o(onupdate.callCount).equals(2)
 			})
 
 			o("async event handlers can skip redraw", function() {
@@ -747,6 +641,53 @@ o.spec("mount/redraw", function() {
 
 				o(oninit.callCount).equals(1)
 				o(onupdate.callCount).equals(0)
+			})
+
+			o("redraws after async event handlers throws error", function() {
+				var onupdate = o.spy()
+				var oninit = o.spy()
+				var e = $document.createEvent("MouseEvents")
+				e.initEvent("click", true, true)
+				var RemoteFailedThenable = function() {
+					var errorCallbacks = []
+
+					return {
+						then: function(unused, errorCallback) {
+							errorCallbacks.push(errorCallback)
+						},
+						fire: function() {
+							errorCallbacks.forEach(function(callback) {
+								callback()
+							})
+						},
+					}
+				}
+				var remoteFailedThenable = RemoteFailedThenable()
+				var getRemoteFailedThenable = function() {
+					return remoteFailedThenable
+				}
+
+				m.mount(root, createComponent({
+					view: function() {
+						return h("button", {
+							onclick: getRemoteFailedThenable,
+							oninit: oninit,
+							onupdate: onupdate,
+						})
+					},
+				}))
+
+				root.firstChild.dispatchEvent(e)
+				throttleMock.fire()
+
+				o(onupdate.callCount).equals(1)
+				o(oninit.callCount).equals(1)
+
+				remoteFailedThenable.fire()
+				throttleMock.fire()
+
+				o(oninit.callCount).equals(1)
+				o(onupdate.callCount).equals(2)
 			})
 
 			o("redraws when the render function is run", function() {
