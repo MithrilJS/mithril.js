@@ -643,51 +643,58 @@ o.spec("mount/redraw", function() {
 				o(onupdate.callCount).equals(0)
 			})
 
-			o("redraws after async event handlers throws error", function() {
+			o("redraws after async event handlers throw error", function() {
 				var onupdate = o.spy()
 				var oninit = o.spy()
 				var e = $document.createEvent("MouseEvents")
 				e.initEvent("click", true, true)
-				var RemoteFailedThenable = function() {
-					var errorCallbacks = []
+				var RemotelyRejectedThenable = function() {
+					var rejectionSubscribers = []
 
 					return {
-						then: function(unused, errorCallback) {
-							errorCallbacks.push(errorCallback)
+						then: function(onFulfilled, onRejection) {
+							rejectionSubscribers.push(onRejection)
 						},
 						fire: function() {
-							errorCallbacks.forEach(function(callback) {
-								callback()
+							rejectionSubscribers.forEach(function(reject) {
+								reject("example error message")
 							})
 						},
 					}
 				}
-				var remoteFailedThenable = RemoteFailedThenable()
-				var getRemoteFailedThenable = function() {
-					return remoteFailedThenable
+				var remotelyRejectedThenable = RemotelyRejectedThenable()
+				var getRemotelyRejectedThenable = function() {
+					return remotelyRejectedThenable
 				}
 
 				m.mount(root, createComponent({
 					view: function() {
 						return h("button", {
-							onclick: getRemoteFailedThenable,
+							onclick: getRemotelyRejectedThenable,
 							oninit: oninit,
 							onupdate: onupdate,
 						})
 					},
 				}))
-
 				root.firstChild.dispatchEvent(e)
 				throttleMock.fire()
 
 				o(onupdate.callCount).equals(1)
 				o(oninit.callCount).equals(1)
 
-				remoteFailedThenable.fire()
+				let errorsThrownCount = 0
+
+				try {
+					remotelyRejectedThenable.fire()
+				} catch (e) {
+					errorsThrownCount++
+				}
+
 				throttleMock.fire()
 
 				o(oninit.callCount).equals(1)
 				o(onupdate.callCount).equals(2)
+				o(errorsThrownCount).equals(1)
 			})
 
 			o("redraws when the render function is run", function() {
