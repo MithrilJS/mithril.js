@@ -34,7 +34,7 @@
     "chokidar": "^3.2.1",
     "escape-string-regexp": "^2.0.0",
     "eslint": "^8.9.0",
-    "gh-pages": "^2.1.1",
+    "gh-pages": "^5.0.0",
     "glob": "^7.1.4",
     "html-minifier": "^4.0.0",
     "istanbul": "^0.4.5",
