@@ -3,80 +3,17 @@
 var buildPathname = require("../pathname/build")
 var hasOwn = require("../util/hasOwn")
 
-module.exports = function($window, Promise, oncompletion) {
-	var callbackCount = 0
-
+module.exports = function($window, oncompletion) {
 	function PromiseProxy(executor) {
 		return new Promise(executor)
 	}
 
-	// In case the global Promise is some userland library's where they rely on
-	// `foo instanceof this.constructor`, `this.constructor.resolve(value)`, or
-	// similar. Let's *not* break them.
-	PromiseProxy.prototype = Promise.prototype
-	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
-
-	function makeRequest(factory) {
-		return function(url, args) {
-			if (typeof url !== "string") { args = url; url = url.url }
-			else if (args == null) args = {}
-			var promise = new Promise(function(resolve, reject) {
-				factory(buildPathname(url, args.params), args, function (data) {
-					if (typeof args.type === "function") {
-						if (Array.isArray(data)) {
-							for (var i = 0; i < data.length; i++) {
-								data[i] = new args.type(data[i])
-							}
-						}
-						else data = new args.type(data)
-					}
-					resolve(data)
-				}, reject)
-			})
-			if (args.background === true) return promise
-			var count = 0
-			function complete() {
-				if (--count === 0 && typeof oncompletion === "function") oncompletion()
-			}
-
-			return wrap(promise)
-
-			function wrap(promise) {
-				var then = promise.then
-				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise. At the time of writing, this is
-				// only necessary for V8, but their behavior is the correct
-				// behavior per spec. See this spec issue for more details:
-				// https://github.com/tc39/ecma262/issues/1577. Also, see the
-				// corresponding comment in `request/tests/test-request.js` for
-				// a bit more background on the issue at hand.
-				promise.constructor = PromiseProxy
-				promise.then = function() {
-					count++
-					var next = then.apply(promise, arguments)
-					next.then(complete, function(e) {
-						complete()
-						if (count === 0) throw e
-					})
-					return wrap(next)
-				}
-				return promise
-			}
-		}
-	}
-
-	function hasHeader(args, name) {
-		for (var key in args.headers) {
-			if (hasOwn.call(args.headers, key) && name.test(key)) return true
-		}
-		return false
-	}
-
-	return {
-		request: makeRequest(function(url, args, resolve, reject) {
+	function makeRequest(url, args) {
+		return new Promise(function(resolve, reject) {
+			url = buildPathname(url, args.params)
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
-			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData || body instanceof $window.URLSearchParams)
 			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
 
 			var xhr = new $window.XMLHttpRequest(), aborted = false, isTimeout = false
@@ -90,10 +27,10 @@ module.exports = function($window, Promise, oncompletion) {
 
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
 
-			if (assumeJSON && body != null && !hasHeader(args, /^content-type$/i)) {
+			if (assumeJSON && body != null && !hasHeader(args, "content-type")) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
+			if (typeof args.deserialize !== "function" && !hasHeader(args, "accept")) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
@@ -123,7 +60,11 @@ module.exports = function($window, Promise, oncompletion) {
 						if (responseType === "json") {
 							// For IE and Edge, which don't implement
 							// `responseType: "json"`.
-							if (!ev.target.responseType && typeof args.extract !== "function") response = JSON.parse(ev.target.responseText)
+							if (!ev.target.responseType && typeof args.extract !== "function") {
+								// Handle no-content which will not parse.
+								try { response = JSON.parse(ev.target.responseText) }
+								catch (e) { response = null }
+							}
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
 							// document is needed on old IE and friends (all
@@ -139,7 +80,18 @@ module.exports = function($window, Promise, oncompletion) {
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						}
-						if (success) resolve(response)
+
+						if (success) {
+							if (typeof args.type === "function") {
+								if (Array.isArray(response)) {
+									for (var i = 0; i < response.length; i++) {
+										response[i] = new args.type(response[i])
+									}
+								}
+								else response = new args.type(response)
+							}
+							resolve(response)
+						}
 						else {
 							var completeErrorResponse = function() {
 								try { message = ev.target.responseText }
@@ -190,26 +142,58 @@ module.exports = function($window, Promise, oncompletion) {
 
 			if (body == null) xhr.send()
 			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
-			else if (body instanceof $window.FormData) xhr.send(body)
+			else if (body instanceof $window.FormData || body instanceof $window.URLSearchParams) xhr.send(body)
 			else xhr.send(JSON.stringify(body))
-		}),
-		jsonp: makeRequest(function(url, args, resolve, reject) {
-			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-			var script = $window.document.createElement("script")
-			$window[callbackName] = function(data) {
-				delete $window[callbackName]
-				script.parentNode.removeChild(script)
-				resolve(data)
+		})
+	}
+
+	// In case the global Promise is some userland library's where they rely on
+	// `foo instanceof this.constructor`, `this.constructor.resolve(value)`, or
+	// similar. Let's *not* break them.
+	PromiseProxy.prototype = Promise.prototype
+	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
+
+	function hasHeader(args, name) {
+		for (var key in args.headers) {
+			if (hasOwn.call(args.headers, key) && key.toLowerCase() === name) return true
+		}
+		return false
+	}
+
+	return {
+		request: function(url, args) {
+			if (typeof url !== "string") { args = url; url = url.url }
+			else if (args == null) args = {}
+			var promise = makeRequest(url, args)
+			if (args.background === true) return promise
+			var count = 0
+			function complete() {
+				if (--count === 0 && typeof oncompletion === "function") oncompletion()
 			}
-			script.onerror = function() {
-				delete $window[callbackName]
-				script.parentNode.removeChild(script)
-				reject(new Error("JSONP request failed"))
+
+			return wrap(promise)
+
+			function wrap(promise) {
+				var then = promise.then
+				// Set the constructor, so engines know to not await or resolve
+				// this as a native promise. At the time of writing, this is
+				// only necessary for V8, but their behavior is the correct
+				// behavior per spec. See this spec issue for more details:
+				// https://github.com/tc39/ecma262/issues/1577. Also, see the
+				// corresponding comment in `request/tests/test-request.js` for
+				// a bit more background on the issue at hand.
+				promise.constructor = PromiseProxy
+				promise.then = function() {
+					count++
+					var next = then.apply(promise, arguments)
+					next.then(complete, function(e) {
+						complete()
+						if (count === 0) throw e
+					})
+					return wrap(next)
+				}
+				return promise
 			}
-			script.src = url + (url.indexOf("?") < 0 ? "?" : "&") +
-				encodeURIComponent(args.callbackKey || "callback") + "=" +
-				encodeURIComponent(callbackName)
-			$window.document.documentElement.appendChild(script)
-		}),
+		}
 	}
 }

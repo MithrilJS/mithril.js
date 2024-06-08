@@ -3,6 +3,8 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
+var trust = require("../../render/trust")
 
 o.spec("updateHTML", function() {
 	var $window, root, render
@@ -13,22 +15,22 @@ o.spec("updateHTML", function() {
 	})
 
 	o("updates html", function() {
-		var vnode = {tag: "<", children: "a"}
-		var updated = {tag: "<", children: "b"}
+		var vnode = trust("a")
+		var updated = trust("b")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(updated.dom).equals(root.firstChild)
 		o(updated.domSize).equals(1)
 		o(updated.dom.nodeValue).equals("b")
 	})
 	o("adds html", function() {
-		var vnode = {tag: "<", children: ""}
-		var updated = {tag: "<", children: "<a></a><b></b>"}
+		var vnode = trust("")
+		var updated = trust("<a></a><b></b>")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(updated.domSize).equals(2)
 		o(updated.dom).equals(root.firstChild)
@@ -37,11 +39,11 @@ o.spec("updateHTML", function() {
 		o(root.childNodes[1].nodeName).equals("B")
 	})
 	o("removes html", function() {
-		var vnode = {tag: "<", children: "<a></a><b></b>"}
-		var updated = {tag: "<", children: ""}
+		var vnode = trust("<a></a><b></b>")
+		var updated = trust("")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(updated.dom).equals(null)
 		o(updated.domSize).equals(0)
@@ -58,14 +60,14 @@ o.spec("updateHTML", function() {
 		return result
 	}
 	o("updates the dom correctly with a contenteditable parent", function() {
-		var div = {tag: "div", attrs: {contenteditable: true}, children: [{tag: "<", children: "<a></a>"}]}
+		var div = m("div", {contenteditable: true}, trust("<a></a>"))
 
 		render(root, div)
 		o(childKeysOf(div.dom, "nodeName")).deepEquals(["A"])
 	})
 	o("updates dom with multiple text children", function() {
-		var vnode = [{tag: "#", children: "a"}, {tag: "<", children: "<a></a>"}, {tag: "<", children: "<b></b>"}]
-		var replacement = [{tag: "#", children: "a"}, {tag: "<", children: "<c></c>"}, {tag: "<", children: "<d></d>"}]
+		var vnode = ["a", trust("<a></a>"), trust("<b></b>")]
+		var replacement = ["a", trust("<c></c>"), trust("<d></d>")]
 
 		render(root, vnode)
 		render(root, replacement)
@@ -74,12 +76,12 @@ o.spec("updateHTML", function() {
 	})
 	o("updates dom with multiple text children in other parents", function() {
 		var vnode = [
-			{tag: "div", attrs: {}, children: [{tag: "#", children: "a"}, {tag: "<", children: "<a></a>"}]},
-			{tag: "div", attrs: {}, children: [{tag: "#", children: "b"}, {tag: "<", children: "<b></b>"}]},
+			m("div", "a", trust("<a></a>")),
+			m("div", "b", trust("<b></b>")),
 		]
 		var replacement = [
-			{tag: "div", attrs: {}, children: [{tag: "#", children: "c"}, {tag: "<", children: "<c></c>"}]},
-			{tag: "div", attrs: {}, children: [{tag: "#", children: "d"}, {tag: "<", children: "<d></d>"}]},
+			m("div", "c", trust("<c></c>")),
+			m("div", "d", trust("<d></d>")),
 		]
 
 		render(root, vnode)
@@ -93,20 +95,20 @@ o.spec("updateHTML", function() {
 	})
 	o("correctly diffs if followed by another trusted vnode", function() {
 		render(root, [
-			{tag: "<", children: "<span>A</span>"},
-			{tag: "<", children: "<span>A</span>"},
+			trust("<span>A</span>"),
+			trust("<span>A</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["A", "A"])
 		render(root, [
-			{tag: "<", children: "<span>B</span>"},
-			{tag: "<", children: "<span>A</span>"},
+			trust("<span>B</span>"),
+			trust("<span>A</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["B", "A"])
 		render(root, [
-			{tag: "<", children: "<span>B</span>"},
-			{tag: "<", children: "<span>B</span>"},
+			trust("<span>B</span>"),
+			trust("<span>B</span>"),
 		])
 		o(childKeysOf(root, "nodeName")).deepEquals(["SPAN", "SPAN"])
 		o(childKeysOf(root, "firstChild.nodeValue")).deepEquals(["B", "B"])

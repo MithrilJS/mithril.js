@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.buildQueryString(), which converts an object like {a: "1", b: "2"} into a string like "a=1&b=2"
+-->
+
 # buildQueryString(object)
 
 - [Description](#description)
@@ -23,7 +27,7 @@ var querystring = m.buildQueryString({a: "1", b: "2"})
 
 Argument     | Type                                       | Required | Description
 ------------ | ------------------------------------------ | -------- | ---
-`object`     | `Object`                                   | Yes      | A key-value map to be converted into a string
+`query`      | `Object`                                   | Yes      | A key-value map to be converted into a string
 **returns**  | `String`                                   |          | A string representing the input object
 
 [How to read signatures](signatures.md)

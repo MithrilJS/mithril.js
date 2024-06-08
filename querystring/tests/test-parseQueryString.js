@@ -20,6 +20,10 @@ o.spec("parseQueryString", function() {
 		var data = parseQueryString("?%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23=%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23")
 		o(data).deepEquals({";:@&=+$,/?%#": ";:@&=+$,/?%#"})
 	})
+	o("handles wrongly escaped values", function() {
+		var data = parseQueryString("?test=%c5%a1%e8ZM%80%82H")
+		o(data).deepEquals({test: "%c5%a1%e8ZM%80%82H"})
+	})
 	o("handles escaped slashes followed by a number", function () {
 		var data = parseQueryString("?hello=%2Fen%2F1")
 		o(data.hello).equals("/en/1")

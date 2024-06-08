@@ -1,101 +1,43 @@
-# Mithril Release Processes
+<!--meta-description
+Describes how we do releases of Mithril.js
+-->
 
-**Note** These steps all assume that `MithrilJS/mithril.js` is a git remote named `mithriljs`, adjust accordingly if that doesn't match your setup.
+# Mithril.js Release Processes
 
-- [Releasing a new Mithril version](#releasing-a-new-mithril-version)
-- [Updating mithril.js.org](#updating-mithriljsorg)
+Mithril.js' release process is automated by [pr-release].  pr-release is maintained by a long time Mithril.js community member [@JAForbes](https://github.com/JAForbes).
 
-## Releasing a new Mithril version
+pr-release handles the following:
 
-### Prepare the release
+- Generating changelog entries
+- Automating the semver version
+- Publishing releases and pre-releases to npm
+- Creating github releases
+- Rollbacks
 
-1. Ensure your local branch is up to date
+## For contributors
 
-```bash
-$ git checkout next
-$ git pull --rebase mithriljs next
-```
+Contributors should create their feature branch targetting the default branch `next`.  When this branch is merged `pr-release` will either generate or update a release PR from `next` to `main`.
 
-2. Determine patch level of the change
-3. Update information in `docs/changelog.md` to match reality of the new version being prepared for release.
-	- Don't forget to add today's date under the version heading!
-4. Replace all existing references to `mithril@next` to `mithril` if moving from a release candidate to stable.
-    - Note: if making an initial release candidate, don't forget to move all the playground snippets to pull from `mithril@next`!
-5. Commit changes to `next`
+The description and title will be managed by [pr-release], including the semver version.
 
-```
-$ git add .
-$ git commit -m "Preparing for release"
+Contributors who have permissions should add the correct semver label to their PR (`major` | `minor` | `patch`).  If no label is set, `patch` is assumed.
 
-# Push to your branch
-$ git push
+If you do not have permissions, the maintainer will set the label on your behalf.
 
-# Push to MithrilJS/mithril.js
-$ git push mithriljs next
-```
+## Changelog
 
-### Merge from `next` to `master`
+There are two changelogs in the Mithril.js project
 
-6. Switch to `master` and make sure it's up to date
+- `docs/changelog.md` a hand written curated reflection of changes to the codebase
+- `docs/release.md` an automatically prepended log of changes, managed by pr-release
 
-```bash
-$ git checkout master
-$ git pull --rebase mithriljs master
-```
+In future we may collapse these into a single file, the separation is due to the fact the `changelog.md` predates the `release.md` file.
 
-7. merge `next` on top of it
+## For maintainers
 
-```bash
-$ git merge next
-```
+Whenever a new feature branch is opened, a reviewing maintainer should add the correct semver label to their PR (`major` | `minor` | `patch`).  If no label is set, `patch` is assumed.
 
-8. Clean & update npm dependencies and ensure the tests are passing.
-
-```bash
-$ npm prune
-$ npm i
-$ npm test
-```
-
-### Publish the release
-
-9. `npm run release <major|minor|patch|semver>`, see the docs for [`npm version`](https://docs.npmjs.com/cli/version)
-10. The changes will be automatically pushed to your fork
-11. Push the changes to `MithrilJS/mithril.js`
-
-```bash
-$ git push mithriljs master
-```
-
-12. Travis will push the new release to npm & create a GitHub release
-
-### Merge `master` back into `next`
-
-This helps to ensure that the `version` field of `package.json` doesn't get out of date.
-
-13. Switch to `next` and make sure it's up to date
-
-```bash
-$ git checkout next
-$ git pull --rebase mithriljs next
-```
-
-14. Merge `master` back onto `next`
-
-```bash
-$ git merge master
-```
-
-15. Push the changes to your fork & `MithrilJS/mithril.js`
-
-```bash
-$ git push
-$ git push mithriljs next
-```
-
-### Update the GitHub release
-
-16. The GitHub Release will require a manual description & title to be added. I suggest coming up with a fun title & then copying the `docs/changelog.md` entry for the build.
+If a `major` or `minor` feature branch is merged but no labels were set, you can still go back and edit the semver labels.  On label change the release pr will automatically be regenerated and will recalculate the semver version.
 
 ## Updating mithril.js.org
 
@@ -120,3 +62,5 @@ $ node scripts/update-docs
 After the docs build completes, the updated docs should appear on https://mithril.js.org in a few minutes.
 
 **Note:** When updating the stable version with a release candidate out, ***make sure to update the index + navigation to point to the new stable version!!!***
+
+[pr-release]: https://pr-release.org/

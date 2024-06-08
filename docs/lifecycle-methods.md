@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on Mithril.js' lifecycle methods, also known as lifecycle "hooks"
+-->
+
 # Lifecycle methods
 
 - [Usage](#usage)
@@ -137,7 +141,7 @@ m(RedrawReporter, {data: "Hello"})
 
 ### onbeforeremove
 
-The `onbeforeremove(vnode)` hook is called before a DOM element is detached from the document. If a Promise is returned, Mithril only detaches the DOM element after the promise completes.
+The `onbeforeremove(vnode)` hook is called before a DOM element is detached from the document. If a Promise is returned, Mithril.js only detaches the DOM element after the promise completes.
 
 This hook is only called on the DOM element that loses its `parentNode`, but it does not get called in its child elements.
 
@@ -188,7 +192,7 @@ function Timer() {
 
 ### onbeforeupdate
 
-The `onbeforeupdate(vnode, old)` hook is called before a vnode is diffed in a update. If this function is defined and returns false, Mithril prevents a diff from happening to the vnode, and consequently to the vnode's children.
+The `onbeforeupdate(vnode, old)` hook is called before a vnode is diffed in a update. If this function is defined and returns false, Mithril.js prevents a diff from happening to the vnode, and consequently to the vnode's children.
 
 This hook by itself does not prevent a virtual DOM subtree from being generated unless the subtree is encapsulated within a component.
 
@@ -200,7 +204,7 @@ This hook is useful to reduce lag in updates in cases where there is a overly la
 
 ### Avoid anti-patterns
 
-Although Mithril is flexible, some code patterns are discouraged:
+Although Mithril.js is flexible, some code patterns are discouraged:
 
 #### Avoid premature optimizations
 

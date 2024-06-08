@@ -3,14 +3,16 @@
 const {promises: fs} = require("fs")
 const path = require("path")
 const {promisify} = require("util")
-const marked = require("marked")
+const {marked} = require("marked")
 const rimraf = promisify(require("rimraf"))
 const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
 const HTMLMinifier = require("html-minifier")
 const upstream = require("./_upstream")
+const version = require("../package.json").version
 
 const r = (file) => path.resolve(__dirname, "..", file)
+const metaDescriptionRegExp = /<!--meta-description\n([\s\S]+?)\n-->/m
 
 // Minify our docs.
 const htmlMinifierConfig = {
@@ -70,9 +72,51 @@ async function makeGenerator() {
 	// Tell Git to ignore our changes - it's no longer there.
 	execFileSync("git", ["add", "archive"])
 
-	return new Generator({version, guides, methods, layout})
+	// add version selector
+	const docsSelect = await archiveDocsSelect()
+
+	return new Generator({
+		version,
+		guides,
+		methods,
+		layout: layout.replaceAll("[archive-docs]", docsSelect)
+	})
 }
 
+async function getArchiveDirs() {
+	const dirs = await fs.readdir(r("dist/archive"))
+	const ver = "v" + version;
+	if (dirs.every((dir) => ver !== dir)) dirs.push(ver);
+	return dirs.reverse();
+}
+
+async function archiveDocsSelect() {
+	const archiveDirs = await getArchiveDirs()
+	var options = archiveDirs
+		.map((ad) => `<option>${ad}</option>`)
+		.join("")
+	return `<select id="archive-docs" onchange="location.href='/archive/' + this.value + '/index.html'">${options}</select>`
+}
+
+function encodeHTML (str) {
+	const charsToEncode = /[&"'<>]/g
+	const encodeTo = {
+		"&": "&amp;",
+		"\"": "&quot;",
+		"'": "&#39;",
+		"<": "&lt;",
+		">": "&gt;",
+	}
+	return str.replace(charsToEncode, function(char) { return encodeTo[char] })
+}
+
+function extractMetaDescription(markdown) {
+	var match = markdown.match(metaDescriptionRegExp)
+	if (match) {
+		return encodeHTML(match[1])
+	}
+	return "Mithril.js Documentation"
+}
 class Generator {
 	constructor(opts) {
 		this._version = opts.version
@@ -81,13 +125,14 @@ class Generator {
 		this._layout = opts.layout
 	}
 
-	compilePage(file, markdown) {
+	async compilePage(file, markdown) {
 		file = path.basename(file)
 		const link = new RegExp(
 			`([ \t]*)(- )(\\[.+?\\]\\(${escapeRegExp(file)}\\))`
 		)
 		const src = link.test(this._guides) ? this._guides : this._methods
-		let body = markdown
+		const metaDescription = extractMetaDescription(markdown)
+		let body = markdown.replace(metaDescriptionRegExp, "")
 
 		// fix pipes in code tags
 		body = body.replace(/`((?:\S| -> |, )+)(\|)(\S+)`/gim,
@@ -115,24 +160,25 @@ class Generator {
 			path + ((/http/).test(path) ? extension : ".html")
 		)
 
-		// Fix type signatures containing Array<...>
-		body = body.replace(/(\W)Array<([^/<]+?)>/gim, "$1Array&lt;$2&gt;")
-
 		const markedHtml = marked(body)
-		const title = body.match(/^#([^\n\r]+)/i) || []
+		const title = body.match(/^#\s+([^\n\r]+)/m) || []
 
 		let result = this._layout
-
-		result = result.replace(
-			/<title>Mithril\.js<\/title>/,
-			`<title>${title[1]} - Mithril.js</title>`
-		)
+		if (title[1]) {
+			result = result.replace(
+				/<title>Mithril\.js<\/title>/,
+				`<title>${title[1]} - Mithril.js</title>`
+			)
+		}
 
 		// update version
 		result = result.replace(/\[version\]/g, this._version)
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
+		
+		// insert meta description
+		result = result.replace(/\[metaDescription\]/, metaDescription)
 
 		// fix anchors
 		const anchorIds = new Map()
@@ -179,7 +225,7 @@ class Generator {
 		}
 		else {
 			let html = await fs.readFile(file, "utf-8")
-			if (file.endsWith(".md")) html = this.compilePage(file, html)
+			if (file.endsWith(".md")) html = await this.compilePage(file, html)
 			const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
 			await archived(
 				relative.replace(/\.md$/, ".html"),

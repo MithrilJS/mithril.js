@@ -9,7 +9,6 @@ var m = require("../../render/hyperscript")
 var coreRenderer = require("../../render/render")
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
-var Promise = require("../../promise/promise")
 
 o.spec("route", function() {
 	// Note: the `n` parameter used in calls to this are generally found by
@@ -37,8 +36,8 @@ o.spec("route", function() {
 		})
 	}
 
-	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}].forEach(function(env) {
-		void ["#", "?", "", "#!", "?!", "/foo"].forEach(function(prefix) {
+	void [{protocol: "http:", hostname: "localhost"}, {protocol: "file:", hostname: "/"}, {protocol: "http:", hostname: "ööö"}].forEach(function(env) {
+		void ["#", "?", "", "#!", "?!", "/foo", "/föö"].forEach(function(prefix) {
 			o.spec("using prefix `" + prefix + "` starting on " + env.protocol + "//" + env.hostname, function() {
 				var $window, root, mountRedraw, route, throttleMock
 				var nextID = 0
@@ -118,7 +117,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("resolves to route w/ escaped unicode", function() {
+				o("resolves to route with escaped unicode", function() {
 					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
 					route(root, "/ö", {
 						"/ö" : {
@@ -131,7 +130,7 @@ o.spec("route", function() {
 					o(root.firstChild.nodeName).equals("DIV")
 				})
 
-				o("resolves to route w/ unicode", function() {
+				o("resolves to route with unicode", function() {
 					$window.location.href = prefix + "/ö?ö=ö"
 					route(root, "/ö", {
 						"/ö" : {
@@ -143,6 +142,19 @@ o.spec("route", function() {
 					})
 
 					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
+				})
+
+				o("resolves to route with matching invalid escape", function() {
+					$window.location.href = prefix + "/%C3%B6abc%def"
+					route(root, "/öabc%def", {
+						"/öabc%def" : {
+							view: lock(function() {
+								return route.get()
+							})
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals("/öabc%def")
 				})
 
 				o("handles parameterized route", function() {
@@ -193,6 +205,23 @@ o.spec("route", function() {
 
 					o(root.firstChild.nodeValue).equals(
 						'{"a":"x/y"} {"a":"x/y"} /test/x/y'
+					)
+				})
+
+				o("keeps trailing / in rest parameterized route", function() {
+					$window.location.href = prefix + "/test/d/"
+					route(root, "/test/:a...", {
+						"/test/:a..." : {
+							view: lock(function(vnode) {
+								return JSON.stringify(route.param()) + " " +
+									JSON.stringify(vnode.attrs) + " " +
+									route.get()
+							})
+						}
+					})
+
+					o(root.firstChild.nodeValue).equals(
+						'{"a":"d/"} {"a":"d/"} /test/d/'
 					)
 				})
 
@@ -1308,7 +1337,7 @@ o.spec("route", function() {
 							}),
 							render: lock(function() {
 								renderCount++
-								return {tag: Component}
+								return m(Component)
 							}),
 						},
 					})
@@ -1350,7 +1379,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver w/ only onmatch", function() {
+				o("onmatch can redirect to another route that has RouteResolver with only onmatch", function() {
 					var redirected = false
 					var render = o.spy()
 					var view = o.spy(function() {return m("div")})
@@ -1381,7 +1410,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to another route that has RouteResolver w/ only render", function() {
+				o("onmatch can redirect to another route that has RouteResolver with only render", function() {
 					var redirected = false
 					var render = o.spy()
 
@@ -1465,7 +1494,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect w/ window.history.back()", function() {
+				o("onmatch can redirect with window.history.back()", function() {
 
 					var render = o.spy()
 					var component = {view: o.spy()}
@@ -1505,7 +1534,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ onmatch", function() {
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver with onmatch", function() {
 					var redirected = false
 					var render = o.spy()
 
@@ -1531,7 +1560,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver w/ render", function() {
+				o("onmatch can redirect to a non-existent route that defaults to a RouteResolver with render", function() {
 					var redirected = false
 					var render = o.spy()
 

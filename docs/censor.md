@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.censor(), which helps cloning vnodes
+-->
+
 # censor(object, extra)
 
 - [Description](#description)
@@ -109,7 +113,7 @@ function Layout() {
 }
 ```
 
-This would end up [throwing an error](keys.md#key-restrictions) because here's what Mithril sees when creating the `Layout` vnode:
+This would end up [throwing an error](keys.md#key-restrictions) because here's what Mithril.js sees when creating the `Layout` vnode:
 
 ```javascript
 return [

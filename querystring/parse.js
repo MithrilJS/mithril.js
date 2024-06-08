@@ -1,5 +1,13 @@
 "use strict"
 
+function decodeURIComponentSave(str) {
+	try {
+		return decodeURIComponent(str)
+	} catch(err) {
+		return str
+	}
+}
+
 module.exports = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
@@ -7,8 +15,8 @@ module.exports = function(string) {
 	var entries = string.split("&"), counters = {}, data = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key = decodeURIComponent(entry[0])
-		var value = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		var key = decodeURIComponentSave(entry[0])
+		var value = entry.length === 2 ? decodeURIComponentSave(entry[1]) : ""
 
 		if (value === "true") value = true
 		else if (value === "false") value = false

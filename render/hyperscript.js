@@ -32,15 +32,13 @@ function compileSelector(selector) {
 
 function execSelector(state, vnode) {
 	var attrs = vnode.attrs
-	var children = Vnode.normalizeChildren(vnode.children)
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 
 	vnode.tag = state.tag
-	vnode.attrs = null
-	vnode.children = undefined
+	vnode.attrs = {}
 
-	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+	if (!isEmpty(state.attrs)) {
 		var newAttrs = {}
 
 		for (var key in attrs) {
@@ -71,12 +69,6 @@ function execSelector(state, vnode) {
 			vnode.attrs = attrs
 			break
 		}
-	}
-
-	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
-		vnode.text = children[0].children
-	} else {
-		vnode.children = children
 	}
 
 	return vnode

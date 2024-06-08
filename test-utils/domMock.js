@@ -99,12 +99,15 @@ module.exports = function(options) {
 		}
 	}
 	function removeChild(child) {
+		if (child == null || typeof child !== "object" || !("nodeType" in child)) {
+			throw new TypeError("Failed to execute removeChild, parameter is not of type 'Node'")
+		}
 		var index = this.childNodes.indexOf(child)
 		if (index > -1) {
 			this.childNodes.splice(index, 1)
 			child.parentNode = null
 		}
-		else throw new TypeError("Failed to execute 'removeChild'")
+		else throw new TypeError("Failed to execute 'removeChild', child not found in parent")
 	}
 	function insertBefore(child, reference) {
 		var ancestor = this
@@ -343,9 +346,8 @@ module.exports = function(options) {
 					get style() {
 						return style
 					},
-					set style(_){
-						// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style#Setting_style
-						throw new Error("setting element.style is not portable")
+					set style(value){
+						this.style.cssText = value
 					},
 					get className() {
 						return this.attributes["class"] ? this.attributes["class"].value : ""
@@ -462,7 +464,7 @@ module.exports = function(options) {
 								if (!this.hasAttribute("href")) return ""
 								// HACK: if it's valid already, there's nothing to implement.
 								var value = this.attributes.href.value
-								if (validURLRegex.test(value)) return value
+								if (validURLRegex.test(encodeURI(value))) return value
 							}
 							return "[FIXME implement]"
 						},
@@ -503,7 +505,7 @@ module.exports = function(options) {
 						set: function(v) {
 							if (this.getAttribute("type") !== "date") throw new Error("invalid state")
 							var time = new Date(v).getTime()
-							return valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
+							valueSetter(isNaN(time) ? "" : new Date(time).toUTCString())
 						},
 						enumerable: true,
 					})
@@ -519,8 +521,8 @@ module.exports = function(options) {
 							v = Number(v)
 							if (!isNaN(v) && !isFinite(v)) throw new TypeError("infinite value")
 							switch (this.getAttribute("type")) {
-								case "date": return valueSetter(isNaN(v) ? "" : new Date(v).toUTCString())
-								case "number": return valueSetter(String(value))
+								case "date": valueSetter(isNaN(v) ? "" : new Date(v).toUTCString()); break;
+								case "number": valueSetter(String(value)); break;
 								default: throw new Error("invalid state")
 							}
 						},

@@ -62,11 +62,6 @@ o.spec("api", function() {
 			o(typeof m.request).equals("function") // TODO improve
 		})
 	})
-	o.spec("m.jsonp", function() {
-		o("works", function() {
-			o(typeof m.jsonp).equals("function") // TODO improve
-		})
-	})
 	o.spec("m.render", function() {
 		o("works", function() {
 			root = window.document.createElement("div")
@@ -129,8 +124,8 @@ o.spec("api", function() {
 						done()
 					}, FRAME_BUDGET)
 				})
-				o("m.route.set", function(done, timeout) {
-					timeout(100)
+				o("m.route.set", function(done) {
+					o.timeout(100)
 					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/:id": createComponent({view: function() {return m("div")}})

@@ -4,7 +4,7 @@
 const {promises: fs} = require("fs")
 const path = require("path")
 const {Glob} = require("glob")
-const marked = require("marked")
+const {marked} = require("marked")
 // Accept just about anything
 const babelParser = require("@babel/parser")
 // Peer dependency on `request`
@@ -281,6 +281,7 @@ async function lintAll({useCache}) {
 				"**/changelog.md",
 				"**/migration-*.md",
 				"**/node_modules/**",
+				"**/recent-changes.md"
 			],
 			nodir: true,
 		})
@@ -309,6 +310,7 @@ if (require.main === module) {
 						"**/changelog.md",
 						"**/migration-*.md",
 						"**/node_modules/**",
+						"**/recent-changes.md"
 					],
 				})
 				.on("add", lintOne)

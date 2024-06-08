@@ -1,0 +1,43 @@
+name: merge
+
+on:
+  push:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+concurrency: prr:deploy
+
+jobs:
+  merge:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: 'next'
+        fetch-depth: 0
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+    - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    # The following will publish the release to npm
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      name: Setup NPM Auth
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: npm publish
+      name: Publish

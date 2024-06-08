@@ -3,6 +3,7 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 // pilfered and adapted from https://github.com/domvm/domvm/blob/7aaec609e4c625b9acf9a22d035d6252a5ca654f/test/src/flat-list-keyed-fuzz.js
 o.spec("updateNodes keyed list Fuzzer", function() {
@@ -26,9 +27,9 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 		while (tests--) {
 			var test = fuzzTest(c.delMax, c.movMax, c.insMax)
 			o(i++ + ": " + test.list.join() + " -> " + test.updated.join(), function() {
-				render(root, test.list.map(function(x){return {tag: x, key: x}}))
+				render(root, test.list.map(function(x){return m(x, {key: x})}))
 				addSpies(root)
-				render(root, test.updated.map(function(x){return {tag: x, key: x}}))
+				render(root, test.updated.map(function(x){return m(x, {key: x})}))
 
 				if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
 

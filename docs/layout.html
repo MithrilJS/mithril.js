@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<title>Mithril.js</title>
@@ -8,16 +8,17 @@
 		<link href="style.css" rel="stylesheet" />
 		<link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="[metaDescription]">
 	</head>
-	<body>
+	<body onload="window.requestAnimationFrame(function(){document.getElementById('archive-docs').selectedIndex = 0})" /* handle back navigation */>
 		<header>
 			<section>
 				<a class="hamburger" href="javascript:;">≡</a>
-				<h1><img src="logo.svg"> Mithril <small>[version]</small></h1>
+				<h1><img src="logo.svg"> Mithril [archive-docs]</h1>
 				<nav>
 					<a href="index.html">Guide</a>
 					<a href="api.html">API</a>
-					<a href="https://gitter.im/MithrilJS/mithril.js">Chat</a>
+					<a href="https://mithril.zulipchat.com/">Chat</a>
 					<a href="https://github.com/MithrilJS/mithril.js">GitHub</a>
 				</nav>
 			</section>

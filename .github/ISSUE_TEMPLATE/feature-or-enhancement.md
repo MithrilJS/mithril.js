@@ -1,25 +1,25 @@
 ---
 name: "\U0001F680 Feature or Enhancement"
-about: Suggest an idea or feature for Mithril
+about: Suggest an idea or feature for Mithril.js
 title: ''
 labels: 'Type: Enhancement'
-assignees: isiahmeadows
+assignees: dead-claudia
 
 ---
 
 <!-- Provide a general summary of your suggestion in the "Title" above -->
 <!--
-Optional: Provide the exact version of Mithril you're experiencing issues with.
+Optional: Provide the exact version of Mithril.js you're experiencing issues with.
 This could matter, even if it's really old like version 0.1.0. Do note that bugs
 in older versions are commonly fixed in newer versions and that newer versions
 are much more actively maintained than older versions, so it's unlikely we'll
 add new features to older versions like 0.1.x.
 -->
-**Mithril version:**
+**Mithril.js version:**
 
 <!--
 Optional: Provide the name and version of both the platform (Chrome, Node, etc.)
-and operating system you're running Mithril on. If it's multiple, feel free to
+and operating system you're running Mithril.js on. If it's multiple, feel free to
 list multiple. This could matter, even if it's super ancient like IE 6 on
 Windows XP.
 -->

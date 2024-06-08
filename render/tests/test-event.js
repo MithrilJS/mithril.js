@@ -3,6 +3,7 @@
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
 
 o.spec("event", function() {
 	var $window, root, redraw, render, reallyRender
@@ -31,12 +32,12 @@ o.spec("event", function() {
 	o("handles onclick", function() {
 		var spyDiv = eventSpy()
 		var spyParent = eventSpy()
-		var div = {tag: "div", attrs: {onclick: spyDiv}}
-		var parent = {tag: "div", attrs: {onclick: spyParent}, children: [div]}
+		var div = m("div", {onclick: spyDiv})
+		var parent = m("div", {onclick: spyParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [parent])
+		render(root, parent)
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
@@ -58,12 +59,12 @@ o.spec("event", function() {
 	o("handles onclick returning false", function() {
 		var spyDiv = eventSpy(function() { return false })
 		var spyParent = eventSpy()
-		var div = {tag: "div", attrs: {onclick: spyDiv}}
-		var parent = {tag: "div", attrs: {onclick: spyParent}, children: [div]}
+		var div = m("div", {onclick: spyDiv})
+		var parent = m("div", {onclick: spyParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [parent])
+		render(root, parent)
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
@@ -83,12 +84,12 @@ o.spec("event", function() {
 		var spyParent = eventSpy()
 		var listenerDiv = {handleEvent: spyDiv}
 		var listenerParent = {handleEvent: spyParent}
-		var div = {tag: "div", attrs: {onclick: listenerDiv}}
-		var parent = {tag: "div", attrs: {onclick: listenerParent}, children: [div]}
+		var div = m("div", {onclick: listenerDiv})
+		var parent = m("div", {onclick: listenerParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [parent])
+		render(root, parent)
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
@@ -112,12 +113,12 @@ o.spec("event", function() {
 		var spyParent = eventSpy()
 		var listenerDiv = {handleEvent: spyDiv}
 		var listenerParent = {handleEvent: spyParent}
-		var div = {tag: "div", attrs: {onclick: listenerDiv}}
-		var parent = {tag: "div", attrs: {onclick: listenerParent}, children: [div]}
+		var div = m("div", {onclick: listenerDiv})
+		var parent = m("div", {onclick: listenerParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [parent])
+		render(root, parent)
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
@@ -138,11 +139,11 @@ o.spec("event", function() {
 
 	o("removes event", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {onclick: spy}}
-		var updated = {tag: "a", attrs: {}}
+		var vnode = m("a", {onclick: spy})
+		var updated = m("a")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -153,11 +154,11 @@ o.spec("event", function() {
 
 	o("removes event when null", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {onclick: spy}}
-		var updated = {tag: "a", attrs: {onclick: null}}
+		var vnode = m("a", {onclick: spy})
+		var updated = m("a", {onclick: null})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -168,11 +169,11 @@ o.spec("event", function() {
 
 	o("removes event when undefined", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {onclick: spy}}
-		var updated = {tag: "a", attrs: {onclick: undefined}}
+		var vnode = m("a", {onclick: spy})
+		var updated = m("a", {onclick: undefined})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -183,11 +184,11 @@ o.spec("event", function() {
 
 	o("removes event added via addEventListener when null", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
-		var updated = {tag: "a", attrs: {ontouchstart: null}}
+		var vnode = m("a", {ontouchstart: spy})
+		var updated = m("a", {ontouchstart: null})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("TouchEvents")
 		e.initEvent("touchstart", true, true)
@@ -198,11 +199,11 @@ o.spec("event", function() {
 
 	o("removes event added via addEventListener", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
-		var updated = {tag: "a", attrs: {}}
+		var vnode = m("a", {ontouchstart: spy})
+		var updated = m("a")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("TouchEvents")
 		e.initEvent("touchstart", true, true)
@@ -213,11 +214,11 @@ o.spec("event", function() {
 
 	o("removes event added via addEventListener when undefined", function() {
 		var spy = o.spy()
-		var vnode = {tag: "a", attrs: {ontouchstart: spy}}
-		var updated = {tag: "a", attrs: {ontouchstart: undefined}}
+		var vnode = m("a", {ontouchstart: spy})
+		var updated = m("a", {ontouchstart: undefined})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("TouchEvents")
 		e.initEvent("touchstart", true, true)
@@ -229,11 +230,11 @@ o.spec("event", function() {
 	o("removes EventListener object", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
-		var vnode = {tag: "a", attrs: {onclick: listener}}
-		var updated = {tag: "a", attrs: {}}
+		var vnode = m("a", {onclick: listener})
+		var updated = m("a")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -245,11 +246,11 @@ o.spec("event", function() {
 	o("removes EventListener object when null", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
-		var vnode = {tag: "a", attrs: {onclick: listener}}
-		var updated = {tag: "a", attrs: {onclick: null}}
+		var vnode = m("a", {onclick: listener})
+		var updated = m("a", {onclick: null})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -261,11 +262,11 @@ o.spec("event", function() {
 	o("removes EventListener object when undefined", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
-		var vnode = {tag: "a", attrs: {onclick: listener}}
-		var updated = {tag: "a", attrs: {onclick: undefined}}
+		var vnode = m("a", {onclick: listener})
+		var updated = m("a", {onclick: undefined})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
@@ -276,13 +277,13 @@ o.spec("event", function() {
 
 	o("fires onclick only once after redraw", function() {
 		var spy = o.spy()
-		var div = {tag: "div", attrs: {id: "a", onclick: spy}}
-		var updated = {tag: "div", attrs: {id: "b", onclick: spy}}
+		var div = m("div", {id: "a", onclick: spy})
+		var updated = m("div", {id: "b", onclick: spy})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [div])
-		render(root, [updated])
+		render(root, div)
+		render(root, updated)
 		div.dom.dispatchEvent(e)
 
 		o(spy.callCount).equals(1)
@@ -299,13 +300,13 @@ o.spec("event", function() {
 	o("fires click EventListener object only once after redraw", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
-		var div = {tag: "div", attrs: {id: "a", onclick: listener}}
-		var updated = {tag: "div", attrs: {id: "b", onclick: listener}}
+		var div = m("div", {id: "a", onclick: listener})
+		var updated = m("div", {id: "b", onclick: listener})
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
-		render(root, [div])
-		render(root, [updated])
+		render(root, div)
+		render(root, updated)
 		div.dom.dispatchEvent(e)
 
 		o(spy.callCount).equals(1)
@@ -321,11 +322,11 @@ o.spec("event", function() {
 
 	o("handles ontransitionend", function() {
 		var spy = o.spy()
-		var div = {tag: "div", attrs: {ontransitionend: spy}}
+		var div = m("div", {ontransitionend: spy})
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 
-		render(root, [div])
+		render(root, div)
 		div.dom.dispatchEvent(e)
 
 		o(spy.callCount).equals(1)
@@ -340,11 +341,11 @@ o.spec("event", function() {
 	o("handles transitionend EventListener object", function() {
 		var spy = o.spy()
 		var listener = {handleEvent: spy}
-		var div = {tag: "div", attrs: {ontransitionend: listener}}
+		var div = m("div", {ontransitionend: listener})
 		var e = $window.document.createEvent("HTMLEvents")
 		e.initEvent("transitionend", true, true)
 
-		render(root, [div])
+		render(root, div)
 		div.dom.dispatchEvent(e)
 
 		o(spy.callCount).equals(1)
@@ -357,7 +358,7 @@ o.spec("event", function() {
 	})
 
 	o("handles changed spy", function() {
-		var div1 = {tag: "div", attrs: {ontransitionend: function() {}}}
+		var div1 = m("div", {ontransitionend: function() {}})
 
 		reallyRender(root, [div1], redraw)
 		var e = $window.document.createEvent("HTMLEvents")
@@ -369,7 +370,7 @@ o.spec("event", function() {
 		o(redraw.args.length).equals(0)
 
 		var replacementRedraw = o.spy()
-		var div2 = {tag: "div", attrs: {ontransitionend: function() {}}}
+		var div2 = m("div", {ontransitionend: function() {}})
 
 		reallyRender(root, [div2], replacementRedraw)
 		var e = $window.document.createEvent("HTMLEvents")

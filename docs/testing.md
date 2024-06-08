@@ -1,3 +1,7 @@
+<!--meta-description
+Approaches you can use to testing your Mithril.js-based apps, including technology and usability suggestions
+-->
+
 # Testing
 
 - [Setup](#setup)
@@ -8,7 +12,7 @@
 
 ### Setup
 
-Testing Mithril applications is relatively easy. The easiest way to get started is with [ospec](https://github.com/MithrilJS/ospec), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
+Testing Mithril.js applications is relatively easy. The easiest way to get started is with [ospec](https://github.com/MithrilJS/ospec), [mithril-query](https://github.com/MithrilJS/mithril-query), and JSDOM. Installing those is pretty easy: open up a terminal and run this command.
 
 ```bash
 npm install --save-dev ospec mithril-query jsdom
@@ -37,13 +41,13 @@ var dom = new jsdom.JSDOM("", {
 	pretendToBeVisual: true,
 })
 
-// Fill in the globals Mithril needs to operate. Also, the first two are often
+// Fill in the globals Mithril.js needs to operate. Also, the first two are often
 // useful to have just in tests.
 global.window = dom.window
 global.document = dom.window.document
 global.requestAnimationFrame = dom.window.requestAnimationFrame
 
-// Require Mithril to make sure it loads properly.
+// Require Mithril.js to make sure it loads properly.
 require("mithril")
 
 // And now, make sure JSDOM ends when the tests end.
@@ -126,7 +130,7 @@ o.spec("addition", function() {
 })
 ```
 
-Just like you can unit test simple stuff like that, you can unit test Mithril components, too. Suppose you have this component:
+Just like you can unit test simple stuff like that, you can unit test Mithril.js components, too. Suppose you have this component:
 
 ```javascript
 // MyComponent.js

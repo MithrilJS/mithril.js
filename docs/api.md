@@ -1,3 +1,7 @@
+<!--meta-description
+An API cheatsheet for Mithril.js
+-->
+
 # API
 
 ### Cheatsheet
@@ -80,21 +84,6 @@ m.request({
 	method: "PUT",
 	url: "/api/v1/users/:id",
 	params: {id: 1, name: "test"}
-})
-.then(function(result) {
-	console.log(result)
-})
-```
-
----
-
-#### m.jsonp(options) - [docs](jsonp.md)
-
-```javascript
-m.jsonp({
-	url: "/api/v1/users/:id",
-	params: {id: 1},
-	callbackKey: "callback",
 })
 .then(function(result) {
 	console.log(result)

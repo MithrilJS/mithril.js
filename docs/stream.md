@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.stream(), a reactive data structure provided optionally within Mithril.js
+-->
+
 # stream()
 
 - [Description](#description)
@@ -37,7 +41,7 @@ For example, in a spreadsheet, if `A1 = B1 + C1`, then changing the value of `B1
 
 Similarly, you can make a stream depend on other streams so that changing the value of one automatically updates the other. This is useful when you have very expensive computations and want to only run them when necessary, as opposed to, say, on every redraw.
 
-Streams are NOT bundled with Mithril's core distribution. To include the Streams module, use:
+Streams are NOT bundled with Mithril.js' core distribution. To include the Streams module, use:
 
 ```javascript
 var Stream = require("mithril/stream")
@@ -49,7 +53,7 @@ You can also download the module directly if your environment does not support a
 <script src="https://unpkg.com/mithril/stream/stream.js"></script>
 ```
 
-When loaded directly with a `<script>` tag (rather than required), the stream library will be exposed as `window.m.stream`. If `window.m` is already defined (e.g. because you also use the main Mithril script), it will attach itself to the existing object. Otherwise it creates a new `window.m`. If you want to use streams in conjunction with Mithril as raw script tags, you should include Mithril in your page before `mithril/stream`, because `mithril` will otherwise overwrite the `window.m` object defined by `mithril/stream`. This is not a concern when the libraries are consumed as CommonJS modules (using `require(...)`).
+When loaded directly with a `<script>` tag (rather than required), the stream library will be exposed as `window.m.stream`. If `window.m` is already defined (e.g. because you also use the main Mithril.js script), it will attach itself to the existing object. Otherwise it creates a new `window.m`. If you want to use streams in conjunction with Mithril.js as raw script tags, you should include Mithril.js in your page before `mithril/stream`, because `mithril` will otherwise overwrite the `window.m` object defined by `mithril/stream`. This is not a concern when the libraries are consumed as CommonJS modules (using `require(...)`).
 
 ---
 
@@ -272,7 +276,7 @@ Argument    | Type                 | Required | Description
 
 ### Basic usage
 
-Streams are not part of the core Mithril distribution. To include them in a project, require its module:
+Streams are not part of the core Mithril.js distribution. To include them in a project, require its module:
 
 ```javascript
 var stream = require("mithril/stream")
@@ -353,7 +357,7 @@ firstName("Mary")
 console.log(fullName()) // logs "Mary Doe"
 ```
 
-Computed properties in Mithril are updated atomically: streams that depend on multiple streams will never be called more than once per value update, no matter how complex the computed property's dependency graph is.
+Computed properties in Mithril.js are updated atomically: streams that depend on multiple streams will never be called more than once per value update, no matter how complex the computed property's dependency graph is.
 
 ---
 
@@ -458,7 +462,7 @@ Pending streams can be created by calling `stream()` with no parameters.
 var pending = stream()
 ```
 
-If a stream is dependent on more than one stream, any of its parent streams is in a pending state, the dependent streams is also in a pending state, and does not update its value.
+If a stream is dependent on more than one stream and any of its parent streams is in a pending state, the dependent stream is also in a pending state, and does not update its value.
 
 ```javascript
 var a = stream(5)
@@ -552,15 +556,15 @@ console.log(serialized) // logs 123
 
 ### Streams do not trigger rendering
 
-Unlike libraries like Knockout, Mithril streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril component views, route changes, or after [`m.request`](request.md) calls resolve.
+Unlike libraries like Knockout, Mithril.js streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril.js component views, route changes, or after [`m.request`](request.md) calls resolve.
 
-If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc), you should manually call [`m.redraw()`](redraw.md)
+If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc.), you should manually call [`m.redraw()`](redraw.md).
 
 ---
 
 ### What is Fantasy Land
 
-[Fantasy Land](https://github.com/fantasyland/fantasy-land) specifies interoperability of common algebraic structures. In plain english, that means that libraries that conform to Fantasy Land specs can be used to write generic functional style code that works regardless of how these libraries implement the constructs.
+[Fantasy Land](https://github.com/fantasyland/fantasy-land) specifies interoperability of common algebraic structures. In plain English, that means that libraries that conform to Fantasy Land specs can be used to write generic functional style code that works regardless of how these libraries implement the constructs.
 
 For example, say we want to create a generic function called `plusOne`. The naive implementation would look like this:
 
@@ -570,7 +574,7 @@ function plusOne(a) {
 }
 ```
 
-The problem with this implementation is that it can only be used with a number. However it's possible that whatever logic produces a value for `a` could also produce an error state (wrapped in a Maybe or an Either from a library like [Sanctuary](https://github.com/sanctuary-js/sanctuary) or [Ramda-Fantasy](https://github.com/ramda/ramda-fantasy)), or it could be a Mithril stream, or a [flyd](https://github.com/paldepind/flyd) stream, etc. Ideally, we wouldn't want to write a similar version of the same function for every possible type that `a` could have and we wouldn't want to be writing wrapping/unwrapping/error handling code repeatedly.
+The problem with this implementation is that it can only be used with a number. However it's possible that whatever logic produces a value for `a` could also produce an error state (wrapped in a Maybe or an Either from a library like [Sanctuary](https://github.com/sanctuary-js/sanctuary) or [Ramda-Fantasy](https://github.com/ramda/ramda-fantasy)), or it could be a Mithril.js stream, a [Flyd](https://github.com/paldepind/flyd) stream, etc. Ideally, we wouldn't want to write a similar version of the same function for every possible type that `a` could have and we wouldn't want to be writing wrapping/unwrapping/error handling code repeatedly.
 
 This is where Fantasy Land can help. Let's rewrite that function in terms of a Fantasy Land algebra:
 

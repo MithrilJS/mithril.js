@@ -24,7 +24,8 @@
 // ```
 
 var hasOwn = require("./hasOwn")
-var magic = /^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$/
+// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
+var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
 
 module.exports = function(attrs, extras) {
 	var result = {}

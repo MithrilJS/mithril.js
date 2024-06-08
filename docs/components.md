@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on the structure, lifecycle methods, state management, and syntactic variants of components in Mithril.js
+-->
+
 # Components
 
 - [Structure](#structure)
@@ -15,7 +19,7 @@
 
 Components are a mechanism to encapsulate parts of a view to make code easier to organize and/or reuse.
 
-Any JavaScript object that has a `view` method is a Mithril component. Components can be consumed via the [`m()`](hyperscript.md) utility:
+Any JavaScript object that has a `view` method is a Mithril.js component. Components can be consumed via the [`m()`](hyperscript.md) utility:
 
 ```javascript
 // define your component
@@ -104,7 +108,7 @@ var Example = {
 }
 ```
 
-NOTE: Lifecycle methods can also be defined in the `attrs` object, so you should avoid using their names for your own callbacks as they would also be invoked by Mithril itself. Use them in `attrs` only when you specifically wish to use them as lifecycle methods.
+NOTE: Lifecycle methods can also be defined in the `attrs` object, so you should avoid using their names for your own callbacks as they would also be invoked by Mithril.js itself. Use them in `attrs` only when you specifically wish to use them as lifecycle methods.
 
 ---
 
@@ -112,13 +116,13 @@ NOTE: Lifecycle methods can also be defined in the `attrs` object, so you should
 
 Like all virtual DOM nodes, component vnodes can have state. Component state is useful for supporting object-oriented architectures, for encapsulation and for separation of concerns.
 
-Note that unlike many other frameworks, mutating component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril's component state mechanisms simply exist as a convenience for applications.
+Note that unlike many other frameworks, mutating component state does *not* trigger [redraws](autoredraw.md) or DOM updates. Instead, redraws are performed when event handlers fire, when HTTP requests made by [m.request](request.md) complete or when the browser navigates to different routes. Mithril.js' component state mechanisms simply exist as a convenience for applications.
 
 If a state change occurs that is not as a result of any of the above conditions (e.g. after a `setTimeout`), then you can use `m.redraw()` to trigger a redraw manually.
 
 #### Closure component state
 
-In the above examples, each component is defined as a POJO (Plain Old JavaScript Object), which is used by Mithril internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
+In the above examples, each component is defined as a POJO (Plain Old JavaScript Object), which is used by Mithril.js internally as the prototype for that component's instances. It's possible to use component state with a POJO (as we'll discuss below), but it's not the cleanest or simplest approach. For that we'll use a  **_closure component_**, which is simply a wrapper function which _returns_ a POJO component instance, which in turn carries its own, closed-over scope.
 
 With a closure component, state can simply be maintained by variables that are declared within the outer function:
 
@@ -337,7 +341,7 @@ Components can be freely mixed. A class component can have closure or POJO compo
 
 ### Special attributes
 
-Mithril places special semantics on several property keys, so you should normally avoid using them in normal component attributes.
+Mithril.js places special semantics on several property keys, so you should normally avoid using them in normal component attributes.
 
 - [Lifecycle methods](lifecycle-methods.md): `oninit`, `oncreate`, `onbeforeupdate`, `onupdate`, `onbeforeremove`, and `onremove`
 - `key`, which is used to track identity in keyed fragments
@@ -347,7 +351,7 @@ Mithril places special semantics on several property keys, so you should normall
 
 ### Avoid anti-patterns
 
-Although Mithril is flexible, some code patterns are discouraged:
+Although Mithril.js is flexible, some code patterns are discouraged:
 
 #### Avoid fat components
 

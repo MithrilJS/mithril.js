@@ -1,7 +1,7 @@
 ;(function() {
 "use strict"
-function Vnode(tag, key, attrs0, children0, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children0, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
+function Vnode(tag, key, attrs0, children, text, dom) {
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
@@ -10,7 +10,7 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children0 = []
+	var children = []
 	if (input.length) {
 		var isKeyed = input[0] != null && input[0].key != null
 		// Note: this is a *very* perf-sensitive check.
@@ -18,14 +18,18 @@ Vnode.normalizeChildren = function(input) {
 		// it, noticeably so.
 		for (var i = 1; i < input.length; i++) {
 			if ((input[i] != null && input[i].key != null) !== isKeyed) {
-				throw new TypeError("Vnodes must either always have keys or never have keys!")
+				throw new TypeError(
+					isKeyed && (input[i] != null || typeof input[i] === "boolean")
+						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit keyed empty fragment, m.fragment({key: ...}), instead of a hole."
+						: "In fragments, vnodes must either all have keys or none have keys."
+				)
 			}
 		}
 		for (var i = 0; i < input.length; i++) {
-			children0[i] = Vnode.normalize(input[i])
+			children[i] = Vnode.normalize(input[i])
 		}
 	}
-	return children0
+	return children
 }
 // Call via `hyperscriptVnode0.apply(startOffset, arguments)`
 //
@@ -36,7 +40,7 @@ Vnode.normalizeChildren = function(input) {
 // In native ES6, I'd instead add a final `...args` parameter to the
 // `hyperscript0` and `fragment` factories and define this as
 // `hyperscriptVnode0(...args)`, since modern engines do optimize that away. But
-// ES5 (what Mithril requires thanks to IE support) doesn't give me that luxury,
+// ES5 (what Mithril.js requires thanks to IE support) doesn't give me that luxury,
 // and engines aren't nearly intelligent enough to do either of these:
 //
 // 1. Elide the allocation for `[].slice.call(arguments, 1)` when it's passed to
@@ -45,19 +49,19 @@ Vnode.normalizeChildren = function(input) {
 //    than `Function.prototype.apply` or `Reflect.apply`.
 //
 // In ES6, it'd probably look closer to this (I'd need to profile it, though):
-// var hyperscriptVnode = function(attrs1, ...children1) {
+// var hyperscriptVnode = function(attrs1, ...children0) {
 //     if (attrs1 == null || typeof attrs1 === "object" && attrs1.tag == null && !Array.isArray(attrs1)) {
-//         if (children1.length === 1 && Array.isArray(children1[0])) children1 = children1[0]
+//         if (children0.length === 1 && Array.isArray(children0[0])) children0 = children0[0]
 //     } else {
-//         children1 = children1.length === 0 && Array.isArray(attrs1) ? attrs1 : [attrs1, ...children1]
+//         children0 = children0.length === 0 && Array.isArray(attrs1) ? attrs1 : [attrs1, ...children0]
 //         attrs1 = undefined
 //     }
 //
 //     if (attrs1 == null) attrs1 = {}
-//     return Vnode("", attrs1.key, attrs1, children1)
+//     return Vnode("", attrs1.key, attrs1, children0)
 // }
 var hyperscriptVnode = function() {
-	var attrs1 = arguments[this], start = this + 1, children1
+	var attrs1 = arguments[this], start = this + 1, children0
 	if (attrs1 == null) {
 		attrs1 = {}
 	} else if (typeof attrs1 !== "object" || attrs1.tag != null || Array.isArray(attrs1)) {
@@ -65,17 +69,18 @@ var hyperscriptVnode = function() {
 		start = this
 	}
 	if (arguments.length === start + 1) {
-		children1 = arguments[start]
-		if (!Array.isArray(children1)) children1 = [children1]
+		children0 = arguments[start]
+		if (!Array.isArray(children0)) children0 = [children0]
 	} else {
-		children1 = []
-		while (start < arguments.length) children1.push(arguments[start++])
+		children0 = []
+		while (start < arguments.length) children0.push(arguments[start++])
 	}
-	return Vnode("", attrs1.key, attrs1, children1)
+	return Vnode("", attrs1.key, attrs1, children0)
 }
+// This exists so I'm1 only saving it once.
+var hasOwn = {}.hasOwnProperty
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorCache = {}
-var hasOwn = {}.hasOwnProperty
 function isEmpty(object) {
 	for (var key in object) if (hasOwn.call(object, key)) return false
 	return true
@@ -99,12 +104,10 @@ function compileSelector(selector) {
 }
 function execSelector(state, vnode) {
 	var attrs = vnode.attrs
-	var children = Vnode.normalizeChildren(vnode.children)
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 	vnode.tag = state.tag
-	vnode.attrs = null
-	vnode.children = undefined
+	vnode.attrs = {}
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
 		for (var key in attrs) {
@@ -132,11 +135,6 @@ function execSelector(state, vnode) {
 			break
 		}
 	}
-	if (Array.isArray(children) && children.length === 1 && children[0] != null && children[0].tag === "#") {
-		vnode.text = children[0].children
-	} else {
-		vnode.children = children
-	}
 	return vnode
 }
 function hyperscript(selector) {
@@ -161,130 +159,7 @@ hyperscript.fragment = function() {
 	vnode2.children = Vnode.normalizeChildren(vnode2.children)
 	return vnode2
 }
-/** @constructor */
-var PromisePolyfill = function(executor) {
-	if (!(this instanceof PromisePolyfill)) throw new Error("Promise must be called with `new`")
-	if (typeof executor !== "function") throw new TypeError("executor must be a function")
-	var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false)
-	var instance = self._instance = {resolvers: resolvers, rejectors: rejectors}
-	var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout
-	function handler(list, shouldAbsorb) {
-		return function execute(value) {
-			var then
-			try {
-				if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-					if (value === self) throw new TypeError("Promise can't be resolved w/ itself")
-					executeOnce(then.bind(value))
-				}
-				else {
-					callAsync(function() {
-						if (!shouldAbsorb && list.length === 0) console.error("Possible unhandled promise rejection:", value)
-						for (var i = 0; i < list.length; i++) list[i](value)
-						resolvers.length = 0, rejectors.length = 0
-						instance.state = shouldAbsorb
-						instance.retry = function() {execute(value)}
-					})
-				}
-			}
-			catch (e) {
-				rejectCurrent(e)
-			}
-		}
-	}
-	function executeOnce(then) {
-		var runs = 0
-		function run(fn) {
-			return function(value) {
-				if (runs++ > 0) return
-				fn(value)
-			}
-		}
-		var onerror = run(rejectCurrent)
-		try {then(run(resolveCurrent), onerror)} catch (e) {onerror(e)}
-	}
-	executeOnce(executor)
-}
-PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
-	var self = this, instance = self._instance
-	function handle(callback, list, next, state) {
-		list.push(function(value) {
-			if (typeof callback !== "function") next(value)
-			else try {resolveNext(callback(value))} catch (e) {if (rejectNext) rejectNext(e)}
-		})
-		if (typeof instance.retry === "function" && state === instance.state) instance.retry()
-	}
-	var resolveNext, rejectNext
-	var promise = new PromisePolyfill(function(resolve, reject) {resolveNext = resolve, rejectNext = reject})
-	handle(onFulfilled, instance.resolvers, resolveNext, true), handle(onRejection, instance.rejectors, rejectNext, false)
-	return promise
-}
-PromisePolyfill.prototype.catch = function(onRejection) {
-	return this.then(null, onRejection)
-}
-PromisePolyfill.prototype.finally = function(callback) {
-	return this.then(
-		function(value) {
-			return PromisePolyfill.resolve(callback()).then(function() {
-				return value
-			})
-		},
-		function(reason) {
-			return PromisePolyfill.resolve(callback()).then(function() {
-				return PromisePolyfill.reject(reason);
-			})
-		}
-	)
-}
-PromisePolyfill.resolve = function(value) {
-	if (value instanceof PromisePolyfill) return value
-	return new PromisePolyfill(function(resolve) {resolve(value)})
-}
-PromisePolyfill.reject = function(value) {
-	return new PromisePolyfill(function(resolve, reject) {reject(value)})
-}
-PromisePolyfill.all = function(list) {
-	return new PromisePolyfill(function(resolve, reject) {
-		var total = list.length, count = 0, values = []
-		if (list.length === 0) resolve([])
-		else for (var i = 0; i < list.length; i++) {
-			(function(i) {
-				function consume(value) {
-					count++
-					values[i] = value
-					if (count === total) resolve(values)
-				}
-				if (list[i] != null && (typeof list[i] === "object" || typeof list[i] === "function") && typeof list[i].then === "function") {
-					list[i].then(consume, reject)
-				}
-				else consume(list[i])
-			})(i)
-		}
-	})
-}
-PromisePolyfill.race = function(list) {
-	return new PromisePolyfill(function(resolve, reject) {
-		for (var i = 0; i < list.length; i++) {
-			list[i].then(resolve, reject)
-		}
-	})
-}
-if (typeof window !== "undefined") {
-	if (typeof window.Promise === "undefined") {
-		window.Promise = PromisePolyfill
-	} else if (!window.Promise.prototype.finally) {
-		window.Promise.prototype.finally = PromisePolyfill.prototype.finally
-	}
-	var PromisePolyfill = window.Promise
-} else if (typeof global !== "undefined") {
-	if (typeof global.Promise === "undefined") {
-		global.Promise = PromisePolyfill
-	} else if (!global.Promise.prototype.finally) {
-		global.Promise.prototype.finally = PromisePolyfill.prototype.finally
-	}
-	var PromisePolyfill = global.Promise
-} else {
-}
-var _12 = function($window) {
+var _11 = function($window) {
 	var $doc = $window && $window.document
 	var currentRedraw
 	var nameSpace = {
@@ -296,7 +171,7 @@ var _12 = function($window) {
 	}
 	//sanity check to discourage people from doing `vnode3.state = ...`
 	function checkState(vnode3, original) {
-		if (vnode3.state !== original) throw new Error("`vnode.state` must not be modified")
+		if (vnode3.state !== original) throw new Error("'vnode.state' must not be modified.")
 	}
 	//Note: the hook is passed as the `this` argument to allow proxying the
 	//arguments without requiring a full array allocation to do so. It also
@@ -376,8 +251,8 @@ var _12 = function($window) {
 	function createFragment(parent, vnode3, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode3.children != null) {
-			var children3 = vnode3.children
-			createNodes(fragment, children3, 0, children3.length, hooks, null, ns)
+			var children2 = vnode3.children
+			createNodes(fragment, children2, 0, children2.length, hooks, null, ns)
 		}
 		vnode3.dom = fragment.firstChild
 		vnode3.domSize = fragment.childNodes.length
@@ -397,13 +272,9 @@ var _12 = function($window) {
 		}
 		insertNode(parent, element, nextSibling)
 		if (!maybeSetContentEditable(vnode3)) {
-			if (vnode3.text != null) {
-				if (vnode3.text !== "") element.textContent = vnode3.text
-				else vnode3.children = [Vnode("#", undefined, undefined, vnode3.text, undefined, undefined)]
-			}
 			if (vnode3.children != null) {
-				var children3 = vnode3.children
-				createNodes(element, children3, 0, children3.length, hooks, null, ns)
+				var children2 = vnode3.children
+				createNodes(element, children2, 0, children2.length, hooks, null, ns)
 				if (vnode3.tag === "select" && attrs2 != null) setLateSelectAttrs(vnode3, attrs2)
 			}
 		}
@@ -485,7 +356,7 @@ var _12 = function($window) {
 	// 3) remove the nodes present in the old list, but absent in the new one
 	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
 	//
-	// To achieve 1) one can create a dictionary of keys => index (for the old list), then0 iterate
+	// To achieve 1) one can create a dictionary of keys => index (for the old list), then iterate
 	// over the new list and for each new vnode3, find the corresponding vnode3 in the old list using
 	// the map.
 	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
@@ -531,7 +402,7 @@ var _12 = function($window) {
 	//
 	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
 	// this is not the case if the node moved (second and fourth part of the diff algo). We move
-	// the old DOM nodes before updateNode runs0 because it enables us to use the cached `nextSibling`
+	// the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 	// variable rather than fetching it using `getNextSibling()`.
 	//
 	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
@@ -548,7 +419,6 @@ var _12 = function($window) {
 			var start = 0, oldStart = 0
 			if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
 			if (!isKeyed0) while (start < vnodes.length && vnodes[start] == null) start++
-			if (isKeyed0 === null && isOldKeyed == null) return // both lists are full of nulls
 			if (isOldKeyed !== isKeyed0) {
 				removeNodes(parent, old, oldStart, old.length)
 				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
@@ -707,11 +577,11 @@ var _12 = function($window) {
 	}
 	function updateFragment(parent, old, vnode3, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode3.children, hooks, nextSibling, ns)
-		var domSize = 0, children3 = vnode3.children
+		var domSize = 0, children2 = vnode3.children
 		vnode3.dom = null
-		if (children3 != null) {
-			for (var i = 0; i < children3.length; i++) {
-				var child = children3[i]
+		if (children2 != null) {
+			for (var i = 0; i < children2.length; i++) {
+				var child = children2[i]
 				if (child != null && child.dom != null) {
 					if (vnode3.dom == null) vnode3.dom = child.dom
 					domSize += child.domSize || 1
@@ -725,21 +595,10 @@ var _12 = function($window) {
 		ns = getNameSpace(vnode3) || ns
 		if (vnode3.tag === "textarea") {
 			if (vnode3.attrs == null) vnode3.attrs = {}
-			if (vnode3.text != null) {
-				vnode3.attrs.value = vnode3.text //FIXME handle0 multiple children3
-				vnode3.text = undefined
-			}
 		}
 		updateAttrs(vnode3, old.attrs, vnode3.attrs, ns)
 		if (!maybeSetContentEditable(vnode3)) {
-			if (old.text != null && vnode3.text != null && vnode3.text !== "") {
-				if (old.text.toString() !== vnode3.text.toString()) old.dom.firstChild.nodeValue = vnode3.text
-			}
-			else {
-				if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-				if (vnode3.text != null) vnode3.children = [Vnode("#", undefined, undefined, vnode3.text, undefined, undefined)]
-				updateNodes(element, old.children, vnode3.children, hooks, null, ns)
-			}
+			updateNodes(element, old.children, vnode3.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode3, hooks, nextSibling, ns) {
@@ -828,12 +687,12 @@ var _12 = function($window) {
 	}
 	// This covers a really specific edge case:
 	// - Parent node is keyed and contains child
-	// - Child is removed, returns unresolved promise0 in `onbeforeremove`
+	// - Child is removed, returns unresolved promise in `onbeforeremove`
 	// - Parent node is moved in keyed diff
-	// - Remaining children3 still need moved appropriately
+	// - Remaining children2 still need moved appropriately
 	//
 	// Ideally, I'd track removed nodes as well, but that introduces a lot more
-	// complexity and I'm0 not exactly interested in doing that.
+	// complexity and I'm2 not exactly interested in doing that.
 	function moveNodes(parent, vnode3, nextSibling) {
 		var frag = $doc.createDocumentFragment()
 		moveChildToFrag(parent, frag, vnode3)
@@ -873,12 +732,12 @@ var _12 = function($window) {
 			vnode3.attrs.contenteditable == null && // attribute
 			vnode3.attrs.contentEditable == null // property
 		)) return false
-		var children3 = vnode3.children
-		if (children3 != null && children3.length === 1 && children3[0].tag === "<") {
-			var content = children3[0].children
+		var children2 = vnode3.children
+		if (children2 != null && children2.length === 1 && children2[0].tag === "<") {
+			var content = children2[0].children
 			if (vnode3.dom.innerHTML !== content) vnode3.dom.innerHTML = content
 		}
-		else if (vnode3.text != null || children3 != null && children3.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (children2 != null && children2.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
 		return true
 	}
 	//remove
@@ -971,10 +830,10 @@ var _12 = function($window) {
 		if (typeof vnode3.tag !== "string") {
 			if (vnode3.instance != null) onremove(vnode3.instance)
 		} else {
-			var children3 = vnode3.children
-			if (Array.isArray(children3)) {
-				for (var i = 0; i < children3.length; i++) {
-					var child = children3[i]
+			var children2 = vnode3.children
+			if (Array.isArray(children2)) {
+				for (var i = 0; i < children2.length; i++) {
+					var child = children2[i]
 					if (child != null) onremove(child)
 				}
 			}
@@ -982,12 +841,18 @@ var _12 = function($window) {
 	}
 	//attrs2
 	function setAttrs(vnode3, attrs2, ns) {
+		// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
+		//
+		// Also, the DOM does things to inputs based on the value, so it needs set first.
+		// See: https://github.com/MithrilJS/mithril.js/issues/2622
+		if (vnode3.tag === "input" && attrs2.type != null) vnode3.dom.setAttribute("type", attrs2.type)
+		var isFileInput = attrs2 != null && vnode3.tag === "input" && attrs2.type === "file"
 		for (var key in attrs2) {
-			setAttr(vnode3, key, null, attrs2[key], ns)
+			setAttr(vnode3, key, null, attrs2[key], ns, isFileInput)
 		}
 	}
-	function setAttr(vnode3, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object") return
+	function setAttr(vnode3, key, old, value, ns, isFileInput) {
+		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode3, key)) && typeof value !== "object" || key === "type" && vnode3.tag === "input") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode3, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode3.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode3.dom, old, value)
@@ -996,16 +861,18 @@ var _12 = function($window) {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && vnode3.dom === activeElement()) return
+				//setting input[type0=file][value] to same value causes an error to be generated if it's non-empty
+				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && (isFileInput || vnode3.dom === activeElement())) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "select" && old !== null && vnode3.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "option" && old !== null && vnode3.dom.value === "" + value) return
+				//setting input[type0=file][value] to different value is an error if it's non-empty
+				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
+				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
 				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
-			if (vnode3.tag === "input" && key === "type") vnode3.dom.setAttribute(key, value)
-			else vnode3.dom[key] = value
+			vnode3.dom[key] = value
 		} else {
 			if (typeof value === "boolean") {
 				if (value) vnode3.dom.setAttribute(key, "")
@@ -1016,11 +883,12 @@ var _12 = function($window) {
 	}
 	function removeAttr(vnode3, key, old, ns) {
 		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
-		if (key[0] === "o" && key[1] === "n" && !isLifecycleMethod(key)) updateEvent(vnode3, key, undefined)
+		if (key[0] === "o" && key[1] === "n") updateEvent(vnode3, key, undefined)
 		else if (key === "style") updateStyle(vnode3.dom, old, null)
 		else if (
 			hasPropertyKey(vnode3, key, ns)
 			&& key !== "className"
+			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
 				vnode3.tag === "option"
 				|| vnode3.tag === "select" && vnode3.dom.selectedIndex === -1 && vnode3.dom === activeElement()
@@ -1048,9 +916,18 @@ var _12 = function($window) {
 		if ("selectedIndex" in attrs2) setAttr(vnode3, "selectedIndex", null, attrs2.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode3, old, attrs2, ns) {
+		if (old && old === attrs2) {
+			console.warn("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
+		}
 		if (attrs2 != null) {
+			// If you assign an input type0 that is not supported by IE 11 with an assignment expression, an error will occur.
+			//
+			// Also, the DOM does things to inputs based on the value, so it needs set first.
+			// See: https://github.com/MithrilJS/mithril.js/issues/2622
+			if (vnode3.tag === "input" && attrs2.type != null) vnode3.dom.setAttribute("type", attrs2.type)
+			var isFileInput = vnode3.tag === "input" && attrs2.type === "file"
 			for (var key in attrs2) {
-				setAttr(vnode3, key, old && old[key], attrs2[key], ns)
+				setAttr(vnode3, key, old && old[key], attrs2[key], ns, isFileInput)
 			}
 		}
 		var val
@@ -1126,7 +1003,7 @@ var _12 = function($window) {
 	//    with a `handleEvent` method.
 	// 3. The object does not inherit from `Object.prototype`, to avoid
 	//    any potential interference with that (e.g. setters).
-	// 4. The event name is remapped to the handler0 before calling it.
+	// 4. The event name is remapped to the handler before calling it.
 	// 5. In function-based event handlers, `ev.target === this`. We replicate
 	//    that below.
 	// 6. In function-based event handlers, `return false` prevents the default
@@ -1137,10 +1014,10 @@ var _12 = function($window) {
 	}
 	EventDict.prototype = Object.create(null)
 	EventDict.prototype.handleEvent = function (ev) {
-		var handler0 = this["on" + ev.type]
+		var handler = this["on" + ev.type]
 		var result
-		if (typeof handler0 === "function") result = handler0.call(ev.currentTarget, ev)
-		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
+		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
+		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
 		if (this._ && ev.redraw !== false) (0, this._)()
 		if (result === false) {
 			ev.preventDefault()
@@ -1150,6 +1027,7 @@ var _12 = function($window) {
 	//event
 	function updateEvent(vnode3, key, value) {
 		if (vnode3.events != null) {
+			vnode3.events._ = currentRedraw
 			if (vnode3.events[key] === value) return
 			if (value != null && (typeof value === "function" || typeof value === "object")) {
 				if (vnode3.events[key] == null) vnode3.dom.addEventListener(key.slice(2), vnode3.events, false)
@@ -1192,47 +1070,52 @@ var _12 = function($window) {
 		// representation. We have to save not only the old DOM info, but also
 		// the attributes used to create it, as we diff *that*, not against the
 		// DOM directly (with a few exceptions in `setAttr`). And, of course, we
-		// need to save the children3 and text as they are conceptually not
+		// need to save the children2 and text as they are conceptually not
 		// unlike special "attributes" internally.
 		vnode3.attrs = old.attrs
 		vnode3.children = old.children
 		vnode3.text = old.text
 		return true
 	}
+	var currentDOM
 	return function(dom, vnodes, redraw) {
-		if (!dom) throw new TypeError("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
+		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
+		if (currentDOM != null && dom.contains(currentDOM)) {
+			throw new TypeError("Node is currently being rendered to and thus is locked.")
+		}
+		var prevRedraw = currentRedraw
+		var prevDOM = currentDOM
 		var hooks = []
 		var active = activeElement()
 		var namespace = dom.namespaceURI
-		// First time rendering into a node clears it out
-		if (dom.vnodes == null) dom.textContent = ""
-		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
-		var prevRedraw = currentRedraw
+		currentDOM = dom
+		currentRedraw = typeof redraw === "function" ? redraw : undefined
 		try {
-			currentRedraw = typeof redraw === "function" ? redraw : undefined
+			// First time rendering into a node clears it out
+			if (dom.vnodes == null) dom.textContent = ""
+			vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
 			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+			dom.vnodes = vnodes
+			// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
+			if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
+			for (var i = 0; i < hooks.length; i++) hooks[i]()
 		} finally {
 			currentRedraw = prevRedraw
+			currentDOM = prevDOM
 		}
-		dom.vnodes = vnodes
-		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
-		if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
-		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 }
-var render = _12(window)
-var _15 = function(render0, schedule, console) {
+var render = _11(typeof window !== "undefined" ? window : null)
+var _14 = function(render0, schedule, console) {
 	var subscriptions = []
-	var rendering = false
 	var pending = false
+	var offset = -1
 	function sync() {
-		if (rendering) throw new Error("Nested m.redraw.sync() call")
-		rendering = true
-		for (var i = 0; i < subscriptions.length; i += 2) {
-			try { render0(subscriptions[i], Vnode(subscriptions[i + 1]), redraw) }
+		for (offset = 0; offset < subscriptions.length; offset += 2) {
+			try { render0(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
 			catch (e) { console.error(e) }
 		}
-		rendering = false
+		offset = -1
 	}
 	function redraw() {
 		if (!pending) {
@@ -1246,12 +1129,13 @@ var _15 = function(render0, schedule, console) {
 	redraw.sync = sync
 	function mount(root, component) {
 		if (component != null && component.view == null && typeof component !== "function") {
-			throw new TypeError("m.mount(element, component) expects a component, not a vnode")
+			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
 		var index = subscriptions.indexOf(root)
 		if (index >= 0) {
 			subscriptions.splice(index, 2)
-			render0(root, [], redraw)
+			if (index <= offset) offset -= 2
+			render0(root, [])
 		}
 		if (component != null) {
 			subscriptions.push(root, component)
@@ -1260,7 +1144,7 @@ var _15 = function(render0, schedule, console) {
 	}
 	return {mount: mount, redraw: redraw}
 }
-var mountRedraw0 = _15(render, requestAnimationFrame, console)
+var mountRedraw0 = _14(render, typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : null, typeof console !== "undefined" ? console : null)
 var buildQueryString = function(object) {
 	if (Object.prototype.toString.call(object) !== "[object Object]") return ""
 	var args = []
@@ -1282,13 +1166,16 @@ var buildQueryString = function(object) {
 		else args.push(encodeURIComponent(key2) + (value1 != null && value1 !== "" ? "=" + encodeURIComponent(value1) : ""))
 	}
 }
+// This exists so I'm5 only saving it once.
 var assign = Object.assign || function(target, source) {
-	if(source) Object.keys(source).forEach(function(key3) { target[key3] = source[key3] })
+	for (var key3 in source) {
+		if (hasOwn.call(source, key3)) target[key3] = source[key3]
+	}
 }
 // Returns `path` from `template` + `params`
 var buildPathname = function(template, params) {
 	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
-		throw new SyntaxError("Template parameter names *must* be separated")
+		throw new SyntaxError("Template parameter names must be separated by either a '/', '-', or '.'.")
 	}
 	if (params == null) return template
 	var queryIndex = template.indexOf("?")
@@ -1298,10 +1185,10 @@ var buildPathname = function(template, params) {
 	var path = template.slice(0, pathEnd)
 	var query = {}
 	assign(query, params)
-	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m2, key1, variadic) {
+	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m4, key1, variadic) {
 		delete query[key1]
 		// If no such parameter exists, don't interpolate it.
-		if (params[key1] == null) return m2
+		if (params[key1] == null) return m4
 		// Escape normal parameters, but not variadic ones.
 		return variadic ? params[key1] : encodeURIComponent(String(params[key1]))
 	})
@@ -1319,75 +1206,18 @@ var buildPathname = function(template, params) {
 	if (newHashIndex >= 0) result0 += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)
 	return result0
 }
-var _18 = function($window, Promise, oncompletion) {
-	var callbackCount = 0
+var _17 = function($window, oncompletion) {
 	function PromiseProxy(executor) {
 		return new Promise(executor)
 	}
-	// In case the global Promise is0 some userland library's where they rely on
-	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
-	// similar. Let's *not* break them.
-	PromiseProxy.prototype = Promise.prototype
-	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
-	function makeRequest(factory) {
-		return function(url, args) {
-			if (typeof url !== "string") { args = url; url = url.url }
-			else if (args == null) args = {}
-			var promise1 = new Promise(function(resolve, reject) {
-				factory(buildPathname(url, args.params), args, function (data) {
-					if (typeof args.type === "function") {
-						if (Array.isArray(data)) {
-							for (var i = 0; i < data.length; i++) {
-								data[i] = new args.type(data[i])
-							}
-						}
-						else data = new args.type(data)
-					}
-					resolve(data)
-				}, reject)
-			})
-			if (args.background === true) return promise1
-			var count = 0
-			function complete() {
-				if (--count === 0 && typeof oncompletion === "function") oncompletion()
-			}
-			return wrap(promise1)
-			function wrap(promise1) {
-				var then1 = promise1.then
-				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise1. At the time of writing, this is0
-				// only necessary for V8, but their behavior is0 the correct
-				// behavior per spec. See this spec issue for more details:
-				// https://github.com/tc39/ecma262/issues/1577. Also, see the
-				// corresponding comment in `request0/tests/test-request0.js` for
-				// a bit more background on the issue at hand.
-				promise1.constructor = PromiseProxy
-				promise1.then = function() {
-					count++
-					var next0 = then1.apply(promise1, arguments)
-					next0.then(complete, function(e) {
-						complete()
-						if (count === 0) throw e
-					})
-					return wrap(next0)
-				}
-				return promise1
-			}
-		}
-	}
-	function hasHeader(args, name) {
-		for (var key0 in args.headers) {
-			if ({}.hasOwnProperty.call(args.headers, key0) && name.test(key0)) return true
-		}
-		return false
-	}
-	return {
-		request: makeRequest(function(url, args, resolve, reject) {
+	function fetch(url, args) {
+		return new Promise(function(resolve, reject) {
+			url = buildPathname(url, args.params)
 			var method = args.method != null ? args.method.toUpperCase() : "GET"
 			var body = args.body
-			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData)
+			var assumeJSON = (args.serialize == null || args.serialize === JSON.serialize) && !(body instanceof $window.FormData || body instanceof $window.URLSearchParams)
 			var responseType = args.responseType || (typeof args.extract === "function" ? "" : "json")
-			var xhr = new $window.XMLHttpRequest(), aborted = false
+			var xhr = new $window.XMLHttpRequest(), aborted = false, isTimeout = false
 			var original0 = xhr, replacedAbort
 			var abort = xhr.abort
 			xhr.abort = function() {
@@ -1395,17 +1225,17 @@ var _18 = function($window, Promise, oncompletion) {
 				abort.call(this)
 			}
 			xhr.open(method, url, args.async !== false, typeof args.user === "string" ? args.user : undefined, typeof args.password === "string" ? args.password : undefined)
-			if (assumeJSON && body != null && !hasHeader(args, /^content0-type1$/i)) {
+			if (assumeJSON && body != null && !hasHeader(args, "content-type")) {
 				xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8")
 			}
-			if (typeof args.deserialize !== "function" && !hasHeader(args, /^accept$/i)) {
+			if (typeof args.deserialize !== "function" && !hasHeader(args, "accept")) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
 			if (args.timeout) xhr.timeout = args.timeout
 			xhr.responseType = responseType
 			for (var key0 in args.headers) {
-				if ({}.hasOwnProperty.call(args.headers, key0)) {
+				if (hasOwn.call(args.headers, key0)) {
 					xhr.setRequestHeader(key0, args.headers[key0])
 				}
 			}
@@ -1424,7 +1254,11 @@ var _18 = function($window, Promise, oncompletion) {
 						if (responseType === "json") {
 							// For IE and Edge, which don't implement
 							// `responseType: "json"`.
-							if (!ev.target.responseType && typeof args.extract !== "function") response = JSON.parse(ev.target.responseText)
+							if (!ev.target.responseType && typeof args.extract !== "function") {
+								// Handle no-content0 which will not parse.
+								try { response = JSON.parse(ev.target.responseText) }
+								catch (e) { response = null }
+							}
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
 							// document is0 needed on old IE and friends (all
@@ -1439,20 +1273,48 @@ var _18 = function($window, Promise, oncompletion) {
 						} else if (typeof args.deserialize === "function") {
 							response = args.deserialize(response)
 						}
-						if (success) resolve(response)
+						if (success) {
+							if (typeof args.type === "function") {
+								if (Array.isArray(response)) {
+									for (var i = 0; i < response.length; i++) {
+										response[i] = new args.type(response[i])
+									}
+								}
+								else response = new args.type(response)
+							}
+							resolve(response)
+						}
 						else {
-							try { message = ev.target.responseText }
-							catch (e) { message = response }
-							var error = new Error(message)
-							error.code = ev.target.status
-							error.response = response
-							reject(error)
+							var completeErrorResponse = function() {
+								try { message = ev.target.responseText }
+								catch (e) { message = response }
+								var error = new Error(message)
+								error.code = ev.target.status
+								error.response = response
+								reject(error)
+							}
+							if (xhr.status === 0) {
+								// Use setTimeout to push this code block onto the event queue
+								// This allows `xhr.ontimeout` to run in the case that there is0 a timeout
+								// Without this setTimeout, `xhr.ontimeout` doesn't have a chance to reject
+								// as `xhr.onreadystatechange` will run before it
+								setTimeout(function() {
+									if (isTimeout) return
+									completeErrorResponse()
+								})
+							} else completeErrorResponse()
 						}
 					}
 					catch (e) {
 						reject(e)
 					}
 				}
+			}
+			xhr.ontimeout = function (ev) {
+				isTimeout = true
+				var error = new Error("Request timed out")
+				error.code = ev.target.status
+				reject(error)
 			}
 			if (typeof args.config === "function") {
 				xhr = args.config(xhr, args, url) || xhr
@@ -1467,46 +1329,80 @@ var _18 = function($window, Promise, oncompletion) {
 			}
 			if (body == null) xhr.send()
 			else if (typeof args.serialize === "function") xhr.send(args.serialize(body))
-			else if (body instanceof $window.FormData) xhr.send(body)
+			else if (body instanceof $window.FormData || body instanceof $window.URLSearchParams) xhr.send(body)
 			else xhr.send(JSON.stringify(body))
-		}),
-		jsonp: makeRequest(function(url, args, resolve, reject) {
-			var callbackName = args.callbackName || "_mithril_" + Math.round(Math.random() * 1e16) + "_" + callbackCount++
-			var script = $window.document.createElement("script")
-			$window[callbackName] = function(data) {
-				delete $window[callbackName]
-				script.parentNode.removeChild(script)
-				resolve(data)
+		})
+	}
+	// In case the global Promise is0 some userland library's where they rely on
+	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
+	// similar. Let's *not* break them.
+	PromiseProxy.prototype = Promise.prototype
+	PromiseProxy.__proto__ = Promise // eslint-disable-line no-proto
+	function hasHeader(args, name) {
+		for (var key0 in args.headers) {
+			if (hasOwn.call(args.headers, key0) && key0.toLowerCase() === name) return true
+		}
+		return false
+	}
+	return {
+		request: function(url, args) {
+			if (typeof url !== "string") { args = url; url = url.url }
+			else if (args == null) args = {}
+			var promise =	fetch(url, args)
+			if (args.background === true) return promise
+			var count = 0
+			function complete() {
+				if (--count === 0 && typeof oncompletion === "function") oncompletion()
 			}
-			script.onerror = function() {
-				delete $window[callbackName]
-				script.parentNode.removeChild(script)
-				reject(new Error("JSONP request failed"))
+			return wrap(promise)
+			function wrap(promise) {
+				var then = promise.then
+				// Set the constructor, so engines know to not await or resolve
+				// this as a native promise. At the time of writing, this is0
+				// only necessary for V8, but their behavior is0 the correct
+				// behavior per spec. See this spec issue for more details:
+				// https://github.com/tc39/ecma262/issues/1577. Also, see the
+				// corresponding comment in `request0/tests/test-request0.js` for
+				// a bit more background on the issue at hand.
+				promise.constructor = PromiseProxy
+				promise.then = function() {
+					count++
+					var next0 = then.apply(promise, arguments)
+					next0.then(complete, function(e) {
+						complete()
+						if (count === 0) throw e
+					})
+					return wrap(next0)
+				}
+				return promise
 			}
-			script.src = url + (url.indexOf("?") < 0 ? "?" : "&") +
-				encodeURIComponent(args.callbackKey || "callback") + "=" +
-				encodeURIComponent(callbackName)
-			$window.document.documentElement.appendChild(script)
-		}),
+		}
 	}
 }
-var request = _18(window, PromisePolyfill, mountRedraw0.redraw)
+var request = _17(typeof window !== "undefined" ? window : null, mountRedraw0.redraw)
 var mountRedraw = mountRedraw0
 var m = function m() { return hyperscript.apply(this, arguments) }
 m.m = hyperscript
 m.trust = hyperscript.trust
 m.fragment = hyperscript.fragment
+m.Fragment = "["
 m.mount = mountRedraw.mount
-var m3 = hyperscript
-var Promise = PromisePolyfill
+var m6 = hyperscript
+function decodeURIComponentSave0(str) {
+	try {
+		return decodeURIComponent(str)
+	} catch(err) {
+		return str
+	}
+}
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
 	if (string.charAt(0) === "?") string = string.slice(1)
 	var entries = string.split("&"), counters = {}, data0 = {}
 	for (var i = 0; i < entries.length; i++) {
 		var entry = entries[i].split("=")
-		var key5 = decodeURIComponent(entry[0])
-		var value2 = entry.length === 2 ? decodeURIComponent(entry[1]) : ""
+		var key5 = decodeURIComponentSave0(entry[0])
+		var value2 = entry.length === 2 ? decodeURIComponentSave0(entry[1]) : ""
 		if (value2 === "true") value2 = true
 		else if (value2 === "false") value2 = false
 		var levels = key5.split(/\]\[?|\[/)
@@ -1547,7 +1443,6 @@ var parsePathname = function(url) {
 	if (!path1) path1 = "/"
 	else {
 		if (path1[0] !== "/") path1 = "/" + path1
-		if (path1.length > 1 && path1[path1.length - 1] === "/") path1 = path1.slice(0, -1)
 	}
 	return {
 		path: path1,
@@ -1571,8 +1466,8 @@ var compileTemplate = function(template) {
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
-		function(m4, key6, extra) {
-			if (key6 == null) return "\\" + m4
+		function(m7, key6, extra) {
+			if (key6 == null) return "\\" + m7
 			keys.push({k: key6, r: extra === "..."})
 			if (extra === "...") return "(.*)"
 			if (extra === ".") return "([^/]+)\\."
@@ -1595,12 +1490,170 @@ var compileTemplate = function(template) {
 		return true
 	}
 }
+// Note: this is3 mildly perf-sensitive.
+//
+// It does *not* use `delete` - dynamic `delete`s usually cause objects to bail
+// out into dictionary mode and just generally cause a bunch of optimization
+// issues within engines.
+//
+// Ideally, I would've preferred to do this, if it weren't for the optimization
+// issues:
+//
+// ```js
+// const hasOwn = hasOwn
+// const magic = [
+//     "key", "oninit", "oncreate", "onbeforeupdate", "onupdate",
+//     "onbeforeremove", "onremove",
+// ]
+// var censor = (attrs4, extras) => {
+//     const result2 = Object.assign0(Object.create(null), attrs4)
+//     for (const key7 of magic) delete result2[key7]
+//     if (extras != null) for (const key7 of extras) delete result2[key7]
+//     return result2
+// }
+// ```
+// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
+var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
+var censor = function(attrs4, extras) {
+	var result2 = {}
+	if (extras != null) {
+		for (var key7 in attrs4) {
+			if (hasOwn.call(attrs4, key7) && !magic.test(key7) && extras.indexOf(key7) < 0) {
+				result2[key7] = attrs4[key7]
+			}
+		}
+	} else {
+		for (var key7 in attrs4) {
+			if (hasOwn.call(attrs4, key7) && !magic.test(key7)) {
+				result2[key7] = attrs4[key7]
+			}
+		}
+	}
+	return result2
+}
 var sentinel0 = {}
-var _25 = function($window, mountRedraw00) {
-	var fireAsync
+function decodeURIComponentSave(component) {
+	try {
+		return decodeURIComponent(component)
+	} catch(e) {
+		return component
+	}
+}
+var _26 = function($window, mountRedraw00) {
+	var callAsync = $window == null
+		// In case Mithril.js' loaded globally without the DOM, let's not break
+		? null
+		: typeof $window.setImmediate === "function" ? $window.setImmediate : $window.setTimeout
+	var p = Promise.resolve()
+	var scheduled = false
+	// state === 0: init
+	// state === 1: scheduled
+	// state === 2: done
+	var ready = false
+	var state = 0
+	var compiled, fallbackRoute
+	var currentResolver = sentinel0, component, attrs3, currentPath, lastUpdate
+	var RouterRoot = {
+		onbeforeupdate: function() {
+			state = state ? 2 : 1
+			return !(!state || sentinel0 === currentResolver)
+		},
+		onremove: function() {
+			$window.removeEventListener("popstate", fireAsync, false)
+			$window.removeEventListener("hashchange", resolveRoute, false)
+		},
+		view: function() {
+			if (!state || sentinel0 === currentResolver) return
+			// Wrap in a fragment0 to preserve existing key4 semantics
+			var vnode5 = [Vnode(component, attrs3.key, attrs3)]
+			if (currentResolver) vnode5 = currentResolver.render(vnode5[0])
+			return vnode5
+		},
+	}
+	var SKIP = route.SKIP = {}
+	function resolveRoute() {
+		scheduled = false
+		// Consider the pathname holistically. The prefix might even be invalid,
+		// but that's not our problem.
+		var prefix = $window.location.hash
+		if (route.prefix[0] !== "#") {
+			prefix = $window.location.search + prefix
+			if (route.prefix[0] !== "?") {
+				prefix = $window.location.pathname + prefix
+				if (prefix[0] !== "/") prefix = "/" + prefix
+			}
+		}
+		// This seemingly useless `.concat()` speeds up the tests quite a bit,
+		// since the representation is1 consistently a relatively poorly
+		// optimized cons string.
+		var path0 = prefix.concat()
+			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
+			.slice(route.prefix.length)
+		var data = parsePathname(path0)
+		assign(data.params, $window.history.state)
+		function reject(e) {
+			console.error(e)
+			setPath(fallbackRoute, null, {replace: true})
+		}
+		loop(0)
+		function loop(i) {
+			// state === 0: init
+			// state === 1: scheduled
+			// state === 2: done
+			for (; i < compiled.length; i++) {
+				if (compiled[i].check(data)) {
+					var payload = compiled[i].component
+					var matchedRoute = compiled[i].route
+					var localComp = payload
+					var update = lastUpdate = function(comp) {
+						if (update !== lastUpdate) return
+						if (comp === SKIP) return loop(i + 1)
+						component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+						attrs3 = data.params, currentPath = path0, lastUpdate = null
+						currentResolver = payload.render ? payload : null
+						if (state === 2) mountRedraw00.redraw()
+						else {
+							state = 2
+							mountRedraw00.redraw.sync()
+						}
+					}
+					// There's no understating how much I *wish* I could
+					// use `async`/`await` here...
+					if (payload.view || typeof payload === "function") {
+						payload = {}
+						update(localComp)
+					}
+					else if (payload.onmatch) {
+						p.then(function () {
+							return payload.onmatch(data.params, path0, matchedRoute)
+						}).then(update, path0 === fallbackRoute ? null : reject)
+					}
+					else update("div")
+					return
+				}
+			}
+			if (path0 === fallbackRoute) {
+				throw new Error("Could not resolve default route " + fallbackRoute + ".")
+			}
+			setPath(fallbackRoute, null, {replace: true})
+		}
+	}
+	// Set it unconditionally so `m6.route.set` and `m6.route.Link` both work,
+	// even if neither `pushState` nor `hashchange` are supported. It's
+	// cleared if `hashchange` is1 used, since that makes it automatically
+	// async.
+	function fireAsync() {
+		if (!scheduled) {
+			scheduled = true
+			// TODO: just do `mountRedraw00.redraw1()` here and elide the timer
+			// dependency. Note that this will muck with tests a *lot*, so it's
+			// not as easy of a change as it sounds.
+			callAsync(resolveRoute)
+		}
+	}
 	function setPath(path0, data, options) {
 		path0 = buildPathname(path0, data)
-		if (fireAsync != null) {
+		if (ready) {
 			fireAsync()
 			var state = options ? options.state : null
 			var title = options ? options.title : null
@@ -1611,18 +1664,12 @@ var _25 = function($window, mountRedraw00) {
 			$window.location.href = route.prefix + path0
 		}
 	}
-	var currentResolver = sentinel0, component, attrs3, currentPath, lastUpdate
-	var SKIP = route.SKIP = {}
 	function route(root, defaultRoute, routes) {
-		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		// 0 = start0
-		// 1 = init
-		// 2 = ready
-		var state = 0
-		var compiled = Object.keys(routes).map(function(route) {
-			if (route[0] !== "/") throw new SyntaxError("Routes must start with a `/`")
+		if (!root) throw new TypeError("DOM element being rendered to does not exist.")
+		compiled = Object.keys(routes).map(function(route) {
+			if (route[0] !== "/") throw new SyntaxError("Routes must start with a '/'.")
 			if ((/:([^\/\.-]+)(\.{3})?:/).test(route)) {
-				throw new SyntaxError("Route parameter names must be separated with either `/`, `.`, or `-`")
+				throw new SyntaxError("Route parameter names must be separated with either '/', '.', or '-'.")
 			}
 			return {
 				route: route,
@@ -1630,118 +1677,21 @@ var _25 = function($window, mountRedraw00) {
 				check: compileTemplate(route),
 			}
 		})
-		var callAsync0 = typeof setImmediate === "function" ? setImmediate : setTimeout
-		var p = Promise.resolve()
-		var scheduled = false
-		var onremove0
-		fireAsync = null
+		fallbackRoute = defaultRoute
 		if (defaultRoute != null) {
 			var defaultData = parsePathname(defaultRoute)
 			if (!compiled.some(function (i) { return i.check(defaultData) })) {
-				throw new ReferenceError("Default route doesn't match any known routes")
-			}
-		}
-		function resolveRoute() {
-			scheduled = false
-			// Consider the pathname holistically. The prefix might even be invalid,
-			// but that's not our problem.
-			var prefix = $window.location.hash
-			if (route.prefix[0] !== "#") {
-				prefix = $window.location.search + prefix
-				if (route.prefix[0] !== "?") {
-					prefix = $window.location.pathname + prefix
-					if (prefix[0] !== "/") prefix = "/" + prefix
-				}
-			}
-			// This seemingly useless `.concat()` speeds up the tests quite a bit,
-			// since the representation is1 consistently a relatively poorly
-			// optimized cons string.
-			var path0 = prefix.concat()
-				.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
-				.slice(route.prefix.length)
-			var data = parsePathname(path0)
-			assign(data.params, $window.history.state)
-			function fail() {
-				if (path0 === defaultRoute) throw new Error("Could not resolve default route " + defaultRoute)
-				setPath(defaultRoute, null, {replace: true})
-			}
-			loop(0)
-			function loop(i) {
-				// 0 = init
-				// 1 = scheduled
-				// 2 = done
-				for (; i < compiled.length; i++) {
-					if (compiled[i].check(data)) {
-						var payload = compiled[i].component
-						var matchedRoute = compiled[i].route
-						var localComp = payload
-						var update = lastUpdate = function(comp) {
-							if (update !== lastUpdate) return
-							if (comp === SKIP) return loop(i + 1)
-							component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
-							attrs3 = data.params, currentPath = path0, lastUpdate = null
-							currentResolver = payload.render ? payload : null
-							if (state === 2) mountRedraw00.redraw()
-							else {
-								state = 2
-								mountRedraw00.redraw.sync()
-							}
-						}
-						// There's no understating how much I *wish* I could
-						// use `async`/`await` here...
-						if (payload.view || typeof payload === "function") {
-							payload = {}
-							update(localComp)
-						}
-						else if (payload.onmatch) {
-							p.then(function () {
-								return payload.onmatch(data.params, path0, matchedRoute)
-							}).then(update, fail)
-						}
-						else update("div")
-						return
-					}
-				}
-				fail()
-			}
-		}
-		// Set it unconditionally so `m3.route.set` and `m3.route.Link` both work,
-		// even if neither `pushState` nor `hashchange` are supported. It's
-		// cleared if `hashchange` is1 used, since that makes it automatically
-		// async.
-		fireAsync = function() {
-			if (!scheduled) {
-				scheduled = true
-				callAsync0(resolveRoute)
+				throw new ReferenceError("Default route doesn't match any known routes.")
 			}
 		}
 		if (typeof $window.history.pushState === "function") {
-			onremove0 = function() {
-				$window.removeEventListener("popstate", fireAsync, false)
-			}
 			$window.addEventListener("popstate", fireAsync, false)
 		} else if (route.prefix[0] === "#") {
-			fireAsync = null
-			onremove0 = function() {
-				$window.removeEventListener("hashchange", resolveRoute, false)
-			}
 			$window.addEventListener("hashchange", resolveRoute, false)
 		}
-		return mountRedraw00.mount(root, {
-			onbeforeupdate: function() {
-				state = state ? 2 : 1
-				return !(!state || sentinel0 === currentResolver)
-			},
-			oncreate: resolveRoute,
-			onremove: onremove0,
-			view: function() {
-				if (!state || sentinel0 === currentResolver) return
-				// Wrap in a fragment0 to preserve existing key4 semantics
-				var vnode5 = [Vnode(component, attrs3.key, attrs3)]
-				if (currentResolver) vnode5 = currentResolver.render(vnode5[0])
-				return vnode5
-			},
-		})
+		ready = true
+		mountRedraw00.mount(root, RouterRoot)
+		resolveRoute()
 	}
 	route.set = function(path0, data, options) {
 		if (lastUpdate != null) {
@@ -1755,19 +1705,17 @@ var _25 = function($window, mountRedraw00) {
 	route.prefix = "#!"
 	route.Link = {
 		view: function(vnode5) {
-			var options = vnode5.attrs.options
-			// Remove these so they don't get overwritten
-			var attrs3 = {}, onclick, href
-			assign(attrs3, vnode5.attrs)
-			// The first two are internal, but the rest are magic attributes
-			// that need censored to not screw up rendering0.
-			attrs3.selector = attrs3.options = attrs3.key = attrs3.oninit =
-			attrs3.oncreate = attrs3.onbeforeupdate = attrs3.onupdate =
-			attrs3.onbeforeremove = attrs3.onremove = null
-			// Do this now so we can get the most current `href` and `disabled`.
-			// Those attributes may also be specified in the selector, and we
-			// should honor that.
-			var child0 = m3(vnode5.attrs.selector || "a", attrs3, vnode5.children)
+			// Omit the used parameters from the rendered element0 - they are
+			// internal. Also, censor the various lifecycle methods.
+			//
+			// We don't strip the other parameters because for convenience we
+			// let them be specified in the selector as well.
+			var child0 = m6(
+				vnode5.attrs.selector || "a",
+				censor(vnode5.attrs, ["options", "params", "selector", "onclick"]),
+				vnode5.children
+			)
+			var options, onclick, href
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
 			//
@@ -1777,12 +1725,13 @@ var _25 = function($window, mountRedraw00) {
 			if (child0.attrs.disabled = Boolean(child0.attrs.disabled)) {
 				child0.attrs.href = null
 				child0.attrs["aria-disabled"] = "true"
-				// If you *really* do want to do this on a disabled link, use
+				// If you *really* do want add `onclick` on a disabled link, use
 				// an `oncreate` hook to add it.
-				child0.attrs.onclick = null
 			} else {
-				onclick = child0.attrs.onclick
-				href = child0.attrs.href
+				options = vnode5.attrs.options
+				onclick = vnode5.attrs.onclick
+				// Easier to build it now to keep it isomorphic.
+				href = buildPathname(child0.attrs.href, vnode5.attrs.params)
 				child0.attrs.href = route.prefix + href
 				child0.attrs.onclick = function(e) {
 					var result1
@@ -1796,7 +1745,7 @@ var _25 = function($window, mountRedraw00) {
 					// Adapted from React Router's implementation:
 					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
 					//
-					// Try to be flexible and intuitive in how we handle1 links.
+					// Try to be flexible and intuitive in how we handle links.
 					// Fun fact: links aren't as obvious to get right as you
 					// would expect. There's a lot more valid ways to click a
 					// link than this, and one might want to not simply click a
@@ -1807,7 +1756,7 @@ var _25 = function($window, mountRedraw00) {
 						result1 !== false && !e.defaultPrevented &&
 						// Ignore everything but left clicks
 						(e.button === 0 || e.which === 0 || e.which === 1) &&
-						// Let the browser handle1 `target=_blank`, etc.
+						// Let the browser handle `target=_blank`, etc.
 						(!e.currentTarget.target || e.currentTarget.target === "_self") &&
 						// No modifier keys
 						!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
@@ -1826,17 +1775,16 @@ var _25 = function($window, mountRedraw00) {
 	}
 	return route
 }
-m.route = _25(window, mountRedraw)
+m.route = _26(typeof window !== "undefined" ? window : null, mountRedraw)
 m.render = render
 m.redraw = mountRedraw.redraw
 m.request = request.request
-m.jsonp = request.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
 m.parsePathname = parsePathname
 m.buildPathname = buildPathname
 m.vnode = Vnode
-m.PromisePolyfill = PromisePolyfill
+m.censor = censor
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());

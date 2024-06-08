@@ -1,3 +1,7 @@
+<!--meta-description
+Approaches you can use to animate your Mithril.js-based apps, including technology and performance suggestions
+-->
+
 # Animations
 
 - [Technology choices](#technology-choices)
@@ -11,7 +15,7 @@
 
 Animations are often used to make applications come alive. Nowadays, browsers have good support for CSS animations, and there are [various](https://greensock.com/gsap) [libraries](https://github.com/julianshapiro/velocity) that provide fast JavaScript-based animations. There's also an upcoming [Web API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API) and a [polyfill](https://github.com/web-animations/web-animations-js) if you like living on the bleeding edge.
 
-Mithril does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril does, however, offer hooks to make life easier in some specific cases where it's traditionally difficult to make animations work.
+Mithril.js does not provide any animation APIs per se, since these other options are more than sufficient to achieve rich, complex animations. Mithril.js does, however, offer hooks to make life easier in some specific cases where it's traditionally difficult to make animations work.
 
 ---
 
@@ -41,7 +45,7 @@ m.mount(document.body, FancyComponent)
 
 ### Animation on element removal
 
-The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril offers the [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
+The problem with animating before removing an element is that we must wait until the animation is complete before we can actually remove the element. Fortunately, Mithril.js offers the [`onbeforeremove`](lifecycle-methods.md#onbeforeremove) hook that allows us to defer the removal of an element.
 
 Let's create an `exit` animation that fades `opacity` from 1 to 0.
 
@@ -86,7 +90,7 @@ var FancyComponent = {
 
 `vnode.dom` points to the root DOM element of the component (`<div class="fancy">`). We use the classList API here to add an `exit` class to `<div class="fancy">`.
 
-Then we return a [Promise](promise.md) that resolves when the `animationend` event fires. When we return a promise from `onbeforeremove`, Mithril waits until the promise is resolved and only then it removes the element. In this case, it waits for the exit animation to finish.
+Then we return a Promise that resolves when the `animationend` event fires. When we return a promise from `onbeforeremove`, Mithril.js waits until the promise is resolved and only then it removes the element. In this case, it waits for the exit animation to finish.
 
 We can verify that both the enter and exit animations work by mounting the `Toggler` component:
 

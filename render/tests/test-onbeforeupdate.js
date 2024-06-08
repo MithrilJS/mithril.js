@@ -4,6 +4,8 @@ var o = require("ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
+var m = require("../../render/hyperscript")
+var fragment = require("../../render/fragment")
 
 o.spec("onbeforeupdate", function() {
 	var $window, root, render
@@ -15,66 +17,44 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in element", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(root.firstChild.attributes["id"].value).equals("a")
 	})
 
-	o("prevents update in text", function() {
-		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
-		var updated = {tag: "#", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
-
-		render(root, [vnode])
-		render(root, [updated])
-
-		o(root.firstChild.nodeValue).equals("a")
-	})
-
-	o("prevents update in html", function() {
-		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "a"}
-		var updated = {tag: "<", attrs: {onbeforeupdate: onbeforeupdate}, children: "b"}
-
-		render(root, [vnode])
-		render(root, [updated])
-
-		o(root.firstChild.nodeValue).equals("a")
-	})
-
 	o("prevents update in fragment", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "a"}]}
-		var updated = {tag: "[", attrs: {onbeforeupdate: onbeforeupdate}, children: [{tag: "#", children: "b"}]}
+		var vnode = fragment({onbeforeupdate: onbeforeupdate}, "a")
+		var updated = fragment({onbeforeupdate: onbeforeupdate}, "b")
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(root.firstChild.nodeValue).equals("a")
 	})
 
 	o("does not prevent update if returning true", function() {
 		var onbeforeupdate = function() {return true}
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(root.firstChild.attributes["id"].value).equals("b")
 	})
 
 	o("accepts arguments for comparison", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		function onbeforeupdate(vnode, old) {
 			count++
@@ -91,9 +71,9 @@ o.spec("onbeforeupdate", function() {
 
 	o("is not called on creation", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		function onbeforeupdate() {
 			count++
@@ -105,11 +85,11 @@ o.spec("onbeforeupdate", function() {
 
 	o("is called only once on update", function() {
 		var count = 0
-		var vnode = {tag: "div", attrs: {id: "a", onbeforeupdate: onbeforeupdate}}
-		var updated = {tag: "div", attrs: {id: "b", onbeforeupdate: onbeforeupdate}}
+		var vnode = m("div", {id: "a", onbeforeupdate: onbeforeupdate})
+		var updated = m("div", {id: "b", onbeforeupdate: onbeforeupdate})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		function onbeforeupdate() {
 			count++
@@ -121,9 +101,9 @@ o.spec("onbeforeupdate", function() {
 
 	o("doesn't fire on recycled nodes", function() {
 		var onbeforeupdate = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
+		var vnodes = [m("div", {key: 1})]
 		var temp = []
-		var updated = [{tag: "div", key: 1, attrs: {onbeforeupdate: onbeforeupdate}}]
+		var updated = [m("div", {key: 1, onbeforeupdate: onbeforeupdate})]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -142,14 +122,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
-						return {tag: "div", children: vnode.children}
+						return m("div", vnode.children)
 					},
 				})
-				var vnode = {tag: component, children: [{tag: "#", children: "a"}]}
-				var updated = {tag: component, children: [{tag: "#", children: "b"}]}
+				var vnode = m(component, "a")
+				var updated = m(component, "b")
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.firstChild.nodeValue).equals("a")
 			})
@@ -158,14 +138,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
-						return {tag: "div", attrs: {id: vnode.attrs.id}}
+						return m("div", {id: vnode.attrs.id})
 					},
 				})
-				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+				var vnode = m(component, {id: "a", onbeforeupdate: function() {return false}})
+				var updated = m(component, {id: "b", onbeforeupdate: function() {return false}})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.attributes["id"].value).equals("a")
 			})
@@ -174,14 +154,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
-						return {tag: "div", attrs: {id: vnode.attrs.id}}
+						return m("div", {id: vnode.attrs.id})
 					},
 				})
-				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+				var vnode = m(component, {id: "a", onbeforeupdate: function() {return true}})
+				var updated = m(component, {id: "b", onbeforeupdate: function() {return true}})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.attributes["id"].value).equals("b")
 			})
@@ -190,14 +170,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return false},
 					view: function(vnode) {
-						return {tag: "div", attrs: {id: vnode.attrs.id}}
+						return m("div", {id: vnode.attrs.id})
 					},
 				})
-				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return true}}}
-				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return true}}}
+				var vnode = m(component, {id: "a", onbeforeupdate: function() {return true}})
+				var updated = m(component, {id: "b", onbeforeupdate: function() {return true}})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.attributes["id"].value).equals("a")
 			})
@@ -206,14 +186,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
-						return {tag: "div", attrs: {id: vnode.attrs.id}}
+						return m("div", {id: vnode.attrs.id})
 					},
 				})
-				var vnode = {tag: component, attrs: {id: "a", onbeforeupdate: function() {return false}}}
-				var updated = {tag: component, attrs: {id: "b", onbeforeupdate: function() {return false}}}
+				var vnode = m(component, {id: "a", onbeforeupdate: function() {return false}})
+				var updated = m(component, {id: "b", onbeforeupdate: function() {return false}})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.attributes["id"].value).equals("a")
 			})
@@ -222,14 +202,14 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: function() {return true},
 					view: function(vnode) {
-						return {tag: "div", attrs: vnode.attrs}
+						return m("div", vnode.attrs)
 					},
 				})
-				var vnode = {tag: component, attrs: {id: "a"}}
-				var updated = {tag: component, attrs: {id: "b"}}
+				var vnode = m(component, {id: "a"})
+				var updated = m(component, {id: "b"})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				o(root.firstChild.attributes["id"].value).equals("b")
 			})
@@ -238,15 +218,15 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
-						return {tag: "div", attrs: vnode.attrs}
+						return m("div", vnode.attrs)
 					},
 				})
 				var count = 0
-				var vnode = {tag: component, attrs: {id: "a"}}
-				var updated = {tag: component, attrs: {id: "b"}}
+				var vnode = m(component, {id: "a"})
+				var updated = m(component, {id: "b"})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				function onbeforeupdate(vnode, old) {
 					count++
@@ -265,14 +245,14 @@ o.spec("onbeforeupdate", function() {
 				createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
-						return {tag: "div", attrs: vnode.attrs}
+						return m("div", vnode.attrs)
 					},
 				})
 
 				var count = 0
-				var vnode = {tag: "div", attrs: {id: "a"}}
+				var vnode = m("div", {id: "a"})
 
-				render(root, [vnode])
+				render(root, vnode)
 
 				function onbeforeupdate() {
 					count++
@@ -286,16 +266,16 @@ o.spec("onbeforeupdate", function() {
 				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
-						return {tag: "div", attrs: vnode.attrs}
+						return m("div", vnode.attrs)
 					},
 				})
 
 				var count = 0
-				var vnode = {tag: component, attrs: {id: "a"}}
-				var updated = {tag: component, attrs: {id: "b"}}
+				var vnode = m(component, {id: "a"})
+				var updated = m(component, {id: "b"})
 
-				render(root, [vnode])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, updated)
 
 				function onbeforeupdate() {
 					count++
@@ -311,94 +291,94 @@ o.spec("onbeforeupdate", function() {
 	o.spec("after prevented update", function() {
 		o("old attributes are retained", function() {
 			render(root, [
-				{tag: "div", attrs: {"id": "foo", onbeforeupdate: function() { return true }}, children: []},
+				m("div", {"id": "foo", onbeforeupdate: function() { return true }})
 			])
 			render(root, [
-				{tag: "div", attrs: {"id": "bar", onbeforeupdate: function() { return false }}, children: []},
+				m("div", {"id": "bar", onbeforeupdate: function() { return false }})
 			])
 			render(root, [
-				{tag: "div", attrs: {"id": "bar", onbeforeupdate: function() { return true }}, children: []},
+				m("div", {"id": "bar", onbeforeupdate: function() { return true }})
 			])
 			o(root.firstChild.attributes["id"].value).equals("bar")
 		})
 		o("old children is retained", function() {
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, children: []}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
-					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
-				]},
-			])
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div")
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return false }},
+					m("div", m("div"))
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div", m("div"))
+				)
+			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
 		o("old text is retained", function() {
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, text: ""}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
-					{tag: "div", attrs: {}, text: "foo"}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, text: "foo"}
-				]},
-			])
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div")
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return false }},
+					m("div", "foo")
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div", "foo")
+				)
+			)
 			o(root.firstChild.firstChild.firstChild.nodeValue).equals("foo")
 		})
 		o("updating component children doesn't error", function() {
 			var Child = {
 				view(v) {
-					return {tag: "div", attrs: {}, children: [
-						v.attrs.foo ? {tag: "div", attrs: {}, children: []} : null
-					]}
+					return m("div",
+						v.attrs.foo ? m("div") : null
+					)
 				}
 			}
 
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: Child, attrs: {foo: false}, children: []},
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
-					{tag: Child, attrs: {foo: false}, children: []},
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: Child, attrs: {foo: true}, children: []},
-				]},
-			])
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m(Child, {foo: false})
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return false }},
+					m(Child, {foo: false})
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m(Child, {foo: true})
+				)
+			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
 		o("adding dom children doesn't error", function() {
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, children: []}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return false }}, children: [
-					{tag: "div", attrs: {}, children: []}
-				]},
-			])
-			render(root, [
-				{tag: "div", attrs: {onbeforeupdate: function() { return true }}, children: [
-					{tag: "div", attrs: {}, children: [{tag: "div", attrs: {}, children: []}]}
-				]},
-			])
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div")
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return false }},
+					m("div")
+				)
+			)
+			render(root,
+				m("div", {onbeforeupdate: function() { return true }},
+					m("div", m("div"))
+				)
+			)
 			o(root.firstChild.firstChild.childNodes.length).equals(1)
 		})
 	})

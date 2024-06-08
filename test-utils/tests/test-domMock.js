@@ -665,16 +665,13 @@ o.spec("domMock", function() {
 			o(div.style.background).equals("url('/*foo*/')")
 
 		})
-		o("setting style throws", function () {
+		o("setting style updates style.cssText", function () {
 			var div = $document.createElement("div")
-			var err = false
-			try {
-				div.style = ""
-			} catch (e) {
-				err = e
-			}
+			div.style = "background: red;"
 
-			o(err instanceof Error).equals(true)
+			o(div.style.background).equals("red")
+			o(div.style.cssText).equals("background: red;")
+
 		})
 	})
 	o.spec("events", function() {

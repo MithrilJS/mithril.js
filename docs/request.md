@@ -1,3 +1,7 @@
+<!--meta-description
+Documentation on m.request(), a utility for making XHR/AJAX requests
+-->
+
 # request(options)
 
 - [Description](#description)
@@ -21,7 +25,7 @@
 
 ### Description
 
-Makes XHR (aka AJAX) requests, and returns a [promise](promise.md)
+Makes XHR (aka AJAX) requests, and returns a promise
 
 ```javascript
 m.request({
@@ -57,11 +61,11 @@ Argument                  | Type                              | Required | Descr
 `options.config`          | `xhr = Function(xhr)`             | No       | Exposes the underlying XMLHttpRequest object for low-level configuration and optional replacement (by returning a new XHR).
 `options.headers`         | `Object`                          | No       | Headers to append to the request before sending it (applied right before `options.config`).
 `options.type`            | `any = Function(any)`             | No       | A constructor to be applied to each object in the response. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function).
-`options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `body`. Defaults to `JSON.stringify`, or if `options.body` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
+`options.serialize`       | `string = Function(any)`          | No       | A serialization method to be applied to `body`. Defaults to `JSON.stringify`, or if `options.body` is an instance of [`FormData`](https://developer.mozilla.org/en/docs/Web/API/FormData) or [`URLSearchParams`](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams), defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function) (i.e. `function(value) {return value}`).
 `options.deserialize`     | `any = Function(any)`          | No       | A deserialization method to be applied to the `xhr.response` or normalized `xhr.responseText`. Defaults to the [identity function](https://en.wikipedia.org/wiki/Identity_function). If `extract` is defined, `deserialize` will be skipped.
 `options.extract`         | `any = Function(xhr, options)`    | No       | A hook to specify how the XMLHttpRequest response should be read. Useful for processing response data, reading headers and cookies. By default this is a function that returns `options.deserialize(parsedResponse)`, throwing an exception when the server response status code indicates an error or when the response is syntactically invalid. If a custom `extract` callback is provided, the `xhr` parameter is the XMLHttpRequest instance used for the request, and `options` is the object that was passed to the `m.request` call. Additionally, `deserialize` will be skipped and the value returned from the extract callback will be left as-is when the promise resolves.
 `options.background`      | `Boolean`                         | No       | If `false`, redraws mounted components upon completion of the request. If `true`, it does not. Defaults to `false`.
-**returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods
+**returns**               | `Promise`                         |          | A promise that resolves to the response data, after it has been piped through the `extract`, `deserialize` and `type` methods. If the response status code indicates an error, the promise rejects, but this can be prevented by setting the `extract` option. 
 
 `promise = m.request(url, options)`
 
@@ -91,7 +95,7 @@ m.request({
 })
 ```
 
-A call to `m.request` returns a [promise](promise.md) and triggers a redraw upon completion of its promise chain.
+A call to `m.request` returns a promise and triggers a redraw upon completion of its promise chain.
 
 By default, `m.request` assumes the response is in JSON format and parses it into a JavaScript object (or array).
 
@@ -360,14 +364,14 @@ function upload(e) {
 			xhr.upload.addEventListener("progress", function(e) {
 				progress = e.loaded / e.total
 
-				m.redraw() // tell Mithril that data changed and a re-render is needed
+				m.redraw() // tell Mithril.js that data changed and a re-render is needed
 			})
 		}
 	})
 }
 ```
 
-In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the `config` callback, a `progress` event handler is registered. This event handler is fired whenever there's a progress update in the XMLHttpRequest. Because the XMLHttpRequest's progress event is not directly handled by Mithril's virtual DOM engine, `m.redraw()` must be called to signal to Mithril that data has changed and a redraw is required.
+In the example above, a file input is rendered. If the user picks a file, an upload is initiated, and in the `config` callback, a `progress` event handler is registered. This event handler is fired whenever there's a progress update in the XMLHttpRequest. Because the XMLHttpRequest's progress event is not directly handled by Mithril.js' virtual DOM engine, `m.redraw()` must be called to signal to Mithril.js that data has changed and a redraw is required.
 
 ---
 
@@ -375,7 +379,7 @@ In the example above, a file input is rendered. If the user picks a file, an upl
 
 Depending on the overall application architecture, it may be desirable to transform the response data of a request to a specific class or type (for example, to uniformly parse date fields or to have helper methods).
 
-You can pass a constructor as the `options.type` parameter and Mithril will instantiate it for each object in the HTTP response.
+You can pass a constructor as the `options.type` parameter and Mithril.js will instantiate it for each object in the HTTP response.
 
 ```javascript
 function User(data) {
@@ -398,7 +402,7 @@ In the example above, assuming `/api/v1/users` returns an array of objects, the 
 
 ### Non-JSON responses
 
-Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
+Sometimes a server endpoint does not return a JSON response: for example, you may be requesting an HTML file, an SVG file, or a CSV file. By default Mithril.js attempts to parse a response as if it was JSON. To override that behavior, define a custom `options.deserialize` function:
 
 ```javascript
 m.request({
@@ -454,7 +458,7 @@ m.request({
 
 ### Retrieving response details
 
-By default Mithril attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
+By default Mithril.js attempts to parse `xhr.responseText` as JSON and returns the parsed object. It may be useful to inspect a server response in more detail and process it manually. This can be accomplished by passing a custom `options.extract` function:
 
 ```javascript
 m.request({
@@ -475,9 +479,9 @@ The parameter to `options.extract` is the XMLHttpRequest object once its operati
 
 Many server-side frameworks provide a view engine that interpolates database data into a template before serving HTML (on page load or via AJAX) and then employ jQuery to handle user interactions.
 
-By contrast, Mithril is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
+By contrast, Mithril.js is framework designed for thick client applications, which typically download templates and data separately and combine them in the browser via JavaScript. Doing the templating heavy-lifting in the browser can bring benefits like reducing operational costs by freeing server resources. Separating templates from data also allow template code to be cached more effectively and enables better code reusability across different types of clients (e.g. desktop, mobile). Another benefit is that Mithril.js enables a [retained mode](https://en.wikipedia.org/wiki/Retained_mode) UI development paradigm, which greatly simplifies development and maintenance of complex user interactions.
 
-By default, `m.request` expects response data to be in JSON format. In a typical Mithril application, that JSON data is then usually consumed by a view.
+By default, `m.request` expects response data to be in JSON format. In a typical Mithril.js application, that JSON data is then usually consumed by a view.
 
 You should avoid trying to render server-generated dynamic HTML with Mithril. If you have an existing application that does use a server-side templating system, and you wish to re-architecture it, first decide whether the effort is feasible at all to begin with. Migrating from a thick server architecture to a thick client architecture is typically a somewhat large effort, and involves refactoring logic out of templates into logical data services (and the testing that goes with it).
 
@@ -489,18 +493,18 @@ Data services may be organized in many different ways depending on the nature of
 
 [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) is a newer Web API for fetching resources from servers, similar to `XMLHttpRequest`.
 
-Mithril's `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of reasons:
+Mithril.js' `m.request` uses `XMLHttpRequest` instead of `fetch()` for a number of reasons:
 
 - `fetch` is not fully standardized yet, and may be subject to specification changes.
 - `XMLHttpRequest` calls can be aborted before they resolve (e.g. to avoid race conditions in for instant search UIs).
 - `XMLHttpRequest` provides hooks for progress listeners for long running requests (e.g. file uploads).
 - `XMLHttpRequest` is supported by all browsers, whereas `fetch()` is not supported by Internet Explorer and older Android (prior to 5.0 Lollipop).
 
-Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril's XHR module.
+Currently, due to lack of browser support, `fetch()` typically requires a [polyfill](https://github.com/github/fetch), which is over 11kb uncompressed - nearly three times larger than Mithril.js' XHR module.
 
-Despite being much smaller, Mithril's XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls), querystring serialization and [JSON-P requests](jsonp.md), in addition to its ability to integrate seamlessly to Mithril's autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
+Despite being much smaller, Mithril.js' XHR module supports many important and not-so-trivial-to-implement features like [URL interpolation](#dynamic-urls) and querystring serialization in addition to its ability to integrate seamlessly to Mithril.js' autoredrawing subsystem. The `fetch` polyfill does not support any of those, and requires extra libraries and boilerplates to achieve the same level of functionality.
 
-In addition, Mithril's XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
+In addition, Mithril.js' XHR module is optimized for JSON-based endpoints and makes that most common case appropriately terse - i.e. `m.request(url)` - whereas `fetch` requires an additional explicit step to parse the response data as JSON: `fetch(url).then(function(response) {return response.json()})`
 
 The `fetch()` API does have a few technical advantages over `XMLHttpRequest` in a few uncommon cases:
 
@@ -515,7 +519,7 @@ In typical scenarios, streaming won't provide noticeable performance benefits be
 
 #### Promises are not the response data
 
-The `m.request` method returns a [Promise](promise.md), not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
+The `m.request` method returns a `Promise`, not the response data itself. It cannot return that data directly because an HTTP request may take a long time to complete (due to network latency), and if JavaScript waited for it, it would freeze the application until the data was available.
 
 ```javascript
 // AVOID

@@ -1,6 +1,6 @@
 ---
 name: "\U0001F64B‍♀️ Question"
-about: Ask a question about Mithril
+about: Ask a question about Mithril.js
 title: ''
 labels: 'Type: Question'
 assignees: ''
@@ -9,10 +9,10 @@ assignees: ''
 
 <!-- Provide a general summary of your question in the "Title" above -->
 <!--
-Provide the exact version of Mithril you're experiencing these issues with. This
+Provide the exact version of Mithril.js you're experiencing these issues with. This
 matters, even if it's really old like version 0.1.0.
 -->
-**Mithril version:**
+**Mithril.js version:**
 
 <!--
 Provide the name and version of both the browser and operating system you're

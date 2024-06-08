@@ -1,3 +1,6 @@
+<!--meta-description
+Documentation on how to work with paths in Mithril.js
+-->
 # Path Handling
 
 - [Path types](#path-types)
@@ -8,7 +11,7 @@
 
 -----
 
-[`m.route`](route.md), [`m.request`](request.md), and [`m.jsonp`](jsonp.md) each have a concept called a path. This is used to generate the URL you route to or fetch from.
+[`m.route`](route.md) and [`m.request`](request.md) each have a concept called a path. This is used to generate the URL you route to or fetch from.
 
 ### Path types
 
@@ -17,7 +20,7 @@ There are two general types of paths: raw paths and parameterized paths.
 - Raw paths are simply strings used directly as URLs. Nothing is substituted or even split. It's just normalized with all the parameters appended to the end.
 - Parameterized paths let you insert values into paths, escaped by default for convenience and safety against URL injection.
 
-For [`m.request`](request.md) and [`m.jsonp`](jsonp.md), these can be pretty much any URL, but for [routes](route.md), these can only be absolute URL path names without schemes or domains.
+For [`m.request`](request.md) these can be pretty much any URL, but for [routes](route.md), these can only be absolute URL path names without schemes or domains.
 
 ### Path parameters
 
@@ -26,7 +29,7 @@ Path parameters are themselves pretty simple. They come in two forms:
 - `:foo` - This injects a simple `params.foo` into the URL, escaping its value first.
 - `:foo...` - This injects a raw `params.foo` path into the URL without escaping anything.
 
-You're probably wondering what that `params` object is supposed to be. It's pretty simple: it's the `params` in either [`m.route.set(path, params)`](route.md#mrouteset), [`m.request({url, params})`](request.md#signature), or [`m.jsonp({url, params})`](jsonp.md#signature).
+You're probably wondering what that `params` object is supposed to be. It's pretty simple: it's the `params` in either [`m.route.set(path, params)`](route.md#mrouteset), [`m.request({url, params})`](request.md#signature).
 
 When receiving routes via [`m.route(root, defaultRoute, routes)`](route.md#signature), you can use these parameters to *extract* values from routes. They work basically the same way as generating the paths, just in the opposite direction.
 
@@ -124,17 +127,17 @@ m.route(document.body, "/edit/1", {
 })
 ```
 
-Query parameters are implicitly consumed - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril would treat that as you trying to literally match against `m.route.param("type") === ":type"`, so you probably don't want to do that. In short, use `m.route.param("key")` or route component attributes to read query parameters.
+Query parameters are implicitly consumed - you don't need to name them to accept them. You can match based on an existing value, like in `"/edit?type=image"`, but you don't need to use `"/edit?type=:type"` to accept the value. In fact, Mithril.js would treat that as you trying to literally match against `m.route.param("type") === ":type"`, so you probably don't want to do that. In short, use `m.route.param("key")` or route component attributes to read query parameters.
 
 ### Path normalization
 
-Parsed paths are always returned with all the duplicate parameters and extra slashes dropped, and they always start with a slash. These little differences often get in the way, and it makes routing and path handling a lot more complicated than it should be. Mithril internally normalizes paths for routing, but it does not expose the current, normalized route directly. (You could compute it via [`m.parsePathname(m.route.get()).path`](parsePathname.md).)
+Parsed paths are always returned with all the duplicate parameters and extra slashes dropped, and they always start with a slash. These little differences often get in the way, and it makes routing and path handling a lot more complicated than it should be. Mithril.js internally normalizes paths for routing, but it does not expose the current, normalized route directly. (You could compute it via [`m.parsePathname(m.route.get()).path`](parsePathname.md).)
 
 When parameters are deduplicated during matching, parameters in the query string are preferred over parameters in the path name, and parameters towards the end of the URL are preferred over parameters closer to the start of the URL.
 
 ### Path escaping
 
-There are some characters that, if you want to use them literally, you need to escape. Conveniently, `encodeURIComponent` encodes these (and more), and when you substitute parameters and add query parameters, they're encoded as necessary using this. Here's the ones Mithril interprets:
+There are some characters that, if you want to use them literally, you need to escape. Conveniently, `encodeURIComponent` encodes these (and more), and when you substitute parameters and add query parameters, they're encoded as necessary using this. Here's the ones Mithril.js interprets:
 
 - `:` = `%3A`
 - `/` = `%2F` (required only in paths)
@@ -142,4 +145,4 @@ There are some characters that, if you want to use them literally, you need to e
 - `?` = `%3F` (required only in paths)
 - `#` = `%23`
 
-Of course, there's others you have to escape per the URL spec, like spaces. But as already noted, `encodeURIComponent` does that for you, and Mithril uses that implicitly when you substitute parameters. So you only really need to care if you're specifying parameters explicitly like in `m.request("https://example.com/api/user/User%20Name/:field", {params: {field: ...}})`.
+Of course, there's others you have to escape per the URL spec, like spaces. But as already noted, `encodeURIComponent` does that for you, and Mithril.js uses that implicitly when you substitute parameters. So you only really need to care if you're specifying parameters explicitly like in `m.request("https://example.com/api/user/User%20Name/:field", {params: {field: ...}})`.

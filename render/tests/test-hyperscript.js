@@ -271,7 +271,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {key:"a"})
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -343,7 +343,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("custom-element", {key:"a"})
 
 			o(vnode.tag).equals("custom-element")
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.key).equals("a")
 		})
 		o("handles many attrs", function() {
@@ -372,22 +372,22 @@ o.spec("hyperscript", function() {
 		o("handles string single child", function() {
 			var vnode = m("div", {}, ["a"])
 
-			o(vnode.text).equals("a")
+			o(vnode.children[0].children).equals("a")
 		})
 		o("handles falsy string single child", function() {
 			var vnode = m("div", {}, [""])
 
-			o(vnode.text).equals("")
+			o(vnode.children[0].children).equals("")
 		})
 		o("handles number single child", function() {
 			var vnode = m("div", {}, [1])
 
-			o(vnode.text).equals("1")
+			o(vnode.children[0].children).equals("1")
 		})
 		o("handles falsy number single child", function() {
 			var vnode = m("div", {}, [0])
 
-			o(vnode.text).equals("0")
+			o(vnode.children[0].children).equals("0")
 		})
 		o("handles boolean single child", function() {
 			var vnode = m("div", {}, [true])
@@ -438,7 +438,7 @@ o.spec("hyperscript", function() {
 		o("handles falsy number single child without attrs", function() {
 			var vnode = m("div", 0)
 
-			o(vnode.text).equals("0")
+			o(vnode.children[0].children).equals("0")
 		})
 	})
 	o.spec("permutations", function() {
@@ -495,25 +495,25 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, ["c"])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("c")
+			o(vnode.children[0].children).equals("c")
 		})
 		o("handles attr and single falsy string text child", function() {
 			var vnode = m("div", {a: "b"}, [""])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("")
+			o(vnode.children[0].children).equals("")
 		})
 		o("handles attr and single number text child", function() {
 			var vnode = m("div", {a: "b"}, [1])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("1")
+			o(vnode.children[0].children).equals("1")
 		})
 		o("handles attr and single falsy number text child", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("0")
+			o(vnode.children[0].children).equals("0")
 		})
 		o("handles attr and single boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [true])
@@ -525,7 +525,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, [0])
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("0")
+			o(vnode.children[0].children).equals("0")
 		})
 		o("handles attr and single false boolean text child", function() {
 			var vnode = m("div", {a: "b"}, [false])
@@ -537,7 +537,7 @@ o.spec("hyperscript", function() {
 			var vnode = m("div", {a: "b"}, "c")
 
 			o(vnode.attrs.a).equals("b")
-			o(vnode.text).equals("c")
+			o(vnode.children[0].children).equals("c")
 		})
 		o("handles attr and text children unwrapped", function() {
 			var vnode = m("div", {a: "b"}, "c", "d")
@@ -551,20 +551,20 @@ o.spec("hyperscript", function() {
 		o("handles children without attr", function() {
 			var vnode = m("div", [m("i"), m("s")])
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
 		o("handles child without attr unwrapped", function() {
 			var vnode = m("div", m("i"))
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 		})
 		o("handles children without attr unwrapped", function() {
 			var vnode = m("div", m("i"), m("s"))
 
-			o(vnode.attrs).equals(null)
+			o(vnode.attrs).deepEquals({})
 			o(vnode.children[0].tag).equals("i")
 			o(vnode.children[1].tag).equals("s")
 		})
@@ -579,6 +579,15 @@ o.spec("hyperscript", function() {
 
 			o(nodeB.attrs.className).equals("b")
 			o(nodeB.attrs.a).equals("b")
+		})
+		o("handles shared empty attrs (#2821)", function() {
+			var attrs = {}
+
+			var nodeA = m(".a", attrs)
+			var nodeB = m(".b", attrs)
+
+			o(nodeA.attrs.className).equals("a")
+			o(nodeB.attrs.className).equals("b")
 		})
 		o("doesnt modify passed attributes object", function() {
 			var attrs = {a: "b"}

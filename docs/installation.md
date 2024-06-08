@@ -1,17 +1,22 @@
+<!--meta-description
+Instructions on how to install Mithril.js
+-->
+
 # Installation
 
-- [CDN](#cdn)
+- [CDN and online playground](#cdn)
 - [npm](#npm)
 - [Quick start with Webpack](#quick-start-with-webpack)
-- [TypeScript](#typescript)
 
-### CDN
+### CDN and online playground
 
-If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
+If you're new to JavaScript or just want a very simple setup to get your feet wet, you can get Mithril.js from a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network):
 
 ```html
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 ```
+
+If you would like to try out mithril without setting up a local environment, you can easily use an online playground at [flems.io/mithril](https://flems.io/mithril).
 
 ---
 
@@ -29,7 +34,7 @@ $ npm install @types/mithril --save-dev
 
 For example usage, to file issues or to discuss TypeScript related topics visit: https://github.com/MithrilJS/mithril.d.ts
 
-Type definitions for pre-release versions of Mithril (on the `next` branch) align with the `next` branch of the [types development repo](https://github.com/MithrilJS/mithril.d.ts/tree/next). You can install these types with:
+Type definitions for pre-release versions of Mithril.js (on the `next` branch) align with the `next` branch of the [types development repo](https://github.com/MithrilJS/mithril.d.ts/tree/next). You can install these types with:
 
 ```bash
 $ npm install -D MithrilJS/mithril.d.ts#next
@@ -55,7 +60,7 @@ $ npm install webpack webpack-cli --save-dev
 {
 	"...": "...",
 	"scripts": {
-		"start": "webpack src/index.js --output bin/app.js -d --watch"
+		"start": "webpack ./src/index.js --output-path ./bin --watch"
 	}
 }
 ```
@@ -70,7 +75,7 @@ m.render(document.body, "hello world");
 ```html
 <!DOCTYPE html>
 <body>
-    <script src="bin/app.js"></script>
+	<script src="bin/main.js"></script>
 </body>
 ```
 
@@ -81,7 +86,7 @@ $ npm start
 
 7. open `index.html` in a browser
 
-Optionally, you can include Mithril as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
+Optionally, you can include Mithril.js as a global variable using Webpack's provide plugin, to avoid including `import m from "mithril"` across a large number of files:
 ```js
 plugins: [
     new webpack.ProvidePlugin({m: "mithril"}),
@@ -92,18 +97,18 @@ Then, you could remove the import line from step 4 (don't forget to restart Webp
 
 #### Step by step
 
-For production-level projects, the recommended way of installing Mithril is to use npm.
+For production-level projects, the recommended way of installing Mithril.js is to use npm.
 
-npm is the default package manager that is bundled w/ Node.js. It is widely used as the package manager for both client-side and server-side libraries in the JavaScript ecosystem. Download and install [Node](https://nodejs.org); npm is bundled with that and installed alongside it.
+npm is the default package manager that is bundled with Node.js. It is widely used as the package manager for both client-side and server-side libraries in the JavaScript ecosystem. Download and install [Node](https://nodejs.org); npm is bundled with that and installed alongside it.
 
-To use Mithril via npm, go to your project folder, and run `npm init --yes` from the command line. This will create a file called `package.json`.
+To use Mithril.js via npm, go to your project folder, and run `npm init --yes` from the command line. This will create a file called `package.json`.
 
 ```bash
 npm init --yes
 # creates a file called package.json
 ```
 
-Then, to install Mithril, run:
+Then, to install Mithril.js, run:
 
 ```bash
 npm install mithril --save
@@ -149,7 +154,7 @@ The `-d` flag tells webpack to use development mode, which produces source maps 
 
 The `--watch` flag tells webpack to watch the file system and automatically recreate `app.js` if file changes are detected.
 
-Now you can run the script via `npm start` in your command line window. This looks up the `webpack` command in the npm path, reads `index.js` and creates a file called `app.js` which includes both Mithril and the `hello world` code above. If you want to run the `webpack` command directly from the command line, you need to either add `node_modules/.bin` to your PATH, or install webpack globally via `npm install webpack -g`. It's, however, recommended that you always install webpack locally and use npm scripts, to ensure builds are reproducible in different computers.
+Now you can run the script via `npm start` in your command line window. This looks up the `webpack` command in the npm path, reads `index.js` and creates a file called `app.js` which includes both Mithril.js and the `hello world` code above. If you want to run the `webpack` command directly from the command line, you need to either add `node_modules/.bin` to your PATH, or install webpack globally via `npm install webpack -g`. It's, however, recommended that you always install webpack locally and use npm scripts, to ensure builds are reproducible in different computers.
 
 ```
 npm start
@@ -190,7 +195,7 @@ var MyComponent = require("./mycomponent")
 m.mount(document.body, MyComponent)
 ```
 
-Note that in this example, we're using `m.mount`, which wires up the component to Mithril's autoredraw system. In most applications, you will want to use `m.mount` (or `m.route` if your application has multiple screens) instead of `m.render` to take advantage of the autoredraw system, rather than re-rendering manually every time a change occurs.
+Note that in this example, we're using `m.mount`, which wires up the component to Mithril.js' autoredraw system. In most applications, you will want to use `m.mount` (or `m.route` if your application has multiple screens) instead of `m.render` to take advantage of the autoredraw system, rather than re-rendering manually every time a change occurs.
 
 #### Production build
 
@@ -221,7 +226,7 @@ You can use hooks in your production environment to run the production build scr
 
 ---
 
-### Alternate ways to use Mithril
+### Alternate ways to use Mithril.js
 
 #### Live reload development environment
 
@@ -264,6 +269,6 @@ If you don't have the ability to run a bundler script due to company security po
 ```javascript
 // index.js
 
-// if a CommonJS environment is not detected, Mithril will be created in the global scope
+// if a CommonJS environment is not detected, Mithril.js will be created in the global scope
 m.render(document.body, "hello world")
 ```

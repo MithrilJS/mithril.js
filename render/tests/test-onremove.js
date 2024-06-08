@@ -5,6 +5,7 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
+var fragment = require("../../render/fragment")
 
 o.spec("onremove", function() {
 	var $window, root, render
@@ -17,42 +18,31 @@ o.spec("onremove", function() {
 	o("does not call onremove when creating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(create.callCount).equals(0)
 	})
 	o("does not call onremove when updating", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: create}}
-		var updated = {tag: "div", attrs: {onremove: update}}
+		var vnode = m("div", {onremove: create})
+		var updated = m("div", {onremove: update})
 
-		render(root, [vnode])
-		render(root, [updated])
+		render(root, vnode)
+		render(root, updated)
 
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
 	o("calls onremove when removing element", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, state: {}}
+		var vnode = m("div", {onremove: remove})
 
-		render(root, [vnode])
-		render(root, [])
-
-		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode.state)
-		o(remove.args[0]).equals(vnode)
-	})
-	o("calls onremove when removing text", function() {
-		var remove = o.spy()
-		var vnode = {tag: "#", attrs: {onremove: remove}, children: "a", state: {}}
-
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		o(remove.callCount).equals(1)
@@ -61,20 +51,9 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = {tag: "[", attrs: {onremove: remove}, children: [], state: {}}
+		var vnode = fragment({onremove: remove})
 
-		render(root, [vnode])
-		render(root, [])
-
-		o(remove.callCount).equals(1)
-		o(remove.this).equals(vnode.state)
-		o(remove.args[0]).equals(vnode)
-	})
-	o("calls onremove when removing html", function() {
-		var remove = o.spy()
-		var vnode = {tag: "<", attrs: {onremove: remove}, children: "a", state: {}}
-
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
 
 		o(remove.callCount).equals(1)
@@ -83,9 +62,9 @@ o.spec("onremove", function() {
 	})
 	o("does not set onremove as an event handler", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", attrs: {onremove: remove}, children: []}
+		var vnode = m("div", {onremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 
 		o(vnode.dom.onremove).equals(undefined)
 		o(vnode.dom.attributes["onremove"]).equals(undefined)
@@ -93,9 +72,9 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove on keyed nodes", function() {
 		var remove = o.spy()
-		var vnodes = [{tag: "div", key: 1}]
-		var temp = [{tag: "div", key: 2, attrs: {onremove: remove}}]
-		var updated = [{tag: "div", key: 1}]
+		var vnodes = [m("div", {key: 1})]
+		var temp = [m("div", {key: 2, onremove: remove})]
+		var updated = [m("div", {key: 1})]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -106,12 +85,12 @@ o.spec("onremove", function() {
 	})
 	o("does not recycle when there's an onremove", function() {
 		var remove = o.spy()
-		var vnode = {tag: "div", key: 1, attrs: {onremove: remove}}
-		var updated = {tag: "div", key: 1, attrs: {onremove: remove}}
+		var vnode = m("div", {key: 1, onremove: remove})
+		var updated = m("div", {key: 1, onremove: remove})
 
-		render(root, [vnode])
+		render(root, vnode)
 		render(root, [])
-		render(root, [updated])
+		render(root, updated)
 
 		o(vnode.dom).notEquals(updated.dom)
 	})
@@ -131,7 +110,7 @@ o.spec("onremove", function() {
 					onremove: spy,
 					view: function() {return m("div")}
 				})
-				render(root, {tag: comp})
+				render(root, m(comp))
 				render(root, null)
 
 				o(spy.callCount).equals(1)
@@ -147,7 +126,7 @@ o.spec("onremove", function() {
 				var inner = createComponent({
 					view: function(vnode) {return m("div", vnode.children)}
 				})
-				render(root, {tag: comp})
+				render(root, m(comp))
 				render(root, null)
 
 				o(spy.callCount).equals(1)
@@ -162,7 +141,7 @@ o.spec("onremove", function() {
 					view: function() {},
 					onremove: spy
 				})
-				render(root, {tag: parent, children: [child]})
+				render(root, m(parent, m(child)))
 				try {
 					render(root, null)
 				} catch (e) {
@@ -182,9 +161,9 @@ o.spec("onremove", function() {
 					view: function() {},
 					onremove: spy
 				})
-				render(root, {tag: parent, children: [child]})
+				render(root, m(parent, m(child)))
 				try {
-					render(root, {tag: parent})
+					render(root, m(parent))
 				} catch (e) {
 					threw = true
 				}
@@ -203,26 +182,27 @@ o.spec("onremove", function() {
 			})
 			o("doesn't fire when removing the children of a node that's brought back from the pool (#1991 part 2)", function() {
 				var onremove = o.spy()
-				var vnode = {tag: "div", key: 1, children: [{tag: "div", attrs: {onremove: onremove}}]}
-				var temp = {tag: "div", key: 2}
-				var updated = {tag: "div", key: 1, children: [{tag: "p"}]}
+				var vnode = m("div", {key: 1}, m("div", {onremove: onremove}))
+				var temp = m("div", {key: 2})
+				var updated = m("div", {key: 1}, m("p"))
 
-				render(root, [vnode])
-				render(root, [temp])
-				render(root, [updated])
+				render(root, vnode)
+				render(root, temp)
+				render(root, updated)
 
 				o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 				o(onremove.callCount).equals(1)
 			})
 			// Warning: this test is complicated because it's replicating a race condition.
-			o("removes correct nodes when child delays removal, parent removes, then child resolves", function () {
-				// Sugar over the complexity - I need to test the entire tree for consistency.
-				function expect(expectedPairs) {
+			o("removes correct nodes in fragment when child delays removal, parent removes, then child resolves", function () {
+				// Custom assertion - we need to test the entire tree for consistency.
+
+				const template = (tpl) => (root) => {
 					var expected = []
 
-					for (var i = 0; i < expectedPairs.length; i++) {
-						var name = expectedPairs[i][0]
-						var text = expectedPairs[i][1]
+					for (var i = 0; i < tpl.length; i++) {
+						var name = tpl[i][0]
+						var text = tpl[i][1]
 						expected.push({
 							name: name,
 							firstType: name === "#text" ? null : "#text",
@@ -243,194 +223,156 @@ o.spec("onremove", function() {
 							text: textNode.nodeValue,
 						})
 					}
-
-					o(actual).deepEquals(expected)
+					actual = JSON.stringify(actual, null, "  ")
+					expected = JSON.stringify(expected, null, "  ")
+					return {
+						pass: actual === expected,
+						message:
+`${expected}
+  expected, got
+${actual}`
+					}
 				}
-
-				var resolve
-
+				var finallyCB1
+				var finallyCB2
+				var C = createComponent({
+					view({children}){return children},
+					onbeforeremove(){
+						return {then(){}, finally: function (fcb) { finallyCB1 = fcb }}
+					}
+				})
 				function update(id, showParent, showChild) {
-					render(root, [
-						{tag: "div", children: [
-							showParent ? {tag: "[", children: [
-								{tag: "#", children: ""}, // Required
-								showChild ? {tag: "[", attrs: {
+					const removeParent = o.spy()
+					const removeSyncChild = o.spy()
+					const removeAsyncChild = o.spy()
+
+					render(root,
+						m("div",
+							showParent && fragment(
+								{onremove: removeParent},
+								m("a", {onremove: removeSyncChild}, "sync child"),
+								showChild && m(C, {
 									onbeforeremove: function () {
-										return {then: function (r) { resolve = r }}
+										return {then(){}, finally: function (fcb) { finallyCB2 = fcb }}
 									},
-								}, children: [
-									{tag: "div", text: id},
-								]} : undefined,
-							]} : undefined,
-						]}
-					])
+									onremove: removeAsyncChild
+								}, m("div", id))
+							)
+						)
+					)
+					return {removeAsyncChild,removeParent, removeSyncChild}
 				}
 
-				update("1", true, true)
-				expect([
-					["#text", ""],
+				const hooks1 = update("1", true, true)
+				o(root).satisfies(template([
+					["A", "sync child"],
 					["DIV", "1"],
-				])
-				o(resolve).equals(undefined)
+				]))
+				o(finallyCB1).equals(undefined)
+				o(finallyCB2).equals(undefined)
 
-				update("2", true, false)
-				expect([
-					["#text", ""],
+				const hooks2 = update("2", true, false)
+
+				o(root).satisfies(template([
+					["A", "sync child"],
 					["DIV", "1"],
-				])
-				o(typeof resolve).equals("function")
-				var original = resolve
+				]))
 
-				update("3", true, true)
-				expect([
-					["#text", ""],
+				o(typeof finallyCB1).equals("function")
+				o(typeof finallyCB2).equals("function")
+
+				var original1 = finallyCB1
+				var original2 = finallyCB2
+
+				const hooks3 = update("3", true, true)
+
+				o(root).satisfies(template([
+					["A", "sync child"],
 					["DIV", "1"],
 					["DIV", "3"],
-				])
-				o(resolve).equals(original)
+				]))
 
-				update("4", false, true)
-				expect([
+				o(hooks3.removeParent.callCount).equals(0)
+				o(hooks3.removeSyncChild.callCount).equals(0)
+				o(hooks3.removeAsyncChild.callCount).equals(0)
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
+
+				const hooks4 = update("4", false, true)
+
+				o(root).satisfies(template([
 					["DIV", "1"],
-				])
-				o(resolve).equals(original)
+				]))
 
-				update("5", true, true)
-				expect([
+				o(hooks3.removeParent.callCount).equals(1)
+				o(hooks3.removeSyncChild.callCount).equals(1)
+				o(hooks3.removeAsyncChild.callCount).equals(1)
+				o(hooks3.removeParent.args[0].tag).equals("[")
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
+
+				const hooks5 = update("5", true, true)
+
+
+				o(root).satisfies(template([
 					["DIV", "1"],
-					["#text", ""],
+					["A", "sync child"],
 					["DIV", "5"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
-				resolve()
-				expect([
-					["#text", ""],
+				o(hooks1.removeAsyncChild.callCount).equals(0)
+
+				finallyCB1()
+
+				o(hooks1.removeAsyncChild.callCount).equals(0)
+
+				finallyCB2()
+
+				o(hooks1.removeAsyncChild.callCount).equals(1)
+
+				o(root).satisfies(template([
+					["A", "sync child"],
 					["DIV", "5"],
-				])
-				o(resolve).equals(original)
+				]))
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
-				update("6", true, true)
-				expect([
-					["#text", ""],
+				const hooks6 = update("6", true, true)
+
+				o(root).satisfies(template([
+					["A", "sync child"],
 					["DIV", "6"],
-				])
-				o(resolve).equals(original)
-			})
-			// Warning: this test is complicated because it's replicating a race condition.
-			o("removes correct nodes when child delays removal, parent removes, then child resolves + rejects both", function () {
-				// Sugar over the complexity - I need to test the entire tree for consistency.
-				function expect(expectedPairs) {
-					var expected = []
+				]))
+				o(finallyCB1).equals(original1)
+				o(finallyCB2).equals(original2)
 
-					for (var i = 0; i < expectedPairs.length; i++) {
-						var name = expectedPairs[i][0]
-						var text = expectedPairs[i][1]
-						expected.push({
-							name: name,
-							firstType: name === "#text" ? null : "#text",
-							text: text,
-						})
-					}
+				// final tally
+				o(hooks1.removeParent.callCount).equals(0)
+				o(hooks1.removeSyncChild.callCount).equals(0)
+				o(hooks1.removeAsyncChild.callCount).equals(1)
 
-					var actual = []
-					var list = root.firstChild.childNodes
-					for (var i = 0; i < list.length; i++) {
-						var current = list[i]
-						var textNode = current.childNodes.length === 1
-							? current.firstChild
-							: current
-						actual.push({
-							name: current.nodeName,
-							firstType: textNode === current ? null : textNode.nodeName,
-							text: textNode.nodeValue,
-						})
-					}
+				o(hooks2.removeParent.callCount).equals(0)
+				o(hooks2.removeSyncChild.callCount).equals(0)
+				o(hooks2.removeAsyncChild.callCount).equals(0)
 
-					o(actual).deepEquals(expected)
-				}
+				o(hooks3.removeParent.callCount).equals(1)
+				o(hooks3.removeSyncChild.callCount).equals(1)
+				o(hooks3.removeAsyncChild.callCount).equals(1)
 
-				var resolve, reject
+				o(hooks4.removeParent.callCount).equals(0)
+				o(hooks4.removeSyncChild.callCount).equals(0)
+				o(hooks4.removeAsyncChild.callCount).equals(0)
 
-				function update(id, showParent, showChild) {
-					render(root, [
-						{tag: "div", children: [
-							showParent ? {tag: "[", children: [
-								{tag: "#", children: ""}, // Required
-								showChild ? {tag: "[", attrs: {
-									onbeforeremove: function () {
-										return {then: function (res, rej) {
-											resolve = res
-											reject = rej
-										}}
-									},
-								}, children: [
-									{tag: "div", text: id},
-								]} : undefined,
-							]} : undefined,
-						]}
-					])
-				}
+				o(hooks5.removeParent.callCount).equals(0)
+				o(hooks5.removeSyncChild.callCount).equals(0)
+				o(hooks5.removeAsyncChild.callCount).equals(0)
 
-				update("1", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-				])
-				o(resolve).equals(undefined)
+				o(hooks6.removeParent.callCount).equals(0)
+				o(hooks6.removeSyncChild.callCount).equals(0)
+				o(hooks6.removeAsyncChild.callCount).equals(0)
 
-				update("2", true, false)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-				])
-				o(typeof resolve).equals("function")
-				var originalResolve = resolve
-				var originalReject = reject
-
-				update("3", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "1"],
-					["DIV", "3"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("4", false, true)
-				expect([
-					["DIV", "1"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("5", true, true)
-				expect([
-					["DIV", "1"],
-					["#text", ""],
-					["DIV", "5"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				resolve()
-				reject()
-				reject()
-				resolve()
-				expect([
-					["#text", ""],
-					["DIV", "5"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
-
-				update("6", true, true)
-				expect([
-					["#text", ""],
-					["DIV", "6"],
-				])
-				o(resolve).equals(originalResolve)
-				o(reject).equals(originalReject)
 			})
 		})
 	})

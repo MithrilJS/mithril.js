@@ -1,0 +1,38 @@
+name: pr
+
+on:
+  push:
+    branches: [ next ]
+
+  workflow_dispatch:
+
+concurrency: prr:pre-release
+
+jobs:
+  pr:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+    - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    # The following will publish a prerelease to npm
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      name: Setup NPM Auth
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: npx pr-release infer-prerelease --preid=next --target master --source next --verbose --publish --minimize-semver-change
+      name: Publish
