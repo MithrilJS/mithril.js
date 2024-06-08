@@ -6,7 +6,7 @@ A complete walkthrough tutorial for building your first simple application in Mi
 
 Let's develop a simple application that shows off how to do most of the major things you would need to deal with while using Mithril.
 
-*An interactive example of the end result can be seen [here](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcICqkBOBZA9ktAHQBWYIANCAGYCWMFqA2qAHYCGAthGpjgSJQyFarHxtEkvgDcO2AARYIigLwLgAHTYLdCqHTDxUC5gF1K2vfvwckAGUPGFNAK5sEdCQAoAlBqtrPWwIeFdsHS5iEIBHVwgjby0dINSeeAALQhNNEABxAFEAFVzLFNTrcKgckAz4eAAHMFQAehaQrgBaEKNOjga6YgyVfABrV36G4nEuFv66FtccMFLAir0AdzpMgGEQokk6DihmhXhseLL1gF9fNaDiTIg2bzcPeC8XntcoeH9k9bWZTYYgGIwKdTfX7EJAceAce7WW73a5le6wcIhSQmYCo+5QWxIExvTw+OhIf6I4KhcKRaIQOIJeBJKlpUJZIkKXKFEpUVlBKo1OqNZptDrdJl9AZDEbjSbTfCzeaLZYtXIKADUCnJV0Bui2u32zw+x1O50u-OR5QeTxeJI+PihfwC1vWwOmmONEIUTstd2teLY9zAHBkEGJ7lJL0prupYQiCiisXiiQBesT7OyXJAAAUMLzdXrBdnhU1Wu0IF0evApYNhtgxhMGlMZnMBiqVGA1SBNUocB7sFj4MQdfzrAAjQgATxM7oxg+NhcBBoye2QxqOJxM5ogS6R-qR2mu2io4GgcAdbCYIAAjKgbwBmECo9jcXjoYGOIwiU-iSTG2R5D7FQv3gb0010CQ6DYbZZ37Ak7FApcZDoCANgjd5Pj8F11hCeNIm8XJiCWFROjBeBSmAkFyOILh+leSNL28EjsBjdMfRpBMuG8JN8FcRBiEcNhRkoDQMhCGgahaZBtm7XsWJHJBRNgKAODAU4AHIWLIpxOm2SsNNRBQFPobAjAAOTfXt1XVLUFNUiy3wPCpbmc3RjzYDzn0oV8eD4YEADF8GwKJyF-CQpHgQDFEC4KuHA+4oJg5x7SwmQ2EICB-ndBCkG8dLMuIOFzjARTfEDawULQjCo2wiCgjw2lE0I2g4so+r2IkMBXHHLhYJcRisKynD2IqCBiAaEIw0kAARCAaA4H5mTc0agX7EMwz8McXO29zROYXbmtyVTxxIE7oEo3IAroMywM4Hhcl8PcKm43JoIafiRzYD74GYeApwaCBVEQAAPeAzGYBpVNgCAsigIhsFUa7boUe6IDMdrDusJKfpqpjhuAOdPUkYhTMcnhvXG+FsAAc1CYg5CgeIKtWhRGfiOCVAHIdSZu8mIEO25nrSFrzuEMXLpAew1Lut9HuFoJXpAd7PpV36oY4GG4YR1RpfBNGMaoEbVpx-i8aG7L+3nHmHPgSyKfUKn5Dp4d2YgFnVrdzmQWt41QRl+2BdjVIhcOpXx34+AJGICP6gkP6AaB7reu2Q3RNyABlUMBZAJ7+TMFaPK8l8QDRvhpanPjhzCsQIoA9A5EUCuq4S60qvQgbMJ8AqiDYipGq4lq6Og-3K-4yiDuDxWWs4GRaOeVwJ6xvRuN4-jxqEkTjdZ8T5pMDSWnIjTl727NgRWXPDoLhXrCVyAo0onvxtgDIGCQLEVusAuUSPE8S7L9A8oa4gD-JFPga8BKTXmnQEG3oNIAGJj5sAgRAbwSB8AYh4CTScSApzpxAIfJwmNrS5EIUYXIOJ+RYgRubHwfc9QDwIs3fioluKficL4T+egPJIiXKQmS8AWioHJBQ7e1hqEqFoS8J+9DASMOasw+ArDvCxRCqJJ+RV6hmU4ZaFEZQrTeV8u+EA0x1LhX-NIdAOC8EKC+j9USMdI4SBGjQCKJgMohWOAoG8AA2BosCABqKhYScAANyBDorTaCJgABMAAGfx4TPLaG0KPFuaZIk02id4hJsDFpRySboOiINOhbCQJkEwN44nVMSb-IMbB55sFcCNTJ2S4kKHaQ+XJSSPKpO0uREa5FOhGCnDAdxEgICFMTM7NpHScm1JSA0OwSBoI0xMHEnpKSGn9N0vpeKaZxya1GDTBs7hOTwIWpcjgUzJzYBod4-xCgwD4AMEgBQ8CkCfKmeIAk2ATDwIfICqZKywAaxnAoccBJYCjCma0tg6y5k3gWboJZnzVkmAAByPJvAAVmRWcCAYNOhEHENgOEnxxlsEmXUvpOAdK9D2agLIYZFBplBjWElwVyUSBMGclQBgqWbPqf7U6UARogrBSYSFGCYURJmfCuZ7S8UgyFaktWI1bn3KRbA55rz3mfKQDc4KCNuh2DoEsEwD58WThKWAOgAAvdFELjWkRtcCwwkqIVQtlSkOFCL2lVPxailZbA1nzNgbi-FZSKk5LiQAUlVQ02OUcdAHKOScvibBzkQBzUau5kiHk6peeSfVXzAiatImSlZFqFBWpVYEH5wV-mAofO60FqlwXQQFRATo0roWwvlf68NUzg1OsDRG5VUz2XErgFyy8lLqXJOFcmnlzKVAavTacrN-yIAYt3buoVz4LAgAFaMJgrBS5vnAdscSDBTxVD4KWUUixvrHIVLMPqmRsAMAAAIxOIHE4gAAWFon7b3CD6g04B-1AZ8DALAb9DQorXDMNcIAA)*
+*An interactive example of the end result can be seen [here](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcICqkBOBZA9ktAHQBWYIANCAGYCWMFqA2qAHYCGAthGpjgSJQyFarHxtEkvgDcO2AARYIigLwLgAHTYLdCqHTDxUC5gF1K2vfvwckAGUPGFNAK5sEdCQAoAlBqtrPWwIeFdsHS5iEIBHVwgjby0dINSeeAALQhNNEABxAFEAFVzLFNTrcKgckAz4eAAHMFQAehauOkzsBgBaEKiaKABPYiIZFo4GuhbXHDBSwIq9AHdOjIBhEKJJOg4oZoV4bHiypYBfX0Wg4kyINm83D3gve5CwVyh4f2Sl62VsYgGIwKdRvD7wUYceAcK7WC5XM5lK6wcIhSQmYCIq5QWxIEyPTw+OhIb6w4KhcKRaIQOIJeBJMlpUJZPEKXKFEpURlBKo1OqNZptDpdXr9YiDEZjCZTGZzFq5BQAagUxNOv10q0ym2Qd2eewORxO3Ph5Wut3uBOePjBn1JpqW-2IKOwaPgIIUNvgxsupqxbCuYA4Mgg+PchPudqWITCEQUUVi8USP3VceZ2TZIAAChhOWr1byM-ymq12mtulA+hABsNRhBxpNprMVGB5SAlUocE7UbriKrudYAEaEIYmR3O11536ajZbXW7fYmQ0QSdwn1w7RnbRUcDQOBWthMEAAVlQABYj5QAIwAdjPF4ATAAOO8gRHsbi8dD-RxGETb8SSLqsjyB2Kg-m66jJroEh0GwnSjp2OJ2OBk4yHQEDLKGTwvH4AT2uSMaRN4uTEE22A9ECXpUKBAKUcQXCTA8Yb7t4ZGRim0aUnG3jxvgriIMQjhsAA1pQGgZCENA1C0yCdK27Zkb2SBibAUAcGABwAORkRRTg9J0VaaYiCiKfQ2BGAAch+7YKgqyqKWplkfmuFQXC5uibmwnmvpQ748Hw-wAGL4NgUTkP+EhSPAwGKEFIVcO6UEKDBcHOJaOEyGwhAQN8jpIUg3iZdlxBQkcYBKb4frWGhGFYeGuFJdYnGxlwxG0PFpR4SmQQSO8A7CnVLE5V13UVBAxANCEwaSAAIhANAcOCfj9imjqBsGy34eqnndcZzArborW5GpA4kCd0CdbkgV0OZbqcDwuS+CuFRHSAsENPxvZsB98DMPAQwNBAqiIAAHvAZjMA0amwBAWRQEQ2CqNdt0KPdEBmJ1jUpilP2DThw3AGO3aSOKN1OTw7rjdC2AAOahMQchQPEVWjbojPxAhKhdi6PZmeTEAHQoFzPWkbXncI4uXSA9jqXdH6PSLQSve9n0q79UMcDDcMI6oMvAmjGPUVj6o4-xeM+ATRM8yTjnwFZFPqFT8h0xC7MQCzrNu5zALjj2tv2wLW1BMLguvQO-HwBIxDh-UEh-QDQN9cKhtibkADKQYCyAT3cmY7lCxuW5viAaN8DLQx8RC4ViJFQHoHIijl5XiVXDVmEuMxGVZUQ7GpM1RG5AxsGAhwFf8Z1+1B9Yr2cDI9F3K4E+C9PPHRJX41CaJI2s7oEnzSYmktJRmnL3oxm5P88zZ4LeeKyvuSQOGnVFUQToZAwSBovn1h5wihdsD5Pyn4QCTAaH+GugFpDoF4vxcak15p0BBu6TSABiE+bAYGIG8EgfAKIeAkyHEgIYqcQBHycJjK4uQyFGFyBibkaIEbmwjNvX4-duJN34mJVq34nC+G-mfBEk4qGyXgC0VAxJaEsKancRhHdsI+BfgTQWbDWocPgFw7wcVQpiUUSVeo5k+HGkERuH0gCS4fj4E6DSEVIHRXQIQ4hCgvo-TEtHCOEgRo0EiiYLKoU9gKEvAANgaEggAaioJAHBOAAG5AgMVprBEw94AAMITYleW0NoEeY83TJniTTRJATUlIMWpHdJh0OAgx6KsJAmQTCXmSY0tJ-8sn4NcCNfJhTkkKG6QAZmKekzyWSdKURGpRHoRghgwB8RICA5S4zOy6T0opzSUgNDsEgWCNMTDJMGZktgpEcC6SMPpRACVkwDk1sJGm2A+JsFZCghaTyODzKHNgWRl4QkKDAPgAwSAFAoKQEC+Z4gcTYBMCg3pUL5mbLABrEcCgBw4lgMJeZnS2A7OWZ8kG8z1lAq2SYR8XzLxHlWboUG8AehEHENgKELwZlsDmS0g5Iy9IGS4KgLIwZFDJgpVSuAIU6USBMO4BGBhGV7P9Ac8WI1YXwpMEi3BqK4mLIxcs7ppKcXMucfxEabyPlfJ+X8gFQKkCvJCgjPodg6CzBML0sliL8BVLAHQAAXgSx17yVA9CHFqlIcq1IIsVSitFqrMXdIaQ6vFmy2DbJWUgklDqal1KKckgApJKrJMdI46AuVcm5dyHkQGLear14KAmGt+cSE1wLAj6u9bSzZtqFD2r9boUFIUIVQt6TCww8qVRsHFRAH1yLlUpHReG+NuKNkesjQmzV8y+XUsFfuBlTKMlSrcbHDFXKVB6vzbc0VEKICPhPSeyVr4LAgHFcJJgrBzH+WgWWBg24qh8CLIKGY31rlOnwFwUsIooAAAF7zEGScQU8AGJIMHosPauIB-qAz4GAWA3QGjRTOGYM4QA)*
 
 First let's create an entry point for the application. Create a file `index.html`:
 
@@ -80,7 +80,7 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the REM (DEAD LINK, FIXME: https //rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the REM (DEAD LINK, FIXME: https //rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://mithril-rem.fly.dev/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 *Note: third-party cookies may have to be enabled for the REM endpoint to work.*
 
@@ -93,7 +93,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -422,7 +422,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -445,7 +445,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -457,7 +457,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+			url: "https://mithril-rem.fly.dev/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -563,7 +563,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -575,7 +575,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+			url: "https://mithril-rem.fly.dev/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -586,7 +586,7 @@ var User = {
 	save: function() {
 		return m.request({
 			method: "PUT",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + User.current.id,
+			url: "https://mithril-rem.fly.dev/api/users/" + User.current.id,
 			body: User.current,
 			withCredentials: true,
 		})
