@@ -2,7 +2,7 @@
 
 Let's develop a simple application that shows off how to do most of the major things you would need to deal with while using Mithril.
 
-*An interactive example of the end result can be seen [here](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcIB0sxhAGhADMBLGXVAbVADsBDAWwjRAFVIAnAWQHsloMAVrgKxu1ROOYA3WuwAEbCPIC8c4AB1qc7XKjEw8VHIoBdPJp27utJABl9huYQCu1BMTEAKAJRqLlnXYIeGd2LXoMIIBHZwgDTw0tAOTGeAALXiN1EABxAFEAFWzzJOTLUKgskDT4eAAHMFQAeiag+gBaIIN22jriDDSlbgBrZ166rG56Jt7iJucOMGL-Mp0Ad2J0gGEgvnFiWihGuXh2WJLVgF9vFYCMdIhqTxc3eA8nrucoeF9E1ctFOwMHoDHJVJ9vhgkLR4LRbpZrrdLiVbrBQkFxEZgMjblBrEgjC93F5iEhfvDAsFQuFIhAYnF4AkKSlghkCXJsvkivhmQEKlUavVGi02p0GT0+gMhqNxpNprN5osmtk5ABqOSki7-bQbba7R5vQ7HU7nXmI0p3B5PIlvLwQn5+C2rQFYdEGsFye1mm4WnHUW5gWhSCCE1zEp7kp2UkJhOQRaKxeJ-bVx1mZDkgAAKLG5Wu1-IzgoazVaEA6XXgEv6g3YIzGdQmonlfUVSjAypAaoUHFd7Ax8Awmt5lmhsKMLrRfYNef+urSO2QBoORyMJogM4RPoRmkuIGRNAYTHQgPsBkEwhAonEBuksm7SlP8A9ye0YmI1E2457eJsj5nUmICA1lDV53h8R1ViCGNwk8bIMAWJR2hBeBinvIFkIwehemeMNbSeBD2EjFNPSpWN6FgkBaHgjgkIcdpNjLVDgDSIJCCqJpkE2DsuwIwckDwOQxFgIIYRDONIm4ZxEGBd9hmROReJIdgDAAOUPLsVRVdVeKgWhVMPLcymuQztEuHc9zwA9GGYQEADFuHYCIhHwS8xAkeBb3kOyHPoZ9bjfD9HBtMCpGoXgIF+F0fyQTxQvCjAYVOMA+O8P1LAAoCQPDcCXwCKDqTjCjCB8pjhzKMQwGcAAjehPycXCwIiiDiLKCAMDqIJg3EAARCBCFoL5GRMlqAR7QNgx8MrkjMqNpoEigpsK7JdKq-gVugVDsls4hlKfOhGGybwNzKcjsnfOopMHagLvgCh4AATzqCBlEQAAPeATAoOpdNgCAMigPh2GUbbdrkfaIBMUrZv+AKbqMCI5wAQVqdgKJkKBYlQ4KvHR2JIp7Sd+wwJT9MYD1cYga5ju1CmvyUXsiZJ+A1IO6HN2pgJTpAdaoGBWhVqgTaQFsPS9sPQ6OcsLnzsumXbu+2hfv+wHlBF0Fwch-BmpG2GpPhjAkZRtHDkxrXsaeCn8fpwmDT50mIHJk3KaOxb0qdumgRt8Q7eZ8W2Z0KnFq5qqpPgMQMBD2oxDux7nsqmrNk1gTsgAZSDCAJd5Exhpm3d9xAcHmBF+7JIHZyRDcm90BkeRi9LvyLQy4D6tAnGwr4IiynysiKKw98+ZLqTUIW-3tC5ugpEwx5nGH12dC5uEtdykaWL6owAHImmQ9fJZhtwRMQfXayktq9GoYY59M5PWEWQ7Fuz3ex4oyBw1QuK+CwNJSCQDFhssbOkTmXzoXdAspy6uWvJIdA8ZS5tQ6n1Ygr1PDrwAMTrx9DAk+ngkDcDRIwb2VVeD3WvlvBwUNLDZFIQYbIWJeQYkBllPCOVFrdxgnXKSAlyIngcN4P+AckQzkoZxeATRUCkhodrPKjwGEt2yu-Jqy8u6kTYbQQe8BOGeG8o5AS8iEoozALws0AidzeAslZI8mBsAXivO5ZghCkDELkFdG6AkI6hzEM1YqmIwY+UOHIAAjAANjqK9OQAA1JQ0I6AAG5-BYXYAAc3fEYAATAABhCbE6gM1NAD3rsmeJSTqBGH8Rk0JA0w5ZLHrQV67QNhIHSCUtJzTMk7k0Lk-BzhmqFOSXINJfS5AAGYylZJydQaiiFkLNWQu0Aw90YBGDCtQCAVS4yyCKUYfp-TSmtKSHUGwSB3wJM2aM9p4yCK0W6AxXyyYqqK2GAk4+1B2QoP6m82gqzCHsBkf4kJcgwDcD0EgOQKCkBgtWaIPE7AjAoMGXC1ZhywAK3ukYKqeJYDDFWT04pAztm7O0PssFRyjAAA4-n+IAKz4pOBAd67Q+CiHYDCd4iyxArLaf6c5NEZnXNQBkYM8hkxvUrAyhyzKxBGFcIDM+7LslnL5gLZqiLkWovRZiuJ6zelbLkFS16pzOXOKks1L5Py-kAqBSCsFSBPkOUBp0GwxAFhGEGdSwhtSwDEAAF7ErkCaxCbqEX6BVb6tVWLNU4u1TsvV-hCWHOoMcgJZSAm6tWfUxpia0kAFJ9W5MjmHLQtz7mPMks8mFEBy02u+UoEpZrAWkkteC-wfr2D2sOU6oZ1LIUORhXCwZgakW6RRRqagMr2hotweqpI2LNkDKjas2NPqo3JupcK+lcAxV4VZcsnN4y80Sv5UoY1RankvIgCSs9Z7RkuUgDAcM5AQCBJSagfxe4zDc1kuQKgBdDzMFqukdgpAXIVGYEWYU8xroPLlE0P9LFSAAAF-EYEQ4E6DmxYO83AQ9J6zAwDCWIHUDylwTCXCAA)*
+*An interactive example of the end result can be seen [here](https://flems.io/#0=N4IgzgpgNhDGAuEAmIBcIB0sxhAGhADMBLGXVAbVADsBDAWwjRAFVIAnAWQHsloMAVrgKxu1ROOYA3WuwAEbCPIC8c4AB1qc7XKjEw8VHIoBdPJp27utJABl9huYQCu1BMTEAKAJRqLlnXYIeGd2LXoMIIBHZwgDTw0tAOTGeAALXiN1EABxAFEAFWzzJOTLUKgskDT4eAAHMFQAeib6YnT2UgBaIIjCKABPDD4pJto64ibnDjBi-zKdAHd2tIBhIL5xYlooRrl4dliShYBfb3mAjHSIak8XN3gPW6CwZyh4X0SFy0V2DD0DHJVC83vBhrR4LQLpYzhcTiULrBQkFxEZgPCLlBrEgjPd3F5iEhPtDAsFQuFIhAYnF4AkSSlghkcXJsvkivh6QEKlUavVGi02h1ur0MP0hiMxhMpjMmtk5ABqOSE47fbTLdLrZA3R47PYHI6c2GlS7XW54x5eEHvYnGha-LDI7VAuRW+CG87GjHUC5gWhSCC41z4242hZBEJhOQRaKxeJfVVRxmZFkgAAKLHZKtV3JTvIazVaK06UB6ED6g2GEFG40m0yUYFlIAVCg4DvYKLBys5liQENoRntSPb2qz33Vaw22u2uyM+ogo5hHphmhOIHhNAYTHQv3sBkEwhAonE2ukshbSl38Gd8e0YmI1HaA9bWJsl9HUmIEEWgYeTx8fltUkI3CTxsgwOt2C6AE3Xwc8-mgjB6HGO4gwtW4INDBNw3JKNQJAWhwI4KCHC6doy2KNQ0iCQgqiaZB2kbZsIIwZU5DEWAgghAMo0ibhnEQf57wAa3hORmJIdgDAAOU3Zs5TlRVmKgWhpM3JcyjOdTtBOFc1zwDdGGYX4ADFuHYCIhHwQ8xAkeBT3kEyzPoa8LjvB9HHNP8pGoXgIE+e0XyQTxvN8jAIQOMAWKJL1LA-L8f2Df8bwCbDI3oPDCCcijkoTNjqFeAAjQUErQzw-IA3KFggDA6iCf1xAAEQgQhaFBHxuwTe1fX9drANVHS+oCUSKA67R0uyZSCv4SboAo7JjOISSrzoRhsm8BcynGkB7zqfiWOoXb4AoeABjqCBlEQAAPeATAoOplNgCAMigPh2GUBalrkFaIBMbLRoCNzDqMCJxwAQVqdg8JkKBYgozyvGh2J-NbIcO1FRbVMYZ1EYgM4NtVHGnyUNs0YkzGIH+vH-q2maoH+WgpqgOaQFsFTls3Nb8YCLadr23mjvu2hHue17lFZwFvt+2CcoTQH+OBjAwYhqGdlh2D4duHHkeJ1HtXp8nsdV3H1v+2KjaJv5dfEfX4Bk1bBsXLnLC2gr+PgMQMFd2oxGO07zsKwUpbwFMAGU-QpkATcGkwtLkAbV3XEBvuYVmBj4sFLJEGyT3QGR5FT9OXONOLvycVCvJ8vhMOSVKQOyJD73ptP+IokaHZ0La6CkRCbmcVvTY7vCoWlgfLCo5qjAAciaaDJ6d752M4xAFfYdPqr0aghNHuPg+yX5Zkj-6Y-nsa8MgYMKJCvgsDSUgkBRWPLBjuFdMT5P0HGOp9yso9bOYaM141WosQS6nhJ4AGJJ4egAfxCAngkDcCRIwa2BVeADF3iAGeDg-rGmyFggw2Q0SchRK9Eqf5q7fFrrhAu-Fg7pR3A4bwj8dADRhKOPB9F4BNFQISQhFUygkKUGQhGldyoyxrmSNKngaHwDoZ4Ry5lg5X2quFSSTDDRwhKGcPSBktyYGwAeX+OcQCoKQOguQ+1DrB09m7MQ-DMqoi+k5HYcgACMAA2Ool05AADUlC9joAAbn8EhdgABze8RgABMAAGLxwTqADU0E3Qu8ZQkROoEYVxcTvGtXdgksatBLpdGWEgdIWSYmVPiSuTQyTkHOH4ekyJcgYktLkAAZhyQkpJ1BCJKGIoCeM0EugGAGDAIwPlqAQAKVGWQGSjCtNadk6pSQ6g2CQPeMJCzum1N6RBAZ8BSKIGcvGAqQshJhNXq4Zk4CWp3NoDM1B7BSFuK8XIMA3A9BIDkOApAfyZmiCxOwIw4D2lgpmRssAgsBhGAKliWAQkZlNMyW0pZKztBrL+ZsowAAON5riACs6L9gQGul0Pgoh2AQieBMsQ0yanej2URYZZF6CoAyP6eQ8YrqHIpWZalYgjDXKUBveliTdn00ZvwyF0LYXwsRSEuZzTFlyCJZdHZjLLH8X4U8l5ri3kfK+T8v5SBHlmVej0GwxBphGHacS1BxSwDEAAF7YrkLq-pDqIX6Fle6+VSKlUopVcs9V-hMUbOoFstxOS3FqpmaU8p0aYkAFINXJK9u7LQpzzmXL4tQG5EBC1mueUI153jDWEmNf8-wHrIJUo2TajpxLAVmRBWC9p3qoXKRhUqagoquhwsQQqpIyKFltJDTM8NbqQ2xuJTy8lcB+VoVpVMtNvSM2Co5UoHVOarn5pBRAHFh7D3dKspAGAwZyAgHcVE1Ari1xmBABvIS5AqBJ03P-IspArIVGYHmfkUwDoXKwNweghYhRQAAAKuIwDB9x4GqKkG-gQE6Z1mBgA4sQOodkTgmBOEAA)*
 
 First let's create an entry point for the application. Create a file `index.html`:
 
@@ -76,7 +76,7 @@ var User = {
 module.exports = User
 ```
 
-Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](https://rem-rest-api.herokuapp.com/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://rem-rest-api.herokuapp.com/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
+Then we can add an `m.request` call to make an XHR request. For this tutorial, we'll make XHR calls to the [REM](https://mithril-rem.fly.dev/) API, a mock REST API designed for rapid prototyping. This API returns a list of users from the `GET https://mithril-rem.fly.dev/api/users` endpoint. Let's use `m.request` to make an XHR request and populate our data with the response of that endpoint.
 
 *Note: third-party cookies may have to be enabled for the REM endpoint to work.*
 
@@ -89,7 +89,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -418,7 +418,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -441,7 +441,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -453,7 +453,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+			url: "https://mithril-rem.fly.dev/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -559,7 +559,7 @@ var User = {
 	loadList: function() {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users",
+			url: "https://mithril-rem.fly.dev/api/users",
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -571,7 +571,7 @@ var User = {
 	load: function(id) {
 		return m.request({
 			method: "GET",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + id,
+			url: "https://mithril-rem.fly.dev/api/users/" + id,
 			withCredentials: true,
 		})
 		.then(function(result) {
@@ -582,7 +582,7 @@ var User = {
 	save: function() {
 		return m.request({
 			method: "PUT",
-			url: "https://rem-rest-api.herokuapp.com/api/users/" + User.current.id,
+			url: "https://mithril-rem.fly.dev/api/users/" + User.current.id,
 			body: User.current,
 			withCredentials: true,
 		})

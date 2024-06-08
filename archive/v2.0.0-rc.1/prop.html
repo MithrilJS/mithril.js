@@ -193,7 +193,7 @@ var Auth = {
 User.load = function(id) {
     return m.request({
         method: &quot;GET&quot;,
-        url: &quot;https://rem-rest-api.herokuapp.com/api/users/&quot; + id,
+        url: &quot;https://mithril-rem.fly.dev/api/users/&quot; + id,
         withCredentials: true,
     })
     .then(function(result) {
@@ -209,7 +209,7 @@ User.load = function(id) {
 User.save = function(user) {
     return m.request({
         method: &quot;PUT&quot;,
-        url: &quot;https://rem-rest-api.herokuapp.com/api/users/&quot; + user.id,
+        url: &quot;https://mithril-rem.fly.dev/api/users/&quot; + user.id,
         data: {
             id: user.id,
             firstName: user.firstName.get(),
@@ -223,7 +223,7 @@ User.save = function(user) {
 User.save = function(user) {
     return m.request({
         method: &quot;PUT&quot;,
-        url: &quot;https://rem-rest-api.herokuapp.com/api/users/&quot; + user.id,
+        url: &quot;https://mithril-rem.fly.dev/api/users/&quot; + user.id,
         data: user,
         withCredentials: true,
     })

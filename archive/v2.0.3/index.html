@@ -220,13 +220,13 @@ m.mount(root, Hello)</code></pre>
 <hr>
 <h3 id=xhr><a href=#xhr>XHR</a></h3>
 <p>Basically, XHR is just a way to talk to a server.</p>
-<p>Let&#39;s change our click counter to make it save data on a server. For the server, we&#39;ll use <a href=https://rem-rest-api.herokuapp.com>REM</a>, a mock REST API designed for toy apps like this tutorial.</p>
+<p>Let&#39;s change our click counter to make it save data on a server. For the server, we&#39;ll use <a href=https://mithril-rem.fly.dev>REM</a>, a mock REST API designed for toy apps like this tutorial.</p>
 <p>First we create a function that calls <code>m.request</code>. The <code>url</code> specifies an endpoint that represents a resource, the <code>method</code> specifies the type of action we&#39;re taking (typically the <code>PUT</code> method <a href=https://en.wiktionary.org/wiki/upsert>upserts</a>), <code>body</code> is the payload that we&#39;re sending to the endpoint and <code>withCredentials</code> means to enable cookies (a requirement for the REM API to work)</p>
 <pre><code class=language-javascript>var count = 0
 var increment = function() {
     m.request({
         method: &quot;PUT&quot;,
-        url: &quot;//rem-rest-api.herokuapp.com/api/tutorial/1&quot;,
+        url: &quot;//mithril-rem.fly.dev/api/tutorial/1&quot;,
         body: {count: count + 1},
         withCredentials: true,
     })

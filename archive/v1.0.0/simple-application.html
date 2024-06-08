@@ -112,7 +112,7 @@ var User = {
 
 module.exports = User
 </code></pre>
-<p>Then we can add an <code>m.request</code> call to make an XHR request. For this tutorial, we&#39;ll make XHR calls to the <a href="http://rem-rest-api.herokuapp.com/">REM</a> API, a mock REST API designed for rapid prototyping. This API returns a list of users from the <code>GET http://rem-rest-api.herokuapp.com/api/users</code> endpoint. Let&#39;s use <code>m.request</code> to make an XHR request and populate our data with the response of that endpoint.</p>
+<p>Then we can add an <code>m.request</code> call to make an XHR request. For this tutorial, we&#39;ll make XHR calls to the <a href="http://mithril-rem.fly.dev/">REM</a> API, a mock REST API designed for rapid prototyping. This API returns a list of users from the <code>GET http://mithril-rem.fly.dev/api/users</code> endpoint. Let&#39;s use <code>m.request</code> to make an XHR request and populate our data with the response of that endpoint.</p>
 <pre><code class="lang-javascript">// src/models/User.js
 var m = require(&quot;mithril&quot;)
 
@@ -121,7 +121,7 @@ var User = {
     loadList: function() {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users&quot;,
             withCredentials: true,
         })
         .then(function(result) {
@@ -320,7 +320,7 @@ var User = {
     loadList: function() {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users&quot;,
             withCredentials: true,
         })
         .then(function(result) {
@@ -340,7 +340,7 @@ var User = {
     loadList: function() {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users&quot;,
             withCredentials: true,
         })
         .then(function(result) {
@@ -352,7 +352,7 @@ var User = {
     load: function(id) {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users/:id&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users/:id&quot;,
             data: {id: id},
             withCredentials: true,
         })
@@ -434,7 +434,7 @@ var User = {
     loadList: function() {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users&quot;,
             withCredentials: true,
         })
         .then(function(result) {
@@ -446,7 +446,7 @@ var User = {
     load: function(id) {
         return m.request({
             method: &quot;GET&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users/:id&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users/:id&quot;,
             data: {id: id},
             withCredentials: true,
         })
@@ -458,7 +458,7 @@ var User = {
     save: function() {
         return m.request({
             method: &quot;PUT&quot;,
-            url: &quot;http://rem-rest-api.herokuapp.com/api/users/:id&quot;,
+            url: &quot;http://mithril-rem.fly.dev/api/users/:id&quot;,
             data: User.current,
             withCredentials: true,
         })
