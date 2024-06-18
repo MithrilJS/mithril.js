@@ -7,7 +7,7 @@
 [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs) &nbsp;
 [![Zulip, join chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mithril.zulipchat.com/)
 
-- [What is Mithril.js?](#what-is-mithriljs?)
+- [What is Mithril.js?](#what-is-mithriljs)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Getting Help](#getting-help)

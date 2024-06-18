@@ -462,7 +462,7 @@ Pending streams can be created by calling `stream()` with no parameters.
 var pending = stream()
 ```
 
-If a stream is dependent on more than one stream, any of its parent streams is in a pending state, the dependent streams is also in a pending state, and does not update its value.
+If a stream is dependent on more than one stream and any of its parent streams is in a pending state, the dependent stream is also in a pending state, and does not update its value.
 
 ```javascript
 var a = stream(5)
@@ -558,13 +558,13 @@ console.log(serialized) // logs 123
 
 Unlike libraries like Knockout, Mithril.js streams do not trigger re-rendering of templates. Redrawing happens in response to event handlers defined in Mithril.js component views, route changes, or after [`m.request`](request.md) calls resolve.
 
-If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc), you should manually call [`m.redraw()`](redraw.md)
+If redrawing is desired in response to other asynchronous events (e.g. `setTimeout`/`setInterval`, websocket subscription, 3rd party library event handler, etc.), you should manually call [`m.redraw()`](redraw.md).
 
 ---
 
 ### What is Fantasy Land
 
-[Fantasy Land](https://github.com/fantasyland/fantasy-land) specifies interoperability of common algebraic structures. In plain english, that means that libraries that conform to Fantasy Land specs can be used to write generic functional style code that works regardless of how these libraries implement the constructs.
+[Fantasy Land](https://github.com/fantasyland/fantasy-land) specifies interoperability of common algebraic structures. In plain English, that means that libraries that conform to Fantasy Land specs can be used to write generic functional style code that works regardless of how these libraries implement the constructs.
 
 For example, say we want to create a generic function called `plusOne`. The naive implementation would look like this:
 
@@ -574,7 +574,7 @@ function plusOne(a) {
 }
 ```
 
-The problem with this implementation is that it can only be used with a number. However it's possible that whatever logic produces a value for `a` could also produce an error state (wrapped in a Maybe or an Either from a library like [Sanctuary](https://github.com/sanctuary-js/sanctuary) or [Ramda-Fantasy](https://github.com/ramda/ramda-fantasy)), or it could be a Mithril.js stream, or a [flyd](https://github.com/paldepind/flyd) stream, etc. Ideally, we wouldn't want to write a similar version of the same function for every possible type that `a` could have and we wouldn't want to be writing wrapping/unwrapping/error handling code repeatedly.
+The problem with this implementation is that it can only be used with a number. However it's possible that whatever logic produces a value for `a` could also produce an error state (wrapped in a Maybe or an Either from a library like [Sanctuary](https://github.com/sanctuary-js/sanctuary) or [Ramda-Fantasy](https://github.com/ramda/ramda-fantasy)), or it could be a Mithril.js stream, a [Flyd](https://github.com/paldepind/flyd) stream, etc. Ideally, we wouldn't want to write a similar version of the same function for every possible type that `a` could have and we wouldn't want to be writing wrapping/unwrapping/error handling code repeatedly.
 
 This is where Fantasy Land can help. Let's rewrite that function in terms of a Fantasy Land algebra:
 

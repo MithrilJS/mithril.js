@@ -12,7 +12,7 @@ h1,h2,h3,h4,h5,h6,p {margin:0 0 10px;}
 	</head>
 	<body>
 		<div id="editor"></div>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.0/marked.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js"></script>
 		<script src="../../mithril.js"></script>
 		<script>
 //model
@@ -31,7 +31,7 @@ var Editor = {
 				oninput: function (e) { state.update(e.target.value) },
 				value: state.text
 			}),
-			m(".preview", m.trust(marked(state.text))),
+			m(".preview", m.trust(marked.parse(state.text))),
 		]
 	}
 }
