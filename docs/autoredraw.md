@@ -45,6 +45,61 @@ function doSomething(e) {
 m.mount(document.body, MyComponent)
 ```
 
+Mithril.js also redraws once promise returned from event handler resolves. It makes it easy to work with async code.
+
+```javascript
+var count = 0
+
+async function incrementAfterDelay() {
+	await new Promise(
+		(resolve) => setTimeout(resolve, 500)
+	)
+
+	count++
+}
+
+var DelayedCounterComponent = {
+	view: function() {
+		return m("button", {
+			onclick: incrementAfterDelay,
+		}, `Add one (${count})`)
+	}
+}
+
+m.mount(document.body, DelayedCounterComponent)
+```
+
+You still have to run `m.redraw()` manually in case you need redraw before whole promise chain is resolved.
+
+```javascript
+var count = 0
+
+async function incrementAfterDelay() {
+	await new Promise(
+		(resolve) => setTimeout(resolve, 500)
+	)
+
+	count++
+
+	m.redraw()
+}
+
+async function complexOperation() {
+	await incrementAfterDelay()
+	await incrementAfterDelay()
+	await incrementAfterDelay()
+}
+
+var ComplexDelayedCounterComponent = {
+	view: function() {
+		return m("button", {
+			onclick: complexOperation,
+		}, `Add 3 (${count})`)
+	}
+}
+
+m.mount(document.body, ComplexDelayedCounterComponent)
+```
 
 ### After m.request
 
