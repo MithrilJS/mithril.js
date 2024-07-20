@@ -307,6 +307,7 @@ module.exports = function(options) {
 					parentNode: null,
 					childNodes: [],
 					attributes: {},
+					ownerDocument: $window.document,
 					contains: function(child) {
 						while (child != null) {
 							if (child === this) return true
@@ -738,6 +739,7 @@ module.exports = function(options) {
 			get activeElement() {return activeElement},
 		},
 	}
+	$window.document.defaultView = $window
 	$window.document.documentElement = $window.document.createElement("html")
 	appendChild.call($window.document.documentElement, $window.document.createElement("head"))
 	$window.document.body = $window.document.createElement("body")

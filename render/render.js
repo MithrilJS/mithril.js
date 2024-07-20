@@ -5,8 +5,9 @@ var df = require("../render/domFor")
 var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
 
-module.exports = function($window) {
-	var $doc = $window && $window.document
+module.exports = function() {
+	var $window
+	var $doc
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -916,6 +917,8 @@ module.exports = function($window) {
 	var currentDOM
 
 	return function(dom, vnodes, redraw) {
+		$window = dom.ownerDocument.defaultView;
+		$doc = $window && $window.document;
 		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 		if (currentDOM != null && dom.contains(currentDOM)) {
 			throw new TypeError("Node is currently being rendered to and thus is locked.")
