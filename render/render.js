@@ -5,8 +5,7 @@ var df = require("../render/domFor")
 var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
 
-module.exports = function($window) {
-	var $doc = $window && $window.document
+module.exports = function() {
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
@@ -16,7 +15,7 @@ module.exports = function($window) {
 	var currentRender
 
 	function getDocument(dom) {
-		return dom.ownerDocument || $doc;
+		return dom.ownerDocument;
 	}
 
 	function getNameSpace(vnode) {
@@ -919,8 +918,6 @@ module.exports = function($window) {
 	var currentDOM
 
 	return function(dom, vnodes, redraw) {
-		$doc = dom.ownerDocument;
-
 		if (!dom) throw new TypeError("DOM element being rendered to does not exist.")
 		if (currentDOM != null && dom.contains(currentDOM)) {
 			throw new TypeError("Node is currently being rendered to and thus is locked.")

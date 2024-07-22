@@ -718,6 +718,7 @@ module.exports = function(options) {
 			},
 			createDocumentFragment: function() {
 				return {
+					ownerDocument: $window.document,
 					nodeType: 11,
 					nodeName: "#document-fragment",
 					appendChild: appendChild,
