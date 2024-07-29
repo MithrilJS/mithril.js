@@ -42,9 +42,9 @@ module.exports = function() {
 
 	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
-	function activeElement(document) {
+	function activeElement(dom) {
 		try {
-			return document.activeElement
+			return getDocument(dom).activeElement
 		} catch (e) {
 			return null
 		}
@@ -695,7 +695,7 @@ module.exports = function() {
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(getDocument(vnode.dom)))) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(vnode.dom))) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
@@ -724,7 +724,7 @@ module.exports = function() {
 			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
 				vnode.tag === "option"
-				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement(getDocument(vnode.dom))
+				|| vnode.tag === "select" && vnode.dom.selectedIndex === -1 && vnode.dom === activeElement(vnode.dom)
 			))
 			&& !(vnode.tag === "input" && key === "type")
 		) {
@@ -773,7 +773,7 @@ module.exports = function() {
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement(getDocument(vnode.dom)) || vnode.tag === "option" && vnode.dom.parentNode === activeElement(getDocument(vnode.dom))
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement(vnode.dom) || vnode.tag === "option" && vnode.dom.parentNode === activeElement(vnode.dom)
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
@@ -925,7 +925,7 @@ module.exports = function() {
 		var prevRedraw = currentRedraw
 		var prevDOM = currentDOM
 		var hooks = []
-		var active = activeElement(getDocument(dom))
+		var active = activeElement(dom)
 		var namespace = dom.namespaceURI
 
 		currentDOM = dom
@@ -938,7 +938,7 @@ module.exports = function() {
 			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 			dom.vnodes = vnodes
 			// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
-			if (active != null && activeElement(getDocument(dom)) !== active && typeof active.focus === "function") active.focus()
+			if (active != null && activeElement(dom) !== active && typeof active.focus === "function") active.focus()
 			for (var i = 0; i < hooks.length; i++) hooks[i]()
 		} finally {
 			currentRedraw = prevRedraw
