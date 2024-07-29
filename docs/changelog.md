@@ -46,6 +46,7 @@ PSA: changes to [`mithril/stream`](stream.md) are now specified in this changelo
 - Add `URLSearchParams` support to `m.request` ([#2695](https://github.com/MithrilJS/mithril.js/pull/2695) [@Coteh](https://github.com/Coteh))
 - Standardise vnode text representation ([#2670](https://github.com/MithrilJS/mithril.js/pull/2670)) [@barneycarroll](https://github.com/barneycarroll)
 - API: Invalid escapes in routes are now safely handled. [@StephanHoyer](https://github.com/StephanHoyer) based on older [fix](https://github.com/MithrilJS/mithril.js/pull/2061) by [@dead-claudia](https://github.com/dead-claudia)
+- Use window and document from render target instead of using globals. ([#2897](https://github.com/MithrilJS/mithril.js/pull/2897))
 
 Important note: if you were using any of these undocumented tools, they are no longer available as of this release. This is not considered a breaking change as they were written for internal usage and as of v2 are all 100% unsupported in userland.
 
