@@ -12,5 +12,6 @@ jobs:
 
     steps:
     - uses: ./.github/actions/setup
-      with: {branch: next}
+      with:
+        branch: next
     - run: npm run lint:js
