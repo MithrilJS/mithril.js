@@ -1,30 +1,22 @@
-name: pr
+name: test-next-push
 
 on:
   push:
     branches: [ next ]
-
   workflow_dispatch:
 
 concurrency: prr:pre-release
 
 jobs:
-  pr:
+  build:
+    uses: ./.github/workflows/test.yml
 
+  publish-prerelease:
+    needs: build
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - uses: ./.github/actions/setup
     - run: npm run build
     - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
       env:
