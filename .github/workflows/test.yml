@@ -16,14 +16,14 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
     - uses: ./.github/actions/setup
     - run: npm run lint:docs
 
   lint-js:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
     - uses: ./.github/actions/setup
     - run: npm run lint:js
 
@@ -39,7 +39,7 @@ jobs:
         - 20
         - 22
     steps:
-    - uses: actions/checkout@v4
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
     - uses: ./.github/actions/setup
       with:
         node-version: ${{ matrix.node-version }}
