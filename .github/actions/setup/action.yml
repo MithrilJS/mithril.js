@@ -2,12 +2,6 @@ name: Setup CI context
 description: Sets up repo and Node context and installs packages
 
 inputs:
-  branch:
-    # Yanked from `actions/checkout`'s description for `ref`.
-    description: >
-      The branch, tag or SHA to checkout. When checking out the repository that
-      triggered a workflow, this defaults to the reference or SHA for that
-      event.  Otherwise, uses the default branch.
   # See supported Node.js release schedule here:
   # https://github.com/nodejs/Release
   node-version:
@@ -17,10 +11,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.branch }}
-        fetch-depth: 0
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
