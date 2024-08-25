@@ -10,12 +10,12 @@ concurrency: prr:pre-release
 
 jobs:
   pr:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: ./.github/actions/setup
-      with: {branch: next}
+      with:
+        branch: next
     - run: npm run build
     - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
       env:
