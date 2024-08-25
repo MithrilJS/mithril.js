@@ -16,6 +16,8 @@ permissions:
 jobs:
   lint-docs:
     # https://github.com/MithrilJS/mithril.js/issues/2898
+    # Semantics aren't quite what I'd prefer. This is what I'd really want:
+    # https://github.com/actions/runner/issues/2347#issue-comment-box
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
