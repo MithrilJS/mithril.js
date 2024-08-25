@@ -16,17 +16,15 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
-      with:
-        branch: next
     - run: npm run lint:docs
 
   lint-js:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
-      with:
-        branch: next
     - run: npm run lint:js
 
   test-js:
@@ -41,9 +39,9 @@ jobs:
         - 20
         - 22
     steps:
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
       with:
-        branch: next
         node-version: ${{ matrix.node-version }}
     - run: npm run build
     - run: npm run test:js
