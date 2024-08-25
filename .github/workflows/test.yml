@@ -10,20 +10,23 @@ permissions:
   actions: write
   contents: read
 
+# This uses actions/checkout instead of `git clone` directly since it's way
+# easier than parsing everything out.
+
 jobs:
   lint-docs:
     # https://github.com/MithrilJS/mithril.js/issues/2898
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
-    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - run: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run lint:docs
 
   lint-js:
     runs-on: ubuntu-latest
     steps:
-    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - run: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run lint:js
 
@@ -31,7 +34,7 @@ jobs:
     needs: lint-js
     runs-on: ubuntu-latest
     steps:
-    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - run: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run build
 
@@ -47,7 +50,7 @@ jobs:
         - 20
         - 22
     steps:
-    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - run: actions/checkout@v4
     - uses: ./.github/actions/setup
       with:
         node-version: ${{ matrix.node-version }}
