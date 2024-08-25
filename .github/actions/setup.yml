@@ -1,0 +1,20 @@
+name: Setup CI context
+description: Sets up repo and Node context and installs packages
+
+inputs:
+  # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+  node-version:
+    type: number
+    default: 20
+    description: The Node version to use
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+    # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+    - run: npm ci
