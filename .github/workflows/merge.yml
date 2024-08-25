@@ -10,12 +10,12 @@ concurrency: prr:deploy
 
 jobs:
   merge:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: ./.github/actions/setup
-      with: {branch: next}
+      with:
+        branch: next
     - run: npm run build
     - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
       env:
