@@ -21,14 +21,14 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
-    - run: actions/checkout@v4
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run lint:docs
 
   lint-js:
     runs-on: ubuntu-latest
     steps:
-    - run: actions/checkout@v4
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run lint:js
 
@@ -36,7 +36,7 @@ jobs:
     needs: lint-js
     runs-on: ubuntu-latest
     steps:
-    - run: actions/checkout@v4
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
     - run: npm run build
 
@@ -52,7 +52,7 @@ jobs:
         - 20
         - 22
     steps:
-    - run: actions/checkout@v4
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/setup
       with:
         node-version: ${{ matrix.node-version }}
