@@ -27,8 +27,16 @@ jobs:
     - uses: ./.github/actions/setup
     - run: npm run lint:js
 
-  test-js:
+  build-js:
     needs: lint-js
+    runs-on: ubuntu-latest
+    steps:
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - uses: ./.github/actions/setup
+    - run: npm run build
+
+  test-js:
+    needs: build-js
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,5 +51,4 @@ jobs:
     - uses: ./.github/actions/setup
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm run build
     - run: npm run test:js
