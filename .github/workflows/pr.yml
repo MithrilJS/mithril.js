@@ -14,12 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        cache: 'npm'
-    - run: npm ci
+    - uses: ./.github/actions/setup
+      with: {branch: next}
     - run: npm run build
     - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
       env:
