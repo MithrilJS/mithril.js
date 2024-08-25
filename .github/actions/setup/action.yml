@@ -4,7 +4,7 @@ description: Sets up repo and Node context and installs packages
 inputs:
   branch:
     type: string
-    default: next
+    required: true
     description: The branch to fetch
   # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
   node-version:
