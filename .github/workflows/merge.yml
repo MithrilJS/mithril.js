@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: ./.github/actions/setup
+    - uses: actions/checkout@v4
       with:
-        branch: next
+        ref: next
+        fetch-depth: 0
+    - uses: ./.github/actions/setup
     - run: npm run build
     - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
       env:
