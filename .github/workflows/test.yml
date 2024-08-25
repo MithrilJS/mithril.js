@@ -1,0 +1,49 @@
+name: test
+
+on:
+  pull_request:
+    branches: [ next ]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  lint-docs:
+    # https://github.com/MithrilJS/mithril.js/issues/2898
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ./.github/actions/setup
+      with:
+        branch: next
+    - run: npm run lint:docs
+
+  lint-js:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ./.github/actions/setup
+      with:
+        branch: next
+    - run: npm run lint:js
+
+  test-js:
+    needs: lint-js
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version:
+        - 16
+        - 18
+        - 20
+        - 22
+    steps:
+    - uses: ./.github/actions/setup
+      with:
+        branch: next
+        node-version: ${{ matrix.node-version }}
+    - run: npm run build
+    - run: npm run test:js
