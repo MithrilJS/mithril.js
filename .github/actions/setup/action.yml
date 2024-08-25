@@ -15,3 +15,4 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
     - run: npm ci
+      shell: bash
