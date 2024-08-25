@@ -1,3 +1,6 @@
+# In the future, I'd like to fold this into its own action under the Mithril.js
+# org and include `actions/checkout` as well. It'd simplify maintenance a bit
+# and I could reuse it across multiple repos.
 name: Setup CI context
 description: Sets up repo and Node context and installs packages
 
