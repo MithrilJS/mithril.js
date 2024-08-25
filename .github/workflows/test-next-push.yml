@@ -15,7 +15,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
     - uses: ./.github/actions/setup
     - run: npm run build
     - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
