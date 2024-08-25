@@ -2,6 +2,10 @@ name: Setup CI context
 description: Sets up repo and Node context and installs packages
 
 inputs:
+  branch:
+    type: string
+    default: next
+    description: The branch to fetch
   # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
   node-version:
     type: number
@@ -12,6 +16,9 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        fetch-depth: 0
     # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     - uses: actions/setup-node@v4
       with:
