@@ -1,0 +1,21 @@
+# In the future, I'd like to fold this into its own action under the Mithril.js
+# org and include `actions/checkout` as well. It'd simplify maintenance a bit
+# and I could reuse it across multiple repos.
+name: Setup CI context
+description: Sets up repo and Node context and installs packages
+
+inputs:
+  # See supported Node.js release schedule here:
+  # https://github.com/nodejs/Release
+  node-version:
+    default: 20
+    description: The Node version to use
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - run: npm ci
+      shell: bash

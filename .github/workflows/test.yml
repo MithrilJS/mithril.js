@@ -1,0 +1,59 @@
+name: test
+
+on:
+  pull_request:
+    branches: [ next ]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  actions: write
+  contents: read
+
+# This uses actions/checkout instead of `git clone` directly since it's way
+# easier than parsing everything out.
+
+jobs:
+  lint-docs:
+    # https://github.com/MithrilJS/mithril.js/issues/2898
+    # Semantics aren't quite what I'd prefer. This is what I'd really want:
+    # https://github.com/actions/runner/issues/2347#issue-comment-box
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+    - run: npm run lint:docs
+
+  lint-js:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+    - run: npm run lint:js
+
+  build-js:
+    needs: lint-js
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+    - run: npm run build
+
+  test-js:
+    needs: build-js
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version:
+        - 16
+        - 18
+        - 20
+        - 22
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm run test:js
