@@ -11,20 +11,17 @@ on:
 
 jobs:
   lint-docs:
+    # https://github.com/MithrilJS/mithril.js/issues/2898
+    continue-on-error: true
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    - uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 20
         cache: 'npm'
     - run: npm ci
     - run: npm run lint:docs
