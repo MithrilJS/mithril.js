@@ -1,17 +1,19 @@
-name: pr
+name: test-next-push
 
 on:
   push:
     branches: [ next ]
-
   workflow_dispatch:
 
 concurrency: prr:pre-release
 
 jobs:
-  pr:
-    runs-on: ubuntu-latest
+  build:
+    uses: ./.github/workflows/test.yml
 
+  publish-prerelease:
+    needs: build
+    runs-on: ubuntu-latest
     steps:
     - uses: ./.github/actions/setup
       with:
