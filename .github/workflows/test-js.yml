@@ -20,10 +20,8 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: ./.github/actions/setup
       with:
+        branch: next
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
     - run: npm run test:js
