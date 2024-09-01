@@ -7,6 +7,8 @@
 // - https://github.com/MithrilJS/mithril.js/issues/2417
 // - https://github.com/MithrilJS/mithril.js/pull/2422
 
+require("./_improve-rejection-crashing.js")
+
 const {promises: fs} = require("fs")
 const path = require("path")
 const zlib = require("zlib")
@@ -33,7 +35,4 @@ async function minify() {
 	console.log("Compiled size: " + format(compressedGzipSize) + " bytes gzipped (" + format(compressedSize) + " bytes uncompressed)")
 }
 
-/* eslint-disable global-require */
-if (require.main === module) {
-	require("./_command")({exec: minify})
-}
+minify()
