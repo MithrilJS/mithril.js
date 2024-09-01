@@ -1,5 +1,7 @@
 "use strict"
 
+require("./_improve-rejection-crashing.js")
+
 const {promises: fs} = require("fs")
 const path = require("path")
 const {promisify} = require("util")
@@ -38,7 +40,6 @@ const htmlMinifierConfig = {
 	useShortDoctype: true,
 }
 
-module.exports = generate
 async function generate() {
 	return (await makeGenerator()).generate()
 }
@@ -176,7 +177,7 @@ class Generator {
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
-		
+
 		// insert meta description
 		result = result.replace(/\[metaDescription\]/, metaDescription)
 
@@ -261,45 +262,46 @@ class Generator {
 	}
 }
 
-/* eslint-disable global-require */
-if (require.main === module) {
-	require("./_command")({
-		exec: generate,
-		async watch() {
-			let timeout, genPromise
-			function updateGenerator() {
-				if (timeout == null) return
-				clearTimeout(timeout)
-				genPromise = new Promise((resolve) => {
-					timeout = setTimeout(function() {
-						timeout = null
-						resolve(makeGenerator().then((g) => g.generate()))
-					}, 100)
-				})
-			}
+function watch() {
+	let timeout, genPromise
+	function updateGenerator() {
+		if (timeout == null) return
+		clearTimeout(timeout)
+		genPromise = new Promise((resolve) => {
+			timeout = setTimeout(function() {
+				timeout = null
+				resolve(makeGenerator().then((g) => g.generate()))
+			}, 100)
+		})
+	}
 
-			async function updateFile(file) {
-				if ((/^layout\.html$|^archive$|^nav-/).test(file)) {
-					updateGenerator()
-				}
-				(await genPromise).generateSingle(file)
-			}
+	async function updateFile(file) {
+		if ((/^layout\.html$|^archive$|^nav-/).test(file)) {
+			updateGenerator()
+		}
+		(await genPromise).generateSingle(file)
+	}
 
-			async function removeFile(file) {
-				(await genPromise).eachTarget(file, (dest) => fs.unlink(dest))
-			}
+	async function removeFile(file) {
+		(await genPromise).eachTarget(file, (dest) => fs.unlink(dest))
+	}
 
-			require("chokidar").watch(r("docs"), {
-				ignored: ["archive/**", /(^|\\|\/)\../],
-				// This depends on `layout`/etc. existing first.
-				ignoreInitial: true,
-				awaitWriteFinish: true,
-			})
-				.on("ready", updateGenerator)
-				.on("add", updateFile)
-				.on("change", updateFile)
-				.on("unlink", removeFile)
-				.on("unlinkDir", removeFile)
-		},
+	// eslint-disable-next-line global-require
+	require("chokidar").watch(r("docs"), {
+		ignored: ["archive/**", /(^|\\|\/)\../],
+		// This depends on `layout`/etc. existing first.
+		ignoreInitial: true,
+		awaitWriteFinish: true,
 	})
+		.on("ready", updateGenerator)
+		.on("add", updateFile)
+		.on("change", updateFile)
+		.on("unlink", removeFile)
+		.on("unlinkDir", removeFile)
+}
+
+if (process.argv.includes("--watch", 2)) {
+	watch()
+} else {
+	generate()
 }

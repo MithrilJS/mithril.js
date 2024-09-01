@@ -7,13 +7,14 @@
 // - https://github.com/MithrilJS/mithril.js/issues/2417
 // - https://github.com/MithrilJS/mithril.js/pull/2422
 
+require("./_improve-rejection-crashing.js")
+
 const path = require("path")
 const {execFileSync} = require("child_process")
 const ghPages = require("gh-pages")
 const upstream = require("./_upstream")
 const generate = require("./generate-docs")
 
-module.exports = update
 async function update() {
 	await generate()
 	const commit = execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
@@ -38,7 +39,4 @@ async function update() {
 	console.log("Published!")
 }
 
-/* eslint-disable global-require */
-if (require.main === module) {
-	require("./_command")({exec: update})
-}
+update()
