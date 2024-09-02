@@ -43,7 +43,7 @@
     "marked": "^14.1.0",
     "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
-    "ospec": "4.1.6",
+    "ospec": "4.2.1",
     "pinpoint": "^1.1.0",
     "rimraf": "^3.0.0",
     "semver": "^6.3.0",
