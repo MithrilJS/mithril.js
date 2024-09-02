@@ -28,9 +28,9 @@ function checkKnownCorrectRequestFail(href, headers, status, body) {
 
 /**
  * Returns `undefined` if no error, a string if an error does occur.
- * @param {(message?: string)} callback
+ * @param {(message?: string) => void} callback
  */
-function checkHttp(href, callback) {
+function checkHttpInner(href, callback) {
 	// Prefer https: > http: where possible, but allow http: when https: is inaccessible.
 
 	const url = new URL(href)
@@ -65,6 +65,39 @@ function checkHttp(href, callback) {
 			return callback(checkKnownCorrectRequestFail(href, headers, status, body))
 		})
 	})
+}
+
+// Kill the remaining duplication by using a global cache.
+const urlCache = new Map()
+
+/**
+ * Returns `undefined` if no error, a string if an error does occur.
+ * @param {(message?: string) => void} callback
+ */
+function checkHttp(href, callback) {
+	if (href.includes("#")) {
+		process.exitCode = 1
+		callback(`Expected href to be sanitized of hashes, but found ${href}`)
+	}
+
+	if (urlCache.has(href)) {
+		const message = urlCache.get(href)
+		if (Array.isArray(message)) {
+			message.push(callback)
+		} else {
+			process.nextTick(callback, message)
+		}
+	} else {
+		const queue = []
+		urlCache.set(href, queue)
+		checkHttpInner(href, (message) => {
+			urlCache.set(href, message)
+			process.nextTick(callback, message)
+			for (const callback of queue) {
+				process.nextTick(callback, message)
+			}
+		})
+	}
 }
 
 module.exports = {
