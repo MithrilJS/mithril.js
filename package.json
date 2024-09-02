@@ -5,6 +5,7 @@
   "author": "Leo Horie",
   "license": "MIT",
   "unpkg": "mithril.min.js",
+  "jsdelivr": "mithril.min.js",
   "repository": "github:MithrilJS/mithril.js",
   "scripts": {
     "precommit": "lint-staged",
