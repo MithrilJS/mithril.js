@@ -9,7 +9,7 @@ const {marked} = require("marked")
 const rimraf = promisify(require("rimraf"))
 const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
-const HTMLMinifier = require("html-minifier")
+const HTMLMinifier = require("html-minifier-terser")
 const upstream = require("./_upstream")
 const version = require("../package.json").version
 
@@ -227,7 +227,7 @@ class Generator {
 		else {
 			let html = await fs.readFile(file, "utf-8")
 			if (file.endsWith(".md")) html = await this.compilePage(file, html)
-			const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
+			const minified = await HTMLMinifier.minify(html, htmlMinifierConfig)
 			await archived(
 				relative.replace(/\.md$/, ".html"),
 				(dest) => fs.writeFile(dest, minified)
