@@ -2,7 +2,6 @@ name: '📃 Documentation Issue'
 description: Report an issue with Mithril.js's documentation
 assignees: dead-claudia
 labels:
-- 'Type: Bug'
 - 'Area: Documentation'
 body:
 - type: checkboxes

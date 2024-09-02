@@ -1,9 +1,8 @@
-name: '🐛 Framework Bug'
-description: Report a bug in Mithril.js core
+name: '🌊 Mithril.js Streams bug'
+description: Report an issue with Mithril.js's Streams module
 assignees: dead-claudia
 labels:
-- 'Type: Bug'
-- 'Area: Core'
+- 'Area: Stream'
 body:
 - type: checkboxes
   attributes:
