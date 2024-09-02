@@ -15,34 +15,24 @@ permissions:
 
 jobs:
   lint-docs:
-    # https://github.com/MithrilJS/mithril.js/issues/2898
-    # Semantics aren't quite what I'd prefer. This is what I'd really want:
-    # https://github.com/actions/runner/issues/2347#issue-comment-box
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup
-    - run: npm run lint:docs
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: lint:docs
+      continue-on-error: true
 
   lint-js:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup
-    - run: npm run lint:js
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: lint:js
 
   build-js:
     needs: lint-js
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup
-    - run: npm run build
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: build
 
   test-js:
     needs: build-js
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
@@ -51,9 +41,7 @@ jobs:
         - 18
         - 20
         - 22
-    steps:
-    - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm run test:js
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      node-version: ${{ matrix.node-version }}
+      task: test:js

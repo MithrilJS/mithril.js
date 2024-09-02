@@ -1,13 +1,12 @@
 name: Ping triage on issue create
-
 on:
   issues:
     types: [opened]
-
+permissions:
+  issues: write
 jobs:
   notify:
-    runs-on: ubuntu-latest
-    steps:
-      - run: gh issue comment ${{ github.event.issue.url }} --body '@MithrilJS/triage Please take a look.'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+    uses: ./.github/workflows/_post-comment.yml
+    with:
+      url: ${{ github.event.issue.url }}
+      message: '@MithrilJS/triage Please take a look.'

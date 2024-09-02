@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - run: git clone --depth=1 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
-    - uses: ./.github/actions/setup
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - run: npm ci
     - run: npm run build
     - run: npx pr-release rollback --verbose --target master --source next --verbose --ignore 'package*' --ignore docs/changelog.md --ignore docs/recent-changes.md
       env:
