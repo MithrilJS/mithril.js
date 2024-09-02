@@ -1,0 +1,38 @@
+name: Run npm task
+
+on:
+  workflow_call:
+    inputs:
+      task:
+        type: string
+        required: true
+      node-version:
+        type: number
+        default: 20
+      continue-on-error:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# This uses actions/checkout instead of `git clone` directly since it's way
+# easier than parsing everything out.
+
+jobs:
+  run-task:
+    name: npm run ${{ inputs.task }}
+    continue-on-error: ${{ inputs.continue-on-error }}
+    runs-on:
+    - ubuntu-latest
+    - windows-latest
+    - macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - run: npm ci
+    - run: npm run ${{ inputs.task }}

@@ -7,11 +7,7 @@ permissions:
   issues: write
 jobs:
   comment:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          gh issue comment ${{ github.event.pull_request.url }} \
-            --body '⚠⚠⚠ Hey @${{ github.actor }}, did you mean to open this against `next`? ⚠⚠⚠'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        name: Post alert comment
+    uses: ./.github/workflows/_post-comment.yml
+    with:
+      url: ${{ github.event.pull_request.url }}
+      message: ⚠⚠⚠ Hey @${{ github.actor }}, did you mean to open this against `next`? ⚠⚠⚠

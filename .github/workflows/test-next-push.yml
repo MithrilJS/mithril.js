@@ -8,15 +8,18 @@ on:
 concurrency: prr:pre-release
 
 jobs:
-  build:
+  test:
     uses: ./.github/workflows/test.yml
 
   publish-prerelease:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
-    - run: git clone --depth=1 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
-    - uses: ./.github/actions/setup
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - run: npm ci
     - run: npm run build
     - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
       env:
