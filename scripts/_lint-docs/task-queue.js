@@ -9,7 +9,7 @@ let running = 0
 function runTask(task, callback) {
 	process.nextTick(task, (...args) => {
 		process.nextTick(callback, ...args)
-		if (running === maxConcurrency) {
+		if (running === maxConcurrency && queue.length !== 0) {
 			const [nextTask, nextCallback] = queue.splice(0, 2)
 			runTask(nextTask, nextCallback)
 		}
@@ -22,6 +22,14 @@ function runTask(task, callback) {
  * @param {(...args: A) => void} callback
  */
 function submitTask(task, callback) {
+	if (typeof task !== "function") {
+		throw new TypeError("`task` must be a function")
+	}
+
+	if (typeof callback !== "function") {
+		throw new TypeError("`callback` must be a function")
+	}
+
 	if (running < maxConcurrency) {
 		running++
 		runTask(task, callback)
