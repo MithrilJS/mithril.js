@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - run: git clone --depth=0 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
+    - run: git clone --depth=1 https://github.com/MithrilJS/mithril.js.git && cd mithril.js
     - uses: ./.github/actions/setup
     - run: npm run build
     - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
