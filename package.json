@@ -36,7 +36,7 @@
     "escape-string-regexp": "^2.0.0",
     "eslint": "^8.9.0",
     "gh-pages": "^6.1.1",
-    "glob": "^7.1.4",
+    "glob": "^11.0.0",
     "html-minifier-terser": "^7.2.0",
     "istanbul": "^0.4.5",
     "lint-staged": "^13.2.1",
