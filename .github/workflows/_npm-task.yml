@@ -23,10 +23,7 @@ jobs:
   run-task:
     name: npm run ${{ inputs.task }}
     continue-on-error: ${{ inputs.continue-on-error }}
-    runs-on:
-    - ubuntu-latest
-    - windows-latest
-    - macos-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
       with:
