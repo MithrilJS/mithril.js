@@ -14,8 +14,10 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - run: gh issue comment "$ISSUE_URL" --body "$MESSAGE"
+      - run: |
+          export GITHUB_TOKEN="$GH_TOKEN_SECRET"
+          gh issue comment "$ISSUE_URL" --body "$MESSAGE"
         env:
           ISSUE_URL: ${{ inputs.url }}
           MESSAGE: ${{ inputs.message }}
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN_SECRET: ${{ github.token }}
