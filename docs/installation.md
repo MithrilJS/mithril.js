@@ -16,7 +16,7 @@ If you're new to JavaScript or just want a very simple setup to get your feet we
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 ```
 
-If you would like to try out mithril without setting up a local environment, you can easily use an online playground at [flems.io/mithril](https://flems.io/mithril).
+If you would like to try out Mithril.js without setting up a local environment, you can easily use an online playground at [flems.io/mithril](https://flems.io/mithril).
 
 ---
 
