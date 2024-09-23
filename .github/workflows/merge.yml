@@ -2,7 +2,7 @@ name: merge
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
   workflow_dispatch:
 
@@ -10,27 +10,18 @@ concurrency: prr:deploy
 
 jobs:
   merge:
-
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        ref: 'next'
-        fetch-depth: 0
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+        ref: next
+    - uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release merge --target master --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
+    - run: npx pr-release merge --target main --source next --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 

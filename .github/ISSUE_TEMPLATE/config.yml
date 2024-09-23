@@ -1,0 +1,18 @@
+blank_issues_enabled: true
+contact_links:
+  - name: ℹ Questions, Ideas, and Discussions
+    url: https://github.com/MithrilJS/mithril.js/discussions
+    about: |
+      Got a question on how to use Mithril.js? Have a fancy idea of how we could do better? Check
+      out our discussions forum!
+  - name: ℹ Show and Tell
+    url: https://github.com/MithrilJS/mithril.js/discussions/new?category=show-and-tell
+    about: |
+      Got something to show off? Made something so cool, you just have to tell the world? Let us
+      know here in our discussions forum!
+  - name: 🚀 Feature Request or Enhancement
+    url: https://github.com/MithrilJS/mithril.js/discussions/new?category=ideas
+    about: Got a feature request? Let us know here! We do those in our discussion forum.
+  - name: 💻 Zulip Chat
+    url: https://mithril.zulipchat.com/
+    about: Not sure about something? Just want to hang out? Come over to our Zulip chat!

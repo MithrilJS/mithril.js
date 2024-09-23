@@ -1,0 +1,47 @@
+name: test
+
+on:
+  pull_request:
+    branches: [ next ]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  actions: write
+  contents: read
+
+# This uses actions/checkout instead of `git clone` directly since it's way
+# easier than parsing everything out.
+
+jobs:
+  lint-docs:
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: lint:docs
+      continue-on-error: true
+
+  lint-js:
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: lint:js
+
+  build-js:
+    needs: lint-js
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      task: build
+
+  test-js:
+    needs: build-js
+    strategy:
+      matrix:
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version:
+        - 16
+        - 18
+        - 20
+        - 22
+    uses: ./.github/workflows/_npm-task.yml
+    with:
+      node-version: ${{ matrix.node-version }}
+      task: test:js

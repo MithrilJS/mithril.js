@@ -3,11 +3,11 @@
 [![npm Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
 [![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/MithrilJS/mithril.js/blob/next/LICENSE) &nbsp;
 [![npm Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) &nbsp;
-[![Build Status](https://img.shields.io/travis/MithrilJS/mithril.js/next.svg?colorB=brightgreen)](https://www.npmjs.com/package/mithril) &nbsp;
+[![Build Status](https://img.shields.io/github/actions/workflow/status/MithrilJS/mithril.js/.github%2Fworkflows%2Ftest-next-push.yml)](https://www.npmjs.com/package/mithril) &nbsp;
 [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs) &nbsp;
 [![Zulip, join chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mithril.zulipchat.com/)
 
-- [What is Mithril.js?](#what-is-mithriljs?)
+- [What is Mithril.js?](#what-is-mithriljs)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Getting Help](#getting-help)
@@ -15,7 +15,7 @@
 
 ## What is Mithril.js?
 
-A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->9.17 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
+A modern client-side JavaScript framework for building Single Page Applications. It's small (<!-- size -->9.14 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
 Mithril.js is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 

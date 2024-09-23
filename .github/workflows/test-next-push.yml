@@ -1,17 +1,19 @@
-name: pr
+name: test-next-push
 
 on:
   push:
     branches: [ next ]
-
   workflow_dispatch:
 
 concurrency: prr:pre-release
 
 jobs:
-  pr:
-    runs-on: ubuntu-latest
+  test:
+    uses: ./.github/workflows/test.yml
 
+  publish-prerelease:
+    needs: test
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -19,7 +21,7 @@ jobs:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release pr --verbose --target main --source next --compact --verbose --minimize-semver-change
+    - run: npx pr-release pr --verbose --target master --source next --compact --verbose --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
     # The following will publish a prerelease to npm
@@ -27,5 +29,5 @@ jobs:
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npx pr-release infer-prerelease --preid=next --target main --source next --verbose --publish --minimize-semver-change
+    - run: npx pr-release infer-prerelease --preid=next --target master --source next --verbose --publish --minimize-semver-change
       name: Publish

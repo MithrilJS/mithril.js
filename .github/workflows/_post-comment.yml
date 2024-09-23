@@ -1,0 +1,23 @@
+name: Post comment
+
+on:
+  workflow_call:
+    inputs:
+      url:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          export GITHUB_TOKEN="$GH_TOKEN_SECRET"
+          gh issue comment "$ISSUE_URL" --body "$MESSAGE"
+        env:
+          ISSUE_URL: ${{ inputs.url }}
+          MESSAGE: ${{ inputs.message }}
+          GH_TOKEN_SECRET: ${{ github.token }}

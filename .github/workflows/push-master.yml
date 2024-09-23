@@ -1,19 +1,13 @@
-name: 'Push `master`'
+name: Warn on pushing to `master`
 on:
   pull_request:
     types: [opened]
-    branches: ['master']
+    branches: [master]
+permissions:
+  issues: write
 jobs:
   comment:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            await github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `⚠⚠⚠ Hey @${context.actor}, did you mean to open this against \`next\`? ⚠⚠⚠`
-            })
+    uses: ./.github/workflows/_post-comment.yml
+    with:
+      url: ${{ github.event.pull_request.url }}
+      message: ⚠⚠⚠ Hey @${{ github.actor }}, did you mean to open this against `next`? ⚠⚠⚠

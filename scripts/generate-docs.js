@@ -1,5 +1,7 @@
 "use strict"
 
+require("./_improve-rejection-crashing.js")
+
 const {promises: fs} = require("fs")
 const path = require("path")
 const {promisify} = require("util")
@@ -7,7 +9,7 @@ const {marked} = require("marked")
 const rimraf = promisify(require("rimraf"))
 const {execFileSync} = require("child_process")
 const escapeRegExp = require("escape-string-regexp")
-const HTMLMinifier = require("html-minifier")
+const HTMLMinifier = require("html-minifier-terser")
 const upstream = require("./_upstream")
 const version = require("../package.json").version
 
@@ -38,7 +40,6 @@ const htmlMinifierConfig = {
 	useShortDoctype: true,
 }
 
-module.exports = generate
 async function generate() {
 	return (await makeGenerator()).generate()
 }
@@ -95,7 +96,7 @@ async function archiveDocsSelect() {
 	var options = archiveDirs
 		.map((ad) => `<option>${ad}</option>`)
 		.join("")
-	return `<select id="archive-docs" onchange="location.href='archive/' + this.value + '/index.html'">${options}</select>`
+	return `<select id="archive-docs" onchange="location.href='/archive/' + this.value + '/index.html'">${options}</select>`
 }
 
 function encodeHTML (str) {
@@ -161,7 +162,7 @@ class Generator {
 		)
 
 		const markedHtml = marked(body)
-		const title = body.match(/^#([^\n\r]+)/i) || []
+		const title = body.match(/^#\s+([^\n\r]+)/m) || []
 
 		let result = this._layout
 		if (title[1]) {
@@ -176,7 +177,7 @@ class Generator {
 
 		// insert parsed HTML
 		result = result.replace(/\[body\]/, markedHtml)
-		
+
 		// insert meta description
 		result = result.replace(/\[metaDescription\]/, metaDescription)
 
@@ -226,7 +227,7 @@ class Generator {
 		else {
 			let html = await fs.readFile(file, "utf-8")
 			if (file.endsWith(".md")) html = await this.compilePage(file, html)
-			const minified = HTMLMinifier.minify(html, htmlMinifierConfig)
+			const minified = await HTMLMinifier.minify(html, htmlMinifierConfig)
 			await archived(
 				relative.replace(/\.md$/, ".html"),
 				(dest) => fs.writeFile(dest, minified)
@@ -261,45 +262,46 @@ class Generator {
 	}
 }
 
-/* eslint-disable global-require */
-if (require.main === module) {
-	require("./_command")({
-		exec: generate,
-		async watch() {
-			let timeout, genPromise
-			function updateGenerator() {
-				if (timeout == null) return
-				clearTimeout(timeout)
-				genPromise = new Promise((resolve) => {
-					timeout = setTimeout(function() {
-						timeout = null
-						resolve(makeGenerator().then((g) => g.generate()))
-					}, 100)
-				})
-			}
+function watch() {
+	let timeout, genPromise
+	function updateGenerator() {
+		if (timeout == null) return
+		clearTimeout(timeout)
+		genPromise = new Promise((resolve) => {
+			timeout = setTimeout(function() {
+				timeout = null
+				resolve(makeGenerator().then((g) => g.generate()))
+			}, 100)
+		})
+	}
 
-			async function updateFile(file) {
-				if ((/^layout\.html$|^archive$|^nav-/).test(file)) {
-					updateGenerator()
-				}
-				(await genPromise).generateSingle(file)
-			}
+	async function updateFile(file) {
+		if ((/^layout\.html$|^archive$|^nav-/).test(file)) {
+			updateGenerator()
+		}
+		(await genPromise).generateSingle(file)
+	}
 
-			async function removeFile(file) {
-				(await genPromise).eachTarget(file, (dest) => fs.unlink(dest))
-			}
+	async function removeFile(file) {
+		(await genPromise).eachTarget(file, (dest) => fs.unlink(dest))
+	}
 
-			require("chokidar").watch(r("docs"), {
-				ignored: ["archive/**", /(^|\\|\/)\../],
-				// This depends on `layout`/etc. existing first.
-				ignoreInitial: true,
-				awaitWriteFinish: true,
-			})
-				.on("ready", updateGenerator)
-				.on("add", updateFile)
-				.on("change", updateFile)
-				.on("unlink", removeFile)
-				.on("unlinkDir", removeFile)
-		},
+	// eslint-disable-next-line global-require
+	require("chokidar").watch(r("docs"), {
+		ignored: ["archive/**", /(^|\\|\/)\../],
+		// This depends on `layout`/etc. existing first.
+		ignoreInitial: true,
+		awaitWriteFinish: true,
 	})
+		.on("ready", updateGenerator)
+		.on("add", updateFile)
+		.on("change", updateFile)
+		.on("unlink", removeFile)
+		.on("unlinkDir", removeFile)
+}
+
+if (process.argv.includes("--watch", 2)) {
+	watch()
+} else {
+	generate()
 }
