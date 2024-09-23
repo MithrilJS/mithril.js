@@ -44,9 +44,9 @@ $ npm install -D MithrilJS/mithril.d.ts#next
 
 ### Create a project locally
 
-You can use one of several existing Mithril starter templates such as
-* [mithril-esbuild-starter](https://github.com/kevinfiol/mithril-esbuild-starter)
+You can use one of several existing Mithril.js starter templates such as
 * [mithril-vite-starter](https://github.com/ArthurClemens/mithril-vite-starter)
+* [mithril-esbuild-starter](https://github.com/kevinfiol/mithril-esbuild-starter)
 * [mithril-rollup-starter](https://github.com/kevinfiol/mithril-rollup-starter)
 
 For example, if you'd like to get started with `mithril-esbuild-starter`, run the following commands:
@@ -66,55 +66,56 @@ npm run dev
 
 ### Quick start with [esbuild](https://esbuild.github.io/)
 
-1. Initialize the directory as an npm package
+1. Initialize the directory as an npm package.
 ```bash
 $ npm init --yes
 ```
 
-2. install required tools
+2. Install required tools.
 ```bash
 $ npm install mithril
 $ npm install esbuild --save-dev
 ```
 
 3. Add a "start" entry to the scripts section in `package.json`.
-```json
-{
-	"...": "...",
-	"scripts": {
-		"start": "esbuild ./src/index.js --bundle --outfile=./bin/main.js --watch"
+	```json
+	{
+		"...": "...",
+		"scripts": {
+			"start": "esbuild index.js --bundle --outfile=bin/main.js --watch"
+		}
 	}
-}
-```
+	```
 
-Optionally, if you'd like to use JSX, you can use the `--jsx-factory` and `--jsx-fragment` flags with esbuild.
+	Optionally, if you'd like to use JSX, you can use the `--jsx-factory` and `--jsx-fragment` flags with esbuild.
 
-```json
-{
-	"...": "...",
-	"scripts": {
-		"start": "esbuild src/index.js --bundle --outfile=public/app.js --jsx-factory=m --jsx-fragment='\"[\"' --watch"
+	```json
+	{
+		"...": "...",
+		"scripts": {
+			"start": "esbuild index.js --bundle --outfile=bin/main.js --jsx-factory=m --jsx-fragment='\"[\"' --watch"
+		}
 	}
-}
-```
+	```
 
-4. Create `src/index.js` file.
+4. Create `index.js` file.
 ```javascript
 import m from "mithril";
-m.render(document.body, "hello world");
+m.render(document.getElementById("app"), "hello world");
 ```
 
-5. create `index.html`
+5. Create `index.html` file.
 ```html
 <!DOCTYPE html>
 <body>
+	<div id="app"></div>
 	<script src="bin/main.js"></script>
 </body>
 ```
 
-6. run bundler
+6. Run your bundler script.
 ```bash
 $ npm run start
 ```
 
-7. open `index.html` in a browser
+7. Open `index.html` in a browser. You should see `hello world` rendered on your page.
