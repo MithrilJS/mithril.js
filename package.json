@@ -34,7 +34,7 @@
     "benchmark": "^2.1.4",
     "chokidar": "^3.2.1",
     "escape-string-regexp": "^2.0.0",
-    "eslint": "^8.9.0",
+    "eslint": "^9.11.0",
     "gh-pages": "^6.1.1",
     "glob": "^11.0.0",
     "html-minifier-terser": "^7.2.0",
