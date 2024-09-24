@@ -1,0 +1,13 @@
+name: Warn on pushing to `main`
+on:
+  pull_request_target:
+    types: [opened]
+    branches: [main]
+permissions:
+  issues: write
+jobs:
+  comment:
+    uses: MithrilJS/infra/.github/workflows/reject-pr.yml@main
+    secrets: inherit
+    with:
+      correct_branch: next

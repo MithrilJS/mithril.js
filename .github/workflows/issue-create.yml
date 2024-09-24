@@ -4,9 +4,7 @@ on:
     types: [opened]
   pull_request_target:
     types: [opened]
-permissions:
-  issues: write
-  repository-projects: write
 jobs:
   notify_triage:
     uses: MithrilJS/infra/.github/workflows/notify-triage.yml@main
+    secrets: inherit

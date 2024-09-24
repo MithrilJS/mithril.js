@@ -50,8 +50,8 @@ Fixes to documentation can land whenever, updates to the site are built and publ
 $ git checkout next
 $ git pull mithriljs next
 
-# Splat the docs folder from next onto master
-$ git checkout master
+# Splat the docs folder from next onto main
+$ git checkout main
 $ git checkout next -- ./docs
 
 # Manually ensure that no new feature docs were added
