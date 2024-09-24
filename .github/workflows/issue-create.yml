@@ -2,20 +2,11 @@ name: Ping triage on issue create
 on:
   issues:
     types: [opened]
+  pull_request_target:
+    types: [opened]
 permissions:
   issues: write
   repository-projects: write
 jobs:
-  add_triage:
-    runs-on: ubuntu-latest
-    steps:
-      - run: gh issue edit "$ISSUE_URL" --add-project 'Triage/bugs'
-        env:
-          ISSUE_URL: ${{ github.event.issue.url }}
-          GITHUB_TOKEN: ${{ github.token }}
-
-  notify:
-    uses: ./.github/workflows/_post-comment.yml
-    with:
-      url: ${{ github.event.issue.url }}
-      message: '@MithrilJS/triage Please take a look.'
+  notify_triage:
+    uses: MithrilJS/infra/.github/workflows/notify-triage.yml@main

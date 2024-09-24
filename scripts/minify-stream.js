@@ -2,12 +2,24 @@
 /* eslint-disable no-process-exit */
 "use strict"
 
-// This is my temporary hack to simplify deployment until I fix the underlying
-// problems in these bugs:
-// - https://github.com/MithrilJS/mithril.js/issues/2417
-// - https://github.com/MithrilJS/mithril.js/pull/2422
+process.on("unhandledRejection", (e) => {
+	process.exitCode = 1
 
-require("./_improve-rejection-crashing.js")
+	if (!e.stdout || !e.stderr) throw e
+
+	console.error(e.stack)
+
+	if (e.stdout?.length) {
+		console.error(e.stdout.toString("utf-8"))
+	}
+
+	if (e.stderr?.length) {
+		console.error(e.stderr.toString("utf-8"))
+	}
+
+	// eslint-disable-next-line no-process-exit
+	process.exit()
+})
 
 const {promises: fs} = require("fs")
 const path = require("path")

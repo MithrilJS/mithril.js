@@ -1,7 +1,7 @@
 name: test
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [ next ]
   workflow_dispatch:
   workflow_call:
@@ -14,12 +14,6 @@ permissions:
 # easier than parsing everything out.
 
 jobs:
-  lint-docs:
-    uses: ./.github/workflows/_npm-task.yml
-    with:
-      task: lint:docs
-      continue-on-error: true
-
   lint-js:
     uses: ./.github/workflows/_npm-task.yml
     with:
