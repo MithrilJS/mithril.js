@@ -10,32 +10,35 @@ permissions:
   actions: write
   contents: read
 
-# This uses actions/checkout instead of `git clone` directly since it's way
-# easier than parsing everything out.
-
 jobs:
   lint-js:
-    uses: ./.github/workflows/_npm-task.yml
-    with:
-      task: lint:js
-
-  build-js:
-    needs: lint-js
-    uses: ./.github/workflows/_npm-task.yml
-    with:
-      task: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - run: npm ci
+    - run: npm run lint
+    - run: npm run build
 
   test-js:
-    needs: build-js
+    needs: lint-js
     strategy:
       matrix:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
         node-version:
-        - 16
         - 18
         - 20
         - 22
-    uses: ./.github/workflows/_npm-task.yml
-    with:
-      node-version: ${{ matrix.node-version }}
-      task: test:js
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci-test
