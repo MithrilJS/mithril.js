@@ -5,7 +5,3 @@
 /.vscode
 /.DS_Store
 /.eslintcache
-
-# These are artifacts from various scripts
-/dist
-/archive
