@@ -11,6 +11,7 @@ jobs:
   run-tests:
     uses: MithrilJS/infra/.github/workflows/run-tests.yml@main
     with:
+      test-node: true
       all-versions: true
     permissions:
       actions: write
