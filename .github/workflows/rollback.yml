@@ -19,3 +19,4 @@ jobs:
     - run: npx pr-release rollback --verbose --target release --source main --verbose --ignore 'package*' --ignore docs/changelog.md --ignore docs/recent-changes.md
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    - run: bash scripts/set-versioned-branch.sh release

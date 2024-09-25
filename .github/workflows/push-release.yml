@@ -1,31 +1,33 @@
-name: pr
+name: Create release when pushing to `release`
 
 on:
   push:
-    branches: [ main ]
-
+    branches: [release]
   workflow_dispatch:
 
-concurrency: prr:pre-release
+concurrency: merge-release
 
 jobs:
-  pr:
+  merge:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        ref: main
     - uses: actions/setup-node@v4
       with:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release pr --verbose --target release --source main --compact --verbose --minimize-semver-change
+    - run: npx pr-release merge --target release --source main --commit --force --clean --changelog ./docs/recent-changes.md --compact --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-    # The following will publish a prerelease to npm
+    - run: bash scripts/set-versioned-branch.sh release
+    # The following will publish the release to npm
     - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npx pr-release infer-prerelease --preid=next --target release --source main --verbose --publish --minimize-semver-change
+    - run: npm publish
       name: Publish
