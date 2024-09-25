@@ -108,7 +108,7 @@ function execSelector(state, vnode) {
 	var className = hasClass ? attrs.class : attrs.className
 	vnode.tag = state.tag
 	vnode.attrs = {}
-	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
+	if (!isEmpty(state.attrs)) {
 		var newAttrs = {}
 		for (var key in attrs) {
 			if (hasOwn.call(attrs, key)) newAttrs[key] = attrs[key]
@@ -177,14 +177,16 @@ var df = {
 }
 var delayedRemoval = df.delayedRemoval
 var domFor0 = df.domFor
-var _11 = function($window) {
-	var $doc = $window && $window.document
+var _11 = function() {
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
 	}
 	var currentRedraw
 	var currentRender
+	function getDocument(dom) {
+		return dom.ownerDocument;
+	}
 	function getNameSpace(vnode3) {
 		return vnode3.attrs && vnode3.attrs.xmlns || nameSpace[vnode3.tag]
 	}
@@ -206,9 +208,9 @@ var _11 = function($window) {
 	}
 	// IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 	// inside an iframe. Catch and swallow this error, and heavy-handidly return null.
-	function activeElement() {
+	function activeElement(dom) {
 		try {
-			return $doc.activeElement
+			return getDocument(dom).activeElement
 		} catch (e) {
 			return null
 		}
@@ -237,7 +239,7 @@ var _11 = function($window) {
 		else createComponent(parent, vnode3, hooks, ns, nextSibling)
 	}
 	function createText(parent, vnode3, nextSibling) {
-		vnode3.dom = $doc.createTextNode(vnode3.children)
+		vnode3.dom = getDocument(parent).createTextNode(vnode3.children)
 		insertDOM(parent, vnode3.dom, nextSibling)
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
@@ -248,7 +250,7 @@ var _11 = function($window) {
 		//     div.innerHTML = "<td>i</td><td>j</td>"
 		//     console.log(div.innerHTML)
 		// --> "ij", no <td> in sight.
-		var temp = $doc.createElement(possibleParents[match0[1]] || "div")
+		var temp = getDocument(parent).createElement(possibleParents[match0[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
 			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode3.children + "</svg>"
 			temp = temp.firstChild
@@ -258,7 +260,7 @@ var _11 = function($window) {
 		vnode3.dom = temp.firstChild
 		vnode3.domSize = temp.childNodes.length
 		// Capture nodes to remove, so we don't confuse them.
-		var fragment = $doc.createDocumentFragment()
+		var fragment = getDocument(parent).createDocumentFragment()
 		var child
 		while (child = temp.firstChild) {
 			fragment.appendChild(child)
@@ -266,7 +268,7 @@ var _11 = function($window) {
 		insertDOM(parent, fragment, nextSibling)
 	}
 	function createFragment(parent, vnode3, hooks, ns, nextSibling) {
-		var fragment = $doc.createDocumentFragment()
+		var fragment = getDocument(parent).createDocumentFragment()
 		if (vnode3.children != null) {
 			var children2 = vnode3.children
 			createNodes(fragment, children2, 0, children2.length, hooks, null, ns)
@@ -281,8 +283,8 @@ var _11 = function($window) {
 		var is = attrs2 && attrs2.is
 		ns = getNameSpace(vnode3) || ns
 		var element = ns ?
-			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
-			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag)
+			is ? getDocument(parent).createElementNS(ns, tag, {is: is}) : getDocument(parent).createElementNS(ns, tag) :
+			is ? getDocument(parent).createElement(tag, {is: is}) : getDocument(parent).createElement(tag)
 		vnode3.dom = element
 		if (attrs2 != null) {
 			setAttrs(vnode3, attrs2, ns)
@@ -704,7 +706,7 @@ var _11 = function($window) {
 				// don't allocate for the common case
 				target = vnode3.dom
 			} else {
-				target = $doc.createDocumentFragment()
+				target = getDocument(parent).createDocumentFragment()
 				for (var dom of domFor0(vnode3)) target.appendChild(dom)
 			}
 			insertDOM(parent, target, nextSibling)
@@ -839,7 +841,7 @@ var _11 = function($window) {
 				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
 				//setting input[type0=file][value] to same value causes an error to be generated if it's non-empty
-				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && (isFileInput || vnode3.dom === activeElement())) return
+				if ((vnode3.tag === "input" || vnode3.tag === "textarea") && vnode3.dom.value === "" + value && (isFileInput || vnode3.dom === activeElement(vnode3.dom))) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
 				if (vnode3.tag === "select" && old !== null && vnode3.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
@@ -868,7 +870,7 @@ var _11 = function($window) {
 			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
 				vnode3.tag === "option"
-				|| vnode3.tag === "select" && vnode3.dom.selectedIndex === -1 && vnode3.dom === activeElement()
+				|| vnode3.tag === "select" && vnode3.dom.selectedIndex === -1 && vnode3.dom === activeElement(vnode3.dom)
 			))
 			&& !(vnode3.tag === "input" && key === "type")
 		) {
@@ -917,7 +919,7 @@ var _11 = function($window) {
 		}
 	}
 	function isFormAttribute(vnode3, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode3.dom === activeElement() || vnode3.tag === "option" && vnode3.dom.parentNode === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode3.dom === activeElement(vnode3.dom) || vnode3.tag === "option" && vnode3.dom.parentNode === activeElement(vnode3.dom)
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
@@ -1063,7 +1065,7 @@ var _11 = function($window) {
 		var prevRedraw = currentRedraw
 		var prevDOM = currentDOM
 		var hooks = []
-		var active = activeElement()
+		var active = activeElement(dom)
 		var namespace = dom.namespaceURI
 		currentDOM = dom
 		currentRedraw = typeof redraw === "function" ? redraw : undefined
@@ -1075,7 +1077,7 @@ var _11 = function($window) {
 			updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 			dom.vnodes = vnodes
 			// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
-			if (active != null && activeElement() !== active && typeof active.focus === "function") active.focus()
+			if (active != null && activeElement(dom) !== active && typeof active.focus === "function") active.focus()
 			for (var i = 0; i < hooks.length; i++) hooks[i]()
 		} finally {
 			currentRedraw = prevRedraw

@@ -1,4 +1,96 @@
 
+# Release v2.2.4
+
+### Patch Changes
+
+#### [Bump gh-pages from 2.1.1 to 5.0.0 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2890)
+
+Bumps [gh-pages](https://github.com/tschaub/gh-pages) from 2.1.1 to 5.0.0.  Release notes.  Sourced from gh-pages's releases.  v5.0.0.
+#### [Bump @babel/parser from 7.7.5 to 7.25.6 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2959)
+
+Bumps [@babel/parser](https://github.com/babel/babel/tree/HEAD/packages/babel-parser) from 7.7.5 to 7.25.6.  Release notes.  Sourced from @​babel/parser's releases.
+#### [Bump minimatch from 3.0.4 to 3.1.2 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2816)
+
+Bumps [minimatch](https://github.com/isaacs/minimatch) from 3.0.4 to 3.1.2.  Commits.  699c459 3.1.2.  2f2b5ff fix: trim pattern.  25d7c0d 3.1.1.
+#### [Bump yaml and lint-staged (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2830)
+
+Bumps [yaml](https://github.com/eemeli/yaml) to 2.2.2 and updates ancestor dependency [lint-staged](https://github.com/okonet/lint-staged).
+#### [Bump gh-pages from 5.0.0 to 6.1.1 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2958)
+
+Bumps [gh-pages](https://github.com/tschaub/gh-pages) from 5.0.0 to 6.1.1.  Release notes.  Sourced from gh-pages's releases.  v6.1.1.  Fixes.
+#### [Bump glob from 7.1.4 to 11.0.0 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2957)
+
+Bumps [glob](https://github.com/isaacs/node-glob) from 7.1.4 to 11.0.0.  Changelog.  Sourced from glob's changelog.  changeglob.  11.0.  Drop support for node before v20.
+#### [Bump rimraf from 3.0.2 to 6.0.1 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2960)
+
+Bumps [rimraf](https://github.com/isaacs/rimraf) from 3.0.2 to 6.0.1.  Changelog.  Sourced from rimraf's changelog.  6.0.  Drop support for nodes before v20.
+#### [Bump lint-staged from 13.2.1 to 15.2.10 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2961)
+
+[//]: # (dependabot-start).  ⚠️  **Dependabot is rebasing this PR** ⚠️.  Rebasing might not happen immediately, so don't worry if this takes some time.
+#### [Revise issue templates (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2955)
+
+
+#### [Update ospec and a few other dependencies (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2907)
+
+1.  Update ospec to the version I just published.  2.
+#### [Fix some outstanding bugs in the docs linter. (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2906)
+
+Missed an edge case in the task queue, and I also wanted to fully dedupe network requests.  Locally it passes.
+#### [Rewrite docs linter, ease JSFiddle request debugging (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2904)
+
+I'll defer to the commit descriptions.  They're self-descriptive.  The first diff is quite large.
+#### [Update vnodes.md (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2903)
+
+Fix a broken link.  Did some further digging (it's been a while since I've played with the scripts) and found that the JSFiddle errors are just warnings.
+#### [Migrate to Node 20, clean up workflows (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2902)
+
+**Note: ignore the commits.  It's a mess.  Just read the combined diff - the PR itself is the standalone unit.  I plan to squash this as I merge anyways.**.
+#### [Remove dependance on global window and document (@KoryNunn)](https://github.com/MithrilJS/mithril.js/pull/2897)
+
+Use window and document from render target instead of using globals.  This makes unit and intergration testing much easier.
+#### [Bump braces from 3.0.2 to 3.0.3 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2896)
+
+Bumps [braces](https://github.com/micromatch/braces) from 3.0.2 to 3.0.3.  Commits.  74b2db2 3.0.3.  88f1429 update eslint.  lint, fix unit tests.
+#### [Tweak docs with warning to fix #2508 (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2895)
+
+[z] Documentation change.  [z] My change requires a change to the documentation.  [z] I have updated the documentation accordingly.
+#### [Bump qs from 6.5.2 to 6.5.3 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2807)
+
+Bumps [qs](https://github.com/ljharb/qs) from 6.5.2 to 6.5.3.  Changelog.  Sourced from qs's changelog.  6.5.3.  [Fix] parse: ignore __proto__ keys (#428).
+#### [Temporarily host REM on fly to fix the docs (@JAForbes)](https://github.com/MithrilJS/mithril.js/pull/2893)
+
+Fixes REM examples in the docs.  The documentation currently has a dead link as REM is no longer hosted on heroku.
+#### [Move from individual code owners to just pinging all collaborators (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2844)
+
+Most collaborators have commit access, and it'd make it a little easier (and more likely) for pull requests to get reviewed.
+#### [docs: absolute url in version selector to avoid 404 errors (2 of 2) (@tbreuss)](https://github.com/MithrilJS/mithril.js/pull/2839)
+
+Fixes #2832 (2 of 2 pull requests).  See my comment at https://github.com/MithrilJS/mithril.js/pull/2835#issuecomment-1535657892.
+#### [fix markdown editor example, bump marked.js version up (@tbreuss)](https://github.com/MithrilJS/mithril.js/pull/2848)
+
+Fixes the strange behavior of markdown editor example.  Using newest version of marked.js, fixed strange behavior of markdown editor example.  See #2845.
+#### [Bump word-wrap from 1.2.3 to 1.2.4 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2856)
+
+Bumps [word-wrap](https://github.com/jonschlinkert/word-wrap) from 1.2.3 to 1.2.4.  Release notes.  Sourced from word-wrap's releases.  1.2.4.  What's Changed.
+#### [Add missing `m.censor` to API navigation (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2843)
+
+Not sure how I forgot about this when I added the method.
+#### [docs: fix regex for parsing page title (@tbreuss)](https://github.com/MithrilJS/mithril.js/pull/2837)
+
+Fixes https://github.com/MithrilJS/mithril.js/issues/2833.  I tested the generated documentation on my dev machine successfully.
+#### [docs: fix broken anchor link on github/npm (@tbreuss)](https://github.com/MithrilJS/mithril.js/pull/2838)
+
+Fixed a not working anchor link on github and npm by removing the question mark.
+#### [hyperscript: handles shared empty attrs, fixes #2821 (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2822)
+
+Whenever there are selector-derived attrs, the attrs object will be regenerated and not shared.
+#### [Fix typos in `stream()` docs (@mtsknn)](https://github.com/MithrilJS/mithril.js/pull/2825)
+
+Noticed these typos while reading through the page.
+#### [Bump async from 2.6.3 to 2.6.4 (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2815)
+
+Bumps [async](https://github.com/caolan/async) from 2.6.3 to 2.6.4.  Changelog.  Sourced from async's changelog.  v2.6.4.
+
 # Release v2.2.3
 
 ### Patch Changes
