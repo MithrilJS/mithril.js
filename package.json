@@ -8,20 +8,15 @@
   "jsdelivr": "mithril.min.js",
   "repository": "github:MithrilJS/mithril.js",
   "scripts": {
-    "precommit": "lint-staged",
     "watch": "run-p watch:**",
     "watch:js": "node scripts/bundler browser.js -output mithril.js -watch",
-    "watch:docs": "node scripts/generate-docs --watch",
-    "watch:docs-lint": "node scripts/lint-docs --watch",
     "build": "run-p build:browser build:min build:stream-min",
     "build:browser": "node scripts/bundler browser.js -output mithril.js",
-    "build:docs": "node scripts/generate-docs",
     "build:min": "node scripts/bundler browser.js -output mithril.min.js -minify -save",
     "build:stream-min": "node scripts/minify-stream",
     "cleanup:lint": "rimraf .eslintcache",
     "lint": "run-s -cn lint:**",
     "lint:js": "eslint . --cache",
-    "lint:docs": "node scripts/lint-docs",
     "perf": "node performance/test-perf.js",
     "pretest": "npm run lint",
     "test": "run-s test:js",
@@ -29,31 +24,14 @@
     "cover": "istanbul cover --print both ospec"
   },
   "devDependencies": {
-    "@alrra/travis-scripts": "^3.0.1",
-    "@babel/parser": "^7.7.5",
     "benchmark": "^2.1.4",
     "chokidar": "^3.2.1",
-    "escape-string-regexp": "^2.0.0",
     "eslint": "^8.9.0",
-    "gh-pages": "^6.1.1",
     "glob": "^11.0.0",
-    "html-minifier-terser": "^7.2.0",
     "istanbul": "^0.4.5",
-    "lint-staged": "^15.2.10",
-    "locater": "^1.3.0",
-    "marked": "^14.1.0",
-    "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
     "ospec": "4.2.1",
-    "pinpoint": "^1.1.0",
     "rimraf": "^6.0.1",
-    "semver": "^6.3.0",
     "terser": "^4.3.4"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint . --fix",
-      "git add"
-    ]
   }
 }
