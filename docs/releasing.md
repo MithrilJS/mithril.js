@@ -16,7 +16,7 @@ pr-release handles the following:
 
 ## For contributors
 
-Contributors should create their feature branch targetting the default branch `next`.  When this branch is merged `pr-release` will either generate or update a release PR from `next` to `release`.
+Contributors should create their feature branch targetting the default branch `main`.  When this branch is merged `pr-release` will either generate or update a release PR from `main` to `release`.
 
 The description and title will be managed by [pr-release], including the semver version.
 

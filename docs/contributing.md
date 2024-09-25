@@ -38,7 +38,7 @@ To send a pull request:
 
 - fork the repo (button at the top right in GitHub)
 - clone the forked repo to your computer (green button in GitHub)
-- Switch to the `next` branch (run `git checkout next`)
+- Switch to the `main` branch (run `git checkout main`)
 - create a feature branch (run `git checkout -b the-feature-branch-name`)
 - make your changes
 - run the tests (run `npm test`)

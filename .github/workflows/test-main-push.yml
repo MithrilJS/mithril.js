@@ -1,8 +1,8 @@
-name: test-next-push
+name: test-main-push
 
 on:
   push:
-    branches: [ next ]
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency: prr:pre-release
@@ -21,7 +21,7 @@ jobs:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release pr --verbose --target release --source next --compact --verbose --minimize-semver-change
+    - run: npx pr-release pr --verbose --target release --source main --compact --verbose --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
     # The following will publish a prerelease to npm
@@ -29,5 +29,5 @@ jobs:
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npx pr-release infer-prerelease --preid=next --target release --source next --verbose --publish --minimize-semver-change
+    - run: npx pr-release infer-prerelease --preid=next --target release --source main --verbose --publish --minimize-semver-change
       name: Publish

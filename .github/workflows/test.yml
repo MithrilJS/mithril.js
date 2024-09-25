@@ -2,7 +2,7 @@ name: test
 
 on:
   pull_request_target:
-    branches: [ next ]
+    branches: [ main ]
   workflow_dispatch:
   workflow_call:
 

@@ -9,5 +9,3 @@ jobs:
   comment:
     uses: MithrilJS/infra/.github/workflows/reject-pr.yml@main
     secrets: inherit
-    with:
-      correct_branch: next

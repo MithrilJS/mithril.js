@@ -16,6 +16,6 @@ jobs:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release rollback --verbose --target release --source next --verbose --ignore 'package*' --ignore docs/changelog.md --ignore docs/recent-changes.md
+    - run: npx pr-release rollback --verbose --target release --source main --verbose --ignore 'package*' --ignore docs/changelog.md --ignore docs/recent-changes.md
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
