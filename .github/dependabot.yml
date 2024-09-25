@@ -10,10 +10,12 @@ updates:
     schedule:
       interval: daily
     groups:
-      version-updates:
-        applies-to: version-updates
-      security-updates:
+      security:
         applies-to: security-updates
+        patterns: ['*']
+      normal:
+        applies-to: version-updates
+        patterns: ['*']
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -21,5 +23,7 @@ updates:
     groups:
       security:
         applies-to: security-updates
+        patterns: ['*']
       normal:
         applies-to: version-updates
+        patterns: ['*']
