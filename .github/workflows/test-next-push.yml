@@ -21,7 +21,7 @@ jobs:
         node-version: 20
     - run: npm ci
     - run: npm run build
-    - run: npx pr-release pr --verbose --target main --source next --compact --verbose --minimize-semver-change
+    - run: npx pr-release pr --verbose --target release --source next --compact --verbose --minimize-semver-change
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
     # The following will publish a prerelease to npm
@@ -29,5 +29,5 @@ jobs:
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npx pr-release infer-prerelease --preid=next --target main --source next --verbose --publish --minimize-semver-change
+    - run: npx pr-release infer-prerelease --preid=next --target release --source next --verbose --publish --minimize-semver-change
       name: Publish

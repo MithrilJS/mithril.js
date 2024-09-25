@@ -16,7 +16,7 @@ pr-release handles the following:
 
 ## For contributors
 
-Contributors should create their feature branch targetting the default branch `next`.  When this branch is merged `pr-release` will either generate or update a release PR from `next` to `main`.
+Contributors should create their feature branch targetting the default branch `next`.  When this branch is merged `pr-release` will either generate or update a release PR from `next` to `release`.
 
 The description and title will be managed by [pr-release], including the semver version.
 
@@ -50,8 +50,8 @@ Fixes to documentation can land whenever, updates to the site are built and publ
 $ git checkout next
 $ git pull mithriljs next
 
-# Splat the docs folder from next onto main
-$ git checkout main
+# Splat the docs folder from next onto release
+$ git checkout release
 $ git checkout next -- ./docs
 
 # Manually ensure that no new feature docs were added

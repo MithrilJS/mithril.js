@@ -1,8 +1,8 @@
-name: Warn on pushing to `main`
+name: Warn on pushing to `release`
 on:
   pull_request_target:
     types: [opened]
-    branches: [main]
+    branches: [release]
 permissions:
   issues: write
 jobs:
