@@ -1,18 +1,40 @@
-name: test
+name: Test and maybe release
 
 on:
   pull_request_target:
     branches: [ main ]
+  push:
+    branches: [ main ]
   workflow_dispatch:
-  workflow_call:
-
-permissions:
-  actions: write
-  contents: read
 
 jobs:
   run-tests:
     uses: MithrilJS/infra/.github/workflows/run-tests.yml@main
     with:
-      all-platforms: true
       all-versions: true
+    permissions:
+      actions: write
+      contents: read
+
+  publish-prerelease:
+    needs: run-tests
+    if: ${{ github.event_name == 'push' }}
+    concurrency: prr:pre-release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - run: npm ci
+    - run: npm run build
+    - run: npx pr-release pr --verbose --target release --source main --compact --verbose --minimize-semver-change
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    # The following will publish a prerelease to npm
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      name: Setup NPM Auth
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: npx pr-release infer-prerelease --preid=next --target release --source main --verbose --publish --minimize-semver-change
+      name: Publish
