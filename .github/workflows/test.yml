@@ -11,34 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  lint-js:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - run: npm ci
-    - run: npm run lint
-    - run: npm run build
-
-  test-js:
-    needs: lint-js
-    strategy:
-      matrix:
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-        node-version:
-        - 18
-        - 20
-        - 22
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci-test
+  run-tests:
+    uses: MithrilJS/infra/.github/workflows/run-tests.yml@main
+    with:
+      all-platforms: true
+      all-versions: true
