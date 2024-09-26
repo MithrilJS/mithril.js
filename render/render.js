@@ -66,7 +66,6 @@ module.exports = function() {
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": createText(parent, vnode, nextSibling); break
-				case "<": createHTML(parent, vnode, ns, nextSibling); break
 				case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
 				default: createElement(parent, vnode, hooks, ns, nextSibling)
 			}
@@ -76,31 +75,6 @@ module.exports = function() {
 	function createText(parent, vnode, nextSibling) {
 		vnode.dom = getDocument(parent).createTextNode(vnode.children)
 		insertDOM(parent, vnode.dom, nextSibling)
-	}
-	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
-	function createHTML(parent, vnode, ns, nextSibling) {
-		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
-		// not using the proper parent makes the child element(s) vanish.
-		//     var div = document.createElement("div")
-		//     div.innerHTML = "<td>i</td><td>j</td>"
-		//     console.log(div.innerHTML)
-		// --> "ij", no <td> in sight.
-		var temp = getDocument(parent).createElement(possibleParents[match[1]] || "div")
-		if (ns === "http://www.w3.org/2000/svg") {
-			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
-			temp = temp.firstChild
-		} else {
-			temp.innerHTML = vnode.children
-		}
-		vnode.dom = temp.firstChild
-		vnode.domSize = temp.childNodes.length
-		// Capture nodes to remove, so we don't confuse them.
-		var fragment = getDocument(parent).createDocumentFragment()
-		var child
-		while (child = temp.firstChild) {
-			fragment.appendChild(child)
-		}
-		insertDOM(parent, fragment, nextSibling)
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = getDocument(parent).createDocumentFragment()
@@ -407,7 +381,6 @@ module.exports = function() {
 				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
-					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
 					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
 					default: updateElement(old, vnode, hooks, ns)
 				}
@@ -424,16 +397,6 @@ module.exports = function() {
 			old.dom.nodeValue = vnode.children
 		}
 		vnode.dom = old.dom
-	}
-	function updateHTML(parent, old, vnode, ns, nextSibling) {
-		if (old.children !== vnode.children) {
-			removeDOM(parent, old, undefined)
-			createHTML(parent, vnode, ns, nextSibling)
-		}
-		else {
-			vnode.dom = old.dom
-			vnode.domSize = old.domSize
-		}
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
@@ -571,11 +534,7 @@ module.exports = function() {
 			vnode.attrs.contentEditable == null // property
 		)) return false
 		var children = vnode.children
-		if (children != null && children.length === 1 && children[0].tag === "<") {
-			var content = children[0].children
-			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
-		}
-		else if (children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
+		if (children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted.")
 		return true
 	}
 

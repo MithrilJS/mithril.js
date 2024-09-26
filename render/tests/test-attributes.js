@@ -4,7 +4,6 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-var trust = require("../../render/trust")
 
 o.spec("attributes", function() {
 	var $window, root, render
@@ -662,19 +661,6 @@ o.spec("attributes", function() {
 		})
 		o("tolerating empty children", function() {
 			var div = m("div", {contenteditable: true})
-			var succeeded = false
-
-			try {
-				render(root, div)
-
-				succeeded = true
-			}
-			catch(e){/* ignore */}
-
-			o(succeeded).equals(true)
-		})
-		o("tolerating trusted content", function() {
-			var div = m("div", {contenteditable: true}, trust("<a></a>"))
 			var succeeded = false
 
 			try {

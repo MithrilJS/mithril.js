@@ -5,7 +5,6 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-var fragment = require("../../render/fragment")
 
 o.spec("onbeforeupdate", function() {
 	var $window, root, render
@@ -28,8 +27,8 @@ o.spec("onbeforeupdate", function() {
 
 	o("prevents update in fragment", function() {
 		var onbeforeupdate = function() {return false}
-		var vnode = fragment({onbeforeupdate: onbeforeupdate}, "a")
-		var updated = fragment({onbeforeupdate: onbeforeupdate}, "b")
+		var vnode = m.fragment({onbeforeupdate: onbeforeupdate}, "a")
+		var updated = m.fragment({onbeforeupdate: onbeforeupdate}, "b")
 
 		render(root, vnode)
 		render(root, updated)

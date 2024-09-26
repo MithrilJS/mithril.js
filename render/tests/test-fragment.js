@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("ospec")
-var fragment = require("../../render/fragment")
 var m = require("../../render/hyperscript")
 
 function fragmentStr() {
@@ -193,5 +192,5 @@ function runTest(name, fragment) {
 	})
 }
 
-runTest("fragment", fragment);
+runTest("fragment", m.fragment);
 runTest("fragment-string-selector", fragmentStr);

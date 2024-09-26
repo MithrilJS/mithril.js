@@ -4,7 +4,6 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-var fragment = require("../../render/fragment")
 
 o.spec("updateFragment", function() {
 	var $window, root, render
@@ -15,8 +14,8 @@ o.spec("updateFragment", function() {
 	})
 
 	o("updates fragment", function() {
-		var vnode = fragment(m("a"))
-		var updated = fragment(m("b"))
+		var vnode = m.fragment(m("a"))
+		var updated = m.fragment(m("b"))
 
 		render(root, vnode)
 		render(root, updated)
@@ -25,8 +24,8 @@ o.spec("updateFragment", function() {
 		o(updated.dom.nodeName).equals("B")
 	})
 	o("adds els", function() {
-		var vnode = fragment()
-		var updated = fragment(m("a"), m("b"))
+		var vnode = m.fragment()
+		var updated = m.fragment(m("a"), m("b"))
 
 		render(root, vnode)
 		render(root, updated)
@@ -38,8 +37,8 @@ o.spec("updateFragment", function() {
 		o(root.childNodes[1].nodeName).equals("B")
 	})
 	o("removes els", function() {
-		var vnode = fragment(m("a"), m("b"))
-		var updated = fragment()
+		var vnode = m.fragment(m("a"), m("b"))
+		var updated = m.fragment()
 
 		render(root, vnode)
 		render(root, updated)
@@ -49,8 +48,8 @@ o.spec("updateFragment", function() {
 		o(root.childNodes.length).equals(0)
 	})
 	o("updates from childless fragment", function() {
-		var vnode = fragment()
-		var updated = fragment(m("a"))
+		var vnode = m.fragment()
+		var updated = m.fragment(m("a"))
 
 		render(root, vnode)
 		render(root, updated)
@@ -59,8 +58,8 @@ o.spec("updateFragment", function() {
 		o(updated.dom.nodeName).equals("A")
 	})
 	o("updates to childless fragment", function() {
-		var vnode = fragment(m("a"))
-		var updated = fragment()
+		var vnode = m.fragment(m("a"))
+		var updated = m.fragment()
 
 		render(root, vnode)
 		render(root, updated)

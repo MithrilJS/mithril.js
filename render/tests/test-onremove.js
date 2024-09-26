@@ -5,7 +5,6 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-var fragment = require("../../render/fragment")
 
 o.spec("onremove", function() {
 	var $window, root, render
@@ -51,7 +50,7 @@ o.spec("onremove", function() {
 	})
 	o("calls onremove when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = fragment({onremove: remove})
+		var vnode = m.fragment({onremove: remove})
 
 		render(root, vnode)
 		render(root, [])
@@ -248,7 +247,7 @@ ${actual}`
 
 					render(root,
 						m("div",
-							showParent && fragment(
+							showParent && m.fragment(
 								{onremove: removeParent},
 								m("a", {onremove: removeSyncChild}, "sync child"),
 								showChild && m(C, {

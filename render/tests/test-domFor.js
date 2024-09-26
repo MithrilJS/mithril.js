@@ -5,7 +5,7 @@ const components = require("../../test-utils/components")
 const domMock = require("../../test-utils/domMock")
 const vdom = require("../render")
 const m = require("../hyperscript")
-const fragment = require("../fragment")
+const fragment = require("../../render/hyperscript").fragment
 const domFor = require("../../render/domFor").domFor
 
 o.spec("domFor(vnode)", function() {

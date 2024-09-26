@@ -89,4 +89,8 @@ function hyperscript(selector, attrs, ...children) {
 	return Vnode(selector, attrs.key, attrs, children)
 }
 
+hyperscript.fragment = function(...args) {
+	return hyperscript("[", ...args)
+}
+
 module.exports = hyperscript

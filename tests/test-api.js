@@ -25,14 +25,6 @@ o.spec("api", function() {
 			o(vnode.tag).equals("div")
 		})
 	})
-	o.spec("m.trust", function() {
-		o("works", function() {
-			var vnode = m.trust("<br>")
-
-			o(vnode.tag).equals("<")
-			o(vnode.children).equals("<br>")
-		})
-	})
 	o.spec("m.fragment", function() {
 		o("works", function() {
 			var vnode = m.fragment({key: 123}, [m("div")])

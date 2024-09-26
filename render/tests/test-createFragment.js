@@ -4,7 +4,7 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
-var fragment = require("../../render/fragment")
+var fragment = require("../../render/hyperscript").fragment
 
 o.spec("createFragment", function() {
 	var $window, root, render
