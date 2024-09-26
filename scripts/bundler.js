@@ -42,7 +42,7 @@ async function build() {
 		return
 	}
 	console.log("minifying...")
-	const minified = Terser.minify(original)
+	const minified = Terser.minify(original, {ecma: 2015})
 	if (minified.error) throw new Error(minified.error)
 	await writeFile(params.output, minified.code, "utf-8")
 	const originalSize = Buffer.byteLength(original, "utf-8")

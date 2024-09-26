@@ -7,6 +7,9 @@ module.exports = {
 		"es6": true,
 		"node": true
 	},
+	"parserOptions": {
+		"ecmaVersion": 2015
+	},
 	"extends": "eslint:recommended",
 	"rules": {
 		"accessor-pairs": "error",
