@@ -10,9 +10,9 @@ Vnode.normalize = function(node) {
 	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
 }
 Vnode.normalizeChildren = function(input) {
-	var children = []
 	if (input.length) {
 		var isKeyed = input[0] != null && input[0].key != null
+		var keys = new Set()
 		// Note: this is a *very* perf-sensitive check.
 		// Fun fact: merging the loop like this is somehow faster than splitting
 		// it, noticeably so.
@@ -24,12 +24,16 @@ Vnode.normalizeChildren = function(input) {
 						: "In fragments, vnodes must either all have keys or none have keys."
 				)
 			}
+			if (isKeyed) {
+				if (keys.has(input[i].key)) {
+					throw new TypeError(`Duplicate key detected: ${input[i].key}`)
+				}
+				keys.add(input[i].key)
+			}
 		}
-		for (var i = 0; i < input.length; i++) {
-			children[i] = Vnode.normalize(input[i])
-		}
+		input = input.map(Vnode.normalize)
 	}
-	return children
+	return input
 }
 
 module.exports = Vnode

@@ -482,6 +482,37 @@ suite.add("repeated add/removal", {
 	},
 })
 
+suite.add("reorder keyed list", {
+	setup: function () {
+		const keys = []
+		for (let i = 0; i < 1000; i++) keys.push(`key-${i}`)
+
+		function shuffle() {
+			// Performs a simple Fisher-Yates shuffle.
+			let current = keys.length
+			while (current) {
+				// eslint-disable-next-line no-bitwise
+				const index = (Math.random() * current--) | 0
+				const temp = keys[index]
+				keys[index] = keys[current]
+				keys[current] = temp
+			}
+		}
+
+		this.app = function () {
+			shuffle()
+			var vnodes = []
+			for (const key of keys) {
+				vnodes.push(m("div.item", {key}))
+			}
+			return vnodes
+		}
+	},
+	fn: function () {
+		m.render(rootElem, this.app())
+	},
+})
+
 if (isDOM) {
 	window.onload = function () {
 		cycleRoot()
