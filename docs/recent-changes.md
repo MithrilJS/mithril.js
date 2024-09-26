@@ -1,4 +1,15 @@
 
+# Release v2.2.5
+
+### Patch Changes
+
+#### [Bump the normal group across 1 directory with 2 updates (@dependabot[bot])](https://github.com/MithrilJS/mithril.js/pull/2976)
+
+Bumps the normal group with 2 updates in the / directory: [chokidar](https://github.com/paulmillr/chokidar) and [eslint](https://github.com/eslint/eslint).
+#### [Cleaning up code by making vnode.attrs always non-null (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2977)
+
+Commit f9e5163 made vnode.attrs always non-null, so there is no need for code to make vnode.attrs null or assume vnode.attrs is null.
+
 # Release v2.2.4
 
 ### Patch Changes

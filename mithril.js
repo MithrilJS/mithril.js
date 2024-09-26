@@ -107,7 +107,6 @@ function execSelector(state, vnode) {
 	var hasClass = hasOwn.call(attrs, "class")
 	var className = hasClass ? attrs.class : attrs.className
 	vnode.tag = state.tag
-	vnode.attrs = {}
 	if (!isEmpty(state.attrs)) {
 		var newAttrs = {}
 		for (var key in attrs) {
@@ -129,12 +128,7 @@ function execSelector(state, vnode) {
 				? state.attrs.className
 				: null
 	if (hasClass) attrs.class = null
-	for (var key in attrs) {
-		if (hasOwn.call(attrs, key) && key !== "key") {
-			vnode.attrs = attrs
-			break
-		}
-	}
+	vnode.attrs = attrs
 	return vnode
 }
 function hyperscript(selector) {
@@ -606,9 +600,6 @@ var _11 = function() {
 	function updateElement(old, vnode3, hooks, ns) {
 		var element = vnode3.dom = old.dom
 		ns = getNameSpace(vnode3) || ns
-		if (vnode3.tag === "textarea") {
-			if (vnode3.attrs == null) vnode3.attrs = {}
-		}
 		updateAttrs(vnode3, old.attrs, vnode3.attrs, ns)
 		if (!maybeSetContentEditable(vnode3)) {
 			updateNodes(element, old.children, vnode3.children, hooks, null, ns)
