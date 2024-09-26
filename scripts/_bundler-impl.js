@@ -170,12 +170,12 @@ module.exports = async (input) => {
 			+ (rest ? `\n${def}${variable}${eq}_${uuid}` : "") // if `rest` is truthy, it means the expression is fluent or higher-order (e.g. require(path).foo or require(path)(foo)
 	}
 
-	const code = ";(function() {\n" +
+	const code = ";(()=>{\n" +
 		(await process(path.resolve(input), await readFile(input, "utf-8")))
 			.replace(/^\s*((?:var|let|const|)[\t ]*)([\w_$\.]+)(\s*=\s*)(\2)(?=[\s]+(\w)|;|$)/gm, "") // remove assignments to self
 			.replace(/;+(\r|\n|$)/g, ";$1") // remove redundant semicolons
 			.replace(/(\r|\n)+/g, "\n").replace(/(\r|\n)$/, "") + // remove multiline breaks
-		"\n}());"
+		"\n})();"
 
 	//try {new Function(code); console.log(`build completed at ${new Date()}`)} catch (e) {}
 	error = null
