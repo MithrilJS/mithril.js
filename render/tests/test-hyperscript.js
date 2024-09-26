@@ -25,43 +25,37 @@ o.spec("hyperscript", function() {
 			o(m("a", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: null
+				class: undefined
 			})
 			o(m("a", {
 				class: false
 			}).attrs).deepEquals({
-				class: null,
-				className: false
+				class: false
 			})
 			o(m("a", {
 				class: true
 			}).attrs).deepEquals({
-				class: null,
-				className: true
+				class: true
 			})
 			o(m("a.x", {
 				class: null
 			}).attrs).deepEquals({
-				class: null,
-				className: "x"
+				class: "x"
 			})
 			o(m("a.x", {
 				class: undefined
 			}).attrs).deepEquals({
-				class: null,
-				className: "x"
+				class: "x"
 			})
 			o(m("a.x", {
 				class: false
 			}).attrs).deepEquals({
-				class: null,
-				className: "x false"
+				class: "x false"
 			})
 			o(m("a.x", {
 				class: true
 			}).attrs).deepEquals({
-				class: null,
-				className: "x true"
+				class: "x true"
 			})
 			o(m("a", {
 				className: null
@@ -76,45 +70,51 @@ o.spec("hyperscript", function() {
 			o(m("a", {
 				className: false
 			}).attrs).deepEquals({
-				className: false
+				className: null,
+				class: false
 			})
 			o(m("a", {
 				className: true
 			}).attrs).deepEquals({
-				className: true
+				className: null,
+				class: true
 			})
 			o(m("a.x", {
 				className: null
 			}).attrs).deepEquals({
-				className: "x"
+				className: null,
+				class: "x"
 			})
 			o(m("a.x", {
 				className: undefined
 			}).attrs).deepEquals({
-				className: "x"
+				className: null,
+				class: "x"
 			})
 			o(m("a.x", {
 				className: false
 			}).attrs).deepEquals({
-				className: "x false"
+				className: null,
+				class: "x false"
 			})
 			o(m("a.x", {
 				className: true
 			}).attrs).deepEquals({
-				className: "x true"
+				className: null,
+				class: "x true"
 			})
 		})
 		o("handles class in selector", function() {
 			var vnode = m(".a")
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs.className).equals("a")
+			o(vnode.attrs.class).equals("a")
 		})
 		o("handles many classes in selector", function() {
 			var vnode = m(".a.b.c")
 
 			o(vnode.tag).equals("div")
-			o(vnode.attrs.className).equals("a b c")
+			o(vnode.attrs.class).equals("a b c")
 		})
 		o("handles id in selector", function() {
 			var vnode = m("#a")
@@ -153,35 +153,35 @@ o.spec("hyperscript", function() {
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.x).equals(true)
 			o(vnode.attrs.a).equals("[b]")
-			o(vnode.attrs.className).equals("c")
+			o(vnode.attrs.class).equals("c")
 		})
 		o("handles attr w/ unmatched square bracket", function() {
 			var vnode = m("[a=']'].c")
 
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("]")
-			o(vnode.attrs.className).equals("c")
+			o(vnode.attrs.class).equals("c")
 		})
 		o("handles attr w/ quoted square bracket and quote", function() {
 			var vnode = m("[a='[b\"\\']'].c") // `[a='[b"\']']`
 
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("[b\"']") // `[b"']`
-			o(vnode.attrs.className).equals("c")
+			o(vnode.attrs.class).equals("c")
 		})
 		o("handles attr w/ quoted square containing escaped square bracket", function() {
 			var vnode = m("[a='[\\]]'].c") // `[a='[\]]']`
 
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("[\\]]") // `[\]]`
-			o(vnode.attrs.className).equals("c")
+			o(vnode.attrs.class).equals("c")
 		})
 		o("handles attr w/ backslashes", function() {
 			var vnode = m("[a='\\\\'].c") // `[a='\\']`
 
 			o(vnode.tag).equals("div")
 			o(vnode.attrs.a).equals("\\")
-			o(vnode.attrs.className).equals("c")
+			o(vnode.attrs.class).equals("c")
 		})
 		o("handles attr w/ quotes and spaces in selector", function() {
 			var vnode = m("[a = 'b']")
@@ -200,14 +200,14 @@ o.spec("hyperscript", function() {
 			var vnode = m("a.b[c = 'd']")
 
 			o(vnode.tag).equals("a")
-			o(vnode.attrs.className).equals("b")
+			o(vnode.attrs.class).equals("b")
 			o(vnode.attrs.c).equals("d")
 		})
 		o("handles tag, mixed classes, attrs in selector", function() {
 			var vnode = m("a.b[c = 'd'].e[f = 'g']")
 
 			o(vnode.tag).equals("a")
-			o(vnode.attrs.className).equals("b e")
+			o(vnode.attrs.class).equals("b e")
 			o(vnode.attrs.c).equals("d")
 			o(vnode.attrs.f).equals("g")
 		})
@@ -284,22 +284,22 @@ o.spec("hyperscript", function() {
 		o("handles className attrs property", function() {
 			var vnode = m("div", {className: "a"})
 
-			o(vnode.attrs.className).equals("a")
+			o(vnode.attrs.class).equals("a")
 		})
 		o("handles 'class' as a verbose attribute declaration", function() {
 			var vnode = m("[class=a]")
 
-			o(vnode.attrs.className).equals("a")
+			o(vnode.attrs.class).equals("a")
 		})
 		o("handles merging classes w/ class property", function() {
 			var vnode = m(".a", {class: "b"})
 
-			o(vnode.attrs.className).equals("a b")
+			o(vnode.attrs.class).equals("a b")
 		})
 		o("handles merging classes w/ className property", function() {
 			var vnode = m(".a", {className: "b"})
 
-			o(vnode.attrs.className).equals("a b")
+			o(vnode.attrs.class).equals("a b")
 		})
 	})
 	o.spec("custom element attrs", function() {
@@ -356,7 +356,7 @@ o.spec("hyperscript", function() {
 		o("handles className attrs property", function() {
 			var vnode = m("custom-element", {className: "a"})
 
-			o(vnode.attrs.className).equals("a")
+			o(vnode.attrs.class).equals("a")
 		})
 		o("casts className using toString like browsers", function() {
 			const className = {
@@ -365,7 +365,7 @@ o.spec("hyperscript", function() {
 			}
 			var vnode = m("custom-element" + className, {className: className})
 
-			o(vnode.attrs.className).equals("valueOf toString")
+			o(vnode.attrs.class).equals("valueOf toString")
 		})
 	})
 	o.spec("children", function() {
@@ -574,10 +574,10 @@ o.spec("hyperscript", function() {
 			var nodeA = m(".a", attrs)
 			var nodeB = m(".b", attrs)
 
-			o(nodeA.attrs.className).equals("a")
+			o(nodeA.attrs.class).equals("a")
 			o(nodeA.attrs.a).equals("b")
 
-			o(nodeB.attrs.className).equals("b")
+			o(nodeB.attrs.class).equals("b")
 			o(nodeB.attrs.a).equals("b")
 		})
 		o("handles shared empty attrs (#2821)", function() {
@@ -586,8 +586,8 @@ o.spec("hyperscript", function() {
 			var nodeA = m(".a", attrs)
 			var nodeB = m(".b", attrs)
 
-			o(nodeA.attrs.className).equals("a")
-			o(nodeB.attrs.className).equals("b")
+			o(nodeA.attrs.class).equals("a")
+			o(nodeB.attrs.class).equals("b")
 		})
 		o("doesnt modify passed attributes object", function() {
 			var attrs = {a: "b"}

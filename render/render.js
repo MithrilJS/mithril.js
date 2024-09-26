@@ -675,8 +675,8 @@ module.exports = function() {
 			setAttr(vnode, key, null, attrs[key], ns)
 		}
 	}
-	function setAttr(vnode, key, old, value, ns) {
-		if (key === "key" || key === "is" || value == null || isLifecycleMethod(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object") return
+	function setAttr(vnode, key, old, value, ns, isFileInput) {
+		if (value == null || isSpecialAttribute.has(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || key === "type" && vnode.tag === "input") return
 		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
 		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
@@ -684,37 +684,37 @@ module.exports = function() {
 			if (key === "value") {
 				// Only do the coercion if we're actually going to check the value.
 				/* eslint-disable no-implicit-coercion */
-				var isFileInput = vnode.tag === "input" && vnode.attrs.type === "file"
-				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(vnode.dom))) return
-				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
-				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
-				//setting input[type=file][value] to different value is an error if it's non-empty
-				// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
-				if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
+				switch (vnode.tag) {
+					//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
+					//setting input[type=file][value] to same value causes an error to be generated if it's non-empty
+					case "input":
+					case "textarea":
+						if (vnode.dom.value === "" + value && (isFileInput || vnode.dom === activeElement(vnode.dom))) return
+						//setting input[type=file][value] to different value is an error if it's non-empty
+						// Not ideal, but it at least works around the most common source of uncaught exceptions for now.
+						if (isFileInput && "" + value !== "") { console.error("`value` is read-only on file inputs!"); return }
+						break
+					//setting select[value] or option[value] to same value while having select open blinks select dropdown in Chrome
+					case "select":
+					case "option":
+						if (old !== null && vnode.dom.value === "" + value) return
+				}
 				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type that is not supported by IE 11 with an assignment expression, an error will occur.
-			if (vnode.tag === "input" && key === "type") vnode.dom.setAttribute(key, value)
-			else vnode.dom[key] = value
+			vnode.dom[key] = value
+		} else if (value === false) {
+			vnode.dom.removeAttribute(key)
 		} else {
-			if (typeof value === "boolean") {
-				if (value) vnode.dom.setAttribute(key, "")
-				else vnode.dom.removeAttribute(key)
-			}
-			else vnode.dom.setAttribute(key === "className" ? "class" : key, value)
+			vnode.dom.setAttribute(key, value === true ? "" : value)
 		}
 	}
 	function removeAttr(vnode, key, old, ns) {
-		if (key === "key" || key === "is" || old == null || isLifecycleMethod(key)) return
+		if (old == null || isSpecialAttribute.has(key)) return
 		if (key[0] === "o" && key[1] === "n") updateEvent(vnode, key, undefined)
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
 			hasPropertyKey(vnode, key, ns)
-			&& key !== "className"
+			&& key !== "class"
 			&& key !== "title" // creates "null" as title
 			&& !(key === "value" && (
 				vnode.tag === "option"
@@ -726,7 +726,7 @@ module.exports = function() {
 		} else {
 			var nsLastIndex = key.indexOf(":")
 			if (nsLastIndex !== -1) key = key.slice(nsLastIndex + 1)
-			if (old !== false) vnode.dom.removeAttribute(key === "className" ? "class" : key)
+			if (old !== false) vnode.dom.removeAttribute(key)
 		}
 	}
 	function setLateSelectAttrs(vnode, attrs) {
@@ -760,19 +760,20 @@ module.exports = function() {
 			}
 		}
 	}
+	var isAlwaysFormAttribute = new Set(["value", "checked", "selected", "selectedIndex"])
+	var isSpecialAttribute = new Set(["key", "is", "oninit", "oncreate", "onupdate", "onremove", "onbeforeupdate", "onbeforeremove"])
+	// Try to avoid a few browser bugs on normal elements.
+	// var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height", "type"])
+	var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height"])
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement(vnode.dom) || vnode.tag === "option" && vnode.dom.parentNode === activeElement(vnode.dom)
-	}
-	function isLifecycleMethod(attr) {
-		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
+		return isAlwaysFormAttribute.has(attr) || attr === "selected" && vnode.dom === activeElement(vnode.dom) || vnode.tag === "option" && vnode.dom.parentNode === activeElement(vnode.dom)
 	}
 	function hasPropertyKey(vnode, key, ns) {
 		// Filter out namespaced keys
 		return ns === undefined && (
 			// If it's a custom element, just keep it.
 			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
-			// If it's a normal element, let's try to avoid a few browser bugs.
-			key !== "href" && key !== "list" && key !== "form" && key !== "width" && key !== "height"// && key !== "type"
+			!propertyMayBeBugged.has(key)
 			// Defer the property check until *after* we check everything.
 		) && key in vnode.dom
 	}
@@ -899,7 +900,6 @@ module.exports = function() {
 		// unlike special "attributes" internally.
 		vnode.attrs = old.attrs
 		vnode.children = old.children
-		vnode.text = old.text
 		return true
 	}
 

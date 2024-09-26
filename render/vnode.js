@@ -1,13 +1,13 @@
 "use strict"
 
-function Vnode(tag, key, attrs, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
+function Vnode(tag, key, attrs, children) {
+	return {tag, key, attrs, children, dom: undefined, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
-	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
+	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node))
 	if (node == null || typeof node === "boolean") return null
 	if (typeof node === "object") return node
-	return Vnode("#", undefined, undefined, String(node), undefined, undefined)
+	return Vnode("#", undefined, undefined, String(node))
 }
 Vnode.normalizeChildren = function(input) {
 	if (input.length) {
