@@ -293,8 +293,8 @@ o.spec("attributes", function() {
 		})
 	})
 	o.spec("input.type", function() {
-		o("the input.type setter is never used", function() {
-			var $window = domMock({spy: o.spy})
+		o("works", function() {
+			var $window = domMock()
 			var root = $window.document.body
 			var render = vdom($window)
 
@@ -303,19 +303,15 @@ o.spec("attributes", function() {
 			var c = m("input")
 
 			render(root, a)
-			var spies = $window.__getSpies(a.dom)
 
-			o(spies.typeSetter.callCount).equals(0)
 			o(a.dom.getAttribute("type")).equals("radio")
 
 			render(root, b)
 
-			o(spies.typeSetter.callCount).equals(0)
 			o(b.dom.getAttribute("type")).equals("text")
 
 			render(root, c)
 
-			o(spies.typeSetter.callCount).equals(0)
 			o(c.dom.hasAttribute("type")).equals(false)
 		})
 	})

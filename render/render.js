@@ -6,6 +6,7 @@ var delayedRemoval = df.delayedRemoval
 var domFor = df.domFor
 
 module.exports = function() {
+	var xlinkNs = "http://www.w3.org/1999/xlink"
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
@@ -671,14 +672,18 @@ module.exports = function() {
 
 	//attrs
 	function setAttrs(vnode, attrs, ns) {
+		// The DOM does things to inputs based on the value, so it needs set first.
+		// See: https://github.com/MithrilJS/mithril.js/issues/2622
+		if (vnode.tag === "input" && attrs.type != null) vnode.dom.type = attrs.type
+		var isFileInput = attrs != null && vnode.tag === "input" && attrs.type === "file"
 		for (var key in attrs) {
 			setAttr(vnode, key, null, attrs[key], ns)
 		}
 	}
 	function setAttr(vnode, key, old, value, ns, isFileInput) {
 		if (value == null || isSpecialAttribute.has(key) || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || key === "type" && vnode.tag === "input") return
-		if (key[0] === "o" && key[1] === "n") return updateEvent(vnode, key, value)
-		if (key.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key.slice(6), value)
+		if (key.startsWith("on")) updateEvent(vnode, key, value)
+		else if (key.startsWith("xlink:")) vnode.dom.setAttributeNS(xlinkNs, key.slice(6), value)
 		else if (key === "style") updateStyle(vnode.dom, old, value)
 		else if (hasPropertyKey(vnode, key, ns)) {
 			if (key === "value") {
@@ -710,7 +715,8 @@ module.exports = function() {
 	}
 	function removeAttr(vnode, key, old, ns) {
 		if (old == null || isSpecialAttribute.has(key)) return
-		if (key[0] === "o" && key[1] === "n") updateEvent(vnode, key, undefined)
+		if (key.startsWith("on")) updateEvent(vnode, key, undefined)
+		else if (key.startsWith("xlink:")) vnode.dom.removeAttributeNS(xlinkNs, key.slice(6))
 		else if (key === "style") updateStyle(vnode.dom, old, null)
 		else if (
 			hasPropertyKey(vnode, key, ns)
@@ -724,8 +730,6 @@ module.exports = function() {
 		) {
 			vnode.dom[key] = null
 		} else {
-			var nsLastIndex = key.indexOf(":")
-			if (nsLastIndex !== -1) key = key.slice(nsLastIndex + 1)
 			if (old !== false) vnode.dom.removeAttribute(key)
 		}
 	}

@@ -1817,7 +1817,7 @@ o.spec("domMock", function() {
 			o(typeof $window.__getSpies).equals("function")
 			o("__getSpies" in domMock()).equals(false)
 		})
-		o("input elements have spies on value and type setters", function() {
+		o("input elements have spies on value setters", function() {
 			var input = $window.document.createElement("input")
 
 			var spies = $window.__getSpies(input)
@@ -1825,20 +1825,13 @@ o.spec("domMock", function() {
 			o(typeof spies).equals("object")
 			o(spies).notEquals(null)
 			o(typeof spies.valueSetter).equals("function")
-			o(typeof spies.typeSetter).equals("function")
 			o(spies.valueSetter.callCount).equals(0)
-			o(spies.typeSetter.callCount).equals(0)
 
 			input.value = "aaa"
-			input.type = "radio"
 
 			o(spies.valueSetter.callCount).equals(1)
 			o(spies.valueSetter.this).equals(input)
 			o(spies.valueSetter.args[0]).equals("aaa")
-
-			o(spies.typeSetter.callCount).equals(1)
-			o(spies.typeSetter.this).equals(input)
-			o(spies.typeSetter.args[0]).equals("radio")
 		})
 		o("select elements have spies on value setters", function() {
 			var select = $window.document.createElement("select")

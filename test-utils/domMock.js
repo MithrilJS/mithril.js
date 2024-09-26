@@ -169,6 +169,10 @@ module.exports = function(options) {
 	function removeAttribute(name) {
 		delete this.attributes[name]
 	}
+	function removeAttributeNS(_ns, name) {
+		// Namespace is ignored for now
+		delete this.attributes[name]
+	}
 	function hasAttribute(name) {
 		return name in this.attributes
 	}
@@ -304,6 +308,7 @@ module.exports = function(options) {
 					setAttribute: setAttribute,
 					setAttributeNS: setAttributeNS,
 					removeAttribute: removeAttribute,
+					removeAttributeNS: removeAttributeNS,
 					parentNode: null,
 					childNodes: [],
 					attributes: {},
@@ -530,10 +535,6 @@ module.exports = function(options) {
 						enumerable: true,
 					})
 
-					// we currently emulate the non-ie behavior, but emulating ie may be more useful (throw when an invalid type is set)
-					var typeSetter = spy(function(v) {
-						this.setAttribute("type", v)
-					})
 					Object.defineProperty(element, "type", {
 						get: function() {
 							if (!this.hasAttribute("type")) return "text"
@@ -543,12 +544,13 @@ module.exports = function(options) {
 								? type
 								: "text"
 						},
-						set: typeSetter,
+						set: function(v) {
+							this.setAttribute("type", v)
+						},
 						enumerable: true,
 					})
 					registerSpies(element, {
 						valueSetter: valueSetter,
-						typeSetter: typeSetter
 					})
 				}
 
