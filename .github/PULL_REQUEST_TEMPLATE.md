@@ -24,5 +24,5 @@
 - [ ] My code follows the code style of this project.
 - [ ] I have added tests to cover my changes.
 - [ ] All new and existing tests passed.
-- [ ] My change requires a documentation update, and I've opened a pull request to update them already: https://github.com/MithrilJS/docs/pulls/NNNN
+- [ ] My change requires a documentation update, and I've opened a pull request to update it already:
 - [ ] I have read https://mithril.js.org/contributing.html.
