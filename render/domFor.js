@@ -2,7 +2,10 @@
 
 var delayedRemoval = new WeakMap
 
-function *domFor({dom, domSize}, {generation} = {}) {
+function *domFor(vnode, object = {}) {
+	var dom = vnode.dom
+	var domSize = vnode.domSize
+	var generation = object.generation
 	if (dom != null) do {
 		const {nextSibling} = dom
 
