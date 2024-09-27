@@ -33,7 +33,7 @@ o.spec("route.get/route.set", function() {
 
 				o("gets route", function() {
 					$window.location.href = prefix + "/test"
-					route(root, "/test", {"/test": {view: function() {}}})
+					route(root, "/test", {"/test": () => ({view: function() {}})})
 
 					o(route.get()).equals("/test")
 				})
@@ -42,8 +42,8 @@ o.spec("route.get/route.set", function() {
 					$window.location.href = prefix + "/other/x/y/z?c=d#e=f"
 
 					route(root, "/other/x/y/z?c=d#e=f", {
-						"/test": {view: function() {}},
-						"/other/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
 					o(route.get()).equals("/other/x/y/z?c=d#e=f")
@@ -53,8 +53,8 @@ o.spec("route.get/route.set", function() {
 					$window.location.href = prefix + encodeURI("/ö/é/å?ö=ö#ö=ö")
 
 					route(root, "/ö/é/å?ö=ö#ö=ö", {
-						"/test": {view: function() {}},
-						"/ö/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/ö/:a/:b...": () => ({view: function() {}}),
 					})
 
 					o(route.get()).equals("/ö/é/å?ö=ö#ö=ö")
@@ -64,8 +64,8 @@ o.spec("route.get/route.set", function() {
 					$window.location.href = prefix + "/ö/é/å?ö=ö#ö=ö"
 
 					route(root, "/ö/é/å?ö=ö#ö=ö", {
-						"/test": {view: function() {}},
-						"/ö/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/ö/:a/:b...": () => ({view: function() {}}),
 					})
 
 					o(route.get()).equals("/ö/é/å?ö=ö#ö=ö")
@@ -77,8 +77,8 @@ o.spec("route.get/route.set", function() {
 					var spy2 = o.spy()
 
 					route(root, "/a", {
-						"/a": {view: spy1},
-						"/b": {view: spy2},
+						"/a": () => ({view: spy1}),
+						"/b": () => ({view: spy2}),
 					})
 
 					o(spy1.callCount).equals(1)
@@ -101,8 +101,8 @@ o.spec("route.get/route.set", function() {
 					var spy2 = o.spy()
 
 					route(root, "/a", {
-						"/a": {view: spy1},
-						"/b": {view: spy2},
+						"/a": () => ({view: spy1}),
+						"/b": () => ({view: spy2}),
 					})
 
 					o(spy1.callCount).equals(0)
@@ -128,8 +128,8 @@ o.spec("route.get/route.set", function() {
 				o("exposes new route asynchronously", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
@@ -144,8 +144,8 @@ o.spec("route.get/route.set", function() {
 				o("exposes new escaped unicode route asynchronously", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/ö": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/ö": () => ({view: function() {}}),
 					})
 
 					route.set(encodeURI("/ö?ö=ö#ö=ö"))
@@ -160,8 +160,8 @@ o.spec("route.get/route.set", function() {
 				o("exposes new unescaped unicode route asynchronously", function(done) {
 					$window.location.href = "file://" + prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/ö": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/ö": () => ({view: function() {}}),
 					})
 
 					route.set("/ö?ö=ö#ö=ö")
@@ -176,8 +176,8 @@ o.spec("route.get/route.set", function() {
 				o("exposes new route asynchronously on fallback mode", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
 					route.set("/other/x/y/z?c=d#e=f")
@@ -192,8 +192,8 @@ o.spec("route.get/route.set", function() {
 				o("sets route via pushState/onpopstate", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
 					setTimeout(function() {
@@ -213,8 +213,8 @@ o.spec("route.get/route.set", function() {
 				o("sets parameterized route", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other/:a/:b...": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
 					route.set("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
@@ -229,8 +229,8 @@ o.spec("route.get/route.set", function() {
 				o("replace:true works", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other": () => ({view: function() {}}),
 					})
 
 					route.set("/other", null, {replace: true})
@@ -246,8 +246,8 @@ o.spec("route.get/route.set", function() {
 				o("replace:false works", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other": () => ({view: function() {}}),
 					})
 
 					route.set("/other", null, {replace: false})
@@ -264,8 +264,8 @@ o.spec("route.get/route.set", function() {
 				o("state works", function(done) {
 					$window.location.href = prefix + "/test"
 					route(root, "/test", {
-						"/test": {view: function() {}},
-						"/other": {view: function() {}},
+						"/test": () => ({view: function() {}}),
+						"/other": () => ({view: function() {}}),
 					})
 
 					route.set("/other", null, {state: {a: 1}})

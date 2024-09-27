@@ -112,25 +112,17 @@ module.exports = function() {
 			}
 		}
 	}
+	var reentrantLock = new WeakSet()
 	function initComponent(vnode, hooks) {
-		var sentinel
-		if (typeof vnode.tag.view === "function") {
-			vnode.state = Object.create(vnode.tag)
-			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return
-			sentinel.$$reentrantLock$$ = true
-		} else {
-			vnode.state = void 0
-			sentinel = vnode.tag
-			if (sentinel.$$reentrantLock$$ != null) return
-			sentinel.$$reentrantLock$$ = true
-			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
-		}
+		vnode.state = void 0
+		if (reentrantLock.has(vnode.tag)) return
+		reentrantLock.add(vnode.tag)
+		vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		initLifecycle(vnode.state, vnode, hooks)
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-		sentinel.$$reentrantLock$$ = null
+		reentrantLock.delete(vnode.tag)
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)

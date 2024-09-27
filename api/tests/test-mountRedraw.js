@@ -36,7 +36,7 @@ o.spec("mount/redraw", function() {
 	o("schedules correctly", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 		m.redraw()
 		o(spy.callCount).equals(1)
@@ -47,7 +47,7 @@ o.spec("mount/redraw", function() {
 	o("should run a single renderer entry", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 
 		o(spy.callCount).equals(1)
 
@@ -68,9 +68,9 @@ o.spec("mount/redraw", function() {
 		var spy2 = o.spy()
 		var spy3 = o.spy()
 
-		m.mount(el1, {view: spy1})
-		m.mount(el2, {view: spy2})
-		m.mount(el3, {view: spy3})
+		m.mount(el1, () => ({view: spy1}))
+		m.mount(el2, () => ({view: spy2}))
+		m.mount(el3, () => ({view: spy3}))
 
 		m.redraw()
 
@@ -99,17 +99,17 @@ o.spec("mount/redraw", function() {
 		var spy2 = o.spy()
 		var spy3 = o.spy()
 
-		m.mount(el1, {view: spy1})
+		m.mount(el1, () => ({view: spy1}))
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(0)
 		o(spy3.callCount).equals(0)
 
-		m.mount(el2, {view: spy2})
+		m.mount(el2, () => ({view: spy2}))
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(1)
 		o(spy3.callCount).equals(0)
 
-		m.mount(el3, {view: spy3})
+		m.mount(el3, () => ({view: spy3}))
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(1)
 		o(spy3.callCount).equals(1)
@@ -118,7 +118,7 @@ o.spec("mount/redraw", function() {
 	o("should stop running after mount null", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 		m.mount(root, null)
 
@@ -132,7 +132,7 @@ o.spec("mount/redraw", function() {
 	o("should stop running after mount undefined", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 		m.mount(root, undefined)
 
@@ -146,7 +146,7 @@ o.spec("mount/redraw", function() {
 	o("should stop running after mount no arg", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 		m.mount(root)
 
@@ -161,7 +161,7 @@ o.spec("mount/redraw", function() {
 		var spy = o.spy()
 		var onremove = o.spy()
 
-		m.mount(root, {view: spy, onremove: onremove})
+		m.mount(root, () => ({view: spy, onremove: onremove}))
 		o(spy.callCount).equals(1)
 		m.mount(root)
 
@@ -172,7 +172,7 @@ o.spec("mount/redraw", function() {
 	o("should stop running after unsubscribe, even if it occurs after redraw is requested", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 		m.redraw()
 		m.mount(root)
@@ -185,7 +185,7 @@ o.spec("mount/redraw", function() {
 	o("does nothing on invalid unmount", function() {
 		var spy = o.spy()
 
-		m.mount(root, {view: spy})
+		m.mount(root, () => ({view: spy}))
 		o(spy.callCount).equals(1)
 
 		m.mount(null)
@@ -202,9 +202,9 @@ o.spec("mount/redraw", function() {
 		var spy2 = o.spy()
 		var spy3 = o.spy()
 
-		m.mount(el1, {view: spy1})
-		m.mount(el2, {view: spy2})
-		m.mount(el3, {view: spy3})
+		m.mount(el1, () => ({view: spy1}))
+		m.mount(el2, () => ({view: spy2}))
+		m.mount(el3, () => ({view: spy3}))
 
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(1)
@@ -234,14 +234,14 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, {
+		m.mount(root1, () => ({
 			onbeforeupdate: function() {
 				m.mount(root2, null)
 			},
 			view: function() { calls.push("root1") },
-		})
-		m.mount(root2, {view: function() { calls.push("root2") }})
-		m.mount(root3, {view: function() { calls.push("root3") }})
+		}))
+		m.mount(root2, () => ({view: function() { calls.push("root2") }}))
+		m.mount(root3, () => ({view: function() { calls.push("root3") }}))
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 		])
@@ -259,14 +259,14 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, {view: function() { calls.push("root1") }})
-		m.mount(root2, {
+		m.mount(root1, () => ({view: function() { calls.push("root1") }}))
+		m.mount(root2, () => ({
 			onbeforeupdate: function() {
 				m.mount(root1, null)
 			},
 			view: function() { calls.push("root2") },
-		})
-		m.mount(root3, {view: function() { calls.push("root3") }})
+		}))
+		m.mount(root3, () => ({view: function() { calls.push("root3") }}))
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 		])
@@ -285,15 +285,15 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, {view: function() { calls.push("root1") }})
-		m.mount(root2, {
+		m.mount(root1, () => ({view: function() { calls.push("root1") }}))
+		m.mount(root2, () => ({
 			onbeforeupdate: function() {
 				m.mount(root1, null)
 				throw "fail"
 			},
 			view: function() { calls.push("root2") },
-		})
-		m.mount(root3, {view: function() { calls.push("root3") }})
+		}))
+		m.mount(root3, () => ({view: function() { calls.push("root3") }}))
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 		])
@@ -311,14 +311,14 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, {view: function() { calls.push("root1") }})
-		m.mount(root2, {
+		m.mount(root1, () => ({view: function() { calls.push("root1") }}))
+		m.mount(root2, () => ({
 			onbeforeupdate: function() {
 				try { m.mount(root2, null) } catch (e) { calls.push([e.constructor, e.message]) }
 			},
 			view: function() { calls.push("root2") },
-		})
-		m.mount(root3, {view: function() { calls.push("root3") }})
+		}))
+		m.mount(root3, () => ({view: function() { calls.push("root3") }}))
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 		])
@@ -339,14 +339,14 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, {view: function() { calls.push("root1") }})
-		m.mount(root2, {
+		m.mount(root1, () => ({view: function() { calls.push("root1") }}))
+		m.mount(root2, () => ({
 			onbeforeupdate: function() {
 				try { m.mount(root2, null) } catch (e) { throw [e.constructor, e.message] }
 			},
 			view: function() { calls.push("root2") },
-		})
-		m.mount(root3, {view: function() { calls.push("root3") }})
+		}))
+		m.mount(root3, () => ({view: function() { calls.push("root3") }}))
 		o(calls).deepEquals([
 			"root1", "root2", "root3",
 		])

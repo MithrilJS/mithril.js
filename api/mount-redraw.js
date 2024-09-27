@@ -28,7 +28,7 @@ module.exports = function(render, schedule, console) {
 	redraw.sync = sync
 
 	function mount(root, component) {
-		if (component != null && component.view == null && typeof component !== "function") {
+		if (component != null && typeof component !== "function") {
 			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
 

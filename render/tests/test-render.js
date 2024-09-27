@@ -63,30 +63,7 @@ o.spec("render", function() {
 		o(threw).equals(true)
 	})
 
-	o("does not enter infinite loop when oninit triggers render and view throws with an object literal component", function(done) {
-		var A = {
-			oninit: init,
-			view: function() {throw new Error("error")}
-		}
-		function run() {
-			render(root, m(A))
-		}
-		function init() {
-			setTimeout(function() {
-				var threwInner = false
-				try {run()} catch (e) {threwInner = true}
-
-				o(threwInner).equals(false)
-				done()
-			}, 0)
-		}
-
-		var threwOuter = false
-		try {run()} catch (e) {threwOuter = true}
-
-		o(threwOuter).equals(true)
-	})
-	o("does not try to re-initialize a constructibe component whose view has thrown", function() {
+	o("does not try to re-initialize a constructible component whose view has thrown", function() {
 		var oninit = o.spy()
 		var onbeforeupdate = o.spy()
 		function A(){}

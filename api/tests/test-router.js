@@ -97,7 +97,7 @@ o.spec("route", function() {
 				o("throws on invalid `root` DOM node", function() {
 					var threw = false
 					try {
-						route(null, "/", {"/":{view: lock(function() {})}})
+						route(null, "/", {"/": () => ({view: lock(function() {})})})
 					} catch (e) {
 						threw = true
 					}
@@ -107,11 +107,11 @@ o.spec("route", function() {
 				o("renders into `root`", function() {
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeName).equals("DIV")
@@ -120,11 +120,11 @@ o.spec("route", function() {
 				o("resolves to route with escaped unicode", function() {
 					$window.location.href = prefix + "/%C3%B6?%C3%B6=%C3%B6"
 					route(root, "/ö", {
-						"/ö" : {
+						"/ö": () => ({
 							view: lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeName).equals("DIV")
@@ -133,12 +133,12 @@ o.spec("route", function() {
 				o("resolves to route with unicode", function() {
 					$window.location.href = prefix + "/ö?ö=ö"
 					route(root, "/ö", {
-						"/ö" : {
+						"/ö": () => ({
 							view: lock(function() {
 								return JSON.stringify(route.param()) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals('{"ö":"ö"} /ö?ö=ö')
@@ -147,11 +147,11 @@ o.spec("route", function() {
 				o("resolves to route with matching invalid escape", function() {
 					$window.location.href = prefix + "/%C3%B6abc%def"
 					route(root, "/öabc%def", {
-						"/öabc%def" : {
+						"/öabc%def": () => ({
 							view: lock(function() {
 								return route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals("/öabc%def")
@@ -160,13 +160,13 @@ o.spec("route", function() {
 				o("handles parameterized route", function() {
 					$window.location.href = prefix + "/test/x"
 					route(root, "/test/:a", {
-						"/test/:a" : {
+						"/test/:a": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals(
@@ -177,13 +177,13 @@ o.spec("route", function() {
 				o("handles multi-parameterized route", function() {
 					$window.location.href = prefix + "/test/x/y"
 					route(root, "/test/:a/:b", {
-						"/test/:a/:b" : {
+						"/test/:a/:b": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals(
@@ -194,13 +194,13 @@ o.spec("route", function() {
 				o("handles rest parameterized route", function() {
 					$window.location.href = prefix + "/test/x/y"
 					route(root, "/test/:a...", {
-						"/test/:a..." : {
+						"/test/:a...": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals(
@@ -211,13 +211,13 @@ o.spec("route", function() {
 				o("keeps trailing / in rest parameterized route", function() {
 					$window.location.href = prefix + "/test/d/"
 					route(root, "/test/:a...", {
-						"/test/:a..." : {
+						"/test/:a...": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals(
@@ -228,13 +228,13 @@ o.spec("route", function() {
 				o("handles route with search", function() {
 					$window.location.href = prefix + "/test?a=b&c=d"
 					route(root, "/test", {
-						"/test" : {
+						"/test": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals(
@@ -245,13 +245,13 @@ o.spec("route", function() {
 				o("redirects to default route if no match", function() {
 					$window.location.href = prefix + "/test"
 					route(root, "/other", {
-						"/other": {
+						"/other": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					return waitCycles(1).then(function() {
@@ -263,12 +263,12 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/z/y/x"
 
 					route(root, "/z/y/x", {
-						"/z/y/x": {
+						"/z/y/x": () => ({
 							view: lock(function() { return "1" }),
-						},
-						"/:a...": {
+						}),
+						"/:a...": () => ({
 							view: lock(function() { return "2" }),
-						},
+						}),
 					})
 
 					o(root.firstChild.nodeValue).equals("1")
@@ -278,12 +278,12 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/z/y/x"
 
 					route(root, "/z/y/x", {
-						"/:a...": {
+						"/:a...": () => ({
 							view: lock(function() { return "2" }),
-						},
-						"/z/y/x": {
+						}),
+						"/z/y/x": () => ({
 							view: lock(function() { return "1" }),
-						},
+						}),
 					})
 
 					o(root.firstChild.nodeValue).equals("2")
@@ -293,13 +293,13 @@ o.spec("route", function() {
 					$window.location.href = "file://" + prefix + "/test"
 
 					route(root, "/test", {
-						"/test" : {
+						"/test": () => ({
 							view: lock(function(vnode) {
 								return JSON.stringify(route.param()) + " " +
 									JSON.stringify(vnode.attrs) + " " +
 									route.get()
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeValue).equals("{} {} /test")
@@ -309,7 +309,7 @@ o.spec("route", function() {
 					var view = o.spy()
 
 					$window.location.href = prefix + "/"
-					route(root, "/", {"/":{view:view}})
+					route(root, "/", {"/": () => ({view})})
 
 					o(view.callCount).equals(1)
 
@@ -365,11 +365,11 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					o(root.firstChild.nodeName).equals("DIV")
@@ -384,11 +384,11 @@ o.spec("route", function() {
 					$window.location.href = "http://new.com"
 
 					route(root, "/a", {
-						"/a" : {
+						"/a": () => ({
 							view: lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					return waitCycles(1).then(function() {
@@ -406,14 +406,14 @@ o.spec("route", function() {
 				o("default route does not inherit params", function() {
 					$window.location.href = "/invalid?foo=bar"
 					route(root, "/a", {
-						"/a" : {
+						"/a": () => ({
 							oninit: lock(function(vnode) {
 								o(vnode.attrs.foo).equals(undefined)
 							}),
 							view: lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					return waitCycles(1)
@@ -425,14 +425,14 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
 									onupdate: onupdate
 								})
 							})
-						}
+						})
 					})
 
 					o(oninit.callCount).equals(1)
@@ -453,7 +453,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
@@ -461,7 +461,7 @@ o.spec("route", function() {
 									onclick: onclick,
 								})
 							})
-						}
+						})
 					})
 
 					root.firstChild.dispatchEvent(e)
@@ -487,7 +487,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m("div", {
 									oninit: oninit,
@@ -497,7 +497,7 @@ o.spec("route", function() {
 									}),
 								})
 							})
-						}
+						})
 					})
 
 					o(oninit.callCount).equals(1)
@@ -519,16 +519,16 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {href: "/test"})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					var slash = prefix[0] === "/" ? "" : "/"
@@ -549,19 +549,19 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
 									options: opts,
 								})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 					route.set = o.spy(route.set)
 
@@ -579,19 +579,19 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
 									params: {key: "value"},
 								})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 					route.set = o.spy(route.set)
 
@@ -807,16 +807,16 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {href: "/test"})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					var slash = prefix[0] === "/" ? "" : "/"
@@ -836,7 +836,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
@@ -845,12 +845,12 @@ o.spec("route", function() {
 									}
 								})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					var slash = prefix[0] === "/" ? "" : "/"
@@ -870,7 +870,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
@@ -881,12 +881,12 @@ o.spec("route", function() {
 									}
 								})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					var slash = prefix[0] === "/" ? "" : "/"
@@ -906,7 +906,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": () => ({
 							view: lock(function() {
 								return m(route.Link, {
 									href: "/test",
@@ -915,12 +915,12 @@ o.spec("route", function() {
 									}
 								})
 							})
-						},
-						"/test" : {
+						}),
+						"/test": () => ({
 							view : lock(function() {
 								return m("div")
 							})
-						}
+						})
 					})
 
 					var slash = prefix[0] === "/" ? "" : "/"
@@ -935,11 +935,11 @@ o.spec("route", function() {
 				o("accepts RouteResolver with onmatch that returns Component", function() {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("span")
 						})
-					}
+					})
 
 					var resolver = {
 						onmatch: lock(function(args, requestedPath, route) {
@@ -978,11 +978,11 @@ o.spec("route", function() {
 					var match2Count = 0
 					var render1 = o.spy()
 					var render2Count = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("span")
 						})
-					}
+					})
 
 					var resolver1 = {
 						onmatch: lock(function(args, requestedPath, key) {
@@ -1036,11 +1036,11 @@ o.spec("route", function() {
 				o("accepts RouteResolver with onmatch that returns Promise<Component>", function() {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("span")
 						})
-					}
+					})
 
 					var resolver = {
 						onmatch: lock(function(args, requestedPath, route) {
@@ -1166,7 +1166,7 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/test/1"
 					route(root, "/default", {
-						"/default" : {view: spy},
+						"/default": () => ({view: spy}),
 						"/test/:id" : resolver
 					})
 
@@ -1181,15 +1181,15 @@ o.spec("route", function() {
 
 				o("accepts RouteResolver without `render` method as payload", function() {
 					var matchCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("div")
 						})
-					}
+					})
 
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id" : {
+						"/:id": {
 							onmatch: lock(function(args, requestedPath, route) {
 								matchCount++
 
@@ -1210,12 +1210,12 @@ o.spec("route", function() {
 
 				o("changing `key` param resets the component", function(){
 					var oninit = o.spy()
-					var Component = {
+					var Component = () => ({
 						oninit: oninit,
 						view: lock(function() {
 							return m("div")
 						})
-					}
+					})
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
 						"/:key": Component,
@@ -1232,15 +1232,15 @@ o.spec("route", function() {
 
 				o("accepts RouteResolver without `onmatch` method as payload", function() {
 					var renderCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("div")
 						})
-					}
+					})
 
 					$window.location.href = prefix + "/abc"
 					route(root, "/abc", {
-						"/:id" : {
+						"/:id": {
 							render: lock(function(vnode) {
 								renderCount++
 
@@ -1258,12 +1258,12 @@ o.spec("route", function() {
 				o("RouteResolver `render` does not have component semantics", function() {
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							render: lock(function() {
 								return m("div", m("p"))
 							}),
 						},
-						"/b" : {
+						"/b": {
 							render: lock(function() {
 								return m("div", m("a"))
 							}),
@@ -1288,15 +1288,15 @@ o.spec("route", function() {
 				o("calls onmatch and view correct number of times", function() {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("div")
 						})
-					}
+					})
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": {
 							onmatch: lock(function() {
 								matchCount++
 								return Component
@@ -1323,15 +1323,15 @@ o.spec("route", function() {
 				o("calls onmatch and view correct number of times when not onmatch returns undefined", function() {
 					var matchCount = 0
 					var renderCount = 0
-					var Component = {
+					var Component = () => ({
 						view: lock(function() {
 							return m("div")
 						})
-					}
+					})
 
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/" : {
+						"/": {
 							onmatch: lock(function() {
 								matchCount++
 							}),
@@ -1360,17 +1360,17 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/b")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": () => ({
 							view: lock(function() {
 								redirected = true
 							})
-						}
+						})
 					})
 
 					return waitCycles(2).then(function() {
@@ -1386,16 +1386,16 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/b", {}, {state: {a: 5}})
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							onmatch: lock(function() {
 								redirected = true
-								return {view: lock(view)}
+								return () => ({view: lock(view)})
 							})
 						}
 					})
@@ -1416,13 +1416,13 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/b")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							render: lock(function(){
 								redirected = true
 							})
@@ -1442,17 +1442,17 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/b")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							onmatch: lock(function() {
 								redirected = true
 								return waitCycles(1).then(function(){
-									return {view: view}
+									return () => ({view: view})
 								})
 							})
 						}
@@ -1472,17 +1472,17 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								waitCycles(1).then(function() {route.set("/b")})
 								return new Promise(function() {})
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							onmatch: lock(function() {
 								redirected = true
-								return {view: lock(view)}
+								return () => ({view: lock(view)})
 							})
 						}
 					})
@@ -1497,19 +1497,20 @@ o.spec("route", function() {
 				o("onmatch can redirect with window.history.back()", function() {
 
 					var render = o.spy()
-					var component = {view: o.spy()}
+					var instance = {view: o.spy()}
+					var Component = () => instance
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
-								return component
+								return Component
 							}),
 							render: lock(function(vnode) {
 								return vnode
 							})
 						},
-						"/b" : {
+						"/b": {
 							onmatch: lock(function() {
 								$window.history.back()
 								return new Promise(function() {})
@@ -1523,13 +1524,13 @@ o.spec("route", function() {
 
 						route.set("/b")
 						o(render.callCount).equals(0)
-						o(component.view.callCount).equals(1)
+						o(instance.view.callCount).equals(1)
 
 						return waitCycles(4).then(function() {
 							throttleMock.fire()
 
 							o(render.callCount).equals(0)
-							o(component.view.callCount).equals(2)
+							o(instance.view.callCount).equals(2)
 						})
 					})
 				})
@@ -1540,16 +1541,16 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/b", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/c")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							onmatch: lock(function(){
 								redirected = true
-								return {view: lock(function() {})}
+								return () => ({view: lock(function() {})})
 							})
 						}
 					})
@@ -1566,13 +1567,13 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/b", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/c")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": {
 							render: lock(function(){
 								redirected = true
 							})
@@ -1591,17 +1592,17 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/b", {
-						"/a" : {
+						"/a": {
 							onmatch: lock(function() {
 								route.set("/c")
 							}),
 							render: lock(render)
 						},
-						"/b" : {
+						"/b": () => ({
 							view: lock(function(){
 								redirected = true
 							})
-						}
+						})
 					})
 
 					return waitCycles(3).then(function() {
@@ -1618,9 +1619,9 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/", {
-						"/a": {view: lock(view)},
+						"/a": () => ({view: lock(view)}),
 						"/b": {onmatch: lock(onmatch)},
-						"/": {view: lock(function() {})}
+						"/": () => ({view: lock(function() {})})
 					})
 
 					o(view.callCount).equals(1)
@@ -1725,7 +1726,7 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/", {
-						"/": {view: lock(function() {})},
+						"/": () => ({view: lock(function() {})}),
 						"/2": {
 							onmatch: lock(function() {
 								return new Promise(function() {})
@@ -1783,7 +1784,7 @@ o.spec("route", function() {
 						"/a": {
 							onmatch: lock(function() {
 								return waitCycles(2).then(function() {
-									return {view: lock(function() {rendered = true})}
+									return () => ({view: lock(function() {rendered = true})})
 								})
 							}),
 							render: lock(function() {
@@ -1791,11 +1792,11 @@ o.spec("route", function() {
 								resolved = "a"
 							})
 						},
-						"/b": {
+						"/b": () => ({
 							view: lock(function() {
 								resolved = "b"
 							})
-						}
+						})
 					})
 
 					route.set("/b")
@@ -1816,13 +1817,13 @@ o.spec("route", function() {
 
 					$window.location.href = prefix + "/a"
 					route(root, "/a", {
-						"/a": {
+						"/a": () => ({
 							onbeforeremove: lock(spy),
 							view: lock(function() {})
-						},
-						"/b": {
+						}),
+						"/b": () => ({
 							view: lock(function() {})
-						}
+						})
 					})
 
 					route.set("/b")
@@ -1848,11 +1849,11 @@ o.spec("route", function() {
 								resolved = "a"
 							})
 						},
-						"/b": {
+						"/b": () => ({
 							view: lock(function() {
 								resolved = "b"
 							})
-						},
+						}),
 					})
 
 					// tick for popstate for /a
@@ -1869,7 +1870,7 @@ o.spec("route", function() {
 					var i = 0
 					$window.location.href = prefix + "/"
 					route(root, "/", {
-						"/": {view: lock(function() {i++})}
+						"/": () => ({view: lock(function() {i++})})
 					})
 					var before = i
 
@@ -1890,13 +1891,13 @@ o.spec("route", function() {
 					$window.location.href = prefix + "/"
 
 					route(root, "/1", {
-						"/:id" : {
+						"/:id": () => ({
 							view : lock(function() {
 								o(route.param("id")).equals("1")
 
 								return m("div")
 							})
-						}
+						})
 					})
 
 					o(route.param("id")).equals(undefined);

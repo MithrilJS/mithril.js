@@ -837,13 +837,13 @@ o.spec("component", function() {
 			o.spec("state", function() {
 				o("initializes state", function() {
 					var data = {a: 1}
-					var component = createComponent(createComponent({
+					var component = createComponent({
 						data: data,
 						oninit: init,
 						view: function() {
 							return ""
 						}
-					}))
+					})
 
 					render(root, m(component))
 
@@ -854,13 +854,13 @@ o.spec("component", function() {
 				o("state proxies to the component object/prototype", function() {
 					var body = {a: 1}
 					var data = [body]
-					var component = createComponent(createComponent({
+					var component = createComponent({
 						data: data,
 						oninit: init,
 						view: function() {
 							return ""
 						}
-					}))
+					})
 
 					render(root, m(component))
 
@@ -874,26 +874,6 @@ o.spec("component", function() {
 	})
 	o.spec("Tests specific to certain component kinds", function() {
 		o.spec("state", function() {
-			o("POJO", function() {
-				var data = {}
-				var component = {
-					data: data,
-					oninit: init,
-					view: function() {
-						return ""
-					}
-				}
-
-				render(root, m(component))
-
-				function init(vnode) {
-					o(vnode.state.data).equals(data)
-
-					//inherits state via prototype
-					component.x = 1
-					o(vnode.state.x).equals(1)
-				}
-			})
 			o("Constructible", function() {
 				var oninit = o.spy()
 				var component = o.spy(function(vnode){

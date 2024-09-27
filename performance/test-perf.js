@@ -251,8 +251,8 @@ suite.add("add large nested tree", {
 			fields.push((i * 999).toString(36))
 		}
 
-		var NestedHeader = {
-			view: function () {
+		var NestedHeader = () => ({
+			view() {
 				return m("header",
 					m("h1.asdf", "a ", "b", " c ", 0, " d"),
 					m("nav",
@@ -261,10 +261,10 @@ suite.add("add large nested tree", {
 					)
 				)
 			}
-		}
+		})
 
-		var NestedForm = {
-			view: function () {
+		var NestedForm = () => ({
+			view() {
 				return m("form", {onSubmit: function () {}},
 					m("input[type=checkbox][checked]"),
 					m("input[type=checkbox]", {checked: false}),
@@ -288,10 +288,10 @@ suite.add("add large nested tree", {
 					m(NestedButtonBar, null)
 				)
 			}
-		}
+		})
 
-		var NestedButtonBar = {
-			view: function () {
+		var NestedButtonBar = () => ({
+			view() {
 				return m(".button-bar",
 					m(NestedButton,
 						{style: "width:10px; height:10px; border:1px solid #FFF;"},
@@ -311,29 +311,29 @@ suite.add("add large nested tree", {
 					)
 				)
 			}
-		}
+		})
 
-		var NestedButton = {
-			view: function (vnode) {
+		var NestedButton = () => ({
+			view(vnode) {
 				return m("button", m.censor(vnode.attrs), vnode.children)
 			}
-		}
+		})
 
-		var NestedMain = {
-			view: function () {
+		var NestedMain = () => ({
+			view() {
 				return m(NestedForm)
 			}
-		}
+		})
 
-		this.NestedRoot = {
-			view: function () {
+		this.NestedRoot = () => ({
+			view() {
 				return m("div.foo.bar[data-foo=bar]",
 					{p: 2},
 					m(NestedHeader),
 					m(NestedMain)
 				)
 			}
-		}
+		})
 	},
 	fn: function () {
 		m.render(rootElem, m(this.NestedRoot))
@@ -401,8 +401,8 @@ suite.add("mutate styles/properties", {
 
 suite.add("repeated add/removal", {
 	setup: function () {
-		var RepeatedHeader = {
-			view: function () {
+		var RepeatedHeader = () => ({
+			view() {
 				return m("header",
 					m("h1.asdf", "a ", "b", " c ", 0, " d"),
 					m("nav",
@@ -411,10 +411,10 @@ suite.add("repeated add/removal", {
 					)
 				)
 			}
-		}
+		})
 
-		var RepeatedForm = {
-			view: function () {
+		var RepeatedForm = () => ({
+			view() {
 				return m("form", {onSubmit: function () {}},
 					m("input", {type: "checkbox", checked: true}),
 					m("input", {type: "checkbox", checked: false}),
@@ -429,10 +429,10 @@ suite.add("repeated add/removal", {
 					m(RepeatedButtonBar, null)
 				)
 			}
-		}
+		})
 
-		var RepeatedButtonBar = {
-			view: function () {
+		var RepeatedButtonBar = () => ({
+			view() {
 				return m(".button-bar",
 					m(RepeatedButton,
 						{style: "width:10px; height:10px; border:1px solid #FFF;"},
@@ -452,29 +452,29 @@ suite.add("repeated add/removal", {
 					)
 				)
 			}
-		}
+		})
 
-		var RepeatedButton = {
-			view: function (vnode) {
+		var RepeatedButton = () => ({
+			view(vnode) {
 				return m("button", vnode.attrs, vnode.children)
 			}
-		}
+		})
 
-		var RepeatedMain = {
-			view: function () {
+		var RepeatedMain = () => ({
+			view() {
 				return m(RepeatedForm)
 			}
-		}
+		})
 
-		this.RepeatedRoot = {
-			view: function () {
+		this.RepeatedRoot = () => ({
+			view() {
 				return m("div.foo.bar[data-foo=bar]",
 					{p: 2},
 					m(RepeatedHeader, null),
 					m(RepeatedMain, null)
 				)
 			}
-		}
+		})
 	},
 	fn: function () {
 		m.render(rootElem, [m(this.RepeatedRoot)])

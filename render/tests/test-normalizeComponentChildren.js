@@ -11,11 +11,11 @@ o.spec("component children", function () {
 	var render = vdom($window)
 
 	o.spec("component children", function () {
-		var component = {
+		var component = () => ({
 			view: function (vnode) {
 				return vnode.children
 			}
-		}
+		})
 
 		var vnode = m(component, "a")
 

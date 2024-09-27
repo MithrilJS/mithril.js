@@ -241,7 +241,7 @@ o.spec("onbeforeupdate", function() {
 			})
 
 			o("is not called on component creation", function() {
-				createComponent({
+				var component = createComponent({
 					onbeforeupdate: onbeforeupdate,
 					view: function(vnode) {
 						return m("div", vnode.attrs)
@@ -249,7 +249,7 @@ o.spec("onbeforeupdate", function() {
 				})
 
 				var count = 0
-				var vnode = m("div", {id: "a"})
+				var vnode = m(component, {id: "a"})
 
 				render(root, vnode)
 
@@ -337,13 +337,13 @@ o.spec("onbeforeupdate", function() {
 			o(root.firstChild.firstChild.firstChild.nodeValue).equals("foo")
 		})
 		o("updating component children doesn't error", function() {
-			var Child = {
+			var Child = () => ({
 				view(v) {
 					return m("div",
 						v.attrs.foo ? m("div") : null
 					)
 				}
-			}
+			})
 
 			render(root,
 				m("div", {onbeforeupdate: function() { return true }},

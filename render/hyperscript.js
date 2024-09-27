@@ -68,7 +68,7 @@ function execSelector(selector, attrs, children) {
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
 // allocations in the fast path, especially with fragments.
 function hyperscript(selector, attrs, ...children) {
-	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
+	if (typeof selector !== "string" && typeof selector !== "function") {
 		throw new Error("The selector must be either a string or a component.");
 	}
 

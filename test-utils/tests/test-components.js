@@ -14,10 +14,7 @@ o.spec("test-utils/components", function() {
 
 				var cmp1, cmp2
 
-				if (component.kind === "POJO") {
-					cmp1 = component.create()
-					cmp2 = component.create(methods)
-				} else if (component.kind === "constructible") {
+				if (component.kind === "constructible") {
 					cmp1 = new (component.create())
 					cmp2 = new (component.create(methods))
 				} else if (component.kind === "closure") {
@@ -47,7 +44,7 @@ o.spec("test-utils/components", function() {
 		}
 	})
 	o.after(function(){
-		o(test.callCount).equals(3)
+		o(test.callCount).equals(2)
 	})
 	components.forEach(function(component) {
 		o.spec(component.kind, test(component))
