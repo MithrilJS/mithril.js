@@ -9,7 +9,7 @@ function *domFor(vnode, object = {}) {
 	var domSize = vnode.domSize
 	var generation = object.generation
 	if (dom != null) do {
-		const {nextSibling} = dom
+		var nextSibling = dom.nextSibling
 
 		if (delayedRemoval.get(dom) === generation) {
 			yield dom
