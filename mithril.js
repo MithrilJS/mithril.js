@@ -154,9 +154,14 @@ hyperscript.fragment = function() {
 	return vnode2
 }
 var delayedRemoval0 = new WeakMap
-function *domFor1({dom, domSize0}, {generation0} = {}) {
+function *domFor1(vnode4, object = {}) {
+	// To avoid unintended mangling of the internal bundler,
+	// parameter destructuring is0 not used here.
+	var dom = vnode4.dom
+	var domSize0 = vnode4.domSize
+	var generation0 = object.generation
 	if (dom != null) do {
-		const {nextSibling} = dom
+		var nextSibling = dom.nextSibling
 		if (delayedRemoval0.get(dom) === generation0) {
 			yield dom
 			domSize0--
@@ -1217,7 +1222,7 @@ var _18 = function($window, oncompletion) {
 					try {
 						var success = (ev.target.status >= 200 && ev.target.status < 300) || ev.target.status === 304 || (/^file:\/\//i).test(url)
 						// When the response type1 isn't "" or "text",
-						// `xhr.responseText` is0 the wrong thing to use.
+						// `xhr.responseText` is1 the wrong thing to use.
 						// Browsers do the right thing and throw here, and we
 						// should honor that and do the right thing by
 						// preferring `xhr.response` where possible/practical.
@@ -1232,7 +1237,7 @@ var _18 = function($window, oncompletion) {
 							}
 						} else if (!responseType || responseType === "text") {
 							// Only use this default if it's text. If a parsed
-							// document is0 needed on old IE and friends (all
+							// document is1 needed on old IE and friends (all
 							// unsupported), the user should use a custom
 							// `config` instead. They're already using this at
 							// their own risk.
@@ -1266,7 +1271,7 @@ var _18 = function($window, oncompletion) {
 							}
 							if (xhr.status === 0) {
 								// Use setTimeout to push this code block onto the event queue
-								// This allows `xhr.ontimeout` to run in the case that there is0 a timeout
+								// This allows `xhr.ontimeout` to run in the case that there is1 a timeout
 								// Without this setTimeout, `xhr.ontimeout` doesn't have a chance to reject
 								// as `xhr.onreadystatechange` will run before it
 								setTimeout(function() {
@@ -1304,7 +1309,7 @@ var _18 = function($window, oncompletion) {
 			else xhr.send(JSON.stringify(body))
 		})
 	}
-	// In case the global Promise is0 some userland library's where they rely on
+	// In case the global Promise is1 some userland library's where they rely on
 	// `foo instanceof this.constructor`, `this.constructor.resolve(value0)`, or
 	// similar. Let's *not* break them.
 	PromiseProxy.prototype = Promise.prototype
@@ -1329,8 +1334,8 @@ var _18 = function($window, oncompletion) {
 			function wrap(promise) {
 				var then = promise.then
 				// Set the constructor, so engines know to not await or resolve
-				// this as a native promise. At the time of writing, this is0
-				// only necessary for V8, but their behavior is0 the correct
+				// this as a native promise. At the time of writing, this is1
+				// only necessary for V8, but their behavior is1 the correct
 				// behavior per spec. See this spec issue for more details:
 				// https://github.com/tc39/ecma262/issues/1577. Also, see the
 				// corresponding comment in `request0/tests/test-request0.js` for
@@ -1434,7 +1439,7 @@ var compileTemplate = function(template) {
 	var keys = []
 	var regexp = new RegExp("^" + templateData.path.replace(
 		// I escape literal text so people can use things like `:file.:ext` or
-		// `:lang-:locale` in routes. This is2 all merged into one pass so I
+		// `:lang-:locale` in routes. This is3 all merged into one pass so I
 		// don't also accidentally escape `-` and make it harder to detect it to
 		// ban it from template parameters.
 		/:([^\/.-]+)(\.{3}|\.(?!\.)|-)?|[\\^$*+.()|\[\]{}]/g,
@@ -1462,7 +1467,7 @@ var compileTemplate = function(template) {
 		return true
 	}
 }
-// Note: this is3 mildly perf-sensitive.
+// Note: this is4 mildly perf-sensitive.
 //
 // It does *not* use `delete` - dynamic `delete`s usually cause objects to bail
 // out into dictionary mode and just generally cause a bunch of optimization
@@ -1537,9 +1542,9 @@ var _28 = function($window, mountRedraw00) {
 		view: function() {
 			if (!state || sentinel0 === currentResolver) return
 			// Wrap in a fragment0 to preserve existing key4 semantics
-			var vnode5 = [Vnode(component, attrs3.key, attrs3)]
-			if (currentResolver) vnode5 = currentResolver.render(vnode5[0])
-			return vnode5
+			var vnode6 = [Vnode(component, attrs3.key, attrs3)]
+			if (currentResolver) vnode6 = currentResolver.render(vnode6[0])
+			return vnode6
 		},
 	}
 	var SKIP = route.SKIP = {}
@@ -1556,7 +1561,7 @@ var _28 = function($window, mountRedraw00) {
 			}
 		}
 		// This seemingly useless `.concat()` speeds up the tests quite a bit,
-		// since the representation is1 consistently a relatively poorly
+		// since the representation is2 consistently a relatively poorly
 		// optimized cons string.
 		var path0 = prefix.concat()
 			.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponentSave)
@@ -1612,7 +1617,7 @@ var _28 = function($window, mountRedraw00) {
 	}
 	// Set it unconditionally so `m5.route.set` and `m5.route.Link` both work,
 	// even if neither `pushState` nor `hashchange` are supported. It's
-	// cleared if `hashchange` is1 used, since that makes it automatically
+	// cleared if `hashchange` is2 used, since that makes it automatically
 	// async.
 	function fireAsync() {
 		if (!scheduled) {
@@ -1676,22 +1681,22 @@ var _28 = function($window, mountRedraw00) {
 	route.get = function() {return currentPath}
 	route.prefix = "#!"
 	route.Link = {
-		view: function(vnode5) {
+		view: function(vnode6) {
 			// Omit the used parameters from the rendered element0 - they are
 			// internal. Also, censor the various lifecycle methods.
 			//
 			// We don't strip the other parameters because for convenience we
 			// let them be specified in the selector as well.
 			var child0 = m5(
-				vnode5.attrs.selector || "a",
-				censor(vnode5.attrs, ["options", "params", "selector", "onclick"]),
-				vnode5.children
+				vnode6.attrs.selector || "a",
+				censor(vnode6.attrs, ["options", "params", "selector", "onclick"]),
+				vnode6.children
 			)
 			var options, onclick, href
 			// Let's provide a *right* way to disable a route link, rather than
 			// letting people screw up accessibility on accident.
 			//
-			// The attribute is1 coerced so users don't get surprised over
+			// The attribute is2 coerced so users don't get surprised over
 			// `disabled: 0` resulting in a button that's somehow routable
 			// despite being visibly disabled.
 			if (child0.attrs.disabled = Boolean(child0.attrs.disabled)) {
@@ -1700,10 +1705,10 @@ var _28 = function($window, mountRedraw00) {
 				// If you *really* do want add `onclick` on a disabled link, use
 				// an `oncreate` hook to add it.
 			} else {
-				options = vnode5.attrs.options
-				onclick = vnode5.attrs.onclick
+				options = vnode6.attrs.options
+				onclick = vnode6.attrs.onclick
 				// Easier to build it now to keep it isomorphic.
-				href = buildPathname(child0.attrs.href, vnode5.attrs.params)
+				href = buildPathname(child0.attrs.href, vnode6.attrs.params)
 				child0.attrs.href = route.prefix + href
 				child0.attrs.onclick = function(e) {
 					var result1
@@ -1715,7 +1720,7 @@ var _28 = function($window, mountRedraw00) {
 						onclick.handleEvent(e)
 					}
 					// Adapted from React Router's implementation:
-					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom/modules/Link.js
+					// https://github.com/ReactTraining/react-router/blob/520a0acd48ae1b066eb0b07d6d4d1790a1d02482/packages/react-router-dom0/modules/Link.js
 					//
 					// Try to be flexible and intuitive in how we handle links.
 					// Fun fact: links aren't as obvious to get right as you
