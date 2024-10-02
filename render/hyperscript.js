@@ -62,7 +62,7 @@ function execSelector(selector, attrs, children) {
 		if (hasClassName) attrs.className = null
 	}
 
-	return Vnode(state.tag, null, attrs, children)
+	return Vnode(state.tag, {}, attrs, children)
 }
 
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
@@ -86,7 +86,7 @@ function hyperscript(selector, attrs, ...children) {
 		if (selector !== "[") return execSelector(selector, attrs, children)
 	}
 
-	return Vnode(selector, undefined, attrs, children)
+	return Vnode(selector, {}, attrs, children)
 }
 
 hyperscript.fragment = function(...args) {

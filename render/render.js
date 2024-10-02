@@ -64,7 +64,6 @@ module.exports = function() {
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (typeof tag === "string") {
-			if (vnode.tag !== "=") vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": createText(parent, vnode, nextSibling); break
