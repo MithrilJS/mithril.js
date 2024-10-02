@@ -2,15 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 o.spec("attributes", function() {
-	var $window, root, render
+	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.body
-		render = vdom($window)
 	})
 	o.spec("basics", function() {
 		o("works (create/update/remove)", function() {
@@ -256,7 +255,6 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
 
 			var a =m("input")
 			var b = m("input", {value: "1"})
@@ -295,7 +293,6 @@ o.spec("attributes", function() {
 		o("works", function() {
 			var $window = domMock()
 			var root = $window.document.body
-			var render = vdom($window)
 
 			var a = m("input", {type: "radio"})
 			var b = m("input", {type: "text"})
@@ -331,7 +328,6 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value and focused", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
 
 			var a = m("textarea")
 			var b = m("textarea", {value: "1"})
@@ -477,7 +473,6 @@ o.spec("attributes", function() {
 		o("isn't set when equivalent to the previous value", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
 
 			var a = m("option")
 			var b = m("option", {value: "1"})
@@ -615,7 +610,6 @@ o.spec("attributes", function() {
 		o("updates with the same value do not re-set the attribute if the select has focus", function() {
 			var $window = domMock({spy: o.spy})
 			var root = $window.document.body
-			var render = vdom($window)
 
 			var a = makeSelect()
 			var b = makeSelect("1")

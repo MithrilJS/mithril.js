@@ -6,7 +6,6 @@ var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 var apiMountRedraw = require("../../api/mount-redraw")
-var coreRenderer = require("../../render/render")
 var apiRouter = require("../../api/router")
 
 o.spec("route.get/route.set", function() {
@@ -26,7 +25,7 @@ o.spec("route.get/route.set", function() {
 
 					root = $window.document.body
 
-					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
+					mountRedraw = apiMountRedraw(throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
 					route.prefix = prefix
 				})

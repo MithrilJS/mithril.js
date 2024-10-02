@@ -1,8 +1,9 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
+var render = require("../render/render")
 
-module.exports = function(render, schedule, console) {
+module.exports = function(schedule, console) {
 	var subscriptions = []
 	var pending = false
 	var offset = -1

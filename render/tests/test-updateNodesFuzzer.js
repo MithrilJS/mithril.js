@@ -2,16 +2,15 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 // pilfered and adapted from https://github.com/domvm/domvm/blob/7aaec609e4c625b9acf9a22d035d6252a5ca654f/test/src/flat-list-keyed-fuzz.js
 o.spec("updateNodes keyed list Fuzzer", function() {
-	var i = 0, $window, root, render
+	var i = 0, $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
 	})
 
 

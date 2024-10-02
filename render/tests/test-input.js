@@ -2,14 +2,13 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 o.spec("form inputs", function() {
-	var $window, root, render
+	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
-		render = vdom($window)
 		root = $window.document.createElement("div")
 		$window.document.body.appendChild(root)
 	})
@@ -132,7 +131,6 @@ o.spec("form inputs", function() {
 
 		o("retains file input value attribute if DOM value is the same as vdom value and is non-empty", function() {
 			var $window = domMock(o)
-			var render = vdom($window)
 			var root = $window.document.createElement("div")
 			$window.document.body.appendChild(root)
 			var input = m("input", {type: "file", value: "", onclick: function() {}})

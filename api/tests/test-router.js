@@ -6,7 +6,7 @@ var browserMock = require("../../test-utils/browserMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 
 var m = require("../../render/hyperscript")
-var coreRenderer = require("../../render/render")
+var render = require("../../render/render")
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
 
@@ -79,7 +79,7 @@ o.spec("route", function() {
 
 					root = $window.document.body
 
-					mountRedraw = apiMountRedraw(coreRenderer($window), throttleMock.schedule, console)
+					mountRedraw = apiMountRedraw(throttleMock.schedule, console)
 					route = apiRouter($window, mountRedraw)
 					route.prefix = prefix
 					console.error = function() {
@@ -603,7 +603,6 @@ o.spec("route", function() {
 
 				o("route.Link can render without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -623,7 +622,6 @@ o.spec("route", function() {
 
 				o("route.Link keeps magic attributes from being double-called", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -681,7 +679,6 @@ o.spec("route", function() {
 
 				o("route.Link can render other tag without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -701,7 +698,6 @@ o.spec("route", function() {
 
 				o("route.Link can render other selector without routes or dom access", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -721,7 +717,6 @@ o.spec("route", function() {
 
 				o("route.Link can render not disabled", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -741,7 +736,6 @@ o.spec("route", function() {
 
 				o("route.Link can render falsy disabled", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -761,7 +755,6 @@ o.spec("route", function() {
 
 				o("route.Link can render disabled", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body
@@ -781,7 +774,6 @@ o.spec("route", function() {
 
 				o("route.Link can render truthy disabled", function() {
 					$window = browserMock(env)
-					var render = coreRenderer($window)
 					route = apiRouter(null, null)
 					route.prefix = prefix
 					root = $window.document.body

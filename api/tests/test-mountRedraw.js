@@ -6,7 +6,6 @@ var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var throttleMocker = require("../../test-utils/throttleMock")
 var mountRedraw = require("../../api/mount-redraw")
-var coreRenderer = require("../../render/render")
 var h = require("../../render/hyperscript")
 
 o.spec("mount/redraw", function() {
@@ -16,7 +15,7 @@ o.spec("mount/redraw", function() {
 		consoleMock = {error: o.spy()}
 		throttleMock = throttleMocker()
 		root = $window.document.body
-		m = mountRedraw(coreRenderer($window), throttleMock.schedule, consoleMock)
+		m = mountRedraw(throttleMock.schedule, consoleMock)
 		$document = $window.document
 		errors = []
 	})

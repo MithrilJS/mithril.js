@@ -3,12 +3,11 @@
 var o = require("ospec")
 var m = require("../../render/hyperscript")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 
 o.spec("component children", function () {
 	var $window = domMock()
 	var root = $window.document.createElement("div")
-	var render = vdom($window)
 
 	o.spec("component children", function () {
 		var component = () => ({

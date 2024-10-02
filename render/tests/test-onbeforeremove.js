@@ -3,15 +3,14 @@
 var o = require("ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 o.spec("onbeforeremove", function() {
-	var $window, root, render
+	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
 	})
 
 	o("does not call onbeforeremove when creating", function() {

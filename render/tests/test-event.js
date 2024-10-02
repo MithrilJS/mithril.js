@@ -2,16 +2,15 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var reallyRender = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 o.spec("event", function() {
-	var $window, root, redraw, render, reallyRender
+	var $window, root, redraw, render
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.body
 		redraw = o.spy()
-		reallyRender = vdom($window)
 		render = function(dom, vnode) {
 			return reallyRender(dom, vnode, redraw)
 		}

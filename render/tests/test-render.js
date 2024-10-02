@@ -2,19 +2,14 @@
 
 var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
-var vdom = require("../../render/render")
+var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 o.spec("render", function() {
-	var $window, root, render
+	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-		render = vdom($window)
-	})
-
-	o("initializes without DOM", function() {
-		vdom()
 	})
 
 	o("renders plain text", function() {
