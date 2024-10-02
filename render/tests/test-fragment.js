@@ -110,7 +110,7 @@ o.spec("key", function() {
 		o(frag.children.length).equals(1)
 		o(frag.children[0]).equals(child)
 
-		o(frag.key).equals(undefined)
+		o(frag.state).equals(undefined)
 	})
 	o("supports non-null keys", function() {
 		var frag = m.key(7, [])
@@ -119,7 +119,7 @@ o.spec("key", function() {
 		o(Array.isArray(frag.children)).equals(true)
 		o(frag.children.length).equals(0)
 
-		o(frag.key).equals(7)
+		o(frag.state).equals(7)
 	})
 	o.spec("children", function() {
 		o("handles string single child", function() {

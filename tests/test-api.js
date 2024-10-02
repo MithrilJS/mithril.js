@@ -44,7 +44,7 @@ o.spec("api", function() {
 			var vnode = m.key(123, [m("div")])
 
 			o(vnode.tag).equals("=")
-			o(vnode.key).equals(123)
+			o(vnode.state).equals(123)
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0].tag).equals("div")
 		})

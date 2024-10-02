@@ -86,7 +86,7 @@ function hyperscript(selector, attrs, ...children) {
 		if (selector !== "[") return execSelector(selector, attrs, children)
 	}
 
-	return Vnode(selector, null, attrs, children)
+	return Vnode(selector, undefined, attrs, children)
 }
 
 hyperscript.fragment = function(...args) {
@@ -97,7 +97,7 @@ hyperscript.key = function(key, ...children) {
 	if (children.length === 1 && Array.isArray(children[0])) {
 		children = children[0].slice()
 	}
-	return Vnode("=", key, null, Vnode.normalizeChildren(children))
+	return Vnode("=", key, undefined, Vnode.normalizeChildren(children))
 }
 
 module.exports = hyperscript

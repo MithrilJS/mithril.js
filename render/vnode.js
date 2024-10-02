@@ -1,7 +1,7 @@
 "use strict"
 
-function Vnode(tag, key, attrs, children) {
-	return {tag, key, attrs, children, dom: undefined, state: undefined, events: undefined, instance: undefined}
+function Vnode(tag, state, attrs, children) {
+	return {tag, state, attrs, children, dom: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (node == null || typeof node === "boolean") return null
@@ -27,10 +27,10 @@ Vnode.normalizeChildren = function(input) {
 				)
 			}
 			if (isKeyed) {
-				if (keys.has(input[i].key)) {
-					throw new TypeError(`Duplicate key detected: ${input[i].key}`)
+				if (keys.has(input[i].state)) {
+					throw new TypeError(`Duplicate key detected: ${input[i].state}`)
 				}
-				keys.add(input[i].key)
+				keys.add(input[i].state)
 			}
 		}
 	}

@@ -64,7 +64,7 @@ module.exports = function() {
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
 		if (typeof tag === "string") {
-			vnode.state = {}
+			if (vnode.tag !== "=") vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
 				case "#": createText(parent, vnode, nextSibling); break
@@ -271,7 +271,7 @@ module.exports = function() {
 				while (oldEnd >= oldStart && end >= start) {
 					oe = old[oldEnd]
 					ve = vnodes[end]
-					if (oe.key !== ve.key) break
+					if (oe.state !== ve.state) break
 					if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns, pathDepth)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldEnd--, end--
@@ -280,14 +280,14 @@ module.exports = function() {
 				while (oldEnd >= oldStart && end >= start) {
 					o = old[oldStart]
 					v = vnodes[start]
-					if (o.key !== v.key) break
+					if (o.state !== v.state) break
 					oldStart++, start++
 					if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns, pathDepth)
 				}
 				// swaps and list reversals
 				while (oldEnd >= oldStart && end >= start) {
 					if (start === end) break
-					if (o.key !== ve.key || oe.key !== v.key) break
+					if (o.state !== ve.state || oe.state !== v.state) break
 					topSibling = getNextSibling(old, oldStart, nextSibling)
 					moveDOM(parent, oe, topSibling)
 					if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns, pathDepth)
@@ -302,7 +302,7 @@ module.exports = function() {
 				}
 				// bottom up once again
 				while (oldEnd >= oldStart && end >= start) {
-					if (oe.key !== ve.key) break
+					if (oe.state !== ve.state) break
 					if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns, pathDepth)
 					if (ve.dom != null) nextSibling = ve.dom
 					oldEnd--, end--
@@ -318,7 +318,7 @@ module.exports = function() {
 					for (i = end; i >= start; i--) {
 						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
 						ve = vnodes[i]
-						var oldIndex = map[ve.key]
+						var oldIndex = map[ve.state]
 						if (oldIndex != null) {
 							pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
 							oldIndices[i-start] = oldIndex
@@ -434,7 +434,7 @@ module.exports = function() {
 		for (; start < end; start++) {
 			var vnode = vnodes[start]
 			if (vnode != null) {
-				map[vnode.key] = start
+				map[vnode.state] = start
 			}
 		}
 		return map
