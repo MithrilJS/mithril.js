@@ -193,16 +193,16 @@ o.spec("render", function() {
 		var updateB = o.spy()
 		var removeB = o.spy()
 		var a = function() {
-			return m("div", {key: 1},
-				m("div", {key: 11, oncreate: createA, onupdate: updateA, onremove: removeA}),
-				m("div", {key: 12})
-			)
+			return m.key(1, m("div",
+				m.key(11, m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})),
+				m.key(12, m("div"))
+			))
 		}
 		var b = function() {
-			return m("div", {key: 2},
-				m("div", {key: 21, oncreate: createB, onupdate: updateB, onremove: removeB}),
-				m("div", {key: 22})
-			)
+			return m.key(2, m("div",
+				m.key(21, m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})),
+				m.key(22, m("div"))
+			))
 		}
 		render(root, a())
 		render(root, b())
@@ -223,14 +223,14 @@ o.spec("render", function() {
 		var updateB = o.spy()
 		var removeB = o.spy()
 		var a = function() {
-			return m("div", {key: 1},
+			return m.key(1, m("div",
 				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
-			)
+			))
 		}
 		var b = function() {
-			return m("div", {key: 2},
+			return m.key(2, m("div",
 				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
-			)
+			))
 		}
 		render(root, a())
 		render(root, b())
@@ -252,14 +252,14 @@ o.spec("render", function() {
 		var removeB = o.spy()
 
 		var a = function() {
-			return m("div", {key: 1},
+			return m.key(1, m("div",
 				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
-			)
+			))
 		}
 		var b = function() {
-			return m("div", {key: 2},
+			return m.key(2, m("div",
 				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
-			)
+			))
 		}
 		render(root, a())
 		render(root, a())
@@ -282,8 +282,8 @@ o.spec("render", function() {
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
 		// note that this only exerciese one branch of the keyed diff algo
 		var svg = m("svg",
-			m("g", {key: 0}),
-			m("g", {key: 1})
+			m.key(0, m("g")),
+			m.key(1, m("g"))
 		)
 		render(root, svg)
 
@@ -292,8 +292,8 @@ o.spec("render", function() {
 		o(svg.dom.childNodes[1].namespaceURI).equals("http://www.w3.org/2000/svg")
 
 		svg = m("svg",
-			m("g", {key: 1, x: 1}),
-			m("g", {key: 2, x: 2})
+			m.key(1, m("g", {x: 1})),
+			m.key(2, m("g", {x: 2}))
 		)
 		render(root, svg)
 

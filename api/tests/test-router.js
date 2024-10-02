@@ -1208,7 +1208,7 @@ o.spec("route", function() {
 					})
 				})
 
-				o("changing `key` param resets the component", function(){
+				o("changing `key` param does not reset the component", function(){
 					var oninit = o.spy()
 					var Component = () => ({
 						oninit: oninit,
@@ -1225,7 +1225,7 @@ o.spec("route", function() {
 						route.set("/def")
 						return waitCycles(1).then(function() {
 							throttleMock.fire()
-							o(oninit.callCount).equals(2)
+							o(oninit.callCount).equals(1)
 						})
 					})
 				})

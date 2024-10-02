@@ -24,21 +24,20 @@
 // ```
 
 var hasOwn = require("./hasOwn")
-// Words in RegExp literals are sometimes mangled incorrectly by the internal bundler, so use RegExp().
-var magic = new RegExp("^(?:key|oninit|oncreate|onbeforeupdate|onupdate|onbeforeremove|onremove)$")
+var magic = new Set(["oninit", "oncreate", "onbeforeupdate", "onupdate", "onbeforeremove", "onremove"])
 
 module.exports = function(attrs, extras) {
 	var result = {}
 
 	if (extras != null) {
 		for (var key in attrs) {
-			if (hasOwn.call(attrs, key) && !magic.test(key) && extras.indexOf(key) < 0) {
+			if (hasOwn.call(attrs, key) && !magic.has(key) && extras.indexOf(key) < 0) {
 				result[key] = attrs[key]
 			}
 		}
 	} else {
 		for (var key in attrs) {
-			if (hasOwn.call(attrs, key) && !magic.test(key)) {
+			if (hasOwn.call(attrs, key) && !magic.has(key)) {
 				result[key] = attrs[key]
 			}
 		}

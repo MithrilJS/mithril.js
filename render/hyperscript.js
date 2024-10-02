@@ -62,7 +62,7 @@ function execSelector(selector, attrs, children) {
 		if (hasClassName) attrs.className = null
 	}
 
-	return Vnode(state.tag, attrs.key, attrs, children)
+	return Vnode(state.tag, null, attrs, children)
 }
 
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
@@ -73,9 +73,9 @@ function hyperscript(selector, attrs, ...children) {
 	}
 
 	if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
-		if (children.length === 1 && Array.isArray(children[0])) children = children[0]
+		if (children.length === 1 && Array.isArray(children[0])) children = children[0].slice()
 	} else {
-		children = children.length === 0 && Array.isArray(attrs) ? attrs : [attrs, ...children]
+		children = children.length === 0 && Array.isArray(attrs) ? attrs.slice() : [attrs, ...children]
 		attrs = undefined
 	}
 
@@ -86,11 +86,18 @@ function hyperscript(selector, attrs, ...children) {
 		if (selector !== "[") return execSelector(selector, attrs, children)
 	}
 
-	return Vnode(selector, attrs.key, attrs, children)
+	return Vnode(selector, null, attrs, children)
 }
 
 hyperscript.fragment = function(...args) {
 	return hyperscript("[", ...args)
+}
+
+hyperscript.key = function(key, ...children) {
+	if (children.length === 1 && Array.isArray(children[0])) {
+		children = children[0].slice()
+	}
+	return Vnode("=", key, null, Vnode.normalizeChildren(children))
 }
 
 module.exports = hyperscript

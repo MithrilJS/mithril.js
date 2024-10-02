@@ -98,21 +98,6 @@ o.spec("onbeforeupdate", function() {
 		o(count).equals(1)
 	})
 
-	o("doesn't fire on recycled nodes", function() {
-		var onbeforeupdate = o.spy()
-		var vnodes = [m("div", {key: 1})]
-		var temp = []
-		var updated = [m("div", {key: 1, onbeforeupdate: onbeforeupdate})]
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(vnodes[0].dom).notEquals(updated[0].dom) // this used to be a recycling pool test
-		o(updated[0].dom.nodeName).equals("DIV")
-		o(onbeforeupdate.callCount).equals(0)
-	})
-
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create

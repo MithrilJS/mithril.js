@@ -27,9 +27,9 @@ o.spec("updateNodes keyed list Fuzzer", function() {
 		while (tests--) {
 			var test = fuzzTest(c.delMax, c.movMax, c.insMax)
 			o(i++ + ": " + test.list.join() + " -> " + test.updated.join(), function() {
-				render(root, test.list.map(function(x){return m(x, {key: x})}))
+				render(root, test.list.map((x) => m.key(x, m(x))))
 				addSpies(root)
-				render(root, test.updated.map(function(x){return m(x, {key: x})}))
+				render(root, test.updated.map((x) => m.key(x, m(x))))
 
 				if (root.appendChild.callCount + root.insertBefore.callCount !== test.expected.creations + test.expected.moves) console.log(test, {aC: root.appendChild.callCount, iB: root.insertBefore.callCount}, [].map.call(root.childNodes, function(n){return n.nodeName.toLowerCase()}))
 

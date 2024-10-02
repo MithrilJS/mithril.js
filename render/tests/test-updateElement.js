@@ -286,8 +286,8 @@ o.spec("updateElement", function() {
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
 	o("doesn't restore since we're not recycling", function() {
-		var vnode = m("div", {key: 1})
-		var updated = m("div", {key: 2})
+		var vnode = m.key(1, m("div"))
+		var updated = m.key(2, m("div"))
 
 		render(root, vnode)
 		var a = vnode.dom
@@ -301,12 +301,12 @@ o.spec("updateElement", function() {
 		o(a).notEquals(c) // this used to be a recycling pool test
 	})
 	o("doesn't restore since we're not recycling (via map)", function() {
-		var a = m("div", {key: 1})
-		var b = m("div", {key: 2})
-		var c = m("div", {key: 3})
-		var d = m("div", {key: 4})
-		var e = m("div", {key: 5})
-		var f = m("div", {key: 6})
+		var a = m.key(1, m("div"))
+		var b = m.key(2, m("div"))
+		var c = m.key(3, m("div"))
+		var d = m.key(4, m("div"))
+		var e = m.key(5, m("div"))
+		var f = m.key(6, m("div"))
 
 		render(root, [a, b, c])
 		var x = root.childNodes[1]

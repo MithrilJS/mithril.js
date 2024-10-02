@@ -2,6 +2,7 @@
 
 var o = require("ospec")
 var Vnode = require("../../render/vnode")
+var m = require("../../render/hyperscript")
 
 o.spec("normalizeChildren", function() {
 	o("normalizes arrays into fragments", function() {
@@ -23,33 +24,33 @@ o.spec("normalizeChildren", function() {
 	})
 	o("allows all keys", function() {
 		var children = Vnode.normalizeChildren([
-			{key: 1},
-			{key: 2},
+			m.key(1),
+			m.key(2),
 		])
 
-		o(children).deepEquals([{key: 1}, {key: 2}])
+		o(children).deepEquals([m.key(1), m.key(2)])
 	})
 	o("allows no keys", function() {
 		var children = Vnode.normalizeChildren([
-			{data: 1},
-			{data: 2},
+			m("foo1"),
+			m("foo2"),
 		])
 
-		o(children).deepEquals([{data: 1}, {data: 2}])
+		o(children).deepEquals([m("foo1"), m("foo2")])
 	})
 	o("disallows mixed keys, starting with key", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{key: 1},
-				{data: 2},
+				m.key(1),
+				m("foo2"),
 			])
 		}).throws(TypeError)
 	})
 	o("disallows mixed keys, starting with no key", function() {
 		o(function() {
 			Vnode.normalizeChildren([
-				{data: 1},
-				{key: 2},
+				m("foo1"),
+				m.key(2),
 			])
 		}).throws(TypeError)
 	})

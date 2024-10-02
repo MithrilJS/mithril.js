@@ -33,14 +33,14 @@ o.spec("oncreate", function() {
 		o(callback.this).equals(vnode.state)
 		o(callback.args[0]).equals(vnode)
 	})
-	o("calls oncreate when replacing keyed", function() {
+	o("calls oncreate when replacing same-keyed", function() {
 		var createDiv = o.spy()
 		var createA = o.spy()
-		var vnode = m("div", {key: 1, oncreate: createDiv})
-		var updated = m("a", {key: 1, oncreate: createA})
+		var vnode = m("div", {oncreate: createDiv})
+		var updated = m("a", {oncreate: createA})
 
-		render(root, vnode)
-		render(root, updated)
+		render(root, m.key(1, vnode))
+		render(root, m.key(1, updated))
 
 		o(createDiv.callCount).equals(1)
 		o(createDiv.this).equals(vnode.state)
@@ -94,13 +94,13 @@ o.spec("oncreate", function() {
 	o("does not call oncreate when updating keyed", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {key: 1, oncreate: create})
-		var otherVnode = m("a", {key: 2})
-		var updated = m("div", {key: 1, oncreate: update})
-		var otherUpdated = m("a", {key: 2})
+		var vnode = m("div", {oncreate: create})
+		var otherVnode = m("a")
+		var updated = m("div", {oncreate: update})
+		var otherUpdated = m("a")
 
-		render(root, [vnode, otherVnode])
-		render(root, [otherUpdated, updated])
+		render(root, [m.key(1, vnode), m.key(2, otherVnode)])
+		render(root, [m.key(2, otherUpdated), m.key(1, updated)])
 
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
@@ -121,12 +121,12 @@ o.spec("oncreate", function() {
 	o("does not recycle when there's an oncreate", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {key: 1, oncreate: create})
-		var updated = m("div", {key: 1, oncreate: update})
+		var vnode = m("div", {oncreate: create})
+		var updated = m("div", {oncreate: update})
 
-		render(root, vnode)
+		render(root, m.key(1, vnode))
 		render(root, [])
-		render(root, updated)
+		render(root, m.key(1, updated))
 
 		o(vnode.dom).notEquals(updated.dom)
 		o(create.callCount).equals(1)
@@ -197,9 +197,9 @@ o.spec("oncreate", function() {
 	})
 	o("calls oncreate on recycle", function() {
 		var create = o.spy()
-		var vnodes = m("div", {key: 1, oncreate: create})
+		var vnodes = m.key(1, m("div", {oncreate: create}))
 		var temp = []
-		var updated = m("div", {key: 1, oncreate: create})
+		var updated = m.key(1, m("div", {oncreate: create}))
 
 		render(root, vnodes)
 		render(root, temp)

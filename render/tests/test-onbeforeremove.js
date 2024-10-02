@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("ospec")
-var callAsync = require("../../test-utils/callAsync")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var vdom = require("../../render/render")
@@ -35,64 +34,95 @@ o.spec("onbeforeremove", function() {
 		o(create.callCount).equals(0)
 		o(update.callCount).equals(0)
 	})
-	o("calls onbeforeremove when removing element", function(done) {
-		var vnode = m("div", {onbeforeremove: remove})
+	o("calls onbeforeremove when removing element", function() {
+		var onbeforeremove = o.spy()
+		var vnode = m("div", {onbeforeremove})
 
-		render(root, vnode)
+		render(root, [vnode])
+		var firstChild = root.firstChild
+		o(firstChild).notEquals(null)
 		render(root, [])
 
-		function remove(node) {
-			o(node).equals(vnode)
-			o(this).equals(vnode.state)
-			o(this != null && typeof this === "object").equals(true)
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild).equals(vnode.dom)
-
-			callAsync(function() {
-				o(root.childNodes.length).equals(0)
-
-				done()
-			})
-		}
+		o(onbeforeremove.callCount).equals(1)
+		o(onbeforeremove.this).equals(vnode.state)
+		o(onbeforeremove.this).satisfies((v) => ({
+			pass: v !== null && typeof v === "object",
+			message: "`onbeforeremove` should be called with an object",
+		}))
+		o(onbeforeremove.args[0]).equals(vnode)
+		o(root.childNodes.length).equals(0)
+		o(vnode.dom).equals(firstChild)
 	})
-	o("calls onbeforeremove when removing fragment", function(done) {
-		var vnode = m.fragment({onbeforeremove: remove}, m("div"))
+	o("calls onbeforeremove when removing fragment", function() {
+		var onbeforeremove = o.spy()
+		var vnode = m.fragment({onbeforeremove}, m("div"))
 
-		render(root, vnode)
+		render(root, [vnode])
+		var firstChild = root.firstChild
+		o(firstChild).notEquals(null)
 		render(root, [])
 
-		function remove(node) {
-			o(node).equals(vnode)
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild).equals(vnode.dom)
-
-			callAsync(function() {
-				o(root.childNodes.length).equals(0)
-
-				done()
-			})
-		}
+		o(onbeforeremove.callCount).equals(1)
+		o(onbeforeremove.this).equals(vnode.state)
+		o(onbeforeremove.this).satisfies((v) => ({
+			pass: v !== null && typeof v === "object",
+			message: "`onbeforeremove` should be called with an object",
+		}))
+		o(onbeforeremove.args[0]).equals(vnode)
+		o(root.childNodes.length).equals(0)
+		o(vnode.dom).equals(firstChild)
 	})
-	o("calls onremove after onbeforeremove resolves", function(done) {
+	o("calls onremove after onbeforeremove returns", function() {
+		var callOrder = []
+		var onbeforeremove = o.spy(() => { callOrder.push("onbeforeremove") })
+		var spy = o.spy(() => { callOrder.push("onremove") })
+		var vnode = m.fragment({onbeforeremove: onbeforeremove, onremove: spy}, "a")
+
+		render(root, [vnode])
+		var firstChild = root.firstChild
+		o(firstChild).notEquals(null)
+		render(root, [])
+
+		o(onbeforeremove.callCount).equals(1)
+		o(onbeforeremove.this).equals(vnode.state)
+		o(onbeforeremove.this).satisfies((v) => ({
+			pass: v !== null && typeof v === "object",
+			message: "`onbeforeremove` should be called with an object",
+		}))
+		o(onbeforeremove.args[0]).equals(vnode)
+		o(root.childNodes.length).equals(0)
+		o(vnode.dom).equals(firstChild)
+		o(spy.callCount).equals(1)
+
+		o(callOrder).deepEquals(["onbeforeremove", "onremove"])
+	})
+	o("calls onremove after onbeforeremove resolves", function() {
+		var removed = Promise.resolve()
+		var onbeforeremove = o.spy(() => removed)
 		var spy = o.spy()
 		var vnode = m.fragment({onbeforeremove: onbeforeremove, onremove: spy}, "a")
 
-		render(root, vnode)
+		render(root, [vnode])
+		var firstChild = root.firstChild
+		o(firstChild).notEquals(null)
 		render(root, [])
 
-		function onbeforeremove(node) {
-			o(node).equals(vnode)
-			o(root.childNodes.length).equals(1)
-			o(root.firstChild).equals(vnode.dom)
-			o(spy.callCount).equals(0)
+		o(onbeforeremove.callCount).equals(1)
+		o(onbeforeremove.this).equals(vnode.state)
+		o(onbeforeremove.this).satisfies((v) => ({
+			pass: v !== null && typeof v === "object",
+			message: "`onbeforeremove` should be called with an object",
+		}))
+		o(onbeforeremove.args[0]).equals(vnode)
+		o(root.childNodes.length).equals(1)
+		o(vnode.dom).equals(firstChild)
+		o(root.firstChild).equals(firstChild)
+		o(spy.callCount).equals(0)
 
-			callAsync(function() {
-				o(root.childNodes.length).equals(0)
-				o(spy.callCount).equals(1)
-
-				done()
-			})
-		}
+		return removed.then(() => {
+			o(onbeforeremove.callCount).equals(1)
+			o(spy.callCount).equals(1)
+		})
 	})
 	o("does not set onbeforeremove as an event handler", function() {
 		var remove = o.spy()
@@ -103,60 +133,40 @@ o.spec("onbeforeremove", function() {
 		o(vnode.dom.onbeforeremove).equals(undefined)
 		o(vnode.dom.attributes["onbeforeremove"]).equals(undefined)
 	})
-	o("does not leave elements out of order during removal", function(done) {
-		var remove = function() {return Promise.resolve()}
-		var vnodes = [m("div", {key: 1, onbeforeremove: remove}, "1"), m("div", {key: 2, onbeforeremove: remove}, "2")]
-		var updated = m("div", {key: 2, onbeforeremove: remove}, "2")
+	o("does not leave elements out of order during removal", function() {
+		var removed = Promise.resolve()
+		var vnodes = [
+			m.key(1, m("div", {onbeforeremove: () => removed})),
+			m.key(2, m("span")),
+		]
+		var updated = [m.key(2, m("span"))]
 
 		render(root, vnodes)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(2)
-		o(root.firstChild.firstChild.nodeValue).equals("1")
+		o(root.firstChild.nodeName).equals("DIV")
 
-		callAsync(function() {
+		return removed.then(() => {
 			o(root.childNodes.length).equals(1)
-			o(root.firstChild.firstChild.nodeValue).equals("2")
-
-			done()
+			o(root.firstChild.nodeName).equals("SPAN")
 		})
 	})
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
-			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function(done) {
+			o("finalizes the remove phase asynchronously when promise is returned synchronously from both attrs- and tag.onbeforeremove", function() {
+				var removed = Promise.resolve()
 				var onremove = o.spy()
-				var onbeforeremove = function(){return Promise.resolve()}
 				var component = createComponent({
-					onbeforeremove: onbeforeremove,
+					onbeforeremove: () => removed,
 					onremove: onremove,
 					view: function() {},
 				})
-				render(root, m(component, {onbeforeremove: onbeforeremove, onremove: onremove}))
+				render(root, [m(component, {onbeforeremove: () => removed, onremove: onremove})])
 				render(root, [])
-				callAsync(function() {
+				return removed.then(() => {
 					o(onremove.callCount).equals(2) // once for `tag`, once for `attrs`
-					done()
-				})
-			})
-			o("awaits promise resolution before removing the node", function(done) {
-				var view = o.spy()
-				var onremove = o.spy()
-				var onbeforeremove = function(){return new Promise(function(resolve){callAsync(resolve)})}
-				var component = createComponent({
-					onbeforeremove: onbeforeremove,
-					onremove: onremove,
-					view: view,
-				})
-				render(root, m(component))
-				render(root, [])
-
-				o(onremove.callCount).equals(0)
-				callAsync(function(){
-					callAsync(function() {
-						o(onremove.callCount).equals(1)
-						done()
-					})
 				})
 			})
 		})

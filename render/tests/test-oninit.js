@@ -36,11 +36,11 @@ o.spec("oninit", function() {
 	o("calls oninit when replacing keyed", function() {
 		var createDiv = o.spy()
 		var createA = o.spy()
-		var vnode = m("div", {key: 1, oninit: createDiv})
-		var updated = m("a", {key: 1, oninit: createA})
+		var vnode = m("div", {oninit: createDiv})
+		var updated = m("a", {oninit: createA})
 
-		render(root, vnode)
-		render(root, updated)
+		render(root, m.key(1, vnode))
+		render(root, m.key(1, updated))
 
 		o(createDiv.callCount).equals(1)
 		o(createDiv.this).equals(vnode.state)
@@ -94,13 +94,13 @@ o.spec("oninit", function() {
 	o("does not call oninit when updating keyed", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {key: 1, oninit: create})
-		var otherVnode = m("a", {key: 2})
-		var updated = m("div", {key: 1, oninit: update})
-		var otherUpdated = m("a", {key: 2})
+		var vnode = m("div", {oninit: create})
+		var otherVnode = m("a")
+		var updated = m("div", {oninit: update})
+		var otherUpdated = m("a")
 
-		render(root, [vnode, otherVnode])
-		render(root, [otherUpdated, updated])
+		render(root, [m.key(1, vnode), m.key(2, otherVnode)])
+		render(root, [m.key(2, otherUpdated), m.key(1, updated)])
 
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
@@ -121,12 +121,12 @@ o.spec("oninit", function() {
 	o("calls oninit when recycling", function() {
 		var create = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {key: 1, oninit: create})
-		var updated = m("div", {key: 1, oninit: update})
+		var vnode = m("div", {oninit: create})
+		var updated = m("div", {oninit: update})
 
-		render(root, vnode)
+		render(root, m.key(1, vnode))
 		render(root, [])
-		render(root, updated)
+		render(root, m.key(1, updated))
 
 		o(create.callCount).equals(1)
 		o(create.this).equals(vnode.state)
@@ -187,16 +187,16 @@ o.spec("oninit", function() {
 		var oninit3 = o.spy()
 
 		render(root, [
-			m("p", {key: 1, oninit: oninit1}),
-			m("p", {key: 2, oninit: oninit2}),
-			m("p", {key: 3, oninit: oninit3}),
+			m.key(1, m("p", {oninit: oninit1})),
+			m.key(2, m("p", {oninit: oninit2})),
+			m.key(3, m("p", {oninit: oninit3})),
 		])
 		render(root, [
-			m("p", {key: 1, oninit: oninit1}),
-			m("p", {key: 3, oninit: oninit3}),
+			m.key(1, m("p", {oninit: oninit1})),
+			m.key(3, m("p", {oninit: oninit3})),
 		])
 		render(root, [
-			m("p", {key: 3, oninit: oninit3}),
+			m.key(3, m("p", {oninit: oninit3})),
 		])
 
 		o(oninit1.callCount).equals(1)

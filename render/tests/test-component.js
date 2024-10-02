@@ -11,7 +11,6 @@ o.spec("component", function() {
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
-
 		render = vdom($window)
 	})
 
@@ -130,9 +129,9 @@ o.spec("component", function() {
 							return m("div")
 						}
 					})
-					var div = m("div", {key: 2})
-					render(root, [m(component, {key: 1}), div])
-					render(root, div)
+					var div = m("div")
+					render(root, [m.key(1, m(component)), m.key(2, div)])
+					render(root, [m.key(2, div)])
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -354,10 +353,10 @@ o.spec("component", function() {
 							]
 						}
 					})
-					var div = m("div", {key: 2})
-					render(root, [m(component, {key: 1}), div])
+					var div = m("div")
+					render(root, [m.key(1, m(component)), m.key(2, div)])
 
-					render(root, [m("div", {key: 2})])
+					render(root, [m.key(2, m("div"))])
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -368,10 +367,10 @@ o.spec("component", function() {
 							return "a"
 						}
 					})
-					var div = m("div", {key: 2})
-					render(root, [m(component, {key: 1}), div])
+					var div = m("div")
+					render(root, [m.key(1, m(component)), m.key(2, div)])
 
-					render(root, [m("div", {key: 2})])
+					render(root, [m.key(2, m("div"))])
 
 					o(root.childNodes.length).equals(1)
 					o(root.firstChild).equals(div.dom)
@@ -569,15 +568,12 @@ o.spec("component", function() {
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
 				o("calls onremove", function() {
-					var called = 0
+					var rootCountInCall
+					var onremove = o.spy(() => {
+						rootCountInCall = root.childNodes.length
+					})
 					var component = createComponent({
-						onremove: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
+						onremove,
 						view: function() {
 							return m("div", {id: "a"}, "b")
 						}
@@ -585,23 +581,24 @@ o.spec("component", function() {
 
 					render(root, m(component))
 
-					o(called).equals(0)
+					o(onremove.callCount).equals(0)
+					o(root.childNodes.length).equals(1)
+					var firstChild = root.firstChild
 
 					render(root, [])
 
-					o(called).equals(1)
+					o(onremove.callCount).equals(1)
+					o(onremove.args[0].dom).equals(firstChild)
+					o(rootCountInCall).equals(0)
 					o(root.childNodes.length).equals(0)
 				})
 				o("calls onremove when returning fragment", function() {
-					var called = 0
+					var rootCountInCall
+					var onremove = o.spy(() => {
+						rootCountInCall = root.childNodes.length
+					})
 					var component = createComponent({
-						onremove: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
+						onremove,
 						view: function() {
 							return [m("div", {id: "a"}, "b")]
 						}
@@ -609,23 +606,24 @@ o.spec("component", function() {
 
 					render(root, m(component))
 
-					o(called).equals(0)
+					o(onremove.callCount).equals(0)
+					o(root.childNodes.length).equals(1)
+					var firstChild = root.firstChild
 
 					render(root, [])
 
-					o(called).equals(1)
+					o(onremove.callCount).equals(1)
+					o(onremove.args[0].dom).equals(firstChild)
+					o(rootCountInCall).equals(0)
 					o(root.childNodes.length).equals(0)
 				})
 				o("calls onbeforeremove", function() {
-					var called = 0
+					var rootCountInCall
+					var onbeforeremove = o.spy(() => {
+						rootCountInCall = root.childNodes.length
+					})
 					var component = createComponent({
-						onbeforeremove: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
+						onbeforeremove,
 						view: function() {
 							return m("div", {id: "a"}, "b")
 						}
@@ -633,11 +631,15 @@ o.spec("component", function() {
 
 					render(root, m(component))
 
-					o(called).equals(0)
+					o(onbeforeremove.callCount).equals(0)
+					o(root.childNodes.length).equals(1)
+					var firstChild = root.firstChild
 
 					render(root, [])
 
-					o(called).equals(1)
+					o(onbeforeremove.callCount).equals(1)
+					o(onbeforeremove.args[0].dom).equals(firstChild)
+					o(rootCountInCall).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
 				o("calls onbeforeremove when returning fragment", function() {
@@ -665,20 +667,20 @@ o.spec("component", function() {
 					o(root.childNodes.length).equals(0)
 				})
 				o("does not recycle when there's an onupdate", function() {
+					var view = o.spy(() => m("div"))
 					var component = createComponent({
 						onupdate: function() {},
-						view: function() {
-							return m("div")
-						}
+						view,
 					})
-					var vnode = m(component, {key: 1})
-					var updated = m(component, {key: 1})
+					var vnode = m(component)
+					var updated = m(component)
 
-					render(root, vnode)
+					render(root, [m.key(1, vnode)])
 					render(root, [])
-					render(root, updated)
+					render(root, [m.key(1, updated)])
 
-					o(vnode.dom).notEquals(updated.dom)
+					o(view.calls[0].this).notEquals(view.calls[1].this)
+					o(view.calls[0].args[0].dom).notEquals(view.calls[1].args[0].dom)
 				})
 				o("lifecycle timing megatest (for a single component)", function() {
 					var methods = {
@@ -824,11 +826,11 @@ o.spec("component", function() {
 					})
 					var component = createComponent({view: view})
 
-					render(root, [m("div", m(component, {key: 1}))])
+					render(root, [m("div", m.key(1, m(component)))])
 					var child = root.firstChild.firstChild
 					render(root, [])
 					step = 1
-					render(root, [m("div", m(component, {key: 1}))])
+					render(root, [m("div", m.key(1, m(component)))])
 
 					o(child).notEquals(root.firstChild.firstChild) // this used to be a recycling pool test
 					o(view.callCount).equals(2)

@@ -7,7 +7,7 @@ var vdom = require("../../render/render")
 var m = require("../../render/hyperscript")
 
 function vnodify(str) {
-	return str.split(",").map(function(k) {return m(k, {key: k})})
+	return str.split(",").map((k) => m.key(k, m(k)))
 }
 
 o.spec("updateNodes", function() {
@@ -19,8 +19,8 @@ o.spec("updateNodes", function() {
 	})
 
 	o("handles el noop", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
-		var updated = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -106,8 +106,8 @@ o.spec("updateNodes", function() {
 		o(root.childNodes.length).equals(1)
 	})
 	o("reverses els w/ even count", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
-		var updated = [m("s", {key: 4}), m("i", {key: 3}), m("b", {key: 2}), m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
+		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -123,23 +123,19 @@ o.spec("updateNodes", function() {
 		o(updated[3].dom).equals(root.childNodes[3])
 	})
 	o("reverses els w/ odd count", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3})]
-		var updated = [m("i", {key: 3}), m("b", {key: 2}), m("a", {key: 1})]
-		var expectedTags = updated.map(function(vn) {return vn.tag})
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
+		var updated = [m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
 		render(root, vnodes)
 		render(root, updated)
-
-		var tagNames = [].map.call(root.childNodes, function(n) {return n.nodeName.toLowerCase()})
 
 		o(root.childNodes.length).equals(3)
 		o(updated[0].dom.nodeName).equals("I")
 		o(updated[1].dom.nodeName).equals("B")
 		o(updated[2].dom.nodeName).equals("A")
-		o(tagNames).deepEquals(expectedTags)
 	})
 	o("creates el at start", function() {
-		var vnodes = [m("a", {key: 1})]
-		var updated = [m("b", {key: 2}), m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a"))]
+		var updated = [m.key(2, m("b")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -151,8 +147,8 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("creates el at end", function() {
-		var vnodes = [m("a", {key: 1})]
-		var updated = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a"))]
+		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -164,8 +160,8 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("creates el in middle", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
-		var updated = [m("a", {key: 1}), m("i", {key: 3}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -178,8 +174,8 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("creates el while reversing", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
-		var updated = [m("b", {key: 2}), m("i", {key: 3}), m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
+		var updated = [m.key(2, m("b")), m.key(3, m("i")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -193,8 +189,8 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("deletes el at start", function() {
-		var vnodes = [m("b", {key: 2}), m("a", {key: 1})]
-		var updated = [m("a", {key: 1})]
+		var vnodes = [m.key(2, m("b")), m.key(1, m("a"))]
+		var updated = [m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -204,8 +200,8 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("deletes el at end", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
-		var updated = [m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -215,8 +211,8 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("deletes el at middle", function() {
-		var vnodes = [m("a", {key: 1}), m("i", {key: 3}), m("b", {key: 2})]
-		var updated = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -228,8 +224,8 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("deletes el while reversing", function() {
-		var vnodes = [m("a", {key: 1}), m("i", {key: 3}), m("b", {key: 2})]
-		var updated = [m("b", {key: 2}), m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
+		var updated = [m.key(2, m("b")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -241,8 +237,8 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("creates, deletes, reverses els at same time", function() {
-		var vnodes = [m("a", {key: 1}), m("i", {key: 3}), m("b", {key: 2})]
-		var updated = [m("b", {key: 2}), m("a", {key: 1}), m("s", {key: 4})]
+		var vnodes = [m.key(1, m("a")), m.key(3, m("i")), m.key(2, m("b"))]
+		var updated = [m.key(2, m("b")), m.key(1, m("a")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -256,8 +252,8 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("creates, deletes, reverses els at same time with '__proto__' key", function() {
-		var vnodes = [m("a", {key: "__proto__"}), m("i", {key: 3}), m("b", {key: 2})]
-		var updated = [m("b", {key: 2}), m("a", {key: "__proto__"}), m("s", {key: 4})]
+		var vnodes = [m.key("__proto__", m("a")), m.key(3, m("i")), m.key(2, m("b"))]
+		var updated = [m.key(2, m("b")), m.key("__proto__", m("a")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -271,8 +267,8 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("adds to empty fragment followed by el", function() {
-		var vnodes = [m.fragment({key: 1}), m("b", {key: 2})]
-		var updated = [m.fragment({key: 1}, m("a")), m("b", {key: 2})]
+		var vnodes = [m.key(1), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a")), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -284,8 +280,8 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("reverses followed by el", function() {
-		var vnodes = [m.fragment({key: 1}, m("a", {key: 2}), m("b", {key: 3})), m("i", {key: 4})]
-		var updated = [m.fragment({key: 1}, m("b", {key: 3}), m("a", {key: 2})), m("i", {key: 4})]
+		var vnodes = [m.key(1, m.key(2, m("a")), m.key(3, m("b"))), m.key(4, m("i"))]
+		var updated = [m.key(1, m.key(3, m("b")), m.key(2, m("a"))), m.key(4, m("i"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -299,59 +295,57 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[2])
 	})
 	o("populates fragment followed by el keyed", function() {
-		var vnodes = [m.fragment({key: 1}), m("i", {key: 2})]
-		var updated = [m.fragment({key: 1}, m("a"), m("b")), m("i", {key: 2})]
+		var vnodes = [m.key(1), m.key(2, m("i"))]
+		var updated = [m.key(1, m("a"), m("b")), m.key(2, m("i"))]
 
 		render(root, vnodes)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(3)
-		o(updated[0].dom.nodeName).equals("A")
-		o(updated[0].dom).equals(root.childNodes[0])
-		o(updated[0].domSize).equals(2)
-		o(updated[0].dom.nextSibling.nodeName).equals("B")
-		o(updated[0].dom.nextSibling).equals(root.childNodes[1])
-		o(updated[1].dom.nodeName).equals("I")
-		o(updated[1].dom).equals(root.childNodes[2])
+		o(updated[0].children[0].dom.nodeName).equals("A")
+		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(updated[0].children[0].dom.nextSibling.nodeName).equals("B")
+		o(updated[0].children[0].dom.nextSibling).equals(root.childNodes[1])
+		o(updated[1].children[0].dom.nodeName).equals("I")
+		o(updated[1].children[0].dom).equals(root.childNodes[2])
 	})
 	o("throws if fragment followed by null then el on first render keyed", function() {
-		var vnodes = [m.fragment({key: 1}), null, m("i", {key: 2})]
+		var vnodes = [m.key(1), null, m.key(2, m("i"))]
 
 		o(function () { render(root, vnodes) }).throws(TypeError)
 	})
 	o("throws if fragment followed by null then el on next render keyed", function() {
-		var vnodes = [m.fragment({key: 1}), m("i", {key: 2})]
-		var updated = [m.fragment({key: 1}, m("a"), m("b")), null, m("i", {key: 2})]
+		var vnodes = [m.key(1), m.key(2, m("i"))]
+		var updated = [m.key(1, m("a"), m("b")), null, m.key(2, m("i"))]
 
 		render(root, vnodes)
 		o(function () { render(root, updated) }).throws(TypeError)
 	})
 	o("populates childless fragment replaced followed by el keyed", function() {
-		var vnodes = [m.fragment({key: 1}), m("i", {key: 2})]
-		var updated = [m.fragment({key: 1}, m("a"), m("b")), m("i", {key: 2})]
+		var vnodes = [m.key(1), m.key(2, m("i"))]
+		var updated = [m.key(1, m("a"), m("b")), m.key(2, m("i"))]
 
 		render(root, vnodes)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(3)
-		o(updated[0].dom.nodeName).equals("A")
-		o(updated[0].dom).equals(root.childNodes[0])
-		o(updated[0].domSize).equals(2)
-		o(updated[0].dom.nextSibling.nodeName).equals("B")
-		o(updated[0].dom.nextSibling).equals(root.childNodes[1])
-		o(updated[1].dom.nodeName).equals("I")
-		o(updated[1].dom).equals(root.childNodes[2])
+		o(updated[0].children[0].dom.nodeName).equals("A")
+		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(updated[0].children[0].dom.nextSibling.nodeName).equals("B")
+		o(updated[0].children[0].dom.nextSibling).equals(root.childNodes[1])
+		o(updated[1].children[0].dom.nodeName).equals("I")
+		o(updated[1].children[0].dom).equals(root.childNodes[2])
 	})
 	o("throws if childless fragment replaced followed by null then el keyed", function() {
-		var vnodes = [m.fragment({key: 1}), m("i", {key: 2})]
-		var updated = [m.fragment({key: 1}, m("a"), m("b")), null, m("i", {key: 2})]
+		var vnodes = [m.key(1), m.key(2, m("i"))]
+		var updated = [m.key(1, m("a"), m("b")), null, m.key(2, m("i"))]
 
 		render(root, vnodes)
 		o(function () { render(root, updated) }).throws(TypeError)
 	})
 	o("moves from end to start", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
-		var updated = [m("s", {key: 4}), m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
+		var updated = [m.key(4, m("s")), m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -367,8 +361,8 @@ o.spec("updateNodes", function() {
 		o(updated[3].dom).equals(root.childNodes[3])
 	})
 	o("moves from start to end", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
-		var updated = [m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4}), m("a", {key: 1})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
+		var updated = [m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, updated)
@@ -384,9 +378,9 @@ o.spec("updateNodes", function() {
 		o(updated[3].dom).equals(root.childNodes[3])
 	})
 	o("removes then recreate", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var temp = []
-		var updated = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
+		var updated = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -403,9 +397,9 @@ o.spec("updateNodes", function() {
 		o(updated[3].dom).equals(root.childNodes[3])
 	})
 	o("removes then recreate reversed", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3}), m("s", {key: 4})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i")), m.key(4, m("s"))]
 		var temp = []
-		var updated = [m("s", {key: 4}), m("i", {key: 3}), m("b", {key: 2}), m("a", {key: 1})]
+		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(2, m("b")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -422,9 +416,9 @@ o.spec("updateNodes", function() {
 		o(updated[3].dom).equals(root.childNodes[3])
 	})
 	o("removes then recreate smaller", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("a", {key: 1})]
+		var updated = [m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -435,9 +429,9 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("removes then recreate bigger", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3})]
+		var updated = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -452,9 +446,9 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("removes then create different", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("i", {key: 3}), m("s", {key: 4})]
+		var updated = [m.key(3, m("i")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -467,9 +461,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("removes then create different smaller", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("i", {key: 3})]
+		var updated = [m.key(3, m("i"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -480,10 +474,10 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("cached keyed nodes move when the list is reversed", function(){
-		var a = m("a", {key: "a"})
-		var b = m("b", {key: "b"})
-		var c = m("c", {key: "c"})
-		var d = m("d", {key: "d"})
+		var a = m.key("a", m("a"))
+		var b = m.key("b", m("b"))
+		var c = m.key("c", m("c"))
+		var d = m.key("d", m("d"))
 
 		render(root, [a, b, c, d])
 		render(root, [d, c, b, a])
@@ -496,10 +490,10 @@ o.spec("updateNodes", function() {
 	})
 	o("cached keyed nodes move when diffed via the map", function() {
 		var onupdate = o.spy()
-		var a = m("a", {key: "a", onupdate: onupdate})
-		var b = m("b", {key: "b", onupdate: onupdate})
-		var c = m("c", {key: "c", onupdate: onupdate})
-		var d = m("d", {key: "d", onupdate: onupdate})
+		var a = m.key("a", m("a", {onupdate}))
+		var b = m.key("b", m("b", {onupdate}))
+		var c = m.key("c", m("c", {onupdate}))
+		var d = m.key("d", m("d", {onupdate}))
 
 		render(root, [a, b, c, d])
 		render(root, [b, d, a, c])
@@ -512,9 +506,9 @@ o.spec("updateNodes", function() {
 		o(onupdate.callCount).equals(0)
 	})
 	o("removes then create different bigger", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("i", {key: 3}), m("s", {key: 4}), m("div", {key: 5})]
+		var updated = [m.key(3, m("i")), m.key(4, m("s")), m.key(5, m("div"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -529,9 +523,9 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("removes then create mixed", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("a", {key: 1}), m("s", {key: 4})]
+		var updated = [m.key(1, m("a")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -544,9 +538,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("removes then create mixed reversed", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("s", {key: 4}), m("a", {key: 1})]
+		var updated = [m.key(4, m("s")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -559,9 +553,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("removes then create mixed smaller", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 		var temp = []
-		var updated = [m("a", {key: 1}), m("s", {key: 4})]
+		var updated = [m.key(1, m("a")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -574,9 +568,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("removes then create mixed smaller reversed", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2}), m("i", {key: 3})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b")), m.key(3, m("i"))]
 		var temp = []
-		var updated = [m("s", {key: 4}), m("a", {key: 1})]
+		var updated = [m.key(4, m("s")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -589,9 +583,9 @@ o.spec("updateNodes", function() {
 		o(updated[1].dom).equals(root.childNodes[1])
 	})
 	o("removes then create mixed bigger", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("a", {key: 1}), m("i", {key: 3}), m("s", {key: 4})]
+		var updated = [m.key(1, m("a")), m.key(3, m("i")), m.key(4, m("s"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -606,9 +600,9 @@ o.spec("updateNodes", function() {
 		o(updated[2].dom).equals(root.childNodes[2])
 	})
 	o("removes then create mixed bigger reversed", function() {
-		var vnodes = [m("a", {key: 1}), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
 		var temp = []
-		var updated = [m("s", {key: 4}), m("i", {key: 3}), m("a", {key: 1})]
+		var updated = [m.key(4, m("s")), m.key(3, m("i")), m.key(1, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -639,10 +633,10 @@ o.spec("updateNodes", function() {
 		o(root.firstChild.childNodes.length).equals(1)
 	})
 	o("removes then recreates then reverses children", function() {
-		var vnodes = [m("a", {key: 1}, m("i", {key: 3}), m("s", {key: 4})), m("b", {key: 2})]
+		var vnodes = [m.key(1, m("a", m.key(3, m("i")), m.key(4, m("s")))), m.key(2, m("b"))]
 		var temp1 = []
-		var temp2 = [m("a", {key: 1}, m("i", {key: 3}), m("s", {key: 4})), m("b", {key: 2})]
-		var updated = [m("a", {key: 1}, m("s", {key: 4}), m("i", {key: 3})), m("b", {key: 2})]
+		var temp2 = [m.key(1, m("a", m.key(3, m("i")), m.key(4, m("s")))), m.key(2, m("b"))]
+		var updated = [m.key(1, m("a", m.key(4, m("s")), m.key(3, m("i")))), m.key(2, m("b"))]
 
 		render(root, vnodes)
 		render(root, temp1)
@@ -659,9 +653,9 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.childNodes[1].nodeName).equals("I")
 	})
 	o("removes then recreates nested", function() {
-		var vnodes = [m("a", {key: 1}, m("a", {key: 3}, m("a", {key: 5})), m("a", {key: 4}, m("a", {key: 5}))), m("a", {key: 2})]
+		var vnodes = [m.key(1, m("a", m.key(3, m("a", m.key(5, m("a")))), m.key(4, m("a", m.key(5, m("a")))))), m.key(2, m("a"))]
 		var temp = []
-		var updated = [m("a", {key: 1}, m("a", {key: 3}, m("a", {key: 5})), m("a", {key: 4}, m("a", {key: 5}))), m("a", {key: 2})]
+		var updated = [m.key(1, m("a", m.key(3, m("a", m.key(5, m("a")))), m.key(4, m("a", m.key(5, m("a")))))), m.key(2, m("a"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -674,9 +668,9 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[1].childNodes.length).equals(0)
 	})
 	o("doesn't recycle", function() {
-		var vnodes = [m("div", {key: 1})]
+		var vnodes = [m.key(1, m("div"))]
 		var temp = []
-		var updated = [m("div", {key: 1})]
+		var updated = [m.key(1, m("div"))]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -699,9 +693,9 @@ o.spec("updateNodes", function() {
 		o(updated[0].dom.nodeName).equals("DIV")
 	})
 	o("doesn't recycle deep", function() {
-		var vnodes = [m("div", m("a", {key: 1}))]
+		var vnodes = [m("div", m.key(1, m("a")))]
 		var temp = [m("div")]
-		var updated = [m("div", m("a", {key: 1}))]
+		var updated = [m("div", m.key(1, m("a")))]
 
 		render(root, vnodes)
 
@@ -740,17 +734,25 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[1].nodeName).equals("B")
 	})
 	o("onremove doesn't fire from nodes in the pool (#1990)", function () {
-		var onremove = o.spy()
-		render(root, [
-			m("div", m("div", {onremove: onremove})),
-			m("div", m("div", {onremove: onremove}))
-		])
-		render(root, [
-			m("div", m("div", {onremove: onremove}))
-		])
-		render(root,[])
+		var onremove1 = o.spy()
+		var onremove2 = o.spy()
 
-		o(onremove.callCount).equals(2)
+		render(root, [
+			m("div", m("div", {onremove: onremove1})),
+			m("div", m("div", {onremove: onremove2}))
+		])
+		o(onremove1.callCount).equals(0)
+		o(onremove2.callCount).equals(0)
+
+		render(root, [
+			m("div", m("div", {onremove: onremove1}))
+		])
+		o(onremove1.callCount).equals(0)
+		o(onremove2.callCount).equals(1)
+
+		render(root,[])
+		o(onremove1.callCount).equals(1)
+		o(onremove2.callCount).equals(1)
 	})
 	o("cached, non-keyed nodes skip diff", function () {
 		var onupdate = o.spy();
@@ -763,7 +765,7 @@ o.spec("updateNodes", function() {
 	})
 	o("cached, keyed nodes skip diff", function () {
 		var onupdate = o.spy()
-		var cached = m("a", {key: "a", onupdate: onupdate})
+		var cached = m.key("a", m("a", {onupdate}))
 
 		render(root, cached)
 		render(root, cached)
@@ -773,9 +775,9 @@ o.spec("updateNodes", function() {
 	o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
-		var cached = m("B", {key: 1},
+		var cached = m.key(1, m("B",
 			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
-		)
+		))
 		render(root, m("div", cached))
 		render(root, [])
 		render(root, m("div", cached))
@@ -801,9 +803,9 @@ o.spec("updateNodes", function() {
 	o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
 		var onupdate = o.spy()
 		var oncreate = o.spy()
-		var cached = m("B", {key: 1},
+		var cached = m.key(1, m("B",
 			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
-		)
+		))
 		render(root, m("div", cached))
 		render(root, m("div"))
 		render(root, [])
@@ -867,7 +869,7 @@ o.spec("updateNodes", function() {
 		o(remove.callCount).equals(0)
 	})
 	o("node is recreated if key changes to undefined", function () {
-		var vnode = m("b", {key: 1})
+		var vnode = m.key(1, m("b"))
 		var updated = m("b")
 
 		render(root, vnode)
@@ -927,8 +929,8 @@ o.spec("updateNodes", function() {
 	})
 	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
 		try {
-			render(root, [m("a", {key: 2})])
-			render(root, [m("b", {key: 1}), m("b", {key: 2})])
+			render(root, [m.key(2, m("a"))])
+			render(root, [m.key(1, m("b")), m.key(2, m("b"))])
 
 			o(root.childNodes.length).equals(2)
 			o(root.childNodes[0].nodeName).equals("B")
@@ -939,8 +941,8 @@ o.spec("updateNodes", function() {
 	})
 	o("supports changing the element of a keyed element in a list when looking up nodes using the map", function() {
 		try {
-			render(root, [m("x", {key: 1}), m("y", {key: 2}), m("z", {key: 3})])
-			render(root, [m("b", {key: 2}), m("c", {key: 1}), m("d", {key: 4}), m("e", {key: 3})])
+			render(root, [m.key(1, m("x")), m.key(2, m("y")), m.key(3, m("z"))])
+			render(root, [m.key(2, m("b")), m.key(1, m("c")), m.key(4, m("d")), m.key(3, m("e"))])
 
 			o(root.childNodes.length).equals(4)
 			o(root.childNodes[0].nodeName).equals("B")
@@ -952,16 +954,16 @@ o.spec("updateNodes", function() {
 		}
 	})
 	o("don't fetch the nextSibling from the pool", function() {
-		render(root, [m.fragment(m("div", {key: 1}), m("div", {key: 2})), m("p")])
+		render(root, [m.fragment(m.key(1, m("div")), m.key(2, m("div"))), m("p")])
 		render(root, [m.fragment(), m("p")])
-		render(root, [m.fragment(m("div", {key: 2}), m("div", {key: 1})), m("p")])
+		render(root, [m.fragment(m.key(2, m("div")), m.key(1, m("div"))), m("p")])
 
 		o([].map.call(root.childNodes, function(el) {return el.nodeName})).deepEquals(["DIV", "DIV", "P"])
 	})
 	o("minimizes DOM operations when scrambling a keyed lists", function() {
 		var vnodes = vnodify("a,b,c,d")
 		var updated = vnodify("b,a,d,c")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -978,7 +980,7 @@ o.spec("updateNodes", function() {
 	o("minimizes DOM operations when reversing a keyed lists with an odd number of items", function() {
 		var vnodes = vnodify("a,b,c,d")
 		var updated = vnodify("d,c,b,a")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -995,9 +997,9 @@ o.spec("updateNodes", function() {
 	o("minimizes DOM operations when reversing a keyed lists with an even number of items", function() {
 		var vnodes = vnodify("a,b,c")
 		var updated = vnodify("c,b,a")
-		var vnodes = [m("a", {key: "a"}), m("b", {key: "b"}), m("c", {key: "c"})]
-		var updated = [m("c", {key: "c"}), m("b", {key: "b"}), m("a", {key: "a"})]
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var vnodes = [m.key("a", m("a")), m.key("b", m("b")), m.key("c", m("c"))]
+		var updated = [m.key("c", m("c")), m.key("b", m("b")), m.key("a", m("a"))]
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -1014,7 +1016,7 @@ o.spec("updateNodes", function() {
 	o("minimizes DOM operations when scrambling a keyed lists with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,d,j")
 		var updated = vnodify("i,b,a,d,c,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -1031,7 +1033,7 @@ o.spec("updateNodes", function() {
 	o("minimizes DOM operations when reversing a keyed lists with an odd number of items with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,d,j")
 		var updated = vnodify("i,d,c,b,a,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -1048,7 +1050,7 @@ o.spec("updateNodes", function() {
 	o("minimizes DOM operations when reversing a keyed lists with an even number of items with prefixes and suffixes", function() {
 		var vnodes = vnodify("i,a,b,c,j")
 		var updated = vnodify("i,c,b,a,j")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -1065,7 +1067,7 @@ o.spec("updateNodes", function() {
 	o("scrambling sample 1", function() {
 		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
 		var updated = vnodify("k4,k1,k2,k9,k0,k3,k6,k5,k8,k7")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 
@@ -1082,7 +1084,7 @@ o.spec("updateNodes", function() {
 	o("scrambling sample 2", function() {
 		var vnodes = vnodify("k0,k1,k2,k3,k4,k5,k6,k7,k8,k9")
 		var updated = vnodify("b,d,k1,k0,k2,k3,k4,a,c,k5,k6,k7,k8,k9")
-		var expectedTagNames = updated.map(function(vn) {return vn.tag})
+		var expectedTagNames = updated.map(function(vn) {return vn.children[0].tag})
 
 		render(root, vnodes)
 

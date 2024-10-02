@@ -12,6 +12,11 @@ o.spec("api", function() {
 		global.window = mock
 		global.requestAnimationFrame = mock.requestAnimationFrame
 	}
+
+	function sleep(ms) {
+		return new Promise((resolve) => setTimeout(resolve, ms))
+	}
+
 	var m = require("..") // eslint-disable-line global-require
 
 	o.afterEach(function() {
@@ -27,9 +32,18 @@ o.spec("api", function() {
 	})
 	o.spec("m.fragment", function() {
 		o("works", function() {
-			var vnode = m.fragment({key: 123}, [m("div")])
+			var vnode = m.fragment([m("div")])
 
 			o(vnode.tag).equals("[")
+			o(vnode.children.length).equals(1)
+			o(vnode.children[0].tag).equals("div")
+		})
+	})
+	o.spec("m.key", function() {
+		o("works", function() {
+			var vnode = m.key(123, [m("div")])
+
+			o(vnode.tag).equals("=")
 			o(vnode.key).equals(123)
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0].tag).equals("div")
@@ -77,76 +91,63 @@ o.spec("api", function() {
 				})
 			})
 			o.spec("m.route", function() {
-				o("works", function(done) {
+				o("works", function() {
 					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
 
-					setTimeout(function() {
+					return sleep(FRAME_BUDGET + 10).then(() => {
 						o(root.childNodes.length).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
+					})
 				})
-				o("m.route.prefix", function(done) {
+				o("m.route.prefix", function() {
 					root = window.document.createElement("div")
 					m.route.prefix = "#"
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
 
-					setTimeout(function() {
+					return sleep(FRAME_BUDGET + 10).then(() => {
 						o(root.childNodes.length).equals(1)
 						o(root.firstChild.nodeName).equals("DIV")
-
-						done()
-					}, FRAME_BUDGET)
+					})
 				})
-				o("m.route.get", function(done) {
+				o("m.route.get", function() {
 					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/a": createComponent({view: function() {return m("div")}})
 					})
 
-					setTimeout(function() {
+					return sleep(FRAME_BUDGET + 10).then(() => {
 						o(m.route.get()).equals("/a")
-
-						done()
-					}, FRAME_BUDGET)
+					})
 				})
-				o("m.route.set", function(done) {
+				o("m.route.set", function() {
 					o.timeout(100)
 					root = window.document.createElement("div")
 					m.route(root, "/a", {
 						"/:id": createComponent({view: function() {return m("div")}})
 					})
 
-					setTimeout(function() {
-						m.route.set("/b")
-						setTimeout(function() {
-							o(m.route.get()).equals("/b")
-
-							done()
-						}, FRAME_BUDGET)
-					}, FRAME_BUDGET)
+					return sleep(FRAME_BUDGET + 10)
+						.then(() => { m.route.set("/b") })
+						.then(() => sleep(FRAME_BUDGET + 10))
+						.then(() => { o(m.route.get()).equals("/b") })
 				})
 			})
 			o.spec("m.redraw", function() {
-				o("works", function(done) {
+				o("works", function() {
 					var count = 0
 					root = window.document.createElement("div")
 					m.mount(root, createComponent({view: function() {count++}}))
 					o(count).equals(1)
 					m.redraw()
 					o(count).equals(1)
-					setTimeout(function() {
-
+					return sleep(FRAME_BUDGET + 10).then(() => {
 						o(count).equals(2)
-
-						done()
-					}, FRAME_BUDGET)
+					})
 				})
 				o("sync", function() {
 					root = window.document.createElement("div")

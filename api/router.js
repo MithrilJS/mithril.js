@@ -1,6 +1,5 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
 var m = require("../render/hyperscript")
 
 var buildPathname = require("../pathname/build")
@@ -49,7 +48,7 @@ module.exports = function($window, mountRedraw) {
 		view: function() {
 			if (!state || sentinel === currentResolver) return
 			// Wrap in a fragment to preserve existing key semantics
-			var vnode = [Vnode(component, attrs.key, attrs)]
+			var vnode = [m(component, attrs)]
 			if (currentResolver) vnode = currentResolver.render(vnode[0])
 			return vnode
 		},

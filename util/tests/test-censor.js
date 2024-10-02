@@ -32,7 +32,7 @@ o.spec("censor", function() {
 			}
 			var censored = censor(original)
 			o(censored).notEquals(original)
-			o(censored).deepEquals({one: "two"})
+			o(censored).deepEquals({one: "two", key: "test"})
 		})
 		o("does not modify original object", function() {
 			var original = {
@@ -87,7 +87,7 @@ o.spec("censor", function() {
 			}
 			var censored = censor(original, null)
 			o(censored).notEquals(original)
-			o(censored).deepEquals({one: "two"})
+			o(censored).deepEquals({one: "two", key: "test"})
 		})
 		o("does not modify original object", function() {
 			var original = {
@@ -142,7 +142,7 @@ o.spec("censor", function() {
 			}
 			var censored = censor(original, ["extra"])
 			o(censored).notEquals(original)
-			o(censored).deepEquals({one: "two"})
+			o(censored).deepEquals({one: "two", key: "test"})
 		})
 		o("does not modify original object", function() {
 			var original = {
@@ -207,7 +207,7 @@ o.spec("censor", function() {
 			}
 			var censored = censor(original, ["extra"])
 			o(censored).notEquals(original)
-			o(censored).deepEquals({one: "two"})
+			o(censored).deepEquals({one: "two", key: "test"})
 		})
 		o("does not modify original object", function() {
 			var original = {
