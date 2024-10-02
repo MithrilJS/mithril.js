@@ -1,7 +1,7 @@
 "use strict"
 
 function Vnode(tag, state, attrs, children) {
-	return {tag, state, attrs, children, dom: undefined, events: undefined, instance: undefined}
+	return {tag, state, attrs, children, dom: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (node == null || typeof node === "boolean") return null

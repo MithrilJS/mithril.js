@@ -67,7 +67,7 @@ o.spec("onremove", function() {
 
 		o(vnode.dom.onremove).equals(undefined)
 		o(vnode.dom.attributes["onremove"]).equals(undefined)
-		o(vnode.events).equals(undefined)
+		o(vnode.instance).equals(undefined)
 	})
 	o("calls onremove on keyed nodes", function() {
 		var remove = o.spy()

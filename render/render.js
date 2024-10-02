@@ -363,7 +363,7 @@ module.exports = function() {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
-			vnode.events = old.events
+			vnode.instance = old.instance
 			if (shouldNotUpdate(vnode, old)) return
 			vnodePath[pathDepth++] = parent
 			vnodePath[pathDepth++] = vnode
@@ -849,20 +849,20 @@ module.exports = function() {
 
 	//event
 	function updateEvent(vnode, key, value) {
-		if (vnode.events != null) {
-			vnode.events._ = currentRedraw
-			if (vnode.events[key] === value) return
+		if (vnode.instance != null) {
+			vnode.instance._ = currentRedraw
+			if (vnode.instance[key] === value) return
 			if (value != null && (typeof value === "function" || typeof value === "object")) {
-				if (vnode.events[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.events, false)
-				vnode.events[key] = value
+				if (vnode.instance[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
+				vnode.instance[key] = value
 			} else {
-				if (vnode.events[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.events, false)
-				vnode.events[key] = undefined
+				if (vnode.instance[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.instance, false)
+				vnode.instance[key] = undefined
 			}
 		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
-			vnode.events = new EventDict()
-			vnode.dom.addEventListener(key.slice(2), vnode.events, false)
-			vnode.events[key] = value
+			vnode.instance = new EventDict()
+			vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
+			vnode.instance[key] = value
 		}
 	}
 
