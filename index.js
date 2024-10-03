@@ -11,5 +11,6 @@ m.p = require("./util/p")
 m.withProgress = require("./util/with-progress")
 m.censor = require("./util/censor")
 m.lazy = require("./util/lazy")(mountRedraw.redraw)
+m.tracked = require("./util/tracked")
 
 module.exports = m
