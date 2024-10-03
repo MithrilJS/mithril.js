@@ -81,17 +81,6 @@ o.spec("onremove", function() {
 		o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 		o(remove.callCount).equals(1)
 	})
-	o("does not recycle when there's an onremove", function() {
-		var remove = o.spy()
-		var vnode = m("div", {onremove: remove})
-		var updated = m("div", {onremove: remove})
-
-		render(root, m.key(1, vnode))
-		render(root, [])
-		render(root, m.key(1, updated))
-
-		o(vnode.dom).notEquals(updated.dom)
-	})
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create

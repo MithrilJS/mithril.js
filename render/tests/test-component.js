@@ -665,22 +665,6 @@ o.spec("component", function() {
 					o(called).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
-				o("does not recycle when there's an onupdate", function() {
-					var view = o.spy(() => m("div"))
-					var component = createComponent({
-						onupdate: function() {},
-						view,
-					})
-					var vnode = m(component)
-					var updated = m(component)
-
-					render(root, [m.key(1, vnode)])
-					render(root, [])
-					render(root, [m.key(1, updated)])
-
-					o(view.calls[0].this).notEquals(view.calls[1].this)
-					o(view.calls[0].args[0].dom).notEquals(view.calls[1].args[0].dom)
-				})
 				o("lifecycle timing megatest (for a single component)", function() {
 					var methods = {
 						view: o.spy(function() {

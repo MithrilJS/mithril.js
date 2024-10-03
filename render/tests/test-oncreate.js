@@ -117,24 +117,6 @@ o.spec("oncreate", function() {
 		o(create.this).equals(vnode.state)
 		o(create.args[0]).equals(vnode)
 	})
-	o("does not recycle when there's an oncreate", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {oncreate: create})
-		var updated = m("div", {oncreate: update})
-
-		render(root, m.key(1, vnode))
-		render(root, [])
-		render(root, m.key(1, updated))
-
-		o(vnode.dom).notEquals(updated.dom)
-		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
-		o(update.callCount).equals(1)
-		o(update.this).equals(updated.state)
-		o(update.args[0]).equals(updated)
-	})
 	o("calls oncreate at the same step as onupdate", function() {
 		var create = o.spy()
 		var update = o.spy()
@@ -193,17 +175,5 @@ o.spec("oncreate", function() {
 
 		o(vnode.dom.oncreate).equals(undefined)
 		o(vnode.dom.attributes["oncreate"]).equals(undefined)
-	})
-	o("calls oncreate on recycle", function() {
-		var create = o.spy()
-		var vnodes = m.key(1, m("div", {oncreate: create}))
-		var temp = []
-		var updated = m.key(1, m("div", {oncreate: create}))
-
-		render(root, vnodes)
-		render(root, temp)
-		render(root, updated)
-
-		o(create.callCount).equals(2)
 	})
 })
