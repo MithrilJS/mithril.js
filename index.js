@@ -16,6 +16,7 @@ m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")
 m.p = require("./pathname/build")
+m.withProgress = require("./util/with-progress")
 m.vnode = require("./render/vnode")
 m.censor = require("./util/censor")
 
