@@ -4,7 +4,7 @@ var o = require("ospec")
 var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var hyperscript = require("../../render/hyperscript")
-var lazy = require("../lazy")
+var makeLazy = require("../lazy")
 var render = require("../../render/render")
 
 o.spec("lazy", () => {
@@ -35,14 +35,14 @@ o.spec("lazy", () => {
 						})
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((resolve) => send = resolve)
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -101,14 +101,14 @@ o.spec("lazy", () => {
 						var scheduled = 1
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((_, reject) => send = reject)
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -166,10 +166,7 @@ o.spec("lazy", () => {
 						})
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((resolve) => send = resolve)
@@ -177,6 +174,9 @@ o.spec("lazy", () => {
 							pending() {
 								calls.push("pending")
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -243,10 +243,7 @@ o.spec("lazy", () => {
 						var scheduled = 1
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((_, reject) => send = reject)
@@ -254,6 +251,9 @@ o.spec("lazy", () => {
 							pending() {
 								calls.push("pending")
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -319,10 +319,7 @@ o.spec("lazy", () => {
 						})
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((resolve) => send = resolve)
@@ -330,6 +327,9 @@ o.spec("lazy", () => {
 							error() {
 								calls.push("error")
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -385,10 +385,7 @@ o.spec("lazy", () => {
 						var scheduled = 1
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((_, reject) => send = reject)
@@ -396,6 +393,9 @@ o.spec("lazy", () => {
 							error(e) {
 								calls.push("error", e.message)
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -456,10 +456,7 @@ o.spec("lazy", () => {
 						})
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((resolve) => send = resolve)
@@ -470,6 +467,9 @@ o.spec("lazy", () => {
 							error() {
 								calls.push("error")
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])
@@ -533,10 +533,7 @@ o.spec("lazy", () => {
 						var scheduled = 1
 						var send, notifyRedrawn
 						var fetchRedrawn = new Promise((resolve) => notifyRedrawn = resolve)
-						var C = lazy(() => {
-							notifyRedrawn()
-							calls.push(`scheduled ${scheduled++}`)
-						})({
+						var C = makeLazy({
 							fetch() {
 								calls.push("fetch")
 								return new Promise((_, reject) => send = reject)
@@ -547,6 +544,9 @@ o.spec("lazy", () => {
 							error(e) {
 								calls.push("error", e.message)
 							},
+						}, () => {
+							notifyRedrawn()
+							calls.push(`scheduled ${scheduled++}`)
 						})
 
 						o(calls).deepEquals([])

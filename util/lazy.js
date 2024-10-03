@@ -1,9 +1,10 @@
 "use strict"
 
+var mountRedraw = require("../mount-redraw")
 var m = require("../render/hyperscript")
 var censor = require("./censor")
 
-module.exports = (redraw) => (opts) => {
+module.exports = (opts, redraw = mountRedraw.redraw) => {
 	var fetched = false
 	var Comp = () => ({view: () => opts.pending && opts.pending()})
 	var e = new ReferenceError("Component not found")
