@@ -19,5 +19,6 @@ m.p = require("./pathname/build")
 m.withProgress = require("./util/with-progress")
 m.vnode = require("./render/vnode")
 m.censor = require("./util/censor")
+m.lazy = require("./util/lazy")(mountRedraw.redraw)
 
 module.exports = m
