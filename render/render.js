@@ -1,6 +1,6 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
+var hyperscript = require("./hyperscript")
 
 var xlinkNs = "http://www.w3.org/1999/xlink"
 var nameSpace = {
@@ -120,7 +120,7 @@ function initComponent(vnode, hooks) {
 	vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 	initLifecycle(vnode.state, vnode, hooks)
 	if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-	vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+	vnode.instance = hyperscript.normalize(callHook.call(vnode.state.view, vnode))
 	if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 	reentrantLock.delete(vnode.tag)
 }
@@ -410,7 +410,7 @@ function updateElement(old, vnode, hooks, ns, pathDepth) {
 	}
 }
 function updateComponent(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
-	vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+	vnode.instance = hyperscript.normalize(callHook.call(vnode.state.view, vnode))
 	if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 	updateLifecycle(vnode.state, vnode, hooks)
 	if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
@@ -924,7 +924,7 @@ module.exports = function(dom, vnodes, redraw) {
 	try {
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
-		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		vnodes = hyperscript.normalizeChildren(Array.isArray(vnodes) ? vnodes.slice() : [vnodes])
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace, 0)
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement

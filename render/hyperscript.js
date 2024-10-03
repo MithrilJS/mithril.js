@@ -1,7 +1,10 @@
 "use strict"
 
-var Vnode = require("./vnode")
 var hasOwn = require("../util/hasOwn")
+
+function Vnode(tag, state, attrs, children) {
+	return {tag, state, attrs, children, dom: undefined, instance: undefined}
+}
 
 var selectorParser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[(.+?)(?:\s*=\s*("|'|)((?:\\["'\]]|.)*?)\5)?\])/g
 var selectorUnescape = /\\(["'\\])/g
@@ -67,7 +70,7 @@ function execSelector(selector, attrs, children) {
 
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
 // allocations in the fast path, especially with fragments.
-function hyperscript(selector, attrs, ...children) {
+function m(selector, attrs, ...children) {
 	if (typeof selector !== "string" && typeof selector !== "function") {
 		throw new Error("The selector must be either a string or a component.");
 	}
@@ -82,22 +85,59 @@ function hyperscript(selector, attrs, ...children) {
 	if (attrs == null) attrs = {}
 
 	if (typeof selector === "string") {
-		children = Vnode.normalizeChildren(children)
+		children = m.normalizeChildren(children)
 		if (selector !== "[") return execSelector(selector, attrs, children)
 	}
 
 	return Vnode(selector, {}, attrs, children)
 }
 
-hyperscript.fragment = function(...args) {
-	return hyperscript("[", ...args)
+m.fragment = function(...args) {
+	return m("[", ...args)
 }
 
-hyperscript.key = function(key, ...children) {
+m.key = function(key, ...children) {
 	if (children.length === 1 && Array.isArray(children[0])) {
 		children = children[0].slice()
 	}
-	return Vnode("=", key, undefined, Vnode.normalizeChildren(children))
+	return Vnode("=", key, undefined, m.normalizeChildren(children))
 }
 
-module.exports = hyperscript
+m.normalize = function(node) {
+	if (node == null || typeof node === "boolean") return null
+	if (typeof node !== "object") return Vnode("#", undefined, undefined, String(node))
+	if (Array.isArray(node)) return Vnode("[", undefined, undefined, m.normalizeChildren(node.slice()))
+	return node
+}
+
+m.normalizeChildren = function(input) {
+	if (input.length) {
+		input[0] = m.normalize(input[0])
+		var isKeyed = input[0] != null && input[0].tag === "="
+		var keys = new Set()
+		// Note: this is a *very* perf-sensitive check.
+		// Fun fact: merging the loop like this is somehow faster than splitting
+		// it, noticeably so.
+		for (var i = 1; i < input.length; i++) {
+			input[i] = m.normalize(input[i])
+			if ((input[i] != null && input[i].tag === "=") !== isKeyed) {
+				throw new TypeError(
+					isKeyed
+						? "In fragments, vnodes must either all have keys or none have keys. You may wish to consider using an explicit empty key vnode, `m.key()`, instead of a hole."
+						: "In fragments, vnodes must either all have keys or none have keys."
+				)
+			}
+			if (isKeyed) {
+				if (keys.has(input[i].state)) {
+					throw new TypeError(`Duplicate key detected: ${input[i].state}`)
+				}
+				keys.add(input[i].state)
+			}
+		}
+	}
+	return input
+}
+
+m.Fragment = "["
+
+module.exports = m
