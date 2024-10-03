@@ -834,20 +834,22 @@ function updateStyle(element, old, style) {
 //    that below.
 // 6. In function-based event handlers, `return false` prevents the default
 //    action and stops event propagation. We replicate that below.
-function EventDict() {
-	// Save this, so the current redraw is correctly tracked.
-	this._ = currentRedraw
-}
-EventDict.prototype = Object.create(null)
-EventDict.prototype.handleEvent = function (ev) {
-	var handler = this["on" + ev.type]
-	var result
-	if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
-	else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-	if (this._ && ev.redraw !== false) (0, this._)()
-	if (result === false) {
-		ev.preventDefault()
-		ev.stopPropagation()
+class EventDict extends Map {
+	constructor() {
+		super()
+		// Save this, so the current redraw is correctly tracked.
+		this._ = currentRedraw
+	}
+	handleEvent(ev) {
+		var handler = this.get(`on${ev.type}`)
+		var result
+		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
+		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
+		if (this._ && ev.redraw !== false) (0, this._)()
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
+		}
 	}
 }
 
@@ -855,18 +857,19 @@ EventDict.prototype.handleEvent = function (ev) {
 function updateEvent(vnode, key, value) {
 	if (vnode.instance != null) {
 		vnode.instance._ = currentRedraw
-		if (vnode.instance[key] === value) return
+		var prev = vnode.instance.get(key)
+		if (prev === value) return
 		if (value != null && (typeof value === "function" || typeof value === "object")) {
-			if (vnode.instance[key] == null) vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
-			vnode.instance[key] = value
+			if (prev == null) vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
+			vnode.instance.set(key, value)
 		} else {
-			if (vnode.instance[key] != null) vnode.dom.removeEventListener(key.slice(2), vnode.instance, false)
-			vnode.instance[key] = undefined
+			if (prev != null) vnode.dom.removeEventListener(key.slice(2), vnode.instance, false)
+			vnode.instance.delete(key)
 		}
 	} else if (value != null && (typeof value === "function" || typeof value === "object")) {
 		vnode.instance = new EventDict()
 		vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
-		vnode.instance[key] = value
+		vnode.instance.set(key, value)
 	}
 }
 
