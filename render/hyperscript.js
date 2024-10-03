@@ -68,6 +68,9 @@ function execSelector(selector, attrs, children) {
 	return Vnode(state.tag, {}, attrs, children)
 }
 
+var resolveChildren = (...children) =>
+	(children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : children)
+
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
 // allocations in the fast path, especially with fragments.
 function m(selector, attrs, ...children) {
@@ -76,9 +79,9 @@ function m(selector, attrs, ...children) {
 	}
 
 	if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
-		if (children.length === 1 && Array.isArray(children[0])) children = children[0].slice()
+		children = resolveChildren(...children)
 	} else {
-		children = children.length === 0 && Array.isArray(attrs) ? attrs.slice() : [attrs, ...children]
+		children = resolveChildren(attrs, ...children)
 		attrs = undefined
 	}
 
@@ -92,25 +95,22 @@ function m(selector, attrs, ...children) {
 	return Vnode(selector, {}, attrs, children)
 }
 
-m.fragment = function(...args) {
-	return m("[", ...args)
-}
+m.fragment = (...args) => m("[", ...args)
 
-m.key = function(key, ...children) {
-	if (children.length === 1 && Array.isArray(children[0])) {
-		children = children[0].slice()
-	}
-	return Vnode("=", key, undefined, m.normalizeChildren(children))
-}
+// When removal is blocked, all ancestors are also blocked. This doesn't block other children, so
+// this method also needs to accept an optional list of children to also keep alive while blocked.
+//
+// Note that the children are still notified of removal *immediately*.
+m.key = (key, ...children) => Vnode("=", key, undefined, m.normalizeChildren(resolveChildren(...children)))
 
-m.normalize = function(node) {
+m.normalize = (node) => {
 	if (node == null || typeof node === "boolean") return null
 	if (typeof node !== "object") return Vnode("#", undefined, undefined, String(node))
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, m.normalizeChildren(node.slice()))
 	return node
 }
 
-m.normalizeChildren = function(input) {
+m.normalizeChildren = (input) => {
 	if (input.length) {
 		input[0] = m.normalize(input[0])
 		var isKeyed = input[0] != null && input[0].tag === "="
