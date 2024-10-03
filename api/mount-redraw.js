@@ -1,6 +1,5 @@
 "use strict"
 
-var Vnode = require("../render/vnode")
 var render = require("../render/render")
 
 module.exports = function(schedule, console) {
@@ -10,7 +9,7 @@ module.exports = function(schedule, console) {
 
 	function sync() {
 		for (offset = 0; offset < subscriptions.length; offset += 2) {
-			try { render(subscriptions[offset], Vnode(subscriptions[offset + 1]), redraw) }
+			try { render(subscriptions[offset], (0, subscriptions[offset + 1])(), redraw) }
 			catch (e) { console.error(e) }
 		}
 		offset = -1
@@ -28,8 +27,8 @@ module.exports = function(schedule, console) {
 
 	redraw.sync = sync
 
-	function mount(root, component) {
-		if (component != null && typeof component !== "function") {
+	function mount(root, view) {
+		if (view != null && typeof view !== "function") {
 			throw new TypeError("m.mount expects a component, not a vnode.")
 		}
 
@@ -40,9 +39,9 @@ module.exports = function(schedule, console) {
 			render(root, [])
 		}
 
-		if (component != null) {
-			subscriptions.push(root, component)
-			render(root, Vnode(component), redraw)
+		if (view != null) {
+			subscriptions.push(root, view)
+			render(root, view(), redraw)
 		}
 	}
 

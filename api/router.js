@@ -184,7 +184,7 @@ module.exports = function($window, mountRedraw) {
 		}
 
 		ready = true
-		mountRedraw.mount(root, RouterRoot)
+		mountRedraw.mount(root, () => m(RouterRoot))
 		resolveRoute()
 	}
 	route.set = function(path, options) {

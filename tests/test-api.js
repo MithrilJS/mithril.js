@@ -77,19 +77,21 @@ o.spec("api", function() {
 			o(root.firstChild.nodeName).equals("DIV")
 		})
 	})
+
+	o.spec("m.mount", function() {
+		o("works", function() {
+			root = window.document.createElement("div")
+			m.mount(root, () => m("div"))
+
+			o(root.childNodes.length).equals(1)
+			o(root.firstChild.nodeName).equals("DIV")
+		})
+	})
+
 	components.forEach(function(cmp){
 		o.spec(cmp.kind, function(){
 			var createComponent = cmp.create
 
-			o.spec("m.mount", function() {
-				o("works", function() {
-					root = window.document.createElement("div")
-					m.mount(root, createComponent({view: function() {return m("div")}}))
-
-					o(root.childNodes.length).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
-				})
-			})
 			o.spec("m.route", function() {
 				o("works", function() {
 					root = window.document.createElement("div")
