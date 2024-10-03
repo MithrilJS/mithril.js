@@ -15,7 +15,7 @@ m.redraw = mountRedraw.redraw
 m.parseQueryString = require("./querystring/parse")
 m.buildQueryString = require("./querystring/build")
 m.parsePathname = require("./pathname/parse")
-m.buildPathname = require("./pathname/build")
+m.p = require("./pathname/build")
 m.vnode = require("./render/vnode")
 m.censor = require("./util/censor")
 

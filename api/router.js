@@ -2,7 +2,6 @@
 
 var m = require("../render/hyperscript")
 
-var buildPathname = require("../pathname/build")
 var parsePathname = require("../pathname/parse")
 var compileTemplate = require("../pathname/compileTemplate")
 var censor = require("../util/censor")
@@ -80,7 +79,7 @@ module.exports = function($window, mountRedraw) {
 
 		function reject(e) {
 			console.error(e)
-			setPath(fallbackRoute, null, {replace: true})
+			setPath(fallbackRoute, {replace: true})
 		}
 
 		loop(0)
@@ -124,7 +123,7 @@ module.exports = function($window, mountRedraw) {
 			if (path === fallbackRoute) {
 				throw new Error("Could not resolve default route " + fallbackRoute + ".")
 			}
-			setPath(fallbackRoute, null, {replace: true})
+			setPath(fallbackRoute, {replace: true})
 		}
 	}
 
@@ -142,8 +141,7 @@ module.exports = function($window, mountRedraw) {
 		}
 	}
 
-	function setPath(path, data, options) {
-		path = buildPathname(path, data)
+	function setPath(path, options) {
 		if (ready) {
 			fireAsync()
 			var state = options ? options.state : null
@@ -189,13 +187,13 @@ module.exports = function($window, mountRedraw) {
 		mountRedraw.mount(root, RouterRoot)
 		resolveRoute()
 	}
-	route.set = function(path, data, options) {
+	route.set = function(path, options) {
 		if (lastUpdate != null) {
 			options = options || {}
 			options.replace = true
 		}
 		lastUpdate = null
-		setPath(path, data, options)
+		setPath(path, options)
 	}
 	route.get = function() {return currentPath}
 	route.prefix = "#!"
@@ -208,7 +206,7 @@ module.exports = function($window, mountRedraw) {
 			// let them be specified in the selector as well.
 			var child = m(
 				vnode.attrs.selector || "a",
-				censor(vnode.attrs, ["options", "params", "selector", "onclick"]),
+				censor(vnode.attrs, ["options", "selector", "onclick"]),
 				vnode.children
 			)
 			var options, onclick, href
@@ -227,8 +225,7 @@ module.exports = function($window, mountRedraw) {
 			} else {
 				options = vnode.attrs.options
 				onclick = vnode.attrs.onclick
-				// Easier to build it now to keep it isomorphic.
-				href = buildPathname(child.attrs.href, vnode.attrs.params)
+				href = child.attrs.href
 				child.attrs.href = route.prefix + href
 				child.attrs.onclick = function(e) {
 					var result
@@ -261,7 +258,7 @@ module.exports = function($window, mountRedraw) {
 					) {
 						e.preventDefault()
 						e.redraw = false
-						route.set(href, null, options)
+						route.set(href, options)
 					}
 				}
 			}

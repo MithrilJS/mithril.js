@@ -7,6 +7,7 @@ var throttleMocker = require("../../test-utils/throttleMock")
 
 var apiMountRedraw = require("../../api/mount-redraw")
 var apiRouter = require("../../api/router")
+var p = require("../../pathname/build")
 
 o.spec("route.get/route.set", function() {
 	function waitTask() {
@@ -213,7 +214,7 @@ o.spec("route.get/route.set", function() {
 						"/other/:a/:b...": () => ({view: function() {}}),
 					})
 
-					route.set("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"})
+					route.set(p("/other/:a/:b", {a: "x", b: "y/z", c: "d", e: "f"}))
 					return waitTask().then(() => {
 						// Yep, before even the throttle mechanism takes hold.
 						o(route.get()).equals("/other/x/y%2Fz?c=d&e=f")
@@ -228,7 +229,7 @@ o.spec("route.get/route.set", function() {
 						"/other": () => ({view: function() {}}),
 					})
 
-					route.set("/other", null, {replace: true})
+					route.set("/other", {replace: true})
 
 					return waitTask().then(() => {
 						throttleMock.fire()
@@ -244,7 +245,7 @@ o.spec("route.get/route.set", function() {
 						"/other": () => ({view: function() {}}),
 					})
 
-					route.set("/other", null, {replace: false})
+					route.set("/other", {replace: false})
 
 					return waitTask().then(() => {
 						throttleMock.fire()
@@ -261,7 +262,7 @@ o.spec("route.get/route.set", function() {
 						"/other": () => ({view: function() {}}),
 					})
 
-					route.set("/other", null, {state: {a: 1}})
+					route.set("/other", {state: {a: 1}})
 					return waitTask().then(() => {
 						throttleMock.fire()
 						o($window.history.state).deepEquals({a: 1})
