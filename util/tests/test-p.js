@@ -1,7 +1,7 @@
 "use strict"
 
 var o = require("ospec")
-var p = require("../build")
+var p = require("../p")
 
 o.spec("p", function() {
 	function test(prefix) {
