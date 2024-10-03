@@ -1,10 +1,24 @@
 "use strict"
 
-var buildQueryString = require("../querystring/build")
+var toString = {}.toString
+
+var serializeQueryValue = (key, value) => {
+	if (value == null || value === false) {
+		return ""
+	} else if (Array.isArray(value)) {
+		return value.map((i) => serializeQueryValue(`${key}[]`, i)).join("&")
+	} else if (toString.call(value) !== "[object Object]") {
+		return `${encodeURIComponent(key)}${value === true ? "" : `=${encodeURIComponent(value)}`}`
+	} else {
+		return Object.entries(value).map(([k, v]) => serializeQueryValue(`${key}[${k}]`, v)).join("&")
+	}
+}
+
+var invalidTemplateChars = /:([^\/\.-]+)(\.{3})?:/
 
 // Returns `path` from `template` + `params`
-module.exports = function(template, params) {
-	if ((/:([^\/\.-]+)(\.{3})?:/).test(template)) {
+module.exports = (template, params) => {
+	if (invalidTemplateChars.test(template)) {
 		throw new SyntaxError("Template parameter names must be separated by either a '/', '-', or '.'.")
 	}
 	if (params == null) return template
@@ -15,7 +29,7 @@ module.exports = function(template, params) {
 	var path = template.slice(0, pathEnd)
 	var query = Object.assign({}, params)
 
-	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, function(m, key, variadic) {
+	var resolved = path.replace(/:([^\/\.-]+)(\.{3})?/g, (m, key, variadic) => {
 		delete query[key]
 		// If no such parameter exists, don't interpolate it.
 		if (params[key] == null) return m
@@ -32,7 +46,7 @@ module.exports = function(template, params) {
 
 	if (queryIndex >= 0) result += template.slice(queryIndex, queryEnd)
 	if (newQueryIndex >= 0) result += (queryIndex < 0 ? "?" : "&") + resolved.slice(newQueryIndex, newQueryEnd)
-	var querystring = buildQueryString(query)
+	var querystring = Object.entries(query).map(([k, v]) => serializeQueryValue(k, v)).join("&")
 	if (querystring) result += (queryIndex < 0 && newQueryIndex < 0 ? "?" : "&") + querystring
 	if (hashIndex >= 0) result += template.slice(hashIndex)
 	if (newHashIndex >= 0) result += (hashIndex < 0 ? "" : "&") + resolved.slice(newHashIndex)

@@ -48,18 +48,11 @@ o.spec("api", function() {
 			o(vnode.children[0].tag).equals("div")
 		})
 	})
-	o.spec("m.parseQueryString", function() {
+	o.spec("m.p", function() {
 		o("works", function() {
-			var query = m.parseQueryString("?a=1&b=2")
+			var query = m.p("/foo/:c", {a: 1, b: 2, c: 3})
 
-			o(query).deepEquals({a: "1", b: "2"})
-		})
-	})
-	o.spec("m.buildQueryString", function() {
-		o("works", function() {
-			var query = m.buildQueryString({a: 1, b: 2})
-
-			o(query).equals("a=1&b=2")
+			o(query).equals("/foo/3?a=1&b=2")
 		})
 	})
 	o.spec("m.render", function() {

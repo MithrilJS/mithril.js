@@ -2,7 +2,6 @@
 
 var callAsync = require("../test-utils/callAsync")
 var parseURL = require("../test-utils/parseURL")
-var parseQueryString = require("../querystring/parse")
 
 module.exports = function() {
 	var routes = {}
@@ -57,7 +56,7 @@ module.exports = function() {
 			}})
 			this.send = function(body) {
 				var self = this
-				
+
 				var completeResponse = function (data) {
 					self._responseCompleted = true
 					if(!aborted) {
@@ -118,7 +117,6 @@ module.exports = function() {
 						var urlData = parseURL(element.src, {protocol: "http:", hostname: "localhost", port: "", pathname: "/"})
 						var handler = routes["GET " + urlData.pathname] || serverErrorHandler.bind(null, element.src)
 						var data = handler({url: urlData.pathname, query: urlData.search, body: null})
-						parseQueryString(urlData.search)
 						callAsync(function() {
 							if (data.status === 200) {
 								new Function("$window", "with ($window) return " + data.responseText).call($window, $window)
