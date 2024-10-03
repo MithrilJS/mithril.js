@@ -8,12 +8,6 @@ var nameSpace = {
 	math: "http://www.w3.org/1998/Math/MathML"
 }
 
-// The vnode path is needed for proper removal unblocking. It's not retained past a given
-// render and is overwritten on every vnode visit, so callers wanting to retain it should
-// always clone the part they're interested in.
-var vnodePath
-var blockedRemovalRefCount = /*@__PURE__*/new WeakMap()
-var removalRequested = /*@__PURE__*/new WeakSet()
 var currentRedraw
 
 function getDocument(dom) {
@@ -231,10 +225,10 @@ function createComponent(parent, vnode, hooks, ns, nextSibling) {
 // the old DOM nodes before updateNode runs because it enables us to use the cached `nextSibling`
 // variable rather than fetching it using `getNextSibling()`.
 
-function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
+function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 	if (old === vnodes || old == null && vnodes == null) return
 	else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-	else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length, pathDepth, false)
+	else if (vnodes == null || vnodes.length === 0) removeNodes(parent, old, 0, old.length)
 	else {
 		var isOldKeyed = old[0] != null && old[0].tag === "="
 		var isKeyed = vnodes[0] != null && vnodes[0].tag === "="
@@ -242,7 +236,7 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 		if (!isOldKeyed) while (oldStart < old.length && old[oldStart] == null) oldStart++
 		if (!isKeyed) while (start < vnodes.length && vnodes[start] == null) start++
 		if (isOldKeyed !== isKeyed) {
-			removeNodes(parent, old, oldStart, old.length, pathDepth, false)
+			removeNodes(parent, old, oldStart, old.length)
 			createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 		} else if (!isKeyed) {
 			// Don't index past the end of either list (causes deopts).
@@ -256,10 +250,10 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 				v = vnodes[start]
 				if (o === v || o == null && v == null) continue
 				else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
-				else if (v == null) removeNode(parent, o, pathDepth, false)
-				else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns, pathDepth)
+				else if (v == null) removeNode(parent, o)
+				else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
 			}
-			if (old.length > commonLength) removeNodes(parent, old, start, old.length, pathDepth, false)
+			if (old.length > commonLength) removeNodes(parent, old, start, old.length)
 			if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
 		} else {
 			// keyed diff
@@ -270,7 +264,7 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 				oe = old[oldEnd]
 				ve = vnodes[end]
 				if (oe.state !== ve.state) break
-				if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns, pathDepth)
+				if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
 				if (ve.dom != null) nextSibling = ve.dom
 				oldEnd--, end--
 			}
@@ -280,7 +274,7 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 				v = vnodes[start]
 				if (o.state !== v.state) break
 				oldStart++, start++
-				if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns, pathDepth)
+				if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
 			}
 			// swaps and list reversals
 			while (oldEnd >= oldStart && end >= start) {
@@ -288,9 +282,9 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 				if (o.state !== ve.state || oe.state !== v.state) break
 				topSibling = getNextSibling(old, oldStart, nextSibling)
 				moveDOM(parent, oe, topSibling)
-				if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns, pathDepth)
+				if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
 				if (++start <= --end) moveDOM(parent, o, nextSibling)
-				if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns, pathDepth)
+				if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
 				if (ve.dom != null) nextSibling = ve.dom
 				oldStart++; oldEnd--
 				oe = old[oldEnd]
@@ -301,13 +295,13 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 			// bottom up once again
 			while (oldEnd >= oldStart && end >= start) {
 				if (oe.state !== ve.state) break
-				if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns, pathDepth)
+				if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
 				if (ve.dom != null) nextSibling = ve.dom
 				oldEnd--, end--
 				oe = old[oldEnd]
 				ve = vnodes[end]
 			}
-			if (start > end) removeNodes(parent, old, oldStart, oldEnd + 1, pathDepth, false)
+			if (start > end) removeNodes(parent, old, oldStart, oldEnd + 1)
 			else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 			else {
 				// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
@@ -322,13 +316,13 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 						oldIndices[i-start] = oldIndex
 						oe = old[oldIndex]
 						old[oldIndex] = null
-						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns, pathDepth)
+						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
 						if (ve.dom != null) nextSibling = ve.dom
 						matched++
 					}
 				}
 				nextSibling = originalNextSibling
-				if (matched !== oldEnd - oldStart + 1) removeNodes(parent, old, oldStart, oldEnd + 1, pathDepth, false)
+				if (matched !== oldEnd - oldStart + 1) removeNodes(parent, old, oldStart, oldEnd + 1)
 				if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
 					if (pos === -1) {
@@ -357,14 +351,12 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns, pathDepth) {
 		}
 	}
 }
-function updateNode(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
+function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 	var oldTag = old.tag, tag = vnode.tag
 	if (oldTag === tag) {
 		vnode.state = old.state
 		vnode.instance = old.instance
 		if (shouldNotUpdate(vnode, old)) return
-		vnodePath[pathDepth++] = parent
-		vnodePath[pathDepth++] = vnode
 		if (typeof oldTag === "string") {
 			if (vnode.attrs != null) {
 				updateLifecycle(vnode.attrs, vnode, hooks)
@@ -372,14 +364,14 @@ function updateNode(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
 			switch (oldTag) {
 				case "#": updateText(old, vnode); break
 				case "=":
-				case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns, pathDepth); break
-				default: updateElement(old, vnode, hooks, ns, pathDepth)
+				case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
+				default: updateElement(old, vnode, hooks, ns)
 			}
 		}
-		else updateComponent(parent, old, vnode, hooks, nextSibling, ns, pathDepth)
+		else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 	}
 	else {
-		removeNode(parent, old, pathDepth, false)
+		removeNode(parent, old)
 		createNode(parent, vnode, hooks, ns, nextSibling)
 	}
 }
@@ -389,8 +381,8 @@ function updateText(old, vnode) {
 	}
 	vnode.dom = old.dom
 }
-function updateFragment(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
-	updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns, pathDepth)
+function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+	updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 	vnode.dom = null
 	if (vnode.children != null) {
 		for (var child of vnode.children) {
@@ -400,27 +392,27 @@ function updateFragment(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
 		}
 	}
 }
-function updateElement(old, vnode, hooks, ns, pathDepth) {
+function updateElement(old, vnode, hooks, ns) {
 	var element = vnode.dom = old.dom
 	ns = getNameSpace(vnode) || ns
 
 	updateAttrs(vnode, old.attrs, vnode.attrs, ns)
 	if (!maybeSetContentEditable(vnode)) {
-		updateNodes(element, old.children, vnode.children, hooks, null, ns, pathDepth)
+		updateNodes(element, old.children, vnode.children, hooks, null, ns)
 	}
 }
-function updateComponent(parent, old, vnode, hooks, nextSibling, ns, pathDepth) {
+function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 	vnode.instance = hyperscript.normalize(callHook.call(vnode.state.view, vnode))
 	if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 	updateLifecycle(vnode.state, vnode, hooks)
 	if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
 	if (vnode.instance != null) {
 		if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
-		else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns, pathDepth)
+		else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
 		vnode.dom = vnode.instance.dom
 	}
 	else if (old.instance != null) {
-		removeNode(parent, old.instance, pathDepth, false)
+		removeNode(parent, old.instance, false)
 		vnode.dom = undefined
 	}
 	else {
@@ -491,7 +483,7 @@ function getNextSibling(vnodes, i, nextSibling) {
 	return nextSibling
 }
 
-// This handles fragments with zombie children (removed from vdom, but persisted in DOM through onbeforeremove)
+// This moves only the nodes tracked by Mithril
 function moveDOM(parent, vnode, nextSibling) {
 	if (typeof vnode.tag === "function") {
 		return moveDOM(parent, vnode.instance, nextSibling)
@@ -524,142 +516,40 @@ function maybeSetContentEditable(vnode) {
 }
 
 //remove
-function invokeBeforeRemove(vnode, host) {
-	try {
-		if (typeof host.onbeforeremove === "function") {
-			var result = callHook.call(host.onbeforeremove, vnode)
-			if (result != null && typeof result.then === "function") return Promise.resolve(result)
-		}
-	} catch (e) {
-		// Errors during removal aren't fatal. Just log them.
-		console.error(e)
-	}
+function removeNodes(parent, vnodes, start, end) {
+	for (var i = start; i < end; i++) removeNode(parent, vnodes[i])
 }
-function tryProcessRemoval(parent, vnode) {
-	// eslint-disable-next-line no-bitwise
-	var refCount = blockedRemovalRefCount.get(vnode) | 0
-	if (refCount > 1) {
-		blockedRemovalRefCount.set(vnode, refCount - 1)
-		return false
-	}
-
-	if (typeof vnode.tag !== "function" && vnode.tag !== "[" && vnode.tag !== "=") {
-		parent.removeChild(vnode.dom)
-	}
-
-	try {
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") {
-			callHook.call(vnode.state.onremove, vnode)
-		}
-	} catch (e) {
-		console.error(e)
-	}
-
-	try {
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") {
-			callHook.call(vnode.attrs.onremove, vnode)
-		}
-	} catch (e) {
-		console.error(e)
-	}
-
-	return true
-}
-function removeNodeAsyncRecurse(parent, vnode) {
-	while (vnode != null) {
-		// Delay the actual subtree removal if there's still pending `onbeforeremove` hooks on
-		// this node or a child node.
-		if (!tryProcessRemoval(parent, vnode)) return false
-		if (typeof vnode.tag !== "function") {
-			if (vnode.tag === "#") break
-			if (vnode.tag !== "[" && vnode.tag !== "=") parent = vnode.dom
-			// Using bitwise ops and `Array.prototype.reduce` to reduce code size. It's not
-			// called nearly enough to merit further optimization.
-			// eslint-disable-next-line no-bitwise
-			return vnode.children.reduce((fail, child) => fail & removeNodeAsyncRecurse(parent, child), 1)
-		}
-		vnode = vnode.instance
-	}
-
-	return true
-}
-function removeNodes(parent, vnodes, start, end, pathDepth, isDelayed) {
-	// Using bitwise ops to reduce code size.
-	var fail = 0
-	// eslint-disable-next-line no-bitwise
-	for (var i = start; i < end; i++) fail |= !removeNode(parent, vnodes[i], pathDepth, isDelayed)
-	return !fail
-}
-function removeNode(parent, vnode, pathDepth, isDelayed) {
+function removeNode(parent, vnode) {
 	if (vnode != null) {
-		delayed: {
-			var attrsResult, stateResult
-
-			// Block removes, but do call nested `onbeforeremove`.
-			if (typeof vnode.tag !== "string") attrsResult = invokeBeforeRemove(vnode, vnode.state)
-			if (vnode.attrs != null) stateResult = invokeBeforeRemove(vnode, vnode.attrs)
-
-			vnodePath[pathDepth++] = parent
-			vnodePath[pathDepth++] = vnode
-
-			if (attrsResult || stateResult) {
-				var path = vnodePath.slice(0, pathDepth)
-				var settle = () => {
-
-					// Remove the innermost node recursively and try to remove the parents
-					// non-recursively.
-					// If it's still delayed, skip. If this node is delayed, all its ancestors are
-					// also necessarily delayed, and so they should be skipped.
-					var i = path.length - 2
-					if (removeNodeAsyncRecurse(path[i], path[i + 1])) {
-						while ((i -= 2) >= 0 && removalRequested.has(path[i + 1])) {
-							tryProcessRemoval(path[i], path[i + 1])
-						}
-					}
-				}
-				var increment = 0
-
-				if (attrsResult) {
-					attrsResult.catch(console.error)
-					attrsResult.then(settle, settle)
-					increment++
-				}
-
-				if (stateResult) {
-					stateResult.catch(console.error)
-					stateResult.then(settle, settle)
-					increment++
-				}
-
-				isDelayed = true
-
-				for (var i = 1; i < pathDepth; i += 2) {
-					// eslint-disable-next-line no-bitwise
-					blockedRemovalRefCount.set(vnodePath[i], (blockedRemovalRefCount.get(vnodePath[i]) | 0) + increment)
-				}
-			}
-
-			if (typeof vnode.tag === "function") {
-				if (vnode.instance != null && !removeNode(parent, vnode.instance, pathDepth, isDelayed)) break delayed
-			} else if (vnode.tag !== "#") {
-				if (!removeNodes(
-					vnode.tag !== "[" && vnode.tag !== "=" ? vnode.dom : parent,
-					vnode.children, 0, vnode.children.length, pathDepth, isDelayed
-				)) break delayed
-			}
-
-			// Don't call removal hooks if removal is delayed.
-			// Delay the actual subtree removal if there's still pending `onbeforeremove` hooks on
-			// this node or a child node.
-			if (isDelayed || tryProcessRemoval(parent, vnode)) break delayed
-
-			return false
+		if (typeof vnode.tag === "function") {
+			if (vnode.instance != null) removeNode(parent, vnode.instance)
+		} else if (vnode.tag !== "#") {
+			removeNodes(
+				vnode.tag !== "[" && vnode.tag !== "=" ? vnode.dom : parent,
+				vnode.children, 0, vnode.children.length
+			)
 		}
 
-		removalRequested.add(vnode)
-	}
+		if (typeof vnode.tag !== "function" && vnode.tag !== "[" && vnode.tag !== "=") {
+			parent.removeChild(vnode.dom)
+		}
 
-	return true
+		try {
+			if (typeof vnode.tag !== "string" && typeof vnode.state.onremove === "function") {
+				callHook.call(vnode.state.onremove, vnode)
+			}
+		} catch (e) {
+			console.error(e)
+		}
+
+		try {
+			if (vnode.attrs && typeof vnode.attrs.onremove === "function") {
+				callHook.call(vnode.attrs.onremove, vnode)
+			}
+		} catch (e) {
+			console.error(e)
+		}
+	}
 }
 
 //attrs
@@ -763,7 +653,7 @@ function updateAttrs(vnode, old, attrs, ns) {
 	}
 }
 var isAlwaysFormAttribute = new Set(["value", "checked", "selected", "selectedIndex"])
-var isSpecialAttribute = new Set(["key", "is", "oninit", "oncreate", "onupdate", "onremove", "onbeforeupdate", "onbeforeremove"])
+var isSpecialAttribute = new Set(["key", "is", "oninit", "oncreate", "onupdate", "onremove", "onbeforeupdate"])
 // Try to avoid a few browser bugs on normal elements.
 // var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height", "type"])
 var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height"])
@@ -919,11 +809,9 @@ module.exports = function(dom, vnodes, redraw) {
 	var hooks = []
 	var active = activeElement(dom)
 	var namespace = dom.namespaceURI
-	var prevPath = vnodePath
 
 	currentDOM = dom
 	currentRedraw = typeof redraw === "function" ? redraw : undefined
-	vnodePath = []
 	try {
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
@@ -936,6 +824,5 @@ module.exports = function(dom, vnodes, redraw) {
 	} finally {
 		currentRedraw = prevRedraw
 		currentDOM = prevDOM
-		vnodePath = prevPath
 	}
 }

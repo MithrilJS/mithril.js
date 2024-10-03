@@ -322,9 +322,6 @@ o.spec("render", function() {
 					updated = true
 					try {render(root, m(A))} catch (e) {thrown.push("onupdate")}
 				},
-				onbeforeremove: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("onbeforeremove")}
-				},
 				onremove: function() {
 					try {render(root, m(A))} catch (e) {thrown.push("onremove")}
 				},
@@ -359,7 +356,6 @@ o.spec("render", function() {
 			"onbeforeupdate",
 			"view",
 			"onupdate",
-			"onbeforeremove",
 			"onremove",
 		])
 	})

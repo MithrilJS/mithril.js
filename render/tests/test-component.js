@@ -616,55 +616,6 @@ o.spec("component", function() {
 					o(rootCountInCall).equals(0)
 					o(root.childNodes.length).equals(0)
 				})
-				o("calls onbeforeremove", function() {
-					var rootCountInCall
-					var onbeforeremove = o.spy(() => {
-						rootCountInCall = root.childNodes.length
-					})
-					var component = createComponent({
-						onbeforeremove,
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						}
-					})
-
-					render(root, m(component))
-
-					o(onbeforeremove.callCount).equals(0)
-					o(root.childNodes.length).equals(1)
-					var firstChild = root.firstChild
-
-					render(root, [])
-
-					o(onbeforeremove.callCount).equals(1)
-					o(onbeforeremove.args[0].dom).equals(firstChild)
-					o(rootCountInCall).equals(1)
-					o(root.childNodes.length).equals(0)
-				})
-				o("calls onbeforeremove when returning fragment", function() {
-					var called = 0
-					var component = createComponent({
-						onbeforeremove: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
-						view: function() {
-							return [m("div", {id: "a"}, "b")]
-						}
-					})
-
-					render(root, m(component))
-
-					o(called).equals(0)
-
-					render(root, [])
-
-					o(called).equals(1)
-					o(root.childNodes.length).equals(0)
-				})
 				o("lifecycle timing megatest (for a single component)", function() {
 					var methods = {
 						view: o.spy(function() {
@@ -674,7 +625,7 @@ o.spec("component", function() {
 					var attrs = {}
 					var hooks = [
 						"oninit", "oncreate", "onbeforeupdate",
-						"onupdate", "onbeforeremove", "onremove"
+						"onupdate", "onremove"
 					]
 					hooks.forEach(function(hook) {
 						if (hook === "onbeforeupdate") {
@@ -703,7 +654,6 @@ o.spec("component", function() {
 					o(methods.oncreate.callCount).equals(0)
 					o(methods.onbeforeupdate.callCount).equals(0)
 					o(methods.onupdate.callCount).equals(0)
-					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
 
 					hooks.forEach(function(hook) {
@@ -717,7 +667,6 @@ o.spec("component", function() {
 					o(methods.oncreate.callCount).equals(1)
 					o(methods.onbeforeupdate.callCount).equals(0)
 					o(methods.onupdate.callCount).equals(0)
-					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
 
 					hooks.forEach(function(hook) {
@@ -731,7 +680,6 @@ o.spec("component", function() {
 					o(methods.oncreate.callCount).equals(1)
 					o(methods.onbeforeupdate.callCount).equals(1)
 					o(methods.onupdate.callCount).equals(1)
-					o(methods.onbeforeremove.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
 
 					hooks.forEach(function(hook) {
@@ -745,7 +693,6 @@ o.spec("component", function() {
 					o(methods.oncreate.callCount).equals(1)
 					o(methods.onbeforeupdate.callCount).equals(1)
 					o(methods.onupdate.callCount).equals(1)
-					o(methods.onbeforeremove.callCount).equals(1)
 					o(methods.onremove.callCount).equals(1)
 
 					hooks.forEach(function(hook) {
@@ -762,7 +709,7 @@ o.spec("component", function() {
 					var attrs = {}
 					var hooks = [
 						"oninit", "oncreate", "onbeforeupdate",
-						"onupdate", "onbeforeremove", "onremove"
+						"onupdate", "onremove"
 					]
 					hooks.forEach(function(hook) {
 						attrs[hook] = o.spy(function(vnode){
@@ -789,7 +736,6 @@ o.spec("component", function() {
 					o(methods.oncreate.args.length).equals(1)
 					o(methods.onbeforeupdate.args.length).equals(2)
 					o(methods.onupdate.args.length).equals(1)
-					o(methods.onbeforeremove.args.length).equals(1)
 					o(methods.onremove.args.length).equals(1)
 
 					hooks.forEach(function(hook) {

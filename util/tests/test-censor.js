@@ -27,7 +27,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			var censored = censor(original)
@@ -42,7 +41,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			censor(original)
@@ -53,7 +51,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			})
 		})
@@ -82,7 +79,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			var censored = censor(original, null)
@@ -97,7 +93,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			censor(original, null)
@@ -108,7 +103,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			})
 		})
@@ -137,7 +131,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			var censored = censor(original, ["extra"])
@@ -152,7 +145,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			censor(original, ["extra"])
@@ -163,7 +155,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			})
 		})
@@ -202,7 +193,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			var censored = censor(original, ["extra"])
@@ -218,7 +208,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			}
 			censor(original, ["extra"])
@@ -230,7 +219,6 @@ o.spec("censor", function() {
 				oncreate: "test",
 				onbeforeupdate: "test",
 				onupdate: "test",
-				onbeforeremove: "test",
 				onremove: "test",
 			})
 		})

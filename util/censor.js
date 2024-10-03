@@ -13,7 +13,7 @@
 // const hasOwn = require("./hasOwn")
 // const magic = [
 //     "key", "oninit", "oncreate", "onbeforeupdate", "onupdate",
-//     "onbeforeremove", "onremove",
+//     "onremove",
 // ]
 // module.exports = (attrs, extras) => {
 //     const result = Object.assign(Object.create(null), attrs)
@@ -24,7 +24,7 @@
 // ```
 
 var hasOwn = require("./hasOwn")
-var magic = new Set(["oninit", "oncreate", "onbeforeupdate", "onupdate", "onbeforeremove", "onremove"])
+var magic = new Set(["oninit", "oncreate", "onbeforeupdate", "onupdate", "onremove"])
 
 module.exports = function(attrs, extras) {
 	var result = {}
