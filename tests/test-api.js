@@ -63,11 +63,6 @@ o.spec("api", function() {
 			o(query).equals("a=1&b=2")
 		})
 	})
-	o.spec("m.request", function() {
-		o("works", function() {
-			o(typeof m.request).equals("function") // TODO improve
-		})
-	})
 	o.spec("m.render", function() {
 		o("works", function() {
 			root = window.document.createElement("div")
@@ -85,6 +80,28 @@ o.spec("api", function() {
 
 			o(root.childNodes.length).equals(1)
 			o(root.firstChild.nodeName).equals("DIV")
+		})
+	})
+
+	o.spec("m.redraw", function() {
+		o("works", function() {
+			var count = 0
+			root = window.document.createElement("div")
+			m.mount(root, () => {count++})
+			o(count).equals(1)
+			m.redraw()
+			o(count).equals(1)
+			return sleep(FRAME_BUDGET + 10).then(() => {
+				o(count).equals(2)
+			})
+		})
+		o("sync", function() {
+			root = window.document.createElement("div")
+			var view = o.spy()
+			m.mount(root, view)
+			o(view.callCount).equals(1)
+			m.redraw.sync()
+			o(view.callCount).equals(2)
 		})
 	})
 
@@ -137,27 +154,6 @@ o.spec("api", function() {
 						.then(() => { m.route.set("/b") })
 						.then(() => sleep(FRAME_BUDGET + 10))
 						.then(() => { o(m.route.get()).equals("/b") })
-				})
-			})
-			o.spec("m.redraw", function() {
-				o("works", function() {
-					var count = 0
-					root = window.document.createElement("div")
-					m.mount(root, createComponent({view: function() {count++}}))
-					o(count).equals(1)
-					m.redraw()
-					o(count).equals(1)
-					return sleep(FRAME_BUDGET + 10).then(() => {
-						o(count).equals(2)
-					})
-				})
-				o("sync", function() {
-					root = window.document.createElement("div")
-					var view = o.spy()
-					m.mount(root, createComponent({view: view}))
-					o(view.callCount).equals(1)
-					m.redraw.sync()
-					o(view.callCount).equals(2)
 				})
 			})
 		})
