@@ -289,12 +289,12 @@ o.spec("updateElement", function() {
 		var updated = m.key(2, m("div"))
 
 		render(root, vnode)
-		var a = vnode.dom
+		var a = vnode.children[0].dom
 
 		render(root, updated)
 
 		render(root, vnode)
-		var c = vnode.dom
+		var c = vnode.children[0].dom
 
 		o(root.childNodes.length).equals(1)
 		o(a).notEquals(c) // this used to be a recycling pool test

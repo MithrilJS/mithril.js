@@ -8,30 +8,32 @@ var mountRedraw = require("../../api/mount-redraw")
 var h = require("../../render/hyperscript")
 
 o.spec("mount/redraw", function() {
-	var root, m, throttleMock, consoleMock, $document, errors
-	o.beforeEach(function() {
-		var $window = domMock()
-		consoleMock = {error: o.spy()}
-		throttleMock = throttleMocker()
-		root = $window.document.body
-		m = mountRedraw(throttleMock.schedule, consoleMock)
-		$document = $window.document
-		errors = []
-	})
-
-	o.afterEach(function() {
-		o(consoleMock.error.calls.map(function(c) {
-			return c.args[0]
-		})).deepEquals(errors)
-		o(throttleMock.queueLength()).equals(0)
+	var error = console.error
+	o.afterEach(() => {
+		console.error = error
 	})
 
 	o("shouldn't error if there are no renderers", function() {
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		m.redraw()
 		throttleMock.fire()
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("schedules correctly", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -40,9 +42,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(2)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should run a single renderer entry", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -56,9 +68,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(2)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should run all renderer entries", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var el1 = $document.createElement("div")
 		var el2 = $document.createElement("div")
 		var el3 = $document.createElement("div")
@@ -87,9 +109,19 @@ o.spec("mount/redraw", function() {
 		o(spy1.callCount).equals(2)
 		o(spy2.callCount).equals(2)
 		o(spy3.callCount).equals(2)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should not redraw when mounting another root", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var el1 = $document.createElement("div")
 		var el2 = $document.createElement("div")
 		var el3 = $document.createElement("div")
@@ -111,9 +143,19 @@ o.spec("mount/redraw", function() {
 		o(spy1.callCount).equals(1)
 		o(spy2.callCount).equals(1)
 		o(spy3.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should stop running after mount null", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -125,9 +167,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should stop running after mount undefined", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -139,9 +191,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should stop running after mount no arg", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -153,9 +215,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should invoke remove callback on unmount", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var onabort = o.spy()
 		var spy = o.spy(() => h.layout((_, signal) => { signal.onabort = onabort }))
 
@@ -165,9 +237,19 @@ o.spec("mount/redraw", function() {
 
 		o(spy.callCount).equals(1)
 		o(onabort.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("should stop running after unsubscribe, even if it occurs after redraw is requested", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -178,9 +260,19 @@ o.spec("mount/redraw", function() {
 		o(spy.callCount).equals(1)
 		throttleMock.fire()
 		o(spy.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("does nothing on invalid unmount", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var spy = o.spy()
 
 		m.mount(root, spy)
@@ -190,9 +282,19 @@ o.spec("mount/redraw", function() {
 		m.redraw()
 		throttleMock.fire()
 		o(spy.callCount).equals(2)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("redraw.sync() redraws all roots synchronously", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var el1 = $document.createElement("div")
 		var el2 = $document.createElement("div")
 		var el3 = $document.createElement("div")
@@ -219,14 +321,34 @@ o.spec("mount/redraw", function() {
 		o(spy1.callCount).equals(3)
 		o(spy2.callCount).equals(3)
 		o(spy3.callCount).equals(3)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 
 	o("throws on invalid view", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		o(function() { m.mount(root, {}) }).throws(TypeError)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("skips roots that were synchronously unsubscribed before they were visited", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var calls = []
 		var root1 = $document.createElement("div")
 		var root2 = $document.createElement("div")
@@ -247,9 +369,19 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("keeps its place when synchronously unsubscribing previously visited roots", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var calls = []
 		var root1 = $document.createElement("div")
 		var root2 = $document.createElement("div")
@@ -270,10 +402,18 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 			"root1", "root2", "root3",
 		])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("keeps its place when synchronously unsubscribing previously visited roots in the face of errors", function() {
-		errors = ["fail"]
+		var $window = domMock()
+		var consoleMock = {error: console.error = o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = ["fail"]
 		var calls = []
 		var root1 = $document.createElement("div")
 		var root2 = $document.createElement("div")
@@ -294,9 +434,19 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("keeps its place when synchronously unsubscribing the current root", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var calls = []
 		var root1 = $document.createElement("div")
 		var root2 = $document.createElement("div")
@@ -317,10 +467,18 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 			"root1", [TypeError, "Node is currently being rendered to and thus is locked."], "root2", "root3",
 		])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("keeps its place when synchronously unsubscribing the current root in the face of an error", function() {
-		errors = [
+		var $window = domMock()
+		var consoleMock = {error: console.error = o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = [
 			[TypeError, "Node is currently being rendered to and thus is locked."],
 		]
 		var calls = []
@@ -343,29 +501,67 @@ o.spec("mount/redraw", function() {
 			"root1", "root2", "root3",
 			"root1", "root3",
 		])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("throws on invalid `root` DOM node", function() {
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		o(function() {
 			m.mount(null, () => {})
 		}).throws(TypeError)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("renders into `root` synchronously", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		m.mount(root, () => h("div"))
 
 		o(root.firstChild.nodeName).equals("DIV")
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("mounting null unmounts", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		m.mount(root, () => h("div"))
 
 		m.mount(root, null)
 
 		o(root.childNodes.length).equals(0)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("Mounting a second root doesn't cause the first one to redraw", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var root1 = $document.createElement("div")
 		var root2 = $document.createElement("div")
 		var view = o.spy()
@@ -379,9 +575,20 @@ o.spec("mount/redraw", function() {
 
 		throttleMock.fire()
 		o(view.callCount).equals(1)
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("redraws on events", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var layout = o.spy()
 		var onclick = o.spy()
 		var e = $document.createEvent("MouseEvents")
@@ -404,9 +611,19 @@ o.spec("mount/redraw", function() {
 		throttleMock.fire()
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("redraws several mount points on events", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var layout0 = o.spy()
 		var onclick0 = o.spy()
 		var layout1 = o.spy()
@@ -448,9 +665,20 @@ o.spec("mount/redraw", function() {
 
 		o(layout0.calls.map((c) => c.args[2])).deepEquals([true, false, false])
 		o(layout1.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("event handlers can skip redraw", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var $document = $window.document
+		var errors = []
+
 		var layout = o.spy()
 		var e = $document.createEvent("MouseEvents")
 
@@ -467,9 +695,19 @@ o.spec("mount/redraw", function() {
 		throttleMock.fire()
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("redraws when the render function is run", function() {
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = []
+
 		var layout = o.spy()
 
 		m.mount(root, () => h("div", h.layout(layout)))
@@ -481,10 +719,18 @@ o.spec("mount/redraw", function() {
 		throttleMock.fire()
 
 		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 
 	o("emits errors correctly", function() {
-		errors = ["foo", "bar", "baz"]
+		var $window = domMock()
+		var consoleMock = {error: o.spy()}
+		var throttleMock = throttleMocker()
+		var root = $window.document.body
+		var m = mountRedraw(throttleMock.schedule, consoleMock)
+		var errors = ["foo", "bar", "baz"]
 		var counter = -1
 
 		m.mount(root, () => {
@@ -499,5 +745,8 @@ o.spec("mount/redraw", function() {
 		throttleMock.fire()
 		m.redraw()
 		throttleMock.fire()
+
+		o(consoleMock.error.calls.map((c) => c.args[0])).deepEquals(errors)
+		o(throttleMock.queueLength()).equals(0)
 	})
 })

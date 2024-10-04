@@ -2,6 +2,33 @@
 
 var hasOwn = require("../util/hasOwn")
 
+/*
+This same structure is used for several nodes. Here's an explainer for each type.
+
+Components:
+- `tag`: component reference
+- `state`: view function, may `=== tag`
+- `attrs`: most recently received attributes
+- `children`: unused
+- `dom`: unused
+- `instance`: unused
+
+DOM elements:
+- `tag`: tag name string
+- `state`: event listener dictionary, if any events were ever registered
+- `attrs`: most recently received attributes
+- `children`: virtual DOM children
+- `dom`: element reference
+- `instance`: unused
+
+Fragments:
+- `tag`: `"["
+- `state`: event listener dictionary, if any events were ever registered
+- `attrs`: most recently received attributes
+- `children`: virtual DOM children
+- `dom`: element reference
+- `instance`: unused
+*/
 function Vnode(tag, state, attrs, children) {
 	return {tag, state, attrs, children, dom: undefined, instance: undefined}
 }

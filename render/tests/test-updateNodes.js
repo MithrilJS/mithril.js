@@ -24,10 +24,10 @@ o.spec("updateNodes", function() {
 		render(root, updated)
 
 		o(root.childNodes.length).equals(2)
-		o(updated[0].dom.nodeName).equals("A")
-		o(updated[0].dom).equals(root.childNodes[0])
-		o(updated[1].dom.nodeName).equals("B")
-		o(updated[1].dom).equals(root.childNodes[1])
+		o(updated[0].children[0].dom.nodeName).equals("A")
+		o(updated[0].children[0].dom).equals(root.childNodes[0])
+		o(updated[1].children[0].dom.nodeName).equals("B")
+		o(updated[1].children[0].dom).equals(root.childNodes[1])
 	})
 	o("handles el noop without key", function() {
 		var vnodes = [m("a"), m("b")]

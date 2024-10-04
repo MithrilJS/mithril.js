@@ -668,20 +668,12 @@ o.spec("attributes", function() {
 		})
 	})
 	o.spec("mutate attr object", function() {
-		o("warn when reusing attrs object", function() {
-			const _consoleWarn = console.warn
-			console.warn = o.spy()
-
+		o("throw when reusing attrs object", function() {
 			const attrs = {className: "on"}
 			render(root, {tag: "input", attrs})
 
 			attrs.className = "off"
-			render(root, {tag: "input", attrs})
-
-			o(console.warn.callCount).equals(1)
-			o(console.warn.args[0]).equals("Don't reuse attrs object, use new object for every redraw, this will throw in next major")
-
-			console.warn = _consoleWarn
+			o(() => render(root, {tag: "input", attrs})).throws(Error)
 		})
 	})
 })
