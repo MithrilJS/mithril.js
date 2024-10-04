@@ -48,7 +48,7 @@ o.spec("layout remove", function() {
 	})
 	o("aborts layout signal when removing fragment", function() {
 		var remove = o.spy()
-		var vnode = m.fragment(layoutRemove(remove))
+		var vnode = [layoutRemove(remove)]
 
 		render(root, vnode)
 		render(root, [])

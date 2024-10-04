@@ -157,7 +157,7 @@ o.spec("mount/redraw", function() {
 
 	o("should invoke remove callback on unmount", function() {
 		var onabort = o.spy()
-		var spy = o.spy(() => h.fragment(h.layout((_, signal) => { signal.onabort = onabort })))
+		var spy = o.spy(() => h.layout((_, signal) => { signal.onabort = onabort }))
 
 		m.mount(root, spy)
 		o(spy.callCount).equals(1)

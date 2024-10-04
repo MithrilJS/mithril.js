@@ -35,7 +35,7 @@ o.spec("layout create", function() {
 	})
 	o("works when creating fragment", function() {
 		var callback = o.spy()
-		var vnode = m.fragment(m.layout(callback))
+		var vnode = [m.layout(callback)]
 
 		render(root, vnode)
 

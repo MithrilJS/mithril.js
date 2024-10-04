@@ -82,8 +82,8 @@ o.spec("layout update", function() {
 	o("invoked on updating fragment", function() {
 		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m.fragment(m.layout(layout))
-		var updated = m.fragment(m.layout(update))
+		var vnode = [m.layout(layout)]
+		var updated = [m.layout(update)]
 
 		render(root, vnode)
 		render(root, updated)

@@ -42,6 +42,7 @@ function compileSelector(selector) {
 }
 
 function execSelector(selector, attrs, children) {
+	attrs = attrs || {}
 	var hasClassName = hasOwn.call(attrs, "className")
 	var dynamicClass = hasClassName ? attrs.className : attrs.class
 	var state = selectorCache.get(selector)
@@ -65,7 +66,7 @@ function execSelector(selector, attrs, children) {
 		if (hasClassName) attrs.className = null
 	}
 
-	return Vnode(state.tag, undefined, attrs, children)
+	return Vnode(state.tag, undefined, attrs, m.normalizeChildren(children))
 }
 
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
@@ -84,15 +85,13 @@ function m(selector, attrs, ...children) {
 		attrs = undefined
 	}
 
-	if (attrs == null) attrs = {}
-
-	if (typeof selector !== "string") {
+	if (typeof selector === "string") {
+		return execSelector(selector, attrs, children)
+	} else if (selector === m.Fragment) {
+		return Vnode("[", undefined, undefined, m.normalizeChildren(children))
+	} else {
 		return Vnode(selector, undefined, Object.assign({children}, attrs), undefined)
 	}
-
-	children = m.normalizeChildren(children)
-	if (selector === "[") return Vnode(selector, undefined, attrs, children)
-	return execSelector(selector, attrs, children)
 }
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
@@ -107,13 +106,11 @@ m.retain = () => Vnode("!", undefined, undefined, undefined)
 
 m.layout = (f) => Vnode(">", f, undefined, undefined)
 
-var simpleVnode = (tag, state, ...children) =>
-	Vnode(tag, state, undefined, m.normalizeChildren(
+m.Fragment = (attrs) => attrs.children
+m.key = (key, ...children) =>
+	Vnode("=", key, undefined, m.normalizeChildren(
 		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
 	))
-
-m.fragment = (...children) => simpleVnode("[", undefined, ...children)
-m.key = (key, ...children) => simpleVnode("=", key, ...children)
 
 m.normalize = (node) => {
 	if (node == null || typeof node === "boolean") return null
@@ -149,7 +146,5 @@ m.normalizeChildren = (input) => {
 	}
 	return input
 }
-
-m.Fragment = "["
 
 module.exports = m

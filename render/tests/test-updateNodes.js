@@ -73,26 +73,26 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].nodeValue).equals("0")
 	})
 	o("handles fragment noop", function() {
-		var vnodes = m.fragment(m("a"))
-		var updated = m.fragment(m("a"))
+		var vnodes = [m("a")]
+		var updated = [m("a")]
 
 		render(root, vnodes)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(updated.dom.nodeName).equals("A")
-		o(updated.dom).equals(root.childNodes[0])
+		o(updated[0].dom.nodeName).equals("A")
+		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("handles fragment noop w/ text child", function() {
-		var vnodes = m.fragment("a")
-		var updated = m.fragment("a")
+		var vnodes = [m.normalize("a")]
+		var updated = [m.normalize("a")]
 
 		render(root, vnodes)
 		render(root, updated)
 
 		o(root.childNodes.length).equals(1)
-		o(updated.dom.nodeValue).equals("a")
-		o(updated.dom).equals(root.childNodes[0])
+		o(updated[0].dom.nodeValue).equals("a")
+		o(updated[0].dom).equals(root.childNodes[0])
 	})
 	o("handles undefined to null noop", function() {
 		var vnodes = [null, m("div")]
@@ -621,7 +621,7 @@ o.spec("updateNodes", function() {
 			m("#", "a")
 		)
 		var updated = m("div",
-			m.fragment(m("#", "b")),
+			[m("#", "b")],
 			undefined,
 			undefined
 		)
@@ -779,38 +779,34 @@ o.spec("updateNodes", function() {
 	})
 	o("don't add back elements from fragments that are restored from the pool #1991", function() {
 		render(root, [
-			m.fragment(),
-			m.fragment()
+			[],
+			[]
 		])
 		render(root, [
-			m.fragment(),
-			m.fragment(
-				m("div")
-			)
+			[],
+			[m("div")]
 		])
 		render(root, [
-			m.fragment(null)
+			[null]
 		])
 		render(root, [
-			m.fragment(),
-			m.fragment()
+			[],
+			[]
 		])
 
 		o(root.childNodes.length).equals(0)
 	})
 	o("don't add back elements from fragments that are being removed #1991", function() {
 		render(root, [
-			m.fragment(),
+			[],
 			m("p"),
 		])
 		render(root, [
-			m.fragment(
-				m("div", 5)
-			)
+			[m("div", 5)]
 		])
 		render(root, [
-			m.fragment(),
-			m.fragment()
+			[],
+			[]
 		])
 
 		o(root.childNodes.length).equals(0)
@@ -852,9 +848,9 @@ o.spec("updateNodes", function() {
 		}
 	})
 	o("don't fetch the nextSibling from the pool", function() {
-		render(root, [m.fragment(m.key(1, m("div")), m.key(2, m("div"))), m("p")])
-		render(root, [m.fragment(), m("p")])
-		render(root, [m.fragment(m.key(2, m("div")), m.key(1, m("div"))), m("p")])
+		render(root, [[m.key(1, m("div")), m.key(2, m("div"))], m("p")])
+		render(root, [[], m("p")])
+		render(root, [[m.key(2, m("div")), m.key(1, m("div"))], m("p")])
 
 		o([].map.call(root.childNodes, function(el) {return el.nodeName})).deepEquals(["DIV", "DIV", "P"])
 	})
@@ -999,9 +995,9 @@ o.spec("updateNodes", function() {
 
 	o("fragment child toggles from null when followed by null component then tag", function() {
 		var component = () => null
-		var vnodes = [m.fragment(m("a"), m(component), m("b"))]
-		var temp = [m.fragment(null, m(component), m("b"))]
-		var updated = [m.fragment(m("a"), m(component), m("b"))]
+		var vnodes = [[m("a"), m(component), m("b")]]
+		var temp = [[null, m(component), m("b")]]
+		var updated = [[m("a"), m(component), m("b")]]
 
 		render(root, vnodes)
 		render(root, temp)
@@ -1015,9 +1011,9 @@ o.spec("updateNodes", function() {
 		var flag = true
 		var a = () => (flag ? m("a") : null)
 		var b = () => null
-		var vnodes = [m.fragment(m(a), m(b), m("s"))]
-		var temp = [m.fragment(m(a), m(b), m("s"))]
-		var updated = [m.fragment(m(a), m(b), m("s"))]
+		var vnodes = [[m(a), m(b), m("s")]]
+		var temp = [[m(a), m(b), m("s")]]
+		var updated = [[m(a), m(b), m("s")]]
 
 		render(root, vnodes)
 		flag = false
@@ -1030,7 +1026,7 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[1].nodeName).equals("S")
 	})
 	o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
-		var component = () => m.fragment(m("a"), m("b"))
+		var component = () => [m("a"), m("b")]
 		try {
 			render(root, [m(component)])
 			render(root, [])

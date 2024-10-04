@@ -26,7 +26,7 @@ o.spec("retain", function() {
 	})
 
 	o("prevents update in fragment", function() {
-		var vnode = m.fragment("a")
+		var vnode = m.normalize(["a"])
 		var updated = m.retain()
 
 		render(root, vnode)

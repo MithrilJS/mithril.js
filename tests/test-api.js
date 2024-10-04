@@ -29,9 +29,9 @@ o.spec("api", function() {
 			o(vnode.tag).equals("div")
 		})
 	})
-	o.spec("m.fragment", function() {
+	o.spec("m.normalize", function() {
 		o("works", function() {
-			var vnode = m.fragment([m("div")])
+			var vnode = m.normalize([m("div")])
 
 			o(vnode.tag).equals("[")
 			o(vnode.children.length).equals(1)

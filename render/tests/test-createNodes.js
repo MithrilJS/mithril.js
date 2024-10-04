@@ -4,7 +4,6 @@ var o = require("ospec")
 var domMock = require("../../test-utils/domMock")
 var render = require("../../render/render")
 var m = require("../../render/hyperscript")
-var fragment = require("../../render/hyperscript").fragment
 
 o.spec("createNodes", function() {
 	var $window, root
@@ -17,7 +16,7 @@ o.spec("createNodes", function() {
 		var vnodes = [
 			m("a"),
 			"b",
-			fragment("c"),
+			["c"],
 		]
 		render(root, vnodes)
 
@@ -31,7 +30,7 @@ o.spec("createNodes", function() {
 			m("a"),
 			"b",
 			null,
-			fragment("c"),
+			["c"],
 		]
 		render(root, vnodes)
 
@@ -45,7 +44,7 @@ o.spec("createNodes", function() {
 			m("a"),
 			"b",
 			undefined,
-			fragment("c"),
+			["c"],
 		]
 		render(root, vnodes)
 
