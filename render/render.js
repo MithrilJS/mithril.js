@@ -726,15 +726,13 @@ function updateStyle(element, old, style) {
 
 // Here's an explanation of how this works:
 // 1. The event names are always (by design) prefixed by `on`.
-// 2. The EventListener interface accepts either a function or an object
-//    with a `handleEvent` method.
-// 3. The object does not inherit from `Object.prototype`, to avoid
-//    any potential interference with that (e.g. setters).
+// 2. The EventListener interface accepts either a function or an object with a `handleEvent` method.
+// 3. The object inherits from `Map`, to avoid hitting global setters.
 // 4. The event name is remapped to the handler before calling it.
-// 5. In function-based event handlers, `ev.target === this`. We replicate
-//    that below.
-// 6. In function-based event handlers, `return false` prevents the default
-//    action and stops event propagation. We replicate that below.
+// 5. In function-based event handlers, `ev.currentTarget === this`. We replicate that below.
+// 6. In function-based event handlers, `return false` prevents the default action and stops event
+//    propagation. Instead of that, we hijack it to control implicit redrawing, and let users
+//    return a promise that resolves to it.
 class EventDict extends Map {
 	constructor() {
 		super()
@@ -743,13 +741,17 @@ class EventDict extends Map {
 	}
 	handleEvent(ev) {
 		var handler = this.get(`on${ev.type}`)
-		var result
-		if (typeof handler === "function") result = handler.call(ev.currentTarget, ev)
-		else if (typeof handler.handleEvent === "function") handler.handleEvent(ev)
-		if (this._ && ev.redraw !== false) (0, this._)()
-		if (result === false) {
-			ev.preventDefault()
-			ev.stopPropagation()
+		if (typeof handler === "function") {
+			var result = handler.call(ev.currentTarget, ev)
+			if (result !== false) {
+				if (result && typeof result.then === "function") {
+					Promise.resolve(result).then((value) => {
+						if (value !== false) (0, this._)()
+					})
+				} else {
+					(0, this._)()
+				}
+			}
 		}
 	}
 }

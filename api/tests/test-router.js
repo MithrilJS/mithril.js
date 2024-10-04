@@ -417,36 +417,7 @@ o.spec("route", () => {
 					})
 				})
 
-				o("route.Link doesn't redraw on preventDefault in handleEvent", () => {
-					var e = $window.document.createEvent("MouseEvents")
-
-					e.initEvent("click", true, true)
-					e.button = 0
-
-					$window.location.href = `${prefix}/`
-					route.init(prefix)
-					mountRedraw.mount(root, () => {
-						if (route.path === "/") {
-							return m("a", route.link({href: "/test", onclick: {handleEvent(e) { e.preventDefault() }}}))
-						} else if (route.path === "/test") {
-							return m("div")
-						} else {
-							throw new Error(`Unknown route: ${route.path}`)
-						}
-					})
-
-					o($window.location.href).equals(fullPrefix)
-
-					root.firstChild.dispatchEvent(e)
-
-					return waitCycles(1).then(() => {
-						throttleMock.fire()
-						o($window.location.href).equals(fullPrefix)
-						o(throttleMock.queueLength()).equals(0)
-					})
-				})
-
-				o("route.Link doesn't redraw on return false", () => {
+				o("route.Link ignores `return false`", () => {
 					var e = $window.document.createEvent("MouseEvents")
 
 					e.initEvent("click", true, true)
@@ -470,7 +441,7 @@ o.spec("route", () => {
 
 					return waitCycles(1).then(() => {
 						throttleMock.fire()
-						o($window.location.href).equals(fullPrefix)
+						o($window.location.href).equals(`${fullPrefix}test`)
 						o(throttleMock.queueLength()).equals(0)
 					})
 				})

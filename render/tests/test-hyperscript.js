@@ -2,6 +2,7 @@
 
 var o = require("ospec")
 var m = require("../../render/hyperscript")
+var domMock = require("../../test-utils/domMock")
 
 o.spec("hyperscript", function() {
 	o.spec("selector", function() {
@@ -650,6 +651,21 @@ o.spec("hyperscript", function() {
 			o(vnode.attrs.id).equals("a")
 			o(vnode.children.length).equals(1)
 			o(vnode.children[0]).equals("b")
+		})
+	})
+
+	o.spec("capture", () => {
+		o("works", () => {
+			var $window = domMock()
+			var e = $window.document.createEvent("MouseEvents")
+			e.initEvent("click", true, true)
+
+			// Only doing this for the sake of initializing the required fields in the mock.
+			$window.document.body.dispatchEvent(e)
+
+			o(m.capture(e)).equals(false)
+			o(e.defaultPrevented).equals(true)
+			o(e.cancelBubble).equals(true)
 		})
 	})
 })

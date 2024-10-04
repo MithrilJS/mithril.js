@@ -55,8 +55,42 @@ o.spec("event", function() {
 		o(e.defaultPrevented).equals(false)
 	})
 
+	o("handles onclick asynchronously returning", function() {
+		var promise
+		var spyDiv = eventSpy(() => promise = Promise.resolve())
+		var spyParent = eventSpy()
+		var div = m("div", {onclick: spyDiv})
+		var parent = m("div", {onclick: spyParent}, div)
+		var e = $window.document.createEvent("MouseEvents")
+		e.initEvent("click", true, true)
+
+		render(root, parent)
+		div.dom.dispatchEvent(e)
+
+		o(spyDiv.calls.length).equals(1)
+		o(spyDiv.calls[0].this).equals(div.dom)
+		o(spyDiv.calls[0].type).equals("click")
+		o(spyDiv.calls[0].target).equals(div.dom)
+		o(spyDiv.calls[0].currentTarget).equals(div.dom)
+		o(spyParent.calls.length).equals(1)
+		o(spyParent.calls[0].this).equals(parent.dom)
+		o(spyParent.calls[0].type).equals("click")
+		o(spyParent.calls[0].target).equals(div.dom)
+		o(spyParent.calls[0].currentTarget).equals(parent.dom)
+		o(redraw.callCount).equals(1)
+		o(redraw.this).equals(undefined)
+		o(redraw.args.length).equals(0)
+		o(e.defaultPrevented).equals(false)
+
+		return promise.then(() => {
+			o(redraw.callCount).equals(2)
+			o(redraw.this).equals(undefined)
+			o(redraw.args.length).equals(0)
+		})
+	})
+
 	o("handles onclick returning false", function() {
-		var spyDiv = eventSpy(function() { return false })
+		var spyDiv = eventSpy((e) => { m.capture(e); return false })
 		var spyParent = eventSpy()
 		var div = m("div", {onclick: spyDiv})
 		var parent = m("div", {onclick: spyParent}, div)
@@ -72,19 +106,16 @@ o.spec("event", function() {
 		o(spyDiv.calls[0].target).equals(div.dom)
 		o(spyDiv.calls[0].currentTarget).equals(div.dom)
 		o(spyParent.calls.length).equals(0)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
+		o(redraw.callCount).equals(0)
 		o(e.defaultPrevented).equals(true)
 	})
 
-	o("handles click EventListener object", function() {
-		var spyDiv = eventSpy()
+	o("handles onclick asynchronously returning false", function() {
+		var promise
+		var spyDiv = eventSpy((e) => { m.capture(e); return promise = Promise.resolve(false) })
 		var spyParent = eventSpy()
-		var listenerDiv = {handleEvent: spyDiv}
-		var listenerParent = {handleEvent: spyParent}
-		var div = m("div", {onclick: listenerDiv})
-		var parent = m("div", {onclick: listenerParent}, div)
+		var div = m("div", {onclick: spyDiv})
+		var parent = m("div", {onclick: spyParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
@@ -92,28 +123,24 @@ o.spec("event", function() {
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
-		o(spyDiv.calls[0].this).equals(listenerDiv)
+		o(spyDiv.calls[0].this).equals(div.dom)
 		o(spyDiv.calls[0].type).equals("click")
 		o(spyDiv.calls[0].target).equals(div.dom)
 		o(spyDiv.calls[0].currentTarget).equals(div.dom)
-		o(spyParent.calls.length).equals(1)
-		o(spyParent.calls[0].this).equals(listenerParent)
-		o(spyParent.calls[0].type).equals("click")
-		o(spyParent.calls[0].target).equals(div.dom)
-		o(spyParent.calls[0].currentTarget).equals(parent.dom)
-		o(redraw.callCount).equals(2)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(e.defaultPrevented).equals(false)
+		o(spyParent.calls.length).equals(0)
+		o(redraw.callCount).equals(0)
+		o(e.defaultPrevented).equals(true)
+
+		return promise.then(() => {
+			o(redraw.callCount).equals(0)
+		})
 	})
 
-	o("handles click EventListener object returning false", function() {
-		var spyDiv = eventSpy(function() { return false })
+	o("handles onclick returning false in child then bubbling to parent and not returning false", function() {
+		var spyDiv = eventSpy(() => false)
 		var spyParent = eventSpy()
-		var listenerDiv = {handleEvent: spyDiv}
-		var listenerParent = {handleEvent: spyParent}
-		var div = m("div", {onclick: listenerDiv})
-		var parent = m("div", {onclick: listenerParent}, div)
+		var div = m("div", {onclick: spyDiv})
+		var parent = m("div", {onclick: spyParent}, div)
 		var e = $window.document.createEvent("MouseEvents")
 		e.initEvent("click", true, true)
 
@@ -121,18 +148,12 @@ o.spec("event", function() {
 		div.dom.dispatchEvent(e)
 
 		o(spyDiv.calls.length).equals(1)
-		o(spyDiv.calls[0].this).equals(listenerDiv)
+		o(spyDiv.calls[0].this).equals(div.dom)
 		o(spyDiv.calls[0].type).equals("click")
 		o(spyDiv.calls[0].target).equals(div.dom)
 		o(spyDiv.calls[0].currentTarget).equals(div.dom)
 		o(spyParent.calls.length).equals(1)
-		o(spyParent.calls[0].this).equals(listenerParent)
-		o(spyParent.calls[0].type).equals("click")
-		o(spyParent.calls[0].target).equals(div.dom)
-		o(spyParent.calls[0].currentTarget).equals(parent.dom)
-		o(redraw.callCount).equals(2)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
+		o(redraw.callCount).equals(1)
 		o(e.defaultPrevented).equals(false)
 	})
 
@@ -226,54 +247,6 @@ o.spec("event", function() {
 		o(spy.callCount).equals(0)
 	})
 
-	o("removes EventListener object", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var vnode = m("a", {onclick: listener})
-		var updated = m("a")
-
-		render(root, vnode)
-		render(root, updated)
-
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-		vnode.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(0)
-	})
-
-	o("removes EventListener object when null", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var vnode = m("a", {onclick: listener})
-		var updated = m("a", {onclick: null})
-
-		render(root, vnode)
-		render(root, updated)
-
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-		vnode.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(0)
-	})
-
-	o("removes EventListener object when undefined", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var vnode = m("a", {onclick: listener})
-		var updated = m("a", {onclick: undefined})
-
-		render(root, vnode)
-		render(root, updated)
-
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-		vnode.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(0)
-	})
-
 	o("fires onclick only once after redraw", function() {
 		var spy = o.spy()
 		var div = m("div", {id: "a", onclick: spy})
@@ -296,29 +269,6 @@ o.spec("event", function() {
 		o(div.dom.attributes["id"].value).equals("b")
 	})
 
-	o("fires click EventListener object only once after redraw", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var div = m("div", {id: "a", onclick: listener})
-		var updated = m("div", {id: "b", onclick: listener})
-		var e = $window.document.createEvent("MouseEvents")
-		e.initEvent("click", true, true)
-
-		render(root, div)
-		render(root, updated)
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(listener)
-		o(spy.args[0].type).equals("click")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-		o(div.dom).equals(updated.dom)
-		o(div.dom.attributes["id"].value).equals("b")
-	})
-
 	o("handles ontransitionend", function() {
 		var spy = o.spy()
 		var div = m("div", {ontransitionend: spy})
@@ -330,25 +280,6 @@ o.spec("event", function() {
 
 		o(spy.callCount).equals(1)
 		o(spy.this).equals(div.dom)
-		o(spy.args[0].type).equals("transitionend")
-		o(spy.args[0].target).equals(div.dom)
-		o(redraw.callCount).equals(1)
-		o(redraw.this).equals(undefined)
-		o(redraw.args.length).equals(0)
-	})
-
-	o("handles transitionend EventListener object", function() {
-		var spy = o.spy()
-		var listener = {handleEvent: spy}
-		var div = m("div", {ontransitionend: listener})
-		var e = $window.document.createEvent("HTMLEvents")
-		e.initEvent("transitionend", true, true)
-
-		render(root, div)
-		div.dom.dispatchEvent(e)
-
-		o(spy.callCount).equals(1)
-		o(spy.this).equals(listener)
 		o(spy.args[0].type).equals("transitionend")
 		o(spy.args[0].target).equals(div.dom)
 		o(redraw.callCount).equals(1)

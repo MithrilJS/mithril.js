@@ -488,20 +488,16 @@ o.spec("mount/redraw", function() {
 		m.mount(root, () => h("div", {
 			oninit: oninit,
 			onupdate: onupdate,
-			onclick: function(e) {
-				e.redraw = false
-			}
+			onclick: () => false,
 		}))
 
 		root.firstChild.dispatchEvent(e)
 
 		o(oninit.callCount).equals(1)
-		o(e.redraw).equals(false)
 
 		throttleMock.fire()
 
 		o(onupdate.callCount).equals(0)
-		o(e.redraw).equals(false)
 	})
 
 	o("redraws when the render function is run", function() {

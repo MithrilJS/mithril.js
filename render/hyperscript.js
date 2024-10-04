@@ -92,6 +92,14 @@ function m(selector, attrs, ...children) {
 	return Vnode(selector, {}, attrs, children)
 }
 
+// Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
+// redrawing.
+m.capture = (ev) => {
+	ev.preventDefault()
+	ev.stopPropagation()
+	return false
+}
+
 m.retain = () => Vnode("!", undefined, undefined, undefined)
 
 m.fragment = (...args) => m("[", ...args)

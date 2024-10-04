@@ -426,6 +426,10 @@ module.exports = function(options) {
 						e.stopPropagation = function() {
 							stopped = true
 						}
+						Object.defineProperty(e, "cancelBubble", {
+							configurable: true,
+							get: function () { return stopped }
+						})
 						e.eventPhase = 1
 						try {
 							for (var i = parents.length - 1; 0 <= i; i--) {

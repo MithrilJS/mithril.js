@@ -43,8 +43,9 @@ o.spec("form inputs", function() {
 		o("syncs input value if DOM value differs from vdom value", function() {
 			var input = m("input", {value: "aaa", oninput: function() {}})
 			var updated = m("input", {value: "aaa", oninput: function() {}})
+			var redraw = o.spy()
 
-			render(root, input)
+			render(root, input, redraw)
 
 			//simulate user typing
 			var e = $window.document.createEvent("KeyboardEvent")
@@ -52,11 +53,13 @@ o.spec("form inputs", function() {
 			input.dom.focus()
 			input.dom.value += "a"
 			input.dom.dispatchEvent(e)
+			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			render(root, updated)
+			render(root, updated, redraw)
 
 			o(updated.dom.value).equals("aaa")
+			o(redraw.callCount).equals(1)
 		})
 
 		o("clear element value if vdom value is set to undefined (aka removed)", function() {
@@ -72,19 +75,22 @@ o.spec("form inputs", function() {
 		o("syncs input checked attribute if DOM value differs from vdom value", function() {
 			var input = m("input", {type: "checkbox", checked: true, onclick: function() {}})
 			var updated = m("input", {type: "checkbox", checked: true, onclick: function() {}})
+			var redraw = o.spy()
 
-			render(root, input)
+			render(root, input, redraw)
 
 			//simulate user clicking checkbox
 			var e = $window.document.createEvent("MouseEvents")
 			e.initEvent("click", true, true)
 			input.dom.focus()
 			input.dom.dispatchEvent(e)
+			o(redraw.callCount).equals(1)
 
 			//re-render may use same vdom value as previous render call
-			render(root, updated)
+			render(root, updated, redraw)
 
 			o(updated.dom.checked).equals(true)
+			o(redraw.callCount).equals(1)
 		})
 
 		o("syncs file input value attribute if DOM value differs from vdom value and is empty", function() {

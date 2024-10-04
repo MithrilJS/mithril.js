@@ -1,5 +1,7 @@
 "use strict"
 
+var m = require("../render/hyperscript")
+
 module.exports = function($window, redraw) {
 	var mustReplace = false
 	var routePrefix, currentUrl, currentPath, currentHref
@@ -58,13 +60,8 @@ module.exports = function($window, redraw) {
 				: {
 					href: routePrefix + opts.href,
 					onclick(e) {
-						var result
 						if (typeof opts.onclick === "function") {
-							result = opts.onclick.call(e.currentTarget, e)
-						} else if (opts.onclick == null || typeof opts.onclick !== "object") {
-						// do nothing
-						} else if (typeof opts.onclick.handleEvent === "function") {
-							opts.onclick.handleEvent(e)
+							opts.onclick.apply(this, arguments)
 						}
 
 						// Adapted from React Router's implementation:
@@ -77,8 +74,8 @@ module.exports = function($window, redraw) {
 						// link, but right click or command-click it to copy the
 						// link target, etc. Nope, this isn't just for blind people.
 						if (
-						// Skip if `onclick` prevented default
-							result !== false && !e.defaultPrevented &&
+							// Skip if `onclick` prevented default
+							!e.defaultPrevented &&
 							// Ignore everything but left clicks
 							(e.button === 0 || e.which === 0 || e.which === 1) &&
 							// Let the browser handle `target=_blank`, etc.
@@ -86,9 +83,9 @@ module.exports = function($window, redraw) {
 							// No modifier keys
 							!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey
 						) {
-							e.preventDefault()
-							e.redraw = false
 							set(opts.href, opts)
+							// Capture the event, and don't double-call `redraw`.
+							return m.capture(e)
 						}
 					},
 				}),
