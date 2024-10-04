@@ -10,18 +10,14 @@ o.spec("component children", function () {
 	var root = $window.document.createElement("div")
 
 	o.spec("component children", function () {
-		var component = () => ({
-			view: function (vnode) {
-				return vnode.children
-			}
-		})
+		var component = (attrs) => attrs.children
 
 		var vnode = m(component, "a")
 
 		render(root, vnode)
 
 		o("are not normalized on ingestion", function () {
-			o(vnode.children[0]).equals("a")
+			o(vnode.attrs.children[0]).equals("a")
 		})
 
 		o("are normalized upon view interpolation", function () {

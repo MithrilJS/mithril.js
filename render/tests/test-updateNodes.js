@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var render = require("../../render/render")
 var m = require("../../render/hyperscript")
@@ -998,55 +997,47 @@ o.spec("updateNodes", function() {
 		o(tagNames).deepEquals(expectedTagNames)
 	})
 
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	o("fragment child toggles from null when followed by null component then tag", function() {
+		var component = () => null
+		var vnodes = [m.fragment(m("a"), m(component), m("b"))]
+		var temp = [m.fragment(null, m(component), m("b"))]
+		var updated = [m.fragment(m("a"), m(component), m("b"))]
 
-			o("fragment child toggles from null when followed by null component then tag", function() {
-				var component = createComponent({view: function() {return null}})
-				var vnodes = [m.fragment(m("a"), m(component), m("b"))]
-				var temp = [m.fragment(null, m(component), m("b"))]
-				var updated = [m.fragment(m("a"), m(component), m("b"))]
+		render(root, vnodes)
+		render(root, temp)
+		render(root, updated)
 
-				render(root, vnodes)
-				render(root, temp)
-				render(root, updated)
+		o(root.childNodes.length).equals(2)
+		o(root.childNodes[0].nodeName).equals("A")
+		o(root.childNodes[1].nodeName).equals("B")
+	})
+	o("fragment child toggles from null in component when followed by null component then tag", function() {
+		var flag = true
+		var a = () => (flag ? m("a") : null)
+		var b = () => null
+		var vnodes = [m.fragment(m(a), m(b), m("s"))]
+		var temp = [m.fragment(m(a), m(b), m("s"))]
+		var updated = [m.fragment(m(a), m(b), m("s"))]
 
-				o(root.childNodes.length).equals(2)
-				o(root.childNodes[0].nodeName).equals("A")
-				o(root.childNodes[1].nodeName).equals("B")
-			})
-			o("fragment child toggles from null in component when followed by null component then tag", function() {
-				var flag = true
-				var a = createComponent({view: function() {return flag ? m("a") : null}})
-				var b = createComponent({view: function() {return null}})
-				var vnodes = [m.fragment(m(a), m(b), m("s"))]
-				var temp = [m.fragment(m(a), m(b), m("s"))]
-				var updated = [m.fragment(m(a), m(b), m("s"))]
+		render(root, vnodes)
+		flag = false
+		render(root, temp)
+		flag = true
+		render(root, updated)
 
-				render(root, vnodes)
-				flag = false
-				render(root, temp)
-				flag = true
-				render(root, updated)
+		o(root.childNodes.length).equals(2)
+		o(root.childNodes[0].nodeName).equals("A")
+		o(root.childNodes[1].nodeName).equals("S")
+	})
+	o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
+		var component = () => m.fragment(m("a"), m("b"))
+		try {
+			render(root, [m(component)])
+			render(root, [])
 
-				o(root.childNodes.length).equals(2)
-				o(root.childNodes[0].nodeName).equals("A")
-				o(root.childNodes[1].nodeName).equals("S")
-			})
-			o("removing a component that returns a fragment doesn't throw (regression test for incidental bug introduced while debugging some Flems)", function() {
-				var component = createComponent({
-					view: function() {return m.fragment(m("a"), m("b"))}
-				})
-				try {
-					render(root, [m(component)])
-					render(root, [])
-
-					o(root.childNodes.length).equals(0)
-				} catch (e) {
-					o(e).equals(null)
-				}
-			})
-		})
+			o(root.childNodes.length).equals(0)
+		} catch (e) {
+			o(e).equals(null)
+		}
 	})
 })

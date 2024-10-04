@@ -439,6 +439,14 @@ o.spec("hyperscript", function() {
 
 			o(vnode.children[0].children).equals("0")
 		})
+		o("handles children in attributes", function() {
+			var vnode = m("div", {children: ["", "a"]})
+
+			o(vnode.children[0].tag).equals("#")
+			o(vnode.children[0].children).equals("")
+			o(vnode.children[1].tag).equals("#")
+			o(vnode.children[1].children).equals("a")
+		})
 	})
 	o.spec("permutations", function() {
 		o("handles null attr and children", function() {
@@ -637,8 +645,8 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals(component)
 			o(vnode.attrs.id).equals("a")
-			o(vnode.children.length).equals(1)
-			o(vnode.children[0]).equals("b")
+			o(vnode.attrs.children.length).equals(1)
+			o(vnode.attrs.children[0]).equals("b")
 		})
 		o("works with closures", function () {
 			var component = o.spy()
@@ -649,8 +657,8 @@ o.spec("hyperscript", function() {
 
 			o(vnode.tag).equals(component)
 			o(vnode.attrs.id).equals("a")
-			o(vnode.children.length).equals(1)
-			o(vnode.children[0]).equals("b")
+			o(vnode.attrs.children.length).equals(1)
+			o(vnode.attrs.children[0]).equals("b")
 		})
 	})
 

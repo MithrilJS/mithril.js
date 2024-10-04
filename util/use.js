@@ -4,17 +4,15 @@ var m = require("../render/hyperscript")
 
 var Use = () => {
 	var key = 0
-	return {
-		view: (v, o) => {
-			if (o && !(
-				v.attrs.d.length === o.attrs.d.length &&
-				v.attrs.d.every((b, i) => Object.is(b, o.attrs.d[i]))
-			)) {
-				key++
-			}
-
-			return m.key(key, v.children)
+	return (n, o) => {
+		if (o && !(
+			n.d.length === o.d.length &&
+			n.d.every((b, i) => Object.is(b, o.d[i]))
+		)) {
+			key++
 		}
+
+		return m.key(key, n.children)
 	}
 }
 

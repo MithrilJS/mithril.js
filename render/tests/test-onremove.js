@@ -1,7 +1,6 @@
 "use strict"
 
 var o = require("ospec")
-var components = require("../../test-utils/components")
 var domMock = require("../../test-utils/domMock")
 var render = require("../../render/render")
 var m = require("../../render/hyperscript")
@@ -69,42 +68,24 @@ o.spec("layout remove", function() {
 		o(vnode.dom).notEquals(updated.dom) // this used to be a recycling pool test
 		o(remove.callCount).equals(1)
 	})
-	components.forEach(function(cmp){
-		o.spec(cmp.kind, function(){
-			var createComponent = cmp.create
+	o("aborts layout signal on nested component", function() {
+		var spy = o.spy()
+		var comp = () => m(outer)
+		var outer = () => m(inner)
+		var inner = () => m.layout(spy)
+		render(root, m(comp))
+		render(root, null)
 
-			o("aborts layout signal on nested component", function() {
-				var spy = o.spy()
-				var comp = createComponent({
-					view: function() {return m(outer)}
-				})
-				var outer = createComponent({
-					view: function() {return m(inner)}
-				})
-				var inner = createComponent({
-					view: () => m.layout(spy),
-				})
-				render(root, m(comp))
-				render(root, null)
+		o(spy.callCount).equals(1)
+	})
+	o("aborts layout signal on nested component child", function() {
+		var spy = o.spy()
+		var comp = () => m(outer)
+		var outer = () => m(inner, m("a", layoutRemove(spy)))
+		var inner = (attrs) => m("div", attrs.children)
+		render(root, m(comp))
+		render(root, null)
 
-				o(spy.callCount).equals(1)
-			})
-			o("aborts layout signal on nested component child", function() {
-				var spy = o.spy()
-				var comp = createComponent({
-					view: function() {return m(outer)}
-				})
-				var outer = createComponent({
-					view: function() {return m(inner, m("a", layoutRemove(spy)))}
-				})
-				var inner = createComponent({
-					view: function(vnode) {return m("div", vnode.children)}
-				})
-				render(root, m(comp))
-				render(root, null)
-
-				o(spy.callCount).equals(1)
-			})
-		})
+		o(spy.callCount).equals(1)
 	})
 })

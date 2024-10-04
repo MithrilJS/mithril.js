@@ -251,89 +251,65 @@ suite.add("add large nested tree", {
 			fields.push((i * 999).toString(36))
 		}
 
-		var NestedHeader = () => ({
-			view() {
-				return m("header",
-					m("h1.asdf", "a ", "b", " c ", 0, " d"),
-					m("nav",
-						m("a", {href: "/foo"}, "Foo"),
-						m("a", {href: "/bar"}, "Bar")
+		var NestedHeader = () => m("header",
+			m("h1.asdf", "a ", "b", " c ", 0, " d"),
+			m("nav",
+				m("a", {href: "/foo"}, "Foo"),
+				m("a", {href: "/bar"}, "Bar")
+			)
+		)
+
+		var NestedForm = () => m("form", {onSubmit: function () {}},
+			m("input[type=checkbox][checked]"),
+			m("input[type=checkbox]", {checked: false}),
+			m("fieldset",
+				m("label",
+					m("input[type=radio][checked]")
+				),
+				m("label",
+					m("input[type=radio]")
+				)
+			),
+			m("fieldset",
+				fields.map(function (field) {
+					return m("label",
+						field,
+						":",
+						m("input", {placeholder: field})
 					)
-				)
-			}
-		})
+				})
+			),
+			m(NestedButtonBar, null)
+		)
 
-		var NestedForm = () => ({
-			view() {
-				return m("form", {onSubmit: function () {}},
-					m("input[type=checkbox][checked]"),
-					m("input[type=checkbox]", {checked: false}),
-					m("fieldset",
-						m("label",
-							m("input[type=radio][checked]")
-						),
-						m("label",
-							m("input[type=radio]")
-						)
-					),
-					m("fieldset",
-						fields.map(function (field) {
-							return m("label",
-								field,
-								":",
-								m("input", {placeholder: field})
-							)
-						})
-					),
-					m(NestedButtonBar, null)
-				)
-			}
-		})
+		var NestedButtonBar = () => m(".button-bar",
+			m(NestedButton,
+				{style: "width:10px; height:10px; border:1px solid #FFF;"},
+				"Normal CSS"
+			),
+			m(NestedButton,
+				{style: "top:0 ; right: 20"},
+				"Poor CSS"
+			),
+			m(NestedButton,
+				{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+				"Poorer CSS"
+			),
+			m(NestedButton,
+				{style: {margin: 0, padding: "10px", overflow: "visible"}},
+				"Object CSS"
+			)
+		)
 
-		var NestedButtonBar = () => ({
-			view() {
-				return m(".button-bar",
-					m(NestedButton,
-						{style: "width:10px; height:10px; border:1px solid #FFF;"},
-						"Normal CSS"
-					),
-					m(NestedButton,
-						{style: "top:0 ; right: 20"},
-						"Poor CSS"
-					),
-					m(NestedButton,
-						{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-						"Poorer CSS"
-					),
-					m(NestedButton,
-						{style: {margin: 0, padding: "10px", overflow: "visible"}},
-						"Object CSS"
-					)
-				)
-			}
-		})
+		var NestedButton = (attrs) => m("button", attrs)
 
-		var NestedButton = () => ({
-			view(vnode) {
-				return m("button", vnode.attrs, vnode.children)
-			}
-		})
+		var NestedMain = () => m(NestedForm)
 
-		var NestedMain = () => ({
-			view() {
-				return m(NestedForm)
-			}
-		})
-
-		this.NestedRoot = () => ({
-			view() {
-				return m("div.foo.bar[data-foo=bar]",
-					{p: 2},
-					m(NestedHeader),
-					m(NestedMain)
-				)
-			}
-		})
+		this.NestedRoot = () => m("div.foo.bar[data-foo=bar]",
+			{p: 2},
+			m(NestedHeader),
+			m(NestedMain)
+		)
 	},
 	fn: function () {
 		m.render(rootElem, m(this.NestedRoot))
@@ -401,80 +377,56 @@ suite.add("mutate styles/properties", {
 
 suite.add("repeated add/removal", {
 	setup: function () {
-		var RepeatedHeader = () => ({
-			view() {
-				return m("header",
-					m("h1.asdf", "a ", "b", " c ", 0, " d"),
-					m("nav",
-						m("a", {href: "/foo"}, "Foo"),
-						m("a", {href: "/bar"}, "Bar")
-					)
+		var RepeatedHeader = () => m("header",
+			m("h1.asdf", "a ", "b", " c ", 0, " d"),
+			m("nav",
+				m("a", {href: "/foo"}, "Foo"),
+				m("a", {href: "/bar"}, "Bar")
+			)
+		)
+
+		var RepeatedForm = () => m("form", {onSubmit: function () {}},
+			m("input", {type: "checkbox", checked: true}),
+			m("input", {type: "checkbox", checked: false}),
+			m("fieldset",
+				m("label",
+					m("input", {type: "radio", checked: true})
+				),
+				m("label",
+					m("input", {type: "radio"})
 				)
-			}
-		})
+			),
+			m(RepeatedButtonBar, null)
+		)
 
-		var RepeatedForm = () => ({
-			view() {
-				return m("form", {onSubmit: function () {}},
-					m("input", {type: "checkbox", checked: true}),
-					m("input", {type: "checkbox", checked: false}),
-					m("fieldset",
-						m("label",
-							m("input", {type: "radio", checked: true})
-						),
-						m("label",
-							m("input", {type: "radio"})
-						)
-					),
-					m(RepeatedButtonBar, null)
-				)
-			}
-		})
+		var RepeatedButtonBar = () => m(".button-bar",
+			m(RepeatedButton,
+				{style: "width:10px; height:10px; border:1px solid #FFF;"},
+				"Normal CSS"
+			),
+			m(RepeatedButton,
+				{style: "top:0 ; right: 20"},
+				"Poor CSS"
+			),
+			m(RepeatedButton,
+				{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+				"Poorer CSS"
+			),
+			m(RepeatedButton,
+				{style: {margin: 0, padding: "10px", overflow: "visible"}},
+				"Object CSS"
+			)
+		)
 
-		var RepeatedButtonBar = () => ({
-			view() {
-				return m(".button-bar",
-					m(RepeatedButton,
-						{style: "width:10px; height:10px; border:1px solid #FFF;"},
-						"Normal CSS"
-					),
-					m(RepeatedButton,
-						{style: "top:0 ; right: 20"},
-						"Poor CSS"
-					),
-					m(RepeatedButton,
-						{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-						"Poorer CSS"
-					),
-					m(RepeatedButton,
-						{style: {margin: 0, padding: "10px", overflow: "visible"}},
-						"Object CSS"
-					)
-				)
-			}
-		})
+		var RepeatedButton = (attrs) => m("button", attrs)
 
-		var RepeatedButton = () => ({
-			view(vnode) {
-				return m("button", vnode.attrs, vnode.children)
-			}
-		})
+		var RepeatedMain = () => m(RepeatedForm)
 
-		var RepeatedMain = () => ({
-			view() {
-				return m(RepeatedForm)
-			}
-		})
-
-		this.RepeatedRoot = () => ({
-			view() {
-				return m("div.foo.bar[data-foo=bar]",
-					{p: 2},
-					m(RepeatedHeader, null),
-					m(RepeatedMain, null)
-				)
-			}
-		})
+		this.RepeatedRoot = () => m("div.foo.bar[data-foo=bar]",
+			{p: 2},
+			m(RepeatedHeader, null),
+			m(RepeatedMain, null)
+		)
 	},
 	fn: function () {
 		m.render(rootElem, [m(this.RepeatedRoot)])

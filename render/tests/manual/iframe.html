@@ -9,14 +9,8 @@
         <script>
             var count = 0
 
-            var Button = () => ({
-                view: function() {
-                    return m(
-                        "button",
-                        {onclick: function() { count += 1 }},
-                        "Inside the iframe: " + count)
-                }
-            })
+            var Button = () =>
+				m("button", {onclick() { count++ }}, "Inside the iframe: ", count)
 
             m.mount(document.getElementById("root"), () => m(Button))
         </script>

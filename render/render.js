@@ -18,26 +18,6 @@ function getNameSpace(vnode) {
 	return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
 }
 
-//sanity check to discourage people from doing `vnode.state = ...`
-
-//Note: the hook is passed as the `this` argument to allow proxying the
-//arguments without requiring a full array allocation to do so. It also
-//takes advantage of the fact the current `vnode` is the first argument in
-//all lifecycle methods.
-function callView(vnode, old) {
-	try {
-		var original = vnode.state
-		var result = hyperscript.normalize(original.view(vnode, old))
-		if (result === vnode) throw Error("A view cannot return the vnode it received as argument")
-		return result
-	} finally {
-		if (vnode.state !== original) {
-			// eslint-disable-next-line no-unsafe-finally
-			throw new Error("'vnode.state' must not be modified.")
-		}
-	}
-}
-
 // IE11 (at least) throws an UnspecifiedError when accessing document.activeElement when
 // inside an iframe. Catch and swallow this error, and heavy-handidly return null.
 function activeElement(dom) {
@@ -113,12 +93,12 @@ function createElement(parent, vnode, hooks, ns, nextSibling) {
 	}
 }
 function createComponent(rawParent, parent, vnode, hooks, ns, nextSibling) {
-	vnode.state = void 0
-	vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
-	vnode.instance = callView(vnode)
+	var tree = (vnode.state = vnode.tag)(vnode.attrs)
+	if (typeof tree === "function") tree = (vnode.state = tree)(vnode.attrs)
+	if (tree === vnode) throw Error("A view cannot return the vnode it received as argument")
+	vnode.instance = hyperscript.normalize(tree)
 	if (vnode.instance != null) {
 		createNode(rawParent, parent, vnode.instance, hooks, ns, nextSibling)
-		vnode.dom = vnode.instance.dom
 	}
 }
 
@@ -408,20 +388,14 @@ function updateElement(old, vnode, hooks, ns) {
 	}
 }
 function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
-	vnode.state = old.state
-	vnode.instance = old.instance
-	vnode.instance = callView(vnode, old)
+	vnode.instance = hyperscript.normalize((vnode.state = old.state)(vnode.attrs, old.attrs))
 	if (vnode.instance != null) {
+		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		if (old.instance == null) createNode(parent, parent, vnode.instance, hooks, ns, nextSibling)
 		else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
-		vnode.dom = vnode.instance.dom
 	}
 	else if (old.instance != null) {
 		removeNode(parent, old.instance, false)
-		vnode.dom = undefined
-	}
-	else {
-		vnode.dom = old.dom
 	}
 }
 function getKeyMap(vnodes, start, end) {
@@ -560,7 +534,7 @@ function setAttrs(vnode, attrs, ns) {
 	}
 }
 function setAttr(vnode, key, old, value, ns, isFileInput) {
-	if (value == null || key === "is" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || key === "type" && vnode.tag === "input") return
+	if (value == null || key === "is" || key === "children" || (old === value && !isFormAttribute(vnode, key)) && typeof value !== "object" || key === "type" && vnode.tag === "input") return
 	if (key.startsWith("on")) updateEvent(vnode, key, value)
 	else if (key.startsWith("xlink:")) vnode.dom.setAttributeNS(xlinkNs, key.slice(6), value)
 	else if (key === "style") updateStyle(vnode.dom, old, value)
@@ -593,7 +567,7 @@ function setAttr(vnode, key, old, value, ns, isFileInput) {
 	}
 }
 function removeAttr(vnode, key, old, ns) {
-	if (old == null || key === "is") return
+	if (old == null || key === "is" || key === "children") return
 	if (key.startsWith("on")) updateEvent(vnode, key, undefined)
 	else if (key.startsWith("xlink:")) vnode.dom.removeAttributeNS(xlinkNs, key.slice(6))
 	else if (key === "style") updateStyle(vnode.dom, old, null)

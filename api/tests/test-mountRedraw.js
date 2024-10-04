@@ -26,10 +26,6 @@ o.spec("mount/redraw", function() {
 		o(throttleMock.queueLength()).equals(0)
 	})
 
-	var Inline = () => ({
-		view: (vnode, old) => vnode.attrs.view(vnode, old),
-	})
-
 	o("shouldn't error if there are no renderers", function() {
 		m.redraw()
 		throttleMock.fire()
@@ -236,11 +232,9 @@ o.spec("mount/redraw", function() {
 		var root2 = $document.createElement("div")
 		var root3 = $document.createElement("div")
 
-		m.mount(root1, () => h(Inline, {
-			view(_, old) {
-				if (old) m.mount(root2, null)
-				calls.push("root1")
-			},
+		m.mount(root1, () => h.layout((_, __, isInit) => {
+			if (!isInit) m.mount(root2, null)
+			calls.push("root1")
 		}))
 		m.mount(root2, () => { calls.push("root2") })
 		m.mount(root3, () => { calls.push("root3") })
@@ -262,11 +256,9 @@ o.spec("mount/redraw", function() {
 		var root3 = $document.createElement("div")
 
 		m.mount(root1, () => { calls.push("root1") })
-		m.mount(root2, () => h(Inline, {
-			view(_, old) {
-				if (old) m.mount(root1, null)
-				calls.push("root2")
-			},
+		m.mount(root2, () => h.layout((_, __, isInit) => {
+			if (!isInit) m.mount(root1, null)
+			calls.push("root2")
 		}))
 		m.mount(root3, () => { calls.push("root3") })
 		o(calls).deepEquals([
@@ -288,11 +280,9 @@ o.spec("mount/redraw", function() {
 		var root3 = $document.createElement("div")
 
 		m.mount(root1, () => { calls.push("root1") })
-		m.mount(root2, () => h(Inline, {
-			view(_, old) {
-				if (old) { m.mount(root1, null); throw "fail" }
-				calls.push("root2")
-			},
+		m.mount(root2, () => h.layout((_, __, isInit) => {
+			if (!isInit) { m.mount(root1, null); throw "fail" }
+			calls.push("root2")
 		}))
 		m.mount(root3, () => { calls.push("root3") })
 		o(calls).deepEquals([
@@ -313,11 +303,9 @@ o.spec("mount/redraw", function() {
 		var root3 = $document.createElement("div")
 
 		m.mount(root1, () => { calls.push("root1") })
-		m.mount(root2, () => h(Inline, {
-			view(_, old) {
-				if (old) try { m.mount(root2, null) } catch (e) { calls.push([e.constructor, e.message]) }
-				calls.push("root2")
-			},
+		m.mount(root2, () => h.layout((_, __, isInit) => {
+			if (!isInit) try { m.mount(root2, null) } catch (e) { calls.push([e.constructor, e.message]) }
+			calls.push("root2")
 		}))
 		m.mount(root3, () => { calls.push("root3") })
 		o(calls).deepEquals([
@@ -341,11 +329,9 @@ o.spec("mount/redraw", function() {
 		var root3 = $document.createElement("div")
 
 		m.mount(root1, () => { calls.push("root1") })
-		m.mount(root2, () => h(Inline, {
-			view(_, old) {
-				if (old) try { m.mount(root2, null) } catch (e) { throw [e.constructor, e.message] }
-				calls.push("root2")
-			},
+		m.mount(root2, () => h.layout((_, __, isInit) => {
+			if (!isInit) try { m.mount(root2, null) } catch (e) { throw [e.constructor, e.message] }
+			calls.push("root2")
 		}))
 		m.mount(root3, () => { calls.push("root3") })
 		o(calls).deepEquals([

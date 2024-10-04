@@ -5,9 +5,9 @@ var m = require("../render/hyperscript")
 
 module.exports = (opts, redraw = mountRedraw.redraw) => {
 	var fetched = false
-	var Comp = () => ({view: () => opts.pending && opts.pending()})
+	var Comp = () => opts.pending && opts.pending()
 	var e = new ReferenceError("Component not found")
-	var ShowError = () => ({view: () => opts.error && opts.error(e)})
+	var ShowError = () => opts.error && opts.error(e)
 
 	return () => {
 		if (!fetched) {
@@ -30,6 +30,6 @@ module.exports = (opts, redraw = mountRedraw.redraw) => {
 			)
 		}
 
-		return {view: ({attrs}) => m(Comp, attrs)}
+		return (attrs) => m(Comp, attrs)
 	}
 }

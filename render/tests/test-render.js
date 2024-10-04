@@ -58,44 +58,22 @@ o.spec("render", function() {
 		o(threw).equals(true)
 	})
 
-	o("tries to re-initialize a constructible component whose view has thrown", function() {
-		var A = o.spy()
-		var view = o.spy(() => { throw new Error("error") })
-		A.prototype.view = view
-		var throwCount = 0
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
-		o(A.callCount).equals(1)
-		o(view.callCount).equals(1)
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(2)
-		o(A.callCount).equals(2)
-		o(view.callCount).equals(2)
-	})
-	o("tries to re-initialize a constructible component whose constructor has thrown", function() {
+	o("tries to re-initialize a component that threw on create", function() {
 		var A = o.spy(() => { throw new Error("error") })
-		var view = o.spy()
-		A.prototype.view = view
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(A.callCount).equals(1)
-		o(view.callCount).equals(0)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
-		o(view.callCount).equals(0)
 	})
-	o("tries to re-initialize a closure component whose view has thrown", function() {
-		var A = o.spy(() => ({view}))
+	o("tries to re-initialize a stateful component whose view threw on create", function() {
+		var A = o.spy(() => view)
 		var view = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
 		try {render(root, m(A))} catch (e) {throwCount++}
@@ -109,19 +87,6 @@ o.spec("render", function() {
 		o(throwCount).equals(2)
 		o(A.callCount).equals(2)
 		o(view.callCount).equals(2)
-	})
-	o("tries to re-initialize a closure component whose closure has thrown", function() {
-		var A = o.spy(() => { throw new Error("error") })
-		var throwCount = 0
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
-		o(A.callCount).equals(1)
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(2)
-		o(A.callCount).equals(2)
 	})
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
 		var onabortA = o.spy()
@@ -287,10 +252,8 @@ o.spec("render", function() {
 		var thrown = []
 		function A() {
 			try {render(root, m(A))} catch (e) {thrown.push("construct")}
-			return {
-				view: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("view")}
-				},
+			return () => {
+				try {render(root, m(A))} catch (e) {thrown.push("view")}
 			}
 		}
 		render(root, m(A))

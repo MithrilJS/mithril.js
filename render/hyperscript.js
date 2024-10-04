@@ -76,7 +76,9 @@ function m(selector, attrs, ...children) {
 	}
 
 	if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
-		children = children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
+		children = children.length === 0 && attrs && hasOwn.call(attrs, "children") && Array.isArray(attrs.children)
+			? attrs.children.slice()
+			: children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
 	} else {
 		children = children.length === 0 && Array.isArray(attrs) ? attrs.slice() : [attrs, ...children]
 		attrs = undefined
@@ -84,12 +86,13 @@ function m(selector, attrs, ...children) {
 
 	if (attrs == null) attrs = {}
 
-	if (typeof selector === "string") {
-		children = m.normalizeChildren(children)
-		if (selector !== "[") return execSelector(selector, attrs, children)
+	if (typeof selector !== "string") {
+		return Vnode(selector, undefined, Object.assign({children}, attrs), undefined)
 	}
 
-	return Vnode(selector, undefined, attrs, children)
+	children = m.normalizeChildren(children)
+	if (selector === "[") return Vnode(selector, undefined, attrs, children)
+	return execSelector(selector, attrs, children)
 }
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
