@@ -65,7 +65,7 @@ function execSelector(selector, attrs, children) {
 		if (hasClassName) attrs.className = null
 	}
 
-	return Vnode(state.tag, {}, attrs, children)
+	return Vnode(state.tag, undefined, attrs, children)
 }
 
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid

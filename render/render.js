@@ -387,8 +387,6 @@ function updateText(old, vnode) {
 	vnode.dom = old.dom
 }
 function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
-	vnode.state = old.state
-	vnode.instance = old.instance
 	updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 	vnode.dom = null
 	if (vnode.children != null) {
@@ -401,7 +399,6 @@ function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 }
 function updateElement(old, vnode, hooks, ns) {
 	vnode.state = old.state
-	vnode.instance = old.instance
 	var element = vnode.dom = old.dom
 	ns = getNameSpace(vnode) || ns
 
@@ -747,21 +744,21 @@ class EventDict extends Map {
 
 //event
 function updateEvent(vnode, key, value) {
-	if (vnode.instance != null) {
-		vnode.instance._ = currentRedraw
-		var prev = vnode.instance.get(key)
+	if (vnode.state != null) {
+		vnode.state._ = currentRedraw
+		var prev = vnode.state.get(key)
 		if (prev === value) return
 		if (value != null && (typeof value === "function" || typeof value === "object")) {
-			if (prev == null) vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
-			vnode.instance.set(key, value)
+			if (prev == null) vnode.dom.addEventListener(key.slice(2), vnode.state, false)
+			vnode.state.set(key, value)
 		} else {
-			if (prev != null) vnode.dom.removeEventListener(key.slice(2), vnode.instance, false)
-			vnode.instance.delete(key)
+			if (prev != null) vnode.dom.removeEventListener(key.slice(2), vnode.state, false)
+			vnode.state.delete(key)
 		}
 	} else if (value != null && (typeof value === "function" || typeof value === "object")) {
-		vnode.instance = new EventDict()
-		vnode.dom.addEventListener(key.slice(2), vnode.instance, false)
-		vnode.instance.set(key, value)
+		vnode.state = new EventDict()
+		vnode.dom.addEventListener(key.slice(2), vnode.state, false)
+		vnode.state.set(key, value)
 	}
 }
 
