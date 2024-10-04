@@ -54,8 +54,8 @@ module.exports = function($window, redraw) {
 		// accessibility on accident.
 		link: (opts) => (
 			opts.disabled
-				// If you *really* do want add `onclick` on a disabled link, use
-				// an `oncreate` hook to add it.
+				// If you *really* do want add `onclick` on a disabled link, spread this and add it
+				// explicitly in your code.
 				? {disabled: true, "aria-disabled": "true"}
 				: {
 					href: routePrefix + opts.href,
