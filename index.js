@@ -10,6 +10,8 @@ m.redraw = mountRedraw.redraw
 m.p = require("./util/p")
 m.withProgress = require("./util/with-progress")
 m.lazy = require("./util/lazy")
+m.init = require("./util/init")
+m.use = require("./util/use")
 m.tracked = require("./util/tracked")
 
 module.exports = m

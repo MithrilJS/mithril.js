@@ -104,16 +104,13 @@ m.retain = () => Vnode("!", undefined, undefined, undefined)
 
 m.layout = (f) => Vnode(">", f, undefined, undefined)
 
-m.fragment = (...args) => m("[", ...args)
-
-// When removal is blocked, all ancestors are also blocked. This doesn't block other children, so
-// this method also needs to accept an optional list of children to also keep alive while blocked.
-//
-// Note that the children are still notified of removal *immediately*.
-m.key = (key, ...children) =>
-	Vnode("=", key, undefined, m.normalizeChildren(
+var simpleVnode = (tag, state, ...children) =>
+	Vnode(tag, state, undefined, m.normalizeChildren(
 		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
 	))
+
+m.fragment = (...children) => simpleVnode("[", undefined, ...children)
+m.key = (key, ...children) => simpleVnode("=", key, ...children)
 
 m.normalize = (node) => {
 	if (node == null || typeof node === "boolean") return null

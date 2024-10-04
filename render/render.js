@@ -360,7 +360,7 @@ function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 		vnode.children = old.children
 		vnode.dom = old.dom
 		vnode.instance = old.instance
-	} else if (oldTag === tag) {
+	} else if (oldTag === tag && (tag !== "=" || vnode.state === old.state)) {
 		if (typeof oldTag === "string") {
 			switch (oldTag) {
 				case ">": updateLayout(parent, old, vnode, hooks); break
