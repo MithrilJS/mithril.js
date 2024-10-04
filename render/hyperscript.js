@@ -95,6 +95,8 @@ function m(selector, attrs, ...children) {
 	return Vnode(selector, {}, attrs, children)
 }
 
+m.retain = () => Vnode("!", undefined, undefined, undefined)
+
 m.fragment = (...args) => m("[", ...args)
 
 // When removal is blocked, all ancestors are also blocked. This doesn't block other children, so

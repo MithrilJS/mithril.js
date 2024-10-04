@@ -60,75 +60,71 @@ o.spec("render", function() {
 
 	o("does not try to re-initialize a constructible component whose view has thrown", function() {
 		var oninit = o.spy()
-		var onbeforeupdate = o.spy()
+		var view = o.spy(() => { throw new Error("error") })
 		function A(){}
-		A.prototype.view = function() {throw new Error("error")}
+		A.prototype.view = view
 		A.prototype.oninit = oninit
-		A.prototype.onbeforeupdate = onbeforeupdate
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(1)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(1)
 	})
 	o("does not try to re-initialize a constructible component whose oninit has thrown", function() {
 		var oninit = o.spy(function(){throw new Error("error")})
-		var onbeforeupdate = o.spy()
+		var view = o.spy()
 		function A(){}
-		A.prototype.view = function(){}
+		A.prototype.view = view
 		A.prototype.oninit = oninit
-		A.prototype.onbeforeupdate = onbeforeupdate
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 	})
 	o("does not try to re-initialize a constructible component whose constructor has thrown", function() {
 		var oninit = o.spy()
-		var onbeforeupdate = o.spy()
+		var view = o.spy()
 		function A(){throw new Error("error")}
-		A.prototype.view = function() {}
+		A.prototype.view = view
 		A.prototype.oninit = oninit
-		A.prototype.onbeforeupdate = onbeforeupdate
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(0)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(0)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 	})
 	o("does not try to re-initialize a closure component whose view has thrown", function() {
 		var oninit = o.spy()
-		var onbeforeupdate = o.spy()
+		var view = o.spy(() => { throw new Error("error") })
 		function A() {
 			return {
-				view: function() {throw new Error("error")},
+				view: view,
 				oninit: oninit,
-				onbeforeupdate: onbeforeupdate
 			}
 		}
 		var throwCount = 0
@@ -136,22 +132,21 @@ o.spec("render", function() {
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(1)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(1)
 	})
 	o("does not try to re-initialize a closure component whose oninit has thrown", function() {
 		var oninit = o.spy(function() {throw new Error("error")})
-		var onbeforeupdate = o.spy()
+		var view = o.spy()
 		function A() {
 			return {
-				view: function() {},
+				view: view,
 				oninit: oninit,
-				onbeforeupdate: onbeforeupdate
 			}
 		}
 		var throwCount = 0
@@ -159,13 +154,13 @@ o.spec("render", function() {
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
 		o(oninit.callCount).equals(1)
-		o(onbeforeupdate.callCount).equals(0)
+		o(view.callCount).equals(0)
 	})
 	o("does not try to re-initialize a closure component whose closure has thrown", function() {
 		function A() {
@@ -314,9 +309,6 @@ o.spec("render", function() {
 				oncreate: function() {
 					try {render(root, m(A))} catch (e) {thrown.push("oncreate")}
 				},
-				onbeforeupdate: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("onbeforeupdate")}
-				},
 				onupdate: function() {
 					if (updated) return
 					updated = true
@@ -343,7 +335,6 @@ o.spec("render", function() {
 			"oninit",
 			"view",
 			"oncreate",
-			"onbeforeupdate",
 			"view",
 			"onupdate",
 		])
@@ -353,7 +344,6 @@ o.spec("render", function() {
 			"oninit",
 			"view",
 			"oncreate",
-			"onbeforeupdate",
 			"view",
 			"onupdate",
 			"onremove",

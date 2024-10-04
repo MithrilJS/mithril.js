@@ -624,27 +624,17 @@ o.spec("component", function() {
 					}
 					var attrs = {}
 					var hooks = [
-						"oninit", "oncreate", "onbeforeupdate",
+						"oninit", "oncreate",
 						"onupdate", "onremove"
 					]
 					hooks.forEach(function(hook) {
-						if (hook === "onbeforeupdate") {
-							// the component's `onbeforeupdate` is called after the `attrs`' one
-							attrs[hook] = o.spy(function() {
-								o(attrs[hook].callCount).equals(methods[hook].callCount + 1)(hook)
-							})
-							methods[hook] = o.spy(function() {
-								o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-							})
-						} else {
-							// the other component hooks are called before the `attrs` ones
-							methods[hook] = o.spy(function() {
-								o(attrs[hook].callCount).equals(methods[hook].callCount - 1)(hook)
-							})
-							attrs[hook] = o.spy(function() {
-								o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-							})
-						}
+						// the other component hooks are called before the `attrs` ones
+						methods[hook] = o.spy(function() {
+							o(attrs[hook].callCount).equals(methods[hook].callCount - 1)(hook)
+						})
+						attrs[hook] = o.spy(function() {
+							o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
+						})
 					})
 
 					var component = createComponent(methods)
@@ -652,7 +642,6 @@ o.spec("component", function() {
 					o(methods.view.callCount).equals(0)
 					o(methods.oninit.callCount).equals(0)
 					o(methods.oncreate.callCount).equals(0)
-					o(methods.onbeforeupdate.callCount).equals(0)
 					o(methods.onupdate.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
 
@@ -665,7 +654,6 @@ o.spec("component", function() {
 					o(methods.view.callCount).equals(1)
 					o(methods.oninit.callCount).equals(1)
 					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(0)
 					o(methods.onupdate.callCount).equals(0)
 					o(methods.onremove.callCount).equals(0)
 
@@ -678,7 +666,6 @@ o.spec("component", function() {
 					o(methods.view.callCount).equals(2)
 					o(methods.oninit.callCount).equals(1)
 					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(1)
 					o(methods.onupdate.callCount).equals(1)
 					o(methods.onremove.callCount).equals(0)
 
@@ -691,7 +678,6 @@ o.spec("component", function() {
 					o(methods.view.callCount).equals(2)
 					o(methods.oninit.callCount).equals(1)
 					o(methods.oncreate.callCount).equals(1)
-					o(methods.onbeforeupdate.callCount).equals(1)
 					o(methods.onupdate.callCount).equals(1)
 					o(methods.onremove.callCount).equals(1)
 
@@ -708,7 +694,7 @@ o.spec("component", function() {
 					}
 					var attrs = {}
 					var hooks = [
-						"oninit", "oncreate", "onbeforeupdate",
+						"oninit", "oncreate",
 						"onupdate", "onremove"
 					]
 					hooks.forEach(function(hook) {
@@ -731,10 +717,9 @@ o.spec("component", function() {
 						o(methods[hook].this).equals(methods.view.this)(hook)
 					})
 
-					o(methods.view.args.length).equals(1)
+					o(methods.view.args.length).equals(2)
 					o(methods.oninit.args.length).equals(1)
 					o(methods.oncreate.args.length).equals(1)
-					o(methods.onbeforeupdate.args.length).equals(2)
 					o(methods.onupdate.args.length).equals(1)
 					o(methods.onremove.args.length).equals(1)
 

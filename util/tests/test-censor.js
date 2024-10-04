@@ -25,7 +25,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -39,7 +38,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -49,7 +47,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			})
@@ -77,7 +74,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -91,7 +87,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -101,7 +96,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			})
@@ -129,7 +123,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -143,7 +136,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -153,7 +145,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			})
@@ -191,7 +182,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -206,7 +196,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			}
@@ -217,7 +206,6 @@ o.spec("censor", function() {
 				key: "test",
 				oninit: "test",
 				oncreate: "test",
-				onbeforeupdate: "test",
 				onupdate: "test",
 				onremove: "test",
 			})

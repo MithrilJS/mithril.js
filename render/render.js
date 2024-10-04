@@ -59,6 +59,7 @@ function createNode(parent, vnode, hooks, ns, nextSibling) {
 	if (typeof tag === "string") {
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 		switch (tag) {
+			case "!": throw new Error("No node present to retain with `m.retain()`")
 			case "#": createText(parent, vnode, nextSibling); break
 			case "=":
 			case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
@@ -353,10 +354,20 @@ function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 }
 function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 	var oldTag = old.tag, tag = vnode.tag
-	if (oldTag === tag) {
+	if (tag === "!") {
+		// If it's a retain node, transmute it into the node it's retaining. Makes it much easier
+		// to implement and work with.
+		//
+		// Note: this key list *must* be complete.
+		vnode.tag = oldTag
+		vnode.state = old.state
+		vnode.attrs = old.attrs
+		vnode.children = old.children
+		vnode.dom = old.dom
+		vnode.instance = old.instance
+	} else if (oldTag === tag) {
 		vnode.state = old.state
 		vnode.instance = old.instance
-		if (shouldNotUpdate(vnode, old)) return
 		if (typeof oldTag === "string") {
 			if (vnode.attrs != null) {
 				updateLifecycle(vnode.attrs, vnode, hooks)
@@ -402,7 +413,7 @@ function updateElement(old, vnode, hooks, ns) {
 	}
 }
 function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
-	vnode.instance = hyperscript.normalize(callHook.call(vnode.state.view, vnode))
+	vnode.instance = hyperscript.normalize(callHook.call(vnode.state.view, vnode, old))
 	if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 	updateLifecycle(vnode.state, vnode, hooks)
 	if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
@@ -653,7 +664,7 @@ function updateAttrs(vnode, old, attrs, ns) {
 	}
 }
 var isAlwaysFormAttribute = new Set(["value", "checked", "selected", "selectedIndex"])
-var isSpecialAttribute = new Set(["key", "is", "oninit", "oncreate", "onupdate", "onremove", "onbeforeupdate"])
+var isSpecialAttribute = new Set(["key", "is", "oninit", "oncreate", "onupdate", "onremove"])
 // Try to avoid a few browser bugs on normal elements.
 // var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height", "type"])
 var propertyMayBeBugged = new Set(["href", "list", "form", "width", "height"])
@@ -770,31 +781,6 @@ function initLifecycle(source, vnode, hooks) {
 }
 function updateLifecycle(source, vnode, hooks) {
 	if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
-}
-function shouldNotUpdate(vnode, old) {
-	do {
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
-			var force = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
-			if (force !== undefined && !force) break
-		}
-		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
-			var force = callHook.call(vnode.state.onbeforeupdate, vnode, old)
-			if (force !== undefined && !force) break
-		}
-		return false
-	} while (false); // eslint-disable-line no-constant-condition
-	vnode.dom = old.dom
-	vnode.instance = old.instance
-	// One would think having the actual latest attributes would be ideal,
-	// but it doesn't let us properly diff based on our current internal
-	// representation. We have to save not only the old DOM info, but also
-	// the attributes used to create it, as we diff *that*, not against the
-	// DOM directly (with a few exceptions in `setAttr`). And, of course, we
-	// need to save the children and text as they are conceptually not
-	// unlike special "attributes" internally.
-	vnode.attrs = old.attrs
-	vnode.children = old.children
-	return true
 }
 
 var currentDOM
