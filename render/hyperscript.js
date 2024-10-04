@@ -68,9 +68,6 @@ function execSelector(selector, attrs, children) {
 	return Vnode(state.tag, {}, attrs, children)
 }
 
-var resolveChildren = (...children) =>
-	(children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : children)
-
 // Caution is advised when editing this - it's very perf-critical. It's specially designed to avoid
 // allocations in the fast path, especially with fragments.
 function m(selector, attrs, ...children) {
@@ -79,9 +76,9 @@ function m(selector, attrs, ...children) {
 	}
 
 	if (attrs == null || typeof attrs === "object" && attrs.tag == null && !Array.isArray(attrs)) {
-		children = resolveChildren(...children)
+		children = children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
 	} else {
-		children = resolveChildren(attrs, ...children)
+		children = children.length === 0 && Array.isArray(attrs) ? attrs.slice() : [attrs, ...children]
 		attrs = undefined
 	}
 
@@ -103,7 +100,10 @@ m.fragment = (...args) => m("[", ...args)
 // this method also needs to accept an optional list of children to also keep alive while blocked.
 //
 // Note that the children are still notified of removal *immediately*.
-m.key = (key, ...children) => Vnode("=", key, undefined, m.normalizeChildren(resolveChildren(...children)))
+m.key = (key, ...children) =>
+	Vnode("=", key, undefined, m.normalizeChildren(
+		children.length === 1 && Array.isArray(children[0]) ? children[0].slice() : [...children]
+	))
 
 m.normalize = (node) => {
 	if (node == null || typeof node === "boolean") return null
