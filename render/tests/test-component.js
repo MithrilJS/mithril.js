@@ -280,9 +280,9 @@ o.spec("component", function() {
 					// A view that returns its vnode would otherwise trigger an infinite loop
 					var threw = false
 					var init = true
-					var oninit = o.spy()
+					var constructor = o.spy()
 					var component = createComponent({
-						oninit: oninit,
+						constructor: constructor,
 						view: function(vnode) {
 							if (init) return init = false
 							else return vnode
@@ -302,7 +302,7 @@ o.spec("component", function() {
 						o(e instanceof RangeError).equals(false)
 					}
 					o(threw).equals(true)
-					o(oninit.callCount).equals(1)
+					o(constructor.callCount).equals(1)
 				})
 				o("can update when returning fragments", function() {
 					var component = createComponent({
@@ -376,10 +376,10 @@ o.spec("component", function() {
 				})
 			})
 			o.spec("lifecycle", function() {
-				o("calls oninit", function() {
+				o("calls constructor", function() {
 					var called = 0
 					var component = createComponent({
-						oninit: function(vnode) {
+						constructor: function(vnode) {
 							called++
 
 							o(vnode.tag).equals(component)
@@ -398,10 +398,10 @@ o.spec("component", function() {
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
-				o("calls oninit when returning fragment", function() {
+				o("calls constructor when returning fragment", function() {
 					var called = 0
 					var component = createComponent({
-						oninit: function(vnode) {
+						constructor: function(vnode) {
 							called++
 
 							o(vnode.tag).equals(component)
@@ -420,27 +420,27 @@ o.spec("component", function() {
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
-				o("calls oninit before view", function() {
+				o("calls constructor before view", function() {
 					var viewCalled = false
 					var component = createComponent({
 						view: function() {
 							viewCalled = true
 							return m("div", {id: "a"}, "b")
 						},
-						oninit: function() {
+						constructor: function() {
 							o(viewCalled).equals(false)
 						},
 					})
 
 					render(root, m(component))
 				})
-				o("does not calls oninit on redraw", function() {
+				o("does not calls constructor on redraw", function() {
 					var init = o.spy()
 					var component = createComponent({
 						view: function() {
 							return m("div", {id: "a"}, "b")
 						},
-						oninit: init,
+						constructor: init,
 					})
 
 					function view() {
@@ -452,280 +452,217 @@ o.spec("component", function() {
 
 					o(init.callCount).equals(1)
 				})
-				o("calls oncreate", function() {
-					var called = 0
+				o("calls inner `m.layout` as initial on first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 					var component = createComponent({
-						oncreate: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						}
+						view: () => [
+							m.layout(layoutSpy),
+							m("div", {id: "a"}, "b"),
+						]
 					})
 
 					render(root, m(component))
 
-					o(called).equals(1)
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[0]).equals(root)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(onabort.callCount).equals(0)
+					o(layoutSpy.args[2]).equals(true)
 					o(root.firstChild.nodeName).equals("DIV")
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
-				o("does not calls oncreate on redraw", function() {
-					var create = o.spy()
+				o("calls inner `m.layout` as non-initial on subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 					var component = createComponent({
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						},
-						oncreate: create,
-					})
-
-					function view() {
-						return m(component)
-					}
-
-					render(root, view())
-					render(root, view())
-
-					o(create.callCount).equals(1)
-				})
-				o("calls oncreate when returning fragment", function() {
-					var called = 0
-					var component = createComponent({
-						oncreate: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						}
+						view: () => [
+							m.layout(layoutSpy),
+							m("div", {id: "a"}, "b"),
+						]
 					})
 
 					render(root, m(component))
+					render(root, m(component))
 
-					o(called).equals(1)
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[0]).equals(root)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(onabort.callCount).equals(0)
+					o(layoutSpy.args[2]).equals(false)
 					o(root.firstChild.nodeName).equals("DIV")
 					o(root.firstChild.attributes["id"].value).equals("a")
 					o(root.firstChild.firstChild.nodeValue).equals("b")
 				})
-				o("calls onupdate", function() {
-					var called = 0
+				o("aborts inner `m.layout` signal after first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 					var component = createComponent({
-						onupdate: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						}
+						view: () => [
+							m.layout(layoutSpy),
+							m("div", {id: "a"}, "b"),
+						]
 					})
 
 					render(root, m(component))
+					render(root, null)
 
-					o(called).equals(0)
-
-					render(root, m(component))
-
-					o(called).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].value).equals("a")
-					o(root.firstChild.firstChild.nodeValue).equals("b")
-				})
-				o("calls onupdate when returning fragment", function() {
-					var called = 0
-					var component = createComponent({
-						onupdate: function(vnode) {
-							called++
-
-							o(vnode.dom).notEquals(undefined)
-							o(vnode.dom).equals(root.firstChild)
-							o(root.childNodes.length).equals(1)
-						},
-						view: function() {
-							return [m("div", {id: "a"}, "b")]
-						}
-					})
-
-					render(root, m(component))
-
-					o(called).equals(0)
-
-					render(root, m(component))
-
-					o(called).equals(1)
-					o(root.firstChild.nodeName).equals("DIV")
-					o(root.firstChild.attributes["id"].value).equals("a")
-					o(root.firstChild.firstChild.nodeValue).equals("b")
-				})
-				o("calls onremove", function() {
-					var rootCountInCall
-					var onremove = o.spy(() => {
-						rootCountInCall = root.childNodes.length
-					})
-					var component = createComponent({
-						onremove,
-						view: function() {
-							return m("div", {id: "a"}, "b")
-						}
-					})
-
-					render(root, m(component))
-
-					o(onremove.callCount).equals(0)
-					o(root.childNodes.length).equals(1)
-					var firstChild = root.firstChild
-
-					render(root, [])
-
-					o(onremove.callCount).equals(1)
-					o(onremove.args[0].dom).equals(firstChild)
-					o(rootCountInCall).equals(0)
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
-				o("calls onremove when returning fragment", function() {
-					var rootCountInCall
-					var onremove = o.spy(() => {
-						rootCountInCall = root.childNodes.length
-					})
+				o("aborts inner `m.layout` signal after subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
 					var component = createComponent({
-						onremove,
-						view: function() {
-							return [m("div", {id: "a"}, "b")]
-						}
+						view: () => [
+							m.layout(layoutSpy),
+							m("div", {id: "a"}, "b"),
+						]
+					})
+
+					render(root, m(component))
+					render(root, m(component))
+					render(root, null)
+
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
+					o(root.childNodes.length).equals(0)
+				})
+				o("calls in-element inner `m.layout` as initial on first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m("div", {id: "a"}, m.layout(layoutSpy), "b"),
 					})
 
 					render(root, m(component))
 
-					o(onremove.callCount).equals(0)
-					o(root.childNodes.length).equals(1)
-					var firstChild = root.firstChild
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[0]).equals(root.firstChild)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(onabort.callCount).equals(0)
+					o(layoutSpy.args[2]).equals(true)
+					o(root.firstChild.nodeName).equals("DIV")
+					o(root.firstChild.attributes["id"].value).equals("a")
+					o(root.firstChild.firstChild.nodeValue).equals("b")
+				})
+				o("calls in-element inner `m.layout` as non-initial on subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m("div", {id: "a"}, m.layout(layoutSpy), "b"),
+					})
 
-					render(root, [])
+					render(root, m(component))
+					render(root, m(component))
 
-					o(onremove.callCount).equals(1)
-					o(onremove.args[0].dom).equals(firstChild)
-					o(rootCountInCall).equals(0)
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[0]).equals(root.firstChild)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(onabort.callCount).equals(0)
+					o(layoutSpy.args[2]).equals(false)
+					o(root.firstChild.nodeName).equals("DIV")
+					o(root.firstChild.attributes["id"].value).equals("a")
+					o(root.firstChild.firstChild.nodeValue).equals("b")
+				})
+				o("aborts in-element inner `m.layout` signal after first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m("div", {id: "a"}, m.layout(layoutSpy), "b"),
+					})
+
+					render(root, m(component))
+					render(root, null)
+
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
 					o(root.childNodes.length).equals(0)
 				})
-				o("lifecycle timing megatest (for a single component)", function() {
-					var methods = {
-						view: o.spy(function() {
-							return ""
-						})
-					}
-					var attrs = {}
-					var hooks = [
-						"oninit", "oncreate",
-						"onupdate", "onremove"
-					]
-					hooks.forEach(function(hook) {
-						// the other component hooks are called before the `attrs` ones
-						methods[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount - 1)(hook)
-						})
-						attrs[hook] = o.spy(function() {
-							o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-						})
+				o("aborts in-element inner `m.layout` signal after subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m("div", {id: "a"}, m.layout(layoutSpy), "b"),
 					})
 
-					var component = createComponent(methods)
+					render(root, m(component))
+					render(root, m(component))
+					render(root, null)
 
-					o(methods.view.callCount).equals(0)
-					o(methods.oninit.callCount).equals(0)
-					o(methods.oncreate.callCount).equals(0)
-					o(methods.onupdate.callCount).equals(0)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [m(component, attrs)])
-
-					o(methods.view.callCount).equals(1)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onupdate.callCount).equals(0)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [m(component, attrs)])
-
-					o(methods.view.callCount).equals(2)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onupdate.callCount).equals(1)
-					o(methods.onremove.callCount).equals(0)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
-
-					render(root, [])
-
-					o(methods.view.callCount).equals(2)
-					o(methods.oninit.callCount).equals(1)
-					o(methods.oncreate.callCount).equals(1)
-					o(methods.onupdate.callCount).equals(1)
-					o(methods.onremove.callCount).equals(1)
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].callCount).equals(methods[hook].callCount)(hook)
-					})
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
+					o(root.childNodes.length).equals(0)
 				})
-				o("hook state and arguments validation", function(){
-					var methods = {
-						view: o.spy(function(vnode) {
-							o(this).equals(vnode.state)
-							return ""
-						})
-					}
-					var attrs = {}
-					var hooks = [
-						"oninit", "oncreate",
-						"onupdate", "onremove"
-					]
-					hooks.forEach(function(hook) {
-						attrs[hook] = o.spy(function(vnode){
-							o(this).equals(vnode.state)(hook)
-						})
-						methods[hook] = o.spy(function(vnode){
-							o(this).equals(vnode.state)
-						})
+				o("calls direct inner `m.layout` as initial on first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m.layout(layoutSpy),
 					})
 
-					var component = createComponent(methods)
+					render(root, m(component))
 
-					render(root, [m(component, attrs)])
-					render(root, [m(component, attrs)])
-					render(root, [])
-
-					hooks.forEach(function(hook) {
-						o(attrs[hook].this).equals(methods.view.this)(hook)
-						o(methods[hook].this).equals(methods.view.this)(hook)
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[0]).equals(root)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(onabort.callCount).equals(0)
+					o(layoutSpy.args[2]).equals(true)
+					o(root.childNodes.length).equals(0)
+				})
+				o("calls direct inner `m.layout` as non-initial on subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m.layout(layoutSpy),
 					})
 
-					o(methods.view.args.length).equals(2)
-					o(methods.oninit.args.length).equals(1)
-					o(methods.oncreate.args.length).equals(1)
-					o(methods.onupdate.args.length).equals(1)
-					o(methods.onremove.args.length).equals(1)
+					render(root, m(component))
+					render(root, m(component))
 
-					hooks.forEach(function(hook) {
-						o(methods[hook].args.length).equals(attrs[hook].args.length)(hook)
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[0]).equals(root)
+					o(layoutSpy.args[1].aborted).equals(false)
+					o(layoutSpy.args[2]).equals(false)
+					o(onabort.callCount).equals(0)
+					o(root.childNodes.length).equals(0)
+				})
+				o("aborts direct inner `m.layout` signal after first render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m.layout(layoutSpy),
 					})
+
+					render(root, m(component))
+					render(root, null)
+
+					o(layoutSpy.callCount).equals(1)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
+					o(root.childNodes.length).equals(0)
+				})
+				o("aborts direct inner `m.layout` signal after subsequent render", function() {
+					var onabort = o.spy()
+					var layoutSpy = o.spy((_, signal) => { signal.onabort = onabort })
+					var component = createComponent({
+						view: () => m.layout(layoutSpy),
+					})
+
+					render(root, m(component))
+					render(root, m(component))
+					render(root, null)
+
+					o(layoutSpy.callCount).equals(2)
+					o(layoutSpy.args[1].aborted).equals(true)
+					o(onabort.callCount).equals(1)
+					o(root.childNodes.length).equals(0)
 				})
 				o("no recycling occurs (was: recycled components get a fresh state)", function() {
 					var step = 0
@@ -755,7 +692,7 @@ o.spec("component", function() {
 					var data = {a: 1}
 					var component = createComponent({
 						data: data,
-						oninit: init,
+						constructor: init,
 						view: function() {
 							return ""
 						}
@@ -763,8 +700,8 @@ o.spec("component", function() {
 
 					render(root, m(component))
 
-					function init(vnode) {
-						o(vnode.state.data).equals(data)
+					function init() {
+						o(this.data).equals(data)
 					}
 				})
 				o("state proxies to the component object/prototype", function() {
@@ -772,7 +709,7 @@ o.spec("component", function() {
 					var data = [body]
 					var component = createComponent({
 						data: data,
-						oninit: init,
+						constructor: init,
 						view: function() {
 							return ""
 						}
@@ -780,9 +717,9 @@ o.spec("component", function() {
 
 					render(root, m(component))
 
-					function init(vnode) {
-						o(vnode.state.data).equals(data)
-						o(vnode.state.data[0]).equals(body)
+					function init() {
+						o(this.data).equals(data)
+						o(this.data[0]).equals(body)
 					}
 				})
 			})
@@ -791,47 +728,40 @@ o.spec("component", function() {
 	o.spec("Tests specific to certain component kinds", function() {
 		o.spec("state", function() {
 			o("Constructible", function() {
-				var oninit = o.spy()
 				var component = o.spy(function(vnode){
 					o(vnode.state).equals(undefined)
-					o(oninit.callCount).equals(0)
 				})
 				var view = o.spy(function(){
 					o(this instanceof component).equals(true)
 					return ""
 				})
 				component.prototype.view = view
-				component.prototype.oninit = oninit
 
-				render(root, [m(component, {oninit: oninit})])
-				render(root, [m(component, {oninit: oninit})])
+				render(root, [m(component)])
+				render(root, [m(component)])
 				render(root, [])
 
 				o(component.callCount).equals(1)
-				o(oninit.callCount).equals(2)
 				o(view.callCount).equals(2)
 			})
 			o("Closure", function() {
 				var state
-				var oninit = o.spy()
 				var view = o.spy(function() {
 					o(this).equals(state)
 					return ""
 				})
 				var component = o.spy(function(vnode) {
 					o(vnode.state).equals(undefined)
-					o(oninit.callCount).equals(0)
 					return state = {
 						view: view
 					}
 				})
 
-				render(root, [m(component, {oninit: oninit})])
-				render(root, [m(component, {oninit: oninit})])
+				render(root, [m(component)])
+				render(root, [m(component)])
 				render(root, [])
 
 				o(component.callCount).equals(1)
-				o(oninit.callCount).equals(1)
 				o(view.callCount).equals(2)
 			})
 		})

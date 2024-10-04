@@ -10,7 +10,7 @@ o.spec("test-utils/components", function() {
 			o("works", function() {
 				o(typeof component.kind).equals("string")
 
-				var methods = {oninit: function(){}, view: function(){}}
+				var methods = {view: function(){}}
 
 				var cmp1, cmp2
 
@@ -38,7 +38,6 @@ o.spec("test-utils/components", function() {
 					// deepEquals doesn't search the prototype, do it manually
 					o(cmp2 != null).equals(true)
 					o(cmp2.view).equals(methods.view)
-					o(cmp2.oninit).equals(methods.oninit)
 				}
 			})
 		}

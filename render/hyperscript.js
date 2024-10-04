@@ -89,7 +89,7 @@ function m(selector, attrs, ...children) {
 		if (selector !== "[") return execSelector(selector, attrs, children)
 	}
 
-	return Vnode(selector, {}, attrs, children)
+	return Vnode(selector, undefined, attrs, children)
 }
 
 // Simple and sweet. Also useful for idioms like `onfoo: m.capture` to drop events without
@@ -101,6 +101,8 @@ m.capture = (ev) => {
 }
 
 m.retain = () => Vnode("!", undefined, undefined, undefined)
+
+m.layout = (f) => Vnode(">", f, undefined, undefined)
 
 m.fragment = (...args) => m("[", ...args)
 

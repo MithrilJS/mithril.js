@@ -2,7 +2,6 @@
 
 var mountRedraw = require("../mount-redraw")
 var m = require("../render/hyperscript")
-var censor = require("./censor")
 
 module.exports = (opts, redraw = mountRedraw.redraw) => {
 	var fetched = false
@@ -31,6 +30,6 @@ module.exports = (opts, redraw = mountRedraw.redraw) => {
 			)
 		}
 
-		return {view: ({attrs}) => m(Comp, censor(attrs))}
+		return {view: ({attrs}) => m(Comp, attrs)}
 	}
 }

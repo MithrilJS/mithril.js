@@ -5,175 +5,155 @@ var domMock = require("../../test-utils/domMock")
 var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
-o.spec("oncreate", function() {
+o.spec("layout create", function() {
 	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
 	})
 
-	o("calls oncreate when creating element", function() {
+	o("works when rendered directly", function() {
 		var callback = o.spy()
-		var vnode = m("div", {oncreate: callback})
+		var vnode = m.layout(callback)
 
 		render(root, vnode)
 
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode.state)
-		o(callback.args[0]).equals(vnode)
+		o(callback.args[0]).equals(root)
+		o(callback.args[1].aborted).equals(false)
+		o(callback.args[2]).equals(true)
 	})
-	o("calls oncreate when creating fragment", function() {
+	o("works when creating element", function() {
 		var callback = o.spy()
-		var vnode = m.fragment({oncreate: callback})
+		var vnode = m("div", m.layout(callback))
 
 		render(root, vnode)
 
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(vnode.state)
-		o(callback.args[0]).equals(vnode)
+		o(callback.args[1].aborted).equals(false)
+		o(callback.args[2]).equals(true)
 	})
-	o("calls oncreate when replacing same-keyed", function() {
+	o("works when creating fragment", function() {
+		var callback = o.spy()
+		var vnode = m.fragment(m.layout(callback))
+
+		render(root, vnode)
+
+		o(callback.callCount).equals(1)
+		o(callback.args[1].aborted).equals(false)
+		o(callback.args[2]).equals(true)
+	})
+	o("works when replacing same-keyed", function() {
 		var createDiv = o.spy()
 		var createA = o.spy()
-		var vnode = m("div", {oncreate: createDiv})
-		var updated = m("a", {oncreate: createA})
+		var vnode = m("div", m.layout(createDiv))
+		var updated = m("a", m.layout(createA))
 
 		render(root, m.key(1, vnode))
 		render(root, m.key(1, updated))
 
 		o(createDiv.callCount).equals(1)
-		o(createDiv.this).equals(vnode.state)
-		o(createDiv.args[0]).equals(vnode)
+		o(createDiv.args[1].aborted).equals(true)
+		o(createDiv.args[2]).equals(true)
 		o(createA.callCount).equals(1)
-		o(createA.this).equals(updated.state)
-		o(createA.args[0]).equals(updated)
+		o(createA.args[1].aborted).equals(false)
+		o(createA.args[2]).equals(true)
 	})
-	o("does not call oncreate when noop", function() {
+	o("works when creating other children", function() {
 		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {oncreate: create})
-		var updated = m("div", {oncreate: update})
+		var vnode = m("div", m.layout(create), m("a"))
 
 		render(root, vnode)
-		render(root, updated)
 
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
-		o(update.callCount).equals(0)
+		o(create.args[0]).equals(root.firstChild)
+		o(create.args[1].aborted).equals(false)
+		o(create.args[2]).equals(true)
 	})
-	o("does not call oncreate when updating attr", function() {
+	o("works inside keyed", function() {
 		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {oncreate: create})
-		var updated = m("div", {oncreate: update, id: "a"})
-
-		render(root, vnode)
-		render(root, updated)
-
-		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
-		o(update.callCount).equals(0)
-	})
-	o("does not call oncreate when updating children", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {oncreate: create}, m("a"))
-		var updated = m("div", {oncreate: update}, m("b"))
-
-		render(root, vnode)
-		render(root, updated)
-
-		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
-		o(update.callCount).equals(0)
-	})
-	o("does not call oncreate when updating keyed", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {oncreate: create})
+		var vnode = m("div", m.layout(create))
 		var otherVnode = m("a")
-		var updated = m("div", {oncreate: update})
-		var otherUpdated = m("a")
 
 		render(root, [m.key(1, vnode), m.key(2, otherVnode)])
-		render(root, [m.key(2, otherUpdated), m.key(1, updated)])
 
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
-		o(update.callCount).equals(0)
+		o(create.args[0]).equals(root.firstChild)
+		o(create.args[1].aborted).equals(false)
+		o(create.args[2]).equals(true)
 	})
-	o("does not call oncreate when removing", function() {
+	o("does not invoke callback when removing, but aborts the provided signal", function() {
 		var create = o.spy()
-		var vnode = m("div", {oncreate: create})
+		var vnode = m("div", m.layout(create))
 
 		render(root, vnode)
+
+		o(create.callCount).equals(1)
+		o(create.args[1].aborted).equals(false)
+
 		render(root, [])
 
 		o(create.callCount).equals(1)
-		o(create.this).equals(vnode.state)
-		o(create.args[0]).equals(vnode)
+		o(create.args[1].aborted).equals(true)
 	})
-	o("calls oncreate at the same step as onupdate", function() {
+	o("works at the same step as layout update", function() {
 		var create = o.spy()
 		var update = o.spy()
 		var callback = o.spy()
-		var vnode = m("div", {onupdate: create})
-		var updated = m("div", {onupdate: update}, m("a", {oncreate: callback}))
+		var vnode = m("div", m.layout(create))
+		var updated = m("div", m.layout(update), m("a", m.layout(callback)))
 
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
+		o(create.callCount).equals(1)
+		o(create.args[0]).equals(root.firstChild)
+		o(create.args[1].aborted).equals(false)
+		o(create.args[2]).equals(true)
+
 		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
+		o(update.args[0]).equals(root.firstChild)
+		o(update.args[1].aborted).equals(false)
+		o(update.args[2]).equals(false)
+
 		o(callback.callCount).equals(1)
-		o(callback.this).equals(updated.children[0].state)
-		o(callback.args[0]).equals(updated.children[0])
+		o(callback.args[0]).equals(root.firstChild.firstChild)
+		o(callback.args[1].aborted).equals(false)
+		o(callback.args[2]).equals(true)
 	})
-	o("calls oncreate on unkeyed that falls into reverse list diff code path", function() {
+	o("works on unkeyed that falls into reverse list diff code path", function() {
 		var create = o.spy()
-		render(root, m("p", m("div")))
-		render(root, m("div", {oncreate: create}, m("div")))
+		render(root, [m.key(1, m("p")), m.key(2, m("div"))])
+		render(root, [m.key(2, m("div", m.layout(create))), m.key(1, m("p"))])
 
 		o(create.callCount).equals(1)
+		o(create.args[0]).equals(root.firstChild)
+		o(create.args[1].aborted).equals(false)
+		o(create.args[2]).equals(true)
 	})
-	o("calls oncreate on unkeyed that falls into forward list diff code path", function() {
+	o("works on unkeyed that falls into forward list diff code path", function() {
 		var create = o.spy()
 		render(root, [m("div"), m("p")])
-		render(root, [m("div"), m("div", {oncreate: create})])
+		render(root, [m("div"), m("div", m.layout(create))])
 
 		o(create.callCount).equals(1)
+		o(create.args[0]).equals(root.childNodes[1])
+		o(create.args[1].aborted).equals(false)
+		o(create.args[2]).equals(true)
 	})
-	o("calls oncreate after full DOM creation", function() {
+	o("works after full DOM creation", function() {
 		var created = false
-		var vnode = m("div",
-			m("a", {oncreate: create},
-				m("b")
-			)
-		)
+		var vnode = m("div", m("a", m.layout(create), m("b")))
 
 		render(root, vnode)
 
-		function create(vnode) {
+		function create(dom, _, isInit) {
+			if (!isInit) return
 			created = true
 
-			o(vnode.dom.parentNode).notEquals(null)
-			o(vnode.dom.childNodes.length).equals(1)
+			o(dom.parentNode).equals(root.firstChild)
+			o(dom.childNodes.length).equals(1)
 		}
 		o(created).equals(true)
-	})
-	o("does not set oncreate as an event handler", function() {
-		var create = o.spy()
-		var vnode = m("div", {oncreate: create})
-
-		render(root, vnode)
-
-		o(vnode.dom.oncreate).equals(undefined)
-		o(vnode.dom.attributes["oncreate"]).equals(undefined)
 	})
 })

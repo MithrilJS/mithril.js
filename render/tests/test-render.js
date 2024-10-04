@@ -58,216 +58,202 @@ o.spec("render", function() {
 		o(threw).equals(true)
 	})
 
-	o("does not try to re-initialize a constructible component whose view has thrown", function() {
-		var oninit = o.spy()
+	o("tries to re-initialize a constructible component whose view has thrown", function() {
+		var A = o.spy()
 		var view = o.spy(() => { throw new Error("error") })
-		function A(){}
 		A.prototype.view = view
-		A.prototype.oninit = oninit
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
+		o(A.callCount).equals(1)
 		o(view.callCount).equals(1)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
-		o(view.callCount).equals(1)
+		o(throwCount).equals(2)
+		o(A.callCount).equals(2)
+		o(view.callCount).equals(2)
 	})
-	o("does not try to re-initialize a constructible component whose oninit has thrown", function() {
-		var oninit = o.spy(function(){throw new Error("error")})
+	o("tries to re-initialize a constructible component whose constructor has thrown", function() {
+		var A = o.spy(() => { throw new Error("error") })
 		var view = o.spy()
-		function A(){}
 		A.prototype.view = view
-		A.prototype.oninit = oninit
 		var throwCount = 0
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
+		o(A.callCount).equals(1)
 		o(view.callCount).equals(0)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
+		o(throwCount).equals(2)
+		o(A.callCount).equals(2)
 		o(view.callCount).equals(0)
 	})
-	o("does not try to re-initialize a constructible component whose constructor has thrown", function() {
-		var oninit = o.spy()
-		var view = o.spy()
-		function A(){throw new Error("error")}
-		A.prototype.view = view
-		A.prototype.oninit = oninit
-		var throwCount = 0
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(0)
-		o(view.callCount).equals(0)
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(0)
-		o(view.callCount).equals(0)
-	})
-	o("does not try to re-initialize a closure component whose view has thrown", function() {
-		var oninit = o.spy()
+	o("tries to re-initialize a closure component whose view has thrown", function() {
+		var A = o.spy(() => ({view}))
 		var view = o.spy(() => { throw new Error("error") })
-		function A() {
-			return {
-				view: view,
-				oninit: oninit,
-			}
-		}
 		var throwCount = 0
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
+		o(A.callCount).equals(1)
 		o(view.callCount).equals(1)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
-		o(view.callCount).equals(1)
+		o(throwCount).equals(2)
+		o(A.callCount).equals(2)
+		o(view.callCount).equals(2)
 	})
-	o("does not try to re-initialize a closure component whose oninit has thrown", function() {
-		var oninit = o.spy(function() {throw new Error("error")})
-		var view = o.spy()
-		function A() {
-			return {
-				view: view,
-				oninit: oninit,
-			}
-		}
+	o("tries to re-initialize a closure component whose closure has thrown", function() {
+		var A = o.spy(() => { throw new Error("error") })
 		var throwCount = 0
 		try {render(root, m(A))} catch (e) {throwCount++}
 
 		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
-		o(view.callCount).equals(0)
+		o(A.callCount).equals(1)
 
 		try {render(root, m(A))} catch (e) {throwCount++}
 
-		o(throwCount).equals(1)
-		o(oninit.callCount).equals(1)
-		o(view.callCount).equals(0)
-	})
-	o("does not try to re-initialize a closure component whose closure has thrown", function() {
-		function A() {
-			throw new Error("error")
-		}
-		var throwCount = 0
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
-
-		try {render(root, m(A))} catch (e) {throwCount++}
-
-		o(throwCount).equals(1)
+		o(throwCount).equals(2)
+		o(A.callCount).equals(2)
 	})
 	o("lifecycle methods work in keyed children of recycled keyed", function() {
-		var createA = o.spy()
-		var updateA = o.spy()
-		var removeA = o.spy()
-		var createB = o.spy()
-		var updateB = o.spy()
-		var removeB = o.spy()
+		var onabortA = o.spy()
+		var onabortB = o.spy()
+		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
 		var a = function() {
 			return m.key(1, m("div",
-				m.key(11, m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})),
+				m.key(11, m("div", m.layout(layoutA))),
 				m.key(12, m("div"))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m.key(21, m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})),
+				m.key(21, m("div", m.layout(layoutB))),
 				m.key(22, m("div"))
 			))
 		}
 		render(root, a())
+		var first = root.firstChild.firstChild
 		render(root, b())
+		var second = root.firstChild.firstChild
 		render(root, a())
+		var third = root.firstChild.firstChild
 
-		o(createA.callCount).equals(2)
-		o(updateA.callCount).equals(0)
-		o(removeA.callCount).equals(1)
-		o(createB.callCount).equals(1)
-		o(updateB.callCount).equals(0)
-		o(removeB.callCount).equals(1)
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[0].args[1].aborted).equals(true)
+		o(layoutA.calls[0].args[2]).equals(true)
+		o(layoutA.calls[1].args[0]).equals(third)
+		o(layoutA.calls[1].args[1].aborted).equals(false)
+		o(layoutA.calls[1].args[2]).equals(true)
+		o(onabortA.callCount).equals(1)
+
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(layoutB.calls[0].args[1]).notEquals(layoutA.calls[0].args[1])
+		o(layoutB.calls[0].args[1].aborted).equals(true)
+		o(layoutB.calls[0].args[2]).equals(true)
+		o(onabortB.callCount).equals(1)
 	})
 	o("lifecycle methods work in unkeyed children of recycled keyed", function() {
-		var createA = o.spy()
-		var updateA = o.spy()
-		var removeA = o.spy()
-		var createB = o.spy()
-		var updateB = o.spy()
-		var removeB = o.spy()
+		var onabortA = o.spy()
+		var onabortB = o.spy()
+		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
+				m("div", m.layout(layoutA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
+				m("div", m.layout(layoutB))
 			))
 		}
 		render(root, a())
+		var first = root.firstChild.firstChild
 		render(root, b())
+		var second = root.firstChild.firstChild
 		render(root, a())
+		var third = root.firstChild.firstChild
 
-		o(createA.callCount).equals(2)
-		o(updateA.callCount).equals(0)
-		o(removeA.callCount).equals(1)
-		o(createB.callCount).equals(1)
-		o(updateB.callCount).equals(0)
-		o(removeB.callCount).equals(1)
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[0].args[1].aborted).equals(true)
+		o(layoutA.calls[0].args[2]).equals(true)
+		o(layoutA.calls[1].args[0]).equals(third)
+		o(layoutA.calls[1].args[1].aborted).equals(false)
+		o(layoutA.calls[1].args[2]).equals(true)
+		o(onabortA.callCount).equals(1)
+
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(layoutB.calls[0].args[1]).notEquals(layoutA.calls[0].args[1])
+		o(layoutB.calls[0].args[1].aborted).equals(true)
+		o(layoutB.calls[0].args[2]).equals(true)
+		o(onabortB.callCount).equals(1)
 	})
 	o("update lifecycle methods work on children of recycled keyed", function() {
-		var createA = o.spy()
-		var updateA = o.spy()
-		var removeA = o.spy()
-		var createB = o.spy()
-		var updateB = o.spy()
-		var removeB = o.spy()
+		var onabortA = o.spy()
+		var onabortB = o.spy()
+		var layoutA = o.spy((_, signal) => { signal.onabort = onabortA })
+		var layoutB = o.spy((_, signal) => { signal.onabort = onabortB })
 
 		var a = function() {
 			return m.key(1, m("div",
-				m("div", {oncreate: createA, onupdate: updateA, onremove: removeA})
+				m("div", m.layout(layoutA))
 			))
 		}
 		var b = function() {
 			return m.key(2, m("div",
-				m("div", {oncreate: createB, onupdate: updateB, onremove: removeB})
+				m("div", m.layout(layoutB))
 			))
 		}
 		render(root, a())
 		render(root, a())
-		o(createA.callCount).equals(1)
-		o(updateA.callCount).equals(1)
-		o(removeA.callCount).equals(0)
+		var first = root.firstChild.firstChild
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[0]).equals(first)
+		o(layoutA.calls[1].args[0]).equals(first)
+		o(layoutA.calls[0].args[1]).equals(layoutA.calls[1].args[1])
+		o(layoutA.calls[0].args[1].aborted).equals(false)
+		o(layoutA.calls[0].args[2]).equals(true)
+		o(layoutA.calls[1].args[2]).equals(false)
+		o(onabortA.callCount).equals(0)
 
 		render(root, b())
-		o(createA.callCount).equals(1)
-		o(updateA.callCount).equals(1)
-		o(removeA.callCount).equals(1)
+		var second = root.firstChild.firstChild
+		o(layoutA.callCount).equals(2)
+		o(layoutA.calls[0].args[1].aborted).equals(true)
+		o(onabortA.callCount).equals(1)
+
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[0]).equals(second)
+		o(layoutB.calls[0].args[1].aborted).equals(false)
+		o(layoutB.calls[0].args[2]).equals(true)
+		o(onabortB.callCount).equals(0)
 
 		render(root, a())
 		render(root, a())
+		var third = root.firstChild.firstChild
+		o(layoutB.callCount).equals(1)
+		o(layoutB.calls[0].args[1].aborted).equals(true)
+		o(onabortB.callCount).equals(1)
 
-		o(createA.callCount).equals(2)
-		o(updateA.callCount).equals(2)
-		o(removeA.callCount).equals(1)
+		o(layoutA.callCount).equals(4)
+		o(layoutA.calls[2].args[0]).equals(third)
+		o(layoutA.calls[2].args[1]).notEquals(layoutA.calls[1].args[1])
+		o(layoutA.calls[2].args[1].aborted).equals(false)
+		o(layoutA.calls[2].args[2]).equals(true)
+		o(onabortA.callCount).equals(1)
 	})
 	o("svg namespace is preserved in keyed diff (#1820)", function(){
 		// note that this only exerciese one branch of the keyed diff algo
@@ -300,23 +286,8 @@ o.spec("render", function() {
 	o("does not allow reentrant invocations", function() {
 		var thrown = []
 		function A() {
-			var updated = false
 			try {render(root, m(A))} catch (e) {thrown.push("construct")}
 			return {
-				oninit: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("oninit")}
-				},
-				oncreate: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("oncreate")}
-				},
-				onupdate: function() {
-					if (updated) return
-					updated = true
-					try {render(root, m(A))} catch (e) {thrown.push("onupdate")}
-				},
-				onremove: function() {
-					try {render(root, m(A))} catch (e) {thrown.push("onremove")}
-				},
 				view: function() {
 					try {render(root, m(A))} catch (e) {thrown.push("view")}
 				},
@@ -325,28 +296,19 @@ o.spec("render", function() {
 		render(root, m(A))
 		o(thrown).deepEquals([
 			"construct",
-			"oninit",
 			"view",
-			"oncreate",
 		])
 		render(root, m(A))
 		o(thrown).deepEquals([
 			"construct",
-			"oninit",
 			"view",
-			"oncreate",
 			"view",
-			"onupdate",
 		])
 		render(root, [])
 		o(thrown).deepEquals([
 			"construct",
-			"oninit",
 			"view",
-			"oncreate",
 			"view",
-			"onupdate",
-			"onremove",
 		])
 	})
 })

@@ -5,122 +5,101 @@ var domMock = require("../../test-utils/domMock")
 var render = require("../../render/render")
 var m = require("../../render/hyperscript")
 
-o.spec("onupdate", function() {
+o.spec("layout update", function() {
 	var $window, root
 	o.beforeEach(function() {
 		$window = domMock()
 		root = $window.document.createElement("div")
 	})
 
-	o("does not call onupdate when creating element", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var vnode = m("div", {onupdate: create})
-		var updated = m("div", {onupdate: update})
-
-		render(root, vnode)
-		render(root, updated)
-
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
-	})
-	o("does not call onupdate when removing element", function() {
-		var create = o.spy()
-		var vnode = m("div", {onupdate: create})
+	o("is not invoked when removing element", function() {
+		var layout = o.spy()
+		var vnode = m("div", m.layout(layout))
 
 		render(root, vnode)
 		render(root, [])
 
-		o(create.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
-	o("does not call onupdate when replacing keyed element", function() {
-		var create = o.spy()
+	o("is not updated when replacing keyed element", function() {
+		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m.key(1, m("div", {onupdate: create}))
-		var updated = m.key(1, m("a", {onupdate: update}))
+		var vnode = m.key(1, m("div", m.layout(layout)))
+		var updated = m.key(1, m("a", m.layout(update)))
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.calls.map((c) => c.args[2])).deepEquals([true])
 	})
-	o("does not call old onupdate when removing the onupdate property in new vnode", function() {
-		var create = o.spy()
-		var vnode = m("a", {onupdate: create})
+	o("does not call old callback when removing layout vnode from new vnode", function() {
+		var layout = o.spy()
+		var vnode = m("a", m.layout(layout))
 		var updated = m("a")
 
 		render(root, vnode)
+		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
-	o("calls onupdate when noop", function() {
-		var create = o.spy()
+	o("invoked on noop", function() {
+		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {onupdate: create})
-		var updated = m("div", {onupdate: update})
+		var vnode = m("div", m.layout(layout))
+		var updated = m("div", m.layout(update))
 
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.calls.map((c) => c.args[2])).deepEquals([false])
 	})
-	o("calls onupdate when updating attr", function() {
-		var create = o.spy()
+	o("invoked on updating attr", function() {
+		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {onupdate: create})
-		var updated = m("div", {onupdate: update, id: "a"})
+		var vnode = m("div", m.layout(layout))
+		var updated = m("div", {id: "a"}, m.layout(update))
 
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.calls.map((c) => c.args[2])).deepEquals([false])
 	})
-	o("calls onupdate when updating children", function() {
-		var create = o.spy()
+	o("invoked on updating children", function() {
+		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m("div", {onupdate: create}, m("a"))
-		var updated = m("div", {onupdate: update}, m("b"))
+		var vnode = m("div", m.layout(layout), m("a"))
+		var updated = m("div", m.layout(update), m("b"))
 
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.calls.map((c) => c.args[2])).deepEquals([false])
 	})
-	o("calls onupdate when updating fragment", function() {
-		var create = o.spy()
+	o("invoked on updating fragment", function() {
+		var layout = o.spy()
 		var update = o.spy()
-		var vnode = m.fragment({onupdate: create})
-		var updated = m.fragment({onupdate: update})
+		var vnode = m.fragment(m.layout(layout))
+		var updated = m.fragment(m.layout(update))
 
 		render(root, vnode)
 		render(root, updated)
 
-		o(create.callCount).equals(0)
-		o(update.callCount).equals(1)
-		o(update.this).equals(vnode.state)
-		o(update.args[0]).equals(updated)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(update.calls.map((c) => c.args[2])).deepEquals([false])
 	})
-	o("calls onupdate after full DOM update", function() {
+	o("invoked on full DOM update", function() {
 		var called = false
 		var vnode = m("div", {id: "1"},
-			m("a", {id: "2"},
+			m("a", {id: "2"}, m.layout(() => {}),
 				m("b", {id: "3"})
 			)
 		)
 		var updated = m("div", {id: "11"},
-			m("a", {id: "22", onupdate: update},
+			m("a", {id: "22"}, m.layout(update),
 				m("b", {id: "33"})
 			)
 		)
@@ -128,22 +107,14 @@ o.spec("onupdate", function() {
 		render(root, vnode)
 		render(root, updated)
 
-		function update(vnode) {
+		function update(dom, _, isInit) {
+			if (isInit) return
 			called = true
 
-			o(vnode.dom.parentNode.attributes["id"].value).equals("11")
-			o(vnode.dom.attributes["id"].value).equals("22")
-			o(vnode.dom.childNodes[0].attributes["id"].value).equals("33")
+			o(dom.parentNode.attributes["id"].value).equals("11")
+			o(dom.attributes["id"].value).equals("22")
+			o(dom.childNodes[0].attributes["id"].value).equals("33")
 		}
 		o(called).equals(true)
-	})
-	o("does not set onupdate as an event handler", function() {
-		var update = o.spy()
-		var vnode = m("div", {onupdate: update})
-
-		render(root, vnode)
-
-		o(vnode.dom.onupdate).equals(undefined)
-		o(vnode.dom.attributes["onupdate"]).equals(undefined)
 	})
 })

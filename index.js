@@ -9,7 +9,6 @@ m.render = require("./render")
 m.redraw = mountRedraw.redraw
 m.p = require("./util/p")
 m.withProgress = require("./util/with-progress")
-m.censor = require("./util/censor")
 m.lazy = require("./util/lazy")
 m.tracked = require("./util/tracked")
 

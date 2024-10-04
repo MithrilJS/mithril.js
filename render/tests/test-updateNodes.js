@@ -488,11 +488,11 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[3].nodeName).equals("A")
 	})
 	o("cached keyed nodes move when diffed via the map", function() {
-		var onupdate = o.spy()
-		var a = m.key("a", m("a", {onupdate}))
-		var b = m.key("b", m("b", {onupdate}))
-		var c = m.key("c", m("c", {onupdate}))
-		var d = m.key("d", m("d", {onupdate}))
+		var layout = o.spy()
+		var a = m.key("a", m("a", m.layout(layout)))
+		var b = m.key("b", m("b", m.layout(layout)))
+		var c = m.key("c", m("c", m.layout(layout)))
+		var d = m.key("d", m("d", m.layout(layout)))
 
 		render(root, [a, b, c, d])
 		render(root, [b, d, a, c])
@@ -502,7 +502,8 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[1].nodeName).equals("D")
 		o(root.childNodes[2].nodeName).equals("A")
 		o(root.childNodes[3].nodeName).equals("C")
-		o(onupdate.callCount).equals(0)
+
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true, true, true])
 	})
 	o("removes then create different bigger", function() {
 		var vnodes = [m.key(1, m("a")), m.key(2, m("b"))]
@@ -666,110 +667,80 @@ o.spec("updateNodes", function() {
 		o(root.childNodes[0].childNodes[1].childNodes.length).equals(1)
 		o(root.childNodes[1].childNodes.length).equals(0)
 	})
-	o("onremove doesn't fire from nodes in the pool (#1990)", function () {
-		var onremove1 = o.spy()
-		var onremove2 = o.spy()
-
-		render(root, [
-			m("div", m("div", {onremove: onremove1})),
-			m("div", m("div", {onremove: onremove2}))
-		])
-		o(onremove1.callCount).equals(0)
-		o(onremove2.callCount).equals(0)
-
-		render(root, [
-			m("div", m("div", {onremove: onremove1}))
-		])
-		o(onremove1.callCount).equals(0)
-		o(onremove2.callCount).equals(1)
-
-		render(root,[])
-		o(onremove1.callCount).equals(1)
-		o(onremove2.callCount).equals(1)
-	})
 	o("cached, non-keyed nodes skip diff", function () {
-		var onupdate = o.spy();
-		var cached = m("a", {onupdate: onupdate})
+		var layout = o.spy();
+		var cached = m("a", m.layout(layout))
 
 		render(root, cached)
 		render(root, cached)
 
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
 	o("cached, keyed nodes skip diff", function () {
-		var onupdate = o.spy()
-		var cached = m.key("a", m("a", {onupdate}))
+		var layout = o.spy()
+		var cached = m.key("a", m("a", m.layout(layout)))
 
 		render(root, cached)
 		render(root, cached)
 
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
 	o("keyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
+		var layout = o.spy()
 		var cached = m.key(1, m("B",
-			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", m.layout(layout), "A")
 		))
 		render(root, m("div", cached))
 		render(root, [])
 		render(root, m("div", cached))
 
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
 	})
 
 	o("unkeyed cached elements are re-initialized when brought back from the pool (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
+		var layout = o.spy()
 		var cached = m("B",
-			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", m.layout(layout), "A")
 		)
 		render(root, m("div", cached))
 		render(root, [])
 		render(root, m("div", cached))
 
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
 	})
 
 	o("keyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
+		var layout = o.spy()
 		var cached = m.key(1, m("B",
-			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", m.layout(layout), "A")
 		))
 		render(root, m("div", cached))
 		render(root, m("div"))
 		render(root, [])
 		render(root, m("div", cached))
 
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
 	})
 
 	o("unkeyed cached elements are re-initialized when brought back from nested pools (#2003)", function () {
-		var onupdate = o.spy()
-		var oncreate = o.spy()
+		var layout = o.spy()
 		var cached = m("B",
-			m("A", {oncreate: oncreate, onupdate: onupdate}, "A")
+			m("A", m.layout(layout), "A")
 		)
 		render(root, m("div", cached))
 		render(root, m("div"))
 		render(root, [])
 		render(root, m("div", cached))
 
-		o(oncreate.callCount).equals(2)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
 	})
 
 	o("null stays in place", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var remove = o.spy()
-		var vnodes = [m("div"), m("a", {oncreate: create, onupdate: update, onremove: remove})]
-		var temp = [null, m("a", {oncreate: create, onupdate: update, onremove: remove})]
-		var updated = [m("div"), m("a", {oncreate: create, onupdate: update, onremove: remove})]
+		var onabort = o.spy()
+		var layout = o.spy((_, signal) => { signal.onabort = onabort })
+		var vnodes = [m("div"), m("a", m.layout(layout))]
+		var temp = [null, m("a", m.layout(layout))]
+		var updated = [m("div"), m("a", m.layout(layout))]
 
 		render(root, vnodes)
 		var before = vnodes[1].dom
@@ -778,17 +749,15 @@ o.spec("updateNodes", function() {
 		var after = updated[1].dom
 
 		o(before).equals(after)
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(2)
-		o(remove.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+		o(onabort.callCount).equals(0)
 	})
 	o("null stays in place if not first", function() {
-		var create = o.spy()
-		var update = o.spy()
-		var remove = o.spy()
-		var vnodes = [m("b"), m("div"), m("a", {oncreate: create, onupdate: update, onremove: remove})]
-		var temp = [m("b"), null, m("a", {oncreate: create, onupdate: update, onremove: remove})]
-		var updated = [m("b"), m("div"), m("a", {oncreate: create, onupdate: update, onremove: remove})]
+		var onabort = o.spy()
+		var layout = o.spy((_, signal) => { signal.onabort = onabort })
+		var vnodes = [m("b"), m("div"), m("a", m.layout(layout))]
+		var temp = [m("b"), null, m("a", m.layout(layout))]
+		var updated = [m("b"), m("div"), m("a", m.layout(layout))]
 
 		render(root, vnodes)
 		var before = vnodes[2].dom
@@ -797,9 +766,8 @@ o.spec("updateNodes", function() {
 		var after = updated[2].dom
 
 		o(before).equals(after)
-		o(create.callCount).equals(1)
-		o(update.callCount).equals(2)
-		o(remove.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+		o(onabort.callCount).equals(0)
 	})
 	o("node is recreated if key changes to undefined", function () {
 		var vnode = m.key(1, m("b"))
@@ -849,16 +817,14 @@ o.spec("updateNodes", function() {
 		o(root.childNodes.length).equals(0)
 	})
 	o("handles null values in unkeyed lists of different length (#2003)", function() {
-		var oncreate = o.spy()
-		var onremove = o.spy()
-		var onupdate = o.spy()
+		var onabort = o.spy()
+		var layout = o.spy((_, signal) => { signal.onabort = onabort })
 
-		render(root, [m("div", {oncreate: oncreate, onremove: onremove, onupdate: onupdate}), null])
-		render(root, [null, m("div", {oncreate: oncreate, onremove: onremove, onupdate: onupdate}), null])
+		render(root, [m("div", m.layout(layout)), null])
+		render(root, [null, m("div", m.layout(layout)), null])
 
-		o(oncreate.callCount).equals(2)
-		o(onremove.callCount).equals(1)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, true])
+		o(onabort.callCount).equals(1)
 	})
 	o("supports changing the element of a keyed element in a list when traversed bottom-up", function() {
 		try {

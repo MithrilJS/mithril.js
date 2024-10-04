@@ -31,9 +31,9 @@ o.spec("form inputs", function() {
 		})
 
 		o("maintains focus when changed manually in hook", function() {
-			var input = m("input", {oncreate: function() {
-				input.dom.focus();
-			}});
+			var input = m("input", m.layout((dom) => {
+				dom.focus()
+			}));
 
 			render(root, input)
 

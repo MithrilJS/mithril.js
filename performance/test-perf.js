@@ -315,7 +315,7 @@ suite.add("add large nested tree", {
 
 		var NestedButton = () => ({
 			view(vnode) {
-				return m("button", m.censor(vnode.attrs), vnode.children)
+				return m("button", vnode.attrs, vnode.children)
 			}
 		})
 

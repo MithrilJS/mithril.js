@@ -160,15 +160,15 @@ o.spec("mount/redraw", function() {
 	})
 
 	o("should invoke remove callback on unmount", function() {
-		var spy = o.spy(() => h.fragment({onremove}))
-		var onremove = o.spy()
+		var onabort = o.spy()
+		var spy = o.spy(() => h.fragment(h.layout((_, signal) => { signal.onabort = onabort })))
 
 		m.mount(root, spy)
 		o(spy.callCount).equals(1)
 		m.mount(root)
 
 		o(spy.callCount).equals(1)
-		o(onremove.callCount).equals(1)
+		o(onabort.callCount).equals(1)
 	})
 
 	o("should stop running after unsubscribe, even if it occurs after redraw is requested", function() {
@@ -396,23 +396,19 @@ o.spec("mount/redraw", function() {
 	})
 
 	o("redraws on events", function() {
-		var onupdate = o.spy()
-		var oninit = o.spy()
+		var layout = o.spy()
 		var onclick = o.spy()
 		var e = $document.createEvent("MouseEvents")
 
 		e.initEvent("click", true, true)
 
 		m.mount(root, () => h("div", {
-			oninit: oninit,
-			onupdate: onupdate,
 			onclick: onclick,
-		}))
+		}, h.layout(layout)))
 
 		root.firstChild.dispatchEvent(e)
 
-		o(oninit.callCount).equals(1)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 
 		o(onclick.callCount).equals(1)
 		o(onclick.this).equals(root.firstChild)
@@ -421,15 +417,13 @@ o.spec("mount/redraw", function() {
 
 		throttleMock.fire()
 
-		o(onupdate.callCount).equals(1)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
 	})
 
 	o("redraws several mount points on events", function() {
-		var onupdate0 = o.spy()
-		var oninit0 = o.spy()
+		var layout0 = o.spy()
 		var onclick0 = o.spy()
-		var onupdate1 = o.spy()
-		var oninit1 = o.spy()
+		var layout1 = o.spy()
 		var onclick1 = o.spy()
 
 		var root1 = $document.createElement("div")
@@ -439,22 +433,16 @@ o.spec("mount/redraw", function() {
 		e.initEvent("click", true, true)
 
 		m.mount(root1, () => h("div", {
-			oninit: oninit0,
-			onupdate: onupdate0,
 			onclick: onclick0,
-		}))
+		}, h.layout(layout0)))
 
-		o(oninit0.callCount).equals(1)
-		o(onupdate0.callCount).equals(0)
+		o(layout0.calls.map((c) => c.args[2])).deepEquals([true])
 
 		m.mount(root2, () => h("div", {
-			oninit: oninit1,
-			onupdate: onupdate1,
 			onclick: onclick1,
-		}))
+		}, h.layout(layout1)))
 
-		o(oninit1.callCount).equals(1)
-		o(onupdate1.callCount).equals(0)
+		o(layout1.calls.map((c) => c.args[2])).deepEquals([true])
 
 		root1.firstChild.dispatchEvent(e)
 		o(onclick0.callCount).equals(1)
@@ -462,8 +450,8 @@ o.spec("mount/redraw", function() {
 
 		throttleMock.fire()
 
-		o(onupdate0.callCount).equals(1)
-		o(onupdate1.callCount).equals(1)
+		o(layout0.calls.map((c) => c.args[2])).deepEquals([true, false])
+		o(layout1.calls.map((c) => c.args[2])).deepEquals([true, false])
 
 		root2.firstChild.dispatchEvent(e)
 
@@ -472,51 +460,41 @@ o.spec("mount/redraw", function() {
 
 		throttleMock.fire()
 
-		o(onupdate0.callCount).equals(2)
-		o(onupdate1.callCount).equals(2)
+		o(layout0.calls.map((c) => c.args[2])).deepEquals([true, false, false])
+		o(layout1.calls.map((c) => c.args[2])).deepEquals([true, false, false])
 	})
 
 	o("event handlers can skip redraw", function() {
-		var onupdate = o.spy(function(){
-			throw new Error("This shouldn't have been called")
-		})
-		var oninit = o.spy()
+		var layout = o.spy()
 		var e = $document.createEvent("MouseEvents")
 
 		e.initEvent("click", true, true)
 
 		m.mount(root, () => h("div", {
-			oninit: oninit,
-			onupdate: onupdate,
 			onclick: () => false,
-		}))
+		}, h.layout(layout)))
 
 		root.firstChild.dispatchEvent(e)
 
-		o(oninit.callCount).equals(1)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 
 		throttleMock.fire()
 
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 	})
 
 	o("redraws when the render function is run", function() {
-		var onupdate = o.spy()
-		var oninit = o.spy()
+		var layout = o.spy()
 
-		m.mount(root, () => h("div", {
-			oninit: oninit,
-			onupdate: onupdate
-		}))
+		m.mount(root, () => h("div", h.layout(layout)))
 
-		o(oninit.callCount).equals(1)
-		o(onupdate.callCount).equals(0)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
 
 		m.redraw()
 
 		throttleMock.fire()
 
-		o(onupdate.callCount).equals(1)
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
 	})
 
 	o("emits errors correctly", function() {
