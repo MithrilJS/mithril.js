@@ -34,14 +34,12 @@ o.spec("layout update", function() {
 	})
 	o("does not call old callback when removing layout vnode from new vnode", function() {
 		var layout = o.spy()
-		var vnode = m("a", m.layout(layout))
-		var updated = m("a")
 
-		render(root, vnode)
-		render(root, vnode)
-		render(root, updated)
+		render(root, m("a", m.layout(layout)))
+		render(root, m("a", m.layout(layout)))
+		render(root, m("a"))
 
-		o(layout.calls.map((c) => c.args[2])).deepEquals([true])
+		o(layout.calls.map((c) => c.args[2])).deepEquals([true, false])
 	})
 	o("invoked on noop", function() {
 		var layout = o.spy()

@@ -2,6 +2,8 @@
 ;(function() {
 "use strict"
 /* eslint-enable */
+/* global window: false */
+
 Stream.SKIP = {}
 Stream.lift = lift
 Stream.scan = scan

@@ -87,8 +87,8 @@ o.spec("component", function() {
 		})
 		o("removes", function() {
 			var component = () => m("div")
+			render(root, [m.key(1, m(component)), m.key(2, m("div"))])
 			var div = m("div")
-			render(root, [m.key(1, m(component)), m.key(2, div)])
 			render(root, [m.key(2, div)])
 
 			o(root.childNodes.length).equals(1)

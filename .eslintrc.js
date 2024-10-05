@@ -2,10 +2,13 @@
 
 module.exports = {
 	"env": {
-		"browser": true,
 		"commonjs": true,
 		"es6": true,
 		"node": true
+	},
+	"globals": {
+		ReadableStream: true,
+		Response: true,
 	},
 	"parserOptions": {
 		"ecmaVersion": 2015

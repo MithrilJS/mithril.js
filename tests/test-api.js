@@ -1,4 +1,5 @@
 "use strict"
+/* global window: false */
 
 var o = require("ospec")
 var browserMock = require("../test-utils/browserMock")

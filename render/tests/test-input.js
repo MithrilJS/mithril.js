@@ -19,13 +19,11 @@ o.spec("form inputs", function() {
 
 	o.spec("input", function() {
 		o("maintains focus after move", function() {
-			var input = m("input")
-			var a = m("a")
-			var b = m("b")
+			var input
 
-			render(root, [m.key(1, input), m.key(2, a), m.key(3, b)])
+			render(root, [m.key(1, input = m("input")), m.key(2, m("a")), m.key(3, m("b"))])
 			input.dom.focus()
-			render(root, [m.key(2, a), m.key(1, input), m.key(3, b)])
+			render(root, [m.key(2, m("a")), m.key(1, input = m("input")), m.key(3, m("b"))])
 
 			o($window.document.activeElement).equals(input.dom)
 		})

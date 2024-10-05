@@ -1,4 +1,5 @@
 "use strict"
+/* global window: false */
 
 var mountRedraw = require("./mount-redraw")
 

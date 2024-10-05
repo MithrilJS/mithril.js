@@ -284,38 +284,4 @@ o.spec("updateElement", function() {
 
 		o(updated.dom.firstChild.namespaceURI).equals("http://www.w3.org/2000/svg")
 	})
-	o("doesn't restore since we're not recycling", function() {
-		var vnode = m.key(1, m("div"))
-		var updated = m.key(2, m("div"))
-
-		render(root, vnode)
-		var a = vnode.children[0].dom
-
-		render(root, updated)
-
-		render(root, vnode)
-		var c = vnode.children[0].dom
-
-		o(root.childNodes.length).equals(1)
-		o(a).notEquals(c) // this used to be a recycling pool test
-	})
-	o("doesn't restore since we're not recycling (via map)", function() {
-		var a = m.key(1, m("div"))
-		var b = m.key(2, m("div"))
-		var c = m.key(3, m("div"))
-		var d = m.key(4, m("div"))
-		var e = m.key(5, m("div"))
-		var f = m.key(6, m("div"))
-
-		render(root, [a, b, c])
-		var x = root.childNodes[1]
-
-		render(root, d)
-
-		render(root, [e, b, f])
-		var y = root.childNodes[1]
-
-		o(root.childNodes.length).equals(3)
-		o(x).notEquals(y) // this used to be a recycling pool test
-	})
 })

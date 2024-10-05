@@ -109,6 +109,39 @@ module.exports = function(options) {
 		}
 		else throw new TypeError("Failed to execute 'removeChild', child not found in parent")
 	}
+	function prepend(child) {
+		return insertBefore.call(this, child, this.firstChild)
+	}
+	function after(child) {
+		if (this == null || typeof this !== "object" || !("nodeType" in this)) {
+			throw new TypeError("Failed to execute 'remove', this is not of type 'ChildNode'")
+		}
+		if (child == null || typeof child !== "object" || !("nodeType" in child)) {
+			throw new TypeError("Failed to execute 'remove', parameter is not of type 'ChildNode'")
+		}
+		var parent = this.parentNode
+		if (parent == null) return
+		var index = parent.childNodes.indexOf(this)
+		if (index < 0) {
+			throw new TypeError("BUG: child linked to parent, parent doesn't contain child")
+		}
+		remove.call(child)
+		parent.childNodes.splice(index + 1, 0, child)
+		child.parentNode = parent
+	}
+	function remove() {
+		if (this == null || typeof this !== "object" || !("nodeType" in this)) {
+			throw new TypeError("Failed to execute 'remove', this is not of type 'ChildNode'")
+		}
+		var parent = this.parentNode
+		if (parent == null) return
+		var index = parent.childNodes.indexOf(this)
+		if (index < 0) {
+			throw new TypeError("BUG: child linked to parent, parent doesn't contain child")
+		}
+		parent.childNodes.splice(index, 1)
+		this.parentNode = null
+	}
 	function insertBefore(child, reference) {
 		var ancestor = this
 		while (ancestor !== child && ancestor !== null) ancestor = ancestor.parentNode
@@ -302,7 +335,10 @@ module.exports = function(options) {
 					namespaceURI: "http://www.w3.org/1999/xhtml",
 					appendChild: appendChild,
 					removeChild: removeChild,
+					remove: remove,
 					insertBefore: insertBefore,
+					prepend: prepend,
+					after: after,
 					hasAttribute: hasAttribute,
 					getAttribute: getAttribute,
 					setAttribute: setAttribute,
@@ -706,6 +742,8 @@ module.exports = function(options) {
 					nodeType: 3,
 					nodeName: "#text",
 					parentNode: null,
+					remove: remove,
+					after: after,
 					get childNodes() { return [] },
 					get firstChild() { return null },
 					get nodeValue() {return nodeValue},
