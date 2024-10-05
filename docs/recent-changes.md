@@ -1,4 +1,15 @@
 
+# Release v2.2.8
+
+### Patch Changes
+
+#### [m.domFor(): workaround for unintentional mangling. Fix #2842 (@kfule)](https://github.com/MithrilJS/mithril.js/pull/2981)
+
+Refactoring of domFor() for the internal bundler.  https://github.com/MithrilJS/mithril.js/blob/cfa890f68571df1ab8543097f7fa61c34ee93683/mithril.js#L157.
+#### [Drop Istanbul to kill install warnings (@dead-claudia)](https://github.com/MithrilJS/mithril.js/pull/2979)
+
+Title's pretty self-explanatory.  Also, this isn't really used much in practice.  From a local run: ```.  $ npm ci.
+
 # Release v2.2.7
 
 ### Patch Changes
