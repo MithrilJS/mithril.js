@@ -12,4 +12,4 @@ major=$(node -pe 'require("./package.json").version.replace(/\..*$/,"")')
 # Can't do a force push due to branch protection rules.
 git checkout "${base}"
 git checkout -B "${base}-v${major}"
-git push origin "${base}-v${major}"
+git push --force origin "${base}-v${major}"
