@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="../mithril.js"></script>
+        <script>
+            var count = 0
+
+            var Button = () =>
+				m("button", {onclick() { count++ }}, "Inside the iframe: ", count)
+
+            m.mount(document.getElementById("root"), () => m(Button))
+        </script>
+    </body>
+</html>
