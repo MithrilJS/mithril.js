@@ -32,10 +32,12 @@ SOFTWARE.
 // this doesn't require a CommonJS sham polyfill.
 
 // I add it globally just so it's visible in the tests.
-/* global m, rootElem: true */
+/* global m, window, document, rootElem: true, simpleTree: false, nestedTree: false */
 
 // set up browser env on before running tests
 var isDOM = typeof window !== "undefined"
+// eslint-disable-next-line no-undef
+var globalObject = typeof globalThis !== "undefined" ? globalThis : isDOM ? window : global
 var Benchmark
 
 if (isDOM) {
@@ -93,185 +95,21 @@ var suite = new Benchmark.Suite("Mithril.js perf", {
 // eslint-disable-next-line no-unused-vars
 var xsuite = {add: function(name) { console.log("skipping " + name) }}
 
-suite.add("construct large vnode tree", {
-	setup: function () {
-		this.fields = []
-
-		for(var i=100; i--;) {
-			this.fields.push((i * 999).toString(36))
-		}
-	},
-	fn: function () {
-		m(".foo.bar[data-foo=bar]", {p: 2},
-			m("header",
-				m("h1.asdf", "a ", "b", " c ", 0, " d"),
-				m("nav",
-					m("a[href=/foo]", "Foo"),
-					m("a[href=/bar]", "Bar")
-				)
-			),
-			m("main",
-				m("form",
-					{onSubmit: function () {}},
-					m("input[type=checkbox][checked]"),
-					m("input[type=checkbox]"),
-					m("fieldset",
-						this.fields.map(function (field) {
-							return m("label",
-								field,
-								":",
-								m("input", {placeholder: field})
-							)
-						})
-					),
-					m("button-bar",
-						m("button",
-							{style: "width:10px; height:10px; border:1px solid #FFF;"},
-							"Normal CSS"
-						),
-						m("button",
-							{style: "top:0 ; right: 20"},
-							"Poor CSS"
-						),
-						m("button",
-							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-							"Poorer CSS"
-						),
-						m("button",
-							{style: {margin: 0, padding: "10px", overflow: "visible"}},
-							"Object CSS"
-						)
-					)
-				)
-			)
+globalObject.simpleTree = () => m(".foo.bar[data-foo=bar]", {p: 2},
+	m("header",
+		m("h1.asdf", "a ", "b", " c ", 0, " d"),
+		m("nav",
+			m("a[href=/foo]", "Foo"),
+			m("a[href=/bar]", "Bar")
 		)
-	},
-})
-
-suite.add("rerender identical vnode", {
-	setup: function () {
-		this.cached = m(".foo.bar[data-foo=bar]", {p: 2},
-			m("header",
-				m("h1.asdf", "a ", "b", " c ", 0, " d"),
-				m("nav",
-					m("a", {href: "/foo"}, "Foo"),
-					m("a", {href: "/bar"}, "Bar")
-				)
-			),
-			m("main",
-				m("form", {onSubmit: function () {}},
-					m("input", {type: "checkbox", checked: true}),
-					m("input", {type: "checkbox", checked: false}),
-					m("fieldset",
-						m("label",
-							m("input", {type: "radio", checked: true})
-						),
-						m("label",
-							m("input", {type: "radio"})
-						)
-					),
-					m("button-bar",
-						m("button",
-							{style: "width:10px; height:10px; border:1px solid #FFF;"},
-							"Normal CSS"
-						),
-						m("button",
-							{style: "top:0 ; right: 20"},
-							"Poor CSS"
-						),
-						m("button",
-							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-							"Poorer CSS"
-						),
-						m("button",
-							{style: {margin: 0, padding: "10px", overflow: "visible"}},
-							"Object CSS"
-						)
-					)
-				)
-			)
-		)
-	},
-	fn: function () {
-		m.render(rootElem, this.cached)
-	},
-})
-
-suite.add("rerender same tree", {
-	fn: function () {
-		m.render(rootElem, m(".foo.bar[data-foo=bar]", {p: 2},
-			m("header",
-				m("h1.asdf", "a ", "b", " c ", 0, " d"),
-				m("nav",
-					m("a", {href: "/foo"}, "Foo"),
-					m("a", {href: "/bar"}, "Bar")
-				)
-			),
-			m("main",
-				m("form", {onSubmit: function () {}},
-					m("input", {type: "checkbox", checked: true}),
-					m("input", {type: "checkbox", checked: false}),
-					m("fieldset",
-						m("label",
-							m("input", {type: "radio", checked: true})
-						),
-						m("label",
-							m("input", {type: "radio"})
-						)
-					),
-					m("button-bar",
-						m("button",
-							{style: "width:10px; height:10px; border:1px solid #FFF;"},
-							"Normal CSS"
-						),
-						m("button",
-							{style: "top:0 ; right: 20"},
-							"Poor CSS"
-						),
-						m("button",
-							{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-							"Poorer CSS"
-						),
-						m("button",
-							{style: {margin: 0, padding: "10px", overflow: "visible"}},
-							"Object CSS"
-						)
-					)
-				)
-			)
-		))
-	},
-})
-
-suite.add("add large nested tree", {
-	setup: function () {
-		var fields = []
-
-		for(var i=100; i--;) {
-			fields.push((i * 999).toString(36))
-		}
-
-		var NestedHeader = () => m("header",
-			m("h1.asdf", "a ", "b", " c ", 0, " d"),
-			m("nav",
-				m("a", {href: "/foo"}, "Foo"),
-				m("a", {href: "/bar"}, "Bar")
-			)
-		)
-
-		var NestedForm = () => m("form", {onSubmit: function () {}},
+	),
+	m("main",
+		m("form",
+			{onSubmit: function () {}},
 			m("input[type=checkbox][checked]"),
-			m("input[type=checkbox]", {checked: false}),
+			m("input[type=checkbox]"),
 			m("fieldset",
-				m("label",
-					m("input[type=radio][checked]")
-				),
-				m("label",
-					m("input[type=radio]")
-				)
-			),
-			m("fieldset",
-				fields.map(function (field) {
+				this.fields.map(function (field) {
 					return m("label",
 						field,
 						":",
@@ -279,40 +117,139 @@ suite.add("add large nested tree", {
 					)
 				})
 			),
-			m(NestedButtonBar, null)
-		)
-
-		var NestedButtonBar = () => m(".button-bar",
-			m(NestedButton,
-				{style: "width:10px; height:10px; border:1px solid #FFF;"},
-				"Normal CSS"
-			),
-			m(NestedButton,
-				{style: "top:0 ; right: 20"},
-				"Poor CSS"
-			),
-			m(NestedButton,
-				{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
-				"Poorer CSS"
-			),
-			m(NestedButton,
-				{style: {margin: 0, padding: "10px", overflow: "visible"}},
-				"Object CSS"
+			m("button-bar",
+				m("button",
+					{style: "width:10px; height:10px; border:1px solid #FFF;"},
+					"Normal CSS"
+				),
+				m("button",
+					{style: "top:0 ; right: 20"},
+					"Poor CSS"
+				),
+				m("button",
+					{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+					"Poorer CSS"
+				),
+				m("button",
+					{style: {margin: 0, padding: "10px", overflow: "visible"}},
+					"Object CSS"
+				)
 			)
 		)
+	)
+)
 
-		var NestedButton = (attrs) => m("button", attrs)
+globalObject.nestedTree = (() => {
+// Result of `JSON.stringify(Array.from({length:100},(_,i)=>((i+1)*999).toString(36)))`
+var fields = [
+	"rr", "1ji", "2b9", "330", "3ur", "4mi", "5e9", "660", "6xr", "7pi",
+	"8h9", "990", "a0r", "asi", "bk9", "cc0", "d3r", "dvi", "en9", "ff0",
+	"g6r", "gyi", "hq9", "ii0", "j9r", "k1i", "kt9", "ll0", "mcr", "n4i",
+	"nw9", "oo0", "pfr", "q7i", "qz9", "rr0", "sir", "tai", "u29", "uu0",
+	"vlr", "wdi", "x59", "xx0", "yor", "zgi", "1089", "1100", "11rr", "12ji",
+	"13b9", "1430", "14ur", "15mi", "16e9", "1760", "17xr", "18pi", "19h9", "1a90",
+	"1b0r", "1bsi", "1ck9", "1dc0", "1e3r", "1evi", "1fn9", "1gf0", "1h6r", "1hyi",
+	"1iq9", "1ji0", "1k9r", "1l1i", "1lt9", "1ml0", "1ncr", "1o4i", "1ow9", "1po0",
+	"1qfr", "1r7i", "1rz9", "1sr0", "1tir", "1uai", "1v29", "1vu0", "1wlr", "1xdi",
+	"1y59", "1yx0", "1zor", "20gi", "2189", "2200", "22rr", "23ji", "24b9", "2530",
+]
 
-		var NestedMain = () => m(NestedForm)
+var NestedHeader = () => m("header",
+	m("h1.asdf", "a ", "b", " c ", 0, " d"),
+	m("nav",
+		m("a", {href: "/foo"}, "Foo"),
+		m("a", {href: "/bar"}, "Bar")
+	)
+)
 
-		this.NestedRoot = () => m("div.foo.bar[data-foo=bar]",
-			{p: 2},
-			m(NestedHeader),
-			m(NestedMain)
+var NestedForm = () => m("form", {onSubmit: function () {}},
+	m("input[type=checkbox][checked]"),
+	m("input[type=checkbox]", {checked: false}),
+	m("fieldset",
+		m("label",
+			m("input[type=radio][checked]")
+		),
+		m("label",
+			m("input[type=radio]")
 		)
+	),
+	m("fieldset",
+		fields.map(function (field) {
+			return m("label",
+				field,
+				":",
+				m("input", {placeholder: field})
+			)
+		})
+	),
+	m(NestedButtonBar, null)
+)
+
+var NestedButtonBar = () => m(".button-bar",
+	m(NestedButton,
+		{style: "width:10px; height:10px; border:1px solid #FFF;"},
+		"Normal CSS"
+	),
+	m(NestedButton,
+		{style: "top:0 ; right: 20"},
+		"Poor CSS"
+	),
+	m(NestedButton,
+		{style: "invalid-prop:1;padding:1px;font:12px/1.1 arial,sans-serif;", icon: true},
+		"Poorer CSS"
+	),
+	m(NestedButton,
+		{style: {margin: 0, padding: "10px", overflow: "visible"}},
+		"Object CSS"
+	)
+)
+
+var NestedButton = (attrs) => m("button", attrs)
+
+var NestedMain = () => m(NestedForm)
+
+var NestedRoot = () => m("div.foo.bar[data-foo=bar]",
+	{p: 2},
+	m(NestedHeader),
+	m(NestedMain)
+)
+
+return () => m(NestedRoot)
+})()
+
+suite.add("construct simple tree", {
+	fn: function () {
+		simpleTree()
+	},
+})
+
+suite.add("mount simple tree", {
+	fn: function () {
+		m.mount(rootElem, simpleTree)
+	},
+})
+
+suite.add("redraw simple tree", {
+	setup: function () {
+		m.mount(rootElem, simpleTree)
 	},
 	fn: function () {
-		m.render(rootElem, m(this.NestedRoot))
+		m.redraw.sync()
+	},
+})
+
+suite.add("mount large nested tree", {
+	fn: function () {
+		m.mount(rootElem, nestedTree)
+	},
+})
+
+suite.add("redraw large nested tree", {
+	setup: function () {
+		m.mount(rootElem, nestedTree)
+	},
+	fn: function () {
+		m.redraw.sync()
 	},
 })
 
